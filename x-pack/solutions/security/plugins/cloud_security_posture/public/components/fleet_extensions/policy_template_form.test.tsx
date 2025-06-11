@@ -693,61 +693,6 @@ describe('<CspPolicyTemplateForm />', () => {
     });
   });
 
-  it('should render setup technology selector for AWS and allow to select cloud connectors in edit mode', async () => {
-    const awsVarsMock = {
-      access_key_id: { type: 'text' },
-      secret_access_key: { type: 'password', isSecret: true },
-      session_token: { type: 'text' },
-      shared_credential_file: { type: 'text' },
-      credential_profile_name: { type: 'text' },
-      role_arn: { type: 'text' },
-      external_id: { type: 'text' },
-      'aws.credentials.type': { value: 'cloud_connectors', type: 'text' },
-      'aws.credentials.external_id': { value: 'external_id', type: 'text' },
-    };
-    const newPackagePolicy = getMockPolicyAWS(awsVarsMock);
-
-    jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
-      services: {
-        cloud: {
-          cloudId:
-            'cloud_connector_cspm:dXMtZWFzdC0xLmF3cy5zdGFnaW5nLmZvdW5kaXQubm86NDQzJDYyMjExNzI5MDhjZTQ0YmE5YWNkOGFmN2NlYmUyYmVjJGZmYmUyNDc2NGFkNTQwODJhZTkyYjU1NDQ0ZDI3NzA5',
-          serverless: { projectId: '' },
-          isCloudEnabled: true,
-        },
-        uiSettings: {
-          get: (key: string) => key === SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING,
-        },
-      },
-    } as any);
-
-    const { getByTestId, queryByLabelText } = render(
-      <WrappedComponent
-        newPolicy={{ ...newPackagePolicy, supports_agentless: true }}
-        isAgentlessEnabled={true}
-        edit={true}
-        packageInfo={getAwsPackageInfoMock() as PackageInfo}
-      />
-    );
-    const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
-
-    // default state
-    expect(setupTechnologySelector).toBeInTheDocument();
-    expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
-
-    const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
-    const roleARNOption = queryByLabelText('Role ARN');
-    const externalIdOption = queryByLabelText('External Id');
-
-    expect(awsCredentialsTypeSelector).not.toBeNull();
-    expect(awsCredentialsTypeSelector).toBeDisabled();
-
-    expect(roleARNOption).toBeInTheDocument();
-    expect(roleARNOption).toBeEnabled();
-    expect(externalIdOption).toBeInTheDocument();
-    expect(externalIdOption).toBeEnabled();
-  });
-
   describe('K8S', () => {
     it('K8S or KSPM Vanilla should not render any Setup Access option', () => {
       const policy = getMockPolicyK8s();

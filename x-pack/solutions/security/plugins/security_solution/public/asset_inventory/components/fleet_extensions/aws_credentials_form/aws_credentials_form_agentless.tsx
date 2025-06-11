@@ -281,8 +281,11 @@ export const AwsCredentialsFormAgentless = ({
     SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CREDENTIALS
   )?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType);
 
-  const cloudConnectorRemoteRoleTemplate =
-    getCloudConnectorRemoteRoleTemplate({ input, cloud, packageInfo }) || undefined;
+  const cloudConnectorRemoteRoleTemplate = getCloudConnectorRemoteRoleTemplate({
+    input,
+    cloud,
+    packageInfo,
+  });
 
   const cloudFormationSettings: Record<
     string,
