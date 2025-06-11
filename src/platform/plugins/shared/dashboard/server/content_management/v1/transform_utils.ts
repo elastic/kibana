@@ -10,10 +10,6 @@
 import { pick } from 'lodash';
 
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import type {
-  ControlGroupAttributes as ControlGroupAttributesV2,
-  DashboardCrudTypes as DashboardCrudTypesV2,
-} from '../../../common/content_management/v2';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import {
   transformControlGroupIn,
@@ -26,7 +22,6 @@ import {
 } from './transforms';
 import type {
   DashboardAttributes,
-  DashboardGetOut,
   DashboardItem,
   ItemAttrsToSavedObjectParams,
   ItemAttrsToSavedObjectReturn,
@@ -80,49 +75,6 @@ export function dashboardAttributesOut(
     ...(version && { version }),
   };
 }
-
-export const getResultV3ToV2 = (result: DashboardGetOut): DashboardCrudTypesV2['GetOut'] => {
-  const { meta, item } = result;
-  const { attributes, ...rest } = item;
-  const {
-    controlGroupInput,
-    description,
-    kibanaSavedObjectMeta,
-    options,
-    panels,
-    refreshInterval,
-    timeFrom,
-    timeRestore,
-    timeTo,
-    title,
-    version,
-  } = attributes;
-
-  const v2Attributes = {
-    ...(controlGroupInput && {
-      controlGroupInput: transformControlGroupIn(controlGroupInput) as ControlGroupAttributesV2,
-    }),
-    description,
-    ...(kibanaSavedObjectMeta && {
-      kibanaSavedObjectMeta: transformSearchSourceIn(kibanaSavedObjectMeta),
-    }),
-    ...(options && { optionsJSON: JSON.stringify(options) }),
-    panelsJSON: panels ? transformPanelsIn(panels, true).panelsJSON : '[]',
-    refreshInterval,
-    ...(timeFrom && { timeFrom }),
-    timeRestore,
-    ...(timeTo && { timeTo }),
-    title,
-    ...(version && { version }),
-  };
-  return {
-    meta,
-    item: {
-      ...rest,
-      attributes: v2Attributes,
-    },
-  };
-};
 
 export const itemAttrsToSavedObject = ({
   attributes,
