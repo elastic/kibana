@@ -93,7 +93,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             .map((key) => `--xpack.${key}.enabled=false`),
           ...findTestPluginPaths([
             path.resolve(__dirname, 'plugins'),
-            path.resolve(__dirname, '../../alerting_api_integration/common/plugins'),
+            path.resolve(
+              __dirname,
+              '../../../platform/test/alerting_api_integration/common/plugins'
+            ),
           ]),
           `--xpack.actions.preconfigured=${JSON.stringify({
             'preconfigured-servicenow': {
