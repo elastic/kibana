@@ -18,7 +18,7 @@ import { telemetryConfiguration } from '../configuration';
 import { createTelemetryFilterListArtifactTaskConfig } from './filterlists';
 import { createTelemetryIndicesMetadataTaskConfig } from './indices.metadata';
 import { createIngestStatsTaskConfig } from './ingest_pipelines_stats';
-import { createTelemetryCustomResponseActionRulesTaskConfig } from './custom_rule';
+import { createTelemetryCustomResponseActionRulesTaskConfig } from './custom_response_actions_rule';
 
 export function createTelemetryTaskConfigs(): SecurityTelemetryTaskConfig[] {
   return [
