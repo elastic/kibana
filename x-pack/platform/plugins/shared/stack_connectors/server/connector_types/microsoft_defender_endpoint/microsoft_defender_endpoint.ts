@@ -474,7 +474,7 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
     }
     const downloadConnection = await this.request(
       {
-        url: resultDfileUrl,
+        url: fileUrl,
         method: 'get',
         responseType: 'stream',
         responseSchema: DownloadActionResultsResponseSchema,
