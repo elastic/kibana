@@ -59,8 +59,12 @@ export const setupServer = async (coreId: symbol = defaultCoreId) => {
   return {
     server: {
       listener: httpSetup.server.listener,
-      start: server.start.bind(server),
-      stop: server.stop.bind(server),
+      start: async () => {
+        await server.start();
+      },
+      stop: async () => {
+        await server.stop();
+      },
     },
     createRouter: httpSetup.createRouter.bind(httpSetup),
     registerRouteHandlerContext: httpSetup.registerRouteHandlerContext.bind(httpSetup),
