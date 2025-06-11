@@ -9,7 +9,7 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import { PersistableState } from '@kbn/kibana-utils-plugin/common';
-import { EmbeddableStateWithType } from '../types';
+import { EmbeddableStateWithType } from './types';
 import { extractBaseEmbeddableInput } from './migrate_base_input';
 
 export const getExtractFunction = (
