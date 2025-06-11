@@ -229,7 +229,7 @@ const compareIntegrations = (
               updated_at: ccrIntegration.updated_at,
               sync_status: SyncStatus.WARNING,
               warning: {
-                title: `${ccrIntegration.package_name} can't be automatically synced`,
+                title: `Integration can't be automatically synced`,
                 message: `This integration must be manually installed on the remote cluster. Automatic updates and remote installs are not supported.`,
               },
             };

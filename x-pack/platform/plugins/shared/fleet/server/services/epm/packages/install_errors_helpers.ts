@@ -59,14 +59,14 @@ export const createOrUpdateFailedInstallStatus = async ({
   pkgName,
   pkgVersion,
   error,
-  installSource,
+  installSource = 'registry',
 }: {
   logger: Logger;
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   pkgVersion: string;
   error: Error;
-  installSource: InstallSource;
+  installSource?: InstallSource;
 }) => {
   const installation = await getInstallationObject({
     pkgName,

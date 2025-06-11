@@ -95,16 +95,19 @@ describe('syncIntegrationsOnRemote', () => {
                   package_name: 'nginx',
                   package_version: '2.2.0',
                   updated_at: '2021-01-01T00:00:00.000Z',
+                  install_source: 'registry',
                 },
                 {
                   package_name: 'system',
                   package_version: '2.2.0',
                   updated_at: '2021-01-01T00:00:00.000Z',
+                  install_source: 'registry',
                 },
                 {
                   package_name: 'custom-pkg',
                   package_version: '1.0.0',
                   updated_at: '2021-01-01T00:00:00.000Z',
+                  install_source: 'custom',
                 },
               ],
               custom_assets: {
@@ -284,136 +287,6 @@ describe('syncIntegrationsOnRemote', () => {
 
     expect(packageClientMock.installPackage).toHaveBeenCalledTimes(2);
   });
-
-  it('should not retry if max retry attempts reached', async () => {
-    getIndicesMock.mockResolvedValue({
-      'fleet-synced-integrations-ccr-remote1': {},
-    });
-    searchMock.mockResolvedValue(getSyncedIntegrationsCCRDoc(true));
-    packageClientMock.getInstallation.mockImplementation((packageName: string) =>
-      packageName === 'nginx'
-        ? {
-            install_status: 'install_failed',
-            version: '2.1.0',
-            latest_install_failed_attempts: [
-              {
-                created_at: new Date().toISOString(),
-              },
-              {
-                created_at: '2025-01-28T08:11:44.395Z',
-              },
-              {
-                created_at: '2025-01-27T08:11:44.395Z',
-              },
-              {
-                created_at: '2025-01-26T08:11:44.395Z',
-              },
-              {
-                created_at: '2025-01-25T08:11:44.395Z',
-              },
-            ],
-          }
-        : {
-            install_status: 'installed',
-            version: '2.2.0',
-          }
-    );
-    packageClientMock.installPackage.mockResolvedValue({
-      status: 'installed',
-    });
-
-    await syncIntegrationsOnRemote(
-      esClientMock,
-      soClientMock,
-      packageClientMock,
-      abortController,
-      loggerMock
-    );
-
-    expect(packageClientMock.installPackage).not.toHaveBeenCalled();
-  });
-
-  it('should not retry if retry time not passed', async () => {
-    getIndicesMock.mockResolvedValue({
-      'fleet-synced-integrations-ccr-remote1': {},
-    });
-    searchMock.mockResolvedValue(getSyncedIntegrationsCCRDoc(true));
-    packageClientMock.getInstallation.mockImplementation((packageName: string) =>
-      packageName === 'nginx'
-        ? {
-            install_status: 'install_failed',
-            version: '2.1.0',
-            latest_install_failed_attempts: [
-              {
-                created_at: new Date().toISOString(),
-              },
-              {
-                created_at: '2025-01-28T08:11:44.395Z',
-              },
-              {
-                created_at: '2025-01-27T08:11:44.395Z',
-              },
-              {
-                created_at: '2025-01-26T08:11:44.395Z',
-              },
-            ],
-          }
-        : {
-            install_status: 'installed',
-            version: '2.2.0',
-          }
-    );
-    packageClientMock.installPackage.mockResolvedValue({
-      status: 'installed',
-    });
-
-    await syncIntegrationsOnRemote(
-      esClientMock,
-      soClientMock,
-      packageClientMock,
-      abortController,
-      loggerMock
-    );
-
-    expect(packageClientMock.installPackage).not.toHaveBeenCalled();
-  });
-
-  it('should retry if retry time passed', async () => {
-    getIndicesMock.mockResolvedValue({
-      'fleet-synced-integrations-ccr-remote1': {},
-    });
-    searchMock.mockResolvedValue(getSyncedIntegrationsCCRDoc(true));
-    packageClientMock.getInstallation.mockImplementation((packageName: string) =>
-      packageName === 'nginx'
-        ? {
-            install_status: 'install_failed',
-            version: '2.1.0',
-            latest_install_failed_attempts: [
-              {
-                created_at: '2025-02-28T04:11:44.395Z',
-              },
-            ],
-          }
-        : {
-            install_status: 'installed',
-            version: '2.2.0',
-          }
-    );
-    packageClientMock.installPackage.mockResolvedValue({
-      status: 'installed',
-    });
-
-    await syncIntegrationsOnRemote(
-      esClientMock,
-      soClientMock,
-      packageClientMock,
-      abortController,
-      loggerMock
-    );
-
-    expect(packageClientMock.installPackage).toHaveBeenCalled();
-  });
-
   it('should call createOrUpdateFailedInstallStatus if installation failed', async () => {
     getIndicesMock.mockResolvedValue({
       'fleet-synced-integrations-ccr-remote1': {},
@@ -447,7 +320,7 @@ describe('syncIntegrationsOnRemote', () => {
     expect(packageClientMock.installPackage).toHaveBeenCalledTimes(1);
     expect(createOrUpdateFailedInstallStatusMock).toHaveBeenCalledWith({
       error: new PackageNotFoundError('package not found in registry'),
-      installSource: 'registry',
+      installSource: 'custom',
       pkgName: 'custom-pkg',
       pkgVersion: '1.0.0',
       logger: expect.anything(),
@@ -505,5 +378,172 @@ describe('syncIntegrationsOnRemote', () => {
     );
 
     expect(installCustomAsset).toHaveBeenCalledTimes(2);
+  });
+
+  describe('Retry logic', () => {
+    it('should not retry if max retry attempts reached', async () => {
+      getIndicesMock.mockResolvedValue({
+        'fleet-synced-integrations-ccr-remote1': {},
+      });
+      searchMock.mockResolvedValue(getSyncedIntegrationsCCRDoc(true));
+      packageClientMock.getInstallation.mockImplementation((packageName: string) =>
+        packageName === 'nginx'
+          ? {
+              install_status: 'install_failed',
+              version: '2.1.0',
+              latest_install_failed_attempts: [
+                {
+                  created_at: new Date().toISOString(),
+                },
+                {
+                  created_at: '2025-01-28T08:11:44.395Z',
+                },
+                {
+                  created_at: '2025-01-27T08:11:44.395Z',
+                },
+                {
+                  created_at: '2025-01-26T08:11:44.395Z',
+                },
+                {
+                  created_at: '2025-01-25T08:11:44.395Z',
+                },
+              ],
+            }
+          : {
+              install_status: 'installed',
+              version: '2.2.0',
+            }
+      );
+      packageClientMock.installPackage.mockResolvedValue({
+        status: 'installed',
+      });
+
+      await syncIntegrationsOnRemote(
+        esClientMock,
+        soClientMock,
+        packageClientMock,
+        abortController,
+        loggerMock
+      );
+
+      expect(packageClientMock.installPackage).not.toHaveBeenCalled();
+    });
+
+    it('should not retry if retry time not passed', async () => {
+      getIndicesMock.mockResolvedValue({
+        'fleet-synced-integrations-ccr-remote1': {},
+      });
+      searchMock.mockResolvedValue(getSyncedIntegrationsCCRDoc(true));
+      packageClientMock.getInstallation.mockImplementation((packageName: string) =>
+        packageName === 'nginx'
+          ? {
+              install_status: 'install_failed',
+              version: '2.1.0',
+              latest_install_failed_attempts: [
+                {
+                  created_at: new Date().toISOString(),
+                },
+                {
+                  created_at: '2025-01-28T08:11:44.395Z',
+                },
+                {
+                  created_at: '2025-01-27T08:11:44.395Z',
+                },
+                {
+                  created_at: '2025-01-26T08:11:44.395Z',
+                },
+              ],
+            }
+          : {
+              install_status: 'installed',
+              version: '2.2.0',
+            }
+      );
+      packageClientMock.installPackage.mockResolvedValue({
+        status: 'installed',
+      });
+
+      await syncIntegrationsOnRemote(
+        esClientMock,
+        soClientMock,
+        packageClientMock,
+        abortController,
+        loggerMock
+      );
+
+      expect(packageClientMock.installPackage).not.toHaveBeenCalled();
+    });
+
+    it('should retry if retry time passed', async () => {
+      getIndicesMock.mockResolvedValue({
+        'fleet-synced-integrations-ccr-remote1': {},
+      });
+      searchMock.mockResolvedValue(getSyncedIntegrationsCCRDoc(true));
+      packageClientMock.getInstallation.mockImplementation((packageName: string) =>
+        packageName === 'nginx'
+          ? {
+              install_status: 'install_failed',
+              version: '2.1.0',
+              latest_install_failed_attempts: [
+                {
+                  created_at: '2025-02-28T04:11:44.395Z',
+                },
+              ],
+            }
+          : {
+              install_status: 'installed',
+              version: '2.2.0',
+            }
+      );
+      packageClientMock.installPackage.mockResolvedValue({
+        status: 'installed',
+      });
+
+      await syncIntegrationsOnRemote(
+        esClientMock,
+        soClientMock,
+        packageClientMock,
+        abortController,
+        loggerMock
+      );
+
+      expect(packageClientMock.installPackage).toHaveBeenCalled();
+    });
+
+    it('should not retry if package has install_source custom even if retry time has passed', async () => {
+      getIndicesMock.mockResolvedValue({
+        'fleet-synced-integrations-ccr-remote1': {},
+      });
+      searchMock.mockResolvedValue(getSyncedIntegrationsCCRDoc(true));
+      packageClientMock.getInstallation.mockImplementation((packageName: string) =>
+        packageName === 'custom'
+          ? {
+              install_status: 'install_failed',
+              version: '2.1.0',
+              latest_install_failed_attempts: [
+                {
+                  created_at: '2025-02-28T04:11:44.395Z',
+                },
+              ],
+            }
+          : {
+              install_status: 'installed',
+              version: '2.2.0',
+            }
+      );
+      packageClientMock.installPackage.mockResolvedValue({
+        status: 'installed',
+      });
+
+      await syncIntegrationsOnRemote(
+        esClientMock,
+        soClientMock,
+        packageClientMock,
+        abortController,
+        loggerMock
+      );
+
+      expect(packageClientMock.installPackage).not.toHaveBeenCalled();
+    });
   });
 });
