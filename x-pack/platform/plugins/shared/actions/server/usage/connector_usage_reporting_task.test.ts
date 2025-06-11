@@ -338,7 +338,7 @@ describe('ConnectorUsageReportingTask', () => {
       },
     ];
 
-    expect(mockedAxiosPost).toHaveBeenCalledWith('usage-api/api/v1/usage', report, {
+    expect(mockedAxiosPost).toHaveBeenCalledWith('usage-api', report, {
       headers: { 'Content-Type': 'application/json' },
       timeout: 30000,
       httpsAgent: expect.any(Object),

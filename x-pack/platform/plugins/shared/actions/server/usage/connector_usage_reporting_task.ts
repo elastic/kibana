@@ -28,7 +28,6 @@ export const CONNECTOR_USAGE_REPORTING_TASK_TIMEOUT = 30000;
 export const CONNECTOR_USAGE_TYPE = `connector_request_body_bytes`;
 export const CONNECTOR_USAGE_REPORTING_SOURCE_ID = `task-connector-usage-report`;
 export const MAX_PUSH_ATTEMPTS = 5;
-export const USAGE_API_PATH = '/api/v1/usage';
 
 export class ConnectorUsageReportingTask {
   private readonly logger: Logger;
@@ -56,7 +55,7 @@ export class ConnectorUsageReportingTask {
     this.logger = logger;
     this.projectId = projectId;
     this.eventLogIndex = eventLogIndex;
-    this.usageApiUrl = `${config.url}${USAGE_API_PATH}`;
+    this.usageApiUrl = config.url;
     this.enabled = config.enabled ?? true;
     const caCertificatePath = config.ca?.path;
 
