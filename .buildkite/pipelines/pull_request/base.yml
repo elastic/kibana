@@ -7,6 +7,15 @@ steps:
       diskSizeGb: 80
 
   - wait
+  - command: .buildkite/scripts/generate_dummy_tasks.sh
+    label: 'Generate Dummy Tasks'
+    agents:
+      machineType: n2-standard-2
+      diskSizeGb: 80
+    timeout_in_minutes: 10
+    key: generate_dummy_tasks
+
+  - wait
 
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution
