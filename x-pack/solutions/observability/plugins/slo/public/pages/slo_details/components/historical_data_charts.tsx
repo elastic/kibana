@@ -29,12 +29,11 @@ export function HistoricalDataCharts({
   selectedTabId,
   onBrushed,
 }: Props) {
-  const { data: historicalSummaries = [], isLoading: historicalSummaryLoading } =
-    useFetchHistoricalSummary({
-      sloList: [slo],
-      shouldRefetch: isAutoRefreshing,
-      range,
-    });
+  const { data: historicalSummaries = [], isLoading } = useFetchHistoricalSummary({
+    sloList: [slo],
+    shouldRefetch: isAutoRefreshing,
+    range,
+  });
 
   const sloHistoricalSummary = historicalSummaries.find(
     (historicalSummary) =>
@@ -52,7 +51,7 @@ export function HistoricalDataCharts({
       <EuiFlexItem>
         <SliChartPanel
           data={historicalSliData}
-          isLoading={historicalSummaryLoading}
+          isLoading={isLoading}
           slo={slo}
           selectedTabId={selectedTabId}
           onBrushed={onBrushed}
@@ -61,7 +60,7 @@ export function HistoricalDataCharts({
       <EuiFlexItem>
         <ErrorBudgetChartPanel
           data={errorBudgetBurnDownData}
-          isLoading={historicalSummaryLoading}
+          isLoading={isLoading}
           slo={slo}
           selectedTabId={selectedTabId}
           onBrushed={onBrushed}
