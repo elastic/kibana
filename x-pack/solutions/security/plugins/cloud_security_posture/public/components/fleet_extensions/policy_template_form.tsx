@@ -9,6 +9,7 @@ import semverCompare from 'semver/functions/compare';
 import semverValid from 'semver/functions/valid';
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
+import semverGte from 'semver/functions/gte';
 import {
   EuiCallOut,
   EuiFieldText,
@@ -691,6 +692,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     const { cloud, uiSettings } = useKibana().services;
     const cloudConnectorsEnabled =
       uiSettings.get(SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING) || false;
+    const CLOUD_CONNECTOR_VERSION_ENABLED_ESS = '2.0.0-preview01';
 
     const isServerless = !!cloud.serverless.projectType;
     const input = getSelectedOption(newPolicy.inputs, integration);
@@ -762,7 +764,10 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       packageInfo,
     });
 
-    const showCloudConnectors = cloudConnectorsEnabled && !!cloudConnectorRemoteRoleTemplate;
+    const showCloudConnectors =
+      cloudConnectorsEnabled &&
+      !!cloudConnectorRemoteRoleTemplate &&
+      semverGte(packageInfo.version, CLOUD_CONNECTOR_VERSION_ENABLED_ESS);
 
     /**
      * - Updates policy inputs by user selection

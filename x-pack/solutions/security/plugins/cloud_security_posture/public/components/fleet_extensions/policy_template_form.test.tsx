@@ -1647,7 +1647,7 @@ describe('<CspPolicyTemplateForm />', () => {
         <WrappedComponent
           newPolicy={{ ...newPackagePolicy, supports_agentless: true }}
           isAgentlessEnabled={true}
-          packageInfo={getAwsPackageInfoMock() as PackageInfo}
+          packageInfo={{ ...getAwsPackageInfoMock(), version: '2.0.0-preview01' } as PackageInfo}
           defaultSetupTechnology={SetupTechnology.AGENTLESS}
         />
       );

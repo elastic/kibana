@@ -17,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 // // import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
 // // import { SubscriptionNotAllowed } from '../subscription_not_allowed';
 import { SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING } from '@kbn/management-settings-ids';
+import semverGte from 'semver/functions/gte';
 import {
   getAssetInputHiddenVars,
   getAssetPolicy,
@@ -92,6 +93,7 @@ export const CloudAssetInventoryPolicyTemplateForm =
       isAgentlessEnabled,
       defaultSetupTechnology,
     }) => {
+      const CLOUD_CONNECTOR_VERSION_ENABLED_ESS = '2.0.0-preview01';
       const { cloud, uiSettings } = useKibana().services;
       const input = getSelectedOption(newPolicy.inputs);
       const { isAgentlessAvailable, setupTechnology, updateSetupTechnology } = useSetupTechnology({
@@ -121,7 +123,10 @@ export const CloudAssetInventoryPolicyTemplateForm =
         packageInfo,
       });
 
-      const showCloudConnectors = cloudConnectorsEnabled && !!cloudConnectorRemoteRoleTemplate;
+      const showCloudConnectors =
+        cloudConnectorsEnabled &&
+        !!cloudConnectorRemoteRoleTemplate &&
+        semverGte(packageInfo.version, CLOUD_CONNECTOR_VERSION_ENABLED_ESS);
 
       // /**
       //  * - Updates policy inputs by user selection

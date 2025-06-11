@@ -126,8 +126,8 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
           id="xpack.csp.agentlessForm.cloudFormation.steps.credentials"
           defaultMessage="Copy {role} and {external_id} then paste the role credentials below"
           values={{
-            role: <strong>ARN role</strong>,
-            external_id: <strong> External Id</strong>,
+            role: <strong>Role ARN</strong>,
+            external_id: <strong> External ID</strong>,
           }}
         />
       ),
@@ -327,20 +327,37 @@ export const AwsCredentialsFormAgentless = ({
     <>
       <AWSSetupInfoContent
         info={
-          <FormattedMessage
-            id="xpack.csp.awsIntegration.gettingStarted.setupInfoContentAgentless"
-            defaultMessage="Utilize AWS Access Keys or Cloud Connector to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
-            values={{
-              gettingStartedLink: (
-                <EuiLink href={documentationLink} target="_blank">
-                  <FormattedMessage
-                    id="xpack.csp.awsIntegration.gettingStarted.setupInfoContentLink"
-                    defaultMessage="Getting Started"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
+          showCloudConnectors ? (
+            <FormattedMessage
+              id="xpack.csp.awsIntegration.gettingStarted.setupInfoContentAgentless"
+              defaultMessage="Utilize AWS Access Keys or Cloud Connector to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
+              values={{
+                gettingStartedLink: (
+                  <EuiLink href={documentationLink} target="_blank">
+                    <FormattedMessage
+                      id="xpack.csp.awsIntegration.gettingStarted.setupInfoContentLink"
+                      defaultMessage="Getting Started"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.csp.awsIntegration.gettingStarted.setupInfoContentAgentlessCloudConnector"
+              defaultMessage="Utilize AWS Access Keys or Cloud Connector to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
+              values={{
+                gettingStartedLink: (
+                  <EuiLink href={documentationLink} target="_blank">
+                    <FormattedMessage
+                      id="xpack.csp.awsIntegration.gettingStarted.setupInfoContentLink"
+                      defaultMessage="Getting Started"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          )
         }
       />
       <EuiSpacer size="l" />

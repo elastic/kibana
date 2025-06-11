@@ -135,8 +135,8 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
           id="xpack.securitySolution.assetInventory.agentlessForm.cloudFormation.steps.credentials"
           defaultMessage="Copy {role} and {external_id} then paste the role credentials below"
           values={{
-            role: <strong>{'ARN role'}</strong>,
-            external_id: <strong>{'External Id'}</strong>,
+            role: <strong>{'Role ARN'}</strong>,
+            external_id: <strong>{'External ID'}</strong>,
           }}
         />
       ),
