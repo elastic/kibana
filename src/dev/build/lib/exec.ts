@@ -35,12 +35,30 @@ const handleBufferChunk = (chunk: Buffer, level: LogLine['level']): LogLine => {
   };
 };
 
+const outputBufferedLogs = (
+  log: ToolingLog,
+  build: Build,
+  logBuildCmd: () => void,
+  logs: LogLine[] | undefined
+) => {
+  log.write(`--- ${build.getBuildDesc()} [${build.getBuildArch()}]`);
+
+  log.indent(4, () => {
+    logBuildCmd();
+
+    if (logs?.length) {
+      logs.forEach((line) => log[line.level](line.chunk));
+    }
+  });
+};
+
 export async function exec(
   log: ToolingLog,
   cmd: string,
   args: string[],
   { level = 'debug', cwd, env, exitAfter, build }: Options = {}
 ) {
+  const logBuildCmd = () => log[level](chalk.dim('$'), cmd, ...args);
   const bufferLogs = build && build?.getBufferLogs();
 
   const proc = execa(cmd, args, {
@@ -51,39 +69,26 @@ export async function exec(
   });
 
   if (bufferLogs) {
-    try {
-      const isDockerBuild = cmd === 'docker' && args[0] === 'build';
-      const stdout$ = fromEvent<Buffer>(proc.stdout!, 'data').pipe<LogLine>(
-        map((chunk) => handleBufferChunk(chunk, level))
-      );
-      // docker build uses stderr as a normal output stream
-      const stderr$ = fromEvent<Buffer>(proc.stderr!, 'data').pipe<LogLine>(
-        map((chunk) => handleBufferChunk(chunk, isDockerBuild ? level : 'error'))
-      );
-      const close$ = fromEvent(proc, 'close');
-      const logs = await merge(stdout$, stderr$).pipe(takeUntil(close$), toArray()).toPromise();
-      const result = await proc;
-
-      log.write(`--- ${build.getBuildDesc()} [${build.getBuildArch()}]`);
-
-      log.indent(4, () => {
-        log[level](chalk.dim('$'), cmd, ...args);
-
-        if (logs?.length) {
-          logs.forEach((line) => log[line.level](line.chunk));
-        }
+    const isDockerBuild = cmd === 'docker' && args[0] === 'build';
+    const stdout$ = fromEvent<Buffer>(proc.stdout!, 'data').pipe<LogLine>(
+      map((chunk) => handleBufferChunk(chunk, level))
+    );
+    // docker build uses stderr as a normal output stream
+    const stderr$ = fromEvent<Buffer>(proc.stderr!, 'data').pipe<LogLine>(
+      map((chunk) => handleBufferChunk(chunk, isDockerBuild ? level : 'error'))
+    );
+    const close$ = fromEvent(proc, 'close');
+    const logs = await merge(stdout$, stderr$).pipe(takeUntil(close$), toArray()).toPromise();
+    await proc
+      .then(() => {
+        outputBufferedLogs(log, build, logBuildCmd, logs);
+      })
+      .catch((error) => {
+        outputBufferedLogs(log, build, logBuildCmd, logs);
+        throw error;
       });
-
-      if (result.failed) {
-        throw new Error(`${result.exitCode}`);
-      }
-    } catch (error) {
-      throw new Error(
-        `${build.getBuildDesc()} [${build.getBuildArch()}] failed with: ${error.message}`
-      );
-    }
   } else {
-    log[level](chalk.dim('$'), cmd, ...args);
+    logBuildCmd();
 
     await watchStdioForLine(proc, (line: string) => log[level](line), exitAfter);
   }
