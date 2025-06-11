@@ -8,11 +8,9 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiButtonIcon,
   EuiCheckbox,
   EuiPanel,
   EuiText,
-  EuiSkeletonText,
   EuiToolTip,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,6 +19,7 @@ import {
   EuiSpacer,
   EuiTab,
   EuiTabs,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { ProcessorOutcomePreview } from './processor_outcome_preview';
 import {
@@ -107,23 +106,33 @@ const DataSourcesList = () => {
   );
   const dataSourcesRefs = useStreamEnrichmentSelector((state) => state.context.dataSourcesRefs);
 
+  const visibleDataSourcesRefs = dataSourcesRefs.slice(0, 2);
+  const hiddenDataSourcesRefs = dataSourcesRefs.slice(2);
+  const hasHiddenDataSources = hiddenDataSourcesRefs.length > 0;
+
   return (
     <EuiFlexGroup wrap={false} alignItems="center" gutterSize="s">
-      {dataSourcesRefs.map((dataSourceRef) => (
+      {visibleDataSourcesRefs.map((dataSourceRef) => (
         <EuiFlexItem key={dataSourceRef.id} grow={false}>
           <DataSourceListItem dataSourceRef={dataSourceRef} />
         </EuiFlexItem>
       ))}
       <EuiFlexItem grow={false}>
-        <EuiPanel paddingSize="s" hasShadow={false} hasBorder>
+        <EuiPanel paddingSize="xs" hasShadow={false} hasBorder>
           <EuiToolTip content={manageDataSourcesLabel}>
-            <EuiButtonIcon
-              size="m"
-              iconSize="l"
-              iconType="advancedSettingsApp"
-              aria-label={manageDataSourcesLabel}
+            <EuiButtonEmpty
+              iconType="controls"
+              iconSide="right"
               onClick={manageDataSources}
-            />
+              aria-label={manageDataSourcesLabel}
+              size="s"
+            >
+              {hasHiddenDataSources && (
+                <EuiNotificationBadge size="m">
+                  +{hiddenDataSourcesRefs.length}
+                </EuiNotificationBadge>
+              )}
+            </EuiButtonEmpty>
           </EuiToolTip>
         </EuiPanel>
       </EuiFlexItem>
@@ -141,42 +150,27 @@ const DataSourceListItem = ({ dataSourceRef }: { dataSourceRef: DataSourceActorR
   const dataSourceState = useDataSourceSelector(dataSourceRef, (snapshot) => snapshot);
 
   const isEnabled = dataSourceState.matches('enabled');
-  const isLoading = dataSourceState.matches({ enabled: 'loadingData' });
   const toggleActivity = () => {
     dataSourceRef.send({ type: 'dataSource.toggleActivity' });
   };
 
   const content = (
-    <div>
-      <strong>
-        {dataSourceState.context.dataSource.name || dataSourceState.context.dataSource.type}
-      </strong>
-      <EuiSkeletonText
-        size="xs"
-        lines={1}
-        isLoading={isLoading}
-        contentAriaLabel={i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.dataSources.loadingSamplesCount',
-          { defaultMessage: 'Loading samples count' }
-        )}
-      >
-        <EuiText size="xs" color="subdued">
-          {i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.dataSources.samplesCount',
-            {
-              defaultMessage: '{count, plural, one {# sample} other {# samples}}',
-              values: { count: dataSourceState.context.data.length },
-            }
-          )}
-        </EuiText>
-      </EuiSkeletonText>
-    </div>
+    <>
+      <EuiText component="span" size="s" className="eui-textTruncate">
+        <strong>
+          {dataSourceState.context.dataSource.name || dataSourceState.context.dataSource.type}
+        </strong>
+      </EuiText>{' '}
+      <EuiText component="span" size="s" color="subdued">
+        ({dataSourceState.context.data.length})
+      </EuiText>
+    </>
   );
 
   return (
     <EuiPanel paddingSize="s" hasShadow={false} hasBorder>
       <EuiCheckbox
-        id={dataSourceRef.id}
+        id={`dataSourceListItem-${dataSourceRef.id}`}
         label={content}
         checked={isEnabled}
         onChange={toggleActivity}

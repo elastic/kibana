@@ -476,7 +476,7 @@ const DataSourceCard = ({
 
   return (
     <EuiCheckableCard
-      id={dataSourceRef.id}
+      id={`dataSourceCard-${dataSourceRef.id}`}
       label={
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
