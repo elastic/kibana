@@ -68,6 +68,8 @@ export interface CreateRuleParams {
   indexName?: string;
   aggType?: string;
   groupBy?: string;
+  termField?: string;
+  termSize?: number;
 }
 
 export function getRuleServices(getService: FtrProviderContext['getService']) {
@@ -128,6 +130,20 @@ export function getRuleServices(getService: FtrProviderContext['getService']) {
     return await esTestIndexToolAAD.getAll(size, sort);
   }
 
+  async function waitForAADDocs(numDocs: number = 1) {
+    return await retry.try(async () => {
+      const searchResult = await getAllAADDocs(numDocs);
+      const value =
+        typeof searchResult.body.hits.total === 'number'
+          ? searchResult.body.hits.total
+          : searchResult.body.hits.total?.value;
+      if (value! < numDocs) {
+        throw new Error(`Expected ${numDocs} alert docs but received ${value}.`);
+      }
+      return searchResult.body.hits.hits;
+    });
+  }
+
   async function removeAllAADDocs(): Promise<any> {
     return await esTestIndexToolAAD.removeAll();
   }
@@ -142,6 +158,7 @@ export function getRuleServices(getService: FtrProviderContext['getService']) {
     createGroupedEsDocumentsInGroups,
     waitForDocs,
     getAllAADDocs,
+    waitForAADDocs,
     removeAllAADDocs,
   };
 }

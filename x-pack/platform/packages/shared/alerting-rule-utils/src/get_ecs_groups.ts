@@ -30,6 +30,7 @@ export const getEcsGroups = (groups: Group[] = []): Record<string, string | stri
   ecsGroups.forEach((group) => {
     const path = group.field;
     const ecsField = ecsFieldMap[path as keyof typeof ecsFieldMap];
+    if (!ecsField) return;
 
     if (!ecsField.array) {
       // if the ecs type is not an array, assign the value
