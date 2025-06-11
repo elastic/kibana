@@ -13,8 +13,10 @@ import { continueConversation } from '../../service/client/operators/continue_co
 import {
   EXECUTE_CONNECTOR_FUNCTION_NAME,
   GET_CONNECTOR_INFO_FUNCTION_NAME,
+  VALIDATE_CONNECTOR_PARAMS_FUNCTION_NAME,
   registerExecuteConnectorFunction,
   registerGetConnectorInfoFunction,
+  registerValidateConnectorParamsFunction,
 } from '../functions/execute_connector';
 import { ChatFunctionClient } from '../../service/chat_function_client';
 
@@ -27,6 +29,9 @@ This is required to:
 Once you receive the connector information:
 - Select the correct connector by its "id".
 - Construct the "params" object using the schema provided for that connector.
+- Validate the "params" using the "${VALIDATE_CONNECTOR_PARAMS_FUNCTION_NAME}" function to ensure they meet the connector's requirements. **important:** This step is crucial to avoid errors during execution. you must include id and params in the validation function call.
+- if the validation fails, try to correct the parameters based on the error message returned by the validation function. if you cannot correct the parameters, inform the user about the issue and ask for clarification or additional information.
+- if the validation is successful, proceed with the execution.
 - Then, and only then, call the "${EXECUTE_CONNECTOR_FUNCTION_NAME}" function with the appropriate "id" and "params".
 
 Skipping this process may result in errors, invalid schema usage, or failed executions.`;
@@ -60,6 +65,13 @@ export function registerExecuteConnectorAgent({
 
       // Register required connector functions
       registerGetConnectorInfoFunction({
+        functions: fnClient,
+        resources,
+        signal,
+        client,
+        scopes,
+      });
+      registerValidateConnectorParamsFunction({
         functions: fnClient,
         resources,
         signal,

@@ -138,3 +138,68 @@ export function registerGetConnectorInfoFunction({
     }
   );
 }
+
+export const VALIDATE_CONNECTOR_PARAMS_FUNCTION_NAME = 'validate_connector_params';
+export function registerValidateConnectorParamsFunction({
+  functions,
+  resources,
+}: FunctionRegistrationParameters) {
+  functions.registerFunction(
+    {
+      name: VALIDATE_CONNECTOR_PARAMS_FUNCTION_NAME,
+      description:
+        'Validates the parameters for a specific connector. it must include the connector ID and parameters to validate.',
+      visibility: FunctionVisibility.AssistantOnly,
+      parameters: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: 'The id of the connector',
+          },
+          params: {
+            type: 'object',
+            description: 'The connector parameters',
+          },
+        },
+        required: ['id', 'params'],
+      } as const,
+    },
+    async ({ arguments: { id, params } }, signal) => {
+      const actionsClient = await (
+        await resources.plugins.actions.start()
+      ).getActionsClientWithRequest(resources.request);
+
+      const connector = await actionsClient.get({ id });
+      if (!connector) {
+        throw new Error(`Connector with id ${id} not found`);
+      }
+
+      const actionType = await actionsClient.getActionType({
+        actionTypeId: connector.actionTypeId,
+      });
+      if (!actionType) {
+        return {
+          content: {
+            message: `Action type for connector with id ${id} not found.`,
+            error: `Action type for connector with id ${id} not found.`,
+          },
+        };
+      }
+      const validatedValue = actionType.validate.params.schema.validate(params);
+      if (!validatedValue) {
+        return {
+          content: {
+            message: `Parameters for connector with id ${id} are invalid.`,
+            error: `Validation failed for parameters: ${JSON.stringify(params)}`,
+          },
+        };
+      }
+      return {
+        content: {
+          message: `Parameters for connector with id ${id} are valid.`,
+        },
+      };
+    }
+  );
+}

@@ -186,6 +186,20 @@ export class ActionsClient {
   }
 
   /**
+   * Get actionType
+   */
+  public async getActionType({
+    actionTypeId,
+  }: {
+    actionTypeId: string;
+  }): Promise<ActionType | undefined> {
+    try {
+      return this.context.actionTypeRegistry.get(actionTypeId);
+    } catch (error) {
+      this.context.logger.error(`Failed to get action type "${actionTypeId}": ${error.message}`);
+    }
+  }
+  /**
    * Get all connectors with in-memory connectors
    */
   public async getAll({ includeSystemActions = false } = {}): Promise<
