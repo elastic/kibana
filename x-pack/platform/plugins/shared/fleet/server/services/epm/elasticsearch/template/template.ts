@@ -326,7 +326,8 @@ function _generateMappings(
         matchingType = field.object_type_mapping_type ?? 'string';
         break;
       case 'keyword':
-        dynProperties = keyword(field);
+        dynProperties = keyword(field, true);
+        matchingType = field.object_type_mapping_type ?? 'string';
         if (field.multi_fields) {
           dynProperties.fields = generateMultiFields(field.multi_fields);
         }
