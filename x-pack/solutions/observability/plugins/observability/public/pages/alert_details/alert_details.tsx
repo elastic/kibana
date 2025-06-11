@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
@@ -34,8 +34,6 @@ import {
 } from '@kbn/rule-data-utils';
 import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_search_alerts_query';
-import moment from 'moment';
 import dedent from 'dedent';
 import { AlertFieldsTable } from '@kbn/alerts-ui-shared/src/alert_fields_table';
 import { dashboardServiceProvider } from '@kbn/response-ops-rule-form/src/common';
@@ -64,10 +62,7 @@ import StaleAlert from './components/stale_alert';
 import { RelatedDashboards } from './components/related_dashboards';
 import { getAlertTitle } from '../../utils/format_alert_title';
 import { AlertSubtitle } from './components/alert_subtitle';
-import {
-  OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
-  observabilityAlertFeatureIds,
-} from '../../../common/constants';
+import { ProximalAlertsCallout } from './proximal_alerts_callout';
 
 interface AlertDetailsPathParams {
   alertId: string;
@@ -153,42 +148,6 @@ export function AlertDetails() {
     }
     history.replace({ search: searchParams.toString() });
   };
-
-  const lookupStart = alertDetail?.formatted.start
-    ? moment(alertDetail.formatted.start).subtract(30, 'minutes').toISOString()
-    : undefined;
-
-  const lookupEnd = alertDetail?.formatted.start
-    ? moment(alertDetail.formatted.start).add(30, 'minutes').toISOString()
-    : undefined;
-
-  const esQuery = useMemo(() => {
-    return lookupStart && lookupEnd
-      ? {
-          bool: {
-            filter: [
-              {
-                range: {
-                  '@timestamp': {
-                    gte: lookupStart,
-                    lte: lookupEnd,
-                  },
-                },
-              },
-            ],
-          },
-        }
-      : {};
-  }, [lookupStart, lookupEnd]);
-
-  const { data, isError } = useSearchAlertsQuery({
-    data: services.data,
-    ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
-    consumers: observabilityAlertFeatureIds,
-    query: esQuery,
-    useDefaultContext: true,
-    pageSize: 100,
-  });
 
   useEffect(() => {
     if (!alertDetail || !observabilityAIAssistant) {
@@ -307,6 +266,7 @@ export function AlertDetails() {
         <EuiSpacer size="m" />
         <EuiFlexGroup direction="column" gutterSize="m">
           <SourceBar alert={alertDetail.formatted} sources={sources} />
+          <ProximalAlertsCallout alertDetail={alertDetail} />
           <AlertDetailContextualInsights alert={alertDetail} />
           {rule && alertDetail.formatted && (
             <>
@@ -326,6 +286,8 @@ export function AlertDetails() {
       </>
     ) : (
       <EuiPanel hasShadow={false} data-test-subj="overviewTabPanel" paddingSize="none">
+        <EuiSpacer size="l" />
+        <ProximalAlertsCallout alertDetail={alertDetail} />
         <EuiSpacer size="l" />
         <AlertDetailContextualInsights alert={alertDetail} />
         <EuiSpacer size="l" />
