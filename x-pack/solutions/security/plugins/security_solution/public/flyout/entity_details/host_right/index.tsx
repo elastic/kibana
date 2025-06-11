@@ -168,7 +168,7 @@ export const HostPanel = ({ contextID, scopeId, hostName, isPreviewMode }: HostP
               }
               expandDetails={openDefaultPanel}
               isPreviewMode={isPreviewMode}
-              isPreview={scopeId === TableId.rulePreview}
+              isRulePreview={scopeId === TableId.rulePreview}
             />
             <HostPanelHeader hostName={hostName} observedHost={observedHostWithAnomalies} />
             <HostPanelContent
