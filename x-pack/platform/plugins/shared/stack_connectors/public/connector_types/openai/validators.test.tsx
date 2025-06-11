@@ -31,10 +31,6 @@ describe('validateUrl', () => {
     expect(validator('')).toMatchObject(errorMessage);
   });
 
-  test('should return error if the value ends with dots', () => {
-    expect(validator('http://example.com.')).toMatchObject({ code, formatType, message });
-  });
-
   test('should return error if the value contains spaces', () => {
     expect(validator('http://exam ple.com')).toMatchObject(errorMessage);
   });

@@ -11,7 +11,9 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
 
-const safeURL = /^[^\s\/:?#]+[^\.#]$/;
+const protocolAndDomainRE = /^(?:\w+:)?\/\/(\S+)$/;
+const localhostDomainRE = /^localhost[\:?\d]*(?:[^\:?\d]\S*)?$/;
+const nonLocalhostDomainRE = /^[^\s\.]+(?:\.\S{2,})?$/;
 
 export const validateURL =
   (message: string) =>
@@ -28,15 +30,22 @@ export const validateURL =
       return error;
     }
 
-    try {
-      const url = new URL(value);
-      const hostname = decodeURIComponent(url.hostname);
-      const path = url.pathname;
+    const match = value.match(protocolAndDomainRE);
+    if (!match) {
+      return error;
+    }
 
-      const isValid = hostname && safeURL.test(hostname) && !path.endsWith('.');
-      if (isValid) return;
-      // eslint-disable-next-line no-empty
-    } catch {}
+    const everythingAfterProtocol = match[1];
+    if (!everythingAfterProtocol) {
+      return error;
+    }
+
+    if (
+      localhostDomainRE.test(everythingAfterProtocol) ||
+      nonLocalhostDomainRE.test(everythingAfterProtocol)
+    ) {
+      return;
+    }
 
     return error;
   };
