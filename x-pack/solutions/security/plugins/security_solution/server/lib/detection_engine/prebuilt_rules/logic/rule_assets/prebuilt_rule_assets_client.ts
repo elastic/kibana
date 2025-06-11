@@ -21,6 +21,7 @@ import type { RuleVersionSpecifier } from '../rule_versions/rule_version_specifi
 
 const MAX_PREBUILT_RULES_COUNT = 10_000;
 const ES_MAX_CLAUSE_COUNT = 1024;
+const ES_MAX_CONCURRENT_REQUESTS = 2;
 
 export interface IPrebuiltRuleAssetsClient {
   fetchLatestAssets: () => Promise<PrebuiltRuleAsset[]>;
@@ -142,9 +143,11 @@ export const createPrebuiltRuleAssetsClient = (
           buckets = await fetchLatestVersionInfo();
         } else {
           // If ruleIds are provided, we need to chunk them to avoid exceeding the ES max clause count.
-          const ruleIdChunks = chunk(ruleIds, ES_MAX_CLAUSE_COUNT);
+          // See: https://github.com/elastic/kibana/pull/223240
+          // We divide by 2 because filter has 2 clauses per version.
+          const ruleIdChunks = chunk(ruleIds, ES_MAX_CLAUSE_COUNT / 2);
           buckets = await pMap(ruleIdChunks, processChunk, {
-            concurrency: 2,
+            concurrency: ES_MAX_CONCURRENT_REQUESTS,
           }).then((results) => results.flat());
         }
 
@@ -189,11 +192,12 @@ export const createPrebuiltRuleAssetsClient = (
         };
 
         // We need to chunk versions to avoid exceeding the ES max clause count.
-        // We divide by 2 because filter has two clauses per version.
-        const versionChunks = chunk(versions, ES_MAX_CLAUSE_COUNT / 2);
+        // See: https://github.com/elastic/kibana/pull/223240
+        // We divide by 4 because filter has 4 clauses per version.
+        const versionChunks = chunk(versions, ES_MAX_CLAUSE_COUNT / 4);
 
         const ruleAssets = await pMap(versionChunks, processChunk, {
-          concurrency: 3,
+          concurrency: ES_MAX_CONCURRENT_REQUESTS,
         }).then((results) => results.flat());
 
         // Rule assets may have duplicates we have to get rid of.
