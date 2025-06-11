@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './filter_item.scss';
-
 import {
   EuiContextMenu,
   EuiContextMenuPanel,
   EuiPopover,
   EuiPopoverProps,
+  UseEuiTheme,
   euiShadowMedium,
   useEuiTheme,
 } from '@elastic/eui';
@@ -34,7 +33,7 @@ import React, {
   useMemo,
   useCallback,
 } from 'react';
-import type { DocLinksStart, IUiSettingsClient } from '@kbn/core/public';
+import { useMemoizedStyles, type DocLinksStart, type IUiSettingsClient } from '@kbn/core/public';
 import { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { css } from '@emotion/react';
 import { getIndexPatternFromFilter, getDisplayValueFromFilter } from '@kbn/data-plugin/public';
@@ -91,6 +90,8 @@ function FilterItemComponent(props: FilterItemProps) {
 
   const [renderedComponent, setRenderedComponent] = useState('menu');
   const { id, filter, indexPatterns, hiddenPanelOptions, readOnly = false, docLinks } = props;
+
+  const styles = useMemoizedStyles(filterItemStyles);
 
   const closePopover = useCallback(() => {
     onCloseFilterPopover([() => setIsPopoverOpen(false)]);
@@ -361,6 +362,7 @@ function FilterItemComponent(props: FilterItemProps) {
     filterLabelStatus: valueLabelConfig.status,
     errorMessage: valueLabelConfig.message,
     className: getClasses(!!filter.meta.negate, valueLabelConfig),
+    css: styles.filterItem,
     dataViews: indexPatterns,
     iconOnClick: handleIconClick,
     onClick: handleBadgeClick,
@@ -412,3 +414,61 @@ function FilterItemComponent(props: FilterItemProps) {
 }
 
 export const FilterItem = withCloseFilterEditorConfirmModal(FilterItemComponent);
+
+const filterItemStyles = {
+  filterItem: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      lineHeight: euiTheme.size.base,
+      color: euiTheme.colors.text,
+      paddingBlock: `calc(${euiTheme.size.m} / 2)`,
+      whiteSpace: 'normal',
+      borderColor: euiTheme.colors.borderBasePlain,
+      '&:not(.globalFilterItem-isDisabled)': {
+        borderColor: euiTheme.colors.borderBasePlain,
+      },
+      '&.globalFilterItem-isExcluded': {
+        borderColor: euiTheme.colors.borderBaseDanger,
+        '&::before': {
+          backgroundColor: euiTheme.colors.backgroundFilledDanger,
+        },
+      },
+      '&.globalFilterItem-isDisabled': {
+        color: euiTheme.colors.darkShade,
+        backgroundColor: euiTheme.colors.disabled,
+        borderColor: 'transparent',
+        textDecoration: 'line-through',
+        fontWeight: euiTheme.font.weight.regular,
+      },
+      '&.globalFilterItem-isError, &.globalFilterItem-isWarning': {
+        '.globalFilterLabel__value': {
+          fontWeight: euiTheme.font.weight.bold,
+        },
+      },
+      '&.globalFilterItem-isError': {
+        '.globalFilterLabel__value': {
+          color: euiTheme.colors.dangerText,
+        },
+      },
+      '&.globalFilterItem-isWarning': {
+        '.globalFilterLabel__value': {
+          color: euiTheme.colors.warningText,
+        },
+      },
+      '&.globalFilterItem-isPinned': {
+        position: 'relative',
+        overflow: 'hidden',
+        '&::before': {
+          content: "''",
+          position: 'absolute',
+          top: 0,
+          bottom: 0,
+          left: 0,
+          width: euiTheme.size.xs,
+          backgroundColor: euiTheme.colors.mediumShade,
+        },
+      },
+      '.globalFilterItem__editorForm': {
+        padding: euiTheme.size.m,
+      },
+    }),
+};
