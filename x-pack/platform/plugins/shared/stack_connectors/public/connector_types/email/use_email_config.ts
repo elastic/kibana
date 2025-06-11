@@ -97,32 +97,3 @@ export function useEmailConfig({ http, toasts }: Props): UseEmailConfigReturnVal
     getEmailServiceConfig,
   };
 }
-
-// export function useEmailConfig({ http, toasts, service }: Props) {
-//   return useQuery({
-//     queryKey: ['emailServiceConfig', service],
-//     queryFn: async () => {
-//       if (
-//         service == null ||
-//         service === AdditionalEmailServices.OTHER ||
-//         service === AdditionalEmailServices.EXCHANGE
-//       ) {
-//         return null;
-//       }
-
-//       const serviceConfig = await getServiceConfig({ http, service });
-//       return getConfig(service, serviceConfig);
-//     },
-//     enabled: service != null && !isEmpty(service),
-//     onError: (error: any) => {
-//       if (error.name !== 'AbortError') {
-//         toasts.addDanger(
-//           error.body?.message ??
-//             i18n.translate('xpack.stackConnectors.components.email.updateErrorNotificationText', {
-//               defaultMessage: 'Cannot get service configuration',
-//             })
-//         );
-//       }
-//     },
-//   });
-// }
