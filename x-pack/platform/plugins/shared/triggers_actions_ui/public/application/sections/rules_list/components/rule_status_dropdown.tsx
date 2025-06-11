@@ -33,8 +33,9 @@ const SNOOZE_END_TIME_FORMAT = 'LL @ LT';
 
 type DropdownRuleRecord = Pick<
   Rule,
-  'enabled' | 'muteAll' | 'isSnoozedUntil' | 'snoozeSchedule' | 'activeSnoozes' | 'ruleTypeId'
->;
+  'enabled' | 'muteAll' | 'isSnoozedUntil' | 'snoozeSchedule' | 'activeSnoozes'
+> &
+  Partial<Pick<Rule, 'ruleTypeId'>>;
 
 export interface ComponentOpts {
   rule: DropdownRuleRecord;
