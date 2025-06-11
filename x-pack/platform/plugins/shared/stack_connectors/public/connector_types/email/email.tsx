@@ -17,49 +17,63 @@ import type {
 import { EmailActionParams, EmailConfig, EmailSecrets } from '../types';
 import { RegistrationServices } from '..';
 
-const emailServices: EuiSelectOption[] = [
+const emailServices: Array<EuiSelectOption & { kbnConfigValue: string }> = [
   {
     text: i18n.translate('xpack.stackConnectors.components.email.gmailServerTypeLabel', {
       defaultMessage: 'Gmail',
     }),
     value: 'gmail',
+    kbnConfigValue: 'google-mail',
   },
   {
     text: i18n.translate('xpack.stackConnectors.components.email.outlookServerTypeLabel', {
       defaultMessage: 'Outlook',
     }),
     value: 'outlook365',
+    kbnConfigValue: 'microsoft-outlook',
   },
   {
     text: i18n.translate('xpack.stackConnectors.components.email.amazonSesServerTypeLabel', {
       defaultMessage: 'Amazon SES',
     }),
     value: 'ses',
+    kbnConfigValue: 'amazon-ses',
   },
   {
     text: i18n.translate('xpack.stackConnectors.components.email.elasticCloudServerTypeLabel', {
       defaultMessage: 'Elastic Cloud',
     }),
     value: 'elastic_cloud',
+    kbnConfigValue: 'elastic-cloud',
   },
   {
     text: i18n.translate('xpack.stackConnectors.components.email.exchangeServerTypeLabel', {
       defaultMessage: 'MS Exchange Server',
     }),
     value: 'exchange_server',
+    kbnConfigValue: 'microsoft-exchange',
   },
   {
     text: i18n.translate('xpack.stackConnectors.components.email.otherServerTypeLabel', {
       defaultMessage: 'Other',
     }),
     value: 'other',
+    kbnConfigValue: 'other',
   },
 ];
 
-export function getEmailServices(isCloudEnabled: boolean) {
-  return isCloudEnabled
+export function getEmailServices(isCloudEnabled: boolean, enabledEmailsServices: string[]) {
+  const allEmailServices = isCloudEnabled
     ? emailServices
     : emailServices.filter((service) => service.value !== 'elastic_cloud');
+
+  if (enabledEmailsServices.length === 0 || enabledEmailsServices.includes('*')) {
+    return allEmailServices;
+  }
+
+  return allEmailServices.filter((service) =>
+    enabledEmailsServices.includes(service.kbnConfigValue)
+  );
 }
 
 export function getConnectorType(

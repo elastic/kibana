@@ -126,6 +126,20 @@ export const configSchema = schema.object({
         domain_allowlist: schema.maybe(schema.arrayOf(schema.string())),
         services: schema.maybe(
           schema.object({
+            enabled: schema.maybe(
+              schema.arrayOf(
+                schema.oneOf([
+                  schema.literal('google-mail'),
+                  schema.literal('microsoft-exchange'),
+                  schema.literal('microsoft-outlook'),
+                  schema.literal('amazon-ses'),
+                  schema.literal('elastic-cloud'),
+                  schema.literal('other'),
+                  schema.literal('*'),
+                ]),
+                { defaultValue: ['*'], minSize: 1 }
+              )
+            ),
             ses: schema.object({
               host: schema.maybe(schema.string({ minLength: 1 })),
               port: schema.maybe(schema.number({ min: 1, max: 65535 })),
@@ -135,11 +149,14 @@ export const configSchema = schema.object({
       },
       {
         validate: (obj) => {
-          if (!obj.domain_allowlist && !obj.services?.ses.host && !obj.services?.ses.port) {
-            return 'Email configuration requires either domain_allowlist or services.ses to be specified';
+          if (!obj.domain_allowlist && !obj.services) {
+            return 'Email configuration requires either domain_allowlist or services to be specified';
           }
 
-          if (obj.services?.ses && (!obj.services.ses.host || !obj.services.ses.port)) {
+          if (
+            (obj.services?.ses?.host && !obj.services?.ses?.port) ||
+            (!obj.services?.ses?.host && obj.services?.ses?.port)
+          ) {
             return 'Email configuration requires both services.ses.host and services.ses.port to be specified';
           }
         },

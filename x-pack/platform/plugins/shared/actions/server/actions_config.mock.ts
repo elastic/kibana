@@ -37,6 +37,7 @@ const createActionsConfigMock = () => {
     enableFooterInEmail: jest.fn().mockReturnValue(true),
     getMaxQueued: jest.fn().mockReturnValue(1000),
     getAwsSesConfig: jest.fn().mockReturnValue(null),
+    getEnabledEmailServices: jest.fn().mockReturnValue(['*']),
   };
   return mocked;
 };

@@ -50,7 +50,7 @@ export type { ServiceParams } from './sub_action_framework/types';
 export const config: PluginConfigDescriptor<ActionsConfig> = {
   schema: configSchema,
   exposeToBrowser: {
-    email: { domain_allowlist: true },
+    email: { domain_allowlist: true, services: { enabled: true } },
   },
 };
 

@@ -203,6 +203,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'vis_type_xy.readOnly (boolean?|never)',
         'vis_type_vega.enableExternalUrls (boolean?)',
         'xpack.actions.email.domain_allowlist (array?)',
+        'xpack.actions.email.services.enabled (array?)',
         'xpack.apm.serviceMapEnabled (boolean?)',
         'xpack.apm.ui.enabled (boolean?)',
         'xpack.apm.ui.maxTraceItems (number?)',

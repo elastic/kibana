@@ -38,6 +38,7 @@ export class StackConnectorsPublicPlugin
       connectorTypeRegistry: triggersActionsUi.actionTypeRegistry,
       services: {
         validateEmailAddresses: actions.validateEmailAddresses,
+        // getEnabledEmailServices: actions.getEnabledEmailServices(),
       },
     });
   }

@@ -56,6 +56,7 @@ export interface ActionsConfigurationUtilities {
   enableFooterInEmail: () => boolean;
   getMaxQueued: () => number;
   getAwsSesConfig: () => AwsSesConfig;
+  getEnabledEmailServices: () => string[];
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -236,6 +237,14 @@ export function getActionsConfigurationUtilities(
       }
 
       return null;
+    },
+    getEnabledEmailServices() {
+      const emailServices = config.email?.services?.enabled;
+      if (emailServices) {
+        return Array.from(new Set(Array.from(emailServices)));
+      }
+
+      return ['*'];
     },
   };
 }

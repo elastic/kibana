@@ -14,26 +14,33 @@ export interface ActionsPublicPluginSetup {
     emails: string[],
     options?: ValidateEmailAddressesOptions
   ): ValidatedEmail[];
+  enabledEmailServices: string[];
 }
 
 export interface Config {
   email: {
     domain_allowlist: string[];
+    services: {
+      enabled: string[];
+    };
   };
 }
 
 export class Plugin implements CorePlugin<ActionsPublicPluginSetup> {
   private readonly allowedEmailDomains: string[] | null = null;
+  private readonly enabledEmailServices: string[];
 
   constructor(ctx: PluginInitializerContext<Config>) {
     const config = ctx.config.get();
     this.allowedEmailDomains = config.email?.domain_allowlist || null;
+    this.enabledEmailServices = Array.from(new Set(config.email?.services?.enabled || ['*']));
   }
 
   public setup(): ActionsPublicPluginSetup {
     return {
       validateEmailAddresses: (emails: string[], options: ValidateEmailAddressesOptions) =>
         validateEmails(this.allowedEmailDomains, emails, options),
+      enabledEmailServices: this.enabledEmailServices,
     };
   }
 

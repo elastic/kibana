@@ -90,11 +90,11 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
 
 export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) => {
   const {
-    actions: { validateEmailAddresses },
+    actions: { validateEmailAddresses, enabledEmailServices },
   } = useKibana().services;
 
   return (
-    <ConnectorProvider value={{ services: { validateEmailAddresses } }}>
+    <ConnectorProvider value={{ services: { validateEmailAddresses, enabledEmailServices } }}>
       <Routes>
         <Route
           path={`/:section(${sectionsRegex})`}
