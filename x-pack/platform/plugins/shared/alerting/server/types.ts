@@ -350,6 +350,11 @@ export interface RuleType<
    */
   autoRecoverAlerts?: boolean;
   getViewInAppRelativeUrl?: GetViewInAppRelativeUrlFn<Params>;
+  /**
+   * Indicates that the rule type is managed internally by the framework.
+   * Alerts of internally managed rule types are not returned by the APIs.
+   */
+  internallyManaged?: boolean;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,
