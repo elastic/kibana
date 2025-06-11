@@ -68,10 +68,22 @@ export const registerESQLExtensionsRoute = (
       const client = core.elasticsearch.client.asCurrentUser;
       const { query, solutionId } = request.params;
       try {
-        const sources = (await client.indices.resolveIndex({
+        const localSources = (await client.indices.resolveIndex({
           name: '*',
           expand_wildcards: 'open',
         })) as ResolveIndexResponse;
+
+        const ccsSources = (await client.indices.resolveIndex({
+          name: '*:*',
+          expand_wildcards: 'open',
+        })) as ResolveIndexResponse;
+
+        const sources = {
+          indices: [...(localSources.indices ?? []), ...(ccsSources.indices ?? [])],
+          aliases: [...(localSources.aliases ?? []), ...(ccsSources.aliases ?? [])],
+          data_streams: [...(localSources.data_streams ?? []), ...(ccsSources.data_streams ?? [])],
+        };
+
         // Validate solutionId
         const validSolutionId = isSolutionId(solutionId) ? solutionId : 'oblt'; // No solutionId provided, or invalid
         // return the recommended queries for now, we will add more extensions later
