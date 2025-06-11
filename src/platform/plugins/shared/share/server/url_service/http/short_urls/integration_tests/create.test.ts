@@ -23,6 +23,7 @@ describe('POST /api/short_url', () => {
   beforeAll(async () => {
     const setup = await setupServer();
     server = setup.server;
+    createRouter = setup.createRouter;
 
     url.locators.get = jest.fn().mockImplementation((locatorId) => {
       if (locatorId === 'LEGACY_SHORT_URL_LOCATOR') {

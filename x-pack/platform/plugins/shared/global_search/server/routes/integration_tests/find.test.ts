@@ -38,7 +38,7 @@ describe('POST /internal/global_search/find', () => {
   >;
 
   beforeEach(async () => {
-    ({ server, createRouter } = await setupServer(pluginId));
+    ({ server, createRouter, registerRouteHandlerContext } = await setupServer(pluginId));
 
     globalSearchHandlerContext = globalSearchPluginMock.createRouteHandlerContext();
     registerRouteHandlerContext<
