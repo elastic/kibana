@@ -9,3 +9,5 @@
 
 export const CONTROL_PANEL_ID = 'controlPanel';
 export const ADD_CONTROL_PANEL_ACTION_ID = 'create_control_panel_action';
+
+export const CONTROL_WIDTH_OPTIONS = { SMALL: 'small', MEDIUM: 'medium', LARGE: 'large' } as const;

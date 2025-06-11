@@ -37,7 +37,22 @@ export class AddControlPanelAction implements Action<EmbeddableApiContext> {
     if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
     embeddable.addNewPanel({
       panelType: CONTROL_PANEL_ID,
-      serializedState: { rawState: { controlCount: 10 } },
+      serializedState: {
+        rawState: {
+          controls: {
+            first: { width: 'small' },
+            second: { width: 'medium' },
+            third: { width: 'large' },
+            fourth: { width: 'small' },
+            fifth: { width: 'small' },
+            sixth: { width: 'medium' },
+            seventh: { width: 'large' },
+            eighth: { width: 'medium' },
+            ninth: { width: 'medium' },
+            tenth: { width: 'small' },
+          },
+        },
+      },
     });
   }
 }

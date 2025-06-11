@@ -9,9 +9,14 @@
 
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { PublishesUnsavedChanges, SerializedTitles } from '@kbn/presentation-publishing';
+import { CONTROL_WIDTH_OPTIONS } from './constants';
+
+export type ControlWidth = (typeof CONTROL_WIDTH_OPTIONS)[keyof typeof CONTROL_WIDTH_OPTIONS];
 
 export interface ControlsGroupInternalState {
-  controlCount: number;
+  controls: {
+    [key: string]: { width: ControlWidth };
+  };
 }
 
 export type ControlGroupSerializedState = SerializedTitles & ControlsGroupInternalState;
