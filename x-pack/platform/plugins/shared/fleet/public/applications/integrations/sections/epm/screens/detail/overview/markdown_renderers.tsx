@@ -13,6 +13,7 @@ import {
   EuiTable,
   EuiTableRow,
   EuiTableRowCell,
+  EuiAccordion,
 } from '@elastic/eui';
 import React from 'react';
 import type { MutableRefObject } from 'react';
@@ -113,6 +114,33 @@ export const markdownRenderers = (
       props: React.ClassAttributes<HTMLImageElement> & React.ImgHTMLAttributes<HTMLImageElement>
     ) => {
       return <img style={{ maxWidth: '100%' }} {...props} alt={props.alt} />;
+    },
+    details: ({ children, node }) => {
+      const [summaryNode, ...bodyNodes] = React.Children.toArray(children).reduce<[React.ReactElement | null, React.ReactNode[]]>(
+        ([summary, body], child) => {
+          if (
+            summary === null &&
+            React.isValidElement(child) &&
+            child.type === 'summary'
+          ) {
+            return [child, body];
+          }
+          return [summary, [...body, child]];
+        },
+        [null, []]
+      );
+
+      const summaryText = summaryNode
+        ? React.Children.toArray(summaryNode.props.children).join('')
+        : '';
+
+      const id = getAnchorId(children[0]?.toString(), node.position?.start.line);
+
+      return (
+        <EuiAccordion id={id} buttonContent={summaryText} initialIsOpen={false}>
+          {bodyNodes}
+        </EuiAccordion>
+      );
     },
   };
 };
