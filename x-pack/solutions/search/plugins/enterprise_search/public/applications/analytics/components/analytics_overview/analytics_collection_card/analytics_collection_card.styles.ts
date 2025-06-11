@@ -10,7 +10,9 @@ import { css } from '@emotion/react';
 import { euiTextTruncate } from '@elastic/eui';
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 
-export const AnalyticsCollectionCardStyles = (euiTheme: EuiThemeComputed) => ({
+export const AnalyticsCollectionCardStyles: (
+  euiTheme: EuiThemeComputed
+) => Record<string, unknown> = (euiTheme: EuiThemeComputed) => ({
   badge: {
     '.euiBadge__text': { color: euiTheme.colors.mediumShade },
     color: euiTheme.colors.subduedText,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import styled, { createGlobalStyle } from 'styled-components';
+import styled, { createGlobalStyle, type StyledComponent } from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiProgress } from '@elastic/eui';
 
 export const StyledTableFlexGroup = styled(EuiFlexGroup).attrs(({ className = '' }) => ({
@@ -28,7 +28,8 @@ export const StyledUnifiedTableFlexItem = styled(EuiFlexItem).attrs(({ className
   overflow: hidden;
 `;
 
-export const StyledEuiProgress = styled(EuiProgress)`
+// @ts-expect-error
+export const StyledEuiProgress: StyledComponent = styled(EuiProgress)`
   z-index: 2;
 `;
 
