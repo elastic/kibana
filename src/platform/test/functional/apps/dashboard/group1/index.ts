@@ -35,7 +35,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     // This has to be first since the other tests create some embeddables as side affects and our counting assumes
     // a fresh index.
-    loadTestFile(require.resolve('./url_field_formatter'));
     loadTestFile(require.resolve('./embeddable_rendering'));
     loadTestFile(require.resolve('./embeddable_data_grid'));
     loadTestFile(require.resolve('./edit_embeddable_redirects'));
