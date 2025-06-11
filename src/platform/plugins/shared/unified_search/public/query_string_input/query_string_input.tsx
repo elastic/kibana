@@ -30,7 +30,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { compact, debounce, isEmpty, isEqual, isFunction, partition } from 'lodash';
 import { CoreStart, DocLinksStart, Toast } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { DataPublicPluginStart, getQueryLog } from '@kbn/data-plugin/public';
 import { type DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { PersistedLog } from '@kbn/data-plugin/public';
@@ -57,7 +56,7 @@ import { onRaf } from '../utils';
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import { AutocompleteService, QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
 import { getCoreStart } from '../services';
-import './query_string_input.scss';
+import { StyledDiv } from './query_string_input.styles';
 
 export const strings = {
   getSearchInputPlaceholderForText: () =>
@@ -800,17 +799,17 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
         isSuggestionsVisible && !isEmpty(this.state.suggestions),
     });
     return (
-      <div className={containerClassName} onFocus={this.onFocusWithin} onBlur={this.onBlurWithin}>
+      <StyledDiv
+        className={containerClassName}
+        onFocus={this.onFocusWithin}
+        onBlur={this.onBlurWithin}
+      >
         {prependElement}
 
         <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
           <div
             {...ariaCombobox}
-            css={{
-              position: 'relative',
-              width: '100%',
-              zIndex: euiThemeVars.euiZLevel1,
-            }}
+            className="kbnQueryBar__textareaWrapOuter"
             aria-label={strings.getQueryBarComboboxAriaLabel(this.props.appName)}
             aria-haspopup="true"
             aria-expanded={this.state.isSuggestionsVisible}
@@ -890,7 +889,7 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
             </EuiPortal>
           </div>
         </EuiOutsideClickDetector>
-      </div>
+      </StyledDiv>
     );
   }
 
