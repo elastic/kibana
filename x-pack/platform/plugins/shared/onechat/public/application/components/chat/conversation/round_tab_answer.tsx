@@ -6,14 +6,106 @@
  */
 
 import React from 'react';
-import { ConversationRound } from '@kbn/onechat-common';
+import { ConversationRound, ConversationRoundStepType } from '@kbn/onechat-common';
 import { ChatMessageText } from './chat_message_text';
+import {
+  EuiPanel,
+  EuiText,
+  EuiSpacer,
+  useEuiTheme,
+  EuiIcon,
+  EuiCodeBlock,
+  EuiAccordion,
+} from '@elastic/eui';
+import { css } from '@emotion/css';
 
-interface RoundTabAnswerProps {
+export interface RoundTabAnswerProps {
   round: ConversationRound;
 }
 
 export const RoundTabAnswer: React.FC<RoundTabAnswerProps> = ({ round }) => {
-  const { assistantResponse } = round;
-  return <ChatMessageText content={assistantResponse?.message ?? ''} />;
+  const { euiTheme } = useEuiTheme();
+  const { assistantResponse, steps } = round;
+
+  const toolCallPanelClass = css`
+    margin-bottom: ${euiTheme.size.m};
+    padding: ${euiTheme.size.m};
+    background-color: ${euiTheme.colors.lightestShade};
+  `;
+
+  const stepHeaderClass = css`
+    display: flex;
+    align-items: center;
+    gap: ${euiTheme.size.s};
+  `;
+
+  const codeBlockClass = css`
+    background-color: ${euiTheme.colors.emptyShade};
+    border: 1px solid ${euiTheme.colors.lightShade};
+    border-radius: ${euiTheme.border.radius.medium};
+  `;
+
+  return (
+    <>
+      {steps?.map((step) => {
+        if (step.type === ConversationRoundStepType.toolCall) {
+          return (
+            <div key={step.toolCallId}>
+              <EuiPanel className={toolCallPanelClass} hasShadow={false} hasBorder={true}>
+                <div className={stepHeaderClass}>
+                  <EuiIcon type="wrench" color="primary" />
+                  <EuiText size="s" color="subdued">
+                    Tool: {step.toolId.toolId}
+                  </EuiText>
+                </div>
+                <EuiSpacer size="xs" />
+                <EuiAccordion
+                  id={`args-${step.toolCallId}`}
+                  buttonContent={
+                    <EuiText size="xs" color="subdued">
+                      Tool call args
+                    </EuiText>
+                  }
+                  paddingSize="s"
+                >
+                  <div className={codeBlockClass}>
+                    <EuiCodeBlock
+                      language="json"
+                      fontSize="s"
+                      paddingSize="s"
+                      isCopyable={false}
+                      transparentBackground
+                    >
+                      {JSON.stringify(step.args, null, 2)}
+                    </EuiCodeBlock>
+                  </div>
+                </EuiAccordion>
+                <EuiSpacer size="s" />
+                {step.result ? (
+                  <div className={codeBlockClass}>
+                    <EuiCodeBlock
+                      language="json"
+                      fontSize="s"
+                      paddingSize="s"
+                      isCopyable={false}
+                      transparentBackground
+                    >
+                      {step.result}
+                    </EuiCodeBlock>
+                  </div>
+                ) : (
+                  <EuiText size="s" color="subdued">
+                    No result available
+                  </EuiText>
+                )}
+              </EuiPanel>
+              <EuiSpacer size="m" />
+            </div>
+          );
+        }
+        return null;
+      })}
+      <ChatMessageText content={assistantResponse?.message ?? ''} />
+    </>
+  );
 };

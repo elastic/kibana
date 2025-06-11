@@ -15,6 +15,7 @@ import {
   createUserMessage,
   createAssistantMessage,
   createToolResult,
+  createToolCall,
 } from '../../../common/conversation_events';
 import { useOneChatServices } from './use_onechat_service';
 import { useKibana } from './use_kibana';
@@ -95,7 +96,17 @@ export const useChat = ({
             );
             setPendingMessages(getAllStreamMessages());
           }
-
+          if (event.type === ChatAgentEventType.toolCall) {
+            const { toolCallId, toolId, args } = event.data;
+            streamMessages.push(
+              createToolCall({
+                toolCallId,
+                toolName: toolId.toolId,
+                args,
+              })
+            );
+            setPendingMessages(getAllStreamMessages());
+          }
           if (event.type === ChatAgentEventType.toolResult) {
             concatenatedChunks = '';
             const { toolCallId, result } = event.data;

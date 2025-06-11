@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { ConversationRound, toStructuredToolIdentifier } from '@kbn/onechat-common';
+import {
+  ConversationRound,
+  toStructuredToolIdentifier,
+  ConversationRoundStepType,
+} from '@kbn/onechat-common';
 import { createToolCallStep } from '@kbn/onechat-common/chat/conversation';
 import {
   type ConversationEvent,
@@ -13,6 +17,7 @@ import {
   isUserMessage,
   isToolResult,
   type ToolCall,
+  isToolCall,
 } from '../../../common/conversation_events';
 
 export interface ConversationRoundToolCall {
@@ -46,7 +51,24 @@ export const getConversationRounds = ({
       const toolCallItem = toolCallMap.get(item.toolCallId);
       if (toolCallItem) {
         toolCallItem.toolResult = item.toolResult;
+        const step = current?.steps?.find((s) => s.toolCallId === item.toolCallId);
+        if (step && step.type === ConversationRoundStepType.toolCall) {
+          step.result = item.toolResult;
+        }
       }
+    }
+    if (isToolCall(item)) {
+      const { toolCallId, toolName, args } = item;
+      toolCallMap.set(toolCallId, { toolCall: item });
+      current!.steps!.push(
+        createToolCallStep({
+          toolCallId,
+          toolId: toStructuredToolIdentifier(toolName),
+          args,
+          result: '',
+        })
+      );
+      toolCallMap.set(toolCallId, { toolCall: item });
     }
     if (isAssistantMessage(item)) {
       if (item.toolCalls.length > 0) {
