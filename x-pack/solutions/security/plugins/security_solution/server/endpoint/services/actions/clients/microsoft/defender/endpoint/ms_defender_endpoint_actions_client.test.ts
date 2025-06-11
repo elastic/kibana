@@ -603,10 +603,10 @@ describe('MS Defender response actions client', () => {
     it('should throw error when Microsoft Defender GET_ACTION_RESULTS API returns no data', async () => {
       // Clear any previous mocks first
       (connectorActionsMock.execute as jest.Mock).mockReset();
-      
+
       // Mock the connector to return undefined data
       (connectorActionsMock.execute as jest.Mock).mockResolvedValueOnce({
-        data: undefined
+        data: undefined,
       });
 
       await expect(msClientMock.getFileDownload('abc', '123')).rejects.toThrow(
