@@ -28,7 +28,7 @@ import { useKibana } from '../utils/kibana_react';
 import { ObservabilityRuleTypeRegistry } from '../rules/create_observability_rule_type_registry';
 import { HideableReactQueryDevTools } from './hideable_react_query_dev_tools';
 
-function App() {
+export function App() {
   const { pricing } = useKibana().services;
   const isCompleteOverviewEnabled = pricing.isFeatureAvailable('observability:complete_overview');
   const allRoutes = {
