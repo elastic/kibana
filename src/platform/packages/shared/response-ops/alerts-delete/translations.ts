@@ -111,6 +111,21 @@ export const RULE_SETTINGS_DESCRIPTION = i18n.translate(
   }
 );
 
+export const RULE_SETTINGS_TECH_PREVIEW_LABEL = i18n.translate(
+  'responseOpsAlertDelete.ruleSettingsTechPreviewLabel',
+  {
+    defaultMessage: 'Technical preview',
+  }
+);
+
+export const RULE_SETTINGS_TECH_PREVIEW_DESCRIPTION = i18n.translate(
+  'responseOpsAlertDelete.ruleSettingsTechPreviewDescription',
+  {
+    defaultMessage:
+      'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+  }
+);
+
 export const RUN_CLEANUP_TASK = i18n.translate('responseOpsAlertDelete.ruleSettingsCleanUp', {
   defaultMessage: 'Clean up',
 });
