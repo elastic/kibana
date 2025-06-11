@@ -21,6 +21,7 @@ import {
   privilegeMonitoringType,
   privilegeMonitoringIndexSourceType,
 } from './lib/entity_analytics/privilege_monitoring/saved_objects';
+import { monitoringEntitySourceType } from './lib/entity_analytics/privilege_monitoring/saved_object/monitoring_entity_source_type';
 
 const types = [
   noteType,
@@ -35,6 +36,7 @@ const types = [
   entityEngineDescriptorType,
   privilegeMonitoringType,
   privilegeMonitoringIndexSourceType,
+  monitoringEntitySourceType,
   protectionUpdatesNoteType,
   promptType,
 ];

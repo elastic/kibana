@@ -47,7 +47,10 @@ type SettersOf<T extends object> = {
 
 export interface StateManager<StateType extends object> {
   getLatestState: () => WithAllKeys<StateType>;
-  reinitializeState: (newState?: Partial<StateType>) => void;
+  reinitializeState: (
+    newState?: Partial<StateType>,
+    comparators?: StateComparators<StateType>
+  ) => void;
   api: SettersOf<StateType> & SubjectsOf<StateType>;
   anyStateChange$: Observable<void>;
 }

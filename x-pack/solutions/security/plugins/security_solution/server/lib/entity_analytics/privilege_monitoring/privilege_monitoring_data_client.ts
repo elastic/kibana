@@ -19,6 +19,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { merge } from 'lodash';
+import { getPrivilegedMonitorUsersIndex } from '../../../../common/entity_analytics/privilege_monitoring/constants';
 import type { UpdatePrivMonUserRequestBody } from '../../../../common/api/entity_analytics/privilege_monitoring/users/update.gen';
 
 import type {
@@ -35,6 +36,8 @@ import type { ApiKeyManager } from './auth/api_key';
 import { startPrivilegeMonitoringTask } from './tasks/privilege_monitoring_task';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import { generateUserIndexMappings, getPrivilegedMonitorUsersIndex } from './indices';
+import { PrivilegeMonitoringEngineDescriptorClient } from './saved_object/privilege_monitoring';
+
 import {
   POST_EXCLUDE_INDICES,
   PRE_EXCLUDE_INDICES,
@@ -165,6 +168,7 @@ export class PrivilegeMonitoringDataClient {
         mappings: generateUserIndexMappings(),
         settings: {
           hidden: true,
+          mode: 'lookup',
         },
       },
     });

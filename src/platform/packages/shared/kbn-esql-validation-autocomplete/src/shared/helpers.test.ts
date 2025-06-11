@@ -8,7 +8,7 @@
  */
 
 import { parse } from '@kbn/esql-ast';
-import { getBracketsToClose, getExpressionType, shouldBeQuotedSource } from './helpers';
+import { getExpressionType, shouldBeQuotedSource } from './helpers';
 import { SupportedDataType, FunctionDefinitionTypes, Location } from '../definitions/types';
 import { setTestFunctions } from './test_functions';
 
@@ -83,16 +83,17 @@ describe('getExpressionType', () => {
         expression: 'NULL',
         expectedType: 'null',
       },
-      // TODO — consider whether we need to be worried about
-      // differentiating between time_duration, and date_period
-      // instead of just using time_literal
       {
         expression: '1 second',
-        expectedType: 'time_literal',
+        expectedType: 'time_duration',
       },
       {
         expression: '1 day',
-        expectedType: 'time_literal',
+        expectedType: 'time_duration',
+      },
+      {
+        expression: '?value',
+        expectedType: 'param',
       },
     ];
     test.each(cases)('detects a literal of type $expectedType', ({ expression, expectedType }) => {
@@ -177,6 +178,10 @@ describe('getExpressionType', () => {
       expect(getExpressionType(getASTForExpression('fieldName'), new Map(), new Map())).toBe(
         'unknown'
       );
+    });
+
+    it('handles fields defined by a named param', () => {
+      expect(getExpressionType(getASTForExpression('??field'), new Map(), new Map())).toBe('param');
     });
   });
 
@@ -339,18 +344,5 @@ describe('getExpressionType', () => {
         expect(getExpressionType(ast)).toBe(expectedType);
       }
     );
-  });
-});
-
-describe('getBracketsToClose', () => {
-  it('returns the number of brackets to close', () => {
-    expect(getBracketsToClose('foo(bar(baz')).toEqual([')', ')']);
-    expect(getBracketsToClose('foo(bar[baz')).toEqual([']', ')']);
-    expect(getBracketsToClose('foo(bar[baz"bap')).toEqual(['"', ']', ')']);
-    expect(
-      getBracketsToClose(
-        'from a | eval case(integerField < 0, "negative", integerField > 0, "positive", '
-      )
-    ).toEqual([')']);
   });
 });

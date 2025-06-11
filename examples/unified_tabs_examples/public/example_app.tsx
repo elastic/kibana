@@ -24,7 +24,7 @@ import type { AppMountParameters } from '@kbn/core-application-browser';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
-import { type TabItem, UnifiedTabs, useNewTabProps } from '@kbn/unified-tabs';
+import { UnifiedTabs, useNewTabProps, type UnifiedTabsProps } from '@kbn/unified-tabs';
 import { type TabPreviewData, TabStatus } from '@kbn/unified-tabs';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { FieldListSidebar, FieldListSidebarProps } from './field_list_sidebar';
@@ -67,9 +67,13 @@ export const UnifiedTabsExampleApp: React.FC<UnifiedTabsExampleAppProps> = ({
   const [dataView, setDataView] = useState<DataView | null>();
   const [selectedFieldNames, setSelectedFieldNames] = useState<string[]>([]);
   const { getNewTabDefaultProps } = useNewTabProps({ numberOfInitialItems: 0 });
-  const [initialItems] = useState<TabItem[]>(() =>
-    Array.from({ length: 7 }, () => getNewTabDefaultProps())
-  );
+  const [{ managedItems, managedSelectedItemId }, setState] = useState<{
+    managedItems: UnifiedTabsProps['items'];
+    managedSelectedItemId: UnifiedTabsProps['selectedItemId'];
+  }>(() => ({
+    managedItems: Array.from({ length: 7 }, () => getNewTabDefaultProps()),
+    managedSelectedItemId: undefined,
+  }));
 
   const onAddFieldToWorkspace = useCallback(
     (field: DataViewField) => {
@@ -121,13 +125,20 @@ export const UnifiedTabsExampleApp: React.FC<UnifiedTabsExampleAppProps> = ({
         {dataView ? (
           <div className="eui-fullHeight">
             <UnifiedTabs
-              initialItems={initialItems}
+              items={managedItems}
+              selectedItemId={managedSelectedItemId}
+              recentlyClosedItems={[]}
               maxItemsCount={25}
               services={services}
-              onChanged={() => {}}
+              onChanged={(updatedState) =>
+                setState({
+                  managedItems: updatedState.items,
+                  managedSelectedItemId: updatedState.selectedItem?.id,
+                })
+              }
               createItem={getNewTabDefaultProps}
-              getPreviewData={
-                () => TAB_CONTENT_MOCK[Math.floor(Math.random() * TAB_CONTENT_MOCK.length)] // TODO change mock to real data when ready
+              getPreviewData={() =>
+                TAB_CONTENT_MOCK[Math.floor(Math.random() * TAB_CONTENT_MOCK.length)]
               }
               renderContent={({ label }) => {
                 return (
