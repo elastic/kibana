@@ -11,15 +11,13 @@ import { OnechatChatPage } from './pages/chat';
 
 export const OnechatRoutes: React.FC<{}> = () => {
   return (
-    <div>
-      <Routes>
-        <Route path="/chat/conversations/:conversationId">
-          <OnechatChatPage />
-        </Route>
-        <Route path="/chat">
-          <OnechatChatPage />
-        </Route>
-      </Routes>
-    </div>
+    <Routes>
+      <Route path="/chat/conversations/:conversationId">
+        <OnechatChatPage />
+      </Route>
+      <Route path="/chat">
+        <OnechatChatPage />
+      </Route>
+    </Routes>
   );
 };

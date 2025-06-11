@@ -15,6 +15,7 @@ import { appPaths } from '../../utils/app_paths';
 import { ChatHeader } from './chat_header';
 import { ConversationEventChanges } from '../../../../common/chat_events';
 import { Chat } from './chat';
+import { ConversationPanel } from './conversation_panel/conversation_panel';
 
 export const OnechatChatView: React.FC<{ conversationId?: string }> = ({ conversationId }) => {
   const { navigateToOnechatUrl } = useNavigation();
@@ -49,6 +50,14 @@ export const OnechatChatView: React.FC<{ conversationId?: string }> = ({ convers
       grow={false}
       panelled={false}
     >
+      <KibanaPageTemplate.Sidebar paddingSize="none" minWidth={280}>
+        <ConversationPanel
+          onNewConversationSelect={() => {
+            navigateToOnechatUrl(appPaths.chat.new);
+          }}
+        />
+      </KibanaPageTemplate.Sidebar>
+
       <KibanaPageTemplate.Section paddingSize="none" grow contentProps={{ css: 'height: 100%' }}>
         <EuiFlexGroup
           className={pageSectionContentClassName}
