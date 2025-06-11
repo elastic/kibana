@@ -4,39 +4,49 @@ exports[`Select Flow Direction rendering it renders the basic group button for u
 <div
   class="euiFilterGroup emotion-euiFilterGroup-uncompressed"
 >
-  <button
-    class="euiButtonEmpty euiFilterButton euiFilterButton-hasActiveFilters emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiFilterButton-withNext-hasActiveFilters"
-    data-test-subj="uniDirectional"
-    type="button"
+  <div
+    class="euiFilterButton__wrapper css-nbqv3o-wrapper-withNext-hasToggle"
   >
-    <span
-      class="euiButtonEmpty__content emotion-euiButtonDisplayContent-euiFilterButton__content"
+    <button
+      aria-pressed="true"
+      class="euiButtonGroupButton euiButtonGroupButton-isSelected euiFilterButton euiFilterButton-isSelected euiFilterButton-hasActiveFilters euiFilterButton-isToggle emotion-euiButtonDisplay-s-defaultMinWidth-euiButtonGroupButton-compressed-fill-text-euiFilterButton-hasActiveFilters-toggle"
+      data-test-subj="uniDirectional"
+      type="button"
     >
       <span
-        class="euiFilterButton__text emotion-euiFilterButton__text"
-        data-text="Unidirectional"
-        title="Unidirectional"
+        class="emotion-euiButtonDisplayContent-euiButtonGroupButton__content-compressed-euiFilterButton__content"
       >
-        Unidirectional
+        <span
+          class="euiFilterButton__text emotion-euiFilterButton__text"
+          data-text="Unidirectional"
+          title="Unidirectional"
+        >
+          Unidirectional
+        </span>
       </span>
-    </span>
-  </button>
-  <button
-    class="euiButtonEmpty euiFilterButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiFilterButton"
-    data-test-subj="biDirectional"
-    type="button"
+    </button>
+  </div>
+  <div
+    class="euiFilterButton__wrapper css-10m1aro-wrapper-hasToggle"
   >
-    <span
-      class="euiButtonEmpty__content emotion-euiButtonDisplayContent-euiFilterButton__content"
+    <button
+      aria-pressed="false"
+      class="euiButtonGroupButton euiFilterButton euiFilterButton-isToggle emotion-euiButtonDisplay-s-defaultMinWidth-euiButtonGroupButton-compressed-empty-text-euiFilterButton-toggle"
+      data-test-subj="biDirectional"
+      type="button"
     >
       <span
-        class="euiFilterButton__text emotion-euiFilterButton__text"
-        data-text="Bidirectional"
-        title="Bidirectional"
+        class="emotion-euiButtonDisplayContent-euiButtonGroupButton__content-compressed-euiFilterButton__content"
       >
-        Bidirectional
+        <span
+          class="euiFilterButton__text emotion-euiFilterButton__text"
+          data-text="Bidirectional"
+          title="Bidirectional"
+        >
+          Bidirectional
+        </span>
       </span>
-    </span>
-  </button>
+    </button>
+  </div>
 </div>
 `;

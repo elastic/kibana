@@ -14,7 +14,8 @@ export type ESQLAstCommand =
   | ESQLAstTimeseriesCommand
   | ESQLAstJoinCommand
   | ESQLAstChangePointCommand
-  | ESQLAstRerankCommand;
+  | ESQLAstRerankCommand
+  | ESQLAstCompletionCommand;
 
 export type ESQLAstNode = ESQLAstCommand | ESQLAstExpression | ESQLAstItem;
 
@@ -108,6 +109,12 @@ export interface ESQLAstChangePointCommand extends ESQLCommand<'change_point'> {
     type: ESQLColumn;
     pvalue: ESQLColumn;
   };
+}
+
+export interface ESQLAstCompletionCommand extends ESQLCommand<'completion'> {
+  prompt: ESQLAstExpression;
+  inferenceId: ESQLIdentifierOrParam;
+  targetField?: ESQLColumn;
 }
 
 export interface ESQLAstRerankCommand extends ESQLCommand<'rerank'> {
@@ -291,14 +298,15 @@ export interface ESQLSource extends ESQLAstBaseItem {
   sourceType: 'index' | 'policy';
 
   /**
-   * Represents the cluster part of the source identifier. Empty string if not
-   * present.
+   * Represents the prefix part of the source identifier. Empty string if not
+   * present. Used in index pattern as the cluster identifier or as "mode" in
+   * enrich policy.
    *
    * ```
-   * FROM [<cluster>:]<index>
+   * FROM [<prefix>:]<index>
    * ```
    */
-  cluster?: ESQLStringLiteral | undefined;
+  prefix?: ESQLStringLiteral | undefined;
 
   /**
    * Represents the index part of the source identifier. Unescaped and unquoted.

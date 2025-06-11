@@ -21,7 +21,7 @@ describe('Agent Identifier utilities', () => {
     });
 
     it('should return false for a serialized identifier', () => {
-      expect(isPlainAgentIdentifier('provider1:my-agent')).toBe(false);
+      expect(isPlainAgentIdentifier('provider1::my-agent')).toBe(false);
     });
 
     it('should return false for a structured identifier', () => {
@@ -48,13 +48,13 @@ describe('Agent Identifier utilities', () => {
     });
 
     it('should return false for a serialized identifier', () => {
-      expect(isStructuredAgentIdentifier('provider1:my-agent')).toBe(false);
+      expect(isStructuredAgentIdentifier('provider1::my-agent')).toBe(false);
     });
   });
 
   describe('isSerializedAgentIdentifier', () => {
     it('should return true for a valid serialized identifier', () => {
-      expect(isSerializedAgentIdentifier('provider1:my-agent')).toBe(true);
+      expect(isSerializedAgentIdentifier('provider1::my-agent')).toBe(true);
     });
 
     it('should return false for a plain string identifier', () => {
@@ -73,7 +73,7 @@ describe('Agent Identifier utilities', () => {
 
   describe('toSerializedAgentIdentifier', () => {
     it('should return the same string for a serialized identifier', () => {
-      const serializedId = 'provider1:my-agent';
+      const serializedId = 'provider1::my-agent';
       expect(toSerializedAgentIdentifier(serializedId)).toBe(serializedId);
     });
 
@@ -82,15 +82,15 @@ describe('Agent Identifier utilities', () => {
         agentId: 'my-agent',
         providerId: 'provider1',
       };
-      expect(toSerializedAgentIdentifier(structuredId)).toBe('provider1:my-agent');
+      expect(toSerializedAgentIdentifier(structuredId)).toBe('provider1::my-agent');
     });
 
     it('should convert a plain identifier to serialized format with unknown provider', () => {
-      expect(toSerializedAgentIdentifier('my-agent')).toBe('unknown:my-agent');
+      expect(toSerializedAgentIdentifier('my-agent')).toBe('unknown::my-agent');
     });
 
     it('should throw an error for malformed identifiers', () => {
-      expect(() => toSerializedAgentIdentifier('invalid:format:extra')).toThrow(
+      expect(() => toSerializedAgentIdentifier('invalid::format::extra')).toThrow(
         'Malformed agent identifier'
       );
     });
@@ -106,7 +106,7 @@ describe('Agent Identifier utilities', () => {
     });
 
     it('should convert a serialized identifier to structured', () => {
-      const result = toStructuredAgentIdentifier('provider1:my-agent');
+      const result = toStructuredAgentIdentifier('provider1::my-agent');
       expect(result).toEqual({
         agentId: 'my-agent',
         providerId: 'provider1',
@@ -122,7 +122,7 @@ describe('Agent Identifier utilities', () => {
     });
 
     it('should throw an error for malformed identifiers', () => {
-      expect(() => toStructuredAgentIdentifier('invalid:format:extra')).toThrow(
+      expect(() => toStructuredAgentIdentifier('invalid::format::extra')).toThrow(
         'Malformed agent identifier'
       );
     });
