@@ -1590,7 +1590,7 @@
     "@types/d3-time": "^2.1.1",
     "@types/d3-transition": "^3.0.1",
     "@types/dedent": "^0.7.0",
-    "@types/deep-freeze-strict": "^1.1.0",
+    "@types/deep-freeze-strict": "^1.1.2",
     "@types/ejs": "^3.1.5",
     "@types/enzyme": "^3.10.12",
     "@types/eslint": "^8.44.2",
