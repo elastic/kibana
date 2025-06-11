@@ -137,7 +137,7 @@ export class IncrementalIdTaskManager {
         await this.taskManager?.runSoon(CASES_INCREMENTAL_ID_SYNC_TASK_ID);
       }
     } catch (e) {
-      this.logger.debug(`Could not run task: ${e}`);
+      this.logger.debug(`Could not run case incremental id task: ${e}`);
     }
   }
 }
