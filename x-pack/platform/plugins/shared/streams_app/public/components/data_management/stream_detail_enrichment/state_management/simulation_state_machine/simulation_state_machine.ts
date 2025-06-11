@@ -91,7 +91,7 @@ export const simulationMachine = setup({
     resetSamples: assign({ samples: [] }),
   },
   delays: {
-    debounceTime: 800,
+    processorChangeDebounceTime: 800,
   },
   guards: {
     canSimulate: ({ context }, params: ProcessorEventParams) =>
@@ -150,6 +150,8 @@ export const simulationMachine = setup({
     },
     'processor.change': {
       target: '.debouncingChanges',
+      reenter: true,
+      description: 'Re-enter debouncing state and reinitialize the delayed processing.',
       actions: [{ type: 'storeProcessors', params: ({ event }) => event }],
     },
     'processor.delete': [
@@ -182,16 +184,8 @@ export const simulationMachine = setup({
     },
 
     debouncingChanges: {
-      on: {
-        'processor.change': {
-          target: 'debouncingChanges',
-          actions: [{ type: 'storeProcessors', params: ({ event }) => event }],
-          description: 'Re-enter debouncing state and reinitialize the delayed processing.',
-          reenter: true,
-        },
-      },
       after: {
-        debounceTime: [{ target: 'assertingSimulationRequirements' }],
+        processorChangeDebounceTime: 'assertingSimulationRequirements',
       },
     },
 

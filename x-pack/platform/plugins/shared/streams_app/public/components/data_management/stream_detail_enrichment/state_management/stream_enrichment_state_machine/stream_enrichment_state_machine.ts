@@ -133,20 +133,19 @@ export const streamEnrichmentMachine = setup({
     addDataSource: assign(
       ({ context, spawn, self }, { dataSource }: { dataSource: EnrichmentDataSource }) => {
         const dataSourceWithUIAttributes = dataSourceConverter.toUIDefinition(dataSource);
-        const dataSourcesRefs = context.dataSourcesRefs.slice();
 
-        dataSourcesRefs.unshift(
-          spawn('dataSourceMachine', {
-            id: dataSourceWithUIAttributes.id,
-            input: {
-              parentRef: self,
-              streamName: context.definition.stream.name,
-              dataSource: dataSourceWithUIAttributes,
-            },
-          })
-        );
+        const newDataSourceRef = spawn('dataSourceMachine', {
+          id: dataSourceWithUIAttributes.id,
+          input: {
+            parentRef: self,
+            streamName: context.definition.stream.name,
+            dataSource: dataSourceWithUIAttributes,
+          },
+        });
 
-        return { dataSourcesRefs };
+        return {
+          dataSourcesRefs: [newDataSourceRef, ...context.dataSourcesRefs],
+        };
       }
     ),
     stopDataSource: stopChild((_, params: { id: string }) => params.id),
@@ -248,7 +247,7 @@ export const streamEnrichmentMachine = setup({
     isWiredStream: ({ context }) => Streams.WiredStream.GetResponse.is(context.definition),
   },
 }).createMachine({
-  /** @xstate-layout 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-btygS5KxgTzi4meWPTRHiok-GhdPaU8L57XDeSXPoIVN7b3GLvE+B84CAoUegpwTQ9bFFZiYNoWiqjajxKnBM8SjBkgMMkgiDAkQQAAEpiDEOeNkfLAm+ElIGWMjRPzBi+NgjxJJ8HBhcHKG4oC-BAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5RgHYCcCWBjAFgZQBc0wBDAWwDoMUMCMSAbDAL2qkOPIGIBtABgC6iUAAcA9rFoYxKYSAAeiALQB2PgDYKAJgCMATnXqV6rQFYt6gMw6ANCACeyvXpXa1AFh1qV7gBy+tLQBfILtUTFwOUkpqKUYWNijuHh0hJBBxSToZOUUEJXVfV2dLPj13Sz0dSp1TO0d8vQsKXy8td3ctMqKVFRCw9Gx8ImiqGjp41hQoADE0MTIAVTQGLgBXFbG4pmZIfjTRCSkc9LyCvT4KdSbrPj9C3xN65R93FvVTS3U+FUstUr0-XAg0iI3IFFgYAIaxEAHF5gBrADCYgYDDAWGyKC4EBkYDGADcxAj8ZDoXDESi0Risfs5JljrJTspKlormVOi5dLUXM98qYDBQ9KZ3GVTHxTB8-jogeEhklKGSYfDiVT0ZjpNiwGh5mgKCIGCQCAAzMRoRVQ5WU1Hq2mCelHLG5ZSilp8PhFLRNDl8Cx1BwvDRCnS6QouCU6O6ykHDTiUTgQexcWBg+MYsAYAl7e3pBlO5kIKXaUw6dwlsse9ruPmqdoUUy+DQ+PSWayt6MRWOjBP2CGpqgQdHJ-vEMl03OOzXOhCfK4NyzmIzWR76Pm-N7fZu+FzVfy+DvykekRN9uMDocps8wiBGsDjw5ZKcFpQXYrqaqVFt3R4qPkGNkVC46juMBpaFOoB6gmePanqM15GmwOJ4oSxL4jCkJoAQCoAIKYma94ZJOJygGcpgqL4QpdD8dzfBKuh-lorj3N4liPNYLiQV24IwZecEiDedDTFw2q6vqhommalDodqWGprhBD4TmD6MtOSitq4IaMToRjGGU6h-q6BilBUJgin87icQqFAwXKuBkKgBA4kaJB4GIGxYPiuAkNMd5KYRj7EQoiCRioOgUMYRhsV0DZ6DWIaXIUWgBJYKjil8Jj7qEwKdlZNkxvZKCOQJLluWgHkUMVSI4N5MAEXmT4kcFvpvGWnRJdujGWJ4NZJXoFC1Co5SMcKIqPJZR4kCetk4AVBAVRgsAGiQ9iJBgZBrOJmpcCI8webAsBmrAFCTRAdVEUyjUIBUFEqElZRdcZKX+g0kYtSKZZWO9XpkeN0HHr202zfNi2Git0x4GtG0ITI227XAB1oEdxBmhA2pnQFF1BVdrHhXdLYVHcT18pKFCtR9C4dN9fRZdNuX-RQgMOcDS1g+wkObTDO1iHtCMUF5PnoypBbXbjjb449qV8hRZOShTnKStTAw5RNU35UzEALSzq3rRz2JczzZp89VAupA6GPTuKYW9E07hVF6rQNr+AYIO0lw6CFGhy1Tv3dvTjOFczoPa1DWKw9z8OG6j6IEL5Bz+ULl0i7dYsPYTkvO2pfUiqYZnATnHiWD73F+2rAcayDy3B7rYcG3qKYkLVfn1YFeSdKYFASr6u7+Dn1Q1o84V6P4fghiBwFjTTMZ05NAOl3N5da+D7PQ3rcP7Yb8Ex4L+aJ7U-XOMYajab8Pg9e6-WtIUKXpT4RRF2mM8M3PgeV0vOsr8my9YhQZDeQ3YAABFnKuXcnAbeDUsaqEjBQBc+gdDbngcKZwfJRSaGuJbawpZjB-HvtZEunYgYLyDm-EOmoKAEgwGAAA7kAggJAAAKxAKHUM-u-b+zCaFQhpJAGYlCGAQFgOAluLoc6k3dKKNQnwfAfH0s7W6VxgLfCHj8SU7tC6T2Vn9R+-t56a2IWzNhZCOG0IYUwyhVDWGkJkEbGqYBGFgGMdzWAvCGAxzQEIzGZxfgUS8CWMwHQrDVFkQ0NSYV2oln0B6aovRgK4LygQ9WejX4GKsSgch5iAFcMxDwvhAjLG63SdQkx9iOEeNUiBS4l8vp-EeKGPkpZLivhzm3EURgOIaMPFo1WCSy5JNZhDQx1jjFZJjhAXhYB+GwHySvCgxpclHQAFRlILCFYMgQLDOBLByLQKC+oPD4ClO6DYQLCjifgoYQNf4oAbmwExICypwCcnQ+5e0+YMAkGAAAsn-GAs1lmXVUCWdkuh-AWH8NpZ6iAupvg5EPd2-xagQQ6VBX22jn5XJudMO5pU9pPJKqAo6J1-mQM6JcSs2kx4hguF1XZmgyi7nKBoDQIozlop6XNDFUBbnAJxY84qLz8RRy4cSs4VRLAd10AYCU-g4WWBQQEK4pZHiij+O6dSIQsooDEKjeA6RaapjNgnSBkYyISv0N8Bs25WhyozpGfwbgDm3WuiGUwuDYgTB2IkA1E5zbPjhR3KoZR2j-FbHwWwGdnBZy6JUL4xgyxmDdeMegnrphzAWMsBghqd6QLUNLCw1wrC3QRb4fu3whQlklPdW2ATcFKgpKqG0NIIHN08S6VKF9UrXFtr0JKxgay-DCnbMw-wLjKJlMirilAoDWmpBqGQMwSAYAYBsMAWaIF5GDYPBFhaRR3F6P2j0pNNLfgCGGn4rLExruEfkSMZQzVSstbKms7h20fEGi+92NEFyK2yp01FJ5eLkCva2xooiDAfhKN+Iwa5QpChuD8d8qVfANgvb2QDMRByrp9Uas4wE+q1C9MYRsbEpYClJk0QIpRyK+kqKh2C4JN5sGA6pIwbwmkPRFO0EU9SPRZw9BUNQUTxQWQndPbpFyHLMb9e+e9FqZXWp6kUK4l9UoXHgWBdRSs-3FzZRJ3pFd+lf2bedVS5FNC+JdQEtswTlAQvCj3bkDY7j2zozol+hnBlpOMc5Ep5ipMAraVcf4OcPQemQ6uORbJDAVOUZ2tRrnn5EOSQM1JhTOEx2yWM+Z-njVJW0GYa4TRyiSNqGuKLijugqKUeOrTKKdPibskzTl3Lnm8t1cpbNuGmik2uI8e6XxfCtmJuYDuYaqjkRSmG5DZyDoMCzBAAASmIMQsk4w5bOJUS4IpwNH0bFYOK7pLi9AOY2Ri9tPgaqCEAA */
   id: 'enrichStream',
   context: ({ input }) => ({
     definition: input.definition,
@@ -262,10 +261,7 @@ export const streamEnrichmentMachine = setup({
   states: {
     initializingStream: {
       always: [
-        {
-          target: 'resolvedRootStream',
-          guard: 'isRootStream',
-        },
+        { target: 'resolvedRootStream', guard: 'isRootStream' },
         { target: 'initializingFromUrl' },
       ],
     },
@@ -275,11 +271,11 @@ export const streamEnrichmentMachine = setup({
       },
       on: {
         'url.initialized': {
-          target: 'setupGrokCollection',
           actions: [
             { type: 'storeUrlState', params: ({ event }) => event },
             { type: 'updateUrlState' },
           ],
+          target: 'setupGrokCollection',
         },
       },
     },
@@ -290,12 +286,8 @@ export const streamEnrichmentMachine = setup({
         input: ({ context }) => ({
           grokCollection: context.grokCollection,
         }),
-        onDone: {
-          target: 'ready',
-        },
-        onError: {
-          target: 'grokCollectionFailure',
-        },
+        onDone: 'ready',
+        onError: 'grokCollectionFailure',
       },
     },
     grokCollectionFailure: {},
@@ -409,7 +401,7 @@ export const streamEnrichmentMachine = setup({
                         params: ({ event }) => event,
                       },
                     ],
-                  }
+                  },
                 ],
                 'processor.delete': {
                   actions: [

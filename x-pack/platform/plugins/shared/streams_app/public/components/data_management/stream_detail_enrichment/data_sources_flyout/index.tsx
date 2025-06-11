@@ -374,11 +374,8 @@ const CustomSamplesDataSourceCard = ({ dataSourceRef }: { dataSourceRef: DataSou
                 <EuiCode>
                   {JSON.stringify([
                     {
-                      _index: 'index',
-                      _id: 'id',
-                      _source: {
-                        foo: 'bar',
-                      },
+                      foo: 'bar',
+                      foo2: 'baz',
                     },
                   ])}
                 </EuiCode>

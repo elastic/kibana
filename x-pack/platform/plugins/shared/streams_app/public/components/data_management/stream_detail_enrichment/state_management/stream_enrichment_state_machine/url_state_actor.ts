@@ -33,6 +33,7 @@ export function createUrlInitializerActor({
     const urlState = enrichmentUrlSchema.safeParse(urlStateValues);
 
     if (urlState.success) {
+      // Always add default random samples data source
       if (!hasDefaultRandomSamplesDataSource(urlState.data.dataSources)) {
         urlState.data.dataSources.unshift(defaultRandomSamplesDataSource);
       }
