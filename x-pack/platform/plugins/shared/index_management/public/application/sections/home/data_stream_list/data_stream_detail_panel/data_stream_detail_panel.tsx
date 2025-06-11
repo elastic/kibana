@@ -402,6 +402,24 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           </ConditionalWrap>
         ),
         dataTestSubj: 'dataRetentionDetail',
+      },
+      {
+        name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.failureStoreTitle', {
+          defaultMessage: 'Failure store',
+        }),
+        toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.failureStoreToolTip', {
+          defaultMessage: 'The failure store provides a mechanism to store documents that fail to be indexed.',
+        }),
+        content: dataStream.failureStoreEnabled ? (
+          i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.failureStoreEnabledText', {
+            defaultMessage: 'Enabled',
+          })
+        ) : (
+          i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.failureStoreDisabledText', {
+            defaultMessage: 'Disabled',
+          })
+        ),
+        dataTestSubj: 'failureStoreDetail',
       }
     );
 

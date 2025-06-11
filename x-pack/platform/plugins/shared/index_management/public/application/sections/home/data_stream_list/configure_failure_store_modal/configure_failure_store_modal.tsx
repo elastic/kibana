@@ -43,7 +43,8 @@ export const ConfigureFailureStoreModal: React.FunctionComponent<Props> = ({
   dataStreams,
   onClose,
 }) => {
-  const dataStreamNames = dataStreams.map(({ name }: DataStream) => name as string);
+  // We will support multiple data streams in the future, but for now we only support one.
+  const dataStream = dataStreams[0];
 
   const {
     services: { notificationService },
@@ -51,7 +52,7 @@ export const ConfigureFailureStoreModal: React.FunctionComponent<Props> = ({
 
   const { form } = useForm({
     defaultValue: {
-      dsFailureStore: false,
+      dsFailureStore: dataStream?.failureStoreEnabled ?? false,
     },
     schema: configureFailureStoreFormSchema,
     id: 'configureFailureStoreForm',
@@ -68,7 +69,7 @@ export const ConfigureFailureStoreModal: React.FunctionComponent<Props> = ({
       return;
     }
 
-    return updateDSFailureStore(dataStreamNames, data).then(({ data: responseData, error }) => {
+    return updateDSFailureStore([dataStream.name], data).then(({ data: responseData, error }) => {
       if (responseData) {
         if (responseData.warning) {
           notificationService.showWarningToast(responseData.warning);

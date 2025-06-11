@@ -35,6 +35,7 @@ export function deserializeDataStream(
     next_generation_managed_by: nextGenerationManagedBy,
     index_mode: indexMode,
   } = dataStreamFromEs;
+
   const meteringStorageSize =
     meteringStorageSizeBytes !== undefined
       ? new ByteSizeValue(meteringStorageSizeBytes).toString()
@@ -79,6 +80,7 @@ export function deserializeDataStream(
       globalMaxRetention,
     },
     nextGenerationManagedBy,
+    failureStoreEnabled: Boolean(dataStreamFromEs.failure_store?.enabled),
     indexMode: (indexMode ??
       (isLogsdbEnabled && /^logs-[^-]+-[^-]+$/.test(name)
         ? LOGSDB_INDEX_MODE

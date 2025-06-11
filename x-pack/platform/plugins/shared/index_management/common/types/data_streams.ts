@@ -68,6 +68,7 @@ export interface DataStream {
   privileges: Privileges;
   hidden: boolean;
   nextGenerationManagedBy: string;
+  failureStoreEnabled?: boolean;
   lifecycle?: IndicesDataStreamLifecycleWithRollover & {
     enabled?: boolean;
     effective_retention?: string;
