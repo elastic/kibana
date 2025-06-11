@@ -258,10 +258,12 @@ describe('CasesIncrementalIdService', () => {
       expect(service.incrementCounterSO).toHaveBeenCalledWith(secondLifeIncIdSo, 13, 'second-life');
     });
 
-    it('should stop processing when max duration has passed', async () => {
+    it('should stop processing when the service has been stopped', async () => {
+      service.stopService();
       // @ts-expect-error: case SO types are not correct
-      await service.incrementCaseIds(cases, -1);
+      await service.incrementCaseIds(cases);
       expect(service.applyIncrementalIdToCaseSo).not.toHaveBeenCalled();
+      expect(service.incrementCounterSO).not.toHaveBeenCalled();
     });
 
     it('should skip processing a case when it has no namespace attached', async () => {
