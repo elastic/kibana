@@ -140,23 +140,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setPopover(false);
   }, []);
 
-  const button = useMemo(() => {
-    return (
-      <EuiToolTip position="top" content={i18n.MORE_ACTIONS}>
-        <EuiButtonIcon
-          aria-label={ariaLabel}
-          data-test-subj="timeline-context-menu-button"
-          size="s"
-          iconType="boxesHorizontal"
-          data-popover-open={isPopoverOpen}
-          onClick={onButtonClick}
-          isDisabled={disabled}
-          color={isPopoverOpen ? 'primary' : 'text'}
-        />
-      </EuiToolTip>
-    );
-  }, [disabled, onButtonClick, ariaLabel, isPopoverOpen]);
-
   const refetchAll = useCallback(() => {
     const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
       newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
@@ -287,6 +270,26 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     [alertTagsPanels, alertAssigneesPanels, items]
   );
 
+  const button = useMemo(() => {
+    const hasItems = !!items.length;
+    const tooltipContent = hasItems ? i18n.MORE_ACTIONS : i18n.NOT_ENOUGH_PRIVILEGES;
+
+    return (
+      <EuiToolTip position="top" content={tooltipContent}>
+        <EuiButtonIcon
+          aria-label={ariaLabel}
+          data-test-subj="timeline-context-menu-button"
+          size="s"
+          iconType="boxesHorizontal"
+          data-popover-open={isPopoverOpen}
+          onClick={onButtonClick}
+          isDisabled={disabled || !hasItems}
+          color={isPopoverOpen ? 'primary' : 'text'}
+        />
+      </EuiToolTip>
+    );
+  }, [ariaLabel, isPopoverOpen, onButtonClick, disabled, items.length]);
+
   const osqueryFlyout = useMemo(() => {
     return (
       <OsqueryFlyout
@@ -300,7 +303,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
 
   return (
     <>
-      {items.length > 0 && (
+      {items.length > 0 ? (
         <div key="actions-context-menu">
           <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
             <EuiPopover
@@ -321,6 +324,8 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
             </EuiPopover>
           </EventsTdContent>
         </div>
+      ) : (
+        button
       )}
       {openAddExceptionFlyout &&
         ruleId &&
