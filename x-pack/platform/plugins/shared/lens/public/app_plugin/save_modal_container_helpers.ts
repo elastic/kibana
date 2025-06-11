@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/server';
+import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import type { LensAppServices } from './types';
 import { LENS_EMBEDDABLE_TYPE } from '../../common/constants';
 import { extract } from '../../common/embeddable_factory';

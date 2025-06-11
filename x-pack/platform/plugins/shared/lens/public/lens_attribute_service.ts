@@ -10,7 +10,7 @@ import type { SavedObjectReference } from '@kbn/core/server';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { noop } from 'lodash';
-import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/server';
+import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import type { LensPluginStartDependencies } from './plugin';
 import type {
   LensSavedObject,
