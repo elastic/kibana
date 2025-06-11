@@ -92,9 +92,9 @@ function validateConfig(
     !enabledServices.includes(emailKbnSettings[serviceKey])
   ) {
     throw new Error(
-      `[service]: ${
+      `[service]: "${
         emailKbnSettings[serviceKey]
-      } is not in the list of enabled email services: ${enabledServices.join(',')}`
+      }" is not in the list of enabled email services: ${enabledServices.join(',')}`
     );
   }
 
