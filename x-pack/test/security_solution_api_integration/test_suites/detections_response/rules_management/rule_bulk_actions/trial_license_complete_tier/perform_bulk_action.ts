@@ -3054,6 +3054,35 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
+    describe('gaps_range filtering', () => {
+      it('should not affect rules without gaps when using gaps_range filters', async () => {
+        // Create two rules without gaps
+        await createRule(supertest, log, {
+          ...getSimpleRule('rule-without-gaps-1'),
+        });
+        await createRule(supertest, log, {
+          ...getSimpleRule('rule-without-gaps-2'),
+        });
+
+        // Execute bulk action with gaps range filter
+        const { body } = await postBulkAction().send({
+          query: '',
+          action: BulkActionTypeEnum.duplicate,
+          gaps_range_start: '2025-01-01T00:00:00.000Z',
+          gaps_range_end: '2025-01-02T00:00:00.000Z',
+          duplicate: { include_exceptions: false, include_expired_exceptions: false },
+        });
+
+        // Verify the summary shows no rules were processed
+        expect(body.attributes.summary).toEqual({
+          failed: 0,
+          skipped: 0,
+          succeeded: 0,
+          total: 0,
+        });
+      });
+    });
+
     it('should limit concurrent requests to 5', async () => {
       const ruleId = 'ruleId';
       const timelineId = '91832785-286d-4ebe-b884-1a208d111a70';
