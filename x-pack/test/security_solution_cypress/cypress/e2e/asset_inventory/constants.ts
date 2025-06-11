@@ -10,6 +10,21 @@ const ADD_ELASTIC_AGENT_LATER_TEST_ID = getDataTestSubjectSelector('confirmModal
 export const SAVE_BUTTON = getDataTestSubjectSelector('createPackagePolicySaveButton');
 export const SAVE_EDIT_BUTTON = getDataTestSubjectSelector('saveIntegration');
 
+export const AWS_PROVIDER_TEST_ID = `${getDataTestSubjectSelector('caiAwsTestId')} input`;
+export const GCP_PROVIDER_TEST_ID = `${getDataTestSubjectSelector('caiGcpTestId')} input`;
+export const AZURE_PROVIDER_TEST_ID = `${getDataTestSubjectSelector('caiAzureTestId')} input`;
+
+export const selectCloudProvider = (provider: 'aws' | 'gcp' | 'azure') => {
+  const providerSelector =
+    provider === 'aws'
+      ? AWS_PROVIDER_TEST_ID
+      : provider === 'gcp'
+      ? GCP_PROVIDER_TEST_ID
+      : AZURE_PROVIDER_TEST_ID;
+
+  cy.get(providerSelector).click();
+};
+
 export const changePolicyName = (policyName: string) => {
   const newPolicyName = `${policyName} ${Date.now()}`;
   cy.get('#name').clear();
