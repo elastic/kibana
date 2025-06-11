@@ -6,6 +6,7 @@
  */
 
 import {
+  getExternalServiceSimulatorPath,
   getAllExternalServiceSimulatorPaths,
   ExternalServiceSimulator,
 } from '@kbn/actions-simulators-plugin/server/plugin';
@@ -16,11 +17,17 @@ import {
   tinesStory1,
 } from '@kbn/actions-simulators-plugin/server/tines_simulation';
 
+interface ServiceNowRequest {
+  work_notes?: string;
+}
+
 export {
+  getExternalServiceSimulatorPath,
   getAllExternalServiceSimulatorPaths,
   ExternalServiceSimulator,
   getServiceNowServer,
   RecordingServiceNowSimulator,
   tinesAgentWebhook,
   tinesStory1,
+  ServiceNowRequest,
 };
