@@ -182,23 +182,16 @@ export const useTopNavLinks = ({
   }, [getAppMenuAccessor, discoverParams, appMenuPrimaryAndSecondaryItems]);
 
   return useMemo(() => {
-    const entries = appMenuRegistry
-      .getSortedItems()
-      .filter(
-        (appMenuItem) =>
-          // Keep menu items that don't have actions or have non-empty actions array
-          !(
-            'actions' in appMenuItem &&
-            Array.isArray(appMenuItem.actions) &&
-            appMenuItem.actions.length === 0
-          )
-      )
-      .map((appMenuItem) =>
-        convertAppMenuItemToTopNavItem({
-          appMenuItem,
-          services,
-        })
-      );
+    const entries = appMenuRegistry.getSortedItems().reduce((acc, appMenuItem) => {
+      const hasEmptyActions =
+        'actions' in appMenuItem &&
+        Array.isArray(appMenuItem.actions) &&
+        appMenuItem.actions.length === 0;
+
+      return hasEmptyActions
+        ? acc
+        : [...acc, convertAppMenuItemToTopNavItem({ appMenuItem, services })];
+    }, [] as TopNavMenuData[]);
 
     if (services.uiSettings.get(ENABLE_ESQL)) {
       /**
