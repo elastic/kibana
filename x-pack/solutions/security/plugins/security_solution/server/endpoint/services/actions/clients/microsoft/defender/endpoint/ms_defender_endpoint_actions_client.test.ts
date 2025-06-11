@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Readable } from 'stream';
 import { MicrosoftDefenderEndpointActionsClient } from './ms_defender_endpoint_actions_client';
 import type { ProcessPendingActionsMethodOptions, ResponseActionsClient } from '../../../../..';
 import { getActionDetailsById as _getActionDetailsById } from '../../../../action_details_by_id';
@@ -19,7 +20,10 @@ import type {
 } from '../../../../../../../../common/endpoint/types';
 import { EndpointActionGenerator } from '../../../../../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { applyEsClientSearchMock } from '../../../../../../mocks/utils.mock';
-import { ENDPOINT_ACTIONS_INDEX } from '../../../../../../../../common/endpoint/constants';
+import {
+  ENDPOINT_ACTIONS_INDEX,
+  ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+} from '../../../../../../../../common/endpoint/constants';
 import type {
   MicrosoftDefenderEndpointGetActionsResponse,
   MicrosoftDefenderEndpointMachineAction,
@@ -356,6 +360,339 @@ describe('MS Defender response actions client', () => {
           }),
         })
       );
+    });
+  });
+
+  describe('#getFileInfo()', () => {
+    beforeEach(() => {
+      // @ts-expect-error assign to readonly property
+      clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointRunScriptEnabled =
+        true;
+
+      const generator = new EndpointActionGenerator('seed');
+      const actionRequestsSearchResponse = generator.toEsSearchResponse([
+        generator.generateActionEsHit<
+          undefined,
+          {},
+          MicrosoftDefenderEndpointActionRequestCommonMeta
+        >({
+          agent: { id: '123' },
+          EndpointActions: {
+            data: { command: 'runscript', comment: 'test comment' },
+            input_type: 'microsoft_defender_endpoint',
+          },
+        }),
+      ]);
+
+      applyEsClientSearchMock({
+        esClientMock: clientConstructorOptionsMock.esClient,
+        index: ENDPOINT_ACTIONS_INDEX,
+        response: actionRequestsSearchResponse,
+      });
+    });
+
+    it('should throw error if feature flag is disabled', async () => {
+      // @ts-expect-error assign to readonly property
+      clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointRunScriptEnabled =
+        false;
+
+      await expect(msClientMock.getFileInfo('abc', '123')).rejects.toThrow(
+        'File downloads are not supported for microsoft_defender_endpoint agent type. Feature disabled'
+      );
+    });
+
+    it('should return file info with status AWAITING_UPLOAD when no response document exists', async () => {
+      const generator = new EndpointActionGenerator('seed');
+      applyEsClientSearchMock({
+        esClientMock: clientConstructorOptionsMock.esClient,
+        index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+        response: generator.toEsSearchResponse([]),
+      });
+
+      await expect(msClientMock.getFileInfo('abc', '123')).resolves.toEqual({
+        actionId: 'abc',
+        agentId: '123',
+        id: '123',
+        agentType: 'microsoft_defender_endpoint',
+        status: 'AWAITING_UPLOAD',
+        created: '',
+        name: '',
+        size: 0,
+        mimeType: '',
+      });
+    });
+
+    it('should return file info with status READY when response document exists', async () => {
+      const generator = new EndpointActionGenerator('seed');
+      const responseEsHit = generator.generateResponseEsHit({
+        agent: { id: '123' },
+        EndpointActions: {
+          data: { command: 'runscript' },
+          input_type: 'microsoft_defender_endpoint',
+        },
+        meta: {
+          createdAt: '2024-05-09T10:30:00Z',
+          filename: 'script_output.txt',
+          machineActionId: 'machine-action-123',
+        },
+      });
+
+      applyEsClientSearchMock({
+        esClientMock: clientConstructorOptionsMock.esClient,
+        index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+        response: generator.toEsSearchResponse([responseEsHit]),
+      });
+
+      await expect(msClientMock.getFileInfo('abc', '123')).resolves.toEqual({
+        actionId: 'abc',
+        agentId: '123',
+        id: '123',
+        agentType: 'microsoft_defender_endpoint',
+        status: 'READY',
+        created: '2024-05-09T10:30:00Z',
+        name: 'script_output.txt',
+        size: 0,
+        mimeType: 'application/octet-stream',
+      });
+    });
+
+    it('should throw error for unsupported command types', async () => {
+      const generator = new EndpointActionGenerator('seed');
+      const actionRequestsSearchResponse = generator.toEsSearchResponse([
+        generator.generateActionEsHit<
+          undefined,
+          {},
+          MicrosoftDefenderEndpointActionRequestCommonMeta
+        >({
+          agent: { id: '123' },
+          EndpointActions: {
+            data: { command: 'isolate', comment: 'test comment' },
+            input_type: 'microsoft_defender_endpoint',
+          },
+        }),
+      ]);
+
+      applyEsClientSearchMock({
+        esClientMock: clientConstructorOptionsMock.esClient,
+        index: ENDPOINT_ACTIONS_INDEX,
+        response: actionRequestsSearchResponse,
+      });
+
+      const responseEsHit = generator.generateResponseEsHit({
+        agent: { id: '123' },
+        EndpointActions: {
+          data: { command: 'isolate' },
+          input_type: 'microsoft_defender_endpoint',
+        },
+      });
+
+      applyEsClientSearchMock({
+        esClientMock: clientConstructorOptionsMock.esClient,
+        index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+        response: generator.toEsSearchResponse([responseEsHit]),
+      });
+
+      await expect(msClientMock.getFileInfo('abc', '123')).rejects.toThrow(
+        'isolate does not support file downloads'
+      );
+    });
+
+    it('should handle ES client errors properly', async () => {
+      // Mock the ES client to throw an error
+      (clientConstructorOptionsMock.esClient.search as unknown as jest.Mock).mockRejectedValueOnce(
+        new Error('ES client error')
+      );
+
+      // The method should catch the error and return AWAITING_UPLOAD status only for ResponseActionAgentResponseEsDocNotFound
+      // Other errors should be propagated
+      await expect(msClientMock.getFileInfo('abc', '123')).rejects.toThrow('ES client error');
+    });
+  });
+
+  describe('#getFileDownload()', () => {
+    beforeEach(() => {
+      // @ts-expect-error assign to readonly property
+      clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointRunScriptEnabled =
+        true;
+
+      const generator = new EndpointActionGenerator('seed');
+      const actionRequestsSearchResponse = generator.toEsSearchResponse([
+        generator.generateActionEsHit<
+          undefined,
+          {},
+          MicrosoftDefenderEndpointActionRequestCommonMeta
+        >({
+          agent: { id: '123' },
+          EndpointActions: {
+            data: { command: 'runscript', comment: 'test comment' },
+            input_type: 'microsoft_defender_endpoint',
+          },
+        }),
+      ]);
+
+      applyEsClientSearchMock({
+        esClientMock: clientConstructorOptionsMock.esClient,
+        index: ENDPOINT_ACTIONS_INDEX,
+        response: actionRequestsSearchResponse,
+      });
+
+      const responseEsHit = generator.generateResponseEsHit({
+        agent: { id: '123' },
+        EndpointActions: {
+          data: { command: 'runscript' },
+          input_type: 'microsoft_defender_endpoint',
+        },
+        meta: {
+          createdAt: '2024-05-09T10:30:00Z',
+          filename: 'script_output.txt',
+          machineActionId: 'machine-action-123',
+        },
+      });
+
+      applyEsClientSearchMock({
+        esClientMock: clientConstructorOptionsMock.esClient,
+        index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+        response: generator.toEsSearchResponse([responseEsHit]),
+      });
+    });
+
+    it('should throw error if feature flag is disabled', async () => {
+      // @ts-expect-error assign to readonly property
+      clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointRunScriptEnabled =
+        false;
+
+      await expect(msClientMock.getFileDownload('abc', '123')).rejects.toThrow(
+        'File downloads are not supported for microsoft_defender_endpoint agent type. Feature disabled'
+      );
+    });
+
+    it('should successfully download file and verify API call to Microsoft Defender GET_ACTION_RESULTS', async () => {
+      const mockStream = new Readable({
+        read() {
+          this.push('test file content');
+          this.push(null);
+        },
+      });
+
+      responseActionsClientMock.setConnectorActionsClientExecuteResponse(
+        connectorActionsMock,
+        MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS,
+        { data: mockStream }
+      );
+
+      const result = await msClientMock.getFileDownload('abc', '123');
+
+      expect(connectorActionsMock.execute).toHaveBeenCalledWith({
+        params: {
+          subAction: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS,
+          subActionParams: {
+            id: 'machine-action-123',
+          },
+        },
+      });
+
+      expect(result).toEqual({
+        stream: {
+          data: expect.any(Readable),
+        },
+        fileName: 'script_output.txt',
+        mimeType: undefined,
+      });
+    });
+
+    it('should throw error when Microsoft Defender GET_ACTION_RESULTS API returns no data', async () => {
+      // Clear any previous mocks first
+      (connectorActionsMock.execute as jest.Mock).mockReset();
+      
+      // Mock the connector to return undefined data
+      (connectorActionsMock.execute as jest.Mock).mockResolvedValueOnce({
+        data: undefined
+      });
+
+      await expect(msClientMock.getFileDownload('abc', '123')).rejects.toThrow(
+        'Unable to establish a file download Readable stream with Microsoft Defender for Endpoint for response action [runscript] [abc]'
+      );
+    });
+
+    it('should throw error when machine action ID is missing in response document', async () => {
+      const generator = new EndpointActionGenerator('seed');
+      const responseEsHit = generator.generateResponseEsHit({
+        agent: { id: '123' },
+        EndpointActions: {
+          data: { command: 'runscript' },
+          input_type: 'microsoft_defender_endpoint',
+        },
+        meta: {
+          createdAt: '2024-05-09T10:30:00Z',
+          filename: 'script_output.txt',
+          // machineActionId is missing
+        },
+      });
+
+      applyEsClientSearchMock({
+        esClientMock: clientConstructorOptionsMock.esClient,
+        index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+        response: generator.toEsSearchResponse([responseEsHit]),
+      });
+
+      await expect(msClientMock.getFileDownload('abc', '123')).rejects.toThrow(
+        'Unable to retrieve file from Microsoft Defender for Endpoint. Response ES document is missing [meta.machineActionId]'
+      );
+    });
+
+    it('should throw error for unsupported command types', async () => {
+      const generator = new EndpointActionGenerator('seed');
+      const actionRequestsSearchResponse = generator.toEsSearchResponse([
+        generator.generateActionEsHit<
+          undefined,
+          {},
+          MicrosoftDefenderEndpointActionRequestCommonMeta
+        >({
+          agent: { id: '123' },
+          EndpointActions: {
+            data: { command: 'isolate', comment: 'test comment' },
+            input_type: 'microsoft_defender_endpoint',
+          },
+        }),
+      ]);
+
+      applyEsClientSearchMock({
+        esClientMock: clientConstructorOptionsMock.esClient,
+        index: ENDPOINT_ACTIONS_INDEX,
+        response: actionRequestsSearchResponse,
+      });
+
+      // Note: For unsupported commands, the method will not enter the switch case
+      // and downloadStream will remain undefined, causing the method to throw
+      await expect(msClientMock.getFileDownload('abc', '123')).rejects.toThrow(
+        'Unable to establish a file download Readable stream with Microsoft Defender for Endpoint for response action [isolate] [abc]'
+      );
+    });
+
+    it('should handle Microsoft Defender API errors and propagate them properly', async () => {
+      responseActionsClientMock.setConnectorActionsClientExecuteResponse(
+        connectorActionsMock,
+        MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS,
+        { data: undefined }
+      );
+
+      // Mock the connector to throw an error
+      (connectorActionsMock.execute as jest.Mock).mockRejectedValueOnce(
+        new Error('Microsoft Defender API error')
+      );
+
+      await expect(msClientMock.getFileDownload('abc', '123')).rejects.toThrow(
+        'Microsoft Defender API error'
+      );
+
+      expect(connectorActionsMock.execute).toHaveBeenCalledWith({
+        params: {
+          subAction: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS,
+          subActionParams: {
+            id: 'machine-action-123',
+          },
+        },
+      });
     });
   });
 
