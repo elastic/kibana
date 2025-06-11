@@ -18,9 +18,15 @@ interface RelatedDashboardsProps {
   alertId: string;
   relatedDashboards?: Array<{ id: string }>;
   rule: Rule;
+  onAddLinkedDashboard: () => void;
 }
 
-export function RelatedDashboards({ alertId, relatedDashboards, rule }: RelatedDashboardsProps) {
+export function RelatedDashboards({
+  alertId,
+  relatedDashboards,
+  rule,
+  onAddLinkedDashboard,
+}: RelatedDashboardsProps) {
   const [dashboardsMeta, setDashboardsMeta] = useState<DashboardMetadata[]>([]);
   const [isLoadingLinkedDashboards, setIsLoadingLinkedDashboards] = useState(true);
   const { isLoadingSuggestedDashboards, suggestedDashboards } = useSuggestedDashboards(alertId);
@@ -33,6 +39,7 @@ export function RelatedDashboards({ alertId, relatedDashboards, rule }: RelatedD
     const suggestedDashboard = suggestedDashboards?.find(({ id }) => id === addedDashboardId);
     if (!suggestedDashboard) throw Error('Suggested dashboard not found, this should never happen');
     setDashboardsMeta((value) => [...value, suggestedDashboard]);
+    onAddLinkedDashboard();
   };
 
   const { onClickAddSuggestedDashboard, addingDashboardId } = useAddSuggestedDashboards({

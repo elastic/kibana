@@ -126,6 +126,7 @@ export function AlertDetails() {
     return urlTabId && isTabId(urlTabId) ? urlTabId : 'overview';
   });
   const [validDashboards, setValidDashboards] = useState<FindDashboardsByIdResponse[]>([]);
+  const [linkedDashboardsNo, setLinkedDashboardsNo] = useState(0);
   const [isLoadingValidDashboards, setIsLoadingValidDashboards] = useState(true);
   const linkedDashboards = React.useMemo(() => rule?.artifacts?.dashboards ?? [], [rule]);
   const handleSetTabId = async (tabId: TabId) => {
@@ -203,6 +204,7 @@ export function AlertDetails() {
       const existingDashboards = await findDashboardsService.fetchValidDashboards(dashboardIds);
 
       setValidDashboards(existingDashboards.length ? existingDashboards : []);
+      setLinkedDashboardsNo(existingDashboards.length);
       setIsLoadingValidDashboards(false);
     };
     if (rule) fetchValidDashboards();
@@ -294,12 +296,17 @@ export function AlertDetails() {
     </EuiPanel>
   );
 
+  const increaseLinkedDashboardNo = () => {
+    setLinkedDashboardsNo((v) => v + 1);
+  };
+
   const relatedDashboardsTab =
     alertDetail && rule ? (
       <RelatedDashboards
         relatedDashboards={isLoadingValidDashboards ? undefined : validDashboards}
         alertId={alertId}
         rule={rule}
+        onAddLinkedDashboard={increaseLinkedDashboardNo}
       />
     ) : (
       <EuiLoadingSpinner />
@@ -370,7 +377,7 @@ export function AlertDetails() {
             <EuiLoadingSpinner css={{ marginLeft: '5px' }} />
           ) : (
             <EuiNotificationBadge color="success" css={{ marginLeft: '5px' }}>
-              {validDashboards?.length}
+              {linkedDashboardsNo}
             </EuiNotificationBadge>
           )}
         </>
