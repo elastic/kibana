@@ -101,13 +101,6 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
     spaceId?: string
   ): Promise<void> {
     try {
-      if (byteSize > MAX_ATTACHMENT_SIZE) {
-        throw new Error('The report is larger than the 10MB limit.');
-      }
-      if (!this.emailNotificationService) {
-        throw new Error('Reporting notification service has not been initialized.');
-      }
-
       const { runAt, params } = taskInstance;
       const task = params as ScheduledReportTaskParams;
       if (!reportSO) {
@@ -121,9 +114,15 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
 
       const { notification } = reportSO.attributes;
       if (notification && notification.email) {
+        if (byteSize > MAX_ATTACHMENT_SIZE) {
+          throw new Error('The report is larger than the 10MB limit.');
+        }
+        if (!this.emailNotificationService) {
+          throw new Error('Reporting notification service has not been initialized.');
+        }
+
         const email = notification.email;
         const title = reportSO.attributes.title;
-
         await this.emailNotificationService.notify({
           reporting: this.opts.reporting,
           index: report._index,
