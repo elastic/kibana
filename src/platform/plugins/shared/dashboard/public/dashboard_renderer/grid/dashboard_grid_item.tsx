@@ -224,7 +224,6 @@ const dashboardGridItemStyles = {
           animationName: highlightOutline(context.euiTheme),
           animationDuration: '4s',
           animationTimingFunction: 'ease-out',
-          zIndex: context.euiTheme.levels.mask,
         },
         // Remove padding in fullscreen mode
         '.kbnAppWrapper--hiddenChrome &.dshDashboardGrid__item--expanded': {
