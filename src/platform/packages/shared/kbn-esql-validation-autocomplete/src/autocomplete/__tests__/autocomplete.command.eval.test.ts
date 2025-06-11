@@ -17,8 +17,8 @@ import {
   fields,
 } from './helpers';
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../shared/esql_types';
-import { timeUnitsToSuggest } from '../../definitions/literals';
 import { Location } from '../../definitions/types';
+import { timeUnitsToSuggest } from '../../definitions/literals';
 import { roundParameterTypes } from './constants';
 
 describe('autocomplete.suggest', () => {
@@ -405,7 +405,6 @@ describe('autocomplete.suggest', () => {
 
     test('date math', async () => {
       const dateSuggestions = timeUnitsToSuggest.map(({ name }) => name);
-
       // Eval bucket is not a valid expression
       await assertSuggestions('from a | eval col0 = bucket(@timestamp, /', [], {
         triggerCharacter: ' ',
@@ -429,7 +428,7 @@ describe('autocomplete.suggest', () => {
       await assertSuggestions(
         'from a | eval col0=date_trunc(/)',
         [
-          ...getLiteralsByType('time_literal').map((t) => `${t}, `),
+          ...getLiteralsByType('time_duration').map((t) => `${t}, `),
           ...getFunctionSignaturesByReturnType(Location.EVAL, ['time_duration', 'date_period'], {
             scalar: true,
           }).map((t) => `${t.text},`),
