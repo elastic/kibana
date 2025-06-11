@@ -9,8 +9,6 @@ import { loggerMock } from '@kbn/logging-mocks';
 
 import type { Logger } from '@kbn/core/server';
 
-import { string } from '@kbn/zod';
-
 import type { InstallFailedAttempt } from '../../../types';
 
 import { getInstallationObject } from './get';
