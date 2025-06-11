@@ -71455,6 +71455,12 @@ components:
           required:
             - start_date
             - end_date
+        gaps_range_end:
+          description: Gaps range end, valid only when query is provided
+          type: string
+        gaps_range_start:
+          description: Gaps range start, valid only when query is provided
+          type: string
         ids:
           description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
           items:
