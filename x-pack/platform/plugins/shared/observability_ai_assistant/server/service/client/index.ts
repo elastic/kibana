@@ -490,6 +490,15 @@ export class ObservabilityAIAssistantClient {
         },
       },
     };
+
+    this.dependencies.logger.debug(
+      () =>
+        `Options for inference client before anonymization: ${JSON.stringify({
+          ...options,
+          messages,
+        })}`
+    );
+
     if (stream) {
       return defer(() =>
         from(this.dependencies.anonymizationService.redactMessages(messages)).pipe(
