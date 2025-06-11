@@ -22,10 +22,12 @@ export function DashboardTiles({
   title,
   isLoadingDashboards,
   dashboards,
+  dataTestSubj,
 }: {
   title: string;
   isLoadingDashboards: boolean;
   dashboards?: Array<DashboardMetadata & { actionButtonProps?: ActionButtonProps }>;
+  dataTestSubj: string;
 }) {
   const wrapWithHeader = (component: React.ReactNode) => {
     return (
@@ -33,7 +35,7 @@ export function DashboardTiles({
         <EuiSpacer size="l" />
         <EuiFlexGroup gutterSize="xs" responsive={false}>
           <EuiFlexItem>
-            <EuiTitle>
+            <EuiTitle data-test-subj={dataTestSubj}>
               <h2>{title}</h2>
             </EuiTitle>
             <EuiHorizontalRule margin="xs" />

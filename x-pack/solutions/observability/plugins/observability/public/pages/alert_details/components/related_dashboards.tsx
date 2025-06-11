@@ -141,6 +141,7 @@ export function RelatedDashboards({
         })}
         isLoadingDashboards={isLoading}
         dashboards={dashboardsMeta}
+        dataTestSubj="linked-dashboards"
       />
       <DashboardTiles
         title={i18n.translate('xpack.observability.alertDetails.suggestedDashboards', {
@@ -148,6 +149,7 @@ export function RelatedDashboards({
         })}
         isLoadingDashboards={isLoading}
         dashboards={filteredSuggestedDashboards}
+        dataTestSubj="suggested-dashboards"
       />
     </div>
   );
