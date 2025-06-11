@@ -559,6 +559,8 @@ export type DataViewSpec = {
   allowHidden?: boolean;
 };
 
+export type DataViewMinimalSpec = Omit<DataViewSpec, 'fields'>;
+
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type SourceFilter = {
   value: string;
