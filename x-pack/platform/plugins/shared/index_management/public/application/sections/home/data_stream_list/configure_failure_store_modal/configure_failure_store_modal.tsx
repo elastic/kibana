@@ -28,7 +28,7 @@ import {
   ToggleField,
 } from '../../../../../shared_imports';
 
-import { documentationService } from '../../services/documentation';
+import { documentationService } from '../../../../services/documentation';
 import { DataStream } from '../../../../../../common';
 import { useAppContext } from '../../../../app_context';
 import { updateDSFailureStore } from '../../../../services/api';

@@ -611,10 +611,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
               setIsConfiguringFailureStore(false);
             }
           }}
-          ilmPolicyName={dataStream?.ilmPolicyName}
-          ilmPolicyLink={ilmPolicyLink}
           dataStreams={[dataStream]}
-          isBulkEdit={false}
         />
       )}
 
