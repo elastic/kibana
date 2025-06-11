@@ -13,6 +13,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiTourStep, EuiTourStepProps } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { SecurityPageName } from '@kbn/deeplinks-security';
 import { KNOWLEDGE_BASE_TAB } from '../../assistant/settings/const';
 import { useAssistantContext } from '../../..';
 import { VideoToast } from './video_toast';
@@ -58,14 +59,21 @@ const KnowledgeBaseTourComp: React.FC<{
       })),
     [setTourState]
   );
+  const { assistantAvailability } = useAssistantContext();
 
-  const navigateToKnowledgeBase = useCallback(
-    () =>
+  const navigateToKnowledgeBase = useCallback(() => {
+    if (assistantAvailability.hasSearchAILakeConfigurations) {
+      navigateToApp('securitySolutionUI', {
+        deepLinkId: SecurityPageName.configurationsAiSettings,
+        path: `?tab=${KNOWLEDGE_BASE_TAB}`,
+        openInNewTab: true,
+      });
+    } else {
       navigateToApp('management', {
         path: `kibana/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}`,
-      }),
-    [navigateToApp]
-  );
+      });
+    }
+  }, [assistantAvailability.hasSearchAILakeConfigurations, navigateToApp]);
 
   const nextStep = useCallback(() => {
     if (tourState?.currentTourStep === 1) {
@@ -81,7 +89,7 @@ const KnowledgeBaseTourComp: React.FC<{
         {i18n.KNOWLEDGE_BASE_TOUR_EXIT}
       </EuiButtonEmpty>,
       // if next, set tour to the video step and navigate to the page
-      <EuiButton color="success" size="s" onClick={nextStep}>
+      <EuiButton color="success" size="s" data-test-subj="tryKb" onClick={nextStep}>
         {i18n.KNOWLEDGE_BASE_TRY_IT}
       </EuiButton>,
     ],
