@@ -15,5 +15,5 @@ export const dashboardAttributesSchema = schema.object(
     description: schema.string({ defaultValue: '' }),
     version: schema.maybe(schema.number()),
   },
-  { unknowns: 'ignore' }
+  { unknowns: 'allow' }
 );
