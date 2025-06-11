@@ -5,22 +5,30 @@
  * 2.0.
  */
 
-import React, { lazy, useCallback, useEffect } from 'react';
-import { EuiPageHeader, EuiPageTemplate, EuiTab, EuiTabs } from '@elastic/eui';
+import React, { useCallback } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { REPORTING_EXPORTS_PATH, REPORTING_SCHEDULES_PATH, Section } from '../../constants';
 import { Route, Routes } from '@kbn/shared-ux-router';
-import { suspendedComponentWithProps } from '../../suspended_component_with_props';
-import { RouteComponentProps } from 'react-router';
+import { RouteComponentProps } from 'react-router-dom';
 import { CoreStart, ScopedHistory } from '@kbn/core/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { ClientConfigType, ReportingAPIClient, useKibana } from '@kbn/reporting-public';
+import {
+  ClientConfigType,
+  ReportingAPIClient,
+  useInternalApiClient,
+  useKibana,
+} from '@kbn/reporting-public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
-import { getReportingSectionBreadcrumb } from './get_reporting_sections_breadcrumb';
 import { FormattedMessage } from '@kbn/i18n-react';
-
-const ReportListing = lazy(() => import('../report_listing'));
+import { suspendedComponentWithProps } from './suspended_component_with_props';
+import { REPORTING_EXPORTS_PATH, REPORTING_SCHEDULES_PATH, Section } from '../../constants';
+import ReportExportsTable from './report_exports_table';
+import { IlmPolicyLink } from './ilm_policy_link';
+import { ReportDiagnostic } from './report_diagnostic';
+import { useIlmPolicyStatus } from '../../lib/ilm_policy_status_context';
+import { MigrateIlmPolicyCallOut } from './migrate_ilm_policy_callout';
+import ReportSchedulesTable from './report_schedules_table';
 
 export interface MatchParams {
   section: Section;
@@ -38,10 +46,23 @@ export interface ReportingTabsProps {
 export const ReportingTabs: React.FunctionComponent<
   Partial<RouteComponentProps> & ReportingTabsProps
 > = (props) => {
-  const { coreStart, license$, shareService, config, apiClient, ...rest } = props;
-  const { application, notifications } = coreStart;
+  const { coreStart, license$, shareService, config, ...rest } = props;
+  const { notifications } = coreStart;
   const { section } = rest.match?.params as MatchParams;
   const history = rest.history as ScopedHistory;
+  const { apiClient } = useInternalApiClient();
+  const {
+    services: {
+      application: { capabilities, navigateToApp, navigateToUrl },
+      http,
+    },
+  } = useKibana();
+
+  const ilmLocator = shareService.url.locators.get('ILM_LOCATOR_ID');
+  const ilmPolicyContextValue = useIlmPolicyStatus();
+  const hasIlmPolicy = ilmPolicyContextValue?.status !== 'policy-not-found';
+  const showIlmPolicyLink = Boolean(ilmLocator && hasIlmPolicy);
+
   const tabs = [
     {
       id: 'exports',
@@ -59,38 +80,61 @@ export const ReportingTabs: React.FunctionComponent<
 
   const renderExportsList = useCallback(() => {
     return suspendedComponentWithProps(
-      ReportListing,
-
+      ReportExportsTable,
       'xl'
     )({
       apiClient,
       toasts: notifications.toasts,
       license$,
       config,
-      redirect: application.navigateToApp,
-      navigateToUrl: application.navigateToUrl,
+      capabilities,
+      redirect: navigateToApp,
+      navigateToUrl,
       urlService: shareService.url,
+      http,
     });
-  }, []);
+  }, [
+    apiClient,
+    notifications.toasts,
+    license$,
+    config,
+    capabilities,
+    navigateToApp,
+    navigateToUrl,
+    shareService.url,
+    http,
+  ]);
 
   const renderSchedulesList = useCallback(() => {
     return (
       <EuiPageTemplate.Section grow={false} paddingSize="none">
         {suspendedComponentWithProps(
-          ReportListing,
+          ReportSchedulesTable,
           'xl'
         )({
           apiClient,
           toasts: notifications.toasts,
           license$,
           config,
-          redirect: application.navigateToApp,
-          navigateToUrl: application.navigateToUrl,
+          capabilities,
+          redirect: navigateToApp,
+          navigateToUrl,
           urlService: shareService.url,
+          http,
         })}
       </EuiPageTemplate.Section>
     );
-  }, []);
+  }, [
+    apiClient,
+    notifications.toasts,
+    license$,
+    config,
+    capabilities,
+    navigateToApp,
+    navigateToUrl,
+    shareService.url,
+    http,
+  ]);
 
   const onSectionChange = (newSection: Section) => {
     history.push(`/${newSection}`);
@@ -98,9 +142,33 @@ export const ReportingTabs: React.FunctionComponent<
 
   return (
     <>
-      <EuiPageHeader
-        data-test-subj="reportingPageHeader"
+      <EuiPageTemplate.Header
+        paddingSize="none"
         bottomBorder
+        rightSideItems={
+          config.statefulSettings.enabled
+            ? [
+                <MigrateIlmPolicyCallOut toasts={notifications.toasts} />,
+                <EuiFlexGroup justifyContent="flexEnd">
+                  {capabilities?.management?.data?.index_lifecycle_management && (
+                    <EuiFlexItem grow={false}>
+                      {ilmPolicyContextValue?.isLoading ? (
+                        <EuiLoadingSpinner />
+                      ) : (
+                        showIlmPolicyLink && (
+                          <IlmPolicyLink navigateToUrl={navigateToUrl} locator={ilmLocator!} />
+                        )
+                      )}
+                    </EuiFlexItem>
+                  )}{' '}
+                </EuiFlexGroup>,
+                <EuiFlexItem grow={false}>
+                  <ReportDiagnostic clientConfig={config} apiClient={apiClient} />
+                </EuiFlexItem>,
+              ]
+            : []
+        }
+        data-test-subj="reportingPageHeader"
         pageTitle={
           <FormattedMessage
             id="xpack.reporting.listing.reports.titleStateful"
@@ -113,23 +181,17 @@ export const ReportingTabs: React.FunctionComponent<
             defaultMessage="Get reports generated in Kibana applications."
           />
         }
+        tabs={tabs.map(({ id, name }) => ({
+          label: name,
+          onClick: () => onSectionChange(id as Section),
+          isSelected: id === section,
+          key: id,
+          'data-test-subj': `reportingTabs-${id}`,
+        }))}
       />
 
-      <EuiTabs>
-        {tabs.map(({ id, name }) => (
-          <EuiTab
-            key={id}
-            onClick={() => onSectionChange(id as Section)}
-            isSelected={section === id}
-            data-test-subj={`connectionDetailsTabBtn-${id}`}
-          >
-            {name}
-          </EuiTab>
-        ))}
-      </EuiTabs>
       <Routes>
         <Route exact path={REPORTING_EXPORTS_PATH} component={renderExportsList} />
-
         <Route exact path={REPORTING_SCHEDULES_PATH} component={renderSchedulesList} />
       </Routes>
     </>
