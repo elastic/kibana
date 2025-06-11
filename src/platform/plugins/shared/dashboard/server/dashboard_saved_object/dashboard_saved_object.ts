@@ -106,7 +106,7 @@ export const createDashboardSavedObjectType = ({
         },
       ],
       schemas: {
-        forwardCompatibility: dashboardAttributesSchemaV4.extends({}, { unknowns: 'ignore' }),
+        forwardCompatibility: dashboardAttributesSchemaV4.extends({}, { unknowns: 'allow' }),
         create: dashboardAttributesSchemaV4,
       },
     },
