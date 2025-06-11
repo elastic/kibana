@@ -22,7 +22,7 @@ import type { ToolEventEmitter } from './events';
 /**
  * Subset of {@link ToolDescriptorMeta} that can be defined during tool registration.
  */
-export type RegisteredToolMeta = Partial<Omit<ToolDescriptorMeta, 'sourceType' | 'sourceId'>>;
+export type RegisteredToolMeta = Partial<Omit<ToolDescriptorMeta, 'providerId'>>;
 
 /**
  * Onechat tool, as registered by built-in tool providers.

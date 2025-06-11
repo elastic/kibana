@@ -23,3 +23,4 @@ export {
   builtinToolProviderId,
   unknownToolProviderId,
 } from './tools';
+export { OnechatToolIds, OnechatToolTags } from './constants';
