@@ -56,7 +56,11 @@
     "@kbn/core-security-server",
     "@kbn/ml-trained-models-utils",
     "@kbn/lock-manager",
-    "@kbn/stack-connectors-plugin"
+    "@kbn/stack-connectors-plugin",
+    "@kbn/i18n-react",
+    "@kbn/inference-tracing"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

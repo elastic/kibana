@@ -14,31 +14,21 @@ import { ActiveIntegrationsCallout } from './active_integrations_callout';
 import { EndpointCallout } from './endpoint_callout';
 import { IntegrationTabId } from '../../../../../../../common/lib/integrations/types';
 
-export const useShowActiveCallout = ({
-  activeIntegrationsCount,
-  isAgentRequired,
-}: {
-  activeIntegrationsCount: number;
-  isAgentRequired?: boolean;
-}) => {
-  return activeIntegrationsCount > 0 || isAgentRequired;
-};
-
-export const IntegrationCardTopCalloutComponent: React.FC<{
+export const IntegrationCardTopCallout = React.memo<{
   activeIntegrationsCount: number;
   isAgentRequired?: boolean;
   selectedTabId: IntegrationTabId;
-}> = ({ activeIntegrationsCount, isAgentRequired, selectedTabId }) => {
+}>(({ activeIntegrationsCount, isAgentRequired, selectedTabId }) => {
   const { isAgentlessAvailable$ } = useOnboardingService();
   const isAgentlessAvailable = useObservable(isAgentlessAvailable$, undefined);
-  const showActiveCallout = useShowActiveCallout({
-    activeIntegrationsCount,
-    isAgentRequired,
-  });
+
+  const showActiveCallout = activeIntegrationsCount > 0 || isAgentRequired;
+
   const showAgentlessCallout =
     isAgentlessAvailable &&
     activeIntegrationsCount === 0 &&
     selectedTabId !== IntegrationTabId.endpoint;
+
   const showEndpointCallout =
     activeIntegrationsCount === 0 && selectedTabId === IntegrationTabId.endpoint;
 
@@ -58,8 +48,5 @@ export const IntegrationCardTopCalloutComponent: React.FC<{
       )}
     </>
   );
-};
-
-export const IntegrationCardTopCallout = React.memo(IntegrationCardTopCalloutComponent);
-
+});
 IntegrationCardTopCallout.displayName = 'IntegrationCardTopCallout';
