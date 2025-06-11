@@ -12,6 +12,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { RuleDashboards } from './rule_dashboards';
+import { ALERT_LINK_DASHBOARDS_PLACEHOLDER } from '../translations';
 
 const mockOnChange = jest.fn();
 
@@ -55,8 +56,12 @@ describe('RuleDashboards', () => {
     useRuleFormDispatch.mockReturnValue(mockOnChange);
     useRuleFormState.mockReturnValue({
       formData: {
-        params: {
-          dashboards: [],
+        artifacts: {
+          dashboards: [
+            {
+              id: '1',
+            },
+          ],
         },
       },
     });
@@ -76,12 +81,9 @@ describe('RuleDashboards', () => {
     expect(screen.getByText('Related dashboards')).toBeInTheDocument();
     expect(useRuleFormState).toHaveBeenCalledTimes(1);
     expect(useRuleFormDispatch).toHaveBeenCalledTimes(1);
-    expect(mockDashboardServiceProvider).toHaveBeenCalledTimes(1);
-    expect(mockDashboardServiceProvider().fetchDashboards).toHaveBeenCalledTimes(1);
-    expect(mockDashboardServiceProvider().fetchDashboard).not.toHaveBeenCalled();
   });
 
-  it('fetches and displays dashboard titles', async () => {
+  it('fetches and displays selected dashboard titles', async () => {
     useRuleFormState.mockReturnValue({
       formData: {
         artifacts: {
@@ -99,11 +101,9 @@ describe('RuleDashboards', () => {
         <RuleDashboards contentManagement={contentManagement} />
       </IntlProvider>
     );
-
     await waitFor(() => {
       expect(screen.getByText('Dashboard 1')).toBeInTheDocument();
-      expect(mockDashboardServiceProvider().fetchDashboards).toHaveBeenCalled();
-      expect(mockDashboardServiceProvider().fetchDashboards).toHaveBeenCalledTimes(1);
+      expect(mockDashboardServiceProvider().fetchDashboards).not.toHaveBeenCalled();
       expect(mockDashboardServiceProvider().fetchDashboard).toHaveBeenCalled();
     });
   });
@@ -130,7 +130,7 @@ describe('RuleDashboards', () => {
     await waitFor(() => {
       expect(screen.getByText('Dashboard 1')).toBeInTheDocument();
       expect(screen.queryByText('Dashboard 2')).not.toBeInTheDocument();
-      expect(mockDashboardServiceProvider().fetchDashboards).toHaveBeenCalled();
+      expect(mockDashboardServiceProvider().fetchDashboards).not.toHaveBeenCalled();
       expect(mockDashboardServiceProvider().fetchDashboard).toHaveBeenCalled();
     });
 
@@ -141,19 +141,40 @@ describe('RuleDashboards', () => {
     if (inputWrap) {
       fireEvent.click(inputWrap);
     }
-    fireEvent.click(screen.getByText('Dashboard 2'));
-
-    expect(mockOnChange).toHaveBeenCalledWith({
-      type: 'setRuleProperty',
-      payload: {
-        property: 'artifacts',
-        value: { dashboards: [{ id: '1' }, { id: '2' }] },
-      },
-    });
-
     await waitFor(() => {
+      fireEvent.click(screen.getByText('Dashboard 2'));
+      expect(mockOnChange).toHaveBeenCalledWith({
+        type: 'setRuleProperty',
+        payload: {
+          property: 'artifacts',
+          value: { dashboards: [{ id: '1' }, { id: '2' }] },
+        },
+      });
       expect(screen.getByText('Dashboard 1')).toBeInTheDocument();
       expect(screen.getByText('Dashboard 2')).toBeInTheDocument();
     });
+  });
+
+  it('does not fetch dashboard list when combobox is not focused', async () => {
+    render(
+      <IntlProvider locale="en">
+        <RuleDashboards contentManagement={contentManagement} />
+      </IntlProvider>
+    );
+
+    expect(mockDashboardServiceProvider().fetchDashboards).not.toHaveBeenCalled();
+  });
+
+  it('fetches dashboard list when combobox is focused', async () => {
+    render(
+      <IntlProvider locale="en">
+        <RuleDashboards contentManagement={contentManagement} />
+      </IntlProvider>
+    );
+    const searchInput = screen.getByPlaceholderText(ALERT_LINK_DASHBOARDS_PLACEHOLDER);
+    fireEvent.focus(searchInput);
+
+    expect(mockDashboardServiceProvider).toHaveBeenCalled();
+    expect(mockDashboardServiceProvider().fetchDashboards).toHaveBeenCalled();
   });
 });

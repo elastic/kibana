@@ -93,9 +93,9 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
     }
   }, [dashboardsFormData, contentManagement]);
 
-  // useMemo(() => {
-  //   fetchDashboardTitles();
-  // }, [fetchDashboardTitles]);
+  useMemo(() => {
+    fetchDashboardTitles();
+  }, [fetchDashboardTitles]);
 
   const onChange = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
     const artifacts = {
@@ -137,9 +137,8 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
     if (!isComboBoxOpen) {
       setIsComboBoxOpen(true);
       loadDashboards();
-      fetchDashboardTitles();
     }
-  }, [fetchDashboardTitles, isComboBoxOpen, loadDashboards]);
+  }, [isComboBoxOpen, loadDashboards]);
 
   return (
     <>
