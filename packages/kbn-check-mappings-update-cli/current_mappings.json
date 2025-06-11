@@ -1079,7 +1079,7 @@
       "managed": {
         "type": "boolean"
       },
-        "matchers": {
+      "matchers": {
         "dynamic": false,
         "type": "object"
       },
@@ -1248,6 +1248,9 @@
       "latest_install_failed_attempts": {
         "enabled": false,
         "type": "object"
+      },
+      "latest_version": {
+        "type": "boolean"
       },
       "name": {
         "type": "keyword"

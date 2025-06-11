@@ -308,6 +308,7 @@ export async function getPackageSavedObjects(
     ...(options || {}),
     type: PACKAGES_SAVED_OBJECT_TYPE,
     perPage: SO_SEARCH_LIMIT,
+    filter: `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.latest_version: true`,
   });
 
   for (const savedObject of result.saved_objects) {

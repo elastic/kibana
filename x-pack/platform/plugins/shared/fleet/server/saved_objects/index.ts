@@ -1074,6 +1074,7 @@ export const getSavedObjectTypes = (
               },
             },
           },
+          latest_version: { type: 'boolean' },
         },
       },
       modelVersions: {
@@ -1108,6 +1109,16 @@ export const getSavedObjectTypes = (
           ],
         },
         '4': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                latest_version: { type: 'boolean' },
+              },
+            },
+          ],
+        },
+        '5': {
           changes: [
             {
               type: 'mappings_addition',

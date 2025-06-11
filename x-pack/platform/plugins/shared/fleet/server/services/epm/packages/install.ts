@@ -1144,6 +1144,10 @@ export async function restartInstallation(options: {
     const previousVersionSO = {
       ...currentInstallation,
       id: `${pkgName}:prev`,
+      attributes: {
+        ...currentInstallation.attributes,
+        latest_version: false,
+      },
     };
     try {
       await savedObjectsClient.update<Installation>(
@@ -1206,6 +1210,7 @@ export async function createInstallation(options: {
     install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
     keep_policies_up_to_date: defaultKeepPoliciesUpToDate,
     verification_status: 'unknown',
+    latest_version: true,
   };
 
   if (verificationResult) {

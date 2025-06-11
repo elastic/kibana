@@ -313,12 +313,9 @@
     "enabled",
     "error",
     "filter",
-    "indexPattern",
     "integrationName",
     "managed",
     "matchers",
-    "matchers.fields",
-    "matchers.values",
     "name",
     "type"
   ],
@@ -371,6 +368,7 @@
     "keep_policies_up_to_date",
     "latest_executed_state",
     "latest_install_failed_attempts",
+    "latest_version",
     "name",
     "package_assets",
     "verification_key_id",
@@ -843,19 +841,7 @@
     "job.job_id",
     "model_id"
   ],
-  "monitoring-entity-source": [
-    "enabled",
-    "error",
-    "filter",
-    "indexPattern",
-    "integrationName",
-    "managed",
-    "matchers",
-    "matchers.fields",
-    "matchers.values",
-    "name",
-    "type"
-  ],
+  "monitoring-entity-source": [],
   "monitoring-telemetry": [
     "reportedClusterUuids"
   ],
