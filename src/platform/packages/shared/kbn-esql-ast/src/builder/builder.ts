@@ -113,10 +113,10 @@ export namespace Builder {
 
     export namespace source {
       export type SourceTemplate = {
-        cluster?: string | ESQLSource['cluster'];
+        prefix?: string | ESQLSource['prefix'];
         index?: string | ESQLSource['index'];
         selector?: string | ESQLSource['selector'];
-      } & Omit<AstNodeTemplate<ESQLSource>, 'name' | 'cluster' | 'index' | 'selector'> &
+      } & Omit<AstNodeTemplate<ESQLSource>, 'name' | 'prefix' | 'index' | 'selector'> &
         Partial<Pick<ESQLSource, 'name'>>;
 
       export const node = (
@@ -127,11 +127,11 @@ export namespace Builder {
           typeof indexOrTemplate === 'string' || isStringLiteral(indexOrTemplate)
             ? { sourceType: 'index', index: indexOrTemplate }
             : indexOrTemplate;
-        const cluster: ESQLSource['cluster'] = !template.cluster
+        const prefix: ESQLSource['prefix'] = !template.prefix
           ? undefined
-          : typeof template.cluster === 'string'
-          ? Builder.expression.literal.string(template.cluster, { unquoted: true })
-          : template.cluster;
+          : typeof template.prefix === 'string'
+          ? Builder.expression.literal.string(template.prefix, { unquoted: true })
+          : template.prefix;
         const index: ESQLSource['index'] = !template.index
           ? undefined
           : typeof template.index === 'string'
@@ -146,7 +146,7 @@ export namespace Builder {
           ...template,
           ...Builder.parserFields(fromParser),
           type: 'source',
-          cluster,
+          prefix,
           index,
           selector,
           name: template.name ?? '',
@@ -161,16 +161,16 @@ export namespace Builder {
 
       export const index = (
         indexName: string,
-        cluster?: string | ESQLSource['cluster'],
+        prefix?: string | ESQLSource['prefix'],
         selector?: string | ESQLSource['selector'],
-        template?: Omit<AstNodeTemplate<ESQLSource>, 'name' | 'index' | 'cluster'>,
+        template?: Omit<AstNodeTemplate<ESQLSource>, 'name' | 'index' | 'prefix'>,
         fromParser?: Partial<AstNodeParserFields>
       ): ESQLSource => {
         return Builder.expression.source.node(
           {
             ...template,
             index: indexName,
-            cluster,
+            prefix,
             selector,
             sourceType: 'index',
           },
@@ -439,15 +439,16 @@ export namespace Builder {
           Partial<Pick<ESQLStringLiteral, 'name'>>,
         fromParser?: Partial<AstNodeParserFields>
       ): ESQLStringLiteral => {
-        const value =
-          '"' +
-          valueUnquoted
-            .replace(/\\/g, '\\\\')
-            .replace(/"/g, '\\"')
-            .replace(/\n/g, '\\n')
-            .replace(/\r/g, '\\r')
-            .replace(/\t/g, '\\t') +
-          '"';
+        const value = !!template?.unquoted
+          ? valueUnquoted
+          : '"' +
+            valueUnquoted
+              .replace(/\\/g, '\\\\')
+              .replace(/"/g, '\\"')
+              .replace(/\n/g, '\\n')
+              .replace(/\r/g, '\\r')
+              .replace(/\t/g, '\\t') +
+            '"';
         const name = template?.name ?? value;
         const node: ESQLStringLiteral = {
           ...template,
