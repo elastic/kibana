@@ -477,7 +477,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                   </EuiDroppable>
                 </EuiDragDropContext>
               </EuiFlexItem>
-              {getValues('type') === 'pinned' ? (
+              {getValues('type') === 'pinned' && actionFields.length !== 0 ? (
                 <EuiCallOut
                   iconType="transitionTopIn"
                   size="s"
@@ -493,18 +493,31 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               <EuiButton
                 data-test-subj="searchQueryRulesQueryRuleFlyoutButton"
                 iconType="plusInCircle"
-                color="text"
+                color={actionFields.length === 0 ? 'primary' : 'text'}
                 size="s"
                 onClick={appendNewAction}
+                fill={actionFields.length === 0}
               >
                 {pinType === 'pinned' ? (
+                  actionFields.length === 0 ? (
+                    <FormattedMessage
+                      id="xpack.search.queryRulesetDetail.queryRuleFlyout.addPinnedDocumentButton"
+                      defaultMessage="Pin document"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.search.queryRulesetDetail.queryRuleFlyout.addPinnedDocumentButtonMore"
+                      defaultMessage="Pin 1 more document"
+                    />
+                  )
+                ) : actionFields.length === 0 ? (
                   <FormattedMessage
-                    id="xpack.search.queryRulesetDetail.queryRuleFlyout.addPinnedDocumentButton"
-                    defaultMessage="Pin 1 more document"
+                    id="xpack.search.queryRulesetDetail.queryRuleFlyout.addExcludedDocumentButton"
+                    defaultMessage="Exclude document"
                   />
                 ) : (
                   <FormattedMessage
-                    id="xpack.search.queryRulesetDetail.queryRuleFlyout.addExcludedDocumentButton"
+                    id="xpack.search.queryRulesetDetail.queryRuleFlyout.addExcludedDocumentButtonMore"
                     defaultMessage="Exclude 1 more document"
                   />
                 )}
@@ -619,7 +632,8 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                   iconType="plusInCircle"
                   iconSide="left"
                   size="s"
-                  color="text"
+                  color={fields.length === 0 ? 'primary' : 'text'}
+                  fill={fields.length === 0}
                 >
                   <FormattedMessage
                     id="xpack.search.queryRulesetDetail.queryRuleFlyout.addCriteriaButton"
