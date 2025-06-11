@@ -11,7 +11,7 @@ import React, { CSSProperties, useCallback, useMemo, useRef, useState, useEffect
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
-import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, ESQLCallbacks, monaco } from '@kbn/monaco';
+import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, ConsoleLang, ESQLCallbacks, monaco } from "@kbn/monaco";
 import { i18n } from '@kbn/i18n';
 import { getESQLSources } from '@kbn/esql-editor/src/helpers';
 import { isEqual } from 'lodash';
@@ -19,7 +19,6 @@ import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
 import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { getSuggestionProvider } from './monaco_editor_suggestion_provider';
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 import type { EditorRequest } from './types';
 import {
@@ -185,9 +184,10 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
     return callbacks;
   }, [license, dataViews, application, http, data.search.search]);
 
-  const suggestionProvider = useMemo(() => {
-    return getSuggestionProvider(actionsProvider, esqlCallbacks);
-  }, [esqlCallbacks]);
+  const suggestionProvider = useMemo(
+    () => ConsoleLang.getSuggestionProvider?.(actionsProvider, esqlCallbacks),
+    [actionsProvider, esqlCallbacks]
+  );
 
   useSetInitialValue({ localStorageValue, setValue, toasts });
 
