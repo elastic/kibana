@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import type { ScheduleBackfillResults } from '../../../backfill/methods/schedule/types';
-
 export type BulkGapsFillStep =
   | 'BULK_GAPS_FILL_STEP_ACCESS_VALIDATION'
-  | 'BULK_GAPS_FILL_STEP_GAPS_RESOLUTION'
   | 'BULK_GAPS_FILL_STEP_SCHEDULING';
 
 export interface BulkGapFillingErroredRule {
@@ -21,18 +18,15 @@ export interface BulkGapFillingErroredRule {
   errorMessage: string;
 }
 
-export interface BulkGapFillingSkippedRule {
+interface RuleToBackfill {
   id: string;
   name: string;
+  alertTypeId: string;
+  consumer: string;
 }
 
 export interface BulkFillGapsByRuleIdsParams {
-  rules: Array<{
-    id: string;
-    name: string;
-    alertTypeId: string;
-    consumer: string;
-  }>;
+  rules: RuleToBackfill[];
   range: {
     start: string;
     end: string;
@@ -40,7 +34,7 @@ export interface BulkFillGapsByRuleIdsParams {
 }
 
 export interface BulkFillGapsByRuleIdsResult {
-  outcomes: ScheduleBackfillResults[];
-  skipped: BulkGapFillingSkippedRule[];
+  backfilled: RuleToBackfill[];
+  skipped: RuleToBackfill[];
   errored: BulkGapFillingErroredRule[];
 }

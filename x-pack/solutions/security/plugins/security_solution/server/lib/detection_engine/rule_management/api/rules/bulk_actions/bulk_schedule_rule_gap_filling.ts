@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { identity, keyBy } from 'lodash';
 import type { RulesClient, BulkOperationError } from '@kbn/alerting-plugin/server';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { BulkManualRuleFillGaps } from '../../../../../../../common/api/detection_engine';
 import type { PromisePoolError } from '../../../../../../utils/promise_pool';
 import type { RuleAlertType } from '../../../../rule_schema';
 import { validateBulkScheduleBackfill } from '../../../logic/bulk_actions/validations';
-import { handleScheduleBackfillResults } from './utils';
 
 interface BuildScheduleRuleGapFillingParams {
   rules: RuleAlertType[];
@@ -60,11 +59,7 @@ export const bulkScheduleRuleGapFilling = async ({
   }
   const { start_date: start, end_date: end } = fillGapsPayload;
 
-  const {
-    outcomes: bulkFillResultsList,
-    skipped,
-    errored,
-  } = await rulesClient.bulkFillGapsByRuleIds({
+  const { backfilled, skipped, errored } = await rulesClient.bulkFillGapsByRuleIds({
     rules: validatedRules.map(({ id, name, consumer, alertTypeId }) => ({
       id,
       name,
@@ -84,24 +79,10 @@ export const bulkScheduleRuleGapFilling = async ({
     });
   });
 
-  const outcomes = bulkFillResultsList.map((results) => {
-    return handleScheduleBackfillResults({ results, rules: validatedRules });
-  });
-
-  // Flatten the outcomes
-  const backfilledRulesDict = outcomes.reduce<Record<string, RuleAlertType>>(
-    (dict, { backfilled, errors: outcomeErrors }) => {
-      backfilled.forEach((backfilledRule) => {
-        dict[backfilledRule.id] = backfilledRule;
-      });
-      errors.push(...outcomeErrors);
-      return dict;
-    },
-    {}
-  );
+  const rulesDict = keyBy(validatedRules, 'id');
 
   return {
-    backfilled: Object.values(backfilledRulesDict),
+    backfilled: backfilled.map(({ id }) => rulesDict[id]).filter(identity),
     errors,
     skipped,
   };

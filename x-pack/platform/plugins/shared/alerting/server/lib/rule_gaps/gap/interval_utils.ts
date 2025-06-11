@@ -230,28 +230,33 @@ export const clipInterval = (interval: Interval, boundary: Interval): Interval |
  * @param boundary
  * @returns
  */
-export const clampIntervals = (intervals: StringInterval[], boundary: StringInterval) => {
+export const clampIntervals = (intervals: Interval[], boundary: Interval) => {
   const clampedIntervals = [];
   const { gte: start, lte: end } = boundary;
 
+  const boundaryStartTime = start.getTime();
+  const boundaryEndTime = end.getTime();
+
   for (const { gte, lte } of intervals) {
+    const intervalStart = gte.getTime();
+    const intervalEnd = lte.getTime();
     // If the interval ends before the range starts, skip it
-    if (lte < start) {
+    if (intervalEnd < boundaryStartTime) {
       continue;
     }
 
     // If the interval starts after the range ends, stop processing (since the list is sorted)
-    if (gte > end) {
+    if (intervalStart > boundaryEndTime) {
       break;
     }
 
     const clamped = {
-      gte: gte < start ? start : gte,
-      lte: lte > end ? end : lte,
+      gte: new Date(intervalStart < boundaryStartTime ? boundaryStartTime : intervalStart),
+      lte: new Date(intervalEnd > boundaryEndTime ? boundaryEndTime : intervalEnd),
     };
 
     // Atter clamping the intervals the limits cannot be the same
-    if (clamped.gte >= clamped.lte) {
+    if (clamped.gte.getTime() >= clamped.lte.getTime()) {
       continue;
     }
 

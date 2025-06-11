@@ -25,7 +25,7 @@ interface ProcessAllGapsInTimeRangeParams {
   };
   eventLogClient: IEventLogClient;
   logger: Logger;
-  processGapsBatch: (gaps: Gap[]) => void;
+  processGapsBatch: (gaps: Gap[]) => Promise<void>;
 }
 
 const DEFAULT_PAGE_SIZE = 500;

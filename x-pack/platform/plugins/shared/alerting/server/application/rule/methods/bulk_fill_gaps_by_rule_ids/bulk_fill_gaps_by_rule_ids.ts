@@ -8,34 +8,13 @@ import pMap from 'p-map';
 import Boom from '@hapi/boom';
 import { groupBy, mapValues } from 'lodash';
 import type { RulesClientContext } from '../../../../rules_client';
-import type { ScheduleBackfillParams } from '../../../backfill/methods/schedule/types';
 import type { BulkFillGapsByRuleIdsResult, BulkFillGapsByRuleIdsParams } from './types';
-import { scheduleBackfill } from '../../../backfill/methods/schedule';
-import type { RuleAuditEventParams } from '../../../../rules_client/common/audit_events';
-import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { toBulkGapFillError } from './utils';
+import { logProcessedAsAuditEvent, toBulkGapFillError } from './utils';
 import { AlertingAuthorizationEntity, WriteOperations } from '../../../../authorization';
-import { getBackfillPayloadForRuleGaps } from './get_backfill_payload_for_rule_gaps';
-import type { Gap } from '../../../../lib/rule_gaps/gap';
+import { batchBackfillRuleGaps } from './batch_backfill_rule_gaps';
 import { bulkFillGapsByRuleIdParamsSchema } from './schemas';
 
 const DEFAULT_MAX_BACKFILL_CONCURRENCY = 10;
-
-const logProcessedAsAuditEvent = (
-  context: RulesClientContext,
-  { id, name }: { id: string; name: string },
-  error?: Error
-) => {
-  const payload: RuleAuditEventParams = {
-    action: RuleAuditAction.FILL_GAPS,
-    savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name },
-  };
-  if (error) {
-    payload.error = error;
-  }
-  context.auditLogger?.log(ruleAuditEvent(payload));
-};
 
 export const bulkFillGapsByRuleIds = async (
   context: RulesClientContext,
@@ -52,7 +31,7 @@ export const bulkFillGapsByRuleIds = async (
 
   const errored: BulkFillGapsByRuleIdsResult['errored'] = [];
   const skipped: BulkFillGapsByRuleIdsResult['skipped'] = [];
-  const outcomes: BulkFillGapsByRuleIdsResult['outcomes'] = [];
+  const backfilled: BulkFillGapsByRuleIdsParams['rules'] = [];
   const eventLogClient = await context.getEventLogClient();
   const maxBackfillConcurrency =
     options?.maxBackfillConcurrency ?? DEFAULT_MAX_BACKFILL_CONCURRENCY;
@@ -90,41 +69,17 @@ export const bulkFillGapsByRuleIds = async (
   await pMap(
     authorizedRules,
     async (rule) => {
-      const { id, name } = rule;
+      const backfillResult = await batchBackfillRuleGaps(context, {
+        rule,
+        range,
+      });
 
-      let payload: ScheduleBackfillParams[0];
-      let gaps: Gap[];
-      try {
-        const { backfillRequestPayload, gaps: allGaps } = await getBackfillPayloadForRuleGaps(
-          eventLogClient,
-          context.logger,
-          {
-            ruleId: id,
-            range,
-          }
-        );
-        payload = backfillRequestPayload;
-        gaps = allGaps;
-      } catch (error) {
-        logProcessedAsAuditEvent(context, { id, name }, error);
-        errored.push(toBulkGapFillError(rule, 'BULK_GAPS_FILL_STEP_GAPS_RESOLUTION', error));
-        return;
-      }
-
-      // Rules might have gaps within the range that don't yield any payload
-      // This can happen when they have gaps that are in an "in progress" state
-      if (payload.ranges.length === 0) {
+      if (backfillResult.outcome === 'backfilled') {
+        backfilled.push(rule);
+      } else if (backfillResult.outcome === 'errored') {
+        errored.push(backfillResult.error);
+      } else {
         skipped.push(rule);
-        return;
-      }
-
-      try {
-        const results = await scheduleBackfill(context, [payload], gaps);
-        outcomes.push(results);
-        logProcessedAsAuditEvent(context, rule);
-      } catch (error) {
-        logProcessedAsAuditEvent(context, { id, name }, error);
-        errored.push(toBulkGapFillError(rule, 'BULK_GAPS_FILL_STEP_SCHEDULING', error));
       }
     },
     {
@@ -133,5 +88,5 @@ export const bulkFillGapsByRuleIds = async (
   );
 
   await eventLogClient.refreshIndex();
-  return { outcomes, skipped, errored };
+  return { backfilled, skipped, errored };
 };

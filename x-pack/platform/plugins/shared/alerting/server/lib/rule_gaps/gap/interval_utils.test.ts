@@ -263,13 +263,16 @@ describe('interval_utils', () => {
   });
 
   describe('clampIntervals', () => {
-    const toInterval = (start: string, end: string) => ({ gte: start, lte: end });
+    const toInterval = (start: string, end: string) => ({
+      gte: new Date(start),
+      lte: new Date(end),
+    });
 
     const buildTestCase = (
       testDescription: string,
-      intervals: StringInterval[],
-      boundary: StringInterval,
-      expectedResult: StringInterval[]
+      intervals: Interval[],
+      boundary: Interval,
+      expectedResult: Interval[]
     ) => ({
       testDescription,
       intervals,
