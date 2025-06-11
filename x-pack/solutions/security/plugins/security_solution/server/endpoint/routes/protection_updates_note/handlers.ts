@@ -76,14 +76,7 @@ async function getSavedObjectClient(
 
   const spaceId = (await context.securitySolution).getSpaceId();
   const scopedFleetService = endpointContext.service.getInternalFleetServices(spaceId);
-  const soClient = scopedFleetService.getSoClient();
-  const packagePolicy = await scopedFleetService.packagePolicy.get(soClient, packagePolicyId);
-  const agentPolicyId = packagePolicy?.policy_ids[0];
-  if (agentPolicyId) {
-    await scopedFleetService.ensureInCurrentSpace({ agentPolicyIds: [agentPolicyId] });
-  } else {
-    await scopedFleetService.ensureInCurrentSpace({ integrationPolicyIds: [packagePolicyId] });
-  }
+  await scopedFleetService.ensureInCurrentSpace({ integrationPolicyIds: [packagePolicyId] });
   const unscopedFleetService = endpointContext.service.getInternalFleetServices(undefined, true);
   return unscopedFleetService.getSoClient();
 }

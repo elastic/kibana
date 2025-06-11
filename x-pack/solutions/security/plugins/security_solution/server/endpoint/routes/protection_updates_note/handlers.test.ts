@@ -198,43 +198,7 @@ describe('test protection updates note handler', () => {
         mockEndpointContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
       });
 
-      it('should call ensureInCurrentSpace with agent policy id', async () => {
-        mockEndpointContext.service.getInternalFleetServices().packagePolicy.get = jest
-          .fn()
-          .mockResolvedValueOnce({
-            policy_ids: ['agent-policy-id'],
-          });
-        const mockEnsureInCurrentSpace = mockEndpointContext.service.getInternalFleetServices()
-          .ensureInCurrentSpace as jest.Mock;
-        const protectionUpdatesNoteHandler = postProtectionUpdatesNoteHandler(mockEndpointContext);
-        const mockRequest = httpServerMock.createKibanaRequest({
-          params: { policyId: 'integration-policy-id' },
-          body: { note: 'this is a very important note' },
-        });
-
-        const mockSOClient = mockEndpointContext.service
-          .getInternalFleetServices()
-          .getSoClient() as jest.Mocked<SavedObjectsClientContract>;
-        mockSOClient.find.mockResolvedValueOnce(mockedSOSuccessfulFindResponseEmpty);
-        mockSOClient.create.mockResolvedValueOnce(createMockedSOSuccessfulCreateResponse('note'));
-        await protectionUpdatesNoteHandler(
-          requestContextMock.convertContext(
-            createRouteHandlerContext(mockScopedClient, mockSavedObjectClient)
-          ),
-          mockRequest,
-          mockResponse
-        );
-        expect(mockEnsureInCurrentSpace).toBeCalledWith({
-          agentPolicyIds: ['agent-policy-id'],
-        });
-      });
-
-      it('should call ensureInCurrentSpace with integration policy id if no agent id found', async () => {
-        mockEndpointContext.service.getInternalFleetServices().packagePolicy.get = jest
-          .fn()
-          .mockResolvedValueOnce({
-            policy_ids: [],
-          });
+      it('should call ensureInCurrentSpace with integration policy id', async () => {
         const mockEnsureInCurrentSpace = mockEndpointContext.service.getInternalFleetServices()
           .ensureInCurrentSpace as jest.Mock;
         const protectionUpdatesNoteHandler = postProtectionUpdatesNoteHandler(mockEndpointContext);
