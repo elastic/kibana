@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Observability } from './observability';
+import { Security } from './security';
 
 export const ThreatDetectionSolutions: React.FC = () => (
   <EuiFlexGroup direction="column" gutterSize="s">
@@ -27,7 +28,7 @@ export const ThreatDetectionSolutions: React.FC = () => (
           <Observability />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <Observability />
+          <Security />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>
