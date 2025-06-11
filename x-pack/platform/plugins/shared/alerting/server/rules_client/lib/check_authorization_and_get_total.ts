@@ -48,8 +48,8 @@ export const checkAuthorizationAndGetTotal = async (
       RuleAuditAction: RuleAuditAction.DISABLE,
     },
     GET: {
-      WriteOperation: ReadOperations.Get,
-      RuleAuditAction: RuleAuditAction.GET,
+      WriteOperation: ReadOperations.BulkGet,
+      RuleAuditAction: RuleAuditAction.BULK_GET,
     },
   };
 
