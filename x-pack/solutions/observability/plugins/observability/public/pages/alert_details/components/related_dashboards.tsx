@@ -94,6 +94,8 @@ export function RelatedDashboards({
   // TODO: the backend should not return suggested dashboards that are already linked to the rule
   // WHen https://github.com/elastic/kibana/pull/221972 is merged we can remove this
   const filteredSuggestedDashboards = useMemo(() => {
+    // The ruleTypeId is something like "observability.rules.custom_threshold", we want to add only the last part to the data-test-subj for telemetry
+    const ruleType = rule.ruleTypeId.split('.').pop();
     return suggestedDashboards
       ? suggestedDashboards.reduce<
           Array<DashboardMetadata & { actionButtonProps: ActionButtonProps }>
@@ -116,13 +118,20 @@ export function RelatedDashboards({
                 }
               ),
               onClick: onClickAddSuggestedDashboard,
+              ruleType: ruleType || 'unknown',
             },
           });
 
           return acc;
         }, [])
       : [];
-  }, [dashboardsMeta, suggestedDashboards, addingDashboardId, onClickAddSuggestedDashboard]);
+  }, [
+    suggestedDashboards,
+    dashboardsMeta,
+    addingDashboardId,
+    onClickAddSuggestedDashboard,
+    rule.ruleTypeId,
+  ]);
 
   return (
     <div>

@@ -21,6 +21,7 @@ export interface ActionButtonProps {
   label: string;
   isLoading: boolean;
   isDisabled: boolean;
+  ruleType: string;
 }
 
 export function DashboardTile({
@@ -66,7 +67,7 @@ export function DashboardTile({
         {actionButtonProps ? (
           <EuiFlexItem grow={false}>
             <EuiButton
-              data-test-subj="add-suggested-dashboard"
+              data-test-subj={`addSuggestedDashboard_alertDetailsPage_${actionButtonProps.ruleType}`}
               onClick={() => actionButtonProps.onClick(dashboard)}
               isLoading={actionButtonProps.isLoading}
               isDisabled={actionButtonProps.isDisabled}
