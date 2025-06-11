@@ -716,6 +716,9 @@ export const Explorer: FC<ExplorerUIProps> = ({
                             title={i18n.translate('xpack.ml.explorer.topInfluencersPopoverTitle', {
                               defaultMessage: 'Top influencers',
                             })}
+                            buttonCss={css`
+                              color: inherit;
+                            `}
                           >
                             <p>
                               <FormattedMessage
