@@ -24,7 +24,7 @@ export const SearchHomepagePage = () => {
 
   return (
     <EuiPageTemplate offset={0} restrictWidth={false} data-test-subj="search-homepage" grow={false}>
-      <SearchHomepageHeader showEndpointsAPIKeys />
+      <SearchHomepageHeader />
       <SearchHomepageBody />
       {embeddableConsole}
     </EuiPageTemplate>

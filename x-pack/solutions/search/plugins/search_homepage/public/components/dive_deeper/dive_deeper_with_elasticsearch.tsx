@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiSpacer, EuiLink } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SearchLabs } from './search_labs';
-import { PythonNotebooks } from './python_notebooks';
+import React from 'react';
 import { ElasticsearchDocumentation } from './elasticsearch_documentation';
+import { PythonNotebooks } from './python_notebooks';
+import { SearchLabs } from './search_labs';
 
 export const DiveDeeperWithElasticsearch: React.FC = () => (
   <EuiFlexGroup direction="column" gutterSize="m">
