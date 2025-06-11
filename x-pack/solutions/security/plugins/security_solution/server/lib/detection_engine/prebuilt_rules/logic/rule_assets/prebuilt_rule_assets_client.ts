@@ -20,6 +20,7 @@ import { PREBUILT_RULE_ASSETS_SO_TYPE } from './prebuilt_rule_assets_type';
 import type { RuleVersionSpecifier } from '../rule_versions/rule_version_specifier';
 
 const MAX_PREBUILT_RULES_COUNT = 10_000;
+const ES_MAX_CLAUSE_COUNT = 1024;
 
 export interface IPrebuiltRuleAssetsClient {
   fetchLatestAssets: () => Promise<PrebuiltRuleAsset[]>;
@@ -82,50 +83,72 @@ export const createPrebuiltRuleAssetsClient = (
           return [];
         }
 
-        const filter = ruleIds
-          ?.map((ruleId) => `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.rule_id: ${ruleId}`)
-          .join(' OR ');
+        const processChunk = async (ruleIdsChunk?: string[]) => {
+          const filter = ruleIdsChunk
+            ?.map((ruleId) => `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.rule_id: ${ruleId}`)
+            .join(' OR ');
 
-        const findResult = await savedObjectsClient.find<
-          PrebuiltRuleAsset,
-          {
-            rules: AggregationsMultiBucketAggregateBase<{
-              latest_version: AggregationsTopHitsAggregate;
-            }>;
-          }
-        >({
-          type: PREBUILT_RULE_ASSETS_SO_TYPE,
-          filter,
-          aggs: {
-            rules: {
-              terms: {
-                field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.rule_id`,
-                size: MAX_PREBUILT_RULES_COUNT,
-              },
-              aggs: {
-                latest_version: {
-                  top_hits: {
-                    size: 1,
-                    sort: [
-                      {
-                        [`${PREBUILT_RULE_ASSETS_SO_TYPE}.version`]: 'desc',
-                      },
-                    ],
-                    _source: [
-                      `${PREBUILT_RULE_ASSETS_SO_TYPE}.rule_id`,
-                      `${PREBUILT_RULE_ASSETS_SO_TYPE}.version`,
-                    ],
+          return fetchLatestVersionInfo(filter);
+        };
+
+        const fetchLatestVersionInfo = async (filter?: string) => {
+          const findResult = await savedObjectsClient.find<
+            PrebuiltRuleAsset,
+            {
+              rules: AggregationsMultiBucketAggregateBase<{
+                latest_version: AggregationsTopHitsAggregate;
+              }>;
+            }
+          >({
+            type: PREBUILT_RULE_ASSETS_SO_TYPE,
+            filter,
+            aggs: {
+              rules: {
+                terms: {
+                  field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.rule_id`,
+                  size: MAX_PREBUILT_RULES_COUNT,
+                },
+                aggs: {
+                  latest_version: {
+                    top_hits: {
+                      size: 1,
+                      sort: [
+                        {
+                          [`${PREBUILT_RULE_ASSETS_SO_TYPE}.version`]: 'desc',
+                        },
+                      ],
+                      _source: [
+                        `${PREBUILT_RULE_ASSETS_SO_TYPE}.rule_id`,
+                        `${PREBUILT_RULE_ASSETS_SO_TYPE}.version`,
+                      ],
+                    },
                   },
                 },
               },
             },
-          },
-        });
+          });
 
-        const buckets = findResult.aggregations?.rules?.buckets ?? [];
-        invariant(Array.isArray(buckets), 'Expected buckets to be an array');
+          const aggregatedBuckets = findResult.aggregations?.rules?.buckets ?? [];
+          invariant(Array.isArray(aggregatedBuckets), 'Expected buckets to be an array');
 
-        return buckets.map((bucket) => {
+          return aggregatedBuckets;
+        };
+
+        let buckets: Array<{
+          latest_version: AggregationsTopHitsAggregate;
+        }> = [];
+
+        if (!ruleIds) {
+          buckets = await fetchLatestVersionInfo();
+        } else {
+          // If ruleIds are provided, we need to chunk them to avoid exceeding the ES max clause count.
+          const ruleIdChunks = chunk(ruleIds, ES_MAX_CLAUSE_COUNT);
+          buckets = await pMap(ruleIdChunks, processChunk, {
+            concurrency: 2,
+          }).then((results) => results.flat());
+        }
+
+        const latestVersions = buckets.map((bucket) => {
           const hit = bucket.latest_version.hits.hits[0];
           const soAttributes = hit._source[PREBUILT_RULE_ASSETS_SO_TYPE];
           const versionInfo: RuleVersionSpecifier = {
@@ -134,6 +157,8 @@ export const createPrebuiltRuleAssetsClient = (
           };
           return versionInfo;
         });
+
+        return latestVersions;
       });
     },
 
@@ -163,10 +188,12 @@ export const createPrebuiltRuleAssetsClient = (
           return ruleAssets;
         };
 
-        const versionChunks = chunk(versions, 1024);
+        // We need to chunk versions to avoid exceeding the ES max clause count.
+        // We divide by 2 because filter has two clauses per version.
+        const versionChunks = chunk(versions, ES_MAX_CLAUSE_COUNT / 2);
 
         const ruleAssets = await pMap(versionChunks, processChunk, {
-          concurrency: 2,
+          concurrency: 3,
         }).then((results) => results.flat());
 
         // Rule assets may have duplicates we have to get rid of.
