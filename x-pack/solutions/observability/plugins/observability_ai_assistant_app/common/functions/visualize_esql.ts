@@ -10,9 +10,11 @@ import { VISUALIZE_ESQL_USER_INTENTIONS } from '@kbn/observability-ai-assistant-
 import type { ESQLRow } from '@kbn/es-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 
+export const VISUALIZE_QUERY_NAME = 'visualize_query';
+
 export const visualizeESQLFunction = {
-  name: 'visualize_query',
-  visibility: FunctionVisibility.UserOnly,
+  name: VISUALIZE_QUERY_NAME,
+  visibility: FunctionVisibility.Internal,
   description: 'Use this function to visualize charts for ES|QL queries.',
   descriptionForUser: 'Use this function to visualize charts for ES|QL queries.',
   parameters: {
