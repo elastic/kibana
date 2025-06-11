@@ -8,7 +8,7 @@
 import React, { Suspense, lazy } from 'react';
 import ReactDOM from 'react-dom';
 
-import type { CoreStart, ScopedHistory } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -21,23 +21,16 @@ import {
   ReportingAPIClient,
   KibanaContext,
 } from '@kbn/reporting-public';
-import { ReportListing } from '.';
-import { PolicyStatusContextProvider } from '../lib/default_status_context';
-import {
-  APP_PATH,
-  HOME_PATH,
-  REPORTING_EXPORTS_PATH,
-  REPORTING_SCHEDULES_PATH,
-  SCHEDULES_TAB_ID,
-  Section,
-} from '../constants';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPage } from '@elastic/eui';
-import { suspendedComponentWithProps } from '../suspended_component_with_props';
-import { Redirect, match } from 'react-router';
-import { MatchParams } from './components/reporting_tabs';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { Redirect } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Section } from '../constants';
+import { PolicyStatusContextProvider } from '../lib/default_status_context';
 
 const ReportingTabs = lazy(() => import('./components/reporting_tabs'));
+
+const queryClient = new QueryClient();
 
 export async function mountManagementSection(
   coreStart: CoreStart,
@@ -55,7 +48,6 @@ export async function mountManagementSection(
     docLinks: coreStart.docLinks,
     data: dataService,
     share: shareService,
-    chrome: coreStart.chrome,
   };
   const sections: Section[] = ['exports', 'schedules'];
   const { element, history } = params;
@@ -67,37 +59,31 @@ export async function mountManagementSection(
       <KibanaContextProvider services={services}>
         <InternalApiClientProvider apiClient={apiClient} http={coreStart.http}>
           <PolicyStatusContextProvider config={config}>
-            <Router history={history}>
-              <Routes>
-                <Route
-                  path={`/:section(${sectionsRegex})`}
-                  render={(routerProps) => {
-                    console.log('Redirecting to Reporting Home', {
-                      routerProps: params,
-                      history,
-                      coreStart,
-                      config,
-                      apiClient,
-                      license$,
-                    });
-                    return (
-                      <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
-                        <ReportingTabs
-                          coreStart={coreStart}
-                          apiClient={apiClient}
-                          license$={license$}
-                          config={config}
-                          dataService={dataService}
-                          shareService={shareService}
-                          {...routerProps}
-                        />
-                      </Suspense>
-                    );
-                  }}
-                />
-                <Redirect from={'/'} to="/exports" />
-              </Routes>
-            </Router>
+            <QueryClientProvider client={queryClient}>
+              <Router history={history}>
+                <Routes>
+                  <Route
+                    path={`/:section(${sectionsRegex})`}
+                    render={(routerProps) => {
+                      return (
+                        <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
+                          <ReportingTabs
+                            coreStart={coreStart}
+                            apiClient={apiClient}
+                            license$={license$}
+                            config={config}
+                            dataService={dataService}
+                            shareService={shareService}
+                            {...routerProps}
+                          />
+                        </Suspense>
+                      );
+                    }}
+                  />
+                  <Redirect from={'/'} to="/exports" />
+                </Routes>
+              </Router>
+            </QueryClientProvider>
           </PolicyStatusContextProvider>
         </InternalApiClientProvider>
       </KibanaContextProvider>

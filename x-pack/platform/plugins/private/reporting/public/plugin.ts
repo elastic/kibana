@@ -35,7 +35,6 @@ import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_ha
 import { StartServices } from './types';
 import { APP_DESC, APP_TITLE } from './translations';
 import { APP_PATH } from './constants';
-import { setBreadcrumbs } from '@kbn/discover-plugin/public/utils/breadcrumbs';
 
 export interface ReportingPublicPluginSetupDependencies {
   home: HomePublicPluginSetup;

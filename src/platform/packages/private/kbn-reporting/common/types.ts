@@ -14,6 +14,7 @@ import type {
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { JOB_STATUS } from './constants';
 import type { LocatorParams } from './url';
+import { Rrule } from '@kbn/task-manager-plugin/server/task';
 
 export * from './url';
 
@@ -210,4 +211,26 @@ export interface LicenseCheckResults {
   enableLinks: boolean;
   showLinks: boolean;
   message: string;
+}
+
+export interface ScheduledReport {
+  id: string;
+  createdAt: string;
+  createdBy: string;
+  enabled: boolean;
+  jobtype: string;
+  lastRun: string | undefined;
+  nextRun: string | undefined;
+  objectType: string;
+  notification?: {
+    email?: {
+      to?: string[];
+      bcc?: string[];
+      cc?: string[];
+    };
+  };
+  schedule: {
+    rrule: Rrule;
+  };
+  title: string;
 }
