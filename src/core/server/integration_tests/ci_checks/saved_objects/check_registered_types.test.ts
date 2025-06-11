@@ -100,7 +100,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "entity-definition": "1c6bff35c423d5dc5650bc806cf2899e4706a0bc",
         "entity-discovery-api-key": "c267a65c69171d1804362155c1378365f5acef88",
         "entity-engine-status": "09f6a617020708e4f638137e5ef35bd9534133be",
-        "epm-packages": "5a9f55e38d424f5b5ebbfeac802788b5b05d867f",
+        "epm-packages": "a0b5685bb4644957d975421d9fd0d3b1b6a8c944",
         "epm-packages-assets": "7a3e58efd9a14191d0d1a00b8aaed30a145fd0b1",
         "event-annotation-group": "715ba867d8c68f3c9438052210ea1c30a9362582",
         "event_loop_delays_daily": "01b967e8e043801357503de09199dfa3853bab88",
