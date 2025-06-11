@@ -9,7 +9,7 @@ import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function backfillTests({ loadTestFile }: FtrProviderContext) {
   describe('backfill rule runs', () => {
-    loadTestFile(require.resolve('./task_runner_with_actions'));
     loadTestFile(require.resolve('./task_runner'));
+    loadTestFile(require.resolve('./task_runner_with_actions'));
   });
 }

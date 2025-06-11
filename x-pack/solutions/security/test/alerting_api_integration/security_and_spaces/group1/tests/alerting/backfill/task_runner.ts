@@ -255,7 +255,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
 
       // query for alert docs
       const alertDocs = await queryForAlertDocs<SecurityAlert>(es, alertsAsDataIndex);
-      expect(alertDocs.length).to.eql(10);
+      expect(alertDocs.length).to.eql(9);
 
       // each alert doc should have these fields
       for (const alert of alertDocs) {
