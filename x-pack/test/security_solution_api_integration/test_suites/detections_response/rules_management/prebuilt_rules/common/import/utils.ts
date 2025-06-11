@@ -7,6 +7,7 @@
 
 import { pick, omit } from 'lodash';
 import expect from 'expect';
+import type { ImportRulesResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { combineArrayToNdJson } from '../../../../utils';
 
@@ -20,7 +21,7 @@ export async function importRules({
   getService,
   rules,
   overwrite,
-}: ImportRulesParams): Promise<void> {
+}: ImportRulesParams): Promise<ImportRulesResponse> {
   const securitySolutionApi = getService('securitySolutionApi');
   const buffer = Buffer.from(combineArrayToNdJson(rules));
 
