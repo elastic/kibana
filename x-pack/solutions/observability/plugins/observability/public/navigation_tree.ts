@@ -492,8 +492,6 @@ function createNavTree({
     ],
   };
 
-  console.log('navTree', JSON.stringify(navTree, null, 2));
-
   return navTree;
 }
 
