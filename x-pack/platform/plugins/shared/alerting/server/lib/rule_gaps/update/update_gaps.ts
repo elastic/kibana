@@ -48,6 +48,7 @@ export const prepareGapForUpdate = async (
     scheduledItems,
     savedObjectsRepository,
     shouldRefetchAllBackfills,
+    logger,
     backfillClient,
     actionsClient,
     ruleId,
@@ -55,12 +56,13 @@ export const prepareGapForUpdate = async (
     scheduledItems: ScheduledItem[];
     savedObjectsRepository: ISavedObjectsRepository;
     shouldRefetchAllBackfills?: boolean;
+    logger: Logger;
     backfillClient: BackfillClient;
     actionsClient: ActionsClient;
     ruleId: string;
   }
 ) => {
-  const hasFailedBackfillTask = scheduledItems?.some(
+  const hasFailedBackfillTask = scheduledItems.some(
     (scheduleItem) =>
       scheduleItem.status === adHocRunStatus.ERROR || scheduleItem.status === adHocRunStatus.TIMEOUT
   );
@@ -77,13 +79,14 @@ export const prepareGapForUpdate = async (
     );
   }
 
-  if (hasFailedBackfillTask || !scheduledItems || shouldRefetchAllBackfills) {
+  if (hasFailedBackfillTask || scheduledItems.length === 0 || shouldRefetchAllBackfills) {
     await calculateGapStateFromAllBackfills({
       gap,
       savedObjectsRepository,
       ruleId,
       backfillClient,
       actionsClient,
+      logger,
     });
   }
 
@@ -136,6 +139,7 @@ const updateGapBatch = async (
           scheduledItems: scheduled,
           savedObjectsRepository,
           shouldRefetchAllBackfills,
+          logger,
           backfillClient,
           actionsClient,
           ruleId,
