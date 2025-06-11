@@ -125,8 +125,8 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     async (param?: { callback?: () => void; bulkActions?: ConversationsBulkActions }) => {
       const { bulkActions, callback } = param ?? {};
       const saveConversationsSettingsParams = isDeleteAll
-        ? { isDeleteAll: true }
-        : { isDeleteAll: false, bulkActions };
+        ? { isDeleteAll: true as const }
+        : { isDeleteAll: false as const, bulkActions };
       const isSuccess = await saveConversationsSettings(saveConversationsSettingsParams);
       if (isSuccess) {
         toasts?.addSuccess({
@@ -379,7 +379,6 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
         <EuiConfirmModal
           aria-labelledby={confirmationTitle}
           title={confirmationTitle}
-          titleProps={{ id: deletedConversations.map(({ id }) => id) ?? undefined }}
           onCancel={onDeleteCancelled}
           onConfirm={onDeleteConfirmed}
           cancelButtonText={CANCEL}

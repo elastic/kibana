@@ -95,6 +95,10 @@ const PageSelectionCheckbox = ({
     );
   }, [isDeleteAll, deletedConversationsIds, conversationOptionsIds]);
 
+  if (conversationOptionsIds.length === 0) {
+    return null;
+  }
+
   return (
     <EuiCheckbox
       data-test-subj={`conversationPageSelect`}
@@ -142,6 +146,7 @@ export const useConversationsTable = () => {
     }): Array<EuiBasicTableColumn<ConversationTableItem>> => {
       return [
         {
+          field: '',
           name: (
             <PageSelectionCheckbox
               isDeleteAll={isDeleteAll}
