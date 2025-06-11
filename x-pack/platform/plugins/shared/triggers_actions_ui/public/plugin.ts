@@ -348,7 +348,6 @@ export class Plugin
         return renderApp({
           ...coreStart,
           actions: plugins.actions,
-          dashboard: pluginsStart.dashboard,
           data: pluginsStart.data,
           dataViews: pluginsStart.dataViews,
           dataViewEditor: pluginsStart.dataViewEditor,
@@ -393,7 +392,6 @@ export class Plugin
           return renderApp({
             ...coreStart,
             actions: plugins.actions,
-            dashboard: pluginsStart.dashboard,
             data: pluginsStart.data,
             dataViews: pluginsStart.dataViews,
             dataViewEditor: pluginsStart.dataViewEditor,
