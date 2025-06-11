@@ -7,19 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  CanGetEmbeddableContentManagementDefinition,
-  EmbeddablePersistableStateService,
-} from './types';
+import { EmbeddablePersistableStateService } from './types';
 
-export const createEmbeddablePersistableStateServiceMock = (): jest.Mocked<
-  EmbeddablePersistableStateService & CanGetEmbeddableContentManagementDefinition
-> => {
-  return {
-    inject: jest.fn((state, references) => state),
-    extract: jest.fn((state) => ({ state, references: [] })),
-    getAllMigrations: jest.fn(() => ({})),
-    telemetry: jest.fn((state, collector) => ({})),
-    getEmbeddableContentManagementDefinition: jest.fn(),
+export const createEmbeddablePersistableStateServiceMock =
+  (): jest.Mocked<EmbeddablePersistableStateService> => {
+    return {
+      inject: jest.fn((state, references) => state),
+      extract: jest.fn((state) => ({ state, references: [] })),
+      getAllMigrations: jest.fn(() => ({})),
+      telemetry: jest.fn((state, collector) => ({})),
+    };
   };
-};
