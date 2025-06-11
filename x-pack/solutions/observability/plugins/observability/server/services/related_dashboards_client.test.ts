@@ -383,6 +383,7 @@ describe('RelatedDashboardsClient', () => {
         },
       });
 
+      // @ts-ignore next-line
       await client.fetchDashboards({ page: 1, perPage: 2 });
 
       expect(dashboardClient.search).toHaveBeenCalledWith(
@@ -415,9 +416,11 @@ describe('RelatedDashboardsClient', () => {
         },
       } as any);
 
+      // @ts-ignore next-line
       const resultWithoutMatch = client.getDashboardsByIndex('index1');
       expect(resultWithoutMatch.dashboards).toEqual([]);
 
+      // @ts-ignore next-line
       const resultWithMatch = client.getDashboardsByIndex('index2');
       expect(resultWithMatch.dashboards).toHaveLength(1);
       expect(resultWithMatch.dashboards[0].id).toBe('dashboard1');
@@ -434,6 +437,7 @@ describe('RelatedDashboardsClient', () => {
         { panel: { panelIndex: '1' }, matchedBy: { fields: ['field1'] } },
       ];
 
+      // @ts-ignore next-line
       const result = client.dedupePanels(panels as any);
 
       expect(result).toHaveLength(1);
@@ -449,12 +453,14 @@ describe('RelatedDashboardsClient', () => {
         getRuleQueryIndex: jest.fn().mockReturnValue('index1'),
       } as unknown as AlertData;
 
+      // @ts-ignore next-line
       client.setAlert(mockAlert);
 
       const dashboard = {
         matchedBy: { fields: ['field1'], index: ['index1'] },
       } as any;
 
+      // @ts-ignore next-line
       const score = client.getScore(dashboard);
 
       expect(score).toBeCloseTo(2 / 3);
@@ -463,6 +469,7 @@ describe('RelatedDashboardsClient', () => {
         matchedBy: { fields: ['field1', 'field2'], index: ['index1'] },
       } as any;
 
+      // @ts-ignore next-line
       const score2 = client.getScore(dashboard2);
 
       expect(score2).toBe(1);
@@ -475,6 +482,7 @@ describe('RelatedDashboardsClient', () => {
         // @ts-ignore next-line
         client.setAlert(null);
 
+        // @ts-ignore next-line
         await expect(client.getLinkedDashboards()).rejects.toThrow(
           `Alert with id ${alertId} not found. Could not fetch related dashboards.`
         );
@@ -486,13 +494,11 @@ describe('RelatedDashboardsClient', () => {
           getRuleId: jest.fn().mockReturnValue(null),
         } as unknown as AlertData;
 
+        // @ts-ignore next-line
         client.setAlert(mockAlert);
 
-        const result = await client.getLinkedDashboards();
-
-        expect(result).toEqual([]);
-        expect(logger.warn).toHaveBeenCalledWith(
-          'Rule id not found. No linked dashboards available.'
+        expect(client.getLinkedDashboards()).rejects.toThrow(
+          `Alert with id ${alertId} does not have a rule ID. Could not fetch linked dashboards.`
         );
       });
 
@@ -501,14 +507,13 @@ describe('RelatedDashboardsClient', () => {
           getRuleId: jest.fn().mockReturnValue('rule-id'),
         } as unknown as AlertData;
 
+        // @ts-ignore next-line
         client.setAlert(mockAlert);
         alertsClient.getRuleById = jest.fn().mockResolvedValue(null);
 
-        const result = await client.getLinkedDashboards();
-
-        expect(result).toEqual([]);
-        expect(logger.warn).toHaveBeenCalledWith(
-          'Rule with id rule-id not found. No linked dashboards available.'
+        // @ts-ignore next-line
+        expect(client.getLinkedDashboards()).rejects.toThrow(
+          `Rule with id rule-id not found. Could not fetch linked dashboards for alert with id ${alertId}.`
         );
       });
 
@@ -517,6 +522,7 @@ describe('RelatedDashboardsClient', () => {
           getRuleId: jest.fn().mockReturnValue('rule-id'),
         } as unknown as AlertData;
 
+        // @ts-ignore next-line
         client.setAlert(mockAlert);
 
         alertsClient.getRuleById = jest.fn().mockResolvedValue({
@@ -534,6 +540,7 @@ describe('RelatedDashboardsClient', () => {
             result: { item: { id: 'dashboard2', attributes: { title: 'Dashboard 2' } } },
           });
 
+        // @ts-ignore next-line
         const result = await client.getLinkedDashboards();
 
         expect(result).toEqual([
