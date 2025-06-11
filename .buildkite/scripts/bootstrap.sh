@@ -3,7 +3,6 @@
 set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
-source .buildkite/scripts/common/setup_bazel.sh
 
 echo "--- yarn install and bootstrap"
 
@@ -24,6 +23,11 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
     echo "Using ~/.kibana/.yarn-local-mirror as a starting point"
     mv ~/.kibana/.yarn-local-mirror ./
   fi
+  if [[ -d ~/.kibana-moon-cache ]]; then
+    echo "Using ~/.moon/cache as a starting point"
+    mkdir -p ./.moon/cache
+    mv ~/.kibana-moon-cache ./.moon/cache
+  fi
 fi
 
 if ! yarn kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"; then
@@ -35,7 +39,9 @@ if ! yarn kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"; then
   rm -rf node_modules
 
   echo "--- yarn install and bootstrap, attempt 2"
-  yarn kbn bootstrap --force-install
+  echo "Actually - this shouldn't happen. Let's exit and count these."
+  exit 33
+#  yarn kbn bootstrap --force-install
 fi
 
 if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then

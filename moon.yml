@@ -1,0 +1,33 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: 'kibana'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-operations'
+toolchain:
+  default: null
+language: unknown
+project:
+  description: Moon project for Kibana
+  metadata:
+    sourceRoot: .
+
+# These will be root level tasks, invoked with `moon run kibana:<task-name>`
+tasks:
+  bootstrap:
+    script: yarn kbn bootstrap
+    inputs:
+      - yarn.lock
+      - package.json
+      - .nvmrc
+      - .yarnrc
+  generateAllTypecheckConfigs:
+    command: node
+    args: 'scripts/type_check.js --config-only'
+    inputs:
+      - '@group(src)'
+    options:
+      runFromWorkspaceRoot: true
+
+workspace:
+  inheritedTasks:
+    include: []
