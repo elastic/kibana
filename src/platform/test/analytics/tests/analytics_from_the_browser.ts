@@ -148,19 +148,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // This helps us to also test the helpers
         const events = await ebtUIHelper.getEvents(2, { eventTypes: ['test-plugin-lifecycle'] });
-        events.forEach(({ trace }) => expect(trace).to.have.property('id'));
-        expect(events.map(({ trace, ...rest }) => rest)).to.eql([
+        expect(events).to.eql([
           {
             timestamp: reportTestPluginLifecycleEventsAction!.meta[setupEvent].timestamp,
             event_type: 'test-plugin-lifecycle',
             context: initialContext,
-            properties: { plugin: 'analyticsPluginA', step: 'setup' },
+            properties: { plugin: 'analyticsPluginA', step: 'setup', traceId: events[0].trace?.id },
+            trace: { id: events[0].properties.traceId }, // Cross-checking with the properties.traceId to validate that they are the same
           },
           {
             timestamp: reportTestPluginLifecycleEventsAction!.meta[startEvent].timestamp,
             event_type: 'test-plugin-lifecycle',
             context: reportEventContext,
-            properties: { plugin: 'analyticsPluginA', step: 'start' },
+            properties: { plugin: 'analyticsPluginA', step: 'start', traceId: events[1].trace?.id },
+            trace: { id: events[1].properties.traceId }, // Cross-checking with the properties.traceId to validate that they are the same
           },
         ]);
       });
