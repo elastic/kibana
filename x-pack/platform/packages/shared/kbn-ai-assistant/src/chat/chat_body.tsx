@@ -283,8 +283,6 @@ export function ChatBody({
     !conversationCalloutDismissed &&
     tourCalloutDismissed;
 
-  const isPublic = conversation.value?.public;
-
   const handleActionClick = ({
     message,
     payload,
