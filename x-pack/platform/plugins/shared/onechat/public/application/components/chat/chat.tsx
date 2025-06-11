@@ -86,7 +86,12 @@ export const Chat: React.FC<ChatProps> = ({ agentId, conversationId, onConversat
       <EuiFlexItem grow className={scrollContainerClassName(scrollBarStyles)}>
         <div ref={scrollContainerRef} className={fullHeightClassName}>
           <EuiPanel hasBorder={false} hasShadow={false} className={conversationPanelClass}>
-            <ChatConversation conversationEvents={conversationEvents} />
+            {conversation && (
+              <ChatConversation
+                conversation={conversation}
+                conversationEvents={conversationEvents}
+              />
+            )}
           </EuiPanel>
         </div>
       </EuiFlexItem>
