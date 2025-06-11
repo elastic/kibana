@@ -243,6 +243,7 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
   );
 };
 
+// TODO: Extract cloud connector logic into separate component
 export const AwsCredentialsFormAgentless = ({
   input,
   newPolicy,
@@ -334,6 +335,13 @@ export const AwsCredentialsFormAgentless = ({
     return getAwsCredentialsFormAgentlessOptions();
   };
 
+  const accordianTitleLink = showCloudConnectors
+    ? cloudFormationSettings[awsCredentialsType].accordianTitleLink
+    : cloudFormationSettings[AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS].accordianTitleLink;
+  const templateUrl = showCloudConnectors
+    ? cloudFormationSettings[awsCredentialsType].templateUrl
+    : cloudFormationSettings[AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS].templateUrl;
+
   return (
     <>
       <AWSSetupInfoContent
@@ -398,7 +406,7 @@ export const AwsCredentialsFormAgentless = ({
           <EuiAccordion
             id="cloudFormationAccordianInstructions"
             data-test-subj={TEST_SUBJ_AWS_CLOUD_FORMATION_ACCORDIAN}
-            buttonContent={cloudFormationSettings[awsCredentialsType].accordianTitleLink}
+            buttonContent={accordianTitleLink}
             paddingSize="l"
           >
             <CloudFormationCloudCredentialsGuide
@@ -412,7 +420,7 @@ export const AwsCredentialsFormAgentless = ({
             target="_blank"
             iconSide="left"
             iconType="launch"
-            href={cloudFormationSettings[awsCredentialsType].templateUrl}
+            href={templateUrl}
           >
             <FormattedMessage
               id="xpack.securitySolution.assetInventory.agentlessForm.agentlessAWSCredentialsForm.cloudFormation.launchButton"
