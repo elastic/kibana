@@ -39,9 +39,10 @@ const outputBufferedLogs = (
   log: ToolingLog,
   build: Build,
   logBuildCmd: () => void,
-  logs: LogLine[] | undefined
+  logs: LogLine[] | undefined,
+  success: boolean
 ) => {
-  log.write(`--- ${build.getBuildDesc()} [${build.getBuildArch()}]`);
+  log.write(`--- ${success ? '✅' : '❌'} ${build.getBuildDesc()} [${build.getBuildArch()}]`);
 
   log.indent(4, () => {
     logBuildCmd();
@@ -81,10 +82,10 @@ export async function exec(
     const logs = await merge(stdout$, stderr$).pipe(takeUntil(close$), toArray()).toPromise();
     await proc
       .then(() => {
-        outputBufferedLogs(log, build, logBuildCmd, logs);
+        outputBufferedLogs(log, build, logBuildCmd, logs, true);
       })
       .catch((error) => {
-        outputBufferedLogs(log, build, logBuildCmd, logs);
+        outputBufferedLogs(log, build, logBuildCmd, logs, false);
         throw error;
       });
   } else {
