@@ -75,9 +75,7 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
 
       <EuiFlexGroup direction="column" gutterSize="l">
         <BurnRatePanel slo={slo} isAutoRefreshing={isAutoRefreshing} />
-
         <HistoricalDataCharts slo={slo} isAutoRefreshing={isAutoRefreshing} />
-
         <EventsChartPanel slo={slo} range={range} />
       </EuiFlexGroup>
     </EuiFlexGroup>

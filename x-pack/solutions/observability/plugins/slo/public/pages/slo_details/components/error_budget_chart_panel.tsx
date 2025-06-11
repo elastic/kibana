@@ -88,7 +88,6 @@ export function ErrorBudgetChartPanel({
         <EuiFlexGroup direction="column" gutterSize="l">
           <ErrorBudgetHeader
             slo={slo}
-            showTitle={true}
             isMouseOver={isMouseOver}
             setDashboardAttachmentReady={setDashboardAttachmentReady}
             hideMetadata={hideMetadata}

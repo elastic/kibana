@@ -16,7 +16,7 @@ import { ErrorBudgetActions } from './error_budget_actions';
 
 interface Props {
   slo: SLOWithSummaryResponse;
-  showTitle?: boolean;
+  hideTitle?: boolean;
   isMouseOver?: boolean;
   setDashboardAttachmentReady?: (value: boolean) => void;
   hideMetadata?: boolean;
@@ -24,7 +24,7 @@ interface Props {
 
 export function ErrorBudgetHeader({
   slo,
-  showTitle = true,
+  hideTitle = false,
   hideMetadata = false,
   isMouseOver,
   setDashboardAttachmentReady,
@@ -37,7 +37,7 @@ export function ErrorBudgetHeader({
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
         <EuiFlexGroup>
-          {showTitle && (
+          {!hideTitle && (
             <EuiFlexItem>
               <EuiTitle size="xs" data-test-subj="errorBudgetPanelTitle">
                 <h2>
