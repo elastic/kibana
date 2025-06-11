@@ -397,6 +397,80 @@
       },
       {
         "parentPluginId": "@kbn/esql-types",
+        "id": "def-common.InferenceEndpointAutocompleteItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "InferenceEndpointAutocompleteItem",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-types/src/inference_endpoint_autocomplete_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.InferenceEndpointAutocompleteItem.inference_id",
+            "type": "string",
+            "tags": [],
+            "label": "inference_id",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/inference_endpoint_autocomplete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.InferenceEndpointAutocompleteItem.task_type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "task_type",
+            "description": [],
+            "signature": [
+              "\"completion\" | \"sparse_embedding\" | \"text_embedding\" | \"rerank\" | \"chat_completion\""
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/inference_endpoint_autocomplete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-types",
+        "id": "def-common.InferenceEndpointsAutocompleteResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "InferenceEndpointsAutocompleteResult",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-types/src/inference_endpoint_autocomplete_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.InferenceEndpointsAutocompleteResult.inferenceEndpoints",
+            "type": "Array",
+            "tags": [],
+            "label": "inferenceEndpoints",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.InferenceEndpointAutocompleteItem",
+                "text": "InferenceEndpointAutocompleteItem"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/inference_endpoint_autocomplete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-types",
         "id": "def-common.PublishesESQLVariable",
         "type": "Interface",
         "tags": [],
