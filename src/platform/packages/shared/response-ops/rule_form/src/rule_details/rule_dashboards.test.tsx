@@ -74,8 +74,8 @@ describe('RuleDashboards', () => {
     );
 
     expect(screen.getByText('Related dashboards')).toBeInTheDocument();
-    expect(useRuleFormState).toHaveBeenCalledTimes(1);
-    expect(useRuleFormDispatch).toHaveBeenCalledTimes(1);
+    expect(useRuleFormState).toHaveBeenCalled();
+    expect(useRuleFormDispatch).toHaveBeenCalled();
     expect(mockDashboardServiceProvider).toHaveBeenCalledTimes(1);
     expect(mockDashboardServiceProvider().fetchDashboards).toHaveBeenCalledTimes(1);
     expect(mockDashboardServiceProvider().fetchDashboard).not.toHaveBeenCalled();

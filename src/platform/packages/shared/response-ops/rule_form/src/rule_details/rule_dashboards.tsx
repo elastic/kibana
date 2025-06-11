@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   EuiComboBox,
   EuiFlexGroup,
@@ -94,7 +94,7 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
     }
   }, [dashboardsFormData, contentManagement]);
 
-  useMemo(() => {
+  useEffect(() => {
     fetchDashboardTitles();
   }, [fetchDashboardTitles]);
 
@@ -145,7 +145,7 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
     }
   }, [contentManagement, searchValue]);
 
-  useMemo(() => {
+  useEffect(() => {
     loadDashboards();
   }, [loadDashboards]);
 
