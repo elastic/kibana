@@ -67,11 +67,11 @@ export interface SearchAlertsParams {
   /**
    * The page size to fetch
    */
-  useDefaultContext?: boolean;
+  pageSize: number;
   /**
    * Force using the default context, otherwise use the AlertQueryContext
    */
-  pageSize: number;
+  useDefaultContext?: boolean;
   /**
    * The minimum score to apply to the query
    */
