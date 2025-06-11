@@ -30,7 +30,8 @@
       "security",
       "stackConnectors",
       "triggersActionsUi",
-      "discover"
+      "discover",
+      "elasticAssistantSharedState",
     ],
     "requiredBundles": [
       "kibanaReact",

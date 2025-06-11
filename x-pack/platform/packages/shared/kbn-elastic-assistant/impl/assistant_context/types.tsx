@@ -8,6 +8,7 @@
 import { ApiConfig, Message, Replacements } from '@kbn/elastic-assistant-common';
 import { EuiCommentProps } from '@elastic/eui';
 import { UserAvatar } from '.';
+import { ReactNode } from 'react';
 
 export interface MessagePresentation {
   delay?: number;

@@ -10,6 +10,7 @@ import { KibanaContextProvider } from './hooks/kibana/use_kibana';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EuiThemeProvider } from './context/eui_them_provider/eui_them_provider';
 import { AssistantProvider } from './context/assistant_context/assistant_provider';
+import { AssistantNavLink } from './components/assistant_nav_link/assistant_nav_link';
 
 export type ElasticAssistantPublicPluginSetup = ReturnType<ElasticAssistantPublicPlugin['setup']>;
 export type ElasticAssistantPublicPluginStart = ReturnType<ElasticAssistantPublicPlugin['start']>;
@@ -28,7 +29,7 @@ export class ElasticAssistantPublicPlugin implements Plugin<
   }
 
   public setup(core: CoreSetup) {
-    
+
     return {};
   }
 
@@ -48,15 +49,14 @@ export class ElasticAssistantPublicPlugin implements Plugin<
         productDocBase: dependencies.productDocBase,
         storage: this.storage,
         discover: dependencies.discover,
+        elasticAssistantSharedState: dependencies.elasticAssistantSharedState,
       };
       return services;
     };
 
     // Return any functionality that should be available to other plugins at runtime
-
-    console.log(1)
     coreStart.chrome.navControls.registerRight({
-      order: 500,
+      order: 1001,
       mount: (target) => {
         const startService = startServices();
         return this.mountAIAssistantButton(target, coreStart, startService);
@@ -85,7 +85,11 @@ export class ElasticAssistantPublicPlugin implements Plugin<
             <ReactQueryClientProvider>
               <AssistantSpaceIdProvider spaceId={"spaceId"}>
                 <AssistantProvider>
-                  <AssistantOverlay />
+                  <>
+                    <span id="yikes"></span>
+                    <AssistantNavLink />
+                    <AssistantOverlay />
+                  </>
                 </AssistantProvider>
               </AssistantSpaceIdProvider>
             </ReactQueryClientProvider>

@@ -34,6 +34,7 @@ export function AssistantProvider({
         userProfile,
         chrome,
         productDocBase,
+        elasticAssistantSharedState
     } = useKibana().services;
 
     const inferenceEnabled = useInferenceEnabled();
@@ -61,7 +62,9 @@ export function AssistantProvider({
             docLinks={{ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }}
             basePath={basePath}
             basePromptContexts={Object.values(PROMPT_CONTEXTS)} 
-            getComments={getComments}
+            getComments={getComments({
+                getActions$: elasticAssistantSharedState.comments.getActions$(),
+            })}
             http={http}
             inferenceEnabled={inferenceEnabled}
             navigateToApp={navigateToApp}

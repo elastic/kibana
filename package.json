@@ -486,6 +486,8 @@
     "@kbn/elastic-assistant": "link:x-pack/platform/packages/shared/kbn-elastic-assistant",
     "@kbn/elastic-assistant-common": "link:x-pack/platform/packages/shared/kbn-elastic-assistant-common",
     "@kbn/elastic-assistant-plugin": "link:x-pack/solutions/security/plugins/elastic_assistant",
+    "@kbn/elastic-assistant-shared-state": "link:x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state",
+    "@kbn/elastic-assistant-shared-state-plugin": "link:x-pack/solutions/security/plugins/elastic_assistant_shared_state",
     "@kbn/elasticsearch-client-plugin": "link:src/platform/test/plugin_functional/plugins/elasticsearch_client_plugin",
     "@kbn/elasticsearch-client-xpack-plugin": "link:x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client",
     "@kbn/embeddable-alerts-table-plugin": "link:x-pack/platform/plugins/shared/embeddable_alerts_table",

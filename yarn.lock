@@ -5381,6 +5381,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/elastic-assistant-shared-state-plugin@link:x-pack/solutions/security/plugins/elastic_assistant_shared_state":
+  version "0.0.0"
+  uid ""
+
+"@kbn/elastic-assistant-shared-state@link:x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state":
+  version "0.0.0"
+  uid ""
+
 "@kbn/elastic-assistant@link:x-pack/platform/packages/shared/kbn-elastic-assistant":
   version "0.0.0"
   uid ""

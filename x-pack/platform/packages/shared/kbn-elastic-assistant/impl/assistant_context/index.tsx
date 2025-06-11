@@ -374,7 +374,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
 
   return (
     <AssistantContext.Provider value={value}>
-      <AssistantNavLink />
+      
       {children}
     </AssistantContext.Provider>
   );

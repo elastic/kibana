@@ -41,7 +41,7 @@ import type {
 } from './types';
 import { SOLUTION_NAME, ASSISTANT_MANAGEMENT_TITLE } from './common/translations';
 
-import { APP_ID, APP_UI_ID, APP_PATH, APP_ICON_SOLUTION } from '../common/constants';
+import { APP_ID, APP_UI_ID, APP_PATH, APP_ICON_SOLUTION, APP_NAME } from '../common/constants';
 
 import type { AppLinkItems } from './common/links';
 import {
@@ -68,6 +68,10 @@ import { PluginServices } from './plugin_services';
 import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/external_reference';
 import { hasAccessToSecuritySolution } from './helpers_access';
 import { generateAttachmentType } from './threat_intelligence/modules/cases/utils/attachments';
+import ReactDOM from 'react-dom';
+import { CommentActions } from './assistant/comment_actions';
+
+import { SecurityApp } from './app/app';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -140,7 +144,24 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
         const subPluginRoutes = getSubPluginRoutesByCapabilities(subPlugins, services);
 
-        return renderApp({ ...params, services, store, usageCollection, subPluginRoutes });
+        const unmountActions = services.elasticAssistantSharedState.comments.registerActions({
+          mount: (args) => (target) => {
+            ReactDOM.render(
+              <SecurityApp history={params.history} services={services} store={store} theme$={params.theme$}>
+                <CommentActions message={args.message} />
+              </SecurityApp>,
+              target
+            );
+            return () => ReactDOM.unmountComponentAtNode(target);
+          }
+        })
+
+        const unmountApp = renderApp({ ...params, services, store, usageCollection, subPluginRoutes });
+
+        return () => {
+          unmountApp();
+          unmountActions();
+        };
       },
     });
 
@@ -246,6 +267,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.services.start(core, plugins);
     this.registerFleetExtensions(core, plugins);
     this.registerPluginUpdates(core, plugins); // Not awaiting to prevent blocking start execution
+
     return this.contract.getStartContract(core);
   }
 

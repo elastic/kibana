@@ -26,6 +26,7 @@
       "dataViews",
       "ecsDataQualityDashboard",
       "elasticAssistant",
+      "elasticAssistantSharedState",
       "embeddable",
       "eventLog",
       "features",
@@ -58,7 +59,7 @@
       "inference",
       "discoverShared",
       "productDocBase",
-      "telemetry"
+      "telemetry",
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
