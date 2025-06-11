@@ -475,7 +475,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
           <EuiSpacer size="s" />
 
-          <EuiFlexGroup direction="row" gutterSize="m" responsive={false} alignItems="baseline">
+          <EuiFlexGroup direction="row" gutterSize="m" alignItems="baseline" wrap>
             {viewBySwimlaneOptions.length > 0 && (
               <>
                 <EuiFlexItem grow={false}>
@@ -495,7 +495,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               </>
             )}
 
-            <EuiFlexItem grow={true} css={{ maxWidth: '500px' }}>
+            <EuiFlexItem grow={false} css={{ minWidth: '280px' }}>
               <SeverityLegendControl
                 allSeverityOptions={severityOptions}
                 selectedSeverities={selectedSeverityOptions}

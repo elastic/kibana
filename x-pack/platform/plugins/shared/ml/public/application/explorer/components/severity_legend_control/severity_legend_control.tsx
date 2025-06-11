@@ -57,7 +57,7 @@ export const SeverityLegendControl: FC<SeverityControlProps> = ({
   );
 
   const severityControl = (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
       {allSeverityOptions.map((severity) => {
         const isSelected = selectedSeverities.some((s) => s.val === severity.val);
 
@@ -77,7 +77,7 @@ export const SeverityLegendControl: FC<SeverityControlProps> = ({
                     size={isSelected ? 'm' : 's'}
                   />
                 </EuiFlexItem>
-                <EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   <EuiText size="s" css={styles.severityText(isSelected)}>
                     {getSeverityRangeDisplay(severity.val)}
                   </EuiText>
