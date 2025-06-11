@@ -63,7 +63,7 @@ export default ({ getService }: FtrProviderContext) => {
           supertest,
           rule: getRuleProps(id, index),
           timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
-          invocationCount: 1,
+          invocationCount: 2,
         });
 
         const previewAlerts = await getPreviewAlerts({
