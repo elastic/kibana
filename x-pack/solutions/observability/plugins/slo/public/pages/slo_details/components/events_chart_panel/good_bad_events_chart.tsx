@@ -62,13 +62,21 @@ export function GoodBadEventsChart({ data, slo, onBrushed }: Props) {
 
   const barClickHandler = (params: XYChartElementEvent[]) => {
     const [datum, eventDetail] = params[0];
-    const isBad = eventDetail.specId === badEventId;
+    const isGoodEventClicked = eventDetail.specId === goodEventId;
+    const isBadEventClicked = eventDetail.specId === badEventId;
     const timeRange = {
       from: moment(datum.x).toISOString(),
       to: moment(datum.x).add(intervalInMilliseconds, 'ms').toISOString(),
       mode: 'absolute' as const,
     };
-    openInDiscover({ slo, showBad: isBad, showGood: !isBad, timeRange, discover, uiSettings });
+    openInDiscover({
+      slo,
+      showBad: isBadEventClicked,
+      showGood: isGoodEventClicked,
+      timeRange,
+      discover,
+      uiSettings,
+    });
   };
 
   return (
