@@ -49,6 +49,10 @@ export const shouldBeEnabled = (selector: string) => {
   cy.get(selector).should('be.enabled');
 };
 
+export const shouldBeSelected = (selector: string) => {
+  cy.get(selector).should('be.selected');
+};
+
 /**
  * Assert that the input has the expected value
  * @param selector the input selector for the DOM element
