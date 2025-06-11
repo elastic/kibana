@@ -16,49 +16,50 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { EmailActionParams, EmailConfig, EmailSecrets } from '../types';
 import { RegistrationServices } from '..';
+import { serviceParamValueToKbnSettingMap as emailKbnSettings } from '../../../common/email/constants';
 
-const emailServices: Array<EuiSelectOption & { kbnConfigValue: string }> = [
+const emailServices: Array<EuiSelectOption & { kbnSettingValue: string }> = [
   {
     text: i18n.translate('xpack.stackConnectors.components.email.gmailServerTypeLabel', {
       defaultMessage: 'Gmail',
     }),
     value: 'gmail',
-    kbnConfigValue: 'google-mail',
+    kbnSettingValue: emailKbnSettings.gmail,
   },
   {
     text: i18n.translate('xpack.stackConnectors.components.email.outlookServerTypeLabel', {
       defaultMessage: 'Outlook',
     }),
     value: 'outlook365',
-    kbnConfigValue: 'microsoft-outlook',
+    kbnSettingValue: emailKbnSettings.outlook365,
   },
   {
     text: i18n.translate('xpack.stackConnectors.components.email.amazonSesServerTypeLabel', {
       defaultMessage: 'Amazon SES',
     }),
     value: 'ses',
-    kbnConfigValue: 'amazon-ses',
+    kbnSettingValue: emailKbnSettings.ses,
   },
   {
     text: i18n.translate('xpack.stackConnectors.components.email.elasticCloudServerTypeLabel', {
       defaultMessage: 'Elastic Cloud',
     }),
     value: 'elastic_cloud',
-    kbnConfigValue: 'elastic-cloud',
+    kbnSettingValue: emailKbnSettings.elastic_cloud,
   },
   {
     text: i18n.translate('xpack.stackConnectors.components.email.exchangeServerTypeLabel', {
       defaultMessage: 'MS Exchange Server',
     }),
     value: 'exchange_server',
-    kbnConfigValue: 'microsoft-exchange',
+    kbnSettingValue: emailKbnSettings.exchange_server,
   },
   {
     text: i18n.translate('xpack.stackConnectors.components.email.otherServerTypeLabel', {
       defaultMessage: 'Other',
     }),
     value: 'other',
-    kbnConfigValue: 'other',
+    kbnSettingValue: emailKbnSettings.other,
   },
 ];
 
@@ -72,7 +73,7 @@ export function getEmailServices(isCloudEnabled: boolean, enabledEmailsServices:
   }
 
   return allEmailServices.filter((service) =>
-    enabledEmailsServices.includes(service.kbnConfigValue)
+    enabledEmailsServices.includes(service.kbnSettingValue)
   );
 }
 
