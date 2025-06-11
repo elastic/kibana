@@ -29,7 +29,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const config = getService('config');
   const isServerless = config.get('serverless');
   const kibanaServer = getService('kibanaServer');
-  const expectedConsumer = isServerless ? 'observability' : 'slo';
 
   describe('Burn rate rule', () => {
     let dataForgeConfig: PartialConfig;
