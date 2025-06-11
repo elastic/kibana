@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { screen, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { pricingServiceMock } from '@kbn/core-pricing-browser-mocks';
 import { noop } from 'lodash';
 import React from 'react';
