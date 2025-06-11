@@ -88,7 +88,7 @@ export const createEsSearchIterable = <
       ? resultsMapper(searchResponse)
       : searchResponse) as unknown as TResultDocument;
 
-    // @ts-expect-error
+    // @ts-expect-error TS2638: Type NonNullable<TResultDocument> may represent a primitive value, which is not permitted as the right operand of the in operator.
     if (value && 'then' in value && typeof value.then === 'function') {
       // eslint-disable-next-line require-atomic-updates
       value = await value;
