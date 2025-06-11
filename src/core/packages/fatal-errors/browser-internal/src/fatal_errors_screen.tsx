@@ -22,7 +22,7 @@ import { Observable, Subscription, merge, tap, fromEvent } from 'rxjs';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { FatalErrorInfo } from '@kbn/core-fatal-errors-browser';
+import { FatalErrorInfo } from './get_error_info';
 
 interface Props {
   kibanaVersion: string;

@@ -79,23 +79,3 @@ describe('#add()', () => {
     expect(mockRender.mock.calls).toMatchSnapshot('fatal error screen component');
   });
 });
-
-describe('setup.get$()', () => {
-  it('provides info about the errors passed to fatalErrors.add()', () => {
-    const { fatalErrors } = setupService();
-
-    const onError = jest.fn();
-    fatalErrors.get$().subscribe(onError);
-
-    expect(onError).not.toHaveBeenCalled();
-    expect(() => {
-      fatalErrors.add(new Error('bar'));
-    }).toThrowError();
-
-    expect(onError).toHaveBeenCalled();
-    expect(onError).toHaveBeenCalledWith({
-      message: 'bar',
-      stack: expect.stringMatching(/Error: bar[\w\W]+fatal_errors_service\.test\.ts/),
-    });
-  });
-});

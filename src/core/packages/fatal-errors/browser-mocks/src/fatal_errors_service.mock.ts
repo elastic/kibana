@@ -14,7 +14,6 @@ import { FatalErrorsService } from '@kbn/core-fatal-errors-browser-internal';
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<FatalErrorsSetup> = {
     add: jest.fn<never, any>(() => undefined as never),
-    get$: jest.fn(),
   };
 
   return setupContract;

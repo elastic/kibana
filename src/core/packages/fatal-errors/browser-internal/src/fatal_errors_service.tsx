@@ -15,10 +15,10 @@ import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { ThemeServiceSetup } from '@kbn/core-theme-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
-import type { FatalErrorInfo, FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
+import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import { FatalErrorsScreen } from './fatal_errors_screen';
-import { getErrorInfo } from './get_error_info';
+import { FatalErrorInfo, getErrorInfo } from './get_error_info';
 
 /** @internal */
 export interface FatalErrorsServiceSetupDeps {
@@ -70,9 +70,6 @@ export class FatalErrorsService {
         }
 
         throw error;
-      },
-      get$: () => {
-        return this.errorInfo$.asObservable();
       },
     };
 
