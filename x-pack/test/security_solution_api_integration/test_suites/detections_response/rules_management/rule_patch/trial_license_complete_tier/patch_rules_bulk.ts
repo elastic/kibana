@@ -55,8 +55,11 @@ export default ({ getService }: FtrProviderContext) => {
           .bulkPatchRules({ body: [{ rule_id: 'rule-1', name: 'some other name' }] })
           .expect(200);
 
-        expect(header.warning?.includes(
-          '299 Kibana "Deprecated endpoint: /api/detection_engine/rules/_bulk_update API is deprecated since v8.2. Please use the /api/detection_engine/rules/_bulk_action API instead. See https://www.elastic.co/docs/api/doc/kibana/v8/group/endpoint-security-detections-api for more detail."')).to.be(true);
+        expect(
+          header.warning?.includes(
+            '299 Kibana "Deprecated endpoint: /api/detection_engine/rules/_bulk_update API is deprecated since v8.2. Please use the /api/detection_engine/rules/_bulk_action API instead. See https://www.elastic.co/docs/api/doc/kibana/v8/group/endpoint-security-detections-api for more detail."'
+          )
+        ).to.be(true);
       });
     });
 
