@@ -32,6 +32,7 @@ import { getUnifiedDocViewerServices } from '../../../../plugin';
 
 export type TransactionOverviewProps = DocViewRenderProps & {
   tracesIndexPattern: string;
+  apmErrorsIndexPattern: string;
   showWaterfall?: boolean;
   showActions?: boolean;
 };
@@ -43,6 +44,7 @@ export function TransactionOverview({
   onAddColumn,
   onRemoveColumn,
   tracesIndexPattern,
+  apmErrorsIndexPattern,
   showWaterfall = true,
   showActions = true,
   dataView,

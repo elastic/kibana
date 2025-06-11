@@ -33,6 +33,7 @@ import { RootTransactionProvider } from '../doc_viewer_transaction_overview/hook
 
 export type SpanOverviewProps = DocViewRenderProps & {
   tracesIndexPattern: string;
+  apmErrorsIndexPattern: string;
   showWaterfall?: boolean;
   showActions?: boolean;
 };
@@ -44,6 +45,7 @@ export function SpanOverview({
   onAddColumn,
   onRemoveColumn,
   tracesIndexPattern,
+  apmErrorsIndexPattern,
   showWaterfall = true,
   showActions = true,
   dataView,
