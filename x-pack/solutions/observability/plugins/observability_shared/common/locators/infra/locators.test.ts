@@ -262,7 +262,14 @@ describe('Infra Locators', () => {
       const { app, path, state } = await kubernetesDashboardLocator.getLocation(params);
 
       expect(app).toBe('metrics');
-      expect(path).toBe(`/kubernetes/${params.dashboardId}`);
+      expect(path).toBe(
+        `/kubernetes/${params.dashboardId}?dashboardParams=${rison.encodeUnknown({
+          dateRange: {
+            from: 'now-15m',
+            to: 'now',
+          },
+        })}`
+      );
       expect(state).toBeDefined();
       expect(Object.keys(state)).toHaveLength(0);
     });

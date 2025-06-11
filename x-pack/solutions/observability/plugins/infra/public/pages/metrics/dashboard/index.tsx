@@ -5,24 +5,21 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiErrorBoundary, EuiLoadingSpinner } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
-import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
-import type { ViewMode } from '@kbn/presentation-publishing';
-import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { FETCH_STATUS, useLinkProps } from '@kbn/observability-shared-plugin/public';
-import { KUBERNETES_DASHBOARD_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
-import type { SerializableRecord } from '@kbn/utility-types';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useFetchDashboardById } from './hooks/use_fetch_dashboard_by_id';
+import { DatePicker } from './components/date_picker/date_picker';
+import { DatePickerProvider } from './hooks/use_date_picker';
+import { RenderDashboard } from './components/dashboard/render_dashboard';
 
 export const Dashboard = () => {
   const {
     services: {
-      share,
       observabilityShared: {
         navigation: { PageTemplate },
       },
@@ -31,36 +28,6 @@ export const Dashboard = () => {
 
   const { dashboardId } = useParams<{ dashboardId: string }>();
   const { data: dashboardData, status } = useFetchDashboardById(dashboardId);
-  const getCreationOptions = useCallback((): Promise<DashboardCreationOptions> => {
-    const getInitialInput = () => ({
-      viewMode: 'view' as ViewMode,
-      timeRange: { from: 'now', to: 'now-15m' },
-    });
-    return Promise.resolve<DashboardCreationOptions>({
-      getInitialInput,
-    });
-  }, []);
-
-  const getLocatorParams = useCallback(
-    (params: SerializableRecord) => {
-      return {
-        dashboardId: params?.dashboardId ?? dashboardId,
-      };
-    },
-    [dashboardId]
-  );
-
-  const locator = useMemo(() => {
-    const baseLocator = share.url.locators.get(KUBERNETES_DASHBOARD_LOCATOR_ID);
-    if (!baseLocator) return;
-
-    return {
-      ...baseLocator,
-      getRedirectUrl: (params: SerializableRecord) =>
-        baseLocator.getRedirectUrl(getLocatorParams(params)),
-      navigate: (params: SerializableRecord) => baseLocator.navigate(getLocatorParams(params)),
-    };
-  }, [share, getLocatorParams]);
 
   const kubernetesLinkProps = useLinkProps({
     app: 'metrics',
@@ -79,7 +46,6 @@ export const Dashboard = () => {
     },
   ]);
 
-  const [dashboard, setDashboard] = useState<DashboardApi | undefined>(undefined);
   const [pageDashTitle, setPageTitle] = useState<string | undefined>(
     i18n.translate('xpack.infra.kubernetes.pageTitle', {
       defaultMessage: 'Kubernetes Dashboard',
@@ -87,34 +53,29 @@ export const Dashboard = () => {
   );
 
   useEffect(() => {
-    if (!dashboard) return;
-    dashboard.setTimeRange({ from: 'now', to: 'now-15m' });
-    dashboard.setQuery({ query: '', language: 'kuery' });
     if (dashboardData && dashboardData.status === 'success') {
       const dashboardTitle = dashboardData?.attributes?.title;
       setPageTitle(dashboardTitle);
     }
-  }, [dashboardData, dashboard, dashboardId]);
+  }, [dashboardData]);
 
   if (status === FETCH_STATUS.LOADING && !dashboardData) {
     return <EuiLoadingSpinner />;
   }
 
   return (
-    <EuiErrorBoundary>
-      <PageTemplate
-        pageHeader={{
-          pageTitle: pageDashTitle,
-        }}
-        data-test-subj="infraKubernetesPage"
-      >
-        <DashboardRenderer
-          locator={locator}
-          savedObjectId={dashboardId}
-          getCreationOptions={getCreationOptions}
-          onApiAvailable={setDashboard}
-        />
-      </PageTemplate>
-    </EuiErrorBoundary>
+    <DatePickerProvider dateRange={undefined}>
+      <EuiErrorBoundary>
+        <PageTemplate
+          pageHeader={{
+            pageTitle: pageDashTitle,
+            rightSideItems: [<DatePicker />],
+          }}
+          data-test-subj="infraKubernetesPage"
+        >
+          <RenderDashboard />
+        </PageTemplate>
+      </EuiErrorBoundary>
+    </DatePickerProvider>
   );
 };
