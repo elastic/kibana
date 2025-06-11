@@ -126,6 +126,7 @@ export function AlertDetails() {
     return urlTabId && isTabId(urlTabId) ? urlTabId : 'overview';
   });
   const [validDashboards, setValidDashboards] = useState<FindDashboardsByIdResponse[]>([]);
+  const [isLoadingValidDashboards, setIsLoadingValidDashboards] = useState(true);
   const linkedDashboards = React.useMemo(() => rule?.artifacts?.dashboards ?? [], [rule]);
   const handleSetTabId = async (tabId: TabId) => {
     setActiveTabId(tabId);
@@ -196,14 +197,15 @@ export function AlertDetails() {
 
   useEffect(() => {
     const fetchValidDashboards = async () => {
+      setIsLoadingValidDashboards(true);
       const dashboardIds = linkedDashboards.map((dashboard: { id: string }) => dashboard.id);
       const findDashboardsService = dashboardServiceProvider(contentManagement);
       const existingDashboards = await findDashboardsService.fetchValidDashboards(dashboardIds);
 
       setValidDashboards(existingDashboards.length ? existingDashboards : []);
+      setIsLoadingValidDashboards(false);
     };
-
-    fetchValidDashboards();
+    if (rule) fetchValidDashboards();
   }, [rule, contentManagement, linkedDashboards]);
 
   if (isLoading) {
@@ -294,7 +296,11 @@ export function AlertDetails() {
 
   const relatedDashboardsTab =
     alertDetail && rule ? (
-      <RelatedDashboards relatedDashboards={validDashboards || []} alertId={alertId} rule={rule} />
+      <RelatedDashboards
+        relatedDashboards={isLoadingValidDashboards ? undefined : validDashboards}
+        alertId={alertId}
+        rule={rule}
+      />
     ) : (
       <EuiLoadingSpinner />
     );
@@ -360,9 +366,13 @@ export function AlertDetails() {
             id="xpack.observability.alertDetails.tab.relatedDashboardsLabel"
             defaultMessage="Related dashboards"
           />
-          <EuiNotificationBadge color="success" css={{ marginLeft: '5px' }}>
-            {validDashboards?.length}
-          </EuiNotificationBadge>
+          {isLoadingValidDashboards ? (
+            <EuiLoadingSpinner css={{ marginLeft: '5px' }} />
+          ) : (
+            <EuiNotificationBadge color="success" css={{ marginLeft: '5px' }}>
+              {validDashboards?.length}
+            </EuiNotificationBadge>
+          )}
         </>
       ),
       'data-test-subj': 'relatedDashboardsTab',

@@ -16,34 +16,19 @@ import { useAddSuggestedDashboards } from '../hooks/use_add_suggested_dashboard'
 
 interface RelatedDashboardsProps {
   alertId: string;
-  relatedDashboards: Array<{ id: string }>;
+  relatedDashboards?: Array<{ id: string }>;
   rule: Rule;
 }
 
 export function RelatedDashboards({ alertId, relatedDashboards, rule }: RelatedDashboardsProps) {
   const [dashboardsMeta, setDashboardsMeta] = useState<DashboardMetadata[]>([]);
   const [isLoadingLinkedDashboards, setIsLoadingLinkedDashboards] = useState(true);
-
   const { isLoadingSuggestedDashboards, suggestedDashboards } = useSuggestedDashboards(alertId);
-
-  const isLoading = isLoadingLinkedDashboards || isLoadingSuggestedDashboards;
-
-  // Filter out suggested dashboards that are already in dashboardsMeta
-  const filteredSuggestedDashboards = useMemo(
-    () =>
-      suggestedDashboards
-        ? suggestedDashboards.filter(
-            (suggestedDashboard) =>
-              !dashboardsMeta.some((dashboard) => dashboard.id === suggestedDashboard.id)
-          )
-        : [],
-    [dashboardsMeta, suggestedDashboards]
-  );
-
   const {
     services: { dashboard: dashboardService },
   } = useKibana();
 
+  // On success add the dashboard to the local linked dashboards to update the UI
   const onSuccessAddSuggestedDashboard = (addedDashboardId: string) => {
     const suggestedDashboard = suggestedDashboards?.find(({ id }) => id === addedDashboardId);
     if (!suggestedDashboard) throw Error('Suggested dashboard not found, this should never happen');
@@ -56,7 +41,7 @@ export function RelatedDashboards({ alertId, relatedDashboards, rule }: RelatedD
   });
 
   useEffect(() => {
-    if (!relatedDashboards?.length || !dashboardService) {
+    if (!relatedDashboards || !dashboardService) {
       return;
     }
 
@@ -96,20 +81,41 @@ export function RelatedDashboards({ alertId, relatedDashboards, rule }: RelatedD
     fetchDashboards();
   }, [relatedDashboards, dashboardService, setDashboardsMeta]);
 
-  const filteredSuggestedDashboardsWithButtonProps = filteredSuggestedDashboards.map((d) => {
-    const actionButtonProps: ActionButtonProps = {
-      isDisabled: addingDashboardId !== undefined && addingDashboardId !== d.id,
-      isLoading: addingDashboardId === d.id,
-      label: i18n.translate('xpack.observability.alertDetails.suggestedDashboards.buttonLabel', {
-        defaultMessage: 'Add to linked dashboards',
-      }),
-      onClick: onClickAddSuggestedDashboard,
-    };
-    return {
-      ...d,
-      actionButtonProps,
-    };
-  });
+  const isLoading = isLoadingLinkedDashboards || isLoadingSuggestedDashboards;
+
+  // Filter out suggested dashboards that are already in dashboardsMeta and add button properties
+  // TODO: the backend should not return suggested dashboards that are already linked to the rule
+  // WHen https://github.com/elastic/kibana/pull/221972 is merged we can remove this
+  const filteredSuggestedDashboards = useMemo(() => {
+    return suggestedDashboards
+      ? suggestedDashboards.reduce<
+          Array<DashboardMetadata & { actionButtonProps: ActionButtonProps }>
+        >((acc, d) => {
+          // Skip if dashboard is already in dashboardsMeta
+          if (dashboardsMeta.some((dashboard) => dashboard.id === d.id)) {
+            return acc;
+          }
+
+          // Add dashboard with button props to accumulator
+          acc.push({
+            ...d,
+            actionButtonProps: {
+              isDisabled: addingDashboardId !== undefined && addingDashboardId !== d.id,
+              isLoading: addingDashboardId === d.id,
+              label: i18n.translate(
+                'xpack.observability.alertDetails.suggestedDashboards.buttonLabel',
+                {
+                  defaultMessage: 'Add to linked dashboards',
+                }
+              ),
+              onClick: onClickAddSuggestedDashboard,
+            },
+          });
+
+          return acc;
+        }, [])
+      : [];
+  }, [dashboardsMeta, suggestedDashboards, addingDashboardId, onClickAddSuggestedDashboard]);
 
   return (
     <div>
@@ -125,7 +131,7 @@ export function RelatedDashboards({ alertId, relatedDashboards, rule }: RelatedD
           defaultMessage: 'Suggested dashboards',
         })}
         isLoadingDashboards={isLoading}
-        dashboards={filteredSuggestedDashboardsWithButtonProps}
+        dashboards={filteredSuggestedDashboards}
       />
     </div>
   );
