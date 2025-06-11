@@ -19,7 +19,7 @@ import { threatDefault } from '../step_about_rule/default_value';
 import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
 import { MitreAttackTechniqueFields } from './technique_fields';
-import type { MitreTactic } from '../../../../detections/mitre/types';
+import type { MitreTactic } from '../../../../../common/detections/mitre/types';
 
 const MitreAttackContainer = styled.div`
   margin-top: 16px;

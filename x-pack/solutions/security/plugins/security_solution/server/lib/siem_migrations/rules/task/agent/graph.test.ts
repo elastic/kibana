@@ -60,8 +60,8 @@ const mockIncorrectRuleName = {
   name: 'wrong-name',
 };
 
-const mockSemanticQueryResponse = JSON.stringify({
-  semantic_query:
+const mockRuleSummaryResponse = JSON.stringify({
+  rule_summary:
     'web http abnormal high volume requests method source ip network traffic analysis datamodel web security',
 });
 
@@ -122,8 +122,8 @@ describe('getRuleMigrationAgent', () => {
       mockRetriever.prebuiltRules.search.mockResolvedValue([mockPrebuiltRule]);
       const graph = await setupAgent([
         {
-          nodeId: 'createSemanticQuery',
-          response: mockSemanticQueryResponse,
+          nodeId: 'createRuleSummary',
+          response: mockRuleSummaryResponse,
         },
         {
           nodeId: 'matchPrebuiltRule',
@@ -141,8 +141,8 @@ describe('getRuleMigrationAgent', () => {
       mockRetriever.prebuiltRules.search.mockResolvedValue([mockIncorrectRuleName]);
       const graph = await setupAgent([
         {
-          nodeId: 'createSemanticQuery',
-          response: mockSemanticQueryResponse,
+          nodeId: 'createRuleSummary',
+          response: mockRuleSummaryResponse,
         },
         {
           nodeId: 'matchPrebuiltRule',
@@ -160,8 +160,8 @@ describe('getRuleMigrationAgent', () => {
       mockRetriever.prebuiltRules.search.mockResolvedValue([]);
       const graph = await setupAgent([
         {
-          nodeId: 'createSemanticQuery',
-          response: mockSemanticQueryResponse,
+          nodeId: 'createRuleSummary',
+          response: mockRuleSummaryResponse,
         },
         {
           nodeId: 'matchPrebuiltRule',
@@ -178,8 +178,8 @@ describe('getRuleMigrationAgent', () => {
       mockRetriever.prebuiltRules.search.mockResolvedValue([mockPrebuiltRule]);
       const graph = await setupAgent([
         {
-          nodeId: 'createSemanticQuery',
-          response: mockSemanticQueryResponse,
+          nodeId: 'createRuleSummary',
+          response: mockRuleSummaryResponse,
         },
         {
           nodeId: 'matchPrebuiltRule',
@@ -198,8 +198,8 @@ describe('getRuleMigrationAgent', () => {
       mockRetriever.prebuiltRules.search.mockResolvedValue([mockPrebuiltRule]);
       const graph = await setupAgent([
         {
-          nodeId: 'createSemanticQuery',
-          response: mockSemanticQueryResponse,
+          nodeId: 'createRuleSummary',
+          response: mockRuleSummaryResponse,
         },
         {
           nodeId: 'matchPrebuiltRule',
@@ -222,8 +222,8 @@ describe('getRuleMigrationAgent', () => {
       mockRetriever.integrations.getIntegrations.mockResolvedValue([mockIntegrationResult]);
       const graph = await setupAgent([
         {
-          nodeId: 'createSemanticQuery',
-          response: mockSemanticQueryResponse,
+          nodeId: 'createRuleSummary',
+          response: mockRuleSummaryResponse,
         },
         {
           nodeId: 'matchPrebuiltRule',

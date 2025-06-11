@@ -17,6 +17,7 @@
 import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '../../api/model/primitives.gen';
+import { ThreatArray } from '../../api/detection_engine/model/rule_schema/common_attributes.gen';
 import { RuleResponse } from '../../api/detection_engine/model/rule_schema/rule_schemas.gen';
 
 /**
@@ -114,6 +115,10 @@ export const ElasticRule = z.object({
    * The IDs of the Elastic integrations suggested to be installed for this rule.
    */
   integration_ids: z.array(z.string()).optional(),
+  /**
+   * The thread information associated with this rule.
+   */
+  threat: ThreatArray.optional(),
   /**
    * The Elastic rule id installed as a result.
    */

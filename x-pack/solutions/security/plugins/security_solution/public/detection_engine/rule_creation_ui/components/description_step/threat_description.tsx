@@ -13,7 +13,7 @@ import type {
   MitreSubTechnique,
   MitreTactic,
   MitreTechnique,
-} from '../../../../detections/mitre/types';
+} from '../../../../../common/detections/mitre/types';
 import ListTreeIcon from './assets/list_tree_icon.svg';
 
 const ThreatEuiFlexGroupStyles = styled(EuiFlexGroup)`

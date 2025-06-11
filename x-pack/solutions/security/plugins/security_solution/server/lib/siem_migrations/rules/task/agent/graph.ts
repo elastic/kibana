@@ -6,7 +6,7 @@
  */
 
 import { END, START, StateGraph } from '@langchain/langgraph';
-import { getCreateSemanticQueryNode } from './nodes/create_semantic_query';
+import { getCreateRuleSummaryNode } from './nodes/create_rule_summary';
 import { getMatchPrebuiltRuleNode } from './nodes/match_prebuilt_rule';
 import { migrateRuleState } from './state';
 import { getTranslateRuleGraph } from './sub_graphs/translate_rule';
@@ -31,16 +31,16 @@ export function getRuleMigrationAgent({
     telemetryClient,
     logger,
   });
-  const createSemanticQueryNode = getCreateSemanticQueryNode({ model });
+  const createRuleSummaryNode = getCreateRuleSummaryNode({ model });
 
   const siemMigrationAgentGraph = new StateGraph(migrateRuleState)
     // Nodes
-    .addNode('createSemanticQuery', createSemanticQueryNode)
+    .addNode('createRuleSummary', createRuleSummaryNode)
     .addNode('matchPrebuiltRule', matchPrebuiltRuleNode)
     .addNode('translationSubGraph', translationSubGraph)
     // Edges
-    .addEdge(START, 'createSemanticQuery')
-    .addEdge('createSemanticQuery', 'matchPrebuiltRule')
+    .addEdge(START, 'createRuleSummary')
+    .addEdge('createRuleSummary', 'matchPrebuiltRule')
     .addConditionalEdges('matchPrebuiltRule', matchedPrebuiltRuleConditional, [
       'translationSubGraph',
       END,

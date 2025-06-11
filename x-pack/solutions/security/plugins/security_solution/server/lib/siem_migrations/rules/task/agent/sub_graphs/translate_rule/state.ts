@@ -31,7 +31,7 @@ export const translateRuleState = Annotation.Root({
     reducer: (current, value) => value ?? current,
     default: () => '',
   }),
-  semantic_query: Annotation<string>({
+  rule_summary: Annotation<string>({
     reducer: (current, value) => value ?? current,
     default: () => '',
   }),

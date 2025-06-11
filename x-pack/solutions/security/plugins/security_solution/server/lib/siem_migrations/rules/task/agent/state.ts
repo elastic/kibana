@@ -21,7 +21,7 @@ export const migrateRuleState = Annotation.Root({
   elastic_rule: Annotation<ElasticRulePartial>({
     reducer: (state, action) => ({ ...state, ...action }),
   }),
-  semantic_query: Annotation<string>({
+  keywords: Annotation<string>({
     reducer: (current, value) => value ?? current,
     default: () => '',
   }),

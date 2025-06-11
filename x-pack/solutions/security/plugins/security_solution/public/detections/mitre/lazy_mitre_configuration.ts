@@ -12,6 +12,6 @@ export const lazyMitreConfiguration = () => {
    */
   return import(
     /* webpackChunkName: "lazy_mitre_configuration" */
-    './mitre_tactics_techniques'
+    '../../../common/detections/mitre/mitre_tactics_techniques'
   );
 };
