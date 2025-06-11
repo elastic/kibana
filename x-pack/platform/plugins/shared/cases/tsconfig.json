@@ -83,6 +83,7 @@
     "@kbn/monaco",
     "@kbn/code-editor",
     "@kbn/core-test-helpers-model-versions",
+    "@kbn/core-user-profile-browser",
   ],
   "exclude": [
     "target/**/*",
