@@ -30,6 +30,7 @@ import {
   EuiBadge,
   EuiToolTip,
 } from '@elastic/eui';
+import { MaintenanceWindowsLink } from '../fields/maintenance_windows/create_maintenance_windows_btn';
 import { MaintenanceWindowsFieldProps } from '../fields/maintenance_windows/maintenance_windows';
 import { kibanaService } from '../../../../../utils/kibana_service';
 import {
@@ -1698,5 +1699,6 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       fullWidth: true,
       value: field?.value as string[],
     }),
+    labelAppend: <MaintenanceWindowsLink />,
   },
 });

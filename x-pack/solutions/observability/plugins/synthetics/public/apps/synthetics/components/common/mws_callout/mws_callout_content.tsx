@@ -8,6 +8,7 @@ import React from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { MaintenanceWindow } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/types';
+import { MaintenanceWindowsLink } from '../../monitor_add_edit/fields/maintenance_windows/create_maintenance_windows_btn';
 
 export const MwsCalloutContent = ({ activeMWs }: { activeMWs: MaintenanceWindow[] }) => {
   if (activeMWs.length) {
@@ -28,12 +29,15 @@ export const MwsCalloutContent = ({ activeMWs }: { activeMWs: MaintenanceWindow[
             'xpack.synthetics.maintenanceWindowCallout.maintenanceWindowActiveDescription.monitors',
             {
               defaultMessage:
-                'Monitors are stopped while maintenance windows are running. Active maintenance windows are {titles}.',
-              values: {
-                titles: activeMWs.map((mw) => mw.title).join(', '),
-              },
+                'Monitors are stopped while maintenance windows are running. Active maintenance windows are ',
             }
           )}
+          {activeMWs.map((mws, index) => (
+            <span key={mws.id}>
+              <MaintenanceWindowsLink id={mws.id} label={mws.title} />
+              {index !== activeMWs.length - 1 ? <span>, </span> : <span>.</span>}
+            </span>
+          ))}
         </EuiCallOut>
         <EuiSpacer size="s" />
       </>
