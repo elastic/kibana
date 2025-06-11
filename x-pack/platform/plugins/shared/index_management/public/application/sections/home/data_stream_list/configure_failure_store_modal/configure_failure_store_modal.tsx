@@ -28,6 +28,7 @@ import {
   ToggleField,
 } from '../../../../../shared_imports';
 
+import { documentationService } from '../../services/documentation';
 import { DataStream } from '../../../../../../common';
 import { useAppContext } from '../../../../app_context';
 import { updateDSFailureStore } from '../../../../services/api';
@@ -128,7 +129,7 @@ export const ConfigureFailureStoreModal: React.FunctionComponent<Props> = ({
             values={{
               docLink: (
                 <EuiLink
-                  href="https://www.elastic.co/guide/en/elasticsearch/reference/current/data-streams-failure-store.html"
+                  href={documentationService.getDataStreamsFailureStoreLink()}
                   target="_blank"
                   external
                   data-test-subj="failureStoreDocLink"

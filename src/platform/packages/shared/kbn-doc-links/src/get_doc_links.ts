@@ -309,6 +309,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       docsBase: `${ELASTIC_DOCS}solutions/search`,
       asyncSearch: `${ELASTIC_DOCS}solutions/search/async-search-api`,
       dataStreams: `${ELASTIC_DOCS}manage-data/data-store/data-streams`,
+      dataStreamsFailureStore: `${ELASTIC_DOCS}manage-data/data-store/data-streams/failure-store`,
       deprecationLogging: `${ELASTIC_DOCS}deploy-manage/monitor/logging-configuration/update-elasticsearch-logging-levels#deprecation-logging`,
       createEnrichPolicy: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-enrich-put-policy`
