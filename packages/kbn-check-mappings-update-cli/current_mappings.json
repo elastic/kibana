@@ -1079,7 +1079,7 @@
       "managed": {
         "type": "boolean"
       },
-        "matchers": {
+      "matchers": {
         "dynamic": false,
         "type": "object"
       },
@@ -3734,6 +3734,9 @@
             "type": "text"
           }
         }
+      },
+      "maintenance_windows": {
+        "type": "keyword"
       },
       "name": {
         "fields": {

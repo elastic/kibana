@@ -1152,6 +1152,7 @@
     "locations",
     "locations.id",
     "locations.label",
+    "maintenance_windows",
     "name",
     "origin",
     "project_id",
