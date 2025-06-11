@@ -58,6 +58,7 @@ const InputCheckbox = ({
       data-test-subj={`conversationSelect-${conversation.id}`}
       id={`conversationSelect-${conversation.id}`}
       checked={checked}
+      disabled={isDeleteAll}
       onChange={(e) => {
         if (e.target.checked) {
           setChecked(true);
@@ -99,6 +100,7 @@ const PageSelectionCheckbox = ({
       data-test-subj={`conversationPageSelect`}
       id={`conversationPageSelect`}
       checked={pageSelectionChecked}
+      disabled={isDeleteAll}
       onChange={(e) => {
         if (e.target.checked) {
           setPageSelectionChecked(true);

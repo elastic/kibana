@@ -31,15 +31,10 @@ const ToolbarComponent: React.FC<Props> = ({
     return null;
   }
 
+  const isAnySelected = selected.length > 0 || isDeleteAll;
+
   return (
     <EuiFlexGroup alignItems="center" data-test-subj="toolbar" gutterSize="none">
-      {(selected.length > 0 || isDeleteAll) && (
-        <EuiFlexItem grow={false}>
-          <EuiText color="subdued" data-test-subj="selectedFields" size="xs">
-            {i18n.SELECTED_CONVERSATIONS(isDeleteAll ? totalConversations : selected.length)}
-          </EuiText>
-        </EuiFlexItem>
-      )}
       <EuiFlexItem grow={false}>
         {!isDeleteAll && (
           <EuiButtonEmpty
@@ -51,7 +46,10 @@ const ToolbarComponent: React.FC<Props> = ({
             {i18n.SELECT_ALL_CONVERSATIONS(totalConversations)}
           </EuiButtonEmpty>
         )}
-        {isDeleteAll && (
+      </EuiFlexItem>
+
+      {isAnySelected && (
+        <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             data-test-subj="unselectAllConversations"
             onClick={handleUnselectAll}
@@ -59,14 +57,23 @@ const ToolbarComponent: React.FC<Props> = ({
           >
             {i18n.UNSELECT_ALL_CONVERSATIONS(totalConversations)}
           </EuiButtonEmpty>
-        )}
-      </EuiFlexItem>
+        </EuiFlexItem>
+      )}
 
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty size="xs" onClick={onConversationsBulkDeleted}>
-          {i18n.DELETE_SELECTED_CONVERSATIONS}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
+      {isAnySelected && (
+        <EuiFlexItem grow={false}>
+          <EuiText color="subdued" data-test-subj="selectedFields" size="xs">
+            {i18n.SELECTED_CONVERSATIONS(isDeleteAll ? totalConversations : selected.length)}
+          </EuiText>
+        </EuiFlexItem>
+      )}
+      {isAnySelected && (
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty size="xs" onClick={onConversationsBulkDeleted}>
+            {i18n.DELETE_SELECTED_CONVERSATIONS}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

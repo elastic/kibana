@@ -239,6 +239,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   }, [conversationOptions]);
 
   const handlePageUnselecting = useCallback(() => {
+    setIsSelectedAll(false);
     setDeletedConversations(DEFAULT_EMPTY_DELETED_CONVERSATIONS_ARRAY);
   }, []);
 
@@ -266,8 +267,8 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   const columns = useMemo(
     () =>
       getColumns({
-        isDeleteEnabled: () => true,
-        isEditEnabled: () => true,
+        isDeleteEnabled: () => !isDeleteAll && deletedConversations.length === 0,
+        isEditEnabled: () => !isDeleteAll && deletedConversations.length === 0,
         onDeleteActionClicked,
         onEditActionClicked,
         handlePageSelection,
