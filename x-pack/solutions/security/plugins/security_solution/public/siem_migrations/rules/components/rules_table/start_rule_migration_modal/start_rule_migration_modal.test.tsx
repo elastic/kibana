@@ -13,6 +13,7 @@ import { fireEvent, render, screen, act } from '@testing-library/react';
 import { DATA_TEST_SUBJ_PREFIX, StartRuleMigrationModal } from './start_rule_migration_modal';
 import type { AIConnector } from '@kbn/elastic-assistant';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { useAIConnectors } from '../../../../../common/hooks/use_get_ai_connectors';
 
 jest.mock('../../../../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
@@ -41,14 +42,18 @@ const availableConnectorsMock: AIConnector[] = [
   },
 ] as unknown as AIConnector[];
 
+jest.mock('../../../../../common/hooks/use_get_ai_connectors');
+const useAIConnectorsMock = useAIConnectors as jest.MockedFunction<typeof useAIConnectors>;
+
 const renderTestComponent = (
   props: Partial<ComponentProps<typeof StartRuleMigrationModal>> = {}
 ) => {
   const finalProps = {
-    availableConnectors: availableConnectorsMock,
     onStartMigrationWithSettings: startMigrationWithSettingsMock,
     onClose: onCloseMock,
-    lastConnectorId: 'connector-1',
+    defaultSettings: {
+      connectorId: 'connector-1',
+    },
     numberOfRules: 10,
     ...props,
   };
@@ -69,6 +74,10 @@ const siemMigrationsServiceMock = {
 
 describe('StartMigrationModal', () => {
   beforeEach(() => {
+    useAIConnectorsMock.mockReturnValue({
+      aiConnectors: availableConnectorsMock,
+      isLoading: false,
+    } as unknown as ReturnType<typeof useAIConnectors>);
     siemMigrationsServiceMock.rules.connectorIdStorage.get.mockReturnValue('connector-2');
 
     useKibanaMock.mockReturnValue({
@@ -120,7 +129,9 @@ describe('StartMigrationModal', () => {
 
   it('should render correct value of prebuilt rule match option', async () => {
     renderTestComponent({
-      skipPrebuiltRulesMatching: true,
+      defaultSettings: {
+        skipPrebuiltRulesMatching: true,
+      },
     });
 
     const prebuiltRuleMatchCheckbox = screen.getByTestId(
@@ -180,7 +191,9 @@ describe('StartMigrationModal', () => {
     siemMigrationsServiceMock.rules.connectorIdStorage.get.mockReturnValue(undefined);
 
     renderTestComponent({
-      lastConnectorId: undefined,
+      defaultSettings: {
+        connectorId: undefined,
+      },
     });
 
     expect(screen.getByTestId(`${DATA_TEST_SUBJ_PREFIX}-ConnectorSelector`)).toHaveTextContent(
@@ -190,7 +203,9 @@ describe('StartMigrationModal', () => {
 
   it('should show the stored connector if no lastConnectorId is provided', () => {
     renderTestComponent({
-      lastConnectorId: undefined,
+      defaultSettings: {
+        connectorId: undefined,
+      },
     });
 
     expect(screen.getByTestId(`${DATA_TEST_SUBJ_PREFIX}-ConnectorSelector`)).toHaveTextContent(

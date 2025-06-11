@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { useAIConnectors } from '../../../../common/hooks/use_get_ai_connectors';
 import type { RelatedIntegration, RuleResponse } from '../../../../../common/api/detection_engine';
 import { isMigrationPrebuiltRule } from '../../../../../common/siem_migrations/rules/utils';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
@@ -85,7 +84,6 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     const [sortField, setSortField] = useState<keyof RuleMigrationRule>(DEFAULT_SORT_FIELD);
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
     const [searchTerm, setSearchTerm] = useState<string | undefined>();
-    const { aiConnectors } = useAIConnectors();
 
     // Filters
     const [filterOptions, setFilterOptions] = useState<FilterOptions | undefined>();
@@ -228,10 +226,16 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       [migrationId, startMigration]
     );
 
+    const defaultSettingsForModal = useMemo(
+      () => ({
+        connectorId: migrationStats?.last_execution?.connector_id,
+        skipPrebuiltRulesMatching: migrationStats?.last_execution?.skip_prebuilt_rules_matching,
+      }),
+      [migrationStats.last_execution]
+    );
+
     const { getModal, showModal: showReprocessFailedRulesModal } = useStartMigrationModal({
-      availableConnectors: aiConnectors,
-      lastConnectorId: migrationStats?.last_execution?.connector_id,
-      skipPrebuiltRulesMatching: migrationStats?.last_execution?.skip_prebuilt_rules_matching,
+      defaultSettings: defaultSettingsForModal,
       onStartMigrationWithSettings: reprocessFailedRulesWithSettings,
       numberOfRules: translationStats?.rules.failed ?? 0,
     });

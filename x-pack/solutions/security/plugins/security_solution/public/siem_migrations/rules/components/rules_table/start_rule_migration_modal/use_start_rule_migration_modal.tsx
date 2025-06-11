@@ -17,14 +17,8 @@ type UseStartMigrationModal = Omit<ComponentProps<typeof StartRuleMigrationModal
  * Accompanying hook for the StartMigrationModal component.
  * Helps manage the visibility and actions related to modal.
  */
-export const useStartMigrationModal = ({
-  lastConnectorId,
-  skipPrebuiltRulesMatching = false,
-  onClose: onCloseProp,
-  onStartMigrationWithSettings,
-  numberOfRules = 0,
-  availableConnectors,
-}: UseStartMigrationModal) => {
+export const useStartMigrationModal = (props: UseStartMigrationModal) => {
+  const { onClose: onCloseProp, ...rest } = props;
   const [isVisible, setIsVisible] = useState(false);
 
   const showModal = useCallback(() => {
@@ -38,26 +32,9 @@ export const useStartMigrationModal = ({
 
   const getModal = useCallback(() => {
     return function ModalWrapper() {
-      return isVisible ? (
-        <StartRuleMigrationModal
-          lastConnectorId={lastConnectorId}
-          skipPrebuiltRulesMatching={skipPrebuiltRulesMatching}
-          onClose={onClose}
-          onStartMigrationWithSettings={onStartMigrationWithSettings}
-          numberOfRules={numberOfRules}
-          availableConnectors={availableConnectors}
-        />
-      ) : null;
+      return isVisible ? <StartRuleMigrationModal {...rest} onClose={onClose} /> : null;
     };
-  }, [
-    lastConnectorId,
-    skipPrebuiltRulesMatching,
-    onClose,
-    onStartMigrationWithSettings,
-    numberOfRules,
-    availableConnectors,
-    isVisible,
-  ]);
+  }, [rest, onClose, isVisible]);
 
   return {
     isVisible,

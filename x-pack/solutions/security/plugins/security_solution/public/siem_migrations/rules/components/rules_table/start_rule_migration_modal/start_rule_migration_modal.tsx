@@ -27,9 +27,9 @@ import {
 import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import type { ActionConnector } from '@kbn/alerts-ui-shared';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SecurityPageName } from '@kbn/deeplinks-security';
+import { useAIConnectors } from '../../../../../common/hooks/use_get_ai_connectors';
 import { getConnectorDescription } from '../../../../../common/utils/connectors/get_connector_description';
 import { useKibana } from '../../../../../common/lib/kibana';
 import * as i18n from '../translations';
@@ -38,16 +38,11 @@ import { OnboardingCardId, OnboardingTopicId } from '../../../../../onboarding/c
 import { useGetSecuritySolutionLinkProps } from '../../../../../common/components/links';
 
 interface StartRuleMigrationModalProps {
-  /** Initial connector Id that should be selected */
-  lastConnectorId?: RuleMigrationSettings['connectorId'];
-  /** initial value to be used for start migration settings */
-  skipPrebuiltRulesMatching?: RuleMigrationSettings['skipPrebuiltRulesMatching'];
-  /** Callback to start the migrations with chosen settings */
+  /** default settings that needs to be selected in the modal */
+  defaultSettings?: Partial<RuleMigrationSettings>;
   onStartMigrationWithSettings: (settings: RuleMigrationSettings) => void;
   /** Callback called when closing the modal */
   onClose: () => void;
-  /** List of available connectors to choose from */
-  availableConnectors: ActionConnector[];
   /** Number of rules that will be process in this migration */
   numberOfRules: number;
 }
@@ -56,25 +51,27 @@ export const DATA_TEST_SUBJ_PREFIX = 'startMigrationModal';
 
 export const StartRuleMigrationModal: FC<StartRuleMigrationModalProps> = React.memo(
   function StartRuleMigrationModal({
-    lastConnectorId,
-    skipPrebuiltRulesMatching = false,
+    defaultSettings = {},
     onClose: closeModal,
     onStartMigrationWithSettings: startMigrationWithSettings,
     numberOfRules = 0,
-    availableConnectors = [],
   }) {
+    const { connectorId, skipPrebuiltRulesMatching } = defaultSettings;
+
     const {
       triggersActionsUi: { actionTypeRegistry },
       siemMigrations,
     } = useKibana().services;
 
-    const siemMigrationsDefaultConnectorId = useMemo(
+    const { aiConnectors, isLoading } = useAIConnectors();
+
+    const siemMigrationsStoredConnectorId = useMemo(
       () => siemMigrations.rules.connectorIdStorage.get(),
       [siemMigrations.rules.connectorIdStorage]
     );
 
     const [selectedConnectorId, setSelectedConnectorId] = useState<string | undefined>(
-      lastConnectorId || siemMigrationsDefaultConnectorId || availableConnectors[0]?.id
+      connectorId || siemMigrationsStoredConnectorId || aiConnectors[0]?.id
     );
     const [enablePrebuiltRulesMatching, setEnablePrebuiltRuleMatching] = useState<boolean>(
       !skipPrebuiltRulesMatching
@@ -83,7 +80,7 @@ export const StartRuleMigrationModal: FC<StartRuleMigrationModalProps> = React.m
     const modalTitleId = useGeneratedHtmlId();
 
     const selectOptions: Array<EuiSuperSelectOption<string>> = useMemo(() => {
-      return availableConnectors.map((connector) => {
+      return aiConnectors.map((connector) => {
         const connectorDescription = getConnectorDescription({
           connector,
           actionTypeRegistry,
@@ -102,7 +99,7 @@ export const StartRuleMigrationModal: FC<StartRuleMigrationModalProps> = React.m
           'data-test-subj': `${DATA_TEST_SUBJ_PREFIX}-ConnectorOption`,
         };
       });
-    }, [actionTypeRegistry, availableConnectors]);
+    }, [actionTypeRegistry, aiConnectors]);
 
     const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
 
@@ -172,6 +169,7 @@ export const StartRuleMigrationModal: FC<StartRuleMigrationModalProps> = React.m
                   onChange={setSelectedConnectorId}
                   data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-ConnectorSelector`}
                   isInvalid={!selectedConnectorId}
+                  isLoading={isLoading}
                 />
               </EuiFormRow>
               <EuiFormRow>
