@@ -408,17 +408,16 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           defaultMessage: 'Failure store',
         }),
         toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.failureStoreToolTip', {
-          defaultMessage: 'The failure store provides a mechanism to store documents that fail to be indexed.',
+          defaultMessage:
+            'The failure store provides a mechanism to store documents that fail to be indexed.',
         }),
-        content: dataStream.failureStoreEnabled ? (
-          i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.failureStoreEnabledText', {
-            defaultMessage: 'Enabled',
-          })
-        ) : (
-          i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.failureStoreDisabledText', {
-            defaultMessage: 'Disabled',
-          })
-        ),
+        content: dataStream.failureStoreEnabled
+          ? i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.failureStoreEnabledText', {
+              defaultMessage: 'Enabled',
+            })
+          : i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.failureStoreDisabledText', {
+              defaultMessage: 'Disabled',
+            }),
         dataTestSubj: 'failureStoreDetail',
       }
     );
@@ -542,12 +541,9 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           : []),
         {
           key: 'configureFailureStore',
-          name: i18n.translate(
-            'xpack.idxMgmt.dataStreamDetailPanel.configureFailureStore',
-            {
-              defaultMessage: 'Configure failure store',
-            }
-          ),
+          name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.configureFailureStore', {
+            defaultMessage: 'Configure failure store',
+          }),
           'data-test-subj': 'configureFailureStoreButton',
           icon: <EuiIcon type="gear" size="m" />,
           onClick: () => {

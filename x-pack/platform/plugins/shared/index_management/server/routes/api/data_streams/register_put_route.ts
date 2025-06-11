@@ -78,7 +78,10 @@ export function registerPutDataRetention({ router, lib: { handleEsError } }: Rou
   );
 }
 
-export function registerPutDataStreamFailureStore({ router, lib: { handleEsError } }: RouteDependencies) {
+export function registerPutDataStreamFailureStore({
+  router,
+  lib: { handleEsError },
+}: RouteDependencies) {
   const bodySchema = schema.object({
     dataStreams: schema.arrayOf(schema.string()),
     dsFailureStore: schema.boolean(),
@@ -120,7 +123,9 @@ export function registerPutDataStreamFailureStore({ router, lib: { handleEsError
 
         const results = await Promise.all(promises);
         const warnings = results
-          .map((headers) => (headers?.warning ? getEsWarningText(headers.warning) ?? headers.warning : null))
+          .map((headers) =>
+            headers?.warning ? getEsWarningText(headers.warning) ?? headers.warning : null
+          )
           .filter(Boolean);
 
         return response.ok({

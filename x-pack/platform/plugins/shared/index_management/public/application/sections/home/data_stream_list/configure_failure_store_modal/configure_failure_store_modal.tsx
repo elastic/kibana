@@ -81,7 +81,7 @@ export const ConfigureFailureStoreModal: React.FunctionComponent<Props> = ({
           'xpack.idxMgmt.dataStreams.configureFailureStoreModal.successFailureStoreNotification',
           {
             defaultMessage:
-            'Failure store {disabledFailureStore, plural, one { disabled } other { configured } }',
+              'Failure store {disabledFailureStore, plural, one { disabled } other { configured } }',
             values: { disabledFailureStore: !data.dsFailureStore ? 1 : 0 },
           }
         );
@@ -115,10 +115,10 @@ export const ConfigureFailureStoreModal: React.FunctionComponent<Props> = ({
       <Form form={form} data-test-subj="configureFailureStoreForm">
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-              <FormattedMessage
-                id="xpack.idxMgmt.dataStreams.configureFailureStoreModal.modalTitleText"
-                defaultMessage="Configure failure store"
-              />
+            <FormattedMessage
+              id="xpack.idxMgmt.dataStreams.configureFailureStoreModal.modalTitleText"
+              defaultMessage="Configure failure store"
+            />
           </EuiModalHeaderTitle>
         </EuiModalHeader>
 
@@ -139,7 +139,7 @@ export const ConfigureFailureStoreModal: React.FunctionComponent<Props> = ({
                     defaultMessage="Learn more"
                   />
                 </EuiLink>
-              )
+              ),
             }}
           />
           <EuiSpacer />
@@ -154,8 +154,8 @@ export const ConfigureFailureStoreModal: React.FunctionComponent<Props> = ({
                 {
                   defaultMessage: 'Enable data stream failure store',
                 }
-              )}
-            }
+              ),
+            }}
           />
 
           <EuiSpacer />

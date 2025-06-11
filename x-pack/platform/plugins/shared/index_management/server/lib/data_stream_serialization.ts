@@ -51,7 +51,7 @@ export function deserializeDataStream(
       ? failureStoreSettings.enabled
       : [failureStoreSettings.enabled];
 
-    const matchesPattern = patterns.some(pattern => {
+    const matchesPattern = patterns.some((pattern) => {
       const regex = new RegExp(pattern.replace('*', '.*'));
       return regex.test(name);
     });
@@ -120,5 +120,7 @@ export function deserializeDataStreamList(
   isLogsdbEnabled: boolean,
   failureStoreSettings?: { enabled?: string[] | string }
 ): DataStream[] {
-  return dataStreamsFromEs.map((dataStream) => deserializeDataStream(dataStream, isLogsdbEnabled, failureStoreSettings));
+  return dataStreamsFromEs.map((dataStream) =>
+    deserializeDataStream(dataStream, isLogsdbEnabled, failureStoreSettings)
+  );
 }

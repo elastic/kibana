@@ -167,8 +167,9 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
 
         // Get failure store cluster settings
         const failureStoreSettings = {
-          enabled: persistent?.data_streams?.failure_store?.enabled ??
-                  defaults?.data_streams?.failure_store?.enabled
+          enabled:
+            persistent?.data_streams?.failure_store?.enabled ??
+            defaults?.data_streams?.failure_store?.enabled,
         };
 
         // Only take the lifecycle of the first data stream since all data streams have the same global retention period
@@ -185,7 +186,11 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
         });
 
         return response.ok({
-          body: deserializeDataStreamList(enhancedDataStreams, isLogsdbEnabled, failureStoreSettings),
+          body: deserializeDataStreamList(
+            enhancedDataStreams,
+            isLogsdbEnabled,
+            failureStoreSettings
+          ),
         });
       } catch (error) {
         return handleEsError({ error, response });
@@ -243,8 +248,9 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
 
           // Get failure store cluster settings
           const failureStoreSettings = {
-            enabled: persistent?.data_streams?.failure_store?.enabled ??
-                    defaults?.data_streams?.failure_store?.enabled
+            enabled:
+              persistent?.data_streams?.failure_store?.enabled ??
+              defaults?.data_streams?.failure_store?.enabled,
           };
 
           const enhancedDataStreams = enhanceDataStreams({
@@ -257,7 +263,11 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
           const isLogsdbEnabled =
             (persistent?.cluster?.logsdb?.enabled ?? defaults?.cluster?.logsdb?.enabled) === 'true';
 
-          const body = deserializeDataStream(enhancedDataStreams[0], isLogsdbEnabled, failureStoreSettings);
+          const body = deserializeDataStream(
+            enhancedDataStreams[0],
+            isLogsdbEnabled,
+            failureStoreSettings
+          );
           return response.ok({ body });
         }
 
