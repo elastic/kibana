@@ -1,16 +1,7 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import React from 'react';
-import type { estypes } from '@elastic/elasticsearch';
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 import { ClusterView } from './cluster_view';
+import type { estypes } from '@elastic/elasticsearch';
 
 describe('render', () => {
   test('should display success', () => {
@@ -26,8 +17,10 @@ describe('render', () => {
         failed: 0,
       },
     } as estypes.ClusterDetails;
-    const wrapper = shallow(<ClusterView clusterDetails={clusterDetails} />);
-    expect(wrapper).toMatchSnapshot();
+
+    render(<ClusterView clusterDetails={clusterDetails} />);
+    expect(screen.getByTestId('inspectorRequestClustersDetails')).toHaveTextContent('3 of 3 successful');
+    expect(screen.getByText(/3 total shards/i)).toBeInTheDocument(); 
   });
 
   describe('partial', () => {
@@ -50,22 +43,21 @@ describe('render', () => {
             node: 'NVzFRd6SS4qT9o0k2vIzlg',
             reason: {
               type: 'query_shard_exception',
-              reason:
-                'failed to create query: [.ds-kibana_sample_data_logs-2023.08.21-000001][0] local shard failure message 123',
+              reason: 'failed to create query...',
               index_uuid: 'z1sPO8E4TdWcijNgsL_BxQ',
               index: 'remote1:.ds-kibana_sample_data_logs-2023.08.21-000001',
               caused_by: {
                 type: 'runtime_exception',
-                reason:
-                  'runtime_exception: [.ds-kibana_sample_data_logs-2023.08.21-000001][0] local shard failure message 123',
+                reason: 'runtime_exception: ...',
               },
             },
           },
         ],
       } as estypes.ClusterDetails;
 
-      const wrapper = shallow(<ClusterView clusterDetails={clusterDetails} />);
-      expect(wrapper).toMatchSnapshot();
+      render(<ClusterView clusterDetails={clusterDetails} />);
+      expect(screen.getByTestId('inspectorRequestClustersDetails')).toHaveTextContent('1 of 2 successful');
+      expect(screen.getByText(/failed/i)).toBeInTheDocument();
     });
 
     test('should display callout when request timed out', () => {
@@ -81,8 +73,9 @@ describe('render', () => {
           failed: 0,
         },
       } as estypes.ClusterDetails;
-      const wrapper = shallow(<ClusterView clusterDetails={clusterDetails} />);
-      expect(wrapper).toMatchSnapshot();
+
+      render(<ClusterView clusterDetails={clusterDetails} />);
+      expect(screen.getByTestId('inspectorRequestClustersDetails')).toHaveTextContent('Request timed out before completion');
     });
   });
 
@@ -103,8 +96,10 @@ describe('render', () => {
           },
         ],
       } as unknown as estypes.ClusterDetails;
-      const wrapper = shallow(<ClusterView clusterDetails={clusterDetails} />);
-      expect(wrapper).toMatchSnapshot();
+
+      render(<ClusterView clusterDetails={clusterDetails} />);
+      expect(screen.getByTestId('inspectorRequestClustersDetails')).toHaveTextContent('Search failed');
+      expect(screen.getByText(/no_such_remote_cluster_exception/)).toBeInTheDocument();
     });
 
     test('should display callout with view failed shards button when all shards fail', () => {
@@ -128,36 +123,35 @@ describe('render', () => {
                   node: '_JVoOnN5QKidGGXFJAlgpA',
                   reason: {
                     type: 'query_shard_exception',
-                    reason:
-                      'failed to create query: [.ds-kibana_sample_data_logs-2023.09.21-000001][0] local shard failure message 123',
+                    reason: 'failed to create query...',
                     index_uuid: 'PAa7v-dKRIyo4kv6b8dxkQ',
                     index: 'remote1:.ds-kibana_sample_data_logs-2023.09.21-000001',
                     caused_by: {
                       type: 'runtime_exception',
-                      reason:
-                        'runtime_exception: [.ds-kibana_sample_data_logs-2023.09.21-000001][0] local shard failure message 123',
+                      reason: 'runtime_exception: ...',
                     },
                   },
                 },
               ],
               caused_by: {
                 type: 'query_shard_exception',
-                reason:
-                  'failed to create query: [.ds-kibana_sample_data_logs-2023.09.21-000001][0] local shard failure message 123',
+                reason: 'failed to create query...',
                 index_uuid: 'PAa7v-dKRIyo4kv6b8dxkQ',
                 index: 'remote1:.ds-kibana_sample_data_logs-2023.09.21-000001',
                 caused_by: {
                   type: 'runtime_exception',
-                  reason:
-                    'runtime_exception: [.ds-kibana_sample_data_logs-2023.09.21-000001][0] local shard failure message 123',
+                  reason: 'runtime_exception: ...',
                 },
               },
             },
           },
         ],
       } as unknown as estypes.ClusterDetails;
-      const wrapper = shallow(<ClusterView clusterDetails={clusterDetails} />);
-      expect(wrapper).toMatchSnapshot();
+
+      render(<ClusterView clusterDetails={clusterDetails} />);
+      expect(screen.getByTestId('inspectorRequestClustersDetails')).toHaveTextContent('Search failed');
+      expect(screen.getByText(/all shards failed/)).toBeInTheDocument();
+      expect(screen.getByRole('button')).toHaveTextContent(/view/i); // Flyout button
     });
   });
 });
