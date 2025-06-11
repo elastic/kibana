@@ -116,7 +116,17 @@ describe('compileConfigStack', () => {
       const configList = compileConfigStack({
         serverless: 'security',
         dev: true,
-        securityProductTier: productTier,
+        unknownOptions: {
+          xpack: {
+            securitySolutionServerless: {
+              productTypes: [
+                {
+                  product_tier: productTier,
+                },
+              ],
+            },
+          },
+        },
       }).map(toFileNames);
 
       expect(configList).toEqual([
@@ -227,6 +237,65 @@ describe('pricing tiers configuration', () => {
     const configList = compileConfigStack({
       serverless: 'oblt',
       dev: true,
+    }).map(toFileNames);
+
+    expect(configList).toEqual([
+      'serverless.yml',
+      'serverless.oblt.yml',
+      'kibana.yml',
+      'kibana.dev.yml',
+      'serverless.dev.yml',
+      'serverless.oblt.dev.yml',
+      'serverless.oblt.complete.yml',
+      'serverless.oblt.complete.dev.yml',
+    ]);
+  });
+
+  it('adds pricing tier config from unknownOptions when pricing.tiers.enabled is true', async () => {
+    getConfigFromFiles.mockImplementationOnce(() => {
+      return {
+        serverless: 'oblt',
+      };
+    });
+
+    const configList = compileConfigStack({
+      serverless: 'oblt',
+      unknownOptions: {
+        pricing: {
+          tiers: {
+            enabled: true,
+            products: [{ name: 'observability', tier: 'essentials' }],
+          },
+        },
+      },
+    }).map(toFileNames);
+
+    expect(configList).toEqual([
+      'serverless.yml',
+      'serverless.oblt.yml',
+      'kibana.yml',
+      'serverless.oblt.essentials.yml',
+    ]);
+  });
+
+  it('adds pricing tier config from unknownOptions with dev mode when pricing.tiers.enabled is true', async () => {
+    getConfigFromFiles.mockImplementationOnce(() => {
+      return {
+        serverless: 'oblt',
+      };
+    });
+
+    const configList = compileConfigStack({
+      serverless: 'oblt',
+      dev: true,
+      unknownOptions: {
+        pricing: {
+          tiers: {
+            enabled: true,
+            products: [{ name: 'observability', tier: 'complete' }],
+          },
+        },
+      },
     }).map(toFileNames);
 
     expect(configList).toEqual([
