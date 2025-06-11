@@ -382,8 +382,8 @@ function generateSearchQuery({
 /**
  * queryRange is used for the filter range on the query,
  * while range is used for storing the actual range requested
- * For a rolling window, the query range starts 1 timeWindow duration before the actual range from.
- * For calednar window, the query range is the same as the range.
+ * For rolling SLO, the query range starts 1 timeWindow duration before the actual range from.
+ * For calendar aligned SLO, the query range is the same as the range.
  *
  * @param timeWindow
  * @param range
