@@ -9,7 +9,7 @@ paths:
       x-codegen-enabled: true
       operationId: CreateEndpointList
       summary: Create an endpoint exception list
-      description: Create the exception list for Elastic Endpoint exceptions. If the Elastic Endpoint exception list already exists, your request will return an empty response.     
+      description: Create the exception list for Elastic Endpoint rule exceptions. When you create the exception list, it will have a `list_id` of `endpoint_list`. If the Elastic Endpoint exception list already exists, your request will return an empty response.     
       responses:
         200:
           description: Successful response
