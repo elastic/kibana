@@ -51,7 +51,9 @@ export interface ESQLCallbacks {
   canSuggestVariables?: () => boolean;
   getJoinIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
   getTimeseriesIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
-  getEditorExtensions?: (queryString: string) => Promise<RecommendedQuery[]>;
+  getEditorExtensions?: (
+    queryString: string
+  ) => Promise<{ recommendedQueries: RecommendedQuery[] }>;
   getInferenceEndpoints?: (
     taskType: InferenceTaskType
   ) => Promise<InferenceEndpointsAutocompleteResult>;
