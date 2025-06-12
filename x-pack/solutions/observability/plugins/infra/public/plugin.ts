@@ -185,11 +185,25 @@ export class Plugin implements InfraClientPluginClass {
                               label: 'Kubernetes',
                               app: 'metrics',
                               path: '/kubernetes',
-                              deepLinks: integrations.kubernetes.map((dashboardId) => ({
-                                id: dashboardId,
-                                title: `Dashboard: ${dashboardId}`,
-                                path: `/kubernetes/${dashboardId}`,
-                              })),
+                              deepLinks: integrations.kubernetes.map(
+                                ({ dashboardId, title, entity }) => {
+                                  const url = new URL(
+                                    entity
+                                      ? `/kubernetes/${entity.replace(/\./g, '-')}`
+                                      : `/kubernetes/overview`,
+                                    window.location.origin
+                                  );
+
+                                  url.searchParams.set('dashboardId', dashboardId);
+
+                                  const path = `${url.pathname}${url.search}`;
+                                  return {
+                                    id: dashboardId,
+                                    title: entity ?? 'Overview',
+                                    path,
+                                  };
+                                }
+                              ),
                             },
                           ]
                         : []),
@@ -249,7 +263,7 @@ export class Plugin implements InfraClientPluginClass {
       integrations,
     }: {
       metricsExplorerEnabled: boolean;
-      integrations?: Record<string, string[]>;
+      integrations?: Record<string, Array<{ dashboardId: string; entity?: string; title: string }>>;
     }): AppDeepLink[] => {
       const visibleIn: AppDeepLinkLocations[] = ['globalSearch'];
 
@@ -286,11 +300,21 @@ export class Plugin implements InfraClientPluginClass {
                 title: 'Kubernetes',
                 path: '/kubernetes',
                 // visibleIn,
-                deepLinks: integrations.kubernetes.map((dashboardId) => ({
-                  id: dashboardId,
-                  title: `Dashboard: ${dashboardId}`,
-                  path: `/kubernetes/${dashboardId}`,
-                })),
+                deepLinks: integrations.kubernetes.map(({ dashboardId, title, entity }) => {
+                  const url = new URL(
+                    entity ? `/kubernetes/${entity.replace(/\./g, '-')}` : `/kubernetes/overview`,
+                    window.location.origin
+                  );
+
+                  url.searchParams.set('dashboardId', dashboardId);
+
+                  const path = `${url.pathname}${url.search}`;
+                  return {
+                    id: dashboardId,
+                    title: entity ?? 'Overview',
+                    path,
+                  };
+                }),
               },
             ]
           : []),

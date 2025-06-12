@@ -130,10 +130,10 @@ export const InfrastructurePage = () => {
                 <Route path="/detail/:type/:node" component={NodeDetail} />
                 <Route path="/hosts" component={HostsPage} />
                 <Route path="/settings" component={MetricsSettingsPage} />
-                <Route strict path="/kubernetes/:dashboardId" component={Dashboard} />
+                <Route strict path="/kubernetes/:entity" component={Dashboard} />
                 <Route
                   strict
-                  path="/kubernetes/kubernetes_otel-cluster-overview "
+                  path="/kubernetes/kubernetes_otel-cluster-overview"
                   component={Dashboard}
                 />
                 <Route path="/kubernetes" component={Kubernetes} />

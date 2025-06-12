@@ -727,6 +727,9 @@ export interface KibanaAssetReference {
   id: string;
   originId?: string;
   type: KibanaSavedObjectType;
+  entity?: string;
+  sideNavOrder?: number;
+  sideNavTitle?: string;
 }
 export interface EsAssetReference {
   id: string;

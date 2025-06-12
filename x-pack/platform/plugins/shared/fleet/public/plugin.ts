@@ -112,7 +112,16 @@ export interface FleetStart {
   registerExtension: UIExtensionRegistrationCallback;
   isInitialized: () => Promise<true>;
 
-  sideNav$: Observable<Record<string, string[]>>;
+  sideNav$: Observable<
+    Record<
+      string,
+      Array<{
+        title: string;
+        entity?: string;
+        dashboardId: string;
+      }>
+    >
+  >;
   hooks: {
     epm: {
       getBulkAssets: (
@@ -404,8 +413,21 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
   public stop() {}
 }
 
-const createSideNavObservable = once((core: CoreStart): Observable<Record<string, string[]>> => {
-  const packageDetailClient = new PackageDetailClient(core.http);
+const createSideNavObservable = once(
+  (
+    core: CoreStart
+  ): Observable<
+    Record<
+      string,
+      Array<{
+        title: string;
+        entity?: string;
+        dashboardId: string;
+      }>
+    >
+  > => {
+    const packageDetailClient = new PackageDetailClient(core.http);
 
-  return from(packageDetailClient.getPackage('kubernetes')).pipe(shareReplay(1));
-});
+    return from(packageDetailClient.getPackage('kubernetes')).pipe(shareReplay(1));
+  }
+);

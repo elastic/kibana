@@ -6,25 +6,24 @@
  */
 
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { KUBERNETES_DASHBOARD_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
+import type { DashboardState } from '@kbn/dashboard-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
 
-export const RenderDashboard = () => {
+export const RenderDashboard = ({ dashboardId }: { dashboardId: string }) => {
   const {
     services: { share },
   } = useKibanaContextForPlugin();
 
-  const { dashboardId } = useParams<{ dashboardId: string }>();
   const { dateRange } = useDatePickerContext();
   const { from, to } = dateRange;
   const getCreationOptions = useCallback((): Promise<DashboardCreationOptions> => {
-    const getInitialInput = () => ({
+    const getInitialInput = (): Partial<DashboardState> => ({
       viewMode: 'view' as ViewMode,
       timeRange: { from, to },
     });
