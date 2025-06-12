@@ -66,7 +66,8 @@ export const deduplicateAttackDiscoveries = async ({
 
   const numDuplicates = attackDiscoveries.length - newDiscoveries.length;
   if (numDuplicates > 0) {
-    logger.debug(`Found ${numDuplicates} duplicate alert(s), skipping report for those.`);
+    logger.info(`Found ${numDuplicates} duplicate alert(s), skipping report for those.`);
+    logger.debug(() => `Duplicated alerts:\n ${JSON.stringify([...foundIds].sort(), null, 2)}`);
   }
 
   return newDiscoveries;
