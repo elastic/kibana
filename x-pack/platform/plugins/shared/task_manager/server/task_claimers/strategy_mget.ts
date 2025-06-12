@@ -25,9 +25,8 @@ import type {
   ConcreteTaskInstance,
   ConcreteTaskInstanceVersion,
   PartialConcreteTaskInstance,
-  concreteTaskInstanceSchema,
 } from '../task';
-import { TaskStatus, TaskCost } from '../task';
+import { TaskStatus, TaskCost, concreteTaskInstanceSchema } from '../task';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 import { TASK_MANAGER_MARK_AS_CLAIMED } from '../queries/task_claiming';
 import type { TaskClaim } from '../task_events';

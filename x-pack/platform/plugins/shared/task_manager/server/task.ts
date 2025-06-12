@@ -10,6 +10,7 @@
 import type { ObjectType, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { isNumber } from 'lodash';
+import moment from 'moment';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { Frequency, Weekday } from '@kbn/rrule';
 import { isErr, tryAsResult } from './lib/result_type';
