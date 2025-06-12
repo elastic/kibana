@@ -56,6 +56,7 @@ import {
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
 } from '../../common/utils/get_template_url_package_info';
 import { AWS_SINGLE_ACCOUNT } from './policy_template_form';
+import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 
 // Posture policies only support the default namespace
 export const POSTURE_NAMESPACE = 'default';
@@ -160,7 +161,9 @@ export const getPosturePolicy = (
   inputVars?: Record<string, PackagePolicyConfigRecordEntry>
 ): NewPackagePolicy => ({
   ...newPolicy,
-  namespace: POSTURE_NAMESPACE,
+  namespace: ExperimentalFeaturesService.get().cloudSecurityNamespaceSupportEnabled
+    ? newPolicy.namespace
+    : POSTURE_NAMESPACE,
   // Enable new policy input and disable all others
   inputs: newPolicy.inputs.map((item) => getPostureInput(item, inputType, inputVars)),
   // Set hidden policy vars

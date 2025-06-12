@@ -11,6 +11,7 @@ import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
 import semverGte from 'semver/functions/gte';
 import {
+  EuiAccordion,
   EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
@@ -20,9 +21,10 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import { SetupTechnology } from '@kbn/fleet-plugin/public';
+import { SetupTechnology, NamespaceComboBox } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   NewPackagePolicyInput,
@@ -52,9 +54,9 @@ import {
   isPostureInput,
   isBelowMinVersion,
   type NewPackagePolicyPostureInput,
-  POSTURE_NAMESPACE,
-  POLICY_TEMPLATE_FORM_DTS,
   hasErrors,
+  POLICY_TEMPLATE_FORM_DTS,
+  POSTURE_NAMESPACE,
   getCloudDefaultAwsCredentialConfig,
   getCloudConnectorRemoteRoleTemplate,
 } from './utils';
@@ -74,6 +76,7 @@ import { SetupTechnologySelector } from './setup_technology_selector/setup_techn
 import { useSetupTechnology } from './setup_technology_selector/use_setup_technology';
 import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form/azure_credentials_form';
 import { useKibana } from '../../common/hooks/use_kibana';
+import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 
 const DEFAULT_INPUT_TYPE = {
   kspm: CLOUDBEAT_VANILLA,
@@ -548,22 +551,26 @@ const useEnsureDefaultNamespace = ({
   newPolicy,
   input,
   updatePolicy,
+  cloudSecurityNamespaceSupportEnabled,
 }: {
   newPolicy: NewPackagePolicy;
   input: NewPackagePolicyPostureInput;
   updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
+  cloudSecurityNamespaceSupportEnabled: boolean;
 }) => {
   useEffect(() => {
+    // If the namespace support is enabled, we don't need to set the default namespace
+    if (cloudSecurityNamespaceSupportEnabled) return;
+    if (input.type.includes('vuln_mgmt')) return;
     if (newPolicy.namespace === POSTURE_NAMESPACE) return;
 
     const policy = { ...getPosturePolicy(newPolicy, input.type), namespace: POSTURE_NAMESPACE };
     updatePolicy(policy);
-  }, [newPolicy, input, updatePolicy]);
+  }, [newPolicy, input, updatePolicy, cloudSecurityNamespaceSupportEnabled]);
 };
 
 const usePolicyTemplateInitialName = ({
   isEditPage,
-  isLoading,
   integration,
   newPolicy,
   packagePolicyList,
@@ -571,7 +578,6 @@ const usePolicyTemplateInitialName = ({
   setCanFetchIntegration,
 }: {
   isEditPage: boolean;
-  isLoading: boolean;
   integration: CloudSecurityPolicyTemplate | undefined;
   newPolicy: NewPackagePolicy;
   packagePolicyList: PackagePolicy[] | undefined;
@@ -581,7 +587,6 @@ const usePolicyTemplateInitialName = ({
   useEffect(() => {
     if (!integration) return;
     if (isEditPage) return;
-    if (isLoading) return;
 
     const packagePolicyListByIntegration = packagePolicyList?.filter(
       (policy) => policy?.vars?.posture?.value === integration
@@ -604,7 +609,7 @@ const usePolicyTemplateInitialName = ({
     setCanFetchIntegration(false);
     // since this useEffect should only run on initial mount updatePolicy and newPolicy shouldn't re-trigger it
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, integration, isEditPage, packagePolicyList]);
+  }, [integration, isEditPage, packagePolicyList]);
 };
 
 const getSelectedOption = (
@@ -687,6 +692,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         ? integrationToEnable
         : undefined;
     const isParentSecurityPosture = !integrationParam;
+
     // Handling validation state
     const [isValid, setIsValid] = useState(true);
     const { cloud, uiSettings } = useKibana().services;
@@ -705,6 +711,12 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       isEditPage,
       defaultSetupTechnology,
     });
+
+    const { euiTheme } = useEuiTheme();
+
+    const cloudSecurityNamespaceSupportEnabled = useMemo(() => {
+      return ExperimentalFeaturesService.get().cloudSecurityNamespaceSupportEnabled;
+    }, []);
 
     const shouldRenderAgentlessSelector =
       (!isEditPage && isAgentlessAvailable) || (isEditPage && isAgentlessEnabled);
@@ -844,7 +856,12 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [setupTechnology]);
 
-    useEnsureDefaultNamespace({ newPolicy, input, updatePolicy });
+    useEnsureDefaultNamespace({
+      newPolicy,
+      input,
+      updatePolicy,
+      cloudSecurityNamespaceSupportEnabled,
+    });
 
     useCloudFormationTemplate({
       packageInfo,
@@ -855,7 +872,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     usePolicyTemplateInitialName({
       packagePolicyList: packagePolicyList?.items,
       isEditPage,
-      isLoading,
       integration: integration as CloudSecurityPolicyTemplate,
       newPolicy,
       updatePolicy,
@@ -996,6 +1012,46 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           fields={integrationFields}
           onChange={(field, value) => updatePolicy({ ...newPolicy, [field]: value })}
         />
+
+        {/* Namespace selector */}
+        {cloudSecurityNamespaceSupportEnabled && !input.type.includes('vuln_mgmt') && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiAccordion
+              id="advancedOptions"
+              data-test-subj="advancedOptionsAccordion"
+              buttonContent={
+                <EuiText
+                  size="xs"
+                  color={euiTheme.colors.textPrimary}
+                  css={{
+                    fontWeight: euiTheme.font.weight.medium,
+                  }}
+                >
+                  <FormattedMessage
+                    id="xpack.csp.fleetIntegration.advancedOptionsLabel"
+                    defaultMessage="Advanced options"
+                  />
+                </EuiText>
+              }
+              paddingSize="m"
+            >
+              <NamespaceComboBox
+                fullWidth
+                namespace={newPolicy.namespace}
+                placeholder="default"
+                isEditPage={isEditPage}
+                validationError={validationResults?.namespace}
+                onNamespaceChange={(namespace: string) => {
+                  updatePolicy({ ...newPolicy, namespace });
+                }}
+                data-test-subj="namespaceInput"
+                labelId="xpack.csp.fleetIntegration.namespaceLabel"
+                helpTextId="xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDescription"
+              />
+            </EuiAccordion>
+          </>
+        )}
 
         {shouldRenderAgentlessSelector && (
           <SetupTechnologySelector
