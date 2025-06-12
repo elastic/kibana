@@ -12707,6 +12707,47 @@ paths:
                               timestamp: '2023-10-31T00:00:00.000Z'
                   ids:
                     - 9e946bfc-3118-4c77-bb25-67d781191921
+              example27:
+                description: The following request set alert suppression to the rules with the specified IDs.
+                summary: Edit - Set alert suppression to rules (idempotent)
+                value:
+                  action: edit
+                  edit:
+                    - type: set_alert_suppression
+                      value:
+                        duration:
+                          unit: h
+                          value: 1
+                        group_by:
+                          - source.ip
+                        missing_fields_strategy: suppress
+                  ids:
+                    - 12345678-1234-1234-1234-1234567890ab
+                    - 87654321-4321-4321-4321-0987654321ba
+              example28:
+                description: The following request set alert suppression to threshold rules with the specified IDs.
+                summary: Edit - Set alert suppression to threshold rules (idempotent)
+                value:
+                  action: edit
+                  edit:
+                    - type: set_alert_suppression_for_threshold
+                      value:
+                        duration:
+                          unit: h
+                          value: 1
+                  ids:
+                    - 12345678-1234-1234-1234-1234567890ab
+                    - 87654321-4321-4321-4321-0987654321ba
+              example29:
+                description: The following request removes alert suppression from the rules with the specified IDs. If the rules do not have alert suppression, no changes are made.
+                summary: Edit - Removes alert suppression from rules (idempotent)
+                value:
+                  action: edit
+                  edit:
+                    - type: delete_alert_suppression
+                  ids:
+                    - 12345678-1234-1234-1234-1234567890ab
+                    - 87654321-4321-4321-4321-0987654321ba
             schema:
               oneOf:
                 - $ref: '#/components/schemas/Security_Detections_API_BulkDeleteRules'
