@@ -493,7 +493,7 @@ export class ObservabilityAIAssistantClient {
 
     this.dependencies.logger.debug(
       () =>
-        `Options for inference client before anonymization: ${JSON.stringify({
+        `Options for inference client for name: "${name}" before anonymization: ${JSON.stringify({
           ...options,
           messages,
         })}`
@@ -503,12 +503,6 @@ export class ObservabilityAIAssistantClient {
       return defer(() =>
         from(this.dependencies.anonymizationService.redactMessages(messages)).pipe(
           switchMap(({ redactedMessages }) => {
-            this.dependencies.logger.debug(
-              () =>
-                `Calling inference client for name: "${name}" with options: ${JSON.stringify(
-                  options
-                )}`
-            );
             return (
               this.dependencies.inferenceClient
                 .chatComplete({
