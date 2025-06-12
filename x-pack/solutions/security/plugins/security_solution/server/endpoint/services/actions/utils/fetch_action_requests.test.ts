@@ -7,6 +7,7 @@
 
 import type { FetchActionRequestsOptions } from './fetch_action_requests';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { applyActionListEsSearchMock } from '../mocks';
 import { fetchActionRequests } from './fetch_action_requests';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../../common/endpoint/constants';
@@ -353,8 +354,7 @@ describe('fetchActionRequests()', () => {
       expect(
         fetchOptions.endpointService.getInternalFleetServices().packagePolicy.fetchAllItemIds
       ).toHaveBeenCalledWith(expect.anything(), {
-        kuery:
-          'ingest-package-policies.package.name: (endpoint OR sentinel_one OR crowdstrike OR microsoft_defender_endpoint OR m365_defender)',
+        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: (endpoint OR sentinel_one OR crowdstrike OR microsoft_defender_endpoint OR m365_defender)`,
       });
     });
 
