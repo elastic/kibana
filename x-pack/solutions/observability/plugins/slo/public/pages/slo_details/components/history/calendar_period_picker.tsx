@@ -40,7 +40,7 @@ export function CalendarPeriodPicker({ slo, onChange }: Props) {
   }
 
   return (
-    <EuiFlexGroup direction="row" justifyContent="flexEnd" alignItems="center">
+    <EuiFlexGroup direction="row" justifyContent="spaceEvenly" alignItems="center">
       <EuiButton
         size="s"
         data-test-subj="sloSloDetailsHistoryPreviousButton"
@@ -52,7 +52,7 @@ export function CalendarPeriodPicker({ slo, onChange }: Props) {
           defaultMessage: 'Previous',
         })}
       </EuiButton>
-      <EuiText size="s">
+      <EuiText size="s" textAlign="center">
         <p>{getCalendarPeriodLabel(slo, periodOffset)}</p>
       </EuiText>
       <EuiButton
@@ -85,5 +85,5 @@ function getCalendarPeriodLabel(slo: SLOWithSummaryResponse, calendarPeriod: num
     .subtract(calendarPeriod, isWeeklyCalendarAligned ? 'week' : 'month')
     .endOf(isWeeklyCalendarAligned ? 'isoWeek' : 'month');
 
-  return `${start.format('LL')} - ${end.format('LL')}`;
+  return `${start.format('ll')} - ${end.format('ll')}`;
 }
