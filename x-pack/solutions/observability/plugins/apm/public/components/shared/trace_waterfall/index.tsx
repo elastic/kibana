@@ -141,7 +141,6 @@ function TraceTree() {
       {({ registerChild }) => (
         <AutoSizer disableHeight>
           {({ width }) => (
-            // @ts-expect-error @types/react@18 Type 'HTMLDivElement' is not assignable to type 'ReactNode'
             <div data-test-subj="waterfall" ref={registerChild}>
               <List
                 ref={listRef}
