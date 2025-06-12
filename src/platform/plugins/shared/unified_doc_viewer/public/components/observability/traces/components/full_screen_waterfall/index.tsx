@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import {
   EuiButtonIcon,
@@ -22,8 +22,11 @@ import {
 import { SERVICE_NAME_FIELD, SPAN_ID_FIELD, TRANSACTION_ID_FIELD } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { useRootTransactionContext } from '../../doc_viewer_transaction_overview/hooks/use_root_transaction';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { SpanFlyout } from './span_flyout';
+import { useRootTransactionContext } from '../../doc_viewer_transaction_overview/hooks/use_root_transaction';
+import { useDataSourcesContext } from '../../hooks/use_data_sources';
 
 export interface FullScreenWaterfallProps {
   traceId: string;
@@ -46,6 +49,42 @@ export const FullScreenWaterfall = ({
   const [spanId, setSpanId] = useState<string | null>(null);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const overlayMaskRef = useRef<HTMLDivElement>(null);
+  const {
+    share: {
+      url: { locators },
+    },
+    data: {
+      query: {
+        timefilter: { timefilter },
+      },
+    },
+  } = getUnifiedDocViewerServices();
+  const { indexes } = useDataSourcesContext();
+
+  const discoverLocator = useMemo(
+    () => locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR'),
+    [locators]
+  );
+
+  const generateRelatedErrorsDiscoverUrl = useCallback(
+    (docId: string) => {
+      if (!discoverLocator) {
+        return null;
+      }
+
+      const url = discoverLocator.getRedirectUrl({
+        timeRange: timefilter.getAbsoluteTime(),
+        filters: [],
+        query: {
+          language: 'kuery',
+          esql: `FROM ${indexes.apm.errors},${indexes.logs} | WHERE trace.id == "${traceId}" AND span.id == "${docId}"`,
+        },
+      });
+
+      return url;
+    },
+    [discoverLocator, timefilter, indexes.apm.errors, indexes.logs, traceId]
+  );
 
   const getParentApi = useCallback(
     () => ({
@@ -57,6 +96,7 @@ export const FullScreenWaterfall = ({
           serviceName: transaction?.[SERVICE_NAME_FIELD],
           entryTransactionId: transaction?.[TRANSACTION_ID_FIELD] || transaction?.[SPAN_ID_FIELD],
           scrollElement: overlayMaskRef.current,
+          getRelatedErrorsHref: generateRelatedErrorsDiscoverUrl,
           onNodeClick: (nodeSpanId: string) => {
             setSpanId(nodeSpanId);
             setIsFlyoutVisible(true);
@@ -64,7 +104,7 @@ export const FullScreenWaterfall = ({
         },
       }),
     }),
-    [traceId, rangeFrom, rangeTo, transaction]
+    [traceId, rangeFrom, rangeTo, transaction, generateRelatedErrorsDiscoverUrl]
   );
 
   return (
