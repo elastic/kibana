@@ -158,21 +158,10 @@ const mockedIndex = {
   typeMeta: {},
   timeFieldName: '@timestamp',
 };
-const mockedDataviewSpec = {
-  id: mockedIndex.id,
-  title: mockedIndex.title,
-  name: mockedIndex.name,
-  timeFieldName: mockedIndex.timeFieldName,
-  fieldFormatMap: mockedIndex.fieldFormatMap,
-  typeMeta: mockedIndex.typeMeta,
-  sourceFilters: [],
-  runtimeFieldMap: {},
-};
 const mockedDataView = {
   getIndexPattern: () => 'mockedIndexPattern',
   getName: () => 'mockedDataViewName',
   getRuntimeMappings: () => undefined,
-  toSpec: () => mockedDataviewSpec,
   ...mockedIndex,
 };
 const mockedSearchSource = {
@@ -1694,9 +1683,6 @@ describe('The custom threshold alert type', () => {
         });
         expect(getViewInAppUrl).lastCalledWith({
           dataViewId: 'valid-index-name',
-          dataViewSpec: {
-            id: 'valid-index-name',
-          },
           spaceId: MOCKED_SPACE_ID,
           groups: [
             {
@@ -1759,9 +1745,6 @@ describe('The custom threshold alert type', () => {
         expect(getViewInAppUrl).toBeCalledTimes(1);
         expect(getViewInAppUrl).toBeCalledWith({
           dataViewId: 'c34a7c79-a88b-4b4a-ad19-72f6d24104e4',
-          dataViewSpec: {
-            id: 'valid-index-name',
-          },
           groups: [
             {
               field: 'host.name',
