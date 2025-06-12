@@ -7,23 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiLoadingSpinner,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { useCancellableSearch } from '@kbn/ml-cancellable-search';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataTableRecord } from '@kbn/discover-utils';
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import type { FC } from 'react';

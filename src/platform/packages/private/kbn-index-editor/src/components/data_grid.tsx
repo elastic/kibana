@@ -11,7 +11,6 @@ import {
   EuiIcon,
   EuiLink,
   EuiText,
-  EuiPortal,
   EuiDataGridCellProps,
   EuiDataGridCellPopoverElementProps,
 } from '@elastic/eui';
@@ -32,7 +31,6 @@ import {
   CustomCellRenderer,
 } from '@kbn/unified-data-table';
 import React, { useCallback, useMemo, useState } from 'react';
-import { INDEX_EDITOR_CELL_ACTION_TRIGGER_ID } from '../ui_action';
 import { KibanaContextExtra } from '../types';
 import { RowViewer } from './row_viewer_lazy';
 import { EditCellValue, getCellValueRenderer } from './value_input_control';

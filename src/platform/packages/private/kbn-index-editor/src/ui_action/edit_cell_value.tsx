@@ -18,7 +18,6 @@ import { i18n } from '@kbn/i18n';
 import type { Trigger } from '@kbn/ui-actions-browser';
 import { EditCellValue } from '../components/value_input_control';
 import { IndexUpdateService } from '../index_update_service';
-import { or } from '../../../../../../../bazel-kibana/x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client';
 
 export const EDIT_CELL_VALUE_TRIGGER_ID = 'EDIT_CELL_VALUE_TRIGGER_ID';
 

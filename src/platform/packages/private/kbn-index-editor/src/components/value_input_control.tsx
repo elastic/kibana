@@ -13,7 +13,6 @@ import React, {
   type FunctionComponent,
   useCallback,
   useRef,
-  useEffect,
   useState,
 } from 'react';
 import {
@@ -22,10 +21,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonIcon,
-  EuiPortal,
-  EuiFocusTrap,
   EuiPopover,
-  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { type DataGridCellValueElementProps } from '@kbn/unified-data-table';
