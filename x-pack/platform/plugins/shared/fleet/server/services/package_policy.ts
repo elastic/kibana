@@ -2417,7 +2417,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           return mapPackagePolicySavedObjectToPackagePolicy(packagePolicySO);
         });
       },
-      usePointInTime: false,
     });
   }
 }

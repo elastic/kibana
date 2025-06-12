@@ -9,20 +9,20 @@ import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/
 
 import { SO_SEARCH_LIMIT } from '../../common';
 import { getAgentsByKuery } from '../services/agents';
-import { AGENTS_PREFIX } from '../constants';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, AGENTS_PREFIX } from '../constants';
 
-import { packagePolicyService, getPackagePolicySavedObjectType } from '../services/package_policy';
+import { packagePolicyService } from '../services/package_policy';
 
 export const getAllFleetServerAgents = async (
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ) => {
   let packagePolicyData;
-  const packagePolicySavedObjectType = await getPackagePolicySavedObjectType();
+
   try {
     packagePolicyData = await packagePolicyService.list(soClient, {
       perPage: SO_SEARCH_LIMIT,
-      kuery: `${packagePolicySavedObjectType}.package.name: fleet_server`,
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: fleet_server`,
     });
   } catch (error) {
     throw new Error(error.message);

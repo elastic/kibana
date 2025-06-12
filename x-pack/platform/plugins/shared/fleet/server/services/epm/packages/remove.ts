@@ -24,6 +24,7 @@ import { updateIndexSettings } from '../elasticsearch/index/update_settings';
 
 import {
   MAX_CONCURRENT_ES_ASSETS_OPERATIONS,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
   USER_SETTINGS_TEMPLATE_SUFFIX,
@@ -43,7 +44,6 @@ import { removeUnusedIndexPatterns } from '../kibana/index_pattern/install';
 import { deleteTransforms } from '../elasticsearch/transform/remove';
 import { deleteMlModel } from '../elasticsearch/ml_model';
 import { packagePolicyService, appContextService } from '../..';
-import { getPackagePolicySavedObjectType } from '../../package_policy';
 import { deletePackageCache } from '../archive';
 import { deleteIlms } from '../elasticsearch/datastream_ilm/remove';
 import { removeArchiveEntries } from '../archive/storage';
@@ -71,11 +71,10 @@ export async function removeInstallation(options: {
   if (!installation) {
     throw new PackageRemovalError(`${pkgName} is not installed`);
   }
-  const packagePolicySavedObjectType = await getPackagePolicySavedObjectType();
   const { total, items } = await packagePolicyService.list(
     appContextService.getInternalUserSOClientWithoutSpaceExtension(),
     {
-      kuery: `${packagePolicySavedObjectType}.package.name:${pkgName}`,
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
       page: 1,
       perPage: SO_SEARCH_LIMIT,
       spaceId: '*',
