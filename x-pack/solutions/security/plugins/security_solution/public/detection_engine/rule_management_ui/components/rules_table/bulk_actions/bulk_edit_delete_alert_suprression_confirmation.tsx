@@ -41,10 +41,18 @@ export const BulkEditDeleteAlertSuppressionConfirmation: React.FC<Props> = ({
   >
     <FormattedMessage
       id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppression.deleteAlertSuppressionConfirmationModalBody"
-      defaultMessage='This action will try to delete alert suppression in {rulesCount, plural, one {the chosen rule} other {{rulesCountStrong} rules}}. Click "Delete" to continue.'
+      defaultMessage="This action will remove alert suppression from {rulesCount, plural, one {the chosen rule} other {{rulesCountStrong} rules}}. Click {deleteStrong} to continue."
       values={{
         rulesCount,
         rulesCountStrong: <strong>{rulesCount}</strong>,
+        deleteStrong: (
+          <strong>
+            <FormattedMessage
+              id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppression.deleteAlertSuppressionConfirmationModalBodyDeleteBtnLabel"
+              defaultMessage="Delete"
+            />
+          </strong>
+        ),
       }}
     />
   </EuiConfirmModal>

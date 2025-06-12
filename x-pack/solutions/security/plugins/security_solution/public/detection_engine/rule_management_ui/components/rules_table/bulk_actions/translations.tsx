@@ -201,13 +201,13 @@ export const bulkAlertSuppression = {
   SET_TITLE: i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppression.addTitle',
     {
-      defaultMessage: 'Set alert suppression',
+      defaultMessage: 'Apply alert suppression',
     }
   ),
   SET_FOR_THRESHOLD_TITLE: i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppression.addTitle',
     {
-      defaultMessage: 'Set alert suppression for threshold rule types only',
+      defaultMessage: 'Apply alert suppression to threshold rules',
     }
   ),
   SUPPRESSION_REQUIRED_ERROR: i18n.translate(
@@ -226,7 +226,7 @@ export const bulkAlertSuppression = {
   DELETE_CONFIRMATION_TITLE: i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppression.bulkDeleteConfirmationTitle',
     {
-      defaultMessage: 'Confirm bulk delete of alert suppression',
+      defaultMessage: 'Confirm bulk removal of alert suppression',
     }
   ),
   DELETE_CONFIRMATION_CONFIRM: i18n.translate(
