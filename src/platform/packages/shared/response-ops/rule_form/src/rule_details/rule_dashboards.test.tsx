@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
@@ -183,11 +183,6 @@ describe('RuleDashboards', () => {
     searchInput.focus();
 
     await userEvent.type(searchInput, 'Dashboard 1');
-
-    // Advance timers to trigger debounce
-    act(() => {
-      jest.advanceTimersByTime(300);
-    });
 
     expect(searchInput).toHaveValue('Dashboard 1');
     // Assert that fetchDashboards was called with the correct search value
