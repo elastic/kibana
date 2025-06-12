@@ -1052,6 +1052,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
             </EuiAccordion>
           </>
         )}
+        {cloud && <div>{JSON.stringify(cloud)}</div>}
 
         {shouldRenderAgentlessSelector && (
           <SetupTechnologySelector
