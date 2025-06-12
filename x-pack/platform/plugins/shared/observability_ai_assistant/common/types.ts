@@ -29,11 +29,31 @@ export interface PendingMessage {
   aborted?: boolean;
   error?: any;
 }
+export interface DetectedEntity {
+  entity: string;
+  class_name: string;
+  start_pos: number;
+  end_pos: number;
+  hash: string;
+  type: 'ner' | 'regex';
+}
+
+export type DetectedEntityType = DetectedEntity['type'];
+export interface Unredaction {
+  entity: string;
+  class_name: string;
+  start_pos: number;
+  end_pos: number;
+  type: 'ner' | 'regex';
+}
+
+export type UnredactionType = Unredaction['type'];
 
 export interface Message {
   '@timestamp': string;
   message: {
     content?: string;
+    unredactions?: Unredaction[];
     name?: string;
     role: MessageRole;
     function_call?: {
@@ -159,4 +179,20 @@ export interface ObservabilityAIAssistantScreenContext {
 export enum ConversationAccess {
   SHARED = 'shared',
   PRIVATE = 'private',
+}
+
+export interface InferenceChunk {
+  chunkText: string;
+  charStartOffset: number;
+}
+
+export interface AnonymizationRule {
+  id: string;
+  entityClass: string;
+  type: 'regex' | 'ner';
+  pattern?: string;
+  enabled: boolean;
+  builtIn: boolean;
+  description?: string;
+  normalize?: boolean;
 }

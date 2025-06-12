@@ -17,7 +17,9 @@ The onechat plugin exposes APIs to interact with onechat primitives.
 
 The main primitives are:
 
-- tools
+- [tools](#tools)
+
+Additionally, the plugin implements [MCP server](#mcp-server) that exposes onechat tools.
 
 ## Tools
 
@@ -216,6 +218,41 @@ try {
 } catch (e) {
   if (isToolNotFoundError(e)) {
     throw new Error(`run ${e.meta.runId} failed because tool was not found`);
+  }
+}
+```
+
+## MCP Server
+
+The MCP server provides a standardized interface for external MCP clients to access onechat tools.
+
+
+### Running with Claude Desktop
+
+To enable the MCP server, add the following to your Kibana config:
+
+```yaml
+uiSettings.overrides:
+  onechat:mcpServer:enabled: true
+```
+
+Configure Claude Desktop by adding this to its configuration:
+
+```json
+{
+  "mcpServers": {
+    "elastic": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "http://localhost:5601/api/mcp",
+        "--header",
+        "Authorization: ApiKey ${API_KEY}"
+      ],
+      "env": {
+        "API_KEY": "..."
+      }
+    }
   }
 }
 ```
