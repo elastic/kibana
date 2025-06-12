@@ -266,7 +266,7 @@ export class RelatedDashboardsClient {
     const emptyFieldsSet = new Set<string>();
     switch (panel.type) {
       case 'lens':
-        const maybeLensAttr = panel.panelConfig.attributes as unknown as LensAttributes;
+        const maybeLensAttr = panel.panelConfig.attributes;
         if (this.isLensVizAttributes(maybeLensAttr)) {
           const lensFields = this.getLensVizFields(maybeLensAttr);
           return lensFields;
