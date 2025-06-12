@@ -53,7 +53,7 @@ const LAUNCH_CLOUD_FORMATION_LATER_TEST_ID = getDataTestSubjectSelector(
   'confirmCloudFormationModalCancelButton'
 );
 
-describe('Asset Inventory integration onboarding - AWS', { tags: ['@serverless'] }, () => {
+describe('Asset Inventory integration onboarding - AWS', { tags: ['@serverless', '@ess'] }, () => {
   beforeEach(() => {
     login();
     visit('/app/integrations/browse');
@@ -66,7 +66,6 @@ describe('Asset Inventory integration onboarding - AWS', { tags: ['@serverless']
     const policyName = changePolicyName('asset_inventory-cloudformation');
 
     shouldBeChecked(AWS_ORGANIZATION_ACCOUNT_TEST_ID);
-    // cy.get(AWS_ORGANIZATION_ACCOUNT).should('be.checked');
     shouldBeChecked(AWS_CLOUD_FORMATION_TEST_ID);
     shouldBeEnabled(SAVE_BUTTON);
 
@@ -141,11 +140,9 @@ describe('Asset Inventory integration onboarding - AWS', { tags: ['@serverless']
     shouldBeChecked(AWS_SINGLE_ACCOUNT_TEST_ID);
     shouldBeChecked(AWS_MANUAL_SETUP_TEST_ID);
     checkInputValue(ACCESS_KEY, testAccessKey);
-    // checkInputValue(SECRET_KEY, testSecretKey);
     shouldBeDisabled(SAVE_EDIT_BUTTON);
 
     cy.get(ACCESS_KEY).type('-edited');
-    // cy.get(SECRET_KEY).type('-edited');
     clickSaveEditButton();
 
     selectPolicyForEditing(policyName);
@@ -182,19 +179,16 @@ describe('Asset Inventory integration onboarding - AWS', { tags: ['@serverless']
     shouldBeChecked(AWS_SINGLE_ACCOUNT_TEST_ID);
     shouldBeChecked(AWS_MANUAL_SETUP_TEST_ID);
     checkInputValue(TEMPORARY_KEY_ACCESS_KEY, testAccessKey);
-    // checkInputValue(TEMPORARY_KEY_SECRET_KEY, testSecretKey);
     checkInputValue(TEMPORARY_KEY_SESSION, testSession);
     shouldBeDisabled(SAVE_EDIT_BUTTON);
 
     cy.get(TEMPORARY_KEY_ACCESS_KEY).type('-edited');
     cy.get(TEMPORARY_KEY_SESSION).type('-edited');
-    // cy.get(TEMPORARY_KEY_SECRET_KEY).type('-edited');
     clickSaveEditButton();
 
     selectPolicyForEditing(policyName);
     checkInputValue(TEMPORARY_KEY_ACCESS_KEY, `${testAccessKey}-edited`);
     checkInputValue(TEMPORARY_KEY_SESSION, `${testSession}-edited`);
-    // checkInputValue(TEMPORARY_KEY_SECRET_KEY, `${testSecretKey}-edited`);
   });
 
   it('should save a package policy with shared credentials', () => {
@@ -221,18 +215,15 @@ describe('Asset Inventory integration onboarding - AWS', { tags: ['@serverless']
     shouldBeChecked(AWS_SINGLE_ACCOUNT_TEST_ID);
     shouldBeChecked(AWS_MANUAL_SETUP_TEST_ID);
     checkInputValue(SHARED_CREDENTIAL_FILE, testSharedCredentialsFile);
-    // checkInputValue(TEMPORARY_KEY_SECRET_KEY, testSecretKey);
     checkInputValue(SHARED_CREDENTIAL_PROFILE, testSharedCredentialsProfile);
     shouldBeDisabled(SAVE_EDIT_BUTTON);
 
     cy.get(SHARED_CREDENTIAL_FILE).type('-edited');
     cy.get(SHARED_CREDENTIAL_PROFILE).type('-edited');
-    // cy.get(TEMPORARY_KEY_SECRET_KEY).type('-edited');
     clickSaveEditButton();
 
     selectPolicyForEditing(policyName);
     checkInputValue(SHARED_CREDENTIAL_FILE, `${testSharedCredentialsFile}-edited`);
     checkInputValue(SHARED_CREDENTIAL_PROFILE, `${testSharedCredentialsProfile}-edited`);
-    // checkInputValue(TEMPORARY_KEY_SECRET_KEY, `${testSecretKey}-edited`);
   });
 });
