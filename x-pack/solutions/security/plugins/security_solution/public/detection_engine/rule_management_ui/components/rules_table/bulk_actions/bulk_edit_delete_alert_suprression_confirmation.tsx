@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { METRIC_TYPE, track, TELEMETRY_EVENT } from '../../../../../common/lib/telemetry';
 import type { BulkActionEditPayloadDeleteAlertSuppression } from '../../../../../../common/api/detection_engine/rule_management';
 import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import { bulkAlertSuppression as i18n } from './translations';
@@ -26,11 +27,12 @@ export const BulkEditDeleteAlertSuppressionConfirmation: React.FC<Props> = ({
   <EuiConfirmModal
     title={i18n.DELETE_CONFIRMATION_TITLE}
     onCancel={onCancel}
-    onConfirm={() =>
+    onConfirm={() => {
       onConfirm({
         type: BulkActionEditTypeEnum.delete_alert_suppression,
-      })
-    }
+      });
+      track(METRIC_TYPE.CLICK, TELEMETRY_EVENT.SET_ALERT_SUPPRESSION_FOR_THRESHOLD);
+    }}
     confirmButtonText={i18n.DELETE_CONFIRMATION_CONFIRM}
     cancelButtonText={i18n.DELETE_CONFIRMATION_CANCEL}
     buttonColor="danger"

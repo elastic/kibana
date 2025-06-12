@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiIcon } from '@elastic
 
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { DEFAULT_INDEX_KEY } from '../../../../../../../common/constants';
-import { METRIC_TYPE, track } from '../../../../../../common/lib/telemetry';
+import { METRIC_TYPE, track, TELEMETRY_EVENT } from '../../../../../../common/lib/telemetry';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../../common/detection_engine/constants';
 import { useFetchIndex } from '../../../../../../common/containers/source';
 import { BulkActionEditTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
@@ -116,7 +116,7 @@ const SetAlertSuppressionFormComponent = ({
     };
 
     onConfirm(suppressionPayload);
-    track(METRIC_TYPE.CLICK, suppressionPayload.type);
+    track(METRIC_TYPE.CLICK, TELEMETRY_EVENT.SET_ALERT_SUPPRESSION);
   };
 
   return (

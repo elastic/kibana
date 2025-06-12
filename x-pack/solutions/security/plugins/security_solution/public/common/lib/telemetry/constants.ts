@@ -50,7 +50,7 @@ export enum TELEMETRY_EVENT {
   DELETE_INVESTIGATION_FIELDS = 'delete_investigation_fields',
 
   // Bulk edit alert suppression
-  ADD_ALERT_SUPPRESSION = 'add_alert_suppression',
+  SET_ALERT_SUPPRESSION_FOR_THRESHOLD = 'set_alert_suppression_for_threshold',
   SET_ALERT_SUPPRESSION = 'set_alert_suppression',
   DELETE_ALERT_SUPPRESSION = 'delete_alert_suppression',
 

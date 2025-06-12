@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiIcon, EuiFormRow } from '@elastic/eui';
 
 import type { FormSchema } from '../../../../../../shared_imports';
-import { METRIC_TYPE, track } from '../../../../../../common/lib/telemetry';
+import { METRIC_TYPE, track, TELEMETRY_EVENT } from '../../../../../../common/lib/telemetry';
 import { BulkActionEditTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
 import type { BulkActionEditPayload } from '../../../../../../../common/api/detection_engine/rule_management';
 import type { AlertSuppressionDuration } from '../../../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
@@ -59,7 +59,7 @@ const SetAlertSuppressionForThresholdFormComponent = ({
       type: BulkActionEditTypeEnum.set_alert_suppression_for_threshold,
     });
 
-    track(METRIC_TYPE.CLICK, BulkActionEditTypeEnum.set_alert_suppression_for_threshold);
+    track(METRIC_TYPE.CLICK, TELEMETRY_EVENT.SET_ALERT_SUPPRESSION_FOR_THRESHOLD);
   };
 
   return (
