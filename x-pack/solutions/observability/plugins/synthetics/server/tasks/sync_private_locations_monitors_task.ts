@@ -291,7 +291,8 @@ export const runSynPrivateLocationMonitorsTaskSoon = async ({
     logger.debug(`Synthetics sync private location task scheduled successfully`);
   } catch (error) {
     logger.error(
-      `Error scheduling Synthetics sync private location monitors task: ${error.message}`
+      `Error scheduling Synthetics sync private location monitors task: ${error.message}`,
+      { error }
     );
   }
 };

@@ -237,6 +237,7 @@ const ConnectorAddModal = ({
       css={css`
         z-index: 9000;
         width: ${actionTypeRegistry.get(actionType.id).modalWidth};
+        overflow-y: auto;
       `}
       data-test-subj="connectorAddModal"
       onClose={closeModal}
