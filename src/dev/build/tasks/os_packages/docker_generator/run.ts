@@ -14,7 +14,6 @@ import { promisify } from 'util';
 import { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson } from '@kbn/repo-info';
 
-import execa from 'execa';
 import { write, copyAll, mkdirp, exec, Config, Build } from '../../../lib';
 import * as dockerTemplates from './templates';
 import { TemplateContext } from './template_context';
@@ -201,12 +200,6 @@ export async function runDockerGenerator(
       }
       await linkAsync(src, dest);
     }
-
-    await execa('cat', ['-vet', './build_docker.sh'], {
-      cwd: dockerBuildDir,
-      stdio: ['ignore', 'pipe', 'pipe'],
-      preferLocal: true,
-    });
 
     await exec(log, `./build_docker.sh`, [], {
       cwd: dockerBuildDir,
