@@ -73,7 +73,7 @@ export class RelatedDashboardsClient {
     const alert = this.checkAlert();
     const allSuggestedDashboards = new Set<SuggestedDashboard>();
     const relevantDashboardsById = new Map<string, SuggestedDashboard>();
-    const index = await this.getRuleQueryIndex();
+    const index = this.getRuleQueryIndex();
     const allRelevantFields = alert.getAllRelevantFields();
 
     if (index) {
@@ -346,16 +346,30 @@ export class RelatedDashboardsClient {
   }
 
   private async getLinkedDashboardsByIds(ids: string[]): Promise<RelatedDashboard[]> {
-    const dashboardsResponse = await Promise.all(ids.map((id) => this.dashboardClient.get(id)));
-    const linkedDashboards: Dashboard[] = dashboardsResponse.map((d) => {
-      return d.result.item;
-    });
-    return linkedDashboards.map((d) => ({
-      id: d.id,
-      title: d.attributes.title,
-      matchedBy: { linked: true },
-      description: d.attributes.description,
-    }));
+    const linkedDashboardsResponse = await Promise.all(
+      ids.map((id) => this.getLinkedDashboardById(id))
+    );
+    return linkedDashboardsResponse.filter((dashboard): dashboard is RelatedDashboard =>
+      Boolean(dashboard)
+    );
+  }
+
+  private async getLinkedDashboardById(id: string): Promise<RelatedDashboard | null> {
+    try {
+      const dashboardResponse = await this.dashboardClient.get(id);
+      return {
+        id: dashboardResponse.result.item.id,
+        title: dashboardResponse.result.item.attributes.title,
+        matchedBy: { linked: true },
+        description: dashboardResponse.result.item.attributes.description,
+      };
+    } catch (error) {
+      if (error.output.statusCode === 404) {
+        this.logger.warn(`Linked dashboard with id ${id} not found. Skipping.`);
+        return null;
+      }
+      throw new Error(`Error fetching dashboard with id ${id}: ${error.message || error}`);
+    }
   }
 
   private getMatchingFields(dashboard: RelatedDashboard): string[] {
