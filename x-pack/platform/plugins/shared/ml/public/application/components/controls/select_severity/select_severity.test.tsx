@@ -57,9 +57,9 @@ const mockUseState = jest.fn().mockImplementation(useState);
 
 jest.mock('@kbn/ml-url-state', () => ({
   usePageUrlState: () => {
-    // Start with default state (first severity option selected)
+    // Start with default state (all severity options selected)
     const [severity, setSeverity] = mockUseState({
-      val: [mockSeverityOptions[0].threshold], // Default to 'low' selected
+      val: mockSeverityOptions.map((option) => option.threshold), // Default to all selected
     });
     return [severity, mockUpdateCallback.mockImplementation((d) => setSeverity(d))];
   },
@@ -108,7 +108,7 @@ describe('SelectSeverity', () => {
       fireEvent.click(button!);
     });
 
-    // Wait for options to appear and click on 'major' option (50-75)
+    // Wait for options to appear and click on 'major' option (50-75) to deselect it
     await waitFor(() => {
       expect(getByRole('option', { name: '50-75' })).toBeInTheDocument();
     });
@@ -118,12 +118,20 @@ describe('SelectSeverity', () => {
       fireEvent.click(majorOption);
     });
 
-    // Should call the update callback with both low and major selected
+    // Should call the update callback with all options except 'major' selected
     await waitFor(() => {
       expect(mockUpdateCallback).toHaveBeenCalledWith({
         val: expect.arrayContaining([
-          mockSeverityOptions[0].threshold, // low (default)
-          mockSeverityOptions[3].threshold, // major (newly selected)
+          mockSeverityOptions[0].threshold, // low
+          mockSeverityOptions[1].threshold, // warning
+          mockSeverityOptions[2].threshold, // minor
+          mockSeverityOptions[4].threshold, // critical
+        ]),
+      });
+      // Should not contain major
+      expect(mockUpdateCallback).toHaveBeenCalledWith({
+        val: expect.not.arrayContaining([
+          mockSeverityOptions[3].threshold, // major
         ]),
       });
     });
@@ -139,7 +147,7 @@ describe('SelectSeverity', () => {
       fireEvent.click(button!);
     });
 
-    // Wait for options to appear and click on the already selected 'low' option (0-3) to deselect it
+    // Wait for options to appear and click on the 'low' option (0-3) to deselect it
     await waitFor(() => {
       expect(getByRole('option', { name: '0-3' })).toBeInTheDocument();
     });
@@ -149,10 +157,21 @@ describe('SelectSeverity', () => {
       fireEvent.click(lowOption);
     });
 
-    // Should call the update callback with empty selection
+    // Should call the update callback with all options except 'low' selected
     await waitFor(() => {
       expect(mockUpdateCallback).toHaveBeenCalledWith({
-        val: [],
+        val: expect.arrayContaining([
+          mockSeverityOptions[1].threshold, // warning
+          mockSeverityOptions[2].threshold, // minor
+          mockSeverityOptions[3].threshold, // major
+          mockSeverityOptions[4].threshold, // critical
+        ]),
+      });
+      // Should not contain low
+      expect(mockUpdateCallback).toHaveBeenCalledWith({
+        val: expect.not.arrayContaining([
+          mockSeverityOptions[0].threshold, // low
+        ]),
       });
     });
   });

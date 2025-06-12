@@ -44,7 +44,7 @@ const useTableSeverityDefault = () => {
   const severityOptions = useSeverityOptions();
   return useMemo(
     () => ({
-      val: [severityOptions[0].threshold],
+      val: severityOptions.map((option) => option.threshold),
     }),
     [severityOptions]
   );
