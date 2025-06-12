@@ -17,7 +17,7 @@
     "patterns": [
       "_watcher/_stop"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/watcher-api-stop.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-stop",
     "availability": {
       "stack": true,
       "serverless": false
