@@ -529,6 +529,7 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
           type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
           id: backfillId,
           provider: 'alerting',
+          // flakky
           actions: new Map([['execute-backfill', { equal: 1 }]]),
         });
         expect(events.length).to.eql(1);
