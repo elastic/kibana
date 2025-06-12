@@ -32,6 +32,7 @@ const renderComponent = () => {
       setTableTabState={mockSetTableTabState}
       isPopoverOpen={false}
       setIsPopoverOpen={mockSetIsPopoverOpen}
+      isAlert={true}
     />,
     // TODO: fails with concurrent mode
     { legacyRoot: true }
@@ -101,6 +102,29 @@ describe('<TableTabSettingButton />', () => {
         ...mockTableTabState,
         hideAlertFields: true,
       });
+    });
+  });
+
+  it('should not render hide alert fields setting if the document is not an alert', () => {
+    const { getByTestId, queryByTestId } = render(
+      <TableTabSettingButton
+        tableTabState={mockTableTabState}
+        setTableTabState={mockSetTableTabState}
+        isPopoverOpen={false}
+        setIsPopoverOpen={mockSetIsPopoverOpen}
+        isAlert={false}
+      />,
+      // TODO: fails with concurrent mode
+      { legacyRoot: true }
+    );
+    const button = getByTestId(TABLE_TAB_SETTING_BUTTON_TEST_ID);
+    expect(button).toBeInTheDocument();
+
+    act(async () => {
+      await userEvent.click(button);
+      expect(getByTestId(TABLE_TAB_SETTING_HIGHLIGHTED_FIELDS_ONLY_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(TABLE_TAB_SETTING_HIDE_EMPTY_FIELDS_TEST_ID)).toBeInTheDocument();
+      expect(queryByTestId(TABLE_TAB_SETTING_HIDE_ALERT_FIELDS_TEST_ID)).not.toBeInTheDocument();
     });
   });
 });

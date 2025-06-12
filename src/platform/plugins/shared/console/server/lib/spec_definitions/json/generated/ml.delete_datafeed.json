@@ -13,7 +13,7 @@
     "patterns": [
       "_ml/datafeeds/{datafeed_id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/ml-delete-datafeed.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-datafeed",
     "availability": {
       "stack": true,
       "serverless": true
