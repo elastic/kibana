@@ -69,7 +69,3 @@ export const ELASTIC_LLM_TOUR_PERFORMANCE = i18n.translate(
     defaultMessage: 'performance',
   }
 );
-
-export const ELASTIC_LLM_TITLE = i18n.translate('xpack.elasticAssistant.elasticLLM.tour.title', {
-  defaultMessage: 'Elastic LLM',
-});
