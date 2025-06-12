@@ -44,6 +44,7 @@ export {
 export { type ToolSchema, type ToolSchemaType, type FromToolSchema } from './tool_schema';
 export {
   ToolChoiceType,
+  type ToolCallbacksOf,
   type ToolOptions,
   type ToolDefinition,
   type ToolCall,
