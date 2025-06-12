@@ -137,10 +137,12 @@ export class CasePlugin
     });
 
     if (plugins.taskManager) {
-      this.incrementalIdTaskManager = new IncrementalIdTaskManager(
-        plugins.taskManager,
-        this.logger
-      );
+      if (this.caseConfig.incrementalIdService.enabled) {
+        this.incrementalIdTaskManager = new IncrementalIdTaskManager(
+          plugins.taskManager,
+          this.logger
+        );
+      }
 
       if (plugins.usageCollection) {
         createCasesTelemetry({

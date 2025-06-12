@@ -23,6 +23,9 @@ export const ConfigSchema = schema.object({
   stack: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
+  incrementalIdService: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
 });
 
 export type ConfigType = TypeOf<typeof ConfigSchema>;
