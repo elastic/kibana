@@ -6,6 +6,7 @@
  */
 
 import { EntityDefinition, ENTITY_SCHEMA_VERSION_V1, MetadataField } from '@kbn/entities-schema';
+import { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
   initializePathScript,
   cleanScript,
@@ -58,7 +59,9 @@ function createMetadataPainlessScript(definition: EntityDefinition) {
   }, '');
 }
 
-function liftIdentityFieldsToDocumentRoot(definition: EntityDefinition) {
+function liftIdentityFieldsToDocumentRoot(
+  definition: EntityDefinition
+): IngestProcessorContainer[] {
   return definition.identityFields.map((key) => ({
     set: {
       if: `ctx.entity?.identity?.${key.field.replaceAll('.', '?.')} != null`,
@@ -68,7 +71,7 @@ function liftIdentityFieldsToDocumentRoot(definition: EntityDefinition) {
   }));
 }
 
-function getCustomIngestPipelines(definition: EntityDefinition) {
+function getCustomIngestPipelines(definition: EntityDefinition): IngestProcessorContainer[] {
   if (isBuiltinDefinition(definition)) {
     return [];
   }
@@ -101,7 +104,7 @@ function getCustomIngestPipelines(definition: EntityDefinition) {
   ];
 }
 
-export function generateLatestProcessors(definition: EntityDefinition) {
+export function generateLatestProcessors(definition: EntityDefinition): IngestProcessorContainer[] {
   return [
     {
       set: {
@@ -115,6 +118,26 @@ export function generateLatestProcessors(definition: EntityDefinition) {
         value: definition.type,
       },
     },
+    // Set entity.type values for specific entity stores
+    ...(definition.type === 'user'
+      ? [
+          {
+            set: {
+              field: 'entity.type',
+              value: 'Identity',
+            },
+          },
+        ]
+      : definition.type === 'host'
+      ? [
+          {
+            set: {
+              field: 'entity.type',
+              value: 'Host',
+            },
+          },
+        ]
+      : []),
     {
       set: {
         field: 'entity.definition_id',
