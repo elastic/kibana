@@ -33,7 +33,7 @@ describe('IlmPhaseFilter', () => {
       </TestExternalProviders>
     );
     expect(screen.getByTestId('selectIlmPhases')).toBeInTheDocument();
-    expect(screen.getByLabelText('ILM phase')).toBeInTheDocument();
+    expect(screen.getByTestId('comboBoxSearchInput')).toBeInTheDocument();
     expect(screen.getByText('hot')).toBeInTheDocument();
     expect(screen.getByText('warm')).toBeInTheDocument();
     expect(screen.getByText('unmanaged')).toBeInTheDocument();
@@ -83,7 +83,11 @@ describe('IlmPhaseFilter', () => {
 
       fireEvent.mouseOver(screen.getByTestId('comboBoxSearchInput'));
 
-      expect(screen.getByRole('tooltip')).toHaveTextContent(INDEX_LIFECYCLE_MANAGEMENT_PHASES);
+      await waitFor(() =>
+        expect(
+          screen.getByText(INDEX_LIFECYCLE_MANAGEMENT_PHASES).closest('[role="tooltip"]')
+        ).toBeInTheDocument()
+      );
     });
   });
 
