@@ -7,6 +7,7 @@
 
 import type { z, ZodObject } from '@kbn/zod';
 import type { MaybePromise } from '@kbn/utility-types';
+import type { Logger } from '@kbn/logging';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
@@ -137,6 +138,10 @@ export interface ToolHandlerContext {
    * Event emitter that can be used to emits custom events
    */
   events: ToolEventEmitter;
+  /**
+   * Logger scoped to this execution
+   */
+  logger: Logger;
 }
 
 /**

@@ -14,7 +14,10 @@ import {
   searchFulltextTool,
   searchDslTool,
   rerankDocumentsTool,
+  nlToEsqlTool,
+  executeEsqlTool,
 } from './retrieval';
+import { researcherTool } from '../services/agents/research';
 
 export const registerTools = ({ tools: registry }: { tools: ToolsServiceSetup }) => {
   const tools: Array<RegisteredTool<any, any>> = [
@@ -24,6 +27,9 @@ export const registerTools = ({ tools: registry }: { tools: ToolsServiceSetup })
     searchFulltextTool(),
     searchDslTool(),
     rerankDocumentsTool(),
+    nlToEsqlTool(),
+    executeEsqlTool(),
+    researcherTool(),
   ];
 
   tools.forEach((tool) => {

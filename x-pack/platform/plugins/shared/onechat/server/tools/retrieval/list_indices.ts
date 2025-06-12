@@ -11,7 +11,12 @@ import { OnechatToolIds, OnechatToolTags } from '@kbn/onechat-common';
 import type { RegisteredTool } from '@kbn/onechat-server';
 
 const listIndicesSchema = z.object({
-  pattern: z.string().optional().describe('optional pattern to filter indices by. Defaults to *'),
+  pattern: z
+    .string()
+    .optional()
+    .describe(
+      '(optional) pattern to filter indices by. Defaults to *. Leave empty to list all indices (recommended)'
+    ),
 });
 
 export interface ListIndexInfo {

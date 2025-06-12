@@ -9,6 +9,9 @@
  * Ids of built-in onechat tools
  */
 export const OnechatToolIds = {
+  indexExplorer: 'index_explorer',
+
+  /// old
   listIndices: 'list_indices',
   getIndexMapping: 'get_index_mapping',
   getDocumentById: 'get_document_by_id',
@@ -16,6 +19,7 @@ export const OnechatToolIds = {
   searchFulltext: 'search_fulltext',
   rerankDocuments: 'rerank_documents',
   generateEsql: 'generate_esql',
+  executeEsql: 'execute_esql',
 };
 
 /**
