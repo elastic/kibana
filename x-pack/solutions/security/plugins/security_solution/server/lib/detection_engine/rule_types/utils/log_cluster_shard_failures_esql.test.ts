@@ -61,9 +61,9 @@ describe('logClusterShardFailuresEsql', () => {
     logClusterShardFailuresEsql({ response, result: mockResult });
     expect(mockResult.warningMessages).toHaveLength(1);
     expect(mockResult.warningMessages[0]).toBe(
-      `The ES|QL query failed to run successfully due to unavailable shards: ${JSON.stringify([
-        shardFailure,
-      ])}`
+      `The ES|QL event query was only executed on the available shards. The query failed to run successfully on the following shards: ${JSON.stringify(
+        [shardFailure]
+      )}`
     );
   });
 
@@ -98,10 +98,9 @@ describe('logClusterShardFailuresEsql', () => {
     logClusterShardFailuresEsql({ response, result: mockResult });
     expect(mockResult.warningMessages).toHaveLength(1);
     expect(mockResult.warningMessages[0]).toBe(
-      `The ES|QL query failed to run successfully due to unavailable shards: ${JSON.stringify([
-        shardFailure1,
-        shardFailure2,
-      ])}`
+      `The ES|QL event query was only executed on the available shards. The query failed to run successfully on the following shards: ${JSON.stringify(
+        [shardFailure1, shardFailure2]
+      )}`
     );
   });
 
