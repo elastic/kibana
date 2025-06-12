@@ -1223,7 +1223,9 @@
                 "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              ">): void; }"
+              ">): void; availableIntegrations: (objectType: string, groupId?: string | undefined) => ",
+              "ShareActionIntents",
+              "[]; }"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/plugin.ts",
             "deprecated": false,
@@ -7188,7 +7190,7 @@
               "\nList agents"
             ],
             "signature": [
-              "(options: Readonly<{ page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; kuery?: any; showUpgradeable?: boolean | undefined; } & {}> & { showInactive: boolean; aggregations?: Record<string, ",
+              "(options: Readonly<{ page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; kuery?: any; showUpgradeable?: boolean | undefined; } & {}> & { showAgentless?: boolean | undefined; showInactive: boolean; aggregations?: Record<string, ",
               "AggregationsAggregationContainer",
               "> | undefined; searchAfter?: ",
               "SortResults",
@@ -7216,7 +7218,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "Readonly<{ page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; kuery?: any; showUpgradeable?: boolean | undefined; } & {}> & { showInactive: boolean; aggregations?: Record<string, ",
+                  "Readonly<{ page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; kuery?: any; showUpgradeable?: boolean | undefined; } & {}> & { showAgentless?: boolean | undefined; showInactive: boolean; aggregations?: Record<string, ",
                   "AggregationsAggregationContainer",
                   "> | undefined; searchAfter?: ",
                   "SortResults",
@@ -13369,13 +13371,7 @@
               "(soClient: ",
               "SavedObjectsClientContract",
               ", options: ",
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.ListWithKuery",
-                "text": "ListWithKuery"
-              },
+              "PackagePolicyClientListIdsOptions",
               ") => Promise<",
               {
                 "pluginId": "fleet",
@@ -13408,18 +13404,12 @@
               {
                 "parentPluginId": "fleet",
                 "id": "def-server.PackagePolicyClient.listIds.$2",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "fleet",
-                    "scope": "common",
-                    "docId": "kibFleetPluginApi",
-                    "section": "def-common.ListWithKuery",
-                    "text": "ListWithKuery"
-                  }
+                  "PackagePolicyClientListIdsOptions"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/package_policy_service.ts",
                 "deprecated": false,
@@ -31485,6 +31475,38 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.agentRouteService.postMigrateSingleAgent",
+            "type": "Function",
+            "tags": [],
+            "label": "postMigrateSingleAgent",
+            "description": [],
+            "signature": [
+              "(agentId: string) => string"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.agentRouteService.postMigrateSingleAgent.$1",
+                "type": "string",
+                "tags": [],
+                "label": "agentId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           }
         ],

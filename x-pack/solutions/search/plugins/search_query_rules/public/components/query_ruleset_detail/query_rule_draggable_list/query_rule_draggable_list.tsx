@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef } from 'react';
-
+import React, { useCallback, useRef, useState } from 'react';
 import {
   EuiDragDropContext,
   EuiDroppable,
@@ -24,6 +23,7 @@ import {
   EuiContextMenuItem,
   EuiNotificationBadge,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { QueryRulesQueryRule } from '@elastic/elasticsearch/lib/api/types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -32,11 +32,15 @@ import { DroppableContainer } from '../styles';
 import { QueryRuleDraggableListHeader } from './query_rule_draggable_list_header';
 import { QueryRuleDraggableListItemActionTypeBadge } from './query_rule_draggable_item_action_type_badge';
 import { QueryRuleDraggableItemCriteriaDisplay } from './query_rule_draggable_item_criteria_display';
+import { DeleteRulesetRuleModal } from './delete_ruleset_rule_modal';
 
 export interface QueryRuleDraggableListItemProps {
+  rules: SearchQueryRulesQueryRule[];
   queryRule: QueryRulesQueryRule;
+  rulesetId: string;
   index: number;
   onEditRuleFlyoutOpen: (ruleId: string) => void;
+  deleteRule?: (ruleId: string) => void;
   isLastItem?: boolean;
   tourInfo?: {
     title: string;
@@ -47,11 +51,15 @@ export interface QueryRuleDraggableListItemProps {
 
 export const QueryRuleDraggableListItem: React.FC<QueryRuleDraggableListItemProps> = ({
   index,
+  rulesetId,
+  rules,
   onEditRuleFlyoutOpen,
+  deleteRule,
   queryRule,
   tourInfo,
   isLastItem = false,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
   const localTourTargetRef = useRef<HTMLDivElement>(null);
   const effectiveRef = tourInfo?.tourTargetRef || localTourTargetRef;
@@ -61,8 +69,21 @@ export const QueryRuleDraggableListItem: React.FC<QueryRuleDraggableListItemProp
   const openPopover = useCallback(() => {
     setIsPopoverOpen(true);
   }, []);
+  const [ruleToDelete, setRuleToDelete] = useState<string | null>(null);
   return (
     <>
+      {ruleToDelete && (
+        <DeleteRulesetRuleModal
+          rulesetId={rulesetId}
+          ruleId={ruleToDelete}
+          closeDeleteModal={() => setRuleToDelete(null)}
+          onSuccessAction={() => {
+            if (deleteRule) {
+              deleteRule(ruleToDelete);
+            }
+          }}
+        />
+      )}
       <EuiDraggable
         spacing="m"
         key={queryRule.rule_id}
@@ -161,21 +182,37 @@ export const QueryRuleDraggableListItem: React.FC<QueryRuleDraggableListItemProp
                           >
                             <FormattedMessage
                               id="xpack.search.queryRulesetDetail.draggableList.actions.edit"
-                              defaultMessage="Edit"
+                              defaultMessage="Edit rule"
                             />
                           </EuiContextMenuItem>,
                           <EuiContextMenuItem
+                            toolTipContent={
+                              rules.length === 1
+                                ? i18n.translate(
+                                    'xpack.search.queryRulesetDetail.draggableList.actions.deleteTooltip',
+                                    {
+                                      defaultMessage: 'The ruleset must contains at least 1 rule.',
+                                    }
+                                  )
+                                : undefined
+                            }
+                            disabled={rules.length === 1}
                             key="delete"
                             icon="trash"
+                            css={css`
+                              color: ${rules.length === 1
+                                ? euiTheme.colors.textDisabled
+                                : euiTheme.colors.danger};
+                            `}
                             data-test-subj="searchQueryRulesQueryRulesetDetailDeleteButton"
                             onClick={() => {
-                              // Logic to handle delete action
+                              setRuleToDelete(queryRule.rule_id);
                               closePopover();
                             }}
                           >
                             <FormattedMessage
                               id="xpack.search.queryRulesetDetail.draggableList.actions.delete"
-                              defaultMessage="Delete"
+                              defaultMessage="Delete rule"
                             />
                           </EuiContextMenuItem>,
                         ]}
@@ -194,10 +231,24 @@ export const QueryRuleDraggableListItem: React.FC<QueryRuleDraggableListItemProp
   );
 };
 
+export interface QueryRuleDraggableListItemProps {
+  queryRule: QueryRulesQueryRule;
+  index: number;
+  onEditRuleFlyoutOpen: (ruleId: string) => void;
+  isLastItem?: boolean;
+  tourInfo?: {
+    title: string;
+    content: string;
+    tourTargetRef?: React.RefObject<HTMLDivElement>;
+  };
+}
+
 export interface QueryRuleDraggableListProps {
   rules: SearchQueryRulesQueryRule[];
+  rulesetId: string;
   onReorder: (queryRules: SearchQueryRulesQueryRule[]) => void;
   onEditRuleFlyoutOpen: (ruleId: string) => void;
+  deleteRule?: (ruleId: string) => void;
   tourInfo?: {
     title: string;
     content: string;
@@ -207,7 +258,9 @@ export interface QueryRuleDraggableListProps {
 
 export const QueryRuleDraggableList: React.FC<QueryRuleDraggableListProps> = ({
   rules,
+  rulesetId,
   onEditRuleFlyoutOpen,
+  deleteRule,
   onReorder,
   tourInfo,
 }) => {
@@ -234,7 +287,11 @@ export const QueryRuleDraggableList: React.FC<QueryRuleDraggableListProps> = ({
             <QueryRuleDraggableListItem
               key={queryRule.rule_id}
               queryRule={queryRule}
+              deleteRule={deleteRule}
+              rulesetId={rulesetId}
+              tourInfo={tourInfo}
               index={index}
+              rules={rules}
               data-test-subj={`searchQueryRulesDraggableItem-${queryRule.rule_id}`}
               onEditRuleFlyoutOpen={onEditRuleFlyoutOpen}
               isLastItem={index === rules.length - 1}

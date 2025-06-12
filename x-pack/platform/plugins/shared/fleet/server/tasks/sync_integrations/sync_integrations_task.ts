@@ -24,6 +24,7 @@ import { getInstalledPackageSavedObjects } from '../../services/epm/packages/get
 import {
   FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
   canEnableSyncIntegrations,
+  createOrUpdateFleetSyncedIntegrationsIndex,
 } from '../../services/setup/fleet_synced_integrations';
 
 import { syncIntegrationsOnRemote } from './sync_integrations_on_remote';
@@ -31,7 +32,7 @@ import { getCustomAssets } from './custom_assets';
 import type { SyncIntegrationsData } from './model';
 
 export const TYPE = 'fleet:sync-integrations-task';
-export const VERSION = '1.0.4';
+export const VERSION = '1.0.5';
 const TITLE = 'Fleet Sync Integrations Task';
 const SCOPE = ['fleet'];
 const INTERVAL = '5m';
@@ -122,13 +123,13 @@ export class SyncIntegrationsTask {
 
     this.logger.info(`[runTask()] started`);
 
-    const [coreStart, _startDeps, { packageService }] = (await core.getStartServices()) as any;
-    const esClient = coreStart.elasticsearch.client.asInternalUser;
-    const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
-
     if (!canEnableSyncIntegrations()) {
       return;
     }
+
+    const [coreStart, _startDeps, { packageService }] = (await core.getStartServices()) as any;
+    const esClient = coreStart.elasticsearch.client.asInternalUser;
+    const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
 
     try {
       // write integrations on main cluster
@@ -153,15 +154,6 @@ export class SyncIntegrationsTask {
       this.logger.error(`[SyncIntegrationsTask] error: ${err}`);
       this.endRun('error');
     }
-  };
-
-  private syncedIntegrationsIndexExists = async (esClient: ElasticsearchClient) => {
-    return await esClient.indices.exists(
-      {
-        index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
-      },
-      { signal: this.abortController.signal }
-    );
   };
 
   private getSyncedIntegrationDoc = async (
@@ -191,15 +183,6 @@ export class SyncIntegrationsTask {
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClient
   ) => {
-    const indexExists = await this.syncedIntegrationsIndexExists(esClient);
-
-    if (!indexExists) {
-      this.logger.info(
-        `[SyncIntegrationsTask] index ${FLEET_SYNCED_INTEGRATIONS_INDEX_NAME} does not exist`
-      );
-      return;
-    }
-
     const outputs = await outputService.list(soClient);
     const remoteESOutputs = outputs.items.filter(
       (output) => output.type === outputType.RemoteElasticsearch
@@ -207,6 +190,10 @@ export class SyncIntegrationsTask {
     const isSyncEnabled = remoteESOutputs.some(
       (output) => (output as NewRemoteElasticsearchOutput).sync_integrations
     );
+
+    if (isSyncEnabled) {
+      await createOrUpdateFleetSyncedIntegrationsIndex(esClient);
+    }
 
     const previousSyncIntegrationsData = await this.getSyncedIntegrationDoc(esClient);
 
@@ -243,6 +230,7 @@ export class SyncIntegrationsTask {
         package_version: item.attributes.version,
         updated_at: item.updated_at ?? new Date().toISOString(),
         install_status: item.attributes.install_status,
+        install_source: item.attributes.install_source,
       };
     });
 

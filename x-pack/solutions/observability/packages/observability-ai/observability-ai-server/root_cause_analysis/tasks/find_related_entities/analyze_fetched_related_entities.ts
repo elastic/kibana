@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InferenceClient } from '@kbn/inference-plugin/server';
+import { InferenceClient } from '@kbn/inference-common';
 import { Logger } from '@kbn/logging';
 import { getEntityKuery } from '@kbn/observability-utils-common/entities/get_entity_kuery';
 import {

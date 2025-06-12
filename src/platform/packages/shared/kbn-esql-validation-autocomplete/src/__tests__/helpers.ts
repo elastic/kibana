@@ -9,6 +9,8 @@
 
 import { camelCase } from 'lodash';
 import type { IndexAutocompleteItem } from '@kbn/esql-types';
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import { InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
 import { ESQLFieldWithMetadata } from '../validation/types';
 import { fieldTypes } from '../definitions/types';
 import { ESQLCallbacks } from '../shared/types';
@@ -96,6 +98,20 @@ export const timeseriesIndices: IndexAutocompleteItem[] = [
   },
 ];
 
+export const editorExtensions = [
+  {
+    name: 'Logs Count by Host',
+    query: 'from logs* | STATS count(*) by host',
+  },
+];
+
+export const inferenceEndpoints: InferenceEndpointAutocompleteItem[] = [
+  {
+    inference_id: 'inference_1',
+    task_type: 'completion',
+  },
+];
+
 export function getCallbackMocks(): ESQLCallbacks {
   return {
     getColumnsFor: jest.fn(async ({ query } = {}) => {
@@ -128,5 +144,12 @@ export function getCallbackMocks(): ESQLCallbacks {
     getPolicies: jest.fn(async () => policies),
     getJoinIndices: jest.fn(async () => ({ indices: joinIndices })),
     getTimeseriesIndices: jest.fn(async () => ({ indices: timeseriesIndices })),
+    getEditorExtensions: jest.fn(async (queryString: string) => {
+      if (queryString.includes('logs*')) {
+        return editorExtensions;
+      }
+      return [];
+    }),
+    getInferenceEndpoints: jest.fn(async (taskType: InferenceTaskType) => ({ inferenceEndpoints })),
   };
 }
