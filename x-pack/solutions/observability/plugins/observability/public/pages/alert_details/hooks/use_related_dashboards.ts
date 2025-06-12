@@ -9,7 +9,6 @@ import { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { GetRelatedDashboardsResponse } from '@kbn/observability-schema';
 import { useQuery } from '@tanstack/react-query';
-import { useCallback } from 'react';
 import { ALERTS_API_URLS } from '../../../../common/constants';
 import { DashboardMetadata } from '../components/related_dashboards/dashboard_tile';
 
@@ -25,13 +24,6 @@ export const fetchRelatedDashboards = async ({
   });
 };
 
-interface RelatedDashboardResponse {
-  isLoadingRelatedDashboards: boolean;
-  suggestedDashboards?: DashboardMetadata[];
-  linkedDashboards?: DashboardMetadata[];
-  refetchRelatedDashboard: () => Promise<void>;
-}
-
 const getDashboardMetadata = <T extends DashboardMetadata>({ description, id, title }: T) => ({
   description,
   id,
@@ -40,7 +32,7 @@ const getDashboardMetadata = <T extends DashboardMetadata>({ description, id, ti
 
 export const getRelatedDashboardsQueryKey = (alertId: string) => ['relatedDashboards', alertId];
 
-export const useRelatedDashboards = (alertId: string): RelatedDashboardResponse => {
+export const useRelatedDashboards = (alertId: string) => {
   const { http } = useKibana().services;
 
   const { data, isLoading, refetch } = useQuery<GetRelatedDashboardsResponse>({
@@ -49,14 +41,10 @@ export const useRelatedDashboards = (alertId: string): RelatedDashboardResponse 
     refetchOnWindowFocus: false, // Disable window focus refetching
   });
 
-  const refetchRelatedDashboard = useCallback(async () => {
-    await refetch();
-  }, [refetch]);
-
   return {
     isLoadingRelatedDashboards: isLoading,
     suggestedDashboards: data?.suggestedDashboards?.map(getDashboardMetadata),
     linkedDashboards: data?.linkedDashboards?.map(getDashboardMetadata),
-    refetchRelatedDashboard,
+    refetchRelatedDashboard: refetch,
   };
 };
