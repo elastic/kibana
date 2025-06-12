@@ -107,8 +107,12 @@ export function AlertDetails() {
   const history = useHistory();
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { alertId } = useParams<AlertDetailsPathParams>();
-  const { isLoadingRelatedDashboards, suggestedDashboards, linkedDashboards } =
-    useRelatedDashboards(alertId);
+  const {
+    isLoadingRelatedDashboards,
+    suggestedDashboards,
+    linkedDashboards,
+    refetchRelatedDashboard,
+  } = useRelatedDashboards(alertId);
 
   const [isLoading, alertDetail] = useFetchAlertDetail(alertId);
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
@@ -286,6 +290,7 @@ export function AlertDetails() {
         linkedDashboards={linkedDashboards}
         isLoadingRelatedDashboards={isLoadingRelatedDashboards}
         rule={rule}
+        onSuccessAddSuggestedDashboard={refetchRelatedDashboard}
       />
     ) : (
       <EuiLoadingSpinner />

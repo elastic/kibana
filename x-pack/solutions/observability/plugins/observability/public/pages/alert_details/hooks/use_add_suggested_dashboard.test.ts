@@ -12,7 +12,7 @@ import { kibanaStartMock } from '../../../utils/kibana_react.mock';
 import { DashboardMetadata } from '../components/related_dashboards/dashboard_tile';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
-let capturedOnSuccess: ((data: Rule) => void) | undefined;
+let capturedOnSuccess: (data: Rule) => Promise<void> | undefined;
 let capturedOnError: ((error: any) => void) | undefined;
 
 // Test constants
@@ -35,7 +35,7 @@ const mockUpdateRule = jest.fn();
 
 jest.mock('@kbn/response-ops-rule-form/src/common/hooks', () => ({
   useUpdateRule: jest.fn(
-    (params: { onSuccess: (data: Rule) => void; onError: (error: any) => void }) => {
+    (params: { onSuccess: (data: Rule) => Promise<void>; onError: (error: any) => void }) => {
       capturedOnSuccess = params.onSuccess;
       capturedOnError = params.onError;
       return { mutateAsync: mockUpdateRule };
@@ -52,6 +52,8 @@ const mockRule = {
   },
 } as unknown as Rule;
 
+const mockOnSuccessAddSuggestedDashboard = jest.fn();
+
 const mockDashboard: DashboardMetadata = {
   id: TEST_DASHBOARD.id,
   title: TEST_DASHBOARD.title,
@@ -67,6 +69,7 @@ describe('useAddSuggestedDashboards', () => {
     const { result } = renderHook(() =>
       useAddSuggestedDashboards({
         rule: mockRule,
+        onSuccessAddSuggestedDashboard: mockOnSuccessAddSuggestedDashboard,
       })
     );
 
@@ -77,6 +80,7 @@ describe('useAddSuggestedDashboards', () => {
     const { result } = renderHook(() =>
       useAddSuggestedDashboards({
         rule: mockRule,
+        onSuccessAddSuggestedDashboard: mockOnSuccessAddSuggestedDashboard,
       })
     );
 
@@ -101,10 +105,11 @@ describe('useAddSuggestedDashboards', () => {
     });
   });
 
-  it('should reset addingDashboardId on success', () => {
+  it('should call onSuccessAddSuggestedDashboard and reset addingDashboardId on success', async () => {
     const { result } = renderHook(() =>
       useAddSuggestedDashboards({
         rule: mockRule,
+        onSuccessAddSuggestedDashboard: mockOnSuccessAddSuggestedDashboard,
       })
     );
 
@@ -125,9 +130,12 @@ describe('useAddSuggestedDashboards', () => {
         dashboards: [{ id: EXISTING_DASHBOARD_ID }, { id: TEST_DASHBOARD.id }],
       },
     } as unknown as Rule;
-    act(() => {
-      capturedOnSuccess!(updatedRule);
+
+    await act(async () => {
+      await capturedOnSuccess!(updatedRule);
     });
+
+    expect(mockOnSuccessAddSuggestedDashboard).toHaveBeenCalled();
 
     // Check that addingDashboardId is reset to undefined
     expect(result.current.addingDashboardId).toBeUndefined();
@@ -143,6 +151,7 @@ describe('useAddSuggestedDashboards', () => {
     const { result } = renderHook(() =>
       useAddSuggestedDashboards({
         rule: mockRule,
+        onSuccessAddSuggestedDashboard: mockOnSuccessAddSuggestedDashboard,
       })
     );
 

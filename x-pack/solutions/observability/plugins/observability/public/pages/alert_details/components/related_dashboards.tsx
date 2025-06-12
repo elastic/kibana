@@ -17,6 +17,7 @@ interface RelatedDashboardsProps {
   suggestedDashboards?: DashboardMetadata[];
   linkedDashboards?: DashboardMetadata[];
   isLoadingRelatedDashboards: boolean;
+  onSuccessAddSuggestedDashboard: () => Promise<void>;
 }
 
 export function RelatedDashboards({
@@ -24,11 +25,11 @@ export function RelatedDashboards({
   isLoadingRelatedDashboards,
   linkedDashboards,
   suggestedDashboards,
+  onSuccessAddSuggestedDashboard,
 }: RelatedDashboardsProps) {
-  // On success add the dashboard to the local linked dashboards to update the UI
-
   const { onClickAddSuggestedDashboard, addingDashboardId } = useAddSuggestedDashboards({
     rule,
+    onSuccessAddSuggestedDashboard,
   });
 
   const suggestedDashboardsWithButton = useMemo(
