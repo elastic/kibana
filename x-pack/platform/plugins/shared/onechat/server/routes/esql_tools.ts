@@ -33,11 +33,11 @@ export function registerESQLToolsRoutes({ router, getInternalServices, logger }:
       try {
         const { esql: esqlToolClientService } = getInternalServices();
         const client = await esqlToolClientService.getScopedClient({ request });
-        const tool = client.get(request.params.id);
+        const tool = await client.get(request.params.id);
 
         return response.ok({
           body: {
-            esqlTool: tool,
+            tool: tool,
           },
         });
       } catch (error) {
@@ -67,39 +67,6 @@ export function registerESQLToolsRoutes({ router, getInternalServices, logger }:
         return response.ok({
           body: {
             tools: tools,
-          },
-        });
-      } catch (error) {
-        throw error;
-      }
-    })
-  );
-
-  router.post(
-    {
-      path: '/api/chat/tools/esql/{id}/_execute',
-      security: {
-        authz: {
-          enabled: false,
-          reason: '',
-        },
-      },
-      validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-        body: schema.object({}, { unknowns: 'allow' }), 
-      },
-    },
-    wrapHandler(async (ctx, request, response) => {
-      try {
-        const { esql: esqlToolClientService } = getInternalServices();
-        const client = await esqlToolClientService.getScopedClient({ request });
-        const responseDoc = await client.execute(request.params.id, request.body);
-
-        return response.ok({
-          body: {
-            response: responseDoc,
           },
         });
       } catch (error) {
@@ -140,6 +107,8 @@ export function registerESQLToolsRoutes({ router, getInternalServices, logger }:
         const { esql: esqlToolService } = getInternalServices();
         const client = await esqlToolService.getScopedClient({ request });
 
+        const now = new Date();
+
         const tool: EsqlToolCreateRequest = {
           id: request.body.id || 'esql',
           description: request.body.description || 'Tool for executing ESQL queries',
@@ -149,6 +118,8 @@ export function registerESQLToolsRoutes({ router, getInternalServices, logger }:
             tags: request.body.meta.tags || [],
             providerId: esqlToolProviderId,
           },
+          created_at: now.toISOString(),
+          updated_at: now.toISOString(),
         };
         
         await client.create(tool);
@@ -159,6 +130,74 @@ export function registerESQLToolsRoutes({ router, getInternalServices, logger }:
           },
         });
     } catch (error) {
+        throw error;
+      }
+    })
+  );
+
+  router.put(
+    {
+      path: '/api/chat/tools/esql/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: '',
+        },
+      },
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+        body: schema.object({
+          id: schema.maybe(schema.string()),
+          description: schema.maybe(schema.string()),
+          query: schema.maybe(schema.string()),
+          params: schema.maybe(schema.recordOf(
+            schema.string(),
+            schema.object({
+              type: schema.string(),
+              description: schema.string(),
+            })
+          )),
+          meta: schema.maybe(schema.object({
+            tags: schema.maybe(schema.arrayOf(schema.string())),
+            providerId: schema.maybe(schema.string()),
+          })),
+        }),
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      try {
+        const { esql: esqlToolService } = getInternalServices();
+        const client = await esqlToolService.getScopedClient({ request });
+
+        const toolId = request.params.id;
+
+        const updates: Partial<EsqlToolCreateRequest> = {
+          ...(request.body.description && { description: request.body.description }),
+          ...(request.body.query && { query: request.body.query }),
+          ...(request.body.params && { params: request.body.params }),
+          ...(request.body.meta && { 
+            meta: {
+              ...(request.body.meta.tags && { tags: request.body.meta.tags }),
+              ...(request.body.meta.providerId && { providerId: request.body.meta.providerId }),
+            }
+          }),
+        };
+        
+        const updatedTool = await client.update(toolId, updates);
+
+        return response.ok({
+          body: {
+            esqlTool: updatedTool,
+          },
+        });
+      } catch (error: any) {
+        if (error.message?.includes('not found')) {
+          return response.notFound({
+            body: { message: `Tool with ID ${request.params.id} not found` },
+          });
+        }
         throw error;
       }
     })

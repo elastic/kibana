@@ -74,31 +74,24 @@ export class EsqlToolRegistryImpl implements EsqlToolRegistry {
   async list(options: { request: KibanaRequest }): Promise<RegisteredTool[]> {
     const client = await this.getScopedClient({ request: options.request });
     const esqlTools = await client.list();
+    const registeredTools: RegisteredTool[] = [];
 
     for (const tool of esqlTools) {
       const executableTool = esqlToolCreater(tool);
-      Object.assign(tool, executableTool);
+      registeredTools.push(executableTool);
     }
-    return esqlTools
+    return registeredTools
   }
 
-  getScopedUsers({ request }: { request: KibanaRequest }) {
-    return {
-      internalUser: this.elasticsearch.client.asScoped(request).asInternalUser,
-      currentUser: this.elasticsearch.client.asScoped(request).asCurrentUser,
-    }
-  }
   async getScopedClient({ request }: { request: KibanaRequest }): Promise<EsqlToolClient> {
     try {
-      const { internalUser, currentUser } = this.getScopedUsers({ request });
       const storage = createStorage({ 
           logger: this.logger, 
-          esClient: internalUser,
+          esClient: this.elasticsearch.client.asScoped(request).asInternalUser,
       });
 
       const client = createClient({ 
-          storage, 
-          esClient: currentUser,
+          storage
       });
 
       return client;
