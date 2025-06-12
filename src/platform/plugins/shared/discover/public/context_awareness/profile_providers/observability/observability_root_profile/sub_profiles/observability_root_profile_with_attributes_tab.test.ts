@@ -11,7 +11,6 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { createContextAwarenessMocks } from '../../../../__mocks__';
 import { SolutionType } from '../../../../profiles';
 import { createObservabilityRootProfileProvider } from '../profile';
-import type { ObservabilityRootProfileProvider } from '../types';
 import { createObservabilityRootProfileProviderWithAttributesTab } from './observability_root_profile_with_attributes_tab';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 
