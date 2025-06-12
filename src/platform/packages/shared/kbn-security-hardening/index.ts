@@ -7,5 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import fsEventBus from './fs-event-bus';
 import './prototype';
 export { unsafeConsole } from './console';
+export { fsEventBus };
