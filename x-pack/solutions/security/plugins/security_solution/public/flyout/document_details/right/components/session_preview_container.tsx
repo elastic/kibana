@@ -38,7 +38,7 @@ export const SessionPreviewContainer: FC = () => {
     scopeId,
     dataAsNestedObject,
     getFieldsData,
-    isPreview,
+    isRulePreview,
     isPreviewMode,
     dataFormattedForFieldBrowser,
   } = useDocumentDetailsContext();
@@ -98,7 +98,7 @@ export const SessionPreviewContainer: FC = () => {
 
   const isNavigationEnabled = useMemo(() => {
     // if the session view is not enabled or in rule preview mode, the navigation is not enabled
-    if (!isEnabled || isPreview) {
+    if (!isEnabled || isRulePreview) {
       return false;
     }
     // if the new navigation is enabled, the navigation is enabled (flyout or timeline)
@@ -107,7 +107,7 @@ export const SessionPreviewContainer: FC = () => {
     }
     // if the new navigation is not enabled, the navigation is enabled if the flyout is not in preview mode
     return !isPreviewMode;
-  }, [isNewNavigationEnabled, isPreviewMode, isEnabled, isPreview]);
+  }, [isNewNavigationEnabled, isPreviewMode, isEnabled, isRulePreview]);
 
   return (
     <ExpandablePanel
