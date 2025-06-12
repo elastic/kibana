@@ -169,12 +169,6 @@ export const SelectSeverityUI: FC<
 
   // Create a display string for the selected severities
   const inputDisplay = useMemo(() => {
-    if (severity.length === 0) {
-      return i18n.translate('xpack.ml.controls.selectSeverity.noneSelected', {
-        defaultMessage: 'None selected',
-      });
-    }
-
     if (severity.length === 1) {
       const selectedSeverity = selectedSeverities[0];
       if (selectedSeverity && typeof selectedSeverity.val === 'number') {
@@ -235,6 +229,11 @@ export const SelectSeverityUI: FC<
       const selectedOptionKeys = newOptions
         .filter((option) => option.checked === 'on')
         .map((option) => option.key);
+
+      // Prevent deselecting all options - at least one must remain selected
+      if (selectedOptionKeys.length === 0) {
+        return;
+      }
 
       // Find the corresponding severity options
       const newSelectedSeverities = allSeverityOptions.filter((option) =>

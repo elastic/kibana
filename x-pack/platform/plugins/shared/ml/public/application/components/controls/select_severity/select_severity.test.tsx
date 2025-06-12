@@ -98,45 +98,6 @@ describe('SelectSeverity', () => {
     });
   });
 
-  it('allows multiple severity selections', async () => {
-    const { getByTestId, getByRole } = render(<SelectSeverity />);
-
-    // Open the popover by clicking the button
-    const control = getByTestId('mlAnomalySeverityThresholdControls');
-    const button = control.querySelector('button');
-    act(() => {
-      fireEvent.click(button!);
-    });
-
-    // Wait for options to appear and click on 'major' option (50-75) to deselect it
-    await waitFor(() => {
-      expect(getByRole('option', { name: '50-75' })).toBeInTheDocument();
-    });
-
-    const majorOption = getByRole('option', { name: '50-75' });
-    act(() => {
-      fireEvent.click(majorOption);
-    });
-
-    // Should call the update callback with all options except 'major' selected
-    await waitFor(() => {
-      expect(mockUpdateCallback).toHaveBeenCalledWith({
-        val: expect.arrayContaining([
-          mockSeverityOptions[0].threshold, // low
-          mockSeverityOptions[1].threshold, // warning
-          mockSeverityOptions[2].threshold, // minor
-          mockSeverityOptions[4].threshold, // critical
-        ]),
-      });
-      // Should not contain major
-      expect(mockUpdateCallback).toHaveBeenCalledWith({
-        val: expect.not.arrayContaining([
-          mockSeverityOptions[3].threshold, // major
-        ]),
-      });
-    });
-  });
-
   it('allows deselecting severity options', async () => {
     const { getByTestId, getByRole } = render(<SelectSeverity />);
 
@@ -161,18 +122,50 @@ describe('SelectSeverity', () => {
     await waitFor(() => {
       expect(mockUpdateCallback).toHaveBeenCalledWith({
         val: expect.arrayContaining([
-          mockSeverityOptions[1].threshold, // warning
-          mockSeverityOptions[2].threshold, // minor
-          mockSeverityOptions[3].threshold, // major
-          mockSeverityOptions[4].threshold, // critical
+          mockSeverityOptions[1].threshold,
+          mockSeverityOptions[2].threshold,
+          mockSeverityOptions[3].threshold,
+          mockSeverityOptions[4].threshold,
         ]),
       });
       // Should not contain low
       expect(mockUpdateCallback).toHaveBeenCalledWith({
-        val: expect.not.arrayContaining([
-          mockSeverityOptions[0].threshold, // low
-        ]),
+        val: expect.not.arrayContaining([mockSeverityOptions[0].threshold]),
       });
+    });
+  });
+
+  it('prevents deselecting all severity options', async () => {
+    // Mock state with only one option selected
+    mockUseState.mockImplementationOnce(() => [
+      {
+        val: [mockSeverityOptions[2].threshold],
+      },
+      jest.fn(),
+    ]);
+
+    const { getByTestId, getByRole } = render(<SelectSeverity />);
+
+    // Open the popover
+    const control = getByTestId('mlAnomalySeverityThresholdControls');
+    const button = control.querySelector('button');
+    act(() => {
+      fireEvent.click(button!);
+    });
+
+    // Wait for options to appear and try to click on the last selected 'minor' option (25-50)
+    await waitFor(() => {
+      expect(getByRole('option', { name: '25-50' })).toBeInTheDocument();
+    });
+
+    const minorOption = getByRole('option', { name: '25-50' });
+    act(() => {
+      fireEvent.click(minorOption);
+    });
+
+    // Should NOT call the update callback since we're trying to deselect the last option
+    await waitFor(() => {
+      expect(mockUpdateCallback).not.toHaveBeenCalled();
     });
   });
 
@@ -180,10 +173,7 @@ describe('SelectSeverity', () => {
     // Mock state with multiple selections
     mockUseState.mockImplementationOnce(() => [
       {
-        val: [
-          mockSeverityOptions[1].threshold, // warning
-          mockSeverityOptions[3].threshold, // major
-        ],
+        val: [mockSeverityOptions[1].threshold, mockSeverityOptions[3].threshold],
       },
       jest.fn(),
     ]);
@@ -198,7 +188,7 @@ describe('SelectSeverity', () => {
     // Mock state with single selection
     mockUseState.mockImplementationOnce(() => [
       {
-        val: [mockSeverityOptions[2].threshold], // minor
+        val: [mockSeverityOptions[2].threshold],
       },
       jest.fn(),
     ]);
