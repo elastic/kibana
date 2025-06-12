@@ -183,6 +183,7 @@ export default async () => {
         `--xpack.cloud.users_and_roles_url=/account/members/`,
         // disable product intercept for all ftr tests by default
         '--xpack.intercepts.enabled=false',
+        '--xpack.cases.incrementalIdService.enabled=false',
       ],
     },
 
