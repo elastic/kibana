@@ -6,27 +6,14 @@
  */
 import { Transform } from 'stream';
 
-// export const batchPartitions = <T>(batchSize: number) => {
-//   let batch: Readable = new Readable({ objectMode: true });
-//   let count = 0;
-
-//   return async (item: T) => {
-//     batch.push(item);
-//     count++;
-
-//     if (count === batchSize) {
-//       count = 0;
-//       batch = new Readable({ objectMode: true });
-//       return;
-//       //   batch.push(null); // Push null to signal the end of the batch
-//     }
-
-//     if (count === 1) {
-//       return batch;
-//     }
-//   };
-// };
-
+/**
+ * Creates a Transform stream that batches incoming data into arrays of a specified size.
+ * When the buffer reaches the specified batch size, it emits the batch and resets the buffer.
+ * If there are remaining items in the buffer when the stream ends, it emits them as a final batch via the `flush` method.
+ *
+ * @param batchSize - The size of each batch to emit.
+ * @returns A Transform stream that batches incoming data.
+ */
 export function batchPartitions<T>(batchSize: number) {
   let buffer: T[] = [];
 
