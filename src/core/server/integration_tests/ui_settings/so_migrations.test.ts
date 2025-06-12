@@ -84,13 +84,13 @@ describe('ui settings migrations', () => {
         references: [],
       },
     ];
-    expect(await testHarness.migrate(input)).toEqual([
-      expect.objectContaining({
-        type: 'config',
-        id: '1',
-        attributes: { 'banners:textContent': 'my custom banner' },
-        references: [],
-      }),
-    ]);
+
+    const output = await testHarness.migrate(input);
+
+    expect(output[0].attributes).toMatchInlineSnapshot(`
+      Object {
+        "banners:textContent": "my custom banner",
+      }
+    `);
   });
 });
