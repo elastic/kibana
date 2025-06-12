@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiErrorBoundary, EuiLoadingSpinner } from '@elastic/eui';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { FETCH_STATUS, useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
@@ -26,7 +26,16 @@ export const Dashboard = () => {
     },
   } = useKibanaContextForPlugin();
 
-  const { dashboardId } = useParams<{ dashboardId: string }>();
+  const { search } = useLocation();
+  const { entity } = useParams<{ entity: string }>();
+
+  const { dashboardId } = useMemo(() => {
+    const query = new URLSearchParams(search);
+    return {
+      dashboardId: query.get('dashboardId') ?? '',
+    };
+  }, [search]);
+
   const { data: dashboardData, status } = useFetchDashboardById(dashboardId);
 
   const kubernetesLinkProps = useLinkProps({
@@ -42,7 +51,7 @@ export const Dashboard = () => {
       ...kubernetesLinkProps,
     },
     {
-      text: dashboardId,
+      text: entity ?? 'Overview',
     },
   ]);
 
@@ -68,12 +77,12 @@ export const Dashboard = () => {
       <EuiErrorBoundary>
         <PageTemplate
           pageHeader={{
-            pageTitle: pageDashTitle,
+            pageTitle: entity ?? pageDashTitle,
             rightSideItems: [<DatePicker />],
           }}
           data-test-subj="infraKubernetesPage"
         >
-          <RenderDashboard />
+          <RenderDashboard dashboardId={dashboardId} />
         </PageTemplate>
       </EuiErrorBoundary>
     </DatePickerProvider>

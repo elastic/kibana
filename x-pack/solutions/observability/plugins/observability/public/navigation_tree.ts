@@ -20,22 +20,22 @@ const icon = 'logoObservability';
 
 function createNavTree({
   streamsAvailable,
-  kubernetesDashboardIds,
+  kubernetesDashboards,
 }: {
   streamsAvailable?: boolean;
-  kubernetesDashboardIds?: string[];
+  kubernetesDashboards?: Array<{
+    title: string;
+    entity?: string;
+    dashboardId: string;
+  }>;
 }) {
   const k8sSubItems =
-    kubernetesDashboardIds?.map((id) => {
-      const shortenedId = id.substring(0, 15);
+    kubernetesDashboards?.map(({ title: dashboardTitle, dashboardId }) => {
       return {
-        link: (id.startsWith('kubernetes')
-          ? `metrics:${id}`
-          : `metrics:kubernetes_${id}`) as AppDeepLinkId,
-        title: i18n.translate('xpack.observability.obltNav.infrastructure.kubernetesDashboard', {
-          defaultMessage: `${shortenedId}`,
-          values: { id: shortenedId },
-        }),
+        link: (dashboardId.startsWith('kubernetes')
+          ? `metrics:${dashboardId}`
+          : `metrics:kubernetes_${dashboardId}`) as AppDeepLinkId,
+        title: dashboardTitle,
       };
     }) ?? [];
 
@@ -497,8 +497,7 @@ function createNavTree({
 }
 
 export const createDefinition = (
-  pluginsStart: ObservabilityPublicPluginsStart,
-  kubernetesDashboardIds?: string[]
+  pluginsStart: ObservabilityPublicPluginsStart
 ): AddSolutionNavigationArg => ({
   id: 'oblt',
   title,
@@ -511,7 +510,7 @@ export const createDefinition = (
     map(({ fleet, streams }) => {
       return createNavTree({
         streamsAvailable: streams.status === 'enabled',
-        kubernetesDashboardIds: fleet?.kubernetes,
+        kubernetesDashboards: fleet?.kubernetes,
       });
     })
   ),

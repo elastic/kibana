@@ -15,7 +15,19 @@ import type { IPackageDetailClient } from './types';
 
 export class PackageDetailClient implements IPackageDetailClient {
   constructor(private readonly http: HttpStart) {}
-  async getPackage(pkgName: string, pkgVersion?: string): Promise<Record<string, string[]>> {
+  async getPackage(
+    pkgName: string,
+    pkgVersion?: string
+  ): Promise<
+    Record<
+      string,
+      Array<{
+        title: string;
+        entity?: string;
+        dashboardId: string;
+      }>
+    >
+  > {
     const pkg = await this.http.fetch<GetInfoResponse>(
       epmRouteService.getInfoPath(pkgName, pkgVersion),
       {
@@ -27,8 +39,23 @@ export class PackageDetailClient implements IPackageDetailClient {
       }
     );
 
+    const sideNav = pkg.item.installationInfo?.installed_kibana
+      .filter((p) => !!p.sideNavTitle)
+      .sort((a, b) => (a.sideNavOrder ?? 0) - (b.sideNavOrder ?? 0));
+
+    if (!sideNav || sideNav.length === 0) {
+      return { [pkg.item.name]: [] };
+    }
+
     return {
-      [pkg.item.name]: pkg.item.installationInfo?.installed_kibana.map((kibana) => kibana.id) ?? [],
+      [pkg.item.name]:
+        sideNav.map((kibana) => {
+          return {
+            title: kibana.sideNavTitle ?? 'missing title',
+            entity: kibana.entity,
+            dashboardId: kibana.id,
+          };
+        }) ?? [],
     };
   }
 }

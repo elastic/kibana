@@ -6,5 +6,13 @@
  */
 
 export interface IPackageDetailClient {
-  getPackage(name: string): Promise<Record<string, string[]>>;
+  getPackage(name: string): Promise<
+    Record<
+      string,
+      Array<{
+        title: string;
+        dashboardId: string;
+      }>
+    >
+  >;
 }
