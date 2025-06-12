@@ -7,15 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiButtonIcon,
-  useEuiTheme,
-  EuiProgress,
-} from '@elastic/eui';
+import React, { ComponentProps, useCallback, useEffect } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, useEuiTheme, EuiProgress } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   useReactTable,
@@ -29,39 +22,41 @@ import {
 import { useVirtualizer, type VirtualItem } from '@tanstack/react-virtual';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { SelectionDropdown } from '../selection_dropdown';
-import { useDataCascadeState, useDataCascadeDispatch } from '../../lib';
+import {
+  DataCascadeProvider,
+  useDataCascadeState,
+  useDataCascadeDispatch,
+  type DocWithId,
+  type IStoreState,
+} from '../../lib';
 
-interface DataCascadeRow {
-  id: string;
-  children?: DataCascadeRow[];
-}
-
-interface DataCascadeProps<T extends DataCascadeRow> {
+interface DataCascadeProps<T extends DocWithId> {
   /**
    * The size of the component, can be 's' (small), 'm' (medium), or 'l' (large). Default is 'm'.
    */
   size?: 's' | 'm' | 'l';
   data: T[];
   onGroupByChange?: (groupBy: string) => void;
-  onGroupByRowExpanded?: (row: Row<T>) => Promise<DataCascadeRow[]>;
+  onGroupByRowExpanded?: (args: { row: Row<T>; state: IStoreState<T> }) => Promise<T[]>;
   rowHeaderTitleSlot: React.FC<{ row: Row<T> }>;
   rowHeaderMetaSlots?: (props: { row: Row<T> }) => React.ReactNode[];
   rowContentSlot: React.FC<{ row: Row<T> }>;
+  tableTitleSlot: React.FC<{ rows: Array<Row<T>> }>;
 }
 
-interface CascadeRowProps {
+interface CascadeRowProps<T extends DocWithId> {
   populateRowDataFn: () => Promise<void>;
-  rowInstance: Row<DataCascadeRow>;
+  rowInstance: Row<T>;
   virtualizerInstance: ReturnType<typeof useVirtualizer>;
   virtualRow: VirtualItem;
 }
 
-function CascadeRow({
+function CascadeRow<T>({
   populateRowDataFn,
   rowInstance,
   virtualRow,
   virtualizerInstance,
-}: CascadeRowProps) {
+}: CascadeRowProps<T>) {
   const { euiTheme } = useEuiTheme();
   const [isPendingRowDataFetch, setRowDataFetch] = React.useState<boolean>(false);
   const cascadeRowRef = React.useRef<HTMLLIElement | null>(null);
@@ -106,6 +101,7 @@ function CascadeRow({
         alignItems="flexStart"
         justifyContent="spaceBetween"
         css={{
+          position: 'relative',
           ...(rowInstance.parentId && rowInstance.getIsAllParentsExpanded()
             ? {
                 padding: `${euiTheme.base / 2}px ${
@@ -138,7 +134,13 @@ function CascadeRow({
         </EuiFlexItem>
         <EuiFlexItem>
           <React.Fragment>
-            {isPendingRowDataFetch && <EuiProgress size="xs" color="accent" position="fixed" />}
+            {isPendingRowDataFetch && (
+              <EuiProgress
+                size="xs"
+                color="accent"
+                position={rowInstance.depth === 0 ? 'fixed' : 'absolute'}
+              />
+            )}
           </React.Fragment>
           <React.Fragment>
             {rowInstance.getVisibleCells().map((cell) => {
@@ -155,18 +157,19 @@ function CascadeRow({
   );
 }
 
-export function DataCascade<T extends DataCascadeRow>({
+function DataCascadeImpl<T extends DocWithId>({
   data,
   onGroupByChange,
   onGroupByRowExpanded,
   rowHeaderTitleSlot: RowTitleSlot,
   rowHeaderMetaSlots,
   rowContentSlot: RowContentSlot,
+  tableTitleSlot: TableTitleSlot,
 }: DataCascadeProps<T>) {
   // The scrollable element for your list
   const parentRef = React.useRef(null);
   const dispatch = useDataCascadeDispatch();
-  const state = useDataCascadeState();
+  const state = useDataCascadeState<T>();
   const columnHelper = createColumnHelper<T>();
   const [expanded, setExpanded] = React.useState<ExpandedState>({});
 
@@ -180,7 +183,7 @@ export function DataCascade<T extends DataCascadeRow>({
   const fetchSubRowData = useCallback(
     ({ row }: { row: Row<T> }) => {
       const dataFetchFn = async () => {
-        const rowData = await onGroupByRowExpanded?.(row);
+        const rowData = await onGroupByRowExpanded?.({ row, state });
         if (!rowData) {
           return;
         }
@@ -197,11 +200,11 @@ export function DataCascade<T extends DataCascadeRow>({
         console.error('Error fetching data for row with ID: %s', row.id, error);
       });
     },
-    [dispatch, onGroupByRowExpanded]
+    [dispatch, onGroupByRowExpanded, state]
   );
 
-  const table = useReactTable({
-    data: state.data as T[],
+  const table = useReactTable<T>({
+    data: state.data,
     state: {
       expanded,
     },
@@ -219,16 +222,7 @@ export function DataCascade<T extends DataCascadeRow>({
             return (
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexItem>
-                  <EuiText>
-                    {i18n.translate('sharedUXPackages.data_cascade.toolbar.query_string', {
-                      defaultMessage: '{entitiesCount} {entitiesAlias} | {groupCount} groups',
-                      values: {
-                        entitiesCount: rows.reduce((acc, row) => acc + row.original.count, 0),
-                        groupCount: rows.length,
-                        entitiesAlias: 'documents',
-                      },
-                    })}
-                  </EuiText>
+                  <TableTitleSlot rows={rows} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <SelectionDropdown onSelectionChange={onGroupByChange} />
@@ -319,5 +313,16 @@ export function DataCascade<T extends DataCascadeRow>({
         )}
       </AutoSizer>
     </div>
+  );
+}
+
+export function DataCascade<T extends DocWithId>({
+  query,
+  ...props
+}: DataCascadeProps<T> & ComponentProps<typeof DataCascadeProvider>) {
+  return (
+    <DataCascadeProvider query={query}>
+      <DataCascadeImpl<T> {...props} />
+    </DataCascadeProvider>
   );
 }
