@@ -104,6 +104,10 @@ function highlightContent(
   return parts;
 }
 
+const euiCommentListClassName = css`
+  padding-bottom: 32px;
+`;
+
 export function ChatTimeline({
   conversationId,
   messages,
@@ -137,10 +141,6 @@ export function ChatTimeline({
     }
   }, [uiSettings]);
   const { euiTheme } = useEuiTheme();
-
-  const euiCommentListClassName = css`
-    padding-bottom: 32px;
-  `;
 
   const stickyCalloutContainerClassName = css`
     position: sticky;
