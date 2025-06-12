@@ -21,7 +21,7 @@ const dualPath = new Set(['copyFile', 'copyFileSync', 'rename', 'renameSync']);
 
 const { REPO_ROOT } = require('@kbn/repo-info');
 
-const fsEventBus = require('../../platform/packages/shared/kbn-security-hardening/fs-event-bus'); // eslint-disable-line @kbn/imports/uniform_imports
+// const fsEventBus = require('../../platform/packages/shared/kbn-security-hardening/fs-event-bus'); // eslint-disable-line @kbn/imports/uniform_imports
 
 const { join, normalize } = require('path');
 const { homedir, tmpdir } = require('os');
@@ -46,10 +46,10 @@ const getSafePath = (userPath) => {
   return normalizedPath;
 };
 
-fsEventBus.on('kbn_config_changed', ({ loggerFilePath }) => {
-  console.log('Logger path changed:', loggerFilePath);
-  safePaths.push(loggerFilePath);
-});
+// fsEventBus.on('kbn_config_changed', ({ loggerFilePath }) => {
+//   console.log('Logger path changed:', loggerFilePath);
+//   safePaths.push(loggerFilePath);
+// });
 
 const patchFs = (fs) => {
   return new Proxy(fs, {
