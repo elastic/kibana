@@ -9,7 +9,7 @@
 
 import React from 'react';
 import type { FC } from 'react';
-import { EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 
 export interface Props {
@@ -23,10 +23,6 @@ export const PatternCellRenderer: FC<Props> = ({ row, columnId, isDetails }) => 
 
   const pattern = String(row.flattened[columnId]);
 
-  if (isDetails) {
-    return <EuiText size="s">{pattern}</EuiText>;
-  }
-
   const keywordStyle = {
     marginRight: euiTheme.size.xs,
     marginBottom: euiTheme.size.xs,
@@ -38,17 +34,36 @@ export const PatternCellRenderer: FC<Props> = ({ row, columnId, isDetails }) => 
   };
 
   const keywords = extractGenericKeywords(pattern);
-  return (
-    <>
-      {keywords.map((keyword, index) => {
-        return (
-          <div key={index} css={keywordStyle}>
-            <code>{keyword}</code>
-          </div>
-        );
-      })}
-    </>
-  );
+  const formattedTokens = keywords.map((keyword, index) => {
+    return (
+      <div key={index} css={keywordStyle}>
+        <code>{keyword}</code>
+      </div>
+    );
+  });
+
+  if (isDetails) {
+    return (
+      <>
+        <EuiText size="s">
+          <strong>Tokens</strong>
+          <EuiSpacer size="s" />
+          {formattedTokens}
+        </EuiText>
+
+        <EuiSpacer size="m" />
+
+        <EuiText size="s">
+          <strong>Regex</strong>
+          <EuiSpacer size="s" />
+          {pattern}
+        </EuiText>
+        <EuiSpacer size="s" />
+      </>
+    );
+  }
+
+  return <>{formattedTokens}</>;
 };
 
 /**
@@ -58,7 +73,7 @@ export const PatternCellRenderer: FC<Props> = ({ row, columnId, isDetails }) => 
  * @param {string} regexString The regular expression string.
  * @returns {string[]} An array of extracted "keywords".
  */
-function extractGenericKeywords(regexString: string) {
+export function extractGenericKeywords(regexString: string) {
   let cleanedString = regexString;
 
   // Strip leading '.*?'

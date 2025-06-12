@@ -9,12 +9,16 @@
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getCategorizeColumns } from '@kbn/esql-utils';
+import { i18n } from '@kbn/i18n';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
-import { PatternCellRenderer } from './pattern_cell_renderer';
+import { PatternCellRenderer, extractGenericKeywords } from './pattern_cell_renderer';
+import type { ProfileProviderServices } from '../../profile_provider_services';
 
-export const createPatternDataSourceProfileProvider = (): DataSourceProfileProvider<{
+export const createPatternDataSourceProfileProvider = (
+  services: ProfileProviderServices
+): DataSourceProfileProvider<{
   patternColumns: string[];
 }> => ({
   profileId: 'patterns-data-source-profile',
@@ -42,22 +46,44 @@ export const createPatternDataSourceProfileProvider = (): DataSourceProfileProvi
           ...patternRenderers,
         };
       },
-    getAdditionalCellActions:
-      (prev, { context }) =>
-      () => {
-        return [
-          ...prev(),
-          {
-            id: 'patterns-data-source-action',
-            getDisplayName: () => 'Example data source action',
-            getIconType: () => 'anomalyChart',
-            execute: () => {
-              alert('Example data source action executed');
-            },
-            isCompatible: ({ field }) => true,
+    getAdditionalCellActions: (prev, ss) => () => {
+      return [
+        ...prev(),
+        {
+          id: 'patterns-action-view-docs-in-discover',
+          getDisplayName: () =>
+            i18n.translate('discover.docViews.patterns.cellAction.viewDocsInDiscover', {
+              defaultMessage: 'View docs in Discover',
+            }),
+          getIconType: () => 'discoverApp',
+          execute: (context) => {
+            const index = context.dataView?.getIndexPattern();
+            if (!isOfAggregateQueryType(context.query) || !context.value || !index) {
+              return;
+            }
+
+            const pattern = extractGenericKeywords(context.value as string).join(' ');
+            const categorizeField = context.query.esql.match(/CATEGORIZE\((.*)\)/)?.[1]?.trim();
+
+            if (!categorizeField || !pattern) {
+              return;
+            }
+            const query = {
+              ...context.query,
+              esql: `FROM ${index}\n  | WHERE MATCH(${categorizeField}, "${pattern}", {"auto_generate_synonyms_phrase_query": false, "fuzziness": 0, "operator": "AND"})\n  | LIMIT 10000`,
+            };
+
+            const discoverLocator = services.share?.url.locators.get('DISCOVER_APP_LOCATOR');
+            const discoverLink = discoverLocator?.getRedirectUrl({
+              query,
+              timeRange: services.data.query.timefilter.timefilter.getTime(),
+            });
+            window.open(discoverLink, '_blank');
           },
-        ];
-      },
+          isCompatible: ({ field }) => true,
+        },
+      ];
+    },
   },
   resolve: (params) => {
     if (!isDataSourceType(params.dataSource, DataSourceType.Esql)) {
