@@ -96,7 +96,7 @@ journey(`PrivateLocationsSettings`, async ({ page, params }) => {
     expect(await page.locator('[aria-label="Select agent policy"]').isDisabled()).toBe(true);
 
     // Verify that tags field is disabled
-    expect(await page.locator('[aria-label="Tags"]').isDisabled()).toBe(true);
+    expect(await page.locator('[aria-label="Tags"]').isDisabled()).toBe(false);
 
     // Verify that spaces selector is disabled
     expect(await page.locator('[aria-label="Spaces "]').isDisabled()).toBe(true);

@@ -33,6 +33,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     let newMonitor: { id: string; name: string };
     const testPrivateLocations = new PrivateLocationTestService(getService);
     const NEW_LOCATION_LABEL = 'Barcelona';
+    const NEW_TAGS = ['myAwesomeTag'];
 
     before(async () => {
       supertestEditorWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('editor', {
@@ -104,11 +105,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       // Edit the private location
       const editResponse = await supertestEditorWithApiKey
         .put(`${SYNTHETICS_API_URLS.PRIVATE_LOCATIONS}/${privateLocation.id}`)
-        .send({ label: NEW_LOCATION_LABEL })
+        .send({ label: NEW_LOCATION_LABEL, tags: NEW_TAGS })
         .expect(200);
 
       // Verify the response contains the updated label
       expect(editResponse.body.label).to.be(NEW_LOCATION_LABEL);
+      expect(editResponse.body.tags).to.eql(NEW_TAGS);
       expect(editResponse.body.id).to.be(privateLocation.id);
       expect(editResponse.body.agentPolicyId).to.be(privateLocation.agentPolicyId);
 

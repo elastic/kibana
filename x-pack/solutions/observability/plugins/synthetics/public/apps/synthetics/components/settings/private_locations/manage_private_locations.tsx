@@ -8,6 +8,7 @@ import React, { useEffect, useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SpacesContextProps } from '@kbn/spaces-plugin/public';
+import { isEqual } from 'lodash';
 import { PrivateLocation } from '../../../../../../common/runtime_types';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
 import { PrivateLocationsTable } from './locations_table';
@@ -65,10 +66,12 @@ export const ManagePrivateLocations = () => {
 
   const handleSubmit = (formData: NewLocation) => {
     if (privateLocationToEdit) {
-      if (formData.label === privateLocationToEdit.label) {
+      const isLabelChanged = formData.label !== privateLocationToEdit.label;
+      const areTagsChanged = !isEqual(formData.tags, privateLocationToEdit.tags);
+      if (!isLabelChanged && !areTagsChanged) {
         onCloseFlyout();
       } else {
-        onEditLocationAPI(privateLocationToEdit.id, { label: formData.label });
+        onEditLocationAPI(privateLocationToEdit.id, { label: formData.label, tags: formData.tags });
       }
     } else {
       onCreateLocationAPI(formData);

@@ -6,9 +6,10 @@
  */
 
 import { TypeOf, schema } from '@kbn/config-schema';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SavedObject, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { i18n } from '@kbn/i18n';
+import { isEqual } from 'lodash';
 import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
 import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
@@ -20,9 +21,12 @@ import { PrivateLocation } from '../../../../common/runtime_types';
 import { parseArrayFilters } from '../../common';
 
 const EditPrivateLocationSchema = schema.object({
-  label: schema.string({
-    minLength: 1,
-  }),
+  label: schema.maybe(
+    schema.string({
+      minLength: 1,
+    })
+  ),
+  tags: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 const EditPrivateLocationQuery = schema.object({
@@ -33,6 +37,30 @@ export type EditPrivateLocationAttributes = Pick<
   PrivateLocationAttributes,
   keyof TypeOf<typeof EditPrivateLocationSchema>
 >;
+
+const isPrivateLocationLabelChanged = (oldLabel: string, newLabel?: string): newLabel is string => {
+  return typeof newLabel === 'string' && oldLabel !== newLabel;
+};
+
+const isPrivateLocationChanged = ({
+  privateLocation,
+  newParams,
+}: {
+  privateLocation: SavedObject<PrivateLocationAttributes>;
+  newParams: TypeOf<typeof EditPrivateLocationSchema>;
+}) => {
+  const isLabelChanged = isPrivateLocationLabelChanged(
+    privateLocation.attributes.label,
+    newParams.label
+  );
+  const areTagsChanged =
+    Array.isArray(newParams.tags) &&
+    (!privateLocation.attributes.tags ||
+      (privateLocation.attributes.tags &&
+        !isEqual(privateLocation.attributes.tags, newParams.tags)));
+
+  return isLabelChanged || areTagsChanged;
+};
 
 export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
   PrivateLocation,
@@ -53,7 +81,7 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
   handler: async (routeContext) => {
     const { response, request, savedObjectsClient, server } = routeContext;
     const { locationId } = request.params;
-    const newLocationLabel = request.body.label;
+    const { label: newLocationLabel, tags: newTags } = request.body;
 
     const repo = new PrivateLocationRepository(routeContext);
 
@@ -71,40 +99,47 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
 
       let newLocation: Awaited<ReturnType<typeof repo.editPrivateLocation>> | undefined;
 
-      if (existingLocation.attributes.label !== newLocationLabel) {
-        const monitorsSpaces = monitorsInLocation.map(({ namespaces }) => namespaces![0]);
+      if (
+        isPrivateLocationChanged({ privateLocation: existingLocation, newParams: request.body })
+      ) {
+        // This privileges check is done only when changing the label, because changing the label will update also the monitors in that location
+        if (isPrivateLocationLabelChanged(existingLocation.attributes.label, newLocationLabel)) {
+          const monitorsSpaces = monitorsInLocation.map(({ namespaces }) => namespaces![0]);
 
-        const checkSavedObjectsPrivileges =
-          server.security.authz.checkSavedObjectsPrivilegesWithRequest(request);
+          const checkSavedObjectsPrivileges =
+            server.security.authz.checkSavedObjectsPrivilegesWithRequest(request);
 
-        const { hasAllRequested } = await checkSavedObjectsPrivileges(
-          'saved_object:synthetics-monitor/bulk_update',
-          monitorsSpaces
-        );
+          const { hasAllRequested } = await checkSavedObjectsPrivileges(
+            'saved_object:synthetics-monitor/bulk_update',
+            monitorsSpaces
+          );
 
-        if (!hasAllRequested) {
-          return response.forbidden({
-            body: {
-              message: i18n.translate('xpack.synthetics.editPrivateLocation.forbidden', {
-                defaultMessage:
-                  'You do not have sufficient permissions to update monitors in all required spaces. This private location is used by monitors in spaces where you lack update privileges.',
-              }),
-            },
-          });
+          if (!hasAllRequested) {
+            return response.forbidden({
+              body: {
+                message: i18n.translate('xpack.synthetics.editPrivateLocation.forbidden', {
+                  defaultMessage:
+                    'You do not have sufficient permissions to update monitors in all required spaces. This private location is used by monitors in spaces where you lack update privileges.',
+                }),
+              },
+            });
+          }
         }
 
         newLocation = await repo.editPrivateLocation(locationId, {
-          label: newLocationLabel,
+          label: newLocationLabel || existingLocation.attributes.label,
+          tags: newTags || existingLocation.attributes.tags,
         });
-        const allPrivateLocations = await getPrivateLocations(savedObjectsClient);
 
-        await updatePrivateLocationMonitors({
-          locationId,
-          newLocationLabel,
-          allPrivateLocations,
-          routeContext,
-          monitorsInLocation,
-        });
+        if (isPrivateLocationLabelChanged(existingLocation.attributes.label, newLocationLabel)) {
+          await updatePrivateLocationMonitors({
+            locationId,
+            newLocationLabel,
+            allPrivateLocations: await getPrivateLocations(savedObjectsClient),
+            routeContext,
+            monitorsInLocation,
+          });
+        }
       }
 
       return toClientContract({
