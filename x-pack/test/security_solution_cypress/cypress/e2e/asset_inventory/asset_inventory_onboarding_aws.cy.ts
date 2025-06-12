@@ -49,11 +49,15 @@ const AWS_CREDENTIALS_SELECTOR_TEST_ID = getDataTestSubjectSelector(
   'aws-credentials-type-selector'
 );
 
+const AWS_ACCESS_KEY = 'test-temporary-access-key';
+const AWS_SECRET_KEY = 'test-temporary-secret-key';
+const AWS_TEMPORARY_SESSION = 'test-temporary-key-session';
+
 const LAUNCH_CLOUD_FORMATION_LATER_TEST_ID = getDataTestSubjectSelector(
   'confirmCloudFormationModalCancelButton'
 );
 
-describe('Asset Inventory integration onboarding - AWS', { tags: ['@serverless', '@ess'] }, () => {
+describe('Asset Inventory integration onboarding - AWS', { tags: ['@ess'] }, () => {
   beforeEach(() => {
     login();
     visit('/app/integrations/browse');
@@ -118,8 +122,6 @@ describe('Asset Inventory integration onboarding - AWS', { tags: ['@serverless',
 
   it('should save a package policy with permanent keys', () => {
     const policyName = changePolicyName('asset_inventory-permanent-keys');
-    const testAccessKey = 'test-access-key';
-    const testSecretKey = 'test-secret-key';
 
     cy.get(AWS_SINGLE_ACCOUNT_TEST_ID).click();
     cy.get(AWS_MANUAL_SETUP_TEST_ID).click();
@@ -127,10 +129,10 @@ describe('Asset Inventory integration onboarding - AWS', { tags: ['@serverless',
 
     cy.get(AWS_CREDENTIALS_SELECTOR_TEST_ID).select('direct_access_keys');
 
-    cy.get(ACCESS_KEY).type(testAccessKey);
+    cy.get(ACCESS_KEY).type(AWS_ACCESS_KEY);
     shouldBeDisabled(SAVE_BUTTON);
 
-    cy.get(SECRET_KEY).type(testSecretKey);
+    cy.get(SECRET_KEY).type(AWS_SECRET_KEY);
     shouldBeEnabled(SAVE_BUTTON);
 
     saveIntegration(policyName);
@@ -139,22 +141,19 @@ describe('Asset Inventory integration onboarding - AWS', { tags: ['@serverless',
     checkPolicyName(policyName);
     shouldBeChecked(AWS_SINGLE_ACCOUNT_TEST_ID);
     shouldBeChecked(AWS_MANUAL_SETUP_TEST_ID);
-    checkInputValue(ACCESS_KEY, testAccessKey);
+    checkInputValue(ACCESS_KEY, AWS_ACCESS_KEY);
     shouldBeDisabled(SAVE_EDIT_BUTTON);
 
     cy.get(ACCESS_KEY).type('-edited');
     clickSaveEditButton();
 
     selectPolicyForEditing(policyName);
-    checkInputValue(ACCESS_KEY, `${testAccessKey}-edited`);
+    checkInputValue(ACCESS_KEY, `${AWS_ACCESS_KEY}-edited`);
     // checkInputValue(SECRET_KEY, `${testSecretKey}-edited`);
   });
 
   it('should save a package policy with temporary keys', () => {
     const policyName = changePolicyName('asset_inventory-temporary-keys');
-    const testAccessKey = 'test-temporary-access-key';
-    const testSecretKey = 'test-temporary-secret-key';
-    const testSession = 'test-temporary-key-session';
 
     cy.get(AWS_SINGLE_ACCOUNT_TEST_ID).click();
     cy.get(AWS_MANUAL_SETUP_TEST_ID).click();
@@ -162,13 +161,13 @@ describe('Asset Inventory integration onboarding - AWS', { tags: ['@serverless',
 
     cy.get(AWS_CREDENTIALS_SELECTOR_TEST_ID).select('temporary_keys');
 
-    cy.get(TEMPORARY_KEY_ACCESS_KEY).type(testAccessKey);
+    cy.get(TEMPORARY_KEY_ACCESS_KEY).type(AWS_ACCESS_KEY);
     shouldBeDisabled(SAVE_BUTTON);
 
-    cy.get(TEMPORARY_KEY_SECRET_KEY).type(testSecretKey);
+    cy.get(TEMPORARY_KEY_SECRET_KEY).type(AWS_SECRET_KEY);
     shouldBeDisabled(SAVE_BUTTON);
 
-    cy.get(TEMPORARY_KEY_SESSION).type(testSession);
+    cy.get(TEMPORARY_KEY_SESSION).type(AWS_TEMPORARY_SESSION);
     shouldBeEnabled(SAVE_BUTTON);
 
     saveIntegration(policyName);
@@ -178,8 +177,8 @@ describe('Asset Inventory integration onboarding - AWS', { tags: ['@serverless',
     checkPolicyName(policyName);
     shouldBeChecked(AWS_SINGLE_ACCOUNT_TEST_ID);
     shouldBeChecked(AWS_MANUAL_SETUP_TEST_ID);
-    checkInputValue(TEMPORARY_KEY_ACCESS_KEY, testAccessKey);
-    checkInputValue(TEMPORARY_KEY_SESSION, testSession);
+    checkInputValue(TEMPORARY_KEY_ACCESS_KEY, AWS_ACCESS_KEY);
+    checkInputValue(TEMPORARY_KEY_SESSION, AWS_TEMPORARY_SESSION);
     shouldBeDisabled(SAVE_EDIT_BUTTON);
 
     cy.get(TEMPORARY_KEY_ACCESS_KEY).type('-edited');
@@ -187,8 +186,8 @@ describe('Asset Inventory integration onboarding - AWS', { tags: ['@serverless',
     clickSaveEditButton();
 
     selectPolicyForEditing(policyName);
-    checkInputValue(TEMPORARY_KEY_ACCESS_KEY, `${testAccessKey}-edited`);
-    checkInputValue(TEMPORARY_KEY_SESSION, `${testSession}-edited`);
+    checkInputValue(TEMPORARY_KEY_ACCESS_KEY, `${AWS_ACCESS_KEY}-edited`);
+    checkInputValue(TEMPORARY_KEY_SESSION, `${AWS_TEMPORARY_SESSION}-edited`);
   });
 
   it('should save a package policy with shared credentials', () => {
@@ -227,3 +226,84 @@ describe('Asset Inventory integration onboarding - AWS', { tags: ['@serverless',
     checkInputValue(SHARED_CREDENTIAL_PROFILE, `${testSharedCredentialsProfile}-edited`);
   });
 });
+
+describe(
+  'Asset Inventory Agentless integration onboarding - AWS',
+  { tags: ['@serverless'] },
+  () => {
+    beforeEach(() => {
+      cy.intercept('POST', '/api/fleet/agent_policies?sys_monitoring=true').as('saveAgentless');
+
+      login();
+      visit('/app/integrations/browse');
+      cy.get('button[role="switch"]').click();
+      visit(ASSET_INVENTORY_INTEGRATION_URL);
+    });
+
+    it('should save an single agentless package policy with temporary keys', () => {
+      changePolicyName('asset_inventory-agentless-temporary-keys');
+
+      cy.get(AWS_SINGLE_ACCOUNT_TEST_ID).click();
+      shouldBeDisabled(SAVE_BUTTON);
+
+      cy.get(AWS_CREDENTIALS_SELECTOR_TEST_ID).select('temporary_keys');
+
+      cy.get(TEMPORARY_KEY_ACCESS_KEY).type(AWS_ACCESS_KEY);
+      shouldBeDisabled(SAVE_BUTTON);
+
+      cy.get(TEMPORARY_KEY_SECRET_KEY).type(AWS_SECRET_KEY);
+      shouldBeDisabled(SAVE_BUTTON);
+
+      cy.get(TEMPORARY_KEY_SESSION).type(AWS_TEMPORARY_SESSION);
+      shouldBeEnabled(SAVE_BUTTON);
+
+      cy.get(SAVE_BUTTON).click();
+    });
+
+    it('should save an organization agentless package policy with temporary keys', () => {
+      changePolicyName('asset_inventory-agentless-temporary-keys');
+
+      cy.get(AWS_ORGANIZATION_ACCOUNT_TEST_ID).click();
+      shouldBeDisabled(SAVE_BUTTON);
+
+      cy.get(AWS_CREDENTIALS_SELECTOR_TEST_ID).select('temporary_keys');
+
+      cy.get(TEMPORARY_KEY_ACCESS_KEY).type(AWS_ACCESS_KEY);
+      shouldBeDisabled(SAVE_BUTTON);
+
+      cy.get(TEMPORARY_KEY_SECRET_KEY).type(AWS_SECRET_KEY);
+      shouldBeDisabled(SAVE_BUTTON);
+
+      cy.get(TEMPORARY_KEY_SESSION).type(AWS_TEMPORARY_SESSION);
+      shouldBeEnabled(SAVE_BUTTON);
+
+      cy.get(SAVE_BUTTON).click();
+    });
+
+    it('should save a single account agentless package policy with permanent keys', () => {
+      changePolicyName('asset_inventory-agentless-permanent-keys');
+      cy.get(AWS_SINGLE_ACCOUNT_TEST_ID).click();
+      shouldBeDisabled(SAVE_BUTTON);
+      cy.get(AWS_CREDENTIALS_SELECTOR_TEST_ID).select('direct_access_keys');
+      cy.get(ACCESS_KEY).type(AWS_ACCESS_KEY);
+      shouldBeDisabled(SAVE_BUTTON);
+      cy.get(SECRET_KEY).type(AWS_SECRET_KEY);
+      shouldBeEnabled(SAVE_BUTTON);
+      cy.get(SAVE_BUTTON).click();
+      cy.wait('@saveAgentless');
+    });
+
+    it('should save an organization account agentless package policy with permanent keys', () => {
+      changePolicyName('asset_inventory-agentless-permanent-keys');
+      cy.get(AWS_SINGLE_ACCOUNT_TEST_ID).click();
+      shouldBeDisabled(SAVE_BUTTON);
+      cy.get(AWS_CREDENTIALS_SELECTOR_TEST_ID).select('direct_access_keys');
+      cy.get(ACCESS_KEY).type(AWS_ACCESS_KEY);
+      shouldBeDisabled(SAVE_BUTTON);
+      cy.get(SECRET_KEY).type(AWS_SECRET_KEY);
+      shouldBeEnabled(SAVE_BUTTON);
+      cy.get(SAVE_BUTTON).click();
+      cy.wait('@saveAgentless');
+    });
+  }
+);

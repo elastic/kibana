@@ -32,6 +32,10 @@ import {
 const GCP_CLOUDSHELL_TEST_ID = `${getDataTestSubjectSelector(
   'gcpGoogleCloudShellOptionTestId'
 )} input`;
+
+const GCP_LAUNCH_GOOGLE_CLOUD_SHELL_TEST_ID = getDataTestSubjectSelector(
+  'launchGoogleCloudShellAgentlessButton'
+);
 const GCP_MANUAL_SETUP_TEST_ID = `${getDataTestSubjectSelector('gcpManualOptionTestId')} input`;
 
 const GCP_SINGLE_ACCOUNT_TEST_ID = `${getDataTestSubjectSelector('gcpSingleAccountTestId')} input`;
@@ -70,11 +74,10 @@ const selectAccountType = (accountType: 'single' | 'organization') => {
   cy.get(accountTypeSelector).click();
 };
 
-describe('Asset Inventory integration onboarding - GCP', { tags: ['@serverless', '@ess'] }, () => {
+describe('Asset Inventory integration onboarding - GCP', { tags: ['@ess'] }, () => {
   beforeEach(() => {
     login();
     visit('/app/integrations/browse');
-    // cy.contains('button', 'Display beta integrations').click();
     cy.get('button[role="switch"]').click();
     visit(ASSET_INVENTORY_INTEGRATION_URL);
   });
@@ -192,3 +195,61 @@ describe('Asset Inventory integration onboarding - GCP', { tags: ['@serverless',
     shouldBeDisabled(SAVE_EDIT_BUTTON);
   });
 });
+
+describe(
+  'Asset Inventory Agentless integration onboarding - GCP ',
+  { tags: ['@serverless'] },
+  () => {
+    beforeEach(() => {
+      cy.intercept('POST', '/api/fleet/agent_policies?sys_monitoring=true').as('saveAgentless');
+      login();
+      visit('/app/integrations/browse');
+      cy.get('button[role="switch"]').click();
+      visit(ASSET_INVENTORY_INTEGRATION_URL);
+    });
+
+    it('should save an agentless package policy with organization account type', () => {
+      changePolicyName('asset_inventory-gcp-agentless-organization');
+      selectCloudProvider('gcp');
+      shouldBeChecked(GCP_PROVIDER_TEST_ID);
+      cy.get(GCP_LAUNCH_GOOGLE_CLOUD_SHELL_TEST_ID).should('be.visible');
+      shouldBeDisabled(SAVE_BUTTON);
+
+      selectAccountType('organization');
+      cy.get(GCP_ORGANIZATION_ID_TEST_ID).should('be.visible');
+      cy.get(GCP_PROJECT_ID_TEST_ID).should('not.exist');
+
+      cy.get(GCP_ORGANIZATION_ID_TEST_ID).type(GCP_ORGANIZATION_ID);
+      cy.get(GCP_CREDENTIALS_JSON_TEST_ID).type(GCP_CREDENTIALS_JSON, {
+        parseSpecialCharSequences: false,
+      });
+
+      cy.get(SAVE_BUTTON).click();
+      cy.wait('@saveAgentless');
+    });
+
+    it('should save an agentless package policy with single account type', () => {
+      changePolicyName('asset_inventory-gcp-agentless-single');
+      selectCloudProvider('gcp');
+      shouldBeChecked(GCP_PROVIDER_TEST_ID);
+      cy.get(GCP_LAUNCH_GOOGLE_CLOUD_SHELL_TEST_ID).should('be.visible');
+      shouldBeDisabled(SAVE_BUTTON);
+
+      selectAccountType('single');
+
+      shouldBeChecked(GCP_SINGLE_ACCOUNT_TEST_ID);
+      shouldBeDisabled(SAVE_BUTTON);
+
+      cy.get(GCP_ORGANIZATION_ID_TEST_ID).should('not.exist');
+      cy.get(GCP_PROJECT_ID_TEST_ID).should('be.visible');
+
+      cy.get(GCP_PROJECT_ID_TEST_ID).type(GCP_PROJECT_ID);
+      cy.get(GCP_CREDENTIALS_JSON_TEST_ID).type(GCP_CREDENTIALS_JSON, {
+        parseSpecialCharSequences: false,
+      });
+
+      cy.get(SAVE_BUTTON).click();
+      cy.wait('@saveAgentless');
+    });
+  }
+);
