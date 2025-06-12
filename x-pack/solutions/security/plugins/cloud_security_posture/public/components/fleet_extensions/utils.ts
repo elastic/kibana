@@ -495,8 +495,8 @@ export const getCloudProviderFromKibanaUrl = (
   kibanaUrl: string | undefined
 ): string | undefined => {
   if (!kibanaUrl) return undefined;
-  const match = kibanaUrl.match(/\.(aws|gcp|azure)\.elastic\.cloud/);
-  return match?.[1];
+  const match = kibanaUrl.match(/\.(aws|gcp|azure)\./)?.[1];
+  return match;
 };
 
 export const getDeploymentIdFromUrl = (url: string | undefined): string | undefined => {
@@ -511,10 +511,10 @@ export const getCloudConnectorRemoteRoleTemplate = ({
   packageInfo,
 }: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
   const accountType = input?.streams?.[0]?.vars?.['aws.account_type']?.value ?? AWS_SINGLE_ACCOUNT;
-
+  console.debug('kibanaUrl', cloud?.kibanaUrl);
   const provider = getCloudProviderFromKibanaUrl(cloud?.kibanaUrl);
   if (!provider || provider !== 'aws') return undefined;
-
+  console.debug('provider', provider);
   const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
   let elasticResourceId: string | undefined;
 
