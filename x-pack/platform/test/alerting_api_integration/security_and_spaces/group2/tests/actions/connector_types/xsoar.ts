@@ -211,7 +211,12 @@ export default function xsoarTest({ getService }: FtrProviderContext) {
             .send({
               params: {
                 subAction: 'run',
-                subActionParams: { severity: 1, createInvestigation: false, body: '' },
+                subActionParams: {
+                  severity: 1,
+                  createInvestigation: false,
+                  body: '',
+                  isRuleSeverity: false,
+                },
               },
             })
             .expect(200);
@@ -277,6 +282,7 @@ export default function xsoarTest({ getService }: FtrProviderContext) {
                     playbookId: '8db0105c-f674-4d83-8095-f95a9f61e77a',
                     createInvestigation: false,
                     body: null,
+                    isRuleSeverity: false,
                   },
                 },
               })
@@ -349,6 +355,7 @@ export default function xsoarTest({ getService }: FtrProviderContext) {
                     name: 'My test incident',
                     playbookId: '8db0105c-f674-4d83-8095-f95a9f61e77a',
                     severity: 1,
+                    isRuleSeverity: false,
                     createInvestigation: false,
                   },
                 },

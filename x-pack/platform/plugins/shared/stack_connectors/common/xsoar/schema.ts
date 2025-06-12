@@ -37,6 +37,7 @@ export const XSOARRunActionParamsSchema = schema.object({
   playbookId: schema.nullable(schema.string()),
   createInvestigation: schema.boolean(),
   severity: schema.number(),
+  isRuleSeverity: schema.boolean(),
   body: schema.nullable(schema.string()),
 });
 export const XSOARRunActionResponseSchema = schema.object({}, { unknowns: 'ignore' });
@@ -44,7 +45,7 @@ export const XSOARRunActionResponseSchema = schema.object({}, { unknowns: 'ignor
 export const ExecutorParamsSchema = schema.oneOf([
   schema.object({
     subAction: schema.literal(SUB_ACTION.PLAYBOOKS),
-    subActionParams: schema.any(),
+    subActionParams: schema.literal(null), // this subaction not required any value as params
   }),
   schema.object({
     subAction: schema.literal(SUB_ACTION.RUN),

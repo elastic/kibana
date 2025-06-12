@@ -8,7 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
-import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import type {
+  ActionTypeExecutorResult,
+  ConnectorUsageCollector,
+} from '@kbn/actions-plugin/server/types';
 import type { AxiosError } from 'axios';
 
 import type {
@@ -35,6 +38,7 @@ export class XSOARConnector extends SubActionConnector<Config, Secrets> {
     incident: string;
   };
   private isCloud: boolean;
+  private ConnectorId: string;
 
   constructor(params: ServiceParams<Config, Secrets>) {
     super(params);
@@ -48,7 +52,7 @@ export class XSOARConnector extends SubActionConnector<Config, Secrets> {
         ? `${this.config.url}${CLOUD_API_PATH}${INCIDENT_PATH}`
         : `${this.config.url}${INCIDENT_PATH}`,
     };
-
+    this.ConnectorId = params.connector.id;
     this.registerSubActions();
   }
 
@@ -79,22 +83,28 @@ export class XSOARConnector extends SubActionConnector<Config, Secrets> {
     return error.toString();
   }
 
+  protected errorInvalidBody(actionId: string, err: Error): ActionTypeExecutorResult<void> {
+    const errMessage = i18n.translate('xpack.stackConnectors.xsoar.incidentBodyParsingError', {
+      defaultMessage: 'error triggering XSOAR workflow, parsing body',
+    });
+    this.logger.error(`error on ${actionId} XSOAR event: ${errMessage}: ${err.message}`);
+    return {
+      status: 'error',
+      message: errMessage,
+      actionId,
+      serviceMessage: err.message,
+    };
+  }
+
   private formatIncidentBody(incident: XSOARRunActionParams) {
     try {
-      const { body, ...incidentWithoutBody } = incident;
-      const bodyJson = JSON.parse(body ?? '{}');
+      const { body, isRuleSeverity, ...incidentWithoutBody } = incident;
+      const bodyJson = JSON.parse(body || '{}');
       const mergedIncident = { ...bodyJson, ...incidentWithoutBody };
 
       return mergedIncident;
     } catch (err) {
-      throw new Error(
-        i18n.translate('xpack.stackConnectors.xsoar.incidentBodyParsingError', {
-          defaultMessage: 'Error parsing incident body for xSOAR: {err}',
-          values: {
-            err: err.toString(),
-          },
-        })
-      );
+      return this.errorInvalidBody(this.ConnectorId, err);
     }
   }
 
@@ -102,12 +112,15 @@ export class XSOARConnector extends SubActionConnector<Config, Secrets> {
     incident: XSOARRunActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ) {
-    const mergedIncident = this.formatIncidentBody(incident);
+    const res = this.formatIncidentBody(incident);
+    if (res?.status === 'error') {
+      return res;
+    }
     await this.request(
       {
         method: 'post',
         url: `${this.urls.incident}`,
-        data: mergedIncident,
+        data: res,
         headers: this.getAuthHeaders(),
         responseSchema: XSOARRunActionResponseSchema,
       },

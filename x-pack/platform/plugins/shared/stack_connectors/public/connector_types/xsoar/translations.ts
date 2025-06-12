@@ -78,22 +78,21 @@ export const SEVERITY_LABEL = i18n.translate(
 export const IS_RULE_SEVERITY_LABEL = i18n.translate(
   'xpack.stackConnectors.components.xsoar.params.isRuleSeverityToggleLabel',
   {
-    defaultMessage: 'Keep severity from rule',
+    defaultMessage: 'Use severity assigned to the rule',
   }
 );
 
 export const PLAYBOOKS_ERROR = i18n.translate(
   'xpack.stackConnectors.components.xsoar.params.componentError.playbooksRequestFailed',
   {
-    defaultMessage: 'Error retrieving playbooks from XSOAR',
+    defaultMessage: 'Unable to retrieve playbooks from XSOAR.',
   }
 );
 
 export const PLAYBOOK_NOT_FOUND_WARNING = i18n.translate(
   'xpack.stackConnectors.components.xsoar.params.componentWarning.playbookNotFound',
   {
-    defaultMessage:
-      'Cannot find the saved playbook. Please select a valid playbook from the selector',
+    defaultMessage: 'Could not find the selected playbook. Choose a different one.',
   }
 );
 
@@ -114,7 +113,7 @@ export const BODY_DESCRIPTION = i18n.translate(
 export const PLAYBOOK_LABEL = i18n.translate(
   'xpack.stackConnectors.components.xsoar.params.playbookFieldLabel',
   {
-    defaultMessage: 'XSOAR Playbooks',
+    defaultMessage: 'XSOAR playbooks',
   }
 );
 
@@ -135,6 +134,6 @@ export const PLAYBOOK_PLACEHOLDER = i18n.translate(
 export const PLAYBOOK_ARIA_LABEL = i18n.translate(
   'xpack.stackConnectors.components.xsoar.params.playbookFieldAriaLabel',
   {
-    defaultMessage: 'Select a XSOAR playbook',
+    defaultMessage: 'Select an XSOAR playbook.',
   }
 );

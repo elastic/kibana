@@ -69,7 +69,8 @@ const XSOARParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorParam
     () =>
       (actionParams.subActionParams as XSOARRunActionParams) ??
       ({
-        severity: isTest ? XSOARSeverity.UNKNOWN : XSOARSeverity.RULE_SEVERITY,
+        severity: XSOARSeverity.UNKNOWN,
+        isRuleSeverity: isTest ? false : true,
         createInvestigation: false,
       } as unknown as XSOARRunActionParams),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -80,9 +81,7 @@ const XSOARParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorParam
   const [selectedPlaybookOption, setSelectedPlaybookOption] = useState<
     PlaybookOption | null | undefined
   >();
-  const [isRuleSeverity, setIsRuleSeverity] = useState<boolean>(
-    incident.severity === XSOARSeverity.RULE_SEVERITY ? true : false
-  );
+  const [isRuleSeverity, setIsRuleSeverity] = useState<boolean>(incident.isRuleSeverity);
   const [playbooks, setPlaybooks] = useState<XSOARPlaybooksObject[]>();
 
   useEffect(() => {
@@ -93,7 +92,8 @@ const XSOARParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorParam
       editAction(
         'subActionParams',
         {
-          severity: isTest ? XSOARSeverity.UNKNOWN : XSOARSeverity.RULE_SEVERITY,
+          severity: XSOARSeverity.UNKNOWN,
+          isRuleSeverity: isTest ? false : true,
           createInvestigation: false,
         },
         index
@@ -249,7 +249,7 @@ const XSOARParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorParam
                 'subActionParams',
                 {
                   ...incident,
-                  severity: e.target.checked ? XSOARSeverity.RULE_SEVERITY : XSOARSeverity.UNKNOWN,
+                  isRuleSeverity: e.target.checked,
                 },
                 index
               );

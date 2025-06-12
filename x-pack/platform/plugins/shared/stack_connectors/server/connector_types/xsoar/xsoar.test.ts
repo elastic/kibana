@@ -31,7 +31,17 @@ describe('XSOARConnector', () => {
     services: actionsMock.createServices(),
   });
 
+  const cloudConnector = new XSOARConnector({
+    configurationUtilities: actionsConfigMock.create(),
+    connector: { id: '2', type: XSOAR_CONNECTOR_ID },
+    config: { url: 'https://test.com' },
+    secrets: { apiKey: 'test123', apiKeyID: '123' },
+    logger,
+    services: actionsMock.createServices(),
+  });
+
   let mockRequest: jest.Mock;
+  let mockCloudRequest: jest.Mock;
   let mockError: jest.Mock;
   let connectorUsageCollector: ConnectorUsageCollector;
 
@@ -193,8 +203,11 @@ describe('XSOARConnector', () => {
 
     beforeEach(() => {
       mockRequest = jest.fn().mockResolvedValue(mockResponse);
+      mockCloudRequest = jest.fn().mockResolvedValue(mockResponse);
       // @ts-ignore
       connector.request = mockRequest;
+      // @ts-ignore
+      cloudConnector.request = mockCloudRequest;
       jest.clearAllMocks();
     });
 
@@ -209,6 +222,25 @@ describe('XSOARConnector', () => {
           responseSchema: XSOARPlaybooksActionResponseSchema,
           headers: {
             Authorization: 'test123',
+          },
+        },
+        connectorUsageCollector
+      );
+      expect(response).toEqual(mockResponse.data);
+    });
+
+    it('Auth headers are correctly set for cloud instance', async () => {
+      const response = await cloudConnector.getPlaybooks(undefined, connectorUsageCollector);
+      expect(mockCloudRequest).toBeCalledTimes(1);
+      expect(mockCloudRequest).toHaveBeenCalledWith(
+        {
+          method: 'post',
+          url: 'https://test.com/xsoar/public/v1/playbook/search',
+          data: {},
+          responseSchema: XSOARPlaybooksActionResponseSchema,
+          headers: {
+            Authorization: 'test123',
+            'x-xdr-auth-id': '123',
           },
         },
         connectorUsageCollector
@@ -429,8 +461,11 @@ describe('XSOARConnector', () => {
 
     beforeEach(() => {
       mockRequest = jest.fn().mockResolvedValue(mockResponse);
+      mockCloudRequest = jest.fn().mockResolvedValue(mockResponse);
       // @ts-ignore
       connector.request = mockRequest;
+      // @ts-ignore
+      cloudConnector.request = mockCloudRequest;
       jest.clearAllMocks();
     });
 
@@ -439,11 +474,21 @@ describe('XSOARConnector', () => {
       playbookId: 'playbook0',
       createInvestigation: false,
       severity: 2,
+      isRuleSeverity: false,
       body: JSON.stringify({}),
     };
 
-    const { body, ...incidentWithoutBody } = incident;
-    const expectedIncident = { ...JSON.parse(body ?? '{}'), ...incidentWithoutBody };
+    const malformedIncident: XSOARRunActionParams = {
+      name: 'My test incident 2',
+      playbookId: 'playbook0',
+      createInvestigation: false,
+      isRuleSeverity: false,
+      severity: 2,
+      body: '{',
+    };
+
+    const { body, isRuleSeverity, ...incidentWithoutBody } = incident;
+    const expectedIncident = { ...JSON.parse(body || '{}'), ...incidentWithoutBody };
 
     it('XSOAR API call is successful with correct parameters', async () => {
       await connector.run(incident, connectorUsageCollector);
@@ -469,6 +514,12 @@ describe('XSOARConnector', () => {
       await expect(connector.run(expectedIncident, connectorUsageCollector)).rejects.toThrow(
         'API Error'
       );
+    });
+
+    it('error when malformed incident is passed', async () => {
+      const res = await connector.run(malformedIncident, connectorUsageCollector);
+      expect(res.status).toBe('error');
+      expect(res.message).toBe('error triggering XSOAR workflow, parsing body');
     });
   });
 });

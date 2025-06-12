@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { ActionConnector, ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public/types';
 import XSOARParamsFields from './params';
 import type { UseSubActionParams } from '@kbn/triggers-actions-ui-plugin/public/application/hooks/use_sub_action';
-import { SUB_ACTION, XSOARSeverity } from '../../../common/xsoar/constants';
+import { SUB_ACTION } from '../../../common/xsoar/constants';
 import { ExecutorParams, XSOARRunActionParams } from '../../../common/xsoar/types';
 import * as translations from './translations';
 
@@ -169,6 +169,7 @@ describe('XSOARParamsFields renders', () => {
     playbookId: '8db0105c-f674-4d83-8095-f95a9f61e77a',
     createInvestigation: false,
     severity: 2,
+    isRuleSeverity: false,
     body: '',
   };
 
@@ -217,7 +218,7 @@ describe('XSOARParamsFields renders', () => {
       expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.RUN, 0);
       expect(editAction).toHaveBeenCalledWith(
         'subActionParams',
-        { createInvestigation: false, severity: 5 },
+        { createInvestigation: false, severity: 0, isRuleSeverity: true },
         0
       );
     });
@@ -237,7 +238,7 @@ describe('XSOARParamsFields renders', () => {
       expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.RUN, 0);
       expect(editAction).toHaveBeenCalledWith(
         'subActionParams',
-        { createInvestigation: false, severity: 0 },
+        { createInvestigation: false, severity: 0, isRuleSeverity: false },
         0
       );
     });
@@ -263,7 +264,7 @@ describe('XSOARParamsFields renders', () => {
         expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.RUN, 0);
         expect(editAction).toHaveBeenCalledWith(
           'subActionParams',
-          { createInvestigation: false, severity: 5 },
+          { createInvestigation: false, severity: 0, isRuleSeverity: true },
           0
         );
         expect(editAction).toHaveBeenCalledWith(
@@ -271,7 +272,8 @@ describe('XSOARParamsFields renders', () => {
           {
             createInvestigation: false,
             playbookId: '8db0105c-f674-4d83-8095-f95a9f61e77a',
-            severity: 5,
+            severity: 0,
+            isRuleSeverity: true,
           },
           0
         );
@@ -313,7 +315,7 @@ describe('XSOARParamsFields renders', () => {
       expect(getByTestId('rule-severity-toggle')).toBeEnabled();
       expect(editAction).toHaveBeenCalledWith(
         'subActionParams',
-        { ...subActionParams, severity: XSOARSeverity.RULE_SEVERITY },
+        { ...subActionParams, severity: 2, isRuleSeverity: true },
         0
       );
 
@@ -323,7 +325,7 @@ describe('XSOARParamsFields renders', () => {
     it('should show warning if playbook not found', () => {
       const props = {
         ...defaultProps,
-        actionParams: { subActionParams: { playbookId: 'wrong-playbookId' } },
+        actionParams: { subActionParams: { ...subActionParams, playbookId: 'wrong-playbookId' } },
       };
       render(<XSOARParamsFields {...props} />);
 

@@ -16,7 +16,8 @@ const params = {
     name: 'new incident - {{alert.uuid}}',
     playbookId: 'playbook0',
     createInvestigation: true,
-    severity: 5,
+    severity: 0,
+    isRuleSeverity: true,
     body: '',
   },
 };
@@ -37,6 +38,7 @@ describe('XSOAR - renderParameterTemplates', () => {
       playbookId: 'playbook0',
       createInvestigation: true,
       severity: 2,
+      isRuleSeverity: true,
       body: '',
     });
   });
@@ -53,6 +55,7 @@ describe('XSOAR - renderParameterTemplates', () => {
       name: 'error rendering mustache template "new incident - {{alert.uuid}}": test error',
       playbookId: 'error rendering mustache template "playbook0": test error',
       severity: 0,
+      isRuleSeverity: true,
     });
   });
 });

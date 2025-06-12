@@ -25,5 +25,4 @@ export enum XSOARSeverity {
   MEDIUM = 2,
   HIGH = 3,
   CRITICAL = 4,
-  RULE_SEVERITY = 5,
 }
