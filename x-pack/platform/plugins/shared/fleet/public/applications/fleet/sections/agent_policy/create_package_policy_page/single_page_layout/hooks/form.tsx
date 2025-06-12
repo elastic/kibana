@@ -159,6 +159,17 @@ export const updateAgentlessCloudConnectorConfig = (
       targetCsp = 'azure';
     }
 
+    if (targetCsp !== 'aws') {
+      setNewAgentPolicy({
+        ...newAgentPolicy,
+        agentless: {
+          ...newAgentPolicy.agentless,
+          cloud_connectors: undefined,
+        },
+      });
+      return;
+    }
+
     if (newAgentPolicy.agentless?.cloud_connectors?.enabled !== enabled) {
       setNewAgentPolicy({
         ...newAgentPolicy,
@@ -195,6 +206,7 @@ export function useOnSubmit({
   hasFleetAddAgentsPrivileges,
   setNewAgentPolicy,
   setSelectedPolicyTab,
+  hideAgentlessSelector,
 }: {
   packageInfo?: PackageInfo;
   newAgentPolicy: NewAgentPolicy;
@@ -206,6 +218,7 @@ export function useOnSubmit({
   hasFleetAddAgentsPrivileges: boolean;
   setNewAgentPolicy: (policy: NewAgentPolicy) => void;
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
+  hideAgentlessSelector?: boolean;
 }) {
   const { notifications, docLinks } = useStartServices();
   const { spaceId } = useFleetStatus();
@@ -357,6 +370,7 @@ export function useOnSubmit({
     packageInfo,
     packagePolicy,
     integrationToEnable,
+    hideAgentlessSelector,
   });
   const setupTechnologyRef = useRef<SetupTechnology | undefined>(selectedSetupTechnology);
   // sync the inputs with the agentless selector change

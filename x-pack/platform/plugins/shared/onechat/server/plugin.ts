@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
+import { schema } from '@kbn/config-schema';
 import type { OnechatConfig } from './config';
 import type {
   OnechatPluginSetup,
@@ -16,6 +18,8 @@ import type {
 } from './types';
 import { registerRoutes } from './routes';
 import { ServiceManager } from './services';
+import { registerFeatures } from './features';
+import { ONECHAT_MCP_SERVER_UI_SETTING_ID } from '../common/constants';
 
 export class OnechatPlugin
   implements
@@ -40,7 +44,26 @@ export class OnechatPlugin
     coreSetup: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
     pluginsSetup: OnechatSetupDependencies
   ): OnechatPluginSetup {
-    const serviceSetups = this.serviceManager.setupServices();
+    const serviceSetups = this.serviceManager.setupServices({
+      logger: this.logger.get('services'),
+    });
+
+    registerFeatures({ features: pluginsSetup.features });
+
+    coreSetup.uiSettings.register({
+      [ONECHAT_MCP_SERVER_UI_SETTING_ID]: {
+        description: i18n.translate('onechat.uiSettings.mcpServer.description', {
+          defaultMessage: 'Enables MCP server with access to tools.',
+        }),
+        name: i18n.translate('onechat.uiSettings.mcpServer.name', {
+          defaultMessage: 'MCP Server',
+        }),
+        schema: schema.boolean(),
+        value: false,
+        readonly: true,
+        readonlyMode: 'ui',
+      },
+    });
 
     const router = coreSetup.http.createRouter();
     registerRoutes({
@@ -59,6 +82,7 @@ export class OnechatPlugin
     return {
       tools: {
         register: serviceSetups.tools.register.bind(serviceSetups.tools),
+        registerProvider: serviceSetups.tools.registerProvider.bind(serviceSetups.tools),
       },
     };
   }
@@ -75,7 +99,7 @@ export class OnechatPlugin
       inference,
     });
 
-    const { tools, runnerFactory } = startServices;
+    const { tools, agents, runnerFactory } = startServices;
     const runner = runnerFactory.getRunner();
 
     return {
@@ -89,6 +113,12 @@ export class OnechatPlugin
               return runner.runTool({ ...args, request });
             },
           };
+        },
+      },
+      agents: {
+        registry: agents.registry.asPublicRegistry(),
+        execute: async (args) => {
+          return agents.execute(args);
         },
       },
     };
