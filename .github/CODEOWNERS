@@ -1547,6 +1547,9 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test_serverless/**/test_suites/common/management/transforms/ @elastic/ml-ui
 /x-pack/test/api_integration/services/ml.ts @elastic/ml-ui
 
+# Security Machine Learning
+x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security_* @elastic/security-ml
+
 # Additional plugins and packages maintained by the ML team.
 /test/examples/response_stream/*.ts @elastic/ml-ui
 /x-pack/test/accessibility/apps/group2/transform.ts  @elastic/ml-ui
