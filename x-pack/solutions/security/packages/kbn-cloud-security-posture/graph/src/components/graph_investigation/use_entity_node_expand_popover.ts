@@ -90,7 +90,7 @@ export const useEntityNodeExpandPopover = (
       return [
         {
           type: 'item',
-          iconType: 'arrowRight',
+          iconType: 'sortRight',
           testSubject: GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
           label:
             actionsByEntityAction === 'show'
@@ -112,7 +112,7 @@ export const useEntityNodeExpandPopover = (
         },
         {
           type: 'item',
-          iconType: 'arrowLeft',
+          iconType: 'sortLeft',
           testSubject: GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID,
           label:
             actionsOnEntityAction === 'show'
