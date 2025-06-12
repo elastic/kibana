@@ -268,7 +268,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Microsoft Defender for  Endpoint's RunScript RTR command
    * Release: 8.19/9.1
    */
-  microsoftDefenderEndpointRunScriptEnabled: true,
+  microsoftDefenderEndpointRunScriptEnabled: false,
 
   /**
    * Enables advanced mode for Trusted Apps creation and update
