@@ -341,7 +341,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           warning: {
             message:
               'This integration must be manually installed on the remote cluster. Automatic updates and remote installs are not supported.',
-            title: "custom-pkg can't be automatically synced",
+            title: "Integration can't be automatically synced",
           },
         },
       ],
@@ -717,7 +717,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           error: 'Found incorrect installed version 1.67.2',
         },
         {
-          error: `Installation status: install_failed error: installation failure at Tue, 20 Jun 2023 08:47:31 GMT`,
+          error: `Installation status: install_failed installation failure at Tue, 20 Jun 2023 08:47:31 GMT`,
           package_name: 'synthetics',
           package_version: '1.4.1',
           install_status: { main: 'installed', remote: 'install_failed' },
