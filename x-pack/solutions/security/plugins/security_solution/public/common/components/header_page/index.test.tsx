@@ -5,39 +5,39 @@
  * 2.0.
  */
 
-import { euiDarkVars } from '@kbn/ui-theme';
-import { shallow } from 'enzyme';
 import React from 'react';
+// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import 'jest-styled-components';
+import { screen, render } from '@testing-library/react';
 
 import { TestProviders } from '../../mock';
 import { HeaderPage } from '.';
-import { useMountAppended } from '../../utils/use_mount_appended';
 import { SecurityPageName } from '../../../app/types';
 
 jest.mock('../../lib/kibana');
 jest.mock('../link_to');
 
 describe('HeaderPage', () => {
-  const mount = useMountAppended();
-
   test('it renders', () => {
-    const wrapper = shallow(
-      <HeaderPage
-        badgeOptions={{ beta: true, text: 'Beta', tooltip: 'Test tooltip' }}
-        border
-        subtitle="Test subtitle"
-        subtitle2="Test subtitle 2"
-        title="Test title"
-      >
-        <p>{'Test supplement'}</p>
-      </HeaderPage>
+    render(
+      <TestProviders>
+        <HeaderPage
+          badgeOptions={{ beta: true, text: 'Beta', tooltip: 'Test tooltip' }}
+          border
+          subtitle="Test subtitle"
+          subtitle2="Test subtitle 2"
+          title="Test title"
+        >
+          <p>{'Test supplement'}</p>
+        </HeaderPage>
+      </TestProviders>
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(screen.getByTestId('header-page')).toMatchSnapshot();
   });
 
   test('it renders the back link when provided', () => {
-    const wrapper = mount(
+    const wrapper = render(
       <TestProviders>
         <HeaderPage
           backOptions={{ path: '#', text: 'Test link', pageId: SecurityPageName.hosts }}
@@ -46,63 +46,63 @@ describe('HeaderPage', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('.securitySolutionHeaderPage__linkBack').first().exists()).toBe(true);
+    expect(
+      wrapper.container.querySelector('.securitySolutionHeaderPage__linkBack')
+    ).toBeInTheDocument();
   });
 
   test('it DOES NOT render the back link when not provided', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <HeaderPage title="Test title" />
       </TestProviders>
     );
 
-    expect(wrapper.find('.securitySolutionHeaderPage__linkBack').first().exists()).toBe(false);
+    expect(container.querySelector('.securitySolutionHeaderPage__linkBack')).toBeNull();
   });
 
   test('it renders the first subtitle when provided', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <HeaderPage subtitle="Test subtitle" title="Test title" />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="header-page-subtitle"]').first().exists()).toBe(true);
+    expect(screen.getByTestId('header-page-subtitle')).toBeInTheDocument();
   });
 
   test('it DOES NOT render the first subtitle when not provided', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <HeaderPage title="Test title" />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="header-section-subtitle"]').first().exists()).toBe(false);
+    expect(screen.queryByTestId('header-section-subtitle')).not.toBeInTheDocument();
   });
 
   test('it renders the second subtitle when provided', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <HeaderPage subtitle2="Test subtitle 2" title="Test title" />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="header-page-subtitle-2"]').first().exists()).toBe(true);
+    expect(screen.getByTestId('header-page-subtitle-2')).toBeInTheDocument();
   });
 
   test('it DOES NOT render the second subtitle when not provided', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <HeaderPage title="Test title" />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="header-section-subtitle-2"]').first().exists()).toBe(
-      false
-    );
+    expect(screen.queryByTestId('header-section-subtitle-2')).not.toBeInTheDocument();
   });
 
   test('it renders supplements when children provided', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <HeaderPage title="Test title">
           <p>{'Test supplement'}</p>
@@ -110,44 +110,33 @@ describe('HeaderPage', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="header-page-supplements"]').first().exists()).toBe(true);
+    expect(screen.getByTestId('header-page-supplements')).toBeInTheDocument();
   });
 
   test('it DOES NOT render supplements when children not provided', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <HeaderPage title="Test title" />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="header-page-supplements"]').first().exists()).toBe(false);
-  });
-
-  test('it DOES NOT apply border styles when border is false', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <HeaderPage title="Test title" />
-      </TestProviders>
-    );
-    const securitySolutionHeaderPage = wrapper.find('.securitySolutionHeaderPage').first();
-
-    expect(securitySolutionHeaderPage).not.toHaveStyleRule(
-      'border-bottom',
-      euiDarkVars.euiBorderThin
-    );
-    expect(securitySolutionHeaderPage).not.toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeL);
+    expect(screen.queryByTestId('header-page-supplements')).not.toBeInTheDocument();
   });
 
   test('it renders the right side items', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <HeaderPage
           title="Test title"
-          rightSideItems={[<div data-test-subj="right-side-item">{'Right side item'}</div>]}
+          rightSideItems={[
+            <div key="test" data-test-subj="right-side-item">
+              {'Right side item'}
+            </div>,
+          ]}
         />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="right-side-item"]').exists()).toBe(true);
+    expect(screen.getByTestId('right-side-item')).toBeInTheDocument();
   });
 });

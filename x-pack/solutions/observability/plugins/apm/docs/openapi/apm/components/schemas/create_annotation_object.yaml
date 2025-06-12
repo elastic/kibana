@@ -5,22 +5,28 @@ required:
 properties:
   '@timestamp':
     type: string
-    description: Timestamp
+    description: The date and time of the annotation. It must be in ISO 8601 format.
   service:
     type: object
-    description: Service
+    description: The service that identifies the configuration to create or update.
     required:
       - version
     properties:
       version:
         type: string
+        description: The version of the service.
       environment:
         type: string
+        description: The environment of the service.
   message:
     type: string
-    description: Message
+    description: The message displayed in the annotation. It defaults to `service.version`.
   tags:
     type: array
-    description: Tags
+    description: >
+      Tags are used by the Applications UI to distinguish APM annotations from other annotations.
+      Tags may have additional functionality in future releases.
+      It defaults to `[apm]`.
+      While you can add additional tags, you cannot remove the `apm` tag.
     items:
       type: string

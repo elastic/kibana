@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EcsEvent } from '@kbn/core/server';
-import { AuditEvent } from '@kbn/security-plugin/server';
-import { ArrayElement } from '@kbn/utility-types';
+import type { EcsEvent } from '@kbn/core/server';
+import type { AuditEvent } from '@kbn/security-plugin/server';
+import type { ArrayElement } from '@kbn/utility-types';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export enum RuleAuditAction {
@@ -29,6 +29,7 @@ export enum RuleAuditAction {
   GET_EXECUTION_LOG = 'rule_get_execution_log',
   GET_GLOBAL_EXECUTION_LOG = 'rule_get_global_execution_log',
   GET_GLOBAL_EXECUTION_KPI = 'rule_get_global_execution_kpi',
+  GET_GLOBAL_EXECUTION_SUMMARY = 'rule_get_global_execution_summary',
   GET_ACTION_ERROR_LOG = 'rule_get_action_error_log',
   GET_RULE_EXECUTION_KPI = 'rule_get_execution_kpi',
   SNOOZE = 'rule_snooze',
@@ -95,6 +96,11 @@ const ruleEventVerbs: Record<RuleAuditAction, VerbsTuple> = {
     'accessing global execution KPI for',
     'accessed global execution KPI for',
   ],
+  rule_get_global_execution_summary: [
+    'access global execution summary for',
+    'accessing global execution summary for',
+    'accessed global execution summary for',
+  ],
   rule_alert_untrack: ['untrack', 'untracking', 'untracked'],
   rule_schedule_backfill: [
     'schedule backfill for',
@@ -146,6 +152,7 @@ const ruleEventTypes: Record<RuleAuditAction, ArrayElement<EcsEvent['type']>> = 
   rule_run_soon: 'access',
   rule_get_execution_kpi: 'access',
   rule_get_global_execution_kpi: 'access',
+  rule_get_global_execution_summary: 'access',
   rule_alert_untrack: 'change',
   rule_schedule_backfill: 'access',
   rule_find_gaps: 'access',

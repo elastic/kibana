@@ -4,16 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+import type { Capabilities } from '@kbn/core-capabilities-common';
 import * as i18n from './translations';
 import {
   COVERAGE_OVERVIEW_PATH,
   RULES_LANDING_PATH,
   RULES_PATH,
+  SECURITY_FEATURE_ID,
   SecurityPageName,
 } from '../../common/constants';
 import { NotFoundPage } from '../app/404';
@@ -30,76 +31,93 @@ import type { SecuritySubPluginRoutes } from '../app/types';
 import { RulesLandingPage } from './landing';
 import { CoverageOverviewPage } from '../detection_engine/rule_management_ui/pages/coverage_overview';
 import { RuleDetailTabs } from '../detection_engine/rule_details_ui/pages/rule_details/use_rule_details_tabs';
+import { withSecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
+import { hasCapabilities } from '../common/lib/capabilities';
+import { useKibana } from '../common/lib/kibana/kibana_react';
 
-const RulesSubRoutes = [
-  {
-    path: '/rules/id/:detailName/edit',
-    main: EditRulePage,
-    exact: true,
-  },
-  {
-    path: `/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts}|${RuleDetailTabs.exceptions}|${RuleDetailTabs.endpointExceptions}|${RuleDetailTabs.executionResults}|${RuleDetailTabs.executionEvents})`,
-    main: RuleDetailsPage,
-    exact: true,
-  },
+const getRulesSubRoutes = (capabilities: Capabilities) => [
+  ...(hasCapabilities(capabilities, `${SECURITY_FEATURE_ID}.detections`) // regular detection rules are enabled
+    ? [
+        {
+          path: '/rules/id/:detailName/edit',
+          main: EditRulePage,
+          exact: true,
+        },
+        {
+          path: `/rules/:tabName(${AllRulesTabs.management}|${AllRulesTabs.monitoring}|${AllRulesTabs.updates})`,
+          main: RulesPage,
+          exact: true,
+        },
+      ]
+    : []),
+  ...(hasCapabilities(capabilities, [
+    `${SECURITY_FEATURE_ID}.detections`,
+    `${SECURITY_FEATURE_ID}.external_detections`,
+  ]) // some detection capability is enabled
+    ? [
+        {
+          path: `/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts}|${RuleDetailTabs.exceptions}|${RuleDetailTabs.endpointExceptions}|${RuleDetailTabs.executionResults}|${RuleDetailTabs.executionEvents})`,
+          main: RuleDetailsPage,
+          exact: true,
+        },
+      ]
+    : []),
   {
     path: '/rules/create',
-    main: CreateRulePage,
-    exact: true,
-  },
-  {
-    path: `/rules/:tabName(${AllRulesTabs.management}|${AllRulesTabs.monitoring}|${AllRulesTabs.updates})`,
-    main: RulesPage,
+    main: withSecurityRoutePageWrapper(CreateRulePage, SecurityPageName.rulesCreate, {
+      omitSpyRoute: true,
+    }),
     exact: true,
   },
   {
     path: '/rules/add_rules',
-    main: AddRulesPage,
+    main: withSecurityRoutePageWrapper(AddRulesPage, SecurityPageName.rulesAdd, {
+      omitSpyRoute: true,
+    }),
     exact: true,
   },
 ];
 
 const RulesContainerComponent: React.FC = () => {
   useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
+  const { capabilities } = useKibana().services.application;
+
+  const subRoutes = useMemo(() => {
+    return getRulesSubRoutes(capabilities).map((route) => (
+      <Route key={`rules-route-${route.path}`} path={route.path} exact={route?.exact ?? false}>
+        <route.main />
+      </Route>
+    ));
+  }, [capabilities]);
 
   return (
     <PluginTemplateWrapper>
-      <TrackApplicationView viewId={SecurityPageName.rules}>
-        <Routes>
-          <Route // Redirect to first tab if none specified
-            path="/rules/id/:detailName"
-            exact
-            render={({
-              match: {
-                params: { detailName },
-              },
-              location,
-            }) => (
-              <Redirect
-                to={{
-                  ...location,
-                  pathname: `/rules/id/${detailName}/${RuleDetailTabs.alerts}`,
-                  search: location.search,
-                }}
-              />
-            )}
-          />
-          <Route path="/rules" exact>
-            <Redirect to={`/rules/${AllRulesTabs.management}`} />
-          </Route>
-          {RulesSubRoutes.map((route) => (
-            <Route
-              key={`rules-route-${route.path}`}
-              path={route.path}
-              exact={route?.exact ?? false}
-            >
-              <route.main />
-            </Route>
-          ))}
-          <Route component={NotFoundPage} />
-          <SpyRoute pageName={SecurityPageName.rules} />
-        </Routes>
-      </TrackApplicationView>
+      <Routes>
+        <Route // Redirect to first tab if none specified
+          path="/rules/id/:detailName"
+          exact
+          render={({
+            match: {
+              params: { detailName },
+            },
+            location,
+          }) => (
+            <Redirect
+              to={{
+                ...location,
+                pathname: `/rules/id/${detailName}/${RuleDetailTabs.alerts}`,
+                search: location.search,
+              }}
+            />
+          )}
+        />
+        <Route path="/rules" exact>
+          <Redirect to={`/rules/${AllRulesTabs.management}`} />
+        </Route>
+        {subRoutes}
+        <Route component={NotFoundPage} />
+        <SpyRoute pageName={SecurityPageName.rules} />
+      </Routes>
     </PluginTemplateWrapper>
   );
 };
@@ -108,23 +126,28 @@ const Rules = React.memo(RulesContainerComponent);
 
 const CoverageOverviewRoutes = () => (
   <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.coverageOverview}>
-      <CoverageOverviewPage />
-    </TrackApplicationView>
+    <CoverageOverviewPage />
   </PluginTemplateWrapper>
 );
 
 export const routes: SecuritySubPluginRoutes = [
   {
     path: RULES_LANDING_PATH,
-    component: RulesLandingPage,
+    component: withSecurityRoutePageWrapper(RulesLandingPage, SecurityPageName.rulesLanding, {
+      omitSpyRoute: true,
+    }),
   },
   {
     path: RULES_PATH,
-    component: Rules,
+    component: withSecurityRoutePageWrapper(Rules, SecurityPageName.rules, {
+      omitSpyRoute: true,
+    }),
   },
   {
     path: COVERAGE_OVERVIEW_PATH,
-    component: CoverageOverviewRoutes,
+    component: withSecurityRoutePageWrapper(
+      CoverageOverviewRoutes,
+      SecurityPageName.coverageOverview
+    ),
   },
 ];

@@ -222,7 +222,7 @@ describe('EnterpriseSearchPageTemplateWrapper', () => {
       );
 
       expect(wrapper.find(KibanaPageTemplate).prop('solutionNav')).toEqual({
-        icon: 'logoEnterpriseSearch',
+        icon: 'logoElasticsearch',
         name: 'Elasticsearch',
         items: [],
       });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import {
   JourneyStep,
@@ -41,7 +41,7 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
   };
 
   const { body: thisJourney } = await uptimeEsClient.search(
-    { body: baseParams },
+    baseParams,
     'getJourneyDetailsCurrentJourney'
   );
 
@@ -109,11 +109,11 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
     };
 
     const { body: previousJourneyResult } = await uptimeEsClient.search(
-      { body: previousParams },
+      previousParams,
       'getJourneyDetailsNextJourney'
     );
     const { body: nextJourneyResult } = await uptimeEsClient.search(
-      { body: nextParams },
+      nextParams,
       'getJourneyDetailsPreviousJourney'
     );
     const previousJourney: any =

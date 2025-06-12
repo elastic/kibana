@@ -6,6 +6,7 @@
  */
 
 import { CasesDeepLinkId, CasesPublicStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
@@ -51,7 +52,6 @@ import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugi
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
-import type { InvestigatePublicStart } from '@kbn/investigate-plugin/public';
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
@@ -71,6 +71,8 @@ import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/publ
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { StreamsPluginStart, StreamsPluginSetup } from '@kbn/streams-plugin/public';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -132,6 +134,7 @@ export interface ObservabilityPublicPluginsStart {
   cases: CasesPublicStart;
   charts: ChartsPluginStart;
   contentManagement: ContentManagementPublicStart;
+  dashboard: DashboardStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
@@ -163,8 +166,9 @@ export interface ObservabilityPublicPluginsStart {
   theme: CoreStart['theme'];
   dataViewFieldEditor: DataViewFieldEditorStart;
   toastNotifications: ToastsStart;
-  investigate?: InvestigatePublicStart;
   streams?: StreamsPluginStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
+  inspector: InspectorPluginStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
@@ -180,17 +184,6 @@ export class Plugin
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry =
     {} as ObservabilityRuleTypeRegistry;
-
-  private lazyRegisterAlertsTableConfiguration() {
-    /**
-     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-     * See https://webpack.js.org/api/module-methods/#magic-comments
-     */
-    return import(
-      /* webpackChunkName: "lazy_register_observability_alerts_table_configuration" */
-      './components/alerts_table/register_alerts_table_configuration'
-    );
-  }
 
   // Define deep links as constant and hidden. Whether they are shown or hidden
   // in the global navigation will happen in `updateGlobalNavigation`.
@@ -447,20 +440,8 @@ export class Plugin
   }
 
   public start(coreStart: CoreStart, pluginsStart: ObservabilityPublicPluginsStart) {
-    const { application, http, notifications } = coreStart;
-    const { dataViews, triggersActionsUi } = pluginsStart;
+    const { application } = coreStart;
     const config = this.initContext.config.get();
-    const { alertsTableConfigurationRegistry } = triggersActionsUi;
-    this.lazyRegisterAlertsTableConfiguration().then(({ registerAlertsTableConfiguration }) => {
-      return registerAlertsTableConfiguration(
-        alertsTableConfigurationRegistry,
-        this.observabilityRuleTypeRegistry,
-        config,
-        dataViews,
-        http,
-        notifications
-      );
-    });
 
     pluginsStart.observabilityShared.updateGlobalNavigation({
       capabilities: application.capabilities,

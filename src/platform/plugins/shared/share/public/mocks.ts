@@ -16,7 +16,7 @@ import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/sho
 export type Setup = jest.Mocked<SharePublicSetup>;
 export type Start = jest.Mocked<SharePublicStart>;
 
-const url = new UrlService<BrowserShortUrlClientFactoryCreateParams, BrowserShortUrlClient>({
+export const url = new UrlService<BrowserShortUrlClientFactoryCreateParams, BrowserShortUrlClient>({
   navigate: async () => {},
   getUrl: async ({ app, path }, { absolute }) => {
     return `${absolute ? 'http://localhost:8888' : ''}/app/${app}${path}`;
@@ -40,6 +40,7 @@ const url = new UrlService<BrowserShortUrlClientFactoryCreateParams, BrowserShor
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     register: jest.fn(),
+    registerShareIntegration: jest.fn(),
     url,
     navigate: jest.fn(),
     setAnonymousAccessServiceProvider: jest.fn(),
@@ -51,6 +52,7 @@ const createStartContract = (): Start => {
   const startContract: Start = {
     url,
     toggleShareContextMenu: jest.fn(),
+    availableIntegrations: jest.fn(),
     navigate: jest.fn(),
   };
   return startContract;

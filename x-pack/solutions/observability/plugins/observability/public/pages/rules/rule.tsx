@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { RuleForm } from '@kbn/response-ops-rule-form';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
@@ -33,11 +33,17 @@ export function RulePage() {
     actionTypeRegistry,
     ruleTypeRegistry,
     chrome,
+    contentManagement,
     ...startServices
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const location = useLocation<{ returnApp?: string; returnPath?: string }>();
   const { returnApp, returnPath } = location.state || {};
+
+  const { id, ruleTypeId } = useParams<{
+    id?: string;
+    ruleTypeId?: string;
+  }>();
 
   useBreadcrumbs(
     [
@@ -54,11 +60,24 @@ export function RulePage() {
           defaultMessage: 'Rules',
         }),
       },
-      {
-        text: i18n.translate('xpack.observability.breadcrumbs.createLinkText', {
-          defaultMessage: 'Create',
-        }),
-      },
+      ...(ruleTypeId
+        ? [
+            {
+              text: i18n.translate('xpack.observability.breadcrumbs.createLinkText', {
+                defaultMessage: 'Create',
+              }),
+            },
+          ]
+        : []),
+      ...(id
+        ? [
+            {
+              text: i18n.translate('xpack.observability.breadcrumbs.editLinkText', {
+                defaultMessage: 'Edit',
+              }),
+            },
+          ]
+        : []),
     ],
     { serverless }
   );
@@ -79,8 +98,11 @@ export function RulePage() {
           docLinks,
           ruleTypeRegistry,
           actionTypeRegistry,
+          contentManagement,
           ...startServices,
         }}
+        id={id}
+        ruleTypeId={ruleTypeId}
         validConsumers={observabilityRuleCreationValidConsumers}
         multiConsumerSelection={AlertConsumers.LOGS}
         isServerless={!!serverless}

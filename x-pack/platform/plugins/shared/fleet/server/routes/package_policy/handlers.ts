@@ -43,7 +43,11 @@ import type {
   UpgradePackagePolicyResponse,
 } from '../../../common/types';
 import { installationStatuses, inputsFormat } from '../../../common/constants';
-import { PackagePolicyNotFoundError, PackagePolicyRequestError } from '../../errors';
+import {
+  PackagePolicyNotFoundError,
+  PackagePolicyRequestError,
+  CustomPackagePolicyNotAllowedForAgentlessError,
+} from '../../errors';
 import {
   getInstallation,
   getInstallations,
@@ -60,7 +64,7 @@ import type {
   SimplifiedInputs,
   SimplifiedPackagePolicy,
 } from '../../../common/services/simplified_package_policy_helper';
-
+import { runWithCache } from '../../services/epm/packages/cache';
 import { validateAgentlessInputs } from '../../../common/services/agentless_policy_helper';
 
 import {
@@ -228,6 +232,9 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const { force, id, package: pkg, ...newPolicy } = request.body;
+  if ('spaceIds' in newPolicy) {
+    delete newPolicy.spaceIds;
+  }
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
   let wasPackageAlreadyInstalled = false;
 
@@ -260,6 +267,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
       savedObjectsClient: soClient,
       pkgName: pkg!.name,
     });
+
     wasPackageAlreadyInstalled = installation?.install_status === 'installed';
 
     // Create package policy
@@ -288,7 +296,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   } catch (error) {
     appContextService
       .getLogger()
-      .error(`Error while creating package policy due to error: ${error.message}`);
+      .error(`Error while creating package policy due to error: ${error.message}`, { error });
     if (!wasPackageAlreadyInstalled) {
       const installation = await getInstallation({
         savedObjectsClient: soClient,
@@ -305,6 +313,29 @@ export const createPackagePolicyHandler: FleetRequestHandler<
           esClient,
         });
       }
+    }
+
+    if (error instanceof CustomPackagePolicyNotAllowedForAgentlessError) {
+      // Agentless deployments have 1:1 agent to integration policies
+      // We delete the associated agent policy previously created.
+      const agentPolicyId = newPolicy.policy_ids?.[0];
+
+      if (agentPolicyId) {
+        appContextService
+          .getLogger()
+          .info(
+            `Deleting agent policy ${agentPolicyId}, associated with custom integration not allowed for agentless deployment`
+          );
+
+        await agentPolicyService.delete(soClient, esClient, agentPolicyId).catch(() => {
+          appContextService
+            .getLogger()
+            .error(
+              `Failed to delete agent policy ${agentPolicyId}, associated with custom integration not allowed for agentless deployment`
+            );
+        });
+      }
+      throw error;
     }
 
     if (error.statusCode) {
@@ -515,7 +546,7 @@ export const upgradePackagePolicyHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
-  const body: UpgradePackagePolicyResponse = await packagePolicyService.upgrade(
+  const body: UpgradePackagePolicyResponse = await packagePolicyService.bulkUpgrade(
     soClient,
     esClient,
     request.body.packagePolicyIds,
@@ -544,11 +575,12 @@ export const dryRunUpgradePackagePolicyHandler: RequestHandler<
 
   const body: UpgradePackagePolicyDryRunResponse = [];
   const { packagePolicyIds } = request.body;
-
-  for (const id of packagePolicyIds) {
-    const result = await packagePolicyService.getUpgradeDryRunDiff(soClient, id);
-    body.push(result);
-  }
+  await runWithCache(async () => {
+    for (const id of packagePolicyIds) {
+      const result = await packagePolicyService.getUpgradeDryRunDiff(soClient, id);
+      body.push(result);
+    }
+  });
 
   const firstFatalError = body.find((item) => item.statusCode && item.statusCode !== 200);
 

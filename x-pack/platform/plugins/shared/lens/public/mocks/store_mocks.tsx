@@ -6,12 +6,12 @@
  */
 
 import React, { PropsWithChildren, ReactElement } from 'react';
-import { ReactWrapper, mount } from 'enzyme';
+import { ReactWrapper } from 'enzyme';
 import { Provider } from 'react-redux';
 import { PreloadedState } from '@reduxjs/toolkit';
-import { RenderOptions, render } from '@testing-library/react';
-import { I18nProvider } from '@kbn/i18n-react';
+import { RenderOptions } from '@testing-library/react';
 import { LensAppServices } from '../app_plugin/types';
+import { mountWithProviders, renderWithProviders } from '../test_utils/test_utils';
 import { makeConfigureStore, LensAppState, LensState, LensStoreDeps } from '../state_management';
 import { getResolvedDateRange } from '../utils';
 import { DatasourceMap, VisualizationMap } from '../types';
@@ -19,21 +19,15 @@ import { mockVisualizationMap } from './visualization_mock';
 import { mockDatasourceMap } from './datasource_mock';
 import { makeDefaultServices } from './services_mock';
 
-export const mockStoreDeps = (
-  {
-    lensServices = makeDefaultServices(),
-    datasourceMap = mockDatasourceMap(),
-    visualizationMap = mockVisualizationMap(),
-  }: {
-    lensServices?: LensAppServices;
-    datasourceMap?: DatasourceMap;
-    visualizationMap?: VisualizationMap;
-  } = {
-    lensServices: makeDefaultServices(),
-    datasourceMap: mockDatasourceMap(),
-    visualizationMap: mockVisualizationMap(),
-  }
-) => ({
+export const mockStoreDeps = ({
+  lensServices = makeDefaultServices(),
+  datasourceMap = mockDatasourceMap(),
+  visualizationMap = mockVisualizationMap(),
+}: {
+  lensServices?: LensAppServices;
+  datasourceMap?: DatasourceMap;
+  visualizationMap?: VisualizationMap;
+} = {}) => ({
   datasourceMap,
   visualizationMap,
   lensServices,
@@ -86,17 +80,13 @@ export const renderWithReduxStore = (
 
   const CustomWrapper = wrapper as React.ComponentType<React.PropsWithChildren<{}>>;
 
-  const Wrapper: React.FC<PropsWithChildren<{}>> = ({ children }) => {
-    return (
-      <Provider store={store}>
-        <I18nProvider>
-          {wrapper ? <CustomWrapper>{children}</CustomWrapper> : children}
-        </I18nProvider>
-      </Provider>
-    );
-  };
+  const Wrapper: React.FC<PropsWithChildren<{}>> = ({ children }) => (
+    <Provider store={store}>
+      {wrapper ? <CustomWrapper>{children}</CustomWrapper> : children}
+    </Provider>
+  );
 
-  const rtlRender = render(ui, { wrapper: Wrapper, ...options });
+  const rtlRender = renderWithProviders(ui, { wrapper: Wrapper, ...options });
 
   return {
     store,
@@ -106,13 +96,11 @@ export const renderWithReduxStore = (
 
 export function makeLensStore({
   preloadedState,
-  dispatch,
   storeDeps = mockStoreDeps(),
 }: {
   storeDeps?: LensStoreDeps;
   preloadedState?: Partial<LensAppState>;
-  dispatch?: jest.Mock;
-}) {
+} = {}) {
   const data = storeDeps.lensServices.data;
   const store = makeConfigureStore(storeDeps, {
     lens: {
@@ -124,18 +112,17 @@ export function makeLensStore({
     },
   } as unknown as PreloadedState<LensState>);
 
-  const origDispatch = store.dispatch;
-  store.dispatch = jest.fn(dispatch || origDispatch);
+  store.dispatch = jest.spyOn(store, 'dispatch') as jest.Mock;
   return { store, deps: storeDeps };
 }
 
 export interface MountStoreProps {
   storeDeps?: LensStoreDeps;
   preloadedState?: Partial<LensAppState>;
-  dispatch?: jest.Mock;
 }
 
-export const mountWithProvider = async (
+// legacy enzyme usage: remove when all tests are migrated to @testing-library/react
+export const mountWithReduxStore = (
   component: React.ReactElement,
   store?: MountStoreProps,
   options?: {
@@ -144,52 +131,24 @@ export const mountWithProvider = async (
     attachTo?: HTMLElement;
   }
 ) => {
-  const { mountArgs, lensStore, deps } = getMountWithProviderParams(component, store, options);
-  const instance = mount(mountArgs.component, mountArgs.options);
-  return { instance, lensStore, deps };
-};
-
-const getMountWithProviderParams = (
-  component: React.ReactElement,
-  store?: MountStoreProps,
-  options?: {
-    wrappingComponent?: React.FC<PropsWithChildren<{}>>;
-    wrappingComponentProps?: Record<string, unknown>;
-    attachTo?: HTMLElement;
-  }
-) => {
-  const { store: lensStore, deps } = makeLensStore(store || {});
+  const { store: lensStore, deps } = makeLensStore(store);
 
   let wrappingComponent: React.FC<PropsWithChildren<{}>> = ({ children }) => (
-    <I18nProvider>
-      <Provider store={lensStore}>{children}</Provider>
-    </I18nProvider>
+    <Provider store={lensStore}>{children}</Provider>
   );
-
-  let restOptions: {
-    attachTo?: HTMLElement | undefined;
-  } = {};
-  if (options) {
-    const { wrappingComponent: _wrappingComponent, wrappingComponentProps, ...rest } = options;
-    restOptions = rest;
-
-    if (_wrappingComponent) {
-      wrappingComponent = ({ children }) => {
-        return _wrappingComponent({
-          ...wrappingComponentProps,
-          children: <Provider store={lensStore}>{children}</Provider>,
-        });
-      };
-    }
+  if (options?.wrappingComponent) {
+    wrappingComponent = ({ children }) => {
+      return options?.wrappingComponent?.({
+        ...options?.wrappingComponentProps,
+        children: wrappingComponent({ children }),
+      });
+    };
   }
 
-  const mountArgs = {
-    component,
-    options: {
-      wrappingComponent,
-      ...restOptions,
-    } as unknown as ReactWrapper,
-  };
+  const instance = mountWithProviders(component, {
+    ...options,
+    wrappingComponent,
+  } as unknown as ReactWrapper);
 
-  return { mountArgs, lensStore, deps };
+  return { instance, lensStore, deps };
 };

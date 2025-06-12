@@ -10,13 +10,13 @@
 import React from 'react';
 import { EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 // @ts-ignore
-import registerSearchEmbeddableSource from '!!raw-loader!../react_embeddables/search/register_search_embeddable';
+import registerSearchEmbeddableSource from '../react_embeddables/search/register_search_embeddable?raw';
 // @ts-ignore
-import registerAttachActionSource from '!!raw-loader!../react_embeddables/search/register_add_search_panel_action';
+import registerAttachActionSource from '../react_embeddables/search/register_add_search_panel_action?raw';
 // @ts-ignore
-import registerFieldListEmbeddableSource from '!!raw-loader!../react_embeddables/field_list/register_field_list_embeddable';
+import registerFieldListEmbeddableSource from '../react_embeddables/field_list/register_field_list_embeddable?raw';
 // @ts-ignore
-import registerReactEmbeddableSavedObjectSource from '!!raw-loader!../react_embeddables/register_saved_object_example';
+import registerReactEmbeddableSavedObjectSource from '../react_embeddables/register_saved_object_example?raw';
 
 export const RegisterEmbeddable = () => {
   return (

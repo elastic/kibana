@@ -7,9 +7,16 @@
 
 import { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
 
-import { AssistantFeatures } from '@kbn/elastic-assistant-common';
+import {
+  ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG,
+  ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID,
+  ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG,
+  AssistantFeatures,
+} from '@kbn/elastic-assistant-common';
 import { ReplaySubject, type Subject } from 'rxjs';
-import { MlPluginSetup } from '@kbn/ml-plugin/server';
+import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
+import { Dataset, IRuleDataClient, IndexOptions } from '@kbn/rule-registry-plugin/server';
+import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { events } from './lib/telemetry/event_based_telemetry';
 import {
   AssistantTool,
@@ -22,10 +29,16 @@ import {
 } from './types';
 import { AIAssistantService } from './ai_assistant_service';
 import { RequestContextFactory } from './routes/request_context_factory';
+import { createEventLogger } from './create_event_logger';
 import { PLUGIN_ID } from '../common/constants';
+import { registerEventLogProvider } from './register_event_log_provider';
 import { registerRoutes } from './routes/register_routes';
-import { appContextService } from './services/app_context';
-import { createGetElserId, removeLegacyQuickPrompt } from './ai_assistant_service/helpers';
+import { CallbackIds, appContextService } from './services/app_context';
+import { removeLegacyQuickPrompt } from './ai_assistant_service/helpers';
+import { getAttackDiscoveryScheduleType } from './lib/attack_discovery/schedules/register_schedule/definition';
+import type { ConfigSchema } from './config_schema';
+import { attackDiscoveryAlertFieldMap } from './lib/attack_discovery/schedules/fields';
+import { ATTACK_DISCOVERY_ALERTS_CONTEXT } from './lib/attack_discovery/schedules/constants';
 
 export class ElasticAssistantPlugin
   implements
@@ -40,13 +53,13 @@ export class ElasticAssistantPlugin
   private assistantService: AIAssistantService | undefined;
   private pluginStop$: Subject<void>;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
-  private mlTrainedModelsProvider?: MlPluginSetup['trainedModelsProvider'];
-  private getElserId?: () => Promise<string>;
+  private readonly config: ConfigSchema;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.pluginStop$ = new ReplaySubject(1);
     this.logger = initializerContext.logger.get();
     this.kibanaVersion = initializerContext.env.packageInfo.version;
+    this.config = initializerContext.config.get<ConfigSchema>();
   }
 
   public setup(
@@ -55,14 +68,21 @@ export class ElasticAssistantPlugin
   ) {
     this.logger.debug('elasticAssistant: Setup');
 
+    registerEventLogProvider(plugins.eventLog);
+    const eventLogger = createEventLogger(plugins.eventLog); // must be created during setup phase
+
     this.assistantService = new AIAssistantService({
       logger: this.logger.get('service'),
       ml: plugins.ml,
       taskManager: plugins.taskManager,
       kibanaVersion: this.kibanaVersion,
+      elserInferenceId: this.config.elserInferenceId,
       elasticsearchClientPromise: core
         .getStartServices()
         .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
+      soClientPromise: core
+        .getStartServices()
+        .then(([{ savedObjects }]) => savedObjects.createInternalRepository()),
       productDocManager: core
         .getStartServices()
         .then(([_, { productDocBase }]) => productDocBase.management),
@@ -80,14 +100,68 @@ export class ElasticAssistantPlugin
     const router = core.http.createRouter<ElasticAssistantRequestHandlerContext>();
     core.http.registerRouteHandlerContext<ElasticAssistantRequestHandlerContext, typeof PLUGIN_ID>(
       PLUGIN_ID,
-      (context, request) => requestContextFactory.create(context, request)
+      (context, request) =>
+        requestContextFactory.create(
+          context,
+          request,
+          plugins.eventLog.getIndexPattern(),
+          eventLogger
+        )
     );
     events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
 
-    this.mlTrainedModelsProvider = plugins.ml.trainedModelsProvider;
-    this.getElserId = createGetElserId(this.mlTrainedModelsProvider);
+    registerRoutes(router, this.logger, this.config);
 
-    registerRoutes(router, this.logger, this.getElserId);
+    // The featureFlags service is not available in the core setup, so we need
+    // to wait for the start services to be available to read the feature flags.
+    // This can take a while, but the plugin setup phase cannot run for a long time.
+    // As a workaround, this promise does not block the setup phase.
+    core
+      .getStartServices()
+      .then(([{ featureFlags }]) => {
+        // read all feature flags:
+        void Promise.all([
+          featureFlags.getBooleanValue(ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG, false),
+          featureFlags.getBooleanValue(ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG, false),
+          // add more feature flags here
+        ]).then(([assistantAttackDiscoverySchedulingEnabled, attackDiscoveryAlertsEnabled]) => {
+          if (assistantAttackDiscoverySchedulingEnabled) {
+            // Register Attack Discovery Schedule type
+            plugins.alerting.registerType(
+              getAttackDiscoveryScheduleType({
+                logger: this.logger,
+                publicBaseUrl: core.http.basePath.publicBaseUrl,
+                telemetry: core.analytics,
+              })
+            );
+          }
+          let adhocAttackDiscoveryDataClient: IRuleDataClient | undefined;
+          if (attackDiscoveryAlertsEnabled) {
+            // Initialize index for ad-hoc generated attack discoveries
+            const { ruleDataService } = plugins.ruleRegistry;
+
+            const ruleDataServiceOptions: IndexOptions = {
+              feature: ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID,
+              registrationContext: ATTACK_DISCOVERY_ALERTS_CONTEXT,
+              dataset: Dataset.alerts,
+              additionalPrefix: '.adhoc',
+              componentTemplateRefs: [ECS_COMPONENT_TEMPLATE_NAME],
+              componentTemplates: [
+                {
+                  name: 'mappings',
+                  mappings: mappingFromFieldMap(attackDiscoveryAlertFieldMap),
+                },
+              ],
+            };
+            adhocAttackDiscoveryDataClient =
+              ruleDataService.initializeIndex(ruleDataServiceOptions);
+          }
+          requestContextFactory.setup(adhocAttackDiscoveryDataClient);
+        });
+      })
+      .catch((error) => {
+        this.logger.error(`error in security assistant plugin setup: ${error}`);
+      });
 
     return {
       actions: plugins.actions,
@@ -107,11 +181,6 @@ export class ElasticAssistantPlugin
     this.logger.debug('elasticAssistant: Started');
     appContextService.start({ logger: this.logger });
 
-    plugins.licensing.license$.subscribe(() => {
-      if (this.mlTrainedModelsProvider) {
-        this.getElserId = createGetElserId(this.mlTrainedModelsProvider);
-      }
-    });
     removeLegacyQuickPrompt(core.elasticsearch.client.asInternalUser)
       .then((res) => {
         if (res?.total)
@@ -133,6 +202,9 @@ export class ElasticAssistantPlugin
       },
       registerTools: (pluginName: string, tools: AssistantTool[]) => {
         return appContextService.registerTools(pluginName, tools);
+      },
+      registerCallback: (callbackId: CallbackIds, callback: Function) => {
+        return appContextService.registerCallback(callbackId, callback);
       },
     };
   }

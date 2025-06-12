@@ -126,7 +126,7 @@ export async function getLogFormatDetectionGraph({ model, client }: LogDetection
       'handleUnstructuredGraph',
       (await getUnstructuredGraph({ model, client })).withConfig({ runName: 'Unstructured' })
     )
-    .addNode('handleCSV', (state: LogFormatDetectionState) => handleCSV({ state, model, client }))
+    .addNode('handleCSV', (state: LogFormatDetectionState) => handleCSV({ state, client }))
     .addEdge(START, 'modelInput')
     .addEdge('modelInput', 'handleLogFormatDetection')
     .addEdge('handleKVGraph', 'modelOutput')

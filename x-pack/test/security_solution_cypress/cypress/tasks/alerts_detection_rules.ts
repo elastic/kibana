@@ -60,7 +60,11 @@ import {
 } from '../screens/alerts_detection_rules';
 import type { RULES_MONITORING_TABLE } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
-import { POPOVER_ACTIONS_TRIGGER_BUTTON, RULE_NAME_HEADER } from '../screens/rule_details';
+import {
+  MODIFIED_PREBUILT_RULE_BADGE,
+  POPOVER_ACTIONS_TRIGGER_BUTTON,
+  RULE_NAME_HEADER,
+} from '../screens/rule_details';
 import { EDIT_SUBMIT_BUTTON } from '../screens/edit_rule';
 import { LOADING_INDICATOR } from '../screens/security_header';
 import { PAGE_CONTENT_SPINNER } from '../screens/common/page';
@@ -132,14 +136,14 @@ export const deleteFirstRule = () => {
 };
 
 export const deleteRuleFromDetailsPage = () => {
-  cy.get(POPOVER_ACTIONS_TRIGGER_BUTTON).click();
+  cy.get(POPOVER_ACTIONS_TRIGGER_BUTTON).click({ force: true });
   cy.get(RULE_DETAILS_DELETE_BTN).click();
   cy.get(RULE_DETAILS_DELETE_BTN).should('not.exist');
   cy.get(CONFIRM_DELETE_RULE_BTN).click();
 };
 
 export const manualRuleRunFromDetailsPage = () => {
-  cy.get(POPOVER_ACTIONS_TRIGGER_BUTTON).click();
+  cy.get(POPOVER_ACTIONS_TRIGGER_BUTTON).click({ force: true });
   cy.get(RULE_DETAILS_MANUAL_RULE_RUN_BTN).click();
   cy.get(RULE_DETAILS_MANUAL_RULE_RUN_BTN).should('not.exist');
   cy.get(MODAL_CONFIRMATION_BTN).click();
@@ -201,6 +205,7 @@ export const filterByElasticRules = () => {
 
 export const filterByCustomRules = () => {
   cy.get(CUSTOM_RULES_BTN).click();
+  waitForRulesTableToBeRefreshed();
 };
 
 export const filterByEnabledRules = () => {
@@ -394,6 +399,14 @@ export const expectToContainRule = (
   cy.get(tableSelector).find(RULES_ROW).should('include.text', ruleName);
 };
 
+export const expectModifiedBadgeToBeDisplayed = () => {
+  cy.get(MODIFIED_PREBUILT_RULE_BADGE).should('exist');
+};
+
+export const expectModifiedBadgeToNotBeDisplayed = () => {
+  cy.get(MODIFIED_PREBUILT_RULE_BADGE).should('not.exist');
+};
+
 const selectOverwriteRulesImport = () => {
   cy.get(RULE_IMPORT_OVERWRITE_CHECKBOX).check({ force: true });
   cy.get(RULE_IMPORT_OVERWRITE_CHECKBOX).should('be.checked');
@@ -405,6 +418,21 @@ export const expectManagementTableRules = (ruleNames: string[]): void => {
   for (const ruleName of ruleNames) {
     expectToContainRule(RULES_MANAGEMENT_TABLE, ruleName);
   }
+};
+
+export const expectToContainModifiedBadge = (ruleName: string) => {
+  cy.get(RULES_MANAGEMENT_TABLE)
+    .find(RULES_ROW)
+    .should('include.text', ruleName)
+    .contains('Modified');
+};
+
+export const expectToNotContainModifiedBadge = (ruleName: string) => {
+  cy.get(RULES_MANAGEMENT_TABLE)
+    .find(RULES_ROW)
+    .should('include.text', ruleName)
+    .contains('Modified')
+    .should('not.exist');
 };
 
 const selectOverwriteExceptionsRulesImport = () => {
@@ -488,13 +516,21 @@ export const disableAutoRefresh = () => {
   expectAutoRefreshIsDisabled();
 };
 
+export const enableAutoRefresh = () => {
+  openRefreshSettingsPopover();
+  cy.get(REFRESH_SETTINGS_SWITCH).click();
+  expectAutoRefreshIsEnabled();
+};
+
 export const mockGlobalClock = () => {
   /**
    * Ran into the error: timer created with setInterval() but cleared with cancelAnimationFrame()
    * There are no cancelAnimationFrames in the codebase that are used to clear a setInterval so
    * explicitly set the below overrides. see https://docs.cypress.io/api/commands/clock#Function-names
+   *
+   * Warning: timers need to be mocked after the first page load,
+   * otherwise plugin deep links won't be registered properly since they use rxjs debounceTime.
    */
-
   cy.clock(Date.now(), ['setInterval', 'clearInterval', 'Date']);
 };
 

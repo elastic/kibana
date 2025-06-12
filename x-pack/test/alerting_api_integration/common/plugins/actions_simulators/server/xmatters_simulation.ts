@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
+import type {
   RequestHandlerContext,
   KibanaRequest,
   KibanaResponseFactory,
@@ -18,6 +18,12 @@ export function initPlugin(router: IRouter, path: string) {
   router.post(
     {
       path,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         authRequired: false,
       },

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -16,16 +15,21 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { isEmpty } from 'lodash/fp';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
 
 import { useEuiComboBoxReset } from '../../../../../common/components/use_combo_box_reset';
 import { StackByComboBox } from '../../../../../detections/components/alerts_kpis/common/components';
 import { useSignalIndex } from '../../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import type { LensAttributes } from '../../../../../common/components/visualization_actions/types';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { sourcererActions } from '../../../../../sourcerer/store';
+import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import * as i18n from '../translations';
 import type { Sorting } from '../types';
+import { useKibanaFeatureFlags } from '../../../use_kibana_feature_flags';
 
 export const ATTACK_DISCOVERY_SETTINGS_ALERTS_COUNT_ID = 'attack-discovery-settings-alerts-count';
 export const RESET_FIELD = 'kibana.alert.rule.name';
@@ -81,9 +85,12 @@ const PreviewTabComponent = ({
   tableStackBy0,
 }: Props) => {
   const { lens } = useKibana().services;
+  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
+
   const {
     euiTheme: { font },
   } = useEuiTheme();
+  const dispatch = useDispatch();
 
   const { signalIndexName } = useSignalIndex();
 
@@ -116,7 +123,12 @@ const PreviewTabComponent = ({
     [esqlQuery, getLensAttributes, sorting, tableStackBy0]
   );
 
-  const onReset = useCallback(() => setTableStackBy0(RESET_FIELD), [setTableStackBy0]);
+  const onReset = useCallback(() => {
+    // clear the input when it's in an error state, i.e. because the user entered an invalid field:
+    stackByField0ComboboxRef.current?.clearSearchValue();
+
+    setTableStackBy0(RESET_FIELD);
+  }, [setTableStackBy0, stackByField0ComboboxRef]);
 
   const actions = useMemo(
     () => [
@@ -144,6 +156,23 @@ const PreviewTabComponent = ({
     [actions, body, tableStackBy0]
   );
 
+  useEffect(() => {
+    if (signalIndexName != null) {
+      // Limit the fields in the StackByComboBox to the fields in the signal index.
+      // NOTE: The page containing this component must also be a member of
+      // `detectionsPaths` in `sourcerer/containers/sourcerer_paths.ts` for this
+      // action to have any effect.
+      dispatch(
+        sourcererActions.setSelectedDataView({
+          id: SourcererScopeName.detections,
+          selectedDataViewId: signalIndexName,
+          selectedPatterns: [signalIndexName],
+          shouldValidateSelectedPatterns: false,
+        })
+      );
+    }
+  }, [dispatch, signalIndexName]);
+
   if (signalIndexName == null) {
     return null;
   }
@@ -164,7 +193,7 @@ const PreviewTabComponent = ({
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiSpacer size="s" />
+        <EuiSpacer size={attackDiscoveryAlertsEnabled ? 'l' : 's'} />
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
@@ -186,7 +215,7 @@ const PreviewTabComponent = ({
                 }
 
                 .euiDataGridRowCell {
-                  font-size: ${font.scale.s}${font.defaultUnits};
+                  font-size: ${attackDiscoveryAlertsEnabled ? font.scale.xs : font.scale.s}${font.defaultUnits} !important;
                 }
 
                 .expExpressionRenderer__expression {

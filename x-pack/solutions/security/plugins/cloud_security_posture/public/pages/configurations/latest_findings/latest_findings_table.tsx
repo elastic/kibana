@@ -18,7 +18,8 @@ import {
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { getVendorName } from '../../../common/utils/get_vendor_name';
+import { getVendorName } from '@kbn/cloud-security-posture/src/utils/get_vendor_name';
+import { createDetectionRuleFromBenchmarkRule } from '@kbn/cloud-security-posture/src/utils/create_detection_rule_from_benchmark';
 import * as TEST_SUBJECTS from '../test_subjects';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
 import { ErrorCallout } from '../layout/error_callout';
@@ -26,8 +27,6 @@ import { CloudSecurityDataTable } from '../../../components/cloud_security_data_
 import { getDefaultQuery, defaultColumns } from './constants';
 import { useLatestFindingsTable } from './use_latest_findings_table';
 import { TimestampTableCell } from '../../../components/timestamp_table_cell';
-import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
-import { createDetectionRuleFromBenchmarkRule } from '../utils/create_detection_rule_from_benchmark';
 import { findingsTableFieldLabels } from './findings_table_field_labels';
 
 interface LatestFindingsTableProps {
@@ -49,13 +48,11 @@ const getCspFinding = (source: Record<string, any> | undefined): CspFinding | un
 };
 
 /**
- * Flyout component for the latest findings table
+ * Flyout component for the latest findings table, renders empty component as now we use Use Expandable Flyout API hook to handle all the rendering
  */
-const flyoutComponent = (row: DataTableRecord, onCloseFlyout: () => void): JSX.Element => {
-  const finding = row.raw._source;
-  if (!finding || !isCspFinding(finding)) return <></>;
+const onOpenFlyoutCallback = (): JSX.Element => {
   uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, OPEN_FINDINGS_FLYOUT);
-  return <FindingsRuleFlyout finding={finding} onClose={onCloseFlyout} />;
+  return <></>;
 };
 
 const title = i18n.translate('xpack.csp.findings.latestFindings.tableRowTypeLabel', {
@@ -141,7 +138,7 @@ export const LatestFindingsTable = ({
             defaultColumns={defaultColumns}
             rows={rows}
             total={total}
-            flyoutComponent={flyoutComponent}
+            onOpenFlyoutCallback={onOpenFlyoutCallback}
             cloudPostureDataTable={cloudPostureDataTable}
             loadMore={fetchNextPage}
             title={title}
@@ -150,6 +147,7 @@ export const LatestFindingsTable = ({
             height={height}
             createRuleFn={createMisconfigurationRuleFn}
             columnHeaders={findingsTableFieldLabels}
+            flyoutType="misconfiguration"
           />
         </>
       )}

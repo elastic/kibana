@@ -5,20 +5,31 @@
  * 2.0.
  */
 
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { ExampleContext } from '../../../test/context_example';
 
 import { Footer } from '../footer';
 
-storiesOf('shareables/Footer', module)
-  .add('contextual: hello', () => (
+export default {
+  title: 'shareables/Footer',
+};
+
+export const ContextualHello = {
+  render: () => (
     <ExampleContext height={172} source="hello">
       <Footer />
     </ExampleContext>
-  ))
-  .add('contextual: austin', () => (
+  ),
+
+  name: 'contextual: hello',
+};
+
+export const ContextualAustin = {
+  render: () => (
     <ExampleContext height={172} source="austin">
       <Footer />
     </ExampleContext>
-  ));
+  ),
+
+  name: 'contextual: austin',
+};

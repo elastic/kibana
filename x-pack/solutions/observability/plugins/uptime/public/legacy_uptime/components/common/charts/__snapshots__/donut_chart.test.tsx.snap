@@ -110,24 +110,6 @@ exports[`DonutChart component passes correct props without errors for valid prop
                   "strokeWidth": 1,
                   "visible": true,
                 },
-                "lumaSteps": Array [
-                  224,
-                  184,
-                  128,
-                  96,
-                  64,
-                  32,
-                  16,
-                  8,
-                  4,
-                  2,
-                  1,
-                  0,
-                  0,
-                  0,
-                  0,
-                  0,
-                ],
                 "vertical": Object {
                   "dash": Array [
                     0,
@@ -231,18 +213,18 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "top": 0,
             },
             "colors": Object {
-              "defaultVizColor": "#6092C0",
+              "defaultVizColor": "#16C5C0",
               "vizColors": Array [
-                "#54B399",
-                "#6092C0",
-                "#9170B8",
-                "#CA8EAE",
-                "#D36086",
-                "#E7664C",
-                "#AA6556",
-                "#DA8B45",
-                "#B9A888",
-                "#D6BF57",
+                "#16C5C0",
+                "#A6EDEA",
+                "#61A2FF",
+                "#BFDBFF",
+                "#EE72A6",
+                "#FFC7DB",
+                "#F6726A",
+                "#FFC9C2",
+                "#EAAE01",
+                "#FCD883",
               ],
             },
             "crosshair": Object {
@@ -697,7 +679,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <span
-                  color="#BD271E"
+                  color="#C61E25"
                   data-euiicon-type="dot"
                 />
               </div>
@@ -739,7 +721,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <span
-                  color="#D3DAE6"
+                  color="#CAD3E2"
                   data-euiicon-type="dot"
                 />
               </div>
@@ -856,7 +838,7 @@ exports[`DonutChart component renders a green check when all monitors are up 1`]
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <span
-                  color="#BD271E"
+                  color="#C61E25"
                   data-euiicon-type="dot"
                 />
               </div>
@@ -898,7 +880,7 @@ exports[`DonutChart component renders a green check when all monitors are up 1`]
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <span
-                  color="#D3DAE6"
+                  color="#CAD3E2"
                   data-euiicon-type="dot"
                 />
               </div>

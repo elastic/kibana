@@ -16,7 +16,6 @@ export interface LogDocument extends DataTableRecord {
     message?: [string];
     'error.message'?: string;
     'event.original'?: string;
-
     'host.name'?: string;
     'service.name'?: string;
     'trace.id'?: string;
@@ -69,14 +68,35 @@ export interface LogFlyoutDoc {
 }
 
 export interface ResourceFields {
-  'host.name'?: string;
   'service.name'?: string;
-  'agent.name'?: string;
+  'kubernetes.container.name'?: string;
+  'k8s.container.name'?: string;
+  'container.name'?: string;
+  'kubernetes.node.name'?: string;
+  'k8s.node.name'?: string;
+  'host.name'?: string;
   'orchestrator.cluster.name'?: string;
+  'k8s.cluster.name'?: string;
+  'kubernetes.namespace'?: string;
+  'k8s.namespace.name'?: string;
+  'kubernetes.pod.name'?: string;
+  'k8s.pod.name'?: string;
+  'kubernetes.deployment.name'?: string;
+  'k8s.deployment.name'?: string;
+  'kubernetes.replicaset.name'?: string;
+  'k8s.replicaset.name'?: string;
+  'kubernetes.statefulset.name'?: string;
+  'k8s.statefulset.name'?: string;
+  'kubernetes.daemonset.name'?: string;
+  'k8s.daemonset.name'?: string;
+  'kubernetes.job.name'?: string;
+  'k8s.job.name'?: string;
+  'kubernetes.cronjob.name'?: string;
+  'k8s.cronjob.name'?: string;
+  'agent.name'?: string;
   'orchestrator.cluster.id'?: string;
   'orchestrator.resource.id'?: string;
   'orchestrator.namespace'?: string;
-  'container.name'?: string;
   'container.id'?: string;
   'cloud.instance.id'?: string;
 }

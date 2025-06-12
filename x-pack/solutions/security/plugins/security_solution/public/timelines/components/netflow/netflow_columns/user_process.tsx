@@ -24,7 +24,8 @@ export const UserProcess = React.memo<{
   eventId: string;
   processName?: string[] | null;
   userName?: string[] | null;
-}>(({ contextId, eventId, processName, userName }) => (
+  scopeId: string;
+}>(({ contextId, eventId, processName, userName, scopeId }) => (
   <EuiFlexGroup
     alignItems="flexStart"
     data-test-subj="user-process"
@@ -36,6 +37,7 @@ export const UserProcess = React.memo<{
       ? uniq(userName).map((user) => (
           <EuiFlexItem grow={false} key={user}>
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               data-test-subj="user-name"
               eventId={eventId}
@@ -53,6 +55,7 @@ export const UserProcess = React.memo<{
       ? uniq(processName).map((process) => (
           <EuiFlexItem grow={false} key={process}>
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field={PROCESS_NAME_FIELD_NAME}

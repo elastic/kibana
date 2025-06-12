@@ -11,3 +11,4 @@ export const ReindexTaskFailed = Symbol('ReindexTaskFailed');
 export const ReindexAlreadyInProgress = Symbol('ReindexAlreadyInProgress');
 export const ReindexCannotBeCancelled = Symbol('ReindexCannotBeCancelled');
 export const MetadataCannotBeGrabbed = Symbol('MetadataCannotBeGrabbed');
+export const ReadonlyTaskFailed = Symbol('ReadonlyTaskFailed');

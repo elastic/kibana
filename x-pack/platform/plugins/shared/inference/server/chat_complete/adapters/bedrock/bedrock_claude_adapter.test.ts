@@ -7,7 +7,7 @@
 
 import { PassThrough } from 'stream';
 import { loggerMock } from '@kbn/logging-mocks';
-import { lastValueFrom, toArray } from 'rxjs';
+import { lastValueFrom, toArray, noop } from 'rxjs';
 import type { InferenceExecutor } from '../../utils/inference_executor';
 import { MessageRole, ToolChoiceType } from '@kbn/inference-common';
 import { bedrockClaudeAdapter } from './bedrock_claude_adapter';
@@ -42,16 +42,18 @@ describe('bedrockClaudeAdapter', () => {
 
   describe('#chatComplete()', () => {
     it('calls `executor.invoke` with the right fixed parameters', () => {
-      bedrockClaudeAdapter.chatComplete({
-        logger,
-        executor: executorMock,
-        messages: [
-          {
-            role: MessageRole.User,
-            content: 'question',
-          },
-        ],
-      });
+      bedrockClaudeAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'question',
+            },
+          ],
+        })
+        .subscribe(noop);
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
       expect(executorMock.invoke).toHaveBeenCalledWith({
@@ -80,34 +82,36 @@ describe('bedrockClaudeAdapter', () => {
     });
 
     it('correctly format tools', () => {
-      bedrockClaudeAdapter.chatComplete({
-        executor: executorMock,
-        logger,
-        messages: [
-          {
-            role: MessageRole.User,
-            content: 'question',
-          },
-        ],
-        tools: {
-          myFunction: {
-            description: 'myFunction',
-          },
-          myFunctionWithArgs: {
-            description: 'myFunctionWithArgs',
-            schema: {
-              type: 'object',
-              properties: {
-                foo: {
-                  type: 'string',
-                  description: 'foo',
+      bedrockClaudeAdapter
+        .chatComplete({
+          executor: executorMock,
+          logger,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'question',
+            },
+          ],
+          tools: {
+            myFunction: {
+              description: 'myFunction',
+            },
+            myFunctionWithArgs: {
+              description: 'myFunctionWithArgs',
+              schema: {
+                type: 'object',
+                properties: {
+                  foo: {
+                    type: 'string',
+                    description: 'foo',
+                  },
                 },
+                required: ['foo'],
               },
-              required: ['foo'],
             },
           },
-        },
-      });
+        })
+        .subscribe(noop);
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
 
@@ -139,47 +143,49 @@ describe('bedrockClaudeAdapter', () => {
     });
 
     it('correctly format messages', () => {
-      bedrockClaudeAdapter.chatComplete({
-        executor: executorMock,
-        logger,
-        messages: [
-          {
-            role: MessageRole.User,
-            content: 'question',
-          },
-          {
-            role: MessageRole.Assistant,
-            content: 'answer',
-          },
-          {
-            role: MessageRole.User,
-            content: 'another question',
-          },
-          {
-            role: MessageRole.Assistant,
-            content: null,
-            toolCalls: [
-              {
-                function: {
-                  name: 'my_function',
-                  arguments: {
-                    foo: 'bar',
-                  },
-                },
-                toolCallId: '0',
-              },
-            ],
-          },
-          {
-            name: 'my_function',
-            role: MessageRole.Tool,
-            toolCallId: '0',
-            response: {
-              bar: 'foo',
+      bedrockClaudeAdapter
+        .chatComplete({
+          executor: executorMock,
+          logger,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'question',
             },
-          },
-        ],
-      });
+            {
+              role: MessageRole.Assistant,
+              content: 'answer',
+            },
+            {
+              role: MessageRole.User,
+              content: 'another question',
+            },
+            {
+              role: MessageRole.Assistant,
+              content: null,
+              toolCalls: [
+                {
+                  function: {
+                    name: 'my_function',
+                    arguments: {
+                      foo: 'bar',
+                    },
+                  },
+                  toolCallId: '0',
+                },
+              ],
+            },
+            {
+              name: 'my_function',
+              role: MessageRole.Tool,
+              toolCallId: '0',
+              response: {
+                bar: 'foo',
+              },
+            },
+          ],
+        })
+        .subscribe(noop);
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
 
@@ -239,17 +245,19 @@ describe('bedrockClaudeAdapter', () => {
     });
 
     it('correctly format system message', () => {
-      bedrockClaudeAdapter.chatComplete({
-        executor: executorMock,
-        logger,
-        system: 'Some system message',
-        messages: [
-          {
-            role: MessageRole.User,
-            content: 'question',
-          },
-        ],
-      });
+      bedrockClaudeAdapter
+        .chatComplete({
+          executor: executorMock,
+          logger,
+          system: 'Some system message',
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'question',
+            },
+          ],
+        })
+        .subscribe(noop);
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
 
@@ -258,44 +266,46 @@ describe('bedrockClaudeAdapter', () => {
     });
 
     it('correctly formats messages with content parts', () => {
-      bedrockClaudeAdapter.chatComplete({
-        executor: executorMock,
-        logger,
-        messages: [
-          {
-            role: MessageRole.User,
-            content: [
-              {
-                type: 'text',
-                text: 'question',
-              },
-            ],
-          },
-          {
-            role: MessageRole.Assistant,
-            content: 'answer',
-          },
-          {
-            role: MessageRole.User,
-            content: [
-              {
-                type: 'image',
-                source: {
-                  data: 'aaaaaa',
-                  mimeType: 'image/png',
+      bedrockClaudeAdapter
+        .chatComplete({
+          executor: executorMock,
+          logger,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: [
+                {
+                  type: 'text',
+                  text: 'question',
                 },
-              },
-              {
-                type: 'image',
-                source: {
-                  data: 'bbbbbb',
-                  mimeType: 'image/png',
+              ],
+            },
+            {
+              role: MessageRole.Assistant,
+              content: 'answer',
+            },
+            {
+              role: MessageRole.User,
+              content: [
+                {
+                  type: 'image',
+                  source: {
+                    data: 'aaaaaa',
+                    mimeType: 'image/png',
+                  },
                 },
-              },
-            ],
-          },
-        ],
-      });
+                {
+                  type: 'image',
+                  source: {
+                    data: 'bbbbbb',
+                    mimeType: 'image/png',
+                  },
+                },
+              ],
+            },
+          ],
+        })
+        .subscribe(noop);
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
 
@@ -344,17 +354,19 @@ describe('bedrockClaudeAdapter', () => {
     });
 
     it('correctly format tool choice', () => {
-      bedrockClaudeAdapter.chatComplete({
-        executor: executorMock,
-        logger,
-        messages: [
-          {
-            role: MessageRole.User,
-            content: 'question',
-          },
-        ],
-        toolChoice: ToolChoiceType.required,
-      });
+      bedrockClaudeAdapter
+        .chatComplete({
+          executor: executorMock,
+          logger,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'question',
+            },
+          ],
+          toolChoice: ToolChoiceType.required,
+        })
+        .subscribe(noop);
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
 
@@ -365,17 +377,19 @@ describe('bedrockClaudeAdapter', () => {
     });
 
     it('correctly format tool choice for named function', () => {
-      bedrockClaudeAdapter.chatComplete({
-        executor: executorMock,
-        logger,
-        messages: [
-          {
-            role: MessageRole.User,
-            content: 'question',
-          },
-        ],
-        toolChoice: { function: 'foobar' },
-      });
+      bedrockClaudeAdapter
+        .chatComplete({
+          executor: executorMock,
+          logger,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'question',
+            },
+          ],
+          toolChoice: { function: 'foobar' },
+        })
+        .subscribe(noop);
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
 
@@ -387,23 +401,25 @@ describe('bedrockClaudeAdapter', () => {
     });
 
     it('correctly adapt the request for ToolChoiceType.None', () => {
-      bedrockClaudeAdapter.chatComplete({
-        executor: executorMock,
-        logger,
-        system: 'some system instruction',
-        messages: [
-          {
-            role: MessageRole.User,
-            content: 'question',
+      bedrockClaudeAdapter
+        .chatComplete({
+          executor: executorMock,
+          logger,
+          system: 'some system instruction',
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'question',
+            },
+          ],
+          tools: {
+            myFunction: {
+              description: 'myFunction',
+            },
           },
-        ],
-        tools: {
-          myFunction: {
-            description: 'myFunction',
-          },
-        },
-        toolChoice: ToolChoiceType.none,
-      });
+          toolChoice: ToolChoiceType.none,
+        })
+        .subscribe(noop);
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
 
@@ -416,12 +432,14 @@ describe('bedrockClaudeAdapter', () => {
     it('propagates the abort signal when provided', () => {
       const abortController = new AbortController();
 
-      bedrockClaudeAdapter.chatComplete({
-        logger,
-        executor: executorMock,
-        messages: [{ role: MessageRole.User, content: 'question' }],
-        abortSignal: abortController.signal,
-      });
+      bedrockClaudeAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          abortSignal: abortController.signal,
+        })
+        .subscribe(noop);
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
       expect(executorMock.invoke).toHaveBeenCalledWith({
@@ -433,12 +451,14 @@ describe('bedrockClaudeAdapter', () => {
     });
 
     it('propagates the temperature parameter', () => {
-      bedrockClaudeAdapter.chatComplete({
-        logger,
-        executor: executorMock,
-        messages: [{ role: MessageRole.User, content: 'question' }],
-        temperature: 0.9,
-      });
+      bedrockClaudeAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          temperature: 0.9,
+        })
+        .subscribe(noop);
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
       expect(executorMock.invoke).toHaveBeenCalledWith({
@@ -450,12 +470,14 @@ describe('bedrockClaudeAdapter', () => {
     });
 
     it('propagates the modelName parameter', () => {
-      bedrockClaudeAdapter.chatComplete({
-        logger,
-        executor: executorMock,
-        messages: [{ role: MessageRole.User, content: 'question' }],
-        modelName: 'claude-opus-3.5',
-      });
+      bedrockClaudeAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          modelName: 'claude-opus-3.5',
+        })
+        .subscribe(noop);
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
       expect(executorMock.invoke).toHaveBeenCalledWith({

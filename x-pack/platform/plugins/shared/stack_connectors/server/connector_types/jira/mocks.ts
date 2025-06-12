@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExternalService, PushToServiceApiParams, ExecutorSubActionPushParams } from './types';
+import type { ExternalService, PushToServiceApiParams, ExecutorSubActionPushParams } from './types';
 
 const createMock = (): jest.Mocked<ExternalService> => {
   const service = {

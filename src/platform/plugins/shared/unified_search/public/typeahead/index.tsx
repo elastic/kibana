@@ -11,7 +11,10 @@ import React from 'react';
 
 const Fallback = () => <div />;
 
-const LazySuggestionsComponent = React.lazy(() => import('./suggestions_component'));
+const LazySuggestionsComponent = React.lazy(async () => {
+  const { SuggestionsComponent } = await import('../ui_module');
+  return { default: SuggestionsComponent };
+});
 export const SuggestionsComponent = (
   props: React.ComponentProps<typeof LazySuggestionsComponent>
 ) => (

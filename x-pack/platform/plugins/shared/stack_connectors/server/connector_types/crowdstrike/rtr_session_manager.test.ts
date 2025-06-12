@@ -6,7 +6,7 @@
  */
 
 import { CrowdStrikeSessionManager } from './rtr_session_manager';
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { CrowdstrikeInitRTRResponseSchema } from '../../../common/crowdstrike/schema';
 
 // There is a lot of logic in private fields/methods of CrowdStrikeSessionManager that we need to test.

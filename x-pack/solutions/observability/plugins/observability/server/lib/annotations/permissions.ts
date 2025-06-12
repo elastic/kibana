@@ -16,13 +16,11 @@ export const checkAnnotationsPermissions = async ({
   esClient: ElasticsearchClient;
 }) => {
   return esClient.security.hasPrivileges({
-    body: {
-      index: [
-        {
-          names: [index],
-          privileges: ['read', 'write'] as SecurityIndexPrivilege[],
-        },
-      ],
-    },
+    index: [
+      {
+        names: [index],
+        privileges: ['read', 'write'] as SecurityIndexPrivilege[],
+      },
+    ],
   });
 };

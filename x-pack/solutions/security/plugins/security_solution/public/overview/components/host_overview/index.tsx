@@ -9,7 +9,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-theme';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_header_title';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
@@ -18,7 +19,6 @@ import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score
 import { buildHostNamesFilter, type HostItem } from '../../../../common/search_strategy';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { DescriptionList } from '../../../../common/utility_types';
-import { useDarkMode } from '../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { hostIdRenderer } from '../../../timelines/components/field_renderers/field_renderers';
 import { DefaultFieldRenderer } from '../../../timelines/components/field_renderers/default_renderer';
@@ -57,8 +57,10 @@ interface HostSummaryProps {
   jobNameById: Record<string, string | undefined>;
 }
 
-const HostRiskOverviewWrapper = styled(EuiFlexGroup)`
-  padding-top: ${({ theme }) => theme.eui.euiSizeM};
+const HostRiskOverviewWrapper = styled(EuiFlexGroup, {
+  shouldForwardProp: (propName) => propName !== '$width',
+})`
+  padding-top: ${({ theme: { euiTheme } }) => euiTheme.size.m};
   width: ${({ $width }: { $width: string }) => $width};
 `;
 
@@ -83,7 +85,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
-    const darkMode = useDarkMode();
+    const darkMode = useKibanaIsDarkMode();
     const filterQuery = useMemo(
       () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
       [hostName]
@@ -176,7 +178,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           title: i18n.HOST_ID,
           description:
             data && data.host
-              ? hostIdRenderer({ host: data.host, noLink: true })
+              ? hostIdRenderer({ host: data.host, noLink: true, scopeId })
               : getEmptyTagValue(),
         },
         {
@@ -202,7 +204,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           ),
         },
       ],
-      [data, indexNames, hostName]
+      [data, scopeId, indexNames, hostName]
     );
     const firstColumn = useMemo(
       () =>

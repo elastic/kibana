@@ -2,6 +2,7 @@
 
 exports[`getKibanaUpgradeStatus returns the correct shape of data 1`] = `
 Object {
+  "apiDeprecations": Array [],
   "totalCriticalDeprecations": 1,
 }
 `;

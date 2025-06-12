@@ -6,10 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { schema } from '@kbn/config-schema';
-import { SavedObjectReference, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { RuleParamsAndRefs } from '@kbn/alerting-plugin/server';
+import type { SavedObjectReference } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import type { RuleParamsAndRefs } from '@kbn/alerting-plugin/server';
 import { STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
+import { trackingContainmentRuleParamsSchema } from '@kbn/response-ops-rule-params/geo_containment';
 import type {
   GeoContainmentRuleType,
   GeoContainmentExtractedRuleParams,
@@ -90,21 +91,6 @@ const actionVariables = {
   ],
 };
 
-export const ParamsSchema = schema.object({
-  index: schema.string({ minLength: 1 }),
-  indexId: schema.string({ minLength: 1 }),
-  geoField: schema.string({ minLength: 1 }),
-  entity: schema.string({ minLength: 1 }),
-  dateField: schema.string({ minLength: 1 }),
-  boundaryType: schema.string({ minLength: 1 }),
-  boundaryIndexTitle: schema.string({ minLength: 1 }),
-  boundaryIndexId: schema.string({ minLength: 1 }),
-  boundaryGeoField: schema.string({ minLength: 1 }),
-  boundaryNameField: schema.maybe(schema.string({ minLength: 1 })),
-  indexQuery: schema.maybe(schema.any({})),
-  boundaryIndexQuery: schema.maybe(schema.any({})),
-});
-
 export function extractEntityAndBoundaryReferences(params: GeoContainmentRuleParams): {
   params: GeoContainmentExtractedRuleParams;
   references: SavedObjectReference[];
@@ -182,13 +168,14 @@ export function getRuleType(): GeoContainmentRuleType {
     executor,
     category: DEFAULT_APP_CATEGORIES.management.id,
     producer: STACK_ALERTS_FEATURE_ID,
+    solution: 'stack',
     validate: {
-      params: ParamsSchema,
+      params: trackingContainmentRuleParamsSchema,
     },
     schemas: {
       params: {
         type: 'config-schema',
-        schema: ParamsSchema,
+        schema: trackingContainmentRuleParamsSchema,
       },
     },
     actionVariables,
@@ -207,7 +194,6 @@ export function getRuleType(): GeoContainmentRuleType {
         return injectEntityAndBoundaryIds(params, references);
       },
     },
-    // @ts-ignore
     alerts: STACK_ALERTS_AAD_CONFIG,
   };
 }

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { TaskTypes } from '../../../../../common/types';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { TaskType } from './task_type';
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 
 describe('TaskType component', () => {
   it.each([
-    [TaskTypes.completion, 'completion'],
-    [TaskTypes.sparse_embedding, 'sparse_embedding'],
-    [TaskTypes.text_embedding, 'text_embedding'],
+    ['completion' as InferenceTaskType, 'completion'],
+    ['sparse_embedding' as InferenceTaskType, 'sparse_embedding'],
+    ['text_embedding' as InferenceTaskType, 'text_embedding'],
   ])('renders the task type badge for %s', (taskType, expected) => {
     render(<TaskType type={taskType} />);
     const badge = screen.getByTestId(`table-column-task-type-${taskType}`);

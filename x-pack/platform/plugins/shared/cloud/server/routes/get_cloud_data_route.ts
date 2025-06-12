@@ -8,12 +8,18 @@
 import { RouteOptions } from '.';
 import { CLOUD_DATA_SAVED_OBJECT_ID } from './constants';
 import { CLOUD_DATA_SAVED_OBJECT_TYPE } from '../saved_objects';
-import { CloudDataAttributes } from './types';
+import { CloudDataAttributes } from '../../common/types';
 
 export const setGetCloudSolutionDataRoute = ({ router }: RouteOptions) => {
   router.versioned
     .get({
       path: `/internal/cloud/solution`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the saved objects client',
+        },
+      },
       access: 'internal',
       summary: 'Get cloud data for solutions',
     })
@@ -26,17 +32,17 @@ export const setGetCloudSolutionDataRoute = ({ router }: RouteOptions) => {
       },
       async (context, request, response) => {
         const coreContext = await context.core;
-        const savedObjectsClient = coreContext.savedObjects.getClient({
-          includedHiddenTypes: [CLOUD_DATA_SAVED_OBJECT_TYPE],
-        });
         try {
+          const savedObjectsClient = coreContext.savedObjects.getClient({
+            includedHiddenTypes: [CLOUD_DATA_SAVED_OBJECT_TYPE],
+          });
           const cloudDataSo = await savedObjectsClient.get<CloudDataAttributes>(
             CLOUD_DATA_SAVED_OBJECT_TYPE,
             CLOUD_DATA_SAVED_OBJECT_ID
           );
           return response.ok({ body: cloudDataSo?.attributes ?? null });
-        } catch (error) {
-          return response.customError(error);
+        } catch (err) {
+          return response.notFound();
         }
       }
     );

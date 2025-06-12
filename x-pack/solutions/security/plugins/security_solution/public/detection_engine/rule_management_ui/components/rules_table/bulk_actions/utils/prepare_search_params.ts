@@ -14,7 +14,11 @@ import { BulkActionsDryRunErrCodeEnum } from '../../../../../../../common/api/de
 
 type PrepareSearchFilterProps =
   | { selectedRuleIds: string[]; dryRunResult?: DryRunResult }
-  | { filterOptions: FilterOptions; dryRunResult?: DryRunResult };
+  | {
+      filterOptions: FilterOptions;
+      gapRange?: { start: string; end: string };
+      dryRunResult?: DryRunResult;
+    };
 
 /**
  * helper methods to prepare search params for bulk actions based on results of previous dry run
@@ -40,6 +44,7 @@ export const prepareSearchParams = ({
   dryRunResult?.ruleErrors.forEach(({ errorCode }) => {
     switch (errorCode) {
       case BulkActionsDryRunErrCodeEnum.IMMUTABLE:
+      case BulkActionsDryRunErrCodeEnum.PREBUILT_CUSTOMIZATION_LICENSE:
         modifiedFilterOptions = { ...modifiedFilterOptions, showCustomRules: true };
         break;
       case BulkActionsDryRunErrCodeEnum.MACHINE_LEARNING_INDEX_PATTERN:
@@ -60,5 +65,6 @@ export const prepareSearchParams = ({
 
   return {
     query: convertRulesFilterToKQL(modifiedFilterOptions),
+    ...(props.gapRange ? { gapRange: props.gapRange } : {}),
   };
 };

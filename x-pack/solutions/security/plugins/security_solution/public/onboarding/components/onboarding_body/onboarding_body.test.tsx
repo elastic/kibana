@@ -10,6 +10,7 @@ import { OnboardingBody } from './onboarding_body';
 import { useBodyConfig } from './hooks/use_body_config';
 import { useExpandedCard } from './hooks/use_expanded_card';
 import { useCompletedCards } from './hooks/use_completed_cards';
+import { TestProviders } from '../../../common/mock';
 
 jest.mock('../onboarding_context');
 jest.mock('./hooks/use_body_config');
@@ -58,14 +59,14 @@ describe('OnboardingBody Component', () => {
   });
 
   it('should render the OnboardingBody component with the correct content', () => {
-    render(<OnboardingBody />);
+    render(<OnboardingBody />, { wrapper: TestProviders });
     expect(screen.getByText('Group 1')).toBeInTheDocument();
     expect(screen.getByText('Card 1')).toBeInTheDocument();
   });
 
   describe('when the card is expanded', () => {
     beforeEach(() => {
-      render(<OnboardingBody />);
+      render(<OnboardingBody />, { wrapper: TestProviders });
       fireEvent.click(screen.getByText('Card 1'));
     });
 
@@ -85,7 +86,7 @@ describe('OnboardingBody Component', () => {
         setExpandedCardId: mockSetExpandedCardId,
       });
 
-      render(<OnboardingBody />);
+      render(<OnboardingBody />, { wrapper: TestProviders });
 
       fireEvent.click(screen.getByText('Card 1'));
     });
@@ -112,7 +113,7 @@ describe('OnboardingBody Component', () => {
         setExpandedCardId: mockSetExpandedCardId,
       });
 
-      render(<OnboardingBody />);
+      render(<OnboardingBody />, { wrapper: TestProviders });
       act(() => {
         fireEvent.click(screen.getByText('Card 1'));
       });
@@ -136,7 +137,7 @@ describe('OnboardingBody Component', () => {
         setExpandedCardId: mockSetExpandedCardId,
       });
 
-      render(<OnboardingBody />);
+      render(<OnboardingBody />, { wrapper: TestProviders });
       act(() => {
         fireEvent.click(screen.getByText('Card 1'));
       });

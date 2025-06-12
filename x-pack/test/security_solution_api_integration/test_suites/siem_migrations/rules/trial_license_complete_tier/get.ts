@@ -6,37 +6,43 @@
  */
 
 import expect from 'expect';
-import { v4 as uuidv4 } from 'uuid';
-import {
-  createMigrationRules,
-  deleteAllMigrationRules,
-  getMigrationRuleDocument,
-  migrationRulesRouteHelpersFactory,
-} from '../../utils';
+import { deleteAllRuleMigrations, ruleMigrationRouteHelpersFactory } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const supertest = getService('supertest');
-  const migrationRulesRoutes = migrationRulesRouteHelpersFactory(supertest);
+  const ruleMigrationRoutes = ruleMigrationRouteHelpersFactory(supertest);
 
   describe('@ess @serverless @serverlessQA Get API', () => {
+    let migrationId: string;
     beforeEach(async () => {
-      await deleteAllMigrationRules(es);
+      await deleteAllRuleMigrations(es);
+      const creationResponse = await ruleMigrationRoutes.create({});
+      migrationId = creationResponse.body.migration_id;
     });
 
-    it('should fetch existing rules within specified migration', async () => {
-      // create a document
-      const migrationId = uuidv4();
-      const migrationRuleDocument = getMigrationRuleDocument({ migration_id: migrationId });
-      await createMigrationRules(es, [migrationRuleDocument]);
+    it('should fetch existing migration', async () => {
+      const migrationResponse = await ruleMigrationRoutes.get({
+        migrationId,
+      });
 
-      const { '@timestamp': timestamp, updated_at: updatedAt, ...rest } = migrationRuleDocument;
+      expect(migrationResponse.body.id).toBe(migrationId);
+    });
 
-      // fetch migration rule
-      const response = await migrationRulesRoutes.get(migrationId);
-      expect(response.body.total).toEqual(1);
-      expect(response.body.data).toEqual(expect.arrayContaining([expect.objectContaining(rest)]));
+    describe('Error handling', () => {
+      it('should return 404 if migration ID does not exist', async () => {
+        const { body } = await ruleMigrationRoutes.get({
+          migrationId: 'non-existing-migration-id',
+          expectStatusCode: 404,
+        });
+
+        expect(body).toMatchObject({
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'No Migration found with id: non-existing-migration-id',
+        });
+      });
     });
   });
 };

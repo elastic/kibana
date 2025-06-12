@@ -18,10 +18,11 @@ import { z } from '@kbn/zod';
 
 import {
   SavedQueryId,
-  DescriptionOrUndefined,
+  SavedQueryDescriptionOrUndefined,
   QueryOrUndefined,
   ECSMappingOrUndefined,
   VersionOrUndefined,
+  PlatformOrUndefined,
   IntervalOrUndefined,
   SnapshotOrUndefined,
   RemovedOrUndefined,
@@ -30,12 +31,15 @@ import {
 export type UpdateSavedQueryRequestBody = z.infer<typeof UpdateSavedQueryRequestBody>;
 export const UpdateSavedQueryRequestBody = z.object({
   id: SavedQueryId.optional(),
-  description: DescriptionOrUndefined.optional(),
+  description: SavedQueryDescriptionOrUndefined.optional(),
   query: QueryOrUndefined.optional(),
   ecs_mapping: ECSMappingOrUndefined.optional(),
   version: VersionOrUndefined.optional(),
-  platform: DescriptionOrUndefined.optional(),
+  platform: PlatformOrUndefined.optional(),
   interval: IntervalOrUndefined.optional(),
   snapshot: SnapshotOrUndefined.optional(),
   removed: RemovedOrUndefined.optional(),
 });
+
+export type UpdateSavedQueryResponse = z.infer<typeof UpdateSavedQueryResponse>;
+export const UpdateSavedQueryResponse = z.object({});

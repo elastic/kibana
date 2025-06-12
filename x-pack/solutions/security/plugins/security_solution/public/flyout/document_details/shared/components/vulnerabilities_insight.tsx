@@ -80,8 +80,8 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
     pageSize: 1,
   });
 
-  const isNewNavigationEnabled = useIsExperimentalFeatureEnabled(
-    'newExpandableFlyoutNavigationEnabled'
+  const isNewNavigationEnabled = !useIsExperimentalFeatureEnabled(
+    'newExpandableFlyoutNavigationDisabled'
   );
 
   const { CRITICAL = 0, HIGH = 0, MEDIUM = 0, LOW = 0, NONE = 0 } = data?.count || {};
@@ -137,7 +137,8 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
             content={
               <FormattedMessage
                 id="xpack.securitySolution.flyout.insights.vulnerabilities.vulnerabilitiesCountTooltip"
-                defaultMessage="Opens list of vulnerabilities in a new flyout"
+                defaultMessage="Opens {count, plural, one {this vulnerability} other {these vulnerabilities}} in a new flyout"
+                values={{ count: totalVulnerabilities }}
               />
             }
           >

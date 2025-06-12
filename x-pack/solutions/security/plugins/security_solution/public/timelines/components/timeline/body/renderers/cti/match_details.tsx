@@ -18,6 +18,7 @@ interface MatchDetailsProps {
   eventId: string;
   sourceField: string;
   sourceValue: string;
+  scopeId: string;
 }
 
 export const MatchDetails: React.FC<MatchDetailsProps> = ({
@@ -25,6 +26,7 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
   eventId,
   sourceField,
   sourceValue,
+  scopeId,
 }) => (
   <EuiFlexGroup
     alignItems="center"
@@ -36,6 +38,7 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
   >
     <EuiFlexItem grow={false}>
       <DraggableBadge
+        scopeId={scopeId}
         contextId={contextId}
         data-test-subj="threat-match-details-source-field"
         eventId={eventId}
@@ -55,6 +58,7 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <DraggableBadge
+        scopeId={scopeId}
         contextId={contextId}
         data-test-subj="threat-match-details-source-value"
         eventId={eventId}

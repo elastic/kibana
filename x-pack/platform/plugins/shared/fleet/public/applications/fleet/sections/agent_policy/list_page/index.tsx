@@ -26,7 +26,6 @@ import { useHistory } from 'react-router-dom';
 import type { AgentPolicy } from '../../../types';
 import { getRootIntegrations } from '../../../../../../common/services';
 import {
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   INGEST_SAVED_OBJECT_INDEX,
 } from '../../../constants';
@@ -39,7 +38,6 @@ import {
   useUrlParams,
   useBreadcrumbs,
   useGetAgentPoliciesQuery,
-  useFleetStatus,
 } from '../../../hooks';
 import { SearchBar } from '../../../components';
 import { AgentPolicySummaryLine } from '../../../../../components';
@@ -48,17 +46,17 @@ import { LinkedAgentCount, AgentPolicyActionMenu } from '../components';
 import { CreateAgentPolicyFlyout } from './components';
 
 export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
-  const { isSpaceAwarenessEnabled } = useFleetStatus();
   useBreadcrumbs('policies_list');
   const { getPath } = useLink();
   const hasFleetAllAgentPoliciesPrivileges = useAuthz().fleet.allAgentPolicies;
-
+  const agentPolicySavedObjectType = LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE;
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
 
   // Table and search states
   const { urlParams, toUrlParams } = useUrlParams();
+  const showAgentless = urlParams.showAgentless === 'true';
   const [search, setSearch] = useState<string>(
     Array.isArray(urlParams.kuery)
       ? urlParams.kuery[urlParams.kuery.length - 1]
@@ -87,6 +85,15 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
     [getPath, history, isCreateAgentPolicyFlyoutOpen, toUrlParams, urlParams]
   );
 
+  // Hide agentless policies by default unless `showAgentless` url param is true
+  const getSearchWithDefaults = (newSearch: string) => {
+    if (showAgentless) {
+      return newSearch;
+    }
+    const defaultSearch = `NOT ${agentPolicySavedObjectType}.supports_agentless:true`;
+    return newSearch.trim() ? `(${defaultSearch}) AND (${newSearch})` : defaultSearch;
+  };
+
   // Fetch agent policies
   const {
     isLoading,
@@ -97,7 +104,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
     perPage: pagination.pageSize,
     sortField: sorting?.field,
     sortOrder: sorting?.direction,
-    kuery: search,
+    kuery: getSearchWithDefaults(search),
     withAgentCount: true, // Explicitly fetch agent count
     full: true,
   });
@@ -328,11 +335,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
           <SearchBar
             value={search}
             indexPattern={INGEST_SAVED_OBJECT_INDEX}
-            fieldPrefix={
-              isSpaceAwarenessEnabled
-                ? AGENT_POLICY_SAVED_OBJECT_TYPE
-                : LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE
-            }
+            fieldPrefix={agentPolicySavedObjectType}
             onChange={(newSearch) => {
               setPagination({
                 ...pagination,

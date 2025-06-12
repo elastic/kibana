@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { APM_SOURCE_MAP_INDEX } from '../settings/apm_indices/apm_system_index_constants';
+import { APM_SOURCE_MAP_INDEX } from '@kbn/apm-sources-access-plugin/server';
 
 export async function deleteApmSourceMap({
   internalESClient,

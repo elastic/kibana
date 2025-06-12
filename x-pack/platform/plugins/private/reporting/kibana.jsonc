@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/reporting-plugin",
   "owner": [
-    "@elastic/appex-sharedux"
+    "@elastic/response-ops"
   ],
   "group": "platform",
   "visibility": "private",
@@ -18,9 +18,11 @@
     "requiredPlugins": [
       "data",
       "discover",
+      "encryptedSavedObjects",
       "fieldFormats",
       "home",
       "management",
+      "notifications",
       "licensing",
       "uiActions",
       "taskManager",

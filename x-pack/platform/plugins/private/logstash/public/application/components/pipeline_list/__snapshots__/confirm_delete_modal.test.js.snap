@@ -2,6 +2,7 @@
 
 exports[`ConfirmDeleteModal component confirms delete for multiple pipelines 1`] = `
 <EuiConfirmModal
+  aria-labelledby="generated-id"
   buttonColor="danger"
   cancelButtonText={
     <Memo(MemoizedFormattedMessage)
@@ -34,6 +35,11 @@ exports[`ConfirmDeleteModal component confirms delete for multiple pipelines 1`]
       }
     />
   }
+  titleProps={
+    Object {
+      "id": "generated-id",
+    }
+  }
 >
   <p>
     <MemoizedFormattedMessage
@@ -46,6 +52,7 @@ exports[`ConfirmDeleteModal component confirms delete for multiple pipelines 1`]
 
 exports[`ConfirmDeleteModal component confirms delete for single pipeline 1`] = `
 <EuiConfirmModal
+  aria-labelledby="generated-id"
   buttonColor="danger"
   cancelButtonText={
     <Memo(MemoizedFormattedMessage)
@@ -72,6 +79,11 @@ exports[`ConfirmDeleteModal component confirms delete for single pipeline 1`] = 
         }
       }
     />
+  }
+  titleProps={
+    Object {
+      "id": "generated-id",
+    }
   }
 >
   <p>

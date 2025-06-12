@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { composeStories } from '@storybook/testing-react';
-import { render, getNodeText, getByTestId, act, waitFor } from '@testing-library/react';
+import { composeStories } from '@storybook/react';
+import { render, getNodeText, getByTestId, waitFor } from '@testing-library/react';
 import React from 'react';
 import * as stories from './link_preview.stories';
 
@@ -19,40 +19,34 @@ describe('LinkPreview', () => {
     getNodeText(getByTestId(container, id));
 
   it('shows label and url default values', () => {
-    act(() => {
-      const { container } = render(<Example label="" url="" filters={[{ key: '', value: '' }]} />);
-      expect(getElementValue(container, 'preview-label')).toEqual('Elastic.co');
-      expect(getElementValue(container, 'preview-url')).toEqual('https://www.elastic.co');
-    });
+    const { container } = render(<Example label="" url="" filters={[{ key: '', value: '' }]} />);
+    expect(getElementValue(container, 'preview-label')).toEqual('Elastic.co');
+    expect(getElementValue(container, 'preview-url')).toEqual('https://www.elastic.co');
   });
 
   it('shows label and url values', () => {
-    act(() => {
-      const { container } = render(
-        <Example label="foo" url="https://baz.co" filters={[{ key: '', value: '' }]} />
-      );
-      expect(getElementValue(container, 'preview-label')).toEqual('foo');
-      expect(
-        removeExternalLinkText((getByTestId(container, 'preview-link') as HTMLAnchorElement).text)
-      ).toContain('https://baz.co');
-    });
+    const { container } = render(
+      <Example label="foo" url="https://baz.co" filters={[{ key: '', value: '' }]} />
+    );
+    expect(getElementValue(container, 'preview-label')).toEqual('foo');
+    expect(
+      removeExternalLinkText((getByTestId(container, 'preview-link') as HTMLAnchorElement).text)
+    ).toContain('https://baz.co');
   });
 
   it("shows warning when couldn't replace context variables", () => {
-    act(() => {
-      const { container } = render(
-        <Example
-          label="foo"
-          url="https://baz.co?service.name={{invalid}"
-          filters={[{ key: '', value: '' }]}
-        />
-      );
-      expect(getElementValue(container, 'preview-label')).toEqual('foo');
-      expect(
-        removeExternalLinkText((getByTestId(container, 'preview-link') as HTMLAnchorElement).text)
-      ).toContain('https://baz.co?service.name={{invalid}');
-      expect(getByTestId(container, 'preview-warning')).toBeInTheDocument();
-    });
+    const { container } = render(
+      <Example
+        label="foo"
+        url="https://baz.co?service.name={{invalid}"
+        filters={[{ key: '', value: '' }]}
+      />
+    );
+    expect(getElementValue(container, 'preview-label')).toEqual('foo');
+    expect(
+      removeExternalLinkText((getByTestId(container, 'preview-link') as HTMLAnchorElement).text)
+    ).toContain('https://baz.co?service.name={{invalid}');
+    expect(getByTestId(container, 'preview-warning')).toBeInTheDocument();
   });
 
   it('replaces url with transaction id', async () => {

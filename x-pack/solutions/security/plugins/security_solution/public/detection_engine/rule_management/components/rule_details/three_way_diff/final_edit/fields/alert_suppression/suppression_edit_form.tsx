@@ -7,19 +7,19 @@
 
 import React from 'react';
 import {
+  ALERT_SUPPRESSION_DEFAULT_DURATION,
   ALERT_SUPPRESSION_DURATION_FIELD_NAME,
   ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
   ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
-  ALERT_SUPPRESSION_DEFAULT_DURATION,
 } from '../../../../../../../rule_creation/components/alert_suppression_edit';
-import { AlertSuppressionDurationType } from '../../../../../../../../detections/pages/detection_engine/rules/types';
+import { AlertSuppressionDurationType } from '../../../../../../../common/types';
 import { type FormData } from '../../../../../../../../shared_imports';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../../../../common/detection_engine/constants';
 import { type AlertSuppression } from '../../../../../../../../../common/api/detection_engine';
 import { RuleFieldEditFormWrapper } from '../../../field_final_side';
 import { AlertSuppressionEditAdapter } from './suppression_edit_adapter';
-import { alertSuppressionFormSchema, type AlertSuppressionFormData } from './form_schema';
+import { type AlertSuppressionFormData, alertSuppressionFormSchema } from './form_schema';
 
 export function AlertSuppressionEditForm(): JSX.Element {
   return (

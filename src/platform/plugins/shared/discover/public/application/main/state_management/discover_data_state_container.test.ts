@@ -13,10 +13,11 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { FetchStatus } from '../../types';
-import { DataDocuments$ } from './discover_data_state_container';
+import type { DataDocuments$ } from './discover_data_state_container';
 import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 import { fetchDocuments } from '../data_fetching/fetch_documents';
 import { omit } from 'lodash';
+import { internalStateActions } from './redux';
 
 jest.mock('../data_fetching/fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue({ records: [] }),
@@ -46,7 +47,6 @@ describe('test getDataStateContainer', () => {
   test('refetch$ triggers a search', async () => {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     jest.spyOn(stateContainer.searchSessionManager, 'getNextSearchSessionId');
-    jest.spyOn(stateContainer.searchSessionManager, 'getCurrentSearchSessionId');
     expect(
       stateContainer.searchSessionManager.getNextSearchSessionId as jest.Mock
     ).not.toHaveBeenCalled();
@@ -84,9 +84,6 @@ describe('test getDataStateContainer', () => {
     expect(
       stateContainer.searchSessionManager.getNextSearchSessionId as jest.Mock
     ).toHaveBeenCalled();
-    expect(
-      stateContainer.searchSessionManager.getCurrentSearchSessionId as jest.Mock
-    ).not.toHaveBeenCalled();
 
     unsubscribe();
   });
@@ -130,11 +127,6 @@ describe('test getDataStateContainer', () => {
       result: initialRecords,
     }) as DataDocuments$;
 
-    jest.spyOn(stateContainer.searchSessionManager, 'getCurrentSearchSessionId');
-    expect(
-      stateContainer.searchSessionManager.getCurrentSearchSessionId as jest.Mock
-    ).not.toHaveBeenCalled();
-
     const dataState = stateContainer.dataState;
     const unsubscribe = dataState.subscribe();
     const resolveDataSourceProfileSpy = jest.spyOn(
@@ -156,10 +148,6 @@ describe('test getDataStateContainer', () => {
       if (hasLoadingMoreStarted && value.fetchStatus === FetchStatus.COMPLETE) {
         expect(resolveDataSourceProfileSpy).not.toHaveBeenCalled();
         expect(value.result).toEqual([...initialRecords, ...moreRecords]);
-        // it uses the same current search session id
-        expect(
-          stateContainer.searchSessionManager.getCurrentSearchSessionId as jest.Mock
-        ).toHaveBeenCalled();
         unsubscribe();
         done();
       }
@@ -176,11 +164,15 @@ describe('test getDataStateContainer', () => {
     const appUnsub = stateContainer.appState.initAndSync();
     await discoverServiceMock.profilesManager.resolveDataSourceProfile({});
     stateContainer.actions.setDataView(dataViewMock);
-    stateContainer.internalState.transitions.setResetDefaultProfileState({
-      columns: true,
-      rowHeight: true,
-      breakdownField: true,
-    });
+    stateContainer.internalState.dispatch(
+      stateContainer.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
+        resetDefaultProfileState: {
+          columns: true,
+          rowHeight: true,
+          breakdownField: true,
+        },
+      })
+    );
 
     dataState.data$.totalHits$.next({
       fetchStatus: FetchStatus.COMPLETE,
@@ -191,7 +183,7 @@ describe('test getDataStateContainer', () => {
     await waitFor(() => {
       expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
     });
-    expect(omit(stateContainer.internalState.get().resetDefaultProfileState, 'resetId')).toEqual({
+    expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
       columns: false,
       rowHeight: false,
       breakdownField: false,
@@ -209,11 +201,15 @@ describe('test getDataStateContainer', () => {
     const appUnsub = stateContainer.appState.initAndSync();
     await discoverServiceMock.profilesManager.resolveDataSourceProfile({});
     stateContainer.actions.setDataView(dataViewMock);
-    stateContainer.internalState.transitions.setResetDefaultProfileState({
-      columns: false,
-      rowHeight: false,
-      breakdownField: false,
-    });
+    stateContainer.internalState.dispatch(
+      stateContainer.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
+        resetDefaultProfileState: {
+          columns: false,
+          rowHeight: false,
+          breakdownField: false,
+        },
+      })
+    );
     dataState.data$.totalHits$.next({
       fetchStatus: FetchStatus.COMPLETE,
       result: 0,
@@ -222,7 +218,7 @@ describe('test getDataStateContainer', () => {
     await waitFor(() => {
       expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
     });
-    expect(omit(stateContainer.internalState.get().resetDefaultProfileState, 'resetId')).toEqual({
+    expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
       columns: false,
       rowHeight: false,
       breakdownField: false,

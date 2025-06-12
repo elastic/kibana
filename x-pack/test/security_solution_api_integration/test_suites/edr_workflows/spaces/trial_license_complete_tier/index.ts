@@ -19,6 +19,7 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
     const kbnClient = getService('kibanaServer');
     const log = getService('log');
     const endpointRegistryHelpers = getService('endpointRegistryHelpers');
+    const endpointTestResources = getService('endpointTestResources');
 
     const roles = Object.values(ROLE);
     before(async () => {
@@ -29,6 +30,7 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
       const registryUrl =
         endpointRegistryHelpers.getRegistryUrlFromTestEnv() ?? getRegistryUrlFromIngest();
       log.info(`Package registry URL for tests: ${registryUrl}`);
+
       try {
         await ingestManager.setup();
       } catch (err) {
@@ -46,6 +48,8 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
       // Enable fleet space awareness
       log.info('Enabling Fleet space awareness');
       await enableFleetSpaceAwareness(kbnClient);
+
+      await endpointTestResources.installOrUpgradeEndpointFleetPackage();
     });
 
     after(async () => {
@@ -57,5 +61,7 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
     });
 
     loadTestFile(require.resolve('./space_awareness'));
+    loadTestFile(require.resolve('./artifacts'));
+    loadTestFile(require.resolve('./response_actions'));
   });
 }

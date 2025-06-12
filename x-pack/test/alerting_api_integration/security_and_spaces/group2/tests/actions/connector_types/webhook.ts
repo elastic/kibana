@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import httpProxy from 'http-proxy';
-import http from 'http';
+import type httpProxy from 'http-proxy';
+import type http from 'http';
 import expect from '@kbn/expect';
-import { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 
 import { URL, format as formatUrl } from 'url';
 import getPort from 'get-port';
@@ -18,7 +18,7 @@ import {
   ExternalServiceSimulator,
   getWebhookServer,
 } from '@kbn/actions-simulators-plugin/server/plugin';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getEventLog } from '../../../../../common/lib';
 
 const defaultValues: Record<string, any> = {

@@ -26,6 +26,7 @@ import {
   RIGHT_ALIGNMENT,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import {
   RuleExecutionStatus,
   formatDuration,
@@ -67,7 +68,7 @@ import { RulesListColumns, useRulesListColumnSelector } from './rules_list_colum
 
 interface RuleTypeState {
   isLoading: boolean;
-  initialLoad: boolean;
+  isInitialLoad: boolean;
   data: RuleTypeIndex;
 }
 
@@ -170,6 +171,17 @@ export function convertRulesToTableItems(opts: ConvertRulesToTableItemsOpts): Ru
     };
   });
 }
+const ruleSidebarActionCss = css`
+  opacity: 0; /* 1 */
+
+  &.ruleSidebarItem__mobile {
+    opacity: 1;
+  }
+
+  &:focus {
+    opacity: 1; /* 2 */
+  }
+`;
 
 export const RulesListTable = (props: RulesListTableProps) => {
   const {
@@ -218,6 +230,25 @@ export const RulesListTable = (props: RulesListTableProps) => {
 
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const { euiTheme } = useEuiTheme();
+
+  const ruleRowCss = css`
+    .actRulesList__tableRowDisabled {
+      background-color: ${euiTheme.colors.lightestShade};
+
+      .actRulesList__tableCellDisabled {
+        color: ${euiTheme.colors.darkShade};
+      }
+    }
+    .euiTableRow {
+      &:hover,
+      &:focus-within,
+      &[class*='-isActive'] {
+        .ruleSidebarItem__action {
+          opacity: 1;
+        }
+      }
+    }
+  `;
 
   const selectedPercentile = useMemo(() => {
     const selectedOption = percentileOptions.find((option) => option.checked === 'on');
@@ -372,6 +403,13 @@ export const RulesListTable = (props: RulesListTableProps) => {
                       {!checkEnabledResult.isEnabled && (
                         <EuiIconTip
                           anchorClassName="ruleDisabledQuestionIcon"
+                          css={css`
+                            .ruleDisabledQuestionIcon {
+                              bottom: ${euiTheme.size.xs};
+                              margin-left: ${euiTheme.size.xs};
+                              position: relative;
+                            }
+                          `}
                           data-test-subj="ruleDisabledByLicenseTooltip"
                           type="questionInCircle"
                           content={checkEnabledResult.message}
@@ -501,6 +539,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
           if (!rule.enabled) {
             return null;
           }
+
           return (
             <RulesListNotifyBadge
               showOnHover
@@ -512,6 +551,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
                 await onSnoozeRule(rule, snoozeSchedule);
               }}
               unsnoozeRule={async (scheduleIds) => await onUnsnoozeRule(rule, scheduleIds)}
+              isRuleEditable={rule.isEditable}
             />
           );
         },
@@ -623,6 +663,12 @@ export const RulesListTable = (props: RulesListTableProps) => {
                 <EuiIconTip
                   data-test-subj="ruleDurationWarning"
                   anchorClassName="ruleDurationWarningIcon"
+                  css={css`
+                    .ruleDurationWarningIcon {
+                      margin-bottom: ${euiTheme.size.xs};
+                      margin-left: ${euiTheme.size.s};
+                    }
+                  `}
                   type="warning"
                   color="warning"
                   content={i18n.translate(
@@ -743,6 +789,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
                           { defaultMessage: 'Edit' }
                         )}
                         className="ruleSidebarItem__action"
+                        css={ruleSidebarActionCss}
                         data-test-subj="editActionHoverButton"
                         onClick={() => onRuleEditClick(rule)}
                         iconType={'pencil'}
@@ -763,6 +810,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
                           { defaultMessage: 'Delete' }
                         )}
                         className="ruleSidebarItem__action"
+                        css={ruleSidebarActionCss}
                         data-test-subj="deleteActionHoverButton"
                         onClick={() => onRuleDeleteClick(rule)}
                         iconType={'trash'}
@@ -816,6 +864,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
     selectedPercentile,
     tagPopoverOpenIndex,
     ruleOutcomeColumnField,
+    euiTheme,
   ]);
 
   const allRuleColumns = useMemo(() => getRulesTableColumns(), [getRulesTableColumns]);
@@ -929,6 +978,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
           sorting={{ sort }}
           rowHeader="name"
           rowProps={rowProps}
+          css={ruleRowCss}
           cellProps={(rule: RuleTableItem) => ({
             'data-test-subj': 'cell',
             className: !ruleTypesState.data.get(rule.ruleTypeId)?.enabledInLicense
@@ -940,7 +990,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
             pageIndex: page.index,
             pageSize: page.size,
             /* Don't display rule count until we have the rule types initialized */
-            totalItemCount: ruleTypesState.initialLoad ? 0 : rulesState.totalItemCount,
+            totalItemCount: ruleTypesState.isInitialLoad ? 0 : rulesState.totalItemCount,
           }}
           onChange={({
             page: changedPage,

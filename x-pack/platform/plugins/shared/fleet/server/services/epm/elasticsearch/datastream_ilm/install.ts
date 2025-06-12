@@ -12,7 +12,11 @@ import {
   ElasticsearchAssetType,
   type PackageInstallContext,
 } from '../../../../../common/types/models';
-import type { EsAssetReference, RegistryDataStream } from '../../../../../common/types/models';
+import type {
+  AssetsMap,
+  EsAssetReference,
+  RegistryDataStream,
+} from '../../../../../common/types/models';
 import { updateEsAssetReferences } from '../../packages/es_assets_reference';
 import { getAssetFromAssetsMap } from '../../archive';
 
@@ -40,7 +44,7 @@ export const installIlmForDataStream = async (
   logger: Logger,
   esReferences: EsAssetReference[]
 ) => {
-  const { packageInfo: registryPackage, paths, assetsMap } = packageInstallContext;
+  const { packageInfo: registryPackage, paths } = packageInstallContext;
   const previousInstalledIlmEsAssets = esReferences.filter(
     ({ type }) => type === ElasticsearchAssetType.dataStreamIlmPolicy
   );
@@ -72,6 +76,19 @@ export const installIlmForDataStream = async (
     };
 
   const dataStreamIlmPaths = paths.filter((path) => isDataStreamIlm(path));
+
+  const dataStreamIlmAssetsMap: AssetsMap = new Map();
+  await packageInstallContext.archiveIterator.traverseEntries(
+    async (entry) => {
+      if (!entry.buffer) {
+        return;
+      }
+
+      dataStreamIlmAssetsMap.set(entry.path, entry.buffer);
+    },
+    (path) => dataStreamIlmPaths.includes(path)
+  );
+
   let installedIlms: EsAssetReference[] = [];
   if (dataStreamIlmPaths.length > 0) {
     const ilmPathDatasets = dataStreams.reduce<IlmPathDataset[]>((acc, dataStream) => {
@@ -103,7 +120,7 @@ export const installIlmForDataStream = async (
     const ilmInstallations: IlmInstallation[] = ilmPathDatasets.map(
       (ilmPathDataset: IlmPathDataset) => {
         const content = JSON.parse(
-          getAssetFromAssetsMap(assetsMap, ilmPathDataset.path).toString('utf-8')
+          getAssetFromAssetsMap(dataStreamIlmAssetsMap, ilmPathDataset.path).toString('utf-8')
         );
         content.policy._meta = getESAssetMetadata({ packageName: registryPackage.name });
 

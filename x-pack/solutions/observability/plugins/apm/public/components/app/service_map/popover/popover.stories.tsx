@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { Meta, Story } from '@storybook/react';
+import type { StoryObj, Meta } from '@storybook/react';
 import cytoscape from 'cytoscape';
 import React from 'react';
+import type { PopoverProps } from '.';
 import { Popover } from '.';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
@@ -15,7 +16,7 @@ import { mockApmApiCallResponse } from '../../../../services/rest/call_apm_api_s
 import { CytoscapeContext } from '../cytoscape';
 import exampleGroupedConnectionsData from '../__stories__/example_grouped_connections.json';
 
-interface Args {
+interface Args extends PopoverProps {
   nodeData: cytoscape.NodeDataDefinition;
 }
 
@@ -84,102 +85,117 @@ const stories: Meta<Args> = {
 };
 export default stories;
 
-export const Dependency: Story<Args> = () => {
-  return (
-    <Popover
-      environment={ENVIRONMENT_ALL.value}
-      kuery=""
-      start="2021-08-20T10:00:00.000Z"
-      end="2021-08-20T10:15:00.000Z"
-    />
-  );
-};
-Dependency.args = {
-  nodeData: {
-    'span.subtype': 'postgresql',
-    'span.destination.service.resource': 'postgresql',
-    'span.type': 'db',
-    id: '>postgresql',
-    label: 'postgresql',
+export const Dependency: StoryObj<Args> = {
+  render: () => {
+    return (
+      <Popover
+        environment={ENVIRONMENT_ALL.value}
+        kuery=""
+        start="2021-08-20T10:00:00.000Z"
+        end="2021-08-20T10:15:00.000Z"
+      />
+    );
+  },
+
+  args: {
+    nodeData: {
+      'span.subtype': 'postgresql',
+      'span.destination.service.resource': 'postgresql',
+      'span.type': 'db',
+      id: '>postgresql',
+      label: 'postgresql',
+    },
   },
 };
 
-export const DependencyWithLongTitle: Story<Args> = () => {
-  return (
-    <Popover
-      environment={ENVIRONMENT_ALL.value}
-      kuery=""
-      start="2021-08-20T10:00:00.000Z"
-      end="2021-08-20T10:15:00.000Z"
-    />
-  );
-};
-DependencyWithLongTitle.args = {
-  nodeData: {
-    'span.subtype': 'http',
-    'span.destination.service.resource':
-      '8b37cb7ca2ae49ada54db165f32d3a19.us-central1.gcp.foundit.no:9243',
-    'span.type': 'external',
-    id: '>8b37cb7ca2ae49ada54db165f32d3a19.us-central1.gcp.foundit.no:9243',
-    label: '8b37cb7ca2ae49ada54db165f32d3a19.us-central1.gcp.foundit.no:9243',
+export const DependencyWithLongTitle: StoryObj<Args> = {
+  render: () => {
+    return (
+      <Popover
+        environment={ENVIRONMENT_ALL.value}
+        kuery=""
+        start="2021-08-20T10:00:00.000Z"
+        end="2021-08-20T10:15:00.000Z"
+      />
+    );
+  },
+
+  args: {
+    nodeData: {
+      'span.subtype': 'http',
+      'span.destination.service.resource':
+        '8b37cb7ca2ae49ada54db165f32d3a19.us-central1.gcp.foundit.no:9243',
+      'span.type': 'external',
+      id: '>8b37cb7ca2ae49ada54db165f32d3a19.us-central1.gcp.foundit.no:9243',
+      label: '8b37cb7ca2ae49ada54db165f32d3a19.us-central1.gcp.foundit.no:9243',
+    },
   },
 };
 
-export const ExternalsList: Story<Args> = () => {
-  return (
-    <Popover
-      environment={ENVIRONMENT_ALL.value}
-      kuery=""
-      start="2021-08-20T10:00:00.000Z"
-      end="2021-08-20T10:15:00.000Z"
-    />
-  );
-};
-ExternalsList.args = {
-  nodeData: exampleGroupedConnectionsData,
-};
+export const ExternalsList: StoryObj<Args> = {
+  render: () => {
+    return (
+      <Popover
+        environment={ENVIRONMENT_ALL.value}
+        kuery=""
+        start="2021-08-20T10:00:00.000Z"
+        end="2021-08-20T10:15:00.000Z"
+      />
+    );
+  },
 
-export const Resource: Story<Args> = () => {
-  return (
-    <Popover
-      environment={ENVIRONMENT_ALL.value}
-      kuery=""
-      start="2021-08-20T10:00:00.000Z"
-      end="2021-08-20T10:15:00.000Z"
-    />
-  );
-};
-Resource.args = {
-  nodeData: {
-    id: '>cdn.loom.com:443',
-    label: 'cdn.loom.com:443',
-    'span.destination.service.resource': 'cdn.loom.com:443',
-    'span.subtype': 'css',
-    'span.type': 'resource',
+  args: {
+    nodeData: exampleGroupedConnectionsData,
   },
 };
 
-export const Service: Story<Args> = () => {
-  return (
-    <Popover
-      environment={ENVIRONMENT_ALL.value}
-      kuery=""
-      start="2021-08-20T10:00:00.000Z"
-      end="2021-08-20T10:15:00.000Z"
-    />
-  );
+export const Resource: StoryObj<Args> = {
+  render: () => {
+    return (
+      <Popover
+        environment={ENVIRONMENT_ALL.value}
+        kuery=""
+        start="2021-08-20T10:00:00.000Z"
+        end="2021-08-20T10:15:00.000Z"
+      />
+    );
+  },
+
+  args: {
+    nodeData: {
+      id: '>cdn.loom.com:443',
+      label: 'cdn.loom.com:443',
+      'span.destination.service.resource': 'cdn.loom.com:443',
+      'span.subtype': 'css',
+      'span.type': 'resource',
+    },
+  },
 };
-Service.args = {
-  nodeData: {
-    id: 'example service',
-    'service.name': 'example service',
-    serviceAnomalyStats: {
-      serviceName: 'opbeans-java',
-      jobId: 'apm-production-802c-high_mean_transaction_duration',
-      transactionType: 'request',
-      actualValue: 16258.496000000017,
-      anomalyScore: 0,
-      healthStatus: 'healthy',
+
+export const Service: StoryObj<Args> = {
+  render: () => {
+    return (
+      <Popover
+        environment={ENVIRONMENT_ALL.value}
+        kuery=""
+        start="2021-08-20T10:00:00.000Z"
+        end="2021-08-20T10:15:00.000Z"
+      />
+    );
+  },
+
+  args: {
+    nodeData: {
+      id: 'example service',
+      'service.name': 'example service',
+      serviceAnomalyStats: {
+        serviceName: 'opbeans-java',
+        jobId: 'apm-production-802c-high_mean_transaction_duration',
+        transactionType: 'request',
+        actualValue: 16258.496000000017,
+        anomalyScore: 0,
+        healthStatus: 'healthy',
+      },
     },
   },
 };

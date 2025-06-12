@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UrlTracker } from '../build_services';
+import type { UrlTracker } from '../build_services';
 
 export const createUrlTrackerMock = () =>
   ({

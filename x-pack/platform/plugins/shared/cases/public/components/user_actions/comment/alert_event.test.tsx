@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
+import { screen } from '@testing-library/react';
 
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer, TestProviders } from '../../../common/mock';
+import { TestProviders, renderWithTestingProviders } from '../../../common/mock';
 import { useKibana } from '../../../common/lib/kibana';
 import { MultipleAlertsCommentEvent, SingleAlertCommentEvent } from './alert_event';
 
@@ -143,38 +143,35 @@ describe('Alert events', () => {
   });
 
   describe('MultipleAlertsCommentEvent', () => {
-    let appMock: AppMockRenderer;
-
     beforeEach(() => {
-      appMock = createAppMockRenderer();
       jest.clearAllMocks();
     });
 
     it('renders correctly', async () => {
-      const result = appMock.render(<MultipleAlertsCommentEvent {...props} totalAlerts={2} />);
+      renderWithTestingProviders(<MultipleAlertsCommentEvent {...props} totalAlerts={2} />);
 
-      expect(result.getByTestId('multiple-alerts-user-action-action-id-1')).toHaveTextContent(
+      expect(screen.getByTestId('multiple-alerts-user-action-action-id-1')).toHaveTextContent(
         'added 2 alerts from Awesome rule'
       );
-      expect(result.getByTestId('alert-rule-link-action-id-1')).toHaveTextContent('Awesome rule');
+      expect(screen.getByTestId('alert-rule-link-action-id-1')).toHaveTextContent('Awesome rule');
     });
 
     it('renders the link when onClick is provided but href is not valid', async () => {
-      const result = appMock.render(
+      renderWithTestingProviders(
         <MultipleAlertsCommentEvent {...props} totalAlerts={2} getRuleDetailsHref={undefined} />
       );
-      expect(result.getByTestId('alert-rule-link-action-id-1')).toHaveTextContent('Awesome rule');
+      expect(screen.getByTestId('alert-rule-link-action-id-1')).toHaveTextContent('Awesome rule');
     });
 
     it('renders the link when href is valid but onClick is not available', async () => {
-      const result = appMock.render(
+      renderWithTestingProviders(
         <MultipleAlertsCommentEvent {...props} totalAlerts={2} onRuleDetailsClick={undefined} />
       );
-      expect(result.getByTestId('alert-rule-link-action-id-1')).toHaveTextContent('Awesome rule');
+      expect(screen.getByTestId('alert-rule-link-action-id-1')).toHaveTextContent('Awesome rule');
     });
 
     it('does NOT render the link when the href and onclick are invalid but it shows the rule name', async () => {
-      const result = appMock.render(
+      renderWithTestingProviders(
         <MultipleAlertsCommentEvent
           {...props}
           totalAlerts={2}
@@ -183,41 +180,41 @@ describe('Alert events', () => {
         />
       );
 
-      expect(result.getByTestId('multiple-alerts-user-action-action-id-1')).toHaveTextContent(
+      expect(screen.getByTestId('multiple-alerts-user-action-action-id-1')).toHaveTextContent(
         'added 2 alerts from Awesome rule'
       );
-      expect(result.queryByTestId('alert-rule-link-action-id-1')).toBeFalsy();
+      expect(screen.queryByTestId('alert-rule-link-action-id-1')).toBeFalsy();
     });
 
     it('does NOT render the link when the rule id is null', async () => {
-      const result = appMock.render(
+      renderWithTestingProviders(
         <MultipleAlertsCommentEvent {...props} totalAlerts={2} ruleId={null} />
       );
 
-      expect(result.getByTestId('multiple-alerts-user-action-action-id-1')).toHaveTextContent(
+      expect(screen.getByTestId('multiple-alerts-user-action-action-id-1')).toHaveTextContent(
         'added 2 alerts from Awesome rule'
       );
-      expect(result.queryByTestId('alert-rule-link-action-id-1')).toBeFalsy();
+      expect(screen.queryByTestId('alert-rule-link-action-id-1')).toBeFalsy();
     });
 
     it('show Unknown rule if the rule name is invalid', async () => {
-      const result = appMock.render(
+      renderWithTestingProviders(
         <MultipleAlertsCommentEvent {...props} totalAlerts={2} ruleName={null} />
       );
 
-      expect(result.getByTestId('multiple-alerts-user-action-action-id-1')).toHaveTextContent(
+      expect(screen.getByTestId('multiple-alerts-user-action-action-id-1')).toHaveTextContent(
         'added 2 alerts from Unknown rule'
       );
 
-      expect(result.getByTestId('alert-rule-link-action-id-1')).toHaveTextContent('Unknown rule');
+      expect(screen.getByTestId('alert-rule-link-action-id-1')).toHaveTextContent('Unknown rule');
     });
 
     it('shows the loading spinner if the alerts data are loading', async () => {
-      const result = appMock.render(
+      renderWithTestingProviders(
         <MultipleAlertsCommentEvent {...props} totalAlerts={2} loadingAlertData={true} />
       );
 
-      expect(result.getByTestId('alert-loading-spinner-action-id-1')).toBeTruthy();
+      expect(screen.getByTestId('alert-loading-spinner-action-id-1')).toBeTruthy();
     });
   });
 });

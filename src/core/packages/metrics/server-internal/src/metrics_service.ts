@@ -78,6 +78,8 @@ export class MetricsService
       }
     );
 
+    this.metricsCollector.registerMetrics();
+
     await this.refreshMetrics();
 
     this.collectInterval = setInterval(() => {

@@ -25,8 +25,8 @@ export async function fetchTrends(
     }
   >
 ): Promise<TrendTable> {
-  const requests = Object.keys(configs).map(
-    (key) => getFetchTrendsQuery(key, configs[key].locations, configs[key].interval).body
+  const requests = Object.keys(configs).map((key) =>
+    getFetchTrendsQuery(key, configs[key].locations, configs[key].interval)
   );
   const results = await esClient.msearch<TrendsQuery>(requests);
 

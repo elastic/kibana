@@ -23,9 +23,8 @@ import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import { INPUT_ERRORS } from '../translations';
 import { licenseService } from '../../../../../common/hooks/use_license';
 import { forceHTMLElementOffsetWidth } from '../../../../components/effected_policy_select/test_utils';
-import type { PolicyData, TrustedAppConditionEntry } from '../../../../../../common/endpoint/types';
-
-import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
+import type { TrustedAppConditionEntry } from '../../../../../../common/endpoint/types';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 
 jest.mock('../../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
@@ -41,7 +40,6 @@ jest.mock('../../../../../common/hooks/use_license', () => {
 
 describe('Trusted apps form', () => {
   const formPrefix = 'trustedApps-form';
-  const generator = new EndpointDocGenerator('effected-policy-select');
   let resetHTMLElementOffsetWidth: ReturnType<typeof forceHTMLElementOffsetWidth>;
 
   let formProps: jest.Mocked<ArtifactFormComponentProps>;
@@ -101,19 +99,6 @@ describe('Trusted apps form', () => {
       ...defaults,
       ...overrides,
     };
-  }
-
-  function createPolicies(): PolicyData[] {
-    const policies = [
-      generator.generatePolicyPackagePolicy(),
-      generator.generatePolicyPackagePolicy(),
-    ];
-    policies.map((p, i) => {
-      p.id = `id-${i}`;
-      p.name = `some-policy-${Math.random().toString(36).split('.').pop()}`;
-      return p;
-    });
-    return policies;
   }
 
   // Some helpers
@@ -181,17 +166,23 @@ describe('Trusted apps form', () => {
       mode: 'create',
       disabled: false,
       error: undefined,
-      policiesIsLoading: false,
       onChange: jest.fn((updates) => {
         latestUpdatedItem = updates.item;
       }),
-      policies: [],
     };
   });
 
   afterEach(() => {
     resetHTMLElementOffsetWidth();
     cleanup();
+  });
+
+  it('should display form submission errors', () => {
+    const message = 'oh oh - failed';
+    formProps.error = new Error(message) as IHttpFetchError;
+    render();
+
+    expect(renderResult.getByTestId(`${formPrefix}-submitError`).textContent).toMatch(message);
   });
 
   describe('Details and Conditions', () => {
@@ -313,29 +304,63 @@ describe('Trusted apps form', () => {
       expect(getConditionValue(getCondition()).required).toEqual(true);
     });
 
-    it('should show path malformed warning', () => {
-      render();
-      expect(screen.queryByText(INPUT_ERRORS.pathWarning(0))).toBeNull();
+    describe('IS operator', () => {
+      it('should show path malformed warning', () => {
+        render();
+        expect(screen.queryByText(INPUT_ERRORS.pathWarning(0))).toBeNull();
 
-      const propsItem: Partial<ArtifactFormComponentProps['item']> = {
-        entries: [createEntry(ConditionEntryField.PATH, 'match', 'malformed-path')],
-      };
-      formProps.item = { ...formProps.item, ...propsItem };
-      render();
-      expect(screen.getByText(INPUT_ERRORS.pathWarning(0))).not.toBeNull();
+        const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+          entries: [createEntry(ConditionEntryField.PATH, 'match', 'malformed-path')],
+        };
+        formProps.item = { ...formProps.item, ...propsItem };
+        render();
+        expect(screen.getByText(INPUT_ERRORS.pathWarning(0))).not.toBeNull();
+      });
+
+      it('should show path malformed path warning for linux/mac without an executable name', () => {
+        render();
+        expect(screen.queryByText(INPUT_ERRORS.pathWarning(0))).toBeNull();
+        expect(screen.queryByText(INPUT_ERRORS.wildcardPathWarning(0))).toBeNull();
+
+        const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+          os_types: [OperatingSystem.LINUX],
+          entries: [createEntry(ConditionEntryField.PATH, 'match', '/')],
+        };
+        formProps.item = { ...formProps.item, ...propsItem };
+        render();
+        expect(screen.getByText(INPUT_ERRORS.pathWarning(0))).not.toBeNull();
+        expect(screen.queryByText(INPUT_ERRORS.wildcardPathWarning(0))).toBeNull();
+      });
+
+      it('should show path malformed path warning for windows with no executable name', () => {
+        render();
+        expect(screen.queryByText(INPUT_ERRORS.pathWarning(0))).toBeNull();
+        expect(screen.queryByText(INPUT_ERRORS.wildcardPathWarning(0))).toBeNull();
+
+        const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+          os_types: [OperatingSystem.WINDOWS],
+          entries: [createEntry(ConditionEntryField.PATH, 'match', 'c:\\fold\\')],
+        };
+        formProps.item = { ...formProps.item, ...propsItem };
+        render();
+        expect(screen.getByText(INPUT_ERRORS.pathWarning(0))).not.toBeNull();
+        expect(screen.queryByText(INPUT_ERRORS.wildcardPathWarning(0))).toBeNull();
+      });
     });
 
-    it('should show wildcard in path warning', () => {
-      render();
-      expect(screen.queryByText(INPUT_ERRORS.wildcardPathWarning(0))).toBeNull();
+    describe('MATCHES operator', () => {
+      it('should show wildcard in path warning', () => {
+        render();
+        expect(screen.queryByText(INPUT_ERRORS.wildcardPathWarning(0))).toBeNull();
 
-      const propsItem: Partial<ArtifactFormComponentProps['item']> = {
-        os_types: [OperatingSystem.LINUX],
-        entries: [createEntry(ConditionEntryField.PATH, 'wildcard', '/sys/wil*/*.app')],
-      };
-      formProps.item = { ...formProps.item, ...propsItem };
-      render();
-      expect(screen.getByText(INPUT_ERRORS.wildcardPathWarning(0))).not.toBeNull();
+        const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+          os_types: [OperatingSystem.LINUX],
+          entries: [createEntry(ConditionEntryField.PATH, 'wildcard', '/sys/wil*/*.app')],
+        };
+        formProps.item = { ...formProps.item, ...propsItem };
+        render();
+        expect(screen.getByText(INPUT_ERRORS.wildcardPathWarning(0))).not.toBeNull();
+      });
     });
 
     it('should display the `AND` button', () => {
@@ -370,90 +395,17 @@ describe('Trusted apps form', () => {
     });
   });
 
-  describe('the Policy Selection area', () => {
-    beforeEach(() => {
-      formProps.policies = createPolicies();
-    });
+  it('should display effective scope options', () => {
+    render();
+    const globalButton = renderResult.getByTestId(
+      `${formPrefix}-effectedPolicies-global`
+    ) as HTMLButtonElement;
 
-    it('should have `global` switch on if effective scope is global and policy options hidden', () => {
-      render();
-      const globalButton = renderResult.getByTestId(
-        `${formPrefix}-effectedPolicies-global`
-      ) as HTMLButtonElement;
-
-      expect(globalButton.classList.contains('euiButtonGroupButton-isSelected')).toEqual(true);
-      expect(
-        renderResult.queryByTestId(`${formPrefix}-effectedPolicies-policiesSelectable`)
-      ).toBeNull();
-      expect(renderResult.queryByTestId('policy-id-0')).toBeNull();
-    });
-
-    it('should have policy options visible and specific policies checked if scope is per-policy', () => {
-      formProps.item.tags = [formProps.policies.map((p) => `policy:${p.id}`)[0]];
-      render();
-
-      const perPolicyButton = renderResult.getByTestId(
-        `${formPrefix}-effectedPolicies-perPolicy`
-      ) as HTMLButtonElement;
-
-      expect(perPolicyButton.classList.contains('euiButtonGroupButton-isSelected')).toEqual(true);
-      expect(renderResult.getByTestId('policy-id-0').getAttribute('aria-disabled')).toEqual(
-        'false'
-      );
-      expect(renderResult.getByTestId('policy-id-0-checkbox')).toBeChecked();
-    });
-
-    it('should show loader when setting `policies.isLoading` to true and scope is per-policy', () => {
-      formProps.policiesIsLoading = true;
-      formProps.item.tags = [formProps.policies.map((p) => `policy:${p.id}`)[0]];
-      render();
-      expect(renderResult.queryByTestId('loading-spinner')).not.toBeNull();
-    });
-  });
-
-  describe('the Policy Selection area when the license downgrades to gold or below', () => {
-    beforeEach(() => {
-      const policies = createPolicies();
-      formProps.policies = policies;
-      formProps.item.tags = [policies.map((p) => `policy:${p.id}`)[0]];
-      formProps.mode = 'edit';
-      // downgrade license
-      (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
-      render();
-    });
-
-    it('maintains policy configuration but does not allow the user to edit add/remove individual policies in edit mode', () => {
-      const perPolicyButton = renderResult.getByTestId(
-        `${formPrefix}-effectedPolicies-perPolicy`
-      ) as HTMLButtonElement;
-      expect(perPolicyButton.classList.contains('euiButtonGroupButton-isSelected')).toEqual(true);
-      expect(renderResult.getByTestId('policy-id-0').getAttribute('aria-disabled')).toEqual('true');
-      expect(renderResult.getByTestId('policy-id-0-checkbox')).toBeChecked();
-    });
-    it("allows the user to set the trusted app entry to 'Global' in the edit option", () => {
-      const globalButtonInput = renderResult.getByTestId(
-        'trustedApps-form-effectedPolicies-global'
-      ) as HTMLButtonElement;
-      act(() => {
-        fireEvent.click(globalButtonInput);
-      });
-
-      const policyItem = formProps.onChange.mock.calls[0][0].item.tags
-        ? formProps.onChange.mock.calls[0][0].item.tags[0]
-        : '';
-      expect(policyItem).toBe('policy:all');
-    });
-
-    it('hides the policy assignment section if the TA is set to global', () => {
-      formProps.item.tags = ['policy:all'];
-      rerender();
-      expect(renderResult.queryByTestId(`${formPrefix}-effectedPolicies`)).toBeNull();
-    });
-    it('hides the policy assignment section if the user is adding a new TA', () => {
-      formProps.mode = 'create';
-      rerender();
-      expect(renderResult.queryByTestId(`${formPrefix}-effectedPolicies`)).toBeNull();
-    });
+    expect(globalButton.classList.contains('euiButtonGroupButton-isSelected')).toEqual(true);
+    expect(
+      renderResult.queryByTestId(`${formPrefix}-effectedPolicies-policiesSelectable`)
+    ).toBeNull();
+    expect(renderResult.queryByTestId('policy-id-0')).toBeNull();
   });
 
   describe('and the user visits required fields but does not fill them out', () => {

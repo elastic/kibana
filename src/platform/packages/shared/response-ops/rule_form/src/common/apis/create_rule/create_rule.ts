@@ -10,7 +10,8 @@
 import type { HttpSetup } from '@kbn/core/public';
 import type { AsApiContract } from '@kbn/actions-types';
 import type { Rule } from '../../types';
-import { CreateRuleBody, transformCreateRuleBody } from '.';
+import type { CreateRuleBody } from '.';
+import { transformCreateRuleBody } from '.';
 import { BASE_ALERTING_API_PATH } from '../../../constants';
 import { transformRule } from '../../transformations';
 

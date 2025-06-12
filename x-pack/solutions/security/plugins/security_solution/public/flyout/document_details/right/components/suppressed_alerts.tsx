@@ -57,7 +57,7 @@ export const SuppressedAlerts: React.VFC<SuppressedAlertsProps> = ({
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem>
         <InsightsSummaryRow
           text={text}
           value={alertSuppressionCount}

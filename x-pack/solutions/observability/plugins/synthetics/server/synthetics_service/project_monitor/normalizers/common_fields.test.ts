@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { ScheduleUnit } from '../../../../common/runtime_types';
 import {
   flattenAndFormatObject,
+  getMonitorSchedule,
   getNormalizeCommonFields,
   getUrlsField,
+  InvalidScheduleError,
   isValidURL,
   NormalizedProjectProps,
 } from './common_fields';
@@ -240,5 +243,35 @@ describe('getNormalizeCommonFields', () => {
         labels: {},
       },
     });
+  });
+});
+
+describe('getMonitorSchedule', () => {
+  it('should return default value if schedule is falsy', () => {
+    const defaultValue = { number: '5', unit: ScheduleUnit.MINUTES };
+    expect(getMonitorSchedule(null as any, defaultValue)).toEqual(defaultValue);
+    expect(getMonitorSchedule(undefined as any, defaultValue)).toEqual(defaultValue);
+  });
+
+  it('should return a schedule object with minutes if schedule is a number', () => {
+    expect(getMonitorSchedule(5)).toEqual({ number: '5', unit: ScheduleUnit.MINUTES });
+  });
+
+  it('should return a schedule object with minutes if schedule is a string without seconds', () => {
+    expect(getMonitorSchedule('10')).toEqual({ number: '10', unit: ScheduleUnit.MINUTES });
+  });
+
+  it('should return a schedule object with seconds if schedule is allowed', () => {
+    expect(getMonitorSchedule('10s')).toEqual({ number: '10', unit: ScheduleUnit.SECONDS });
+    expect(getMonitorSchedule('30s')).toEqual({ number: '30', unit: ScheduleUnit.SECONDS });
+  });
+
+  it('should throw InvalidScheduleError if schedule in seconds is not allowed', () => {
+    expect(() => getMonitorSchedule('20s')).toThrow(InvalidScheduleError);
+  });
+
+  it('should return the schedule object if schedule is already in the correct format', () => {
+    const existingSchedule = { number: '15', unit: ScheduleUnit.MINUTES };
+    expect(getMonitorSchedule(existingSchedule)).toEqual(existingSchedule);
   });
 });

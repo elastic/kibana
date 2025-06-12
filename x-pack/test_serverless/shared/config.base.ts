@@ -70,7 +70,7 @@ export default async () => {
         port: dockerRegistryPort,
         args: dockerArgs,
         waitForLogLine: 'package manifests loaded',
-        waitForLogLineTimeoutMs: 60 * 2 * 1000, // 2 minutes
+        waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
       },
     }),
     browser: {
@@ -181,6 +181,8 @@ export default async () => {
         `--xpack.cloud.deployments_url=/deployments`,
         `--xpack.cloud.organization_url=/account/`,
         `--xpack.cloud.users_and_roles_url=/account/members/`,
+        // disable product intercept for all ftr tests by default
+        '--xpack.intercepts.enabled=false',
       ],
     },
 
@@ -194,7 +196,7 @@ export default async () => {
       ...services,
     },
 
-    // overriding default timeouts from packages/kbn-test/src/functional_test_runner/lib/config/schema.ts
+    // overriding default timeouts from src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/config/schema.ts
     // so we can easily adjust them for serverless where needed
     timeouts: {
       find: 10 * 1000,

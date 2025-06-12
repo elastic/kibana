@@ -5,33 +5,19 @@
  * 2.0.
  */
 import { performance } from 'perf_hooks';
+import { isEmpty } from 'lodash';
 
-import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import type {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RuleExecutorServices,
-} from '@kbn/alerting-plugin/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Filter } from '@kbn/es-query';
-import isEmpty from 'lodash/isEmpty';
-
+import type { ShardFailure } from '@elastic/elasticsearch/lib/api/types';
 import { buildEqlSearchRequest } from './build_eql_search_request';
-import { createEnrichEventsFunction } from '../utils/enrichments';
 
 import type { ExperimentalFeatures } from '../../../../../common';
 import type {
-  BulkCreate,
-  WrapHits,
-  WrapSequences,
-  RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
   SignalSource,
-  CreateRuleOptions,
   WrapSuppressedHits,
+  SecuritySharedParams,
+  SecurityRuleServices,
 } from '../types';
-import type { SharedParams } from '../utils/utils';
 import {
   addToSearchAfterReturn,
   createSearchAfterReturnType,
@@ -41,13 +27,12 @@ import {
   getSuppressionMaxSignalsWarning,
 } from '../utils/utils';
 import { buildReasonMessageForEqlAlert } from '../utils/reason_formatters';
-import type { CompleteRule, EqlRuleParams } from '../../rule_schema';
+import type { EqlRuleParams } from '../../rule_schema';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
-import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import {
   bulkCreateSuppressedAlertsInMemory,
   bulkCreateSuppressedSequencesInMemory,
@@ -59,51 +44,25 @@ import * as i18n from '../translations';
 import { alertSuppressionTypeGuard } from '../utils/get_is_alert_suppression_active';
 import { isEqlSequenceQuery } from '../../../../../common/detection_engine/utils';
 import { logShardFailures } from '../utils/log_shard_failure';
+import { checkErrorDetails } from '../utils/check_error_details';
+import { wrapSequences } from './wrap_sequences';
+import { bulkCreate, wrapHits } from '../factories';
+import type { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
 
 interface EqlExecutorParams {
-  inputIndex: string[];
-  runtimeMappings: estypes.MappingRuntimeFields | undefined;
-  completeRule: CompleteRule<EqlRuleParams>;
-  tuple: RuleRangeTuple;
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  version: string;
-  bulkCreate: BulkCreate;
-  wrapHits: WrapHits;
-  sharedParams: SharedParams;
-  wrapSequences: WrapSequences;
-  primaryTimestamp: string;
-  secondaryTimestamp?: string;
-  exceptionFilter: Filter | undefined;
-  unprocessedExceptions: ExceptionListItemSchema[];
+  sharedParams: SecuritySharedParams<EqlRuleParams>;
+  services: SecurityRuleServices;
   wrapSuppressedHits: WrapSuppressedHits;
-  alertTimestampOverride: Date | undefined;
-  alertWithSuppression: SuppressedAlertService;
   isAlertSuppressionActive: boolean;
   experimentalFeatures: ExperimentalFeatures;
   state?: Record<string, unknown>;
-  scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
+  scheduleNotificationResponseActionsService: ScheduleNotificationResponseActionsService;
 }
 
 export const eqlExecutor = async ({
-  inputIndex,
-  runtimeMappings,
-  completeRule,
-  tuple,
-  ruleExecutionLogger,
-  services,
-  version,
-  bulkCreate,
-  wrapHits,
-  wrapSequences,
-  primaryTimestamp,
-  secondaryTimestamp,
-  exceptionFilter,
-  unprocessedExceptions,
-  wrapSuppressedHits,
   sharedParams,
-  alertTimestampOverride,
-  alertWithSuppression,
+  services,
+  wrapSuppressedHits,
   isAlertSuppressionActive,
   experimentalFeatures,
   state,
@@ -112,6 +71,7 @@ export const eqlExecutor = async ({
   result: SearchAfterAndBulkCreateReturnType;
   loggedRequests?: RulePreviewLoggedRequest[];
 }> => {
+  const { completeRule, tuple, ruleExecutionLogger } = sharedParams;
   const ruleParams = completeRule.ruleParams;
   const isLoggedRequestsEnabled = state?.isLoggedRequestsEnabled ?? false;
   const loggedRequests: RulePreviewLoggedRequest[] = [];
@@ -127,23 +87,19 @@ export const eqlExecutor = async ({
     const isSequenceQuery = isEqlSequenceQuery(ruleParams.query);
 
     const request = buildEqlSearchRequest({
+      sharedParams,
       query: ruleParams.query,
-      index: inputIndex,
       from: tuple.from.toISOString(),
       to: tuple.to.toISOString(),
       size: ruleParams.maxSignals,
       filters: [...(ruleParams.filters || []), ...dataTiersFilters],
-      primaryTimestamp,
-      secondaryTimestamp,
-      runtimeMappings,
       eventCategoryOverride: ruleParams.eventCategoryOverride,
       timestampField: ruleParams.timestampField,
       tiebreakerField: ruleParams.tiebreakerField,
-      exceptionFilter,
     });
 
     ruleExecutionLogger.debug(`EQL query request: ${JSON.stringify(request)}`);
-    const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
+    const exceptionsWarning = getUnprocessedExceptionsWarnings(sharedParams.unprocessedExceptions);
     if (exceptionsWarning) {
       result.warningMessages.push(exceptionsWarning);
     }
@@ -171,60 +127,54 @@ export const eqlExecutor = async ({
 
       let newSignals: Array<WrappedFieldsLatest<BaseFieldsLatest>> | undefined;
 
-      // @ts-expect-error shard_failures exists in
-      // elasticsearch response v9
-      // needs to be spec needs to be backported
-      // https://github.com/elastic/elasticsearch-specification/pull/3372#issuecomment-2621835599
-      // TODO: remove ts-expect-error when ES lib version is updated
       const shardFailures = response.shard_failures;
       if (!isEmpty(shardFailures)) {
-        logShardFailures(isSequenceQuery, shardFailures, result, ruleExecutionLogger);
+        logShardFailures(
+          isSequenceQuery,
+          shardFailures as ShardFailure[],
+          result,
+          ruleExecutionLogger
+        );
       }
 
       const { events, sequences } = response.hits;
 
       if (events) {
-        if (isAlertSuppressionActive) {
+        if (
+          isAlertSuppressionActive &&
+          alertSuppressionTypeGuard(completeRule.ruleParams.alertSuppression)
+        ) {
           await bulkCreateSuppressedAlertsInMemory({
+            sharedParams,
             enrichedEvents: events,
             toReturn: result,
-            wrapHits,
-            bulkCreate,
             services,
             buildReasonMessage: buildReasonMessageForEqlAlert,
-            ruleExecutionLogger,
-            tuple,
             alertSuppression: completeRule.ruleParams.alertSuppression,
             wrapSuppressedHits,
-            alertTimestampOverride,
-            alertWithSuppression,
-            experimentalFeatures,
           });
         } else {
-          newSignals = wrapHits(events, buildReasonMessageForEqlAlert);
+          newSignals = wrapHits(sharedParams, events, buildReasonMessageForEqlAlert);
         }
       } else if (sequences) {
         if (
           isAlertSuppressionActive &&
-          experimentalFeatures.alertSuppressionForSequenceEqlRuleEnabled &&
           alertSuppressionTypeGuard(completeRule.ruleParams.alertSuppression)
         ) {
           await bulkCreateSuppressedSequencesInMemory({
+            sharedParams,
             sequences,
             toReturn: result,
-            bulkCreate,
             services,
             buildReasonMessage: buildReasonMessageForEqlAlert,
-            ruleExecutionLogger,
-            tuple,
             alertSuppression: completeRule.ruleParams.alertSuppression,
-            sharedParams,
-            alertTimestampOverride,
-            alertWithSuppression,
-            experimentalFeatures,
           });
         } else {
-          newSignals = wrapSequences(sequences, buildReasonMessageForEqlAlert);
+          newSignals = wrapSequences({
+            sharedParams,
+            sequences,
+            buildReasonMessage: buildReasonMessageForEqlAlert,
+          });
         }
       } else {
         throw new Error(
@@ -233,14 +183,11 @@ export const eqlExecutor = async ({
       }
 
       if (newSignals?.length) {
-        const createResult = await bulkCreate(
-          newSignals,
-          undefined,
-          createEnrichEventsFunction({
-            services,
-            logger: ruleExecutionLogger,
-          })
-        );
+        const createResult = await bulkCreate({
+          wrappedAlerts: newSignals,
+          sharedParams,
+          services,
+        });
         addToSearchAfterReturn({ current: result, next: createResult });
       }
 
@@ -260,12 +207,7 @@ export const eqlExecutor = async ({
       });
       return { result, ...(isLoggedRequestsEnabled ? { loggedRequests } : {}) };
     } catch (error) {
-      if (
-        typeof error.message === 'string' &&
-        (error.message as string).includes('verification_exception')
-      ) {
-        // We report errors that are more related to user configuration of rules rather than system outages as "user errors"
-        // so SLO dashboards can show less noise around system outages
+      if (checkErrorDetails(error).isUserError) {
         result.userError = true;
       }
       result.errors.push(error.message);

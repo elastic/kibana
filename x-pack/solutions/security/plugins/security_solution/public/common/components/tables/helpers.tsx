@@ -6,7 +6,7 @@
  */
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { css } from '@emotion/react';
 import {
   EuiLink,
   EuiPopover,
@@ -15,17 +15,14 @@ import {
   EuiTextColor,
   EuiFlexGroup,
   EuiFlexItem,
+  useEuiFontSize,
+  useEuiTheme,
 } from '@elastic/eui';
-import styled from 'styled-components';
 import { SecurityCellActions, CellActionsMode, SecurityCellActionsTrigger } from '../cell_actions';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
 import { MoreRowItems } from '../page';
 import { MoreContainer } from '../../../timelines/components/field_renderers/more_container';
-
-const Subtext = styled.div`
-  font-size: ${(props) => props.theme.eui.euiFontSizeXS};
-`;
 
 interface GetRowItemsWithActionsParams {
   values: string[] | null | undefined;
@@ -73,6 +70,7 @@ export const getRowItemsWithActions = ({
           idPrefix={idPrefix}
           overflowIndexStart={displayCount}
           maxOverflowItems={maxOverflow}
+          render={render}
         />
       </>
     ) : (
@@ -89,6 +87,7 @@ interface RowItemOverflowProps {
   idPrefix: string;
   overflowIndexStart: number;
   maxOverflowItems: number;
+  render?: (item: string) => React.ReactNode;
 }
 
 export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
@@ -97,7 +96,9 @@ export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
   idPrefix,
   overflowIndexStart = 5,
   maxOverflowItems = 5,
+  render,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const maxVisibleValues = useMemo(
     () => values.slice(0, maxOverflowItems + 1),
     [values, maxOverflowItems]
@@ -113,11 +114,12 @@ export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
               values={maxVisibleValues}
               overflowIndexStart={overflowIndexStart}
               moreMaxHeight="none"
+              render={render}
             />
           </EuiText>
           {values.length > overflowIndexStart + maxOverflowItems && (
             <EuiFlexGroup
-              css={{ paddingTop: euiThemeVars.euiSizeM }}
+              css={{ paddingTop: euiTheme.size.m }}
               data-test-subj="popover-additional-overflow"
             >
               <EuiFlexItem>
@@ -148,14 +150,23 @@ interface PopoverComponentProps {
   idPrefix: string;
 }
 
+const useStyles = () => {
+  return {
+    subtext: css`
+      font-size: ${useEuiFontSize('xs').fontSize};
+    `,
+  };
+};
+
 const PopoverComponent: React.FC<PopoverComponentProps> = ({ children, count, idPrefix }) => {
+  const styles = useStyles();
   const [isOpen, setIsOpen] = useState(false);
   const onButtonClick = useCallback(() => {
     setIsOpen(!isOpen);
   }, [isOpen]);
 
   return (
-    <Subtext>
+    <div css={styles.subtext}>
       <EuiPopover
         button={
           <EuiLink onClick={onButtonClick} data-test-subj="overflow-button">
@@ -174,7 +185,7 @@ const PopoverComponent: React.FC<PopoverComponentProps> = ({ children, count, id
       >
         {children}
       </EuiPopover>
-    </Subtext>
+    </div>
   );
 };
 

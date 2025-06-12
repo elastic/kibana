@@ -1,0 +1,3816 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GetPreviewData for 'APM Availability' indicator type builds the query for a set of groupings 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "aggs": Object {
+          "perInterval": Object {
+            "aggs": Object {
+              "good": Object {
+                "filter": Object {
+                  "bool": Object {
+                    "should": Object {
+                      "match": Object {
+                        "event.outcome": "success",
+                      },
+                    },
+                  },
+                },
+              },
+              "total": Object {
+                "filter": Object {
+                  "match_all": Object {},
+                },
+              },
+            },
+            "date_histogram": Object {
+              "extended_bounds": Object {
+                "max": 1740407209056,
+                "min": 1740320809056,
+              },
+              "field": "@timestamp",
+              "fixed_interval": "10m",
+            },
+          },
+        },
+        "index": "remote_cluster:apm-*,remote_cluster:metrics-apm*,remote_cluster:metrics-*.otel-*,apm-*,metrics-apm*,metrics-*.otel-*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": 1740320809056,
+                    "lte": 1740407209056,
+                  },
+                },
+              },
+              Object {
+                "term": Object {
+                  "metricset.name": "transaction",
+                },
+              },
+              Object {
+                "terms": Object {
+                  "event.outcome": Array [
+                    "success",
+                    "failure",
+                  ],
+                },
+              },
+              Object {
+                "term": Object {
+                  "host.name": "host.001",
+                },
+              },
+              Object {
+                "term": Object {
+                  "env": "prod",
+                },
+              },
+              Object {
+                "match": Object {
+                  "service.name": "frontend",
+                },
+              },
+              Object {
+                "match": Object {
+                  "service.environment": "prod",
+                },
+              },
+              Object {
+                "match": Object {
+                  "transaction.name": "GET /api",
+                },
+              },
+              Object {
+                "match": Object {
+                  "transaction.type": "request",
+                },
+              },
+              Object {
+                "bool": Object {
+                  "filter": Array [
+                    Object {
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "match": Object {
+                              "some.lable": "bar",
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                  "must": Array [],
+                  "must_not": Array [],
+                  "should": Array [],
+                },
+              },
+            ],
+          },
+        },
+        "runtime_mappings": Object {},
+        "size": 0,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`GetPreviewData for 'APM Availability' indicator type builds the query with 1 group 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "aggs": Object {
+          "perGroup": Object {
+            "aggs": Object {
+              "perInterval": Object {
+                "aggs": Object {
+                  "good": Object {
+                    "filter": Object {
+                      "bool": Object {
+                        "should": Object {
+                          "match": Object {
+                            "event.outcome": "success",
+                          },
+                        },
+                      },
+                    },
+                  },
+                  "total": Object {
+                    "filter": Object {
+                      "match_all": Object {},
+                    },
+                  },
+                },
+                "date_histogram": Object {
+                  "extended_bounds": Object {
+                    "max": 1740407209056,
+                    "min": 1740320809056,
+                  },
+                  "field": "@timestamp",
+                  "fixed_interval": "10m",
+                },
+              },
+            },
+            "terms": Object {
+              "field": "host.name",
+              "size": 5,
+            },
+          },
+          "perInterval": Object {
+            "aggs": Object {
+              "good": Object {
+                "filter": Object {
+                  "bool": Object {
+                    "should": Object {
+                      "match": Object {
+                        "event.outcome": "success",
+                      },
+                    },
+                  },
+                },
+              },
+              "total": Object {
+                "filter": Object {
+                  "match_all": Object {},
+                },
+              },
+            },
+            "date_histogram": Object {
+              "extended_bounds": Object {
+                "max": 1740407209056,
+                "min": 1740320809056,
+              },
+              "field": "@timestamp",
+              "fixed_interval": "10m",
+            },
+          },
+        },
+        "index": "remote_cluster:apm-*,remote_cluster:metrics-apm*,remote_cluster:metrics-*.otel-*,apm-*,metrics-apm*,metrics-*.otel-*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": 1740320809056,
+                    "lte": 1740407209056,
+                  },
+                },
+              },
+              Object {
+                "term": Object {
+                  "metricset.name": "transaction",
+                },
+              },
+              Object {
+                "terms": Object {
+                  "event.outcome": Array [
+                    "success",
+                    "failure",
+                  ],
+                },
+              },
+              Object {
+                "match": Object {
+                  "service.name": "frontend",
+                },
+              },
+              Object {
+                "match": Object {
+                  "service.environment": "prod",
+                },
+              },
+              Object {
+                "match": Object {
+                  "transaction.name": "GET /api",
+                },
+              },
+              Object {
+                "match": Object {
+                  "transaction.type": "request",
+                },
+              },
+              Object {
+                "bool": Object {
+                  "filter": Array [
+                    Object {
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "match": Object {
+                              "some.lable": "bar",
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                  "must": Array [],
+                  "must_not": Array [],
+                  "should": Array [],
+                },
+              },
+            ],
+          },
+        },
+        "runtime_mappings": Object {},
+        "size": 0,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`GetPreviewData for 'APM Availability' indicator type builds the query with 2 groups 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "aggs": Object {
+          "perGroup": Object {
+            "aggs": Object {
+              "perInterval": Object {
+                "aggs": Object {
+                  "good": Object {
+                    "filter": Object {
+                      "bool": Object {
+                        "should": Object {
+                          "match": Object {
+                            "event.outcome": "success",
+                          },
+                        },
+                      },
+                    },
+                  },
+                  "total": Object {
+                    "filter": Object {
+                      "match_all": Object {},
+                    },
+                  },
+                },
+                "date_histogram": Object {
+                  "extended_bounds": Object {
+                    "max": 1740407209056,
+                    "min": 1740320809056,
+                  },
+                  "field": "@timestamp",
+                  "fixed_interval": "10m",
+                },
+              },
+            },
+            "multi_terms": Object {
+              "size": 5,
+              "terms": Array [
+                Object {
+                  "field": "host.name",
+                },
+                Object {
+                  "field": "event.action",
+                },
+              ],
+            },
+          },
+          "perInterval": Object {
+            "aggs": Object {
+              "good": Object {
+                "filter": Object {
+                  "bool": Object {
+                    "should": Object {
+                      "match": Object {
+                        "event.outcome": "success",
+                      },
+                    },
+                  },
+                },
+              },
+              "total": Object {
+                "filter": Object {
+                  "match_all": Object {},
+                },
+              },
+            },
+            "date_histogram": Object {
+              "extended_bounds": Object {
+                "max": 1740407209056,
+                "min": 1740320809056,
+              },
+              "field": "@timestamp",
+              "fixed_interval": "10m",
+            },
+          },
+        },
+        "index": "remote_cluster:apm-*,remote_cluster:metrics-apm*,remote_cluster:metrics-*.otel-*,apm-*,metrics-apm*,metrics-*.otel-*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": 1740320809056,
+                    "lte": 1740407209056,
+                  },
+                },
+              },
+              Object {
+                "term": Object {
+                  "metricset.name": "transaction",
+                },
+              },
+              Object {
+                "terms": Object {
+                  "event.outcome": Array [
+                    "success",
+                    "failure",
+                  ],
+                },
+              },
+              Object {
+                "match": Object {
+                  "service.name": "frontend",
+                },
+              },
+              Object {
+                "match": Object {
+                  "service.environment": "prod",
+                },
+              },
+              Object {
+                "match": Object {
+                  "transaction.name": "GET /api",
+                },
+              },
+              Object {
+                "match": Object {
+                  "transaction.type": "request",
+                },
+              },
+              Object {
+                "bool": Object {
+                  "filter": Array [
+                    Object {
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "match": Object {
+                              "some.lable": "bar",
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                  "must": Array [],
+                  "must_not": Array [],
+                  "should": Array [],
+                },
+              },
+            ],
+          },
+        },
+        "runtime_mappings": Object {},
+        "size": 0,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`GetPreviewData for 'APM Availability' indicator type builds the query without groups 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "aggs": Object {
+          "perInterval": Object {
+            "aggs": Object {
+              "good": Object {
+                "filter": Object {
+                  "bool": Object {
+                    "should": Object {
+                      "match": Object {
+                        "event.outcome": "success",
+                      },
+                    },
+                  },
+                },
+              },
+              "total": Object {
+                "filter": Object {
+                  "match_all": Object {},
+                },
+              },
+            },
+            "date_histogram": Object {
+              "extended_bounds": Object {
+                "max": 1740407209056,
+                "min": 1740320809056,
+              },
+              "field": "@timestamp",
+              "fixed_interval": "10m",
+            },
+          },
+        },
+        "index": "remote_cluster:apm-*,remote_cluster:metrics-apm*,remote_cluster:metrics-*.otel-*,apm-*,metrics-apm*,metrics-*.otel-*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": 1740320809056,
+                    "lte": 1740407209056,
+                  },
+                },
+              },
+              Object {
+                "term": Object {
+                  "metricset.name": "transaction",
+                },
+              },
+              Object {
+                "terms": Object {
+                  "event.outcome": Array [
+                    "success",
+                    "failure",
+                  ],
+                },
+              },
+              Object {
+                "match": Object {
+                  "service.name": "frontend",
+                },
+              },
+              Object {
+                "match": Object {
+                  "service.environment": "prod",
+                },
+              },
+              Object {
+                "match": Object {
+                  "transaction.name": "GET /api",
+                },
+              },
+              Object {
+                "match": Object {
+                  "transaction.type": "request",
+                },
+              },
+              Object {
+                "bool": Object {
+                  "filter": Array [
+                    Object {
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "match": Object {
+                              "some.lable": "bar",
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                  "must": Array [],
+                  "must_not": Array [],
+                  "should": Array [],
+                },
+              },
+            ],
+          },
+        },
+        "runtime_mappings": Object {},
+        "size": 0,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`GetPreviewData for 'APM Latency' indicator type builds the query for a set of groupings 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "aggs": Object {
+          "perInterval": Object {
+            "aggs": Object {
+              "_good": Object {
+                "range": Object {
+                  "field": "transaction.duration.histogram",
+                  "keyed": true,
+                  "ranges": Array [
+                    Object {
+                      "key": "target",
+                      "to": 250000,
+                    },
+                  ],
+                },
+              },
+              "good": Object {
+                "bucket_script": Object {
+                  "buckets_path": Object {
+                    "_good": "_good['target']>_count",
+                  },
+                  "script": "params._good",
+                },
+              },
+              "total": Object {
+                "value_count": Object {
+                  "field": "transaction.duration.histogram",
+                },
+              },
+            },
+            "date_histogram": Object {
+              "extended_bounds": Object {
+                "max": 1740407209056,
+                "min": 1740320809056,
+              },
+              "field": "@timestamp",
+              "fixed_interval": "10m",
+            },
+          },
+        },
+        "index": "remote_cluster:apm-*,remote_cluster:metrics-apm*,remote_cluster:metrics-*.otel-*,apm-*,metrics-apm*,metrics-*.otel-*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": 1740320809056,
+                    "lte": 1740407209056,
+                  },
+                },
+              },
+              Object {
+                "terms": Object {
+                  "processor.event": Array [
+                    "metric",
+                  ],
+                },
+              },
+              Object {
+                "term": Object {
+                  "metricset.name": "transaction",
+                },
+              },
+              Object {
+                "exists": Object {
+                  "field": "transaction.duration.histogram",
+                },
+              },
+              Object {
+                "term": Object {
+                  "host.name": "host.001",
+                },
+              },
+              Object {
+                "term": Object {
+                  "env": "prod",
+                },
+              },
+              Object {
+                "match": Object {
+                  "service.name": "frontend",
+                },
+              },
+              Object {
+                "match": Object {
+                  "service.environment": "prod",
+                },
+              },
+              Object {
+                "match": Object {
+                  "transaction.name": "GET /api",
+                },
+              },
+              Object {
+                "match": Object {
+                  "transaction.type": "request",
+                },
+              },
+              Object {
+                "bool": Object {
+                  "filter": Array [
+                    Object {
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "match": Object {
+                              "some.lable": "foo",
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                  "must": Array [],
+                  "must_not": Array [],
+                  "should": Array [],
+                },
+              },
+            ],
+          },
+        },
+        "runtime_mappings": Object {},
+        "size": 0,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`GetPreviewData for 'APM Latency' indicator type builds the query with 1 group 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "aggs": Object {
+          "perGroup": Object {
+            "aggs": Object {
+              "perInterval": Object {
+                "aggs": Object {
+                  "_good": Object {
+                    "range": Object {
+                      "field": "transaction.duration.histogram",
+                      "keyed": true,
+                      "ranges": Array [
+                        Object {
+                          "key": "target",
+                          "to": 250000,
+                        },
+                      ],
+                    },
+                  },
+                  "good": Object {
+                    "bucket_script": Object {
+                      "buckets_path": Object {
+                        "_good": "_good['target']>_count",
+                      },
+                      "script": "params._good",
+                    },
+                  },
+                  "total": Object {
+                    "value_count": Object {
+                      "field": "transaction.duration.histogram",
+                    },
+                  },
+                },
+                "date_histogram": Object {
+                  "extended_bounds": Object {
+                    "max": 1740407209056,
+                    "min": 1740320809056,
+                  },
+                  "field": "@timestamp",
+                  "fixed_interval": "10m",
+                },
+              },
+            },
+            "terms": Object {
+              "field": "host.name",
+              "size": 5,
+            },
+          },
+          "perInterval": Object {
+            "aggs": Object {
+              "_good": Object {
+                "range": Object {
+                  "field": "transaction.duration.histogram",
+                  "keyed": true,
+                  "ranges": Array [
+                    Object {
+                      "key": "target",
+                      "to": 250000,
+                    },
+                  ],
+                },
+              },
+              "good": Object {
+                "bucket_script": Object {
+                  "buckets_path": Object {
+                    "_good": "_good['target']>_count",
+                  },
+                  "script": "params._good",
+                },
+              },
+              "total": Object {
+                "value_count": Object {
+                  "field": "transaction.duration.histogram",
+                },
+              },
+            },
+            "date_histogram": Object {
+              "extended_bounds": Object {
+                "max": 1740407209056,
+                "min": 1740320809056,
+              },
+              "field": "@timestamp",
+              "fixed_interval": "10m",
+            },
+          },
+        },
+        "index": "remote_cluster:apm-*,remote_cluster:metrics-apm*,remote_cluster:metrics-*.otel-*,apm-*,metrics-apm*,metrics-*.otel-*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": 1740320809056,
+                    "lte": 1740407209056,
+                  },
+                },
+              },
+              Object {
+                "terms": Object {
+                  "processor.event": Array [
+                    "metric",
+                  ],
+                },
+              },
+              Object {
+                "term": Object {
+                  "metricset.name": "transaction",
+                },
+              },
+              Object {
+                "exists": Object {
+                  "field": "transaction.duration.histogram",
+                },
+              },
+              Object {
+                "match": Object {
+                  "service.name": "frontend",
+                },
+              },
+              Object {
+                "match": Object {
+                  "service.environment": "prod",
+                },
+              },
+              Object {
+                "match": Object {
+                  "transaction.name": "GET /api",
+                },
+              },
+              Object {
+                "match": Object {
+                  "transaction.type": "request",
+                },
+              },
+              Object {
+                "bool": Object {
+                  "filter": Array [
+                    Object {
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "match": Object {
+                              "some.lable": "foo",
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                  "must": Array [],
+                  "must_not": Array [],
+                  "should": Array [],
+                },
+              },
+            ],
+          },
+        },
+        "runtime_mappings": Object {},
+        "size": 0,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`GetPreviewData for 'APM Latency' indicator type builds the query with 2 groups 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "aggs": Object {
+          "perGroup": Object {
+            "aggs": Object {
+              "perInterval": Object {
+                "aggs": Object {
+                  "_good": Object {
+                    "range": Object {
+                      "field": "transaction.duration.histogram",
+                      "keyed": true,
+                      "ranges": Array [
+                        Object {
+                          "key": "target",
+                          "to": 250000,
+                        },
+                      ],
+                    },
+                  },
+                  "good": Object {
+                    "bucket_script": Object {
+                      "buckets_path": Object {
+                        "_good": "_good['target']>_count",
+                      },
+                      "script": "params._good",
+                    },
+                  },
+                  "total": Object {
+                    "value_count": Object {
+                      "field": "transaction.duration.histogram",
+                    },
+                  },
+                },
+                "date_histogram": Object {
+                  "extended_bounds": Object {
+                    "max": 1740407209056,
+                    "min": 1740320809056,
+                  },
+                  "field": "@timestamp",
+                  "fixed_interval": "10m",
+                },
+              },
+            },
+            "multi_terms": Object {
+              "size": 5,
+              "terms": Array [
+                Object {
+                  "field": "host.name",
+                },
+                Object {
+                  "field": "event.action",
+                },
+              ],
+            },
+          },
+          "perInterval": Object {
+            "aggs": Object {
+              "_good": Object {
+                "range": Object {
+                  "field": "transaction.duration.histogram",
+                  "keyed": true,
+                  "ranges": Array [
+                    Object {
+                      "key": "target",
+                      "to": 250000,
+                    },
+                  ],
+                },
+              },
+              "good": Object {
+                "bucket_script": Object {
+                  "buckets_path": Object {
+                    "_good": "_good['target']>_count",
+                  },
+                  "script": "params._good",
+                },
+              },
+              "total": Object {
+                "value_count": Object {
+                  "field": "transaction.duration.histogram",
+                },
+              },
+            },
+            "date_histogram": Object {
+              "extended_bounds": Object {
+                "max": 1740407209056,
+                "min": 1740320809056,
+              },
+              "field": "@timestamp",
+              "fixed_interval": "10m",
+            },
+          },
+        },
+        "index": "remote_cluster:apm-*,remote_cluster:metrics-apm*,remote_cluster:metrics-*.otel-*,apm-*,metrics-apm*,metrics-*.otel-*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": 1740320809056,
+                    "lte": 1740407209056,
+                  },
+                },
+              },
+              Object {
+                "terms": Object {
+                  "processor.event": Array [
+                    "metric",
+                  ],
+                },
+              },
+              Object {
+                "term": Object {
+                  "metricset.name": "transaction",
+                },
+              },
+              Object {
+                "exists": Object {
+                  "field": "transaction.duration.histogram",
+                },
+              },
+              Object {
+                "match": Object {
+                  "service.name": "frontend",
+                },
+              },
+              Object {
+                "match": Object {
+                  "service.environment": "prod",
+                },
+              },
+              Object {
+                "match": Object {
+                  "transaction.name": "GET /api",
+                },
+              },
+              Object {
+                "match": Object {
+                  "transaction.type": "request",
+                },
+              },
+              Object {
+                "bool": Object {
+                  "filter": Array [
+                    Object {
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "match": Object {
+                              "some.lable": "foo",
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                  "must": Array [],
+                  "must_not": Array [],
+                  "should": Array [],
+                },
+              },
+            ],
+          },
+        },
+        "runtime_mappings": Object {},
+        "size": 0,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`GetPreviewData for 'APM Latency' indicator type builds the query without groups 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "aggs": Object {
+          "perInterval": Object {
+            "aggs": Object {
+              "_good": Object {
+                "range": Object {
+                  "field": "transaction.duration.histogram",
+                  "keyed": true,
+                  "ranges": Array [
+                    Object {
+                      "key": "target",
+                      "to": 250000,
+                    },
+                  ],
+                },
+              },
+              "good": Object {
+                "bucket_script": Object {
+                  "buckets_path": Object {
+                    "_good": "_good['target']>_count",
+                  },
+                  "script": "params._good",
+                },
+              },
+              "total": Object {
+                "value_count": Object {
+                  "field": "transaction.duration.histogram",
+                },
+              },
+            },
+            "date_histogram": Object {
+              "extended_bounds": Object {
+                "max": 1740407209056,
+                "min": 1740320809056,
+              },
+              "field": "@timestamp",
+              "fixed_interval": "10m",
+            },
+          },
+        },
+        "index": "remote_cluster:apm-*,remote_cluster:metrics-apm*,remote_cluster:metrics-*.otel-*,apm-*,metrics-apm*,metrics-*.otel-*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": 1740320809056,
+                    "lte": 1740407209056,
+                  },
+                },
+              },
+              Object {
+                "terms": Object {
+                  "processor.event": Array [
+                    "metric",
+                  ],
+                },
+              },
+              Object {
+                "term": Object {
+                  "metricset.name": "transaction",
+                },
+              },
+              Object {
+                "exists": Object {
+                  "field": "transaction.duration.histogram",
+                },
+              },
+              Object {
+                "match": Object {
+                  "service.name": "frontend",
+                },
+              },
+              Object {
+                "match": Object {
+                  "service.environment": "prod",
+                },
+              },
+              Object {
+                "match": Object {
+                  "transaction.name": "GET /api",
+                },
+              },
+              Object {
+                "match": Object {
+                  "transaction.type": "request",
+                },
+              },
+              Object {
+                "bool": Object {
+                  "filter": Array [
+                    Object {
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "match": Object {
+                              "some.lable": "foo",
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                  "must": Array [],
+                  "must_not": Array [],
+                  "should": Array [],
+                },
+              },
+            ],
+          },
+        },
+        "runtime_mappings": Object {},
+        "size": 0,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`GetPreviewData for 'Custom Histogram' indicator type builds the query for a set of groupings 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "aggs": Object {
+          "perInterval": Object {
+            "aggs": Object {
+              "_good": Object {
+                "aggs": Object {
+                  "total": Object {
+                    "range": Object {
+                      "field": "processor.latency",
+                      "keyed": true,
+                      "ranges": Array [
+                        Object {
+                          "from": 0,
+                          "key": "target",
+                          "to": 100,
+                        },
+                      ],
+                    },
+                  },
+                },
+                "filter": Object {
+                  "match_all": Object {},
+                },
+              },
+              "_total": Object {
+                "aggs": Object {
+                  "total": Object {
+                    "value_count": Object {
+                      "field": "processor.latency",
+                    },
+                  },
+                },
+                "filter": Object {
+                  "match_all": Object {},
+                },
+              },
+              "good": Object {
+                "bucket_script": Object {
+                  "buckets_path": Object {
+                    "value": "_good>total['target']>_count",
+                  },
+                  "script": "params.value",
+                },
+              },
+              "total": Object {
+                "bucket_script": Object {
+                  "buckets_path": Object {
+                    "value": "_total>total",
+                  },
+                  "script": "params.value",
+                },
+              },
+            },
+            "date_histogram": Object {
+              "extended_bounds": Object {
+                "max": 1740407209056,
+                "min": 1740320809056,
+              },
+              "field": "@timestamp",
+              "fixed_interval": "10m",
+            },
+          },
+        },
+        "index": "kbn-data-forge-fake_stack.message_processor-*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": 1740320809056,
+                    "lte": 1740407209056,
+                  },
+                },
+              },
+              Object {
+                "match_all": Object {},
+              },
+              Object {
+                "term": Object {
+                  "host.name": "host.001",
+                },
+              },
+              Object {
+                "term": Object {
+                  "env": "prod",
+                },
+              },
+            ],
+          },
+        },
+        "runtime_mappings": Object {},
+        "size": 0,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`GetPreviewData for 'Custom Histogram' indicator type builds the query with 1 group 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "aggs": Object {
+          "perGroup": Object {
+            "aggs": Object {
+              "perInterval": Object {
+                "aggs": Object {
+                  "_good": Object {
+                    "aggs": Object {
+                      "total": Object {
+                        "range": Object {
+                          "field": "processor.latency",
+                          "keyed": true,
+                          "ranges": Array [
+                            Object {
+                              "from": 0,
+                              "key": "target",
+                              "to": 100,
+                            },
+                          ],
+                        },
+                      },
+                    },
+                    "filter": Object {
+                      "match_all": Object {},
+                    },
+                  },
+                  "_total": Object {
+                    "aggs": Object {
+                      "total": Object {
+                        "value_count": Object {
+                          "field": "processor.latency",
+                        },
+                      },
+                    },
+                    "filter": Object {
+                      "match_all": Object {},
+                    },
+                  },
+                  "good": Object {
+                    "bucket_script": Object {
+                      "buckets_path": Object {
+                        "value": "_good>total['target']>_count",
+                      },
+                      "script": "params.value",
+                    },
+                  },
+                  "total": Object {
+                    "bucket_script": Object {
+                      "buckets_path": Object {
+                        "value": "_total>total",
+                      },
+                      "script": "params.value",
+                    },
+                  },
+                },
+                "date_histogram": Object {
+                  "extended_bounds": Object {
+                    "max": 1740407209056,
+                    "min": 1740320809056,
+                  },
+                  "field": "@timestamp",
+                  "fixed_interval": "10m",
+                },
+              },
+            },
+            "terms": Object {
+              "field": "host.name",
+              "size": 5,
+            },
+          },
+          "perInterval": Object {
+            "aggs": Object {
+              "_good": Object {
+                "aggs": Object {
+                  "total": Object {
+                    "range": Object {
+                      "field": "processor.latency",
+                      "keyed": true,
+                      "ranges": Array [
+                        Object {
+                          "from": 0,
+                          "key": "target",
+                          "to": 100,
+                        },
+                      ],
+                    },
+                  },
+                },
+                "filter": Object {
+                  "match_all": Object {},
+                },
+              },
+              "_total": Object {
+                "aggs": Object {
+                  "total": Object {
+                    "value_count": Object {
+                      "field": "processor.latency",
+                    },
+                  },
+                },
+                "filter": Object {
+                  "match_all": Object {},
+                },
+              },
+              "good": Object {
+                "bucket_script": Object {
+                  "buckets_path": Object {
+                    "value": "_good>total['target']>_count",
+                  },
+                  "script": "params.value",
+                },
+              },
+              "total": Object {
+                "bucket_script": Object {
+                  "buckets_path": Object {
+                    "value": "_total>total",
+                  },
+                  "script": "params.value",
+                },
+              },
+            },
+            "date_histogram": Object {
+              "extended_bounds": Object {
+                "max": 1740407209056,
+                "min": 1740320809056,
+              },
+              "field": "@timestamp",
+              "fixed_interval": "10m",
+            },
+          },
+        },
+        "index": "kbn-data-forge-fake_stack.message_processor-*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": 1740320809056,
+                    "lte": 1740407209056,
+                  },
+                },
+              },
+              Object {
+                "match_all": Object {},
+              },
+            ],
+          },
+        },
+        "runtime_mappings": Object {},
+        "size": 0,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`GetPreviewData for 'Custom Histogram' indicator type builds the query with 2 groups 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "aggs": Object {
+          "perGroup": Object {
+            "aggs": Object {
+              "perInterval": Object {
+                "aggs": Object {
+                  "_good": Object {
+                    "aggs": Object {
+                      "total": Object {
+                        "range": Object {
+                          "field": "processor.latency",
+                          "keyed": true,
+                          "ranges": Array [
+                            Object {
+                              "from": 0,
+                              "key": "target",
+                              "to": 100,
+                            },
+                          ],
+                        },
+                      },
+                    },
+                    "filter": Object {
+                      "match_all": Object {},
+                    },
+                  },
+                  "_total": Object {
+                    "aggs": Object {
+                      "total": Object {
+                        "value_count": Object {
+                          "field": "processor.latency",
+                        },
+                      },
+                    },
+                    "filter": Object {
+                      "match_all": Object {},
+                    },
+                  },
+                  "good": Object {
+                    "bucket_script": Object {
+                      "buckets_path": Object {
+                        "value": "_good>total['target']>_count",
+                      },
+                      "script": "params.value",
+                    },
+                  },
+                  "total": Object {
+                    "bucket_script": Object {
+                      "buckets_path": Object {
+                        "value": "_total>total",
+                      },
+                      "script": "params.value",
+                    },
+                  },
+                },
+                "date_histogram": Object {
+                  "extended_bounds": Object {
+                    "max": 1740407209056,
+                    "min": 1740320809056,
+                  },
+                  "field": "@timestamp",
+                  "fixed_interval": "10m",
+                },
+              },
+            },
+            "multi_terms": Object {
+              "size": 5,
+              "terms": Array [
+                Object {
+                  "field": "host.name",
+                },
+                Object {
+                  "field": "event.action",
+                },
+              ],
+            },
+          },
+          "perInterval": Object {
+            "aggs": Object {
+              "_good": Object {
+                "aggs": Object {
+                  "total": Object {
+                    "range": Object {
+                      "field": "processor.latency",
+                      "keyed": true,
+                      "ranges": Array [
+                        Object {
+                          "from": 0,
+                          "key": "target",
+                          "to": 100,
+                        },
+                      ],
+                    },
+                  },
+                },
+                "filter": Object {
+                  "match_all": Object {},
+                },
+              },
+              "_total": Object {
+                "aggs": Object {
+                  "total": Object {
+                    "value_count": Object {
+                      "field": "processor.latency",
+                    },
+                  },
+                },
+                "filter": Object {
+                  "match_all": Object {},
+                },
+              },
+              "good": Object {
+                "bucket_script": Object {
+                  "buckets_path": Object {
+                    "value": "_good>total['target']>_count",
+                  },
+                  "script": "params.value",
+                },
+              },
+              "total": Object {
+                "bucket_script": Object {
+                  "buckets_path": Object {
+                    "value": "_total>total",
+                  },
+                  "script": "params.value",
+                },
+              },
+            },
+            "date_histogram": Object {
+              "extended_bounds": Object {
+                "max": 1740407209056,
+                "min": 1740320809056,
+              },
+              "field": "@timestamp",
+              "fixed_interval": "10m",
+            },
+          },
+        },
+        "index": "kbn-data-forge-fake_stack.message_processor-*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": 1740320809056,
+                    "lte": 1740407209056,
+                  },
+                },
+              },
+              Object {
+                "match_all": Object {},
+              },
+            ],
+          },
+        },
+        "runtime_mappings": Object {},
+        "size": 0,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`GetPreviewData for 'Custom Histogram' indicator type builds the query without groups 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "aggs": Object {
+          "perInterval": Object {
+            "aggs": Object {
+              "_good": Object {
+                "aggs": Object {
+                  "total": Object {
+                    "range": Object {
+                      "field": "processor.latency",
+                      "keyed": true,
+                      "ranges": Array [
+                        Object {
+                          "from": 0,
+                          "key": "target",
+                          "to": 100,
+                        },
+                      ],
+                    },
+                  },
+                },
+                "filter": Object {
+                  "match_all": Object {},
+                },
+              },
+              "_total": Object {
+                "aggs": Object {
+                  "total": Object {
+                    "value_count": Object {
+                      "field": "processor.latency",
+                    },
+                  },
+                },
+                "filter": Object {
+                  "match_all": Object {},
+                },
+              },
+              "good": Object {
+                "bucket_script": Object {
+                  "buckets_path": Object {
+                    "value": "_good>total['target']>_count",
+                  },
+                  "script": "params.value",
+                },
+              },
+              "total": Object {
+                "bucket_script": Object {
+                  "buckets_path": Object {
+                    "value": "_total>total",
+                  },
+                  "script": "params.value",
+                },
+              },
+            },
+            "date_histogram": Object {
+              "extended_bounds": Object {
+                "max": 1740407209056,
+                "min": 1740320809056,
+              },
+              "field": "@timestamp",
+              "fixed_interval": "10m",
+            },
+          },
+        },
+        "index": "kbn-data-forge-fake_stack.message_processor-*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": 1740320809056,
+                    "lte": 1740407209056,
+                  },
+                },
+              },
+              Object {
+                "match_all": Object {},
+              },
+            ],
+          },
+        },
+        "runtime_mappings": Object {},
+        "size": 0,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`GetPreviewData for 'Custom KQL' indicator type builds the query for a set of groupings 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "aggs": Object {
+          "perInterval": Object {
+            "aggs": Object {
+              "good": Object {
+                "filter": Object {
+                  "bool": Object {
+                    "filter": Array [
+                      Object {
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "range": Object {
+                                "http.response.status_code": Object {
+                                  "lt": "500",
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                    "must": Array [],
+                    "must_not": Array [],
+                    "should": Array [],
+                  },
+                },
+              },
+              "total": Object {
+                "filter": Object {
+                  "bool": Object {
+                    "filter": Array [
+                      Object {
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "exists": Object {
+                                "field": "http.response.status_code",
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                    "must": Array [],
+                    "must_not": Array [],
+                    "should": Array [],
+                  },
+                },
+              },
+            },
+            "date_histogram": Object {
+              "extended_bounds": Object {
+                "max": 1740407209056,
+                "min": 1740320809056,
+              },
+              "field": "@timestamp",
+              "fixed_interval": "10m",
+            },
+          },
+        },
+        "index": "kbn-data-forge-fake_stack.admin-console-*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": 1740320809056,
+                    "lte": 1740407209056,
+                  },
+                },
+              },
+              Object {
+                "bool": Object {
+                  "filter": Array [
+                    Object {
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "exists": Object {
+                              "field": "http.response.status_code",
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                  "must": Array [],
+                  "must_not": Array [],
+                  "should": Array [],
+                },
+              },
+              Object {
+                "term": Object {
+                  "host.name": "host.001",
+                },
+              },
+              Object {
+                "term": Object {
+                  "env": "prod",
+                },
+              },
+            ],
+          },
+        },
+        "runtime_mappings": Object {},
+        "size": 0,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`GetPreviewData for 'Custom KQL' indicator type builds the query with 1 group 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "aggs": Object {
+          "perGroup": Object {
+            "aggs": Object {
+              "perInterval": Object {
+                "aggs": Object {
+                  "good": Object {
+                    "filter": Object {
+                      "bool": Object {
+                        "filter": Array [
+                          Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "range": Object {
+                                    "http.response.status_code": Object {
+                                      "lt": "500",
+                                    },
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                        "must": Array [],
+                        "must_not": Array [],
+                        "should": Array [],
+                      },
+                    },
+                  },
+                  "total": Object {
+                    "filter": Object {
+                      "bool": Object {
+                        "filter": Array [
+                          Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "exists": Object {
+                                    "field": "http.response.status_code",
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                        "must": Array [],
+                        "must_not": Array [],
+                        "should": Array [],
+                      },
+                    },
+                  },
+                },
+                "date_histogram": Object {
+                  "extended_bounds": Object {
+                    "max": 1740407209056,
+                    "min": 1740320809056,
+                  },
+                  "field": "@timestamp",
+                  "fixed_interval": "10m",
+                },
+              },
+            },
+            "terms": Object {
+              "field": "host.name",
+              "size": 5,
+            },
+          },
+          "perInterval": Object {
+            "aggs": Object {
+              "good": Object {
+                "filter": Object {
+                  "bool": Object {
+                    "filter": Array [
+                      Object {
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "range": Object {
+                                "http.response.status_code": Object {
+                                  "lt": "500",
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                    "must": Array [],
+                    "must_not": Array [],
+                    "should": Array [],
+                  },
+                },
+              },
+              "total": Object {
+                "filter": Object {
+                  "bool": Object {
+                    "filter": Array [
+                      Object {
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "exists": Object {
+                                "field": "http.response.status_code",
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                    "must": Array [],
+                    "must_not": Array [],
+                    "should": Array [],
+                  },
+                },
+              },
+            },
+            "date_histogram": Object {
+              "extended_bounds": Object {
+                "max": 1740407209056,
+                "min": 1740320809056,
+              },
+              "field": "@timestamp",
+              "fixed_interval": "10m",
+            },
+          },
+        },
+        "index": "kbn-data-forge-fake_stack.admin-console-*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": 1740320809056,
+                    "lte": 1740407209056,
+                  },
+                },
+              },
+              Object {
+                "bool": Object {
+                  "filter": Array [
+                    Object {
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "exists": Object {
+                              "field": "http.response.status_code",
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                  "must": Array [],
+                  "must_not": Array [],
+                  "should": Array [],
+                },
+              },
+            ],
+          },
+        },
+        "runtime_mappings": Object {},
+        "size": 0,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`GetPreviewData for 'Custom KQL' indicator type builds the query with 2 groups 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "aggs": Object {
+          "perGroup": Object {
+            "aggs": Object {
+              "perInterval": Object {
+                "aggs": Object {
+                  "good": Object {
+                    "filter": Object {
+                      "bool": Object {
+                        "filter": Array [
+                          Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "range": Object {
+                                    "http.response.status_code": Object {
+                                      "lt": "500",
+                                    },
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                        "must": Array [],
+                        "must_not": Array [],
+                        "should": Array [],
+                      },
+                    },
+                  },
+                  "total": Object {
+                    "filter": Object {
+                      "bool": Object {
+                        "filter": Array [
+                          Object {
+                            "bool": Object {
+                              "minimum_should_match": 1,
+                              "should": Array [
+                                Object {
+                                  "exists": Object {
+                                    "field": "http.response.status_code",
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                        "must": Array [],
+                        "must_not": Array [],
+                        "should": Array [],
+                      },
+                    },
+                  },
+                },
+                "date_histogram": Object {
+                  "extended_bounds": Object {
+                    "max": 1740407209056,
+                    "min": 1740320809056,
+                  },
+                  "field": "@timestamp",
+                  "fixed_interval": "10m",
+                },
+              },
+            },
+            "multi_terms": Object {
+              "size": 5,
+              "terms": Array [
+                Object {
+                  "field": "host.name",
+                },
+                Object {
+                  "field": "event.action",
+                },
+              ],
+            },
+          },
+          "perInterval": Object {
+            "aggs": Object {
+              "good": Object {
+                "filter": Object {
+                  "bool": Object {
+                    "filter": Array [
+                      Object {
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "range": Object {
+                                "http.response.status_code": Object {
+                                  "lt": "500",
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                    "must": Array [],
+                    "must_not": Array [],
+                    "should": Array [],
+                  },
+                },
+              },
+              "total": Object {
+                "filter": Object {
+                  "bool": Object {
+                    "filter": Array [
+                      Object {
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "exists": Object {
+                                "field": "http.response.status_code",
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                    "must": Array [],
+                    "must_not": Array [],
+                    "should": Array [],
+                  },
+                },
+              },
+            },
+            "date_histogram": Object {
+              "extended_bounds": Object {
+                "max": 1740407209056,
+                "min": 1740320809056,
+              },
+              "field": "@timestamp",
+              "fixed_interval": "10m",
+            },
+          },
+        },
+        "index": "kbn-data-forge-fake_stack.admin-console-*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": 1740320809056,
+                    "lte": 1740407209056,
+                  },
+                },
+              },
+              Object {
+                "bool": Object {
+                  "filter": Array [
+                    Object {
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "exists": Object {
+                              "field": "http.response.status_code",
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                  "must": Array [],
+                  "must_not": Array [],
+                  "should": Array [],
+                },
+              },
+            ],
+          },
+        },
+        "runtime_mappings": Object {},
+        "size": 0,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`GetPreviewData for 'Custom KQL' indicator type builds the query without groups 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "aggs": Object {
+          "perInterval": Object {
+            "aggs": Object {
+              "good": Object {
+                "filter": Object {
+                  "bool": Object {
+                    "filter": Array [
+                      Object {
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "range": Object {
+                                "http.response.status_code": Object {
+                                  "lt": "500",
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                    "must": Array [],
+                    "must_not": Array [],
+                    "should": Array [],
+                  },
+                },
+              },
+              "total": Object {
+                "filter": Object {
+                  "bool": Object {
+                    "filter": Array [
+                      Object {
+                        "bool": Object {
+                          "minimum_should_match": 1,
+                          "should": Array [
+                            Object {
+                              "exists": Object {
+                                "field": "http.response.status_code",
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                    "must": Array [],
+                    "must_not": Array [],
+                    "should": Array [],
+                  },
+                },
+              },
+            },
+            "date_histogram": Object {
+              "extended_bounds": Object {
+                "max": 1740407209056,
+                "min": 1740320809056,
+              },
+              "field": "@timestamp",
+              "fixed_interval": "10m",
+            },
+          },
+        },
+        "index": "kbn-data-forge-fake_stack.admin-console-*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": 1740320809056,
+                    "lte": 1740407209056,
+                  },
+                },
+              },
+              Object {
+                "bool": Object {
+                  "filter": Array [
+                    Object {
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "exists": Object {
+                              "field": "http.response.status_code",
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                  "must": Array [],
+                  "must_not": Array [],
+                  "should": Array [],
+                },
+              },
+            ],
+          },
+        },
+        "runtime_mappings": Object {},
+        "size": 0,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`GetPreviewData for 'Custom Metric' indicator type builds the query for a set of groupings 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "aggs": Object {
+          "perInterval": Object {
+            "aggs": Object {
+              "_good_A": Object {
+                "aggs": Object {
+                  "metric": Object {
+                    "sum": Object {
+                      "field": "processor.processed",
+                    },
+                  },
+                },
+                "filter": Object {
+                  "match_all": Object {},
+                },
+              },
+              "_total_A": Object {
+                "aggs": Object {
+                  "metric": Object {
+                    "sum": Object {
+                      "field": "processor.accepted",
+                    },
+                  },
+                },
+                "filter": Object {
+                  "match_all": Object {},
+                },
+              },
+              "good": Object {
+                "bucket_script": Object {
+                  "buckets_path": Object {
+                    "A": "_good_A>metric",
+                  },
+                  "script": Object {
+                    "lang": "painless",
+                    "source": "params.A",
+                  },
+                },
+              },
+              "total": Object {
+                "bucket_script": Object {
+                  "buckets_path": Object {
+                    "A": "_total_A>metric",
+                  },
+                  "script": Object {
+                    "lang": "painless",
+                    "source": "params.A",
+                  },
+                },
+              },
+            },
+            "date_histogram": Object {
+              "extended_bounds": Object {
+                "max": 1740407209056,
+                "min": 1740320809056,
+              },
+              "field": "@timestamp",
+              "fixed_interval": "10m",
+            },
+          },
+        },
+        "index": "kbn-data-forge-fake_stack.message_processor-*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": 1740320809056,
+                    "lte": 1740407209056,
+                  },
+                },
+              },
+              Object {
+                "match_all": Object {},
+              },
+              Object {
+                "term": Object {
+                  "host.name": "host.001",
+                },
+              },
+              Object {
+                "term": Object {
+                  "env": "prod",
+                },
+              },
+            ],
+          },
+        },
+        "runtime_mappings": Object {},
+        "size": 0,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`GetPreviewData for 'Custom Metric' indicator type builds the query with 1 group 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "aggs": Object {
+          "perGroup": Object {
+            "aggs": Object {
+              "perInterval": Object {
+                "aggs": Object {
+                  "_good_A": Object {
+                    "aggs": Object {
+                      "metric": Object {
+                        "sum": Object {
+                          "field": "processor.processed",
+                        },
+                      },
+                    },
+                    "filter": Object {
+                      "match_all": Object {},
+                    },
+                  },
+                  "_total_A": Object {
+                    "aggs": Object {
+                      "metric": Object {
+                        "sum": Object {
+                          "field": "processor.accepted",
+                        },
+                      },
+                    },
+                    "filter": Object {
+                      "match_all": Object {},
+                    },
+                  },
+                  "good": Object {
+                    "bucket_script": Object {
+                      "buckets_path": Object {
+                        "A": "_good_A>metric",
+                      },
+                      "script": Object {
+                        "lang": "painless",
+                        "source": "params.A",
+                      },
+                    },
+                  },
+                  "total": Object {
+                    "bucket_script": Object {
+                      "buckets_path": Object {
+                        "A": "_total_A>metric",
+                      },
+                      "script": Object {
+                        "lang": "painless",
+                        "source": "params.A",
+                      },
+                    },
+                  },
+                },
+                "date_histogram": Object {
+                  "extended_bounds": Object {
+                    "max": 1740407209056,
+                    "min": 1740320809056,
+                  },
+                  "field": "@timestamp",
+                  "fixed_interval": "10m",
+                },
+              },
+            },
+            "terms": Object {
+              "field": "host.name",
+              "size": 5,
+            },
+          },
+          "perInterval": Object {
+            "aggs": Object {
+              "_good_A": Object {
+                "aggs": Object {
+                  "metric": Object {
+                    "sum": Object {
+                      "field": "processor.processed",
+                    },
+                  },
+                },
+                "filter": Object {
+                  "match_all": Object {},
+                },
+              },
+              "_total_A": Object {
+                "aggs": Object {
+                  "metric": Object {
+                    "sum": Object {
+                      "field": "processor.accepted",
+                    },
+                  },
+                },
+                "filter": Object {
+                  "match_all": Object {},
+                },
+              },
+              "good": Object {
+                "bucket_script": Object {
+                  "buckets_path": Object {
+                    "A": "_good_A>metric",
+                  },
+                  "script": Object {
+                    "lang": "painless",
+                    "source": "params.A",
+                  },
+                },
+              },
+              "total": Object {
+                "bucket_script": Object {
+                  "buckets_path": Object {
+                    "A": "_total_A>metric",
+                  },
+                  "script": Object {
+                    "lang": "painless",
+                    "source": "params.A",
+                  },
+                },
+              },
+            },
+            "date_histogram": Object {
+              "extended_bounds": Object {
+                "max": 1740407209056,
+                "min": 1740320809056,
+              },
+              "field": "@timestamp",
+              "fixed_interval": "10m",
+            },
+          },
+        },
+        "index": "kbn-data-forge-fake_stack.message_processor-*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": 1740320809056,
+                    "lte": 1740407209056,
+                  },
+                },
+              },
+              Object {
+                "match_all": Object {},
+              },
+            ],
+          },
+        },
+        "runtime_mappings": Object {},
+        "size": 0,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`GetPreviewData for 'Custom Metric' indicator type builds the query with 2 groups 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "aggs": Object {
+          "perGroup": Object {
+            "aggs": Object {
+              "perInterval": Object {
+                "aggs": Object {
+                  "_good_A": Object {
+                    "aggs": Object {
+                      "metric": Object {
+                        "sum": Object {
+                          "field": "processor.processed",
+                        },
+                      },
+                    },
+                    "filter": Object {
+                      "match_all": Object {},
+                    },
+                  },
+                  "_total_A": Object {
+                    "aggs": Object {
+                      "metric": Object {
+                        "sum": Object {
+                          "field": "processor.accepted",
+                        },
+                      },
+                    },
+                    "filter": Object {
+                      "match_all": Object {},
+                    },
+                  },
+                  "good": Object {
+                    "bucket_script": Object {
+                      "buckets_path": Object {
+                        "A": "_good_A>metric",
+                      },
+                      "script": Object {
+                        "lang": "painless",
+                        "source": "params.A",
+                      },
+                    },
+                  },
+                  "total": Object {
+                    "bucket_script": Object {
+                      "buckets_path": Object {
+                        "A": "_total_A>metric",
+                      },
+                      "script": Object {
+                        "lang": "painless",
+                        "source": "params.A",
+                      },
+                    },
+                  },
+                },
+                "date_histogram": Object {
+                  "extended_bounds": Object {
+                    "max": 1740407209056,
+                    "min": 1740320809056,
+                  },
+                  "field": "@timestamp",
+                  "fixed_interval": "10m",
+                },
+              },
+            },
+            "multi_terms": Object {
+              "size": 5,
+              "terms": Array [
+                Object {
+                  "field": "host.name",
+                },
+                Object {
+                  "field": "event.action",
+                },
+              ],
+            },
+          },
+          "perInterval": Object {
+            "aggs": Object {
+              "_good_A": Object {
+                "aggs": Object {
+                  "metric": Object {
+                    "sum": Object {
+                      "field": "processor.processed",
+                    },
+                  },
+                },
+                "filter": Object {
+                  "match_all": Object {},
+                },
+              },
+              "_total_A": Object {
+                "aggs": Object {
+                  "metric": Object {
+                    "sum": Object {
+                      "field": "processor.accepted",
+                    },
+                  },
+                },
+                "filter": Object {
+                  "match_all": Object {},
+                },
+              },
+              "good": Object {
+                "bucket_script": Object {
+                  "buckets_path": Object {
+                    "A": "_good_A>metric",
+                  },
+                  "script": Object {
+                    "lang": "painless",
+                    "source": "params.A",
+                  },
+                },
+              },
+              "total": Object {
+                "bucket_script": Object {
+                  "buckets_path": Object {
+                    "A": "_total_A>metric",
+                  },
+                  "script": Object {
+                    "lang": "painless",
+                    "source": "params.A",
+                  },
+                },
+              },
+            },
+            "date_histogram": Object {
+              "extended_bounds": Object {
+                "max": 1740407209056,
+                "min": 1740320809056,
+              },
+              "field": "@timestamp",
+              "fixed_interval": "10m",
+            },
+          },
+        },
+        "index": "kbn-data-forge-fake_stack.message_processor-*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": 1740320809056,
+                    "lte": 1740407209056,
+                  },
+                },
+              },
+              Object {
+                "match_all": Object {},
+              },
+            ],
+          },
+        },
+        "runtime_mappings": Object {},
+        "size": 0,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`GetPreviewData for 'Custom Metric' indicator type builds the query without groups 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "aggs": Object {
+          "perInterval": Object {
+            "aggs": Object {
+              "_good_A": Object {
+                "aggs": Object {
+                  "metric": Object {
+                    "sum": Object {
+                      "field": "processor.processed",
+                    },
+                  },
+                },
+                "filter": Object {
+                  "match_all": Object {},
+                },
+              },
+              "_total_A": Object {
+                "aggs": Object {
+                  "metric": Object {
+                    "sum": Object {
+                      "field": "processor.accepted",
+                    },
+                  },
+                },
+                "filter": Object {
+                  "match_all": Object {},
+                },
+              },
+              "good": Object {
+                "bucket_script": Object {
+                  "buckets_path": Object {
+                    "A": "_good_A>metric",
+                  },
+                  "script": Object {
+                    "lang": "painless",
+                    "source": "params.A",
+                  },
+                },
+              },
+              "total": Object {
+                "bucket_script": Object {
+                  "buckets_path": Object {
+                    "A": "_total_A>metric",
+                  },
+                  "script": Object {
+                    "lang": "painless",
+                    "source": "params.A",
+                  },
+                },
+              },
+            },
+            "date_histogram": Object {
+              "extended_bounds": Object {
+                "max": 1740407209056,
+                "min": 1740320809056,
+              },
+              "field": "@timestamp",
+              "fixed_interval": "10m",
+            },
+          },
+        },
+        "index": "kbn-data-forge-fake_stack.message_processor-*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": 1740320809056,
+                    "lte": 1740407209056,
+                  },
+                },
+              },
+              Object {
+                "match_all": Object {},
+              },
+            ],
+          },
+        },
+        "runtime_mappings": Object {},
+        "size": 0,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`GetPreviewData for 'Synthetics' indicator type builds the query for a set of groupings 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "aggs": Object {
+          "perInterval": Object {
+            "aggs": Object {
+              "good": Object {
+                "filter": Object {
+                  "term": Object {
+                    "monitor.status": "up",
+                  },
+                },
+              },
+              "total": Object {
+                "filter": Object {
+                  "match_all": Object {},
+                },
+              },
+            },
+            "date_histogram": Object {
+              "extended_bounds": Object {
+                "max": 1740407209056,
+                "min": 1740320809056,
+              },
+              "field": "@timestamp",
+              "fixed_interval": "10m",
+            },
+          },
+        },
+        "index": "synthetics-*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": 1740320809056,
+                    "lte": 1740407209056,
+                  },
+                },
+              },
+              Object {
+                "term": Object {
+                  "summary.final_attempt": true,
+                },
+              },
+              Object {
+                "term": Object {
+                  "meta.space_id": "default",
+                },
+              },
+              Object {
+                "terms": Object {
+                  "monitor.id": Array [
+                    "monitor-1",
+                    "monitor-2",
+                  ],
+                },
+              },
+              Object {
+                "terms": Object {
+                  "tags": Array [
+                    "tag-1",
+                  ],
+                },
+              },
+              Object {
+                "terms": Object {
+                  "monitor.project.id": Array [
+                    "project-1",
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        "runtime_mappings": Object {},
+        "size": 0,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`GetPreviewData for 'Synthetics' indicator type builds the query with 1 group 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "aggs": Object {
+          "perGroup": Object {
+            "aggs": Object {
+              "perInterval": Object {
+                "aggs": Object {
+                  "good": Object {
+                    "filter": Object {
+                      "term": Object {
+                        "monitor.status": "up",
+                      },
+                    },
+                  },
+                  "total": Object {
+                    "filter": Object {
+                      "match_all": Object {},
+                    },
+                  },
+                },
+                "date_histogram": Object {
+                  "extended_bounds": Object {
+                    "max": 1740407209056,
+                    "min": 1740320809056,
+                  },
+                  "field": "@timestamp",
+                  "fixed_interval": "10m",
+                },
+              },
+            },
+            "terms": Object {
+              "field": "host.name",
+              "size": 5,
+            },
+          },
+          "perInterval": Object {
+            "aggs": Object {
+              "good": Object {
+                "filter": Object {
+                  "term": Object {
+                    "monitor.status": "up",
+                  },
+                },
+              },
+              "total": Object {
+                "filter": Object {
+                  "match_all": Object {},
+                },
+              },
+            },
+            "date_histogram": Object {
+              "extended_bounds": Object {
+                "max": 1740407209056,
+                "min": 1740320809056,
+              },
+              "field": "@timestamp",
+              "fixed_interval": "10m",
+            },
+          },
+        },
+        "index": "synthetics-*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": 1740320809056,
+                    "lte": 1740407209056,
+                  },
+                },
+              },
+              Object {
+                "term": Object {
+                  "summary.final_attempt": true,
+                },
+              },
+              Object {
+                "term": Object {
+                  "meta.space_id": "default",
+                },
+              },
+              Object {
+                "terms": Object {
+                  "monitor.id": Array [
+                    "monitor-1",
+                    "monitor-2",
+                  ],
+                },
+              },
+              Object {
+                "terms": Object {
+                  "tags": Array [
+                    "tag-1",
+                  ],
+                },
+              },
+              Object {
+                "terms": Object {
+                  "monitor.project.id": Array [
+                    "project-1",
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        "runtime_mappings": Object {},
+        "size": 0,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`GetPreviewData for 'Synthetics' indicator type builds the query with 2 groups 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "aggs": Object {
+          "perGroup": Object {
+            "aggs": Object {
+              "perInterval": Object {
+                "aggs": Object {
+                  "good": Object {
+                    "filter": Object {
+                      "term": Object {
+                        "monitor.status": "up",
+                      },
+                    },
+                  },
+                  "total": Object {
+                    "filter": Object {
+                      "match_all": Object {},
+                    },
+                  },
+                },
+                "date_histogram": Object {
+                  "extended_bounds": Object {
+                    "max": 1740407209056,
+                    "min": 1740320809056,
+                  },
+                  "field": "@timestamp",
+                  "fixed_interval": "10m",
+                },
+              },
+            },
+            "multi_terms": Object {
+              "size": 5,
+              "terms": Array [
+                Object {
+                  "field": "host.name",
+                },
+                Object {
+                  "field": "event.action",
+                },
+              ],
+            },
+          },
+          "perInterval": Object {
+            "aggs": Object {
+              "good": Object {
+                "filter": Object {
+                  "term": Object {
+                    "monitor.status": "up",
+                  },
+                },
+              },
+              "total": Object {
+                "filter": Object {
+                  "match_all": Object {},
+                },
+              },
+            },
+            "date_histogram": Object {
+              "extended_bounds": Object {
+                "max": 1740407209056,
+                "min": 1740320809056,
+              },
+              "field": "@timestamp",
+              "fixed_interval": "10m",
+            },
+          },
+        },
+        "index": "synthetics-*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": 1740320809056,
+                    "lte": 1740407209056,
+                  },
+                },
+              },
+              Object {
+                "term": Object {
+                  "summary.final_attempt": true,
+                },
+              },
+              Object {
+                "term": Object {
+                  "meta.space_id": "default",
+                },
+              },
+              Object {
+                "terms": Object {
+                  "monitor.id": Array [
+                    "monitor-1",
+                    "monitor-2",
+                  ],
+                },
+              },
+              Object {
+                "terms": Object {
+                  "tags": Array [
+                    "tag-1",
+                  ],
+                },
+              },
+              Object {
+                "terms": Object {
+                  "monitor.project.id": Array [
+                    "project-1",
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        "runtime_mappings": Object {},
+        "size": 0,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`GetPreviewData for 'Synthetics' indicator type builds the query without groups 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "aggs": Object {
+          "perInterval": Object {
+            "aggs": Object {
+              "good": Object {
+                "filter": Object {
+                  "term": Object {
+                    "monitor.status": "up",
+                  },
+                },
+              },
+              "total": Object {
+                "filter": Object {
+                  "match_all": Object {},
+                },
+              },
+            },
+            "date_histogram": Object {
+              "extended_bounds": Object {
+                "max": 1740407209056,
+                "min": 1740320809056,
+              },
+              "field": "@timestamp",
+              "fixed_interval": "10m",
+            },
+          },
+        },
+        "index": "synthetics-*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": 1740320809056,
+                    "lte": 1740407209056,
+                  },
+                },
+              },
+              Object {
+                "term": Object {
+                  "summary.final_attempt": true,
+                },
+              },
+              Object {
+                "term": Object {
+                  "meta.space_id": "default",
+                },
+              },
+              Object {
+                "terms": Object {
+                  "monitor.id": Array [
+                    "monitor-1",
+                    "monitor-2",
+                  ],
+                },
+              },
+              Object {
+                "terms": Object {
+                  "tags": Array [
+                    "tag-1",
+                  ],
+                },
+              },
+              Object {
+                "terms": Object {
+                  "monitor.project.id": Array [
+                    "project-1",
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        "runtime_mappings": Object {},
+        "size": 0,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`GetPreviewData for 'Timeslice Metric' indicator type builds the query for a set of groupings 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "aggs": Object {
+          "perInterval": Object {
+            "aggs": Object {
+              "_A": Object {
+                "aggs": Object {
+                  "metric": Object {
+                    "sum": Object {
+                      "field": "processor.timeSpent",
+                    },
+                  },
+                },
+                "filter": Object {
+                  "match_all": Object {},
+                },
+              },
+              "_B": Object {
+                "aggs": Object {
+                  "metric": Object {
+                    "sum": Object {
+                      "field": "processor.processed",
+                    },
+                  },
+                },
+                "filter": Object {
+                  "match_all": Object {},
+                },
+              },
+              "metric": Object {
+                "bucket_script": Object {
+                  "buckets_path": Object {
+                    "A": "_A>metric",
+                    "B": "_B>metric",
+                  },
+                  "script": Object {
+                    "lang": "painless",
+                    "source": "params.A / params.B / 1000",
+                  },
+                },
+              },
+            },
+            "date_histogram": Object {
+              "extended_bounds": Object {
+                "max": 1740407209056,
+                "min": 1740320809056,
+              },
+              "field": "@timestamp",
+              "fixed_interval": "1m",
+            },
+          },
+        },
+        "index": "kbn-data-forge-fake_stack.message_processor-*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": 1740320809056,
+                    "lte": 1740407209056,
+                  },
+                },
+              },
+              Object {
+                "match_all": Object {},
+              },
+              Object {
+                "term": Object {
+                  "host.name": "host.001",
+                },
+              },
+              Object {
+                "term": Object {
+                  "env": "prod",
+                },
+              },
+            ],
+          },
+        },
+        "runtime_mappings": Object {},
+        "size": 0,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`GetPreviewData for 'Timeslice Metric' indicator type builds the query with 1 group 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "aggs": Object {
+          "perGroup": Object {
+            "aggs": Object {
+              "perInterval": Object {
+                "aggs": Object {
+                  "_A": Object {
+                    "aggs": Object {
+                      "metric": Object {
+                        "sum": Object {
+                          "field": "processor.timeSpent",
+                        },
+                      },
+                    },
+                    "filter": Object {
+                      "match_all": Object {},
+                    },
+                  },
+                  "_B": Object {
+                    "aggs": Object {
+                      "metric": Object {
+                        "sum": Object {
+                          "field": "processor.processed",
+                        },
+                      },
+                    },
+                    "filter": Object {
+                      "match_all": Object {},
+                    },
+                  },
+                  "metric": Object {
+                    "bucket_script": Object {
+                      "buckets_path": Object {
+                        "A": "_A>metric",
+                        "B": "_B>metric",
+                      },
+                      "script": Object {
+                        "lang": "painless",
+                        "source": "params.A / params.B / 1000",
+                      },
+                    },
+                  },
+                },
+                "date_histogram": Object {
+                  "extended_bounds": Object {
+                    "max": 1740407209056,
+                    "min": 1740320809056,
+                  },
+                  "field": "@timestamp",
+                  "fixed_interval": "1m",
+                },
+              },
+            },
+            "terms": Object {
+              "field": "host.name",
+              "size": 5,
+            },
+          },
+          "perInterval": Object {
+            "aggs": Object {
+              "_A": Object {
+                "aggs": Object {
+                  "metric": Object {
+                    "sum": Object {
+                      "field": "processor.timeSpent",
+                    },
+                  },
+                },
+                "filter": Object {
+                  "match_all": Object {},
+                },
+              },
+              "_B": Object {
+                "aggs": Object {
+                  "metric": Object {
+                    "sum": Object {
+                      "field": "processor.processed",
+                    },
+                  },
+                },
+                "filter": Object {
+                  "match_all": Object {},
+                },
+              },
+              "metric": Object {
+                "bucket_script": Object {
+                  "buckets_path": Object {
+                    "A": "_A>metric",
+                    "B": "_B>metric",
+                  },
+                  "script": Object {
+                    "lang": "painless",
+                    "source": "params.A / params.B / 1000",
+                  },
+                },
+              },
+            },
+            "date_histogram": Object {
+              "extended_bounds": Object {
+                "max": 1740407209056,
+                "min": 1740320809056,
+              },
+              "field": "@timestamp",
+              "fixed_interval": "1m",
+            },
+          },
+        },
+        "index": "kbn-data-forge-fake_stack.message_processor-*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": 1740320809056,
+                    "lte": 1740407209056,
+                  },
+                },
+              },
+              Object {
+                "match_all": Object {},
+              },
+            ],
+          },
+        },
+        "runtime_mappings": Object {},
+        "size": 0,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`GetPreviewData for 'Timeslice Metric' indicator type builds the query with 2 groups 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "aggs": Object {
+          "perGroup": Object {
+            "aggs": Object {
+              "perInterval": Object {
+                "aggs": Object {
+                  "_A": Object {
+                    "aggs": Object {
+                      "metric": Object {
+                        "sum": Object {
+                          "field": "processor.timeSpent",
+                        },
+                      },
+                    },
+                    "filter": Object {
+                      "match_all": Object {},
+                    },
+                  },
+                  "_B": Object {
+                    "aggs": Object {
+                      "metric": Object {
+                        "sum": Object {
+                          "field": "processor.processed",
+                        },
+                      },
+                    },
+                    "filter": Object {
+                      "match_all": Object {},
+                    },
+                  },
+                  "metric": Object {
+                    "bucket_script": Object {
+                      "buckets_path": Object {
+                        "A": "_A>metric",
+                        "B": "_B>metric",
+                      },
+                      "script": Object {
+                        "lang": "painless",
+                        "source": "params.A / params.B / 1000",
+                      },
+                    },
+                  },
+                },
+                "date_histogram": Object {
+                  "extended_bounds": Object {
+                    "max": 1740407209056,
+                    "min": 1740320809056,
+                  },
+                  "field": "@timestamp",
+                  "fixed_interval": "1m",
+                },
+              },
+            },
+            "multi_terms": Object {
+              "size": 5,
+              "terms": Array [
+                Object {
+                  "field": "host.name",
+                },
+                Object {
+                  "field": "event.action",
+                },
+              ],
+            },
+          },
+          "perInterval": Object {
+            "aggs": Object {
+              "_A": Object {
+                "aggs": Object {
+                  "metric": Object {
+                    "sum": Object {
+                      "field": "processor.timeSpent",
+                    },
+                  },
+                },
+                "filter": Object {
+                  "match_all": Object {},
+                },
+              },
+              "_B": Object {
+                "aggs": Object {
+                  "metric": Object {
+                    "sum": Object {
+                      "field": "processor.processed",
+                    },
+                  },
+                },
+                "filter": Object {
+                  "match_all": Object {},
+                },
+              },
+              "metric": Object {
+                "bucket_script": Object {
+                  "buckets_path": Object {
+                    "A": "_A>metric",
+                    "B": "_B>metric",
+                  },
+                  "script": Object {
+                    "lang": "painless",
+                    "source": "params.A / params.B / 1000",
+                  },
+                },
+              },
+            },
+            "date_histogram": Object {
+              "extended_bounds": Object {
+                "max": 1740407209056,
+                "min": 1740320809056,
+              },
+              "field": "@timestamp",
+              "fixed_interval": "1m",
+            },
+          },
+        },
+        "index": "kbn-data-forge-fake_stack.message_processor-*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": 1740320809056,
+                    "lte": 1740407209056,
+                  },
+                },
+              },
+              Object {
+                "match_all": Object {},
+              },
+            ],
+          },
+        },
+        "runtime_mappings": Object {},
+        "size": 0,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`GetPreviewData for 'Timeslice Metric' indicator type builds the query without groups 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "aggs": Object {
+          "perInterval": Object {
+            "aggs": Object {
+              "_A": Object {
+                "aggs": Object {
+                  "metric": Object {
+                    "sum": Object {
+                      "field": "processor.timeSpent",
+                    },
+                  },
+                },
+                "filter": Object {
+                  "match_all": Object {},
+                },
+              },
+              "_B": Object {
+                "aggs": Object {
+                  "metric": Object {
+                    "sum": Object {
+                      "field": "processor.processed",
+                    },
+                  },
+                },
+                "filter": Object {
+                  "match_all": Object {},
+                },
+              },
+              "metric": Object {
+                "bucket_script": Object {
+                  "buckets_path": Object {
+                    "A": "_A>metric",
+                    "B": "_B>metric",
+                  },
+                  "script": Object {
+                    "lang": "painless",
+                    "source": "params.A / params.B / 1000",
+                  },
+                },
+              },
+            },
+            "date_histogram": Object {
+              "extended_bounds": Object {
+                "max": 1740407209056,
+                "min": 1740320809056,
+              },
+              "field": "@timestamp",
+              "fixed_interval": "1m",
+            },
+          },
+        },
+        "index": "kbn-data-forge-fake_stack.message_processor-*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "gte": 1740320809056,
+                    "lte": 1740407209056,
+                  },
+                },
+              },
+              Object {
+                "match_all": Object {},
+              },
+            ],
+          },
+        },
+        "runtime_mappings": Object {},
+        "size": 0,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;

@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { TheHiveSimulator } from '@kbn/actions-simulators-plugin/server/thehive_simulation';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 const connectorTypeId = '.thehive';
 const name = 'TheHive action';

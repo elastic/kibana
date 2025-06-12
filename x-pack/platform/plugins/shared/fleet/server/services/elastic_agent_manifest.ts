@@ -36,7 +36,7 @@ spec:
       # Uncomment if using hints feature
       #initContainers:
       #  - name: k8s-templates-downloader
-      #    image: docker.elastic.co/beats/elastic-agent:VERSION
+      #    image: docker.elastic.co/elastic-agent/elastic-agent:VERSION
       #    command: ['bash']
       #    args:
       #      - -c
@@ -48,7 +48,7 @@ spec:
       #        mountPath: /etc/elastic-agent/inputs.d
       containers:
         - name: elastic-agent
-          image: docker.elastic.co/beats/elastic-agent:VERSION
+          image: docker.elastic.co/elastic-agent/elastic-agent:VERSION
           args: ["-c", "/etc/elastic-agent/agent.yml", "-e"]
           env:
             # The API Key with access privilleges to connect to Elasticsearch. https://www.elastic.co/guide/en/fleet/current/grant-access-to-elasticsearch.html#create-api-key-standalone-agent
@@ -341,7 +341,7 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: elastic-agent
-          image: docker.elastic.co/beats/elastic-agent:VERSION
+          image: docker.elastic.co/elastic-agent/elastic-agent:VERSION
           env:
             # Set to 1 for enrollment into Fleet server. If not set, Elastic Agent is run in standalone mode
             - name: FLEET_ENROLL

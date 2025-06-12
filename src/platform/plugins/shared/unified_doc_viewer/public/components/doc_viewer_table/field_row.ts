@@ -10,6 +10,7 @@
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/types';
 import {
+  convertValueToString,
   formatFieldValue,
   getIgnoredReason,
   IgnoredReason,
@@ -92,16 +93,16 @@ export class FieldRow {
   // format as text in a lazy way
   public get formattedAsText(): string | undefined {
     if (!this.#isFormattedAsText) {
-      this.#formattedAsText = String(
-        formatFieldValue(
-          this.flattenedValue,
-          this.#hit.raw,
-          this.#fieldFormats,
-          this.#dataView,
-          this.dataViewField,
-          'text'
-        )
-      );
+      this.#formattedAsText = convertValueToString({
+        dataView: this.#dataView,
+        dataViewField: this.dataViewField,
+        flattenedValue: this.flattenedValue,
+        dataTableRecord: this.#hit,
+        fieldFormats: this.#fieldFormats,
+        options: {
+          compatibleWithCSV: true,
+        },
+      }).formattedString;
       this.#isFormattedAsText = true;
     }
 

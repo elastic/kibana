@@ -38,17 +38,15 @@ export async function getDataStreamsQueryMetadata({
       // it's just appended as a query string to the search operation and we can't
       // set `unmapped_type` for cases where `event.ingested` is not defiend, e.g.
       // in custom logs or custom HTTPJSON integrations
-      body: {
-        query: {
-          ...termsEnumIndexFilter,
-        },
-        sort: {
-          'event.ingested': {
-            order: 'desc',
-            // Necessary because of https://github.com/elastic/elasticsearch/issues/81960
-            missing: 0,
-            unmapped_type: 'long',
-          },
+      query: {
+        ...termsEnumIndexFilter,
+      },
+      sort: {
+        'event.ingested': {
+          order: 'desc',
+          // Necessary because of https://github.com/elastic/elasticsearch/issues/81960
+          missing: 0,
+          unmapped_type: 'long',
         },
       },
     }),

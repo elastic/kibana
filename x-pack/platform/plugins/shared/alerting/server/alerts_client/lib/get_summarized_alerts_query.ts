@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import {
+import type {
   QueryDslQueryContainer,
   SearchRequest,
   SearchTotalHits,
-  AggregationsAggregationContainer,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { BoolQuery } from '@kbn/es-query';
+  MsearchRequestItem,
+} from '@elastic/elasticsearch/lib/api/types';
+import type { BoolQuery } from '@kbn/es-query';
 import {
   ALERT_END,
   ALERT_INSTANCE_ID,
@@ -23,9 +23,10 @@ import {
   EVENT_ACTION,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import { Alert } from '@kbn/alerts-as-data-utils';
-import { AlertsFilter, ISO_WEEKDAYS, RuleAlertData } from '../../../common';
-import {
+import type { Alert } from '@kbn/alerts-as-data-utils';
+import type { AlertsFilter, RuleAlertData } from '../../../common';
+import { ISO_WEEKDAYS } from '../../../common';
+import type {
   GetLifecycleAlertsQueryByExecutionUuidParams,
   GetLifecycleAlertsQueryByTimeRangeParams,
   GetAlertsQueryParams,
@@ -33,11 +34,10 @@ import {
   GetQueryByTimeRangeParams,
   GetQueryByScopedQueriesParams,
   GetMaintenanceWindowAlertsQueryParams,
-  ScopedQueryAggregationResult,
   SearchResult,
 } from '../types';
-import { SummarizedAlertsChunk, ScopedQueryAlerts } from '../..';
-import { FormatAlert } from '../../types';
+import type { SummarizedAlertsChunk } from '../..';
+import type { FormatAlert } from '../../types';
 import { expandFlattenedAlert } from './format_alert';
 import { injectAnalyzeWildcard } from './inject_analyze_wildcard';
 
@@ -47,13 +47,15 @@ enum AlertTypes {
   RECOVERED,
 }
 
+export const RUNTIME_MAINTENANCE_WINDOW_ID_FIELD = 'runtime_maintenance_window_id';
+
 const getLifecycleAlertsQueryByExecutionUuid = ({
   executionUuid,
   ruleId,
   excludedAlertInstanceIds,
   alertsFilter,
   maxAlertLimit,
-}: GetLifecycleAlertsQueryByExecutionUuidParams): Array<SearchRequest['body']> => {
+}: GetLifecycleAlertsQueryByExecutionUuidParams): SearchRequest[] => {
   // lifecycle alerts assign a different action to an alert depending
   // on whether it is new/ongoing/recovered. query for each action in order
   // to get the count of each action type as well as up to the maximum number
@@ -93,7 +95,7 @@ const getLifecycleAlertsQueryByTimeRange = ({
   excludedAlertInstanceIds,
   alertsFilter,
   maxAlertLimit,
-}: GetLifecycleAlertsQueryByTimeRangeParams): Array<SearchRequest['body']> => {
+}: GetLifecycleAlertsQueryByTimeRangeParams): SearchRequest[] => {
   return [
     getQueryByTimeRange({
       start,
@@ -132,7 +134,7 @@ const getQueryByExecutionUuid = ({
   action,
   alertsFilter,
   maxAlertLimit,
-}: GetQueryByExecutionUuidParams): SearchRequest['body'] => {
+}: GetQueryByExecutionUuidParams): SearchRequest => {
   const filter: QueryDslQueryContainer[] = [
     {
       term: {
@@ -196,7 +198,7 @@ const getQueryByTimeRange = ({
   type,
   alertsFilter,
   maxAlertLimit,
-}: GetQueryByTimeRangeParams<AlertTypes>): SearchRequest['body'] => {
+}: GetQueryByTimeRangeParams<AlertTypes>): SearchRequest => {
   // base query filters the alert documents for a rule by the given time range
   let filter: QueryDslQueryContainer[] = [
     {
@@ -292,7 +294,7 @@ export const getQueryByScopedQueries = ({
   action,
   maintenanceWindows,
   maxAlertLimit,
-}: GetQueryByScopedQueriesParams): SearchRequest['body'] => {
+}: GetQueryByScopedQueriesParams): MsearchRequestItem[] => {
   const filters: QueryDslQueryContainer[] = [
     {
       term: {
@@ -314,7 +316,7 @@ export const getQueryByScopedQueries = ({
     });
   }
 
-  const aggs: Record<string, AggregationsAggregationContainer> = {};
+  const searches: MsearchRequestItem[] = [];
 
   maintenanceWindows.forEach(({ id, scopedQuery }) => {
     if (!scopedQuery) {
@@ -330,31 +332,30 @@ export const getQueryByScopedQueries = ({
       }
     )[0] as { bool: BoolQuery };
 
-    aggs[id] = {
-      filter: {
+    searches.push({});
+    searches.push({
+      query: {
         bool: {
           ...scopedQueryFilter.bool,
           filter: [...(scopedQueryFilter.bool?.filter || []), ...filters],
         },
       },
-      aggs: {
-        alertId: {
-          top_hits: {
-            size: maxAlertLimit,
-            _source: {
-              includes: [ALERT_UUID],
-            },
+      runtime_mappings: {
+        [RUNTIME_MAINTENANCE_WINDOW_ID_FIELD]: {
+          script: {
+            source: `emit('${id}');`,
           },
+          type: 'keyword',
         },
       },
-    };
+      fields: [ALERT_UUID, RUNTIME_MAINTENANCE_WINDOW_ID_FIELD],
+      _source: false,
+      size: maxAlertLimit,
+      track_total_hits: true,
+    });
   });
 
-  return {
-    size: 0,
-    track_total_hits: true,
-    aggs: { ...aggs },
-  };
+  return searches;
 };
 
 const generateAlertsFilterDSL = (
@@ -449,20 +450,6 @@ const getHitsWithCount = <AlertData extends RuleAlertData>(
   };
 };
 
-const getScopedQueryHitsWithIds = <AlertData extends RuleAlertData>(
-  aggregationsResult: SearchResult<AlertData, ScopedQueryAggregationResult>['aggregations']
-): ScopedQueryAlerts => {
-  return Object.entries(aggregationsResult || {}).reduce<ScopedQueryAlerts>(
-    (result, [maintenanceWindowId, aggregation]) => {
-      result[maintenanceWindowId] = (aggregation.alertId?.hits?.hits || []).map(
-        (hit) => hit._source[ALERT_UUID]
-      );
-      return result;
-    },
-    {}
-  );
-};
-
 const getLifecycleAlertsQueries = ({
   executionUuid,
   start,
@@ -471,9 +458,9 @@ const getLifecycleAlertsQueries = ({
   excludedAlertInstanceIds,
   alertsFilter,
   maxAlertLimit,
-}: GetAlertsQueryParams): Array<SearchRequest['body']> => {
+}: GetAlertsQueryParams): SearchRequest[] => {
   let queryBodies;
-  if (!!executionUuid) {
+  if (executionUuid) {
     queryBodies = getLifecycleAlertsQueryByExecutionUuid({
       executionUuid: executionUuid!,
       ruleId,
@@ -503,9 +490,9 @@ const getContinualAlertsQuery = ({
   excludedAlertInstanceIds,
   alertsFilter,
   maxAlertLimit,
-}: GetAlertsQueryParams): SearchRequest['body'] => {
+}: GetAlertsQueryParams): SearchRequest => {
   let queryBody;
-  if (!!executionUuid) {
+  if (executionUuid) {
     queryBody = getQueryByExecutionUuid({
       executionUuid,
       ruleId,
@@ -533,7 +520,7 @@ const getMaintenanceWindowAlertsQuery = ({
   action,
   maintenanceWindows,
   maxAlertLimit,
-}: GetMaintenanceWindowAlertsQueryParams): SearchRequest['body'] => {
+}: GetMaintenanceWindowAlertsQueryParams): MsearchRequestItem[] => {
   return getQueryByScopedQueries({
     executionUuid,
     ruleId,
@@ -548,5 +535,4 @@ export {
   getLifecycleAlertsQueries,
   getContinualAlertsQuery,
   getMaintenanceWindowAlertsQuery,
-  getScopedQueryHitsWithIds,
 };

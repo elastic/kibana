@@ -13,25 +13,21 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
-import type { FileUploadResults } from '@kbn/file-upload-common';
+import React, { useEffect } from 'react';
+import type { OpenFileUploadLiteContext } from '@kbn/file-upload-common/src/types';
+import { useFileUploadContext } from '@kbn/file-upload';
+import { STATUS } from '@kbn/file-upload';
 import type { ResultLinks } from '../../common/app';
 import type { GetAdditionalLinks } from '../application/common/components/results_links';
 import { FileClashWarning } from './file_clash_warning';
-import { FileManager } from './file_manager';
-import { STATUS } from './file_manager/file_manager';
 import { FilePicker } from './file_picker';
 import { FileStatus } from './file_status';
 import { IndexInput } from './index_input';
@@ -40,79 +36,47 @@ import { ImportErrors } from './import_errors';
 import { DataViewIllustration } from './data_view_illustration';
 
 interface Props {
-  dataStart: DataPublicPluginStart;
-  http: HttpSetup;
-  fileUpload: FileUploadStartApi;
   resultLinks?: ResultLinks;
-  capabilities: ApplicationStart['capabilities'];
   getAdditionalLinks?: GetAdditionalLinks;
-  setUploadResults?: (results: FileUploadResults) => void;
-  autoAddInference?: string;
-  indexSettings?: IndicesIndexSettings;
+  props: OpenFileUploadLiteContext;
   onClose?: () => void;
 }
 
-export const FileUploadLiteView: FC<Props> = ({
-  fileUpload,
-  http,
-  dataStart,
-  setUploadResults,
-  autoAddInference,
-  indexSettings,
-  onClose,
-}) => {
-  const [indexName, setIndexName] = useState<string>('');
-  const [indexValidationStatus, setIndexValidationStatus] = useState<STATUS>(STATUS.NOT_STARTED);
-
-  const fm = useMemo(
-    () =>
-      new FileManager(
-        fileUpload,
-        http,
-        dataStart.dataViews,
-        autoAddInference ?? null,
-        true,
-        indexSettings
-      ),
-    [autoAddInference, dataStart.dataViews, fileUpload, http, indexSettings]
-  );
-  const deleteFile = useCallback((i: number) => fm.removeFile(i), [fm]);
-
-  const filesStatus = useObservable(fm.fileAnalysisStatus$, []);
-  const uploadStatus = useObservable(fm.uploadStatus$, fm.uploadStatus$.getValue());
-  const fileClashes = useMemo(
-    () => uploadStatus.fileClashes.some((f) => f.clash),
-    [uploadStatus.fileClashes]
-  );
+export const FileUploadLiteView: FC<Props> = ({ props, onClose }) => {
+  const { flyoutContent } = props;
+  const {
+    fileUploadManager,
+    filesStatus,
+    uploadStatus,
+    fileClashes,
+    fullFileUpload,
+    uploadStarted,
+    onImportClick,
+    canImport,
+    setIndexName,
+    setIndexValidationStatus,
+    deleteFile,
+  } = useFileUploadContext();
 
   useEffect(() => {
     return () => {
-      fm.destroy();
+      fileUploadManager.destroy();
     };
-  }, [fm]);
-
-  const uploadInProgress =
-    uploadStatus.overallImportStatus === STATUS.STARTED ||
-    uploadStatus.overallImportStatus === STATUS.COMPLETED ||
-    uploadStatus.overallImportStatus === STATUS.FAILED;
-
-  const onImportClick = useCallback(() => {
-    fm.import(indexName).then((res) => {
-      if (setUploadResults && res) {
-        setUploadResults(res);
-      }
-    });
-  }, [fm, indexName, setUploadResults]);
+  }, [fileUploadManager]);
 
   return (
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h3>
-            <FormattedMessage
-              id="xpack.dataVisualizer.file.uploadView.uploadFileTitle"
-              defaultMessage="Upload a file"
-            />
+            {flyoutContent?.title ? (
+              flyoutContent.title
+            ) : (
+              <FormattedMessage
+                id="xpack.dataVisualizer.file.uploadView.uploadFileTitle"
+                defaultMessage="Upload a file"
+              />
+            )}
           </h3>
         </EuiTitle>
       </EuiFlyoutHeader>
@@ -124,16 +88,37 @@ export const FileUploadLiteView: FC<Props> = ({
               <>
                 <EuiText>
                   <p>
-                    <FormattedMessage
-                      id="xpack.dataVisualizer.file.uploadView.uploadFileDescription"
-                      defaultMessage="Upload your file, analyze its data, and import the data into an Elasticsearch index. The data can also be automatically vectorized using semantic text."
-                    />
+                    {flyoutContent?.description ? (
+                      flyoutContent.description
+                    ) : (
+                      <>
+                        <FormattedMessage
+                          id="xpack.dataVisualizer.file.uploadView.uploadFileDescription"
+                          defaultMessage="Upload your file, analyze its data, and import the data into an Elasticsearch index. The data can also be automatically vectorized using semantic text."
+                        />
+                        <br />
+                        <FormattedMessage
+                          id="xpack.dataVisualizer.file.uploadView.uploadFileDescriptionLink"
+                          defaultMessage="If you need to customize the file upload process, the full version is available {fullToolLink}."
+                          values={{
+                            fullToolLink: (
+                              <EuiLink onClick={fullFileUpload}>
+                                <FormattedMessage
+                                  id="xpack.dataVisualizer.file.uploadView.uploadFileDescriptionLinkText"
+                                  defaultMessage="here"
+                                />
+                              </EuiLink>
+                            ),
+                          }}
+                        />{' '}
+                      </>
+                    )}
                   </p>
                 </EuiText>
 
                 <EuiSpacer />
 
-                <FilePicker fileManager={fm} />
+                <FilePicker fileUploadManager={fileUploadManager} />
               </>
             ) : null}
 
@@ -146,6 +131,8 @@ export const FileUploadLiteView: FC<Props> = ({
                     key={i}
                     deleteFile={() => deleteFile(i)}
                     index={i}
+                    showFileContentPreview={flyoutContent?.showFileContentPreview}
+                    showFileSummary={flyoutContent?.showFileSummary}
                   />
                 ))}
 
@@ -153,7 +140,7 @@ export const FileUploadLiteView: FC<Props> = ({
                   <FileClashWarning
                     uploadStatus={uploadStatus}
                     filesStatus={filesStatus}
-                    removeClashingFiles={() => fm.removeClashingFiles()}
+                    removeClashingFiles={() => fileUploadManager.removeClashingFiles()}
                   />
                 ) : null}
                 <EuiSpacer />
@@ -162,16 +149,18 @@ export const FileUploadLiteView: FC<Props> = ({
 
             {uploadStatus.overallImportStatus === STATUS.NOT_STARTED &&
             filesStatus.length > 0 &&
-            uploadStatus.analysisOk ? (
+            uploadStatus.analysisStatus !== STATUS.NOT_STARTED ? (
               <>
-                <IndexInput
-                  setIndexName={setIndexName}
-                  setIndexValidationStatus={setIndexValidationStatus}
-                  fileUpload={fileUpload}
-                />
+                {fileUploadManager.isExistingIndexUpload() === false ? (
+                  <IndexInput
+                    setIndexName={setIndexName}
+                    setIndexValidationStatus={setIndexValidationStatus}
+                  />
+                ) : null}
               </>
             ) : null}
-            {uploadInProgress ? (
+
+            {uploadStarted ? (
               <>
                 <EuiFlexGroup>
                   <EuiFlexItem />
@@ -221,10 +210,7 @@ export const FileUploadLiteView: FC<Props> = ({
               </EuiFlexGroup>
             ) : null}
             {uploadStatus.overallImportStatus === STATUS.NOT_STARTED ? (
-              <EuiButton
-                disabled={indexName === '' || indexValidationStatus !== STATUS.COMPLETED}
-                onClick={onImportClick}
-              >
+              <EuiButton disabled={canImport === false} onClick={onImportClick}>
                 <FormattedMessage
                   id="xpack.dataVisualizer.file.uploadView.importButton"
                   defaultMessage="Import"

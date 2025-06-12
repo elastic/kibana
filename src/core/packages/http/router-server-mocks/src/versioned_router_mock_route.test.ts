@@ -13,13 +13,29 @@ describe('createVersionedRouterMock#getRoute', () => {
   it('throws if no routes are registered', () => {
     const versionedRouter = createVersionedRouterMock();
     expect(() => versionedRouter.getRoute('get', '/foo')).toThrow(/No routes registered/);
-    versionedRouter.get({ path: '/foo', access: 'internal' });
+    versionedRouter.get({
+      path: '/foo',
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
+    });
     expect(() => versionedRouter.getRoute('get', '/foo')).not.toThrow();
     expect(() => versionedRouter.getRoute('get', '/bar')).toThrow(/No routes registered/);
   });
   it('allows versioned routes to be introspected', () => {
     const versionedRouter = createVersionedRouterMock();
-    const route = versionedRouter.get({ path: '/foo', access: 'internal' });
+    const route = versionedRouter.get({
+      path: '/foo',
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
+    });
 
     // Empty case
     expect(versionedRouter.getRoute('get', '/foo')).toMatchInlineSnapshot(`
@@ -27,6 +43,13 @@ describe('createVersionedRouterMock#getRoute', () => {
         "config": Object {
           "access": "internal",
           "path": "/foo",
+          "security": Object {
+            "authz": Object {
+              "requiredPrivileges": Array [
+                "foo",
+              ],
+            },
+          },
         },
         "versions": Object {},
       }
@@ -44,6 +67,13 @@ describe('createVersionedRouterMock#getRoute', () => {
         "config": Object {
           "access": "internal",
           "path": "/foo",
+          "security": Object {
+            "authz": Object {
+              "requiredPrivileges": Array [
+                "foo",
+              ],
+            },
+          },
         },
         "versions": Object {
           "1": Object {

@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { TypeOf } from '@kbn/config-schema/src/types/object_type';
+import type { TypeOf } from '@kbn/config-schema/src/types/object_type';
 import { omit } from 'lodash';
-import { NormalizedAlertAction, NormalizedSystemAction } from '../../rules_client';
-import { actionsSchema, systemActionsSchema } from './actions_schema';
+import type { NormalizedAlertAction, NormalizedSystemAction } from '../../rules_client';
+import type { actionsSchema, systemActionsSchema } from './actions_schema';
 
 export const rewriteActionsReq = (
   actions: TypeOf<typeof actionsSchema>

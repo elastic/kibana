@@ -11,6 +11,7 @@ import React from 'react';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 import { TestProviders } from '../../../../../common/mock';
 import { ArgsComponent } from './args';
+import { CellActionsWrapper } from '../../../../../common/components/drag_and_drop/cell_actions_wrapper';
 
 jest.mock('../../../../../common/lib/kibana');
 
@@ -22,13 +23,28 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+jest.mock('../../../../../common/components/drag_and_drop/cell_actions_wrapper', () => {
+  return {
+    CellActionsWrapper: jest.fn(),
+  };
+});
+
+const MockedCellActionsWrapper = jest.fn(({ children }) => {
+  return <div data-test-subj="mock-cell-action-wrapper">{children}</div>;
+});
+
 describe('Args', () => {
   const mount = useMountAppended();
+
+  beforeEach(() => {
+    (CellActionsWrapper as unknown as jest.Mock).mockImplementation(MockedCellActionsWrapper);
+  });
 
   describe('rendering', () => {
     test('it renders against shallow snapshot', () => {
       const wrapper = shallow(
         <ArgsComponent
+          scopeId="some_scope"
           contextId="context-123"
           eventId="event-123"
           args={['arg1', 'arg2', 'arg3']}
@@ -42,6 +58,7 @@ describe('Args', () => {
       const wrapper = mount(
         <TestProviders>
           <ArgsComponent
+            scopeId="some_scope"
             contextId="context-123"
             eventId="event-123"
             args={undefined}
@@ -56,6 +73,7 @@ describe('Args', () => {
       const wrapper = mount(
         <TestProviders>
           <ArgsComponent
+            scopeId="some_scope"
             contextId="context-123"
             eventId="event-123"
             args={null}
@@ -69,7 +87,13 @@ describe('Args', () => {
     test('it returns an empty string when args is an empty array, and title is an empty string', () => {
       const wrapper = mount(
         <TestProviders>
-          <ArgsComponent contextId="context-123" eventId="event-123" args={[]} processTitle="" />
+          <ArgsComponent
+            scopeId="some_scope"
+            contextId="context-123"
+            eventId="event-123"
+            args={[]}
+            processTitle=""
+          />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual('');
@@ -79,6 +103,7 @@ describe('Args', () => {
       const wrapper = mount(
         <TestProviders>
           <ArgsComponent
+            scopeId="some_scope"
             contextId="context-123"
             eventId="event-123"
             args={['arg1', 'arg2', 'arg3']}
@@ -93,6 +118,7 @@ describe('Args', () => {
       const wrapper = mount(
         <TestProviders>
           <ArgsComponent
+            scopeId="some_scope"
             contextId="context-123"
             eventId="event-123"
             args={null}
@@ -107,6 +133,7 @@ describe('Args', () => {
       const wrapper = mount(
         <TestProviders>
           <ArgsComponent
+            scopeId="some_scope"
             contextId="context-123"
             eventId="event-123"
             args={['arg1', 'arg2', 'arg3']}
@@ -115,6 +142,29 @@ describe('Args', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual('arg1arg2arg3process-title-1');
+    });
+
+    test('should passing correct scopeId to cell actions', () => {
+      mount(
+        <TestProviders>
+          <div>
+            <ArgsComponent
+              scopeId="some_scope"
+              contextId="context-123"
+              eventId="event-123"
+              args={['arg1', 'arg2', 'arg3']}
+              processTitle="process-title-1"
+            />
+          </div>
+        </TestProviders>
+      );
+
+      expect(MockedCellActionsWrapper).toHaveBeenCalledWith(
+        expect.objectContaining({
+          scopeId: 'some_scope',
+        }),
+        {}
+      );
     });
   });
 });

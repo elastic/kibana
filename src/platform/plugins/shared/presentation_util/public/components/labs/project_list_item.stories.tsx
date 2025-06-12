@@ -35,46 +35,48 @@ export function EmptyList() {
   return <ProjectList {...{ projects }} solutions={[]} onStatusChange={action('onStatusChange')} />;
 }
 
-export const ListItem = (
-  props: Pick<
-    Props['project'],
-    'description' | 'isActive' | 'name' | 'solutions' | 'environments' | 'isDisplayed'
-  > &
-    Omit<ProjectStatus, 'defaultValue'>
-) => {
-  const { kibana, browser, session, ...rest } = props;
-  const status: EnvironmentStatus = { kibana, browser, session };
-  const projectConfig: ProjectConfig = {
-    ...rest,
-    id: 'storybook:component' as ProjectID,
-  };
+export const ListItem = {
+  render: (
+    props: Pick<
+      Props['project'],
+      'description' | 'isActive' | 'name' | 'solutions' | 'environments' | 'isDisplayed'
+    > &
+      Omit<ProjectStatus, 'defaultValue'>
+  ) => {
+    const { kibana, browser, session, ...rest } = props;
+    const status: EnvironmentStatus = { kibana, browser, session };
+    const projectConfig: ProjectConfig = {
+      ...rest,
+      id: 'storybook:component' as ProjectID,
+    };
 
-  return (
-    <div style={{ maxWidth: 800 }}>
-      <ProjectListItem
-        project={applyProjectStatus(projectConfig, status)}
-        onStatusChange={(_id, env, enabled) => ({ ...status, [env]: enabled })}
-      />
-    </div>
-  );
-};
+    return (
+      <div style={{ maxWidth: 800 }}>
+        <ProjectListItem
+          project={applyProjectStatus(projectConfig, status)}
+          onStatusChange={(_id, env, enabled) => ({ ...status, [env]: enabled })}
+        />
+      </div>
+    );
+  },
 
-ListItem.args = {
-  isActive: false,
-  name: 'Demo Project',
-  description: 'This is a demo project, and this is the description of the demo project.',
-  kibana: false,
-  browser: false,
-  session: false,
-  solutions: ['dashboard', 'canvas'],
-  environments: ['kibana', 'browser', 'session'],
-};
+  args: {
+    isActive: false,
+    name: 'Demo Project',
+    description: 'This is a demo project, and this is the description of the demo project.',
+    kibana: false,
+    browser: false,
+    session: false,
+    solutions: ['dashboard', 'canvas'],
+    environments: ['kibana', 'browser', 'session'],
+  },
 
-ListItem.argTypes = {
-  environments: {
-    control: {
-      type: 'check',
-      options: ['kibana', 'browser', 'session'],
+  argTypes: {
+    environments: {
+      control: {
+        type: 'check',
+        options: ['kibana', 'browser', 'session'],
+      },
     },
   },
 };

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { FieldType } from '@kbn/inference-endpoint-ui-common';
-import { InferenceProvider } from '../../types';
+import { FieldType, InferenceProvider } from '@kbn/inference-endpoint-ui-common';
 
 export const mockProviders: InferenceProvider[] = [
   {

@@ -25,10 +25,24 @@ export const DEFAULT_MODEL_LABEL = i18n.translate(
   }
 );
 
-export const DEFAULT_MODEL_TOOLTIP_CONTENT = i18n.translate(
-  'xpack.stackConnectors.components.genAi.defaultModelTooltipContent',
+export const ORG_ID_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.orgIdTextFieldLabel',
   {
-    defaultMessage: 'If a request does not include a model, it uses the default.',
+    defaultMessage: 'OpenAI Organization',
+  }
+);
+
+export const PROJECT_ID_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.projectIdTextFieldLabel',
+  {
+    defaultMessage: 'OpenAI Project',
+  }
+);
+
+export const OPTIONAL_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.optionalLabel',
+  {
+    defaultMessage: 'Optional',
   }
 );
 
@@ -55,6 +69,70 @@ export const DOCUMENTATION = i18n.translate(
   'xpack.stackConnectors.components.genAi.documentation',
   {
     defaultMessage: 'documentation',
+  }
+);
+
+export const CERT_DATA_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.certificateDataLabel',
+  {
+    defaultMessage: 'Certificate file',
+  }
+);
+
+export const CERT_DATA_DESC = i18n.translate(
+  'xpack.stackConnectors.components.genAi.certificateDataDocumentation',
+  {
+    defaultMessage: 'Raw PKI certificate content (PEM format) for cloud or on-premise deployments.',
+  }
+);
+
+export const KEY_DATA_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.privateKeyDataLabel',
+  {
+    defaultMessage: 'Private key file',
+  }
+);
+
+export const KEY_DATA_DESC = i18n.translate(
+  'xpack.stackConnectors.components.genAi.privateKeyDataDocumentation',
+  {
+    defaultMessage: 'Raw PKI private key content (PEM format) for cloud or on-premise deployments.',
+  }
+);
+
+export const VERIFICATION_MODE_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.verificationModeLabel',
+  {
+    defaultMessage: 'SSL verification mode',
+  }
+);
+
+export const VERIFICATION_MODE_DESC = i18n.translate(
+  'xpack.stackConnectors.components.genAi.verificationModeDocumentation',
+  {
+    defaultMessage:
+      'Controls SSL/TLS certificate verification: `Full` verifies both certificate and hostname, `Certificate` verifies the certificate but not the hostname, `None` skips all verification. Use `None` cautiously for testing purposes.',
+  }
+);
+
+export const VERIFICATION_MODE_FULL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.verificationModeFullLabel',
+  {
+    defaultMessage: 'Full (Certificate and Hostname)',
+  }
+);
+
+export const VERIFICATION_MODE_CERTIFICATE = i18n.translate(
+  'xpack.stackConnectors.components.genAi.verificationModeCertificateLabel',
+  {
+    defaultMessage: 'Certificate Only',
+  }
+);
+
+export const VERIFICATION_MODE_NONE = i18n.translate(
+  'xpack.stackConnectors.components.genAi.verificationModeNoneLabel',
+  {
+    defaultMessage: 'None (Skip Verification)',
   }
 );
 
@@ -104,3 +182,18 @@ export const USAGE_DASHBOARD_LINK = (apiProvider: string, connectorName: string)
     values: { apiProvider, connectorName },
     defaultMessage: 'View {apiProvider} Usage Dashboard for "{ connectorName }" Connector',
   });
+
+export const PKI_MODE_LABEL = i18n.translate('xpack.stackConnectors.genAi.pkiModeLabel', {
+  defaultMessage: 'Enable PKI Authentication',
+});
+
+export const CA_DATA_LABEL = i18n.translate('xpack.stackConnectors.components.genAi.caDataLabel', {
+  defaultMessage: 'CA certificate file',
+});
+
+export const CA_DATA_DESC = i18n.translate(
+  'xpack.stackConnectors.components.genAi.caDataDocumentation',
+  {
+    defaultMessage: 'Raw CA certificate content (PEM) used to verify the server certificate.',
+  }
+);

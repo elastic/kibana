@@ -25,7 +25,9 @@ import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions/types';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import type { Space } from '@kbn/spaces-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { TelemetryConfigProvider } from '../../common/telemetry_config/telemetry_config_provider';
 import { SavedObjectsClientFactory } from './services/saved_objects';
 import type { ResponseActionsClient } from './services';
@@ -88,6 +90,7 @@ export interface EndpointAppContextServiceStartContract {
   savedObjectsServiceStart: SavedObjectsServiceStart;
   connectorActions: ActionsPluginStartContract;
   telemetryConfigProvider: TelemetryConfigProvider;
+  spacesService: SpacesServiceStart | undefined;
 }
 
 /**
@@ -157,13 +160,8 @@ export class EndpointAppContextService {
       alerting,
       licenseService,
       telemetryConfigProvider,
-      exceptionListsClient,
-      featureUsageService,
-      esClient,
       productFeaturesService,
     } = this.startDependencies;
-    const endpointMetadataService = this.getEndpointMetadataService();
-    const soClient = this.savedObjects.createInternalScopedSoClient({ readonly: false });
     const logger = this.createLogger('endpointFleetExtension');
 
     registerFleetCallback(
@@ -185,7 +183,6 @@ export class EndpointAppContextService {
         this.setupDependencies.securitySolutionRequestContextFactory,
         alerting,
         licenseService,
-        exceptionListsClient,
         this.setupDependencies.cloud,
         productFeaturesService,
         telemetryConfigProvider
@@ -196,23 +193,12 @@ export class EndpointAppContextService {
 
     registerFleetCallback(
       'packagePolicyUpdate',
-      getPackagePolicyUpdateCallback(
-        logger,
-        licenseService,
-        featureUsageService,
-        endpointMetadataService,
-        this.setupDependencies.cloud,
-        esClient,
-        productFeaturesService
-      )
+      getPackagePolicyUpdateCallback(this, this.setupDependencies.cloud, productFeaturesService)
     );
 
     registerFleetCallback('packagePolicyPostUpdate', getPackagePolicyPostUpdateCallback(this));
 
-    registerFleetCallback(
-      'packagePolicyPostDelete',
-      getPackagePolicyDeleteCallback(exceptionListsClient, soClient)
-    );
+    registerFleetCallback('packagePolicyPostDelete', getPackagePolicyDeleteCallback(this));
   }
 
   /**
@@ -297,14 +283,19 @@ export class EndpointAppContextService {
   /**
    * SpaceId should be defined if wanting go get back an inernal client that is scoped to a given space id
    * @param spaceId
+   * @param unscoped
    */
-  public getInternalFleetServices(spaceId?: string): EndpointInternalFleetServicesInterface {
+  public getInternalFleetServices(
+    spaceId?: string,
+    unscoped: boolean = false
+  ): EndpointInternalFleetServicesInterface {
     if (this.fleetServicesFactory === null) {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
     return this.fleetServicesFactory.asInternalUser(
-      this.experimentalFeatures.endpointManagementSpaceAwarenessEnabled ? spaceId : undefined
+      this.experimentalFeatures.endpointManagementSpaceAwarenessEnabled ? spaceId : undefined,
+      unscoped
     );
   }
 
@@ -362,7 +353,9 @@ export class EndpointAppContextService {
     username = 'elastic',
     taskId,
     taskType,
+    spaceId,
   }: {
+    spaceId: string;
     agentType?: ResponseActionAgentType;
     username?: string;
     /** Used with background task and needed for `UnsecuredActionsClient`  */
@@ -378,11 +371,13 @@ export class EndpointAppContextService {
       endpointService: this,
       esClient: this.startDependencies.esClient,
       username,
+      spaceId,
       isAutomated: true,
       connectorActions: new NormalizedExternalConnectorClient(
         this.startDependencies.connectorActions.getUnsecuredActionsClient(),
         this.createLogger('responseActions'),
         {
+          spaceId,
           relatedSavedObjects:
             taskId && taskType
               ? [
@@ -429,5 +424,13 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotSetUpError();
     }
     return this.setupDependencies.telemetry;
+  }
+
+  public getActiveSpace(httpRequest: KibanaRequest): Promise<Space> {
+    if (!this.startDependencies?.spacesService) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.startDependencies.spacesService.getActiveSpace(httpRequest);
   }
 }

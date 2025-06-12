@@ -16,6 +16,8 @@ import {
 } from '../../../telemetry/event_based/events';
 import type { RuleMigrationIntegration, RuleSemanticSearchResult } from '../types';
 import type { MigrateRuleState } from './agent/types';
+import { siemMigrationEventNames } from '../../../telemetry/event_based/event_meta';
+import { SiemMigrationsEventTypes } from '../../../telemetry/event_based/types';
 
 interface IntegrationMatchEvent {
   preFilterIntegrations: RuleMigrationIntegration[];
@@ -25,19 +27,6 @@ interface IntegrationMatchEvent {
 interface PrebuiltRuleMatchEvent {
   preFilterRules: RuleSemanticSearchResult[];
   postFilterRule?: RuleSemanticSearchResult;
-}
-
-interface RuleTranslationEvent {
-  error?: Error;
-  migrationResult?: MigrateRuleState;
-}
-
-interface SiemMigrationEvent {
-  error?: Error;
-  stats: {
-    failed: number;
-    completed: number;
-  };
 }
 
 export class SiemMigrationTelemetryClient {
@@ -67,8 +56,10 @@ export class SiemMigrationTelemetryClient {
       preFilterIntegrationCount: preFilterIntegrations.length,
       postFilterIntegrationName: postFilterIntegration ? postFilterIntegration.id : '',
       postFilterIntegrationCount: postFilterIntegration ? 1 : 0,
+      eventName: siemMigrationEventNames[SiemMigrationsEventTypes.IntegrationsMatch],
     });
   }
+
   public reportPrebuiltRulesMatch({
     preFilterRules,
     postFilterRule,
@@ -80,62 +71,65 @@ export class SiemMigrationTelemetryClient {
       preFilterRuleCount: preFilterRules.length,
       postFilterRuleName: postFilterRule ? postFilterRule.rule_id : '',
       postFilterRuleCount: postFilterRule ? 1 : 0,
+      eventName: siemMigrationEventNames[SiemMigrationsEventTypes.PrebuiltRulesMatch],
     });
   }
-  public startRuleTranslation(): (
-    args: Pick<RuleTranslationEvent, 'error' | 'migrationResult'>
-  ) => void {
+
+  public startSiemMigrationTask() {
     const startTime = Date.now();
+    const stats = { completed: 0, failed: 0 };
 
-    return ({ error, migrationResult }) => {
-      const duration = Date.now() - startTime;
-
-      if (error) {
-        this.reportEvent(SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE, {
+    return {
+      startRuleTranslation: () => {
+        const ruleStartTime = Date.now();
+        return {
+          success: (migrationResult: MigrateRuleState) => {
+            stats.completed++;
+            this.reportEvent(SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS, {
+              migrationId: this.migrationId,
+              translationResult: migrationResult.translation_result || '',
+              duration: Date.now() - ruleStartTime,
+              model: this.modelName,
+              prebuiltMatch: migrationResult.elastic_rule?.prebuilt_rule_id ? true : false,
+              eventName: siemMigrationEventNames[SiemMigrationsEventTypes.TranslationSucess],
+            });
+          },
+          failure: (error: Error) => {
+            stats.failed++;
+            this.reportEvent(SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE, {
+              migrationId: this.migrationId,
+              error: error.message,
+              model: this.modelName,
+              eventName: siemMigrationEventNames[SiemMigrationsEventTypes.TranslationFailure],
+            });
+          },
+        };
+      },
+      success: () => {
+        const duration = Date.now() - startTime;
+        this.reportEvent(SIEM_MIGRATIONS_MIGRATION_SUCCESS, {
           migrationId: this.migrationId,
-          error: error.message,
-          model: this.modelName,
+          model: this.modelName || '',
+          completed: stats.completed,
+          failed: stats.failed,
+          total: stats.completed + stats.failed,
+          duration,
+          eventName: siemMigrationEventNames[SiemMigrationsEventTypes.MigrationSuccess],
         });
-        return;
-      }
-
-      this.reportEvent(SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS, {
-        migrationId: this.migrationId,
-        translationResult: migrationResult?.translation_result || '',
-        duration,
-        model: this.modelName,
-        prebuiltMatch: migrationResult?.elastic_rule?.prebuilt_rule_id ? true : false,
-      });
-    };
-  }
-  public startSiemMigration(): (args: Pick<SiemMigrationEvent, 'error' | 'stats'>) => void {
-    const startTime = Date.now();
-
-    return ({ error, stats }) => {
-      const duration = Date.now() - startTime;
-      const total = stats ? stats.completed + stats.failed : 0;
-
-      if (error) {
+      },
+      failure: (error: Error) => {
+        const duration = Date.now() - startTime;
         this.reportEvent(SIEM_MIGRATIONS_MIGRATION_FAILURE, {
           migrationId: this.migrationId,
           model: this.modelName || '',
-          completed: stats ? stats.completed : 0,
-          failed: stats ? stats.failed : 0,
-          total,
+          completed: stats.completed,
+          failed: stats.failed,
+          total: stats.completed + stats.failed,
           duration,
           error: error.message,
+          eventName: siemMigrationEventNames[SiemMigrationsEventTypes.MigrationFailure],
         });
-        return;
-      }
-
-      this.reportEvent(SIEM_MIGRATIONS_MIGRATION_SUCCESS, {
-        migrationId: this.migrationId,
-        model: this.modelName || '',
-        completed: stats ? stats.completed : 0,
-        failed: stats ? stats.failed : 0,
-        total,
-        duration,
-      });
+      },
     };
   }
 }

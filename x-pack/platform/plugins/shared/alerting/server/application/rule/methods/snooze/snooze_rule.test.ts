@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { RulesClientContext } from '../../../../rules_client';
+import type { RulesClientContext } from '../../../../rules_client';
 import { snoozeRule } from './snooze_rule';
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { SnoozeRuleOptions } from './types';
+import type { SnoozeRuleOptions } from './types';
 
 const loggerErrorMock = jest.fn();
 const getBulkMock = jest.fn();

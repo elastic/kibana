@@ -12,6 +12,7 @@ exports[`Should invert legend 1`] = `
       <EuiToolTip
         content="bytes"
         delay="regular"
+        disableScreenReaderOutput={false}
         display="inlineBlock"
         position="top"
         title="Symbol size"
@@ -102,6 +103,7 @@ exports[`Should render legend 1`] = `
       <EuiToolTip
         content="bytes"
         delay="regular"
+        disableScreenReaderOutput={false}
         display="inlineBlock"
         position="top"
         title="Symbol size"
@@ -224,6 +226,7 @@ exports[`Should render legend with 2 markers when size difference does not provi
       <EuiToolTip
         content="bytes"
         delay="regular"
+        disableScreenReaderOutput={false}
         display="inlineBlock"
         position="top"
         title="Symbol size"
@@ -298,6 +301,7 @@ exports[`Should render legend with 3 markers when size difference does not provi
       <EuiToolTip
         content="bytes"
         delay="regular"
+        disableScreenReaderOutput={false}
         display="inlineBlock"
         position="top"
         title="Symbol size"
@@ -388,6 +392,7 @@ exports[`Should render legend with only max marker when size difference does not
       <EuiToolTip
         content="bytes"
         delay="regular"
+        disableScreenReaderOutput={false}
         display="inlineBlock"
         position="top"
         title="Symbol size"
@@ -446,6 +451,7 @@ exports[`Should render legend without label cutoff when min size is 1 1`] = `
       <EuiToolTip
         content="bytes"
         delay="regular"
+        disableScreenReaderOutput={false}
         display="inlineBlock"
         position="top"
         title="Symbol size"
@@ -520,6 +526,7 @@ exports[`Should render max label with std clamp notification 1`] = `
       <EuiToolTip
         content="bytes"
         delay="regular"
+        disableScreenReaderOutput={false}
         display="inlineBlock"
         position="top"
         title="Symbol size"

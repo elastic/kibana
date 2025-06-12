@@ -48,3 +48,6 @@ export const mockRenderingSetupDeps = {
   userSettings,
   i18n: i18nServiceMock.createSetupContract(),
 };
+export const mockRenderingStartDeps = {
+  featureFlags: coreFeatureFlagsMock.createStart(),
+};

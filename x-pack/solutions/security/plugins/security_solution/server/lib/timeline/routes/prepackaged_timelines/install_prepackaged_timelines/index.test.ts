@@ -40,7 +40,7 @@ describe('installPrepackagedTimelines', () => {
 
   beforeEach(() => {
     jest.resetModules();
-    jest.resetAllMocks();
+    jest.clearAllMocks();
 
     server = serverMock.create();
     context = requestContextMock.createTools().context;

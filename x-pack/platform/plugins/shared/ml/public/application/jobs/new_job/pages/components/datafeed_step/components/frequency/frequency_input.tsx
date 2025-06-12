@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useState, useContext, useEffect } from 'react';
-import { EuiFieldText } from '@elastic/eui';
+import { EuiFieldText, useGeneratedHtmlId } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
 import { calculateDatafeedFrequencyDefaultSeconds } from '../../../../../../../../../common/util/job_utils';
@@ -20,7 +20,9 @@ export const FrequencyInput: FC = () => {
   const { value: frequency, setValue: setFrequency } = useStringifiedValue(jobCreator.frequency);
 
   const [defaultFrequency, setDefaultFrequency] = useState(createDefaultFrequency());
-
+  const titleId = useGeneratedHtmlId({
+    prefix: 'frequencyInput',
+  });
   useEffect(() => {
     jobCreator.frequency = frequency === '' ? null : frequency;
     jobCreatorUpdate();
@@ -46,13 +48,14 @@ export const FrequencyInput: FC = () => {
   }
 
   return (
-    <Description validation={validation}>
+    <Description validation={validation} titleId={titleId}>
       <EuiFieldText
         value={frequency}
         placeholder={defaultFrequency}
         onChange={(e) => setFrequency(e.target.value)}
         isInvalid={validation.valid === false}
         data-test-subj="mlJobWizardInputFrequency"
+        aria-labelledby={titleId}
       />
     </Description>
   );

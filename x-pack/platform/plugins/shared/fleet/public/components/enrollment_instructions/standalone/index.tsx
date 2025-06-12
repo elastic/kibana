@@ -60,6 +60,10 @@ Expand-Archive .\elastic-agent-${agentVersion}-windows-x86_64.zip -DestinationPa
 cd elastic-agent-${agentVersion}-windows-x86_64
 .\\elastic-agent.exe install`;
 
+  const windowsMSICommand = `$ProgressPreference = 'SilentlyContinue'
+Invoke-WebRequest -Uri ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-windows-x86_64.msi -OutFile elastic-agent-${agentVersion}-windows-x86_64.msi ${windowsDownloadSourceProxyArgs}
+.\\elastic-agent.msi install`;
+
   const k8sCommand = 'kubectl apply -f elastic-agent-standalone-kubernetes.yml';
 
   return {
@@ -68,6 +72,7 @@ cd elastic-agent-${agentVersion}-windows-x86_64
     mac_aarch64: macAarch64Command,
     mac_x86_64: macX8664Command,
     windows: windowsCommand,
+    windows_msi: windowsMSICommand,
     deb_aarch64: linuxDebAarch64Command,
     deb_x86_64: linuxDebX8664Command,
     rpm_aarch64: linuxRpmAarch64Command,

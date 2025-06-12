@@ -55,8 +55,8 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
           },
         }
       }
+      scopeId="timeline-test"
       text="some text"
-      timelineId="timeline-test"
     />
   </RowRendererContainer>
 </span>

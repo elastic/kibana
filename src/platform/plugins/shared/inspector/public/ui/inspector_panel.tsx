@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './inspector_panel.scss';
 import { i18n } from '@kbn/i18n';
 import React, { Component, Suspense } from 'react';
 import PropTypes from 'prop-types';
@@ -28,6 +27,7 @@ import {
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import { css } from '@emotion/react';
 import { InspectorViewDescription } from '../types';
 import { Adapters } from '../../common';
 import { InspectorViewChooser } from './inspector_view_chooser';
@@ -131,7 +131,7 @@ export class InspectorPanel extends Component<InspectorPanelProps, InspectorPane
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={true}>
               <EuiTitle size="s">
-                <h1>{title}</h1>
+                <h1 id="inspector-panel-title">{title}</h1>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -143,7 +143,24 @@ export class InspectorPanel extends Component<InspectorPanelProps, InspectorPane
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
-        <EuiFlyoutBody className="insInspectorPanel__flyoutBody">
+        <EuiFlyoutBody
+          css={css({
+            '.euiFlyoutBody__overflowContent': {
+              height: '100%',
+              display: 'flex',
+              flexWrap: 'nowrap',
+              flexDirection: 'column',
+
+              '> div': {
+                flexGrow: 0,
+              },
+
+              '.insRequestCodeViewer': {
+                flexGrow: 1,
+              },
+            },
+          })}
+        >
           {this.renderSelectedPanel()}
         </EuiFlyoutBody>
       </KibanaContextProvider>

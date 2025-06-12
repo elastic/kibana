@@ -1,0 +1,18 @@
+{
+  "type": "plugin",
+  "id": "@kbn/management-test-plugin",
+  "owner": "@elastic/kibana-management",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "managementTestPlugin",
+    "server": false,
+    "browser": true,
+    "configPath": [
+      "management_test_plugin"
+    ],
+    "requiredPlugins": [
+      "management"
+    ]
+  }
+}

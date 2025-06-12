@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import { getPostCaseRequest, postCommentActionsReq } from '../../../../../common/lib/mock';
 
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
   createCase,
   createComment,

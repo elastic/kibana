@@ -39,6 +39,7 @@ export const DnsRequestEventDetails = React.memo<Props>(({ data, contextId, time
   return (
     <Details>
       <DnsRequestEventDetailsLine
+        scopeId={timelineId}
         contextId={contextId}
         dnsQuestionName={dnsQuestionName}
         dnsQuestionType={dnsQuestionType}

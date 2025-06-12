@@ -35,8 +35,11 @@ export class RedirectManager {
     application.register({
       id: 'r',
       title: 'Redirect endpoint',
-      chromeless: true,
+      visibleIn: [],
       mount: async (params) => {
+        const abortController = new AbortController();
+        this.onMount(params.history.location, abortController.signal);
+
         const { render } = await import('./render');
         const [start] = await core.getStartServices();
         const { chrome, uiSettings, userProfile } = start;
@@ -50,9 +53,8 @@ export class RedirectManager {
           homeHref: getHomeHref(http, uiSettings),
         });
 
-        this.onMount(params.history.location);
-
         return () => {
+          abortController.abort();
           unmount();
         };
       },
@@ -85,18 +87,23 @@ export class RedirectManager {
           const { hashUrl } = await import('@kbn/kibana-utils-plugin/public');
           redirectUrl = hashUrl(redirectUrl);
         }
+
         const url = core.http.basePath.prepend(redirectUrl);
+        if (!core.http.externalUrl.isInternalUrl(url)) {
+          throw new Error(`Can not redirect to external URL: ${url}`);
+        }
+
         location.href = url;
         return () => {};
       },
     });
   }
 
-  public onMount(location: Location) {
+  public onMount(location: Location, abortSignal?: AbortSignal) {
     const pathname = location.pathname;
     const isShortUrlRedirectBySlug = pathname.startsWith('/s/');
     if (isShortUrlRedirectBySlug) {
-      this.navigateToShortUrlBySlug(pathname.substring('/s/'.length));
+      this.navigateToShortUrlBySlug(pathname.substring('/s/'.length), abortSignal);
       return;
     }
     const urlLocationSearch = location.search;
@@ -104,17 +111,23 @@ export class RedirectManager {
     this.navigate(options);
   }
 
-  private navigateToShortUrlBySlug(slug: string) {
+  private navigateToShortUrlBySlug(slug: string, abortSignal?: AbortSignal) {
     (async () => {
       const urlService = this.deps.url;
       const shortUrls = urlService.shortUrls.get(null);
       const shortUrl = await shortUrls.resolve(slug);
+
+      if (abortSignal?.aborted)
+        return; /* it means that the user navigated away before the short url resolved */
+
       const locatorId = shortUrl.data.locator.id;
       const locator = urlService.locators.get(locatorId);
       if (!locator) throw new Error(`Locator "${locatorId}" not found.`);
       const locatorState = shortUrl.data.locator.state;
       await locator.navigate(locatorState, { replace: true });
     })().catch((error) => {
+      if (abortSignal?.aborted) return;
+
       this.error$.next(error);
       // eslint-disable-next-line no-console
       console.error(error);

@@ -21,17 +21,17 @@ export function registerValueSuggestionsRoute(router: IRouter, config$: Observab
     .post({
       path: '/internal/kibana/suggestions/values/{index}',
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because uses the current user authorizations.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because uses the current user authorizations.',
-          },
-        },
         validate: {
           request: {
             params: schema.object(

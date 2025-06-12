@@ -304,13 +304,14 @@ export class HttpService
             mergeMap(async () => {
               try {
                 // Potentially quite expensive
-                const result = generateOpenApiDocument(
+                const result = await generateOpenApiDocument(
                   this.httpServer.getRouters({ pluginId: query.pluginId }),
                   {
                     baseUrl,
                     title: 'Kibana HTTP APIs',
                     version: '0.0.0', // TODO get a better version here
                     filters,
+                    env: { serverless: this.env.packageInfo.buildFlavor === 'serverless' },
                   }
                 );
                 return h.response(result);

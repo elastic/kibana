@@ -11,7 +11,7 @@ exports[`useComparisonCellValue should render a tooltip when the field is derive
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <span
-        class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis1"
+        class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis2"
       >
         <span
           data-euiicon-type="tokenString"
@@ -406,7 +406,7 @@ exports[`useComparisonCellValue should render field cells 1`] = `
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <span
-        class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis1"
+        class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis2"
       >
         <span
           data-euiicon-type="tokenString"
@@ -441,7 +441,7 @@ exports[`useComparisonCellValue should render field cells 2`] = `
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <span
-        class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis1"
+        class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis2"
       >
         <span
           data-euiicon-type="tokenString"

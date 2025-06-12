@@ -17,9 +17,10 @@ interface Props {
   contextId: string;
   data: Ecs;
   text: string;
+  scopeId: string;
 }
 
-const RegistryEventDetailsComponent: React.FC<Props> = ({ contextId, data, text }) => {
+const RegistryEventDetailsComponent: React.FC<Props> = ({ contextId, data, text, scopeId }) => {
   const hostName: string | null | undefined = get('host.name[0]', data);
   const id = data._id;
   const processName: string | null | undefined = get('process.name[0]', data);
@@ -36,6 +37,7 @@ const RegistryEventDetailsComponent: React.FC<Props> = ({ contextId, data, text 
   return (
     <Details>
       <RegistryEventDetailsLine
+        scopeId={scopeId}
         contextId={contextId}
         hostName={hostName}
         id={id}

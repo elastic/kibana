@@ -11,11 +11,10 @@ export type {
   ESQLAst,
   ESQLAstItem,
   ESQLAstCommand,
-  ESQLAstMetricsCommand,
+  ESQLAstTimeseriesCommand,
   ESQLAstJoinCommand,
   ESQLCommand,
   ESQLCommandOption,
-  ESQLCommandMode,
   ESQLFunction,
   ESQLTimeInterval,
   ESQLLocation,
@@ -26,9 +25,12 @@ export type {
   ESQLColumn,
   ESQLLiteral,
   ESQLParamLiteral,
-  AstProviderFn,
   EditorError,
   ESQLAstNode,
+  ESQLInlineCast,
+  ESQLAstRenameExpression,
+  ESQLAstBaseItem,
+  ESQLAstChangePointCommand,
 } from './src/types';
 
 export {
@@ -49,18 +51,15 @@ export {
 export { Builder, type AstNodeParserFields, type AstNodeTemplate } from './src/builder';
 
 export {
-  getParser,
   createParser,
-  getLexer,
   parse,
   parseErrors,
   type ParseOptions,
   type ParseResult,
-  getAstAndSyntaxErrors,
   ESQLErrorListener,
 } from './src/parser';
 
-export { Walker, type WalkerOptions, walk } from './src/walker';
+export { Walker, type WalkerOptions, walk, type WalkerAstNode } from './src/walker';
 export * as synth from './src/synth';
 
 export {
@@ -75,3 +74,5 @@ export {
 export { EsqlQuery } from './src/query';
 
 export * as mutate from './src/mutate';
+
+export { singleItems, resolveItem, lastItem, firstItem } from './src/visitor/utils';

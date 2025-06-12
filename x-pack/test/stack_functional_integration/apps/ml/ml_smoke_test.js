@@ -23,16 +23,13 @@ export default function ({ getService }) {
       await ml.navigation.assertOverviewTabEnabled(true);
 
       await ml.testExecution.logTestStep('should display the enabled "Anomaly Detection" tab');
-      await ml.navigation.assertAnomalyDetectionTabEnabled(true);
+      await ml.navigation.assertAnomalyDetectionTabsEnabled(true);
 
       await ml.testExecution.logTestStep('should display the enabled "Data Frame Analytics" tab');
-      await ml.navigation.assertDataFrameAnalyticsTabEnabled(true);
+      await ml.navigation.assertDataFrameAnalyticsTabsEnabled(true);
 
       await ml.testExecution.logTestStep('should display the enabled "Data Visualizer" tab');
       await ml.navigation.assertDataVisualizerTabEnabled(true);
-
-      await ml.testExecution.logTestStep('should display the enabled "Settings" tab');
-      await ml.navigation.assertSettingsTabEnabled(true);
     });
   });
 }

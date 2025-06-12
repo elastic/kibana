@@ -8,7 +8,7 @@
 // TODO Consolidate with duplicate query utils in
 // `x-pack/platform/plugins/private/data_visualizer/common/utils/query_utils.ts`
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { Query } from '@kbn/es-query';
 import { type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';

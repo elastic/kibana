@@ -29,6 +29,19 @@ const docIdSelector = (state: PreviewState) => {
     customId: state.customId,
   };
 };
+
+export const getDocInputIdValue = (
+  customId: string | undefined,
+  documentId: string | undefined
+): string => {
+  if (typeof customId === 'string') {
+    return customId;
+  }
+  if (documentId) {
+    return documentId;
+  }
+  return '';
+};
 const fetchDocErrorSelector = (state: PreviewState) => state.fetchDocError;
 
 export const DocumentsNavPreview = () => {
@@ -64,7 +77,7 @@ export const DocumentsNavPreview = () => {
           >
             <EuiFieldText
               isInvalid={isInvalid}
-              value={customId || documentId || ''}
+              value={getDocInputIdValue(customId, documentId)}
               onChange={onDocumentIdChange}
               fullWidth
               data-test-subj="documentIdField"

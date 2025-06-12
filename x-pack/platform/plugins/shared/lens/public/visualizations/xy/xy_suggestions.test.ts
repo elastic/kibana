@@ -1311,4 +1311,93 @@ describe('xy_suggestions', () => {
       ]
     `);
   });
+
+  test('suggests an area stacked chart when current xy chart is bar stacked', () => {
+    const currentState: XYState = {
+      legend: { isVisible: true, position: 'right' },
+      valueLabels: 'hide',
+      preferredSeriesType: 'bar_stacked',
+      layers: [
+        {
+          layerId: 'first',
+          layerType: LayerTypes.DATA,
+          seriesType: 'bar_stacked',
+          xAccessor: 'date',
+          accessors: ['bytes'],
+          splitAccessor: undefined,
+        },
+      ],
+    };
+
+    const [suggestion, ...rest] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('bytes'), dateCol('date')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: ['first'],
+      state: currentState,
+    });
+
+    expect(rest).toHaveLength(visualizationSubtypes.length - 1);
+    expect(suggestion.title).toEqual('Area stacked');
+    expect(suggestion.state).toEqual(
+      expect.objectContaining({
+        ...currentState,
+        preferredSeriesType: 'area_stacked',
+        layers: [
+          expect.objectContaining({
+            ...currentState.layers[0],
+            seriesType: 'area_stacked',
+          }),
+        ],
+      })
+    );
+  });
+
+  test('suggests an area chart when current xy chart is line', () => {
+    const currentState: XYState = {
+      legend: { isVisible: true, position: 'right' },
+      valueLabels: 'hide',
+      preferredSeriesType: 'line',
+      layers: [
+        {
+          layerId: 'first',
+          layerType: LayerTypes.DATA,
+          seriesType: 'line',
+          xAccessor: 'date',
+          accessors: ['bytes'],
+          splitAccessor: undefined,
+        },
+      ],
+    };
+
+    const [suggestion, ...rest] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('bytes'), dateCol('date')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: ['first'],
+      state: currentState,
+    });
+
+    expect(rest).toHaveLength(visualizationSubtypes.length - 1);
+
+    expect(suggestion.title).toEqual('Area chart');
+    expect(suggestion.state).toEqual(
+      expect.objectContaining({
+        ...currentState,
+        preferredSeriesType: 'area',
+        layers: [
+          expect.objectContaining({
+            ...currentState.layers[0],
+            seriesType: 'area',
+          }),
+        ],
+      })
+    );
+  });
 });

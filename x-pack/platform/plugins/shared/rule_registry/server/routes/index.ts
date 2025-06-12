@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { getAlertsGroupAggregations } from './get_alerts_group_aggregations';
-import { RacRequestHandlerContext } from '../types';
+import type { RacRequestHandlerContext } from '../types';
 import { getAlertByIdRoute } from './get_alert_by_id';
 import { updateAlertByIdRoute } from './update_alert_by_id';
 import { getAlertsIndexRoute } from './get_alert_index';
@@ -15,7 +15,6 @@ import { bulkUpdateAlertsRoute } from './bulk_update_alerts';
 import { findAlertsByQueryRoute } from './find';
 import { getBrowserFieldsByFeatureId } from './get_browser_fields_by_rule_type_ids';
 import { getAlertSummaryRoute } from './get_alert_summary';
-import { getAADFieldsByRuleType } from './get_aad_fields_by_rule_type';
 
 export function defineRoutes(router: IRouter<RacRequestHandlerContext>) {
   getAlertByIdRoute(router);
@@ -26,5 +25,4 @@ export function defineRoutes(router: IRouter<RacRequestHandlerContext>) {
   getAlertsGroupAggregations(router);
   getBrowserFieldsByFeatureId(router);
   getAlertSummaryRoute(router);
-  getAADFieldsByRuleType(router);
 }

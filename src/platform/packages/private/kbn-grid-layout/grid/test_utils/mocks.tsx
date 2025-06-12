@@ -9,16 +9,18 @@
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { ObservedSize } from 'use-resize-observer/polyfilled';
-import {
-  ActivePanel,
+import type { ObservedSize } from 'use-resize-observer/polyfilled';
+
+import type { ActivePanelEvent } from '../grid_panel';
+import type { ActiveSectionEvent } from '../grid_section';
+import type {
   GridAccessMode,
   GridLayoutData,
   GridLayoutStateManager,
-  PanelInteractionEvent,
+  OrderedLayout,
   RuntimeGridSettings,
 } from '../types';
-import { getSampleLayout } from './sample_layout';
+import { getSampleOrderedLayout } from './sample_layout';
 
 const DASHBOARD_MARGIN_SIZE = 8;
 const DASHBOARD_GRID_HEIGHT = 20;
@@ -29,26 +31,29 @@ export const gridSettings = {
   rowHeight: DASHBOARD_GRID_HEIGHT,
   columnCount: DASHBOARD_GRID_COLUMN_COUNT,
 };
-
 export const mockRenderPanelContents = jest.fn((panelId) => (
   <button aria-label={`panelId:${panelId}`}>panel content {panelId}</button>
 ));
 
-const runtimeSettings$ = new BehaviorSubject<RuntimeGridSettings>({
-  ...gridSettings,
-  columnPixelWidth: 0,
-});
-
-export const gridLayoutStateManagerMock: GridLayoutStateManager = {
-  expandedPanelId$: new BehaviorSubject<string | undefined>(undefined),
-  isMobileView$: new BehaviorSubject<boolean>(false),
-  gridLayout$: new BehaviorSubject<GridLayoutData>(getSampleLayout()),
-  proposedGridLayout$: new BehaviorSubject<GridLayoutData | undefined>(undefined),
-  runtimeSettings$,
-  panelRefs: { current: [] },
-  rowRefs: { current: [] },
-  accessMode$: new BehaviorSubject<GridAccessMode>('EDIT'),
-  interactionEvent$: new BehaviorSubject<PanelInteractionEvent | undefined>(undefined),
-  activePanel$: new BehaviorSubject<ActivePanel | undefined>(undefined),
-  gridDimensions$: new BehaviorSubject<ObservedSize>({ width: 600, height: 900 }),
+export const getGridLayoutStateManagerMock = (overrides?: Partial<GridLayoutStateManager>) => {
+  return {
+    layoutRef: { current: {} },
+    expandedPanelId$: new BehaviorSubject<string | undefined>(undefined),
+    isMobileView$: new BehaviorSubject<boolean>(false),
+    gridLayout$: new BehaviorSubject<OrderedLayout>(getSampleOrderedLayout()),
+    proposedGridLayout$: new BehaviorSubject<GridLayoutData | undefined>(undefined),
+    runtimeSettings$: new BehaviorSubject<RuntimeGridSettings>({
+      ...gridSettings,
+      columnPixelWidth: 0,
+      keyboardDragTopLimit: 0,
+    }),
+    panelRefs: { current: {} },
+    sectionRefs: { current: {} },
+    headerRefs: { current: {} },
+    accessMode$: new BehaviorSubject<GridAccessMode>('EDIT'),
+    activePanelEvent$: new BehaviorSubject<ActivePanelEvent | undefined>(undefined),
+    activeSectionEvent$: new BehaviorSubject<ActiveSectionEvent | undefined>(undefined),
+    gridDimensions$: new BehaviorSubject<ObservedSize>({ width: 600, height: 900 }),
+    ...overrides,
+  } as GridLayoutStateManager;
 };

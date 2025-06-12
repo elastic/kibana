@@ -10,8 +10,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import classnames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { of } from 'rxjs';
-import useObservable from 'react-use/lib/useObservable';
 import './data_table.scss';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
@@ -28,7 +26,6 @@ import {
   EuiDataGridCustomBodyProps,
   EuiDataGridStyle,
   EuiDataGridProps,
-  EuiHorizontalRule,
   EuiDataGridToolBarVisibilityDisplaySelectorOptions,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -52,6 +49,8 @@ import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { AdditionalFieldGroups } from '@kbn/unified-field-list';
 import { useDataGridInTableSearch } from '@kbn/data-grid-in-table-search';
+import { useThrottleFn } from '@kbn/react-hooks';
+import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import { DATA_GRID_DENSITY_STYLE_MAP, useDataGridDensity } from '../hooks/use_data_grid_density';
 import {
   UnifiedDataTableSettings,
@@ -59,6 +58,7 @@ import {
   DataTableColumnsMeta,
   CustomCellRenderer,
   CustomGridColumnsConfiguration,
+  DataGridPaginationMode,
 } from '../types';
 import { getDisplayedColumns } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
@@ -80,6 +80,7 @@ import {
   ROWS_HEIGHT_OPTIONS,
   toolbarVisibility as toolbarVisibilityDefaults,
   DataGridDensity,
+  DEFAULT_PAGINATION_MODE,
 } from '../constants';
 import { UnifiedDataTableFooter } from './data_table_footer';
 import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
@@ -91,13 +92,12 @@ import { getCustomCellPopoverRenderer } from '../utils/get_render_cell_popover';
 import { useSelectedDocs } from '../hooks/use_selected_docs';
 import {
   getColorIndicatorControlColumn,
+  getActionsColumn,
   type ColorIndicatorControlColumnParams,
-  getAdditionalRowControlColumns,
 } from './custom_control_columns';
 import { useSorting } from '../hooks/use_sorting';
 
 const CONTROL_COLUMN_IDS_DEFAULT = [SELECT_ROW, OPEN_DETAILS];
-const THEME_DEFAULT = { darkMode: false };
 const VIRTUALIZATION_OPTIONS: EuiDataGridProps['virtualizationOptions'] = {
   // Allowing some additional rows to be rendered outside
   // the view minimizes pop-in when scrolling quickly
@@ -189,7 +189,7 @@ export interface UnifiedDataTableProps {
   /**
    * Function to set the expanded document, which is displayed in a flyout
    */
-  setExpandedDoc?: (doc?: DataTableRecord) => void;
+  setExpandedDoc?: (doc?: DataTableRecord, options?: { initialTabId?: string }) => void;
   /**
    * Grid display settings persisted in Elasticsearch (e.g. column width)
    */
@@ -226,6 +226,14 @@ export interface UnifiedDataTableProps {
    * Manage pagination control
    */
   isPaginationEnabled?: boolean;
+  /**
+   * Manage pagination mode
+   * @default 'multiPage'
+   * "multiPage" - Regular pagination with numbers and arrows to control the page
+   * "singlePage" - Hides the general pagination bar and shows Load more button at the bottom of the grid
+   * "infinite" - Hides the general pagination bar and loads more data as the user scrolls [Not yet implemented]
+   */
+  paginationMode?: DataGridPaginationMode;
   /**
    * List of used control columns (available: 'openDetails', 'select')
    */
@@ -462,6 +470,7 @@ export const UnifiedDataTable = ({
   sort,
   isSortEnabled = true,
   isPaginationEnabled = true,
+  paginationMode = DEFAULT_PAGINATION_MODE,
   cellActionsTriggerId,
   cellActionsMetadata,
   cellActionsHandling = 'replace',
@@ -509,10 +518,10 @@ export const UnifiedDataTable = ({
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
-  const { darkMode } = useObservable(services.theme?.theme$ ?? of(THEME_DEFAULT), THEME_DEFAULT);
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [isFilterActive, setIsFilterActive] = useState(false);
   const [isCompareActive, setIsCompareActive] = useState(false);
+  const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, dataView);
   const defaultColumns = displayedColumns.includes('_source');
   const docMap = useMemo(
@@ -580,6 +589,8 @@ export const UnifiedDataTable = ({
     defaultColumns,
     onSort,
   });
+
+  const { columns: sortedColumns } = sorting ?? {};
 
   const displayedRows = useMemo(() => {
     if (!sortedRows) {
@@ -672,7 +683,6 @@ export const UnifiedDataTable = ({
       getRowByIndex: (index: number) => displayedRows[index],
       onFilter,
       dataView,
-      isDarkMode: darkMode,
       selectedDocsState,
       valueToStringConverter,
       componentsTourSteps,
@@ -682,7 +692,6 @@ export const UnifiedDataTable = ({
     }),
     [
       componentsTourSteps,
-      darkMode,
       dataView,
       isPlainRecord,
       isPaginationEnabled,
@@ -811,21 +820,28 @@ export const UnifiedDataTable = ({
     [displayedRows]
   );
 
-  const cellActionsFields = useMemo<UseDataGridColumnsCellActionsProps['fields']>(
-    () =>
-      cellActionsTriggerId
-        ? visibleColumns.map(
-            (columnName) =>
-              dataView.getFieldByName(columnName)?.toSpec() ?? {
-                name: '',
-                type: '',
-                aggregatable: false,
-                searchable: false,
-              }
-          )
-        : undefined,
-    [cellActionsTriggerId, visibleColumns, dataView]
-  );
+  const cellActionsFields = useMemo<UseDataGridColumnsCellActionsProps['fields']>(() => {
+    if (!cellActionsTriggerId) {
+      return undefined;
+    }
+
+    return visibleColumns.map((columnName) => {
+      const field = getDataViewFieldOrCreateFromColumnMeta({
+        dataView,
+        fieldName: columnName,
+        columnMeta: columnsMeta?.[columnName],
+      });
+      return (
+        field?.toSpec() ?? {
+          name: '',
+          type: '',
+          aggregatable: false,
+          searchable: false,
+        }
+      );
+    });
+  }, [cellActionsTriggerId, visibleColumns, dataView, columnsMeta]);
+
   const allCellActionsMetadata = useMemo(
     () => ({ dataViewId: dataView.id, ...(cellActionsMetadata ?? {}) }),
     [dataView, cellActionsMetadata]
@@ -891,6 +907,7 @@ export const UnifiedDataTable = ({
         headerRowHeightLines,
         customGridColumnsConfiguration,
         onResize,
+        sortedColumns,
       }),
     [
       cellActionsHandling,
@@ -914,6 +931,7 @@ export const UnifiedDataTable = ({
       valueToStringConverter,
       visibleCellActions,
       visibleColumns,
+      sortedColumns,
     ]
   );
 
@@ -939,34 +957,32 @@ export const UnifiedDataTable = ({
   const canSetExpandedDoc = Boolean(setExpandedDoc && !!renderDocumentView);
 
   const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
-    const defaultControlColumns = getLeadControlColumns({ rows: displayedRows, canSetExpandedDoc });
-    const internalControlColumns = controlColumnIds
-      ? // reorder the default controls as per controlColumnIds
-        controlColumnIds.reduce((acc, id) => {
-          const controlColumn = defaultControlColumns.find((col) => col.id === id);
-          if (controlColumn) {
-            acc.push(controlColumn);
-          }
-          return acc;
-        }, [] as EuiDataGridControlColumn[])
-      : defaultControlColumns;
+    const { leadColumns, leadColumnsExtraContent } = getLeadControlColumns({
+      rows: displayedRows,
+      canSetExpandedDoc,
+    });
 
-    const leadingColumns: EuiDataGridControlColumn[] = externalControlColumns
-      ? [...internalControlColumns, ...externalControlColumns]
-      : internalControlColumns;
+    const filteredLeadColumns = leadColumns.filter((column) =>
+      controlColumnIds.includes(column.id)
+    );
 
     if (getRowIndicator) {
       const colorIndicatorControlColumn = getColorIndicatorControlColumn({
         getRowIndicator,
       });
-      leadingColumns.unshift(colorIndicatorControlColumn);
+      filteredLeadColumns.unshift(colorIndicatorControlColumn);
     }
 
-    if (rowAdditionalLeadingControls?.length) {
-      leadingColumns.push(...getAdditionalRowControlColumns(rowAdditionalLeadingControls));
+    const actionsColumn = getActionsColumn({
+      baseColumns: leadColumnsExtraContent,
+      rowAdditionalLeadingControls,
+      externalControlColumns,
+    });
+    if (actionsColumn) {
+      filteredLeadColumns.push(actionsColumn);
     }
 
-    return leadingColumns;
+    return filteredLeadColumns;
   }, [
     canSetExpandedDoc,
     controlColumnIds,
@@ -1061,11 +1077,10 @@ export const UnifiedDataTable = ({
 
     return {
       allowDensity: Boolean(onUpdateDataGridDensity),
-      allowRowHeight: false,
+      allowRowHeight: Boolean(onChangeRowHeight) || Boolean(onChangeHeaderRowHeight),
       allowResetButton: false,
-      additionalDisplaySettings: (
+      customRender: ({ densityControl }) => (
         <>
-          {onUpdateDataGridDensity ? <EuiHorizontalRule margin="s" /> : null}
           <UnifiedDataTableAdditionalDisplaySettings
             rowHeight={rowHeight}
             onChangeRowHeight={onChangeRowHeight}
@@ -1078,6 +1093,7 @@ export const UnifiedDataTable = ({
             onChangeSampleSize={onUpdateSampleSize}
             lineCountInput={lineCountInput}
             headerLineCountInput={headerLineCountInput}
+            densityControl={densityControl}
           />
         </>
       ),
@@ -1133,6 +1149,58 @@ export const UnifiedDataTable = ({
     rowHeightLines,
     rowLineHeight: rowLineHeightOverride,
   });
+
+  const handleOnScroll = useCallback(
+    (event: { scrollTop: number }) => {
+      setHasScrolledToBottom((prevHasScrolledToBottom) => {
+        if (loadingState !== DataLoadingState.loaded) {
+          return prevHasScrolledToBottom;
+        }
+
+        // We need to manually query the react-window wrapper since EUI doesn't
+        // expose outerRef in virtualizationOptions, but we should request it
+        const outerRef = dataGridWrapper?.querySelector<HTMLElement>('.euiDataGrid__virtualized');
+
+        if (!outerRef) {
+          return prevHasScrolledToBottom;
+        }
+
+        // Account for footer height when it's visible to avoid flickering
+        const scrollBottomMargin = prevHasScrolledToBottom ? 140 : 100;
+        const isScrollable = outerRef.scrollHeight > outerRef.offsetHeight;
+        const isScrolledToBottom =
+          event.scrollTop + outerRef.offsetHeight >= outerRef.scrollHeight - scrollBottomMargin;
+
+        return isScrollable && isScrolledToBottom;
+      });
+    },
+    [dataGridWrapper, loadingState]
+  );
+
+  const { run: throttledHandleOnScroll } = useThrottleFn(handleOnScroll, { wait: 200 });
+
+  useEffect(() => {
+    if (loadingState === DataLoadingState.loadingMore) {
+      setHasScrolledToBottom(false);
+    }
+  }, [loadingState]);
+
+  const virtualizationOptions = useMemo(() => {
+    const options = {
+      onScroll: paginationMode === 'multiPage' ? undefined : throttledHandleOnScroll,
+    };
+
+    // Don't use row "overscan" when showing Summary column since
+    // rendering so much DOM content in each cell impacts performance
+    if (defaultColumns) {
+      return options;
+    }
+
+    return {
+      ...VIRTUALIZATION_OPTIONS,
+      ...options,
+    };
+  }, [defaultColumns, paginationMode, throttledHandleOnScroll]);
 
   const isRenderComplete = loadingState !== DataLoadingState.loading;
 
@@ -1216,7 +1284,7 @@ export const UnifiedDataTable = ({
               data-test-subj="docTable"
               leadingControlColumns={leadingControlColumns}
               onColumnResize={onResize}
-              pagination={paginationObj}
+              pagination={paginationMode === 'multiPage' ? paginationObj : undefined}
               renderCellValue={renderCellValueWithInTableSearchSupport}
               ref={dataGridRef}
               rowCount={rowCount}
@@ -1230,9 +1298,7 @@ export const UnifiedDataTable = ({
               trailingControlColumns={trailingControlColumns}
               cellContext={cellContextWithInTableSearchSupport}
               renderCellPopover={renderCustomPopover}
-              // Don't use row overscan when showing Document column since
-              // rendering so much DOM content in each cell impacts performance
-              virtualizationOptions={defaultColumns ? undefined : VIRTUALIZATION_OPTIONS}
+              virtualizationOptions={virtualizationOptions}
             />
           )}
         </div>
@@ -1250,6 +1316,8 @@ export const UnifiedDataTable = ({
               onFetchMoreRecords={onFetchMoreRecords}
               data={data}
               fieldFormats={fieldFormats}
+              paginationMode={paginationMode}
+              hasScrolledToBottom={paginationMode !== 'multiPage' ? hasScrolledToBottom : true}
             />
           )}
         {searchTitle && (

@@ -45,13 +45,10 @@ import {
 } from '../../../../../../common/field_maps/field_names';
 
 import { transformHitToAlert } from './transform_hit_to_alert';
-import {
-  getCompleteRuleMock,
-  getEsqlRuleParams,
-  getQueryRuleParams,
-} from '../../../rule_schema/mocks';
+import { getEsqlRuleParams, getQueryRuleParams } from '../../../rule_schema/mocks';
 import { ruleExecutionLogMock } from '../../../rule_monitoring/mocks';
 import { get } from 'lodash';
+import { getSharedParamsMock } from '../../__mocks__/shared_params';
 
 const SPACE_ID = 'space';
 const publicBaseUrl = 'testKibanaBasePath.com';
@@ -66,23 +63,21 @@ describe('transformHitToAlert', () => {
       'event.action': 'process',
       'event.action.keyword': 'process',
     });
-    const completeRule = getCompleteRuleMock(getEsqlRuleParams());
-
+    const sharedParams = getSharedParamsMock({
+      ruleParams: getEsqlRuleParams(),
+      rewrites: {
+        spaceId: SPACE_ID,
+        mergeStrategy: 'missingFields',
+        publicBaseUrl,
+        ruleExecutionLogger,
+      },
+    });
     const alert = transformHitToAlert({
-      spaceId: SPACE_ID,
-      completeRule,
+      sharedParams,
       doc,
-      mergeStrategy: 'missingFields',
-      ignoreFields: {},
-      ignoreFieldsRegexes: [],
       applyOverrides: true,
       buildReasonMessage: buildReasonMessageStub,
-      indicesToQuery: [],
-      alertTimestampOverride: undefined,
-      ruleExecutionLogger,
       alertUuid,
-      publicBaseUrl,
-      intendedTimestamp: undefined,
     });
 
     expect(alert['kibana.alert.original_event.action']).toEqual('process');
@@ -99,23 +94,23 @@ describe('transformHitToAlert', () => {
         },
       },
     };
-    const completeRule = getCompleteRuleMock(getEsqlRuleParams());
+
+    const sharedParams = getSharedParamsMock({
+      ruleParams: getEsqlRuleParams(),
+      rewrites: {
+        spaceId: SPACE_ID,
+        mergeStrategy: 'missingFields',
+        publicBaseUrl,
+        ruleExecutionLogger,
+      },
+    });
 
     const alert = transformHitToAlert({
-      spaceId: SPACE_ID,
-      completeRule,
+      sharedParams,
       doc,
-      mergeStrategy: 'missingFields',
-      ignoreFields: {},
-      ignoreFieldsRegexes: [],
       applyOverrides: true,
       buildReasonMessage: buildReasonMessageStub,
-      indicesToQuery: [],
-      alertTimestampOverride: undefined,
-      ruleExecutionLogger,
       alertUuid,
-      publicBaseUrl,
-      intendedTimestamp: undefined,
     });
 
     expect(get(alert.event, 'kind')).toEqual(undefined);
@@ -130,23 +125,23 @@ describe('transformHitToAlert', () => {
         'event.kind': 'test-value',
       },
     };
-    const completeRule = getCompleteRuleMock(getEsqlRuleParams());
+
+    const sharedParams = getSharedParamsMock({
+      ruleParams: getEsqlRuleParams(),
+      rewrites: {
+        spaceId: SPACE_ID,
+        mergeStrategy: 'missingFields',
+        publicBaseUrl,
+        ruleExecutionLogger,
+      },
+    });
 
     const alert = transformHitToAlert({
-      spaceId: SPACE_ID,
-      completeRule,
+      sharedParams,
       doc,
-      mergeStrategy: 'missingFields',
-      ignoreFields: {},
-      ignoreFieldsRegexes: [],
       applyOverrides: true,
       buildReasonMessage: buildReasonMessageStub,
-      indicesToQuery: [],
-      alertTimestampOverride: undefined,
-      ruleExecutionLogger,
       alertUuid,
-      publicBaseUrl,
-      intendedTimestamp: undefined,
     });
 
     expect(get(alert.event, 'kind')).toEqual(undefined);
@@ -161,23 +156,23 @@ describe('transformHitToAlert', () => {
         testField: 'testValue',
       },
     };
-    const completeRule = getCompleteRuleMock(getEsqlRuleParams());
+
+    const sharedParams = getSharedParamsMock({
+      ruleParams: getEsqlRuleParams(),
+      rewrites: {
+        spaceId: SPACE_ID,
+        mergeStrategy: 'missingFields',
+        publicBaseUrl,
+        ruleExecutionLogger,
+      },
+    });
 
     const alert = transformHitToAlert({
-      spaceId: SPACE_ID,
-      completeRule,
+      sharedParams,
       doc,
-      mergeStrategy: 'missingFields',
-      ignoreFields: {},
-      ignoreFieldsRegexes: [],
       applyOverrides: true,
       buildReasonMessage: buildReasonMessageStub,
-      indicesToQuery: [],
-      alertTimestampOverride: undefined,
-      ruleExecutionLogger,
       alertUuid,
-      publicBaseUrl,
-      intendedTimestamp: undefined,
     });
 
     expect(alert.event).toEqual(undefined);
@@ -192,23 +187,23 @@ describe('transformHitToAlert', () => {
         'event.action': ['process', { objectSubfield: 'test' }],
       },
     };
-    const completeRule = getCompleteRuleMock(getEsqlRuleParams());
+
+    const sharedParams = getSharedParamsMock({
+      ruleParams: getEsqlRuleParams(),
+      rewrites: {
+        spaceId: SPACE_ID,
+        mergeStrategy: 'missingFields',
+        publicBaseUrl,
+        ruleExecutionLogger,
+      },
+    });
 
     const alert = transformHitToAlert({
-      spaceId: SPACE_ID,
-      completeRule,
+      sharedParams,
       doc,
-      mergeStrategy: 'missingFields',
-      ignoreFields: {},
-      ignoreFieldsRegexes: [],
       applyOverrides: true,
       buildReasonMessage: buildReasonMessageStub,
-      indicesToQuery: [],
-      alertTimestampOverride: undefined,
-      ruleExecutionLogger,
       alertUuid,
-      publicBaseUrl,
-      intendedTimestamp: undefined,
     });
 
     expect(alert['kibana.alert.original_event.action']).toEqual(['process']);
@@ -216,22 +211,23 @@ describe('transformHitToAlert', () => {
 
   it('builds an alert as expected without original_event if event does not exist', () => {
     const doc = sampleDocNoSortIdWithTimestamp('d5e8eb51-a6a0-456d-8a15-4b79bfec3d71');
-    const completeRule = getCompleteRuleMock(getQueryRuleParams());
+
+    const sharedParams = getSharedParamsMock({
+      ruleParams: getQueryRuleParams(),
+      rewrites: {
+        spaceId: SPACE_ID,
+        mergeStrategy: 'missingFields',
+        publicBaseUrl,
+        ruleExecutionLogger,
+        inputIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+      },
+    });
     const alert = transformHitToAlert({
-      spaceId: SPACE_ID,
-      completeRule,
+      sharedParams,
       doc,
-      mergeStrategy: 'missingFields',
-      ignoreFields: {},
-      ignoreFieldsRegexes: [],
       applyOverrides: true,
       buildReasonMessage: buildReasonMessageStub,
-      indicesToQuery: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-      alertTimestampOverride: undefined,
-      ruleExecutionLogger,
       alertUuid,
-      publicBaseUrl,
-      intendedTimestamp: undefined,
     });
     delete doc._source.event;
 
@@ -329,7 +325,7 @@ describe('transformHitToAlert', () => {
         filters: [{ query: { match_phrase: { 'host.name': 'some-host' } } }],
         investigation_fields: undefined,
       },
-      [ALERT_RULE_INDICES]: completeRule.ruleParams.index,
+      [ALERT_RULE_INDICES]: sharedParams.completeRule.ruleParams.index,
       ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
         actions: [],
         author: ['Elastic'],
@@ -418,22 +414,21 @@ describe('transformHitToAlert', () => {
         [EVENT_MODULE]: 'system',
       },
     };
-    const completeRule = getCompleteRuleMock(getQueryRuleParams());
+    const sharedParams = getSharedParamsMock({
+      ruleParams: getQueryRuleParams(),
+      rewrites: {
+        spaceId: SPACE_ID,
+        mergeStrategy: 'missingFields',
+        publicBaseUrl,
+        ruleExecutionLogger,
+      },
+    });
     const alert = transformHitToAlert({
-      spaceId: SPACE_ID,
-      completeRule,
+      sharedParams,
       doc,
-      mergeStrategy: 'missingFields',
-      ignoreFields: {},
-      ignoreFieldsRegexes: [],
       applyOverrides: true,
       buildReasonMessage: buildReasonMessageStub,
-      indicesToQuery: [],
-      alertTimestampOverride: undefined,
-      ruleExecutionLogger,
       alertUuid,
-      publicBaseUrl,
-      intendedTimestamp: undefined,
     });
     const expected = {
       ...alert,
@@ -459,22 +454,22 @@ describe('transformHitToAlert', () => {
         [EVENT_MODULE]: 'system',
       },
     };
-    const completeRule = getCompleteRuleMock(getQueryRuleParams());
+    const sharedParams = getSharedParamsMock({
+      ruleParams: getQueryRuleParams(),
+      rewrites: {
+        spaceId: SPACE_ID,
+        mergeStrategy: 'missingFields',
+        publicBaseUrl,
+        ruleExecutionLogger,
+        intendedTimestamp: new Date('2019-01-01T00:00:00.000Z'),
+      },
+    });
     const alert = transformHitToAlert({
-      spaceId: SPACE_ID,
-      completeRule,
+      sharedParams,
       doc,
-      mergeStrategy: 'missingFields',
-      ignoreFields: {},
-      ignoreFieldsRegexes: [],
       applyOverrides: true,
       buildReasonMessage: buildReasonMessageStub,
-      indicesToQuery: [],
-      alertTimestampOverride: undefined,
-      ruleExecutionLogger,
       alertUuid,
-      publicBaseUrl,
-      intendedTimestamp: new Date('2019-01-01T00:00:00.000Z'),
     });
     const expected = {
       ...alert,

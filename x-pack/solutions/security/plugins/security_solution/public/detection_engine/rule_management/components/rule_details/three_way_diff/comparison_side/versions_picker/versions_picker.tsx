@@ -22,20 +22,11 @@ interface VersionsPickerProps {
   options: VersionsPickerOptionEnum[];
   selectedOption: VersionsPickerOptionEnum;
   onChange: (selectedOption: VersionsPickerOptionEnum) => void;
-  hasResolvedValueDifferentFromSuggested: boolean;
 }
 
-export function VersionsPicker({
-  options,
-  selectedOption,
-  onChange,
-  hasResolvedValueDifferentFromSuggested,
-}: VersionsPickerProps) {
+export function VersionsPicker({ options, selectedOption, onChange }: VersionsPickerProps) {
   const euiSelectOptions = options.map((option) => {
-    const { title: displayName, description: explanation } = getOptionDetails(
-      option,
-      hasResolvedValueDifferentFromSuggested
-    );
+    const { title: displayName, description: explanation } = getOptionDetails(option);
 
     return {
       value: option,

@@ -113,20 +113,18 @@ export const buildNetworkDetailsQuery = ({ defaultIndex, ip }: NetworkDetailsReq
     index: defaultIndex,
     ignore_unavailable: true,
     track_total_hits: false,
-    body: {
-      aggs: {
-        ...getAggs('source', ip),
-        ...getAggs('destination', ip),
-        ...getHostAggs(ip),
-      },
-      query: {
-        bool: {
-          should: [],
-        },
-      },
-      size: 0,
-      _source: false,
+    aggs: {
+      ...getAggs('source', ip),
+      ...getAggs('destination', ip),
+      ...getHostAggs(ip),
     },
+    query: {
+      bool: {
+        should: [],
+      },
+    },
+    size: 0,
+    _source: false,
   };
 
   return dslQuery;

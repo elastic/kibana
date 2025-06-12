@@ -5,9 +5,20 @@
  * 2.0.
  */
 
-export type { Message, Conversation, KnowledgeBaseEntry } from './types';
-export type { ConversationCreateRequest } from './types';
-export { KnowledgeBaseEntryRole, MessageRole } from './types';
+export type {
+  Message,
+  Conversation,
+  KnowledgeBaseEntry,
+  ConversationCreateRequest,
+  AnonymizationRule,
+} from './types';
+export {
+  KnowledgeBaseEntryRole,
+  MessageRole,
+  ConversationAccess,
+  KnowledgeBaseType,
+  KnowledgeBaseState,
+} from './types';
 export type { FunctionDefinition, CompatibleJSONSchema } from './functions/types';
 export { FunctionVisibility } from './functions/function_visibility';
 export {
@@ -18,7 +29,6 @@ export {
 export type {
   ChatCompletionChunkEvent,
   ChatCompletionMessageEvent,
-  TokenCountEvent,
   ConversationCreateEvent,
   ConversationUpdateEvent,
   MessageAddEvent,
@@ -43,10 +53,17 @@ export {
   aiAssistantLogsIndexPattern,
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
+  aiAssistantAnonymizationRules,
 } from './ui_settings/settings_keys';
 
 export { concatenateChatCompletionChunks } from './utils/concatenate_chat_completion_chunks';
 
 export { ShortIdTable } from './utils/short_id_table';
 
-export { KnowledgeBaseType } from './types';
+export {
+  ELSER_ON_ML_NODE_INFERENCE_ID,
+  ELSER_IN_EIS_INFERENCE_ID,
+  E5_SMALL_INFERENCE_ID,
+  E5_LARGE_IN_EIS_INFERENCE_ID,
+  EIS_PRECONFIGURED_INFERENCE_IDS,
+} from './preconfigured_inference_ids';

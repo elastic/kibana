@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { EditMenu } from '../edit_menu.component';
@@ -36,42 +35,74 @@ const handlers = {
   redoHistory: action('redoHistory'),
 };
 
-storiesOf('components/WorkpadHeader/EditMenu', module)
-  .add('default', () => (
+export default {
+  title: 'components/WorkpadHeader/EditMenu',
+};
+
+export const Default = {
+  render: () => (
     <EditMenu selectedNodes={[]} groupIsSelected={false} hasPasteData={false} {...handlers} />
-  ))
-  .add('clipboard data exists', () => (
+  ),
+
+  name: 'default',
+};
+
+export const ClipboardDataExists = {
+  render: () => (
     <EditMenu selectedNodes={[]} groupIsSelected={false} hasPasteData={true} {...handlers} />
-  ))
-  .add('single element selected', () => (
+  ),
+
+  name: 'clipboard data exists',
+};
+
+export const SingleElementSelected = {
+  render: () => (
     <EditMenu
       selectedNodes={[{ id: 'foo' }] as PositionedElement[]}
       groupIsSelected={false}
       hasPasteData={false}
       {...handlers}
     />
-  ))
-  .add('single grouped element selected', () => (
+  ),
+
+  name: 'single element selected',
+};
+
+export const SingleGroupedElementSelected = {
+  render: () => (
     <EditMenu
       selectedNodes={[{ id: 'foo' }, { id: 'bar' }] as PositionedElement[]}
       groupIsSelected={true}
       hasPasteData={false}
       {...handlers}
     />
-  ))
-  .add('2 elements selected', () => (
+  ),
+
+  name: 'single grouped element selected',
+};
+
+export const _2ElementsSelected = {
+  render: () => (
     <EditMenu
       selectedNodes={[{ id: 'foo' }, { id: 'bar' }] as PositionedElement[]}
       groupIsSelected={false}
       hasPasteData={false}
       {...handlers}
     />
-  ))
-  .add('3+ elements selected', () => (
+  ),
+
+  name: '2 elements selected',
+};
+
+export const _3ElementsSelected = {
+  render: () => (
     <EditMenu
       selectedNodes={[{ id: 'foo' }, { id: 'bar' }, { id: 'fizz' }] as PositionedElement[]}
       groupIsSelected={false}
       hasPasteData={false}
       {...handlers}
     />
-  ));
+  ),
+
+  name: '3+ elements selected',
+};

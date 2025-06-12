@@ -83,7 +83,6 @@ describe('AIAssistantConversationsDataClient', () => {
                 },
               ],
               title: 'Alert summary',
-              is_default: true,
               users: [
                 {
                   name: 'elastic',
@@ -113,7 +112,6 @@ describe('AIAssistantConversationsDataClient', () => {
       createdAt: '2024-01-25T01:32:37.649Z',
       excludeFromLastConversationStorage: undefined,
       id: undefined,
-      isDefault: true,
       messages: [
         {
           content:

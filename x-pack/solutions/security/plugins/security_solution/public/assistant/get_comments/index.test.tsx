@@ -38,6 +38,7 @@ const testProps = {
   isFetchingResponse: false,
   currentConversation,
   showAnonymizedValues,
+  contentReferencesVisible: true,
 };
 describe('getComments', () => {
   it('Does not add error state message has no error', () => {

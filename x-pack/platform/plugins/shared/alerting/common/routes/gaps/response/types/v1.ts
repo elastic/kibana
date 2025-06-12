@@ -6,7 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { gapsResponseSchemaV1, errorResponseSchemaV1 } from '..';
+import type { gapsResponseSchemaV1, errorResponseSchemaV1 } from '..';
 
 export type GapsResponse = TypeOf<typeof gapsResponseSchemaV1>;
 export type ErrorResponse = TypeOf<typeof errorResponseSchemaV1>;

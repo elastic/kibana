@@ -1,0 +1,15 @@
+steps:
+  - command: .buildkite/scripts/steps/test/scout_test_run_builder.sh
+    label: 'Scout Test Run Builder'
+    agents:
+      machineType: n2-standard-2
+    timeout_in_minutes: 10
+    env:
+      SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout_configs.sh'
+    retry:
+      automatic:
+        # No retry when Scout configs fail
+        - exit_status: 10
+          limit: 0
+        - exit_status: '*'
+          limit: 1

@@ -22,11 +22,10 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { Warnings } from '@kbn/charts-plugin/public';
 import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
 import { Adapters } from '@kbn/inspector-plugin/public';
-import { EmbeddableInput } from '@kbn/embeddable-plugin/common';
-import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
 import {
   ExpressionAstExpression,
   ExpressionLoader,
+  ExpressionRendererEvent,
   ExpressionRenderError,
   IExpressionLoaderParams,
 } from '@kbn/expressions-plugin/public';
@@ -48,7 +47,7 @@ import { toExpressionAst } from '../../embeddable/to_ast';
 import { AttributeService } from './attribute_service';
 import { VisualizationsStartDeps } from '../../plugin';
 import { Embeddable } from './embeddable';
-import { EmbeddableOutput } from './i_embeddable';
+import { EmbeddableInput, EmbeddableOutput } from './i_embeddable';
 
 export interface VisualizeEmbeddableDeps {
   start: StartServicesGetter<
@@ -95,7 +94,7 @@ export type VisualizeSavedObjectAttributes = SavedObjectAttributes & {
   savedVis?: VisSavedObject;
 };
 export type VisualizeByValueInput = { attributes: VisualizeSavedObjectAttributes } & VisualizeInput;
-export type VisualizeByReferenceInput = SavedObjectEmbeddableInput & VisualizeInput;
+export type VisualizeByReferenceInput = { savedObjectId: string } & VisualizeInput;
 
 /** @deprecated
  * VisualizeEmbeddable is no longer registered with the legacy embeddable system and is only
@@ -122,11 +121,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private abortController?: AbortController;
   private readonly deps: VisualizeEmbeddableDeps;
   private readonly inspectorAdapters?: Adapters;
-  private attributeService?: AttributeService<
-    VisualizeSavedObjectAttributes,
-    VisualizeByValueInput,
-    VisualizeByReferenceInput
-  >;
+  private attributeService?: AttributeService;
   private expressionVariables: Record<string, unknown> | undefined;
   private readonly expressionVariablesSubject = new ReplaySubject<
     Record<string, unknown> | undefined
@@ -136,11 +131,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     timefilter: TimefilterContract,
     { vis, editPath, editUrl, indexPatterns, deps, capabilities }: VisualizeEmbeddableConfiguration,
     initialInput: VisualizeInput,
-    attributeService?: AttributeService<
-      VisualizeSavedObjectAttributes,
-      VisualizeByValueInput,
-      VisualizeByReferenceInput
-    >
+    attributeService?: AttributeService
   ) {
     super(initialInput, {
       defaultTitle: vis.title,
@@ -446,11 +437,25 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     render(
       <KibanaRenderContextProvider {...core}>
         <div className="visChart__spinner">
-          <EuiLoadingChart mono size="l" />
+          <EuiLoadingChart size="l" />
         </div>
       </KibanaRenderContextProvider>,
       this.domNode
     );
+
+    const hasCompatibleActions = async (event: ExpressionRendererEvent) => {
+      const uiActions = getUiActions();
+      if (!uiActions?.getTriggerCompatibleActions) {
+        return false;
+      }
+      const eventName = get(VIS_EVENT_TO_TRIGGER, event.name, event.name);
+      const actions = await uiActions.getTriggerCompatibleActions(eventName, {
+        data: event.data,
+        embeddable: this,
+      });
+
+      return actions.length > 0;
+    };
 
     const expressions = getExpressions();
     this.handler = await expressions.loader(this.domNode, undefined, {
@@ -458,6 +463,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       onRenderError: (element: HTMLElement, error: ExpressionRenderError) => {
         this.onContainerError(error);
       },
+      hasCompatibleActions,
       executionContext: this.getExecutionContext(),
     });
 

@@ -117,36 +117,34 @@ export async function getServiceInstancesSystemMetricStatistics<T extends true |
     apm: {
       events: [ProcessorEvent.metric],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            ...rangeQuery(startWithOffset, endWithOffset),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            ...(serviceNodeIds?.length ? [{ terms: { [SERVICE_NODE_NAME]: serviceNodeIds } }] : []),
-            {
-              bool: {
-                should: [cgroupMemory.filter, systemMemory.filter, cpuUsageFilter],
-                minimum_should_match: 1,
-              },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          { term: { [SERVICE_NAME]: serviceName } },
+          ...rangeQuery(startWithOffset, endWithOffset),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+          ...(serviceNodeIds?.length ? [{ terms: { [SERVICE_NODE_NAME]: serviceNodeIds } }] : []),
+          {
+            bool: {
+              should: [cgroupMemory.filter, systemMemory.filter, cpuUsageFilter],
+              minimum_should_match: 1,
             },
-          ],
-        },
-      },
-      aggs: {
-        [SERVICE_NODE_NAME]: {
-          terms: {
-            field: SERVICE_NODE_NAME,
-            missing: SERVICE_NODE_NAME_MISSING,
-            ...(size ? { size } : {}),
-            ...(serviceNodeIds?.length ? { include: serviceNodeIds } : {}),
           },
-          aggs: subAggs,
+        ],
+      },
+    },
+    aggs: {
+      [SERVICE_NODE_NAME]: {
+        terms: {
+          field: SERVICE_NODE_NAME,
+          missing: SERVICE_NODE_NAME_MISSING,
+          ...(size ? { size } : {}),
+          ...(serviceNodeIds?.length ? { include: serviceNodeIds } : {}),
         },
+        aggs: subAggs,
       },
     },
   });

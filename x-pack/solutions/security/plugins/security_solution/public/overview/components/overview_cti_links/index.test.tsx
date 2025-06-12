@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
-import { ThreatIntelLinkPanel } from '.';
+import { screen, render } from '@testing-library/react';
 
 import { TestProviders } from '../../../common/mock';
 import { mockProps, mockTiDataSources, mockCtiLinksResponse } from './mock';
 import { useTiDataSources } from '../../containers/overview_cti_links/use_ti_data_sources';
 import { useCtiDashboardLinks } from '../../containers/overview_cti_links';
+import { ThreatIntelLinkPanel } from '.';
 
 jest.mock('../../containers/overview_cti_links/use_ti_data_sources');
 const useTiDataSourcesMock = useTiDataSources as jest.Mock;
@@ -24,24 +24,24 @@ useCtiDashboardLinksMock.mockReturnValue(mockCtiLinksResponse);
 
 describe('ThreatIntelLinkPanel', () => {
   it('renders CtiEnabledModule when Threat Intel module is enabled', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <ThreatIntelLinkPanel {...mockProps} />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="cti-enabled-module"]').length).toEqual(1);
-    expect(wrapper.find('[data-test-subj="cti-enable-integrations-button"]').length).toEqual(0);
-    expect(wrapper.find('[data-test-subj="cti-view-indicators"]').length).toBeGreaterThan(0);
+    expect(screen.getByTestId('cti-enabled-module')).toBeInTheDocument();
+    expect(screen.queryByTestId('cti-enable-integrations-button')).not.toBeInTheDocument();
+    expect(screen.getByTestId('cti-view-indicators')).toBeInTheDocument();
   });
 
   it('renders CtiDisabledModule when Threat Intel module is disabled', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <ThreatIntelLinkPanel {...mockProps} allTiDataSources={[]} />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="cti-disabled-module"]').length).toEqual(1);
+    expect(screen.getByTestId('cti-disabled-module')).toBeInTheDocument();
   });
 });

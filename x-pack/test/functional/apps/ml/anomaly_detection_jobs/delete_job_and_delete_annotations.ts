@@ -6,11 +6,11 @@
  */
 
 import { ANNOTATION_TYPE } from '@kbn/ml-plugin/common/constants/annotations';
-import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   SINGLE_METRIC_JOB_CONFIG,
   MULTI_METRIC_JOB_CONFIG,
-} from '../../../../api_integration/apis/ml/jobs/common_jobs';
+} from '@kbn/test-suites-xpack-platform/api_integration/apis/ml/jobs/common_jobs';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const config = getService('config');
@@ -95,8 +95,10 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.api.assertAnnotationsCount(jobId, expectedAnnotations.beforeDelete);
 
           await ml.testExecution.logTestStep('job creation loads the job management page');
-          await ml.navigation.navigateToMl();
-          await ml.navigation.navigateToJobManagement();
+          await ml.navigation.navigateToStackManagementMlSection(
+            'anomaly_detection',
+            'ml-jobs-list'
+          );
 
           await ml.testExecution.logTestStep('job deletion triggers the delete action');
           await ml.jobTable.clickDeleteJobAction(jobId);

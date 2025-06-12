@@ -16,10 +16,6 @@ import {
   RULE_NAME_HEADER,
   RULE_TYPE_DETAILS,
   RULE_NAME_OVERRIDE_DETAILS,
-  DEFINITION_DETAILS,
-  SUPPRESS_BY_DETAILS,
-  SUPPRESS_FOR_DETAILS,
-  SUPPRESS_MISSING_FIELD,
 } from '../../../../screens/rule_details';
 
 import { ESQL_QUERY_BAR } from '../../../../screens/create_new_rule';
@@ -41,14 +37,6 @@ import {
   fillRuleName,
   fillDescription,
   getAboutContinueButton,
-  fillAlertSuppressionFields,
-  selectAlertSuppressionPerInterval,
-  setAlertSuppressionDuration,
-  selectDoNotSuppressForMissingFields,
-  continueFromDefineStep,
-  fillAboutRuleMinimumAndContinue,
-  skipScheduleRuleAction,
-  interceptEsqlQueryFieldsRequest,
   createRuleWithNonBlockingErrors,
 } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
@@ -67,9 +55,8 @@ const workaroundForResizeObserver = () =>
     }
   });
 
-// Failing: See https://github.com/elastic/kibana/issues/184558
-describe.skip(
-  'Detection ES|QL rules, creation',
+describe(
+  'Detection ES|QL rules - Rule Creation',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
@@ -184,7 +171,7 @@ describe.skip(
       });
 
       it('shows syntax error when query is syntactically invalid - prioritizing it over missing metadata operator error', function () {
-        const invalidNonAggregatingQuery = 'from auditbeat* | limit 5 test';
+        const invalidNonAggregatingQuery = 'from auditbeat* | where true test';
         selectEsqlRuleType();
         fillEsqlQueryBar(invalidNonAggregatingQuery);
         getDefineContinueButton().click();
@@ -240,61 +227,6 @@ describe.skip(
         createRuleWithoutEnabling();
 
         cy.get(INVESTIGATION_FIELDS_VALUE_ITEM).should('have.text', CUSTOM_ESQL_FIELD);
-      });
-    });
-
-    describe('Alert suppression', () => {
-      beforeEach(() => {
-        login();
-        visit(CREATE_RULE_URL);
-      });
-      it('shows custom ES|QL field in investigation fields autocomplete and saves it in rule', function () {
-        const CUSTOM_ESQL_FIELD = '_custom_agent_name';
-        const SUPPRESS_BY_FIELDS = [CUSTOM_ESQL_FIELD, 'agent.type'];
-
-        const queryWithCustomFields = [
-          `from auditbeat* metadata _id, _version, _index`,
-          `eval ${CUSTOM_ESQL_FIELD} = agent.name`,
-          `drop agent.*`,
-        ].join(' | ');
-
-        workaroundForResizeObserver();
-
-        selectEsqlRuleType();
-
-        interceptEsqlQueryFieldsRequest(queryWithCustomFields, 'esqlSuppressionFieldsRequest');
-        fillEsqlQueryBar(queryWithCustomFields);
-
-        cy.wait('@esqlSuppressionFieldsRequest');
-        fillAlertSuppressionFields(SUPPRESS_BY_FIELDS);
-        selectAlertSuppressionPerInterval();
-        setAlertSuppressionDuration(2, 'h');
-        selectDoNotSuppressForMissingFields();
-        continueFromDefineStep();
-
-        // ensures details preview works correctly
-        cy.get(DEFINITION_DETAILS).within(() => {
-          getDetails(SUPPRESS_BY_DETAILS).should('have.text', SUPPRESS_BY_FIELDS.join(''));
-          getDetails(SUPPRESS_FOR_DETAILS).should('have.text', '2h');
-          getDetails(SUPPRESS_MISSING_FIELD).should(
-            'have.text',
-            'Do not suppress alerts for events with missing fields'
-          );
-        });
-
-        fillAboutRuleMinimumAndContinue(rule);
-        skipScheduleRuleAction();
-        createRuleWithoutEnabling();
-
-        // ensures rule details displayed correctly after rule created
-        cy.get(DEFINITION_DETAILS).within(() => {
-          getDetails(SUPPRESS_BY_DETAILS).should('have.text', SUPPRESS_BY_FIELDS.join(''));
-          getDetails(SUPPRESS_FOR_DETAILS).should('have.text', '2h');
-          getDetails(SUPPRESS_MISSING_FIELD).should(
-            'have.text',
-            'Do not suppress alerts for events with missing fields'
-          );
-        });
       });
     });
   }

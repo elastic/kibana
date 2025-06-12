@@ -8,9 +8,9 @@
  */
 
 import { ALERT_RULE_NAME, ALERT_STATUS } from '@kbn/rule-data-utils';
-import { OptionsListControlState } from '@kbn/controls-plugin/public';
+import type { OptionsListControlState } from '@kbn/controls-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { FilterControlConfig } from './types';
+import type { FilterControlConfig } from './types';
 
 export const DEFAULT_CONTROLS: FilterControlConfig[] = [
   {

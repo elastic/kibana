@@ -9,6 +9,7 @@ import * as rt from 'io-ts';
 
 const userPrivilegesRt = rt.type({
   canMonitor: rt.boolean,
+  canReadFailureStore: rt.boolean,
 });
 
 const datasetUserPrivilegesRt = rt.intersection([
@@ -32,6 +33,7 @@ export const dataStreamStatRt = rt.intersection([
     lastActivity: rt.number,
     integration: rt.string,
     totalDocs: rt.number,
+    creationDate: rt.number,
   }),
 ]);
 

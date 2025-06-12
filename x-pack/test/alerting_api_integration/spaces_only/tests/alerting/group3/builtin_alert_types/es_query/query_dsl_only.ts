@@ -9,12 +9,12 @@ import expect from '@kbn/expect';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { pull } from 'lodash';
 import { Spaces } from '../../../../../scenarios';
-import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
 import { createDataStream, deleteDataStream } from '../../../create_test_data';
+import type { CreateRuleParams } from './common';
 import {
   createConnector,
-  CreateRuleParams,
   ES_GROUPS_TO_WRITE,
   ES_TEST_DATA_STREAM_NAME,
   ES_TEST_INDEX_REFERENCE,

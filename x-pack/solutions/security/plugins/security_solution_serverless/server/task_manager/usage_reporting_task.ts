@@ -17,6 +17,7 @@ import type {
   SecurityUsageReportingTaskStartContract,
   SecurityUsageReportingTaskSetupContract,
   UsageRecord,
+  BackfillConfig,
 } from '../types';
 import type { ServerlessSecurityConfig } from '../config';
 import type { UsageReportingService } from '../common/services/usage_reporting_service';
@@ -36,6 +37,9 @@ export class SecurityUsageReportingTask {
   private readonly logger: Logger;
   private readonly config: ServerlessSecurityConfig;
   private readonly usageReportingService: UsageReportingService;
+  private readonly backfillConfig: BackfillConfig = {
+    enabled: false,
+  };
 
   constructor(setupContract: SecurityUsageReportingTaskSetupContract) {
     const {
@@ -49,6 +53,7 @@ export class SecurityUsageReportingTask {
       version,
       meteringCallback,
       usageReportingService,
+      backfillConfig,
     } = setupContract;
 
     this.cloudSetup = cloudSetup;
@@ -57,6 +62,13 @@ export class SecurityUsageReportingTask {
     this.logger = logFactory.get(this.taskId);
     this.config = config;
     this.usageReportingService = usageReportingService;
+    if (backfillConfig) {
+      if (backfillConfig.enabled && !backfillConfig.maxRecords) {
+        throw new Error('maxRecords is required when backfill is enabled');
+      }
+
+      this.backfillConfig = backfillConfig;
+    }
 
     try {
       taskManager.registerTaskDefinitions({
@@ -109,6 +121,8 @@ export class SecurityUsageReportingTask {
     core: CoreSetup,
     meteringCallback: MeteringCallback
   ) => {
+    this.logger.info('Usage reporting task is running.');
+
     // if task was not `.start()`'d yet, then exit
     if (!this.wasStarted) {
       this.logger.debug('[runTask()] Aborted. Task not started yet');
@@ -162,6 +176,11 @@ export class SecurityUsageReportingTask {
     this.logger.debug(() => `received usage records: ${JSON.stringify(usageRecords)}`);
 
     let usageReportResponse: Response | undefined;
+    let backfillRecords: UsageRecord[] = taskInstance.state.backfillRecords || [];
+
+    if (backfillRecords.length > 0) {
+      usageRecords = [...backfillRecords, ...usageRecords];
+    }
 
     if (usageRecords.length !== 0) {
       try {
@@ -174,6 +193,13 @@ export class SecurityUsageReportingTask {
           this.logger.error(`API error ${usageReportResponse.status}, ${errorResponse}`);
           return { state: taskInstance.state, runAt: new Date() };
         }
+
+        if (backfillRecords.length > 0) {
+          this.logger.debug(
+            `${backfillRecords.length} backfill usage records were sent successfully`
+          );
+        }
+        backfillRecords = [];
 
         this.logger.debug(
           `(${
@@ -188,6 +214,18 @@ export class SecurityUsageReportingTask {
             usageRecords.length
           }) usage records starting from ${lastSuccessfulReport.toISOString()}: ${err} `
         );
+        if (this.backfillConfig.enabled) {
+          backfillRecords = [...backfillRecords, ...usageRecords];
+
+          if (
+            this.backfillConfig.maxRecords &&
+            backfillRecords.length > this.backfillConfig.maxRecords
+          ) {
+            backfillRecords = backfillRecords.slice(
+              backfillRecords.length - this.backfillConfig.maxRecords
+            );
+          }
+        }
       }
     }
 
@@ -196,6 +234,7 @@ export class SecurityUsageReportingTask {
         !usageRecords.length || usageReportResponse?.status === 201
           ? (latestRecordTimestamp || meteringCallbackTime).toISOString()
           : lastSuccessfulReport.toISOString(),
+      backfillRecords,
     };
 
     return shouldRunAgain ? { state, runAt: new Date() } : { state };

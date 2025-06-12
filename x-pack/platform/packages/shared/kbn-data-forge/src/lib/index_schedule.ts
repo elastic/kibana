@@ -36,7 +36,9 @@ export async function indexSchedule(config: Config, client: Client, logger: Tool
   const compiledSchedule = config.schedule.map(parseSchedule(now));
   for (const schedule of compiledSchedule) {
     const interval = schedule.interval ?? config.indexing.interval;
-    const startTs = moment(schedule.start);
+    const startTs = config.indexing.alignEventsToInterval
+      ? moment(schedule.start).startOf('minute')
+      : moment(schedule.start);
     const end =
       schedule.end === false && startTs.isAfter(now)
         ? moment(schedule.start + interval)

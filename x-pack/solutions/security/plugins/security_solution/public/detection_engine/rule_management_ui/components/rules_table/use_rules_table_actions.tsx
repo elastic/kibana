@@ -14,7 +14,7 @@ import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { useKibana } from '../../../../common/lib/kibana';
 import { canEditRuleWithActions } from '../../../../common/utils/privileges';
-import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
+import * as i18n from '../../../common/translations';
 import type { Rule } from '../../../rule_management/logic';
 import { useBulkExport } from '../../../rule_management/logic/bulk_actions/use_bulk_export';
 import {
@@ -25,7 +25,6 @@ import { useDownloadExportedRules } from '../../../rule_management/logic/bulk_ac
 import { useHasActionsPrivileges } from './use_has_actions_privileges';
 import type { TimeRange } from '../../../rule_gaps/types';
 import { useScheduleRuleRun } from '../../../rule_gaps/logic/use_schedule_rule_run';
-import { usePrebuiltRulesCustomizationStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status';
 import { ManualRuleRunEventTypes } from '../../../../common/lib/telemetry';
 
 export const useRulesTableActions = ({
@@ -47,7 +46,6 @@ export const useRulesTableActions = ({
   const { bulkExport } = useBulkExport();
   const downloadExportedRules = useDownloadExportedRules();
   const { scheduleRuleRun } = useScheduleRuleRun();
-  const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
 
   return [
     {
@@ -118,7 +116,6 @@ export const useRulesTableActions = ({
           await downloadExportedRules(response);
         }
       },
-      enabled: (rule: Rule) => isRulesCustomizationEnabled || !rule.immutable,
     },
     {
       type: 'icon',

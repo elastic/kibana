@@ -104,8 +104,7 @@ export class CustomLogsPage {
   async clickAdvancedSettingsButton() {
     return this.page.testSubj
       .locator('obltOnboardingCustomLogsAdvancedSettings')
-      .getByRole('button')
-      .first()
+      .locator('button.euiAccordion__button')
       .click();
   }
 

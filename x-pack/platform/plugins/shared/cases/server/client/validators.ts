@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { getValidatorForObservableType } from '../../common/observables/validators';
 import { OBSERVABLE_TYPES_BUILTIN } from '../../common/constants';
 import { type CasesClient } from './client';
 import { getAvailableObservableTypesMap } from './observable_types';
@@ -125,5 +126,19 @@ export const validateObservableTypeKeyExists = async (
   const observableTypesSet = await getAvailableObservableTypesMap(casesClient, caseOwner);
   if (!observableTypesSet.has(observableTypeKey)) {
     throw Boom.badRequest(`Invalid observable type, key does not exist: ${observableTypeKey}`);
+  }
+};
+
+export const validateObservableValue = (
+  observableTypeKey: string | undefined,
+  observableValue: unknown
+) => {
+  const validator = getValidatorForObservableType(observableTypeKey);
+  const validationError = validator(observableValue);
+
+  if (validationError) {
+    throw Boom.badRequest(
+      `Observable value "${observableValue}" is not valid for selected observable type ${observableTypeKey}.`
+    );
   }
 };

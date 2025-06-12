@@ -11,6 +11,7 @@ import {
   SavedObjectsFindResponse,
   SavedObjectsClientContract,
   ElasticsearchClient,
+  Logger,
 } from '@kbn/core/server';
 import {
   REINDEX_OP_TYPE,
@@ -22,6 +23,7 @@ import {
 } from '../../../common/types';
 import { generateNewIndexName } from './index_settings';
 import { FlatSettings } from './types';
+import { getRollupJobByIndexName } from '../rollup_job';
 
 // TODO: base on elasticsearch.requestTimeout?
 export const LOCK_WINDOW = moment.duration(90, 'seconds');
@@ -84,7 +86,8 @@ export interface ReindexActions {
 
 export const reindexActionsFactory = (
   client: SavedObjectsClientContract,
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  log: Logger
 ): ReindexActions => {
   // ----- Internal functions
   const isLocked = (reindexOp: ReindexSavedObject) => {
@@ -125,6 +128,9 @@ export const reindexActionsFactory = (
   // ----- Public interface
   return {
     async createReindexOp(indexName: string, opts?: ReindexOptions) {
+      // gets rollup job if it exists and needs stopping, otherwise returns undefined
+      const rollupJob = await getRollupJobByIndexName(esClient, log, indexName);
+
       return client.create<ReindexOperation>(REINDEX_OP_TYPE, {
         indexName,
         newIndexName: generateNewIndexName(indexName),
@@ -136,6 +142,7 @@ export const reindexActionsFactory = (
         errorMessage: null,
         runningReindexCount: null,
         reindexOptions: opts,
+        rollupJob,
       });
     },
 

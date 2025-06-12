@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import React from 'react';
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { basicCase } from './mock';
 import * as api from './api';
-import type { AppMockRenderer } from '../common/mock';
-import { createAppMockRenderer } from '../common/mock';
 import { useToasts } from '../common/lib/kibana';
 import { casesQueriesKeys } from './constants';
 import { useUpdateComment } from './use_update_comment';
+import { TestProviders, createTestQueryClient } from '../common/mock';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
@@ -29,18 +29,16 @@ describe('useUpdateComment', () => {
   const addError = jest.fn();
   (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
 
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
   });
 
   it('patch case and refresh the case page', async () => {
-    const queryClientSpy = jest.spyOn(appMockRender.queryClient, 'invalidateQueries');
+    const queryClient = createTestQueryClient();
+    const queryClientSpy = jest.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useUpdateComment(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: (props) => <TestProviders {...props} queryClient={queryClient} />,
     });
 
     act(() => {
@@ -49,14 +47,15 @@ describe('useUpdateComment', () => {
 
     await waitFor(() => {
       expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView());
-      expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
     });
+
+    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
     const patchCommentSpy = jest.spyOn(api, 'patchComment');
     const { result } = renderHook(() => useUpdateComment(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {
@@ -75,7 +74,7 @@ describe('useUpdateComment', () => {
     jest.spyOn(api, 'patchComment').mockRejectedValue(new Error('useUpdateComment: Test error'));
 
     const { result } = renderHook(() => useUpdateComment(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {

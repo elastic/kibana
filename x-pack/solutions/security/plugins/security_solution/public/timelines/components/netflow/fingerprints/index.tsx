@@ -26,6 +26,7 @@ export const Fingerprints = React.memo<{
   tlsClientCertificateFingerprintSha1?: string[] | null;
   tlsFingerprintsJa3Hash?: string[] | null;
   tlsServerCertificateFingerprintSha1?: string[] | null;
+  scopeId: string;
 }>(
   ({
     contextId,
@@ -33,6 +34,7 @@ export const Fingerprints = React.memo<{
     tlsClientCertificateFingerprintSha1,
     tlsFingerprintsJa3Hash,
     tlsServerCertificateFingerprintSha1,
+    scopeId,
   }) => (
     <EuiFlexGroup
       alignItems="center"
@@ -45,6 +47,7 @@ export const Fingerprints = React.memo<{
         ? uniq(tlsFingerprintsJa3Hash).map((ja3) => (
             <EuiFlexItem grow={false} key={ja3}>
               <Ja3Fingerprint
+                scopeId={scopeId}
                 eventId={eventId}
                 fieldName={JA3_HASH_FIELD_NAME}
                 contextId={contextId}
@@ -57,6 +60,7 @@ export const Fingerprints = React.memo<{
         ? uniq(tlsClientCertificateFingerprintSha1).map((clientCert) => (
             <EuiFlexItem grow={false} key={clientCert}>
               <CertificateFingerprint
+                scopeId={scopeId}
                 eventId={eventId}
                 certificateType="client"
                 contextId={contextId}
@@ -70,6 +74,7 @@ export const Fingerprints = React.memo<{
         ? uniq(tlsServerCertificateFingerprintSha1).map((serverCert) => (
             <EuiFlexItem grow={false} key={serverCert}>
               <CertificateFingerprint
+                scopeId={scopeId}
                 eventId={eventId}
                 certificateType="server"
                 contextId={contextId}

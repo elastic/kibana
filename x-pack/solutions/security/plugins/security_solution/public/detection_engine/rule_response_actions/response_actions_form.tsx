@@ -10,11 +10,11 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { map, reduce } from 'lodash';
 import ReactMarkdown from 'react-markdown';
 import { ResponseActionsWrapper } from './response_actions_wrapper';
-import { FORM_ERRORS_TITLE } from '../rule_creation/components/rule_actions_field/translations';
 import { ResponseActionsHeader } from './response_actions_header';
 import type { ArrayItem, FormHook } from '../../shared_imports';
 import { useSupportedResponseActionTypes } from './use_supported_response_action_types';
 import { getActionDetails } from './constants';
+import { FORM_ERRORS_TITLE } from '../../common/components/rule_actions_field/translations';
 
 interface ResponseActionsFormProps {
   items: ArrayItem[];

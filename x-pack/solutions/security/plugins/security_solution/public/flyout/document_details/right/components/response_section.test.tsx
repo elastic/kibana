@@ -47,7 +47,7 @@ const renderResponseSection = () =>
 
 describe('<ResponseSection />', () => {
   beforeEach(() => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
   });
 
   it('should render response component', () => {
@@ -155,9 +155,9 @@ describe('<ResponseSection />', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  describe('newExpandableFlyoutNavigationEnabled', () => {
+  describe('newExpandableFlyoutNavigationDisabled is false', () => {
     beforeEach(() => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     });
 
     it('should render if isPreviewMode is true', () => {

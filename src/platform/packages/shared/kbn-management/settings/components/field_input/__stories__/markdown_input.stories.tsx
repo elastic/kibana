@@ -9,5 +9,9 @@
 
 import { getInputStory, getStory } from './common';
 
-export default getStory('Markdown Input', 'An input with a markdown value.');
+const Story = getStory('Markdown Input', 'An input with a markdown value.');
 export const MarkdownInput = getInputStory('markdown' as const);
+
+export default {
+  ...Story,
+};

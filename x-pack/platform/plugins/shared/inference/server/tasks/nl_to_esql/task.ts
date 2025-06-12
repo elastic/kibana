@@ -21,6 +21,8 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
   toolChoice,
   logger,
   functionCalling,
+  maxRetries,
+  retryConfiguration,
   system,
   metadata,
   ...rest
@@ -39,6 +41,8 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
         logger,
         systemMessage,
         functionCalling,
+        maxRetries,
+        retryConfiguration,
         metadata,
         toolOptions: {
           tools,
@@ -50,6 +54,8 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
       return requestDocumentation({
         connectorId,
         functionCalling,
+        maxRetries,
+        retryConfiguration,
         outputApi: client.output,
         messages,
         system: systemMessage,
@@ -62,8 +68,8 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
         switchMap((documentationEvent) => {
           return askLlmToRespond({
             documentationRequest: {
-              commands: documentationEvent.output.commands,
-              functions: documentationEvent.output.functions,
+              commands: documentationEvent.output?.commands,
+              functions: documentationEvent.output?.functions,
             },
           });
         })

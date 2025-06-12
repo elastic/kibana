@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { notImplemented } from '@hapi/boom';
+
 import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { v4 } from 'uuid';
@@ -14,6 +14,7 @@ import type { RecalledEntry } from '../../service/knowledge_base_service';
 import { getSystemMessageFromInstructions } from '../../service/util/get_system_message_from_instructions';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { assistantScopeType } from '../runtime_types';
+import { getDatasetInfo } from '../../functions/get_dataset_info';
 
 const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/functions',
@@ -50,7 +51,7 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
 
     const client = await service.getClient({ request });
 
-    const [functionClient, userInstructions] = await Promise.all([
+    const [functionClient, kbUserInstructions] = await Promise.all([
       service.getFunctionClient({
         signal: controller.signal,
         resources,
@@ -70,11 +71,51 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
       functionDefinitions,
       systemMessage: getSystemMessageFromInstructions({
         applicationInstructions: functionClient.getInstructions(),
-        userInstructions,
-        adHocInstructions: functionClient.getAdhocInstructions(),
+        kbUserInstructions,
+        apiUserInstructions: [],
         availableFunctionNames,
       }),
     };
+  },
+});
+
+const functionDatasetInfoRoute = createObservabilityAIAssistantServerRoute({
+  endpoint: 'GET /internal/observability_ai_assistant/functions/get_dataset_info',
+  params: t.type({
+    query: t.type({ index: t.string, connectorId: t.string }),
+  }),
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
+  },
+  handler: async (resources) => {
+    const client = await resources.service.getClient({ request: resources.request });
+
+    const {
+      query: { index, connectorId },
+    } = resources.params;
+
+    const controller = new AbortController();
+    resources.request.events.aborted$.subscribe(() => {
+      controller.abort();
+    });
+
+    const resp = await getDatasetInfo({
+      resources,
+      indexPattern: index,
+      signal: controller.signal,
+      messages: [],
+      chat: (operationName, params) => {
+        return client.chat(operationName, {
+          ...params,
+          stream: true,
+          connectorId,
+        });
+      },
+    });
+
+    return resp;
   },
 });
 
@@ -115,10 +156,6 @@ const functionRecallRoute = createObservabilityAIAssistantServerRoute({
       body: { queries, categories },
     } = resources.params;
 
-    if (!client) {
-      throw notImplemented();
-    }
-
     const entries = await client.recall({ queries, categories });
     return { entries };
   },
@@ -143,10 +180,6 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
   },
   handler: async (resources): Promise<void> => {
     const client = await resources.service.getClient({ request: resources.request });
-
-    if (!client) {
-      throw notImplemented();
-    }
 
     const {
       title,
@@ -176,4 +209,5 @@ export const functionRoutes = {
   ...getFunctionsRoute,
   ...functionRecallRoute,
   ...functionSummariseRoute,
+  ...functionDatasetInfoRoute,
 };

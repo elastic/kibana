@@ -7,15 +7,21 @@
 import * as t from 'io-ts';
 import { toBooleanRt } from '@kbn/io-ts-utils';
 import {
-  type Conversation,
   type ConversationCreateRequest,
-  type ConversationRequestBase,
   type ConversationUpdateRequest,
   type Message,
   MessageRole,
   type ObservabilityAIAssistantScreenContextRequest,
   type StarterPrompt,
 } from '../../common/types';
+
+export const unredactionRt = t.type({
+  entity: t.string,
+  class_name: t.string,
+  start_pos: t.number,
+  end_pos: t.number,
+  type: t.union([t.literal('ner'), t.literal('regex')]),
+});
 
 export const messageRt: t.Type<Message> = t.type({
   '@timestamp': t.string,
@@ -47,6 +53,7 @@ export const messageRt: t.Type<Message> = t.type({
           arguments: t.string,
         }),
       ]),
+      unredactions: t.array(unredactionRt),
     }),
   ]),
 });
@@ -57,21 +64,22 @@ const tokenCountRt = t.type({
   total: t.number,
 });
 
-export const baseConversationRt: t.Type<ConversationRequestBase> = t.type({
-  '@timestamp': t.string,
-  conversation: t.intersection([
-    t.type({
+export const conversationCreateRt: t.Type<ConversationCreateRequest> = t.intersection([
+  t.type({
+    '@timestamp': t.string,
+    conversation: t.type({
       title: t.string,
     }),
-    t.partial({
-      token_count: tokenCountRt,
-    }),
-  ]),
-  messages: t.array(messageRt),
-  labels: t.record(t.string, t.string),
-  numeric_labels: t.record(t.string, t.number),
-  public: toBooleanRt,
-});
+    messages: t.array(messageRt),
+    labels: t.record(t.string, t.string),
+    numeric_labels: t.record(t.string, t.number),
+    public: toBooleanRt,
+  }),
+  t.partial({
+    systemMessage: t.string,
+    archived: toBooleanRt,
+  }),
+]);
 
 export const assistantScopeType = t.union([
   t.literal('observability'),
@@ -79,17 +87,8 @@ export const assistantScopeType = t.union([
   t.literal('all'),
 ]);
 
-export const conversationCreateRt: t.Type<ConversationCreateRequest> = t.intersection([
-  baseConversationRt,
-  t.type({
-    conversation: t.type({
-      title: t.string,
-    }),
-  }),
-]);
-
 export const conversationUpdateRt: t.Type<ConversationUpdateRequest> = t.intersection([
-  baseConversationRt,
+  conversationCreateRt,
   t.type({
     conversation: t.intersection([
       t.type({
@@ -97,31 +96,10 @@ export const conversationUpdateRt: t.Type<ConversationUpdateRequest> = t.interse
         title: t.string,
       }),
       t.partial({
-        token_count: tokenCountRt,
+        token_count: tokenCountRt, // deprecated, but kept for backwards compatibility
       }),
     ]),
   }),
-]);
-
-export const conversationRt: t.Type<Conversation> = t.intersection([
-  baseConversationRt,
-  t.intersection([
-    t.type({
-      namespace: t.string,
-      conversation: t.intersection([
-        t.type({
-          id: t.string,
-          last_updated: t.string,
-        }),
-        t.partial({
-          token_count: tokenCountRt,
-        }),
-      ]),
-    }),
-    t.partial({
-      user: t.intersection([t.type({ name: t.string }), t.partial({ id: t.string })]),
-    }),
-  ]),
 ]);
 
 export const functionRt = t.intersection([

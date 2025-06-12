@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { Spaces } from '../../../../../scenarios';
-import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover, getEventLog } from '../../../../../../common/lib';
 import { createEsDocumentsWithGroups } from '../../../create_test_data';
 
@@ -24,7 +24,8 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
-  describe('index threshold rule that hits max alerts circuit breaker', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/193876
+  describe.skip('index threshold rule that hits max alerts circuit breaker', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     beforeEach(async () => {

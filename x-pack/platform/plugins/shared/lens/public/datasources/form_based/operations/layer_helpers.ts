@@ -10,6 +10,7 @@ import { CoreStart } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import memoizeOne from 'memoize-one';
 import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
+import { nonNullable } from '../../../utils';
 import type { DateRange } from '../../../../common/types';
 import type {
   DatasourceFixAction,
@@ -1567,7 +1568,7 @@ export function getErrorMessages(
   const skippedColumns = visibleManagedReferences.flatMap(([columnId]) =>
     getManagedColumnsFrom(columnId, layer.columns).map(([id]) => id)
   );
-  const errors = columns
+  const errors: LayerErrorMessage[] = columns
     .flatMap(([columnId, column]) => {
       if (skippedColumns.includes(columnId)) {
         return;
@@ -1606,7 +1607,7 @@ export function getErrorMessages(
       };
     })
     // remove the undefined values
-    .filter((v) => v != null) as LayerErrorMessage[];
+    .filter(nonNullable) as LayerErrorMessage[];
 
   return errors.length ? errors : undefined;
 }

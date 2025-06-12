@@ -9,7 +9,7 @@ import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 import { requestContextMock } from './__mocks__/request_context';
 import { getAlertsGroupAggregationsRequest } from './__mocks__/request_responses';
 import { requestMock, serverMock } from './__mocks__/server';
-import { AlertsClient } from '..';
+import type { AlertsClient } from '..';
 import { getAlertsGroupAggregations } from './get_alerts_group_aggregations';
 
 const getMockAggregations = () =>

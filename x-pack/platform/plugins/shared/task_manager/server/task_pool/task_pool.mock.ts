@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { TaskPool } from './task_pool';
+import type { TaskPool } from './task_pool';
 
 const defaultGetCapacityOverride: () => Partial<{
   load: number;

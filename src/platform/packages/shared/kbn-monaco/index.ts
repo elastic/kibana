@@ -9,40 +9,17 @@
 
 import './src/register_globals';
 
-export {
-  monaco,
-  cssConf,
-  cssLanguage,
-  markdownConf,
-  markdownLanguage,
-  yamlConf,
-  yamlLanguage,
-} from './src/monaco_imports';
-export { XJsonLang } from './src/xjson';
-export { SQLLang } from './src/sql';
-export { ESQL_LANG_ID, ESQL_DARK_THEME_ID, ESQL_LIGHT_THEME_ID, ESQLLang } from './src/esql';
+export { monaco } from './src/monaco_imports';
+
 export type { ESQLCallbacks } from '@kbn/esql-validation-autocomplete';
 
-export * from './src/painless';
 /* eslint-disable-next-line @kbn/eslint/module_migration */
 import * as BarePluginApi from 'monaco-editor/esm/vs/editor/editor.api';
-export { YAML_LANG_ID, configureMonacoYamlSchema } from './src/yaml';
 
-import { registerLanguage } from './src/helpers';
+export * from './src/languages';
 
-export { BarePluginApi, registerLanguage };
+export { BarePluginApi };
 export * from './src/types';
-
-export {
-  CONSOLE_LANG_ID,
-  CONSOLE_OUTPUT_LANG_ID,
-  CONSOLE_THEME_ID,
-  getParsedRequestsProvider,
-  ConsoleParsedRequestsProvider,
-  createOutputParser,
-} from './src/console';
-
-export type { ParsedRequest } from './src/console';
 
 export {
   defaultThemesResolvers,

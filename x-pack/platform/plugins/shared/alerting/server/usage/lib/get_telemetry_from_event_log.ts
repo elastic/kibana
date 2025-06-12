@@ -14,8 +14,8 @@ import type {
   AggregationsTermsAggregateBase,
   AggregationsStringTermsBucketKeys,
   AggregationsBuckets,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+} from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   NUM_ALERTING_RULE_TYPES,
   NUM_ALERTING_EXECUTION_FAILURE_REASON_TYPES,
@@ -137,21 +137,19 @@ export async function getExecutionsPerDayCount({
     const query = {
       index: eventLogIndex,
       size: 0,
-      body: {
-        query: getProviderAndActionFilterForTimeRange('execute'),
-        aggs: {
-          ...eventLogAggs,
-          by_rule_type_id: {
-            terms: {
-              field: 'rule.category',
-              size: NUM_ALERTING_RULE_TYPES,
-            },
-            aggs: eventLogAggs,
+      query: getProviderAndActionFilterForTimeRange('execute'),
+      aggs: {
+        ...eventLogAggs,
+        by_rule_type_id: {
+          terms: {
+            field: 'rule.category',
+            size: NUM_ALERTING_RULE_TYPES,
           },
-          by_execution_status: {
-            terms: {
-              field: 'event.outcome',
-            },
+          aggs: eventLogAggs,
+        },
+        by_execution_status: {
+          terms: {
+            field: 'event.outcome',
           },
         },
       },
@@ -224,14 +222,12 @@ export async function getExecutionTimeoutsPerDayCount({
     const query = {
       index: eventLogIndex,
       size: 0,
-      body: {
-        query: getProviderAndActionFilterForTimeRange('execute-timeout'),
-        aggs: {
-          by_rule_type_id: {
-            terms: {
-              field: 'rule.category',
-              size: NUM_ALERTING_RULE_TYPES,
-            },
+      query: getProviderAndActionFilterForTimeRange('execute-timeout'),
+      aggs: {
+        by_rule_type_id: {
+          terms: {
+            field: 'rule.category',
+            size: NUM_ALERTING_RULE_TYPES,
           },
         },
       },
@@ -344,7 +340,7 @@ export function parseRuleTypeBucket(
     alertsPercentilesByType: { p50: {}, p90: {}, p99: {} },
   };
   for (const bucket of buckets ?? []) {
-    const ruleType: string = replaceDotSymbols(bucket?.key) ?? '';
+    const ruleType: string = replaceDotSymbols(`${bucket?.key ?? ''}`);
     const numExecutions: number = bucket?.doc_count ?? 0;
     const avgExecutionTimeNanos = bucket?.avg_execution_time?.value ?? 0;
     const avgEsSearchTimeMillis = bucket?.avg_es_search_duration?.value ?? 0;
@@ -395,7 +391,7 @@ export function parseExecutionFailureByRuleType(
   const executionFailuresWithRuleTypeBuckets: FlattenedExecutionFailureBucket[] = flatMap(
     buckets ?? [],
     (bucket) => {
-      const ruleType: string = replaceDotSymbols(bucket.key);
+      const ruleType: string = replaceDotSymbols(`${bucket.key}`);
 
       /**
        * Execution failure bucket format
@@ -413,7 +409,7 @@ export function parseExecutionFailureByRuleType(
 
       const executionFailuresBuckets = bucket?.execution_failures?.by_reason
         ?.buckets as AggregationsStringTermsBucketKeys[];
-      return (executionFailuresBuckets ?? []).map((b) => ({ ...b, ruleType }));
+      return (executionFailuresBuckets ?? []).map((b) => ({ ...b, key: `${b.key}`, ruleType }));
     }
   );
 
@@ -552,7 +548,7 @@ export function parseExecutionCountAggregationResults(results: {
     countTotalFailedExecutions: results?.execution_failures?.doc_count ?? 0,
     countFailedExecutionsByReason: executionFailuresByReasonBuckets.reduce<Record<string, number>>(
       (acc, bucket: AggregationsStringTermsBucketKeys) => {
-        const reason: string = bucket.key;
+        const reason: string = `${bucket.key}`;
         acc[reason] = bucket.doc_count ?? 0;
         return acc;
       },
@@ -570,8 +566,8 @@ export function parseExecutionCountAggregationResults(results: {
 
 function getProviderAndActionFilterForTimeRange(
   action: string,
-  provider: string = 'alerting',
-  range: string = '1d'
+  provider = 'alerting',
+  range = '1d'
 ) {
   return {
     bool: {

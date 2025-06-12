@@ -97,24 +97,6 @@ exports[`GaugeComponent renders the chart 1`] = `
               "strokeWidth": 1,
               "visible": true,
             },
-            "lumaSteps": Array [
-              224,
-              184,
-              128,
-              96,
-              64,
-              32,
-              16,
-              8,
-              4,
-              2,
-              1,
-              0,
-              0,
-              0,
-              0,
-              0,
-            ],
             "vertical": Object {
               "dash": Array [
                 0,
@@ -218,18 +200,18 @@ exports[`GaugeComponent renders the chart 1`] = `
           "top": 0,
         },
         "colors": Object {
-          "defaultVizColor": "#6092C0",
+          "defaultVizColor": "#16C5C0",
           "vizColors": Array [
-            "#54B399",
-            "#6092C0",
-            "#9170B8",
-            "#CA8EAE",
-            "#D36086",
-            "#E7664C",
-            "#AA6556",
-            "#DA8B45",
-            "#B9A888",
-            "#D6BF57",
+            "#16C5C0",
+            "#A6EDEA",
+            "#61A2FF",
+            "#BFDBFF",
+            "#EE72A6",
+            "#FFC7DB",
+            "#F6726A",
+            "#FFC9C2",
+            "#EAAE01",
+            "#FCD883",
           ],
         },
         "crosshair": Object {
@@ -568,8 +550,8 @@ exports[`GaugeComponent renders the chart 1`] = `
   <Bullet
     colorBands={
       Array [
-        "#D3DAE6",
-        "#D3DAE6",
+        "#CAD3E2",
+        "#CAD3E2",
       ]
     }
     data={

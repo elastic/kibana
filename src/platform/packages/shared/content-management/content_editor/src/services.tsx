@@ -13,6 +13,7 @@ import {
   UserProfilesProvider,
   useUserProfilesServices,
 } from '@kbn/content-management-user-profiles';
+import { QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 
 import type { EuiComboBoxProps } from '@elastic/eui';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
@@ -138,18 +139,21 @@ export const ContentEditorKibanaProvider: FC<
   }, [savedObjectsTagging?.ui.components.TagList]);
 
   const userProfilesServices = useUserProfilesServices();
+  const queryClient = useQueryClient();
 
   const openFlyout = useCallback(
     (node: ReactNode, options: OverlayFlyoutOpenOptions) => {
       return coreOpenFlyout(
         toMountPoint(
-          <UserProfilesProvider {...userProfilesServices}>{node}</UserProfilesProvider>,
+          <QueryClientProvider client={queryClient}>
+            <UserProfilesProvider {...userProfilesServices}>{node}</UserProfilesProvider>
+          </QueryClientProvider>,
           startServices
         ),
         options
       );
     },
-    [coreOpenFlyout, startServices, userProfilesServices]
+    [coreOpenFlyout, startServices, userProfilesServices, queryClient]
   );
 
   return (

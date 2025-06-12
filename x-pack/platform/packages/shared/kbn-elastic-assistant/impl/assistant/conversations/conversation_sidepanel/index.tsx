@@ -13,12 +13,17 @@ import {
   EuiListGroupItem,
   EuiPanel,
   EuiConfirmModal,
+  EuiText,
+  EuiSpacer,
+  useEuiTheme,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import useEvent from 'react-use/lib/useEvent';
 
 import { css } from '@emotion/react';
-import { isEmpty, findIndex, orderBy } from 'lodash';
+import { isEmpty, findIndex } from 'lodash';
+import { useConversationsByDate } from './use_conversations_by_date';
 import { DataStreamApis } from '../../use_data_stream_apis';
 import { Conversation } from '../../../..';
 import * as i18n from './translations';
@@ -27,13 +32,15 @@ const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
 interface Props {
   currentConversation?: Conversation;
-  onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
+  onConversationSelected: ({ cId }: { cId: string }) => void;
   shouldDisableKeyboardShortcut?: () => boolean;
   isDisabled?: boolean;
+  isFetchingCurrentUserConversations: boolean;
   conversations: Record<string, Conversation>;
   onConversationDeleted: (conversationId: string) => void;
   onConversationCreate: () => void;
   refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
+  setPaginationObserver: (ref: HTMLDivElement) => void;
 }
 
 const getCurrentConversationIndex = (
@@ -75,19 +82,28 @@ export const ConversationSidePanel = React.memo<Props>(
     onConversationSelected,
     shouldDisableKeyboardShortcut = () => false,
     isDisabled = false,
+    isFetchingCurrentUserConversations,
     conversations,
     onConversationDeleted,
     onConversationCreate,
+    setPaginationObserver,
   }) => {
+    const euiTheme = useEuiTheme();
+
+    const titleClassName = css`
+      text-transform: uppercase;
+      font-weight: ${euiTheme.euiTheme.font.weight.bold};
+    `;
     const [deleteConversationItem, setDeleteConversationItem] = useState<Conversation | null>(null);
 
+    const conversationsCategorizedByDate = useConversationsByDate(Object.values(conversations));
+
     const conversationList = useMemo(
-      () =>
-        orderBy(Object.values(conversations), 'updatedAt', 'desc').sort((a, b) =>
-          a.id.length > b.id.length ? -1 : 1
-        ),
-      [conversations]
+      () => Object.values(conversationsCategorizedByDate).flatMap((p) => p),
+      [conversationsCategorizedByDate]
     );
+
+    const lastConversationId = conversationList[conversationList.length - 1]?.id;
 
     const conversationIds = useMemo(() => Object.keys(conversations), [conversations]);
 
@@ -98,7 +114,6 @@ export const ConversationSidePanel = React.memo<Props>(
           const previousConversation = getNextConversation(conversationList, conversation);
           onConversationSelected({
             cId: previousConversation.id,
-            cTitle: previousConversation.title,
           });
         }
         onConversationDeleted(conversation.id);
@@ -111,14 +126,12 @@ export const ConversationSidePanel = React.memo<Props>(
 
       onConversationSelected({
         cId: previousConversation.id,
-        cTitle: previousConversation.title,
       });
     }, [conversationList, currentConversation, onConversationSelected]);
     const onArrowDownClick = useCallback(() => {
       const nextConversation = getNextConversation(conversationList, currentConversation);
       onConversationSelected({
         cId: nextConversation.id,
-        cTitle: nextConversation.title,
       });
     }, [conversationList, currentConversation, onConversationSelected]);
 
@@ -167,7 +180,6 @@ export const ConversationSidePanel = React.memo<Props>(
     }, [deleteConversationItem, onDelete]);
 
     useEvent('keydown', onKeyDown);
-
     return (
       <>
         <EuiFlexGroup
@@ -183,38 +195,81 @@ export const ConversationSidePanel = React.memo<Props>(
               overflow: auto;
             `}
           >
-            <EuiPanel hasShadow={false} borderRadius="none">
-              <EuiListGroup
-                size="xs"
-                css={css`
-                  padding: 0;
-                `}
-              >
-                {conversationList.map((conversation) => (
-                  <EuiListGroupItem
-                    key={conversation.id + conversation.title}
-                    onClick={() =>
-                      onConversationSelected({ cId: conversation.id, cTitle: conversation.title })
-                    }
-                    label={conversation.title}
-                    data-test-subj={`conversation-select-${conversation.title}`}
-                    isActive={
-                      !isEmpty(conversation.id)
-                        ? conversation.id === currentConversation?.id
-                        : conversation.title === currentConversation?.title
-                    }
-                    extraAction={{
-                      color: 'danger',
-                      onClick: () => setDeleteConversationItem(conversation),
-                      iconType: 'trash',
-                      iconSize: 's',
-                      disabled: conversation.isDefault,
-                      'aria-label': i18n.DELETE_CONVERSATION_ARIA_LABEL,
-                      'data-test-subj': 'delete-option',
-                    }}
-                  />
-                ))}
-              </EuiListGroup>
+            <EuiPanel
+              hasShadow={false}
+              borderRadius="none"
+              data-test-subj={'conversationSidePanel'}
+            >
+              {Object.entries(conversationsCategorizedByDate).map(([category, convoList]) =>
+                convoList.length ? (
+                  <EuiFlexItem grow={false} key={category}>
+                    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
+                      <EuiText css={titleClassName} size="s">
+                        {i18n.DATE_CATEGORY_LABELS[category]}
+                      </EuiText>
+                    </EuiPanel>
+                    <EuiListGroup
+                      size="xs"
+                      css={css`
+                        padding: 0;
+                      `}
+                    >
+                      {convoList.map((conversation) => {
+                        const internalSetObserver = (ref: HTMLDivElement | null) => {
+                          if (conversation.id === lastConversationId && ref) {
+                            setPaginationObserver(ref);
+                          }
+                        };
+                        return (
+                          <span key={conversation.id + conversation.title}>
+                            <EuiListGroupItem
+                              size="xs"
+                              onClick={() =>
+                                onConversationSelected({
+                                  cId: conversation.id,
+                                })
+                              }
+                              label={conversation.title}
+                              data-test-subj={`conversation-select-${conversation.title}`}
+                              isActive={
+                                !isEmpty(conversation.id)
+                                  ? conversation.id === currentConversation?.id
+                                  : conversation.title === currentConversation?.title
+                              }
+                              extraAction={{
+                                color: 'danger',
+                                onClick: () => setDeleteConversationItem(conversation),
+                                iconType: 'trash',
+                                iconSize: 's',
+                                'aria-label': i18n.DELETE_CONVERSATION_ARIA_LABEL,
+                                'data-test-subj': 'delete-option',
+                              }}
+                            />
+                            {conversation.id === lastConversationId && (
+                              <div
+                                ref={internalSetObserver}
+                                css={css`
+                                  height: 1px;
+                                `}
+                              />
+                            )}
+                          </span>
+                        );
+                      })}
+                    </EuiListGroup>
+                    <EuiSpacer size="s" />
+                  </EuiFlexItem>
+                ) : null
+              )}
+              {isFetchingCurrentUserConversations && (
+                <EuiLoadingSpinner
+                  size="m"
+                  css={css`
+                    display: block;
+                    margin: 0 auto;
+                  `}
+                />
+              )}
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

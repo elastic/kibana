@@ -8,13 +8,12 @@
 import { set } from '@kbn/safer-lodash-set';
 import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
-import {
+import type {
   AlertAttachmentAttributes,
   UserCommentAttachmentAttributes,
-  AttachmentType,
-  CaseStatuses,
 } from '@kbn/cases-plugin/common/types/domain';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { AttachmentType, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
   defaultUser,

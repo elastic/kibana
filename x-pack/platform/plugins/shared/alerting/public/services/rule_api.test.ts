@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Rule, RuleType } from '../../common';
+import type { Rule, RuleType } from '../../common';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { loadRule, loadRuleType, loadRuleTypes } from './rule_api';
 

@@ -6,22 +6,18 @@
  */
 
 import { omit, pick } from 'lodash';
-import {
+import type {
   ElasticsearchClient,
   SavedObjectsClient,
-  SavedObjectsErrorHelpers,
   SavedObjectsUpdateOptions,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { decodeRequestVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { RawRule } from '../types';
+import type { RawRule } from '../types';
 
-import {
-  RuleAttributesToEncrypt,
-  RuleAttributesIncludedInAAD,
-  RuleAttributesNotPartiallyUpdatable,
-  RULE_SAVED_OBJECT_TYPE,
-} from '.';
+import type { RuleAttributesNotPartiallyUpdatable } from '.';
+import { RuleAttributesToEncrypt, RuleAttributesIncludedInAAD, RULE_SAVED_OBJECT_TYPE } from '.';
 
 export type PartiallyUpdateableRuleAttributes = Partial<
   Omit<RawRule, RuleAttributesNotPartiallyUpdatable>

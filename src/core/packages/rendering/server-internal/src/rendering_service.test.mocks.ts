@@ -36,3 +36,10 @@ jest.doMock('./get_apm_config', () => {
     getApmConfig: getApmConfigMock,
   };
 });
+
+export const getIsThemeBundledMock = jest.fn();
+jest.doMock('./theme', () => {
+  return {
+    isThemeBundled: getIsThemeBundledMock,
+  };
+});

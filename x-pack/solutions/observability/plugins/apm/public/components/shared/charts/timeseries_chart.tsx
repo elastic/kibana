@@ -31,9 +31,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, useEuiTheme } from '@ela
 import { i18n } from '@kbn/i18n';
 import type { ReactElement } from 'react';
 import React from 'react';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { useHistory } from 'react-router-dom';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
-import { getVizColorForIndex } from '../../../../common/viz_colors';
 import { isExpectedBoundsComparison } from '../time_comparison/get_comparison_options';
 
 import { useChartPointerEventContext } from '../../../context/chart_pointer_event/use_chart_pointer_event_context';
@@ -78,7 +78,8 @@ export function TimeseriesChart({
 }: TimeseriesChartProps) {
   const history = useHistory();
   const { chartRef, updatePointerEvent } = useChartPointerEventContext();
-  const { euiTheme, colorMode } = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
+  const isDarkMode = useKibanaIsDarkMode();
   const chartThemes = useChartThemes();
   const anomalyChartTimeseries = getChartAnomalyTimeseries({
     anomalyTimeseries,
@@ -118,7 +119,6 @@ export function TimeseriesChart({
       }
     : undefined;
 
-  const isDarkMode = colorMode === 'DARK';
   const endZoneColor = isDarkMode ? euiTheme.colors.lightShade : euiTheme.colors.darkShade;
   const endZoneRectAnnotationStyle: Partial<RectAnnotationStyle> = {
     stroke: endZoneColor,
@@ -153,7 +153,7 @@ export function TimeseriesChart({
                     alignItems="center"
                     responsive={false}
                     gutterSize="xs"
-                    style={{ fontWeight: 'normal' }}
+                    css={{ fontWeight: 'normal' }}
                   >
                     <EuiFlexItem grow={false}>
                       <EuiIcon type="iInCircle" />
@@ -232,6 +232,7 @@ export function TimeseriesChart({
               key={serie.title}
               id={serie.id || serie.title}
               groupId={serie.groupId}
+              // Defaults to multi layer time axis as of Elastic Charts v70
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
               xAccessor="x"
@@ -240,7 +241,7 @@ export function TimeseriesChart({
               stackAccessors={serie.stackAccessors ?? undefined}
               markSizeAccessor={serie.markSizeAccessor}
               data={isEmpty ? [] : serie.data}
-              color={getVizColorForIndex(index, euiTheme)}
+              color={serie.color}
               curve={CurveType.CURVE_MONOTONE_X}
               hideInLegend={serie.hideLegend}
               fit={serie.fit ?? undefined}

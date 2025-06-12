@@ -14,8 +14,6 @@ export * from './use_exception_lists';
 export * from './use_export_list';
 export * from './use_find_lists';
 export * from './use_import_list';
-export * from './use_persist_exception_item';
-export * from './use_persist_exception_list';
 export * from './use_read_list_index';
 export * from './use_read_list_privileges';
 export * from './use_find_list_items';

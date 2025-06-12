@@ -8,7 +8,11 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { useAssistantContext, type Conversation } from '@kbn/elastic-assistant';
+import {
+  useAssistantContext,
+  type Conversation,
+  useAssistantLastConversation,
+} from '@kbn/elastic-assistant';
 import { useCurrentConversation } from '@kbn/elastic-assistant/impl/assistant/use_current_conversation';
 import { useDataStreamApis } from '@kbn/elastic-assistant/impl/assistant/use_data_stream_apis';
 import { getDefaultConnector } from '@kbn/elastic-assistant/impl/assistant/helpers';
@@ -61,27 +65,28 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
   const {
     http,
     assistantAvailability: { isAssistantEnabled },
-    baseConversations,
-    getLastConversationId,
   } = useAssistantContext();
+  const { getLastConversation, setLastConversation } = useAssistantLastConversation({ spaceId });
   const {
     allSystemPrompts,
     conversations,
     isFetchedCurrentUserConversations,
     isFetchedPrompts,
     refetchCurrentUserConversations,
-  } = useDataStreamApis({ http, baseConversations, isAssistantEnabled });
+  } = useDataStreamApis({ http, isAssistantEnabled });
 
   const { currentConversation, handleOnConversationSelected } = useCurrentConversation({
     allSystemPrompts,
     conversations,
     defaultConnector,
+    spaceId,
     refetchCurrentUserConversations,
-    conversationId: getLastConversationId(),
+    lastConversation: getLastConversation(),
     mayUpdateConversations:
       isFetchedCurrentUserConversations &&
       isFetchedPrompts &&
       Object.keys(conversations).length > 0,
+    setLastConversation,
   });
 
   const onConversationChange = useCallback(
@@ -101,7 +106,6 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
       const config = getGenAiConfig(connector);
       const apiProvider = config?.apiProvider;
       const model = config?.defaultModel;
-
       if (currentConversation != null) {
         const conversation = await setApiConfig({
           conversation: currentConversation,
@@ -113,6 +117,10 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
             provider: apiProvider,
             model,
           },
+        }).catch(() => {
+          // If the conversation is not found, it means the connector was deleted
+          // and return null to avoid setting the conversation
+          return null;
         });
 
         if (conversation && onConversationChange != null) {
@@ -120,17 +128,11 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
         }
       }
 
-      if (selectedConnectorId != null) {
+      if (connector) {
         setSelectedConnectorId(connectorId);
       }
     },
-    [
-      currentConversation,
-      selectedConnectorId,
-      setApiConfig,
-      onConversationChange,
-      setSelectedConnectorId,
-    ]
+    [currentConversation, setApiConfig, onConversationChange, setSelectedConnectorId]
   );
 
   if (!checkCompleteMetadata) {

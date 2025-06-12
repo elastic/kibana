@@ -23,3 +23,15 @@ components:
         api_key:
           type: string
           description: The API key to use for tracing.
+
+    LangSmithEvaluationSettings:
+      description: The LangSmith settings object for evaluations.
+      allOf:
+        - $ref: '#/components/schemas/LangSmithOptions'
+        - type: object
+          required:
+            - dataset
+          properties:
+            dataset:
+              type: string
+              description: The dataset name to use for evaluations.

@@ -99,6 +99,9 @@ export function TimeComparison() {
 
   return (
     <EuiSelect
+      aria-label={i18n.translate('xpack.apm.timeComparison.euiSelect.seletTimeComparisonLabel', {
+        defaultMessage: 'Select time comparison options',
+      })}
       fullWidth={isSmall || isMedium}
       data-test-subj="comparisonSelect"
       disabled={comparisonEnabled === false}

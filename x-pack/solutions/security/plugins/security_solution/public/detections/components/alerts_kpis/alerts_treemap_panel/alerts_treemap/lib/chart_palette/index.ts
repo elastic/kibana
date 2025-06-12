@@ -12,7 +12,7 @@ import {
   RISK_SCORE_MEDIUM,
   RISK_SCORE_HIGH,
   RISK_SCORE_CRITICAL,
-} from '../../../../../../../common/constants';
+} from '../../../../../../../../common/detection_engine/constants';
 import { getRiskSeverityColors } from '../../../../../../../common/utils/risk_color_palette';
 
 /**

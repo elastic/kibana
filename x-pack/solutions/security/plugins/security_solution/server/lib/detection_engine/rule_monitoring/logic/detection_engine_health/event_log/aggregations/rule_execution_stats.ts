@@ -5,19 +5,10 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { mapValues } from 'lodash';
 
-import type {
-  AggregatedMetric,
-  HealthOverviewStats,
-  LogLevel,
-  NumberOfDetectedGaps,
-  NumberOfExecutions,
-  NumberOfLoggedMessages,
-  RuleExecutionStatus,
-  TopMessages,
-} from '../../../../../../../../common/api/detection_engine/rule_monitoring';
+import type { RuleExecutionStatus } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
   LogLevelEnum,
   RuleExecutionEventTypeEnum,
@@ -31,6 +22,14 @@ import {
 import * as f from '../../../event_log/event_log_fields';
 import { DEFAULT_PERCENTILES } from '../../../utils/es_aggregations';
 import type { RawData } from '../../../utils/normalization';
+import type {
+  AggregatedMetric,
+  HealthOverviewStats,
+  NumberOfDetectedGaps,
+  NumberOfExecutions,
+  NumberOfLoggedMessages,
+  TopMessages,
+} from './types';
 
 export type RuleExecutionStatsAggregationLevel = 'whole-interval' | 'histogram';
 
@@ -117,6 +116,20 @@ export const getRuleExecutionStatsAggregation = (
             totalGapDurationS: {
               sum: {
                 field: f.RULE_EXECUTION_GAP_DURATION_S,
+              },
+            },
+          },
+        },
+        frozenIndices: {
+          filter: {
+            exists: {
+              field: f.RULE_EXECUTION_FROZEN_INDICES_QUERIED_COUNT,
+            },
+          },
+          aggs: {
+            frozenIndicesQueriedCount: {
+              max: {
+                field: f.RULE_EXECUTION_FROZEN_INDICES_QUERIED_COUNT,
               },
             },
           },
@@ -212,6 +225,7 @@ export const normalizeRuleExecutionStatsAggregationResult = (
   const gaps = executionMetricsEvents.gaps || {};
   const searchDurationMs = executionMetricsEvents.searchDurationMs || {};
   const indexingDurationMs = executionMetricsEvents.indexingDurationMs || {};
+  const frozenIndices = executionMetricsEvents.frozenIndices || {};
 
   return {
     number_of_executions: normalizeNumberOfExecutions(totalExecutions, executionsByStatus),
@@ -229,6 +243,7 @@ export const normalizeRuleExecutionStatsAggregationResult = (
       aggregationLevel === 'whole-interval'
         ? normalizeTopWarnings(messageContainingEvents)
         : undefined,
+    frozen_indices_queried_max_count: normalizeFrozenQueriedIndices(frozenIndices),
   };
 };
 
@@ -278,6 +293,10 @@ const normalizeNumberOfDetectedGaps = (gaps: RawData): NumberOfDetectedGaps => {
     total: Number(gaps.doc_count || 0),
     total_duration_s: Number(gaps.totalGapDurationS?.value || 0),
   };
+};
+
+const normalizeFrozenQueriedIndices = (frozenQueriedIndices: RawData): number => {
+  return Number(frozenQueriedIndices?.frozenIndicesQueriedCount?.value || 0);
 };
 
 const normalizeAggregatedMetric = (

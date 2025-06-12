@@ -123,7 +123,7 @@ export function SparkPlotItem({
           justifyContent: 'center',
         }}
       >
-        <EuiLoadingChart mono />
+        <EuiLoadingChart />
       </div>
     );
   }
@@ -165,6 +165,7 @@ export function SparkPlotItem({
           <>
             <LineSeries
               id="Sparkline"
+              // Defaults to multi layer time axis as of Elastic Charts v70
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
               xAccessor={'x'}
@@ -176,6 +177,7 @@ export function SparkPlotItem({
             {hasComparisonSeries && (
               <AreaSeries
                 id="comparisonSeries"
+                // Defaults to multi layer time axis as of Elastic Charts v70
                 xScaleType={ScaleType.Time}
                 yScaleType={ScaleType.Linear}
                 xAccessor={'x'}

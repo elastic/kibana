@@ -26,7 +26,6 @@
       "uiActions",
       "urlForwarding",
       "presentationUtil",
-      "visualizations",
       "unifiedSearch"
     ],
     "optionalPlugins": [

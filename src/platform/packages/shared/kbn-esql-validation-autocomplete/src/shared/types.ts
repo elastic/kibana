@@ -6,8 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLRealField, JoinIndexAutocompleteItem } from '../validation/types';
-
+import type { ESQLControlVariable, IndexAutocompleteItem, RecommendedQuery } from '@kbn/esql-types';
+import { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types/src/inference_endpoint_autocomplete_types';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type { ESQLFieldWithMetadata } from '../validation/types';
 /** @internal **/
 type CallbackFn<Options = {}, Result = string> = (ctx?: Options) => Result[] | Promise<Result[]>;
 
@@ -36,30 +38,23 @@ export interface ESQLSourceResult {
   type?: string;
 }
 
-export interface ESQLControlVariable {
-  key: string;
-  value: string | number;
-  type: ESQLVariableType;
-}
-
-export enum ESQLVariableType {
-  TIME_LITERAL = 'time_literal',
-  FIELDS = 'fields',
-  VALUES = 'values',
-}
-
 export interface ESQLCallbacks {
   getSources?: CallbackFn<{}, ESQLSourceResult>;
-  getColumnsFor?: CallbackFn<{ query: string }, ESQLRealField>;
+  getColumnsFor?: CallbackFn<{ query: string }, ESQLFieldWithMetadata>;
   getPolicies?: CallbackFn<
     {},
     { name: string; sourceIndices: string[]; matchField: string; enrichFields: string[] }
   >;
   getPreferences?: () => Promise<{ histogramBarTarget: number }>;
   getFieldsMetadata?: Promise<PartialFieldsMetadataClient>;
-  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined;
+  getVariables?: () => ESQLControlVariable[] | undefined;
   canSuggestVariables?: () => boolean;
-  getJoinIndices?: () => Promise<{ indices: JoinIndexAutocompleteItem[] }>;
+  getJoinIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
+  getTimeseriesIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
+  getEditorExtensions?: (queryString: string) => Promise<RecommendedQuery[]>;
+  getInferenceEndpoints?: (
+    taskType: InferenceTaskType
+  ) => Promise<InferenceEndpointsAutocompleteResult>;
 }
 
 export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';

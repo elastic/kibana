@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function alertingTests({ loadTestFile }: FtrProviderContext) {
   describe('Alerts', () => {
     loadTestFile(require.resolve('./gold_noop_alert_type'));
     loadTestFile(require.resolve('./basic_noop_alert_type'));
+    loadTestFile(require.resolve('./enabled_rule_types'));
   });
 }

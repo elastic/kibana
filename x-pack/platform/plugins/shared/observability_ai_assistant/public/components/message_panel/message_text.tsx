@@ -18,7 +18,7 @@ import {
 import { css } from '@emotion/css';
 import classNames from 'classnames';
 import type { Code, InlineCode, Parent, Text } from 'mdast';
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo } from 'react';
 import type { Node } from 'unist';
 import { ChatActionClickHandler } from '../chat/types';
 import { CodeBlock, EsqlCodeBlock } from './esql_code_block';
@@ -27,6 +27,7 @@ interface Props {
   content: string;
   loading: boolean;
   onActionClick: ChatActionClickHandler;
+  anonymizedHighlightedContent?: React.ReactNode;
 }
 
 const ANIMATION_TIME = 1;
@@ -115,14 +116,15 @@ const esqlLanguagePlugin = () => {
   };
 };
 
-export function MessageText({ loading, content, onActionClick }: Props) {
+export function MessageText({
+  loading,
+  content,
+  onActionClick,
+  anonymizedHighlightedContent,
+}: Props) {
   const containerClassName = css`
     overflow-wrap: anywhere;
   `;
-
-  const onActionClickRef = useRef(onActionClick);
-
-  onActionClickRef.current = onActionClick;
 
   const { parsingPluginList, processingPluginList } = useMemo(() => {
     const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
@@ -147,8 +149,9 @@ export function MessageText({ loading, content, onActionClick }: Props) {
           <>
             <EsqlCodeBlock
               value={props.value}
+              lang={props.lang}
               actionsDisabled={loading}
-              onActionClick={onActionClickRef.current}
+              onActionClick={onActionClick}
             />
             <EuiSpacer size="m" />
           </>
@@ -186,17 +189,19 @@ export function MessageText({ loading, content, onActionClick }: Props) {
       parsingPluginList: [loadingCursorPlugin, esqlLanguagePlugin, ...parsingPlugins],
       processingPluginList: processingPlugins,
     };
-  }, [loading]);
+  }, [loading, onActionClick]);
 
   return (
     <EuiText size="s" className={containerClassName}>
-      <EuiMarkdownFormat
-        textSize="s"
-        parsingPluginList={parsingPluginList}
-        processingPluginList={processingPluginList}
-      >
-        {`${content}${loading ? CURSOR : ''}`}
-      </EuiMarkdownFormat>
+      {anonymizedHighlightedContent || (
+        <EuiMarkdownFormat
+          textSize="s"
+          parsingPluginList={parsingPluginList}
+          processingPluginList={processingPluginList}
+        >
+          {`${content}${loading ? CURSOR : ''}`}
+        </EuiMarkdownFormat>
+      )}
     </EuiText>
   );
 }

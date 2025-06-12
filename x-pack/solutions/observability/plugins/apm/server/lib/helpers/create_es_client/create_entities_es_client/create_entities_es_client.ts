@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { InferSearchResponseOf } from '@kbn/es-types';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { entitiesAliasPattern, ENTITY_LATEST, ENTITY_HISTORY } from '@kbn/entities-schema';
 import { unwrapEsResponse } from '@kbn/observability-plugin/common/utils/unwrap_es_response';
 import type {
-  MsearchMultisearchBody,
+  SearchSearchRequestBody,
   MsearchMultisearchHeader,
 } from '@elastic/elasticsearch/lib/api/types';
 import { withApmSpan } from '../../../../utils/with_apm_span';
@@ -106,14 +106,12 @@ export async function createEntitiesESClient({
     ): Promise<{ responses: Array<InferSearchResponseOf<TDocument, TSearchRequest>> }> {
       const searches = allSearches
         .map((params) => {
-          const searchParams: [MsearchMultisearchHeader, MsearchMultisearchBody] = [
+          const searchParams: [MsearchMultisearchHeader, SearchSearchRequestBody] = [
             {
               index: [SERVICE_ENTITIES_LATEST_ALIAS],
               ignore_unavailable: true,
             },
-            {
-              ...params.body,
-            },
+            params,
           ];
 
           return searchParams;

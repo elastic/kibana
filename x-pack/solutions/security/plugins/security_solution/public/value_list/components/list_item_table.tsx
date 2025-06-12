@@ -39,7 +39,7 @@ export const ListItemTable = ({
       name: COLUMN_VALUE,
       render: (value, item) =>
         canWriteIndex ? <InlineEditListItemValue listItem={item} key={value} /> : value,
-      sortable: list.type !== 'text',
+      sortable: list.type !== 'text' && list.type !== 'ip_range',
     },
     {
       field: LIST_ITEM_FIELDS.updatedAt,

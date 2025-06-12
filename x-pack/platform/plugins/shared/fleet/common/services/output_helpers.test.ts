@@ -53,6 +53,14 @@ describe('getAllowedOutputTypesForAgentPolicy', () => {
     expect(res).toEqual(['elasticsearch']);
   });
 
+  it('should return only elasticsearch for an agent policy with Fleet Server not yet installed', () => {
+    const res = getAllowedOutputTypesForAgentPolicy({
+      has_fleet_server: true,
+    } as any);
+
+    expect(res).toEqual(['elasticsearch']);
+  });
+
   it('should return only elasticsearch for an agentless agent policy', () => {
     const res = getAllowedOutputTypesForAgentPolicy({ supports_agentless: true } as any);
 

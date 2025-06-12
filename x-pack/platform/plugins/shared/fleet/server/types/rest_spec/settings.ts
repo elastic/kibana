@@ -9,9 +9,10 @@ import { schema } from '@kbn/config-schema';
 
 import { isDiffPathProtocol } from '../../../common/services';
 
-import { OutputSchema } from '../models';
+import { DownloadSourceResponseSchema, OutputSchema } from '../models';
 
 import { FleetProxySchema } from './fleet_proxies';
+import { FleetServerHostSchema } from './fleet_server_policy_config';
 
 export const GetSettingsRequestSchema = {};
 
@@ -113,39 +114,11 @@ export const GetEnrollmentSettingsResponseSchema = schema.object({
       })
     ),
     has_active: schema.boolean(),
-    host: schema.maybe(
-      schema.object({
-        id: schema.string(),
-        name: schema.string(),
-        host_urls: schema.arrayOf(schema.string()),
-        is_default: schema.boolean(),
-        is_preconfigured: schema.boolean(),
-        is_internal: schema.maybe(schema.boolean()),
-        proxy_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-      })
-    ),
+    host: schema.maybe(FleetServerHostSchema),
     host_proxy: schema.maybe(FleetProxySchema),
     es_output: schema.maybe(OutputSchema),
     es_output_proxy: schema.maybe(FleetProxySchema),
   }),
-  download_source: schema.maybe(
-    schema.object({
-      id: schema.string(),
-      name: schema.string(),
-      host: schema.string(),
-      is_default: schema.boolean(),
-      proxy_id: schema.maybe(
-        schema.oneOf([
-          schema.literal(null),
-          schema.string({
-            meta: {
-              description:
-                'The ID of the proxy to use for this download source. See the proxies API for more information.',
-            },
-          }),
-        ])
-      ),
-    })
-  ),
+  download_source: DownloadSourceResponseSchema,
   download_source_proxy: schema.maybe(FleetProxySchema),
 });

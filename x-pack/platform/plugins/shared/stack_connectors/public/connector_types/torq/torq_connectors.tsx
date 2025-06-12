@@ -17,6 +17,7 @@ import {
 import { isUrl } from '@kbn/es-ui-shared-plugin/static/validators/string';
 import { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';
+import { isValidTorqHostName } from '../../../common/torq';
 import * as i18n from './translations';
 
 const { urlField, emptyField } = fieldValidators;
@@ -42,7 +43,7 @@ const torqWebhookEndpoint =
     };
     if (!isUrl(value)) return error;
     const hostname = new URL(value).hostname;
-    return hostname === 'hooks.torq.io' ? undefined : error;
+    return isValidTorqHostName(hostname) ? undefined : error;
   };
 
 const TorqActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({

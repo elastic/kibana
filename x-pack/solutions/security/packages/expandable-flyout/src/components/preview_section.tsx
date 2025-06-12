@@ -12,11 +12,13 @@ import {
   EuiFlexItem,
   EuiSplitPanel,
   EuiText,
+  transparentize,
   useEuiTheme,
 } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { has } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import {
   selectDefaultWidths,
   selectPushVsOverlay,
@@ -30,7 +32,19 @@ import {
   PREVIEW_SECTION_TEST_ID,
 } from './test_ids';
 import { useExpandableFlyoutApi } from '../..';
-import { BACK_BUTTON, CLOSE_BUTTON } from './translations';
+
+const BACK_BUTTON = i18n.translate(
+  'securitySolutionPackages.expandableFlyout.previewSection.backButton',
+  {
+    defaultMessage: 'Back',
+  }
+);
+const CLOSE_BUTTON = i18n.translate(
+  'securitySolutionPackages.expandableFlyout.previewSection.closeButton',
+  {
+    defaultMessage: 'Close',
+  }
+);
 
 export interface PreviewBanner {
   /**
@@ -99,14 +113,15 @@ export const PreviewSection: React.FC<PreviewSectionProps> = memo(
       const percentage = rightPercentage
         ? rightPercentage
         : defaultPercentages[type].rightPercentage;
-      return showExpanded ? `calc(${percentage}% - 8px)` : `calc(100% - 8px)`;
+      // we need to keep 1px here to make sure users can click on the EuiResizableButton and resize the flyout with preview opened
+      return showExpanded ? `calc(${percentage}% - 1px)` : `calc(100% - 1px)`;
     }, [defaultPercentages, rightPercentage, showExpanded, type]);
 
     const closeButton = (
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           iconType="cross"
-          onClick={() => closePreviewPanel()}
+          onClick={closePreviewPanel}
           data-test-subj={PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID}
           aria-label={CLOSE_BUTTON}
         />
@@ -119,7 +134,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = memo(
             size="xs"
             iconType="arrowLeft"
             iconSide="left"
-            onClick={() => previousPreviewPanel()}
+            onClick={previousPreviewPanel}
             data-test-subj={PREVIEW_SECTION_BACK_BUTTON_TEST_ID}
             aria-label={BACK_BUTTON}
           >
@@ -134,21 +149,17 @@ export const PreviewSection: React.FC<PreviewSectionProps> = memo(
       <div
         css={css`
           position: absolute;
-          top: 8px;
-          bottom: 8px;
-          right: 4px;
+          top: 0;
+          bottom: 0;
+          right: 0;
           width: ${width};
           z-index: 1000;
+          padding: ${euiTheme.size.m} ${euiTheme.size.s} 0px ${euiTheme.size.s};
+          // TODO EUI: add color with transparency
+          background: ${transparentize(euiTheme.colors.shadow, 0.1)};
         `}
       >
-        <EuiSplitPanel.Outer
-          css={css`
-            margin: ${euiTheme.size.xs};
-            box-shadow: 0 0 ${euiTheme.size.base} 0 ${euiTheme.colors.lightShade};
-          `}
-          data-test-subj={PREVIEW_SECTION_TEST_ID}
-          className="eui-fullHeight"
-        >
+        <EuiSplitPanel.Outer data-test-subj={PREVIEW_SECTION_TEST_ID} className="eui-fullHeight">
           {isPreviewBanner(banner) && (
             <EuiSplitPanel.Inner
               grow={false}

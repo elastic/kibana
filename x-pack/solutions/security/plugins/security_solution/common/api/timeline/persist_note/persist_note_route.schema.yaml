@@ -26,24 +26,17 @@ paths:
               properties:
                 note:
                   $ref: '../model/components.schema.yaml#/components/schemas/BareNote'
-                overrideOwner:
-                  type: boolean
-                  nullable: true
+                  description: The note to add or update.
                 noteId:
                   type: string
                   nullable: true
+                  description: The `savedObjectId` of the note
+                  example: 709f99c6-89b6-4953-9160-35945c8e174e
                 version:
                   type: string
                   nullable: true
-                eventIngested:
-                  type: string
-                  nullable: true
-                eventTimestamp:
-                  type: string
-                  nullable: true
-                eventDataView:
-                  type: string
-                  nullable: true
+                  description: The version of the note
+                  example: WzQ2LDFd
       responses:
         '200':
           description: Indicates the note was successfully created.
