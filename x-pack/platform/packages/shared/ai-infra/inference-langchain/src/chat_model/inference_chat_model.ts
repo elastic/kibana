@@ -34,14 +34,13 @@ import {
   InferenceConnector,
   ChatCompleteAPI,
   ChatCompleteOptions,
-  ChatCompleteCompositeResponse,
   FunctionCallingMode,
-  ToolOptions,
   isChatCompletionChunkEvent,
   isChatCompletionTokenCountEvent,
   isToolValidationError,
   getConnectorDefaultModel,
   getConnectorProvider,
+  ChatCompleteResponse,
 } from '@kbn/inference-common';
 import type { ToolChoice } from './types';
 import { toAsyncIterator, wrapInferenceError } from './utils';
@@ -186,15 +185,9 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     };
   }
 
-  async completionWithRetry(
-    request: ChatCompleteOptions<ToolOptions, false>
-  ): Promise<ChatCompleteCompositeResponse<ToolOptions, false>>;
-  async completionWithRetry(
-    request: ChatCompleteOptions<ToolOptions, true>
-  ): Promise<ChatCompleteCompositeResponse<ToolOptions, true>>;
-  async completionWithRetry(
-    request: ChatCompleteOptions<ToolOptions, boolean>
-  ): Promise<ChatCompleteCompositeResponse<ToolOptions, boolean>> {
+  completionWithRetry = <TStream extends boolean | undefined = false>(
+    request: ChatCompleteOptions & { stream?: TStream }
+  ) => {
     return this.caller.call(async () => {
       try {
         return await this.chatComplete(request);
@@ -202,7 +195,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
         throw wrapInferenceError(e);
       }
     });
-  }
+  };
 
   async _generate(
     baseMessages: BaseMessage[],
@@ -211,7 +204,8 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   ): Promise<ChatResult> {
     const { system, messages } = messagesToInference(baseMessages);
 
-    let response: Awaited<ChatCompleteCompositeResponse<ToolOptions, false>>;
+    let response: ChatCompleteResponse;
+
     try {
       response = await this.completionWithRetry({
         ...this.invocationParams(options),
@@ -264,7 +258,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       system,
       messages,
       stream: true as const,
-    } as ChatCompleteOptions<ToolOptions, true>);
+    });
 
     const responseIterator = toAsyncIterator(response$);
     for await (const event of responseIterator) {
