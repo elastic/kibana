@@ -97,7 +97,12 @@ export class FeatureFlagsService {
       }
     });
     this.overrides$.pipe(pairwise()).subscribe(([prev, next]) => {
-      featureFlagsChanged$.next(Object.keys({ ...prev, ...next })); // Assume that all keys are changed just in case
+      const mergedObject = { ...prev, ...next };
+      const keys = Object.keys(mergedObject).filter(
+        // Keep only the keys that have been removed or changed
+        (key) => !Object.hasOwn(next, key) || next[key] !== prev[key]
+      );
+      featureFlagsChanged$.next(keys);
     });
     const observeFeatureFlag$ = (flagName: string) =>
       featureFlagsChanged$.pipe(
@@ -158,6 +163,7 @@ export class FeatureFlagsService {
    */
   public async stop() {
     await OpenFeature.close();
+    this.overrides$.complete();
   }
 
   /**
