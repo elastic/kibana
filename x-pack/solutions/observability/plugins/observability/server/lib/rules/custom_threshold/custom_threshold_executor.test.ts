@@ -61,7 +61,7 @@ const mockOptions = {
   previousStartedAt: null,
   params: {
     searchConfiguration: {
-      index: {},
+      index: 'valid-index-name',
       query: {
         query: mockQuery,
         language: 'kuery',
@@ -672,7 +672,7 @@ describe('The custom threshold alert type', () => {
               },
             ],
             searchConfiguration: {
-              index: {},
+              index: 'valid-index-name',
               query: {
                 query: filterQuery,
                 language: 'kuery',
@@ -1584,7 +1584,7 @@ describe('The custom threshold alert type', () => {
           id: 'a',
         });
         expect(getViewInAppUrl).lastCalledWith({
-          dataViewId: 'c34a7c79-a88b-4b4a-ad19-72f6d24104e4',
+          dataViewId: 'valid-index-name',
           spaceId: MOCKED_SPACE_ID,
           groups: [
             {
@@ -1592,11 +1592,11 @@ describe('The custom threshold alert type', () => {
               value: 'a',
             },
           ],
-          logsExplorerLocator: undefined,
+          logsLocator: undefined,
           metrics: customThresholdCountCriterion.metrics,
           startedAt: expect.stringMatching(ISO_DATE_REGEX),
           searchConfiguration: {
-            index: {},
+            index: 'valid-index-name',
             query: {
               query: mockQuery,
               language: 'kuery',
@@ -1647,11 +1647,11 @@ describe('The custom threshold alert type', () => {
               value: 'host-0',
             },
           ],
-          logsExplorerLocator: undefined,
+          logsLocator: undefined,
           metrics: customThresholdCountCriterion.metrics,
           startedAt: expect.stringMatching(ISO_DATE_REGEX),
           searchConfiguration: {
-            index: {},
+            index: 'valid-index-name',
             query: {
               query: mockQuery,
               language: 'kuery',
@@ -2703,7 +2703,7 @@ describe('The custom threshold alert type', () => {
               },
             ],
             searchConfiguration: {
-              index: {},
+              index: 'mockedIndexId',
               query: {
                 query: filterQuery,
                 language: 'kuery',
