@@ -607,7 +607,7 @@ describe('getWebhookSettings', () => {
     });
   });
 
-  test('returns undefined when no webhook settings are defined', () => {
+  test('returns true when no webhook settings are defined', () => {
     const config: ActionsConfig = defaultActionsConfig;
     const webhookSettings = getActionsConfigurationUtilities(config).getWebhookSettings();
     expect(webhookSettings).toEqual({ ssl: { pfx: true } });
