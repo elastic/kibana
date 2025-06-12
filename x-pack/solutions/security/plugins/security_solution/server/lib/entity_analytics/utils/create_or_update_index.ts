@@ -42,7 +42,7 @@ export const createOrUpdateIndex = async ({
                 () => esClient.indices.putMapping({ index, ...options.mappings }),
                 { logger }
               );
-              logger.info(`Update mappings for ${index}`);
+              logger.info(`Updated mappings for ${index}`);
             } catch (err) {
               logger.error(`Failed to PUT mapping for index ${index}: ${err.message}`);
             }
@@ -62,7 +62,7 @@ export const createOrUpdateIndex = async ({
                   }),
                 { logger }
               );
-              logger.info(`Update settings for ${index}`);
+              logger.info(`Updated settings for ${index}`);
             } catch (err) {
               logger.error(`Failed to PUT settings for index ${index}: ${err.message}`);
             }
