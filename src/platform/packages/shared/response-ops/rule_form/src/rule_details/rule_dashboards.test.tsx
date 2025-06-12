@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { RuleDashboards } from './rule_dashboards';
@@ -140,9 +141,9 @@ describe('RuleDashboards', () => {
       .getByTestId('ruleLinkedDashboards')
       .querySelector('.euiComboBox__inputWrap');
     if (inputWrap) {
-      fireEvent.click(inputWrap);
+      await userEvent.click(inputWrap);
     }
-    fireEvent.click(screen.getByText('Dashboard 2'));
+    await userEvent.click(screen.getByText('Dashboard 2'));
 
     expect(mockOnChange).toHaveBeenCalledWith({
       type: 'setRuleProperty',
@@ -178,7 +179,10 @@ describe('RuleDashboards', () => {
     );
 
     const searchInput = screen.getByPlaceholderText(ALERT_LINK_DASHBOARDS_PLACEHOLDER);
-    fireEvent.change(searchInput, { target: { value: 'Dashboard 1' } });
+    // Focus the input before typing
+    searchInput.focus();
+
+    await userEvent.type(searchInput, 'Dashboard 1');
 
     // Advance timers to trigger debounce
     act(() => {
