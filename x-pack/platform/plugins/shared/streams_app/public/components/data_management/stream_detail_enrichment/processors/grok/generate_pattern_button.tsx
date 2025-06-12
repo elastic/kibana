@@ -158,7 +158,7 @@ export const AdditionalChargesCallout = ({ aiFeatures }: AdditionalChargesCallou
     <EuiCallOut onDismiss={() => aiFeatures.acknowledgeAdditionalCharges(true)}>
       <FormattedMessage
         id="xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.managedConnectorTooltip"
-        defaultMessage="Elastic LLM is the new default for generating patterns and incurs <costLink>additional charges</costLink>. Other LLM connectors remain available. <learnMoreLink>Learn more</learnMoreLink>"
+        defaultMessage="Elastic Managed LLM is the new default for generating patterns and incurs <costLink>additional charges</costLink>. Other LLM connectors remain available. <learnMoreLink>Learn more</learnMoreLink>"
         values={{
           costLink: (...chunks: React.ReactNode[]) => (
             <EuiLink
