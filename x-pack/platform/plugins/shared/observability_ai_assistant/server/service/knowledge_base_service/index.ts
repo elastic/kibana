@@ -476,27 +476,42 @@ export class KnowledgeBaseService {
     }
 
     try {
-      const bulkBody = entries.flatMap((entry) => [
-        { index: { _index: resourceNames.writeIndexAlias.kb, _id: entry.id } },
-        {
-          '@timestamp': new Date().toISOString(),
-          ...entry,
-          ...(entry.text ? { semantic_text: entry.text } : {}),
-          user,
-          namespace,
-        },
-      ]);
+      const BATCH_SIZE = 100;
 
-      const bulkResult = await this.dependencies.esClient.asInternalUser.bulk({
-        refresh: 'wait_for',
-        body: bulkBody,
-      });
+      for (let i = 0; i < entries.length; i += BATCH_SIZE) {
+        const batch = entries.slice(i, i + BATCH_SIZE);
+        this.dependencies.logger.debug(
+          `Processing batch ${Math.floor(i / BATCH_SIZE) + 1} of ${Math.ceil(
+            entries.length / BATCH_SIZE
+          )} (${batch.length} entries)`
+        );
 
-      if (bulkResult.errors) {
-        const errorMessages = bulkResult.items
-          .filter((item: any) => item.index?.error)
-          .map((item: any) => item.index?.error?.reason);
-        throw new Error(`Indexing failed: ${errorMessages.join(', ')}`);
+        await this.dependencies.esClient.asInternalUser.helpers.bulk({
+          onDocument(doc) {
+            return [
+              { index: { _index: resourceNames.writeIndexAlias.kb, _id: doc.id } },
+              {
+                '@timestamp': new Date().toISOString(),
+                ...doc,
+                ...(doc.text ? { semantic_text: doc.text } : {}),
+                user,
+                namespace,
+              },
+            ];
+          },
+          datasource: batch,
+          refresh: 'wait_for',
+          concurrency: 10,
+          retries: 3,
+          onDrop(doc) {
+            console.error(
+              `Indexing failed for document. Status: ${doc.status}, Error: ${doc.error}, Id: ${doc.document.id}}`
+            );
+            throw Error(
+              `Indexing failed for document. Status: ${doc.status}, Error: ${doc.error}, Id: ${doc.document.id}}`
+            );
+          },
+        });
       }
 
       this.dependencies.logger.debug(
