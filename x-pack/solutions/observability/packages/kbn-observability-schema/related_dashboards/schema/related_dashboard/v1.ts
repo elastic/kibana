@@ -14,6 +14,18 @@ export const relatedDashboardSchema = z.object({
   matchedBy: z.object({
     fields: z.array(z.string()).optional(),
     index: z.array(z.string()).optional(),
+    linked: z.boolean().optional(),
+  }),
+  relevantPanelCount: z.number().optional(),
+  relevantPanels: z.array(relevantPanelSchema).optional(),
+});
+
+export const suggestedDashboardSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  matchedBy: z.object({
+    fields: z.array(z.string()).optional(),
+    index: z.array(z.string()).optional(),
   }),
   relevantPanelCount: z.number(),
   relevantPanels: z.array(relevantPanelSchema),
@@ -21,3 +33,4 @@ export const relatedDashboardSchema = z.object({
 });
 
 export type RelatedDashboard = z.output<typeof relatedDashboardSchema>;
+export type SuggestedDashboard = z.output<typeof suggestedDashboardSchema>;
