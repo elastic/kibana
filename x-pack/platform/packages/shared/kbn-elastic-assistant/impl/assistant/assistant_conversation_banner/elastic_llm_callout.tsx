@@ -64,7 +64,7 @@ export const ElasticLlmCallout = ({ showEISCallout }: { showEISCallout: boolean 
       <p>
         <FormattedMessage
           id="xpack.elasticAssistant.assistant.connectors.tour.elasticLlmDescription"
-          defaultMessage="Elastic Al Assistant and other Al features are powered by an LLM. The Elastic Managed LLM connector is used by default ({costLink}) when no custom connectors are available. You can configure a {customConnector} if you prefer."
+          defaultMessage="Elastic AI Assistant and other AI features are powered by an LLM. The Elastic Managed LLM connector is used by default ({costLink}) when no custom connectors are available. You can configure a {customConnector} if you prefer."
           values={{
             costLink: (
               <EuiLink
