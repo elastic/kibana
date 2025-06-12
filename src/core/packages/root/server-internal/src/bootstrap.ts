@@ -11,6 +11,7 @@ import chalk from 'chalk';
 import { getPackages } from '@kbn/repo-packages';
 import { CliArgs, Env, RawConfigService } from '@kbn/config';
 import { CriticalError } from '@kbn/core-base-server-internal';
+import { fsEventBus } from '@kbn/security-hardening';
 import { Root } from './root';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 
@@ -51,6 +52,18 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   const root = new Root(rawConfigService, env, onRootShutdown);
   const cliLogger = root.logger.get('cli');
   const rootLogger = root.logger.get('root');
+
+  rawConfigService.getConfig$().subscribe((config) => {
+    const loggerFilePath = Object.values(config.logging.appenders)
+      // @ts-expect-error
+      .filter((appender) => appender.type === 'file')
+      // @ts-expect-error
+      .map((appender) => appender.fileName);
+
+    if (loggerFilePath.length) {
+      fsEventBus.emit('kbn_config_changed', { loggerFilePath });
+    }
+  });
 
   rootLogger.info('Kibana is starting');
 
