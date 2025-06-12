@@ -32,6 +32,7 @@ describe('DashboardService', () => {
       },
       options: {
         fields: ['title', 'description'],
+        includeReferences: ['tag'],
         spaces: ['*'],
       },
     });
