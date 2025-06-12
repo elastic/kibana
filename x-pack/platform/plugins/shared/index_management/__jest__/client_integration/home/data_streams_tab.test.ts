@@ -1217,20 +1217,36 @@ describe('Data Streams tab', () => {
 
     const dataStreamFullPermissions = createDataStreamPayload({
       name: 'dataStreamFullPermissions',
-      privileges: { delete_index: true, manage_data_stream_lifecycle: true, read_failure_store: true },
+      privileges: {
+        delete_index: true,
+        manage_data_stream_lifecycle: true,
+        read_failure_store: true,
+      },
     });
     const dataStreamNoDelete = createDataStreamPayload({
       name: 'dataStreamNoDelete',
-      privileges: { delete_index: false, manage_data_stream_lifecycle: true, read_failure_store: true },
+      privileges: {
+        delete_index: false,
+        manage_data_stream_lifecycle: true,
+        read_failure_store: true,
+      },
     });
     const dataStreamNoEditRetention = createDataStreamPayload({
       name: 'dataStreamNoEditRetention',
-      privileges: { delete_index: true, manage_data_stream_lifecycle: false, read_failure_store: true },
+      privileges: {
+        delete_index: true,
+        manage_data_stream_lifecycle: false,
+        read_failure_store: true,
+      },
     });
 
     const dataStreamNoPermissions = createDataStreamPayload({
       name: 'dataStreamNoPermissions',
-      privileges: { delete_index: false, manage_data_stream_lifecycle: false, read_failure_store: false },
+      privileges: {
+        delete_index: false,
+        manage_data_stream_lifecycle: false,
+        read_failure_store: false,
+      },
     });
 
     describe('delete', () => {
