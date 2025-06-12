@@ -77,7 +77,7 @@ export function registerESQLToolsRoutes({ router, getInternalServices, logger }:
       },
       validate: {
         body: schema.object({
-          id: schema.maybe(schema.string()),
+          id: schema.string(),
           description: schema.string(),
           query: schema.string(),
           params: schema.recordOf(

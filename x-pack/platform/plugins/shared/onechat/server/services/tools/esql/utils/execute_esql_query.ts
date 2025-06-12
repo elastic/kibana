@@ -21,29 +21,33 @@ export const esqlToolCreater = (tool: EsqlToolCreateRequest): EsqlTool => {
       params: tool.params,
       schema: esqlSchema,
       handler: async ({ params }, { esClient }) => {
-        const client = esClient.asCurrentUser;
+        try {
+          const client = esClient.asCurrentUser;
 
-        const filledQuery = tool.query.replace(/\?(\w+)/g, (_, key) => {
-          if (!(key in tool.params)) { 
-            throw new Error(`Parameter ${key} not found in tool params. Available: ${Object.keys(tool.params).join(', ')}`);
-          }
-          const value = params[key];
-          if (value === undefined || value === null) {
-              throw new Error(`Parameter ${key} is required but was not provided`);
-          }
+          const filledQuery = tool.query.replace(/\?(\w+)/g, (_, key) => {
+            if (!(key in tool.params)) { 
+              throw new Error(`Parameter ${key} not found in tool params. Available: ${Object.keys(tool.params).join(', ')}`);
+            }
+            const value = params[key];
+            if (value === undefined || value === null) {
+                throw new Error(`Parameter ${key} is required but was not provided`);
+            }
 
-          return typeof value === 'string' ? `"${value}"` : value;
-        });
+            return typeof value === 'string' ? `"${value.replace(/"/g, '\\"')}"` : value;
+          });
 
-        console.log(`Executing ESQL query: ${filledQuery}`);
-        const esqlResponse = await client.transport.request({
-          method: 'POST',
-          path: '/_query',
-          body: {
-            query: filledQuery
-          }
-        });
-        return esqlResponse;
+          const response = await client.transport.request({
+            method: 'POST',
+            path: '/_query',
+            body: {
+              query: filledQuery
+            }
+          });
+
+          return response;
+      } catch (error) {
+        throw error;
+      }
       },
       meta: tool.meta
     };
