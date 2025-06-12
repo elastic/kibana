@@ -46,11 +46,15 @@ const createActions = (testBed: TestBed) => {
         | 'reindex'
         | 'default'
         | 'clusterSetting'
-        | 'dataStream',
-      index: number
+        | 'dataStream'
+        | 'unfreeze',
+      index: number,
+      action?: 'reindex' | 'readonly' | 'unfreeze'
     ) => {
       await act(async () => {
-        find(`deprecation-${deprecationType}`).at(index).simulate('click');
+        find(`deprecation-${deprecationType}${action ? `-${action}` : ''}`)
+          .at(index)
+          .simulate('click');
       });
 
       component.update();
@@ -219,7 +223,7 @@ const createActions = (testBed: TestBed) => {
     },
     closeFlyout: async () => {
       await act(async () => {
-        find('closeDataStreamReindexingButton').simulate('click');
+        find('closeDataStreamConfirmStepButton').simulate('click');
       });
       component.update();
     },

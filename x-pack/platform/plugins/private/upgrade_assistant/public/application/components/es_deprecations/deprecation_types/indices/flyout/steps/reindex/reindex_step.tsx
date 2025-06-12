@@ -22,18 +22,14 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import {
-  EnrichedDeprecationInfo,
-  ReindexAction,
-  ReindexStatus,
-} from '../../../../../../../../../common/types';
+import { ReindexStatus } from '../../../../../../../../../common/types';
 import { LoadingState } from '../../../../../../types';
 import type { ReindexState } from '../../../use_reindex';
 import { ReindexProgress } from './progress';
 import { useAppContext } from '../../../../../../../app_context';
-import { FrozenCallOut } from '../frozen_callout';
-import { FetchFailedCallOut } from '../fetch_failed_callout';
-import { ReindexingFailedCallOut } from '../reindexing_failed_callout';
+import { FrozenCallOut } from '../callouts/frozen_callout';
+import { FetchFailedCallOut } from '../callouts/fetch_failed_callout';
+import { ReindexingFailedCallOut } from '../callouts/reindexing_failed_callout';
 
 const buttonLabel = (status?: ReindexStatus) => {
   switch (status) {
@@ -83,9 +79,7 @@ export const ReindexFlyoutStep: React.FunctionComponent<{
   reindexState: ReindexState;
   startReindex: () => void;
   cancelReindex: () => void;
-  startReadonly: () => void;
-  deprecation: EnrichedDeprecationInfo;
-}> = ({ closeFlyout, reindexState, startReindex, cancelReindex, startReadonly, deprecation }) => {
+}> = ({ closeFlyout, reindexState, startReindex, cancelReindex }) => {
   const {
     services: {
       api,
@@ -93,23 +87,13 @@ export const ReindexFlyoutStep: React.FunctionComponent<{
     },
   } = useAppContext();
 
-  const { loadingState, status, hasRequiredPrivileges, meta } = reindexState;
+  const { loadingState, status, hasRequiredPrivileges } = reindexState;
   const loading = loadingState === LoadingState.Loading || status === ReindexStatus.inProgress;
   const isCompleted = status === ReindexStatus.completed;
   const hasFetchFailed = status === ReindexStatus.fetchFailed;
   const hasReindexingFailed = status === ReindexStatus.failed;
 
   const { data: nodes } = api.useLoadNodeDiskSpace();
-
-  const { excludedActions = [] } = (deprecation.correctiveAction as ReindexAction) || {};
-
-  const readOnlyExcluded = excludedActions.includes('readOnly');
-
-  const canShowReadonlyButton =
-    !readOnlyExcluded &&
-    !loading &&
-    !meta.isReadonly &&
-    reindexState.status === ReindexStatus.failed;
 
   return (
     <Fragment>
@@ -214,21 +198,6 @@ export const ReindexFlyoutStep: React.FunctionComponent<{
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-            {canShowReadonlyButton && (
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  onClick={startReadonly}
-                  disabled={!hasRequiredPrivileges}
-                  color={'primary'}
-                  data-test-subj="startIndexReadonlyButton"
-                >
-                  <FormattedMessage
-                    id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.startIndexReadonlyButton"
-                    defaultMessage="Mark as read-only"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-            )}
             {!hasFetchFailed && !isCompleted && hasRequiredPrivileges && (
               <EuiFlexItem grow={false}>
                 <EuiButton

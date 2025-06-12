@@ -33,6 +33,8 @@ import {
 } from './warnings';
 
 import { ReindexWarningCallout, ReadonlyWarningCallout } from './callouts';
+import { DurationClarificationCallOut } from './warnings/warnings_callout';
+import { NodesLowSpaceCallOut } from '../../../../../common/nodes_low_disk_space';
 interface CheckedIds {
   [id: string]: boolean;
 }
@@ -52,14 +54,23 @@ export const idForWarning = (id: number) => `migrationWarning-${id}`;
  * must acknowledge each change before being allowed to proceed.
  */
 export const ConfirmMigrationFlyoutStep: React.FunctionComponent<{
-  hideWarningsStep: () => void;
+  closeFlyout: () => void;
   startAction: () => void;
   resolutionType: DataStreamResolutionType;
   warnings: DataStreamMigrationWarning[];
   meta: DataStreamMetadata;
-}> = ({ warnings, hideWarningsStep, startAction, resolutionType, meta }) => {
+  lastIndexCreationDateFormatted: string;
+}> = ({
+  closeFlyout,
+  warnings,
+  startAction,
+  resolutionType,
+  meta,
+  lastIndexCreationDateFormatted,
+}) => {
   const {
     services: {
+      api,
       core: { docLinks },
     },
   } = useAppContext();
@@ -71,6 +82,7 @@ export const ConfirmMigrationFlyoutStep: React.FunctionComponent<{
     }, {} as { [id: string]: boolean })
   );
 
+  const { data: nodes } = api.useLoadNodeDiskSpace();
   // Do not allow to proceed until all checkboxes are checked.
   const blockAdvance = Object.values(checkedIds).filter((v) => v).length < warnings.length;
 
@@ -145,6 +157,13 @@ export const ConfirmMigrationFlyoutStep: React.FunctionComponent<{
   return (
     <>
       <EuiFlyoutBody>
+        <DurationClarificationCallOut
+          formattedDate={lastIndexCreationDateFormatted}
+          learnMoreUrl={meta.documentationUrl}
+        />
+        <EuiSpacer size="m" />
+        {nodes && nodes.length > 0 && <NodesLowSpaceCallOut nodes={nodes} />}
+        <EuiSpacer size="m" />
         {warnings.length > 0 && (
           <>
             {resolutionType === 'reindex' && <ReindexWarningCallout />}
@@ -173,14 +192,14 @@ export const ConfirmMigrationFlyoutStep: React.FunctionComponent<{
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              iconType="arrowLeft"
-              onClick={hideWarningsStep}
+              iconType="cross"
+              onClick={closeFlyout}
               flush="left"
-              data-test-subj="backButton"
+              data-test-subj="closeDataStreamConfirmStepButton"
             >
               <FormattedMessage
-                id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.backButtonLabel"
-                defaultMessage="Back"
+                id="xpack.upgradeAssistant.dataStream.migration.flyout.confirmStep.closeButtonLabel"
+                defaultMessage="Close"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>

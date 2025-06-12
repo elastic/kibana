@@ -23,7 +23,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   DataStreamMigrationStatus,
   DataStreamResolutionType,
-  DataStreamsAction,
 } from '../../../../../../../../../common/types';
 import { LoadingState } from '../../../../../../types';
 import type { MigrationState } from '../../../use_migration_state';
@@ -40,17 +39,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
   resolutionType: DataStreamResolutionType;
   executeAction: () => void;
   cancelAction: () => void;
-  startReadonly: () => void;
-  correctiveAction: DataStreamsAction;
-}> = ({
-  closeFlyout,
-  migrationState,
-  resolutionType,
-  executeAction,
-  cancelAction,
-  startReadonly,
-  correctiveAction,
-}) => {
+}> = ({ closeFlyout, migrationState, resolutionType, executeAction, cancelAction }) => {
   const {
     services: { api },
   } = useAppContext();
@@ -66,9 +55,6 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
 
   const showMainButton = !hasFetchFailed && !isCompleted && hasRequiredPrivileges;
   const shouldShowCancelButton = showMainButton && status === DataStreamMigrationStatus.inProgress;
-  const readOnlyExcluded = correctiveAction.metadata.excludedActions?.includes('readOnly');
-  const shouldShowReadOnlyButton =
-    !readOnlyExcluded && !loading && status === DataStreamMigrationStatus.failed;
 
   return (
     <Fragment>
@@ -202,20 +188,6 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
                       id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.cancelMigrationButtonLabel"
                       defaultMessage="Cancel {resolutionType, select, reindex {reindexing} readonly {marking as read-only} other {migration}}"
                       values={{ resolutionType }}
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-              )}
-              {shouldShowReadOnlyButton && (
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    color={'primary'}
-                    onClick={startReadonly}
-                    data-test-subj="startDataStreamReadonlyButton"
-                  >
-                    <FormattedMessage
-                      id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.initMarkAsReadOnlyButtonLabel"
-                      defaultMessage="Mark as read-only"
                     />
                   </EuiButton>
                 </EuiFlexItem>

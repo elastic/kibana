@@ -8,7 +8,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { EuiTableRowCell, EuiTableRow } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { EnrichedDeprecationInfo } from '../../../../../../common/types';
+import { EnrichedDeprecationInfo, IndicesResolutionType } from '../../../../../../common/types';
 import { GlobalFlyout } from '../../../../../shared_imports';
 import { useAppContext } from '../../../../app_context';
 import {
@@ -37,6 +37,9 @@ const IndexTableRowCells: React.FunctionComponent<TableRowProps> = ({
   index,
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
+  const [selectedResolutionType, setSelectedResolutionType] = useState<
+    IndicesResolutionType | undefined
+  >(undefined);
   const indexContext = useIndexContext();
 
   const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
@@ -56,6 +59,7 @@ const IndexTableRowCells: React.FunctionComponent<TableRowProps> = ({
         props: {
           closeFlyout,
           ...indexContext,
+          selectedResolutionType,
         },
         flyoutProps: {
           onClose: closeFlyout,
@@ -65,7 +69,14 @@ const IndexTableRowCells: React.FunctionComponent<TableRowProps> = ({
         },
       });
     }
-  }, [addContentToGlobalFlyout, deprecation, showFlyout, indexContext, closeFlyout]);
+  }, [
+    addContentToGlobalFlyout,
+    deprecation,
+    showFlyout,
+    indexContext,
+    closeFlyout,
+    selectedResolutionType,
+  ]);
 
   useEffect(() => {
     if (showFlyout) {
@@ -87,7 +98,12 @@ const IndexTableRowCells: React.FunctionComponent<TableRowProps> = ({
               fieldName={field}
               deprecation={deprecation}
               resolutionTableCell={<ReindexResolutionCell deprecation={deprecation} />}
-              actionsTableCell={<ReindexActionCell openFlyout={() => setShowFlyout(true)} />}
+              actionsTableCell={
+                <ReindexActionCell
+                  openFlyout={() => setShowFlyout(true)}
+                  setSelectedResolutionType={setSelectedResolutionType}
+                />
+              }
             />
           </EuiTableRowCell>
         );

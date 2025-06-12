@@ -22,7 +22,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { UpdateIndexState } from '../../../use_update_index';
-import { FrozenCallOut } from '../frozen_callout';
+import { FrozenCallOut } from '../callouts/frozen_callout';
 import { StepProgress, type StepProgressStep } from '../../../../../common/step_progress';
 import type { ReindexState } from '../../../use_reindex';
 

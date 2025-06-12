@@ -8,7 +8,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { EuiTableRowCell, EuiTableRow } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { DataStreamsAction, EnrichedDeprecationInfo } from '../../../../../../common/types';
+import {
+  DataStreamResolutionType,
+  DataStreamsAction,
+  EnrichedDeprecationInfo,
+} from '../../../../../../common/types';
 import { GlobalFlyout } from '../../../../../shared_imports';
 import { useAppContext } from '../../../../app_context';
 import {
@@ -37,6 +41,9 @@ const DataStreamTableRowCells: React.FunctionComponent<TableRowProps> = ({
   index,
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
+  const [selectedResolutionType, setSelectedResolutionType] = useState<
+    DataStreamResolutionType | undefined
+  >(undefined);
   const dataStreamContext = useDataStreamMigrationContext();
   const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
     useGlobalFlyout();
@@ -56,6 +63,7 @@ const DataStreamTableRowCells: React.FunctionComponent<TableRowProps> = ({
           ...dataStreamContext,
           deprecation,
           closeFlyout,
+          selectedResolutionType,
         },
         flyoutProps: {
           onClose: closeFlyout,
@@ -65,7 +73,14 @@ const DataStreamTableRowCells: React.FunctionComponent<TableRowProps> = ({
         },
       });
     }
-  }, [addContentToGlobalFlyout, deprecation, dataStreamContext, showFlyout, closeFlyout]);
+  }, [
+    addContentToGlobalFlyout,
+    deprecation,
+    dataStreamContext,
+    showFlyout,
+    closeFlyout,
+    selectedResolutionType,
+  ]);
 
   useEffect(() => {
     if (showFlyout) {
@@ -94,7 +109,10 @@ const DataStreamTableRowCells: React.FunctionComponent<TableRowProps> = ({
               actionsTableCell={
                 <DataStreamReindexActionsCell
                   correctiveAction={deprecation.correctiveAction as DataStreamsAction}
-                  openFlyout={() => setShowFlyout(true)}
+                  openFlyout={() => {
+                    setShowFlyout(true);
+                  }}
+                  setSelectedResolutionType={setSelectedResolutionType}
                 />
               }
             />
