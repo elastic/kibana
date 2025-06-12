@@ -10,19 +10,23 @@
 // eslint-disable-next-line max-classes-per-file
 import { EmbeddableContentManagementDefinition } from '..';
 
+type MaybeEmbeddableContentManagementDefinition = EmbeddableContentManagementDefinition | undefined;
+type ResultSyncOrAsync<IsAsync, Result> = IsAsync extends true ? Promise<Result> : Result;
+type DefinitionSyncOrAsync<IsAsync> = ResultSyncOrAsync<
+  IsAsync,
+  EmbeddableContentManagementDefinition
+>;
+type MaybeDefinitionSyncOrAsync<IsAsync> = ResultSyncOrAsync<
+  IsAsync,
+  MaybeEmbeddableContentManagementDefinition
+>;
+
 class EmbeddableContentManagementRegistry<IsAsync extends true | false = false> {
-  private registry: Map<
-    string,
-    () => IsAsync extends true
-      ? Promise<EmbeddableContentManagementDefinition>
-      : EmbeddableContentManagementDefinition
-  > = new Map();
+  private registry: Map<string, () => DefinitionSyncOrAsync<IsAsync>> = new Map();
 
   public registerContentManagementDefinition = (
     id: string,
-    getDefinition: () => IsAsync extends true
-      ? Promise<EmbeddableContentManagementDefinition>
-      : EmbeddableContentManagementDefinition
+    getDefinition: () => DefinitionSyncOrAsync<IsAsync>
   ) => {
     if (this.registry.has(id)) {
       throw new Error(`Content management definition for type "${id}" is already registered.`);
@@ -36,11 +40,7 @@ class EmbeddableContentManagementRegistry<IsAsync extends true | false = false> 
     this.registry.set(id, getDefinition);
   };
 
-  public getContentManagementDefinition(
-    id: string
-  ): IsAsync extends true
-    ? Promise<EmbeddableContentManagementDefinition | undefined>
-    : EmbeddableContentManagementDefinition | undefined {
+  public getContentManagementDefinition(id: string): MaybeDefinitionSyncOrAsync<IsAsync> {
     const getDefinition = this.registry.get(id);
     if (!getDefinition) {
       return undefined as IsAsync extends true ? Promise<undefined> : undefined;
@@ -52,15 +52,13 @@ class EmbeddableContentManagementRegistry<IsAsync extends true | false = false> 
 export class EmbeddableContentManagementRegistryPublic extends EmbeddableContentManagementRegistry<true> {
   public async getContentManagementDefinition(
     id: string
-  ): Promise<EmbeddableContentManagementDefinition | undefined> {
+  ): Promise<MaybeEmbeddableContentManagementDefinition> {
     return await super.getContentManagementDefinition(id);
   }
 }
 
 export class EmbeddableContentManagementRegistryServer extends EmbeddableContentManagementRegistry<false> {
-  public getContentManagementDefinition(
-    id: string
-  ): EmbeddableContentManagementDefinition | undefined {
+  public getContentManagementDefinition(id: string): MaybeEmbeddableContentManagementDefinition {
     return super.getContentManagementDefinition(id);
   }
 }
