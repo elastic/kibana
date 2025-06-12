@@ -23,6 +23,7 @@ import { SharingSavedObjectProps } from './types';
 import { LensRuntimeState, LensSavedObjectAttributes } from './react_embeddable/types';
 import { LensConfigBuilder, LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import { createFormulaPublicApi } from './async_services';
+import { injectReferences } from './datasources/form_based/loader'
 
 type Reference = LensSavedObject['references'][number];
 
@@ -85,29 +86,25 @@ export function getLensAttributeService(
         createFormulaPublicApi(),
       );
 
-      const withInjectedReferences = inject(
-        { 
-          attributes: {
-            ...item.attributes,
-            state: item.attributes.state as LensSavedObjectAttributes['state'],
-            references: item.references,
-          }
-        } as unknown as EmbeddableStateWithType,
-        item.references
-      ) as unknown as LensRuntimeState;
+      (item.attributes.state as any).datasourceStates.formBased = 
+      { 
+        ...(item.attributes.state as any).datasourceStates.formBased,
+        ...injectReferences((item.attributes.state as any).datasourceStates.formBased, item.references),
+      };
 
       const config = await configBuilder.reverseBuild(
-        withInjectedReferences
+        item as unknown as LensRuntimeState,
       );
 
       console.log(JSON.stringify(config, null, 2));
 
+      const { references, ...attributes } = await configBuilder.build(config.config, config.options);
 
       return {
         attributes: {
-          ...item.attributes,
-          state: item.attributes.state as LensSavedObjectAttributes['state'],
-          references: item.references,
+          ...attributes,
+          state: attributes.state as LensSavedObjectAttributes['state'],
+          references,
         },
         sharingSavedObjectProps: {
           aliasTargetId: meta.aliasTargetId,

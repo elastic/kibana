@@ -341,7 +341,7 @@ export const buildQuery = (
   }
 
   let formula: string | undefined;
-  if ('operationType' in column && column.operationType) {
+  if ('operationType' in column && column.operationType && column.operationType !== 'formula') {
     // convert to formula
     formula = formulaAPI!.generateFormula(column, layer, '', undefined);
   } else if ('formula' in column && column.formula) {

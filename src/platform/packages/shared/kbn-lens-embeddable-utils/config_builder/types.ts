@@ -12,6 +12,7 @@ import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { DataViewsCommon } from './config_builder';
 import { CustomPaletteParams } from '@kbn/coloring';
+import { LensOperation } from './operation_types';
 
 export type LensAttributes = TypedLensByValueInput['attributes'];
 export const DEFAULT_LAYER_ID = 'layer_0';
@@ -57,10 +58,10 @@ export interface LensLayerQueryConfig {
   query: string;
   scale?: 'ordinal' | 'interval' | 'ratio' | 'nominal';
   format?: ValueFormatConfig;
-  label?: string; 
+  label?: string;
 }
 
-export type LensLayerQuery = string | LensLayerQueryConfig;
+export type LensLayerQuery = string | LensLayerQueryConfig | LensOperation;
 export interface LensDataviewDataset {
   index: string;
   timeFieldName?: string;
