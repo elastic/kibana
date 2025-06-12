@@ -26,7 +26,7 @@ const projectDefaultRoles = new Map<string, Role>([
   ['chat', 'developer'], // TODO: double check if it's really 'developer'
 ]);
 
-const projectTypesWithCustomRolesEnabled = ['es', 'security', 'oblt'];
+const projectTypesWithCustomRolesEnabled = ['es', 'security'];
 
 const getDefaultServerlessRole = (projectType: string) => {
   if (projectDefaultRoles.has(projectType)) {
