@@ -22,5 +22,6 @@ echo "--- Upload Build Artifacts"
 version="$(jq -r '.version' package.json)"
 cd "$KIBANA_DIR/target"
 cp "kibana-$version-SNAPSHOT-linux-x86_64.tar.gz" kibana-default.tar.gz
+cp "kibana-serverless-$version-SNAPSHOT-linux-x86_64.tar.gz" kibana-serverless.tar.gz
 buildkite-agent artifact upload "./*.tar.gz;./*.zip;./*.deb;./*.rpm"
 cd -
