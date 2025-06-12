@@ -14,6 +14,7 @@ import type {
   SavedObjectCreateOptions,
   SavedObjectUpdateOptions,
 } from '@kbn/content-management-utils';
+// @ts-expect-error for easy search
 import type { SimpleSavedObject } from '@kbn/core/public';
 import { BaseVisType } from './base_vis_type';
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// @ts-expect-error for easy search
 import type { ResolvedSimpleSavedObject, SavedObjectReference } from '@kbn/core/public';
 import type { MapAttributes } from '../../../../common/content_management';
 import { getMapClient } from '../../../content_management';

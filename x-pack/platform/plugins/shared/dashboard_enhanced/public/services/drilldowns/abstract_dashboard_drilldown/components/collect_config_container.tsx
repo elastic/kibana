@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { debounce, findIndex } from 'lodash';
+// @ts-expect-error for easy search
 import { SimpleSavedObject } from '@kbn/core/public';
 import { CollectConfigProps } from '@kbn/kibana-utils-plugin/public';
 import { DashboardDrilldownConfig } from './dashboard_drilldown_config';

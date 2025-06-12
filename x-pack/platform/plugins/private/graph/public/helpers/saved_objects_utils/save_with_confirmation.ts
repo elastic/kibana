@@ -7,6 +7,7 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
+// @ts-expect-error for easy search
 import type { CoreStart, SavedObjectsCreateOptions } from '@kbn/core/public';
 import { ContentClient } from '@kbn/content-management-plugin/public';
 import { CONTENT_ID, GraphCreateIn, GraphCreateOut } from '../../../common/content_management';

@@ -8,6 +8,7 @@
  */
 
 import { EuiButton, EuiContextMenu, EuiFlexItem, EuiPopover, IconType } from '@elastic/eui';
+// @ts-expect-error for easy search
 import { CoreSetup, CoreStart, Plugin, SimpleSavedObject } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import type {

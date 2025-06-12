@@ -7,6 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
+// @ts-expect-error for easy search
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';

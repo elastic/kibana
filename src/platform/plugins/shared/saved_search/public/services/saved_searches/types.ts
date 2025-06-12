@@ -8,6 +8,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
+// @ts-expect-error for easy search
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 import type { SavedSearch as SavedSearchCommon, SavedSearchAttributes } from '../../../common';
 

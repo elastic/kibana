@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// @ts-expect-error for easy search
 import type { SimpleSavedObject } from '@kbn/core/public';
 import type { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
 import { showSavedObject } from './show_saved_object';

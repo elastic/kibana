@@ -168,22 +168,7 @@ export type {
 } from '@kbn/core-application-browser';
 export { CoreScopedHistory } from '@kbn/core-application-browser-internal';
 
-export type {
-  SimpleSavedObject,
-  SavedObjectsCreateOptions,
-  SavedObjectsDeleteOptions,
-  SavedObjectsBatchResponse,
-  SavedObjectsFindOptions,
-  SavedObjectsFindOptionsReference,
-  SavedObjectsUpdateOptions,
-  ResolvedSimpleSavedObject,
-  SavedObjectsBulkUpdateObject,
-  SavedObjectsFindResponse,
-  SavedObjectsBulkCreateOptions,
-  SavedObjectsBulkUpdateOptions,
-  SavedObjectsBulkResolveResponse,
-  SavedObjectsBulkCreateObject,
-} from '@kbn/core-saved-objects-api-browser';
+export type { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-server';
 export type {
   SavedObject,
   SavedObjectTypeIdTuple,

@@ -18,6 +18,7 @@ import type { Query, Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { DataView } from '@kbn/data-views-plugin/public';
+// @ts-expect-error for easy search
 import type { SimpleSavedObject } from '@kbn/core/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { getDefaultDSLQuery, type SearchQueryLanguage } from '@kbn/ml-query-utils';

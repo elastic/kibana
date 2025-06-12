@@ -8,6 +8,7 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
+// @ts-expect-error for easy search
 import type { SavedObjectsCreateOptions } from '@kbn/core/public';
 import { saveWithConfirmation } from './save_with_confirmation';
 import { VisSavedObject } from '../../types';

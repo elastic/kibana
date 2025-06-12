@@ -10,7 +10,7 @@
 import { useContentClient } from '@kbn/content-management-plugin/public';
 import { TableListView } from '@kbn/content-management-table-list-view';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
-import { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-browser';
+import { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import React from 'react';
 
 export const MSearchTable = () => {

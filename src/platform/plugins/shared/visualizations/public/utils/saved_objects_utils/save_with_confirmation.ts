@@ -9,6 +9,7 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
+// @ts-expect-error for easy search
 import type { SavedObjectsCreateOptions } from '@kbn/core/public';
 import { OVERWRITE_REJECTED } from './constants';
 import { confirmModalPromise } from './confirm_modal_promise';

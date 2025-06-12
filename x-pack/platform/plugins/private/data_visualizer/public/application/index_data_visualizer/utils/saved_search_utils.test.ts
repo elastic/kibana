@@ -121,7 +121,6 @@ const luceneSavedSearch: SavedSearch = {
   }),
 } as unknown as SavedSearch;
 
-// @ts-expect-error We don't need the full object here
 const luceneSavedSearchObj: SavedSearchSavedObject = {
   attributes: {
     title: 'farequote_filter_and_lucene',
@@ -136,7 +135,6 @@ const luceneSavedSearchObj: SavedSearchSavedObject = {
   type: 'search',
 };
 
-// @ts-expect-error We don't need the full object here
 const luceneInvalidSavedSearchObj: SavedSearchSavedObject = {
   attributes: {
     kibanaSavedObjectMeta: {

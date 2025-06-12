@@ -574,8 +574,6 @@
       "@kbn/core-root-browser-internal/*": ["src/core/packages/root/browser-internal/*"],
       "@kbn/core-root-server-internal": ["src/core/packages/root/server-internal"],
       "@kbn/core-root-server-internal/*": ["src/core/packages/root/server-internal/*"],
-      "@kbn/core-saved-objects-api-browser": ["src/core/packages/saved-objects/api-browser"],
-      "@kbn/core-saved-objects-api-browser/*": ["src/core/packages/saved-objects/api-browser/*"],
       "@kbn/core-saved-objects-api-server": ["src/core/packages/saved-objects/api-server"],
       "@kbn/core-saved-objects-api-server/*": ["src/core/packages/saved-objects/api-server/*"],
       "@kbn/core-saved-objects-api-server-internal": ["src/core/packages/saved-objects/api-server-internal"],

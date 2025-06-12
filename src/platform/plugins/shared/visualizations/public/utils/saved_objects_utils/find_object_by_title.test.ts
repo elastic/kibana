@@ -8,6 +8,7 @@
  */
 
 import { findObjectByTitle } from './find_object_by_title';
+// @ts-expect-error for easy search
 import { SimpleSavedObject } from '@kbn/core/public';
 
 const mockFindContent = jest.fn(async () => ({

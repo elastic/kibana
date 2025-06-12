@@ -134,7 +134,6 @@
     "@kbn/core-plugins-browser",
     "@kbn/core-base-browser-internal",
     "@kbn/core-analytics-browser",
-    "@kbn/core-saved-objects-api-browser",
     "@kbn/core-overlays-browser",
     "@kbn/core-notifications-browser-internal",
     "@kbn/core-theme-browser",
