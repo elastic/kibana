@@ -256,6 +256,9 @@ export const allowedExperimentalValues = Object.freeze({
    */
   eventCollectionDataReductionBannerEnabled: true,
 
+  /** Enables new Data View Picker */
+  newDataViewPickerEnabled: false,
+
   /**
    * Automatically installs the security AI prompts package
    */

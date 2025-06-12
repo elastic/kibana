@@ -15,18 +15,25 @@ export const fontWeightDefinitions = (euiTheme: UseEuiTheme['euiTheme']) => ({
 });
 
 export const ToolbarButtonStyles = ({ euiTheme }: UseEuiTheme) => {
+  const isAmsterdam = euiTheme.themeName === 'EUI_THEME_AMSTERDAM';
+
   return {
-    default: {
-      // style declaration carried over from https://github.com/elastic/kibana/blob/v8.10.4/src/plugins/kibana_react/public/toolbar_button/toolbar_button.scss
-      // informed by issue https://github.com/elastic/eui/issues/4730
-      borderStyle: 'solid',
-      border: euiTheme.border.thin,
-      borderColor: euiTheme.border.color,
-    },
+    default: isAmsterdam
+      ? {
+          // style declaration carried over from https://github.com/elastic/kibana/blob/v8.10.4/src/plugins/kibana_react/public/toolbar_button/toolbar_button.scss
+          // informed by issue https://github.com/elastic/eui/issues/4730
+          borderStyle: 'solid',
+          border: euiTheme.border.thin,
+          borderColor: euiTheme.border.color,
+        }
+      : {
+          // manual border override to ensure disabled buttons have a border to align with EuiButtonGroup styles
+          border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
+        },
     emptyButton: {
-      backgroundColor: euiTheme.colors.emptyShade,
-      border: `${euiTheme.border.thin}`,
-      color: `${euiTheme.colors.text}`,
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
+      border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
+      color: `${euiTheme.colors.textParagraph}`,
     },
     buttonPositions: {
       left: {

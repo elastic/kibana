@@ -35,6 +35,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
       loadTestFile(require.resolve('./unmute_instance'));
       loadTestFile(require.resolve('./update'));
       loadTestFile(require.resolve('./update_api_key'));
+      loadTestFile(require.resolve('./alert_deletion'));
     });
   });
 }

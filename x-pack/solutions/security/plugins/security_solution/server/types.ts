@@ -21,7 +21,7 @@ import type { AlertsClient, IRuleDataService } from '@kbn/rule-registry-plugin/s
 import type { Readable } from 'stream';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
-import type { InferenceClient } from '@kbn/inference-plugin/server';
+import type { InferenceClient } from '@kbn/inference-common';
 import type { Immutable } from '../common/endpoint/types';
 import { AppClient } from './client';
 import type { ConfigType } from './config';
