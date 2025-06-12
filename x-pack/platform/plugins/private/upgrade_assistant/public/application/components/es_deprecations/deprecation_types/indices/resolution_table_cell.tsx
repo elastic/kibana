@@ -90,6 +90,36 @@ const i18nTexts = {
       defaultMessage: 'Update complete',
     }
   ),
+  updateInProgressText: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.indices.updateInProgressText',
+    {
+      defaultMessage: 'Update in progress…',
+    }
+  ),
+  unfreezeCompleteText: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.indices.unfreezeCompleteText',
+    {
+      defaultMessage: 'Index is unfrozen',
+    }
+  ),
+  unfreezeInProgressText: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.indices.unfreezeInProgressText',
+    {
+      defaultMessage: 'Unfreezing index…',
+    }
+  ),
+  readOnlyCompleteText: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.indices.readOnlyCompleteText',
+    {
+      defaultMessage: 'Index is set to read-only',
+    }
+  ),
+  readOnlyInProgressText: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.indices.readOnlyInProgressText',
+    {
+      defaultMessage: 'Setting index to read-only…',
+    }
+  ),
   recommendedActionTexts: {
     isLargeIndex: {
       text: recommendedReadOnlyText,
@@ -205,6 +235,13 @@ export const ReindexResolutionCell: React.FunctionComponent<{
       ? getRecommendedActionForUnfreezeAction()
       : getRecommendedActionForReindexingAction();
 
+  const updateAction =
+    deprecation.correctiveAction?.type === 'unfreeze'
+      ? 'unfreeze'
+      : deprecation.correctiveAction?.type === 'reindex'
+      ? 'readOnly'
+      : 'update';
+
   if (reindexState.loadingState === LoadingState.Loading) {
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -291,6 +328,19 @@ export const ReindexResolutionCell: React.FunctionComponent<{
   }
 
   switch (updateIndexState.status) {
+    case 'inProgress':
+      return (
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="m" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued">
+              <em>{i18nTexts[`${updateAction}InProgressText`]}</em>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
     case 'complete':
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -298,7 +348,7 @@ export const ReindexResolutionCell: React.FunctionComponent<{
             <EuiIcon type="checkInCircleFilled" color="success" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="s">{i18nTexts.updateCompleteText}</EuiText>
+            <EuiText size="s">{i18nTexts[`${updateAction}CompleteText`]}</EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
