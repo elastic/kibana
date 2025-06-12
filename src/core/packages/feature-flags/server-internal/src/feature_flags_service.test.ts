@@ -288,6 +288,16 @@ describe('FeatureFlagsService Server', () => {
       await expect(firstValueFrom(flag$)).resolves.toEqual(false);
       expect(observedValues).toHaveLength(2);
       expect(observedValues).toStrictEqual([true, false]);
+
+      // Reevaluates and emits when the observed flag is changed (removed)
+      config$.next({
+        overrides: {
+          'myPlugin.myOverriddenFlag': false,
+        },
+      });
+      await expect(firstValueFrom(flag$)).resolves.toEqual(false);
+      expect(observedValues).toHaveLength(3);
+      expect(observedValues).toStrictEqual([true, false, false]);
     });
 
     test('overrides with dotted names', async () => {
