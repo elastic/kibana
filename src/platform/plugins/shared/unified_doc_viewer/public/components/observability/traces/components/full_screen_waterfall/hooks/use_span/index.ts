@@ -68,7 +68,7 @@ export const useSpan = ({ spanId, indexPattern }: UseSpanParams) => {
       try {
         setLoading(true);
         const result = await getSpanData({ spanId, indexPattern, data, signal });
-        setSpan({ ...result.rawResponse.hits.hits[0]?._source });
+        setSpan(result.rawResponse.hits.hits[0]?._source);
         setDocId(result.rawResponse.hits.hits[0]?._id ?? null);
       } catch (err) {
         if (!signal.aborted) {
