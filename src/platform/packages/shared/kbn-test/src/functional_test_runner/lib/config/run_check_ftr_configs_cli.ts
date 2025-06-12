@@ -8,7 +8,7 @@
  */
 
 import execa from 'execa';
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { run } from '@kbn/dev-cli-runner';
@@ -29,6 +29,7 @@ const IGNORED_PATHS = [
 export async function runCheckFtrConfigsCli() {
   run(
     async ({ log }) => {
+      const outDatedConfigs = [];
       const { ftrConfigEntries, manifestPaths } = getAllFtrConfigsAndManifests();
       const duplicateEntries = Array.from(ftrConfigEntries.entries()).filter(
         ([, paths]) => paths.length > 1
@@ -108,6 +109,11 @@ export async function runCheckFtrConfigsCli() {
           return false;
         }
 
+        if (!existsSync(file)) {
+          outDatedConfigs.push(file);
+          return false;
+        }
+
         const fileContent = readFileSync(file).toString();
 
         if (
@@ -150,6 +156,19 @@ export async function runCheckFtrConfigsCli() {
 
       if (loadingConfigs.length) {
         log.info(`${loadingConfigs.length} files were loaded as FTR configs for validation`);
+      }
+
+      if (outDatedConfigs.length) {
+        const outdatedList =
+          ' - ' + outDatedConfigs.map((path) => Path.relative(REPO_ROOT, path)).join('\n - ');
+        log.error(
+          `The following files look like non-existing FTR configs which are listed in one of manifest files:\n${outdatedList}\n
+Make sure to remove these entries from\n
+Stateful tests:\n${(manifestPaths.stateful as string[]).join('\n')}\n
+Serverless tests:\n${(manifestPaths.serverless as string[]).join('\n')}
+          `
+        );
+        throw createFailError(`Please remove the listed paths or contact #kibana-operations`);
       }
 
       const allFtrConfigs = Array.from(ftrConfigEntries.keys());

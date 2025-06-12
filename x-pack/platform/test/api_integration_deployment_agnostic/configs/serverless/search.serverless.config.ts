@@ -11,6 +11,6 @@ export default createServerlessTestConfig({
   serverlessProject: 'es',
   testFiles: [require.resolve('./search.index.ts')],
   junit: {
-    reportName: 'Serverless Search - Deployment-agnostic API Integration Tests',
+    reportName: 'Serverless Search - Deployment-agnostic platform API Integration Tests',
   },
 });

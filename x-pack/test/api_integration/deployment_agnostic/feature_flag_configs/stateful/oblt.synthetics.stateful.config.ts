@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createStatefulFeatureFlagTestConfig } from '../../default_configs/feature_flag.stateful.config.base';
+import { createStatefulFeatureFlagTestConfig } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/default_configs/feature_flag.stateful.config.base';
 
 export default createStatefulFeatureFlagTestConfig({
   testFiles: [require.resolve('./oblt.synthetics.index.ts')],
