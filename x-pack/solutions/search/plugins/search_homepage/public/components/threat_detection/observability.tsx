@@ -97,12 +97,9 @@ export const Observability: React.FC = () => {
                       target="_blank"
                       data-test-subj="createObservabilityProjectLink"
                     >
-                      {i18n.translate(
-                        'xpack.searchHomepage.observability.observabilityProjectLink',
-                        {
-                          defaultMessage: 'Create an Observability project',
-                        }
-                      )}
+                      {i18n.translate('xpack.searchHomepage.observability.observabilitySpaceLink', {
+                        defaultMessage: 'Create an Observability space',
+                      })}
                     </EuiLink>
                   </EuiFlexItem>
                 </EuiFlexGroup>
