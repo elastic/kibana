@@ -6,19 +6,61 @@
  */
 import React, { useState } from 'react';
 import { render, act, fireEvent, waitFor } from '@testing-library/react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-import { SelectSeverity, SEVERITY_OPTIONS } from './select_severity';
+import { SelectSeverity } from './select_severity';
+import type { SeverityOption } from '../../../explorer/hooks/use_severity_options';
+
+// Mock severity options that match the structure from useSeverityOptions
+const mockSeverityOptions: SeverityOption[] = [
+  {
+    val: 0,
+    display: 'low',
+    color: '#CFEEF7',
+    threshold: { min: 0, max: 3 },
+  },
+  {
+    val: 3,
+    display: 'warning',
+    color: '#94D8EB',
+    threshold: { min: 3, max: 25 },
+  },
+  {
+    val: 25,
+    display: 'minor',
+    color: '#F5A700',
+    threshold: { min: 25, max: 50 },
+  },
+  {
+    val: 50,
+    display: 'major',
+    color: '#E7664C',
+    threshold: { min: 50, max: 75 },
+  },
+  {
+    val: 75,
+    display: 'critical',
+    color: '#CC5642',
+    threshold: { min: 75 },
+  },
+];
+
+// Mock the useSeverityOptions hook
+jest.mock('../../../explorer/hooks/use_severity_options', () => ({
+  useSeverityOptions: () => mockSeverityOptions,
+}));
 
 // The following mock setup is necessary so that we can simulate
 // both triggering the update callback and the internal state update
-// to update the dropdown to the new state.
-const mockSeverityOptions = SEVERITY_OPTIONS;
+// to update the component to the new state.
 const mockUpdateCallback = jest.fn();
 const mockUseState = jest.fn().mockImplementation(useState);
+
 jest.mock('@kbn/ml-url-state', () => ({
   usePageUrlState: () => {
-    const [severity, setSeverity] = mockUseState(mockSeverityOptions[0]);
+    // Start with default state (first severity option selected)
+    const [severity, setSeverity] = mockUseState({
+      val: [mockSeverityOptions[0].threshold], // Default to 'low' selected
+    });
     return [severity, mockUpdateCallback.mockImplementation((d) => setSeverity(d))];
   },
 }));
@@ -28,43 +70,124 @@ describe('SelectSeverity', () => {
     jest.clearAllMocks();
   });
 
-  it('updates the severity option correctly on click', async () => {
-    // arrange
-    const { getByText, getAllByText, queryByText, getByTestId } = render(
-      <IntlProvider locale="en">
-        <SelectSeverity />
-      </IntlProvider>
-    );
+  it('renders with default severity selection', () => {
+    const { getByTestId } = render(<SelectSeverity />);
 
-    // assert initial state
-    expect(getAllByText('warning')).toHaveLength(1);
-    expect(queryByText('minor')).not.toBeInTheDocument();
-    expect(queryByText('major')).not.toBeInTheDocument();
-    expect(queryByText('critical')).not.toBeInTheDocument();
+    // Should render the main control
+    expect(getByTestId('mlAnomalySeverityThresholdControls')).toBeInTheDocument();
+  });
 
-    // open popover
+  it('opens popover when clicked', async () => {
+    const { getByTestId, getByRole } = render(<SelectSeverity />);
+
+    // Click the button inside the control to open popover
+    const control = getByTestId('mlAnomalySeverityThresholdControls');
+    const button = control.querySelector('button');
+    expect(button).toBeInTheDocument();
     act(() => {
-      fireEvent.click(getByTestId('mlAnomalySeverityThresholdControls'));
+      fireEvent.click(button!);
     });
 
-    // assert open popover
-    expect(getAllByText('warning')).toHaveLength(2);
-    expect(getAllByText('minor')).toHaveLength(1);
-    expect(getAllByText('major')).toHaveLength(1);
-    expect(getAllByText('critical')).toHaveLength(1);
-
-    // click item in popver
-    act(() => {
-      fireEvent.click(getByText('major'));
-    });
-
-    // assert updated state
-    expect(mockUpdateCallback).toBeCalledWith(SEVERITY_OPTIONS[2]);
+    // Should show the selectable options with threshold ranges
     await waitFor(() => {
-      expect(queryByText('warning')).not.toBeInTheDocument();
-      expect(queryByText('minor')).not.toBeInTheDocument();
-      expect(getAllByText('major')).toHaveLength(1);
-      expect(queryByText('critical')).not.toBeInTheDocument();
+      expect(getByRole('option', { name: '0-3' })).toBeInTheDocument();
+      expect(getByRole('option', { name: '3-25' })).toBeInTheDocument();
+      expect(getByRole('option', { name: '25-50' })).toBeInTheDocument();
+      expect(getByRole('option', { name: '50-75' })).toBeInTheDocument();
+      expect(getByRole('option', { name: '75-100' })).toBeInTheDocument();
     });
+  });
+
+  it('allows multiple severity selections', async () => {
+    const { getByTestId, getByRole } = render(<SelectSeverity />);
+
+    // Open the popover by clicking the button
+    const control = getByTestId('mlAnomalySeverityThresholdControls');
+    const button = control.querySelector('button');
+    act(() => {
+      fireEvent.click(button!);
+    });
+
+    // Wait for options to appear and click on 'major' option (50-75)
+    await waitFor(() => {
+      expect(getByRole('option', { name: '50-75' })).toBeInTheDocument();
+    });
+
+    const majorOption = getByRole('option', { name: '50-75' });
+    act(() => {
+      fireEvent.click(majorOption);
+    });
+
+    // Should call the update callback with both low and major selected
+    await waitFor(() => {
+      expect(mockUpdateCallback).toHaveBeenCalledWith({
+        val: expect.arrayContaining([
+          mockSeverityOptions[0].threshold, // low (default)
+          mockSeverityOptions[3].threshold, // major (newly selected)
+        ]),
+      });
+    });
+  });
+
+  it('allows deselecting severity options', async () => {
+    const { getByTestId, getByRole } = render(<SelectSeverity />);
+
+    // Open the popover by clicking the button
+    const control = getByTestId('mlAnomalySeverityThresholdControls');
+    const button = control.querySelector('button');
+    act(() => {
+      fireEvent.click(button!);
+    });
+
+    // Wait for options to appear and click on the already selected 'low' option (0-3) to deselect it
+    await waitFor(() => {
+      expect(getByRole('option', { name: '0-3' })).toBeInTheDocument();
+    });
+
+    const lowOption = getByRole('option', { name: '0-3' });
+    act(() => {
+      fireEvent.click(lowOption);
+    });
+
+    // Should call the update callback with empty selection
+    await waitFor(() => {
+      expect(mockUpdateCallback).toHaveBeenCalledWith({
+        val: [],
+      });
+    });
+  });
+
+  it('displays "Multiple" when multiple severities are selected', () => {
+    // Mock state with multiple selections
+    mockUseState.mockImplementationOnce(() => [
+      {
+        val: [
+          mockSeverityOptions[1].threshold, // warning
+          mockSeverityOptions[3].threshold, // major
+        ],
+      },
+      jest.fn(),
+    ]);
+
+    const { getByTestId } = render(<SelectSeverity />);
+
+    const control = getByTestId('mlAnomalySeverityThresholdControls');
+    expect(control).toHaveTextContent('Multiple');
+  });
+
+  it('displays single severity range when only one is selected', () => {
+    // Mock state with single selection
+    mockUseState.mockImplementationOnce(() => [
+      {
+        val: [mockSeverityOptions[2].threshold], // minor
+      },
+      jest.fn(),
+    ]);
+
+    const { getByTestId } = render(<SelectSeverity />);
+
+    const control = getByTestId('mlAnomalySeverityThresholdControls');
+
+    expect(control).toHaveTextContent('25-50');
   });
 });
