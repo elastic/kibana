@@ -18,6 +18,8 @@
     "@kbn/shared-ux-router",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/shared-ux-utility",
+    "@kbn/security-plugin",
+    "@kbn/security-plugin-types-common",
     "@kbn/i18n",
     "@kbn/console-plugin",
     "@kbn/share-plugin",

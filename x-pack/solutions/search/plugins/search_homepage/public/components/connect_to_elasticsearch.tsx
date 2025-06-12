@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { ConnectToElasticsearchSidePanel } from './connect_to_elasticsearch_side_panel';
 import { AISearchCapabilities } from './ai_search_capabilities/ai_search_capabilities';
 import { useKibana } from '../hooks/use_kibana';
+import { useGetApiKeys } from '../hooks/api/use_api_key';
 
 const LOCALHOST_URL = 'http://localhost:9200/';
 const MANAGEMENT_API_KEYS = '/app/management/security/api_keys';
@@ -30,6 +31,7 @@ const CREATE_API_KEY = '/app/management/security/api_keys/create';
 
 export const ConnectToElasticsearch = () => {
   const { http } = useKibana().services;
+  const { data } = useGetApiKeys();
 
   return (
     <EuiFlexGroup>
@@ -140,7 +142,12 @@ export const ConnectToElasticsearch = () => {
                         </EuiButtonEmpty>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <EuiBadge color="warning">0 active</EuiBadge>
+                        <EuiBadge
+                          data-test-subj="activeApiKeysBadge"
+                          color={(data?.apiKeys?.length ?? 0) > 0 ? 'success' : 'warning'}
+                        >
+                          {data?.apiKeys?.length ?? 0} active
+                        </EuiBadge>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>

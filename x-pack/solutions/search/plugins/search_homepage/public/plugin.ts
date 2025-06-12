@@ -18,6 +18,7 @@ import { PLUGIN_ID } from '../common';
 import { SearchHomepage } from './embeddable';
 import { isHomepageEnabled } from './feature_flags';
 import { docLinks } from '../common/doc_links';
+import { QueryClient, MutationCache, QueryCache } from '@tanstack/react-query';
 import {
   SearchHomepageConfigType,
   SearchHomepagePluginSetup,
@@ -26,6 +27,7 @@ import {
   SearchHomepageAppInfo,
   SearchHomepageServicesContext,
 } from './types';
+import { getErrorCode, getErrorMessage, isKibanaServerError } from './utils/get_error_message';
 
 const appInfo: SearchHomepageAppInfo = {
   id: PLUGIN_ID,
@@ -44,6 +46,32 @@ export class SearchHomepagePlugin
   public setup(
     core: CoreSetup<SearchHomepageAppPluginStartDependencies, SearchHomepagePluginStart>
   ) {
+    const queryClient = new QueryClient({
+      mutationCache: new MutationCache({
+        onError: (error) => {
+          core.notifications.toasts.addError(error as Error, {
+            title: (error as Error).name,
+            toastMessage: getErrorMessage(error),
+            toastLifeTimeMs: 1000,
+          });
+        },
+      }),
+      queryCache: new QueryCache({
+        onError: (error) => {
+          // 404s are often functionally okay and shouldn't show toasts by default
+          if (getErrorCode(error) === 404) {
+            return;
+          }
+          if (isKibanaServerError(error) && !error.skipToast) {
+            core.notifications.toasts.addError(error, {
+              title: error.name,
+              toastMessage: getErrorMessage(error),
+              toastLifeTimeMs: 1000,
+            });
+          }
+        },
+      }),
+    });
     const result: SearchHomepagePluginSetup = {
       app: appInfo,
       isHomepageFeatureEnabled() {
@@ -62,9 +90,10 @@ export class SearchHomepagePlugin
         const startDeps: SearchHomepageServicesContext = {
           ...depsStart,
           history,
+          http: coreStart.http,
         };
 
-        return renderApp(coreStart, startDeps, element);
+        return renderApp(coreStart, startDeps, element, queryClient);
       },
     });
 
