@@ -40,11 +40,15 @@ function deserializePanels(panels: PageState['panels']) {
   return { layout, childState };
 }
 
+const defaultState = {
+  panels: [],
+  timeRange: { from: new Date().toISOString(), to: new Date().toISOString() },
+};
+
 export function getPageApi(embeddable: EmbeddableStart) {
   const initialUnsavedState = unsavedChangesSessionStorage.load();
-  const initialState = lastSavedStateSessionStorage.load(embeddable);
 
-  const lastSavedState$ = new BehaviorSubject<PageState>(initialState);
+  const lastSavedState$ = new BehaviorSubject<PageState>(defaultState);
   const children$ = new BehaviorSubject<{ [key: string]: unknown }>({});
   const { layout: initialLayout, childState: initialChildState } = deserializePanels(
     initialUnsavedState?.panels ?? lastSavedState$.value.panels
@@ -54,8 +58,13 @@ export function getPageApi(embeddable: EmbeddableStart) {
 
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
   const timeRange$ = new BehaviorSubject<TimeRange>(
-    initialUnsavedState?.timeRange ?? initialState.timeRange
+    initialUnsavedState?.timeRange ?? defaultState.timeRange
   );
+
+  lastSavedStateSessionStorage.load(embeddable).then((lastSavedState) => {
+    lastSavedState$.next(lastSavedState);
+    if (!initialUnsavedState?.timeRange) timeRange$.next(lastSavedState.timeRange);
+  });
 
   const reload$ = new Subject<void>();
 
@@ -177,7 +186,7 @@ export function getPageApi(embeddable: EmbeddableStart) {
         // simulate save await
         await new Promise((resolve) => setTimeout(resolve, 1000));
         lastSavedState$.next(serializedPage);
-        lastSavedStateSessionStorage.save(serializedPage, embeddable);
+        await lastSavedStateSessionStorage.save(serializedPage, embeddable);
         unsavedChangesSessionStorage.clear();
       },
       layout$,

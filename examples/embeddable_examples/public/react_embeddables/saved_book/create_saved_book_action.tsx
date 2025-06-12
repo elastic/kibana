@@ -48,9 +48,7 @@ export const registerCreateSavedBookAction = (
       });
 
       const bookAttributes = newPanelStateManager.getLatestState();
-      const initialState: BookSerializedState = savedObjectId
-        ? { savedObjectId }
-        : { attributes: bookAttributes };
+      const initialState: BookSerializedState = savedObjectId ? { savedObjectId } : bookAttributes;
 
       embeddable.addNewPanel<BookSerializedState>({
         panelType: SAVED_BOOK_ID,

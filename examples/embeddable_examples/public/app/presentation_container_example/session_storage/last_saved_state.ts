@@ -43,49 +43,53 @@ export const lastSavedStateSessionStorage = {
   clear: () => {
     sessionStorage.removeItem(SAVED_STATE_SESSION_STORAGE_KEY);
   },
-  load: (embeddable: EmbeddableStart): PageState => {
+  load: async (embeddable: EmbeddableStart): Promise<PageState> => {
     const savedState = sessionStorage.getItem(SAVED_STATE_SESSION_STORAGE_KEY);
     const { timeRange, panels } = savedState
       ? (JSON.parse(savedState) as PageState)
       : { ...DEFAULT_STATE };
-    const transformedPanels = panels.map((panel) => {
-      const { rawState } = panel.serializedState ?? {};
-      if (!isByValue(rawState)) return panel;
+    const transformedPanels = await Promise.all(
+      panels.map(async (panel) => {
+        const { rawState } = panel.serializedState ?? {};
+        if (!isByValue(rawState)) return panel;
 
-      // Transform the panel state if necessary, e.g., to ensure compatibility with the latest version
-      const embeddableCmDefinitions = embeddable.getEmbeddableContentManagementDefinition(
-        panel.type
-      );
-      const { savedObjectToItem } = getLatestVersionOfDefinition(embeddableCmDefinitions);
-      if (!savedObjectToItem) return panel;
-      const newState = savedObjectToItem(rawState);
+        // Transform the panel state if necessary, e.g., to ensure compatibility with the latest version
+        const embeddableCmDefinitions = await embeddable.getEmbeddableContentManagementDefinition(
+          panel.type
+        );
+        const { savedObjectToItem } = getLatestVersionOfDefinition(embeddableCmDefinitions);
+        if (!savedObjectToItem) return panel;
+        const newState = savedObjectToItem(rawState);
 
-      return {
-        ...panel,
-        serializedState: {
-          rawState: { attributes: newState },
-        },
-      };
-    });
+        return {
+          ...panel,
+          serializedState: {
+            rawState: { attributes: newState },
+          },
+        };
+      })
+    );
     return { timeRange, panels: transformedPanels };
   },
-  save: (state: PageState, embeddable: EmbeddableStart) => {
-    const transformedPanels = state.panels.map((panel) => {
-      const { rawState } = panel.serializedState ?? {};
-      if (!isByValue(rawState)) return panel;
+  save: async (state: PageState, embeddable: EmbeddableStart) => {
+    const transformedPanels = await Promise.all(
+      state.panels.map(async (panel) => {
+        const { rawState } = panel.serializedState ?? {};
+        if (!isByValue(rawState)) return panel;
 
-      // Transform the panel state if necessary, e.g., to ensure compatibility with the latest version
-      const embeddableCmDefinitions = embeddable.getEmbeddableContentManagementDefinition(
-        panel.type
-      );
-      const { itemToSavedObject } = getLatestVersionOfDefinition(embeddableCmDefinitions);
-      if (!itemToSavedObject) return panel;
-      const savedState = itemToSavedObject(rawState.attributes);
-      return {
-        ...panel,
-        serializedState: { rawState: savedState },
-      };
-    });
+        // Transform the panel state if necessary, e.g., to ensure compatibility with the latest version
+        const embeddableCmDefinitions = await embeddable.getEmbeddableContentManagementDefinition(
+          panel.type
+        );
+        const { itemToSavedObject } = getLatestVersionOfDefinition(embeddableCmDefinitions);
+        if (!itemToSavedObject) return panel;
+        const savedState = itemToSavedObject(rawState.attributes);
+        return {
+          ...panel,
+          serializedState: { rawState: savedState },
+        };
+      })
+    );
     state.panels = transformedPanels;
     sessionStorage.setItem(SAVED_STATE_SESSION_STORAGE_KEY, JSON.stringify(state));
   },

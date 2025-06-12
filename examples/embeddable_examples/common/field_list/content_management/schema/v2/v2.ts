@@ -17,8 +17,9 @@ export const fieldListAttributesDefinition: VersionableEmbeddableObject<
   SavedFieldListAttributes,
   FieldListAttributes
 > = {
-  itemToSavedObject: ({ attributes, references }) => {
-    const { selectedFieldNames, dataViewId } = attributes;
+  itemToSavedObject: (item) => {
+    const { selectedFieldNames, dataViewId } = item;
+    const references = [];
     if (dataViewId) {
       // inject data view id as a reference
       references.push({
@@ -40,12 +41,8 @@ export const fieldListAttributesDefinition: VersionableEmbeddableObject<
     // inject data view id from references
     const dataViewRef = references.find((ref) => ref.name === FIELD_LIST_DATA_VIEW_REF_NAME);
     return {
-      attributes: {
-        selectedFieldNames,
-        dataViewId: dataViewRef?.id,
-      },
-      // since all references are injected, we return an empty array
-      references: [],
+      selectedFieldNames,
+      dataViewId: dataViewRef?.id,
     };
   },
 };

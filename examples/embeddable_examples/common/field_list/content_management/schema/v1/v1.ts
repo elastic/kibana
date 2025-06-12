@@ -8,13 +8,13 @@
  */
 
 import type { VersionableEmbeddableObject } from '@kbn/embeddable-plugin/common';
-import type { SavedFieldListAttributesV1 } from '../../../../../server/types';
+import type { SavedFieldListAttributes } from '../../../../../server/types';
 import type { FieldListAttributes } from '../../../../../server/field_list/content_management/schema/v1';
 
 export const fieldListAttributesDefinition: VersionableEmbeddableObject<
-  SavedFieldListAttributesV1,
+  SavedFieldListAttributes,
   FieldListAttributes
 > = {
-  itemToSavedObject: ({ attributes, references }) => ({ attributes, references }),
-  savedObjectToItem: ({ attributes, references }) => ({ attributes, references }),
+  itemToSavedObject: (item) => ({ attributes: item, references: [] }),
+  savedObjectToItem: ({ attributes }) => attributes,
 };

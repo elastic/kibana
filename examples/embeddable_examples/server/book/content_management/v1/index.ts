@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { BookAttributes, BookSearchOptions } from './types';
-export { bookAttributesSchema, serviceDefinition } from './v1';
+export type { BookSearchOptions } from './types';
+export { serviceDefinition } from './v1';

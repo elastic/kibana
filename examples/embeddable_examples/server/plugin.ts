@@ -11,10 +11,13 @@ import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '
 import type { EmbeddableContentManagementDefinition } from '@kbn/embeddable-plugin/common';
 import type { SetupDeps, StartDeps } from './types';
 import { bookCmDefinitions } from '../common/book/content_management/cm_services';
-import { bookAttributesSchema } from './book/content_management/v1';
 import { SavedBookAttributes, createBookSavedObjectType } from './book/saved_object';
 import { SavedBookStorage } from './book/content_management';
-import { BOOK_CONTENT_ID, BOOK_LATEST_VERSION } from '../common/book/content_management/schema';
+import {
+  BOOK_CONTENT_ID,
+  BOOK_LATEST_VERSION,
+  bookItemSchema,
+} from '../common/book/content_management/schema';
 
 export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   private readonly logger: Logger;
@@ -27,7 +30,7 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
     const bookCmDefinitionsWithSchemas: EmbeddableContentManagementDefinition = {
       id: 'book',
       versions: {
-        1: { ...bookCmDefinitions.versions[1], itemSchema: bookAttributesSchema },
+        1: { ...bookCmDefinitions.versions[1], itemSchema: bookItemSchema },
       },
       latestVersion: 1,
     };
