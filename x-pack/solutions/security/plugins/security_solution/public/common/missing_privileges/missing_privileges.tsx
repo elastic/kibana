@@ -42,10 +42,17 @@ interface MissingPrivilegesTooltip {
   children: React.ReactElement; // EuiToolTip requires a single ReactElement child
   description: React.ReactNode;
 }
+
+const anchorProps = {
+  style: { width: 'fit-content' },
+  'data-test-subj': 'missingPrivilegesTooltipAnchor',
+};
+
 export const MissingPrivilegesTooltip = React.memo<MissingPrivilegesTooltip>(
   ({ children, description }) => (
     <EuiToolTip
-      anchorProps={{ style: { width: 'fit-content' } }}
+      data-test-subj="missingPrivilegesTooltip"
+      anchorProps={anchorProps}
       title={i18n.PRIVILEGES_MISSING_TITLE}
       content={description}
     >

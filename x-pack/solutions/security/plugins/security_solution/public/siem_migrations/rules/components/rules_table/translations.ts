@@ -42,51 +42,6 @@ export const GO_BACK_TO_RULES_TABLE_BUTTON = i18n.translate(
   }
 );
 
-export const INSTALL_SELECTED_RULES = (numberOfSelectedRules: number) => {
-  return i18n.translate('xpack.securitySolution.siemMigrations.rules.table.installSelectedRules', {
-    defaultMessage: 'Install selected ({numberOfSelectedRules})',
-    values: { numberOfSelectedRules },
-  });
-};
-
-export const REPROCESS_FAILED_RULES = (numberOfFailedRules: number) => {
-  return i18n.translate('xpack.securitySolution.siemMigrations.rules.table.reprocessFailedRules', {
-    defaultMessage: 'Reprocess rules ({numberOfFailedRules})',
-    values: { numberOfFailedRules },
-  });
-};
-export const INSTALL_TRANSLATED_RULES_EMPTY_STATE = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.installTranslatedRulesEmptyState',
-  {
-    defaultMessage: 'Install translated rules',
-  }
-);
-
-export const INSTALL_TRANSLATED_RULES = (numberOfAllRules: number) => {
-  return i18n.translate(
-    'xpack.securitySolution.siemMigrations.rules.table.installTranslatedRules',
-    {
-      defaultMessage:
-        'Install translated {numberOfAllRules, plural, one {rule} other {rules}} ({numberOfAllRules})',
-      values: { numberOfAllRules },
-    }
-  );
-};
-
-export const INSTALL_SELECTED_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.installSelectedButtonAriaLabel',
-  {
-    defaultMessage: 'Install selected translated rules',
-  }
-);
-
-export const INSTALL_TRANSLATED_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.installTranslatedButtonAriaLabel',
-  {
-    defaultMessage: 'Install all translated rules',
-  }
-);
-
 export const REPROCESS_FAILED_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.table.reprocessFailedRulesButtonAriaLabel',
   {

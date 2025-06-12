@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as i18n from './translations';
+import { ReprocessFailedRulesButton } from './reprocess_failed_rules';
 
 export interface BulkActionsProps {
   isTableLoading: boolean;
@@ -17,6 +18,8 @@ export interface BulkActionsProps {
   installTranslatedRule?: () => void;
   installSelectedRule?: () => void;
   reprocessFailedRules?: () => void;
+  hasMissingCapabilities?: boolean;
+  missingCapabilitiesText?: React.ReactNode | string;
 }
 
 /**
@@ -54,17 +57,12 @@ export const BulkActions: React.FC<BulkActionsProps> = React.memo(
         )}
         {showRetryFailedRulesButton && (
           <EuiFlexItem grow={false}>
-            <EuiButton
-              iconType="refresh"
-              color={'warning'}
+            <ReprocessFailedRulesButton
               onClick={() => reprocessFailedRules?.()}
-              disabled={isTableLoading}
+              isDisabled={isTableLoading}
               isLoading={isTableLoading}
-              data-test-subj="reprocessFailedRulesButton"
-              aria-label={i18n.REPROCESS_FAILED_ARIA_LABEL}
-            >
-              {i18n.REPROCESS_FAILED_RULES(numberOfFailedRules)}
-            </EuiButton>
+              numberOfFailedRules={numberOfFailedRules}
+            />
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>
