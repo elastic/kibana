@@ -82,6 +82,7 @@ const getAllRiskEngineSpaces = async (
 export const createEventIngestedPipelineInAllNamespaces = async ({
   getStartServices,
   logger,
+  auditLogger,
 }: EntityAnalyticsMigrationsParams) => {
   const [coreStart] = await getStartServices();
   const esClient = coreStart.elasticsearch.client.asInternalUser;
@@ -90,7 +91,7 @@ export const createEventIngestedPipelineInAllNamespaces = async ({
   const assetCriticalityMigrationClient = new AssetCriticalityMigrationClient({
     esClient,
     logger,
-    auditLogger: undefined, // Audit logger is not used in this migration
+    auditLogger,
   });
   const assetCriticalitySpaces =
     await assetCriticalityMigrationClient.getAllSpacesWithAssetCriticalityInstalled();
