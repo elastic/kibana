@@ -96,7 +96,7 @@ export class ServiceManager {
       conversationService: conversations,
       agentService: agents,
     });
-    
+
     this.internalStart = {
       tools,
       agents,

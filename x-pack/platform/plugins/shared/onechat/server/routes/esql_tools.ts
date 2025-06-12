@@ -14,7 +14,6 @@ import { apiPrivileges } from '../../common/features';
 export function registerESQLToolsRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
-  // add apiPriveleges for ESQL tools
   router.get(
     {
       path: '/api/chat/tools/esql/{id}',

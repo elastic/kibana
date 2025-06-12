@@ -13,7 +13,6 @@ import type {
   import { EsqlToolClient, createClient } from './client';
   import { createStorage } from './storage';
 import { RegisteredToolProviderWithId } from '../types';
-import { z } from 'zod';
 import { EsqlTool, RegisteredTool } from '@kbn/onechat-server';
 import { esqlToolProviderId } from '@kbn/onechat-common';
 import { esqlToolCreater } from './utils/execute_esql_query';
@@ -21,10 +20,6 @@ import { esqlToolCreater } from './utils/execute_esql_query';
 export interface EsqlToolRegistry extends RegisteredToolProviderWithId {
   getScopedClient(options: { request: KibanaRequest }): Promise<EsqlToolClient>;
 }
-
-export const esqlSchema = z.object({
-  params: z.record(z.any()).optional().describe('Params needed to execute the query'),
-});
 
 export class EsqlToolRegistryImpl implements EsqlToolRegistry {
   public readonly id = esqlToolProviderId;
