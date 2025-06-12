@@ -20,7 +20,8 @@ const singlePath = new Set([
 const dualPath = new Set(['copyFile', 'copyFileSync', 'rename', 'renameSync']);
 
 const { REPO_ROOT } = require('@kbn/repo-info');
-const fsEventBus = require('@kbn/security-hardening/fs-event-bus');
+
+const fsEventBus = require('../../platform/packages/shared/kbn-security-hardening/fs-event-bus'); // eslint-disable-line @kbn/imports/uniform_imports
 
 const { join, normalize } = require('path');
 const { homedir, tmpdir } = require('os');
