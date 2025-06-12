@@ -169,7 +169,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           const entries = await getEntries({ sortBy: 'id', sortDirection: 'desc' });
 
           const ids = entries.map(({ id }) => id);
-          const sortedIds = [...ids].sort((a, b) => (a > b ? -1 : 1));
+          const sortedIds = [...ids].sort().reverse();
 
           expect(ids).to.eql(sortedIds);
           expect(ids[0]).to.equal('500');

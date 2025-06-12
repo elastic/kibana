@@ -476,43 +476,33 @@ export class KnowledgeBaseService {
     }
 
     try {
-      const BATCH_SIZE = 100;
+      const result = await this.dependencies.esClient.asInternalUser.helpers.bulk({
+        onDocument(doc) {
+          return [
+            { index: { _index: resourceNames.writeIndexAlias.kb, _id: doc.id } },
+            {
+              '@timestamp': new Date().toISOString(),
+              ...doc,
+              ...(doc.text ? { semantic_text: doc.text } : {}),
+              user,
+              namespace,
+            },
+          ];
+        },
+        datasource: entries,
+        refresh: 'wait_for',
+        concurrency: 5,
+        flushBytes: 500 * 1024,
+        flushInterval: 1000,
+        retries: 5,
+      });
 
-      for (let i = 0; i < entries.length; i += BATCH_SIZE) {
-        const batch = entries.slice(i, i + BATCH_SIZE);
-        this.dependencies.logger.debug(
-          `Processing batch ${Math.floor(i / BATCH_SIZE) + 1} of ${Math.ceil(
-            entries.length / BATCH_SIZE
-          )} (${batch.length} entries)`
-        );
-
-        await this.dependencies.esClient.asInternalUser.helpers.bulk({
-          onDocument(doc) {
-            return [
-              { index: { _index: resourceNames.writeIndexAlias.kb, _id: doc.id } },
-              {
-                '@timestamp': new Date().toISOString(),
-                ...doc,
-                ...(doc.text ? { semantic_text: doc.text } : {}),
-                user,
-                namespace,
-              },
-            ];
-          },
-          datasource: batch,
-          refresh: 'wait_for',
-          concurrency: 10,
-          retries: 3,
-          onDrop(doc) {
-            throw Error(
-              `Indexing failed for document. Status: ${doc.status}, Error: ${doc.error}, Id: ${doc.document.id}}`
-            );
-          },
-        });
+      if (result.failed > 0) {
+        throw Error(`Failed ingesting ${result.failed} documents.`);
       }
 
       this.dependencies.logger.debug(
-        `Successfully added ${entries.length} entries to the knowledge base`
+        `Successfully added ${result.successful} entries to the knowledge base`
       );
     } catch (error) {
       this.dependencies.logger.error(`Failed to add entries to the knowledge base: ${error}`);
