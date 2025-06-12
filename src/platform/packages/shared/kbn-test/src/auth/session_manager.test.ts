@@ -476,7 +476,6 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
       cloudHostName,
     };
     let samlSessionManager: SamlSessionManager;
-    const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
     beforeEach(() => {
       jest.resetAllMocks();
@@ -500,8 +499,6 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
 
       // Act
       await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleViewer);
-      // Add a small delay between calls
-      await delay(500); // 500ms delay
       await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleViewer);
 
       // Assert
@@ -519,8 +516,6 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
 
       // Act
       await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleViewer);
-      // Add a small delay between calls
-      await delay(500); // 500ms delay
       await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleViewer);
 
       // Assert
