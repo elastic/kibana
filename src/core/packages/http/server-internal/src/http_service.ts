@@ -329,7 +329,7 @@ export class HttpService
           security: {
             authz: {
               enabled: false,
-              reason: 'Dev only Route',
+              reason: 'Dev only route',
             },
           },
         },
