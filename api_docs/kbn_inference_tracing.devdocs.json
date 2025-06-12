@@ -1,0 +1,492 @@
+{
+  "id": "@kbn/inference-tracing",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/inference-tracing",
+        "id": "def-server.initLangfuseProcessor",
+        "type": "Function",
+        "tags": [],
+        "label": "initLangfuseProcessor",
+        "description": [],
+        "signature": [
+          "({\n  logger,\n  config,\n}: { logger: ",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          },
+          "; config: ",
+          "InferenceTracingLangfuseExportConfig",
+          "; }) => () => Promise<void>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/langfuse/init_langfuse_processor.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-tracing",
+            "id": "def-server.initLangfuseProcessor.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  logger,\n  config,\n}",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/langfuse/init_langfuse_processor.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-tracing",
+                "id": "def-server.initLangfuseProcessor.$1.logger",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "common",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-common.Logger",
+                    "text": "Logger"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/langfuse/init_langfuse_processor.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-tracing",
+                "id": "def-server.initLangfuseProcessor.$1.config",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  "InferenceTracingLangfuseExportConfig"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/langfuse/init_langfuse_processor.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-tracing",
+        "id": "def-server.initPhoenixProcessor",
+        "type": "Function",
+        "tags": [],
+        "label": "initPhoenixProcessor",
+        "description": [],
+        "signature": [
+          "({\n  logger,\n  config,\n}: { logger: ",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          },
+          "; config: ",
+          "InferenceTracingPhoenixExportConfig",
+          "; }) => () => Promise<void>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/phoenix/init_phoenix_processor.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-tracing",
+            "id": "def-server.initPhoenixProcessor.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  logger,\n  config,\n}",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/phoenix/init_phoenix_processor.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-tracing",
+                "id": "def-server.initPhoenixProcessor.$1.logger",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "common",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-common.Logger",
+                    "text": "Logger"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/phoenix/init_phoenix_processor.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-tracing",
+                "id": "def-server.initPhoenixProcessor.$1.config",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  "InferenceTracingPhoenixExportConfig"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/phoenix/init_phoenix_processor.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-tracing",
+        "id": "def-server.withChatCompleteSpan",
+        "type": "Function",
+        "tags": [],
+        "label": "withChatCompleteSpan",
+        "description": [
+          "\nWrapper around {@link withInferenceSpan} that sets the right attributes for a chat operation span."
+        ],
+        "signature": [
+          "(options: InferenceGenerationOptions, cb: (span?: ",
+          "Span",
+          " | undefined) => T) => T"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_chat_complete_span.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-tracing",
+            "id": "def-server.withChatCompleteSpan.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "InferenceGenerationOptions"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_chat_complete_span.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/inference-tracing",
+            "id": "def-server.withChatCompleteSpan.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "cb",
+            "description": [],
+            "signature": [
+              "(span?: ",
+              "Span",
+              " | undefined) => T"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_chat_complete_span.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-tracing",
+        "id": "def-server.withChatCompleteSpan",
+        "type": "Function",
+        "tags": [],
+        "label": "withChatCompleteSpan",
+        "description": [],
+        "signature": [
+          "(options: InferenceGenerationOptions, cb: (span?: ",
+          "Span",
+          " | undefined) => Promise<",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompleteResponse",
+            "text": "ChatCompleteResponse"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolOptions",
+            "text": "ToolOptions"
+          },
+          "<string>>> | ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompleteStreamResponse",
+            "text": "ChatCompleteStreamResponse"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolOptions",
+            "text": "ToolOptions"
+          },
+          "<string>>) => Promise<",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompleteResponse",
+            "text": "ChatCompleteResponse"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolOptions",
+            "text": "ToolOptions"
+          },
+          "<string>>> | ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompleteStreamResponse",
+            "text": "ChatCompleteStreamResponse"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolOptions",
+            "text": "ToolOptions"
+          },
+          "<string>>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_chat_complete_span.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-tracing",
+            "id": "def-server.withChatCompleteSpan.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "InferenceGenerationOptions"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_chat_complete_span.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/inference-tracing",
+            "id": "def-server.withChatCompleteSpan.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "cb",
+            "description": [],
+            "signature": [
+              "(span?: ",
+              "Span",
+              " | undefined) => Promise<",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteResponse",
+                "text": "ChatCompleteResponse"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolOptions",
+                "text": "ToolOptions"
+              },
+              "<string>>> | ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteStreamResponse",
+                "text": "ChatCompleteStreamResponse"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolOptions",
+                "text": "ToolOptions"
+              },
+              "<string>>"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_chat_complete_span.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-tracing",
+        "id": "def-server.withExecuteToolSpan",
+        "type": "Function",
+        "tags": [],
+        "label": "withExecuteToolSpan",
+        "description": [
+          "\nWrapper around {@link withInferenceSpan} that sets the right attributes for a execute_tool operation span."
+        ],
+        "signature": [
+          "(options: string | { name: string; description?: string | undefined; toolCallId?: string | undefined; input?: unknown; }, cb: (span?: ",
+          "Span",
+          " | undefined) => T) => T"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_execute_tool_span.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-tracing",
+            "id": "def-server.withExecuteToolSpan.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "string | { name: string; description?: string | undefined; toolCallId?: string | undefined; input?: unknown; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_execute_tool_span.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/inference-tracing",
+            "id": "def-server.withExecuteToolSpan.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "cb",
+            "description": [],
+            "signature": [
+              "(span?: ",
+              "Span",
+              " | undefined) => T"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_execute_tool_span.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-tracing",
+        "id": "def-server.withInferenceSpan",
+        "type": "Function",
+        "tags": [],
+        "label": "withInferenceSpan",
+        "description": [
+          "\nWraps a callback in an active span. If the callback returns an Observable\nor Promise, it will set the span status to the appropriate value when the\nasync operation completes."
+        ],
+        "signature": [
+          "(options: string | ({ name: string; } & ",
+          "GenAISemConvAttributes",
+          "), cb: (span?: ",
+          "Span",
+          " | undefined) => T) => T"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_inference_span.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-tracing",
+            "id": "def-server.withInferenceSpan.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "string | ({ name: string; } & ",
+              "GenAISemConvAttributes",
+              ")"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_inference_span.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/inference-tracing",
+            "id": "def-server.withInferenceSpan.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "cb",
+            "description": [],
+            "signature": [
+              "(span?: ",
+              "Span",
+              " | undefined) => T"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_inference_span.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

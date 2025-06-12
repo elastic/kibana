@@ -19,6 +19,7 @@ import {
 import { createDashboardSavedObjectType } from './dashboard_saved_object';
 
 const embeddableSetupMock = createEmbeddableSetupMock();
+const embeddableStartMock = createEmbeddableStartMock();
 
 describe('dashboard saved object model version transformations', () => {
   let migrator: ModelVersionTestMigrator;
@@ -28,7 +29,7 @@ describe('dashboard saved object model version transformations', () => {
       type: createDashboardSavedObjectType({
         migrationDeps: {
           embeddableSetup: embeddableSetupMock,
-          getEmbeddableStart: () => createEmbeddableStartMock(),
+          getEmbeddableStart: () => embeddableStartMock,
         },
       }),
     });
