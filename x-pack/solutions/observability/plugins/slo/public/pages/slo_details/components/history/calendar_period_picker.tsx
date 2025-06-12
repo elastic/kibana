@@ -9,7 +9,7 @@ import { EuiButton, EuiFlexGroup, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { toDuration } from '../../../../utils/slo/duration';
 import { TimeBounds } from '../../types';
 
@@ -19,21 +19,25 @@ interface Props {
 }
 
 export function CalendarPeriodPicker({ slo, onChange }: Props) {
-  const [calendarPeriod, setCalendarPeriod] = useState<number>(0);
+  const [periodOffset, setPeriodOffset] = useState<number>(0);
 
-  useEffect(() => {
-    if (slo.timeWindow.type === 'calendarAligned') {
-      const now = moment();
-      const duration = toDuration(slo.timeWindow.duration);
-      const unit = duration.unit === 'w' ? 'isoWeek' : 'month';
-      const durationUnit = duration.unit === 'w' ? 'week' : 'month';
+  function handleChangePeriod(offset: number) {
+    const now = moment();
+    const duration = toDuration(slo.timeWindow.duration);
+    const unit = duration.unit === 'w' ? 'isoWeek' : 'month';
+    const durationUnit = duration.unit === 'w' ? 'week' : 'month';
 
-      return onChange({
-        from: moment.utc(now).subtract(calendarPeriod, durationUnit).startOf(unit).toDate(),
-        to: moment.utc(now).subtract(calendarPeriod, durationUnit).endOf(unit).toDate(),
+    setPeriodOffset((curr) => {
+      const newOffset = curr + offset;
+
+      onChange({
+        from: moment.utc(now).subtract(newOffset, durationUnit).startOf(unit).toDate(),
+        to: moment.utc(now).subtract(newOffset, durationUnit).endOf(unit).toDate(),
       });
-    }
-  }, [onChange, calendarPeriod, slo.timeWindow]);
+
+      return newOffset;
+    });
+  }
 
   return (
     <EuiFlexGroup direction="row" justifyContent="flexEnd" alignItems="center">
@@ -41,7 +45,7 @@ export function CalendarPeriodPicker({ slo, onChange }: Props) {
         size="s"
         data-test-subj="sloSloDetailsHistoryPreviousButton"
         onClick={() => {
-          setCalendarPeriod((curr) => curr + 1);
+          handleChangePeriod(+1);
         }}
       >
         {i18n.translate('xpack.slo.sloDetailsHistory.previousPeriodButtonLabel', {
@@ -49,14 +53,14 @@ export function CalendarPeriodPicker({ slo, onChange }: Props) {
         })}
       </EuiButton>
       <EuiText size="s">
-        <p>{getCalendarPeriodLabel(slo, calendarPeriod)}</p>
+        <p>{getCalendarPeriodLabel(slo, periodOffset)}</p>
       </EuiText>
       <EuiButton
         size="s"
         data-test-subj="sloSloDetailsHistoryNextButton"
-        disabled={calendarPeriod <= 0}
+        disabled={periodOffset <= 0}
         onClick={() => {
-          setCalendarPeriod((curr) => curr - 1);
+          handleChangePeriod(-1);
         }}
       >
         {i18n.translate('xpack.slo.sloDetailsHistory.nextPeriodButtonLabel', {

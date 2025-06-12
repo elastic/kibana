@@ -33,7 +33,6 @@ export interface Props {
 export function SloDetailsHistory({ slo, isAutoRefreshing }: Props) {
   const { uiSettings } = useKibana().services;
 
-  // TODO: refactor
   const [range, setRange] = useState<TimeBounds>(() => {
     if (slo.timeWindow.type === 'calendarAligned') {
       const now = moment();
