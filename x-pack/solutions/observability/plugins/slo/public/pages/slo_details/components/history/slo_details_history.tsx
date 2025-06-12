@@ -37,7 +37,7 @@ export function SloDetailsHistory({ slo, isAutoRefreshing }: Props) {
     if (slo.timeWindow.type === 'calendarAligned') {
       const now = moment();
       const duration = toDuration(slo.timeWindow.duration);
-      const unit = duration.unit === 'w' ? 'isoWeek' : 'months';
+      const unit = duration.unit === 'w' ? 'isoWeek' : 'month';
 
       return {
         from: moment.utc(now).startOf(unit).toDate(),
