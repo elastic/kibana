@@ -309,11 +309,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       if (isServerless) {
         it('is forbidden', async () => {
-          const createdRule = await alertingApi.helpers.createEsQueryRule({
+          await alertingApi.helpers.createEsQueryRule({
             roleAuthc: editorRoleAuthc,
             ...getESQueryRuleConfiguration({ consumer }),
+            expectedStatusCode: 403,
           });
-          expect(createdRule.statusCode).to.be(403);
         });
       } else {
         it('creates rule successfully', async () => {

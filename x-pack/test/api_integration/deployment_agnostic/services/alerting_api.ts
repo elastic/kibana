@@ -263,6 +263,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       consumer,
       notifyWhen,
       enabled = true,
+      expectedStatusCode = 200,
     }: {
       roleAuthc: RoleCredentials;
       ruleTypeId: string;
@@ -274,6 +275,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       schedule?: { interval: string };
       notifyWhen?: string;
       enabled?: boolean;
+      expectedStatusCode?: number;
     }) {
       const { body } = await supertestWithoutAuth
         .post(`/api/alerting/rule`)
@@ -292,7 +294,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
           actions,
           ...(notifyWhen ? { notify_when: notifyWhen, throttle: '5m' } : {}),
         })
-        .expect(200);
+        .expect(expectedStatusCode);
       return body;
     },
 
