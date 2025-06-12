@@ -7,10 +7,10 @@
 
 import React, { memo } from 'react';
 import { BaseEdge, getSmoothStepPath } from '@xyflow/react';
-import { useEuiTheme } from '@elastic/eui';
 import type { EdgeProps, EdgeViewModel } from '../types';
 import { getShapeHandlePosition } from './utils';
 import { getMarkerEnd } from './markers';
+import { useEdgeColor } from './styles';
 
 type EdgeColor = EdgeViewModel['color'];
 
@@ -32,7 +32,6 @@ export const DefaultEdge = memo(
     targetPosition,
     data,
   }: EdgeProps) => {
-    const { euiTheme } = useEuiTheme();
     const color: EdgeColor = data?.color || 'primary';
     const sourceMargin = getShapeHandlePosition(data?.sourceShape);
     const targetMargin = getShapeHandlePosition(data?.targetShape);
@@ -65,7 +64,7 @@ export const DefaultEdge = memo(
           path={edgePath}
           interactionWidth={0}
           style={{
-            stroke: euiTheme.colors[color],
+            stroke: useEdgeColor(color),
             // Defaults to solid when type is not available
             ...(data?.type === 'dashed' ? dashedStyle : {}),
           }}

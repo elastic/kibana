@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useEuiTheme } from '@elastic/eui';
+import { useEdgeColor } from './styles';
 
 const getArrowPoints = (width: number, height: number): string => {
   return `${-width},${-height} 0,0 ${-width},${height} ${-width},${-height}`;
@@ -59,13 +59,11 @@ export const getMarkerEnd = (color: string) => {
 };
 
 export const SvgDefsMarker = () => {
-  const { euiTheme } = useEuiTheme();
-
   return (
     <svg css={{ position: 'absolute', width: 0, height: 0 }}>
       <defs>
-        <ArrowMarker id="arrowPrimary" color={euiTheme.colors.primary} width={6} height={4.8} />
-        <ArrowMarker id="arrowDanger" color={euiTheme.colors.danger} width={6} height={4.8} />
+        <ArrowMarker id="arrowPrimary" color={useEdgeColor('primary')} width={6} height={4.8} />
+        <ArrowMarker id="arrowDanger" color={useEdgeColor('danger')} width={6} height={4.8} />
       </defs>
     </svg>
   );
