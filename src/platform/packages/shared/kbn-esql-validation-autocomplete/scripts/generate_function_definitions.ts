@@ -153,7 +153,7 @@ const enrichOperators = (
     const arePredicates =
       op.operator?.toLowerCase() === 'is null' || op.operator?.toLowerCase() === 'is not null';
 
-    const isInOperator = op.operator === 'in' || op.operator === 'not in';
+    const isInOperator = op.name === 'in' || op.name === 'not_in';
     const isLikeOperator = /like/i.test(op.name);
 
     let signatures = op.signatures.map((s) => ({

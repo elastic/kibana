@@ -354,10 +354,10 @@ describe('validation logic', () => {
         'Argument of [in] must be [integer[]], found value [("a", "b", "c")] type [(keyword, keyword, keyword)]',
       ]);
       testErrorsAndWarnings('row var = 5 not in ("a", "b", "c")', [
-        'Argument of [not_in] must be [integer[]], found value [("a", "b", "c")] type [(keyword, keyword, keyword)]',
+        'Argument of [not in] must be [integer[]], found value [("a", "b", "c")] type [(keyword, keyword, keyword)]',
       ]);
       testErrorsAndWarnings('row var = 5 not in (1, 2, 3, "a")', [
-        'Argument of [not_in] must be [integer[]], found value [(1, 2, 3, "a")] type [(integer, integer, integer, keyword)]',
+        'Argument of [not in] must be [integer[]], found value [(1, 2, 3, "a")] type [(integer, integer, integer, keyword)]',
       ]);
 
       // test that "and" and "or" accept null... not sure if this is the best place or not...
@@ -414,13 +414,13 @@ describe('validation logic', () => {
           `Argument of [${op}] must be [keyword], found value [5] type [integer]`,
         ]);
         testErrorsAndWarnings(`row var = 5 NOT ${op} "?a"`, [
-          `Argument of [not_${op}] must be [keyword], found value [5] type [integer]`,
+          `Argument of [not ${op}] must be [keyword], found value [5] type [integer]`,
         ]);
         testErrorsAndWarnings(`row var = NOT 5 ${op} "?a"`, [
           `Argument of [${op}] must be [keyword], found value [5] type [integer]`,
         ]);
         testErrorsAndWarnings(`row var = NOT 5 NOT ${op} "?a"`, [
-          `Argument of [not_${op}] must be [keyword], found value [5] type [integer]`,
+          `Argument of [not ${op}] must be [keyword], found value [5] type [integer]`,
         ]);
       }
 
@@ -869,13 +869,13 @@ describe('validation logic', () => {
           `Argument of [${op}] must be [keyword], found value [doubleField] type [double]`,
         ]);
         testErrorsAndWarnings(`from a_index | where doubleField NOT ${op} "?a"`, [
-          `Argument of [not_${op}] must be [keyword], found value [doubleField] type [double]`,
+          `Argument of [not ${op}] must be [keyword], found value [doubleField] type [double]`,
         ]);
         testErrorsAndWarnings(`from a_index | where NOT doubleField ${op} "?a"`, [
           `Argument of [${op}] must be [keyword], found value [doubleField] type [double]`,
         ]);
         testErrorsAndWarnings(`from a_index | where NOT doubleField NOT ${op} "?a"`, [
-          `Argument of [not_${op}] must be [keyword], found value [doubleField] type [double]`,
+          `Argument of [not ${op}] must be [keyword], found value [doubleField] type [double]`,
         ]);
       }
 
@@ -1176,13 +1176,13 @@ describe('validation logic', () => {
           `Argument of [${op}] must be [keyword], found value [doubleField] type [double]`,
         ]);
         testErrorsAndWarnings(`from a_index | eval doubleField NOT ${op} "?a"`, [
-          `Argument of [not_${op}] must be [keyword], found value [doubleField] type [double]`,
+          `Argument of [not ${op}] must be [keyword], found value [doubleField] type [double]`,
         ]);
         testErrorsAndWarnings(`from a_index | eval NOT doubleField ${op} "?a"`, [
           `Argument of [${op}] must be [keyword], found value [doubleField] type [double]`,
         ]);
         testErrorsAndWarnings(`from a_index | eval NOT doubleField NOT ${op} "?a"`, [
-          `Argument of [not_${op}] must be [keyword], found value [doubleField] type [double]`,
+          `Argument of [not ${op}] must be [keyword], found value [doubleField] type [double]`,
         ]);
       }
       // test lists
