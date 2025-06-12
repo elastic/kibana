@@ -13,22 +13,14 @@ import {
   EuiText,
   EuiSpacer,
   EuiLink,
-  EuiImage,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import ObservabilityImage from '../../../public/assets/observability.svg';
 
 export const Observability: React.FC = () => (
   <EuiFlexGroup gutterSize="m">
     <EuiFlexItem grow={false}>
-      <EuiImage
-        src={ObservabilityImage}
-        alt={i18n.translate('xpack.searchHomepage.observability.imageAlt', {
-          defaultMessage: 'Observability',
-        })}
-        size="xs"
-      />
+      <EuiIcon type="logoObservability" size="xl" />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <EuiFlexGroup direction="column" gutterSize="s">

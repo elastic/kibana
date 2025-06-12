@@ -33,7 +33,7 @@ export const VectorSearch: React.FC = () => (
             alt={i18n.translate('xpack.searchHomepage.aiSearchCapabilities.vectorSearch.imageAlt', {
               defaultMessage: 'Vector Search',
             })}
-            size="s"
+            size={'s'}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -42,7 +42,7 @@ export const VectorSearch: React.FC = () => (
               <EuiTitle size="xs">
                 <span>
                   {i18n.translate('xpack.searchHomepage.aiSearchCapabilities.vectorSearch.title', {
-                    defaultMessage: 'Supercharge retrieval with vector search.',
+                    defaultMessage: 'Store and search your vector embeddings',
                   })}
                 </span>
               </EuiTitle>
@@ -53,7 +53,7 @@ export const VectorSearch: React.FC = () => (
                 'xpack.searchHomepage.aiSearchCapabilities.vectorSearch.description',
                 {
                   defaultMessage:
-                    'Store and search dense vector representations of your data for similarity-based retrieval and advanced AI-powered search experiences.',
+                    'Use Elasticsearch as a datastore for vector embeddings andenable lightning-fast searches and insights.',
                 }
               )}
             </EuiFlexItem>
@@ -70,7 +70,8 @@ export const VectorSearch: React.FC = () => (
                         {i18n.translate(
                           'xpack.searchHomepage.aiSearchCapabilities.vectorSearch.firstLine',
                           {
-                            defaultMessage: 'Supports multiple vector similarity algorithms',
+                            defaultMessage:
+                              'A single solution to generate, store and search your vector embeddings. ',
                           }
                         )}
                       </EuiText>
@@ -87,7 +88,8 @@ export const VectorSearch: React.FC = () => (
                         {i18n.translate(
                           'xpack.searchHomepage.aiSearchCapabilities.vectorSearch.secondLine',
                           {
-                            defaultMessage: 'Integrates with popular ML frameworks',
+                            defaultMessage:
+                              'Utilize the dense_vector field type for approximate kNN searches.',
                           }
                         )}
                       </EuiText>
@@ -104,7 +106,8 @@ export const VectorSearch: React.FC = () => (
                         {i18n.translate(
                           'xpack.searchHomepage.aiSearchCapabilities.vectorSearch.thirdLine',
                           {
-                            defaultMessage: 'Scale to billions of vectors with efficient indexing',
+                            defaultMessage:
+                              'Choose from several memory quantization strategies to reduce bloat.',
                           }
                         )}
                       </EuiText>
@@ -123,7 +126,7 @@ export const VectorSearch: React.FC = () => (
                   {i18n.translate(
                     'xpack.searchHomepage.aiSearchCapabilities.vectorSearch.createVectorIndex',
                     {
-                      defaultMessage: 'Create a vector index',
+                      defaultMessage: 'Create a vector optimized index',
                     }
                   )}
                 </EuiButton>

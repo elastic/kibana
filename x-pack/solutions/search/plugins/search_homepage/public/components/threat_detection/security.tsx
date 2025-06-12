@@ -13,22 +13,14 @@ import {
   EuiText,
   EuiSpacer,
   EuiLink,
-  EuiImage,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import SecurityImage from '../../../public/assets/security.svg';
 
 export const Security: React.FC = () => (
   <EuiFlexGroup gutterSize="m">
     <EuiFlexItem grow={false}>
-      <EuiImage
-        src={SecurityImage}
-        alt={i18n.translate('xpack.searchHomepage.security.imageAlt', {
-          defaultMessage: 'Security',
-        })}
-        size="xs"
-      />
+      <EuiIcon type="logoSecurity" size="xl" />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <EuiFlexGroup direction="column" gutterSize="s">

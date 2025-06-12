@@ -36,7 +36,7 @@ export const KeywordSearch: React.FC = () => (
                 defaultMessage: 'Keyword Search',
               }
             )}
-            size="s"
+            size={'s'}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -45,7 +45,8 @@ export const KeywordSearch: React.FC = () => (
               <EuiTitle size="xs">
                 <span>
                   {i18n.translate('xpack.searchHomepage.aiSearchCapabilities.keywordSearch.title', {
-                    defaultMessage: 'Boost results with keyword search.',
+                    defaultMessage:
+                      'Setup your application with Elasticsearch’s full-text search capabilities',
                   })}
                 </span>
               </EuiTitle>
@@ -56,7 +57,7 @@ export const KeywordSearch: React.FC = () => (
                 'xpack.searchHomepage.aiSearchCapabilities.keywordSearch.description',
                 {
                   defaultMessage:
-                    'Leverage traditional text matching techniques to quickly retrieve precise keyword-based results from your data.',
+                    'Use a semantic_text field and Elastic’s built-in ELSER machine learning model.',
                 }
               )}
             </EuiFlexItem>
@@ -73,7 +74,7 @@ export const KeywordSearch: React.FC = () => (
                         {i18n.translate(
                           'xpack.searchHomepage.aiSearchCapabilities.keywordSearch.firstLine',
                           {
-                            defaultMessage: 'Fast text matching and filtering capabilities',
+                            defaultMessage: 'Take advantage of EIS...',
                           }
                         )}
                       </EuiText>
@@ -90,7 +91,7 @@ export const KeywordSearch: React.FC = () => (
                         {i18n.translate(
                           'xpack.searchHomepage.aiSearchCapabilities.keywordSearch.secondLine',
                           {
-                            defaultMessage: 'Optimized for large-scale data retrieval',
+                            defaultMessage: 'Hybrid search...',
                           }
                         )}
                       </EuiText>
@@ -107,7 +108,7 @@ export const KeywordSearch: React.FC = () => (
                         {i18n.translate(
                           'xpack.searchHomepage.aiSearchCapabilities.keywordSearch.thirdLine',
                           {
-                            defaultMessage: 'Easily integrate with existing keyword indices',
+                            defaultMessage: 'Hybrid search...',
                           }
                         )}
                       </EuiText>

@@ -36,7 +36,7 @@ export const SemanticSearch: React.FC = () => (
                 defaultMessage: 'Semantic Search',
               }
             )}
-            size="s"
+            size={'s'}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
