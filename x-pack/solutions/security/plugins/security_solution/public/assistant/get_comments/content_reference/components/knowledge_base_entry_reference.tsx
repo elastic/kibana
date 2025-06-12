@@ -9,12 +9,11 @@ import type { KnowledgeBaseEntryContentReference } from '@kbn/elastic-assistant-
 import React, { useCallback } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { useAssistantContext } from '@kbn/elastic-assistant';
-import { SecurityPageName } from '@kbn/deeplinks-security';
-import { KNOWLEDGE_BASE_TAB } from '@kbn/elastic-assistant/impl/assistant/settings/const';
 import { KNOWLEDGE_BASE_ENTRY_REFERENCE_LABEL } from './translations';
 import type { ResolvedContentReferenceNode } from '../content_reference_parser';
 import { PopoverReference } from './popover_reference';
 import { useKibana } from '../../../../common/lib/kibana';
+import { openKnowledgeBasePageByEntryId } from './navigation_helpers';
 
 interface Props {
   contentReferenceNode: ResolvedContentReferenceNode<KnowledgeBaseEntryContentReference>;
@@ -26,18 +25,11 @@ export const KnowledgeBaseEntryReference: React.FC<Props> = ({ contentReferenceN
   const onClick = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
-      if (assistantAvailability.hasSearchAILakeConfigurations) {
-        navigateToApp('securitySolutionUI', {
-          deepLinkId: SecurityPageName.configurationsAiSettings,
-          path: `?tab=${KNOWLEDGE_BASE_TAB}&entry_search_term=${contentReferenceNode.contentReference.knowledgeBaseEntryId}`,
-          openInNewTab: true,
-        });
-      } else {
-        navigateToApp('management', {
-          path: `kibana/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}&entry_search_term=${contentReferenceNode.contentReference.knowledgeBaseEntryId}`,
-          openInNewTab: true,
-        });
-      }
+      return openKnowledgeBasePageByEntryId(
+        navigateToApp,
+        contentReferenceNode.contentReference.knowledgeBaseEntryId,
+        assistantAvailability.hasSearchAILakeConfigurations
+      );
     },
     [
       assistantAvailability.hasSearchAILakeConfigurations,

@@ -9,14 +9,11 @@ import type { SecurityAlertContentReference } from '@kbn/elastic-assistant-commo
 import React, { useCallback } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { useAssistantContext } from '@kbn/elastic-assistant';
-import { SecurityPageName } from '@kbn/deeplinks-security';
-import { encode } from '@kbn/rison';
-import { URL_PARAM_KEY } from '../../../../common/hooks/constants';
-import { getDetectionEngineUrl } from '../../../../common/components/link_to';
 import { SECURITY_ALERT_REFERENCE_LABEL } from './translations';
 import type { ResolvedContentReferenceNode } from '../content_reference_parser';
 import { PopoverReference } from './popover_reference';
 import { useKibana } from '../../../../common/lib/kibana';
+import { openAlertsPageByAlertId } from './navigation_helpers';
 
 interface Props {
   contentReferenceNode: ResolvedContentReferenceNode<SecurityAlertContentReference>;
@@ -29,27 +26,11 @@ export const SecurityAlertReference: React.FC<Props> = ({ contentReferenceNode }
   const onClick = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
-      if (assistantAvailability.hasSearchAILakeConfigurations) {
-        const kqlAppQuery = encode({
-          language: 'kuery',
-          query: `_id: ${contentReferenceNode.contentReference.alertId}`,
-        });
-
-        const urlParams = new URLSearchParams({
-          [URL_PARAM_KEY.appQuery]: kqlAppQuery,
-        });
-
-        navigateToApp('securitySolutionUI', {
-          deepLinkId: SecurityPageName.alertSummary,
-          path: getDetectionEngineUrl(urlParams.toString()),
-          openInNewTab: true,
-        });
-      } else {
-        navigateToApp('security', {
-          path: `alerts/redirect/${contentReferenceNode.contentReference.alertId}`,
-          openInNewTab: true,
-        });
-      }
+      return openAlertsPageByAlertId(
+        navigateToApp,
+        contentReferenceNode.contentReference.alertId,
+        assistantAvailability.hasSearchAILakeConfigurations
+      );
     },
     [
       assistantAvailability.hasSearchAILakeConfigurations,
@@ -57,7 +38,6 @@ export const SecurityAlertReference: React.FC<Props> = ({ contentReferenceNode }
       navigateToApp,
     ]
   );
-
   return (
     <PopoverReference
       contentReferenceCount={contentReferenceNode.contentReferenceCount}
