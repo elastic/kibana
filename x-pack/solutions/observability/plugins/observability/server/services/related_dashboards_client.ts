@@ -251,7 +251,7 @@ export class RelatedDashboardsClient {
     const emptyIndicesSet = new Set<string>();
     switch (panel.type) {
       case 'lens':
-        const maybeLensAttr = panel.panelConfig.attributes as unknown as LensAttributes;
+        const maybeLensAttr = panel.panelConfig.attributes;
         if (this.isLensVizAttributes(maybeLensAttr)) {
           const lensIndices = this.getLensVizIndices(maybeLensAttr);
           return lensIndices;
