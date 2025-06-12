@@ -19,7 +19,6 @@ import {
   EuiTabbedContentTab,
   useEuiTheme,
   EuiFlexGroup,
-  EuiMarkdownFormat,
   EuiNotificationBadge,
 } from '@elastic/eui';
 import {
@@ -39,6 +38,7 @@ import { omit } from 'lodash';
 import { RelatedAlerts } from './components/related_alerts/related_alerts';
 import { AlertDetailsSource } from './types';
 import { SourceBar } from './components';
+import { InvestigationGuide } from './components/investigation_guide';
 import { StatusBar } from './components/status_bar';
 import { observabilityFeatureId } from '../../../common';
 import { useKibana } from '../../utils/kibana_react';
@@ -331,19 +331,7 @@ export function AlertDetails() {
         />
       ),
       'data-test-subj': 'investigationGuideTab',
-      disabled: !rule?.artifacts?.investigation_guide?.blob,
-      content: (
-        <>
-          <EuiSpacer size="m" />
-          <EuiMarkdownFormat
-            css={css`
-              word-wrap: break-word;
-            `}
-          >
-            {rule?.artifacts?.investigation_guide?.blob ?? ''}
-          </EuiMarkdownFormat>
-        </>
-      ),
+      content: <InvestigationGuide blob={rule?.artifacts?.investigation_guide?.blob} />,
     },
     {
       id: 'related_alerts',

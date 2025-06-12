@@ -23,6 +23,7 @@ interface RuleFlyoutProps {
   onCancel?: () => void;
   onSave: (formData: RuleFormData) => void;
   onChangeMetaData?: (metadata?: RuleTypeMetaData) => void;
+  initialEditStep?: RuleFormStepId;
 }
 
 // This component is only responsible for the CONTENT of the EuiFlyout. See `flyout/rule_form_flyout.tsx` for the
@@ -38,8 +39,9 @@ export const RuleFlyout = ({
   // we're displaying the confirmation modal for closing the flyout.
   onCancel: onClose = () => {},
   onChangeMetaData = () => {},
+  initialEditStep,
 }: RuleFlyoutProps) => {
-  const [initialStep, setInitialStep] = useState<RuleFormStepId | undefined>(undefined);
+  const [initialStep, setInitialStep] = useState<RuleFormStepId | undefined>(initialEditStep);
   const [isConfirmCloseModalVisible, setIsConfirmCloseModalVisible] = useState(false);
 
   const {
