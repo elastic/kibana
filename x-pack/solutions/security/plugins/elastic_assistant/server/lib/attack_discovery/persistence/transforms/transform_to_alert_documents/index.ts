@@ -181,13 +181,11 @@ export const transformToAlertDocuments = ({
   authenticatedUser,
   createAttackDiscoveryAlertsParams,
   now,
-  ownerId,
   spaceId,
 }: {
   authenticatedUser: AuthenticatedUser;
   createAttackDiscoveryAlertsParams: CreateAttackDiscoveryAlertsParams;
   now: Date;
-  ownerId: string;
   spaceId: string;
 }): AttackDiscoveryAlertDocument[] => {
   const { attackDiscoveries, generationUuid, ...restParams } = createAttackDiscoveryAlertsParams;
@@ -196,7 +194,7 @@ export const transformToAlertDocuments = ({
     const alertHash = generateAttackDiscoveryAlertHash({
       attackDiscovery,
       connectorId: restParams.apiConfig.connectorId,
-      ownerId,
+      ownerId: authenticatedUser.profile_uid ?? authenticatedUser.username,
       spaceId,
     });
 

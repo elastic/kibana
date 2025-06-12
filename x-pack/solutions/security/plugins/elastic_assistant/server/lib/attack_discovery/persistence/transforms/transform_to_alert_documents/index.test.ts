@@ -49,7 +49,6 @@ describe('Transform attack discoveries to alert documents', () => {
       connectorId: 'test-connector-1',
       createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
       now: mockNow,
-      ownerId: 'test-user-1',
       spaceId: 'test-space-1',
     };
 
@@ -96,7 +95,7 @@ describe('Transform attack discoveries to alert documents', () => {
       const result = transformToAlertDocuments(defaultProps);
 
       expect(result[0][ALERT_UUID]).toBe(
-        '8b22ce173c17bd9048c77dc4991c78cc1a9acf9e5cdf1d87163c3eebe06f916e'
+        'c12dc54a0eb70f7c1d5db7f343f8dfc45abd207b3e5a4d9effd6ab39bc9437ae'
       );
     });
 
@@ -140,8 +139,8 @@ describe('Transform attack discoveries to alert documents', () => {
 
       const uuids = result.map((alert) => alert[ALERT_UUID]);
       expect(uuids).toEqual([
-        '8b22ce173c17bd9048c77dc4991c78cc1a9acf9e5cdf1d87163c3eebe06f916e',
-        'af1c13851eca0338dbca8f1d90dfadd68c0d2f222a84691b3e05b1b1ae9ca060',
+        'c12dc54a0eb70f7c1d5db7f343f8dfc45abd207b3e5a4d9effd6ab39bc9437ae',
+        'da901c94a3fdb8f0e336ec0064b88bd9a072dfc568325da5748f23f5670f1e51',
       ]);
     });
 
