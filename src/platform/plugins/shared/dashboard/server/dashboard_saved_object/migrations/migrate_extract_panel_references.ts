@@ -31,6 +31,7 @@ export function createExtractPanelReferencesMigration(
   deps: DashboardSavedObjectTypeMigrationsDeps
 ): SavedObjectMigrationParams<DashboardSavedObjectAttributes> {
   return {
+    // @ts-expect-error Remove when deferred saved migrations are publicly available
     deferred: true,
     transform: (doc, { log }) => {
       const references = doc.references ?? [];

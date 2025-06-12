@@ -10,6 +10,8 @@
 import type { SavedObjectMigration } from '@kbn/core-saved-objects-server';
 
 export const transformMigrationVersion: SavedObjectMigration = {
+  // @todo Remove when deferred migrations are publicly available.
+  // @ts-expect-error
   deferred: true,
   transform: ({ migrationVersion, ...doc }) => ({
     ...doc,

@@ -132,6 +132,7 @@ describe('buildActiveMigrations', () => {
             transform: jest.fn(),
           },
           '8.4.0': {
+            // @ts-expect-error
             deferred: true,
             transform: jest.fn(),
           },
@@ -445,11 +446,13 @@ describe('buildActiveMigrations', () => {
         name: 'foo',
         migrations: {
           '7.12.0': {
+            // @ts-expect-error
             deferred: true,
             transform: jest.fn(),
           },
           '7.16.0': jest.fn(),
           '8.3.0': {
+            // @ts-expect-error
             deferred: true,
             transform: jest.fn(),
           },
