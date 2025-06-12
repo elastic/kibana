@@ -39,7 +39,6 @@ import type { TabItem, TabsSizeConfig, GetTabMenuItems, TabsServices } from '../
 import { TabStatus, type TabPreviewData } from '../../types';
 import { TabWithBackground } from '../tabs_visual_glue_to_header/tab_with_background';
 import { TabPreview } from '../tab_preview';
-import { MAX_TAB_WIDTH } from '../../constants';
 
 export interface TabProps {
   item: TabItem;
@@ -206,8 +205,19 @@ export const Tab: React.FC<TabProps> = (props) => {
               {previewData.status === TabStatus.RUNNING && (
                 <EuiProgress size="xs" color="accent" position="absolute" />
               )}
-              <EuiText id={tabLabelId} color="inherit" size="s" css={getTabLabelCss(euiTheme)}>
-                <EuiTextTruncate text={item.label} width={MAX_TAB_WIDTH} truncation="middle" />
+              <EuiText
+                id={tabLabelId}
+                color="inherit"
+                size="s"
+                css={getTabLabelCss(euiTheme)}
+                className="unifiedTabs__tabLabelText"
+              >
+                <EuiTextTruncate
+                  text={item.label}
+                  // Truncation width must be equal to max tab width minus padding
+                  width={tabsSizeConfig.regularTabMaxWidth - euiTheme.base}
+                  truncation="middle"
+                />
               </EuiText>
             </div>
           )}
@@ -305,6 +315,14 @@ function getTabContainerCss(
       .unifiedTabs__tabLabel {
         width: calc(100% - ${euiTheme.size.l} * 2);
       }
+
+      .unifiedTabs__tabLabelText {
+        mask-image: linear-gradient(
+          to right,
+          rgb(255, 0, 0) calc(100% - ${euiTheme.size.s}),
+          rgba(255, 0, 0, 0.1) 100%
+        );
+      }
     }
 
     ${!isSelected
@@ -344,13 +362,7 @@ function getTabLabelContainerCss(euiTheme: EuiThemeComputed) {
 
 function getTabLabelCss(euiTheme: EuiThemeComputed) {
   return css`
-    padding-right: ${euiTheme.size.s};
     white-space: nowrap;
-    mask-image: linear-gradient(
-      to right,
-      rgb(255, 0, 0) calc(100% - ${euiTheme.size.s}),
-      rgba(255, 0, 0, 0.1) 100%
-    );
     transform: translateZ(0);
     overflow: hidden;
   `;
