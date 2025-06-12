@@ -42,7 +42,8 @@ const alertsDynamicDashboardSuggestions = createObservabilityServerRoute({
     });
 
     const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
-    const investigateAlertsClient = new InvestigateAlertsClient(alertsClient);
+    const rulesClient = await ruleRegistry.alerting.getRulesClientWithRequest(request);
+    const investigateAlertsClient = new InvestigateAlertsClient(alertsClient, rulesClient);
 
     const dashboardParser = new RelatedDashboardsClient(
       logger,
@@ -51,10 +52,11 @@ const alertsDynamicDashboardSuggestions = createObservabilityServerRoute({
       alertId
     );
     try {
-      const { suggestedDashboards } = await dashboardParser.fetchSuggestedDashboards();
+      const { suggestedDashboards, linkedDashboards } =
+        await dashboardParser.fetchRelatedDashboards();
       return {
         suggestedDashboards,
-        linkedDashboards: [],
+        linkedDashboards,
       };
     } catch (e) {
       if (e instanceof AlertNotFoundError) {
