@@ -85,6 +85,17 @@ describe('ESQLMenuPopover', () => {
         `/internal/esql_registry/extensions/oblt/${esqlQuery}`
       );
     });
+
+    // open the popover and check for recommended queries
+    await userEvent.click(screen.getByRole('button'));
+    expect(screen.queryByTestId('esql-recommended-queries')).toBeInTheDocument();
+    // Open the nested section to see the recommended queries
+    await waitFor(() => userEvent.click(screen.getByTestId('esql-recommended-queries')));
+
+    await waitFor(() => {
+      expect(screen.getByText('Count of logs')).toBeInTheDocument();
+      expect(screen.getByText('Average bytes')).toBeInTheDocument();
+    });
   });
 
   it('should handle API call failure gracefully', async () => {
@@ -104,21 +115,37 @@ describe('ESQLMenuPopover', () => {
   });
 
   it('should not fetch ESQL extensions if queryForRecommendedQueries is null', async () => {
+    const mockQueries = [
+      { name: 'Count of logs', query: 'FROM logstash1 | STATS COUNT()' },
+      { name: 'Average bytes', query: 'FROM logstash2 | STATS AVG(bytes) BY log.level' },
+    ];
+
+    // Configure the mock to resolve with mockQueries
+    httpModule.http.get.mockResolvedValueOnce({ recommendedQueries: mockQueries });
     renderESQLPopover();
 
-    // Assert that http.get was NOT called
-    await waitFor(() => {
-      expect(httpModule.http.get).not.toHaveBeenCalled();
-    });
+    // open the popover and check for recommended queries
+    await userEvent.click(screen.getByRole('button'));
+    expect(screen.queryByTestId('esql-recommended-queries')).not.toBeInTheDocument();
   });
 
   it('should not fetch ESQL extensions if activeSolutionId is not present', async () => {
+    const mockQueries = [
+      { name: 'Count of logs', query: 'FROM logstash1 | STATS COUNT()' },
+      { name: 'Average bytes', query: 'FROM logstash2 | STATS AVG(bytes) BY log.level' },
+    ];
+    httpModule.http.get.mockResolvedValueOnce({ recommendedQueries: mockQueries });
     startMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject(null));
     renderESQLPopover(stubIndexPattern);
 
-    // Assert that http.get was NOT called
+    // open the popover and check for recommended queries
+    await userEvent.click(screen.getByRole('button'));
+    expect(screen.queryByTestId('esql-recommended-queries')).toBeInTheDocument();
+    // Open the nested section to see the recommended queries
+    await waitFor(() => userEvent.click(screen.getByTestId('esql-recommended-queries')));
+
     await waitFor(() => {
-      expect(httpModule.http.get).not.toHaveBeenCalled();
+      expect(screen.queryByText('Count of logs')).not.toBeInTheDocument();
     });
   });
 });
