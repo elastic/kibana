@@ -23,7 +23,7 @@ import { countDownTest } from '../count_down_test';
 export const searchAlerts = async (
   supertest: SuperTest.Agent,
   log: ToolingLog,
-  searchBody: unknown
+  searchBody: object
 ): Promise<SearchResponse<DetectionAlert>> => {
   const alertsOpen = await countDownTest<SearchResponse<DetectionAlert>>(
     async () => {
