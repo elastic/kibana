@@ -66,13 +66,7 @@ export const ContentSourceContainer = ({ getContent }: ContentSourceContainerPro
               icon={<EuiLoadingSpinner size="l" />}
             />
           ) : (
-            <EuiCodeBlock
-              language="json"
-              lineNumbers
-              isCopyable
-              overflowHeight="100%"
-              isVirtualized
-            >
+            <EuiCodeBlock language="json" isCopyable overflowHeight="100%" isVirtualized>
               {JSON.stringify(content, null, 2)}
             </EuiCodeBlock>
           )}
