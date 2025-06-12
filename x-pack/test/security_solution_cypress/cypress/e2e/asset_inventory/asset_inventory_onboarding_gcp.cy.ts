@@ -70,7 +70,7 @@ const selectAccountType = (accountType: 'single' | 'organization') => {
   cy.get(accountTypeSelector).click();
 };
 
-describe('Asset Inventory integration onboarding - GCP', { tags: ['@serverless'] }, () => {
+describe('Asset Inventory integration onboarding - GCP', { tags: ['@serverless', '@ess'] }, () => {
   beforeEach(() => {
     login();
     visit('/app/integrations/browse');
