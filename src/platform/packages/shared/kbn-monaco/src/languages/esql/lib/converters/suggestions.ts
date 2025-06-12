@@ -14,7 +14,8 @@ import { offsetRangeToMonacoRange } from '../shared/utils';
 
 export function wrapAsMonacoSuggestions(
   suggestions: SuggestionRawDefinition[],
-  fullText: string
+  fullText: string,
+  defineRange: boolean = true
 ): MonacoAutocompleteCommandDefinition[] {
   return suggestions.map<MonacoAutocompleteCommandDefinition>(
     ({
@@ -44,7 +45,7 @@ export function wrapAsMonacoSuggestions(
         insertTextRules: asSnippet
           ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
           : undefined,
-        range: rangeToReplace ? offsetRangeToMonacoRange(fullText, rangeToReplace) : undefined,
+        range: rangeToReplace && defineRange ? offsetRangeToMonacoRange(fullText, rangeToReplace) : undefined,
       };
       return monacoSuggestion;
     }

@@ -782,10 +782,10 @@ export class MonacoEditorActionsProvider {
     return this.editor.getPosition() ?? { lineNumber: 1, column: 1 };
   }
 
-  private async isPositionInsideScript(
+  private async isPositionInsideTripleQuotes(
     model: monaco.editor.ITextModel,
     position: monaco.Position
-  ): Promise<boolean> {
+  ): Promise<{ insideTripleQuotes: boolean; insideQuery: boolean }> {
     const selectedRequests = await this.getSelectedParsedRequests();
 
     for (const request of selectedRequests) {
@@ -800,19 +800,16 @@ export class MonacoEditorActionsProvider {
           endColumn: position.column,
         });
 
-        const { insideTripleQuotes, insideQuery } = isInsideTripleQuotes(requestContentBefore);
-        if (insideTripleQuotes && !insideQuery) {
-          return true;
-        }
+        return isInsideTripleQuotes(requestContentBefore);
       }
       if (request.startLineNumber > position.lineNumber) {
         // Stop iteration once we pass the cursor position
-        return false;
+        return { insideTripleQuotes: false, insideQuery: false };
       }
     }
 
-    // Return false if no match
-    return false;
+    // Return false if the position is not inside a request
+    return { insideTripleQuotes: false, insideQuery: false };
   }
 
   private triggerSuggestions() {
@@ -821,23 +818,32 @@ export class MonacoEditorActionsProvider {
     if (!model || !position) {
       return;
     }
-    this.isPositionInsideScript(model, position).then((isCursorInsideScript) => {
-      if (isCursorInsideScript) {
-        // Don't trigger autocomplete suggestions inside scripts
-        return;
-      }
+    this.isPositionInsideTripleQuotes(model, position).then(
+      ({ insideTripleQuotes, insideQuery }) => {
+        if (insideTripleQuotes && !insideQuery) {
+          // Don't trigger autocomplete suggestions inside scripts and strings
+          return;
+        }
 
-      const lineContentBefore = model.getValueInRange({
-        startLineNumber: position.lineNumber,
-        startColumn: 1,
-        endLineNumber: position.lineNumber,
-        endColumn: position.column,
-      });
-      // if the line is empty or it matches specified regex, trigger suggestions
-      if (!lineContentBefore.trim() || shouldTriggerSuggestions(lineContentBefore)) {
-        this.editor.trigger(TRIGGER_SUGGESTIONS_ACTION_LABEL, TRIGGER_SUGGESTIONS_HANDLER_ID, {});
+        const lineContentBefore = model.getValueInRange({
+          startLineNumber: position.lineNumber,
+          startColumn: 1,
+          endLineNumber: position.lineNumber,
+          endColumn: position.column,
+        });
+        // Trigger suggestions if the line:
+        // - is empty
+        // - matches specified regex
+        // - is inside a query
+        if (
+          !lineContentBefore.trim() ||
+          shouldTriggerSuggestions(lineContentBefore) ||
+          insideQuery
+        ) {
+          this.editor.trigger(TRIGGER_SUGGESTIONS_ACTION_LABEL, TRIGGER_SUGGESTIONS_HANDLER_ID, {});
+        }
       }
-    });
+    );
   }
 
   /*

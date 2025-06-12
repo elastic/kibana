@@ -490,8 +490,7 @@ export const shouldTriggerSuggestions = (lineContent: string): boolean => {
     methodWhitespaceRegex.test(lineContent) ||
     methodWithUrlRegex.test(lineContent) ||
     propertyNameRegex.test(lineContent) ||
-    propertyValueRegex.test(lineContent) ||
-    queryRegex.test(lineContent)
+    propertyValueRegex.test(lineContent)
   );
 };
 
