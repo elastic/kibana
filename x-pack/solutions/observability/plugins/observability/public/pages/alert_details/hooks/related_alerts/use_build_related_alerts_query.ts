@@ -19,7 +19,6 @@ import {
 import dedent from 'dedent';
 import moment from 'moment';
 import { ObservabilityFields } from '../../../../../common/utils/alerting/types';
-import { PROXIMAL_DURATION_LOOKUP } from '../../../../../common/constants';
 import { TopAlert } from '../../../../typings/alerts';
 
 interface Props {
@@ -63,7 +62,7 @@ export function useBuildRelatedAlertsQuery({
   const tags = alert.fields[ALERT_RULE_TAGS] ?? [];
   const instanceId = alert.fields[ALERT_INSTANCE_ID]?.split(',') ?? [];
 
-  const range = filterProximal ? PROXIMAL_DURATION_LOOKUP : [1, 'days'];
+  const range = filterProximal ? [30, 'minutes'] : [1, 'days'];
 
   return {
     bool: {
