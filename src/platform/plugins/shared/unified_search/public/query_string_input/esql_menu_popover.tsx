@@ -6,8 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import React, { useMemo, useState, useCallback, useEffect } from 'react';
+import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import {
   EuiPopover,
   EuiButton,
@@ -48,6 +47,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
   const activeSolutionId = useObservable(chrome.getActiveSolutionNavId$());
   const [isESQLMenuPopoverOpen, setIsESQLMenuPopoverOpen] = useState(false);
   const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
+
   const [solutionsRecommendedQueries, setSolutionsRecommendedQueries] = useState<
     RecommendedQuery[]
   >([]);
@@ -66,33 +66,40 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
     };
   }, [adHocDataview]);
 
+  // Use a ref to store the *previous* fetched recommended queries
+  const lastFetchedQueries = useRef<RecommendedQuery[]>([]);
+
   useEffect(() => {
     let cancelled = false;
     const getESQLExtensions = async () => {
+      if (!activeSolutionId || !queryForRecommendedQueries) {
+        return; // Don't fetch if dependencies aren't ready
+      }
+
       try {
-        // Fetch ESQL solutions recommended queries from the registry
         const extensions: { recommendedQueries: RecommendedQuery[] } = await http.get(
           `${REGISTRY_EXTENSIONS_ROUTE}${activeSolutionId}/${queryForRecommendedQueries}`
         );
-        // If the component is unmounted before the request completes, do not update the state
+
         if (cancelled) return;
 
-        if (!isEqual(extensions.recommendedQueries, solutionsRecommendedQueries)) {
+        // Only update state if the new data is actually different from the *last successfully set* data
+        // This is where the isEqual check becomes crucial.
+        if (!isEqual(extensions.recommendedQueries, lastFetchedQueries.current)) {
           setSolutionsRecommendedQueries(extensions.recommendedQueries);
+          lastFetchedQueries.current = extensions.recommendedQueries; // Update the ref with the new data
         }
       } catch (error) {
         // Do nothing if the extensions are not available
       }
     };
-    if (activeSolutionId && queryForRecommendedQueries) {
-      // The ESQL extensions are fetched only when the active solution ID is available
-      // as they are solution-specific.
-      getESQLExtensions();
-    }
+
+    getESQLExtensions();
+
     return () => {
       cancelled = true;
     };
-  }, [activeSolutionId, http, queryForRecommendedQueries, solutionsRecommendedQueries]);
+  }, [activeSolutionId, http, queryForRecommendedQueries]);
 
   const toggleLanguageComponent = useCallback(() => {
     setIsLanguageComponentOpen(!isLanguageComponentOpen);
@@ -141,7 +148,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
             name: i18n.translate('unifiedSearch.query.queryBar.esqlMenu.quickReference', {
               defaultMessage: 'Quick Reference',
             }),
-            icon: 'nedocumentationsted',
+            icon: 'nedocumentationsted', // Typo: Should be 'documentation'
             renderItem: () => (
               <EuiContextMenuItem
                 key="quickReference"
@@ -232,7 +239,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
     queryForRecommendedQueries,
     timeFieldName,
     toggleLanguageComponent,
-    solutionsRecommendedQueries,
+    solutionsRecommendedQueries, // This dependency is fine here, as it *uses* the state
   ]);
 
   const esqlMenuPopoverStyles = css`
