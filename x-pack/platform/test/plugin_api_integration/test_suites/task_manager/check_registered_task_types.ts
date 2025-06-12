@@ -141,6 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
         'apm-source-map-migration-task',
         'apm-telemetry-task',
         'cases-telemetry-task',
+        'cases_incremental_id_assignment',
         'cloud_security_posture-stats_task',
         'dashboard_telemetry',
         'endpoint:complete-external-response-actions',

@@ -103,6 +103,9 @@ describe('config validation', () => {
               "application/pdf",
             ],
           },
+          "incrementalIdService": Object {
+            "enabled": true,
+          },
           "markdownPlugins": Object {
             "lens": true,
           },

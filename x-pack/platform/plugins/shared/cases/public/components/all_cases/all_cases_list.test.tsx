@@ -19,7 +19,6 @@ import {
   renderWithTestingProviders,
 } from '../../common/mock';
 import { useGetCasesMockState, connectorsMock } from '../../containers/mock';
-import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 import { SortFieldCase } from '../../../common/ui/types';
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
@@ -80,15 +79,12 @@ const useGetCategoriesMock = useGetCategories as jest.Mock;
 const useSuggestUserProfilesMock = useSuggestUserProfiles as jest.Mock;
 
 const mockTriggersActionsUiService = triggersActionsUiMock.createStart();
-let mockSettingsService = settingsServiceMock.createStartContract();
 
 const mockKibana = () => {
-  mockSettingsService = settingsServiceMock.createStartContract();
   useKibanaMock.mockReturnValue({
     services: {
       ...createStartServicesMock(),
       triggersActionsUi: mockTriggersActionsUiService,
-      settings: mockSettingsService,
     },
   } as unknown as ReturnType<typeof useKibana>);
 };
@@ -192,9 +188,10 @@ describe('AllCasesListGeneric', () => {
   });
 
   it('should render AllCasesList', async () => {
-    (mockSettingsService.client.get as jest.Mock).mockReturnValue(true);
     useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
-    renderWithTestingProviders(<AllCasesList />);
+    renderWithTestingProviders(<AllCasesList />, {
+      wrapperProps: { settings: { displayIncrementalCaseId: true } },
+    });
 
     const caseDetailsLinks = await screen.findAllByTestId('case-details-link');
 
@@ -230,9 +227,10 @@ describe('AllCasesListGeneric', () => {
   });
 
   it('should not render incremental id if setting is disabled', async () => {
-    (mockSettingsService.client.get as jest.Mock).mockReturnValue(false);
     useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
-    renderWithTestingProviders(<AllCasesList />);
+    renderWithTestingProviders(<AllCasesList />, {
+      wrapperProps: { settings: { displayIncrementalCaseId: false } },
+    });
 
     await screen.findAllByTestId('case-details-link');
 
