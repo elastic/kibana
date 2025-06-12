@@ -69,43 +69,50 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
         }),
       ]);
 
-      const monitorsSpaces = monitorsInLocation.map(({ attributes: { namespace } }) => namespace);
+      let newLocation: Awaited<ReturnType<typeof repo.editPrivateLocation>> | undefined;
 
-      const checkSavedObjectsPrivileges =
-        server.security.authz.checkSavedObjectsPrivilegesWithRequest(request);
+      if (existingLocation.attributes.label !== newLocationLabel) {
+        const monitorsSpaces = monitorsInLocation.map(({ namespaces }) => namespaces![0]);
 
-      const { hasAllRequested } = await checkSavedObjectsPrivileges(
-        'saved_object:synthetics-monitor/bulk_update',
-        monitorsSpaces
-      );
+        const checkSavedObjectsPrivileges =
+          server.security.authz.checkSavedObjectsPrivilegesWithRequest(request);
 
-      if (!hasAllRequested) {
-        return response.forbidden({
-          body: {
-            message: i18n.translate('xpack.synthetics.editPrivateLocation.forbidden', {
-              defaultMessage:
-                'You do not have sufficient permissions to update monitors in all required spaces. This private location is used by monitors in spaces where you lack update privileges.',
-            }),
-          },
+        const { hasAllRequested } = await checkSavedObjectsPrivileges(
+          'saved_object:synthetics-monitor/bulk_update',
+          monitorsSpaces
+        );
+
+        if (!hasAllRequested) {
+          return response.forbidden({
+            body: {
+              message: i18n.translate('xpack.synthetics.editPrivateLocation.forbidden', {
+                defaultMessage:
+                  'You do not have sufficient permissions to update monitors in all required spaces. This private location is used by monitors in spaces where you lack update privileges.',
+              }),
+            },
+          });
+        }
+
+        newLocation = await repo.editPrivateLocation(locationId, {
+          label: newLocationLabel,
+        });
+        const allPrivateLocations = await getPrivateLocations(savedObjectsClient);
+
+        await updatePrivateLocationMonitors({
+          locationId,
+          newLocationLabel,
+          allPrivateLocations,
+          routeContext,
+          monitorsInLocation,
         });
       }
 
-      const newLocation = await repo.editPrivateLocation(locationId, {
-        label: newLocationLabel,
-      });
-      const allPrivateLocations = await getPrivateLocations(savedObjectsClient);
-
-      await updatePrivateLocationMonitors({
-        locationId,
-        newLocationLabel,
-        allPrivateLocations,
-        routeContext,
-        monitorsInLocation,
-      });
-
       return toClientContract({
         ...existingLocation,
-        attributes: { ...existingLocation.attributes, ...newLocation.attributes },
+        attributes: {
+          ...existingLocation.attributes,
+          ...(newLocation ? newLocation.attributes : {}),
+        },
       });
     } catch (error) {
       if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
