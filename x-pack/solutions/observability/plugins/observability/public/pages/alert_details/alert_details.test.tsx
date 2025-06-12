@@ -241,7 +241,7 @@ describe('Alert details', () => {
     // Find and click the Related Dashboards tab
     const relatedDashboardsTab = alertDetails.getByText(/Related dashboards/);
     expect(relatedDashboardsTab).toBeTruthy();
-    expect(relatedDashboardsTab.textContent).toContain('1');
+    expect(relatedDashboardsTab.textContent).toContain('2');
 
     // Click on the Related Dashboards tab
     await userEvent.click(relatedDashboardsTab);

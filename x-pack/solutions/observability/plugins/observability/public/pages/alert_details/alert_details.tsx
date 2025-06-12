@@ -366,7 +366,7 @@ export function AlertDetails() {
             <EuiLoadingSpinner css={{ marginLeft: '5px' }} />
           ) : (
             <EuiNotificationBadge color="success" css={{ marginLeft: '5px' }}>
-              {linkedDashboards?.length || 0}
+              {(linkedDashboards?.length || 0) + (suggestedDashboards?.length || 0)}
             </EuiNotificationBadge>
           )}
         </>
