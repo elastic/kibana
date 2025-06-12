@@ -17,11 +17,11 @@ import React, {
   type PropsWithChildren,
 } from 'react';
 import { once } from 'lodash';
-import { type IStoreState, type IDispatchAction, storeReducer } from './reducers';
+import { type DocWithId, type IStoreState, type IDispatchAction, storeReducer } from './reducers';
 import { getStatsGroupByColumnsFromQuery } from '../parse_esql';
 
-interface IStoreContext {
-  state: IStoreState;
+interface IStoreContext<T extends DocWithId> {
+  state: IStoreState<T>;
   dispatch: Dispatch<IDispatchAction>;
 }
 
@@ -29,16 +29,17 @@ interface IDataCascadeProviderProps {
   query: string;
 }
 
-export const createStore = once(() => {
-  return createContext<IStoreContext | null>(null);
+export const createStoreContext = once(<T extends DocWithId>() => {
+  return createContext<IStoreContext<T> | null>(null);
 });
 
-export function DataCascadeProvider({
+export function DataCascadeProvider<T extends DocWithId>({
   query,
   children,
 }: PropsWithChildren<IDataCascadeProviderProps>) {
-  const StoreContext = createStore();
-  const initialState = useRef<IStoreState>({
+  const StoreContext = createStoreContext<T>();
+
+  const initialState = useRef<IStoreContext<T>['state']>({
     data: [],
     currentQueryString: '',
     groupByColumns: null,
@@ -46,7 +47,7 @@ export function DataCascadeProvider({
   });
 
   const createInitialState = useCallback(
-    (state: IStoreContext['state']) => {
+    (state: IStoreContext<T>['state']) => {
       if (query !== state.currentQueryString) {
         const columns = getStatsGroupByColumnsFromQuery(query);
         return {
@@ -66,20 +67,20 @@ export function DataCascadeProvider({
   return <StoreContext.Provider value={{ state, dispatch }}>{children}</StoreContext.Provider>;
 }
 
-const useDataCascadeStore = () => {
-  const ctx = useContext(createStore());
+function useDataCascadeStore<T extends DocWithId>() {
+  const ctx = useContext(createStoreContext<T>());
   if (!ctx) {
     throw new Error('useDataCascadeStore must be used within a DataCascadeProvider');
   }
-  return ctx as IStoreContext;
-};
+  return ctx;
+}
 
-export const useDataCascadeDispatch = () => {
-  const ctx = useDataCascadeStore();
+export function useDataCascadeDispatch<T extends DocWithId = DocWithId>() {
+  const ctx = useDataCascadeStore<T>();
   return ctx.dispatch;
-};
+}
 
-export const useDataCascadeState = () => {
-  const ctx = useDataCascadeStore();
+export function useDataCascadeState<T extends DocWithId>() {
+  const ctx = useDataCascadeStore<T>();
   return ctx.state;
-};
+}
