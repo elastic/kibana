@@ -78,6 +78,15 @@ export const getMessageVariables = (): ActionVariables => {
           }
         ),
       },
+      {
+        name: 'attack.detailsUrl',
+        description: i18n.translate(
+          'xpack.securitySolution.attackDiscovery.schedule.messageVariable.attack.detailsUrl',
+          {
+            defaultMessage: 'A link to the attack discovery details',
+          }
+        ),
+      },
     ],
   };
 };

@@ -8,11 +8,13 @@
 import type { SecurityAlertsPageContentReference } from '@kbn/elastic-assistant-common';
 import React, { useCallback } from 'react';
 import { EuiLink } from '@elastic/eui';
+import { useAssistantContext } from '@kbn/elastic-assistant';
 import type { ResolvedContentReferenceNode } from '../content_reference_parser';
 import { PopoverReference } from './popover_reference';
 import { SECURITY_ALERTS_PAGE_REFERENCE_LABEL } from './translations';
 import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
-import { FILTER_OPEN, FILTER_ACKNOWLEDGED } from '../../../../../common/types';
+import { useKibana } from '../../../../common/lib/kibana';
+import { openAlertsPageByOpenAndAck } from './navigation_helpers';
 
 interface Props {
   contentReferenceNode: ResolvedContentReferenceNode<SecurityAlertsPageContentReference>;
@@ -20,21 +22,19 @@ interface Props {
 
 export const SecurityAlertsPageReference: React.FC<Props> = ({ contentReferenceNode }) => {
   const openAlertsPageWithFilters = useNavigateToAlertsPageWithFilters();
+  const { assistantAvailability } = useAssistantContext();
+  const { navigateToApp } = useKibana().services.application;
 
   const onClick = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
-      openAlertsPageWithFilters(
-        {
-          selectedOptions: [FILTER_OPEN, FILTER_ACKNOWLEDGED],
-          fieldName: 'kibana.alert.workflow_status',
-          persist: false,
-        },
-        true,
-        '(global:(timerange:(fromStr:now-24h,kind:relative,toStr:now)))'
+      return openAlertsPageByOpenAndAck(
+        navigateToApp,
+        openAlertsPageWithFilters,
+        assistantAvailability.hasSearchAILakeConfigurations
       );
     },
-    [openAlertsPageWithFilters]
+    [assistantAvailability.hasSearchAILakeConfigurations, navigateToApp, openAlertsPageWithFilters]
   );
 
   return (
@@ -42,7 +42,9 @@ export const SecurityAlertsPageReference: React.FC<Props> = ({ contentReferenceN
       contentReferenceCount={contentReferenceNode.contentReferenceCount}
       data-test-subj="SecurityAlertsPageReference"
     >
-      <EuiLink onClick={onClick}>{SECURITY_ALERTS_PAGE_REFERENCE_LABEL}</EuiLink>
+      <EuiLink onClick={onClick} data-test-subj="alertsReferenceLink">
+        {SECURITY_ALERTS_PAGE_REFERENCE_LABEL}
+      </EuiLink>
     </PopoverReference>
   );
 };
