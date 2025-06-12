@@ -100,8 +100,10 @@ export const generateAndUpdateAttackDiscoveries = async ({
       const dedupedDiscoveries = await deduplicateAttackDiscoveries({
         esClient,
         attackDiscoveries: attackDiscoveries ?? [],
+        connectorId: apiConfig.connectorId,
         indexPattern,
         logger,
+        ownerId: authenticatedUser.profile_uid ?? authenticatedUser.username,
         spaceId: dataClient.spaceId,
       });
       storedAttackDiscoveries = dedupedDiscoveries;

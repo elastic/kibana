@@ -123,8 +123,10 @@ export const attackDiscoveryScheduleExecutor = async ({
     const dedupedDiscoveries = await deduplicateAttackDiscoveries({
       esClient,
       attackDiscoveries: attackDiscoveries ?? [],
+      connectorId: params.apiConfig.connectorId,
       indexPattern,
       logger,
+      ownerId: rule.id,
       spaceId,
     });
 
@@ -132,6 +134,8 @@ export const attackDiscoveryScheduleExecutor = async ({
       dedupedDiscoveries.map(async (attackDiscovery) => {
         const alertInstanceId = generateAttackDiscoveryAlertUuid({
           attackDiscovery,
+          connectorId: params.apiConfig.connectorId,
+          ownerId: rule.id,
           spaceId,
         });
         const { uuid: alertDocId } = alertsClient.report({

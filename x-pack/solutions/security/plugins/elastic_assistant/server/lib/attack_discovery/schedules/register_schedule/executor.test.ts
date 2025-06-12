@@ -281,7 +281,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
 
     const { id, ...restDiscovery } = mockAttackDiscoveries[0];
     expect(services.alertsClient.report).toHaveBeenCalledWith({
-      id: '4275d382ef6959b70722cc580116c1ce93890a5a00b5e43b1e1f709dc16420c7',
+      id: '1517c5b7a4e203cfd56cb99bb831b3b82ffa60597ae7036dfb322732d9fcd22f',
       actionGroup: 'default',
     });
 
@@ -290,7 +290,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
       payload: {
         'ecs.version': EcsVersion,
         'kibana.alert.instance.id':
-          '4275d382ef6959b70722cc580116c1ce93890a5a00b5e43b1e1f709dc16420c7',
+          '1517c5b7a4e203cfd56cb99bb831b3b82ffa60597ae7036dfb322732d9fcd22f',
         'kibana.alert.uuid': 'fake-alert',
         'kibana.alert.attack_discovery.alert_ids': [
           '021b27d6bee0650a843be1d511119a3b5c7c8fdaeff922471ce0248ad27bd26c',
@@ -403,9 +403,11 @@ describe('attackDiscoveryScheduleExecutor', () => {
 
     expect(deduplicateAttackDiscoveries).toHaveBeenCalledWith({
       attackDiscoveries: mockAttackDiscoveries,
+      connectorId: params.apiConfig.connectorId,
       esClient: services.scopedClusterClient.asCurrentUser,
       indexPattern: '.alerts-security.attack.discovery.alerts-test-space',
       logger: mockLogger,
+      ownerId: executorOptions.rule.id,
       spaceId,
     });
   });

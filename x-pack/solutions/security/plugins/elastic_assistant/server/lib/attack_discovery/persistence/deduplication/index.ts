@@ -14,17 +14,21 @@ import { generateAttackDiscoveryAlertUuid } from '../transforms/transform_to_ale
 
 interface DeduplicateAttackDiscoveriesParams {
   attackDiscoveries: AttackDiscoveries;
+  connectorId: string;
   esClient: ElasticsearchClient;
   indexPattern: string;
   logger: Logger;
+  ownerId: string;
   spaceId: string;
 }
 
 export const deduplicateAttackDiscoveries = async ({
   attackDiscoveries,
+  connectorId,
   esClient,
   indexPattern,
   logger,
+  ownerId,
   spaceId,
 }: DeduplicateAttackDiscoveriesParams): Promise<AttackDiscoveries> => {
   if (!attackDiscoveries || attackDiscoveries.length === 0) {
@@ -33,7 +37,12 @@ export const deduplicateAttackDiscoveries = async ({
 
   // 1. Transform all attackDiscoveries to alert documents and collect alertUuids
   const alertDocs = attackDiscoveries.map((attack) => {
-    const alertUuid = generateAttackDiscoveryAlertUuid({ attackDiscovery: attack, spaceId });
+    const alertUuid = generateAttackDiscoveryAlertUuid({
+      attackDiscovery: attack,
+      connectorId,
+      ownerId,
+      spaceId,
+    });
     return { attack, alertUuid };
   });
   const alertUuids = alertDocs.map((doc) => doc.alertUuid);

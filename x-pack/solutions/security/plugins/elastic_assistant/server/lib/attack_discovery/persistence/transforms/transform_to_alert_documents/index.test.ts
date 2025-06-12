@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { createHash } from 'crypto';
 import {
   replaceAnonymizedValuesWithOriginalValues,
   ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID,
@@ -45,19 +44,21 @@ import { mockAttackDiscoveries } from '../../../evaluation/__mocks__/mock_attack
 describe('Transform attack discoveries to alert documents', () => {
   describe('transformToAlertDocuments', () => {
     const mockNow = new Date('2025-04-24T17:36:25.812Z');
-    const spaceId = 'default';
+    const defaultProps = {
+      authenticatedUser: mockAuthenticatedUser,
+      connectorId: 'test-connector-1',
+      createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
+      now: mockNow,
+      ownerId: 'test-user-1',
+      spaceId: 'test-space-1',
+    };
 
     beforeEach(() => {
       jest.resetAllMocks();
     });
 
     it(`returns the expected ${ALERT_ATTACK_DISCOVERY_ALERT_IDS} field`, () => {
-      const result = transformToAlertDocuments({
-        authenticatedUser: mockAuthenticatedUser,
-        createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
-        now: mockNow,
-        spaceId,
-      });
+      const result = transformToAlertDocuments(defaultProps);
 
       expect(result[0][ALERT_ATTACK_DISCOVERY_ALERT_IDS]).toEqual(
         mockCreateAttackDiscoveryAlertsParams.attackDiscoveries[0].alertIds
@@ -76,22 +77,15 @@ describe('Transform attack discoveries to alert documents', () => {
       };
 
       const result = transformToAlertDocuments({
-        authenticatedUser: mockAuthenticatedUser,
+        ...defaultProps,
         createAttackDiscoveryAlertsParams: params,
-        now: mockNow,
-        spaceId,
       });
 
       expect(result[0][ALERT_ATTACK_DISCOVERY_ALERT_IDS]).toEqual([]);
     });
 
     it(`returns the expected ${ALERT_ATTACK_DISCOVERY_ALERTS_CONTEXT_COUNT} field`, () => {
-      const result = transformToAlertDocuments({
-        authenticatedUser: mockAuthenticatedUser,
-        createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
-        now: mockNow,
-        spaceId,
-      });
+      const result = transformToAlertDocuments(defaultProps);
 
       expect(result[0][ALERT_ATTACK_DISCOVERY_ALERTS_CONTEXT_COUNT]).toEqual(
         mockCreateAttackDiscoveryAlertsParams.alertsContextCount
@@ -99,72 +93,39 @@ describe('Transform attack discoveries to alert documents', () => {
     });
 
     it(`returns the expected ${ALERT_UUID}`, () => {
-      const result = transformToAlertDocuments({
-        authenticatedUser: mockAuthenticatedUser,
-        createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
-        now: mockNow,
-        spaceId,
-      });
+      const result = transformToAlertDocuments(defaultProps);
 
-      const alertUuid1 = createHash('sha256')
-        .update(mockCreateAttackDiscoveryAlertsParams.attackDiscoveries[0].alertIds.sort().join())
-        .update(spaceId)
-        .digest('hex');
-
-      expect(result[0][ALERT_UUID]).toBe(alertUuid1);
+      expect(result[0][ALERT_UUID]).toBe(
+        '8b22ce173c17bd9048c77dc4991c78cc1a9acf9e5cdf1d87163c3eebe06f916e'
+      );
     });
 
     it(`returns the same ${ALERT_INSTANCE_ID} as the ${ALERT_UUID}`, () => {
-      const result = transformToAlertDocuments({
-        authenticatedUser: mockAuthenticatedUser,
-        createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
-        now: mockNow,
-        spaceId,
-      });
+      const result = transformToAlertDocuments(defaultProps);
 
       expect(result[0][ALERT_INSTANCE_ID]).toEqual(result[0][ALERT_UUID]);
     });
 
     it(`returns the expected ${ALERT_RISK_SCORE}`, () => {
-      const result = transformToAlertDocuments({
-        authenticatedUser: mockAuthenticatedUser,
-        createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
-        now: mockNow,
-        spaceId,
-      });
+      const result = transformToAlertDocuments(defaultProps);
 
       expect(result[0][ALERT_RISK_SCORE]).toEqual(1316);
     });
 
     it(`returns the expected ${ALERT_ATTACK_DISCOVERY_USER_ID}`, () => {
-      const result = transformToAlertDocuments({
-        authenticatedUser: mockAuthenticatedUser,
-        createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
-        now: mockNow,
-        spaceId,
-      });
+      const result = transformToAlertDocuments(defaultProps);
 
       expect(result[0][ALERT_ATTACK_DISCOVERY_USER_ID]).toEqual(mockAuthenticatedUser.profile_uid);
     });
 
     it(`returns the expected ${ALERT_ATTACK_DISCOVERY_USER_NAME}`, () => {
-      const result = transformToAlertDocuments({
-        authenticatedUser: mockAuthenticatedUser,
-        createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
-        now: mockNow,
-        spaceId,
-      });
+      const result = transformToAlertDocuments(defaultProps);
 
       expect(result[0][ALERT_ATTACK_DISCOVERY_USER_NAME]).toEqual(mockAuthenticatedUser.username);
     });
 
     it(`returns the expected ${ALERT_ATTACK_DISCOVERY_USERS}`, () => {
-      const result = transformToAlertDocuments({
-        authenticatedUser: mockAuthenticatedUser,
-        createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
-        now: mockNow,
-        spaceId,
-      });
+      const result = transformToAlertDocuments(defaultProps);
 
       expect(result[0][ALERT_ATTACK_DISCOVERY_USERS]).toEqual([
         {
@@ -175,35 +136,21 @@ describe('Transform attack discoveries to alert documents', () => {
     });
 
     it('generates unique UUIDs for multiple alerts', () => {
-      const params = {
-        authenticatedUser: mockAuthenticatedUser,
-        createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
-        now: mockNow,
-        spaceId,
-      };
-
-      const result = transformToAlertDocuments(params);
-
-      const alertUuid1 = createHash('sha256')
-        .update(mockCreateAttackDiscoveryAlertsParams.attackDiscoveries[0].alertIds.sort().join())
-        .update(spaceId)
-        .digest('hex');
-
-      const alertUuid2 = createHash('sha256')
-        .update(mockCreateAttackDiscoveryAlertsParams.attackDiscoveries[1].alertIds.sort().join())
-        .update(spaceId)
-        .digest('hex');
+      const result = transformToAlertDocuments(defaultProps);
 
       const uuids = result.map((alert) => alert[ALERT_UUID]);
-      expect(uuids).toEqual([alertUuid1, alertUuid2]);
+      expect(uuids).toEqual([
+        '8b22ce173c17bd9048c77dc4991c78cc1a9acf9e5cdf1d87163c3eebe06f916e',
+        'af1c13851eca0338dbca8f1d90dfadd68c0d2f222a84691b3e05b1b1ae9ca060',
+      ]);
     });
 
     it(`returns the expected ${ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN_WITH_REPLACEMENTS}`, () => {
       const result = transformToAlertDocuments({
+        ...defaultProps,
         authenticatedUser: mockAuthenticatedUser,
         createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
         now: mockNow,
-        spaceId,
       });
 
       expect(result[0][ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN_WITH_REPLACEMENTS]).toEqual(
@@ -227,10 +174,10 @@ describe('Transform attack discoveries to alert documents', () => {
       };
 
       const result = transformToAlertDocuments({
+        ...defaultProps,
         authenticatedUser: mockAuthenticatedUser,
         createAttackDiscoveryAlertsParams: params,
         now: mockNow,
-        spaceId,
       });
 
       expect(
@@ -240,10 +187,10 @@ describe('Transform attack discoveries to alert documents', () => {
 
     it(`returns the expected ${ALERT_ATTACK_DISCOVERY_REPLACEMENTS}`, () => {
       const result = transformToAlertDocuments({
+        ...defaultProps,
         authenticatedUser: mockAuthenticatedUser,
         createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
         now: mockNow,
-        spaceId,
       });
 
       expect(result[0][ALERT_ATTACK_DISCOVERY_REPLACEMENTS]).toEqual(
@@ -258,10 +205,10 @@ describe('Transform attack discoveries to alert documents', () => {
 
     it('returns the expected static ALERT_RULE* fields', () => {
       const result = transformToAlertDocuments({
+        ...defaultProps,
         authenticatedUser: mockAuthenticatedUser,
         createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
         now: mockNow,
-        spaceId,
       });
 
       expect(result[0][ALERT_RULE_CATEGORY]).toBe(
@@ -279,10 +226,10 @@ describe('Transform attack discoveries to alert documents', () => {
       };
 
       const result = transformToAlertDocuments({
+        ...defaultProps,
         authenticatedUser: mockAuthenticatedUser,
         createAttackDiscoveryAlertsParams: params,
         now: mockNow,
-        spaceId,
       });
 
       expect(result[0][ALERT_ATTACK_DISCOVERY_REPLACEMENTS]).toBeUndefined();
@@ -441,38 +388,44 @@ describe('Transform attack discoveries to alert documents', () => {
   });
 
   describe('generateAttackDiscoveryAlertUuid', () => {
-    const spaceId = 'test-space';
+    const defaultProps = {
+      spaceId: 'test-space-2',
+      connectorId: 'test-connector-2',
+      ownerId: 'test-user-2',
+    };
 
     it('generates a deterministic UUID for the same attack discovery and space', () => {
       const uuid1a = generateAttackDiscoveryAlertUuid({
+        ...defaultProps,
         attackDiscovery: mockAttackDiscoveries[0],
-        spaceId,
       });
       const uuid1b = generateAttackDiscoveryAlertUuid({
+        ...defaultProps,
         attackDiscovery: mockAttackDiscoveries[0],
-        spaceId,
       });
       expect(uuid1a).toBe(uuid1b);
     });
 
     it('generates different UUIDs for different attack discoveries', () => {
       const uuid1 = generateAttackDiscoveryAlertUuid({
+        ...defaultProps,
         attackDiscovery: mockAttackDiscoveries[0],
-        spaceId,
       });
       const uuid2 = generateAttackDiscoveryAlertUuid({
+        ...defaultProps,
         attackDiscovery: mockAttackDiscoveries[1],
-        spaceId,
       });
       expect(uuid1).not.toBe(uuid2);
     });
 
     it('generates different UUIDs for the same attack discovery in different spaces', () => {
       const uuidDefault = generateAttackDiscoveryAlertUuid({
+        ...defaultProps,
         attackDiscovery: mockAttackDiscoveries[0],
         spaceId: 'default',
       });
       const uuidOther = generateAttackDiscoveryAlertUuid({
+        ...defaultProps,
         attackDiscovery: mockAttackDiscoveries[0],
         spaceId: 'other-space',
       });
@@ -483,12 +436,12 @@ describe('Transform attack discoveries to alert documents', () => {
       const attackDiscoveryA = { ...mockAttackDiscoveries[0], alertIds: ['b', 'a', 'c'] };
       const attackDiscoveryB = { ...mockAttackDiscoveries[0], alertIds: ['c', 'b', 'a'] };
       const uuidA = generateAttackDiscoveryAlertUuid({
+        ...defaultProps,
         attackDiscovery: attackDiscoveryA,
-        spaceId,
       });
       const uuidB = generateAttackDiscoveryAlertUuid({
+        ...defaultProps,
         attackDiscovery: attackDiscoveryB,
-        spaceId,
       });
       expect(uuidA).toBe(uuidB);
     });

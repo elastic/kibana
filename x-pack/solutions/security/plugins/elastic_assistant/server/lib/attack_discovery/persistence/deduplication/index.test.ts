@@ -22,11 +22,18 @@ const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
 const mockLogger = loggerMock.create();
 
 describe('deduplicateAttackDiscoveries', () => {
-  const spaceId = 'test-space';
-  const indexPattern = '.test.alerts-*,.adhoc.alerts-*';
   const uuid1 = 'test-uuid-1';
   const uuid2 = 'test-uuid-2';
   const [attack1, attack2] = mockAttackDiscoveries;
+  const defaultProps = {
+    attackDiscoveries: mockAttackDiscoveries,
+    connectorId: 'test-connector-1',
+    esClient: mockEsClient,
+    indexPattern: '.test.alerts-*,.adhoc.alerts-*',
+    logger: mockLogger,
+    ownerId: 'test-owner-1',
+    spaceId: 'test-space',
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -39,25 +46,13 @@ describe('deduplicateAttackDiscoveries', () => {
   });
 
   it('should return empty array if no attack discoveries passed to the function', async () => {
-    const result = await deduplicateAttackDiscoveries({
-      attackDiscoveries: [],
-      esClient: mockEsClient,
-      indexPattern,
-      logger: mockLogger,
-      spaceId,
-    });
+    const result = await deduplicateAttackDiscoveries({ ...defaultProps, attackDiscoveries: [] });
 
     expect(result).toEqual([]);
   });
 
   it('should return all discoveries if none are duplicates', async () => {
-    const result = await deduplicateAttackDiscoveries({
-      attackDiscoveries: mockAttackDiscoveries,
-      esClient: mockEsClient,
-      indexPattern,
-      logger: mockLogger,
-      spaceId,
-    });
+    const result = await deduplicateAttackDiscoveries(defaultProps);
     expect(result).toEqual(mockAttackDiscoveries);
   });
 
@@ -70,13 +65,7 @@ describe('deduplicateAttackDiscoveries', () => {
         ],
       },
     } as unknown as estypes.SearchResponse);
-    const result = await deduplicateAttackDiscoveries({
-      attackDiscoveries: mockAttackDiscoveries,
-      esClient: mockEsClient,
-      indexPattern,
-      logger: mockLogger,
-      spaceId,
-    });
+    const result = await deduplicateAttackDiscoveries(defaultProps);
     expect(result).toEqual([]);
   });
 
@@ -87,11 +76,8 @@ describe('deduplicateAttackDiscoveries', () => {
       },
     } as unknown as estypes.SearchResponse);
     const result = await deduplicateAttackDiscoveries({
+      ...defaultProps,
       attackDiscoveries: [attack1, attack2],
-      esClient: mockEsClient,
-      indexPattern,
-      logger: mockLogger,
-      spaceId,
     });
     expect(result).toEqual([attack1]);
   });
@@ -103,11 +89,8 @@ describe('deduplicateAttackDiscoveries', () => {
       },
     } as unknown as estypes.SearchResponse);
     const result = await deduplicateAttackDiscoveries({
+      ...defaultProps,
       attackDiscoveries: [attack1],
-      esClient: mockEsClient,
-      indexPattern,
-      logger: mockLogger,
-      spaceId,
     });
     expect(result).toEqual([attack1]);
   });
@@ -118,13 +101,7 @@ describe('deduplicateAttackDiscoveries', () => {
         hits: [{ _source: { 'kibana.alert.instance.id': uuid1 } }],
       },
     } as unknown as estypes.SearchResponse);
-    await deduplicateAttackDiscoveries({
-      attackDiscoveries: mockAttackDiscoveries,
-      esClient: mockEsClient,
-      indexPattern,
-      logger: mockLogger,
-      spaceId,
-    });
+    await deduplicateAttackDiscoveries(defaultProps);
     expect(mockLogger.debug).toHaveBeenCalledWith(
       'Found 1 duplicate alert(s), skipping report for those.'
     );
