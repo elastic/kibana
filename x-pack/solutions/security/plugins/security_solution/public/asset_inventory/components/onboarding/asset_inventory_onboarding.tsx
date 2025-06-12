@@ -25,7 +25,7 @@ export const AssetInventoryOnboarding: FC<PropsWithChildren> = ({ children }) =>
   const { installAssetInventoryDataView } = useAssetInventoryRoutes();
 
   useEffect(() => {
-    const installAssetInventoryDataView = async () => {
+    const checkAndInstallAssetInventoryDataView = async () => {
       if (!isLoading && data) {
         const { status } = data;
 
@@ -37,7 +37,7 @@ export const AssetInventoryOnboarding: FC<PropsWithChildren> = ({ children }) =>
       }
     };
 
-    installAssetInventoryDataView();
+    checkAndInstallAssetInventoryDataView();
   }, [isLoading, data, installAssetInventoryDataView]);
 
   if (isLoading || !data) {
