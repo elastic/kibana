@@ -377,7 +377,7 @@ export function ChatBody({
   const { conversationCalloutDismissed, tourCalloutDismissed } = useElasticLlmCalloutsStatus(false);
 
   const showElasticLlmCalloutInChat =
-    elasticManagedLlm &&
+    !!elasticManagedLlm &&
     connectors.selectedConnector === elasticManagedLlm.id &&
     !conversationCalloutDismissed &&
     tourCalloutDismissed;
