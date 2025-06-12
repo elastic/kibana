@@ -16,18 +16,17 @@ import { RegisteredToolProviderWithId } from '../types';
 import { z } from 'zod';
 import { EsqlTool, RegisteredTool } from '@kbn/onechat-server';
 import { esqlToolProviderId } from '@kbn/onechat-common';
-import { EsqlToolCreateRequest } from '@kbn/onechat-plugin/common/tools';
+import { esqlToolCreater } from './utils/execute_esql_query';
   
-export interface EsqlToolService extends RegisteredToolProviderWithId {
+export interface EsqlToolRegistry extends RegisteredToolProviderWithId {
   getScopedClient(options: { request: KibanaRequest }): Promise<EsqlToolClient>;
 }
 
 export const esqlSchema = z.object({
-  id: z.string().describe('Esql tool ID'),
-  params: z.record(z.any()).optional().describe('parameters to pass to the ESQL query'),
+  params: z.record(z.any()).optional().describe('Params needed to execute the query'),
 });
 
-export class EsqlToolServiceImpl implements EsqlToolService {
+export class EsqlToolRegistryImpl implements EsqlToolRegistry {
   public readonly id = esqlToolProviderId;
   private readonly logger: Logger;
   private readonly elasticsearch: ElasticsearchServiceStart;
@@ -59,7 +58,7 @@ export class EsqlToolServiceImpl implements EsqlToolService {
       try {
           const document = await client.get(toolId);
           const tool = document;
-          const executableTool = this.esqlToolCreater(tool);
+          const executableTool = esqlToolCreater(tool);
 
           return executableTool as EsqlTool;
           
@@ -75,6 +74,11 @@ export class EsqlToolServiceImpl implements EsqlToolService {
   async list(options: { request: KibanaRequest }): Promise<RegisteredTool[]> {
     const client = await this.getScopedClient({ request: options.request });
     const esqlTools = await client.list();
+
+    for (const tool of esqlTools) {
+      const executableTool = esqlToolCreater(tool);
+      Object.assign(tool, executableTool);
+    }
     return esqlTools
   }
 
@@ -103,21 +107,6 @@ export class EsqlToolServiceImpl implements EsqlToolService {
       throw error;
       }
   }
-  esqlToolCreater = (tool: EsqlToolCreateRequest): EsqlTool => {
-    this.logger.info(`Creating ESQL tool: ${tool.id}`);
-    return {
-      id: tool.id,
-      description: tool.description,
-      query: tool.query,
-      params: tool.params,
-      schema: esqlSchema,
-      handler: async ({ id, params }) => {
-        return "For some reason the schema isn't working :( ";
-      },
-      meta: tool.meta
-    };
-    
-  };
 
 }
 

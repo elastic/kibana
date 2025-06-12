@@ -19,7 +19,7 @@ export interface EsqlToolClient{
     get(toolId: string): Promise<EsqlToolCreateRequest>;
     list(): Promise<EsqlTool[]>;
     create(esqlTool: EsqlToolCreateRequest): Promise<EsqlToolCreateRequest>;
-    execute(name: string, params: Record<string, any>): Promise<any>;
+    execute(id: string, params: Record<string, any>): Promise<any>;
   }
 
 export const createClient = ({

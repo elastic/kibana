@@ -10,7 +10,7 @@ import type { Runner, RegisteredTool } from '@kbn/onechat-server';
 import { createBuiltinToolRegistry, type BuiltinToolRegistry } from './builtin_registry';
 import type { ToolsServiceSetup, ToolsServiceStart, RegisteredToolProviderWithId } from './types';
 import { createInternalRegistry } from './utils';
-import { EsqlToolServiceImpl } from './esql/esql_tool_service';
+import { EsqlToolRegistryImpl } from './esql/esql_registry';
 import { Logger } from 'elastic-apm-node';
 import { ElasticsearchServiceStart } from '@kbn/core/server';
 
@@ -43,7 +43,7 @@ export class ToolsService {
 
   start({ getRunner, logger, elasticsearch }: ToolsServiceStartDeps): ToolsServiceStart {
 
-    const esql = new EsqlToolServiceImpl({
+    const esql = new EsqlToolRegistryImpl({
       logger: logger.get('esql'),
       elasticsearch,
     });
