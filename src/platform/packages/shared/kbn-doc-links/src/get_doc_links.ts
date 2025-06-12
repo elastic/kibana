@@ -278,6 +278,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       migrateOffScriptedFields: `${ELASTIC_DOCS}explore-analyze/find-and-organize/data-views#migrate-off-scripted-fields`,
     },
     addData: `${ELASTIC_DOCS}manage-data/ingest`,
+    elasticCommunity: `${ELASTIC_WEBSITE_URL}community/`,
     kibana: {
       askElastic: `${ELASTIC_WEBSITE_URL}products/kibana/ask-elastic?blade=kibanaaskelastic`,
       createGithubIssue: `${ELASTIC_GITHUB}kibana/issues/new/choose`,

@@ -248,6 +248,7 @@ export interface DocLinks {
     readonly migrateOffScriptedFields: string;
   };
   readonly addData: string;
+  readonly elasticCommunity: string;
   readonly kibana: {
     readonly askElastic: string;
     readonly createGithubIssue: string;

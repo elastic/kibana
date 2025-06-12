@@ -9,10 +9,12 @@ import { DocLinks } from '@kbn/doc-links';
 
 class ESDocLinks {
   public kibanaFeedback: string = '';
+  public elasticCommunity: string = '';
   constructor() {}
 
   setDocLinks(newDocLinks: DocLinks) {
     this.kibanaFeedback = newDocLinks.kibana.feedback;
+    this.elasticCommunity = newDocLinks.elasticCommunity;
   }
 }
 
