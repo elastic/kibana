@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Serverless Security Cases', function () {
+    this.tags(['serverless_security_cases']);
     loadTestFile(require.resolve('./attachment_framework'));
     loadTestFile(require.resolve('./view_case'));
     loadTestFile(require.resolve('./create_case_form'));
