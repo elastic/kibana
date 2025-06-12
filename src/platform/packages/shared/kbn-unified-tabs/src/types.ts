@@ -24,8 +24,9 @@ export interface TabsSizeConfig {
 
 // TODO status value for now matches EuiHealth colors for mocking simplicity, adjust when real data is available
 export enum TabStatus {
-  SUCCESS = 'success',
+  DEFAULT = 'default',
   RUNNING = 'running',
+  SUCCESS = 'success',
   ERROR = 'danger',
 }
 

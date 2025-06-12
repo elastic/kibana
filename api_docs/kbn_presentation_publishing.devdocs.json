@@ -1372,7 +1372,7 @@
             "section": "def-public.StateComparators",
             "text": "StateComparators"
           },
-          "<StateType>, lastSavedState?: StateType | undefined, currentState?: StateType | undefined, defaultState?: Partial<StateType> | undefined) => boolean"
+          "<StateType>, lastSavedState?: StateType | undefined, currentState?: StateType | undefined, defaultState?: Partial<StateType> | undefined, getCustomLogLabel?: ((key: string) => string) | undefined) => boolean"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_comparators.ts",
         "deprecated": false,
@@ -1439,6 +1439,21 @@
             "description": [],
             "signature": [
               "Partial<StateType> | undefined"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_comparators.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.areComparatorsEqual.$5",
+            "type": "Function",
+            "tags": [],
+            "label": "getCustomLogLabel",
+            "description": [],
+            "signature": [
+              "((key: string) => string) | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_comparators.ts",
             "deprecated": false,
@@ -2179,6 +2194,71 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-public.logStateDiff",
+        "type": "Function",
+        "tags": [],
+        "label": "logStateDiff",
+        "description": [
+          "\nConditional (window.ELASTIC_PRESENTATION_LOGGER needs to be set to true) logger function"
+        ],
+        "signature": [
+          "(label: string, lastValue: unknown, currentValue: unknown) => Promise<void>"
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_diff_logger.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.logStateDiff.$1",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_diff_logger.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.logStateDiff.$2",
+            "type": "Unknown",
+            "tags": [],
+            "label": "lastValue",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_diff_logger.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.logStateDiff.$3",
+            "type": "Unknown",
+            "tags": [],
+            "label": "currentValue",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_diff_logger.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-public.runComparator",
         "type": "Function",
         "tags": [],
@@ -2282,6 +2362,23 @@
             "isRequired": false
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-public.shouldLogStateDiff",
+        "type": "Function",
+        "tags": [],
+        "label": "shouldLogStateDiff",
+        "description": [],
+        "signature": [
+          "() => boolean"
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_diff_logger.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },

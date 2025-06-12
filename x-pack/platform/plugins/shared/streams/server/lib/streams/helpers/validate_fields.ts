@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import { FieldDefinition, Streams, isRoot } from '@kbn/streams-schema';
+import {
+  FieldDefinition,
+  Streams,
+  isRoot,
+  keepFields,
+  namespacePrefixes,
+} from '@kbn/streams-schema';
 import { MalformedFieldsError } from '../errors/malformed_fields_error';
+import { baseMappings } from '../component_templates/logs_layer';
 
 export function validateAncestorFields({
   ancestors,
@@ -17,8 +24,10 @@ export function validateAncestorFields({
 }) {
   for (const ancestor of ancestors) {
     for (const fieldName in fields) {
+      if (!Object.hasOwn(fields, fieldName)) {
+        continue;
+      }
       if (
-        Object.hasOwn(fields, fieldName) &&
         Object.entries(ancestor.ingest.wired.fields).some(
           ([ancestorFieldName, attr]) =>
             attr.type !== fields[fieldName].type && ancestorFieldName === fieldName
@@ -26,6 +35,31 @@ export function validateAncestorFields({
       ) {
         throw new MalformedFieldsError(
           `Field ${fieldName} is already defined with incompatible type in the parent stream ${ancestor.name}`
+        );
+      }
+      if (
+        !namespacePrefixes.some((prefix) => fieldName.startsWith(prefix)) &&
+        !keepFields.includes(fieldName)
+      ) {
+        throw new MalformedFieldsError(
+          `Field ${fieldName} is not allowed to be defined as it doesn't match the namespaced ECS or OTel schema.`
+        );
+      }
+      for (const prefix of namespacePrefixes) {
+        const prefixedName = `${prefix}${fieldName}`;
+        if (
+          Object.hasOwn(fields, prefixedName) ||
+          Object.hasOwn(ancestor.ingest.wired.fields, prefixedName)
+        ) {
+          throw new MalformedFieldsError(
+            `Field ${fieldName} is an automatic alias of ${prefixedName} because of otel compat mode`
+          );
+        }
+      }
+      // check the otelMappings - they are aliases and are not allowed to have the same name as a field
+      if (fieldName in baseMappings) {
+        throw new MalformedFieldsError(
+          `Field ${fieldName} is an automatic alias of another field because of otel compat mode`
         );
       }
     }

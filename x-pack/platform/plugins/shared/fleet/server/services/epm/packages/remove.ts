@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { differenceBy } from 'lodash';
 
 import type { SavedObject } from '@kbn/core/server';
 
@@ -383,8 +384,8 @@ async function deleteIndexTemplate(esClient: ElasticsearchClient, name: string):
   if (name && name !== '*') {
     try {
       await esClient.indices.deleteIndexTemplate({ name }, { ignore: [404] });
-    } catch {
-      throw new FleetError(`Error deleting index template ${name}`);
+    } catch (error) {
+      throw new FleetError(`Error deleting index template ${name}: ${error.message}`);
     }
   }
 }
@@ -395,7 +396,7 @@ async function deleteComponentTemplate(esClient: ElasticsearchClient, name: stri
     try {
       await esClient.cluster.deleteComponentTemplate({ name }, { ignore: [404] });
     } catch (error) {
-      throw new FleetError(`Error deleting component template ${name}`);
+      throw new FleetError(`Error deleting component template ${name}: ${error.message}`);
     }
   }
 }
@@ -486,6 +487,45 @@ export function cleanupTransforms(
     .filter((asset) => asset.type === ElasticsearchAssetType.transform)
     .map((asset) => asset.id);
   return deleteTransforms(esClient, idsToDelete);
+}
+
+/**
+ * This function deletes assets for a given installation and updates the package SO accordingly.
+ *
+ * It is used to delete assets installed for input packages when they are no longer relevant,
+ * e.g. when a package policy is deleted and the package has no more policies.
+ */
+export async function cleanupAssets(
+  datasetName: string,
+  installationToDelete: Installation,
+  originalInstallation: Installation,
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract
+) {
+  await deleteAssets(installationToDelete, esClient);
+
+  const {
+    installed_es: installedEs,
+    installed_kibana: installedKibana,
+    es_index_patterns: installedIndexPatterns,
+  } = originalInstallation;
+  const { installed_es: ESToRemove, installed_kibana: kibanaToRemove } = installationToDelete;
+
+  if (installedIndexPatterns && installedIndexPatterns[datasetName]) {
+    delete installedIndexPatterns[datasetName];
+  }
+
+  await soClient.update(PACKAGES_SAVED_OBJECT_TYPE, originalInstallation.name, {
+    installed_es: differenceBy(installedEs, ESToRemove, 'id'),
+    installed_kibana: differenceBy(installedKibana, kibanaToRemove, 'id'),
+    es_index_patterns: installedIndexPatterns,
+  });
+  auditLoggingService.writeCustomSoAuditLog({
+    action: 'update',
+    id: originalInstallation.name,
+    name: originalInstallation.name,
+    savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+  });
 }
 
 async function updateUninstallStatusToFailed(
