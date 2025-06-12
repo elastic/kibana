@@ -14,6 +14,7 @@ import React from 'react';
 import moment from 'moment';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { fromMountPoint } from '@kbn/react-kibana-mount';
 import { NewsfeedPluginBrowserConfig, NewsfeedPluginStartDependencies } from './types';
 import { NewsfeedNavButton } from './components/newsfeed_header_nav_button';
 import { getApi, NewsfeedApi, NewsfeedApiEndpoint } from './lib/api';
@@ -51,7 +52,7 @@ export class NewsfeedPublicPlugin
     const api = this.createNewsfeedApi(this.config, NewsfeedApiEndpoint.KIBANA, isScreenshotMode);
     core.chrome.navControls.registerRight({
       order: 1000,
-      mount: (target) => this.mount(api, target, core),
+      control: fromMountPoint((target) => this.mount(api, target, core)),
     });
 
     return {

@@ -13,11 +13,9 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { GlobalSearchPluginStart } from '@kbn/global-search-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { SearchBar } from './components/search_bar';
 import type { GlobalSearchBarConfigType } from './types';
 import { EventReporter, eventTypes } from './telemetry';
@@ -55,23 +53,16 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBar
 
     const navControl: ChromeNavControl = {
       order: 1000,
-      mount: (container) => {
-        ReactDOM.render(
-          <KibanaRenderContextProvider {...core}>
-            <SearchBar
-              globalSearch={{ ...globalSearch, searchCharLimit: this.config.input_max_limit }}
-              navigateToUrl={application.navigateToUrl}
-              taggingApi={savedObjectsTagging}
-              basePathUrl={http.basePath.prepend('/plugins/globalSearchBar/assets/')}
-              chromeStyle$={core.chrome.getChromeStyle$()}
-              reportEvent={reportEvent}
-            />
-          </KibanaRenderContextProvider>,
-          container
-        );
-
-        return () => ReactDOM.unmountComponentAtNode(container);
-      },
+      control: (
+        <SearchBar
+          globalSearch={{ ...globalSearch, searchCharLimit: this.config.input_max_limit }}
+          navigateToUrl={application.navigateToUrl}
+          taggingApi={savedObjectsTagging}
+          basePathUrl={http.basePath.prepend('/plugins/globalSearchBar/assets/')}
+          chromeStyle$={core.chrome.getChromeStyle$()}
+          reportEvent={reportEvent}
+        />
+      ),
     };
     return navControl;
   }
