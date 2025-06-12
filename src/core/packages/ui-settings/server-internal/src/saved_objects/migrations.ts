@@ -26,7 +26,15 @@ export const modelVersions: SavedObjectsModelVersionMap = {
   1: {
     changes: [],
   },
-  // 2: {
+  2: {
+    changes: [
+      {
+        type: 'data_removal',
+        removedAttributePaths: ['visualization:useLegacyTimeAxis'],
+      },
+    ],
+  },
+  // 3: {
   //   changes: [ /* Put future migration here */ ],
   // },
 };
@@ -215,27 +223,6 @@ export const migrations = {
           [
             // owner: Team:Visualizations
             'visualize:enableLabs',
-          ].includes(key)
-            ? {
-                ...acc,
-              }
-            : {
-                ...acc,
-                [key]: doc.attributes[key],
-              },
-        {}
-      ),
-    }),
-    references: doc.references || [],
-  }),
-  '8.19.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({
-    ...doc,
-    ...(doc.attributes && {
-      attributes: Object.keys(doc.attributes).reduce(
-        (acc, key) =>
-          [
-            // owner: Team:Visualizations
-            'visualization:useLegacyTimeAxis',
           ].includes(key)
             ? {
                 ...acc,
