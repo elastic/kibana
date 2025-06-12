@@ -89,6 +89,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.alerting.rules.minimumScheduleInterval.value="5s"`,
         `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
         `--xpack.actions.preconfiguredAlertHistoryEsIndex=false`,
+        `--xpack.cases.incrementalIdService.enabled=false`,
         `--xpack.actions.preconfigured=${JSON.stringify({
           'my-slack1': {
             actionTypeId: '.slack',
