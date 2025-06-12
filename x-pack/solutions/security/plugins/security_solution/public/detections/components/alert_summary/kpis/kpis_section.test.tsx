@@ -11,11 +11,20 @@ import { KPIsSection } from './kpis_section';
 import { ALERTS_BY_HOST_PANEL } from './alerts_progress_bar_by_host_name_panel';
 import { TestProviders } from '../../../../common/mock';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { useSummaryChartData } from '../../alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data';
 
 jest.mock('../../../../common/hooks/use_selector');
 jest.mock('../../alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data');
 
 describe('<KPIsSection />', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useSummaryChartData as jest.Mock).mockReturnValue({
+      items: [],
+      isLoading: false,
+    });
+  });
+
   it('should render all components', async () => {
     (useDeepEqualSelector as jest.Mock).mockReturnValue({
       meta: {},
