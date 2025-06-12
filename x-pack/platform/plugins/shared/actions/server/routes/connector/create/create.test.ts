@@ -11,6 +11,7 @@ import { licenseStateMock } from '../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../_mock_handler_arguments';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { errors as esErrors } from '@elastic/elasticsearch';
+import { type DiagnosticResult } from '@elastic/elasticsearch';
 import { omit } from 'lodash';
 import { actionsClientMock } from '../../../actions_client/actions_client.mock';
 import { createConnectorRequestBodySchemaV1 } from '../../../../common/routes/connector/apis/create';
@@ -120,7 +121,7 @@ describe('createConnectorRoute', () => {
         },
         warnings: [],
         headers: {},
-        meta: {} as any,
+        meta: {} as DiagnosticResult['meta'],
       })
     );
     const [context, req, res] = mockHandlerArguments(
