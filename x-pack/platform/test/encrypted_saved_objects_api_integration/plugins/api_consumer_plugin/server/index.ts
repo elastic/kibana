@@ -338,8 +338,8 @@ function defineModelVersionWithMigration(core: CoreSetup<PluginsStart>, deps: Pl
           changes: [
             {
               type: 'unsafe_transform',
-              transformFn: (sanitize) =>
-                sanitize(
+              transformFn: (typeSafeGuard) =>
+                typeSafeGuard(
                   // ideally, we should use generic types for the whole function, defining it on a separate const
                   (
                     document: SavedObjectModelTransformationDoc<{
@@ -366,8 +366,8 @@ function defineModelVersionWithMigration(core: CoreSetup<PluginsStart>, deps: Pl
           changes: [
             {
               type: 'unsafe_transform',
-              transformFn: (sanitize) =>
-                sanitize(
+              transformFn: (typeSafeGuard) =>
+                typeSafeGuard(
                   // ideally, we should use generic types for the whole function, defining it on a separate const
                   (
                     document: SavedObjectModelTransformationDoc<{

@@ -104,8 +104,8 @@ export class EsoModelVersionExample
             changes: [
               {
                 type: 'unsafe_transform',
-                transformFn: (sanitize) =>
-                  sanitize((document) => {
+                transformFn: (typeSafeGuard) =>
+                  typeSafeGuard((document) => {
                     return { document };
                   }),
               },

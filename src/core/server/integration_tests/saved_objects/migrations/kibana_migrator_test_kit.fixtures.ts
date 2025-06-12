@@ -177,7 +177,7 @@ export const getReindexingBaselineTypes = (removedTypes: string[]) => {
               },
               {
                 type: 'unsafe_transform',
-                transformFn: (sanitize) => sanitize(transformComplex),
+                transformFn: (typeSafeGuard) => typeSafeGuard(transformComplex),
               },
             ],
           },

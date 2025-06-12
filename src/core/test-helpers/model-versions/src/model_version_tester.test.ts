@@ -114,7 +114,7 @@ describe('modelVersionTester', () => {
         changes: [
           {
             type: 'unsafe_transform',
-            transformFn: (sanitize) => sanitize(testTypeUnsafeTransform),
+            transformFn: (typeSafeGuard) => typeSafeGuard(testTypeUnsafeTransform),
           },
         ],
         schemas: {

@@ -21,7 +21,7 @@ import type { EncryptedSavedObjectTypeRegistration } from './crypto';
 import { EncryptionError, EncryptionErrorOperation } from './crypto';
 import { encryptedSavedObjectsServiceMock } from './crypto/index.mock';
 
-const dummySanitize = (
+const dummyTypeSafeGuard = (
   fn: SavedObjectModelUnsafeTransformFn<any, any>
 ): SavedObjectModelTransformationFn => {
   return (
@@ -60,8 +60,8 @@ describe('create ESO model version', () => {
           changes: [
             {
               type: 'unsafe_transform',
-              transformFn: (sanitize) =>
-                sanitize((document) => {
+              transformFn: (typeSafeGuard) =>
+                typeSafeGuard((document) => {
                   return { document };
                 }),
             },
@@ -113,8 +113,8 @@ describe('create ESO model version', () => {
         changes: [
           {
             type: 'unsafe_transform',
-            transformFn: (sanitize) =>
-              sanitize((document: SavedObjectModelTransformationDoc<{ three: string }>) => {
+            transformFn: (typeSafeGuard) =>
+              typeSafeGuard((document: SavedObjectModelTransformationDoc<{ three: string }>) => {
                 document.attributes.three = '3';
                 return { document };
               }),
@@ -125,8 +125,8 @@ describe('create ESO model version', () => {
           },
           {
             type: 'unsafe_transform',
-            transformFn: (sanitize) =>
-              sanitize((document: SavedObjectModelTransformationDoc<{ two: string }>) => {
+            transformFn: (typeSafeGuard) =>
+              typeSafeGuard((document: SavedObjectModelTransformationDoc<{ two: string }>) => {
                 document.attributes.two = '2';
                 return { document: { ...document, new_prop_1: 'new prop 1' } };
               }),
@@ -139,8 +139,8 @@ describe('create ESO model version', () => {
           },
           {
             type: 'unsafe_transform',
-            transformFn: (sanitize) =>
-              sanitize((document: SavedObjectModelTransformationDoc<{ four: string }>) => {
+            transformFn: (typeSafeGuard) =>
+              typeSafeGuard((document: SavedObjectModelTransformationDoc<{ four: string }>) => {
                 document.attributes.four = '4';
                 return { document: { ...document, new_prop_2: 'new prop 2' } };
               }),
@@ -174,7 +174,7 @@ describe('create ESO model version', () => {
     ) as SavedObjectsModelUnsafeTransformChange[];
     expect(unsafeTransforms.length === 1);
 
-    const result = unsafeTransforms[0].transformFn(dummySanitize)(
+    const result = unsafeTransforms[0].transformFn(dummyTypeSafeGuard)(
       {
         id: '123',
         type: 'known-type-1',
@@ -221,8 +221,8 @@ describe('create ESO model version', () => {
         changes: [
           {
             type: 'unsafe_transform',
-            transformFn: (sanitize) =>
-              sanitize((document) => {
+            transformFn: (typeSafeGuard) =>
+              typeSafeGuard((document) => {
                 return { document };
               }),
           },
@@ -246,7 +246,7 @@ describe('create ESO model version', () => {
     ) as SavedObjectsModelUnsafeTransformChange[];
     expect(unsafeTransforms.length === 1);
     expect(() => {
-      unsafeTransforms[0].transformFn(dummySanitize)(
+      unsafeTransforms[0].transformFn(dummyTypeSafeGuard)(
         {
           id: '123',
           type: 'known-type-1',
@@ -283,8 +283,8 @@ describe('create ESO model version', () => {
         changes: [
           {
             type: 'unsafe_transform',
-            transformFn: (sanitize) =>
-              sanitize((document) => {
+            transformFn: (typeSafeGuard) =>
+              typeSafeGuard((document) => {
                 return { document };
               }),
           },
@@ -308,7 +308,7 @@ describe('create ESO model version', () => {
     ) as SavedObjectsModelUnsafeTransformChange[];
     expect(unsafeTransforms.length === 1);
     expect(() => {
-      unsafeTransforms[0].transformFn(dummySanitize)(
+      unsafeTransforms[0].transformFn(dummyTypeSafeGuard)(
         {
           id: '123',
           type: 'known-type-1',
@@ -346,8 +346,8 @@ describe('create ESO model version', () => {
         changes: [
           {
             type: 'unsafe_transform',
-            transformFn: (sanitize) =>
-              sanitize((document) => {
+            transformFn: (typeSafeGuard) =>
+              typeSafeGuard((document) => {
                 return { document };
               }),
           },
@@ -383,7 +383,7 @@ describe('create ESO model version', () => {
       (change) => change.type === 'unsafe_transform'
     ) as SavedObjectsModelUnsafeTransformChange[];
     expect(unsafeTransforms.length === 1);
-    unsafeTransforms[0].transformFn(dummySanitize)(
+    unsafeTransforms[0].transformFn(dummyTypeSafeGuard)(
       {
         id: '123',
         type: 'known-type-1',
@@ -426,8 +426,8 @@ describe('create ESO model version', () => {
         changes: [
           {
             type: 'unsafe_transform',
-            transformFn: (sanitize) =>
-              sanitize((document) => {
+            transformFn: (typeSafeGuard) =>
+              typeSafeGuard((document) => {
                 throw new Error('transform failed!');
               }),
           },
@@ -448,7 +448,7 @@ describe('create ESO model version', () => {
     ) as SavedObjectsModelUnsafeTransformChange[];
     expect(unsafeTransforms.length === 1);
     expect(() => {
-      unsafeTransforms[0].transformFn(dummySanitize)(
+      unsafeTransforms[0].transformFn(dummyTypeSafeGuard)(
         {
           id: '123',
           type: 'known-type-1',
@@ -485,8 +485,8 @@ describe('create ESO model version', () => {
         changes: [
           {
             type: 'unsafe_transform',
-            transformFn: (sanitize) =>
-              sanitize((document) => {
+            transformFn: (typeSafeGuard) =>
+              typeSafeGuard((document) => {
                 throw new Error('transform failed!');
               }),
           },
@@ -508,7 +508,7 @@ describe('create ESO model version', () => {
     ) as SavedObjectsModelUnsafeTransformChange[];
     expect(unsafeTransforms.length === 1);
     expect(() => {
-      unsafeTransforms[0].transformFn(dummySanitize)(
+      unsafeTransforms[0].transformFn(dummyTypeSafeGuard)(
         {
           id: '123',
           type: 'known-type-1',
@@ -545,8 +545,8 @@ describe('create ESO model version', () => {
         changes: [
           {
             type: 'unsafe_transform',
-            transformFn: (sanitize) =>
-              sanitize((document) => {
+            transformFn: (typeSafeGuard) =>
+              typeSafeGuard((document) => {
                 return { document };
               }),
           },
@@ -570,7 +570,7 @@ describe('create ESO model version', () => {
     ) as SavedObjectsModelUnsafeTransformChange[];
     expect(unsafeTransforms.length === 1);
     expect(() => {
-      unsafeTransforms[0].transformFn(dummySanitize)(
+      unsafeTransforms[0].transformFn(dummyTypeSafeGuard)(
         {
           id: '123',
           type: 'known-type-1',
@@ -614,8 +614,8 @@ describe('create ESO model version', () => {
         changes: [
           {
             type: 'unsafe_transform',
-            transformFn: (sanitize) =>
-              sanitize((document) => {
+            transformFn: (typeSafeGuard) =>
+              typeSafeGuard((document) => {
                 return { document };
               }),
           },
@@ -640,7 +640,7 @@ describe('create ESO model version', () => {
     ) as SavedObjectsModelUnsafeTransformChange[];
     expect(unsafeTransforms.length === 1);
     expect(() => {
-      unsafeTransforms[0].transformFn(dummySanitize)(
+      unsafeTransforms[0].transformFn(dummyTypeSafeGuard)(
         {
           id: '123',
           type: 'known-type-1',
@@ -691,8 +691,8 @@ describe('create ESO model version', () => {
           changes: [
             {
               type: 'unsafe_transform',
-              transformFn: (sanitize) =>
-                sanitize(
+              transformFn: (typeSafeGuard) =>
+                typeSafeGuard(
                   (
                     document: SavedObjectModelTransformationDoc<{
                       firstAttr: string;
@@ -736,7 +736,7 @@ describe('create ESO model version', () => {
       (change) => change.type === 'unsafe_transform'
     ) as SavedObjectsModelUnsafeTransformChange[];
     expect(unsafeTransforms.length === 1);
-    const result = unsafeTransforms[0].transformFn(dummySanitize)(
+    const result = unsafeTransforms[0].transformFn(dummyTypeSafeGuard)(
       {
         id: '123',
         type: 'known-type-1',

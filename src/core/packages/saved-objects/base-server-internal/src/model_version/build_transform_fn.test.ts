@@ -185,7 +185,7 @@ describe('buildModelVersionTransformFn', () => {
       const changes: SavedObjectsModelChange[] = [
         {
           type: 'unsafe_transform',
-          transformFn: (sanitize) => sanitize(transformFn),
+          transformFn: (typeSafeGuard) => typeSafeGuard(transformFn),
         },
       ];
 
@@ -203,8 +203,8 @@ describe('buildModelVersionTransformFn', () => {
       const changes: SavedObjectsModelChange[] = [
         {
           type: 'unsafe_transform',
-          transformFn: (sanitize) =>
-            sanitize(
+          transformFn: (typeSafeGuard) =>
+            typeSafeGuard(
               (
                 document: SavedObjectModelTransformationDoc<{
                   oldProp?: string;
@@ -314,8 +314,8 @@ describe('buildModelVersionTransformFn', () => {
         },
         {
           type: 'unsafe_transform',
-          transformFn: (sanitize) =>
-            sanitize(
+          transformFn: (typeSafeGuard) =>
+            typeSafeGuard(
               (
                 document: SavedObjectModelTransformationDoc<{
                   unsafeNewProp: string;

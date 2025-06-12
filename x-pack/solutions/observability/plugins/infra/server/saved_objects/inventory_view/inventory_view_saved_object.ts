@@ -94,7 +94,7 @@ export const inventoryViewSavedObjectType: SavedObjectsType = {
       changes: [
         {
           type: 'unsafe_transform',
-          transformFn: (sanitize) => sanitize(inventoryV2Transform),
+          transformFn: (typeSafeGuard) => typeSafeGuard(inventoryV2Transform),
         },
       ],
       schemas: {

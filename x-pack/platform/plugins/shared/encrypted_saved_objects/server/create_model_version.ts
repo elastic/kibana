@@ -75,7 +75,9 @@ export const getCreateEsoModelVersion =
 
     return {
       ...modelVersion,
-      changes: [{ type: 'unsafe_transform', transformFn: (sanitize) => sanitize(transformFn) }],
+      changes: [
+        { type: 'unsafe_transform', transformFn: (typeSafeGuard) => typeSafeGuard(transformFn) },
+      ],
     };
   };
 

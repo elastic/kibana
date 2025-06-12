@@ -107,8 +107,8 @@ describe('ZDT upgrades - encountering conversion failures', () => {
         changes: [
           {
             type: 'unsafe_transform',
-            transformFn: (sanitize) =>
-              sanitize((doc) => {
+            transformFn: (typeSafeGuard) =>
+              typeSafeGuard((doc) => {
                 throw new Error(`error from ${doc.id}`);
               }),
           },
@@ -123,8 +123,8 @@ describe('ZDT upgrades - encountering conversion failures', () => {
         changes: [
           {
             type: 'unsafe_transform',
-            transformFn: (sanitize) =>
-              sanitize((doc) => {
+            transformFn: (typeSafeGuard) =>
+              typeSafeGuard((doc) => {
                 if (doc.id === 'b-0') {
                   throw new Error(`error from ${doc.id}`);
                 }

@@ -163,7 +163,7 @@ export interface SavedObjectsModelDataRemovalChange {
  * // this is how you would specify a change in the changes: []
  * const change: SavedObjectsModelUnsafeTransformChange = {
  *   type: 'unsafe_transform',
- *   transformFn: (sanitize) => sanitize(transformFn),
+ *   transformFn: (typeSafeGuard) => typeSafeGuard(transformFn),
  * };
  * ```
  *
@@ -178,7 +178,7 @@ export interface SavedObjectsModelUnsafeTransformChange {
    * The transform function to execute.
    */
   transformFn: (
-    sanitize: <PreviousAttributes, NewAttributes>(
+    typeSafeGuard: <PreviousAttributes, NewAttributes>(
       fn: SavedObjectModelUnsafeTransformFn<PreviousAttributes, NewAttributes>
     ) => SavedObjectModelTransformationFn
   ) => SavedObjectModelTransformationFn;

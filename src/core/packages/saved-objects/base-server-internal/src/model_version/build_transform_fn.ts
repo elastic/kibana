@@ -65,12 +65,12 @@ export const dataBackfillChangeToTransformFn = (
 
 // we must force 'any' type on the generic arguments of the received function
 // otherwise they are 'unknown' and they cannot be cast to the PreviousAttributes and NewAttributes
-// generic arguments needed by the sanitize functions
-type SanitizeUnsafeTransformFn = (
+// generic arguments needed by the typeSafeGuard functions
+type TypeSafeGuardUnsafeTransformFn = (
   fn: SavedObjectModelUnsafeTransformFn<any, any>
 ) => SavedObjectModelUnsafeTransformFn;
 
-const sanitize: SanitizeUnsafeTransformFn = (
+const typeSafeGuard: TypeSafeGuardUnsafeTransformFn = (
   fn: SavedObjectModelUnsafeTransformFn
 ): SavedObjectModelTransformationFn => {
   return (
@@ -81,7 +81,7 @@ const sanitize: SanitizeUnsafeTransformFn = (
 
 export const unsafeTransformChangeToTransformFn = (
   change: SavedObjectsModelUnsafeTransformChange
-): SavedObjectModelTransformationFn => change.transformFn(sanitize);
+): SavedObjectModelTransformationFn => change.transformFn(typeSafeGuard);
 
 const mergeTransformFunctions = (
   transformFns: SavedObjectModelTransformationFn[]

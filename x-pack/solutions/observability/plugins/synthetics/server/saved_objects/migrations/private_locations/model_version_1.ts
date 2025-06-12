@@ -58,7 +58,7 @@ export const modelVersion1: SavedObjectsModelVersion = {
   changes: [
     {
       type: 'unsafe_transform',
-      transformFn: (sanitize) => sanitize(transformGeoProperty),
+      transformFn: (typeSafeGuard) => typeSafeGuard(transformGeoProperty),
     },
   ],
 };

@@ -367,7 +367,7 @@ const transformFn: SavedObjectModelUnsafeTransformFn<BeforeType, AfterType> = (
 // this is how you would specify a change in the changes: []
 const change: SavedObjectsModelUnsafeTransformChange = {
   type: 'unsafe_transform',
-  transformFn: (sanitize) => sanitize(transformFn),
+  transformFn: (typeSafeGuard) => typeSafeGuard(transformFn),
 };
 ```
 
@@ -1123,7 +1123,3 @@ Which is why, when using this option, the API consumer needs to make sure that *
 #### Using `bulkUpdate` for fields with large `json` blobs [_using_bulkupdate_for_fields_with_large_json_blobs]
 
 The savedObjects `bulkUpdate` API will update documents client-side and then reindex the updated documents. These update operations are done in-memory, and cause memory constraint issues when updating many objects with large `json` blobs stored in some fields. As such, we recommend against using `bulkUpdate` for savedObjects that: - use arrays (as these tend to be large objects) - store large `json` blobs in some fields
-
-
-
-

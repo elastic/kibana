@@ -83,7 +83,7 @@ describe('test', () => {
     // this is how you would specify a change in the changes: []
     const change: SavedObjectsModelUnsafeTransformChange = {
       type: 'unsafe_transform',
-      transformFn: (sanitize) => sanitize(transformFn),
+      transformFn: (typeSafeGuard) => typeSafeGuard(transformFn),
     };
 
     expect(change).toMatchInlineSnapshot(`
