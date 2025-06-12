@@ -11,6 +11,7 @@ import { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
+import { ALERT_URL } from '@kbn/rule-data-utils';
 import {
   reportAttackDiscoveryGenerationFailure,
   reportAttackDiscoveryGenerationSuccess,
@@ -28,12 +29,14 @@ import { transformToBaseAlertDocument } from '../../persistence/transforms/trans
 export interface AttackDiscoveryScheduleExecutorParams {
   options: AttackDiscoveryExecutorOptions;
   logger: Logger;
+  publicBaseUrl: string | undefined;
   telemetry: AnalyticsServiceSetup;
 }
 
 export const attackDiscoveryScheduleExecutor = async ({
   options,
   logger,
+  publicBaseUrl,
   telemetry,
 }: AttackDiscoveryScheduleExecutorParams) => {
   const { params, rule, services, spaceId } = options;
@@ -112,17 +115,25 @@ export const attackDiscoveryScheduleExecutor = async ({
     };
 
     attackDiscoveries?.forEach((attack) => {
-      const payload = transformToBaseAlertDocument({
-        attackDiscovery: attack,
-        alertsParams,
+      const { id, ...restAttack } = attack;
+      const alertId = uuidv4();
+      const { uuid } = alertsClient.report({
+        id: alertId,
+        actionGroup: 'default',
       });
 
-      const { id, ...restAttack } = attack;
-      alertsClient.report({
-        id: uuidv4(),
-        actionGroup: 'default',
+      const payload = transformToBaseAlertDocument({
+        alertId: uuid,
+        attackDiscovery: attack,
+        alertsParams,
+        publicBaseUrl,
+        spaceId,
+      });
+
+      alertsClient.setAlertData({
+        id: alertId,
         payload,
-        context: { attack: restAttack },
+        context: { attack: { ...restAttack, detailsUrl: payload[ALERT_URL] } },
       });
     });
   } catch (error) {
