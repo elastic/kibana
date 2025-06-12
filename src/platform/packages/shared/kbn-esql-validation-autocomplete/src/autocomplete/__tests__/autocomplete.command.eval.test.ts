@@ -231,6 +231,7 @@ describe('autocomplete.suggest', () => {
         'IN $0',
         'IS NOT NULL',
         'IS NULL',
+        'NOT IN $0',
       ]);
       await assertSuggestions(
         'from a | eval a=round(doubleField, /',
