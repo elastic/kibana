@@ -123,10 +123,10 @@ export class CasePlugin
 
     core.uiSettings.register({
       [CASES_UI_SETTING_ID_DISPLAY_INCREMENTAL_ID]: {
-        description: i18n.translate('cases.uiSettings.displayIncrementalId.description', {
+        description: i18n.translate('xpack.cases.uiSettings.displayIncrementalId.description', {
           defaultMessage: 'Shows the incremental id of a case in the relevant pages',
         }),
-        name: i18n.translate('cases.uiSettings.displayIncrementalId.name', {
+        name: i18n.translate('xpack.cases.uiSettings.displayIncrementalId.name', {
           defaultMessage: 'Show incremental id',
         }),
         schema: schema.boolean(),
