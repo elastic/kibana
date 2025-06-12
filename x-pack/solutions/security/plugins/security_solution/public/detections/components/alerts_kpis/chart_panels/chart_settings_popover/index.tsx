@@ -40,6 +40,7 @@ const ChartSettingsPopoverComponent: React.FC<Props> = ({
         iconType="boxesVertical"
         onClick={onButtonClick}
         size="xs"
+        data-test-subj="chart-settings-popover-button"
       />
     ),
     [onButtonClick]

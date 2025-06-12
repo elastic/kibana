@@ -82,7 +82,7 @@ describe('ConnectorCards', () => {
   });
 
   it('renders a loading spinner when connectors are not provided', () => {
-    render(
+    const { container } = render(
       <ConnectorCards
         connectors={undefined}
         onNewConnectorSaved={jest.fn()}
@@ -90,7 +90,7 @@ describe('ConnectorCards', () => {
         onConnectorSelected={jest.fn()}
       />
     );
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    expect(container.querySelector('[role="progressbar"]')).toBeInTheDocument();
   });
 
   it('calls onConnectorSelected when a connector is selected', async () => {
@@ -104,7 +104,7 @@ describe('ConnectorCards', () => {
       />
     );
 
-    await userEvent.click(screen.getByRole('button', { name: /Connector Selector/i }));
+    await userEvent.click(screen.getByTestId('connector-selector'));
     await userEvent.click(screen.getByText('Connector 1'));
     expect(onConnectorSelected).toHaveBeenCalledWith(mockConnectors[0]);
   });

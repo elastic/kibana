@@ -262,12 +262,12 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
         onChangeRowHeight: jest.fn(),
         onChangeRowHeightLines: jest.fn(),
       });
-      expect(screen.getByLabelText('Body cell lines')).toBeInTheDocument();
+      expect(screen.getByTestId('unifiedDataTableRowHeightSettings')).toBeInTheDocument();
     });
 
     it('should not render rowHeight if onChangeRowHeight and onChangeRowHeightLines are undefined', () => {
       renderDisplaySettings();
-      expect(screen.queryByLabelText('Body cell lines')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedDataTableRowHeightSettings')).not.toBeInTheDocument();
     });
 
     it('should call onChangeRowHeight and onChangeRowHeightLines when the rowHeight changes', async () => {
@@ -278,9 +278,11 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
         onChangeRowHeight,
         onChangeRowHeightLines,
       });
-      fireEvent.change(screen.getByRole('spinbutton'), { target: { value: 5 } });
+      fireEvent.change(screen.getByTestId('unifiedDataTableRowHeightSettings_lineCountNumber'), {
+        target: { value: 5 },
+      });
       expect(onChangeRowHeightLines).toHaveBeenCalledWith(5, true);
-      await userEvent.click(screen.getByRole('button', { name: 'Auto' }));
+      await userEvent.click(screen.getByTestId('unifiedDataTableRowHeightSettings_rowHeight_auto'));
       expect(onChangeRowHeight).toHaveBeenCalledWith('auto');
     });
   });
@@ -291,12 +293,14 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
         onChangeHeaderRowHeight: jest.fn(),
         onChangeHeaderRowHeightLines: jest.fn(),
       });
-      expect(screen.getByLabelText('Max header cell lines')).toBeInTheDocument();
+      expect(screen.getByTestId('unifiedDataTableHeaderRowHeightSettings')).toBeInTheDocument();
     });
 
     it('should not render headerRowHeight if onChangeHeaderRowHeight and onChangeHeaderRowHeightLines are undefined', () => {
       renderDisplaySettings();
-      expect(screen.queryByLabelText('Max header cell lines')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('unifiedDataTableHeaderRowHeightSettings')
+      ).not.toBeInTheDocument();
     });
 
     it('should call onChangeHeaderRowHeight and onChangeHeaderRowHeightLines when the headerRowHeight changes', async () => {
@@ -307,9 +311,14 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
         onChangeHeaderRowHeight,
         onChangeHeaderRowHeightLines,
       });
-      fireEvent.change(screen.getByRole('spinbutton'), { target: { value: 3 } });
+      fireEvent.change(
+        screen.getByTestId('unifiedDataTableHeaderRowHeightSettings_lineCountNumber'),
+        { target: { value: 3 } }
+      );
       expect(onChangeHeaderRowHeightLines).toHaveBeenCalledWith(3, true);
-      await userEvent.click(screen.getByRole('button', { name: 'Auto' }));
+      await userEvent.click(
+        screen.getByTestId('unifiedDataTableHeaderRowHeightSettings_rowHeight_auto')
+      );
       expect(onChangeHeaderRowHeight).toHaveBeenCalledWith('auto');
     });
   });

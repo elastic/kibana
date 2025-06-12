@@ -69,7 +69,7 @@ describe('ConnectorSelectorPanel', () => {
         onConnectorSelected={onConnectorSelected}
       />
     );
-    await userEvent.click(screen.getByRole('button', { name: /Connector Selector/i }));
+    await userEvent.click(screen.getByTestId('connector-selector'));
     await userEvent.click(screen.getByText('Connector 2'));
     expect(onConnectorSelected).toHaveBeenCalledWith(mockConnectors[1]);
   });

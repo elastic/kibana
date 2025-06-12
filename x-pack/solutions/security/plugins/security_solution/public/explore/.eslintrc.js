@@ -79,6 +79,25 @@ const RESTRICTED_IMPORTS_PATHS = [
     name: 'enzyme',
     message: 'Please use @testing-library/react instead',
   },
+  {
+    name: '@testing-library/react',
+    importNames: [
+      'getByRole',
+      'getAllByRole',
+      'queryByRole',
+      'queryAllByRole',
+      'findByRole',
+      'findAllByRole',
+      'getByLabelText',
+      'getAllByLabelText',
+      'queryByLabelText',
+      'queryAllByLabelText',
+      'findByLabelText',
+      'findAllByLabelText',
+    ],
+    message:
+      'ByRole and ByLabelText selectors are considered slow. Use lighter alternatives like ByText, ByTestId etc. instead.',
+  },
 ];
 
 const ROOT_DIR = execSync('git rev-parse --show-toplevel', {

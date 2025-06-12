@@ -370,8 +370,8 @@ describe('getActionsColumn', () => {
       );
 
       // The rest of the items are in a menu
-      expect(screen.getByLabelText('Additional actions')).toBeVisible();
-      await user.click(screen.getByLabelText('Additional actions'));
+      expect(screen.getByTestId('unifiedDataTable_additionalRowControl_actionsMenu')).toBeVisible();
+      await user.click(screen.getByTestId('unifiedDataTable_additionalRowControl_actionsMenu'));
 
       rowAdditionalLeadingControls.slice(1).forEach((control) => {
         expect(screen.getByTestId(`unifiedDataTable_rowMenu_${control.id}`)).toBeVisible();
