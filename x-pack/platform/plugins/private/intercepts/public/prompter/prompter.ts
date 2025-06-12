@@ -24,6 +24,8 @@ export class InterceptPrompter {
   private userInterceptRunPersistenceService = new UserInterceptRunPersistenceService();
   private interceptDialogService = new InterceptDialogService();
   private queueIntercept?: ReturnType<InterceptDialogService['start']>['add'];
+  // observer for page visibility changes, shared across all intercepts
+  private pageHidden$?: Rx.Observable<boolean>;
 
   setup({ analytics, notifications }: ProductInterceptPrompterSetupDeps) {
     this.interceptDialogService.setup({ analytics, notifications });
@@ -40,6 +42,11 @@ export class InterceptPrompter {
       persistInterceptRunId: updateUserTriggerData,
       staticAssetsHelper: http.staticAssets,
     }));
+
+    this.pageHidden$ = Rx.fromEvent(document, 'visibilitychange').pipe(
+      Rx.map(() => document.hidden),
+      Rx.startWith(document.hidden)
+    );
 
     return {
       /**
@@ -87,40 +94,47 @@ export class InterceptPrompter {
 
           nextRunId = runs + 1;
 
-          // setup a timer that will recursively count down to the next run, considering safe bounds
-          return Rx.timer(
-            Math.min(nextRunId * response.triggerIntervalInMs - diff, safeTimerInterval),
-            Math.min(response.triggerIntervalInMs, safeTimerInterval)
-          ).pipe(
-            Rx.switchMap((timerIterationCount) => {
-              if (response.triggerIntervalInMs < safeTimerInterval) {
-                return getUserTriggerData$(intercept.id);
-              } else {
-                const timeElapsedSinceRegistration = diff + safeTimerInterval * timerIterationCount;
+          return this.pageHidden$!.pipe(
+            Rx.switchMap((isHidden) => {
+              if (isHidden) return Rx.EMPTY;
 
-                const timeTillTriggerEvent =
-                  nextRunId * response.triggerIntervalInMs - timeElapsedSinceRegistration;
+              // setup a timer that will recursively count down to the next run, considering safe bounds
+              return Rx.timer(
+                Math.min(nextRunId * response.triggerIntervalInMs - diff, safeTimerInterval),
+                Math.min(response.triggerIntervalInMs, safeTimerInterval)
+              ).pipe(
+                Rx.switchMap((timerIterationCount) => {
+                  if (response.triggerIntervalInMs < safeTimerInterval) {
+                    return getUserTriggerData$(intercept.id);
+                  } else {
+                    const timeElapsedSinceRegistration =
+                      diff + safeTimerInterval * timerIterationCount;
 
-                if (timeTillTriggerEvent <= safeTimerInterval) {
-                  // trigger event would happen sometime within this current slice
-                  // set up a single use timer that will emit the trigger event
-                  return Rx.timer(timeTillTriggerEvent).pipe(
-                    Rx.switchMap(() => {
-                      return getUserTriggerData$(intercept.id);
-                    })
-                  );
-                } else {
-                  // current timer slice requires no action
-                  return Rx.EMPTY;
-                }
-              }
-            }),
-            Rx.takeWhile((triggerData) => {
-              // Stop the timer if lastInteractedInterceptId is defined and matches nextRunId
-              if (!response.recurrent && triggerData.lastInteractedInterceptId) {
-                return false;
-              }
-              return true;
+                    const timeTillTriggerEvent =
+                      nextRunId * response.triggerIntervalInMs - timeElapsedSinceRegistration;
+
+                    if (timeTillTriggerEvent <= safeTimerInterval) {
+                      // trigger event would happen sometime within this current slice
+                      // set up a single use timer that will emit the trigger event
+                      return Rx.timer(timeTillTriggerEvent).pipe(
+                        Rx.switchMap(() => {
+                          return getUserTriggerData$(intercept.id);
+                        })
+                      );
+                    } else {
+                      // current timer slice requires no action
+                      return Rx.EMPTY;
+                    }
+                  }
+                }),
+                Rx.takeWhile((triggerData) => {
+                  // Stop the timer if lastInteractedInterceptId is defined and matches nextRunId
+                  if (!response.recurrent && triggerData.lastInteractedInterceptId) {
+                    return false;
+                  }
+                  return true;
+                })
+              );
             })
           );
         })

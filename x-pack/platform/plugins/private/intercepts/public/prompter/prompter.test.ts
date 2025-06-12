@@ -194,8 +194,6 @@ describe('ProductInterceptPrompter', () => {
             body: JSON.stringify({ triggerId: intercept.id }),
           });
 
-          jest.advanceTimersByTime(timeInMsTillNextRun);
-
           expect(mockQueueInterceptFn).toHaveBeenCalledWith(
             expect.objectContaining({
               id: intercept.id,
