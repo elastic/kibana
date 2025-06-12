@@ -93,7 +93,9 @@ export const registerESQLExtensionsRoute = (
           validSolutionId
         );
         return response.ok({
-          body: recommendedQueries,
+          body: {
+            recommendedQueries,
+          },
         });
       } catch (error) {
         logger.get().debug(error);
