@@ -86,14 +86,15 @@ export const registerESQLExtensionsRoute = (
 
         // Validate solutionId
         const validSolutionId = isSolutionId(solutionId) ? solutionId : 'oblt'; // No solutionId provided, or invalid
-        // return the recommended queries for now, we will add more extensions later
         const recommendedQueries = extensionsRegistry.getRecommendedQueries(
           query,
           sources,
           validSolutionId
         );
         return response.ok({
-          body: recommendedQueries,
+          body: {
+            recommendedQueries,
+          },
         });
       } catch (error) {
         logger.get().debug(error);
