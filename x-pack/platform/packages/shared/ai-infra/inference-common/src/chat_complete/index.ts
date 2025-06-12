@@ -8,17 +8,14 @@
 export type {
   ChatCompleteCompositeResponse,
   ChatCompleteAPI,
+  ChatCompleteAPIResponse,
   ChatCompleteOptions,
   FunctionCallingMode,
   ChatCompleteStreamResponse,
   ChatCompleteResponse,
   ChatCompleteRetryConfiguration,
 } from './api';
-export type {
-  BoundChatCompleteAPI,
-  BoundChatCompleteOptions,
-  UnboundChatCompleteOptions,
-} from './bound_api';
+export type { BoundChatCompleteAPI, UnboundChatCompleteOptions } from './bound_api';
 export {
   ChatCompletionEventType,
   type ChatCompletionMessageEvent,
