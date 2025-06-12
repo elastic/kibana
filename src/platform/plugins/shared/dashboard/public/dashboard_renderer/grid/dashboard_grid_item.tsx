@@ -8,18 +8,19 @@
  */
 
 import { EuiLoadingChart, UseEuiTheme } from '@elastic/eui';
-import { css, keyframes } from '@emotion/react';
+import { css, Global } from '@emotion/react';
+import { useMemoizedStyles } from '@kbn/core/public';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { useMemoizedStyles } from '@kbn/core/public';
 import { DashboardPanelState } from '../../../common';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import { presentationUtilService } from '../../services/kibana_services';
-import { DASHBOARD_MARGIN_SIZE } from './constants';
 import { printViewportVisStyles } from '../print_styles';
+import { DASHBOARD_MARGIN_SIZE } from './constants';
+import { getHighlightStyles, highlightGlobalStyles } from './highlight_styles';
 
 type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style' | 'children'>;
 
@@ -140,25 +141,28 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
         });
 
     return (
-      <div
-        css={[focusStyles, styles.item]}
-        className={[classes, className].join(' ')}
-        data-test-subj="dashboardPanel"
-        id={`panel-${id}`}
-        ref={ref}
-        {...rest}
-      >
-        {isRenderable ? (
-          <>
-            {renderedEmbeddable}
-            {children}
-          </>
-        ) : (
-          <div>
-            <EuiLoadingChart size="l" />
-          </div>
-        )}
-      </div>
+      <>
+        <Global styles={highlightGlobalStyles} />
+        <div
+          css={[focusStyles, styles.item]}
+          className={[classes, className].join(' ')}
+          data-test-subj="dashboardPanel"
+          id={`panel-${id}`}
+          ref={ref}
+          {...rest}
+        >
+          {isRenderable ? (
+            <>
+              {renderedEmbeddable}
+              {children}
+            </>
+          ) : (
+            <div>
+              <EuiLoadingChart size="l" />
+            </div>
+          )}
+        </div>
+      </>
     );
   }
 );
@@ -219,12 +223,6 @@ const dashboardGridItemStyles = {
     css([
       {
         height: '100%',
-        '&.dshDashboardGrid__item--highlighted .embPanel': {
-          borderRadius: context.euiTheme.border.radius.small,
-          animationName: highlightOutline(context.euiTheme),
-          animationDuration: '4s',
-          animationTimingFunction: 'ease-out',
-        },
         // Remove padding in fullscreen mode
         '.kbnAppWrapper--hiddenChrome &.dshDashboardGrid__item--expanded': {
           padding: 0,
@@ -233,6 +231,7 @@ const dashboardGridItemStyles = {
           padding: 0,
         },
       },
+      getHighlightStyles(context),
       printViewportVisStyles(context),
     ]),
   focusPanelBlur: css({
@@ -240,16 +239,3 @@ const dashboardGridItemStyles = {
     opacity: '0.25',
   }),
 };
-
-const highlightOutline = (euiTheme: UseEuiTheme['euiTheme']) =>
-  keyframes({
-    '0%': {
-      outline: `solid ${euiTheme.size.xs} transparent`,
-    },
-    '25%': {
-      outline: `solid ${euiTheme.size.xs} ${euiTheme.colors.backgroundLightSuccess}`,
-    },
-    '100%': {
-      outline: `solid ${euiTheme.size.xs} transparent`,
-    },
-  });

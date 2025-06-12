@@ -51,7 +51,7 @@ export function initializeTrackPanel(untilLoaded: (id: string) => Promise<undefi
           // Removes the class after the highlight animation finishes
           setTimeout(() => {
             panelRef.classList.remove('dshDashboardGrid__item--highlighted');
-          }, 5000);
+          }, 3000);
         });
       }
       highlightPanelId$.next(undefined);
