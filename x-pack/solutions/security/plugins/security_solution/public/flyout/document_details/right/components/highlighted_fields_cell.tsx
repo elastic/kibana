@@ -7,7 +7,8 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { getAgentTypeForAgentIdField } from '../../../../common/lib/endpoint/utils/get_agent_type_for_agent_id_field';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { AgentStatus } from '../../../../common/components/endpoint/agents/agent_status';
@@ -58,11 +59,15 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
   const agentType: ResponseActionAgentType = useMemo(() => {
     return getAgentTypeForAgentIdField(originalField);
   }, [originalField]);
+  const { euiTheme } = useEuiTheme();
 
   return (
     <>
       {values != null &&
         values.map((value, i) => {
+          const isLastValue = i === values.length - 1;
+          const shouldAddMargin = values.length > 1 && !isLastValue;
+
           return (
             <EuiFlexItem
               grow={false}
@@ -83,7 +88,18 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
                   data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
                 />
               ) : (
-                <span data-test-subj={HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID}>{value}</span>
+                <span
+                  css={
+                    shouldAddMargin
+                      ? css`
+                          margin-bottom: ${euiTheme.size.s};
+                        `
+                      : undefined
+                  }
+                  data-test-subj={HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID}
+                >
+                  {value}
+                </span>
               )}
             </EuiFlexItem>
           );
