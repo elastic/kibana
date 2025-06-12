@@ -150,8 +150,6 @@
     "@kbn/actions-simulators-plugin",
     "@kbn/cases-api-integration-test-plugin",
     "@kbn/security-solution-plugin/public/management/cypress",
-    "@kbn/mock-idp-utils",
-    "@kbn/saved-objects-management-plugin",
     "@kbn/alerting-types",
     "@kbn/ai-assistant-common",
     "@kbn/core-deprecations-common",
