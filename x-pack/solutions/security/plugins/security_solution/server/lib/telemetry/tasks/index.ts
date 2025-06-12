@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ExperimentalFeatures } from '../../../../common';
 import type { SecurityTelemetryTaskConfig } from '../task';
 import { createTelemetryDiagnosticsTaskConfig } from './diagnostic';
 import { createTelemetryEndpointTaskConfig } from './endpoint';
@@ -20,15 +21,14 @@ import { createTelemetryIndicesMetadataTaskConfig } from './indices.metadata';
 import { createIngestStatsTaskConfig } from './ingest_pipelines_stats';
 import { createTelemetryCustomResponseActionRulesTaskConfig } from './custom_response_actions_rule';
 
-export function createTelemetryTaskConfigs(): SecurityTelemetryTaskConfig[] {
-  return [
+export function createTelemetryTaskConfigs(
+  experimentalFeatures: ExperimentalFeatures
+): SecurityTelemetryTaskConfig[] {
+  const tasks = [
     createTelemetryDiagnosticsTaskConfig(),
     createTelemetryEndpointTaskConfig(telemetryConfiguration.max_security_list_telemetry_batch),
     createTelemetrySecurityListTaskConfig(telemetryConfiguration.max_endpoint_telemetry_batch),
     createTelemetryDetectionRuleListsTaskConfig(
-      telemetryConfiguration.max_detection_rule_telemetry_batch
-    ),
-    createTelemetryCustomResponseActionRulesTaskConfig(
       telemetryConfiguration.max_detection_rule_telemetry_batch
     ),
     createTelemetryPrebuiltRuleAlertsTaskConfig(telemetryConfiguration.max_detection_alerts_batch),
@@ -39,4 +39,14 @@ export function createTelemetryTaskConfigs(): SecurityTelemetryTaskConfig[] {
     createTelemetryIndicesMetadataTaskConfig(),
     createIngestStatsTaskConfig(),
   ];
+
+  if (experimentalFeatures.responseActionsTelemetryEnabled) {
+    tasks.push(
+      createTelemetryCustomResponseActionRulesTaskConfig(
+        telemetryConfiguration.max_detection_rule_telemetry_batch
+      )
+    );
+  }
+
+  return tasks;
 }
