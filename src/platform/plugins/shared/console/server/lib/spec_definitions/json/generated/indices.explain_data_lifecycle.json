@@ -17,7 +17,7 @@
     "patterns": [
       "{index}/_lifecycle/explain"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/data-streams-explain-lifecycle.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-explain-data-lifecycle",
     "availability": {
       "stack": true,
       "serverless": true

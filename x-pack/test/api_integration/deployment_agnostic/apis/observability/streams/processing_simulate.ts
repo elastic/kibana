@@ -49,16 +49,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     const testDoc = {
       '@timestamp': TEST_TIMESTAMP,
-      message: TEST_MESSAGE,
-      'host.name': TEST_HOST,
-      'log.level': 'error',
+      'body.text': TEST_MESSAGE,
+      'resource.attributes.host.name': TEST_HOST,
+      severity_text: 'error',
     };
 
     const basicDissectProcessor = {
       id: 'dissect-uuid',
       dissect: {
-        field: 'message',
-        pattern: '%{parsed_timestamp} %{parsed_level} %{parsed_message}',
+        field: 'body.text',
+        pattern:
+          '%{attributes.parsed_timestamp} %{attributes.parsed_level} %{attributes.parsed_message}',
         if: { always: {} },
       },
     };
@@ -66,9 +67,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const basicGrokProcessor = {
       id: 'draft',
       grok: {
-        field: 'message',
+        field: 'body.text',
         patterns: [
-          '%{TIMESTAMP_ISO8601:parsed_timestamp} %{LOGLEVEL:parsed_level} %{GREEDYDATA:parsed_message}',
+          '%{TIMESTAMP_ISO8601:attributes.parsed_timestamp} %{LOGLEVEL:attributes.parsed_level} %{GREEDYDATA:attributes.parsed_message}',
         ],
         if: { always: {} },
       },
@@ -76,7 +77,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     const createTestDocument = (message = TEST_MESSAGE) => ({
       '@timestamp': TEST_TIMESTAMP,
-      message,
+      'body.text': message,
     });
 
     before(async () => {
@@ -93,7 +94,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           name: 'logs.test',
         },
         if: {
-          field: 'host.name',
+          field: 'resource.attributes.host.name',
           operator: 'eq' as const,
           value: TEST_HOST,
         },
@@ -118,13 +119,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(status).to.be('parsed');
         expect(errors).to.eql([]);
         expect(detected_fields).to.eql([
-          { processor_id: 'draft', name: 'parsed_level' },
-          { processor_id: 'draft', name: 'parsed_message' },
-          { processor_id: 'draft', name: 'parsed_timestamp' },
+          { processor_id: 'draft', name: 'attributes.parsed_level' },
+          { processor_id: 'draft', name: 'attributes.parsed_message' },
+          { processor_id: 'draft', name: 'attributes.parsed_timestamp' },
         ]);
-        expect(value).to.have.property('parsed_level', 'error');
-        expect(value).to.have.property('parsed_message', 'test');
-        expect(value).to.have.property('parsed_timestamp', TEST_TIMESTAMP);
+        expect(value).to.have.property('attributes.parsed_level', 'error');
+        expect(value).to.have.property('attributes.parsed_message', 'test');
+        expect(value).to.have.property('attributes.parsed_timestamp', TEST_TIMESTAMP);
       });
 
       it('should simulate with detected fields', async () => {
@@ -132,8 +133,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           processing: [basicGrokProcessor],
           documents: [createTestDocument()],
           detected_fields: [
-            { name: 'parsed_timestamp', type: 'date' },
-            { name: 'parsed_level', type: 'keyword' },
+            { name: 'attributes.parsed_timestamp', type: 'date' },
+            { name: 'attributes.parsed_level', type: 'keyword' },
           ],
         });
 
@@ -141,8 +142,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           response.body.detected_fields.find((f: { name: string }) => f.name === name);
 
         expect(response.body.detected_fields).to.have.length(3); // Including parsed_message
-        expect(findField('parsed_timestamp')).to.have.property('type', 'date');
-        expect(findField('parsed_level')).to.have.property('type', 'keyword');
+        expect(findField('attributes.parsed_timestamp')).to.have.property('type', 'date');
+        expect(findField('attributes.parsed_level')).to.have.property('type', 'keyword');
       });
 
       it('should simulate multiple sequential processors', async () => {
@@ -152,8 +153,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               id: 'draft',
               grok: {
-                field: 'parsed_message',
-                patterns: ['%{IP:parsed_ip}'],
+                field: 'attributes.parsed_message',
+                patterns: ['%{IP:attributes.parsed_ip}'],
                 if: { always: {} },
               },
             },
@@ -167,15 +168,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const { detected_fields, status, value } = response.body.documents[0];
         expect(status).to.be('parsed');
         expect(detected_fields).to.eql([
-          { processor_id: 'dissect-uuid', name: 'parsed_level' },
-          { processor_id: 'dissect-uuid', name: 'parsed_message' },
-          { processor_id: 'dissect-uuid', name: 'parsed_timestamp' },
-          { processor_id: 'draft', name: 'parsed_ip' },
+          { processor_id: 'dissect-uuid', name: 'attributes.parsed_level' },
+          { processor_id: 'dissect-uuid', name: 'attributes.parsed_message' },
+          { processor_id: 'dissect-uuid', name: 'attributes.parsed_timestamp' },
+          { processor_id: 'draft', name: 'attributes.parsed_ip' },
         ]);
-        expect(value).to.have.property('parsed_level', 'error');
-        expect(value).to.have.property('parsed_message', 'test 127.0.0.1');
-        expect(value).to.have.property('parsed_timestamp', TEST_TIMESTAMP);
-        expect(value).to.have.property('parsed_ip', '127.0.0.1');
+        expect(value).to.have.property('attributes.parsed_level', 'error');
+        expect(value).to.have.property('attributes.parsed_message', 'test 127.0.0.1');
+        expect(value).to.have.property('attributes.parsed_timestamp', TEST_TIMESTAMP);
+        expect(value).to.have.property('attributes.parsed_ip', '127.0.0.1');
       });
 
       it('should simulate partially parsed documents', async () => {
@@ -185,8 +186,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               id: 'draft',
               grok: {
-                field: 'parsed_message',
-                patterns: ['%{TIMESTAMP_ISO8601:other_date}'], // This processor will fail, as won't match another date from the remaining message
+                field: 'attributes.parsed_message',
+                patterns: ['%{TIMESTAMP_ISO8601:attributes.other_date}'], // This processor will fail, as won't match another date from the remaining message
                 if: { always: {} },
               },
             },
@@ -201,13 +202,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const { detected_fields, status, value } = response.body.documents[0];
         expect(status).to.be('partially_parsed');
         expect(detected_fields).to.eql([
-          { processor_id: 'dissect-uuid', name: 'parsed_level' },
-          { processor_id: 'dissect-uuid', name: 'parsed_message' },
-          { processor_id: 'dissect-uuid', name: 'parsed_timestamp' },
+          { processor_id: 'dissect-uuid', name: 'attributes.parsed_level' },
+          { processor_id: 'dissect-uuid', name: 'attributes.parsed_message' },
+          { processor_id: 'dissect-uuid', name: 'attributes.parsed_timestamp' },
         ]);
-        expect(value).to.have.property('parsed_level', 'error');
-        expect(value).to.have.property('parsed_message', 'test 127.0.0.1');
-        expect(value).to.have.property('parsed_timestamp', TEST_TIMESTAMP);
+        expect(value).to.have.property('attributes.parsed_level', 'error');
+        expect(value).to.have.property('attributes.parsed_message', 'test 127.0.0.1');
+        expect(value).to.have.property('attributes.parsed_timestamp', TEST_TIMESTAMP);
       });
 
       it('should return processor metrics', async () => {
@@ -217,8 +218,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               id: 'draft',
               grok: {
-                field: 'parsed_message',
-                patterns: ['%{TIMESTAMP_ISO8601:other_date}'], // This processor will fail, as won't match another date from the remaining message
+                field: 'attributes.parsed_message',
+                patterns: ['%{TIMESTAMP_ISO8601:attributes.other_date}'], // This processor will fail, as won't match another date from the remaining message
                 if: { always: {} },
               },
             },
@@ -231,9 +232,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const grokMetrics = processorsMetrics.draft;
 
         expect(dissectMetrics.detected_fields).to.eql([
-          'parsed_level',
-          'parsed_message',
-          'parsed_timestamp',
+          'attributes.parsed_level',
+          'attributes.parsed_message',
+          'attributes.parsed_timestamp',
         ]);
         expect(dissectMetrics.errors).to.eql([]);
         expect(dissectMetrics.failed_rate).to.be(0);
@@ -259,8 +260,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               id: 'draft',
               grok: {
-                field: 'parsed_message',
-                patterns: ['%{IP:parsed_ip}'],
+                field: 'attributes.parsed_message',
+                patterns: ['%{IP:attributes.parsed_ip}'],
                 if: { always: {} },
               },
             },
@@ -299,7 +300,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...basicDissectProcessor,
               dissect: {
                 ...basicDissectProcessor.dissect,
-                if: { field: 'message', operator: 'contains', value: 'test' },
+                if: { field: 'body.text', operator: 'contains', value: 'test' },
               },
             },
           ],
@@ -333,8 +334,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               id: 'draft',
               grok: {
-                field: 'parsed_message',
-                patterns: ['%{WORD:ignored_field} %{IP:parsed_ip} %{GREEDYDATA:parsed_message}'], // Try overriding parsed_message previously computed by dissect
+                field: 'attributes.parsed_message',
+                patterns: [
+                  '%{WORD:attributes.ignored_field} %{IP:attributes.parsed_ip} %{GREEDYDATA:attributes.parsed_message}',
+                ], // Try overriding parsed_message previously computed by dissect
                 if: { always: {} },
               },
             },
@@ -348,14 +351,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const { detected_fields, status, value } = response.body.documents[0];
         expect(status).to.be('parsed');
         expect(detected_fields).to.eql([
-          { processor_id: 'dissect-uuid', name: 'parsed_level' },
-          { processor_id: 'dissect-uuid', name: 'parsed_message' },
-          { processor_id: 'dissect-uuid', name: 'parsed_timestamp' },
-          { processor_id: 'draft', name: 'ignored_field' },
-          { processor_id: 'draft', name: 'parsed_ip' },
-          { processor_id: 'draft', name: 'parsed_message' },
+          { processor_id: 'dissect-uuid', name: 'attributes.parsed_level' },
+          { processor_id: 'dissect-uuid', name: 'attributes.parsed_message' },
+          { processor_id: 'dissect-uuid', name: 'attributes.parsed_timestamp' },
+          { processor_id: 'draft', name: 'attributes.ignored_field' },
+          { processor_id: 'draft', name: 'attributes.parsed_ip' },
+          { processor_id: 'draft', name: 'attributes.parsed_message' },
         ]);
-        expect(value).to.have.property('parsed_message', 'greedy data message');
+        expect(value).to.have.property('attributes.parsed_message', 'greedy data message');
       });
 
       it('should gracefully return the errors for each partially parsed or failed document', async () => {
@@ -365,8 +368,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               id: 'draft',
               grok: {
-                field: 'parsed_message',
-                patterns: ['%{TIMESTAMP_ISO8601:other_date}'], // This processor will fail, as won't match another date from the remaining message
+                field: 'attributes.parsed_message',
+                patterns: ['%{TIMESTAMP_ISO8601:attributes.other_date}'], // This processor will fail, as won't match another date from the remaining message
                 if: { always: {} },
               },
             },
@@ -391,7 +394,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               id: 'draft',
               grok: {
-                field: 'message',
+                field: 'body.text',
                 patterns: ['%{INVALID_PATTERN:field}'],
                 if: { always: {} },
               },
@@ -413,22 +416,87 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ]);
       });
 
+      it('should gracefully return errors related to non-namespaced fields', async () => {
+        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+          processing: [
+            {
+              id: 'draft',
+              grok: {
+                field: 'body.text',
+                patterns: ['%{WORD:abc}'],
+                if: { always: {} },
+              },
+            },
+          ],
+          documents: [createTestDocument('test message')],
+        });
+
+        const processorsMetrics = response.body.processors_metrics;
+        const grokMetrics = processorsMetrics.draft;
+
+        expect(grokMetrics.errors).to.eql([
+          {
+            processor_id: 'draft',
+            type: 'non_namespaced_fields_failure',
+            message: 'The fields generated by the processor are not namespaced ECS fields: [abc]',
+          },
+        ]);
+      });
+
+      it('should correctly associate nested processors within Elasticsearch ingest pipeline', async () => {
+        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+          processing: [
+            {
+              id: 'draft',
+              manual_ingest_pipeline: {
+                processors: [
+                  {
+                    set: {
+                      field: 'attributes.test',
+                      value: 'test',
+                    },
+                  },
+                  {
+                    fail: {
+                      message: 'Failing',
+                    },
+                  },
+                ],
+                if: { always: {} },
+              },
+            },
+          ],
+          documents: [createTestDocument('test message')],
+        });
+
+        const processorsMetrics = response.body.processors_metrics;
+        const processorMetrics = processorsMetrics.draft;
+
+        expect(processorMetrics.errors).to.eql([
+          {
+            processor_id: 'draft',
+            type: 'generic_processor_failure',
+            message: 'Failing',
+          },
+        ]);
+      });
+
       it('should gracefully return non-additive simulation errors', async () => {
         const response = await simulateProcessingForStream(apiClient, 'logs.test', {
           processing: [
             {
               id: 'draft',
               grok: {
-                field: 'message',
+                field: 'body.text',
                 patterns: [
                   // This overwrite the exising log.level and message values
-                  '%{TIMESTAMP_ISO8601:parsed_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message}',
+                  '%{TIMESTAMP_ISO8601:attributes.parsed_timestamp} %{LOGLEVEL:severity_text} %{GREEDYDATA:body.text}',
                 ],
                 if: { always: {} },
               },
             },
           ],
-          documents: [{ ...createTestDocument(), 'log.level': 'info' }],
+          documents: [{ ...createTestDocument(), severity_text: 'info' }],
         });
 
         const processorsMetrics = response.body.processors_metrics;
@@ -439,7 +507,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             processor_id: 'draft',
             type: 'non_additive_processor_failure',
             message:
-              'The processor is not additive to the documents. It might update fields [log.level,message]',
+              'The processor is not additive to the documents. It might update fields [body.text,severity_text]',
           },
         ]);
         // Non-additive changes are not counted as error
@@ -453,7 +521,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               id: 'draft',
               grok: {
-                field: 'message',
+                field: 'body.text',
                 patterns: ['%{TIMESTAMP_ISO8601:@timestamp}'],
                 if: { always: {} },
               },
@@ -485,7 +553,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             processing: [basicGrokProcessor],
             documents: [createTestDocument()],
             detected_fields: [
-              { name: 'parsed_timestamp', type: 'boolean' }, // Incompatible type
+              { name: 'attributes.parsed_timestamp', type: 'boolean' }, // Incompatible type
             ],
           }
         );
@@ -493,7 +561,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(detectedFieldsFailureResponse.body.documents[0].errors).to.eql([
           {
             type: 'field_mapping_failure',
-            message: `Some field types might not be compatible with this document: [1:44] failed to parse field [parsed_timestamp] of type [boolean] in document with id '0'. Preview of field's value: '${TEST_TIMESTAMP}'`,
+            message: `Some field types might not be compatible with this document: [1:98] failed to parse field [attributes.parsed_timestamp] of type [boolean] in document with id '0'. Preview of field's value: '${TEST_TIMESTAMP}'`,
           },
         ]);
         expect(detectedFieldsFailureResponse.body.documents[0].status).to.be('failed');
@@ -510,16 +578,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               {
                 id: 'draft',
                 grok: {
-                  field: 'message',
+                  field: 'body.text',
                   patterns: [
                     // This overwrite the exising log.level and message values
-                    '%{TIMESTAMP_ISO8601:parsed_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message}',
+                    '%{TIMESTAMP_ISO8601:attributes.parsed_timestamp} %{LOGLEVEL:severity_text} %{GREEDYDATA:attributes.message}',
                   ],
                   if: { always: {} },
                 },
               },
             ],
-            documents: [{ ...createTestDocument(), 'log.level': 'info' }],
+            documents: [{ ...createTestDocument(), severity_text: 'info' }],
           }),
         ]);
 
