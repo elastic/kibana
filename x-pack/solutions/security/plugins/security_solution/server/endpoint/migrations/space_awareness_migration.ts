@@ -268,8 +268,6 @@ const migrateArtifactsToSpaceAware = async (
 const migrateResponseActionsToSpaceAware = async (
   endpointService: EndpointAppContextService
 ): Promise<void> => {
-  // FIXME:PT how do we ensure that the new endpoint package is installed first - since we need the index mappings to be applied
-
   const logger = endpointService.createLogger(LOGGER_KEY, 'responseActions');
   const soClient = endpointService.savedObjects.createInternalScopedSoClient({ readonly: false });
   const migrationState = await getMigrationState(
@@ -301,7 +299,31 @@ const migrateResponseActionsToSpaceAware = async (
   migrationState.metadata.data = migrationStats;
   await updateMigrationState(soClient, RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID, migrationState);
 
-  // FIXME:PT need to ensure that 9.1 package is installed OR that the index has  mappings
+  const indexInfo = await ensureResponseActionsIndexHasRequiredMappings(endpointService);
+
+  if (indexInfo.error) {
+    migrationStats.errors.push(indexInfo.error);
+  }
+
+  if (!indexInfo.successful) {
+    migrationState.metadata.status = 'complete';
+    migrationState.metadata.finished = new Date().toISOString();
+    await updateMigrationState(soClient, RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID, migrationState);
+
+    return;
+  }
+
+  if (!indexInfo.indexExists) {
+    const exitMessage = `Response actions index [${ENDPOINT_ACTIONS_INDEX}] does not exist. Nothing to migrate`;
+
+    logger.debug(exitMessage);
+    migrationState.metadata.status = 'complete';
+    migrationState.metadata.finished = new Date().toISOString();
+    migrationStats.warnings.push(exitMessage);
+    await updateMigrationState(soClient, RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID, migrationState);
+
+    return;
+  }
 
   const policyInfoBuilder = new AgentPolicyInfoBuilder(endpointService, logger);
   const esClient = endpointService.getInternalEsClient();
@@ -757,3 +779,114 @@ class AgentPolicyInfoBuilder {
     return this.externalEdrAgentIdToElasticAgentIdMapCache.get(externalEdrAgentId)!;
   }
 }
+
+interface EnsureResponseActionsIndexHasRequiredMappingsResponse {
+  successful: boolean;
+  indexExists: boolean;
+  error: string | undefined;
+}
+
+const ensureResponseActionsIndexHasRequiredMappings = async (
+  endpointService: EndpointAppContextService
+): Promise<EnsureResponseActionsIndexHasRequiredMappingsResponse> => {
+  const logger = endpointService.createLogger(
+    LOGGER_KEY,
+    'ensureResponseActionsIndexHasRequiredMappings'
+  );
+
+  logger.debug(`Checking index [${ENDPOINT_ACTIONS_INDEX}] mappings`);
+
+  const response: EnsureResponseActionsIndexHasRequiredMappingsResponse = {
+    successful: true,
+    indexExists: true,
+    error: undefined,
+  };
+  const esClient = endpointService.getInternalEsClient();
+  const fleetServices = endpointService.getInternalFleetServices();
+  const [indexExists, installedEndpointPackages] = await Promise.all([
+    esClient.indices.exists({ index: ENDPOINT_ACTIONS_INDEX }).catch(catchAndWrapError),
+
+    fleetServices.packages.getInstalledPackages({
+      perPage: 100,
+      sortOrder: 'desc',
+      nameQuery: 'endpoint',
+    }),
+  ]);
+
+  response.indexExists = indexExists;
+
+  logger.debug(
+    () =>
+      `Index already exists [${indexExists}]. Currently installed endpoint package:${stringify(
+        installedEndpointPackages
+      )}`
+  );
+
+  // If current installed package is 9.1, then nothing to do. Mapping are included in that package version.
+  if (
+    installedEndpointPackages.items.some((endpointPackage) =>
+      endpointPackage.version.startsWith('9.1')
+    )
+  ) {
+    logger.debug(`Endpoint package version 9.1.* already installed. Nothing to do.`);
+    return response;
+  }
+
+  // If the index does not exist and Endpoint package is not installed, then this must be an env.
+  // where the use of security and/or Fleet is not being utilized.
+  if (!indexExists && installedEndpointPackages.total === 0) {
+    logger.debug(
+      `Index [${ENDPOINT_ACTIONS_INDEX}] does not yet exist and no endpoint package installed. Nothing to do.`
+    );
+    return response;
+  }
+
+  // if we got this far, then endpoint package is installed. Ensure index exists and add mappings
+  if (!indexExists) {
+    await esClient.indices.createDataStream({ name: ENDPOINT_ACTIONS_INDEX }).catch((error) => {
+      // Ignore error if the index already exists
+      if (error.body?.error?.type !== 'resource_already_exists_exception') {
+        response.error = `Attempt to create [${ENDPOINT_ACTIONS_INDEX}] index failed with:${stringify(
+          error
+        )}`;
+        response.successful = false;
+        return response;
+      }
+    });
+  }
+
+  logger.info(
+    `Adding required new mappings to index [${ENDPOINT_ACTIONS_INDEX}] in support of space awareness`
+  );
+
+  await esClient.indices
+    .putMapping({
+      index: ENDPOINT_ACTIONS_INDEX,
+      properties: {
+        originSpaceId: { type: 'keyword', ignore_above: 1024 },
+        agent: {
+          properties: {
+            policy: {
+              properties: {
+                agentId: { type: 'keyword', ignore_above: 1024 },
+                elasticAgentId: { type: 'keyword', ignore_above: 1024 },
+                integrationPolicyId: { type: 'keyword', ignore_above: 1024 },
+                agentPolicyId: { type: 'keyword', ignore_above: 1024 },
+              },
+            },
+          },
+        },
+      },
+    })
+    .catch((error) => {
+      response.error = `Attempt to add new mappings to [${ENDPOINT_ACTIONS_INDEX}] index failed with:${stringify(
+        error
+      )}`;
+      response.successful = false;
+      return response;
+    });
+
+  logger.debug(`New mappings to index [${ENDPOINT_ACTIONS_INDEX}] have been added successfully.`);
+
+  return response;
+};
