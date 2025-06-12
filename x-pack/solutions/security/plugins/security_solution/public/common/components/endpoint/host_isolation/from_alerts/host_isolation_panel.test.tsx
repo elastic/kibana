@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderReactTestingLibraryWithI18n as render } from '@kbn/test-jest-helpers';
+import { renderWithI18n as render } from '@kbn/test-jest-helpers';
 import { HostIsolationPanel } from '.';
 import { useKibana as mockUseKibana } from '../../../../lib/kibana/__mocks__';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';

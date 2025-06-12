@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderReactTestingLibraryWithI18n } from '@kbn/test-jest-helpers';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { TransformManagementSection } from './transform_management_section';
@@ -17,7 +17,7 @@ const queryClient = new QueryClient();
 
 describe('Transform: <TransformManagementSection />', () => {
   test('Minimal initialization', () => {
-    const { container } = renderReactTestingLibraryWithI18n(
+    const { container } = renderWithI18n(
       <QueryClientProvider client={queryClient}>
         <TransformManagementSection />
       </QueryClientProvider>
