@@ -96,6 +96,14 @@ const inferenceEndpoints = [
       model_id: 'elser-v2',
     },
   },
+  {
+    inference_id: 'custom-inference-id',
+    task_type: 'sparse_embedding',
+    service: 'elastic',
+    service_settings: {
+      model_id: 'elser-v2',
+    },
+  },
 ] as InferenceAPIConfigResponse[];
 
 jest.mock('../../hooks/use_delete_endpoint', () => ({
@@ -113,10 +121,11 @@ describe('When the tabular page is loaded', () => {
     expect(rows[2]).toHaveTextContent('.elser-v2-elastic');
     expect(rows[3]).toHaveTextContent('.multilingual-e5-small-elasticsearch');
     expect(rows[4]).toHaveTextContent('.sparkles');
-    expect(rows[5]).toHaveTextContent('elastic-rerank');
-    expect(rows[6]).toHaveTextContent('local-model');
-    expect(rows[7]).toHaveTextContent('my-elser-model-05');
-    expect(rows[8]).toHaveTextContent('third-party-model');
+    expect(rows[5]).toHaveTextContent('custom-inference-id');
+    expect(rows[6]).toHaveTextContent('elastic-rerank');
+    expect(rows[7]).toHaveTextContent('local-model');
+    expect(rows[8]).toHaveTextContent('my-elser-model-05');
+    expect(rows[9]).toHaveTextContent('third-party-model');
   });
 
   it('should display all service and model ids in the table', () => {
@@ -135,17 +144,20 @@ describe('When the tabular page is loaded', () => {
     expect(rows[4]).toHaveTextContent('Elastic');
     expect(rows[4]).toHaveTextContent('rainbow-sprinkles');
 
-    expect(rows[5]).toHaveTextContent('Elasticsearch');
-    expect(rows[5]).toHaveTextContent('.rerank-v1');
+    expect(rows[5]).toHaveTextContent('Elastic');
+    expect(rows[5]).toHaveTextContent('elser-v2');
 
     expect(rows[6]).toHaveTextContent('Elasticsearch');
-    expect(rows[6]).toHaveTextContent('.own_model');
+    expect(rows[6]).toHaveTextContent('.rerank-v1');
 
     expect(rows[7]).toHaveTextContent('Elasticsearch');
-    expect(rows[7]).toHaveTextContent('.elser_model_2');
+    expect(rows[7]).toHaveTextContent('.own_model');
 
-    expect(rows[8]).toHaveTextContent('OpenAI');
-    expect(rows[8]).toHaveTextContent('.own_model');
+    expect(rows[8]).toHaveTextContent('Elasticsearch');
+    expect(rows[8]).toHaveTextContent('.elser_model_2');
+
+    expect(rows[9]).toHaveTextContent('OpenAI');
+    expect(rows[9]).toHaveTextContent('.own_model');
   });
 
   it('should only disable delete action for preconfigured endpoints', () => {
@@ -185,9 +197,11 @@ describe('When the tabular page is loaded', () => {
     expect(rows[5]).not.toHaveTextContent(preconfigured);
     expect(rows[6]).not.toHaveTextContent(preconfigured);
     expect(rows[7]).not.toHaveTextContent(preconfigured);
+    expect(rows[8]).not.toHaveTextContent(preconfigured);
+    expect(rows[9]).not.toHaveTextContent(preconfigured);
   });
 
-  it('should show tech preview badge only for reranker-v1 model', () => {
+  it('should show tech preview badge only for reranker-v1 model, rainbow-sprinkles, and preconfigured elser-v2', () => {
     render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
 
     const techPreview = 'TECH PREVIEW';
@@ -197,9 +211,10 @@ describe('When the tabular page is loaded', () => {
     expect(rows[2]).toHaveTextContent(techPreview);
     expect(rows[3]).not.toHaveTextContent(techPreview);
     expect(rows[4]).toHaveTextContent(techPreview);
-    expect(rows[5]).toHaveTextContent(techPreview);
-    expect(rows[6]).not.toHaveTextContent(techPreview);
+    expect(rows[5]).not.toHaveTextContent(techPreview);
+    expect(rows[6]).toHaveTextContent(techPreview);
     expect(rows[7]).not.toHaveTextContent(techPreview);
     expect(rows[8]).not.toHaveTextContent(techPreview);
+    expect(rows[9]).not.toHaveTextContent(techPreview);
   });
 });
