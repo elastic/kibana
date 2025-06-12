@@ -227,16 +227,16 @@ export class ObservabilityAIAssistantClient {
               }).pipe(shareReplay());
 
         const systemMessage$ = kbUserInstructions$.pipe(
-          map((kbUserInstructions) =>
-            getSystemMessageFromInstructions({
+          map((kbUserInstructions) => {
+            return getSystemMessageFromInstructions({
               applicationInstructions: functionClient.getInstructions(),
               kbUserInstructions,
               apiUserInstructions,
               availableFunctionNames: disableFunctions
                 ? []
                 : functionClient.getFunctions().map((fn) => fn.definition.name),
-            })
-          ),
+            });
+          }),
           shareReplay()
         );
 
@@ -472,10 +472,7 @@ export class ObservabilityAIAssistantClient {
 
     this.dependencies.logger.debug(
       () =>
-        `Options for inference client for name: "${name}" before anonymization: ${JSON.stringify({
-          ...options,
-          messages,
-        })}`
+        `Calling inference client with for name: "${name}" with options: ${JSON.stringify(options)}`
     );
 
     if (stream) {
