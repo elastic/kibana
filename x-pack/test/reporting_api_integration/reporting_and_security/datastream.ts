@@ -57,7 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
         maxTimeStamp: 0,
         privileges: {
           delete_index: true,
-          manage_data_stream_lifecycle: true
+          manage_data_stream_lifecycle: true,
           read_failure_store: true,
         },
         hidden: true,
