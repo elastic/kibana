@@ -19,6 +19,7 @@ import { useKibana } from './use_kibana';
 interface MutationArgs {
   rulesetId: string;
   forceWrite?: boolean;
+  rules?: QueryRulesQueryRuleset['rules'];
 }
 
 export const usePutRuleset = (
@@ -31,11 +32,12 @@ export const usePutRuleset = (
   } = useKibana();
 
   return useMutation(
-    async ({ rulesetId, forceWrite }: MutationArgs) => {
+    async ({ rulesetId, forceWrite, rules }: MutationArgs) => {
       return await http.put<QueryRulesQueryRuleset>(
         `/internal/search_query_rules/ruleset/${rulesetId}`,
         {
           query: { forceWrite },
+          ...(rules ? { body: JSON.stringify({ rules }) } : {}),
         }
       );
     },
