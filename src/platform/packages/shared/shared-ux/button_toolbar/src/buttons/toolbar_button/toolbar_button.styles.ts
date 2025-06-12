@@ -8,19 +8,13 @@
  */
 
 import { UseEuiTheme } from '@elastic/eui';
-import type * as CSS from 'csstype';
 
-export const fontWeightDefinitions: (euiTheme: UseEuiTheme['euiTheme']) => {
-  bold?: CSS.Property.FontWeight;
-  normal?: CSS.Property.FontWeight;
-} = (euiTheme: UseEuiTheme['euiTheme']) => ({
+export const fontWeightDefinitions = (euiTheme: UseEuiTheme['euiTheme']) => ({
   bold: euiTheme.font.weight.bold,
   normal: euiTheme.font.weight.regular,
 });
 
-export const ToolbarButtonStyles: (euiTheme: UseEuiTheme) => Record<string, any> = ({
-  euiTheme,
-}: UseEuiTheme) => {
+export const ToolbarButtonStyles = ({ euiTheme }: UseEuiTheme) => {
   const isAmsterdam = euiTheme.themeName === 'EUI_THEME_AMSTERDAM';
 
   return {
@@ -29,7 +23,7 @@ export const ToolbarButtonStyles: (euiTheme: UseEuiTheme) => Record<string, any>
           // style declaration carried over from https://github.com/elastic/kibana/blob/v8.10.4/src/plugins/kibana_react/public/toolbar_button/toolbar_button.scss
           // informed by issue https://github.com/elastic/eui/issues/4730
           borderStyle: 'solid',
-          // border: euiTheme.border.thin,
+          border: euiTheme.border.thin,
           borderColor: euiTheme.border.color,
         }
       : {
@@ -38,7 +32,7 @@ export const ToolbarButtonStyles: (euiTheme: UseEuiTheme) => Record<string, any>
         },
     emptyButton: {
       backgroundColor: euiTheme.colors.backgroundBasePlain,
-      // border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
+      border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
       color: `${euiTheme.colors.textParagraph}`,
     },
     buttonPositions: {
