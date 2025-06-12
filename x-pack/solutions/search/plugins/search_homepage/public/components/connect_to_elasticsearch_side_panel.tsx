@@ -24,12 +24,9 @@ export const ConnectToElasticsearchSidePanel = () => (
       <EuiCard
         textAlign="left"
         titleSize="xs"
-        title={
-          <FormattedMessage
-            id="xpack.searchHomepage.connectToElasticsearch.uploadFileTitle"
-            defaultMessage="Upload a file"
-          />
-        }
+        title={i18n.translate('xpack.searchHomepage.connectToElasticsearch.uploadFileTitle', {
+          defaultMessage: 'Upload a file',
+        })}
         description={
           <FormattedMessage
             id="xpack.searchHomepage.connectToElasticsearch.uploadFileDescription"
@@ -37,11 +34,10 @@ export const ConnectToElasticsearchSidePanel = () => (
           />
         }
         footer={
-          <EuiButtonEmpty flush="right" iconType="importAction">
-            <FormattedMessage
-              id="xpack.searchHomepage.connectToElasticsearch.uploadFileButton"
-              defaultMessage="Upload a file"
-            />
+          <EuiButtonEmpty flush="right" iconType="importAction" data-test-subj="uploadFileButton">
+            {i18n.translate('xpack.searchHomepage.connectToElasticsearch.uploadFileButton', {
+              defaultMessage: 'Upload a file',
+            })}
           </EuiButtonEmpty>
         }
       />
@@ -63,11 +59,14 @@ export const ConnectToElasticsearchSidePanel = () => (
           />
         }
         footer={
-          <EuiButtonEmpty flush="right" iconType="importAction">
-            <FormattedMessage
-              id="xpack.searchHomepage.connectToElasticsearch.sampleDatasetButton"
-              defaultMessage="Sample dataset"
-            />
+          <EuiButtonEmpty
+            flush="right"
+            iconType="importAction"
+            data-test-subj="sampleDatasetButton"
+          >
+            {i18n.translate('xpack.searchHomepage.connectToElasticsearch.sampleDatasetButton', {
+              defaultMessage: 'Sample dataset',
+            })}
           </EuiButtonEmpty>
         }
       />
@@ -95,7 +94,11 @@ export const ConnectToElasticsearchSidePanel = () => (
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiLink href="https://www.elastic.co/contact/support" target="_blank">
+          <EuiLink
+            href="https://www.elastic.co/contact/support"
+            target="_blank"
+            data-test-subj="customerEngineerRequestFormLink"
+          >
             {i18n.translate(
               'xpack.searchHomepage.connectToElasticsearch.customerEngineerRequestForm',
               {

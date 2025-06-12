@@ -124,7 +124,10 @@ export const SemanticSearch: React.FC = () => (
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <div>
-                <EuiButton iconType="plusInCircle">
+                <EuiButton
+                  iconType="plusInCircle"
+                  data-test-subj="createSemanticOptimizedIndexButton"
+                >
                   {i18n.translate(
                     'xpack.searchHomepage.aiSearchCapabilities.semanticSearch.createSemanticOptimizedIndex',
                     {

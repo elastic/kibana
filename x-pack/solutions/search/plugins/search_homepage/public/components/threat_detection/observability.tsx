@@ -68,7 +68,7 @@ export const Observability: React.FC = () => (
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiLink target="_blank">
+                  <EuiLink target="_blank" data-test-subj="exploreLogstashAndBeatsLink">
                     {i18n.translate('xpack.searchHomepage.observability.exploreLogstashBeats', {
                       defaultMessage: 'Explore Logstash and Beats',
                     })}
@@ -91,7 +91,7 @@ export const Observability: React.FC = () => (
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiLink target="_blank">
+                  <EuiLink target="_blank" data-test-subj="createObservabilityProjectLink">
                     {i18n.translate('xpack.searchHomepage.observability.observabilityProjectLink', {
                       defaultMessage: 'Create an Observability project',
                     })}

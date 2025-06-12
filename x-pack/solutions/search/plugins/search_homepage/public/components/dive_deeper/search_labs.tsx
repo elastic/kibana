@@ -31,7 +31,7 @@ export const SearchLabs: React.FC = () => (
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <span>
-        <EuiButton>
+        <EuiButton data-test-subj="searchLabsButton">
           {i18n.translate('xpack.searchHomepage.searchLabs.buttonText', {
             defaultMessage: 'Visit Search Labs',
           })}

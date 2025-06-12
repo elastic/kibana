@@ -69,6 +69,7 @@ export const AISearchCapabilities: React.FC = () => {
                   label={capability.label}
                   onClick={() => setSelectedCapability(capability.value)}
                   isActive={selectedCapability === capability.value}
+                  data-test-subj={`aiSearchCapabilities-item-${capability.value}`}
                 />
               ))}
             </EuiListGroup>

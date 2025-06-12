@@ -118,7 +118,11 @@ export const KeywordSearch: React.FC = () => (
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <div>
-                <EuiButton iconType="plusInCircle" size="s">
+                <EuiButton
+                  iconType="plusInCircle"
+                  size="s"
+                  data-test-subj="createKeywordIndexButton"
+                >
                   {i18n.translate(
                     'xpack.searchHomepage.aiSearchCapabilities.keywordSearch.createKeywordIndex',
                     {

@@ -73,12 +73,22 @@ export const ConnectToElasticsearch = () => {
                         <EuiFlexItem grow={false}>
                           <EuiCopy textToCopy={LOCALHOST_URL}>
                             {(copy) => (
-                              <EuiButtonIcon onClick={copy} iconType="copyClipboard" size="m" />
+                              <EuiButtonIcon
+                                onClick={copy}
+                                iconType="copyClipboard"
+                                size="m"
+                                data-test-subj="copyEndpointButton"
+                              />
                             )}
                           </EuiCopy>
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
-                          <EuiFieldText value={LOCALHOST_URL} readOnly style={{ width: 400 }} />
+                          <EuiFieldText
+                            value={LOCALHOST_URL}
+                            readOnly
+                            style={{ width: 400 }}
+                            data-test-subj="endpointValueField"
+                          />
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiFlexItem>
@@ -101,7 +111,7 @@ export const ConnectToElasticsearch = () => {
                     <EuiFlexItem grow={false}>
                       <EuiFlexGroup gutterSize="s" alignItems="baseline">
                         <EuiFlexItem grow={false}>
-                          <EuiButton iconType="key">
+                          <EuiButton iconType="key" data-test-subj="createApiKeyButton">
                             {i18n.translate(
                               'xpack.searchHomepage.connectToElasticsearch.createApiKey',
                               {
@@ -111,7 +121,9 @@ export const ConnectToElasticsearch = () => {
                           </EuiButton>
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
-                          <EuiButtonEmpty iconType="gear">Manage API keys</EuiButtonEmpty>
+                          <EuiButtonEmpty iconType="gear" data-test-subj="manageApiKeysButton">
+                            Manage API keys
+                          </EuiButtonEmpty>
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
                           <EuiBadge color="warning">0 active</EuiBadge>
