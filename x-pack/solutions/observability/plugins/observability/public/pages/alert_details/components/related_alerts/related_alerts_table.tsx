@@ -11,7 +11,7 @@ import { ALERT_START, ALERT_UUID } from '@kbn/rule-data-utils';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import { getRelatedColumns } from './get_related_columns';
-import { useBuildRelatedAlertsQuery } from '../../hooks/related_alerts/use_build_related_alerts_query';
+import { getBuildRelatedAlertsQuery } from '../../hooks/related_alerts/get_build_related_alerts_query';
 import { AlertData } from '../../../../hooks/use_fetch_alert_detail';
 import {
   GetObservabilityAlertsTableProp,
@@ -54,7 +54,7 @@ const RELATED_ALERTS_TABLE_ID = 'xpack.observability.alerts.relatedAlerts';
 export function RelatedAlertsTable({ alertData }: Props) {
   const { formatted: alert } = alertData;
   const filterProximal = useProximalFilterParam();
-  const esQuery = useBuildRelatedAlertsQuery({ alert, filterProximal });
+  const esQuery = getBuildRelatedAlertsQuery({ alert, filterProximal });
   const { observabilityRuleTypeRegistry, config } = usePluginContext();
   const services = useKibana().services;
 

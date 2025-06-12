@@ -26,7 +26,7 @@ interface Props {
   filterProximal: boolean;
 }
 
-export function useBuildRelatedAlertsQuery({
+export function getBuildRelatedAlertsQuery({
   alert,
   filterProximal,
 }: Props): QueryDslQueryContainer {

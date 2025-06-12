@@ -12,12 +12,12 @@ import {
 } from '../../../../common/constants';
 import { AlertData } from '../../../hooks/use_fetch_alert_detail';
 import { useKibana } from '../../../utils/kibana_react';
-import { useBuildRelatedAlertsQuery } from './related_alerts/use_build_related_alerts_query';
+import { getBuildRelatedAlertsQuery } from './related_alerts/get_build_related_alerts_query';
 
 export const useFindProximalAlerts = (alertDetail: AlertData) => {
   const { services } = useKibana();
 
-  const esQuery = useBuildRelatedAlertsQuery({
+  const esQuery = getBuildRelatedAlertsQuery({
     alert: alertDetail.formatted,
     filterProximal: true,
   });
