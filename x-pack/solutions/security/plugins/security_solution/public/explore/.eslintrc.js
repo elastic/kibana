@@ -71,10 +71,29 @@ const path = require('path');
 const minimatch = require('minimatch');
 
 /** @type {Array.<RestrictedImportPath>} */
-const RESTRICTED_IMPORTS = [
+const RESTRICTED_IMPORTS_PATHS = [
   {
     name: 'enzyme',
     message: 'Please use @testing-library/react instead',
+  },
+  {
+    name: '@testing-library/react',
+    importNames: [
+      'getByRole',
+      'getAllByRole',
+      'queryByRole',
+      'queryAllByRole',
+      'findByRole',
+      'findAllByRole',
+      'getByLabelText',
+      'getAllByLabelText',
+      'queryByLabelText',
+      'queryAllByLabelText',
+      'findByLabelText',
+      'findAllByLabelText',
+    ],
+    message:
+      'ByRole and ByLabelText selectors are considered slow. Use lighter alternatives like ByText, ByTestId etc. instead.',
   },
 ];
 
@@ -114,7 +133,7 @@ for (const override of overridesWithNoRestrictedImportRule) {
     // Dynamic duplicates removal for all restricted imports
     const existingPaths = modernConfig.paths.filter(
       (existing) =>
-        !RESTRICTED_IMPORTS.some((restriction) =>
+        !RESTRICTED_IMPORTS_PATHS.some((restriction) =>
           typeof existing === 'string'
             ? existing === restriction.name
             : existing.name === restriction.name
@@ -125,7 +144,7 @@ for (const override of overridesWithNoRestrictedImportRule) {
     const newRuleConfig = [
       severity,
       {
-        paths: [...existingPaths, ...RESTRICTED_IMPORTS],
+        paths: [...existingPaths, ...RESTRICTED_IMPORTS_PATHS],
         patterns: modernConfig.patterns,
       },
     ];

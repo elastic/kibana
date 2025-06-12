@@ -75,10 +75,6 @@ const minimatch = require('minimatch');
 /** @type {Array.<RestrictedImportPath>} */
 const RESTRICTED_IMPORTS_PATHS = [
   {
-    name: 'enzyme',
-    message: 'Please use @testing-library/react instead',
-  },
-  {
     name: '@testing-library/react',
     importNames: [
       'getByRole',

@@ -15,16 +15,16 @@ describe('StatItemHeader', () => {
   beforeEach(() => {});
 
   it('renders expand button', () => {
-    const { getByRole } = render(
+    const { getByTestId } = render(
       <StatItemHeader onToggle={mockOnToggle} isToggleExpanded={true} />
     );
-    expect(getByRole('button')).toHaveAttribute('title', 'Open');
+    expect(getByTestId('query-toggle-stat')).toHaveAttribute('title', 'Open');
   });
 
   it('renders collapse button', () => {
-    const { getByRole } = render(
+    const { getByTestId } = render(
       <StatItemHeader onToggle={mockOnToggle} isToggleExpanded={false} />
     );
-    expect(getByRole('button')).toHaveAttribute('title', 'Closed');
+    expect(getByTestId('query-toggle-stat')).toHaveAttribute('title', 'Closed');
   });
 });
