@@ -149,6 +149,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   // apply capacity constraint to candidate tasks
   const tasksToRun: ConcreteTaskInstance[] = [];
   const leftOverTasks: ConcreteTaskInstance[] = [];
+  const tasksWithMalformedData: ConcreteTaskInstance[] = [];
 
   let capacityAccumulator = 0;
   for (const task of candidateTasks) {
@@ -166,19 +167,28 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   const now = new Date();
   const taskUpdates: PartialConcreteTaskInstance[] = [];
   for (const task of tasksToRun) {
-    taskUpdates.push({
-      id: task.id,
-      version: task.version,
-      scheduledAt:
-        task.retryAt != null && new Date(task.retryAt).getTime() < Date.now()
-          ? task.retryAt
-          : task.runAt,
-      status: TaskStatus.Running,
-      startedAt: now,
-      attempts: task.attempts + 1,
-      retryAt: getRetryAt(task, definitions.get(task.taskType)) ?? null,
-      ownerId: taskStore.taskManagerId,
-    });
+    try {
+      taskUpdates.push({
+        id: task.id,
+        version: task.version,
+        scheduledAt:
+          task.retryAt != null && new Date(task.retryAt).getTime() < Date.now()
+            ? task.retryAt
+            : task.runAt,
+        status: TaskStatus.Running,
+        startedAt: now,
+        attempts: task.attempts + 1,
+        retryAt: getRetryAt(task, definitions.get(task.taskType)) ?? null,
+        ownerId: taskStore.taskManagerId,
+      });
+    } catch (error) {
+      logger.error(
+        `Error validating task schema ${task.id}:${task.taskType} during claim: ${JSON.stringify(
+          error.message
+        )}`
+      );
+      tasksWithMalformedData.push(task);
+    }
   }
 
   // perform the task object updates, deal with errors
@@ -234,7 +244,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
       tasksConflicted: conflicts,
       tasksClaimed: fullTasksToRun.length,
       tasksLeftUnclaimed: leftOverTasks.length,
-      tasksErrors: bulkUpdateErrors + bulkGetErrors,
+      tasksErrors: bulkUpdateErrors + bulkGetErrors + tasksWithMalformedData.length,
       staleTasks: staleTasks.length,
     },
     docs: fullTasksToRun,
