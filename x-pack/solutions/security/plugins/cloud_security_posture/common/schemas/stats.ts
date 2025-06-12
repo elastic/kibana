@@ -15,4 +15,5 @@ export const getComplianceDashboardSchema = schema.object({
     schema.literal(CSPM_POLICY_TEMPLATE),
     schema.literal(KSPM_POLICY_TEMPLATE),
   ]),
+  namespace: schema.maybe(schema.string()),
 });
