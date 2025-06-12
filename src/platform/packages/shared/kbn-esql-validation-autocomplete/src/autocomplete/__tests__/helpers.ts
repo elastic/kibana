@@ -8,7 +8,6 @@
  */
 
 import { camelCase } from 'lodash';
-import { parse } from '@kbn/esql-ast';
 import { scalarFunctionDefinitions } from '../../definitions/generated/scalar_functions';
 import { operatorsDefinitions } from '../../definitions/all_operators';
 import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
@@ -16,6 +15,7 @@ import { aggFunctionDefinitions } from '../../definitions/generated/aggregation_
 import { timeUnitsToSuggest } from '../../definitions/literals';
 import {
   FunctionDefinitionTypes,
+  Location,
   getLocationFromCommandOrOptionName,
 } from '../../definitions/types';
 import { groupingFunctionDefinitions } from '../../definitions/generated/grouping_functions';
@@ -23,7 +23,7 @@ import * as autocomplete from '../autocomplete';
 import type { ESQLCallbacks } from '../../shared/types';
 import type { EditorContext, SuggestionRawDefinition } from '../types';
 import { TIME_SYSTEM_PARAMS, TRIGGER_SUGGESTION_COMMAND, getSafeInsertText } from '../factories';
-import { ESQLRealField } from '../../validation/types';
+import { ESQLFieldWithMetadata } from '../../validation/types';
 import {
   FieldType,
   fieldTypes,
@@ -31,7 +31,12 @@ import {
   FunctionReturnType,
   SupportedDataType,
 } from '../../definitions/types';
-import { joinIndices } from '../../__tests__/helpers';
+import {
+  joinIndices,
+  timeseriesIndices,
+  editorExtensions,
+  inferenceEndpoints,
+} from '../../__tests__/helpers';
 
 export interface Integration {
   name: string;
@@ -52,7 +57,7 @@ export const TIME_PICKER_SUGGESTION: PartialSuggestionWithText = {
 
 export const triggerCharacters = [',', '(', '=', ' '];
 
-export type TestField = ESQLRealField & { suggestedAs?: string };
+export type TestField = ESQLFieldWithMetadata & { suggestedAs?: string };
 
 export const fields: TestField[] = [
   ...fieldTypes.map((type) => ({
@@ -135,7 +140,7 @@ export const policies = [
  * @returns
  */
 export function getFunctionSignaturesByReturnType(
-  command: string | string[],
+  location: Location | Location[],
   _expectedReturnType: Readonly<FunctionReturnType | 'any' | Array<FunctionReturnType | 'any'>>,
   {
     agg,
@@ -177,7 +182,7 @@ export function getFunctionSignaturesByReturnType(
 
   const deduped = Array.from(new Set(list));
 
-  const commands = Array.isArray(command) ? command : [command];
+  const locations = Array.isArray(location) ? location : [location];
 
   return deduped
     .filter(({ signatures, ignoreAsSuggestion, locationsAvailable }) => {
@@ -185,8 +190,8 @@ export function getFunctionSignaturesByReturnType(
         return false;
       }
       if (
-        !(option ? [...commands, option] : commands).some((name) =>
-          locationsAvailable.includes(getLocationFromCommandOrOptionName(name))
+        !(option ? [...locations, getLocationFromCommandOrOptionName(option)] : locations).some(
+          (loc) => locationsAvailable.includes(loc)
         )
       ) {
         return false;
@@ -255,7 +260,7 @@ export function getFieldNamesByType(
 
 export function getLiteralsByType(_type: SupportedDataType | SupportedDataType[]) {
   const type = Array.isArray(_type) ? _type : [_type];
-  if (type.includes('time_literal')) {
+  if (type.includes('time_duration')) {
     // return only singular
     return timeUnitsToSuggest.map(({ name }) => `1 ${name}`).filter((s) => !/s$/.test(s));
   }
@@ -278,7 +283,7 @@ export function createCustomCallbackMocks(
    * `FROM index | EVAL foo = 1 | LIMIT 0` will be used to fetch columns. The response
    * will include "foo" as a column.
    */
-  customColumnsSinceLastCommand?: ESQLRealField[],
+  customColumnsSinceLastCommand?: ESQLFieldWithMetadata[],
   customSources?: Array<{ name: string; hidden: boolean }>,
   customPolicies?: Array<{
     name: string;
@@ -303,6 +308,14 @@ export function createCustomCallbackMocks(
     getSources: jest.fn(async () => finalSources),
     getPolicies: jest.fn(async () => finalPolicies),
     getJoinIndices: jest.fn(async () => ({ indices: joinIndices })),
+    getTimeseriesIndices: jest.fn(async () => ({ indices: timeseriesIndices })),
+    getEditorExtensions: jest.fn(async (queryString: string) => {
+      if (queryString.includes('logs*')) {
+        return editorExtensions;
+      }
+      return [];
+    }),
+    getInferenceEndpoints: jest.fn(async () => ({ inferenceEndpoints })),
   };
 }
 
@@ -332,6 +345,11 @@ export type AssertSuggestionsFn = (
   opts?: SuggestOptions
 ) => Promise<void>;
 
+export type SuggestFn = (
+  query: string,
+  opts?: SuggestOptions
+) => Promise<SuggestionRawDefinition[]>;
+
 export const setup = async (caret = '/') => {
   if (caret.length !== 1) {
     throw new Error('Caret must be a single character');
@@ -339,7 +357,7 @@ export const setup = async (caret = '/') => {
 
   const callbacks = createCustomCallbackMocks();
 
-  const suggest = async (query: string, opts: SuggestOptions = {}) => {
+  const suggest: SuggestFn = async (query, opts = {}) => {
     const pos = query.indexOf(caret);
     if (pos < 0) throw new Error(`User cursor/caret "${caret}" not found in query: ${query}`);
     const querySansCaret = query.slice(0, pos) + query.slice(pos + 1);
@@ -347,20 +365,10 @@ export const setup = async (caret = '/') => {
       ? { triggerKind: 1, triggerCharacter: opts.triggerCharacter }
       : { triggerKind: 0 };
 
-    return await autocomplete.suggest(
-      querySansCaret,
-      pos,
-      ctx,
-      (_query: string | undefined) => parse(_query, { withFormatting: true }),
-      opts.callbacks ?? callbacks
-    );
+    return await autocomplete.suggest(querySansCaret, pos, ctx, opts.callbacks ?? callbacks);
   };
 
-  const assertSuggestions = async (
-    query: string,
-    expected: Array<string | PartialSuggestionWithText>,
-    opts?: SuggestOptions
-  ) => {
+  const assertSuggestions: AssertSuggestionsFn = async (query, expected, opts) => {
     try {
       const result = await suggest(query, opts);
       const resultTexts = [...result.map((suggestion) => suggestion.text)].sort();

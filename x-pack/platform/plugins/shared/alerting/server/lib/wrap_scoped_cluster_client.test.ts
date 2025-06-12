@@ -606,6 +606,66 @@ describe('wrapScopedClusterClient', () => {
         );
         expect(logger.warn).not.toHaveBeenCalled();
       });
+
+      test('throws error when es|ql async search throws abort error', async () => {
+        const { abortController, scopedClusterClient, childClient } = getMockClusterClients();
+
+        abortController.abort();
+        childClient.transport.request.mockRejectedValueOnce(
+          new Error('Request has been aborted by the user')
+        );
+
+        const abortableSearchClient = createWrappedScopedClusterClientFactory({
+          scopedClusterClient,
+          rule,
+          logger,
+          abortController,
+        }).client();
+
+        await expect(
+          abortableSearchClient.asInternalUser.transport.request({
+            method: 'POST',
+            path: '/_query/async',
+          })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"ES|QL search has been aborted due to cancelled execution"`
+        );
+
+        expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
+          `executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {\"method\":\"POST\",\"path\":\"/_query/async\"} - with options {}`
+        );
+        expect(logger.warn).not.toHaveBeenCalled();
+      });
+
+      test('throws error when es|ql async query poll throws abort error', async () => {
+        const { abortController, scopedClusterClient, childClient } = getMockClusterClients();
+
+        abortController.abort();
+        childClient.transport.request.mockRejectedValueOnce(
+          new Error('Request has been aborted by the user')
+        );
+
+        const abortableSearchClient = createWrappedScopedClusterClientFactory({
+          scopedClusterClient,
+          rule,
+          logger,
+          abortController,
+        }).client();
+
+        await expect(
+          abortableSearchClient.asInternalUser.transport.request({
+            method: 'GET',
+            path: '/_query/async/FjhHTHlyRVltUm5xck1tV0RFN18wREEeOUxMcnkxZ3NTd0MzOTNabm1NQW9TUTozMjY1NjQ3',
+          })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"ES|QL search has been aborted due to cancelled execution"`
+        );
+
+        expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
+          `executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {\"method\":\"GET\",\"path\":\"/_query/async/FjhHTHlyRVltUm5xck1tV0RFN18wREEeOUxMcnkxZ3NTd0MzOTNabm1NQW9TUTozMjY1NjQ3\"} - with options {}`
+        );
+        expect(logger.warn).not.toHaveBeenCalled();
+      });
     });
 
     test('uses asInternalUser when specified', async () => {

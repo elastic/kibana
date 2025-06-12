@@ -34,6 +34,7 @@ import {
   type ChatActionClickPayload,
   type Feedback,
   aiAssistantSimulatedFunctionCalling,
+  getElasticManagedLlmConnector,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { findLastIndex } from 'lodash';
@@ -44,6 +45,7 @@ import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE 
 import { useAIAssistantChatService } from '../hooks/use_ai_assistant_chat_service';
 import { useGenAIConnectors } from '../hooks/use_genai_connectors';
 import { useConversation } from '../hooks/use_conversation';
+import { useElasticLlmCalloutsStatus } from '../hooks/use_elastic_llm_callouts_status';
 import { FlyoutPositionMode } from './chat_flyout';
 import { ChatHeader } from './chat_header';
 import { ChatTimeline } from './chat_timeline';
@@ -54,6 +56,7 @@ import { useLicense } from '../hooks/use_license';
 import { PromptEditor } from '../prompt_editor/prompt_editor';
 import { useKibana } from '../hooks/use_kibana';
 import { ChatBanner } from './chat_banner';
+import { useConversationContextMenu } from '../hooks';
 
 const fullHeightClassName = css`
   height: 100%;
@@ -229,6 +232,7 @@ export function ChatBody({
         namespace,
         public: isPublic,
         '@timestamp': timestamp,
+        archived,
       } = conversation.value;
 
       const conversationWithoutMessagesAndTitle: ChatFeedback['conversation'] = {
@@ -238,6 +242,7 @@ export function ChatBody({
         numeric_labels: numericLabels,
         namespace,
         public: isPublic,
+        archived,
         conversation: { id, last_updated: lastUpdated },
       };
 
@@ -288,75 +293,74 @@ export function ChatBody({
     }
   });
 
-  const handleActionClick = ({
-    message,
-    payload,
-  }: {
-    message: Message;
-    payload: ChatActionClickPayload;
-  }) => {
-    setStickToBottom(true);
-    switch (payload.type) {
-      case ChatActionClickType.executeEsqlQuery:
-        next(
-          messages.concat({
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.Assistant,
-              content: '',
-              function_call: {
-                name: 'execute_query',
-                arguments: JSON.stringify({
-                  query: payload.query,
-                }),
-                trigger: MessageRole.User,
+  const handleActionClick = useCallback(
+    ({ message, payload }: { message: Message; payload: ChatActionClickPayload }) => {
+      setStickToBottom(true);
+      switch (payload.type) {
+        case ChatActionClickType.executeEsqlQuery:
+          next(
+            messages.concat({
+              '@timestamp': new Date().toISOString(),
+              message: {
+                role: MessageRole.Assistant,
+                content: '',
+                function_call: {
+                  name: 'execute_query',
+                  arguments: JSON.stringify({
+                    query: payload.query,
+                  }),
+                  trigger: MessageRole.User,
+                },
               },
-            },
-          })
-        );
-        break;
+            })
+          );
+          break;
 
-      case ChatActionClickType.updateVisualization:
-        const visualizeQueryResponse = message;
+        case ChatActionClickType.updateVisualization:
+          const visualizeQueryResponse = message;
 
-        const visualizeQueryResponseData = JSON.parse(visualizeQueryResponse.message.data ?? '{}');
+          const visualizeQueryResponseData = JSON.parse(
+            visualizeQueryResponse.message.data ?? '{}'
+          );
 
-        next(
-          messages.slice(0, messages.indexOf(visualizeQueryResponse)).concat({
-            '@timestamp': new Date().toISOString(),
-            message: {
-              name: 'visualize_query',
-              content: visualizeQueryResponse.message.content,
-              data: JSON.stringify({
-                ...visualizeQueryResponseData,
-                userOverrides: payload.userOverrides,
-              }),
-              role: MessageRole.User,
-            },
-          })
-        );
-        break;
-      case ChatActionClickType.visualizeEsqlQuery:
-        next(
-          messages.concat({
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.Assistant,
-              content: '',
-              function_call: {
+          next(
+            messages.slice(0, messages.indexOf(visualizeQueryResponse)).concat({
+              '@timestamp': new Date().toISOString(),
+              message: {
                 name: 'visualize_query',
-                arguments: JSON.stringify({
-                  query: payload.query,
-                  intention: VisualizeESQLUserIntention.visualizeAuto,
+                content: visualizeQueryResponse.message.content,
+                data: JSON.stringify({
+                  ...visualizeQueryResponseData,
+                  userOverrides: payload.userOverrides,
                 }),
-                trigger: MessageRole.User,
+                role: MessageRole.User,
               },
-            },
-          })
-        );
-        break;
-    }
-  };
+            })
+          );
+          break;
+        case ChatActionClickType.visualizeEsqlQuery:
+          next(
+            messages.concat({
+              '@timestamp': new Date().toISOString(),
+              message: {
+                role: MessageRole.Assistant,
+                content: '',
+                function_call: {
+                  name: 'visualize_query',
+                  arguments: JSON.stringify({
+                    query: payload.query,
+                    intention: VisualizeESQLUserIntention.visualizeAuto,
+                  }),
+                  trigger: MessageRole.User,
+                },
+              },
+            })
+          );
+          break;
+      }
+    },
+    [messages, next]
+  );
 
   const handleConversationAccessUpdate = async (access: ConversationAccess) => {
     await updateConversationAccess(access);
@@ -364,10 +368,39 @@ export function ChatBody({
     refreshConversations();
   };
 
+  const { copyConversationToClipboard, copyUrl, deleteConversation, archiveConversation } =
+    useConversationContextMenu({
+      setIsUpdatingConversationList,
+      refreshConversations,
+    });
+
+  const handleArchiveConversation = async (id: string, isArchived: boolean) => {
+    await archiveConversation(id, isArchived);
+    conversation.refresh();
+  };
+
+  const elasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
+  const { conversationCalloutDismissed, tourCalloutDismissed } = useElasticLlmCalloutsStatus(false);
+
+  const showElasticLlmCalloutInChat =
+    elasticManagedLlm &&
+    connectors.selectedConnector === elasticManagedLlm.id &&
+    !conversationCalloutDismissed &&
+    tourCalloutDismissed;
+
   const isPublic = conversation.value?.public;
-  const showPromptEditor = !isPublic || isConversationOwnedByCurrentUser;
-  const bannerTitle = i18n.translate('xpack.aiAssistant.shareBanner.title', {
+  const isArchived = !!conversation.value?.archived;
+  const showPromptEditor = !isArchived && (!isPublic || isConversationOwnedByCurrentUser);
+
+  const sharedBannerTitle = i18n.translate('xpack.aiAssistant.shareBanner.title', {
     defaultMessage: 'This conversation is shared with your team.',
+  });
+  const viewerDescription = i18n.translate('xpack.aiAssistant.banner.viewerDescription', {
+    defaultMessage:
+      "You can't edit or continue this conversation, but you can duplicate it into a new private conversation. The original conversation will remain unchanged.",
+  });
+  const duplicateButton = i18n.translate('xpack.aiAssistant.duplicateButton', {
+    defaultMessage: 'Duplicate',
   });
 
   let sharedBanner = null;
@@ -375,16 +408,11 @@ export function ChatBody({
   if (isPublic && !isConversationOwnedByCurrentUser) {
     sharedBanner = (
       <ChatBanner
-        title={bannerTitle}
-        description={i18n.translate('xpack.aiAssistant.shareBanner.viewerDescription', {
-          defaultMessage:
-            "You can't edit or continue this conversation, but you can duplicate it into a new private conversation. The original conversation will remain unchanged.",
-        })}
+        title={sharedBannerTitle}
+        description={viewerDescription}
         button={
           <EuiButton onClick={duplicateConversation} iconType="copy" size="s">
-            {i18n.translate('xpack.aiAssistant.duplicateButton', {
-              defaultMessage: 'Duplicate',
-            })}
+            {duplicateButton}
           </EuiButton>
         }
       />
@@ -392,11 +420,53 @@ export function ChatBody({
   } else if (isConversationOwnedByCurrentUser && isPublic) {
     sharedBanner = (
       <ChatBanner
-        title={bannerTitle}
+        title={sharedBannerTitle}
         description={i18n.translate('xpack.aiAssistant.shareBanner.ownerDescription', {
           defaultMessage:
             'Any further edits you do to this conversation will be shared with the rest of the team.',
         })}
+      />
+    );
+  }
+
+  let archivedBanner = null;
+  const archivedBannerTitle = i18n.translate('xpack.aiAssistant.archivedBanner.title', {
+    defaultMessage: 'This conversation has been archived.',
+  });
+
+  if (isConversationOwnedByCurrentUser) {
+    archivedBanner = (
+      <ChatBanner
+        title={archivedBannerTitle}
+        icon="folderOpen"
+        description={i18n.translate('xpack.aiAssistant.archivedBanner.ownerDescription', {
+          defaultMessage:
+            "You can't edit or continue this conversation as it's been archived, but you can unarchive it.",
+        })}
+        button={
+          <EuiButton
+            onClick={() => handleArchiveConversation(conversationId!, !isArchived)}
+            iconType="folderOpen"
+            size="s"
+          >
+            {i18n.translate('xpack.aiAssistant.unarchiveButton', {
+              defaultMessage: 'Unarchive',
+            })}
+          </EuiButton>
+        }
+      />
+    );
+  } else {
+    archivedBanner = (
+      <ChatBanner
+        title={archivedBannerTitle}
+        icon="folderOpen"
+        description={viewerDescription}
+        button={
+          <EuiButton onClick={duplicateConversation} iconType="copy" size="s">
+            {duplicateButton}
+          </EuiButton>
+        }
       />
     );
   }
@@ -458,6 +528,7 @@ export function ChatBody({
                       ])
                     )
                   }
+                  showElasticLlmCalloutInChat={showElasticLlmCalloutInChat}
                 />
               ) : (
                 <ChatTimeline
@@ -483,6 +554,8 @@ export function ChatBody({
                   }
                   onStopGenerating={stop}
                   onActionClick={handleActionClick}
+                  isArchived={isArchived}
+                  showElasticLlmCalloutInChat={showElasticLlmCalloutInChat}
                 />
               )}
             </EuiPanel>
@@ -496,12 +569,13 @@ export function ChatBody({
         ) : null}
 
         <>
-          {conversationId ? sharedBanner : null}
+          {conversationId && !isArchived ? sharedBanner : null}
+          {conversationId && isArchived ? archivedBanner : null}
           {showPromptEditor ? (
             <EuiFlexItem
               grow={false}
               className={promptEditorClassname(euiTheme)}
-              style={{ height: promptEditorHeight }}
+              css={{ height: promptEditorHeight }}
             >
               <EuiHorizontalRule margin="none" />
               <EuiPanel
@@ -605,11 +679,14 @@ export function ChatBody({
           navigateToConversation={
             initialMessages?.length && !initialConversationId ? undefined : navigateToConversation
           }
-          setIsUpdatingConversationList={setIsUpdatingConversationList}
-          refreshConversations={refreshConversations}
           updateDisplayedConversation={updateDisplayedConversation}
           handleConversationAccessUpdate={handleConversationAccessUpdate}
           isConversationOwnedByCurrentUser={isConversationOwnedByCurrentUser}
+          copyConversationToClipboard={copyConversationToClipboard}
+          copyUrl={copyUrl}
+          deleteConversation={deleteConversation}
+          handleArchiveConversation={handleArchiveConversation}
+          isConversationApp={!showLinkToConversationsApp}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

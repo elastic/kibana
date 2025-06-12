@@ -16,15 +16,18 @@ import {
   EuiButton,
   EuiLink,
   EuiCode,
+  EuiFieldPassword,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+
+import { snakeCase } from 'lodash';
 
 import { MultiRowInput } from '../multi_row_input';
 
 import { ExperimentalFeaturesService } from '../../../../services';
 
-import { useStartServices } from '../../../../hooks';
+import { licenseService, useStartServices } from '../../../../hooks';
 
 import type { OutputFormInputsType } from './use_output_form';
 import { SecretFormRow } from './output_form_secret_form_row';
@@ -43,7 +46,7 @@ export interface IsConvertedToSecret {
 }
 
 export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props) => {
-  const { docLinks } = useStartServices();
+  const { docLinks, cloud } = useStartServices();
   const { inputs, useSecretsStorage, onToggleSecretStorage } = props;
   const [isConvertedToSecret, setIsConvertedToSecret] = React.useState<IsConvertedToSecret>({
     serviceToken: false,
@@ -51,6 +54,9 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
     sslKey: false,
   });
   const { enableSyncIntegrationsOnRemote, enableSSLSecrets } = ExperimentalFeaturesService.get();
+  const enableSyncIntegrations =
+    enableSyncIntegrationsOnRemote && licenseService.isEnterprise() && !cloud?.isServerlessEnabled;
+
   const [isRemoteClusterInstructionsOpen, setIsRemoteClusterInstructionsOpen] =
     React.useState(false);
 
@@ -67,12 +73,6 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
         inputs.serviceTokenInput.clear();
         isServiceTokenSecret = true;
       }
-      let isKibanaAPIKeySecret = false;
-      if (inputs.kibanaAPIKeyInput.value && !inputs.kibanaAPIKeySecretInput.value) {
-        inputs.kibanaAPIKeySecretInput.setValue(inputs.kibanaAPIKeyInput.value);
-        inputs.kibanaAPIKeyInput.clear();
-        isKibanaAPIKeySecret = true;
-      }
       let isSslKeySecretInput = false;
       if (enableSSLSecrets) {
         if (inputs.sslKeyInput.value && !inputs.sslKeySecretInput.value) {
@@ -84,7 +84,6 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
       setIsConvertedToSecret({
         ...isConvertedToSecret,
         serviceToken: isServiceTokenSecret,
-        kibanaAPIKey: isKibanaAPIKeySecret,
         sslKey: isSslKeySecretInput,
       });
     }
@@ -93,7 +92,6 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
     inputs.serviceTokenInput,
     inputs.serviceTokenSecretInput,
     inputs.kibanaAPIKeyInput,
-    inputs.kibanaAPIKeySecretInput,
     isFirstLoad,
     setIsFirstLoad,
     isConvertedToSecret,
@@ -109,7 +107,6 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
       if (enableSSLSecrets) inputs.sslKeyInput.clear();
     } else {
       inputs.serviceTokenSecretInput.setValue('');
-      inputs.kibanaAPIKeySecretInput.setValue('');
       if (enableSSLSecrets) inputs.sslKeyInput.setValue('');
     }
     setIsConvertedToSecret({
@@ -214,7 +211,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
         onToggleSecretAndClearValue={onToggleSecretAndClearValue}
       />
       <EuiSpacer size="m" />
-      {enableSyncIntegrationsOnRemote ? (
+      {enableSyncIntegrations ? (
         <>
           <EuiFormRow
             fullWidth
@@ -239,6 +236,28 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
           </EuiFormRow>
           {inputs.syncIntegrationsInput.value === true && (
             <>
+              <EuiSpacer size="m" />
+              <EuiFormRow
+                fullWidth
+                helpText={
+                  <FormattedMessage
+                    id="xpack.fleet.settings.editOutputFlyout.syncUninstalledIntegrationsFormRowLabel"
+                    defaultMessage="If enabled, uninstalled integrations will also be uninstalled on the remote Elasticsearch cluster"
+                  />
+                }
+                {...inputs.syncUninstalledIntegrationsInput.formRowProps}
+              >
+                <EuiSwitch
+                  {...inputs.syncUninstalledIntegrationsInput.props}
+                  data-test-subj="syncUninstalledIntegrationsSwitch"
+                  label={
+                    <FormattedMessage
+                      id="xpack.fleet.settings.editOutputFlyout.syncUninstalledIntegrationsSwitchLabel"
+                      defaultMessage="Uninstall integrations on remote"
+                    />
+                  }
+                />
+              </EuiFormRow>
               <EuiSpacer size="m" />
               <EuiCallOut
                 iconType="iInCircle"
@@ -318,7 +337,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
                             followerIndex: (
                               <EuiCode>
                                 fleet-synced-integrations-ccr-
-                                {inputs.nameInput.props.value || '<output name>'}
+                                {snakeCase(inputs.nameInput.props.value) || '<output name>'}
                               </EuiCode>
                             ),
                           }}
@@ -332,6 +351,24 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
                         />
                       </li>
                     </ol>
+                    <EuiSpacer size="s" />
+                    <FormattedMessage
+                      id="xpack.fleet.settings.remoteClusterConfiguration.ccsDescription"
+                      defaultMessage="To search accross remote clusters from this cluster, see the {prerequisites}. Once the remote cluster is added, CCS Data Views will be created automatically."
+                      values={{
+                        prerequisites: (
+                          <EuiLink
+                            target="_blank"
+                            href={`${docLinks.links.ccs.guide}#_prerequisites`}
+                          >
+                            <FormattedMessage
+                              id="xpack.fleet.settings.remoteClusterConfiguration.ccsDocumentationLink"
+                              defaultMessage="CCS prerequisites"
+                            />
+                          </EuiLink>
+                        ),
+                      }}
+                    />
                   </>
                 )}
               </EuiCallOut>
@@ -359,56 +396,31 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
                 />
               </EuiFormRow>
               <EuiSpacer size="m" />
-              {!useSecretsStorage ? (
-                <SecretFormRow
-                  fullWidth
-                  label={
-                    <FormattedMessage
-                      id="xpack.fleet.settings.editOutputFlyout.kibanaAPIKeyLabel"
-                      defaultMessage="Remote Kibana API Key"
-                    />
-                  }
-                  {...inputs.kibanaAPIKeyInput.formRowProps}
-                  useSecretsStorage={useSecretsStorage}
-                  onToggleSecretStorage={onToggleSecretAndClearValue}
-                >
-                  <EuiFieldText
-                    fullWidth
-                    data-test-subj="kibanaAPIKeySecretInput"
-                    {...inputs.kibanaAPIKeyInput.props}
-                    placeholder={i18n.translate(
-                      'xpack.fleet.settings.editOutputFlyout.kibanaAPIKeyPlaceholder',
-                      {
-                        defaultMessage: 'Specify Kibana API Key',
-                      }
-                    )}
+
+              <EuiFormRow
+                fullWidth
+                label={
+                  <FormattedMessage
+                    id="xpack.fleet.settings.editOutputFlyout.kibanaAPIKeyLabel"
+                    defaultMessage="Remote Kibana API Key"
                   />
-                </SecretFormRow>
-              ) : (
-                <SecretFormRow
+                }
+                {...inputs.kibanaAPIKeyInput.formRowProps}
+              >
+                <EuiFieldPassword
                   fullWidth
-                  title={i18n.translate('xpack.fleet.settings.editOutputFlyout.kibanaAPIKeyLabel', {
-                    defaultMessage: 'Remote Kibana API Key',
-                  })}
-                  {...inputs.kibanaAPIKeySecretInput.formRowProps}
-                  cancelEdit={inputs.kibanaAPIKeySecretInput.cancelEdit}
-                  useSecretsStorage={useSecretsStorage}
-                  isConvertedToSecret={isConvertedToSecret.kibanaAPIKey}
-                  onToggleSecretStorage={onToggleSecretAndClearValue}
-                >
-                  <EuiFieldText
-                    data-test-subj="kibanaAPIKeySecretInput"
-                    fullWidth
-                    {...inputs.kibanaAPIKeySecretInput.props}
-                    placeholder={i18n.translate(
-                      'xpack.fleet.settings.editOutputFlyout.kibanaAPIKeyPlaceholder',
-                      {
-                        defaultMessage: 'Specify Kibana API Key',
-                      }
-                    )}
-                  />
-                </SecretFormRow>
-              )}
+                  type="dual"
+                  data-test-subj="kibanaAPIKeySecretInput"
+                  {...inputs.kibanaAPIKeyInput.props}
+                  placeholder={i18n.translate(
+                    'xpack.fleet.settings.editOutputFlyout.kibanaAPIKeyPlaceholder',
+                    {
+                      defaultMessage: 'Specify Kibana API Key',
+                    }
+                  )}
+                />
+              </EuiFormRow>
+
               <EuiSpacer size="m" />
               <EuiCallOut
                 title={

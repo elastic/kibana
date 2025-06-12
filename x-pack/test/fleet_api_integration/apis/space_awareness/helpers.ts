@@ -72,6 +72,7 @@ export async function cleanFleetAgentPolicies(esClient: Client) {
     index: AGENT_POLICY_INDEX,
     q: '*',
     refresh: true,
+    ignore_unavailable: true,
   });
 }
 

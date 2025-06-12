@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { createActorContext, useSelector } from '@xstate5/react';
 import { createConsoleInspector } from '@kbn/xstate-utils';
 import {
@@ -16,6 +16,8 @@ import { StreamEnrichmentInput, StreamEnrichmentServiceDependencies } from './ty
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { ProcessorActorRef } from '../processor_state_machine';
 import { PreviewDocsFilterOption, SimulationActorSnapshot } from '../simulation_state_machine';
+import { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
+import { isGrokProcessor } from '../../utils';
 
 const consoleInspector = createConsoleInspector();
 
@@ -24,6 +26,11 @@ const StreamEnrichmentContext = createActorContext(streamEnrichmentMachine);
 export const useStreamsEnrichmentSelector = StreamEnrichmentContext.useSelector;
 
 export type StreamEnrichmentEvents = ReturnType<typeof useStreamEnrichmentEvents>;
+
+export const useGetStreamEnrichmentState = () => {
+  const service = StreamEnrichmentContext.useActorRef();
+  return useCallback(() => service.getSnapshot(), [service]);
+};
 
 export const useStreamEnrichmentEvents = () => {
   const service = StreamEnrichmentContext.useActorRef();
@@ -51,6 +58,12 @@ export const useStreamEnrichmentEvents = () => {
       changePreviewDocsFilter: (filter: PreviewDocsFilterOption) => {
         service.send({ type: 'simulation.changePreviewDocsFilter', filter });
       },
+      mapField: (field: SchemaField) => {
+        service.send({ type: 'simulation.fields.map', field: field as MappedSchemaField });
+      },
+      unmapField: (fieldName: string) => {
+        service.send({ type: 'simulation.fields.unmap', fieldName });
+      },
     }),
     [service]
   );
@@ -72,9 +85,32 @@ export const StreamEnrichmentContextProvider = ({
         },
       }}
     >
+      <StreamEnrichmentCleanupOnUnmount />
       <ListenForDefinitionChanges definition={definition}>{children}</ListenForDefinitionChanges>
     </StreamEnrichmentContext.Provider>
   );
+};
+
+/* Grok resources are not directly modeled by Xstate (they are not first class machines or actors etc) */
+const StreamEnrichmentCleanupOnUnmount = () => {
+  const service = StreamEnrichmentContext.useActorRef();
+
+  useEffect(() => {
+    return () => {
+      const context = service.getSnapshot().context;
+      context.processorsRefs.forEach((procRef) => {
+        const procContext = procRef.getSnapshot().context;
+        if (isGrokProcessor(procContext.processor)) {
+          const draftGrokExpressions = procContext.resources?.grokExpressions ?? [];
+          draftGrokExpressions.forEach((expression) => {
+            expression.destroy();
+          });
+        }
+      });
+    };
+  }, [service]);
+
+  return null;
 };
 
 const ListenForDefinitionChanges = ({

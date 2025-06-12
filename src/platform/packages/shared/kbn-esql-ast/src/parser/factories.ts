@@ -11,60 +11,55 @@
  * In case of changes in the grammar, this script should be updated: esql_update_ast_script.js
  */
 
-import type {
-  Token,
-  ParserRuleContext,
-  TerminalNode,
-  RecognitionException,
-  ParseTree,
-} from 'antlr4';
+import type { ParseTree, ParserRuleContext, RecognitionException, TerminalNode } from 'antlr4';
 import {
+  FunctionContext,
+  IdentifierContext,
+  IdentifierOrParameterContext,
   IndexPatternContext,
+  InputDoubleParamsContext,
+  InputNamedOrPositionalDoubleParamsContext,
+  InputNamedOrPositionalParamContext,
+  InputParamContext,
   QualifiedNameContext,
+  QualifiedNamePatternContext,
+  SelectorStringContext,
+  StringContext,
   type ArithmeticUnaryContext,
   type DecimalValueContext,
   type InlineCastContext,
   type IntegerValueContext,
   type QualifiedIntegerLiteralContext,
-  QualifiedNamePatternContext,
-  FunctionContext,
-  IdentifierContext,
-  InputParamContext,
-  InputNamedOrPositionalParamContext,
-  IdentifierOrParameterContext,
-  StringContext,
-  InputNamedOrPositionalDoubleParamsContext,
-  InputDoubleParamsContext,
 } from '../antlr/esql_parser';
-import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK, TICKS_REGEX } from './constants';
+import { Builder, type AstNodeParserFields } from '../builder';
+import { LeafPrinter } from '../pretty_print';
 import type {
+  BinaryExpressionOperator,
   ESQLAstBaseItem,
-  ESQLLiteral,
-  ESQLList,
-  ESQLTimeInterval,
-  ESQLLocation,
-  ESQLFunction,
-  ESQLSource,
-  ESQLColumn,
-  ESQLCommandOption,
   ESQLAstItem,
-  ESQLCommandMode,
-  ESQLInlineCast,
-  ESQLUnknownItem,
-  ESQLNumericLiteralType,
-  FunctionSubtype,
-  ESQLNumericLiteral,
-  ESQLOrderExpression,
-  InlineCastingType,
+  ESQLBinaryExpression,
+  ESQLColumn,
+  ESQLCommand,
+  ESQLCommandOption,
+  ESQLFunction,
   ESQLFunctionCallExpression,
   ESQLIdentifier,
-  ESQLBinaryExpression,
-  BinaryExpressionOperator,
-  ESQLCommand,
+  ESQLInlineCast,
+  ESQLList,
+  ESQLLiteral,
+  ESQLLocation,
+  ESQLNumericLiteral,
+  ESQLNumericLiteralType,
   ESQLParamKinds,
+  ESQLSource,
+  ESQLStringLiteral,
+  ESQLTimeInterval,
+  ESQLUnknownItem,
+  FunctionSubtype,
+  InlineCastingType,
 } from '../types';
-import { parseIdentifier, getPosition } from './helpers';
-import { Builder, type AstNodeParserFields } from '../builder';
+import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK, TICKS_REGEX } from './constants';
+import { getPosition, parseIdentifier } from './helpers';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
@@ -82,11 +77,23 @@ export function createAstBaseItem<Name = string>(
   };
 }
 
-const createParserFields = (ctx: ParserRuleContext): AstNodeParserFields => ({
+export const createParserFields = (ctx: ParserRuleContext): AstNodeParserFields => ({
   text: ctx.getText(),
   location: getPosition(ctx.start, ctx.stop),
   incomplete: Boolean(ctx.exception),
 });
+
+export const createParserFieldsFromTerminalNode = (node: TerminalNode): AstNodeParserFields => {
+  const text = node.getText();
+  const symbol = node.symbol;
+  const fields: AstNodeParserFields = {
+    text,
+    location: getPosition(symbol, symbol),
+    incomplete: false,
+  };
+
+  return fields;
+};
 
 export const createCommand = <
   Name extends string,
@@ -138,7 +145,9 @@ export function createFakeMultiplyLiteral(
   };
 }
 
-export function createLiteralString(ctx: StringContext): ESQLLiteral {
+export function createLiteralString(
+  ctx: Pick<StringContext, 'QUOTED_STRING'> & ParserRuleContext
+): ESQLStringLiteral {
   const quotedString = ctx.QUOTED_STRING()?.getText() ?? '""';
   const isTripleQuoted = quotedString.startsWith('"""') && quotedString.endsWith('"""');
   let valueUnquoted = isTripleQuoted ? quotedString.slice(3, -3) : quotedString.slice(1, -1);
@@ -337,21 +346,6 @@ export const createParam = (ctx: ParseTree) => {
   }
 };
 
-export const createOrderExpression = (
-  ctx: ParserRuleContext,
-  arg: ESQLColumn,
-  order: ESQLOrderExpression['order'],
-  nulls: ESQLOrderExpression['nulls']
-) => {
-  const node = Builder.expression.order(
-    arg as ESQLColumn,
-    { order, nulls },
-    createParserFields(ctx)
-  );
-
-  return node;
-};
-
 function walkFunctionStructure(
   args: ESQLAstItem[],
   initialLocation: ESQLLocation,
@@ -438,34 +432,6 @@ function sanitizeSourceString(ctx: ParserRuleContext) {
   return contextText;
 }
 
-const unquoteIndexString = (indexString: string): string => {
-  const isStringQuoted = indexString[0] === '"';
-
-  if (!isStringQuoted) {
-    return indexString;
-  }
-
-  // If wrapped by triple double quotes, simply remove them.
-  if (indexString.startsWith(`"""`) && indexString.endsWith(`"""`)) {
-    return indexString.slice(3, -3);
-  }
-
-  // If wrapped by double quote, remove them and unescape the string.
-  if (indexString[indexString.length - 1] === '"') {
-    indexString = indexString.slice(1, -1);
-    indexString = indexString
-      .replace(/\\"/g, '"')
-      .replace(/\\r/g, '\r')
-      .replace(/\\n/g, '\n')
-      .replace(/\\t/g, '\t')
-      .replace(/\\\\/g, '\\');
-    return indexString;
-  }
-
-  // This should never happen, but if it does, return the original string.
-  return indexString;
-};
-
 export function sanitizeIdentifierString(ctx: ParserRuleContext) {
   const result =
     getUnquotedText(ctx)?.getText() ||
@@ -479,66 +445,66 @@ export function wrapIdentifierAsArray<T extends ParserRuleContext>(identifierCtx
   return Array.isArray(identifierCtx) ? identifierCtx : [identifierCtx];
 }
 
-export function createSetting(policyName: Token, mode: string): ESQLCommandMode {
-  return {
-    type: 'mode',
-    name: mode.replace('_', '').toLowerCase(),
-    text: mode,
-    location: getPosition(policyName, { stop: policyName.start + mode.length - 1 }), // unfortunately this is the only location we have
-    incomplete: false,
-  };
-}
+const visitUnquotedOrQuotedString = (ctx: SelectorStringContext): ESQLStringLiteral => {
+  const unquotedCtx = ctx.UNQUOTED_SOURCE();
 
-/**
- * In https://github.com/elastic/elasticsearch/pull/103949 the ENRICH policy name
- * changed from rule to token type so we need to handle this specifically
- */
-export function createPolicy(token: Token, policy: string): ESQLSource {
-  return {
-    type: 'source',
-    name: policy,
-    text: policy,
-    sourceType: 'policy',
-    location: getPosition({
-      start: token.stop - policy.length + 1,
-      stop: token.stop,
-    }), // take into account ccq modes
-    incomplete: false,
-  };
-}
+  if (unquotedCtx) {
+    const valueUnquoted = unquotedCtx.getText();
+    const quotedString = LeafPrinter.string({ valueUnquoted });
 
-export function createSource(
+    return Builder.expression.literal.string(
+      valueUnquoted,
+      {
+        name: quotedString,
+        unquoted: true,
+      },
+      createParserFieldsFromTerminalNode(unquotedCtx)
+    );
+  }
+
+  return createLiteralString(ctx);
+};
+
+export function visitSource(
   ctx: ParserRuleContext,
   type: 'index' | 'policy' = 'index'
 ): ESQLSource {
   const text = sanitizeSourceString(ctx);
 
-  let cluster: string = '';
-  let index: string = '';
+  let prefix: ESQLStringLiteral | undefined;
+  let index: ESQLStringLiteral | undefined;
+  let selector: ESQLStringLiteral | undefined;
 
   if (ctx instanceof IndexPatternContext) {
-    const clusterString = ctx.clusterString();
-    const indexString = ctx.indexString();
+    const clusterStringCtx = ctx.clusterString();
+    const indexStringCtx = ctx.indexString();
+    const selectorStringCtx = ctx.selectorString();
 
-    if (clusterString) {
-      cluster = clusterString.getText();
+    if (clusterStringCtx) {
+      prefix = visitUnquotedOrQuotedString(clusterStringCtx);
     }
-    if (indexString) {
-      index = indexString.getText();
-      index = unquoteIndexString(index);
+    if (indexStringCtx) {
+      index = visitUnquotedOrQuotedString(indexStringCtx);
+    }
+    if (selectorStringCtx) {
+      selector = visitUnquotedOrQuotedString(selectorStringCtx);
     }
   }
 
-  return {
-    type: 'source',
-    cluster,
-    index,
-    name: text,
-    sourceType: type,
-    location: getPosition(ctx.start, ctx.stop),
-    incomplete: Boolean(ctx.exception || text === ''),
-    text: ctx?.getText(),
-  };
+  return Builder.expression.source.node(
+    {
+      sourceType: type,
+      prefix,
+      index,
+      selector,
+      name: text,
+    },
+    {
+      location: getPosition(ctx.start, ctx.stop),
+      incomplete: Boolean(ctx.exception || text === ''),
+      text: ctx?.getText(),
+    }
+  );
 }
 
 export function createColumnStar(ctx: TerminalNode): ESQLColumn {

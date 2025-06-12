@@ -31,7 +31,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { DashboardSettings } from '../../dashboard_api/types';
+import { DashboardSettings } from '../../../common';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
 import { savedObjectsTaggingService } from '../../services/kibana_services';
@@ -282,7 +282,7 @@ export const DashboardSettingsFlyout = ({ onClose }: DashboardSettingsProps) => 
                         content={
                           <FormattedMessage
                             id="dashboard.embeddableApi.showSettings.flyout.form.syncColorsBetweenPanelsSwitchHelp"
-                            defaultMessage="Only valid for {default} and {compatibility} palettes"
+                            defaultMessage="Only valid for legacy {default} and {compatibility} palettes"
                             values={{
                               default: (
                                 <strong>

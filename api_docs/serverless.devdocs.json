@@ -130,23 +130,13 @@
           "label": "initNavigation",
           "description": [],
           "signature": [
-            "(id: ",
-            "SolutionId",
-            ", navigationTree$: ",
+            "(id: \"security\" | \"oblt\" | \"es\" | \"chat\", navigationTree$: ",
             "Observable",
             "<",
             "NavigationTreeDefinition",
             "<",
             "AppDeepLinkId",
-            ", string, string>>, config?: { dataTestSubj?: string | undefined; panelContentProvider?: ",
-            {
-              "pluginId": "@kbn/shared-ux-chrome-navigation",
-              "scope": "public",
-              "docId": "kibKbnSharedUxChromeNavigationPluginApi",
-              "section": "def-public.ContentProvider",
-              "text": "ContentProvider"
-            },
-            " | undefined; } | undefined) => void"
+            ", string, string>>, config?: { dataTestSubj?: string | undefined; } | undefined) => void"
           ],
           "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
           "deprecated": false,
@@ -160,7 +150,7 @@
               "label": "id",
               "description": [],
               "signature": [
-                "SolutionId"
+                "\"security\" | \"oblt\" | \"es\" | \"chat\""
               ],
               "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
               "deprecated": false,
@@ -207,27 +197,6 @@
                   "description": [],
                   "signature": [
                     "string | undefined"
-                  ],
-                  "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
-                  "deprecated": false,
-                  "trackAdoption": false
-                },
-                {
-                  "parentPluginId": "serverless",
-                  "id": "def-public.ServerlessPluginStart.initNavigation.$3.panelContentProvider",
-                  "type": "Function",
-                  "tags": [],
-                  "label": "panelContentProvider",
-                  "description": [],
-                  "signature": [
-                    {
-                      "pluginId": "@kbn/shared-ux-chrome-navigation",
-                      "scope": "public",
-                      "docId": "kibKbnSharedUxChromeNavigationPluginApi",
-                      "section": "def-public.ContentProvider",
-                      "text": "ContentProvider"
-                    },
-                    " | undefined"
                   ],
                   "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
                   "deprecated": false,

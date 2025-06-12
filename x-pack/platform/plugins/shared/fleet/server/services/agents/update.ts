@@ -22,16 +22,18 @@ export async function unenrollForAgentPolicyId(
   while (hasMore) {
     const { agents } = await getAgentsByKuery(esClient, soClient, {
       kuery: `${AGENTS_PREFIX}.policy_id:"${policyId}"`,
+      showInactive: false,
       page: page++,
       perPage: 1000,
-      showInactive: false,
     });
 
     if (agents.length === 0) {
       hasMore = false;
     }
     for (const agent of agents) {
-      await unenrollAgent(soClient, esClient, agent.id);
+      await unenrollAgent(soClient, esClient, agent.id, {
+        skipAgentlessValidation: true,
+      });
     }
   }
 }

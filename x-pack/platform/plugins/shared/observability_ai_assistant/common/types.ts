@@ -29,11 +29,31 @@ export interface PendingMessage {
   aborted?: boolean;
   error?: any;
 }
+export interface DetectedEntity {
+  entity: string;
+  class_name: string;
+  start_pos: number;
+  end_pos: number;
+  hash: string;
+  type: 'ner' | 'regex';
+}
+
+export type DetectedEntityType = DetectedEntity['type'];
+export interface Unredaction {
+  entity: string;
+  class_name: string;
+  start_pos: number;
+  end_pos: number;
+  type: 'ner' | 'regex';
+}
+
+export type UnredactionType = Unredaction['type'];
 
 export interface Message {
   '@timestamp': string;
   message: {
     content?: string;
+    unredactions?: Unredaction[];
     name?: string;
     role: MessageRole;
     function_call?: {
@@ -62,6 +82,7 @@ export interface Conversation {
   numeric_labels: Record<string, number>;
   namespace: string;
   public: boolean;
+  archived?: boolean;
 }
 
 type ConversationRequestBase = Omit<Conversation, 'user' | 'conversation' | 'namespace'> & {
@@ -100,6 +121,15 @@ export enum KnowledgeBaseType {
 
   // contextual entries are only included in the system prompt if the user's input matches the context
   Contextual = 'contextual',
+}
+
+export enum KnowledgeBaseState {
+  NOT_INSTALLED = 'NOT_INSTALLED',
+  MODEL_PENDING_DEPLOYMENT = 'MODEL_PENDING_DEPLOYMENT',
+  DEPLOYING_MODEL = 'DEPLOYING_MODEL',
+  MODEL_PENDING_ALLOCATION = 'MODEL_PENDING_ALLOCATION',
+  READY = 'READY',
+  ERROR = 'ERROR',
 }
 
 export interface ObservabilityAIAssistantScreenContextRequest {
@@ -149,4 +179,20 @@ export interface ObservabilityAIAssistantScreenContext {
 export enum ConversationAccess {
   SHARED = 'shared',
   PRIVATE = 'private',
+}
+
+export interface InferenceChunk {
+  chunkText: string;
+  charStartOffset: number;
+}
+
+export interface AnonymizationRule {
+  id: string;
+  entityClass: string;
+  type: 'regex' | 'ner';
+  pattern?: string;
+  enabled: boolean;
+  builtIn: boolean;
+  description?: string;
+  normalize?: boolean;
 }

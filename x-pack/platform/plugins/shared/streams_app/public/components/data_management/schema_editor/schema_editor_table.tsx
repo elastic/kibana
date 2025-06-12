@@ -13,11 +13,13 @@ import {
   EuiDataGrid,
   EuiDataGridCellProps,
   EuiDataGridControlColumn,
+  EuiIconTip,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { WiredStreamDefinition } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
-import { TABLE_COLUMNS, EMPTY_CONTENT } from './constants';
+import { TABLE_COLUMNS, EMPTY_CONTENT, TableColumnName } from './constants';
 import { FieldActionsCell } from './field_actions';
 import { FieldParent } from './field_parent';
 import { FieldStatusBadge } from './field_status';
@@ -26,18 +28,22 @@ import { SchemaField } from './types';
 import { FieldType } from './field_type';
 
 export function FieldsTable({
-  fields,
   controls,
+  defaultColumns,
+  fields,
   stream,
   withTableActions,
+  withToolbar,
 }: {
-  fields: SchemaField[];
   controls: TControls;
-  stream: WiredStreamDefinition;
+  defaultColumns: TableColumnName[];
+  fields: SchemaField[];
+  stream: Streams.ingest.all.Definition;
   withTableActions: boolean;
+  withToolbar: boolean;
 }) {
   // Column visibility
-  const [visibleColumns, setVisibleColumns] = useState(Object.keys(TABLE_COLUMNS));
+  const [visibleColumns, setVisibleColumns] = useState<string[]>(defaultColumns);
   // Column sorting
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridColumnSortingConfig[]>([]);
 
@@ -73,7 +79,7 @@ export function FieldsTable({
         canDragAndDropColumns: false,
       }}
       sorting={{ columns: sortingColumns, onSort: setSortingColumns }}
-      toolbarVisibility={true}
+      toolbarVisibility={withToolbar}
       rowCount={filteredFields.length}
       renderCellValue={RenderCellValue}
       trailingControlColumns={trailingColumns}
@@ -88,15 +94,37 @@ export function FieldsTable({
 }
 
 const createCellRenderer =
-  (fields: SchemaField[], stream: WiredStreamDefinition): EuiDataGridCellProps['renderCellValue'] =>
+  (
+    fields: SchemaField[],
+    stream: Streams.ingest.all.Definition
+  ): EuiDataGridCellProps['renderCellValue'] =>
   ({ rowIndex, columnId }) => {
     const field = fields[rowIndex];
     if (!field) return null;
     const { parent, status } = field;
 
     if (columnId === 'type') {
-      if (!field.type) return EMPTY_CONTENT;
-      return <FieldType type={field.type} />;
+      if (!field.type) {
+        if (field.status === 'unmapped' && field.esType) {
+          return (
+            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+              {field.esType}
+              <EuiIconTip
+                content={i18n.translate(
+                  'xpack.streams.streamDetailSchemaEditorFieldsTableTypeEsTypeTooltip',
+                  {
+                    defaultMessage:
+                      'This field is not managed by Streams, but is defined in Elasticsearch. It can be controlled via the underlying index template and component templates available in the "Advanced" tab.',
+                  }
+                )}
+                position="right"
+              />
+            </EuiFlexGroup>
+          );
+        }
+        return EMPTY_CONTENT;
+      }
+      return <FieldType type={field.type} aliasFor={field.alias_for} />;
     }
 
     if (columnId === 'parent') {

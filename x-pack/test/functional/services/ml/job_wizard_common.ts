@@ -608,7 +608,7 @@ export function MachineLearningJobWizardCommonProvider(
 
     async createJobWithoutDatafeedStart() {
       await testSubjects.clickWhenNotDisabledWithoutRetry('mlJobWizardButtonCreateJob');
-      await testSubjects.existOrFail('mlPageJobManagement');
+      await testSubjects.existOrFail('ml-jobs-list');
     },
 
     async assertConvertToMultiMetricButtonExist(bucketSpan: string) {

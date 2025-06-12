@@ -685,7 +685,7 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async getPanels() {
-    return await this.find.allByCssSelector('.react-grid-item'); // These are gridster-defined elements and classes
+    return await this.testSubjects.findAll('dashboardPanel');
   }
 
   public async getPanelDimensions() {

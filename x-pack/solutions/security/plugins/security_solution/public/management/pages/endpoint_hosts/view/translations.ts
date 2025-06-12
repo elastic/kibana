@@ -45,10 +45,24 @@ export const WORKFLOW_INSIGHTS = {
     title: i18n.translate('xpack.securitySolution.endpointDetails.workflowInsights.issues.title', {
       defaultMessage: 'Insights',
     }),
+    survey: {
+      description: i18n.translate(
+        'xpack.securitySolution.endpointDetails.workflowInsights.survey.text',
+        {
+          defaultMessage: 'How is Automatic Troubleshooting working for you? ',
+        }
+      ),
+      callToAction: i18n.translate(
+        'xpack.securitySolution.endpointDetails.workflowInsights.survey.callToAction',
+        {
+          defaultMessage: 'Provide feedback',
+        }
+      ),
+    },
     emptyResults: i18n.translate(
       'xpack.securitySolution.endpointDetails.workflowInsights.issues.emptyResults',
       {
-        defaultMessage: 'No issues had been found',
+        defaultMessage: 'Troubleshooting scan complete, no issues found.',
       }
     ),
     remediationButton: {
@@ -95,6 +109,12 @@ export const WORKFLOW_INSIGHTS = {
       'xpack.securitySolution.endpointDetails.workflowInsights.toast.updateInsightError',
       {
         defaultMessage: 'Failed to mark insight as remediated',
+      }
+    ),
+    maxFetchAttemptsReached: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.toast.maxFetchAttemptsReached',
+      {
+        defaultMessage: 'Failed to fetch insights after multiple attempts',
       }
     ),
   },

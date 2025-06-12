@@ -31,139 +31,142 @@ export default class esql_parser extends parser_config {
 	public static readonly LINE_COMMENT = 1;
 	public static readonly MULTILINE_COMMENT = 2;
 	public static readonly WS = 3;
-	public static readonly DEV_CHANGE_POINT = 4;
+	public static readonly CHANGE_POINT = 4;
 	public static readonly ENRICH = 5;
 	public static readonly EXPLAIN = 6;
-	public static readonly DISSECT = 7;
-	public static readonly EVAL = 8;
-	public static readonly GROK = 9;
-	public static readonly LIMIT = 10;
-	public static readonly ROW = 11;
-	public static readonly SORT = 12;
-	public static readonly STATS = 13;
-	public static readonly WHERE = 14;
-	public static readonly DEV_INLINESTATS = 15;
-	public static readonly FROM = 16;
-	public static readonly DEV_METRICS = 17;
-	public static readonly DEV_FORK = 18;
-	public static readonly JOIN_LOOKUP = 19;
-	public static readonly DEV_JOIN_FULL = 20;
-	public static readonly DEV_JOIN_LEFT = 21;
-	public static readonly DEV_JOIN_RIGHT = 22;
-	public static readonly DEV_LOOKUP = 23;
-	public static readonly MV_EXPAND = 24;
-	public static readonly DROP = 25;
-	public static readonly KEEP = 26;
-	public static readonly DEV_INSIST = 27;
-	public static readonly DEV_RRF = 28;
-	public static readonly RENAME = 29;
-	public static readonly SHOW = 30;
-	public static readonly UNKNOWN_CMD = 31;
-	public static readonly CHANGE_POINT_LINE_COMMENT = 32;
-	public static readonly CHANGE_POINT_MULTILINE_COMMENT = 33;
-	public static readonly CHANGE_POINT_WS = 34;
-	public static readonly ON = 35;
-	public static readonly WITH = 36;
-	public static readonly ENRICH_POLICY_NAME = 37;
-	public static readonly ENRICH_LINE_COMMENT = 38;
-	public static readonly ENRICH_MULTILINE_COMMENT = 39;
-	public static readonly ENRICH_WS = 40;
-	public static readonly ENRICH_FIELD_LINE_COMMENT = 41;
-	public static readonly ENRICH_FIELD_MULTILINE_COMMENT = 42;
-	public static readonly ENRICH_FIELD_WS = 43;
-	public static readonly SETTING = 44;
-	public static readonly SETTING_LINE_COMMENT = 45;
-	public static readonly SETTTING_MULTILINE_COMMENT = 46;
-	public static readonly SETTING_WS = 47;
-	public static readonly EXPLAIN_WS = 48;
-	public static readonly EXPLAIN_LINE_COMMENT = 49;
-	public static readonly EXPLAIN_MULTILINE_COMMENT = 50;
-	public static readonly PIPE = 51;
-	public static readonly QUOTED_STRING = 52;
-	public static readonly INTEGER_LITERAL = 53;
-	public static readonly DECIMAL_LITERAL = 54;
-	public static readonly BY = 55;
+	public static readonly COMPLETION = 7;
+	public static readonly DISSECT = 8;
+	public static readonly EVAL = 9;
+	public static readonly GROK = 10;
+	public static readonly LIMIT = 11;
+	public static readonly ROW = 12;
+	public static readonly SORT = 13;
+	public static readonly STATS = 14;
+	public static readonly WHERE = 15;
+	public static readonly DEV_INLINESTATS = 16;
+	public static readonly DEV_RERANK = 17;
+	public static readonly DEV_SAMPLE = 18;
+	public static readonly FROM = 19;
+	public static readonly DEV_TIME_SERIES = 20;
+	public static readonly DEV_FORK = 21;
+	public static readonly JOIN_LOOKUP = 22;
+	public static readonly DEV_JOIN_FULL = 23;
+	public static readonly DEV_JOIN_LEFT = 24;
+	public static readonly DEV_JOIN_RIGHT = 25;
+	public static readonly DEV_LOOKUP = 26;
+	public static readonly MV_EXPAND = 27;
+	public static readonly DROP = 28;
+	public static readonly KEEP = 29;
+	public static readonly DEV_INSIST = 30;
+	public static readonly DEV_RRF = 31;
+	public static readonly RENAME = 32;
+	public static readonly SHOW = 33;
+	public static readonly UNKNOWN_CMD = 34;
+	public static readonly CHANGE_POINT_LINE_COMMENT = 35;
+	public static readonly CHANGE_POINT_MULTILINE_COMMENT = 36;
+	public static readonly CHANGE_POINT_WS = 37;
+	public static readonly ENRICH_POLICY_NAME = 38;
+	public static readonly ENRICH_LINE_COMMENT = 39;
+	public static readonly ENRICH_MULTILINE_COMMENT = 40;
+	public static readonly ENRICH_WS = 41;
+	public static readonly ENRICH_FIELD_LINE_COMMENT = 42;
+	public static readonly ENRICH_FIELD_MULTILINE_COMMENT = 43;
+	public static readonly ENRICH_FIELD_WS = 44;
+	public static readonly SETTING = 45;
+	public static readonly SETTING_LINE_COMMENT = 46;
+	public static readonly SETTTING_MULTILINE_COMMENT = 47;
+	public static readonly SETTING_WS = 48;
+	public static readonly EXPLAIN_WS = 49;
+	public static readonly EXPLAIN_LINE_COMMENT = 50;
+	public static readonly EXPLAIN_MULTILINE_COMMENT = 51;
+	public static readonly PIPE = 52;
+	public static readonly QUOTED_STRING = 53;
+	public static readonly INTEGER_LITERAL = 54;
+	public static readonly DECIMAL_LITERAL = 55;
 	public static readonly AND = 56;
-	public static readonly ASC = 57;
-	public static readonly ASSIGN = 58;
-	public static readonly CAST_OP = 59;
-	public static readonly COLON = 60;
-	public static readonly COMMA = 61;
-	public static readonly DESC = 62;
-	public static readonly DOT = 63;
-	public static readonly FALSE = 64;
-	public static readonly FIRST = 65;
-	public static readonly IN = 66;
-	public static readonly IS = 67;
-	public static readonly LAST = 68;
-	public static readonly LIKE = 69;
-	public static readonly NOT = 70;
-	public static readonly NULL = 71;
-	public static readonly NULLS = 72;
-	public static readonly OR = 73;
-	public static readonly PARAM = 74;
-	public static readonly RLIKE = 75;
-	public static readonly TRUE = 76;
-	public static readonly EQ = 77;
-	public static readonly CIEQ = 78;
-	public static readonly NEQ = 79;
-	public static readonly LT = 80;
-	public static readonly LTE = 81;
-	public static readonly GT = 82;
-	public static readonly GTE = 83;
-	public static readonly PLUS = 84;
-	public static readonly MINUS = 85;
-	public static readonly ASTERISK = 86;
-	public static readonly SLASH = 87;
-	public static readonly PERCENT = 88;
-	public static readonly LEFT_BRACES = 89;
-	public static readonly RIGHT_BRACES = 90;
-	public static readonly DOUBLE_PARAMS = 91;
-	public static readonly NAMED_OR_POSITIONAL_PARAM = 92;
-	public static readonly NAMED_OR_POSITIONAL_DOUBLE_PARAMS = 93;
-	public static readonly OPENING_BRACKET = 94;
-	public static readonly CLOSING_BRACKET = 95;
-	public static readonly LP = 96;
-	public static readonly RP = 97;
-	public static readonly UNQUOTED_IDENTIFIER = 98;
-	public static readonly QUOTED_IDENTIFIER = 99;
-	public static readonly EXPR_LINE_COMMENT = 100;
-	public static readonly EXPR_MULTILINE_COMMENT = 101;
-	public static readonly EXPR_WS = 102;
-	public static readonly METADATA = 103;
-	public static readonly UNQUOTED_SOURCE = 104;
-	public static readonly FROM_LINE_COMMENT = 105;
-	public static readonly FROM_MULTILINE_COMMENT = 106;
-	public static readonly FROM_WS = 107;
-	public static readonly FORK_WS = 108;
-	public static readonly FORK_LINE_COMMENT = 109;
-	public static readonly FORK_MULTILINE_COMMENT = 110;
-	public static readonly JOIN = 111;
-	public static readonly USING = 112;
-	public static readonly JOIN_LINE_COMMENT = 113;
-	public static readonly JOIN_MULTILINE_COMMENT = 114;
-	public static readonly JOIN_WS = 115;
-	public static readonly LOOKUP_LINE_COMMENT = 116;
-	public static readonly LOOKUP_MULTILINE_COMMENT = 117;
-	public static readonly LOOKUP_WS = 118;
-	public static readonly LOOKUP_FIELD_LINE_COMMENT = 119;
-	public static readonly LOOKUP_FIELD_MULTILINE_COMMENT = 120;
-	public static readonly LOOKUP_FIELD_WS = 121;
-	public static readonly MVEXPAND_LINE_COMMENT = 122;
-	public static readonly MVEXPAND_MULTILINE_COMMENT = 123;
-	public static readonly MVEXPAND_WS = 124;
-	public static readonly ID_PATTERN = 125;
-	public static readonly PROJECT_LINE_COMMENT = 126;
-	public static readonly PROJECT_MULTILINE_COMMENT = 127;
-	public static readonly PROJECT_WS = 128;
-	public static readonly AS = 129;
-	public static readonly RENAME_LINE_COMMENT = 130;
-	public static readonly RENAME_MULTILINE_COMMENT = 131;
-	public static readonly RENAME_WS = 132;
-	public static readonly INFO = 133;
-	public static readonly SHOW_LINE_COMMENT = 134;
-	public static readonly SHOW_MULTILINE_COMMENT = 135;
-	public static readonly SHOW_WS = 136;
+	public static readonly AS = 57;
+	public static readonly ASC = 58;
+	public static readonly ASSIGN = 59;
+	public static readonly BY = 60;
+	public static readonly CAST_OP = 61;
+	public static readonly COLON = 62;
+	public static readonly COMMA = 63;
+	public static readonly DESC = 64;
+	public static readonly DOT = 65;
+	public static readonly FALSE = 66;
+	public static readonly FIRST = 67;
+	public static readonly IN = 68;
+	public static readonly IS = 69;
+	public static readonly LAST = 70;
+	public static readonly LIKE = 71;
+	public static readonly NOT = 72;
+	public static readonly NULL = 73;
+	public static readonly NULLS = 74;
+	public static readonly ON = 75;
+	public static readonly OR = 76;
+	public static readonly PARAM = 77;
+	public static readonly RLIKE = 78;
+	public static readonly TRUE = 79;
+	public static readonly WITH = 80;
+	public static readonly EQ = 81;
+	public static readonly CIEQ = 82;
+	public static readonly NEQ = 83;
+	public static readonly LT = 84;
+	public static readonly LTE = 85;
+	public static readonly GT = 86;
+	public static readonly GTE = 87;
+	public static readonly PLUS = 88;
+	public static readonly MINUS = 89;
+	public static readonly ASTERISK = 90;
+	public static readonly SLASH = 91;
+	public static readonly PERCENT = 92;
+	public static readonly LEFT_BRACES = 93;
+	public static readonly RIGHT_BRACES = 94;
+	public static readonly DOUBLE_PARAMS = 95;
+	public static readonly NAMED_OR_POSITIONAL_PARAM = 96;
+	public static readonly NAMED_OR_POSITIONAL_DOUBLE_PARAMS = 97;
+	public static readonly OPENING_BRACKET = 98;
+	public static readonly CLOSING_BRACKET = 99;
+	public static readonly LP = 100;
+	public static readonly RP = 101;
+	public static readonly UNQUOTED_IDENTIFIER = 102;
+	public static readonly QUOTED_IDENTIFIER = 103;
+	public static readonly EXPR_LINE_COMMENT = 104;
+	public static readonly EXPR_MULTILINE_COMMENT = 105;
+	public static readonly EXPR_WS = 106;
+	public static readonly METADATA = 107;
+	public static readonly UNQUOTED_SOURCE = 108;
+	public static readonly FROM_LINE_COMMENT = 109;
+	public static readonly FROM_MULTILINE_COMMENT = 110;
+	public static readonly FROM_WS = 111;
+	public static readonly FORK_WS = 112;
+	public static readonly FORK_LINE_COMMENT = 113;
+	public static readonly FORK_MULTILINE_COMMENT = 114;
+	public static readonly JOIN = 115;
+	public static readonly USING = 116;
+	public static readonly JOIN_LINE_COMMENT = 117;
+	public static readonly JOIN_MULTILINE_COMMENT = 118;
+	public static readonly JOIN_WS = 119;
+	public static readonly LOOKUP_LINE_COMMENT = 120;
+	public static readonly LOOKUP_MULTILINE_COMMENT = 121;
+	public static readonly LOOKUP_WS = 122;
+	public static readonly LOOKUP_FIELD_LINE_COMMENT = 123;
+	public static readonly LOOKUP_FIELD_MULTILINE_COMMENT = 124;
+	public static readonly LOOKUP_FIELD_WS = 125;
+	public static readonly MVEXPAND_LINE_COMMENT = 126;
+	public static readonly MVEXPAND_MULTILINE_COMMENT = 127;
+	public static readonly MVEXPAND_WS = 128;
+	public static readonly ID_PATTERN = 129;
+	public static readonly PROJECT_LINE_COMMENT = 130;
+	public static readonly PROJECT_MULTILINE_COMMENT = 131;
+	public static readonly PROJECT_WS = 132;
+	public static readonly RENAME_LINE_COMMENT = 133;
+	public static readonly RENAME_MULTILINE_COMMENT = 134;
+	public static readonly RENAME_WS = 135;
+	public static readonly INFO = 136;
+	public static readonly SHOW_LINE_COMMENT = 137;
+	public static readonly SHOW_MULTILINE_COMMENT = 138;
+	public static readonly SHOW_WS = 139;
 	public static override readonly EOF = Token.EOF;
 	public static readonly RULE_singleStatement = 0;
 	public static readonly RULE_query = 1;
@@ -174,83 +177,91 @@ export default class esql_parser extends parser_config {
 	public static readonly RULE_rowCommand = 6;
 	public static readonly RULE_fields = 7;
 	public static readonly RULE_field = 8;
-	public static readonly RULE_fromCommand = 9;
-	public static readonly RULE_metricsCommand = 10;
-	public static readonly RULE_indexPatternAndMetadataFields = 11;
-	public static readonly RULE_indexPattern = 12;
-	public static readonly RULE_clusterString = 13;
-	public static readonly RULE_selectorString = 14;
-	public static readonly RULE_indexString = 15;
-	public static readonly RULE_metadata = 16;
-	public static readonly RULE_evalCommand = 17;
-	public static readonly RULE_statsCommand = 18;
-	public static readonly RULE_aggFields = 19;
-	public static readonly RULE_aggField = 20;
-	public static readonly RULE_qualifiedName = 21;
-	public static readonly RULE_qualifiedNamePattern = 22;
-	public static readonly RULE_qualifiedNamePatterns = 23;
-	public static readonly RULE_identifier = 24;
-	public static readonly RULE_identifierPattern = 25;
-	public static readonly RULE_parameter = 26;
-	public static readonly RULE_doubleParameter = 27;
-	public static readonly RULE_identifierOrParameter = 28;
-	public static readonly RULE_limitCommand = 29;
-	public static readonly RULE_sortCommand = 30;
-	public static readonly RULE_orderExpression = 31;
-	public static readonly RULE_keepCommand = 32;
-	public static readonly RULE_dropCommand = 33;
-	public static readonly RULE_renameCommand = 34;
-	public static readonly RULE_renameClause = 35;
-	public static readonly RULE_dissectCommand = 36;
-	public static readonly RULE_grokCommand = 37;
-	public static readonly RULE_mvExpandCommand = 38;
-	public static readonly RULE_commandOptions = 39;
-	public static readonly RULE_commandOption = 40;
-	public static readonly RULE_explainCommand = 41;
-	public static readonly RULE_subqueryExpression = 42;
-	public static readonly RULE_showCommand = 43;
-	public static readonly RULE_enrichCommand = 44;
-	public static readonly RULE_enrichWithClause = 45;
-	public static readonly RULE_lookupCommand = 46;
-	public static readonly RULE_inlinestatsCommand = 47;
-	public static readonly RULE_changePointCommand = 48;
-	public static readonly RULE_insistCommand = 49;
-	public static readonly RULE_forkCommand = 50;
-	public static readonly RULE_forkSubQueries = 51;
-	public static readonly RULE_forkSubQuery = 52;
-	public static readonly RULE_forkSubQueryCommand = 53;
-	public static readonly RULE_forkSubQueryProcessingCommand = 54;
-	public static readonly RULE_rrfCommand = 55;
-	public static readonly RULE_booleanExpression = 56;
-	public static readonly RULE_regexBooleanExpression = 57;
-	public static readonly RULE_matchBooleanExpression = 58;
-	public static readonly RULE_valueExpression = 59;
-	public static readonly RULE_operatorExpression = 60;
-	public static readonly RULE_primaryExpression = 61;
-	public static readonly RULE_functionExpression = 62;
-	public static readonly RULE_functionName = 63;
-	public static readonly RULE_mapExpression = 64;
-	public static readonly RULE_entryExpression = 65;
-	public static readonly RULE_constant = 66;
-	public static readonly RULE_booleanValue = 67;
-	public static readonly RULE_numericValue = 68;
-	public static readonly RULE_decimalValue = 69;
-	public static readonly RULE_integerValue = 70;
-	public static readonly RULE_string = 71;
-	public static readonly RULE_comparisonOperator = 72;
-	public static readonly RULE_joinCommand = 73;
-	public static readonly RULE_joinTarget = 74;
-	public static readonly RULE_joinCondition = 75;
-	public static readonly RULE_joinPredicate = 76;
+	public static readonly RULE_rerankFields = 9;
+	public static readonly RULE_rerankField = 10;
+	public static readonly RULE_fromCommand = 11;
+	public static readonly RULE_timeSeriesCommand = 12;
+	public static readonly RULE_indexPatternAndMetadataFields = 13;
+	public static readonly RULE_indexPattern = 14;
+	public static readonly RULE_clusterString = 15;
+	public static readonly RULE_selectorString = 16;
+	public static readonly RULE_indexString = 17;
+	public static readonly RULE_metadata = 18;
+	public static readonly RULE_evalCommand = 19;
+	public static readonly RULE_statsCommand = 20;
+	public static readonly RULE_aggFields = 21;
+	public static readonly RULE_aggField = 22;
+	public static readonly RULE_qualifiedName = 23;
+	public static readonly RULE_qualifiedNamePattern = 24;
+	public static readonly RULE_qualifiedNamePatterns = 25;
+	public static readonly RULE_identifier = 26;
+	public static readonly RULE_identifierPattern = 27;
+	public static readonly RULE_parameter = 28;
+	public static readonly RULE_doubleParameter = 29;
+	public static readonly RULE_identifierOrParameter = 30;
+	public static readonly RULE_limitCommand = 31;
+	public static readonly RULE_sortCommand = 32;
+	public static readonly RULE_orderExpression = 33;
+	public static readonly RULE_keepCommand = 34;
+	public static readonly RULE_dropCommand = 35;
+	public static readonly RULE_renameCommand = 36;
+	public static readonly RULE_renameClause = 37;
+	public static readonly RULE_dissectCommand = 38;
+	public static readonly RULE_grokCommand = 39;
+	public static readonly RULE_mvExpandCommand = 40;
+	public static readonly RULE_commandOptions = 41;
+	public static readonly RULE_commandOption = 42;
+	public static readonly RULE_explainCommand = 43;
+	public static readonly RULE_subqueryExpression = 44;
+	public static readonly RULE_showCommand = 45;
+	public static readonly RULE_enrichCommand = 46;
+	public static readonly RULE_enrichWithClause = 47;
+	public static readonly RULE_lookupCommand = 48;
+	public static readonly RULE_inlinestatsCommand = 49;
+	public static readonly RULE_changePointCommand = 50;
+	public static readonly RULE_insistCommand = 51;
+	public static readonly RULE_forkCommand = 52;
+	public static readonly RULE_forkSubQueries = 53;
+	public static readonly RULE_forkSubQuery = 54;
+	public static readonly RULE_forkSubQueryCommand = 55;
+	public static readonly RULE_forkSubQueryProcessingCommand = 56;
+	public static readonly RULE_rrfCommand = 57;
+	public static readonly RULE_rerankCommand = 58;
+	public static readonly RULE_completionCommand = 59;
+	public static readonly RULE_sampleCommand = 60;
+	public static readonly RULE_booleanExpression = 61;
+	public static readonly RULE_regexBooleanExpression = 62;
+	public static readonly RULE_matchBooleanExpression = 63;
+	public static readonly RULE_valueExpression = 64;
+	public static readonly RULE_operatorExpression = 65;
+	public static readonly RULE_primaryExpression = 66;
+	public static readonly RULE_functionExpression = 67;
+	public static readonly RULE_functionName = 68;
+	public static readonly RULE_mapExpression = 69;
+	public static readonly RULE_entryExpression = 70;
+	public static readonly RULE_constant = 71;
+	public static readonly RULE_booleanValue = 72;
+	public static readonly RULE_numericValue = 73;
+	public static readonly RULE_decimalValue = 74;
+	public static readonly RULE_integerValue = 75;
+	public static readonly RULE_string = 76;
+	public static readonly RULE_comparisonOperator = 77;
+	public static readonly RULE_joinCommand = 78;
+	public static readonly RULE_joinTarget = 79;
+	public static readonly RULE_joinCondition = 80;
+	public static readonly RULE_joinPredicate = 81;
 	public static readonly literalNames: (string | null)[] = [ null, null, 
                                                             null, null, 
-                                                            null, "'enrich'", 
+                                                            "'change_point'", 
+                                                            "'enrich'", 
                                                             "'explain'", 
+                                                            "'completion'", 
                                                             "'dissect'", 
                                                             "'eval'", "'grok'", 
                                                             "'limit'", "'row'", 
                                                             "'sort'", "'stats'", 
                                                             "'where'", null, 
+                                                            null, null, 
                                                             "'from'", null, 
                                                             null, "'lookup'", 
                                                             null, null, 
@@ -261,8 +272,7 @@ export default class esql_parser extends parser_config {
                                                             "'rename'", 
                                                             "'show'", null, 
                                                             null, null, 
-                                                            null, "'on'", 
-                                                            "'with'", null, 
+                                                            null, null, 
                                                             null, null, 
                                                             null, null, 
                                                             null, null, 
@@ -271,31 +281,33 @@ export default class esql_parser extends parser_config {
                                                             null, null, 
                                                             null, "'|'", 
                                                             null, null, 
-                                                            null, "'by'", 
-                                                            "'and'", "'asc'", 
-                                                            "'='", "'::'", 
-                                                            "':'", "','", 
-                                                            "'desc'", "'.'", 
-                                                            "'false'", "'first'", 
-                                                            "'in'", "'is'", 
-                                                            "'last'", "'like'", 
-                                                            "'not'", "'null'", 
-                                                            "'nulls'", "'or'", 
+                                                            null, "'and'", 
+                                                            "'as'", "'asc'", 
+                                                            "'='", "'by'", 
+                                                            "'::'", "':'", 
+                                                            "','", "'desc'", 
+                                                            "'.'", "'false'", 
+                                                            "'first'", "'in'", 
+                                                            "'is'", "'last'", 
+                                                            "'like'", "'not'", 
+                                                            "'null'", "'nulls'", 
+                                                            "'on'", "'or'", 
                                                             "'?'", "'rlike'", 
-                                                            "'true'", "'=='", 
-                                                            "'=~'", "'!='", 
-                                                            "'<'", "'<='", 
-                                                            "'>'", "'>='", 
-                                                            "'+'", "'-'", 
-                                                            "'*'", "'/'", 
-                                                            "'%'", "'{'", 
-                                                            "'}'", "'??'", 
+                                                            "'true'", "'with'", 
+                                                            "'=='", "'=~'", 
+                                                            "'!='", "'<'", 
+                                                            "'<='", "'>'", 
+                                                            "'>='", "'+'", 
+                                                            "'-'", "'*'", 
+                                                            "'/'", "'%'", 
+                                                            "'{'", "'}'", 
+                                                            "'??'", null, 
                                                             null, null, 
-                                                            null, "']'", 
-                                                            null, "')'", 
+                                                            "']'", null, 
+                                                            "')'", null, 
                                                             null, null, 
                                                             null, null, 
-                                                            null, "'metadata'", 
+                                                            "'metadata'", 
                                                             null, null, 
                                                             null, null, 
                                                             null, null, 
@@ -308,19 +320,22 @@ export default class esql_parser extends parser_config {
                                                             null, null, 
                                                             null, null, 
                                                             null, null, 
-                                                            null, "'as'", 
                                                             null, null, 
-                                                            null, "'info'" ];
+                                                            null, null, 
+                                                            "'info'" ];
 	public static readonly symbolicNames: (string | null)[] = [ null, "LINE_COMMENT", 
                                                              "MULTILINE_COMMENT", 
-                                                             "WS", "DEV_CHANGE_POINT", 
+                                                             "WS", "CHANGE_POINT", 
                                                              "ENRICH", "EXPLAIN", 
+                                                             "COMPLETION", 
                                                              "DISSECT", 
                                                              "EVAL", "GROK", 
                                                              "LIMIT", "ROW", 
                                                              "SORT", "STATS", 
                                                              "WHERE", "DEV_INLINESTATS", 
-                                                             "FROM", "DEV_METRICS", 
+                                                             "DEV_RERANK", 
+                                                             "DEV_SAMPLE", 
+                                                             "FROM", "DEV_TIME_SERIES", 
                                                              "DEV_FORK", 
                                                              "JOIN_LOOKUP", 
                                                              "DEV_JOIN_FULL", 
@@ -336,7 +351,6 @@ export default class esql_parser extends parser_config {
                                                              "CHANGE_POINT_LINE_COMMENT", 
                                                              "CHANGE_POINT_MULTILINE_COMMENT", 
                                                              "CHANGE_POINT_WS", 
-                                                             "ON", "WITH", 
                                                              "ENRICH_POLICY_NAME", 
                                                              "ENRICH_LINE_COMMENT", 
                                                              "ENRICH_MULTILINE_COMMENT", 
@@ -354,18 +368,19 @@ export default class esql_parser extends parser_config {
                                                              "PIPE", "QUOTED_STRING", 
                                                              "INTEGER_LITERAL", 
                                                              "DECIMAL_LITERAL", 
-                                                             "BY", "AND", 
+                                                             "AND", "AS", 
                                                              "ASC", "ASSIGN", 
-                                                             "CAST_OP", 
+                                                             "BY", "CAST_OP", 
                                                              "COLON", "COMMA", 
                                                              "DESC", "DOT", 
                                                              "FALSE", "FIRST", 
                                                              "IN", "IS", 
                                                              "LAST", "LIKE", 
                                                              "NOT", "NULL", 
-                                                             "NULLS", "OR", 
-                                                             "PARAM", "RLIKE", 
-                                                             "TRUE", "EQ", 
+                                                             "NULLS", "ON", 
+                                                             "OR", "PARAM", 
+                                                             "RLIKE", "TRUE", 
+                                                             "WITH", "EQ", 
                                                              "CIEQ", "NEQ", 
                                                              "LT", "LTE", 
                                                              "GT", "GTE", 
@@ -410,7 +425,7 @@ export default class esql_parser extends parser_config {
                                                              "PROJECT_LINE_COMMENT", 
                                                              "PROJECT_MULTILINE_COMMENT", 
                                                              "PROJECT_WS", 
-                                                             "AS", "RENAME_LINE_COMMENT", 
+                                                             "RENAME_LINE_COMMENT", 
                                                              "RENAME_MULTILINE_COMMENT", 
                                                              "RENAME_WS", 
                                                              "INFO", "SHOW_LINE_COMMENT", 
@@ -419,22 +434,24 @@ export default class esql_parser extends parser_config {
 	// tslint:disable:no-trailing-whitespace
 	public static readonly ruleNames: string[] = [
 		"singleStatement", "query", "sourceCommand", "processingCommand", "whereCommand", 
-		"dataType", "rowCommand", "fields", "field", "fromCommand", "metricsCommand", 
-		"indexPatternAndMetadataFields", "indexPattern", "clusterString", "selectorString", 
-		"indexString", "metadata", "evalCommand", "statsCommand", "aggFields", 
-		"aggField", "qualifiedName", "qualifiedNamePattern", "qualifiedNamePatterns", 
-		"identifier", "identifierPattern", "parameter", "doubleParameter", "identifierOrParameter", 
-		"limitCommand", "sortCommand", "orderExpression", "keepCommand", "dropCommand", 
-		"renameCommand", "renameClause", "dissectCommand", "grokCommand", "mvExpandCommand", 
-		"commandOptions", "commandOption", "explainCommand", "subqueryExpression", 
-		"showCommand", "enrichCommand", "enrichWithClause", "lookupCommand", "inlinestatsCommand", 
+		"dataType", "rowCommand", "fields", "field", "rerankFields", "rerankField", 
+		"fromCommand", "timeSeriesCommand", "indexPatternAndMetadataFields", "indexPattern", 
+		"clusterString", "selectorString", "indexString", "metadata", "evalCommand", 
+		"statsCommand", "aggFields", "aggField", "qualifiedName", "qualifiedNamePattern", 
+		"qualifiedNamePatterns", "identifier", "identifierPattern", "parameter", 
+		"doubleParameter", "identifierOrParameter", "limitCommand", "sortCommand", 
+		"orderExpression", "keepCommand", "dropCommand", "renameCommand", "renameClause", 
+		"dissectCommand", "grokCommand", "mvExpandCommand", "commandOptions", 
+		"commandOption", "explainCommand", "subqueryExpression", "showCommand", 
+		"enrichCommand", "enrichWithClause", "lookupCommand", "inlinestatsCommand", 
 		"changePointCommand", "insistCommand", "forkCommand", "forkSubQueries", 
 		"forkSubQuery", "forkSubQueryCommand", "forkSubQueryProcessingCommand", 
-		"rrfCommand", "booleanExpression", "regexBooleanExpression", "matchBooleanExpression", 
-		"valueExpression", "operatorExpression", "primaryExpression", "functionExpression", 
-		"functionName", "mapExpression", "entryExpression", "constant", "booleanValue", 
-		"numericValue", "decimalValue", "integerValue", "string", "comparisonOperator", 
-		"joinCommand", "joinTarget", "joinCondition", "joinPredicate",
+		"rrfCommand", "rerankCommand", "completionCommand", "sampleCommand", "booleanExpression", 
+		"regexBooleanExpression", "matchBooleanExpression", "valueExpression", 
+		"operatorExpression", "primaryExpression", "functionExpression", "functionName", 
+		"mapExpression", "entryExpression", "constant", "booleanValue", "numericValue", 
+		"decimalValue", "integerValue", "string", "comparisonOperator", "joinCommand", 
+		"joinTarget", "joinCondition", "joinPredicate",
 	];
 	public get grammarFileName(): string { return "esql_parser.g4"; }
 	public get literalNames(): (string | null)[] { return esql_parser.literalNames; }
@@ -457,9 +474,9 @@ export default class esql_parser extends parser_config {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 154;
+			this.state = 164;
 			this.query(0);
-			this.state = 155;
+			this.state = 165;
 			this.match(esql_parser.EOF);
 			}
 		}
@@ -501,11 +518,11 @@ export default class esql_parser extends parser_config {
 			this._ctx = localctx;
 			_prevctx = localctx;
 
-			this.state = 158;
+			this.state = 168;
 			this.sourceCommand();
 			}
 			this._ctx.stop = this._input.LT(-1);
-			this.state = 165;
+			this.state = 175;
 			this._errHandler.sync(this);
 			_alt = this._interp.adaptivePredict(this._input, 0, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
@@ -518,18 +535,18 @@ export default class esql_parser extends parser_config {
 					{
 					localctx = new CompositeQueryContext(this, new QueryContext(this, _parentctx, _parentState));
 					this.pushNewRecursionContext(localctx, _startState, esql_parser.RULE_query);
-					this.state = 160;
+					this.state = 170;
 					if (!(this.precpred(this._ctx, 1))) {
 						throw this.createFailedPredicateException("this.precpred(this._ctx, 1)");
 					}
-					this.state = 161;
+					this.state = 171;
 					this.match(esql_parser.PIPE);
-					this.state = 162;
+					this.state = 172;
 					this.processingCommand();
 					}
 					}
 				}
-				this.state = 167;
+				this.state = 177;
 				this._errHandler.sync(this);
 				_alt = this._interp.adaptivePredict(this._input, 0, this._ctx);
 			}
@@ -554,46 +571,46 @@ export default class esql_parser extends parser_config {
 		let localctx: SourceCommandContext = new SourceCommandContext(this, this._ctx, this.state);
 		this.enterRule(localctx, 4, esql_parser.RULE_sourceCommand);
 		try {
-			this.state = 174;
+			this.state = 184;
 			this._errHandler.sync(this);
 			switch ( this._interp.adaptivePredict(this._input, 1, this._ctx) ) {
 			case 1:
 				this.enterOuterAlt(localctx, 1);
 				{
-				this.state = 168;
+				this.state = 178;
 				this.explainCommand();
 				}
 				break;
 			case 2:
 				this.enterOuterAlt(localctx, 2);
 				{
-				this.state = 169;
+				this.state = 179;
 				this.fromCommand();
 				}
 				break;
 			case 3:
 				this.enterOuterAlt(localctx, 3);
 				{
-				this.state = 170;
+				this.state = 180;
 				this.rowCommand();
 				}
 				break;
 			case 4:
 				this.enterOuterAlt(localctx, 4);
 				{
-				this.state = 171;
+				this.state = 181;
 				this.showCommand();
 				}
 				break;
 			case 5:
 				this.enterOuterAlt(localctx, 5);
 				{
-				this.state = 172;
+				this.state = 182;
 				if (!(this.isDevVersion())) {
 					throw this.createFailedPredicateException("this.isDevVersion()");
 				}
-				this.state = 173;
-				this.metricsCommand();
+				this.state = 183;
+				this.timeSeriesCommand();
 				}
 				break;
 			}
@@ -617,164 +634,189 @@ export default class esql_parser extends parser_config {
 		let localctx: ProcessingCommandContext = new ProcessingCommandContext(this, this._ctx, this.state);
 		this.enterRule(localctx, 6, esql_parser.RULE_processingCommand);
 		try {
-			this.state = 201;
+			this.state = 215;
 			this._errHandler.sync(this);
 			switch ( this._interp.adaptivePredict(this._input, 2, this._ctx) ) {
 			case 1:
 				this.enterOuterAlt(localctx, 1);
 				{
-				this.state = 176;
+				this.state = 186;
 				this.evalCommand();
 				}
 				break;
 			case 2:
 				this.enterOuterAlt(localctx, 2);
 				{
-				this.state = 177;
+				this.state = 187;
 				this.whereCommand();
 				}
 				break;
 			case 3:
 				this.enterOuterAlt(localctx, 3);
 				{
-				this.state = 178;
+				this.state = 188;
 				this.keepCommand();
 				}
 				break;
 			case 4:
 				this.enterOuterAlt(localctx, 4);
 				{
-				this.state = 179;
+				this.state = 189;
 				this.limitCommand();
 				}
 				break;
 			case 5:
 				this.enterOuterAlt(localctx, 5);
 				{
-				this.state = 180;
+				this.state = 190;
 				this.statsCommand();
 				}
 				break;
 			case 6:
 				this.enterOuterAlt(localctx, 6);
 				{
-				this.state = 181;
+				this.state = 191;
 				this.sortCommand();
 				}
 				break;
 			case 7:
 				this.enterOuterAlt(localctx, 7);
 				{
-				this.state = 182;
+				this.state = 192;
 				this.dropCommand();
 				}
 				break;
 			case 8:
 				this.enterOuterAlt(localctx, 8);
 				{
-				this.state = 183;
+				this.state = 193;
 				this.renameCommand();
 				}
 				break;
 			case 9:
 				this.enterOuterAlt(localctx, 9);
 				{
-				this.state = 184;
+				this.state = 194;
 				this.dissectCommand();
 				}
 				break;
 			case 10:
 				this.enterOuterAlt(localctx, 10);
 				{
-				this.state = 185;
+				this.state = 195;
 				this.grokCommand();
 				}
 				break;
 			case 11:
 				this.enterOuterAlt(localctx, 11);
 				{
-				this.state = 186;
+				this.state = 196;
 				this.enrichCommand();
 				}
 				break;
 			case 12:
 				this.enterOuterAlt(localctx, 12);
 				{
-				this.state = 187;
+				this.state = 197;
 				this.mvExpandCommand();
 				}
 				break;
 			case 13:
 				this.enterOuterAlt(localctx, 13);
 				{
-				this.state = 188;
+				this.state = 198;
 				this.joinCommand();
 				}
 				break;
 			case 14:
 				this.enterOuterAlt(localctx, 14);
 				{
-				this.state = 189;
-				if (!(this.isDevVersion())) {
-					throw this.createFailedPredicateException("this.isDevVersion()");
-				}
-				this.state = 190;
-				this.inlinestatsCommand();
+				this.state = 199;
+				this.changePointCommand();
 				}
 				break;
 			case 15:
 				this.enterOuterAlt(localctx, 15);
 				{
-				this.state = 191;
-				if (!(this.isDevVersion())) {
-					throw this.createFailedPredicateException("this.isDevVersion()");
-				}
-				this.state = 192;
-				this.lookupCommand();
+				this.state = 200;
+				this.completionCommand();
 				}
 				break;
 			case 16:
 				this.enterOuterAlt(localctx, 16);
 				{
-				this.state = 193;
+				this.state = 201;
 				if (!(this.isDevVersion())) {
 					throw this.createFailedPredicateException("this.isDevVersion()");
 				}
-				this.state = 194;
-				this.changePointCommand();
+				this.state = 202;
+				this.inlinestatsCommand();
 				}
 				break;
 			case 17:
 				this.enterOuterAlt(localctx, 17);
 				{
-				this.state = 195;
+				this.state = 203;
 				if (!(this.isDevVersion())) {
 					throw this.createFailedPredicateException("this.isDevVersion()");
 				}
-				this.state = 196;
-				this.insistCommand();
+				this.state = 204;
+				this.lookupCommand();
 				}
 				break;
 			case 18:
 				this.enterOuterAlt(localctx, 18);
 				{
-				this.state = 197;
+				this.state = 205;
 				if (!(this.isDevVersion())) {
 					throw this.createFailedPredicateException("this.isDevVersion()");
 				}
-				this.state = 198;
-				this.forkCommand();
+				this.state = 206;
+				this.insistCommand();
 				}
 				break;
 			case 19:
 				this.enterOuterAlt(localctx, 19);
 				{
-				this.state = 199;
+				this.state = 207;
 				if (!(this.isDevVersion())) {
 					throw this.createFailedPredicateException("this.isDevVersion()");
 				}
-				this.state = 200;
+				this.state = 208;
+				this.forkCommand();
+				}
+				break;
+			case 20:
+				this.enterOuterAlt(localctx, 20);
+				{
+				this.state = 209;
+				if (!(this.isDevVersion())) {
+					throw this.createFailedPredicateException("this.isDevVersion()");
+				}
+				this.state = 210;
+				this.rerankCommand();
+				}
+				break;
+			case 21:
+				this.enterOuterAlt(localctx, 21);
+				{
+				this.state = 211;
+				if (!(this.isDevVersion())) {
+					throw this.createFailedPredicateException("this.isDevVersion()");
+				}
+				this.state = 212;
 				this.rrfCommand();
+				}
+				break;
+			case 22:
+				this.enterOuterAlt(localctx, 22);
+				{
+				this.state = 213;
+				if (!(this.isDevVersion())) {
+					throw this.createFailedPredicateException("this.isDevVersion()");
+				}
+				this.state = 214;
+				this.sampleCommand();
 				}
 				break;
 			}
@@ -800,9 +842,9 @@ export default class esql_parser extends parser_config {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 203;
+			this.state = 217;
 			this.match(esql_parser.WHERE);
-			this.state = 204;
+			this.state = 218;
 			this.booleanExpression(0);
 			}
 		}
@@ -828,7 +870,7 @@ export default class esql_parser extends parser_config {
 			localctx = new ToDataTypeContext(this, localctx);
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 206;
+			this.state = 220;
 			this.identifier();
 			}
 		}
@@ -853,9 +895,9 @@ export default class esql_parser extends parser_config {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 208;
+			this.state = 222;
 			this.match(esql_parser.ROW);
-			this.state = 209;
+			this.state = 223;
 			this.fields();
 			}
 		}
@@ -881,23 +923,23 @@ export default class esql_parser extends parser_config {
 			let _alt: number;
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 211;
+			this.state = 225;
 			this.field();
-			this.state = 216;
+			this.state = 230;
 			this._errHandler.sync(this);
 			_alt = this._interp.adaptivePredict(this._input, 3, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 				if (_alt === 1) {
 					{
 					{
-					this.state = 212;
+					this.state = 226;
 					this.match(esql_parser.COMMA);
-					this.state = 213;
+					this.state = 227;
 					this.field();
 					}
 					}
 				}
-				this.state = 218;
+				this.state = 232;
 				this._errHandler.sync(this);
 				_alt = this._interp.adaptivePredict(this._input, 3, this._ctx);
 			}
@@ -924,20 +966,101 @@ export default class esql_parser extends parser_config {
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 222;
+			this.state = 236;
 			this._errHandler.sync(this);
 			switch ( this._interp.adaptivePredict(this._input, 4, this._ctx) ) {
 			case 1:
 				{
-				this.state = 219;
+				this.state = 233;
 				this.qualifiedName();
-				this.state = 220;
+				this.state = 234;
 				this.match(esql_parser.ASSIGN);
 				}
 				break;
 			}
-			this.state = 224;
+			this.state = 238;
 			this.booleanExpression(0);
+			}
+		}
+		catch (re) {
+			if (re instanceof RecognitionException) {
+				localctx.exception = re;
+				this._errHandler.reportError(this, re);
+				this._errHandler.recover(this, re);
+			} else {
+				throw re;
+			}
+		}
+		finally {
+			this.exitRule();
+		}
+		return localctx;
+	}
+	// @RuleVersion(0)
+	public rerankFields(): RerankFieldsContext {
+		let localctx: RerankFieldsContext = new RerankFieldsContext(this, this._ctx, this.state);
+		this.enterRule(localctx, 18, esql_parser.RULE_rerankFields);
+		try {
+			let _alt: number;
+			this.enterOuterAlt(localctx, 1);
+			{
+			this.state = 240;
+			this.rerankField();
+			this.state = 245;
+			this._errHandler.sync(this);
+			_alt = this._interp.adaptivePredict(this._input, 5, this._ctx);
+			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
+				if (_alt === 1) {
+					{
+					{
+					this.state = 241;
+					this.match(esql_parser.COMMA);
+					this.state = 242;
+					this.rerankField();
+					}
+					}
+				}
+				this.state = 247;
+				this._errHandler.sync(this);
+				_alt = this._interp.adaptivePredict(this._input, 5, this._ctx);
+			}
+			}
+		}
+		catch (re) {
+			if (re instanceof RecognitionException) {
+				localctx.exception = re;
+				this._errHandler.reportError(this, re);
+				this._errHandler.recover(this, re);
+			} else {
+				throw re;
+			}
+		}
+		finally {
+			this.exitRule();
+		}
+		return localctx;
+	}
+	// @RuleVersion(0)
+	public rerankField(): RerankFieldContext {
+		let localctx: RerankFieldContext = new RerankFieldContext(this, this._ctx, this.state);
+		this.enterRule(localctx, 20, esql_parser.RULE_rerankField);
+		try {
+			this.enterOuterAlt(localctx, 1);
+			{
+			this.state = 248;
+			this.qualifiedName();
+			this.state = 251;
+			this._errHandler.sync(this);
+			switch ( this._interp.adaptivePredict(this._input, 6, this._ctx) ) {
+			case 1:
+				{
+				this.state = 249;
+				this.match(esql_parser.ASSIGN);
+				this.state = 250;
+				this.booleanExpression(0);
+				}
+				break;
+			}
 			}
 		}
 		catch (re) {
@@ -957,13 +1080,13 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public fromCommand(): FromCommandContext {
 		let localctx: FromCommandContext = new FromCommandContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 18, esql_parser.RULE_fromCommand);
+		this.enterRule(localctx, 22, esql_parser.RULE_fromCommand);
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 226;
+			this.state = 253;
 			this.match(esql_parser.FROM);
-			this.state = 227;
+			this.state = 254;
 			this.indexPatternAndMetadataFields();
 			}
 		}
@@ -982,15 +1105,15 @@ export default class esql_parser extends parser_config {
 		return localctx;
 	}
 	// @RuleVersion(0)
-	public metricsCommand(): MetricsCommandContext {
-		let localctx: MetricsCommandContext = new MetricsCommandContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 20, esql_parser.RULE_metricsCommand);
+	public timeSeriesCommand(): TimeSeriesCommandContext {
+		let localctx: TimeSeriesCommandContext = new TimeSeriesCommandContext(this, this._ctx, this.state);
+		this.enterRule(localctx, 24, esql_parser.RULE_timeSeriesCommand);
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 229;
-			this.match(esql_parser.DEV_METRICS);
-			this.state = 230;
+			this.state = 256;
+			this.match(esql_parser.DEV_TIME_SERIES);
+			this.state = 257;
 			this.indexPatternAndMetadataFields();
 			}
 		}
@@ -1011,37 +1134,37 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public indexPatternAndMetadataFields(): IndexPatternAndMetadataFieldsContext {
 		let localctx: IndexPatternAndMetadataFieldsContext = new IndexPatternAndMetadataFieldsContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 22, esql_parser.RULE_indexPatternAndMetadataFields);
+		this.enterRule(localctx, 26, esql_parser.RULE_indexPatternAndMetadataFields);
 		try {
 			let _alt: number;
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 232;
+			this.state = 259;
 			this.indexPattern();
-			this.state = 237;
+			this.state = 264;
 			this._errHandler.sync(this);
-			_alt = this._interp.adaptivePredict(this._input, 5, this._ctx);
+			_alt = this._interp.adaptivePredict(this._input, 7, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 				if (_alt === 1) {
 					{
 					{
-					this.state = 233;
+					this.state = 260;
 					this.match(esql_parser.COMMA);
-					this.state = 234;
+					this.state = 261;
 					this.indexPattern();
 					}
 					}
 				}
-				this.state = 239;
+				this.state = 266;
 				this._errHandler.sync(this);
-				_alt = this._interp.adaptivePredict(this._input, 5, this._ctx);
+				_alt = this._interp.adaptivePredict(this._input, 7, this._ctx);
 			}
-			this.state = 241;
+			this.state = 268;
 			this._errHandler.sync(this);
-			switch ( this._interp.adaptivePredict(this._input, 6, this._ctx) ) {
+			switch ( this._interp.adaptivePredict(this._input, 8, this._ctx) ) {
 			case 1:
 				{
-				this.state = 240;
+				this.state = 267;
 				this.metadata();
 				}
 				break;
@@ -1065,47 +1188,43 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public indexPattern(): IndexPatternContext {
 		let localctx: IndexPatternContext = new IndexPatternContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 24, esql_parser.RULE_indexPattern);
+		this.enterRule(localctx, 28, esql_parser.RULE_indexPattern);
 		try {
-			this.state = 255;
+			this.state = 281;
 			this._errHandler.sync(this);
-			switch ( this._interp.adaptivePredict(this._input, 9, this._ctx) ) {
+			switch ( this._interp.adaptivePredict(this._input, 11, this._ctx) ) {
 			case 1:
 				this.enterOuterAlt(localctx, 1);
 				{
-				this.state = 246;
+				this.state = 273;
 				this._errHandler.sync(this);
-				switch ( this._interp.adaptivePredict(this._input, 7, this._ctx) ) {
+				switch ( this._interp.adaptivePredict(this._input, 9, this._ctx) ) {
 				case 1:
 					{
-					this.state = 243;
+					this.state = 270;
 					this.clusterString();
-					this.state = 244;
+					this.state = 271;
 					this.match(esql_parser.COLON);
 					}
 					break;
 				}
-				this.state = 248;
+				this.state = 275;
 				this.indexString();
 				}
 				break;
 			case 2:
 				this.enterOuterAlt(localctx, 2);
 				{
-				this.state = 249;
-				if (!(this.isDevVersion())) {
-					throw this.createFailedPredicateException("this.isDevVersion()");
-				}
-				this.state = 250;
+				this.state = 276;
 				this.indexString();
-				this.state = 253;
+				this.state = 279;
 				this._errHandler.sync(this);
-				switch ( this._interp.adaptivePredict(this._input, 8, this._ctx) ) {
+				switch ( this._interp.adaptivePredict(this._input, 10, this._ctx) ) {
 				case 1:
 					{
-					this.state = 251;
+					this.state = 277;
 					this.match(esql_parser.CAST_OP);
-					this.state = 252;
+					this.state = 278;
 					this.selectorString();
 					}
 					break;
@@ -1131,14 +1250,14 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public clusterString(): ClusterStringContext {
 		let localctx: ClusterStringContext = new ClusterStringContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 26, esql_parser.RULE_clusterString);
+		this.enterRule(localctx, 30, esql_parser.RULE_clusterString);
 		let _la: number;
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 257;
+			this.state = 283;
 			_la = this._input.LA(1);
-			if(!(_la===52 || _la===104)) {
+			if(!(_la===53 || _la===108)) {
 			this._errHandler.recoverInline(this);
 			}
 			else {
@@ -1164,14 +1283,14 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public selectorString(): SelectorStringContext {
 		let localctx: SelectorStringContext = new SelectorStringContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 28, esql_parser.RULE_selectorString);
+		this.enterRule(localctx, 32, esql_parser.RULE_selectorString);
 		let _la: number;
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 259;
+			this.state = 285;
 			_la = this._input.LA(1);
-			if(!(_la===52 || _la===104)) {
+			if(!(_la===53 || _la===108)) {
 			this._errHandler.recoverInline(this);
 			}
 			else {
@@ -1197,14 +1316,14 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public indexString(): IndexStringContext {
 		let localctx: IndexStringContext = new IndexStringContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 30, esql_parser.RULE_indexString);
+		this.enterRule(localctx, 34, esql_parser.RULE_indexString);
 		let _la: number;
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 261;
+			this.state = 287;
 			_la = this._input.LA(1);
-			if(!(_la===52 || _la===104)) {
+			if(!(_la===53 || _la===108)) {
 			this._errHandler.recoverInline(this);
 			}
 			else {
@@ -1230,32 +1349,32 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public metadata(): MetadataContext {
 		let localctx: MetadataContext = new MetadataContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 32, esql_parser.RULE_metadata);
+		this.enterRule(localctx, 36, esql_parser.RULE_metadata);
 		try {
 			let _alt: number;
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 263;
+			this.state = 289;
 			this.match(esql_parser.METADATA);
-			this.state = 264;
+			this.state = 290;
 			this.match(esql_parser.UNQUOTED_SOURCE);
-			this.state = 269;
+			this.state = 295;
 			this._errHandler.sync(this);
-			_alt = this._interp.adaptivePredict(this._input, 10, this._ctx);
+			_alt = this._interp.adaptivePredict(this._input, 12, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 				if (_alt === 1) {
 					{
 					{
-					this.state = 265;
+					this.state = 291;
 					this.match(esql_parser.COMMA);
-					this.state = 266;
+					this.state = 292;
 					this.match(esql_parser.UNQUOTED_SOURCE);
 					}
 					}
 				}
-				this.state = 271;
+				this.state = 297;
 				this._errHandler.sync(this);
-				_alt = this._interp.adaptivePredict(this._input, 10, this._ctx);
+				_alt = this._interp.adaptivePredict(this._input, 12, this._ctx);
 			}
 			}
 		}
@@ -1276,13 +1395,13 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public evalCommand(): EvalCommandContext {
 		let localctx: EvalCommandContext = new EvalCommandContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 34, esql_parser.RULE_evalCommand);
+		this.enterRule(localctx, 38, esql_parser.RULE_evalCommand);
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 272;
+			this.state = 298;
 			this.match(esql_parser.EVAL);
-			this.state = 273;
+			this.state = 299;
 			this.fields();
 			}
 		}
@@ -1303,30 +1422,30 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public statsCommand(): StatsCommandContext {
 		let localctx: StatsCommandContext = new StatsCommandContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 36, esql_parser.RULE_statsCommand);
+		this.enterRule(localctx, 40, esql_parser.RULE_statsCommand);
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 275;
+			this.state = 301;
 			this.match(esql_parser.STATS);
-			this.state = 277;
+			this.state = 303;
 			this._errHandler.sync(this);
-			switch ( this._interp.adaptivePredict(this._input, 11, this._ctx) ) {
+			switch ( this._interp.adaptivePredict(this._input, 13, this._ctx) ) {
 			case 1:
 				{
-				this.state = 276;
+				this.state = 302;
 				localctx._stats = this.aggFields();
 				}
 				break;
 			}
-			this.state = 281;
+			this.state = 307;
 			this._errHandler.sync(this);
-			switch ( this._interp.adaptivePredict(this._input, 12, this._ctx) ) {
+			switch ( this._interp.adaptivePredict(this._input, 14, this._ctx) ) {
 			case 1:
 				{
-				this.state = 279;
+				this.state = 305;
 				this.match(esql_parser.BY);
-				this.state = 280;
+				this.state = 306;
 				localctx._grouping = this.fields();
 				}
 				break;
@@ -1350,30 +1469,30 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public aggFields(): AggFieldsContext {
 		let localctx: AggFieldsContext = new AggFieldsContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 38, esql_parser.RULE_aggFields);
+		this.enterRule(localctx, 42, esql_parser.RULE_aggFields);
 		try {
 			let _alt: number;
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 283;
+			this.state = 309;
 			this.aggField();
-			this.state = 288;
+			this.state = 314;
 			this._errHandler.sync(this);
-			_alt = this._interp.adaptivePredict(this._input, 13, this._ctx);
+			_alt = this._interp.adaptivePredict(this._input, 15, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 				if (_alt === 1) {
 					{
 					{
-					this.state = 284;
+					this.state = 310;
 					this.match(esql_parser.COMMA);
-					this.state = 285;
+					this.state = 311;
 					this.aggField();
 					}
 					}
 				}
-				this.state = 290;
+				this.state = 316;
 				this._errHandler.sync(this);
-				_alt = this._interp.adaptivePredict(this._input, 13, this._ctx);
+				_alt = this._interp.adaptivePredict(this._input, 15, this._ctx);
 			}
 			}
 		}
@@ -1394,20 +1513,20 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public aggField(): AggFieldContext {
 		let localctx: AggFieldContext = new AggFieldContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 40, esql_parser.RULE_aggField);
+		this.enterRule(localctx, 44, esql_parser.RULE_aggField);
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 291;
+			this.state = 317;
 			this.field();
-			this.state = 294;
+			this.state = 320;
 			this._errHandler.sync(this);
-			switch ( this._interp.adaptivePredict(this._input, 14, this._ctx) ) {
+			switch ( this._interp.adaptivePredict(this._input, 16, this._ctx) ) {
 			case 1:
 				{
-				this.state = 292;
+				this.state = 318;
 				this.match(esql_parser.WHERE);
-				this.state = 293;
+				this.state = 319;
 				this.booleanExpression(0);
 				}
 				break;
@@ -1431,116 +1550,28 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public qualifiedName(): QualifiedNameContext {
 		let localctx: QualifiedNameContext = new QualifiedNameContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 42, esql_parser.RULE_qualifiedName);
+		this.enterRule(localctx, 46, esql_parser.RULE_qualifiedName);
 		try {
 			let _alt: number;
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 296;
+			this.state = 322;
 			this.identifierOrParameter();
-			this.state = 301;
-			this._errHandler.sync(this);
-			_alt = this._interp.adaptivePredict(this._input, 15, this._ctx);
-			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
-				if (_alt === 1) {
-					{
-					{
-					this.state = 297;
-					this.match(esql_parser.DOT);
-					this.state = 298;
-					this.identifierOrParameter();
-					}
-					}
-				}
-				this.state = 303;
-				this._errHandler.sync(this);
-				_alt = this._interp.adaptivePredict(this._input, 15, this._ctx);
-			}
-			}
-		}
-		catch (re) {
-			if (re instanceof RecognitionException) {
-				localctx.exception = re;
-				this._errHandler.reportError(this, re);
-				this._errHandler.recover(this, re);
-			} else {
-				throw re;
-			}
-		}
-		finally {
-			this.exitRule();
-		}
-		return localctx;
-	}
-	// @RuleVersion(0)
-	public qualifiedNamePattern(): QualifiedNamePatternContext {
-		let localctx: QualifiedNamePatternContext = new QualifiedNamePatternContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 44, esql_parser.RULE_qualifiedNamePattern);
-		try {
-			let _alt: number;
-			this.enterOuterAlt(localctx, 1);
-			{
-			this.state = 304;
-			this.identifierPattern();
-			this.state = 309;
-			this._errHandler.sync(this);
-			_alt = this._interp.adaptivePredict(this._input, 16, this._ctx);
-			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
-				if (_alt === 1) {
-					{
-					{
-					this.state = 305;
-					this.match(esql_parser.DOT);
-					this.state = 306;
-					this.identifierPattern();
-					}
-					}
-				}
-				this.state = 311;
-				this._errHandler.sync(this);
-				_alt = this._interp.adaptivePredict(this._input, 16, this._ctx);
-			}
-			}
-		}
-		catch (re) {
-			if (re instanceof RecognitionException) {
-				localctx.exception = re;
-				this._errHandler.reportError(this, re);
-				this._errHandler.recover(this, re);
-			} else {
-				throw re;
-			}
-		}
-		finally {
-			this.exitRule();
-		}
-		return localctx;
-	}
-	// @RuleVersion(0)
-	public qualifiedNamePatterns(): QualifiedNamePatternsContext {
-		let localctx: QualifiedNamePatternsContext = new QualifiedNamePatternsContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 46, esql_parser.RULE_qualifiedNamePatterns);
-		try {
-			let _alt: number;
-			this.enterOuterAlt(localctx, 1);
-			{
-			this.state = 312;
-			this.qualifiedNamePattern();
-			this.state = 317;
+			this.state = 327;
 			this._errHandler.sync(this);
 			_alt = this._interp.adaptivePredict(this._input, 17, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 				if (_alt === 1) {
 					{
 					{
-					this.state = 313;
-					this.match(esql_parser.COMMA);
-					this.state = 314;
-					this.qualifiedNamePattern();
+					this.state = 323;
+					this.match(esql_parser.DOT);
+					this.state = 324;
+					this.identifierOrParameter();
 					}
 					}
 				}
-				this.state = 319;
+				this.state = 329;
 				this._errHandler.sync(this);
 				_alt = this._interp.adaptivePredict(this._input, 17, this._ctx);
 			}
@@ -1561,16 +1592,104 @@ export default class esql_parser extends parser_config {
 		return localctx;
 	}
 	// @RuleVersion(0)
+	public qualifiedNamePattern(): QualifiedNamePatternContext {
+		let localctx: QualifiedNamePatternContext = new QualifiedNamePatternContext(this, this._ctx, this.state);
+		this.enterRule(localctx, 48, esql_parser.RULE_qualifiedNamePattern);
+		try {
+			let _alt: number;
+			this.enterOuterAlt(localctx, 1);
+			{
+			this.state = 330;
+			this.identifierPattern();
+			this.state = 335;
+			this._errHandler.sync(this);
+			_alt = this._interp.adaptivePredict(this._input, 18, this._ctx);
+			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
+				if (_alt === 1) {
+					{
+					{
+					this.state = 331;
+					this.match(esql_parser.DOT);
+					this.state = 332;
+					this.identifierPattern();
+					}
+					}
+				}
+				this.state = 337;
+				this._errHandler.sync(this);
+				_alt = this._interp.adaptivePredict(this._input, 18, this._ctx);
+			}
+			}
+		}
+		catch (re) {
+			if (re instanceof RecognitionException) {
+				localctx.exception = re;
+				this._errHandler.reportError(this, re);
+				this._errHandler.recover(this, re);
+			} else {
+				throw re;
+			}
+		}
+		finally {
+			this.exitRule();
+		}
+		return localctx;
+	}
+	// @RuleVersion(0)
+	public qualifiedNamePatterns(): QualifiedNamePatternsContext {
+		let localctx: QualifiedNamePatternsContext = new QualifiedNamePatternsContext(this, this._ctx, this.state);
+		this.enterRule(localctx, 50, esql_parser.RULE_qualifiedNamePatterns);
+		try {
+			let _alt: number;
+			this.enterOuterAlt(localctx, 1);
+			{
+			this.state = 338;
+			this.qualifiedNamePattern();
+			this.state = 343;
+			this._errHandler.sync(this);
+			_alt = this._interp.adaptivePredict(this._input, 19, this._ctx);
+			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
+				if (_alt === 1) {
+					{
+					{
+					this.state = 339;
+					this.match(esql_parser.COMMA);
+					this.state = 340;
+					this.qualifiedNamePattern();
+					}
+					}
+				}
+				this.state = 345;
+				this._errHandler.sync(this);
+				_alt = this._interp.adaptivePredict(this._input, 19, this._ctx);
+			}
+			}
+		}
+		catch (re) {
+			if (re instanceof RecognitionException) {
+				localctx.exception = re;
+				this._errHandler.reportError(this, re);
+				this._errHandler.recover(this, re);
+			} else {
+				throw re;
+			}
+		}
+		finally {
+			this.exitRule();
+		}
+		return localctx;
+	}
+	// @RuleVersion(0)
 	public identifier(): IdentifierContext {
 		let localctx: IdentifierContext = new IdentifierContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 48, esql_parser.RULE_identifier);
+		this.enterRule(localctx, 52, esql_parser.RULE_identifier);
 		let _la: number;
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 320;
+			this.state = 346;
 			_la = this._input.LA(1);
-			if(!(_la===98 || _la===99)) {
+			if(!(_la===102 || _la===103)) {
 			this._errHandler.recoverInline(this);
 			}
 			else {
@@ -1596,31 +1715,31 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public identifierPattern(): IdentifierPatternContext {
 		let localctx: IdentifierPatternContext = new IdentifierPatternContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 50, esql_parser.RULE_identifierPattern);
+		this.enterRule(localctx, 54, esql_parser.RULE_identifierPattern);
 		try {
-			this.state = 325;
+			this.state = 351;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case 125:
+			case 129:
 				this.enterOuterAlt(localctx, 1);
 				{
-				this.state = 322;
+				this.state = 348;
 				this.match(esql_parser.ID_PATTERN);
 				}
 				break;
-			case 74:
-			case 92:
+			case 77:
+			case 96:
 				this.enterOuterAlt(localctx, 2);
 				{
-				this.state = 323;
+				this.state = 349;
 				this.parameter();
 				}
 				break;
-			case 91:
-			case 93:
+			case 95:
+			case 97:
 				this.enterOuterAlt(localctx, 3);
 				{
-				this.state = 324;
+				this.state = 350;
 				this.doubleParameter();
 				}
 				break;
@@ -1645,24 +1764,24 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public parameter(): ParameterContext {
 		let localctx: ParameterContext = new ParameterContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 52, esql_parser.RULE_parameter);
+		this.enterRule(localctx, 56, esql_parser.RULE_parameter);
 		try {
-			this.state = 329;
+			this.state = 355;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case 74:
+			case 77:
 				localctx = new InputParamContext(this, localctx);
 				this.enterOuterAlt(localctx, 1);
 				{
-				this.state = 327;
+				this.state = 353;
 				this.match(esql_parser.PARAM);
 				}
 				break;
-			case 92:
+			case 96:
 				localctx = new InputNamedOrPositionalParamContext(this, localctx);
 				this.enterOuterAlt(localctx, 2);
 				{
-				this.state = 328;
+				this.state = 354;
 				this.match(esql_parser.NAMED_OR_POSITIONAL_PARAM);
 				}
 				break;
@@ -1687,24 +1806,24 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public doubleParameter(): DoubleParameterContext {
 		let localctx: DoubleParameterContext = new DoubleParameterContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 54, esql_parser.RULE_doubleParameter);
+		this.enterRule(localctx, 58, esql_parser.RULE_doubleParameter);
 		try {
-			this.state = 333;
+			this.state = 359;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case 91:
+			case 95:
 				localctx = new InputDoubleParamsContext(this, localctx);
 				this.enterOuterAlt(localctx, 1);
 				{
-				this.state = 331;
+				this.state = 357;
 				this.match(esql_parser.DOUBLE_PARAMS);
 				}
 				break;
-			case 93:
+			case 97:
 				localctx = new InputNamedOrPositionalDoubleParamsContext(this, localctx);
 				this.enterOuterAlt(localctx, 2);
 				{
-				this.state = 332;
+				this.state = 358;
 				this.match(esql_parser.NAMED_OR_POSITIONAL_DOUBLE_PARAMS);
 				}
 				break;
@@ -1729,32 +1848,32 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public identifierOrParameter(): IdentifierOrParameterContext {
 		let localctx: IdentifierOrParameterContext = new IdentifierOrParameterContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 56, esql_parser.RULE_identifierOrParameter);
+		this.enterRule(localctx, 60, esql_parser.RULE_identifierOrParameter);
 		try {
-			this.state = 338;
+			this.state = 364;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case 98:
-			case 99:
+			case 102:
+			case 103:
 				this.enterOuterAlt(localctx, 1);
 				{
-				this.state = 335;
+				this.state = 361;
 				this.identifier();
 				}
 				break;
-			case 74:
-			case 92:
+			case 77:
+			case 96:
 				this.enterOuterAlt(localctx, 2);
 				{
-				this.state = 336;
+				this.state = 362;
 				this.parameter();
 				}
 				break;
-			case 91:
-			case 93:
+			case 95:
+			case 97:
 				this.enterOuterAlt(localctx, 3);
 				{
-				this.state = 337;
+				this.state = 363;
 				this.doubleParameter();
 				}
 				break;
@@ -1779,14 +1898,14 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public limitCommand(): LimitCommandContext {
 		let localctx: LimitCommandContext = new LimitCommandContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 58, esql_parser.RULE_limitCommand);
+		this.enterRule(localctx, 62, esql_parser.RULE_limitCommand);
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 340;
+			this.state = 366;
 			this.match(esql_parser.LIMIT);
-			this.state = 341;
-			this.match(esql_parser.INTEGER_LITERAL);
+			this.state = 367;
+			this.constant();
 			}
 		}
 		catch (re) {
@@ -1806,32 +1925,32 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public sortCommand(): SortCommandContext {
 		let localctx: SortCommandContext = new SortCommandContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 60, esql_parser.RULE_sortCommand);
+		this.enterRule(localctx, 64, esql_parser.RULE_sortCommand);
 		try {
 			let _alt: number;
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 343;
+			this.state = 369;
 			this.match(esql_parser.SORT);
-			this.state = 344;
+			this.state = 370;
 			this.orderExpression();
-			this.state = 349;
+			this.state = 375;
 			this._errHandler.sync(this);
-			_alt = this._interp.adaptivePredict(this._input, 22, this._ctx);
+			_alt = this._interp.adaptivePredict(this._input, 24, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 				if (_alt === 1) {
 					{
 					{
-					this.state = 345;
+					this.state = 371;
 					this.match(esql_parser.COMMA);
-					this.state = 346;
+					this.state = 372;
 					this.orderExpression();
 					}
 					}
 				}
-				this.state = 351;
+				this.state = 377;
 				this._errHandler.sync(this);
-				_alt = this._interp.adaptivePredict(this._input, 22, this._ctx);
+				_alt = this._interp.adaptivePredict(this._input, 24, this._ctx);
 			}
 			}
 		}
@@ -1852,22 +1971,22 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public orderExpression(): OrderExpressionContext {
 		let localctx: OrderExpressionContext = new OrderExpressionContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 62, esql_parser.RULE_orderExpression);
+		this.enterRule(localctx, 66, esql_parser.RULE_orderExpression);
 		let _la: number;
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 352;
+			this.state = 378;
 			this.booleanExpression(0);
-			this.state = 354;
+			this.state = 380;
 			this._errHandler.sync(this);
-			switch ( this._interp.adaptivePredict(this._input, 23, this._ctx) ) {
+			switch ( this._interp.adaptivePredict(this._input, 25, this._ctx) ) {
 			case 1:
 				{
-				this.state = 353;
+				this.state = 379;
 				localctx._ordering = this._input.LT(1);
 				_la = this._input.LA(1);
-				if(!(_la===57 || _la===62)) {
+				if(!(_la===58 || _la===64)) {
 				    localctx._ordering = this._errHandler.recoverInline(this);
 				}
 				else {
@@ -1877,17 +1996,17 @@ export default class esql_parser extends parser_config {
 				}
 				break;
 			}
-			this.state = 358;
+			this.state = 384;
 			this._errHandler.sync(this);
-			switch ( this._interp.adaptivePredict(this._input, 24, this._ctx) ) {
+			switch ( this._interp.adaptivePredict(this._input, 26, this._ctx) ) {
 			case 1:
 				{
-				this.state = 356;
+				this.state = 382;
 				this.match(esql_parser.NULLS);
-				this.state = 357;
+				this.state = 383;
 				localctx._nullOrdering = this._input.LT(1);
 				_la = this._input.LA(1);
-				if(!(_la===65 || _la===68)) {
+				if(!(_la===67 || _la===70)) {
 				    localctx._nullOrdering = this._errHandler.recoverInline(this);
 				}
 				else {
@@ -1916,13 +2035,13 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public keepCommand(): KeepCommandContext {
 		let localctx: KeepCommandContext = new KeepCommandContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 64, esql_parser.RULE_keepCommand);
+		this.enterRule(localctx, 68, esql_parser.RULE_keepCommand);
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 360;
+			this.state = 386;
 			this.match(esql_parser.KEEP);
-			this.state = 361;
+			this.state = 387;
 			this.qualifiedNamePatterns();
 			}
 		}
@@ -1943,13 +2062,13 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public dropCommand(): DropCommandContext {
 		let localctx: DropCommandContext = new DropCommandContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 66, esql_parser.RULE_dropCommand);
+		this.enterRule(localctx, 70, esql_parser.RULE_dropCommand);
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 363;
+			this.state = 389;
 			this.match(esql_parser.DROP);
-			this.state = 364;
+			this.state = 390;
 			this.qualifiedNamePatterns();
 			}
 		}
@@ -1970,32 +2089,32 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public renameCommand(): RenameCommandContext {
 		let localctx: RenameCommandContext = new RenameCommandContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 68, esql_parser.RULE_renameCommand);
+		this.enterRule(localctx, 72, esql_parser.RULE_renameCommand);
 		try {
 			let _alt: number;
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 366;
+			this.state = 392;
 			this.match(esql_parser.RENAME);
-			this.state = 367;
+			this.state = 393;
 			this.renameClause();
-			this.state = 372;
+			this.state = 398;
 			this._errHandler.sync(this);
-			_alt = this._interp.adaptivePredict(this._input, 25, this._ctx);
+			_alt = this._interp.adaptivePredict(this._input, 27, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 				if (_alt === 1) {
 					{
 					{
-					this.state = 368;
+					this.state = 394;
 					this.match(esql_parser.COMMA);
-					this.state = 369;
+					this.state = 395;
 					this.renameClause();
 					}
 					}
 				}
-				this.state = 374;
+				this.state = 400;
 				this._errHandler.sync(this);
-				_alt = this._interp.adaptivePredict(this._input, 25, this._ctx);
+				_alt = this._interp.adaptivePredict(this._input, 27, this._ctx);
 			}
 			}
 		}
@@ -2016,15 +2135,15 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public renameClause(): RenameClauseContext {
 		let localctx: RenameClauseContext = new RenameClauseContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 70, esql_parser.RULE_renameClause);
+		this.enterRule(localctx, 74, esql_parser.RULE_renameClause);
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 375;
+			this.state = 401;
 			localctx._oldName = this.qualifiedNamePattern();
-			this.state = 376;
+			this.state = 402;
 			this.match(esql_parser.AS);
-			this.state = 377;
+			this.state = 403;
 			localctx._newName = this.qualifiedNamePattern();
 			}
 		}
@@ -2045,22 +2164,22 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public dissectCommand(): DissectCommandContext {
 		let localctx: DissectCommandContext = new DissectCommandContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 72, esql_parser.RULE_dissectCommand);
+		this.enterRule(localctx, 76, esql_parser.RULE_dissectCommand);
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 379;
+			this.state = 405;
 			this.match(esql_parser.DISSECT);
-			this.state = 380;
+			this.state = 406;
 			this.primaryExpression(0);
-			this.state = 381;
+			this.state = 407;
 			this.string_();
-			this.state = 383;
+			this.state = 409;
 			this._errHandler.sync(this);
-			switch ( this._interp.adaptivePredict(this._input, 26, this._ctx) ) {
+			switch ( this._interp.adaptivePredict(this._input, 28, this._ctx) ) {
 			case 1:
 				{
-				this.state = 382;
+				this.state = 408;
 				this.commandOptions();
 				}
 				break;
@@ -2084,15 +2203,15 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public grokCommand(): GrokCommandContext {
 		let localctx: GrokCommandContext = new GrokCommandContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 74, esql_parser.RULE_grokCommand);
+		this.enterRule(localctx, 78, esql_parser.RULE_grokCommand);
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 385;
+			this.state = 411;
 			this.match(esql_parser.GROK);
-			this.state = 386;
+			this.state = 412;
 			this.primaryExpression(0);
-			this.state = 387;
+			this.state = 413;
 			this.string_();
 			}
 		}
@@ -2113,13 +2232,13 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public mvExpandCommand(): MvExpandCommandContext {
 		let localctx: MvExpandCommandContext = new MvExpandCommandContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 76, esql_parser.RULE_mvExpandCommand);
+		this.enterRule(localctx, 80, esql_parser.RULE_mvExpandCommand);
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 389;
+			this.state = 415;
 			this.match(esql_parser.MV_EXPAND);
-			this.state = 390;
+			this.state = 416;
 			this.qualifiedName();
 			}
 		}
@@ -2140,30 +2259,30 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public commandOptions(): CommandOptionsContext {
 		let localctx: CommandOptionsContext = new CommandOptionsContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 78, esql_parser.RULE_commandOptions);
+		this.enterRule(localctx, 82, esql_parser.RULE_commandOptions);
 		try {
 			let _alt: number;
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 392;
+			this.state = 418;
 			this.commandOption();
-			this.state = 397;
+			this.state = 423;
 			this._errHandler.sync(this);
-			_alt = this._interp.adaptivePredict(this._input, 27, this._ctx);
+			_alt = this._interp.adaptivePredict(this._input, 29, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 				if (_alt === 1) {
 					{
 					{
-					this.state = 393;
+					this.state = 419;
 					this.match(esql_parser.COMMA);
-					this.state = 394;
+					this.state = 420;
 					this.commandOption();
 					}
 					}
 				}
-				this.state = 399;
+				this.state = 425;
 				this._errHandler.sync(this);
-				_alt = this._interp.adaptivePredict(this._input, 27, this._ctx);
+				_alt = this._interp.adaptivePredict(this._input, 29, this._ctx);
 			}
 			}
 		}
@@ -2184,15 +2303,15 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public commandOption(): CommandOptionContext {
 		let localctx: CommandOptionContext = new CommandOptionContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 80, esql_parser.RULE_commandOption);
+		this.enterRule(localctx, 84, esql_parser.RULE_commandOption);
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 400;
+			this.state = 426;
 			this.identifier();
-			this.state = 401;
+			this.state = 427;
 			this.match(esql_parser.ASSIGN);
-			this.state = 402;
+			this.state = 428;
 			this.constant();
 			}
 		}
@@ -2213,13 +2332,13 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public explainCommand(): ExplainCommandContext {
 		let localctx: ExplainCommandContext = new ExplainCommandContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 82, esql_parser.RULE_explainCommand);
+		this.enterRule(localctx, 86, esql_parser.RULE_explainCommand);
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 404;
+			this.state = 430;
 			this.match(esql_parser.EXPLAIN);
-			this.state = 405;
+			this.state = 431;
 			this.subqueryExpression();
 			}
 		}
@@ -2240,15 +2359,15 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public subqueryExpression(): SubqueryExpressionContext {
 		let localctx: SubqueryExpressionContext = new SubqueryExpressionContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 84, esql_parser.RULE_subqueryExpression);
+		this.enterRule(localctx, 88, esql_parser.RULE_subqueryExpression);
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 407;
+			this.state = 433;
 			this.match(esql_parser.OPENING_BRACKET);
-			this.state = 408;
+			this.state = 434;
 			this.query(0);
-			this.state = 409;
+			this.state = 435;
 			this.match(esql_parser.CLOSING_BRACKET);
 			}
 		}
@@ -2269,14 +2388,14 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public showCommand(): ShowCommandContext {
 		let localctx: ShowCommandContext = new ShowCommandContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 86, esql_parser.RULE_showCommand);
+		this.enterRule(localctx, 90, esql_parser.RULE_showCommand);
 		try {
 			localctx = new ShowInfoContext(this, localctx);
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 411;
+			this.state = 437;
 			this.match(esql_parser.SHOW);
-			this.state = 412;
+			this.state = 438;
 			this.match(esql_parser.INFO);
 			}
 		}
@@ -2297,53 +2416,53 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public enrichCommand(): EnrichCommandContext {
 		let localctx: EnrichCommandContext = new EnrichCommandContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 88, esql_parser.RULE_enrichCommand);
+		this.enterRule(localctx, 92, esql_parser.RULE_enrichCommand);
 		try {
 			let _alt: number;
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 414;
+			this.state = 440;
 			this.match(esql_parser.ENRICH);
-			this.state = 415;
+			this.state = 441;
 			localctx._policyName = this.match(esql_parser.ENRICH_POLICY_NAME);
-			this.state = 418;
-			this._errHandler.sync(this);
-			switch ( this._interp.adaptivePredict(this._input, 28, this._ctx) ) {
-			case 1:
-				{
-				this.state = 416;
-				this.match(esql_parser.ON);
-				this.state = 417;
-				localctx._matchField = this.qualifiedNamePattern();
-				}
-				break;
-			}
-			this.state = 429;
+			this.state = 444;
 			this._errHandler.sync(this);
 			switch ( this._interp.adaptivePredict(this._input, 30, this._ctx) ) {
 			case 1:
 				{
-				this.state = 420;
+				this.state = 442;
+				this.match(esql_parser.ON);
+				this.state = 443;
+				localctx._matchField = this.qualifiedNamePattern();
+				}
+				break;
+			}
+			this.state = 455;
+			this._errHandler.sync(this);
+			switch ( this._interp.adaptivePredict(this._input, 32, this._ctx) ) {
+			case 1:
+				{
+				this.state = 446;
 				this.match(esql_parser.WITH);
-				this.state = 421;
+				this.state = 447;
 				this.enrichWithClause();
-				this.state = 426;
+				this.state = 452;
 				this._errHandler.sync(this);
-				_alt = this._interp.adaptivePredict(this._input, 29, this._ctx);
+				_alt = this._interp.adaptivePredict(this._input, 31, this._ctx);
 				while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 					if (_alt === 1) {
 						{
 						{
-						this.state = 422;
+						this.state = 448;
 						this.match(esql_parser.COMMA);
-						this.state = 423;
+						this.state = 449;
 						this.enrichWithClause();
 						}
 						}
 					}
-					this.state = 428;
+					this.state = 454;
 					this._errHandler.sync(this);
-					_alt = this._interp.adaptivePredict(this._input, 29, this._ctx);
+					_alt = this._interp.adaptivePredict(this._input, 31, this._ctx);
 				}
 				}
 				break;
@@ -2367,23 +2486,23 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public enrichWithClause(): EnrichWithClauseContext {
 		let localctx: EnrichWithClauseContext = new EnrichWithClauseContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 90, esql_parser.RULE_enrichWithClause);
+		this.enterRule(localctx, 94, esql_parser.RULE_enrichWithClause);
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 434;
+			this.state = 460;
 			this._errHandler.sync(this);
-			switch ( this._interp.adaptivePredict(this._input, 31, this._ctx) ) {
+			switch ( this._interp.adaptivePredict(this._input, 33, this._ctx) ) {
 			case 1:
 				{
-				this.state = 431;
+				this.state = 457;
 				localctx._newName = this.qualifiedNamePattern();
-				this.state = 432;
+				this.state = 458;
 				this.match(esql_parser.ASSIGN);
 				}
 				break;
 			}
-			this.state = 436;
+			this.state = 462;
 			localctx._enrichField = this.qualifiedNamePattern();
 			}
 		}
@@ -2404,17 +2523,17 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public lookupCommand(): LookupCommandContext {
 		let localctx: LookupCommandContext = new LookupCommandContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 92, esql_parser.RULE_lookupCommand);
+		this.enterRule(localctx, 96, esql_parser.RULE_lookupCommand);
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 438;
+			this.state = 464;
 			this.match(esql_parser.DEV_LOOKUP);
-			this.state = 439;
+			this.state = 465;
 			localctx._tableName = this.indexPattern();
-			this.state = 440;
+			this.state = 466;
 			this.match(esql_parser.ON);
-			this.state = 441;
+			this.state = 467;
 			localctx._matchFields = this.qualifiedNamePatterns();
 			}
 		}
@@ -2435,22 +2554,22 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public inlinestatsCommand(): InlinestatsCommandContext {
 		let localctx: InlinestatsCommandContext = new InlinestatsCommandContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 94, esql_parser.RULE_inlinestatsCommand);
+		this.enterRule(localctx, 98, esql_parser.RULE_inlinestatsCommand);
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 443;
+			this.state = 469;
 			this.match(esql_parser.DEV_INLINESTATS);
-			this.state = 444;
+			this.state = 470;
 			localctx._stats = this.aggFields();
-			this.state = 447;
+			this.state = 473;
 			this._errHandler.sync(this);
-			switch ( this._interp.adaptivePredict(this._input, 32, this._ctx) ) {
+			switch ( this._interp.adaptivePredict(this._input, 34, this._ctx) ) {
 			case 1:
 				{
-				this.state = 445;
+				this.state = 471;
 				this.match(esql_parser.BY);
-				this.state = 446;
+				this.state = 472;
 				localctx._grouping = this.fields();
 				}
 				break;
@@ -2474,38 +2593,38 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public changePointCommand(): ChangePointCommandContext {
 		let localctx: ChangePointCommandContext = new ChangePointCommandContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 96, esql_parser.RULE_changePointCommand);
+		this.enterRule(localctx, 100, esql_parser.RULE_changePointCommand);
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 449;
-			this.match(esql_parser.DEV_CHANGE_POINT);
-			this.state = 450;
+			this.state = 475;
+			this.match(esql_parser.CHANGE_POINT);
+			this.state = 476;
 			localctx._value = this.qualifiedName();
-			this.state = 453;
+			this.state = 479;
 			this._errHandler.sync(this);
-			switch ( this._interp.adaptivePredict(this._input, 33, this._ctx) ) {
+			switch ( this._interp.adaptivePredict(this._input, 35, this._ctx) ) {
 			case 1:
 				{
-				this.state = 451;
+				this.state = 477;
 				this.match(esql_parser.ON);
-				this.state = 452;
+				this.state = 478;
 				localctx._key = this.qualifiedName();
 				}
 				break;
 			}
-			this.state = 460;
+			this.state = 486;
 			this._errHandler.sync(this);
-			switch ( this._interp.adaptivePredict(this._input, 34, this._ctx) ) {
+			switch ( this._interp.adaptivePredict(this._input, 36, this._ctx) ) {
 			case 1:
 				{
-				this.state = 455;
+				this.state = 481;
 				this.match(esql_parser.AS);
-				this.state = 456;
+				this.state = 482;
 				localctx._targetType = this.qualifiedName();
-				this.state = 457;
+				this.state = 483;
 				this.match(esql_parser.COMMA);
-				this.state = 458;
+				this.state = 484;
 				localctx._targetPvalue = this.qualifiedName();
 				}
 				break;
@@ -2529,13 +2648,13 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public insistCommand(): InsistCommandContext {
 		let localctx: InsistCommandContext = new InsistCommandContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 98, esql_parser.RULE_insistCommand);
+		this.enterRule(localctx, 102, esql_parser.RULE_insistCommand);
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 462;
+			this.state = 488;
 			this.match(esql_parser.DEV_INSIST);
-			this.state = 463;
+			this.state = 489;
 			this.qualifiedNamePatterns();
 			}
 		}
@@ -2556,13 +2675,13 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public forkCommand(): ForkCommandContext {
 		let localctx: ForkCommandContext = new ForkCommandContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 100, esql_parser.RULE_forkCommand);
+		this.enterRule(localctx, 104, esql_parser.RULE_forkCommand);
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 465;
+			this.state = 491;
 			this.match(esql_parser.DEV_FORK);
-			this.state = 466;
+			this.state = 492;
 			this.forkSubQueries();
 			}
 		}
@@ -2583,12 +2702,12 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public forkSubQueries(): ForkSubQueriesContext {
 		let localctx: ForkSubQueriesContext = new ForkSubQueriesContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 102, esql_parser.RULE_forkSubQueries);
+		this.enterRule(localctx, 106, esql_parser.RULE_forkSubQueries);
 		try {
 			let _alt: number;
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 469;
+			this.state = 495;
 			this._errHandler.sync(this);
 			_alt = 1;
 			do {
@@ -2596,7 +2715,7 @@ export default class esql_parser extends parser_config {
 				case 1:
 					{
 					{
-					this.state = 468;
+					this.state = 494;
 					this.forkSubQuery();
 					}
 					}
@@ -2604,9 +2723,9 @@ export default class esql_parser extends parser_config {
 				default:
 					throw new NoViableAltException(this);
 				}
-				this.state = 471;
+				this.state = 497;
 				this._errHandler.sync(this);
-				_alt = this._interp.adaptivePredict(this._input, 35, this._ctx);
+				_alt = this._interp.adaptivePredict(this._input, 37, this._ctx);
 			} while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER);
 			}
 		}
@@ -2627,15 +2746,15 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public forkSubQuery(): ForkSubQueryContext {
 		let localctx: ForkSubQueryContext = new ForkSubQueryContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 104, esql_parser.RULE_forkSubQuery);
+		this.enterRule(localctx, 108, esql_parser.RULE_forkSubQuery);
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 473;
+			this.state = 499;
 			this.match(esql_parser.LP);
-			this.state = 474;
+			this.state = 500;
 			this.forkSubQueryCommand(0);
-			this.state = 475;
+			this.state = 501;
 			this.match(esql_parser.RP);
 			}
 		}
@@ -2666,8 +2785,8 @@ export default class esql_parser extends parser_config {
 		let _parentState: number = this.state;
 		let localctx: ForkSubQueryCommandContext = new ForkSubQueryCommandContext(this, this._ctx, _parentState);
 		let _prevctx: ForkSubQueryCommandContext = localctx;
-		let _startState: number = 106;
-		this.enterRecursionRule(localctx, 106, esql_parser.RULE_forkSubQueryCommand, _p);
+		let _startState: number = 110;
+		this.enterRecursionRule(localctx, 110, esql_parser.RULE_forkSubQueryCommand, _p);
 		try {
 			let _alt: number;
 			this.enterOuterAlt(localctx, 1);
@@ -2677,13 +2796,13 @@ export default class esql_parser extends parser_config {
 			this._ctx = localctx;
 			_prevctx = localctx;
 
-			this.state = 478;
+			this.state = 504;
 			this.forkSubQueryProcessingCommand();
 			}
 			this._ctx.stop = this._input.LT(-1);
-			this.state = 485;
+			this.state = 511;
 			this._errHandler.sync(this);
-			_alt = this._interp.adaptivePredict(this._input, 36, this._ctx);
+			_alt = this._interp.adaptivePredict(this._input, 38, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 				if (_alt === 1) {
 					if (this._parseListeners != null) {
@@ -2694,20 +2813,20 @@ export default class esql_parser extends parser_config {
 					{
 					localctx = new CompositeForkSubQueryContext(this, new ForkSubQueryCommandContext(this, _parentctx, _parentState));
 					this.pushNewRecursionContext(localctx, _startState, esql_parser.RULE_forkSubQueryCommand);
-					this.state = 480;
+					this.state = 506;
 					if (!(this.precpred(this._ctx, 1))) {
 						throw this.createFailedPredicateException("this.precpred(this._ctx, 1)");
 					}
-					this.state = 481;
+					this.state = 507;
 					this.match(esql_parser.PIPE);
-					this.state = 482;
+					this.state = 508;
 					this.forkSubQueryProcessingCommand();
 					}
 					}
 				}
-				this.state = 487;
+				this.state = 513;
 				this._errHandler.sync(this);
-				_alt = this._interp.adaptivePredict(this._input, 36, this._ctx);
+				_alt = this._interp.adaptivePredict(this._input, 38, this._ctx);
 			}
 			}
 		}
@@ -2728,30 +2847,51 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public forkSubQueryProcessingCommand(): ForkSubQueryProcessingCommandContext {
 		let localctx: ForkSubQueryProcessingCommandContext = new ForkSubQueryProcessingCommandContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 108, esql_parser.RULE_forkSubQueryProcessingCommand);
+		this.enterRule(localctx, 112, esql_parser.RULE_forkSubQueryProcessingCommand);
 		try {
-			this.state = 491;
+			this.state = 520;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case 14:
+			case 9:
 				this.enterOuterAlt(localctx, 1);
 				{
-				this.state = 488;
+				this.state = 514;
+				this.evalCommand();
+				}
+				break;
+			case 15:
+				this.enterOuterAlt(localctx, 2);
+				{
+				this.state = 515;
 				this.whereCommand();
 				}
 				break;
-			case 12:
-				this.enterOuterAlt(localctx, 2);
+			case 11:
+				this.enterOuterAlt(localctx, 3);
 				{
-				this.state = 489;
+				this.state = 516;
+				this.limitCommand();
+				}
+				break;
+			case 14:
+				this.enterOuterAlt(localctx, 4);
+				{
+				this.state = 517;
+				this.statsCommand();
+				}
+				break;
+			case 13:
+				this.enterOuterAlt(localctx, 5);
+				{
+				this.state = 518;
 				this.sortCommand();
 				}
 				break;
-			case 10:
-				this.enterOuterAlt(localctx, 3);
+			case 8:
+				this.enterOuterAlt(localctx, 6);
 				{
-				this.state = 490;
-				this.limitCommand();
+				this.state = 519;
+				this.dissectCommand();
 				}
 				break;
 			default:
@@ -2775,12 +2915,135 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public rrfCommand(): RrfCommandContext {
 		let localctx: RrfCommandContext = new RrfCommandContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 110, esql_parser.RULE_rrfCommand);
+		this.enterRule(localctx, 114, esql_parser.RULE_rrfCommand);
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 493;
+			this.state = 522;
 			this.match(esql_parser.DEV_RRF);
+			}
+		}
+		catch (re) {
+			if (re instanceof RecognitionException) {
+				localctx.exception = re;
+				this._errHandler.reportError(this, re);
+				this._errHandler.recover(this, re);
+			} else {
+				throw re;
+			}
+		}
+		finally {
+			this.exitRule();
+		}
+		return localctx;
+	}
+	// @RuleVersion(0)
+	public rerankCommand(): RerankCommandContext {
+		let localctx: RerankCommandContext = new RerankCommandContext(this, this._ctx, this.state);
+		this.enterRule(localctx, 116, esql_parser.RULE_rerankCommand);
+		try {
+			this.enterOuterAlt(localctx, 1);
+			{
+			this.state = 524;
+			this.match(esql_parser.DEV_RERANK);
+			this.state = 525;
+			localctx._queryText = this.constant();
+			this.state = 526;
+			this.match(esql_parser.ON);
+			this.state = 527;
+			this.rerankFields();
+			this.state = 530;
+			this._errHandler.sync(this);
+			switch ( this._interp.adaptivePredict(this._input, 40, this._ctx) ) {
+			case 1:
+				{
+				this.state = 528;
+				this.match(esql_parser.WITH);
+				this.state = 529;
+				localctx._inferenceId = this.identifierOrParameter();
+				}
+				break;
+			}
+			}
+		}
+		catch (re) {
+			if (re instanceof RecognitionException) {
+				localctx.exception = re;
+				this._errHandler.reportError(this, re);
+				this._errHandler.recover(this, re);
+			} else {
+				throw re;
+			}
+		}
+		finally {
+			this.exitRule();
+		}
+		return localctx;
+	}
+	// @RuleVersion(0)
+	public completionCommand(): CompletionCommandContext {
+		let localctx: CompletionCommandContext = new CompletionCommandContext(this, this._ctx, this.state);
+		this.enterRule(localctx, 118, esql_parser.RULE_completionCommand);
+		try {
+			this.enterOuterAlt(localctx, 1);
+			{
+			this.state = 532;
+			this.match(esql_parser.COMPLETION);
+			this.state = 533;
+			localctx._prompt = this.primaryExpression(0);
+			this.state = 534;
+			this.match(esql_parser.WITH);
+			this.state = 535;
+			localctx._inferenceId = this.identifierOrParameter();
+			this.state = 538;
+			this._errHandler.sync(this);
+			switch ( this._interp.adaptivePredict(this._input, 41, this._ctx) ) {
+			case 1:
+				{
+				this.state = 536;
+				this.match(esql_parser.AS);
+				this.state = 537;
+				localctx._targetField = this.qualifiedName();
+				}
+				break;
+			}
+			}
+		}
+		catch (re) {
+			if (re instanceof RecognitionException) {
+				localctx.exception = re;
+				this._errHandler.reportError(this, re);
+				this._errHandler.recover(this, re);
+			} else {
+				throw re;
+			}
+		}
+		finally {
+			this.exitRule();
+		}
+		return localctx;
+	}
+	// @RuleVersion(0)
+	public sampleCommand(): SampleCommandContext {
+		let localctx: SampleCommandContext = new SampleCommandContext(this, this._ctx, this.state);
+		this.enterRule(localctx, 120, esql_parser.RULE_sampleCommand);
+		try {
+			this.enterOuterAlt(localctx, 1);
+			{
+			this.state = 540;
+			this.match(esql_parser.DEV_SAMPLE);
+			this.state = 541;
+			localctx._probability = this.decimalValue();
+			this.state = 543;
+			this._errHandler.sync(this);
+			switch ( this._interp.adaptivePredict(this._input, 42, this._ctx) ) {
+			case 1:
+				{
+				this.state = 542;
+				localctx._seed = this.integerValue();
+				}
+				break;
+			}
 			}
 		}
 		catch (re) {
@@ -2810,25 +3073,25 @@ export default class esql_parser extends parser_config {
 		let _parentState: number = this.state;
 		let localctx: BooleanExpressionContext = new BooleanExpressionContext(this, this._ctx, _parentState);
 		let _prevctx: BooleanExpressionContext = localctx;
-		let _startState: number = 112;
-		this.enterRecursionRule(localctx, 112, esql_parser.RULE_booleanExpression, _p);
+		let _startState: number = 122;
+		this.enterRecursionRule(localctx, 122, esql_parser.RULE_booleanExpression, _p);
 		let _la: number;
 		try {
 			let _alt: number;
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 524;
+			this.state = 574;
 			this._errHandler.sync(this);
-			switch ( this._interp.adaptivePredict(this._input, 41, this._ctx) ) {
+			switch ( this._interp.adaptivePredict(this._input, 46, this._ctx) ) {
 			case 1:
 				{
 				localctx = new LogicalNotContext(this, localctx);
 				this._ctx = localctx;
 				_prevctx = localctx;
 
-				this.state = 496;
+				this.state = 546;
 				this.match(esql_parser.NOT);
-				this.state = 497;
+				this.state = 547;
 				this.booleanExpression(8);
 				}
 				break;
@@ -2837,7 +3100,7 @@ export default class esql_parser extends parser_config {
 				localctx = new BooleanDefaultContext(this, localctx);
 				this._ctx = localctx;
 				_prevctx = localctx;
-				this.state = 498;
+				this.state = 548;
 				this.valueExpression();
 				}
 				break;
@@ -2846,7 +3109,7 @@ export default class esql_parser extends parser_config {
 				localctx = new RegexExpressionContext(this, localctx);
 				this._ctx = localctx;
 				_prevctx = localctx;
-				this.state = 499;
+				this.state = 549;
 				this.regexBooleanExpression();
 				}
 				break;
@@ -2855,41 +3118,41 @@ export default class esql_parser extends parser_config {
 				localctx = new LogicalInContext(this, localctx);
 				this._ctx = localctx;
 				_prevctx = localctx;
-				this.state = 500;
+				this.state = 550;
 				this.valueExpression();
-				this.state = 502;
+				this.state = 552;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (_la===70) {
+				if (_la===72) {
 					{
-					this.state = 501;
+					this.state = 551;
 					this.match(esql_parser.NOT);
 					}
 				}
 
-				this.state = 504;
+				this.state = 554;
 				this.match(esql_parser.IN);
-				this.state = 505;
+				this.state = 555;
 				this.match(esql_parser.LP);
-				this.state = 506;
+				this.state = 556;
 				this.valueExpression();
-				this.state = 511;
+				this.state = 561;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				while (_la===61) {
+				while (_la===63) {
 					{
 					{
-					this.state = 507;
+					this.state = 557;
 					this.match(esql_parser.COMMA);
-					this.state = 508;
+					this.state = 558;
 					this.valueExpression();
 					}
 					}
-					this.state = 513;
+					this.state = 563;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
 				}
-				this.state = 514;
+				this.state = 564;
 				this.match(esql_parser.RP);
 				}
 				break;
@@ -2898,21 +3161,21 @@ export default class esql_parser extends parser_config {
 				localctx = new IsNullContext(this, localctx);
 				this._ctx = localctx;
 				_prevctx = localctx;
-				this.state = 516;
+				this.state = 566;
 				this.valueExpression();
-				this.state = 517;
+				this.state = 567;
 				this.match(esql_parser.IS);
-				this.state = 519;
+				this.state = 569;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (_la===70) {
+				if (_la===72) {
 					{
-					this.state = 518;
+					this.state = 568;
 					this.match(esql_parser.NOT);
 					}
 				}
 
-				this.state = 521;
+				this.state = 571;
 				this.match(esql_parser.NULL);
 				}
 				break;
@@ -2921,15 +3184,15 @@ export default class esql_parser extends parser_config {
 				localctx = new MatchExpressionContext(this, localctx);
 				this._ctx = localctx;
 				_prevctx = localctx;
-				this.state = 523;
+				this.state = 573;
 				this.matchBooleanExpression();
 				}
 				break;
 			}
 			this._ctx.stop = this._input.LT(-1);
-			this.state = 534;
+			this.state = 584;
 			this._errHandler.sync(this);
-			_alt = this._interp.adaptivePredict(this._input, 43, this._ctx);
+			_alt = this._interp.adaptivePredict(this._input, 48, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 				if (_alt === 1) {
 					if (this._parseListeners != null) {
@@ -2937,21 +3200,21 @@ export default class esql_parser extends parser_config {
 					}
 					_prevctx = localctx;
 					{
-					this.state = 532;
+					this.state = 582;
 					this._errHandler.sync(this);
-					switch ( this._interp.adaptivePredict(this._input, 42, this._ctx) ) {
+					switch ( this._interp.adaptivePredict(this._input, 47, this._ctx) ) {
 					case 1:
 						{
 						localctx = new LogicalBinaryContext(this, new BooleanExpressionContext(this, _parentctx, _parentState));
 						(localctx as LogicalBinaryContext)._left = _prevctx;
 						this.pushNewRecursionContext(localctx, _startState, esql_parser.RULE_booleanExpression);
-						this.state = 526;
+						this.state = 576;
 						if (!(this.precpred(this._ctx, 5))) {
 							throw this.createFailedPredicateException("this.precpred(this._ctx, 5)");
 						}
-						this.state = 527;
+						this.state = 577;
 						(localctx as LogicalBinaryContext)._operator = this.match(esql_parser.AND);
-						this.state = 528;
+						this.state = 578;
 						(localctx as LogicalBinaryContext)._right = this.booleanExpression(6);
 						}
 						break;
@@ -2960,22 +3223,22 @@ export default class esql_parser extends parser_config {
 						localctx = new LogicalBinaryContext(this, new BooleanExpressionContext(this, _parentctx, _parentState));
 						(localctx as LogicalBinaryContext)._left = _prevctx;
 						this.pushNewRecursionContext(localctx, _startState, esql_parser.RULE_booleanExpression);
-						this.state = 529;
+						this.state = 579;
 						if (!(this.precpred(this._ctx, 4))) {
 							throw this.createFailedPredicateException("this.precpred(this._ctx, 4)");
 						}
-						this.state = 530;
+						this.state = 580;
 						(localctx as LogicalBinaryContext)._operator = this.match(esql_parser.OR);
-						this.state = 531;
+						this.state = 581;
 						(localctx as LogicalBinaryContext)._right = this.booleanExpression(5);
 						}
 						break;
 					}
 					}
 				}
-				this.state = 536;
+				this.state = 586;
 				this._errHandler.sync(this);
-				_alt = this._interp.adaptivePredict(this._input, 43, this._ctx);
+				_alt = this._interp.adaptivePredict(this._input, 48, this._ctx);
 			}
 			}
 		}
@@ -2996,51 +3259,51 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public regexBooleanExpression(): RegexBooleanExpressionContext {
 		let localctx: RegexBooleanExpressionContext = new RegexBooleanExpressionContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 114, esql_parser.RULE_regexBooleanExpression);
+		this.enterRule(localctx, 124, esql_parser.RULE_regexBooleanExpression);
 		let _la: number;
 		try {
-			this.state = 551;
+			this.state = 601;
 			this._errHandler.sync(this);
-			switch ( this._interp.adaptivePredict(this._input, 46, this._ctx) ) {
+			switch ( this._interp.adaptivePredict(this._input, 51, this._ctx) ) {
 			case 1:
 				this.enterOuterAlt(localctx, 1);
 				{
-				this.state = 537;
+				this.state = 587;
 				this.valueExpression();
-				this.state = 539;
+				this.state = 589;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (_la===70) {
+				if (_la===72) {
 					{
-					this.state = 538;
+					this.state = 588;
 					this.match(esql_parser.NOT);
 					}
 				}
 
-				this.state = 541;
+				this.state = 591;
 				localctx._kind = this.match(esql_parser.LIKE);
-				this.state = 542;
+				this.state = 592;
 				localctx._pattern = this.string_();
 				}
 				break;
 			case 2:
 				this.enterOuterAlt(localctx, 2);
 				{
-				this.state = 544;
+				this.state = 594;
 				this.valueExpression();
-				this.state = 546;
+				this.state = 596;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (_la===70) {
+				if (_la===72) {
 					{
-					this.state = 545;
+					this.state = 595;
 					this.match(esql_parser.NOT);
 					}
 				}
 
-				this.state = 548;
+				this.state = 598;
 				localctx._kind = this.match(esql_parser.RLIKE);
-				this.state = 549;
+				this.state = 599;
 				localctx._pattern = this.string_();
 				}
 				break;
@@ -3063,28 +3326,28 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public matchBooleanExpression(): MatchBooleanExpressionContext {
 		let localctx: MatchBooleanExpressionContext = new MatchBooleanExpressionContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 116, esql_parser.RULE_matchBooleanExpression);
+		this.enterRule(localctx, 126, esql_parser.RULE_matchBooleanExpression);
 		let _la: number;
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 553;
+			this.state = 603;
 			localctx._fieldExp = this.qualifiedName();
-			this.state = 556;
+			this.state = 606;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la===59) {
+			if (_la===61) {
 				{
-				this.state = 554;
+				this.state = 604;
 				this.match(esql_parser.CAST_OP);
-				this.state = 555;
+				this.state = 605;
 				localctx._fieldType = this.dataType();
 				}
 			}
 
-			this.state = 558;
+			this.state = 608;
 			this.match(esql_parser.COLON);
-			this.state = 559;
+			this.state = 609;
 			localctx._matchQuery = this.constant();
 			}
 		}
@@ -3105,16 +3368,16 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public valueExpression(): ValueExpressionContext {
 		let localctx: ValueExpressionContext = new ValueExpressionContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 118, esql_parser.RULE_valueExpression);
+		this.enterRule(localctx, 128, esql_parser.RULE_valueExpression);
 		try {
-			this.state = 566;
+			this.state = 616;
 			this._errHandler.sync(this);
-			switch ( this._interp.adaptivePredict(this._input, 48, this._ctx) ) {
+			switch ( this._interp.adaptivePredict(this._input, 53, this._ctx) ) {
 			case 1:
 				localctx = new ValueExpressionDefaultContext(this, localctx);
 				this.enterOuterAlt(localctx, 1);
 				{
-				this.state = 561;
+				this.state = 611;
 				this.operatorExpression(0);
 				}
 				break;
@@ -3122,11 +3385,11 @@ export default class esql_parser extends parser_config {
 				localctx = new ComparisonContext(this, localctx);
 				this.enterOuterAlt(localctx, 2);
 				{
-				this.state = 562;
+				this.state = 612;
 				(localctx as ComparisonContext)._left = this.operatorExpression(0);
-				this.state = 563;
+				this.state = 613;
 				this.comparisonOperator();
-				this.state = 564;
+				this.state = 614;
 				(localctx as ComparisonContext)._right = this.operatorExpression(0);
 				}
 				break;
@@ -3159,23 +3422,23 @@ export default class esql_parser extends parser_config {
 		let _parentState: number = this.state;
 		let localctx: OperatorExpressionContext = new OperatorExpressionContext(this, this._ctx, _parentState);
 		let _prevctx: OperatorExpressionContext = localctx;
-		let _startState: number = 120;
-		this.enterRecursionRule(localctx, 120, esql_parser.RULE_operatorExpression, _p);
+		let _startState: number = 130;
+		this.enterRecursionRule(localctx, 130, esql_parser.RULE_operatorExpression, _p);
 		let _la: number;
 		try {
 			let _alt: number;
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 572;
+			this.state = 622;
 			this._errHandler.sync(this);
-			switch ( this._interp.adaptivePredict(this._input, 49, this._ctx) ) {
+			switch ( this._interp.adaptivePredict(this._input, 54, this._ctx) ) {
 			case 1:
 				{
 				localctx = new OperatorExpressionDefaultContext(this, localctx);
 				this._ctx = localctx;
 				_prevctx = localctx;
 
-				this.state = 569;
+				this.state = 619;
 				this.primaryExpression(0);
 				}
 				break;
@@ -3184,25 +3447,25 @@ export default class esql_parser extends parser_config {
 				localctx = new ArithmeticUnaryContext(this, localctx);
 				this._ctx = localctx;
 				_prevctx = localctx;
-				this.state = 570;
+				this.state = 620;
 				(localctx as ArithmeticUnaryContext)._operator = this._input.LT(1);
 				_la = this._input.LA(1);
-				if(!(_la===84 || _la===85)) {
+				if(!(_la===88 || _la===89)) {
 				    (localctx as ArithmeticUnaryContext)._operator = this._errHandler.recoverInline(this);
 				}
 				else {
 					this._errHandler.reportMatch(this);
 				    this.consume();
 				}
-				this.state = 571;
+				this.state = 621;
 				this.operatorExpression(3);
 				}
 				break;
 			}
 			this._ctx.stop = this._input.LT(-1);
-			this.state = 582;
+			this.state = 632;
 			this._errHandler.sync(this);
-			_alt = this._interp.adaptivePredict(this._input, 51, this._ctx);
+			_alt = this._interp.adaptivePredict(this._input, 56, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 				if (_alt === 1) {
 					if (this._parseListeners != null) {
@@ -3210,29 +3473,29 @@ export default class esql_parser extends parser_config {
 					}
 					_prevctx = localctx;
 					{
-					this.state = 580;
+					this.state = 630;
 					this._errHandler.sync(this);
-					switch ( this._interp.adaptivePredict(this._input, 50, this._ctx) ) {
+					switch ( this._interp.adaptivePredict(this._input, 55, this._ctx) ) {
 					case 1:
 						{
 						localctx = new ArithmeticBinaryContext(this, new OperatorExpressionContext(this, _parentctx, _parentState));
 						(localctx as ArithmeticBinaryContext)._left = _prevctx;
 						this.pushNewRecursionContext(localctx, _startState, esql_parser.RULE_operatorExpression);
-						this.state = 574;
+						this.state = 624;
 						if (!(this.precpred(this._ctx, 2))) {
 							throw this.createFailedPredicateException("this.precpred(this._ctx, 2)");
 						}
-						this.state = 575;
+						this.state = 625;
 						(localctx as ArithmeticBinaryContext)._operator = this._input.LT(1);
 						_la = this._input.LA(1);
-						if(!(((((_la - 86)) & ~0x1F) === 0 && ((1 << (_la - 86)) & 7) !== 0))) {
+						if(!(((((_la - 90)) & ~0x1F) === 0 && ((1 << (_la - 90)) & 7) !== 0))) {
 						    (localctx as ArithmeticBinaryContext)._operator = this._errHandler.recoverInline(this);
 						}
 						else {
 							this._errHandler.reportMatch(this);
 						    this.consume();
 						}
-						this.state = 576;
+						this.state = 626;
 						(localctx as ArithmeticBinaryContext)._right = this.operatorExpression(3);
 						}
 						break;
@@ -3241,30 +3504,30 @@ export default class esql_parser extends parser_config {
 						localctx = new ArithmeticBinaryContext(this, new OperatorExpressionContext(this, _parentctx, _parentState));
 						(localctx as ArithmeticBinaryContext)._left = _prevctx;
 						this.pushNewRecursionContext(localctx, _startState, esql_parser.RULE_operatorExpression);
-						this.state = 577;
+						this.state = 627;
 						if (!(this.precpred(this._ctx, 1))) {
 							throw this.createFailedPredicateException("this.precpred(this._ctx, 1)");
 						}
-						this.state = 578;
+						this.state = 628;
 						(localctx as ArithmeticBinaryContext)._operator = this._input.LT(1);
 						_la = this._input.LA(1);
-						if(!(_la===84 || _la===85)) {
+						if(!(_la===88 || _la===89)) {
 						    (localctx as ArithmeticBinaryContext)._operator = this._errHandler.recoverInline(this);
 						}
 						else {
 							this._errHandler.reportMatch(this);
 						    this.consume();
 						}
-						this.state = 579;
+						this.state = 629;
 						(localctx as ArithmeticBinaryContext)._right = this.operatorExpression(2);
 						}
 						break;
 					}
 					}
 				}
-				this.state = 584;
+				this.state = 634;
 				this._errHandler.sync(this);
-				_alt = this._interp.adaptivePredict(this._input, 51, this._ctx);
+				_alt = this._interp.adaptivePredict(this._input, 56, this._ctx);
 			}
 			}
 		}
@@ -3295,22 +3558,22 @@ export default class esql_parser extends parser_config {
 		let _parentState: number = this.state;
 		let localctx: PrimaryExpressionContext = new PrimaryExpressionContext(this, this._ctx, _parentState);
 		let _prevctx: PrimaryExpressionContext = localctx;
-		let _startState: number = 122;
-		this.enterRecursionRule(localctx, 122, esql_parser.RULE_primaryExpression, _p);
+		let _startState: number = 132;
+		this.enterRecursionRule(localctx, 132, esql_parser.RULE_primaryExpression, _p);
 		try {
 			let _alt: number;
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 593;
+			this.state = 643;
 			this._errHandler.sync(this);
-			switch ( this._interp.adaptivePredict(this._input, 52, this._ctx) ) {
+			switch ( this._interp.adaptivePredict(this._input, 57, this._ctx) ) {
 			case 1:
 				{
 				localctx = new ConstantDefaultContext(this, localctx);
 				this._ctx = localctx;
 				_prevctx = localctx;
 
-				this.state = 586;
+				this.state = 636;
 				this.constant();
 				}
 				break;
@@ -3319,7 +3582,7 @@ export default class esql_parser extends parser_config {
 				localctx = new DereferenceContext(this, localctx);
 				this._ctx = localctx;
 				_prevctx = localctx;
-				this.state = 587;
+				this.state = 637;
 				this.qualifiedName();
 				}
 				break;
@@ -3328,7 +3591,7 @@ export default class esql_parser extends parser_config {
 				localctx = new FunctionContext(this, localctx);
 				this._ctx = localctx;
 				_prevctx = localctx;
-				this.state = 588;
+				this.state = 638;
 				this.functionExpression();
 				}
 				break;
@@ -3337,19 +3600,19 @@ export default class esql_parser extends parser_config {
 				localctx = new ParenthesizedExpressionContext(this, localctx);
 				this._ctx = localctx;
 				_prevctx = localctx;
-				this.state = 589;
+				this.state = 639;
 				this.match(esql_parser.LP);
-				this.state = 590;
+				this.state = 640;
 				this.booleanExpression(0);
-				this.state = 591;
+				this.state = 641;
 				this.match(esql_parser.RP);
 				}
 				break;
 			}
 			this._ctx.stop = this._input.LT(-1);
-			this.state = 600;
+			this.state = 650;
 			this._errHandler.sync(this);
-			_alt = this._interp.adaptivePredict(this._input, 53, this._ctx);
+			_alt = this._interp.adaptivePredict(this._input, 58, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 				if (_alt === 1) {
 					if (this._parseListeners != null) {
@@ -3360,20 +3623,20 @@ export default class esql_parser extends parser_config {
 					{
 					localctx = new InlineCastContext(this, new PrimaryExpressionContext(this, _parentctx, _parentState));
 					this.pushNewRecursionContext(localctx, _startState, esql_parser.RULE_primaryExpression);
-					this.state = 595;
+					this.state = 645;
 					if (!(this.precpred(this._ctx, 1))) {
 						throw this.createFailedPredicateException("this.precpred(this._ctx, 1)");
 					}
-					this.state = 596;
+					this.state = 646;
 					this.match(esql_parser.CAST_OP);
-					this.state = 597;
+					this.state = 647;
 					this.dataType();
 					}
 					}
 				}
-				this.state = 602;
+				this.state = 652;
 				this._errHandler.sync(this);
-				_alt = this._interp.adaptivePredict(this._input, 53, this._ctx);
+				_alt = this._interp.adaptivePredict(this._input, 58, this._ctx);
 			}
 			}
 		}
@@ -3394,72 +3657,72 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public functionExpression(): FunctionExpressionContext {
 		let localctx: FunctionExpressionContext = new FunctionExpressionContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 124, esql_parser.RULE_functionExpression);
+		this.enterRule(localctx, 134, esql_parser.RULE_functionExpression);
 		let _la: number;
 		try {
 			let _alt: number;
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 603;
+			this.state = 653;
 			this.functionName();
-			this.state = 604;
+			this.state = 654;
 			this.match(esql_parser.LP);
-			this.state = 618;
+			this.state = 668;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case 86:
+			case 90:
 				{
-				this.state = 605;
+				this.state = 655;
 				this.match(esql_parser.ASTERISK);
 				}
 				break;
-			case 52:
 			case 53:
 			case 54:
-			case 64:
-			case 70:
-			case 71:
-			case 74:
-			case 76:
-			case 84:
-			case 85:
-			case 91:
-			case 92:
-			case 93:
-			case 94:
+			case 55:
+			case 66:
+			case 72:
+			case 73:
+			case 77:
+			case 79:
+			case 88:
+			case 89:
+			case 95:
 			case 96:
+			case 97:
 			case 98:
-			case 99:
+			case 100:
+			case 102:
+			case 103:
 				{
 				{
-				this.state = 606;
+				this.state = 656;
 				this.booleanExpression(0);
-				this.state = 611;
+				this.state = 661;
 				this._errHandler.sync(this);
-				_alt = this._interp.adaptivePredict(this._input, 54, this._ctx);
+				_alt = this._interp.adaptivePredict(this._input, 59, this._ctx);
 				while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 					if (_alt === 1) {
 						{
 						{
-						this.state = 607;
+						this.state = 657;
 						this.match(esql_parser.COMMA);
-						this.state = 608;
+						this.state = 658;
 						this.booleanExpression(0);
 						}
 						}
 					}
-					this.state = 613;
+					this.state = 663;
 					this._errHandler.sync(this);
-					_alt = this._interp.adaptivePredict(this._input, 54, this._ctx);
+					_alt = this._interp.adaptivePredict(this._input, 59, this._ctx);
 				}
-				this.state = 616;
+				this.state = 666;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (_la===61) {
+				if (_la===63) {
 					{
-					this.state = 614;
+					this.state = 664;
 					this.match(esql_parser.COMMA);
-					this.state = 615;
+					this.state = 665;
 					this.mapExpression();
 					}
 				}
@@ -3467,12 +3730,12 @@ export default class esql_parser extends parser_config {
 				}
 				}
 				break;
-			case 97:
+			case 101:
 				break;
 			default:
 				break;
 			}
-			this.state = 620;
+			this.state = 670;
 			this.match(esql_parser.RP);
 			}
 		}
@@ -3493,11 +3756,11 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public functionName(): FunctionNameContext {
 		let localctx: FunctionNameContext = new FunctionNameContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 126, esql_parser.RULE_functionName);
+		this.enterRule(localctx, 136, esql_parser.RULE_functionName);
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 622;
+			this.state = 672;
 			this.identifierOrParameter();
 			}
 		}
@@ -3518,32 +3781,32 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public mapExpression(): MapExpressionContext {
 		let localctx: MapExpressionContext = new MapExpressionContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 128, esql_parser.RULE_mapExpression);
+		this.enterRule(localctx, 138, esql_parser.RULE_mapExpression);
 		let _la: number;
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 624;
+			this.state = 674;
 			this.match(esql_parser.LEFT_BRACES);
-			this.state = 625;
+			this.state = 675;
 			this.entryExpression();
-			this.state = 630;
+			this.state = 680;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			while (_la===61) {
+			while (_la===63) {
 				{
 				{
-				this.state = 626;
+				this.state = 676;
 				this.match(esql_parser.COMMA);
-				this.state = 627;
+				this.state = 677;
 				this.entryExpression();
 				}
 				}
-				this.state = 632;
+				this.state = 682;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
 			}
-			this.state = 633;
+			this.state = 683;
 			this.match(esql_parser.RIGHT_BRACES);
 			}
 		}
@@ -3564,15 +3827,15 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public entryExpression(): EntryExpressionContext {
 		let localctx: EntryExpressionContext = new EntryExpressionContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 130, esql_parser.RULE_entryExpression);
+		this.enterRule(localctx, 140, esql_parser.RULE_entryExpression);
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 635;
+			this.state = 685;
 			localctx._key = this.string_();
-			this.state = 636;
+			this.state = 686;
 			this.match(esql_parser.COLON);
-			this.state = 637;
+			this.state = 687;
 			localctx._value = this.constant();
 			}
 		}
@@ -3593,17 +3856,17 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public constant(): ConstantContext {
 		let localctx: ConstantContext = new ConstantContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 132, esql_parser.RULE_constant);
+		this.enterRule(localctx, 142, esql_parser.RULE_constant);
 		let _la: number;
 		try {
-			this.state = 681;
+			this.state = 731;
 			this._errHandler.sync(this);
-			switch ( this._interp.adaptivePredict(this._input, 61, this._ctx) ) {
+			switch ( this._interp.adaptivePredict(this._input, 66, this._ctx) ) {
 			case 1:
 				localctx = new NullLiteralContext(this, localctx);
 				this.enterOuterAlt(localctx, 1);
 				{
-				this.state = 639;
+				this.state = 689;
 				this.match(esql_parser.NULL);
 				}
 				break;
@@ -3611,9 +3874,9 @@ export default class esql_parser extends parser_config {
 				localctx = new QualifiedIntegerLiteralContext(this, localctx);
 				this.enterOuterAlt(localctx, 2);
 				{
-				this.state = 640;
+				this.state = 690;
 				this.integerValue();
-				this.state = 641;
+				this.state = 691;
 				this.match(esql_parser.UNQUOTED_IDENTIFIER);
 				}
 				break;
@@ -3621,7 +3884,7 @@ export default class esql_parser extends parser_config {
 				localctx = new DecimalLiteralContext(this, localctx);
 				this.enterOuterAlt(localctx, 3);
 				{
-				this.state = 643;
+				this.state = 693;
 				this.decimalValue();
 				}
 				break;
@@ -3629,7 +3892,7 @@ export default class esql_parser extends parser_config {
 				localctx = new IntegerLiteralContext(this, localctx);
 				this.enterOuterAlt(localctx, 4);
 				{
-				this.state = 644;
+				this.state = 694;
 				this.integerValue();
 				}
 				break;
@@ -3637,7 +3900,7 @@ export default class esql_parser extends parser_config {
 				localctx = new BooleanLiteralContext(this, localctx);
 				this.enterOuterAlt(localctx, 5);
 				{
-				this.state = 645;
+				this.state = 695;
 				this.booleanValue();
 				}
 				break;
@@ -3645,7 +3908,7 @@ export default class esql_parser extends parser_config {
 				localctx = new InputParameterContext(this, localctx);
 				this.enterOuterAlt(localctx, 6);
 				{
-				this.state = 646;
+				this.state = 696;
 				this.parameter();
 				}
 				break;
@@ -3653,7 +3916,7 @@ export default class esql_parser extends parser_config {
 				localctx = new StringLiteralContext(this, localctx);
 				this.enterOuterAlt(localctx, 7);
 				{
-				this.state = 647;
+				this.state = 697;
 				this.string_();
 				}
 				break;
@@ -3661,27 +3924,27 @@ export default class esql_parser extends parser_config {
 				localctx = new NumericArrayLiteralContext(this, localctx);
 				this.enterOuterAlt(localctx, 8);
 				{
-				this.state = 648;
+				this.state = 698;
 				this.match(esql_parser.OPENING_BRACKET);
-				this.state = 649;
+				this.state = 699;
 				this.numericValue();
-				this.state = 654;
+				this.state = 704;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				while (_la===61) {
+				while (_la===63) {
 					{
 					{
-					this.state = 650;
+					this.state = 700;
 					this.match(esql_parser.COMMA);
-					this.state = 651;
+					this.state = 701;
 					this.numericValue();
 					}
 					}
-					this.state = 656;
+					this.state = 706;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
 				}
-				this.state = 657;
+				this.state = 707;
 				this.match(esql_parser.CLOSING_BRACKET);
 				}
 				break;
@@ -3689,27 +3952,27 @@ export default class esql_parser extends parser_config {
 				localctx = new BooleanArrayLiteralContext(this, localctx);
 				this.enterOuterAlt(localctx, 9);
 				{
-				this.state = 659;
+				this.state = 709;
 				this.match(esql_parser.OPENING_BRACKET);
-				this.state = 660;
+				this.state = 710;
 				this.booleanValue();
-				this.state = 665;
+				this.state = 715;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				while (_la===61) {
+				while (_la===63) {
 					{
 					{
-					this.state = 661;
+					this.state = 711;
 					this.match(esql_parser.COMMA);
-					this.state = 662;
+					this.state = 712;
 					this.booleanValue();
 					}
 					}
-					this.state = 667;
+					this.state = 717;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
 				}
-				this.state = 668;
+				this.state = 718;
 				this.match(esql_parser.CLOSING_BRACKET);
 				}
 				break;
@@ -3717,27 +3980,27 @@ export default class esql_parser extends parser_config {
 				localctx = new StringArrayLiteralContext(this, localctx);
 				this.enterOuterAlt(localctx, 10);
 				{
-				this.state = 670;
+				this.state = 720;
 				this.match(esql_parser.OPENING_BRACKET);
-				this.state = 671;
+				this.state = 721;
 				this.string_();
-				this.state = 676;
+				this.state = 726;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				while (_la===61) {
+				while (_la===63) {
 					{
 					{
-					this.state = 672;
+					this.state = 722;
 					this.match(esql_parser.COMMA);
-					this.state = 673;
+					this.state = 723;
 					this.string_();
 					}
 					}
-					this.state = 678;
+					this.state = 728;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
 				}
-				this.state = 679;
+				this.state = 729;
 				this.match(esql_parser.CLOSING_BRACKET);
 				}
 				break;
@@ -3760,14 +4023,14 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public booleanValue(): BooleanValueContext {
 		let localctx: BooleanValueContext = new BooleanValueContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 134, esql_parser.RULE_booleanValue);
+		this.enterRule(localctx, 144, esql_parser.RULE_booleanValue);
 		let _la: number;
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 683;
+			this.state = 733;
 			_la = this._input.LA(1);
-			if(!(_la===64 || _la===76)) {
+			if(!(_la===66 || _la===79)) {
 			this._errHandler.recoverInline(this);
 			}
 			else {
@@ -3793,22 +4056,22 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public numericValue(): NumericValueContext {
 		let localctx: NumericValueContext = new NumericValueContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 136, esql_parser.RULE_numericValue);
+		this.enterRule(localctx, 146, esql_parser.RULE_numericValue);
 		try {
-			this.state = 687;
+			this.state = 737;
 			this._errHandler.sync(this);
-			switch ( this._interp.adaptivePredict(this._input, 62, this._ctx) ) {
+			switch ( this._interp.adaptivePredict(this._input, 67, this._ctx) ) {
 			case 1:
 				this.enterOuterAlt(localctx, 1);
 				{
-				this.state = 685;
+				this.state = 735;
 				this.decimalValue();
 				}
 				break;
 			case 2:
 				this.enterOuterAlt(localctx, 2);
 				{
-				this.state = 686;
+				this.state = 736;
 				this.integerValue();
 				}
 				break;
@@ -3831,19 +4094,19 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public decimalValue(): DecimalValueContext {
 		let localctx: DecimalValueContext = new DecimalValueContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 138, esql_parser.RULE_decimalValue);
+		this.enterRule(localctx, 148, esql_parser.RULE_decimalValue);
 		let _la: number;
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 690;
+			this.state = 740;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la===84 || _la===85) {
+			if (_la===88 || _la===89) {
 				{
-				this.state = 689;
+				this.state = 739;
 				_la = this._input.LA(1);
-				if(!(_la===84 || _la===85)) {
+				if(!(_la===88 || _la===89)) {
 				this._errHandler.recoverInline(this);
 				}
 				else {
@@ -3853,7 +4116,7 @@ export default class esql_parser extends parser_config {
 				}
 			}
 
-			this.state = 692;
+			this.state = 742;
 			this.match(esql_parser.DECIMAL_LITERAL);
 			}
 		}
@@ -3874,19 +4137,19 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public integerValue(): IntegerValueContext {
 		let localctx: IntegerValueContext = new IntegerValueContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 140, esql_parser.RULE_integerValue);
+		this.enterRule(localctx, 150, esql_parser.RULE_integerValue);
 		let _la: number;
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 695;
+			this.state = 745;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la===84 || _la===85) {
+			if (_la===88 || _la===89) {
 				{
-				this.state = 694;
+				this.state = 744;
 				_la = this._input.LA(1);
-				if(!(_la===84 || _la===85)) {
+				if(!(_la===88 || _la===89)) {
 				this._errHandler.recoverInline(this);
 				}
 				else {
@@ -3896,7 +4159,7 @@ export default class esql_parser extends parser_config {
 				}
 			}
 
-			this.state = 697;
+			this.state = 747;
 			this.match(esql_parser.INTEGER_LITERAL);
 			}
 		}
@@ -3917,11 +4180,11 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public string_(): StringContext {
 		let localctx: StringContext = new StringContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 142, esql_parser.RULE_string);
+		this.enterRule(localctx, 152, esql_parser.RULE_string);
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 699;
+			this.state = 749;
 			this.match(esql_parser.QUOTED_STRING);
 			}
 		}
@@ -3942,14 +4205,14 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public comparisonOperator(): ComparisonOperatorContext {
 		let localctx: ComparisonOperatorContext = new ComparisonOperatorContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 144, esql_parser.RULE_comparisonOperator);
+		this.enterRule(localctx, 154, esql_parser.RULE_comparisonOperator);
 		let _la: number;
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 701;
+			this.state = 751;
 			_la = this._input.LA(1);
-			if(!(((((_la - 77)) & ~0x1F) === 0 && ((1 << (_la - 77)) & 125) !== 0))) {
+			if(!(((((_la - 81)) & ~0x1F) === 0 && ((1 << (_la - 81)) & 125) !== 0))) {
 			this._errHandler.recoverInline(this);
 			}
 			else {
@@ -3975,26 +4238,26 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public joinCommand(): JoinCommandContext {
 		let localctx: JoinCommandContext = new JoinCommandContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 146, esql_parser.RULE_joinCommand);
+		this.enterRule(localctx, 156, esql_parser.RULE_joinCommand);
 		let _la: number;
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 703;
+			this.state = 753;
 			localctx._type_ = this._input.LT(1);
 			_la = this._input.LA(1);
-			if(!((((_la) & ~0x1F) === 0 && ((1 << _la) & 6815744) !== 0))) {
+			if(!((((_la) & ~0x1F) === 0 && ((1 << _la) & 54525952) !== 0))) {
 			    localctx._type_ = this._errHandler.recoverInline(this);
 			}
 			else {
 				this._errHandler.reportMatch(this);
 			    this.consume();
 			}
-			this.state = 704;
+			this.state = 754;
 			this.match(esql_parser.JOIN);
-			this.state = 705;
+			this.state = 755;
 			this.joinTarget();
-			this.state = 706;
+			this.state = 756;
 			this.joinCondition();
 			}
 		}
@@ -4015,11 +4278,11 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public joinTarget(): JoinTargetContext {
 		let localctx: JoinTargetContext = new JoinTargetContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 148, esql_parser.RULE_joinTarget);
+		this.enterRule(localctx, 158, esql_parser.RULE_joinTarget);
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 708;
+			this.state = 758;
 			localctx._index = this.indexPattern();
 			}
 		}
@@ -4040,32 +4303,32 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public joinCondition(): JoinConditionContext {
 		let localctx: JoinConditionContext = new JoinConditionContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 150, esql_parser.RULE_joinCondition);
+		this.enterRule(localctx, 160, esql_parser.RULE_joinCondition);
 		try {
 			let _alt: number;
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 710;
+			this.state = 760;
 			this.match(esql_parser.ON);
-			this.state = 711;
+			this.state = 761;
 			this.joinPredicate();
-			this.state = 716;
+			this.state = 766;
 			this._errHandler.sync(this);
-			_alt = this._interp.adaptivePredict(this._input, 65, this._ctx);
+			_alt = this._interp.adaptivePredict(this._input, 70, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 				if (_alt === 1) {
 					{
 					{
-					this.state = 712;
+					this.state = 762;
 					this.match(esql_parser.COMMA);
-					this.state = 713;
+					this.state = 763;
 					this.joinPredicate();
 					}
 					}
 				}
-				this.state = 718;
+				this.state = 768;
 				this._errHandler.sync(this);
-				_alt = this._interp.adaptivePredict(this._input, 65, this._ctx);
+				_alt = this._interp.adaptivePredict(this._input, 70, this._ctx);
 			}
 			}
 		}
@@ -4086,11 +4349,11 @@ export default class esql_parser extends parser_config {
 	// @RuleVersion(0)
 	public joinPredicate(): JoinPredicateContext {
 		let localctx: JoinPredicateContext = new JoinPredicateContext(this, this._ctx, this.state);
-		this.enterRule(localctx, 152, esql_parser.RULE_joinPredicate);
+		this.enterRule(localctx, 162, esql_parser.RULE_joinPredicate);
 		try {
 			this.enterOuterAlt(localctx, 1);
 			{
-			this.state = 719;
+			this.state = 769;
 			this.valueExpression();
 			}
 		}
@@ -4117,15 +4380,13 @@ export default class esql_parser extends parser_config {
 			return this.sourceCommand_sempred(localctx as SourceCommandContext, predIndex);
 		case 3:
 			return this.processingCommand_sempred(localctx as ProcessingCommandContext, predIndex);
-		case 12:
-			return this.indexPattern_sempred(localctx as IndexPatternContext, predIndex);
-		case 53:
+		case 55:
 			return this.forkSubQueryCommand_sempred(localctx as ForkSubQueryCommandContext, predIndex);
-		case 56:
-			return this.booleanExpression_sempred(localctx as BooleanExpressionContext, predIndex);
-		case 60:
-			return this.operatorExpression_sempred(localctx as OperatorExpressionContext, predIndex);
 		case 61:
+			return this.booleanExpression_sempred(localctx as BooleanExpressionContext, predIndex);
+		case 65:
+			return this.operatorExpression_sempred(localctx as OperatorExpressionContext, predIndex);
+		case 66:
 			return this.primaryExpression_sempred(localctx as PrimaryExpressionContext, predIndex);
 		}
 		return true;
@@ -4158,11 +4419,6 @@ export default class esql_parser extends parser_config {
 			return this.isDevVersion();
 		case 7:
 			return this.isDevVersion();
-		}
-		return true;
-	}
-	private indexPattern_sempred(localctx: IndexPatternContext, predIndex: number): boolean {
-		switch (predIndex) {
 		case 8:
 			return this.isDevVersion();
 		}
@@ -4201,7 +4457,7 @@ export default class esql_parser extends parser_config {
 		return true;
 	}
 
-	public static readonly _serializedATN: number[] = [4,1,136,722,2,0,7,0,
+	public static readonly _serializedATN: number[] = [4,1,139,772,2,0,7,0,
 	2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,7,7,7,2,8,7,8,2,9,7,9,
 	2,10,7,10,2,11,7,11,2,12,7,12,2,13,7,13,2,14,7,14,2,15,7,15,2,16,7,16,2,
 	17,7,17,2,18,7,18,2,19,7,19,2,20,7,20,2,21,7,21,2,22,7,22,2,23,7,23,2,24,
@@ -4212,232 +4468,249 @@ export default class esql_parser extends parser_config {
 	7,53,2,54,7,54,2,55,7,55,2,56,7,56,2,57,7,57,2,58,7,58,2,59,7,59,2,60,7,
 	60,2,61,7,61,2,62,7,62,2,63,7,63,2,64,7,64,2,65,7,65,2,66,7,66,2,67,7,67,
 	2,68,7,68,2,69,7,69,2,70,7,70,2,71,7,71,2,72,7,72,2,73,7,73,2,74,7,74,2,
-	75,7,75,2,76,7,76,1,0,1,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,5,1,164,8,1,10,1,
-	12,1,167,9,1,1,2,1,2,1,2,1,2,1,2,1,2,3,2,175,8,2,1,3,1,3,1,3,1,3,1,3,1,
-	3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,
-	3,1,3,3,3,202,8,3,1,4,1,4,1,4,1,5,1,5,1,6,1,6,1,6,1,7,1,7,1,7,5,7,215,8,
-	7,10,7,12,7,218,9,7,1,8,1,8,1,8,3,8,223,8,8,1,8,1,8,1,9,1,9,1,9,1,10,1,
-	10,1,10,1,11,1,11,1,11,5,11,236,8,11,10,11,12,11,239,9,11,1,11,3,11,242,
-	8,11,1,12,1,12,1,12,3,12,247,8,12,1,12,1,12,1,12,1,12,1,12,3,12,254,8,12,
-	3,12,256,8,12,1,13,1,13,1,14,1,14,1,15,1,15,1,16,1,16,1,16,1,16,5,16,268,
-	8,16,10,16,12,16,271,9,16,1,17,1,17,1,17,1,18,1,18,3,18,278,8,18,1,18,1,
-	18,3,18,282,8,18,1,19,1,19,1,19,5,19,287,8,19,10,19,12,19,290,9,19,1,20,
-	1,20,1,20,3,20,295,8,20,1,21,1,21,1,21,5,21,300,8,21,10,21,12,21,303,9,
-	21,1,22,1,22,1,22,5,22,308,8,22,10,22,12,22,311,9,22,1,23,1,23,1,23,5,23,
-	316,8,23,10,23,12,23,319,9,23,1,24,1,24,1,25,1,25,1,25,3,25,326,8,25,1,
-	26,1,26,3,26,330,8,26,1,27,1,27,3,27,334,8,27,1,28,1,28,1,28,3,28,339,8,
-	28,1,29,1,29,1,29,1,30,1,30,1,30,1,30,5,30,348,8,30,10,30,12,30,351,9,30,
-	1,31,1,31,3,31,355,8,31,1,31,1,31,3,31,359,8,31,1,32,1,32,1,32,1,33,1,33,
-	1,33,1,34,1,34,1,34,1,34,5,34,371,8,34,10,34,12,34,374,9,34,1,35,1,35,1,
-	35,1,35,1,36,1,36,1,36,1,36,3,36,384,8,36,1,37,1,37,1,37,1,37,1,38,1,38,
-	1,38,1,39,1,39,1,39,5,39,396,8,39,10,39,12,39,399,9,39,1,40,1,40,1,40,1,
-	40,1,41,1,41,1,41,1,42,1,42,1,42,1,42,1,43,1,43,1,43,1,44,1,44,1,44,1,44,
-	3,44,419,8,44,1,44,1,44,1,44,1,44,5,44,425,8,44,10,44,12,44,428,9,44,3,
-	44,430,8,44,1,45,1,45,1,45,3,45,435,8,45,1,45,1,45,1,46,1,46,1,46,1,46,
-	1,46,1,47,1,47,1,47,1,47,3,47,448,8,47,1,48,1,48,1,48,1,48,3,48,454,8,48,
-	1,48,1,48,1,48,1,48,1,48,3,48,461,8,48,1,49,1,49,1,49,1,50,1,50,1,50,1,
-	51,4,51,470,8,51,11,51,12,51,471,1,52,1,52,1,52,1,52,1,53,1,53,1,53,1,53,
-	1,53,1,53,5,53,484,8,53,10,53,12,53,487,9,53,1,54,1,54,1,54,3,54,492,8,
-	54,1,55,1,55,1,56,1,56,1,56,1,56,1,56,1,56,1,56,3,56,503,8,56,1,56,1,56,
-	1,56,1,56,1,56,5,56,510,8,56,10,56,12,56,513,9,56,1,56,1,56,1,56,1,56,1,
-	56,3,56,520,8,56,1,56,1,56,1,56,3,56,525,8,56,1,56,1,56,1,56,1,56,1,56,
-	1,56,5,56,533,8,56,10,56,12,56,536,9,56,1,57,1,57,3,57,540,8,57,1,57,1,
-	57,1,57,1,57,1,57,3,57,547,8,57,1,57,1,57,1,57,3,57,552,8,57,1,58,1,58,
-	1,58,3,58,557,8,58,1,58,1,58,1,58,1,59,1,59,1,59,1,59,1,59,3,59,567,8,59,
-	1,60,1,60,1,60,1,60,3,60,573,8,60,1,60,1,60,1,60,1,60,1,60,1,60,5,60,581,
-	8,60,10,60,12,60,584,9,60,1,61,1,61,1,61,1,61,1,61,1,61,1,61,1,61,3,61,
-	594,8,61,1,61,1,61,1,61,5,61,599,8,61,10,61,12,61,602,9,61,1,62,1,62,1,
-	62,1,62,1,62,1,62,5,62,610,8,62,10,62,12,62,613,9,62,1,62,1,62,3,62,617,
-	8,62,3,62,619,8,62,1,62,1,62,1,63,1,63,1,64,1,64,1,64,1,64,5,64,629,8,64,
-	10,64,12,64,632,9,64,1,64,1,64,1,65,1,65,1,65,1,65,1,66,1,66,1,66,1,66,
-	1,66,1,66,1,66,1,66,1,66,1,66,1,66,1,66,1,66,5,66,653,8,66,10,66,12,66,
-	656,9,66,1,66,1,66,1,66,1,66,1,66,1,66,5,66,664,8,66,10,66,12,66,667,9,
-	66,1,66,1,66,1,66,1,66,1,66,1,66,5,66,675,8,66,10,66,12,66,678,9,66,1,66,
-	1,66,3,66,682,8,66,1,67,1,67,1,68,1,68,3,68,688,8,68,1,69,3,69,691,8,69,
-	1,69,1,69,1,70,3,70,696,8,70,1,70,1,70,1,71,1,71,1,72,1,72,1,73,1,73,1,
-	73,1,73,1,73,1,74,1,74,1,75,1,75,1,75,1,75,5,75,715,8,75,10,75,12,75,718,
-	9,75,1,76,1,76,1,76,0,5,2,106,112,120,122,77,0,2,4,6,8,10,12,14,16,18,20,
-	22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,
-	70,72,74,76,78,80,82,84,86,88,90,92,94,96,98,100,102,104,106,108,110,112,
-	114,116,118,120,122,124,126,128,130,132,134,136,138,140,142,144,146,148,
-	150,152,0,9,2,0,52,52,104,104,1,0,98,99,2,0,57,57,62,62,2,0,65,65,68,68,
-	1,0,84,85,1,0,86,88,2,0,64,64,76,76,2,0,77,77,79,83,2,0,19,19,21,22,748,
-	0,154,1,0,0,0,2,157,1,0,0,0,4,174,1,0,0,0,6,201,1,0,0,0,8,203,1,0,0,0,10,
-	206,1,0,0,0,12,208,1,0,0,0,14,211,1,0,0,0,16,222,1,0,0,0,18,226,1,0,0,0,
-	20,229,1,0,0,0,22,232,1,0,0,0,24,255,1,0,0,0,26,257,1,0,0,0,28,259,1,0,
-	0,0,30,261,1,0,0,0,32,263,1,0,0,0,34,272,1,0,0,0,36,275,1,0,0,0,38,283,
-	1,0,0,0,40,291,1,0,0,0,42,296,1,0,0,0,44,304,1,0,0,0,46,312,1,0,0,0,48,
-	320,1,0,0,0,50,325,1,0,0,0,52,329,1,0,0,0,54,333,1,0,0,0,56,338,1,0,0,0,
-	58,340,1,0,0,0,60,343,1,0,0,0,62,352,1,0,0,0,64,360,1,0,0,0,66,363,1,0,
-	0,0,68,366,1,0,0,0,70,375,1,0,0,0,72,379,1,0,0,0,74,385,1,0,0,0,76,389,
-	1,0,0,0,78,392,1,0,0,0,80,400,1,0,0,0,82,404,1,0,0,0,84,407,1,0,0,0,86,
-	411,1,0,0,0,88,414,1,0,0,0,90,434,1,0,0,0,92,438,1,0,0,0,94,443,1,0,0,0,
-	96,449,1,0,0,0,98,462,1,0,0,0,100,465,1,0,0,0,102,469,1,0,0,0,104,473,1,
-	0,0,0,106,477,1,0,0,0,108,491,1,0,0,0,110,493,1,0,0,0,112,524,1,0,0,0,114,
-	551,1,0,0,0,116,553,1,0,0,0,118,566,1,0,0,0,120,572,1,0,0,0,122,593,1,0,
-	0,0,124,603,1,0,0,0,126,622,1,0,0,0,128,624,1,0,0,0,130,635,1,0,0,0,132,
-	681,1,0,0,0,134,683,1,0,0,0,136,687,1,0,0,0,138,690,1,0,0,0,140,695,1,0,
-	0,0,142,699,1,0,0,0,144,701,1,0,0,0,146,703,1,0,0,0,148,708,1,0,0,0,150,
-	710,1,0,0,0,152,719,1,0,0,0,154,155,3,2,1,0,155,156,5,0,0,1,156,1,1,0,0,
-	0,157,158,6,1,-1,0,158,159,3,4,2,0,159,165,1,0,0,0,160,161,10,1,0,0,161,
-	162,5,51,0,0,162,164,3,6,3,0,163,160,1,0,0,0,164,167,1,0,0,0,165,163,1,
-	0,0,0,165,166,1,0,0,0,166,3,1,0,0,0,167,165,1,0,0,0,168,175,3,82,41,0,169,
-	175,3,18,9,0,170,175,3,12,6,0,171,175,3,86,43,0,172,173,4,2,1,0,173,175,
-	3,20,10,0,174,168,1,0,0,0,174,169,1,0,0,0,174,170,1,0,0,0,174,171,1,0,0,
-	0,174,172,1,0,0,0,175,5,1,0,0,0,176,202,3,34,17,0,177,202,3,8,4,0,178,202,
-	3,64,32,0,179,202,3,58,29,0,180,202,3,36,18,0,181,202,3,60,30,0,182,202,
-	3,66,33,0,183,202,3,68,34,0,184,202,3,72,36,0,185,202,3,74,37,0,186,202,
-	3,88,44,0,187,202,3,76,38,0,188,202,3,146,73,0,189,190,4,3,2,0,190,202,
-	3,94,47,0,191,192,4,3,3,0,192,202,3,92,46,0,193,194,4,3,4,0,194,202,3,96,
-	48,0,195,196,4,3,5,0,196,202,3,98,49,0,197,198,4,3,6,0,198,202,3,100,50,
-	0,199,200,4,3,7,0,200,202,3,110,55,0,201,176,1,0,0,0,201,177,1,0,0,0,201,
-	178,1,0,0,0,201,179,1,0,0,0,201,180,1,0,0,0,201,181,1,0,0,0,201,182,1,0,
-	0,0,201,183,1,0,0,0,201,184,1,0,0,0,201,185,1,0,0,0,201,186,1,0,0,0,201,
-	187,1,0,0,0,201,188,1,0,0,0,201,189,1,0,0,0,201,191,1,0,0,0,201,193,1,0,
-	0,0,201,195,1,0,0,0,201,197,1,0,0,0,201,199,1,0,0,0,202,7,1,0,0,0,203,204,
-	5,14,0,0,204,205,3,112,56,0,205,9,1,0,0,0,206,207,3,48,24,0,207,11,1,0,
-	0,0,208,209,5,11,0,0,209,210,3,14,7,0,210,13,1,0,0,0,211,216,3,16,8,0,212,
-	213,5,61,0,0,213,215,3,16,8,0,214,212,1,0,0,0,215,218,1,0,0,0,216,214,1,
-	0,0,0,216,217,1,0,0,0,217,15,1,0,0,0,218,216,1,0,0,0,219,220,3,42,21,0,
-	220,221,5,58,0,0,221,223,1,0,0,0,222,219,1,0,0,0,222,223,1,0,0,0,223,224,
-	1,0,0,0,224,225,3,112,56,0,225,17,1,0,0,0,226,227,5,16,0,0,227,228,3,22,
-	11,0,228,19,1,0,0,0,229,230,5,17,0,0,230,231,3,22,11,0,231,21,1,0,0,0,232,
-	237,3,24,12,0,233,234,5,61,0,0,234,236,3,24,12,0,235,233,1,0,0,0,236,239,
-	1,0,0,0,237,235,1,0,0,0,237,238,1,0,0,0,238,241,1,0,0,0,239,237,1,0,0,0,
-	240,242,3,32,16,0,241,240,1,0,0,0,241,242,1,0,0,0,242,23,1,0,0,0,243,244,
-	3,26,13,0,244,245,5,60,0,0,245,247,1,0,0,0,246,243,1,0,0,0,246,247,1,0,
-	0,0,247,248,1,0,0,0,248,256,3,30,15,0,249,250,4,12,8,0,250,253,3,30,15,
-	0,251,252,5,59,0,0,252,254,3,28,14,0,253,251,1,0,0,0,253,254,1,0,0,0,254,
-	256,1,0,0,0,255,246,1,0,0,0,255,249,1,0,0,0,256,25,1,0,0,0,257,258,7,0,
-	0,0,258,27,1,0,0,0,259,260,7,0,0,0,260,29,1,0,0,0,261,262,7,0,0,0,262,31,
-	1,0,0,0,263,264,5,103,0,0,264,269,5,104,0,0,265,266,5,61,0,0,266,268,5,
-	104,0,0,267,265,1,0,0,0,268,271,1,0,0,0,269,267,1,0,0,0,269,270,1,0,0,0,
-	270,33,1,0,0,0,271,269,1,0,0,0,272,273,5,8,0,0,273,274,3,14,7,0,274,35,
-	1,0,0,0,275,277,5,13,0,0,276,278,3,38,19,0,277,276,1,0,0,0,277,278,1,0,
-	0,0,278,281,1,0,0,0,279,280,5,55,0,0,280,282,3,14,7,0,281,279,1,0,0,0,281,
-	282,1,0,0,0,282,37,1,0,0,0,283,288,3,40,20,0,284,285,5,61,0,0,285,287,3,
-	40,20,0,286,284,1,0,0,0,287,290,1,0,0,0,288,286,1,0,0,0,288,289,1,0,0,0,
-	289,39,1,0,0,0,290,288,1,0,0,0,291,294,3,16,8,0,292,293,5,14,0,0,293,295,
-	3,112,56,0,294,292,1,0,0,0,294,295,1,0,0,0,295,41,1,0,0,0,296,301,3,56,
-	28,0,297,298,5,63,0,0,298,300,3,56,28,0,299,297,1,0,0,0,300,303,1,0,0,0,
-	301,299,1,0,0,0,301,302,1,0,0,0,302,43,1,0,0,0,303,301,1,0,0,0,304,309,
-	3,50,25,0,305,306,5,63,0,0,306,308,3,50,25,0,307,305,1,0,0,0,308,311,1,
-	0,0,0,309,307,1,0,0,0,309,310,1,0,0,0,310,45,1,0,0,0,311,309,1,0,0,0,312,
-	317,3,44,22,0,313,314,5,61,0,0,314,316,3,44,22,0,315,313,1,0,0,0,316,319,
-	1,0,0,0,317,315,1,0,0,0,317,318,1,0,0,0,318,47,1,0,0,0,319,317,1,0,0,0,
-	320,321,7,1,0,0,321,49,1,0,0,0,322,326,5,125,0,0,323,326,3,52,26,0,324,
-	326,3,54,27,0,325,322,1,0,0,0,325,323,1,0,0,0,325,324,1,0,0,0,326,51,1,
-	0,0,0,327,330,5,74,0,0,328,330,5,92,0,0,329,327,1,0,0,0,329,328,1,0,0,0,
-	330,53,1,0,0,0,331,334,5,91,0,0,332,334,5,93,0,0,333,331,1,0,0,0,333,332,
-	1,0,0,0,334,55,1,0,0,0,335,339,3,48,24,0,336,339,3,52,26,0,337,339,3,54,
-	27,0,338,335,1,0,0,0,338,336,1,0,0,0,338,337,1,0,0,0,339,57,1,0,0,0,340,
-	341,5,10,0,0,341,342,5,53,0,0,342,59,1,0,0,0,343,344,5,12,0,0,344,349,3,
-	62,31,0,345,346,5,61,0,0,346,348,3,62,31,0,347,345,1,0,0,0,348,351,1,0,
-	0,0,349,347,1,0,0,0,349,350,1,0,0,0,350,61,1,0,0,0,351,349,1,0,0,0,352,
-	354,3,112,56,0,353,355,7,2,0,0,354,353,1,0,0,0,354,355,1,0,0,0,355,358,
-	1,0,0,0,356,357,5,72,0,0,357,359,7,3,0,0,358,356,1,0,0,0,358,359,1,0,0,
-	0,359,63,1,0,0,0,360,361,5,26,0,0,361,362,3,46,23,0,362,65,1,0,0,0,363,
-	364,5,25,0,0,364,365,3,46,23,0,365,67,1,0,0,0,366,367,5,29,0,0,367,372,
-	3,70,35,0,368,369,5,61,0,0,369,371,3,70,35,0,370,368,1,0,0,0,371,374,1,
-	0,0,0,372,370,1,0,0,0,372,373,1,0,0,0,373,69,1,0,0,0,374,372,1,0,0,0,375,
-	376,3,44,22,0,376,377,5,129,0,0,377,378,3,44,22,0,378,71,1,0,0,0,379,380,
-	5,7,0,0,380,381,3,122,61,0,381,383,3,142,71,0,382,384,3,78,39,0,383,382,
-	1,0,0,0,383,384,1,0,0,0,384,73,1,0,0,0,385,386,5,9,0,0,386,387,3,122,61,
-	0,387,388,3,142,71,0,388,75,1,0,0,0,389,390,5,24,0,0,390,391,3,42,21,0,
-	391,77,1,0,0,0,392,397,3,80,40,0,393,394,5,61,0,0,394,396,3,80,40,0,395,
-	393,1,0,0,0,396,399,1,0,0,0,397,395,1,0,0,0,397,398,1,0,0,0,398,79,1,0,
-	0,0,399,397,1,0,0,0,400,401,3,48,24,0,401,402,5,58,0,0,402,403,3,132,66,
-	0,403,81,1,0,0,0,404,405,5,6,0,0,405,406,3,84,42,0,406,83,1,0,0,0,407,408,
-	5,94,0,0,408,409,3,2,1,0,409,410,5,95,0,0,410,85,1,0,0,0,411,412,5,30,0,
-	0,412,413,5,133,0,0,413,87,1,0,0,0,414,415,5,5,0,0,415,418,5,37,0,0,416,
-	417,5,35,0,0,417,419,3,44,22,0,418,416,1,0,0,0,418,419,1,0,0,0,419,429,
-	1,0,0,0,420,421,5,36,0,0,421,426,3,90,45,0,422,423,5,61,0,0,423,425,3,90,
-	45,0,424,422,1,0,0,0,425,428,1,0,0,0,426,424,1,0,0,0,426,427,1,0,0,0,427,
-	430,1,0,0,0,428,426,1,0,0,0,429,420,1,0,0,0,429,430,1,0,0,0,430,89,1,0,
-	0,0,431,432,3,44,22,0,432,433,5,58,0,0,433,435,1,0,0,0,434,431,1,0,0,0,
-	434,435,1,0,0,0,435,436,1,0,0,0,436,437,3,44,22,0,437,91,1,0,0,0,438,439,
-	5,23,0,0,439,440,3,24,12,0,440,441,5,35,0,0,441,442,3,46,23,0,442,93,1,
-	0,0,0,443,444,5,15,0,0,444,447,3,38,19,0,445,446,5,55,0,0,446,448,3,14,
-	7,0,447,445,1,0,0,0,447,448,1,0,0,0,448,95,1,0,0,0,449,450,5,4,0,0,450,
-	453,3,42,21,0,451,452,5,35,0,0,452,454,3,42,21,0,453,451,1,0,0,0,453,454,
-	1,0,0,0,454,460,1,0,0,0,455,456,5,129,0,0,456,457,3,42,21,0,457,458,5,61,
-	0,0,458,459,3,42,21,0,459,461,1,0,0,0,460,455,1,0,0,0,460,461,1,0,0,0,461,
-	97,1,0,0,0,462,463,5,27,0,0,463,464,3,46,23,0,464,99,1,0,0,0,465,466,5,
-	18,0,0,466,467,3,102,51,0,467,101,1,0,0,0,468,470,3,104,52,0,469,468,1,
-	0,0,0,470,471,1,0,0,0,471,469,1,0,0,0,471,472,1,0,0,0,472,103,1,0,0,0,473,
-	474,5,96,0,0,474,475,3,106,53,0,475,476,5,97,0,0,476,105,1,0,0,0,477,478,
-	6,53,-1,0,478,479,3,108,54,0,479,485,1,0,0,0,480,481,10,1,0,0,481,482,5,
-	51,0,0,482,484,3,108,54,0,483,480,1,0,0,0,484,487,1,0,0,0,485,483,1,0,0,
-	0,485,486,1,0,0,0,486,107,1,0,0,0,487,485,1,0,0,0,488,492,3,8,4,0,489,492,
-	3,60,30,0,490,492,3,58,29,0,491,488,1,0,0,0,491,489,1,0,0,0,491,490,1,0,
-	0,0,492,109,1,0,0,0,493,494,5,28,0,0,494,111,1,0,0,0,495,496,6,56,-1,0,
-	496,497,5,70,0,0,497,525,3,112,56,8,498,525,3,118,59,0,499,525,3,114,57,
-	0,500,502,3,118,59,0,501,503,5,70,0,0,502,501,1,0,0,0,502,503,1,0,0,0,503,
-	504,1,0,0,0,504,505,5,66,0,0,505,506,5,96,0,0,506,511,3,118,59,0,507,508,
-	5,61,0,0,508,510,3,118,59,0,509,507,1,0,0,0,510,513,1,0,0,0,511,509,1,0,
-	0,0,511,512,1,0,0,0,512,514,1,0,0,0,513,511,1,0,0,0,514,515,5,97,0,0,515,
-	525,1,0,0,0,516,517,3,118,59,0,517,519,5,67,0,0,518,520,5,70,0,0,519,518,
-	1,0,0,0,519,520,1,0,0,0,520,521,1,0,0,0,521,522,5,71,0,0,522,525,1,0,0,
-	0,523,525,3,116,58,0,524,495,1,0,0,0,524,498,1,0,0,0,524,499,1,0,0,0,524,
-	500,1,0,0,0,524,516,1,0,0,0,524,523,1,0,0,0,525,534,1,0,0,0,526,527,10,
-	5,0,0,527,528,5,56,0,0,528,533,3,112,56,6,529,530,10,4,0,0,530,531,5,73,
-	0,0,531,533,3,112,56,5,532,526,1,0,0,0,532,529,1,0,0,0,533,536,1,0,0,0,
-	534,532,1,0,0,0,534,535,1,0,0,0,535,113,1,0,0,0,536,534,1,0,0,0,537,539,
-	3,118,59,0,538,540,5,70,0,0,539,538,1,0,0,0,539,540,1,0,0,0,540,541,1,0,
-	0,0,541,542,5,69,0,0,542,543,3,142,71,0,543,552,1,0,0,0,544,546,3,118,59,
-	0,545,547,5,70,0,0,546,545,1,0,0,0,546,547,1,0,0,0,547,548,1,0,0,0,548,
-	549,5,75,0,0,549,550,3,142,71,0,550,552,1,0,0,0,551,537,1,0,0,0,551,544,
-	1,0,0,0,552,115,1,0,0,0,553,556,3,42,21,0,554,555,5,59,0,0,555,557,3,10,
-	5,0,556,554,1,0,0,0,556,557,1,0,0,0,557,558,1,0,0,0,558,559,5,60,0,0,559,
-	560,3,132,66,0,560,117,1,0,0,0,561,567,3,120,60,0,562,563,3,120,60,0,563,
-	564,3,144,72,0,564,565,3,120,60,0,565,567,1,0,0,0,566,561,1,0,0,0,566,562,
-	1,0,0,0,567,119,1,0,0,0,568,569,6,60,-1,0,569,573,3,122,61,0,570,571,7,
-	4,0,0,571,573,3,120,60,3,572,568,1,0,0,0,572,570,1,0,0,0,573,582,1,0,0,
-	0,574,575,10,2,0,0,575,576,7,5,0,0,576,581,3,120,60,3,577,578,10,1,0,0,
-	578,579,7,4,0,0,579,581,3,120,60,2,580,574,1,0,0,0,580,577,1,0,0,0,581,
-	584,1,0,0,0,582,580,1,0,0,0,582,583,1,0,0,0,583,121,1,0,0,0,584,582,1,0,
-	0,0,585,586,6,61,-1,0,586,594,3,132,66,0,587,594,3,42,21,0,588,594,3,124,
-	62,0,589,590,5,96,0,0,590,591,3,112,56,0,591,592,5,97,0,0,592,594,1,0,0,
-	0,593,585,1,0,0,0,593,587,1,0,0,0,593,588,1,0,0,0,593,589,1,0,0,0,594,600,
-	1,0,0,0,595,596,10,1,0,0,596,597,5,59,0,0,597,599,3,10,5,0,598,595,1,0,
-	0,0,599,602,1,0,0,0,600,598,1,0,0,0,600,601,1,0,0,0,601,123,1,0,0,0,602,
-	600,1,0,0,0,603,604,3,126,63,0,604,618,5,96,0,0,605,619,5,86,0,0,606,611,
-	3,112,56,0,607,608,5,61,0,0,608,610,3,112,56,0,609,607,1,0,0,0,610,613,
-	1,0,0,0,611,609,1,0,0,0,611,612,1,0,0,0,612,616,1,0,0,0,613,611,1,0,0,0,
-	614,615,5,61,0,0,615,617,3,128,64,0,616,614,1,0,0,0,616,617,1,0,0,0,617,
-	619,1,0,0,0,618,605,1,0,0,0,618,606,1,0,0,0,618,619,1,0,0,0,619,620,1,0,
-	0,0,620,621,5,97,0,0,621,125,1,0,0,0,622,623,3,56,28,0,623,127,1,0,0,0,
-	624,625,5,89,0,0,625,630,3,130,65,0,626,627,5,61,0,0,627,629,3,130,65,0,
-	628,626,1,0,0,0,629,632,1,0,0,0,630,628,1,0,0,0,630,631,1,0,0,0,631,633,
-	1,0,0,0,632,630,1,0,0,0,633,634,5,90,0,0,634,129,1,0,0,0,635,636,3,142,
-	71,0,636,637,5,60,0,0,637,638,3,132,66,0,638,131,1,0,0,0,639,682,5,71,0,
-	0,640,641,3,140,70,0,641,642,5,98,0,0,642,682,1,0,0,0,643,682,3,138,69,
-	0,644,682,3,140,70,0,645,682,3,134,67,0,646,682,3,52,26,0,647,682,3,142,
-	71,0,648,649,5,94,0,0,649,654,3,136,68,0,650,651,5,61,0,0,651,653,3,136,
-	68,0,652,650,1,0,0,0,653,656,1,0,0,0,654,652,1,0,0,0,654,655,1,0,0,0,655,
-	657,1,0,0,0,656,654,1,0,0,0,657,658,5,95,0,0,658,682,1,0,0,0,659,660,5,
-	94,0,0,660,665,3,134,67,0,661,662,5,61,0,0,662,664,3,134,67,0,663,661,1,
-	0,0,0,664,667,1,0,0,0,665,663,1,0,0,0,665,666,1,0,0,0,666,668,1,0,0,0,667,
-	665,1,0,0,0,668,669,5,95,0,0,669,682,1,0,0,0,670,671,5,94,0,0,671,676,3,
-	142,71,0,672,673,5,61,0,0,673,675,3,142,71,0,674,672,1,0,0,0,675,678,1,
-	0,0,0,676,674,1,0,0,0,676,677,1,0,0,0,677,679,1,0,0,0,678,676,1,0,0,0,679,
-	680,5,95,0,0,680,682,1,0,0,0,681,639,1,0,0,0,681,640,1,0,0,0,681,643,1,
-	0,0,0,681,644,1,0,0,0,681,645,1,0,0,0,681,646,1,0,0,0,681,647,1,0,0,0,681,
-	648,1,0,0,0,681,659,1,0,0,0,681,670,1,0,0,0,682,133,1,0,0,0,683,684,7,6,
-	0,0,684,135,1,0,0,0,685,688,3,138,69,0,686,688,3,140,70,0,687,685,1,0,0,
-	0,687,686,1,0,0,0,688,137,1,0,0,0,689,691,7,4,0,0,690,689,1,0,0,0,690,691,
-	1,0,0,0,691,692,1,0,0,0,692,693,5,54,0,0,693,139,1,0,0,0,694,696,7,4,0,
-	0,695,694,1,0,0,0,695,696,1,0,0,0,696,697,1,0,0,0,697,698,5,53,0,0,698,
-	141,1,0,0,0,699,700,5,52,0,0,700,143,1,0,0,0,701,702,7,7,0,0,702,145,1,
-	0,0,0,703,704,7,8,0,0,704,705,5,111,0,0,705,706,3,148,74,0,706,707,3,150,
-	75,0,707,147,1,0,0,0,708,709,3,24,12,0,709,149,1,0,0,0,710,711,5,35,0,0,
-	711,716,3,152,76,0,712,713,5,61,0,0,713,715,3,152,76,0,714,712,1,0,0,0,
-	715,718,1,0,0,0,716,714,1,0,0,0,716,717,1,0,0,0,717,151,1,0,0,0,718,716,
-	1,0,0,0,719,720,3,118,59,0,720,153,1,0,0,0,66,165,174,201,216,222,237,241,
-	246,253,255,269,277,281,288,294,301,309,317,325,329,333,338,349,354,358,
-	372,383,397,418,426,429,434,447,453,460,471,485,491,502,511,519,524,532,
-	534,539,546,551,556,566,572,580,582,593,600,611,616,618,630,654,665,676,
-	681,687,690,695,716];
+	75,7,75,2,76,7,76,2,77,7,77,2,78,7,78,2,79,7,79,2,80,7,80,2,81,7,81,1,0,
+	1,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,5,1,174,8,1,10,1,12,1,177,9,1,1,2,1,2,1,
+	2,1,2,1,2,1,2,3,2,185,8,2,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,
+	3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,3,
+	3,216,8,3,1,4,1,4,1,4,1,5,1,5,1,6,1,6,1,6,1,7,1,7,1,7,5,7,229,8,7,10,7,
+	12,7,232,9,7,1,8,1,8,1,8,3,8,237,8,8,1,8,1,8,1,9,1,9,1,9,5,9,244,8,9,10,
+	9,12,9,247,9,9,1,10,1,10,1,10,3,10,252,8,10,1,11,1,11,1,11,1,12,1,12,1,
+	12,1,13,1,13,1,13,5,13,263,8,13,10,13,12,13,266,9,13,1,13,3,13,269,8,13,
+	1,14,1,14,1,14,3,14,274,8,14,1,14,1,14,1,14,1,14,3,14,280,8,14,3,14,282,
+	8,14,1,15,1,15,1,16,1,16,1,17,1,17,1,18,1,18,1,18,1,18,5,18,294,8,18,10,
+	18,12,18,297,9,18,1,19,1,19,1,19,1,20,1,20,3,20,304,8,20,1,20,1,20,3,20,
+	308,8,20,1,21,1,21,1,21,5,21,313,8,21,10,21,12,21,316,9,21,1,22,1,22,1,
+	22,3,22,321,8,22,1,23,1,23,1,23,5,23,326,8,23,10,23,12,23,329,9,23,1,24,
+	1,24,1,24,5,24,334,8,24,10,24,12,24,337,9,24,1,25,1,25,1,25,5,25,342,8,
+	25,10,25,12,25,345,9,25,1,26,1,26,1,27,1,27,1,27,3,27,352,8,27,1,28,1,28,
+	3,28,356,8,28,1,29,1,29,3,29,360,8,29,1,30,1,30,1,30,3,30,365,8,30,1,31,
+	1,31,1,31,1,32,1,32,1,32,1,32,5,32,374,8,32,10,32,12,32,377,9,32,1,33,1,
+	33,3,33,381,8,33,1,33,1,33,3,33,385,8,33,1,34,1,34,1,34,1,35,1,35,1,35,
+	1,36,1,36,1,36,1,36,5,36,397,8,36,10,36,12,36,400,9,36,1,37,1,37,1,37,1,
+	37,1,38,1,38,1,38,1,38,3,38,410,8,38,1,39,1,39,1,39,1,39,1,40,1,40,1,40,
+	1,41,1,41,1,41,5,41,422,8,41,10,41,12,41,425,9,41,1,42,1,42,1,42,1,42,1,
+	43,1,43,1,43,1,44,1,44,1,44,1,44,1,45,1,45,1,45,1,46,1,46,1,46,1,46,3,46,
+	445,8,46,1,46,1,46,1,46,1,46,5,46,451,8,46,10,46,12,46,454,9,46,3,46,456,
+	8,46,1,47,1,47,1,47,3,47,461,8,47,1,47,1,47,1,48,1,48,1,48,1,48,1,48,1,
+	49,1,49,1,49,1,49,3,49,474,8,49,1,50,1,50,1,50,1,50,3,50,480,8,50,1,50,
+	1,50,1,50,1,50,1,50,3,50,487,8,50,1,51,1,51,1,51,1,52,1,52,1,52,1,53,4,
+	53,496,8,53,11,53,12,53,497,1,54,1,54,1,54,1,54,1,55,1,55,1,55,1,55,1,55,
+	1,55,5,55,510,8,55,10,55,12,55,513,9,55,1,56,1,56,1,56,1,56,1,56,1,56,3,
+	56,521,8,56,1,57,1,57,1,58,1,58,1,58,1,58,1,58,1,58,3,58,531,8,58,1,59,
+	1,59,1,59,1,59,1,59,1,59,3,59,539,8,59,1,60,1,60,1,60,3,60,544,8,60,1,61,
+	1,61,1,61,1,61,1,61,1,61,1,61,3,61,553,8,61,1,61,1,61,1,61,1,61,1,61,5,
+	61,560,8,61,10,61,12,61,563,9,61,1,61,1,61,1,61,1,61,1,61,3,61,570,8,61,
+	1,61,1,61,1,61,3,61,575,8,61,1,61,1,61,1,61,1,61,1,61,1,61,5,61,583,8,61,
+	10,61,12,61,586,9,61,1,62,1,62,3,62,590,8,62,1,62,1,62,1,62,1,62,1,62,3,
+	62,597,8,62,1,62,1,62,1,62,3,62,602,8,62,1,63,1,63,1,63,3,63,607,8,63,1,
+	63,1,63,1,63,1,64,1,64,1,64,1,64,1,64,3,64,617,8,64,1,65,1,65,1,65,1,65,
+	3,65,623,8,65,1,65,1,65,1,65,1,65,1,65,1,65,5,65,631,8,65,10,65,12,65,634,
+	9,65,1,66,1,66,1,66,1,66,1,66,1,66,1,66,1,66,3,66,644,8,66,1,66,1,66,1,
+	66,5,66,649,8,66,10,66,12,66,652,9,66,1,67,1,67,1,67,1,67,1,67,1,67,5,67,
+	660,8,67,10,67,12,67,663,9,67,1,67,1,67,3,67,667,8,67,3,67,669,8,67,1,67,
+	1,67,1,68,1,68,1,69,1,69,1,69,1,69,5,69,679,8,69,10,69,12,69,682,9,69,1,
+	69,1,69,1,70,1,70,1,70,1,70,1,71,1,71,1,71,1,71,1,71,1,71,1,71,1,71,1,71,
+	1,71,1,71,1,71,1,71,5,71,703,8,71,10,71,12,71,706,9,71,1,71,1,71,1,71,1,
+	71,1,71,1,71,5,71,714,8,71,10,71,12,71,717,9,71,1,71,1,71,1,71,1,71,1,71,
+	1,71,5,71,725,8,71,10,71,12,71,728,9,71,1,71,1,71,3,71,732,8,71,1,72,1,
+	72,1,73,1,73,3,73,738,8,73,1,74,3,74,741,8,74,1,74,1,74,1,75,3,75,746,8,
+	75,1,75,1,75,1,76,1,76,1,77,1,77,1,78,1,78,1,78,1,78,1,78,1,79,1,79,1,80,
+	1,80,1,80,1,80,5,80,765,8,80,10,80,12,80,768,9,80,1,81,1,81,1,81,0,5,2,
+	110,122,130,132,82,0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,
+	38,40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,76,78,80,82,84,
+	86,88,90,92,94,96,98,100,102,104,106,108,110,112,114,116,118,120,122,124,
+	126,128,130,132,134,136,138,140,142,144,146,148,150,152,154,156,158,160,
+	162,0,9,2,0,53,53,108,108,1,0,102,103,2,0,58,58,64,64,2,0,67,67,70,70,1,
+	0,88,89,1,0,90,92,2,0,66,66,79,79,2,0,81,81,83,87,2,0,22,22,24,25,804,0,
+	164,1,0,0,0,2,167,1,0,0,0,4,184,1,0,0,0,6,215,1,0,0,0,8,217,1,0,0,0,10,
+	220,1,0,0,0,12,222,1,0,0,0,14,225,1,0,0,0,16,236,1,0,0,0,18,240,1,0,0,0,
+	20,248,1,0,0,0,22,253,1,0,0,0,24,256,1,0,0,0,26,259,1,0,0,0,28,281,1,0,
+	0,0,30,283,1,0,0,0,32,285,1,0,0,0,34,287,1,0,0,0,36,289,1,0,0,0,38,298,
+	1,0,0,0,40,301,1,0,0,0,42,309,1,0,0,0,44,317,1,0,0,0,46,322,1,0,0,0,48,
+	330,1,0,0,0,50,338,1,0,0,0,52,346,1,0,0,0,54,351,1,0,0,0,56,355,1,0,0,0,
+	58,359,1,0,0,0,60,364,1,0,0,0,62,366,1,0,0,0,64,369,1,0,0,0,66,378,1,0,
+	0,0,68,386,1,0,0,0,70,389,1,0,0,0,72,392,1,0,0,0,74,401,1,0,0,0,76,405,
+	1,0,0,0,78,411,1,0,0,0,80,415,1,0,0,0,82,418,1,0,0,0,84,426,1,0,0,0,86,
+	430,1,0,0,0,88,433,1,0,0,0,90,437,1,0,0,0,92,440,1,0,0,0,94,460,1,0,0,0,
+	96,464,1,0,0,0,98,469,1,0,0,0,100,475,1,0,0,0,102,488,1,0,0,0,104,491,1,
+	0,0,0,106,495,1,0,0,0,108,499,1,0,0,0,110,503,1,0,0,0,112,520,1,0,0,0,114,
+	522,1,0,0,0,116,524,1,0,0,0,118,532,1,0,0,0,120,540,1,0,0,0,122,574,1,0,
+	0,0,124,601,1,0,0,0,126,603,1,0,0,0,128,616,1,0,0,0,130,622,1,0,0,0,132,
+	643,1,0,0,0,134,653,1,0,0,0,136,672,1,0,0,0,138,674,1,0,0,0,140,685,1,0,
+	0,0,142,731,1,0,0,0,144,733,1,0,0,0,146,737,1,0,0,0,148,740,1,0,0,0,150,
+	745,1,0,0,0,152,749,1,0,0,0,154,751,1,0,0,0,156,753,1,0,0,0,158,758,1,0,
+	0,0,160,760,1,0,0,0,162,769,1,0,0,0,164,165,3,2,1,0,165,166,5,0,0,1,166,
+	1,1,0,0,0,167,168,6,1,-1,0,168,169,3,4,2,0,169,175,1,0,0,0,170,171,10,1,
+	0,0,171,172,5,52,0,0,172,174,3,6,3,0,173,170,1,0,0,0,174,177,1,0,0,0,175,
+	173,1,0,0,0,175,176,1,0,0,0,176,3,1,0,0,0,177,175,1,0,0,0,178,185,3,86,
+	43,0,179,185,3,22,11,0,180,185,3,12,6,0,181,185,3,90,45,0,182,183,4,2,1,
+	0,183,185,3,24,12,0,184,178,1,0,0,0,184,179,1,0,0,0,184,180,1,0,0,0,184,
+	181,1,0,0,0,184,182,1,0,0,0,185,5,1,0,0,0,186,216,3,38,19,0,187,216,3,8,
+	4,0,188,216,3,68,34,0,189,216,3,62,31,0,190,216,3,40,20,0,191,216,3,64,
+	32,0,192,216,3,70,35,0,193,216,3,72,36,0,194,216,3,76,38,0,195,216,3,78,
+	39,0,196,216,3,92,46,0,197,216,3,80,40,0,198,216,3,156,78,0,199,216,3,100,
+	50,0,200,216,3,118,59,0,201,202,4,3,2,0,202,216,3,98,49,0,203,204,4,3,3,
+	0,204,216,3,96,48,0,205,206,4,3,4,0,206,216,3,102,51,0,207,208,4,3,5,0,
+	208,216,3,104,52,0,209,210,4,3,6,0,210,216,3,116,58,0,211,212,4,3,7,0,212,
+	216,3,114,57,0,213,214,4,3,8,0,214,216,3,120,60,0,215,186,1,0,0,0,215,187,
+	1,0,0,0,215,188,1,0,0,0,215,189,1,0,0,0,215,190,1,0,0,0,215,191,1,0,0,0,
+	215,192,1,0,0,0,215,193,1,0,0,0,215,194,1,0,0,0,215,195,1,0,0,0,215,196,
+	1,0,0,0,215,197,1,0,0,0,215,198,1,0,0,0,215,199,1,0,0,0,215,200,1,0,0,0,
+	215,201,1,0,0,0,215,203,1,0,0,0,215,205,1,0,0,0,215,207,1,0,0,0,215,209,
+	1,0,0,0,215,211,1,0,0,0,215,213,1,0,0,0,216,7,1,0,0,0,217,218,5,15,0,0,
+	218,219,3,122,61,0,219,9,1,0,0,0,220,221,3,52,26,0,221,11,1,0,0,0,222,223,
+	5,12,0,0,223,224,3,14,7,0,224,13,1,0,0,0,225,230,3,16,8,0,226,227,5,63,
+	0,0,227,229,3,16,8,0,228,226,1,0,0,0,229,232,1,0,0,0,230,228,1,0,0,0,230,
+	231,1,0,0,0,231,15,1,0,0,0,232,230,1,0,0,0,233,234,3,46,23,0,234,235,5,
+	59,0,0,235,237,1,0,0,0,236,233,1,0,0,0,236,237,1,0,0,0,237,238,1,0,0,0,
+	238,239,3,122,61,0,239,17,1,0,0,0,240,245,3,20,10,0,241,242,5,63,0,0,242,
+	244,3,20,10,0,243,241,1,0,0,0,244,247,1,0,0,0,245,243,1,0,0,0,245,246,1,
+	0,0,0,246,19,1,0,0,0,247,245,1,0,0,0,248,251,3,46,23,0,249,250,5,59,0,0,
+	250,252,3,122,61,0,251,249,1,0,0,0,251,252,1,0,0,0,252,21,1,0,0,0,253,254,
+	5,19,0,0,254,255,3,26,13,0,255,23,1,0,0,0,256,257,5,20,0,0,257,258,3,26,
+	13,0,258,25,1,0,0,0,259,264,3,28,14,0,260,261,5,63,0,0,261,263,3,28,14,
+	0,262,260,1,0,0,0,263,266,1,0,0,0,264,262,1,0,0,0,264,265,1,0,0,0,265,268,
+	1,0,0,0,266,264,1,0,0,0,267,269,3,36,18,0,268,267,1,0,0,0,268,269,1,0,0,
+	0,269,27,1,0,0,0,270,271,3,30,15,0,271,272,5,62,0,0,272,274,1,0,0,0,273,
+	270,1,0,0,0,273,274,1,0,0,0,274,275,1,0,0,0,275,282,3,34,17,0,276,279,3,
+	34,17,0,277,278,5,61,0,0,278,280,3,32,16,0,279,277,1,0,0,0,279,280,1,0,
+	0,0,280,282,1,0,0,0,281,273,1,0,0,0,281,276,1,0,0,0,282,29,1,0,0,0,283,
+	284,7,0,0,0,284,31,1,0,0,0,285,286,7,0,0,0,286,33,1,0,0,0,287,288,7,0,0,
+	0,288,35,1,0,0,0,289,290,5,107,0,0,290,295,5,108,0,0,291,292,5,63,0,0,292,
+	294,5,108,0,0,293,291,1,0,0,0,294,297,1,0,0,0,295,293,1,0,0,0,295,296,1,
+	0,0,0,296,37,1,0,0,0,297,295,1,0,0,0,298,299,5,9,0,0,299,300,3,14,7,0,300,
+	39,1,0,0,0,301,303,5,14,0,0,302,304,3,42,21,0,303,302,1,0,0,0,303,304,1,
+	0,0,0,304,307,1,0,0,0,305,306,5,60,0,0,306,308,3,14,7,0,307,305,1,0,0,0,
+	307,308,1,0,0,0,308,41,1,0,0,0,309,314,3,44,22,0,310,311,5,63,0,0,311,313,
+	3,44,22,0,312,310,1,0,0,0,313,316,1,0,0,0,314,312,1,0,0,0,314,315,1,0,0,
+	0,315,43,1,0,0,0,316,314,1,0,0,0,317,320,3,16,8,0,318,319,5,15,0,0,319,
+	321,3,122,61,0,320,318,1,0,0,0,320,321,1,0,0,0,321,45,1,0,0,0,322,327,3,
+	60,30,0,323,324,5,65,0,0,324,326,3,60,30,0,325,323,1,0,0,0,326,329,1,0,
+	0,0,327,325,1,0,0,0,327,328,1,0,0,0,328,47,1,0,0,0,329,327,1,0,0,0,330,
+	335,3,54,27,0,331,332,5,65,0,0,332,334,3,54,27,0,333,331,1,0,0,0,334,337,
+	1,0,0,0,335,333,1,0,0,0,335,336,1,0,0,0,336,49,1,0,0,0,337,335,1,0,0,0,
+	338,343,3,48,24,0,339,340,5,63,0,0,340,342,3,48,24,0,341,339,1,0,0,0,342,
+	345,1,0,0,0,343,341,1,0,0,0,343,344,1,0,0,0,344,51,1,0,0,0,345,343,1,0,
+	0,0,346,347,7,1,0,0,347,53,1,0,0,0,348,352,5,129,0,0,349,352,3,56,28,0,
+	350,352,3,58,29,0,351,348,1,0,0,0,351,349,1,0,0,0,351,350,1,0,0,0,352,55,
+	1,0,0,0,353,356,5,77,0,0,354,356,5,96,0,0,355,353,1,0,0,0,355,354,1,0,0,
+	0,356,57,1,0,0,0,357,360,5,95,0,0,358,360,5,97,0,0,359,357,1,0,0,0,359,
+	358,1,0,0,0,360,59,1,0,0,0,361,365,3,52,26,0,362,365,3,56,28,0,363,365,
+	3,58,29,0,364,361,1,0,0,0,364,362,1,0,0,0,364,363,1,0,0,0,365,61,1,0,0,
+	0,366,367,5,11,0,0,367,368,3,142,71,0,368,63,1,0,0,0,369,370,5,13,0,0,370,
+	375,3,66,33,0,371,372,5,63,0,0,372,374,3,66,33,0,373,371,1,0,0,0,374,377,
+	1,0,0,0,375,373,1,0,0,0,375,376,1,0,0,0,376,65,1,0,0,0,377,375,1,0,0,0,
+	378,380,3,122,61,0,379,381,7,2,0,0,380,379,1,0,0,0,380,381,1,0,0,0,381,
+	384,1,0,0,0,382,383,5,74,0,0,383,385,7,3,0,0,384,382,1,0,0,0,384,385,1,
+	0,0,0,385,67,1,0,0,0,386,387,5,29,0,0,387,388,3,50,25,0,388,69,1,0,0,0,
+	389,390,5,28,0,0,390,391,3,50,25,0,391,71,1,0,0,0,392,393,5,32,0,0,393,
+	398,3,74,37,0,394,395,5,63,0,0,395,397,3,74,37,0,396,394,1,0,0,0,397,400,
+	1,0,0,0,398,396,1,0,0,0,398,399,1,0,0,0,399,73,1,0,0,0,400,398,1,0,0,0,
+	401,402,3,48,24,0,402,403,5,57,0,0,403,404,3,48,24,0,404,75,1,0,0,0,405,
+	406,5,8,0,0,406,407,3,132,66,0,407,409,3,152,76,0,408,410,3,82,41,0,409,
+	408,1,0,0,0,409,410,1,0,0,0,410,77,1,0,0,0,411,412,5,10,0,0,412,413,3,132,
+	66,0,413,414,3,152,76,0,414,79,1,0,0,0,415,416,5,27,0,0,416,417,3,46,23,
+	0,417,81,1,0,0,0,418,423,3,84,42,0,419,420,5,63,0,0,420,422,3,84,42,0,421,
+	419,1,0,0,0,422,425,1,0,0,0,423,421,1,0,0,0,423,424,1,0,0,0,424,83,1,0,
+	0,0,425,423,1,0,0,0,426,427,3,52,26,0,427,428,5,59,0,0,428,429,3,142,71,
+	0,429,85,1,0,0,0,430,431,5,6,0,0,431,432,3,88,44,0,432,87,1,0,0,0,433,434,
+	5,98,0,0,434,435,3,2,1,0,435,436,5,99,0,0,436,89,1,0,0,0,437,438,5,33,0,
+	0,438,439,5,136,0,0,439,91,1,0,0,0,440,441,5,5,0,0,441,444,5,38,0,0,442,
+	443,5,75,0,0,443,445,3,48,24,0,444,442,1,0,0,0,444,445,1,0,0,0,445,455,
+	1,0,0,0,446,447,5,80,0,0,447,452,3,94,47,0,448,449,5,63,0,0,449,451,3,94,
+	47,0,450,448,1,0,0,0,451,454,1,0,0,0,452,450,1,0,0,0,452,453,1,0,0,0,453,
+	456,1,0,0,0,454,452,1,0,0,0,455,446,1,0,0,0,455,456,1,0,0,0,456,93,1,0,
+	0,0,457,458,3,48,24,0,458,459,5,59,0,0,459,461,1,0,0,0,460,457,1,0,0,0,
+	460,461,1,0,0,0,461,462,1,0,0,0,462,463,3,48,24,0,463,95,1,0,0,0,464,465,
+	5,26,0,0,465,466,3,28,14,0,466,467,5,75,0,0,467,468,3,50,25,0,468,97,1,
+	0,0,0,469,470,5,16,0,0,470,473,3,42,21,0,471,472,5,60,0,0,472,474,3,14,
+	7,0,473,471,1,0,0,0,473,474,1,0,0,0,474,99,1,0,0,0,475,476,5,4,0,0,476,
+	479,3,46,23,0,477,478,5,75,0,0,478,480,3,46,23,0,479,477,1,0,0,0,479,480,
+	1,0,0,0,480,486,1,0,0,0,481,482,5,57,0,0,482,483,3,46,23,0,483,484,5,63,
+	0,0,484,485,3,46,23,0,485,487,1,0,0,0,486,481,1,0,0,0,486,487,1,0,0,0,487,
+	101,1,0,0,0,488,489,5,30,0,0,489,490,3,50,25,0,490,103,1,0,0,0,491,492,
+	5,21,0,0,492,493,3,106,53,0,493,105,1,0,0,0,494,496,3,108,54,0,495,494,
+	1,0,0,0,496,497,1,0,0,0,497,495,1,0,0,0,497,498,1,0,0,0,498,107,1,0,0,0,
+	499,500,5,100,0,0,500,501,3,110,55,0,501,502,5,101,0,0,502,109,1,0,0,0,
+	503,504,6,55,-1,0,504,505,3,112,56,0,505,511,1,0,0,0,506,507,10,1,0,0,507,
+	508,5,52,0,0,508,510,3,112,56,0,509,506,1,0,0,0,510,513,1,0,0,0,511,509,
+	1,0,0,0,511,512,1,0,0,0,512,111,1,0,0,0,513,511,1,0,0,0,514,521,3,38,19,
+	0,515,521,3,8,4,0,516,521,3,62,31,0,517,521,3,40,20,0,518,521,3,64,32,0,
+	519,521,3,76,38,0,520,514,1,0,0,0,520,515,1,0,0,0,520,516,1,0,0,0,520,517,
+	1,0,0,0,520,518,1,0,0,0,520,519,1,0,0,0,521,113,1,0,0,0,522,523,5,31,0,
+	0,523,115,1,0,0,0,524,525,5,17,0,0,525,526,3,142,71,0,526,527,5,75,0,0,
+	527,530,3,18,9,0,528,529,5,80,0,0,529,531,3,60,30,0,530,528,1,0,0,0,530,
+	531,1,0,0,0,531,117,1,0,0,0,532,533,5,7,0,0,533,534,3,132,66,0,534,535,
+	5,80,0,0,535,538,3,60,30,0,536,537,5,57,0,0,537,539,3,46,23,0,538,536,1,
+	0,0,0,538,539,1,0,0,0,539,119,1,0,0,0,540,541,5,18,0,0,541,543,3,148,74,
+	0,542,544,3,150,75,0,543,542,1,0,0,0,543,544,1,0,0,0,544,121,1,0,0,0,545,
+	546,6,61,-1,0,546,547,5,72,0,0,547,575,3,122,61,8,548,575,3,128,64,0,549,
+	575,3,124,62,0,550,552,3,128,64,0,551,553,5,72,0,0,552,551,1,0,0,0,552,
+	553,1,0,0,0,553,554,1,0,0,0,554,555,5,68,0,0,555,556,5,100,0,0,556,561,
+	3,128,64,0,557,558,5,63,0,0,558,560,3,128,64,0,559,557,1,0,0,0,560,563,
+	1,0,0,0,561,559,1,0,0,0,561,562,1,0,0,0,562,564,1,0,0,0,563,561,1,0,0,0,
+	564,565,5,101,0,0,565,575,1,0,0,0,566,567,3,128,64,0,567,569,5,69,0,0,568,
+	570,5,72,0,0,569,568,1,0,0,0,569,570,1,0,0,0,570,571,1,0,0,0,571,572,5,
+	73,0,0,572,575,1,0,0,0,573,575,3,126,63,0,574,545,1,0,0,0,574,548,1,0,0,
+	0,574,549,1,0,0,0,574,550,1,0,0,0,574,566,1,0,0,0,574,573,1,0,0,0,575,584,
+	1,0,0,0,576,577,10,5,0,0,577,578,5,56,0,0,578,583,3,122,61,6,579,580,10,
+	4,0,0,580,581,5,76,0,0,581,583,3,122,61,5,582,576,1,0,0,0,582,579,1,0,0,
+	0,583,586,1,0,0,0,584,582,1,0,0,0,584,585,1,0,0,0,585,123,1,0,0,0,586,584,
+	1,0,0,0,587,589,3,128,64,0,588,590,5,72,0,0,589,588,1,0,0,0,589,590,1,0,
+	0,0,590,591,1,0,0,0,591,592,5,71,0,0,592,593,3,152,76,0,593,602,1,0,0,0,
+	594,596,3,128,64,0,595,597,5,72,0,0,596,595,1,0,0,0,596,597,1,0,0,0,597,
+	598,1,0,0,0,598,599,5,78,0,0,599,600,3,152,76,0,600,602,1,0,0,0,601,587,
+	1,0,0,0,601,594,1,0,0,0,602,125,1,0,0,0,603,606,3,46,23,0,604,605,5,61,
+	0,0,605,607,3,10,5,0,606,604,1,0,0,0,606,607,1,0,0,0,607,608,1,0,0,0,608,
+	609,5,62,0,0,609,610,3,142,71,0,610,127,1,0,0,0,611,617,3,130,65,0,612,
+	613,3,130,65,0,613,614,3,154,77,0,614,615,3,130,65,0,615,617,1,0,0,0,616,
+	611,1,0,0,0,616,612,1,0,0,0,617,129,1,0,0,0,618,619,6,65,-1,0,619,623,3,
+	132,66,0,620,621,7,4,0,0,621,623,3,130,65,3,622,618,1,0,0,0,622,620,1,0,
+	0,0,623,632,1,0,0,0,624,625,10,2,0,0,625,626,7,5,0,0,626,631,3,130,65,3,
+	627,628,10,1,0,0,628,629,7,4,0,0,629,631,3,130,65,2,630,624,1,0,0,0,630,
+	627,1,0,0,0,631,634,1,0,0,0,632,630,1,0,0,0,632,633,1,0,0,0,633,131,1,0,
+	0,0,634,632,1,0,0,0,635,636,6,66,-1,0,636,644,3,142,71,0,637,644,3,46,23,
+	0,638,644,3,134,67,0,639,640,5,100,0,0,640,641,3,122,61,0,641,642,5,101,
+	0,0,642,644,1,0,0,0,643,635,1,0,0,0,643,637,1,0,0,0,643,638,1,0,0,0,643,
+	639,1,0,0,0,644,650,1,0,0,0,645,646,10,1,0,0,646,647,5,61,0,0,647,649,3,
+	10,5,0,648,645,1,0,0,0,649,652,1,0,0,0,650,648,1,0,0,0,650,651,1,0,0,0,
+	651,133,1,0,0,0,652,650,1,0,0,0,653,654,3,136,68,0,654,668,5,100,0,0,655,
+	669,5,90,0,0,656,661,3,122,61,0,657,658,5,63,0,0,658,660,3,122,61,0,659,
+	657,1,0,0,0,660,663,1,0,0,0,661,659,1,0,0,0,661,662,1,0,0,0,662,666,1,0,
+	0,0,663,661,1,0,0,0,664,665,5,63,0,0,665,667,3,138,69,0,666,664,1,0,0,0,
+	666,667,1,0,0,0,667,669,1,0,0,0,668,655,1,0,0,0,668,656,1,0,0,0,668,669,
+	1,0,0,0,669,670,1,0,0,0,670,671,5,101,0,0,671,135,1,0,0,0,672,673,3,60,
+	30,0,673,137,1,0,0,0,674,675,5,93,0,0,675,680,3,140,70,0,676,677,5,63,0,
+	0,677,679,3,140,70,0,678,676,1,0,0,0,679,682,1,0,0,0,680,678,1,0,0,0,680,
+	681,1,0,0,0,681,683,1,0,0,0,682,680,1,0,0,0,683,684,5,94,0,0,684,139,1,
+	0,0,0,685,686,3,152,76,0,686,687,5,62,0,0,687,688,3,142,71,0,688,141,1,
+	0,0,0,689,732,5,73,0,0,690,691,3,150,75,0,691,692,5,102,0,0,692,732,1,0,
+	0,0,693,732,3,148,74,0,694,732,3,150,75,0,695,732,3,144,72,0,696,732,3,
+	56,28,0,697,732,3,152,76,0,698,699,5,98,0,0,699,704,3,146,73,0,700,701,
+	5,63,0,0,701,703,3,146,73,0,702,700,1,0,0,0,703,706,1,0,0,0,704,702,1,0,
+	0,0,704,705,1,0,0,0,705,707,1,0,0,0,706,704,1,0,0,0,707,708,5,99,0,0,708,
+	732,1,0,0,0,709,710,5,98,0,0,710,715,3,144,72,0,711,712,5,63,0,0,712,714,
+	3,144,72,0,713,711,1,0,0,0,714,717,1,0,0,0,715,713,1,0,0,0,715,716,1,0,
+	0,0,716,718,1,0,0,0,717,715,1,0,0,0,718,719,5,99,0,0,719,732,1,0,0,0,720,
+	721,5,98,0,0,721,726,3,152,76,0,722,723,5,63,0,0,723,725,3,152,76,0,724,
+	722,1,0,0,0,725,728,1,0,0,0,726,724,1,0,0,0,726,727,1,0,0,0,727,729,1,0,
+	0,0,728,726,1,0,0,0,729,730,5,99,0,0,730,732,1,0,0,0,731,689,1,0,0,0,731,
+	690,1,0,0,0,731,693,1,0,0,0,731,694,1,0,0,0,731,695,1,0,0,0,731,696,1,0,
+	0,0,731,697,1,0,0,0,731,698,1,0,0,0,731,709,1,0,0,0,731,720,1,0,0,0,732,
+	143,1,0,0,0,733,734,7,6,0,0,734,145,1,0,0,0,735,738,3,148,74,0,736,738,
+	3,150,75,0,737,735,1,0,0,0,737,736,1,0,0,0,738,147,1,0,0,0,739,741,7,4,
+	0,0,740,739,1,0,0,0,740,741,1,0,0,0,741,742,1,0,0,0,742,743,5,55,0,0,743,
+	149,1,0,0,0,744,746,7,4,0,0,745,744,1,0,0,0,745,746,1,0,0,0,746,747,1,0,
+	0,0,747,748,5,54,0,0,748,151,1,0,0,0,749,750,5,53,0,0,750,153,1,0,0,0,751,
+	752,7,7,0,0,752,155,1,0,0,0,753,754,7,8,0,0,754,755,5,115,0,0,755,756,3,
+	158,79,0,756,757,3,160,80,0,757,157,1,0,0,0,758,759,3,28,14,0,759,159,1,
+	0,0,0,760,761,5,75,0,0,761,766,3,162,81,0,762,763,5,63,0,0,763,765,3,162,
+	81,0,764,762,1,0,0,0,765,768,1,0,0,0,766,764,1,0,0,0,766,767,1,0,0,0,767,
+	161,1,0,0,0,768,766,1,0,0,0,769,770,3,128,64,0,770,163,1,0,0,0,71,175,184,
+	215,230,236,245,251,264,268,273,279,281,295,303,307,314,320,327,335,343,
+	351,355,359,364,375,380,384,398,409,423,444,452,455,460,473,479,486,497,
+	511,520,530,538,543,552,561,569,574,582,584,589,596,601,606,616,622,630,
+	632,643,650,661,666,668,680,704,715,726,731,737,740,745,766];
 
 	private static __ATN: ATN;
 	public static get _ATN(): ATN {
@@ -4555,8 +4828,8 @@ export class SourceCommandContext extends ParserRuleContext {
 	public showCommand(): ShowCommandContext {
 		return this.getTypedRuleContext(ShowCommandContext, 0) as ShowCommandContext;
 	}
-	public metricsCommand(): MetricsCommandContext {
-		return this.getTypedRuleContext(MetricsCommandContext, 0) as MetricsCommandContext;
+	public timeSeriesCommand(): TimeSeriesCommandContext {
+		return this.getTypedRuleContext(TimeSeriesCommandContext, 0) as TimeSeriesCommandContext;
 	}
     public get ruleIndex(): number {
     	return esql_parser.RULE_sourceCommand;
@@ -4618,14 +4891,17 @@ export class ProcessingCommandContext extends ParserRuleContext {
 	public joinCommand(): JoinCommandContext {
 		return this.getTypedRuleContext(JoinCommandContext, 0) as JoinCommandContext;
 	}
+	public changePointCommand(): ChangePointCommandContext {
+		return this.getTypedRuleContext(ChangePointCommandContext, 0) as ChangePointCommandContext;
+	}
+	public completionCommand(): CompletionCommandContext {
+		return this.getTypedRuleContext(CompletionCommandContext, 0) as CompletionCommandContext;
+	}
 	public inlinestatsCommand(): InlinestatsCommandContext {
 		return this.getTypedRuleContext(InlinestatsCommandContext, 0) as InlinestatsCommandContext;
 	}
 	public lookupCommand(): LookupCommandContext {
 		return this.getTypedRuleContext(LookupCommandContext, 0) as LookupCommandContext;
-	}
-	public changePointCommand(): ChangePointCommandContext {
-		return this.getTypedRuleContext(ChangePointCommandContext, 0) as ChangePointCommandContext;
 	}
 	public insistCommand(): InsistCommandContext {
 		return this.getTypedRuleContext(InsistCommandContext, 0) as InsistCommandContext;
@@ -4633,8 +4909,14 @@ export class ProcessingCommandContext extends ParserRuleContext {
 	public forkCommand(): ForkCommandContext {
 		return this.getTypedRuleContext(ForkCommandContext, 0) as ForkCommandContext;
 	}
+	public rerankCommand(): RerankCommandContext {
+		return this.getTypedRuleContext(RerankCommandContext, 0) as RerankCommandContext;
+	}
 	public rrfCommand(): RrfCommandContext {
 		return this.getTypedRuleContext(RrfCommandContext, 0) as RrfCommandContext;
+	}
+	public sampleCommand(): SampleCommandContext {
+		return this.getTypedRuleContext(SampleCommandContext, 0) as SampleCommandContext;
 	}
     public get ruleIndex(): number {
     	return esql_parser.RULE_processingCommand;
@@ -4802,6 +5084,69 @@ export class FieldContext extends ParserRuleContext {
 }
 
 
+export class RerankFieldsContext extends ParserRuleContext {
+	constructor(parser?: esql_parser, parent?: ParserRuleContext, invokingState?: number) {
+		super(parent, invokingState);
+    	this.parser = parser;
+	}
+	public rerankField_list(): RerankFieldContext[] {
+		return this.getTypedRuleContexts(RerankFieldContext) as RerankFieldContext[];
+	}
+	public rerankField(i: number): RerankFieldContext {
+		return this.getTypedRuleContext(RerankFieldContext, i) as RerankFieldContext;
+	}
+	public COMMA_list(): TerminalNode[] {
+	    	return this.getTokens(esql_parser.COMMA);
+	}
+	public COMMA(i: number): TerminalNode {
+		return this.getToken(esql_parser.COMMA, i);
+	}
+    public get ruleIndex(): number {
+    	return esql_parser.RULE_rerankFields;
+	}
+	public enterRule(listener: esql_parserListener): void {
+	    if(listener.enterRerankFields) {
+	 		listener.enterRerankFields(this);
+		}
+	}
+	public exitRule(listener: esql_parserListener): void {
+	    if(listener.exitRerankFields) {
+	 		listener.exitRerankFields(this);
+		}
+	}
+}
+
+
+export class RerankFieldContext extends ParserRuleContext {
+	constructor(parser?: esql_parser, parent?: ParserRuleContext, invokingState?: number) {
+		super(parent, invokingState);
+    	this.parser = parser;
+	}
+	public qualifiedName(): QualifiedNameContext {
+		return this.getTypedRuleContext(QualifiedNameContext, 0) as QualifiedNameContext;
+	}
+	public ASSIGN(): TerminalNode {
+		return this.getToken(esql_parser.ASSIGN, 0);
+	}
+	public booleanExpression(): BooleanExpressionContext {
+		return this.getTypedRuleContext(BooleanExpressionContext, 0) as BooleanExpressionContext;
+	}
+    public get ruleIndex(): number {
+    	return esql_parser.RULE_rerankField;
+	}
+	public enterRule(listener: esql_parserListener): void {
+	    if(listener.enterRerankField) {
+	 		listener.enterRerankField(this);
+		}
+	}
+	public exitRule(listener: esql_parserListener): void {
+	    if(listener.exitRerankField) {
+	 		listener.exitRerankField(this);
+		}
+	}
+}
+
+
 export class FromCommandContext extends ParserRuleContext {
 	constructor(parser?: esql_parser, parent?: ParserRuleContext, invokingState?: number) {
 		super(parent, invokingState);
@@ -4829,28 +5174,28 @@ export class FromCommandContext extends ParserRuleContext {
 }
 
 
-export class MetricsCommandContext extends ParserRuleContext {
+export class TimeSeriesCommandContext extends ParserRuleContext {
 	constructor(parser?: esql_parser, parent?: ParserRuleContext, invokingState?: number) {
 		super(parent, invokingState);
     	this.parser = parser;
 	}
-	public DEV_METRICS(): TerminalNode {
-		return this.getToken(esql_parser.DEV_METRICS, 0);
+	public DEV_TIME_SERIES(): TerminalNode {
+		return this.getToken(esql_parser.DEV_TIME_SERIES, 0);
 	}
 	public indexPatternAndMetadataFields(): IndexPatternAndMetadataFieldsContext {
 		return this.getTypedRuleContext(IndexPatternAndMetadataFieldsContext, 0) as IndexPatternAndMetadataFieldsContext;
 	}
     public get ruleIndex(): number {
-    	return esql_parser.RULE_metricsCommand;
+    	return esql_parser.RULE_timeSeriesCommand;
 	}
 	public enterRule(listener: esql_parserListener): void {
-	    if(listener.enterMetricsCommand) {
-	 		listener.enterMetricsCommand(this);
+	    if(listener.enterTimeSeriesCommand) {
+	 		listener.enterTimeSeriesCommand(this);
 		}
 	}
 	public exitRule(listener: esql_parserListener): void {
-	    if(listener.exitMetricsCommand) {
-	 		listener.exitMetricsCommand(this);
+	    if(listener.exitTimeSeriesCommand) {
+	 		listener.exitTimeSeriesCommand(this);
 		}
 	}
 }
@@ -5468,8 +5813,8 @@ export class LimitCommandContext extends ParserRuleContext {
 	public LIMIT(): TerminalNode {
 		return this.getToken(esql_parser.LIMIT, 0);
 	}
-	public INTEGER_LITERAL(): TerminalNode {
-		return this.getToken(esql_parser.INTEGER_LITERAL, 0);
+	public constant(): ConstantContext {
+		return this.getTypedRuleContext(ConstantContext, 0) as ConstantContext;
 	}
     public get ruleIndex(): number {
     	return esql_parser.RULE_limitCommand;
@@ -6093,8 +6438,8 @@ export class ChangePointCommandContext extends ParserRuleContext {
 		super(parent, invokingState);
     	this.parser = parser;
 	}
-	public DEV_CHANGE_POINT(): TerminalNode {
-		return this.getToken(esql_parser.DEV_CHANGE_POINT, 0);
+	public CHANGE_POINT(): TerminalNode {
+		return this.getToken(esql_parser.CHANGE_POINT, 0);
 	}
 	public qualifiedName_list(): QualifiedNameContext[] {
 		return this.getTypedRuleContexts(QualifiedNameContext) as QualifiedNameContext[];
@@ -6301,14 +6646,23 @@ export class ForkSubQueryProcessingCommandContext extends ParserRuleContext {
 		super(parent, invokingState);
     	this.parser = parser;
 	}
+	public evalCommand(): EvalCommandContext {
+		return this.getTypedRuleContext(EvalCommandContext, 0) as EvalCommandContext;
+	}
 	public whereCommand(): WhereCommandContext {
 		return this.getTypedRuleContext(WhereCommandContext, 0) as WhereCommandContext;
+	}
+	public limitCommand(): LimitCommandContext {
+		return this.getTypedRuleContext(LimitCommandContext, 0) as LimitCommandContext;
+	}
+	public statsCommand(): StatsCommandContext {
+		return this.getTypedRuleContext(StatsCommandContext, 0) as StatsCommandContext;
 	}
 	public sortCommand(): SortCommandContext {
 		return this.getTypedRuleContext(SortCommandContext, 0) as SortCommandContext;
 	}
-	public limitCommand(): LimitCommandContext {
-		return this.getTypedRuleContext(LimitCommandContext, 0) as LimitCommandContext;
+	public dissectCommand(): DissectCommandContext {
+		return this.getTypedRuleContext(DissectCommandContext, 0) as DissectCommandContext;
 	}
     public get ruleIndex(): number {
     	return esql_parser.RULE_forkSubQueryProcessingCommand;
@@ -6345,6 +6699,121 @@ export class RrfCommandContext extends ParserRuleContext {
 	public exitRule(listener: esql_parserListener): void {
 	    if(listener.exitRrfCommand) {
 	 		listener.exitRrfCommand(this);
+		}
+	}
+}
+
+
+export class RerankCommandContext extends ParserRuleContext {
+	public _queryText!: ConstantContext;
+	public _inferenceId!: IdentifierOrParameterContext;
+	constructor(parser?: esql_parser, parent?: ParserRuleContext, invokingState?: number) {
+		super(parent, invokingState);
+    	this.parser = parser;
+	}
+	public DEV_RERANK(): TerminalNode {
+		return this.getToken(esql_parser.DEV_RERANK, 0);
+	}
+	public ON(): TerminalNode {
+		return this.getToken(esql_parser.ON, 0);
+	}
+	public rerankFields(): RerankFieldsContext {
+		return this.getTypedRuleContext(RerankFieldsContext, 0) as RerankFieldsContext;
+	}
+	public constant(): ConstantContext {
+		return this.getTypedRuleContext(ConstantContext, 0) as ConstantContext;
+	}
+	public WITH(): TerminalNode {
+		return this.getToken(esql_parser.WITH, 0);
+	}
+	public identifierOrParameter(): IdentifierOrParameterContext {
+		return this.getTypedRuleContext(IdentifierOrParameterContext, 0) as IdentifierOrParameterContext;
+	}
+    public get ruleIndex(): number {
+    	return esql_parser.RULE_rerankCommand;
+	}
+	public enterRule(listener: esql_parserListener): void {
+	    if(listener.enterRerankCommand) {
+	 		listener.enterRerankCommand(this);
+		}
+	}
+	public exitRule(listener: esql_parserListener): void {
+	    if(listener.exitRerankCommand) {
+	 		listener.exitRerankCommand(this);
+		}
+	}
+}
+
+
+export class CompletionCommandContext extends ParserRuleContext {
+	public _prompt!: PrimaryExpressionContext;
+	public _inferenceId!: IdentifierOrParameterContext;
+	public _targetField!: QualifiedNameContext;
+	constructor(parser?: esql_parser, parent?: ParserRuleContext, invokingState?: number) {
+		super(parent, invokingState);
+    	this.parser = parser;
+	}
+	public COMPLETION(): TerminalNode {
+		return this.getToken(esql_parser.COMPLETION, 0);
+	}
+	public WITH(): TerminalNode {
+		return this.getToken(esql_parser.WITH, 0);
+	}
+	public primaryExpression(): PrimaryExpressionContext {
+		return this.getTypedRuleContext(PrimaryExpressionContext, 0) as PrimaryExpressionContext;
+	}
+	public identifierOrParameter(): IdentifierOrParameterContext {
+		return this.getTypedRuleContext(IdentifierOrParameterContext, 0) as IdentifierOrParameterContext;
+	}
+	public AS(): TerminalNode {
+		return this.getToken(esql_parser.AS, 0);
+	}
+	public qualifiedName(): QualifiedNameContext {
+		return this.getTypedRuleContext(QualifiedNameContext, 0) as QualifiedNameContext;
+	}
+    public get ruleIndex(): number {
+    	return esql_parser.RULE_completionCommand;
+	}
+	public enterRule(listener: esql_parserListener): void {
+	    if(listener.enterCompletionCommand) {
+	 		listener.enterCompletionCommand(this);
+		}
+	}
+	public exitRule(listener: esql_parserListener): void {
+	    if(listener.exitCompletionCommand) {
+	 		listener.exitCompletionCommand(this);
+		}
+	}
+}
+
+
+export class SampleCommandContext extends ParserRuleContext {
+	public _probability!: DecimalValueContext;
+	public _seed!: IntegerValueContext;
+	constructor(parser?: esql_parser, parent?: ParserRuleContext, invokingState?: number) {
+		super(parent, invokingState);
+    	this.parser = parser;
+	}
+	public DEV_SAMPLE(): TerminalNode {
+		return this.getToken(esql_parser.DEV_SAMPLE, 0);
+	}
+	public decimalValue(): DecimalValueContext {
+		return this.getTypedRuleContext(DecimalValueContext, 0) as DecimalValueContext;
+	}
+	public integerValue(): IntegerValueContext {
+		return this.getTypedRuleContext(IntegerValueContext, 0) as IntegerValueContext;
+	}
+    public get ruleIndex(): number {
+    	return esql_parser.RULE_sampleCommand;
+	}
+	public enterRule(listener: esql_parserListener): void {
+	    if(listener.enterSampleCommand) {
+	 		listener.enterSampleCommand(this);
+		}
+	}
+	public exitRule(listener: esql_parserListener): void {
+	    if(listener.exitSampleCommand) {
+	 		listener.exitSampleCommand(this);
 		}
 	}
 }

@@ -34,13 +34,18 @@ import { isRefreshIntervalValid, isTimeRangeValid } from '../../../../../utils/v
 import { getValidFilters } from '../../../../../utils/get_valid_filters';
 import { updateSavedSearch } from '../../utils/update_saved_search';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
+import { TABS_ENABLED } from '../../../../../constants';
 import { selectTabRuntimeState } from '../runtime_state';
+import type { ConnectedCustomizationService } from '../../../../../customizations';
+import { disconnectTab, clearAllTabs } from './tabs';
 
 export interface InitializeSessionParams {
   stateContainer: DiscoverStateContainer;
+  customizationService: ConnectedCustomizationService;
   discoverSessionId: string | undefined;
   dataViewSpec: DataViewSpec | undefined;
   defaultUrlState: DiscoverAppState | undefined;
+  shouldClearAllTabs: boolean | undefined;
 }
 
 export const initializeSession: InternalStateThunkActionCreator<
@@ -49,25 +54,77 @@ export const initializeSession: InternalStateThunkActionCreator<
 > =
   ({
     tabId,
-    initializeSessionParams: { stateContainer, discoverSessionId, dataViewSpec, defaultUrlState },
+    initializeSessionParams: {
+      stateContainer,
+      customizationService,
+      discoverSessionId,
+      dataViewSpec,
+      defaultUrlState,
+      shouldClearAllTabs,
+    },
   }) =>
   async (
     dispatch,
     getState,
-    { services, customizationContext, runtimeStateManager, urlStateStorage }
+    { services, customizationContext, runtimeStateManager, urlStateStorage, tabsStorageManager }
   ) => {
+    dispatch(disconnectTab({ tabId }));
     dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId }));
+
+    if (TABS_ENABLED && shouldClearAllTabs) {
+      dispatch(clearAllTabs());
+    }
+
+    const discoverSessionLoadTracker =
+      services.ebtManager.trackPerformanceEvent('discoverLoadSavedSearch');
+
+    const { currentDataView$, stateContainer$, customizationService$ } = selectTabRuntimeState(
+      runtimeStateManager,
+      tabId
+    );
+    let initialUrlState = defaultUrlState ?? urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY);
+
+    /**
+     * New tab initialization with the restored data if available
+     */
+
+    const wasTabInitialized = Boolean(stateContainer$.getValue());
+
+    if (wasTabInitialized) {
+      // Clear existing runtime state on re-initialization
+      // to ensure no stale state is used during loading
+      currentDataView$.next(undefined);
+      stateContainer$.next(undefined);
+      customizationService$.next(undefined);
+    }
+
+    if (TABS_ENABLED && !wasTabInitialized) {
+      const tabGlobalStateFromLocalStorage =
+        tabsStorageManager.loadTabGlobalStateFromLocalCache(tabId);
+
+      if (tabGlobalStateFromLocalStorage?.filters) {
+        services.filterManager.setGlobalFilters(cloneDeep(tabGlobalStateFromLocalStorage.filters));
+      }
+
+      if (tabGlobalStateFromLocalStorage?.timeRange) {
+        services.timefilter.setTime(tabGlobalStateFromLocalStorage.timeRange);
+      }
+      if (tabGlobalStateFromLocalStorage?.refreshInterval) {
+        services.timefilter.setRefreshInterval(tabGlobalStateFromLocalStorage.refreshInterval);
+      }
+
+      const tabAppStateFromLocalStorage = tabsStorageManager.loadTabAppStateFromLocalCache(tabId);
+
+      if (tabAppStateFromLocalStorage) {
+        initialUrlState = tabAppStateFromLocalStorage;
+      }
+    }
 
     /**
      * "No data" checks
      */
+    const urlState = cleanupUrlState(initialUrlState, services.uiSettings);
 
-    const discoverSessionLoadTracker =
-      services.ebtManager.trackPerformanceEvent('discoverLoadSavedSearch');
-    const urlState = cleanupUrlState(
-      defaultUrlState ?? urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY),
-      services.uiSettings
-    );
     const persistedDiscoverSession = discoverSessionId
       ? await services.savedSearch.get(discoverSessionId)
       : undefined;
@@ -98,6 +155,7 @@ export const initializeSession: InternalStateThunkActionCreator<
      * Session initialization
      */
 
+    // TODO: Needs to happen when switching tabs too?
     if (customizationContext.displayMode === 'standalone' && persistedDiscoverSession) {
       if (persistedDiscoverSession.id) {
         services.chrome.recentlyAccessed.add(
@@ -116,8 +174,6 @@ export const initializeSession: InternalStateThunkActionCreator<
     let dataView: DataView;
 
     if (isOfAggregateQueryType(initialQuery)) {
-      const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
-
       // Regardless of what was requested, we always use ad hoc data views for ES|QL
       dataView = await getEsqlDataView(
         initialQuery,
@@ -239,6 +295,12 @@ export const initializeSession: InternalStateThunkActionCreator<
     // Make sure app state container is completely reset
     stateContainer.appState.resetToState(initialState);
     stateContainer.appState.resetInitialState();
+    stateContainer$.next(stateContainer);
+    customizationService$.next(customizationService);
+
+    // Begin syncing the state and trigger the initial fetch
+    stateContainer.actions.initializeAndSync();
+    stateContainer.actions.fetchData(true);
     discoverSessionLoadTracker.reportEvent();
 
     return { showNoDataPage: false };

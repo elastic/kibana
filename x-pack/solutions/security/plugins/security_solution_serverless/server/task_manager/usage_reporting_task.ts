@@ -121,6 +121,8 @@ export class SecurityUsageReportingTask {
     core: CoreSetup,
     meteringCallback: MeteringCallback
   ) => {
+    this.logger.info('Usage reporting task is running.');
+
     // if task was not `.start()`'d yet, then exit
     if (!this.wasStarted) {
       this.logger.debug('[runTask()] Aborted. Task not started yet');

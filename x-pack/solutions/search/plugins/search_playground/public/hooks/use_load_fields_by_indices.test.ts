@@ -6,17 +6,21 @@
  */
 
 import { renderHook } from '@testing-library/react';
+import {
+  generateSearchQuery,
+  getDefaultQueryFields,
+  getDefaultSourceFields,
+} from '@kbn/search-queries';
 import { useLoadFieldsByIndices } from './use_load_fields_by_indices';
 import { useUsageTracker } from './use_usage_tracker';
 import { useIndicesFields } from './use_indices_fields';
-import { createQuery, getDefaultQueryFields, getDefaultSourceFields } from '../utils/create_query';
 import { AnalyticsEvents } from '../analytics/constants';
-import { ChatFormFields } from '../types';
+import { PlaygroundFormFields } from '../types';
 
 // Mock dependencies
 jest.mock('./use_usage_tracker');
 jest.mock('./use_indices_fields');
-jest.mock('../utils/create_query');
+jest.mock('@kbn/search-queries');
 
 describe('useLoadFieldsByIndices', () => {
   const mockSetValue = jest.fn();
@@ -30,7 +34,7 @@ describe('useLoadFieldsByIndices', () => {
     (useIndicesFields as jest.Mock).mockReturnValue({ fields: {}, isFetched: true });
     (getDefaultQueryFields as jest.Mock).mockReturnValue({ newIndex: ['title', 'body'] });
     (getDefaultSourceFields as jest.Mock).mockReturnValue({ testIndex: ['content'] });
-    (createQuery as jest.Mock).mockReturnValue('mocked query');
+    (generateSearchQuery as jest.Mock).mockReturnValue('mocked query');
   });
 
   const setup = () => {
@@ -49,18 +53,21 @@ describe('useLoadFieldsByIndices', () => {
       isFetched: true,
     });
     mockGetValues.mockReturnValueOnce({
-      [ChatFormFields.queryFields]: {},
-      [ChatFormFields.sourceFields]: {},
+      [PlaygroundFormFields.queryFields]: {},
+      [PlaygroundFormFields.sourceFields]: {},
     });
     mockWatch.mockReturnValue(['index1']);
 
     setup();
 
-    expect(mockSetValue).toHaveBeenCalledWith(ChatFormFields.elasticsearchQuery, 'mocked query');
-    expect(mockSetValue).toHaveBeenCalledWith(ChatFormFields.queryFields, {
+    expect(mockSetValue).toHaveBeenCalledWith(
+      PlaygroundFormFields.elasticsearchQuery,
+      'mocked query'
+    );
+    expect(mockSetValue).toHaveBeenCalledWith(PlaygroundFormFields.queryFields, {
       newIndex: ['title', 'body'],
     });
-    expect(mockSetValue).toHaveBeenCalledWith(ChatFormFields.sourceFields, {
+    expect(mockSetValue).toHaveBeenCalledWith(PlaygroundFormFields.sourceFields, {
       testIndex: ['content'],
     });
     expect(mockUsageTracker.count).toHaveBeenCalledWith(AnalyticsEvents.sourceFieldsLoaded, 2);
@@ -71,17 +78,17 @@ describe('useLoadFieldsByIndices', () => {
       (getDefaultQueryFields as jest.Mock).mockReturnValue({ index: ['title', 'body'] });
       (getDefaultSourceFields as jest.Mock).mockReturnValue({ index: ['title'] });
       mockGetValues.mockReturnValueOnce({
-        [ChatFormFields.queryFields]: { index: [] },
-        [ChatFormFields.sourceFields]: { index: ['body'] },
+        [PlaygroundFormFields.queryFields]: { index: [] },
+        [PlaygroundFormFields.sourceFields]: { index: ['body'] },
       });
 
       setup();
 
       expect(mockSetValue).toHaveBeenCalledTimes(3);
-      expect(mockSetValue).toHaveBeenNthCalledWith(2, ChatFormFields.queryFields, {
+      expect(mockSetValue).toHaveBeenNthCalledWith(2, PlaygroundFormFields.queryFields, {
         index: [],
       });
-      expect(mockSetValue).toHaveBeenNthCalledWith(3, ChatFormFields.sourceFields, {
+      expect(mockSetValue).toHaveBeenNthCalledWith(3, PlaygroundFormFields.sourceFields, {
         index: ['body'],
       });
     });
@@ -90,16 +97,16 @@ describe('useLoadFieldsByIndices', () => {
       (getDefaultQueryFields as jest.Mock).mockReturnValue({ index: ['title', 'body'] });
       (getDefaultSourceFields as jest.Mock).mockReturnValue({ index: ['title'] });
       mockGetValues.mockReturnValueOnce({
-        [ChatFormFields.queryFields]: { index: [], oldIndex: ['title'] },
-        [ChatFormFields.sourceFields]: { index: ['body'], oldIndex: ['title'] },
+        [PlaygroundFormFields.queryFields]: { index: [], oldIndex: ['title'] },
+        [PlaygroundFormFields.sourceFields]: { index: ['body'], oldIndex: ['title'] },
       });
 
       setup();
 
-      expect(mockSetValue).toHaveBeenNthCalledWith(2, ChatFormFields.queryFields, {
+      expect(mockSetValue).toHaveBeenNthCalledWith(2, PlaygroundFormFields.queryFields, {
         index: [],
       });
-      expect(mockSetValue).toHaveBeenNthCalledWith(3, ChatFormFields.sourceFields, {
+      expect(mockSetValue).toHaveBeenNthCalledWith(3, PlaygroundFormFields.sourceFields, {
         index: ['body'],
       });
     });
@@ -114,17 +121,17 @@ describe('useLoadFieldsByIndices', () => {
         newIndex: ['content'],
       });
       mockGetValues.mockReturnValueOnce({
-        [ChatFormFields.queryFields]: { index: [], oldIndex: ['title'] },
-        [ChatFormFields.sourceFields]: { index: ['body'], oldIndex: ['title'] },
+        [PlaygroundFormFields.queryFields]: { index: [], oldIndex: ['title'] },
+        [PlaygroundFormFields.sourceFields]: { index: ['body'], oldIndex: ['title'] },
       });
 
       setup();
 
-      expect(mockSetValue).toHaveBeenNthCalledWith(2, ChatFormFields.queryFields, {
+      expect(mockSetValue).toHaveBeenNthCalledWith(2, PlaygroundFormFields.queryFields, {
         index: [],
         newIndex: ['content'],
       });
-      expect(mockSetValue).toHaveBeenNthCalledWith(3, ChatFormFields.sourceFields, {
+      expect(mockSetValue).toHaveBeenNthCalledWith(3, PlaygroundFormFields.sourceFields, {
         index: ['body'],
         newIndex: ['content'],
       });

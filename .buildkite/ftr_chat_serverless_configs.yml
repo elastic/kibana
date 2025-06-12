@@ -1,0 +1,12 @@
+disabled:
+  # Base config files, only necessary to inform config finding script
+
+defaultQueue: 'n2-4-spot'
+enabled:
+  - x-pack/test_serverless/api_integration/test_suites/chat/config.ts
+  - x-pack/test_serverless/api_integration/test_suites/chat/config.feature_flags.ts
+  - x-pack/test_serverless/api_integration/test_suites/chat/common_configs/config.group1.ts
+  - x-pack/test_serverless/functional/test_suites/chat/config.ts
+  - x-pack/test_serverless/functional/test_suites/chat/config.feature_flags.ts
+  - x-pack/test_serverless/functional/test_suites/chat/common_configs/config.config_compat_mode.ts
+  - x-pack/test_serverless/functional/test_suites/chat/common_configs/config.group1.ts

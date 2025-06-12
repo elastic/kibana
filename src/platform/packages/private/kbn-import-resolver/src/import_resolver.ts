@@ -142,6 +142,11 @@ export class ImportResolver {
       return this.adaptReq('src/core/server', dirname);
     }
 
+    if (req.startsWith('@modelcontextprotocol/sdk')) {
+      const relPath = req.split('@modelcontextprotocol/sdk')[1];
+      return Path.resolve(REPO_ROOT, `node_modules/@modelcontextprotocol/sdk/dist/esm/${relPath}`);
+    }
+
     // turn root-relative paths into relative paths
     if (
       req.startsWith('src/') ||

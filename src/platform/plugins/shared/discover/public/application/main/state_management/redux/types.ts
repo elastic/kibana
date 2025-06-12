@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { RefreshInterval } from '@kbn/data-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { TimeRange } from '@kbn/es-query';
-import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
+import type { Filter, TimeRange } from '@kbn/es-query';
+import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
 import type { TabItem } from '@kbn/unified-tabs';
 
 export enum LoadingStatus {
@@ -39,13 +40,17 @@ export type TotalHitsRequest = RequestState<number>;
 export type ChartRequest = RequestState<{}>;
 
 export interface InternalStateDataRequestParams {
-  timeRangeAbsolute?: TimeRange;
-  timeRangeRelative?: TimeRange;
+  timeRangeAbsolute: TimeRange | undefined;
+  timeRangeRelative: TimeRange | undefined;
+  searchSessionId: string | undefined;
 }
 
 export interface TabState extends TabItem {
-  globalState?: Record<string, unknown>;
-  appState?: Record<string, unknown>;
+  lastPersistedGlobalState: {
+    timeRange?: TimeRange;
+    refreshInterval?: RefreshInterval;
+    filters?: Filter[];
+  };
   dataViewId: string | undefined;
   isDataViewLoading: boolean;
   dataRequestParams: InternalStateDataRequestParams;
@@ -61,14 +66,28 @@ export interface TabState extends TabItem {
   chartRequest: ChartRequest;
 }
 
+export interface RecentlyClosedTabState extends TabState {
+  closedAt: number;
+}
+
 export interface DiscoverInternalState {
   initializationState: { hasESData: boolean; hasUserDataView: boolean };
   savedDataViews: DataViewListItem[];
   defaultProfileAdHocDataViewIds: string[];
   expandedDoc: DataTableRecord | undefined;
+  initialDocViewerTabId?: string;
   isESQLToDataViewTransitionModalVisible: boolean;
   tabs: {
-    byId: Record<string, TabState>;
+    byId: Record<string, TabState | RecentlyClosedTabState>;
     allIds: string[];
+    recentlyClosedTabIds: string[];
+    /**
+     * WARNING: You probably don't want to use this property.
+     * This is used high in the component tree for managing tabs,
+     * but is unsafe to use in actions and selectors since it can
+     * change between renders and leak state between tabs.
+     * Actions and selectors should use a tab ID parameter instead.
+     */
+    unsafeCurrentId: string;
   };
 }

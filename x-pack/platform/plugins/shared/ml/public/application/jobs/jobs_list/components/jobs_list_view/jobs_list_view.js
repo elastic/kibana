@@ -21,7 +21,6 @@ import { DeleteJobModal } from '../delete_job_modal';
 import { ResetJobModal } from '../reset_job_modal';
 import { StartDatafeedModal } from '../start_datafeed_modal';
 import { MultiJobActions } from '../multi_job_actions';
-import { NewJobButton } from '../new_job_button';
 import { JobStatsBar } from '../jobs_stats_bar';
 import { NodeAvailableWarning } from '../../../../components/node_available_warning';
 import { JobsAwaitingNodeWarning } from '../../../../components/jobs_awaiting_node_warning';
@@ -41,6 +40,7 @@ import { removeNodeInfo } from '../../../../../../common/util/job_utils';
 import { jobCloningService } from '../../../../services/job_cloning_service';
 import { ANOMALY_DETECTOR_SAVED_OBJECT_TYPE } from '../../../../../../common/types/saved_objects';
 import { SpaceManagementContextWrapper } from '../../../../components/space_management_context_wrapper';
+import { DatePicker } from '../../../../components/ml_page/date_picker';
 
 let blockingJobsRefreshTimeout = null;
 
@@ -427,6 +427,10 @@ export class JobsListViewUI extends Component {
     return BLOCKED_JOBS_REFRESH_INTERVAL_MS;
   }
 
+  refreshJobs = () => {
+    this.refreshJobSummaryList();
+  };
+
   renderJobsListComponents() {
     const { isRefreshing, loading, jobsSummaryList, jobsAwaitingNodeCount } = this.state;
     const jobIds = jobsSummaryList.map((j) => j.id);
@@ -448,20 +452,21 @@ export class JobsListViewUI extends Component {
 
         <>
           <SpaceManagementContextWrapper>
-            {noJobsFound ? <AnomalyDetectionEmptyState /> : null}
+            {noJobsFound ? <AnomalyDetectionEmptyState showDocsLink /> : null}
 
             {jobIds.length > 0 ? (
               <>
-                <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexGroup gutterSize="none">
                   <EuiFlexItem grow={false}>
                     <JobStatsBar
                       jobsSummaryList={jobsSummaryList}
                       showNodeInfo={this.props.showNodeInfo}
                     />
                   </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <NewJobButton />
-                  </EuiFlexItem>
+                  <EuiFlexItem grow={true} />
+                  <EuiFlexGroup justifyContent="flexEnd">
+                    <DatePicker />
+                  </EuiFlexGroup>
                 </EuiFlexGroup>
 
                 <EuiSpacer size="s" />

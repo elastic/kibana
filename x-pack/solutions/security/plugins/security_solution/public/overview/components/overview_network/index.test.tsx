@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
+import { screen, render, fireEvent } from '@testing-library/react';
 import React from 'react';
 
 import { TestProviders } from '../../../common/mock';
@@ -13,7 +13,6 @@ import { OverviewNetwork } from '.';
 import { useNetworkOverview } from '../../containers/overview_network';
 import { SecurityPageName } from '../../../app/types';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
-import { render } from '@testing-library/react';
 
 jest.mock('../../../common/components/link_to');
 const mockNavigateToApp = jest.fn();
@@ -80,62 +79,54 @@ describe('OverviewNetwork', () => {
   });
 
   test('it renders the expected widget title', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <OverviewNetwork {...defaultProps} />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="header-section-title"]').first().text()).toEqual(
-      'Network events'
-    );
+    expect(screen.getByTestId('header-section-title').textContent).toBe('Network events');
   });
 
   test('it renders an empty subtitle while loading', () => {
     useNetworkOverviewMock.mockReturnValueOnce([true, { overviewNetwork: {} }]);
-    const wrapper = mount(
+    render(
       <TestProviders>
         <OverviewNetwork {...defaultProps} />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="header-panel-subtitle"]').first().text()).toEqual('');
+    expect(screen.getByTestId('header-panel-subtitle').textContent).toBe('');
   });
 
   test('it renders the expected event count in the subtitle after loading events', async () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <OverviewNetwork {...defaultProps} />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="header-panel-subtitle"]').first().text()).toEqual(
-      'Showing: 9 events'
-    );
+    expect(screen.getByTestId('header-panel-subtitle').textContent).toEqual('Showing: 9 events');
   });
 
   it('it renders View Network', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <OverviewNetwork {...defaultProps} />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="overview-network-go-to-network-page"]')).toBeTruthy();
+    expect(screen.getByTestId('overview-network-go-to-network-page')).toBeInTheDocument();
   });
 
   it('when click on View Network we call navigateToApp to make sure to navigate to right page', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <OverviewNetwork {...defaultProps} />
       </TestProviders>
     );
 
-    wrapper
-      .find('[data-test-subj="overview-network-go-to-network-page"] button')
-      .simulate('click', {
-        preventDefault: jest.fn(),
-      });
+    fireEvent.click(screen.getByTestId('overview-network-go-to-network-page'));
 
     expect(mockNavigateToApp).toBeCalledWith('securitySolutionUI', {
       path: '',
@@ -144,22 +135,22 @@ describe('OverviewNetwork', () => {
   });
 
   it('toggleStatus=true, do not skip', () => {
-    const { queryByTestId } = render(
+    render(
       <TestProviders>
         <OverviewNetwork {...defaultProps} />
       </TestProviders>
     );
     expect(useNetworkOverviewMock.mock.calls[0][0].skip).toEqual(false);
-    expect(queryByTestId('overview-network-stats')).toBeInTheDocument();
+    expect(screen.queryByTestId('overview-network-stats')).toBeInTheDocument();
   });
   it('toggleStatus=false, skip', () => {
     mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: jest.fn() });
-    const { queryByTestId } = render(
+    render(
       <TestProviders>
         <OverviewNetwork {...defaultProps} />
       </TestProviders>
     );
     expect(useNetworkOverviewMock.mock.calls[0][0].skip).toEqual(true);
-    expect(queryByTestId('overview-network-stats')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('overview-network-stats')).not.toBeInTheDocument();
   });
 });

@@ -33,6 +33,7 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { BehaviorSubject } from 'rxjs';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { kibanaFullBodyHeightCss } from '@kbn/core/public';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
@@ -41,6 +42,7 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
 import { DiscoverSidebarResponsive } from '../sidebar';
+import type { DiscoverTopNavProps } from '../top_nav/discover_topnav';
 import { DiscoverTopNav } from '../top_nav/discover_topnav';
 import { getResultState } from '../../utils/get_result_state';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
@@ -49,7 +51,6 @@ import type { SidebarToggleState } from '../../../types';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
-import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import { ErrorCallout } from '../../../../components/common/error_callout';
 import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
@@ -58,9 +59,18 @@ import { PanelsToggle } from '../../../../components/panels_toggle';
 import { sendErrorMsg } from '../../hooks/use_saved_search_messages';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useCurrentDataView, useCurrentTabSelector } from '../../state_management/redux';
+import { TABS_ENABLED } from '../../../../constants';
+import { DiscoverHistogramLayout } from './discover_histogram_layout';
 
+const queryClient = new QueryClient();
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
-const TopNavMemoized = React.memo(DiscoverTopNav);
+
+const TopNavMemoized = React.memo((props: DiscoverTopNavProps) => (
+  // QueryClientProvider is used to allow querying the authorized rules api hook
+  <QueryClientProvider client={queryClient}>
+    <DiscoverTopNav {...props} />
+  </QueryClientProvider>
+));
 
 export interface DiscoverLayoutProps {
   stateContainer: DiscoverStateContainer;
@@ -368,7 +378,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         background-color: ${pageBackgroundColor};
 
         ${useEuiBreakpoint(['m', 'l', 'xl'])} {
-          ${kibanaFullBodyHeightCss()}
+          ${kibanaFullBodyHeightCss(TABS_ENABLED ? '32px' : undefined)}
         }
       `}
     >

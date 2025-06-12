@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getGroupingQuery, parseGroupingQuery } from '.';
+import dedent from 'dedent';
+import { getGroupingQuery, MAX_RUNTIME_FIELD_SIZE, parseGroupingQuery } from '.';
 import { getEmptyValue } from './helpers';
 import type { GroupingAggregation } from '../../..';
 import { groupingBucket, mocktestProps1, mockTestProps2 } from '../../mocks';
@@ -27,7 +28,6 @@ describe('group selector', () => {
         bucket_truncate: { bucket_sort: { from: 0, size: 25 } },
         alertsCount: { cardinality: { field: 'kibana.alert.uuid' } },
         rulesCountAggregation: { cardinality: { field: 'kibana.alert.rule.rule_id' } },
-        countSeveritySubAggregation: { cardinality: { field: 'kibana.alert.severity' } },
         severitiesSubAggregation: { terms: { field: 'kibana.alert.severity' } },
         usersCountAggregation: { cardinality: { field: 'user.name' } },
       });
@@ -94,8 +94,16 @@ describe('group selector', () => {
 
     it('groupByField script should contain logic which gets all values of groupByField', () => {
       const scriptResponse = {
-        source:
-          "if (doc[params['selectedGroup']].size()==0) { emit(params['uniqueValue']) } else { emit(doc[params['selectedGroup']].join(params['uniqueValue']))}",
+        source: dedent(`
+          def groupValues = [];
+          if (doc.containsKey(params['selectedGroup']) && !doc[params['selectedGroup']].empty) {
+            groupValues = doc[params['selectedGroup']];
+          }  
+          int count = groupValues.size();
+          if (count == 0 || count > ${MAX_RUNTIME_FIELD_SIZE} ) { emit(params['uniqueValue']); }
+          else {
+            emit(groupValues.join(params['uniqueValue']));
+          }`),
         params: {
           selectedGroup: 'resource.name',
           uniqueValue: 'whatAGreatAndUniqueValue',
@@ -105,6 +113,7 @@ describe('group selector', () => {
       const result = getGroupingQuery(mockTestProps2);
 
       expect(result.runtime_mappings.groupByField.script).toEqual(scriptResponse);
+      expect(result.runtime_mappings.groupByField.script.params).toEqual(scriptResponse.params);
       expect(result.aggs.unitsCount).toEqual({ value_count: { field: 'groupByField' } });
     });
 
@@ -113,8 +122,16 @@ describe('group selector', () => {
       const countByKeyForMultiValueFields = 'event.id';
 
       const scriptResponse = {
-        source:
-          "if (doc[params['selectedGroup']].size()==0) { emit(params['uniqueValue']) } else { for (def id : doc[params['selectedGroup']]) { emit(id) }}",
+        source: dedent(`
+          def groupValues = [];
+          if (doc.containsKey(params['selectedGroup']) && !doc[params['selectedGroup']].empty) {
+            groupValues = doc[params['selectedGroup']];
+          }  
+          int count = groupValues.size();
+          if (count == 0 || count > ${MAX_RUNTIME_FIELD_SIZE} ) { emit(params['uniqueValue']); }
+          else {
+            for (int i = 0; i < count && i < ${MAX_RUNTIME_FIELD_SIZE}; i++) { emit(groupValues[i]); }
+          }`),
         params: {
           selectedGroup: groupByField,
           uniqueValue: 'whatAGreatAndUniqueValue',

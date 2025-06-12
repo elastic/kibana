@@ -358,7 +358,9 @@ export function useObservabilityAIAssistantContext({
                 return dashboardApi
                   .addNewPanel({
                     panelType: 'lens',
-                    initialState: embeddableInput,
+                    serializedState: {
+                      rawState: { embeddableInput },
+                    },
                   })
                   .then(() => {
                     return {

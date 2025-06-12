@@ -5,7 +5,6 @@
   },
   "include": [
     "../../../../typings/**/*",
-    "common/**/*",
     "public/**/*",
     "server/**/*",
   ],
@@ -35,6 +34,8 @@
     "@kbn/i18n-react",
     "@kbn/visualization-utils",
     "@kbn/esql-types",
+    "@kbn/licensing-plugin",
+    "@kbn/projects-solutions-groups"
   ],
   "exclude": [
     "target/**/*",

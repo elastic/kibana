@@ -13,21 +13,24 @@ import type { Validation } from '../../../../../common/job_validator';
 
 interface Props {
   validation: Validation;
+  titleId: string;
 }
 
-export const Description: FC<PropsWithChildren<Props>> = memo(({ children, validation }) => {
-  const title = i18n.translate('xpack.ml.newJob.wizard.jobDetailsStep.jobId.title', {
-    defaultMessage: 'Job ID',
-  });
-  const description = i18n.translate('xpack.ml.newJob.wizard.jobDetailsStep.jobId.description', {
-    defaultMessage:
-      'A unique identifier for the job. Spaces and the characters  / ? , " < > | * are not allowed',
-  });
-  return (
-    <EuiDescribedFormGroup title={<h3>{title}</h3>} description={description}>
-      <EuiFormRow error={validation.message} isInvalid={validation.valid === false}>
-        <>{children}</>
-      </EuiFormRow>
-    </EuiDescribedFormGroup>
-  );
-});
+export const Description: FC<PropsWithChildren<Props>> = memo(
+  ({ children, validation, titleId }) => {
+    const title = i18n.translate('xpack.ml.newJob.wizard.jobDetailsStep.jobId.title', {
+      defaultMessage: 'Job ID',
+    });
+    const description = i18n.translate('xpack.ml.newJob.wizard.jobDetailsStep.jobId.description', {
+      defaultMessage:
+        'A unique identifier for the job. Spaces and the characters  / ? , " < > | * are not allowed',
+    });
+    return (
+      <EuiDescribedFormGroup title={<h3 id={titleId}>{title}</h3>} description={description}>
+        <EuiFormRow error={validation.message} isInvalid={validation.valid === false}>
+          <>{children}</>
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+    );
+  }
+);

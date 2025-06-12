@@ -57,7 +57,7 @@ export const OBSERVER_LISTENING = 'observer.listening';
 export const PROCESSOR_EVENT = 'processor.event';
 export const PROCESSOR_NAME = 'processor.name';
 
-export const TRANSACTION_AGENT_MARKS = 'transaction.agent.marks';
+export const TRANSACTION_MARKS_AGENT = 'transaction.marks.agent';
 export const TRANSACTION_DURATION = 'transaction.duration.us';
 export const TRANSACTION_DURATION_HISTOGRAM = 'transaction.duration.histogram';
 export const TRANSACTION_DURATION_SUMMARY = 'transaction.duration.summary';
@@ -73,6 +73,9 @@ export const TRANSACTION_OVERFLOW_COUNT = 'transaction.aggregation.overflow_coun
 // for transaction metrics
 export const TRANSACTION_ROOT = 'transaction.root';
 export const TRANSACTION_PROFILER_STACK_TRACE_IDS = 'transaction.profiler_stack_trace_ids';
+
+// OTel field to link profiling and APM
+export const ELASTIC_PROFILER_STACK_TRACE_IDS = 'elastic.profiler_stack_trace_ids';
 
 export const EVENT_OUTCOME = 'event.outcome';
 
@@ -202,8 +205,9 @@ export const SERVER_ADDRESS = 'server.address';
 export const SERVER_PORT = 'server.port';
 
 // OpenTelemetry span links
-export const LINKS_SPAN_ID = 'links.span_id';
-export const LINKS_TRACE_ID = 'links.trace_id';
+export const OTEL_SPAN_LINKS = 'links';
+export const OTEL_SPAN_LINKS_SPAN_ID = 'links.span_id';
+export const OTEL_SPAN_LINKS_TRACE_ID = 'links.trace_id';
 
 // Metadata
 export const TIER = '_tier';

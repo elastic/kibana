@@ -15,8 +15,9 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SearchEmptyPrompt, DecorativeHorizontalStepper } from '@kbn/search-shared-ui';
+import { SearchEmptyPrompt } from '@kbn/search-shared-ui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { DecorativeHorizontalStepper } from '@kbn/search-connectors';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 
 export const SelfManagedWebCrawlersEmptyPrompt = () => {

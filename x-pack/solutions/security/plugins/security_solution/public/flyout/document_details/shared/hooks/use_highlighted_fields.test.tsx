@@ -21,7 +21,12 @@ const dataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser;
 
 describe('useHighlightedFields', () => {
   it('should return data', () => {
-    const hookResult = renderHook(() => useHighlightedFields({ dataFormattedForFieldBrowser }));
+    const hookResult = renderHook(() =>
+      useHighlightedFields({
+        dataFormattedForFieldBrowser,
+        investigationFields: [],
+      })
+    );
     expect(hookResult.result.current).toEqual({
       'host.name': {
         values: ['host-name'],
@@ -39,6 +44,7 @@ describe('useHighlightedFields', () => {
     const hookResult = renderHook(() =>
       useHighlightedFields({
         dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowserWithOverridenField,
+        investigationFields: [],
       })
     );
 

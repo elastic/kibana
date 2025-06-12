@@ -10,13 +10,13 @@ import { type DataView } from '@kbn/data-views-plugin/public';
 
 import { DataViewManagerScopeName } from '../constants';
 import { useDataViewSpec } from './use_data_view_spec';
-import { useFullDataView } from './use_full_data_view';
+import { useDataView } from './use_data_view';
 
-jest.mock('./use_full_data_view');
+jest.mock('./use_data_view');
 
 describe('useDataViewSpec', () => {
   beforeEach(() => {
-    jest.mocked(useFullDataView).mockReturnValue({
+    jest.mocked(useDataView).mockReturnValue({
       dataView: {
         id: 'test',
         title: 'test',
@@ -31,7 +31,7 @@ describe('useDataViewSpec', () => {
       initialProps: DataViewManagerScopeName.default,
     });
 
-    expect(jest.mocked(useFullDataView)).toHaveBeenCalledWith(DataViewManagerScopeName.default);
+    expect(jest.mocked(useDataView)).toHaveBeenCalledWith(DataViewManagerScopeName.default);
 
     expect(wrapper.result.current).toMatchObject({
       status: expect.any(String),
@@ -39,7 +39,7 @@ describe('useDataViewSpec', () => {
     });
 
     wrapper.rerender(DataViewManagerScopeName.timeline);
-    expect(jest.mocked(useFullDataView)).toHaveBeenCalledWith(DataViewManagerScopeName.timeline);
+    expect(jest.mocked(useDataView)).toHaveBeenCalledWith(DataViewManagerScopeName.timeline);
 
     expect(wrapper.result.current).toMatchObject({
       status: expect.any(String),

@@ -14,6 +14,7 @@ export const ML_APP_NAME = i18n.translate('xpack.ml.navMenu.mlAppNameText', {
   defaultMessage: 'Machine Learning and Analytics',
 });
 export const ML_APP_ROUTE = '/app/ml';
+export const ML_MANAGEMENT_APP_ROUTE = '/app/management/ml';
 export const ML_INTERNAL_BASE_PATH = '/internal/ml';
 export const ML_EXTERNAL_BASE_PATH = '/api/ml';
 

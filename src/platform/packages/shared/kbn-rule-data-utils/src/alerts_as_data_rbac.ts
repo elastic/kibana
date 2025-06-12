@@ -21,6 +21,7 @@ export const AlertConsumers = {
   LOGS: 'logs',
   INFRASTRUCTURE: 'infrastructure',
   OBSERVABILITY: 'observability',
+  STREAMS: 'streams',
   SLO: 'slo',
   SIEM: 'siem',
   UPTIME: 'uptime',
@@ -51,17 +52,19 @@ export const isValidFeatureId = (a: unknown): a is ValidFeatureId =>
  * @param sortIds estypes.SortResults | undefined
  * @returns SortResults
  */
-export const getSafeSortIds = (sortIds: estypes.SortResults | null | undefined) => {
+export const getSafeSortIds = (
+  sortIds: estypes.SortResults | null | undefined
+): Array<string | number> | undefined => {
   if (sortIds == null) {
-    return sortIds;
+    return sortIds as undefined;
   }
   return sortIds.map((sortId) => {
     // haven't determined when we would receive a null value for a sort id
     // but in case we do, default to sending the stringified Java max_int
-    if (sortId == null || sortId === '' || sortId >= Number.MAX_SAFE_INTEGER) {
+    if (sortId == null || sortId === '' || Number(sortId) >= Number.MAX_SAFE_INTEGER) {
       return '9223372036854775807';
     }
-    return sortId;
+    return sortId as string | number;
   });
 };
 
@@ -98,4 +101,5 @@ export const getEsQueryConfig = (params?: GetEsQueryConfigParamType): EsQueryCon
  * TODO: Remove when checks for specific rule type ids is not needed
  *in the codebase.
  */
-export const isSiemRuleType = (ruleTypeId: string) => ruleTypeId.startsWith('siem.');
+export const isSiemRuleType = (ruleTypeId: string) =>
+  ruleTypeId.startsWith('siem.') || ruleTypeId === 'attack-discovery';

@@ -22,7 +22,7 @@ import {
   OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
   observabilityAlertFeatureIds,
 } from '../../../common/constants';
-import { paths } from '../../../common/locators/paths';
+import { paths, relativePaths } from '../../../common/locators/paths';
 import type { AlertStatus } from '../../../common/typings';
 import { RuleDetailsLocatorParams } from '../../locators/rule_details';
 import { getControlIndex } from '../../utils/alert_controls/get_control_index';
@@ -60,7 +60,7 @@ interface RuleDetailsPathParams {
 export function RuleDetailsPage() {
   const { services } = useKibana();
   const {
-    application: { capabilities, navigateToUrl },
+    application: { capabilities, navigateToUrl, navigateToApp },
     http: { basePath },
     share: {
       url: { locators },
@@ -106,9 +106,7 @@ export function RuleDetailsPage() {
     { serverless }
   );
 
-  const [alertFilterControlHandler, setAlertFilterControlHandler] = useState<
-    FilterGroupHandler | undefined
-  >();
+  const [controlApi, setControlApi] = useState<FilterGroupHandler | undefined>();
   const [activeTabId, setActiveTabId] = useState<TabId>(() => {
     const searchParams = new URLSearchParams(search);
     const urlTabId = searchParams.get(RULE_DETAILS_TAB_URL_STORAGE_KEY);
@@ -156,7 +154,7 @@ export function RuleDetailsPage() {
 
     const statusControlIndex = getControlIndex(ALERT_STATUS, controlConfigs);
     controlConfigs = setStatusOnControlConfigs(status, controlConfigs);
-    updateSelectedOptions(status, statusControlIndex, alertFilterControlHandler);
+    updateSelectedOptions(status, statusControlIndex, controlApi);
 
     await locators.get<RuleDetailsLocatorParams>(ruleDetailsLocatorID)?.navigate(
       {
@@ -177,7 +175,15 @@ export function RuleDetailsPage() {
   };
 
   const handleEditRule = () => {
-    setEditRuleFlyoutVisible(true);
+    if (rule) {
+      navigateToApp('observability', {
+        path: relativePaths.observability.editRule(rule.id),
+        state: {
+          returnApp: 'observability',
+          returnPath: relativePaths.observability.ruleDetails(rule.id),
+        },
+      });
+    }
   };
 
   const handleCloseRuleFlyout = () => {
@@ -222,19 +228,22 @@ export function RuleDetailsPage() {
         },
         children: <PageTitleContent rule={rule} />,
         bottomBorder: false,
-        rightSideItems: [
-          <HeaderActions
-            isLoading={isLoading || isRuleDeleting}
-            isRuleEditable={isEditable}
-            onEditRule={handleEditRule}
-            onDeleteRule={handleDeleteRule}
-          />,
-        ],
+        rightSideItems: ruleId
+          ? [
+              <HeaderActions
+                ruleId={ruleId}
+                isLoading={isLoading || isRuleDeleting}
+                isRuleEditable={isEditable}
+                onEditRule={handleEditRule}
+                onDeleteRule={handleDeleteRule}
+              />,
+            ]
+          : [],
       }}
     >
       <HeaderMenu />
       <EuiFlexGroup wrap gutterSize="m">
-        <EuiFlexItem style={{ minWidth: 350 }}>
+        <EuiFlexItem css={{ minWidth: 350 }}>
           <RuleStatusPanel
             rule={rule}
             isEditable={isEditable}
@@ -244,7 +253,7 @@ export function RuleDetailsPage() {
           />
         </EuiFlexItem>
 
-        <EuiFlexItem style={{ minWidth: 350 }}>
+        <EuiFlexItem css={{ minWidth: 350 }}>
           <AlertSummaryWidget
             ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
             consumers={observabilityAlertFeatureIds}
@@ -262,6 +271,7 @@ export function RuleDetailsPage() {
           actionTypeRegistry={actionTypeRegistry}
           rule={rule}
           ruleTypeRegistry={ruleTypeRegistry}
+          navigateToEditRuleForm={handleEditRule}
           onEditRule={async () => {
             refetch();
           }}
@@ -281,7 +291,8 @@ export function RuleDetailsPage() {
         activeTabId={activeTabId}
         onEsQueryChange={setEsQuery}
         onSetTabId={handleSetTabId}
-        onControlApiAvailable={setAlertFilterControlHandler}
+        onControlApiAvailable={setControlApi}
+        controlApi={controlApi}
       />
 
       {isEditRuleFlyoutVisible && (

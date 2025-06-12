@@ -43,7 +43,7 @@ import {
 import { ActionAccordionFormProps } from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
 import { validateParamsForWarnings } from '../../lib/validate_params_for_warnings';
-import { useRuleTypeAadTemplateFields } from '../../hooks/use_rule_aad_template_fields';
+import { useRuleTypeAlertFields } from '../../hooks/use_rule_alert_fields';
 
 export type SystemActionTypeFormProps = {
   actionItem: RuleSystemAction;
@@ -117,7 +117,7 @@ export const SystemActionTypeForm = ({
 
   const [warning, setWarning] = useState<string | null>(null);
 
-  const { fields: aadTemplateFields } = useRuleTypeAadTemplateFields(http, ruleTypeId, true);
+  const { fields: alertFields } = useRuleTypeAlertFields(http, ruleTypeId, true);
 
   const getDefaultParams = useCallback(() => {
     const connectorType = actionTypeRegistry.get(actionItem.actionTypeId);
@@ -220,7 +220,7 @@ export const SystemActionTypeForm = ({
                       );
                       setActionParamsProperty(key, value, i);
                     }}
-                    messageVariables={aadTemplateFields}
+                    messageVariables={alertFields}
                     defaultMessage={defaultSummaryMessage}
                     useDefaultMessage={true}
                     actionConnector={actionConnector}

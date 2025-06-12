@@ -127,6 +127,11 @@ export const CaseAttributesRt = rt.intersection([
     updated_at: rt.union([rt.string, rt.null]),
     updated_by: rt.union([UserRt, rt.null]),
   }),
+  rt.exact(
+    rt.partial({
+      incremental_id: rt.union([rt.number, rt.null]),
+    })
+  ),
 ]);
 
 export const CaseRt = rt.intersection([

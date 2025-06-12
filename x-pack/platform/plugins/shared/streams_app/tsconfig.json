@@ -9,7 +9,8 @@
     "typings/**/*",
     "public/**/*.json",
     "server/**/*",
-    ".storybook/**/*"
+    ".storybook/**/*",
+    "ui_tests/**/*"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"],
   "kbn_references": [
@@ -27,6 +28,8 @@
     "@kbn/react-kibana-context-render",
     "@kbn/code-editor",
     "@kbn/ui-theme",
+    "@kbn/charts-plugin",
+    "@kbn/discover-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/es-query",
     "@kbn/server-route-repository-client",
@@ -49,7 +52,6 @@
     "@kbn/react-kibana-mount",
     "@kbn/fields-metadata-plugin",
     "@kbn/observability-ai-assistant-plugin",
-    "@kbn/actions-plugin",
     "@kbn/dataset-quality-plugin",
     "@kbn/search-types",
     "@kbn/object-utils",
@@ -65,5 +67,9 @@
     "@kbn/index-management-shared-types",
     "@kbn/ingest-pipelines-plugin",
     "@kbn/deeplinks-observability",
+    "@kbn/content-packs-schema",
+    "@kbn/charts-theme",
+    "@kbn/grok-ui",
+    "@kbn/scout"
   ]
 }

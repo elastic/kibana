@@ -6,7 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { type Either, isLeft, left, right } from 'fp-ts/lib/Either';
+import { type Either, isLeft, left, right } from 'fp-ts/Either';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';

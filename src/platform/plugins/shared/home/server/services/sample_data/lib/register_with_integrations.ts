@@ -11,7 +11,6 @@ import { CoreSetup } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import { HOME_APP_BASE_PATH } from '../../../../common/constants';
-import { GLOBE_ICON_PATH } from '../data_sets/logs';
 
 export function registerSampleDatasetWithIntegration(
   customIntegrations: CustomIntegrationsPluginSetup,
@@ -27,7 +26,12 @@ export function registerSampleDatasetWithIntegration(
     }),
     uiInternalPath: `${HOME_APP_BASE_PATH}#/tutorial_directory/sampleData`,
     isBeta: false,
-    icons: [{ type: 'svg', src: core.http.basePath.prepend(GLOBE_ICON_PATH) }],
+    icons: [
+      {
+        type: 'svg',
+        src: core.http.staticAssets.getPluginAssetHref('/sample_data_resources/logs/icon.svg'),
+      },
+    ],
     categories: ['custom'],
     shipper: 'sample_data',
   });

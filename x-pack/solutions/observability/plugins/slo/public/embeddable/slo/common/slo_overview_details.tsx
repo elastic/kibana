@@ -17,6 +17,7 @@ import {
   EuiTab,
   EuiTabs,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
@@ -44,6 +45,10 @@ export function SloOverviewDetails({
     uiSettings,
   } = useKibana().services;
 
+  const flyoutTitleId = useGeneratedHtmlId({
+    prefix: 'sloOverviewFlyout',
+  });
+
   const onClose = () => {
     setSelectedSlo(null);
   };
@@ -62,10 +67,10 @@ export function SloOverviewDetails({
   }
 
   return (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout onClose={onClose} aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader>
         <EuiTitle>
-          <h2>
+          <h2 id={flyoutTitleId}>
             {i18n.translate('xpack.slo.sloOverviewDetails.h2.detailsLabel', {
               defaultMessage: '{sloName}',
               values: { sloName: slo.name },

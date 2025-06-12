@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './_dashboard_app.scss';
-
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -18,7 +16,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { HashRouter, Redirect, RouteComponentProps } from 'react-router-dom';
 
-import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../plugin_constants';
+import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/constants';
 import { RedirectToProps } from './types';
 import { coreServices, dataService, embeddableService } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';

@@ -47,7 +47,6 @@ describe('test getDataStateContainer', () => {
   test('refetch$ triggers a search', async () => {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     jest.spyOn(stateContainer.searchSessionManager, 'getNextSearchSessionId');
-    jest.spyOn(stateContainer.searchSessionManager, 'getCurrentSearchSessionId');
     expect(
       stateContainer.searchSessionManager.getNextSearchSessionId as jest.Mock
     ).not.toHaveBeenCalled();
@@ -85,9 +84,6 @@ describe('test getDataStateContainer', () => {
     expect(
       stateContainer.searchSessionManager.getNextSearchSessionId as jest.Mock
     ).toHaveBeenCalled();
-    expect(
-      stateContainer.searchSessionManager.getCurrentSearchSessionId as jest.Mock
-    ).not.toHaveBeenCalled();
 
     unsubscribe();
   });
@@ -131,11 +127,6 @@ describe('test getDataStateContainer', () => {
       result: initialRecords,
     }) as DataDocuments$;
 
-    jest.spyOn(stateContainer.searchSessionManager, 'getCurrentSearchSessionId');
-    expect(
-      stateContainer.searchSessionManager.getCurrentSearchSessionId as jest.Mock
-    ).not.toHaveBeenCalled();
-
     const dataState = stateContainer.dataState;
     const unsubscribe = dataState.subscribe();
     const resolveDataSourceProfileSpy = jest.spyOn(
@@ -157,10 +148,6 @@ describe('test getDataStateContainer', () => {
       if (hasLoadingMoreStarted && value.fetchStatus === FetchStatus.COMPLETE) {
         expect(resolveDataSourceProfileSpy).not.toHaveBeenCalled();
         expect(value.result).toEqual([...initialRecords, ...moreRecords]);
-        // it uses the same current search session id
-        expect(
-          stateContainer.searchSessionManager.getCurrentSearchSessionId as jest.Mock
-        ).toHaveBeenCalled();
         unsubscribe();
         done();
       }

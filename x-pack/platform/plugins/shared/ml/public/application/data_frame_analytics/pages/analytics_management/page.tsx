@@ -6,26 +6,29 @@
  */
 
 import type { FC } from 'react';
-import React, { useMemo, useState } from 'react';
-
-import { useLocation } from 'react-router-dom';
+import React, { useState, useCallback } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useUrlState, usePageUrlState, type ListingPageUrlState } from '@kbn/ml-url-state';
+import { usePageUrlState, type ListingPageUrlState } from '@kbn/ml-url-state';
+import { css } from '@emotion/react';
 import { DataFrameAnalyticsList } from './components/analytics_list';
 import { useRefreshInterval } from './components/analytics_list/use_refresh_interval';
 import { NodeAvailableWarning } from '../../../components/node_available_warning';
 import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
 import { UpgradeWarning } from '../../../components/upgrade';
-import { JobMap } from '../job_map';
 import { DataFrameAnalyticsListColumn } from './components/analytics_list/common';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { HelpMenu } from '../../../components/help_menu';
-import { useMlKibana } from '../../../contexts/kibana';
+import { useMlKibana, useMlManagementLocator } from '../../../contexts/kibana';
 import { useRefreshAnalyticsList } from '../../common';
 import { MlPageHeader } from '../../../components/page_header';
+import { CreateAnalyticsButton } from './components/create_analytics_button/create_analytics_button';
+import { usePermissionCheck } from '../../../capabilities/check_capabilities';
+import { ExportJobsFlyout, ImportJobsFlyout } from '../../../components/import_export_jobs';
+import { SynchronizeSavedObjectsButton } from '../../../jobs/jobs_list/components/top_level_actions/synchronize_saved_objects_button';
 
 interface PageUrlState {
-  pageKey: typeof ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE;
+  pageKey: typeof ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE_FOR_URL;
   pageUrlState: ListingPageUrlState;
 }
 
@@ -38,10 +41,9 @@ export const getDefaultDFAListState = (): ListingPageUrlState => ({
 
 export const Page: FC = () => {
   const [blockRefresh, setBlockRefresh] = useState(false);
-  const [globalState] = useUrlState('_g');
 
   const [dfaPageState, setDfaPageState] = usePageUrlState<PageUrlState>(
-    ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
+    ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE_FOR_URL,
     getDefaultDFAListState()
   );
 
@@ -49,21 +51,53 @@ export const Page: FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { refresh } = useRefreshAnalyticsList({ isLoading: setIsLoading });
 
-  const location = useLocation();
-  const selectedTabId = useMemo(() => location.pathname.split('/').pop(), [location]);
-  const mapJobId = globalState?.ml?.jobId;
-  const mapModelId = globalState?.ml?.modelId;
   const {
     services: { docLinks },
   } = useMlKibana();
   const helpLink = docLinks.links.ml.dataFrameAnalytics;
+  const mlManagementLocator = useMlManagementLocator();
+
+  const navigateToSourceSelection = useCallback(async () => {
+    await mlManagementLocator?.navigate({
+      sectionId: 'ml',
+      appId: `analytics/${ML_PAGES.DATA_FRAME_ANALYTICS_SOURCE_SELECTION}`,
+    });
+  }, [mlManagementLocator]);
+
+  const canCreateAnalytics = usePermissionCheck('canCreateDataFrameAnalytics');
   return (
     <>
       <MlPageHeader>
-        <FormattedMessage
-          id="xpack.ml.dataframe.analyticsList.title"
-          defaultMessage="Data Frame Analytics Jobs"
-        />
+        <EuiFlexGroup direction="row" gutterSize="s" wrap={true}>
+          <EuiFlexItem grow={true} css={css({ minWidth: '400px' })}>
+            <FormattedMessage
+              id="xpack.ml.dataframe.analyticsList.title"
+              defaultMessage="Data Frame Analytics Jobs"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={true} />
+          <EuiFlexItem grow={false} justifyContent="flexEnd">
+            <EuiFlexGroup direction="row" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <SynchronizeSavedObjectsButton refreshJobs={refresh} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <ExportJobsFlyout
+                  isDisabled={!canCreateAnalytics}
+                  currentTab={'data-frame-analytics'}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <ImportJobsFlyout isDisabled={!canCreateAnalytics} onImportComplete={refresh} />
+              </EuiFlexItem>
+              <CreateAnalyticsButton
+                size="m"
+                navigateToSourceSelection={navigateToSourceSelection}
+                isDisabled={!canCreateAnalytics}
+              />
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </MlPageHeader>
 
       <NodeAvailableWarning />
@@ -71,16 +105,11 @@ export const Page: FC = () => {
       <SavedObjectsWarning onCloseFlyout={refresh} forceRefresh={isLoading} />
       <UpgradeWarning />
 
-      {selectedTabId === 'map' && (mapJobId || mapModelId) && (
-        <JobMap analyticsId={mapJobId} modelId={mapModelId} />
-      )}
-      {selectedTabId === 'data_frame_analytics' && (
-        <DataFrameAnalyticsList
-          blockRefresh={blockRefresh}
-          pageState={dfaPageState}
-          updatePageState={setDfaPageState}
-        />
-      )}
+      <DataFrameAnalyticsList
+        blockRefresh={blockRefresh}
+        pageState={dfaPageState}
+        updatePageState={setDfaPageState}
+      />
       <HelpMenu docLink={helpLink} />
     </>
   );

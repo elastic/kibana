@@ -8,24 +8,33 @@
  */
 
 import { camelCase } from 'lodash';
-import { ESQLRealField, JoinIndexAutocompleteItem } from '../validation/types';
+import type { IndexAutocompleteItem } from '@kbn/esql-types';
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import { InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
+import { ESQLFieldWithMetadata } from '../validation/types';
 import { fieldTypes } from '../definitions/types';
 import { ESQLCallbacks } from '../shared/types';
+import { METADATA_FIELDS } from '../shared/constants';
 
-export const fields: ESQLRealField[] = [
+export const metadataFields: ESQLFieldWithMetadata[] = METADATA_FIELDS.map((field) => ({
+  name: field,
+  type: 'keyword',
+}));
+
+export const fields: ESQLFieldWithMetadata[] = [
   ...fieldTypes.map((type) => ({ name: `${camelCase(type)}Field`, type })),
   { name: 'any#Char$Field', type: 'double' },
   { name: 'kubernetes.something.something', type: 'double' },
   { name: '@timestamp', type: 'date' },
 ];
 
-export const enrichFields: ESQLRealField[] = [
+export const enrichFields: ESQLFieldWithMetadata[] = [
   { name: 'otherField', type: 'text' },
   { name: 'yetAnotherField', type: 'double' },
 ];
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export const unsupported_field: ESQLRealField[] = [
+export const unsupported_field: ESQLFieldWithMetadata[] = [
   { name: 'unsupported_field', type: 'unsupported' },
 ];
 
@@ -53,7 +62,7 @@ export const policies = [
   },
 ];
 
-export const joinIndices: JoinIndexAutocompleteItem[] = [
+export const joinIndices: IndexAutocompleteItem[] = [
   {
     name: 'join_index',
     mode: 'lookup',
@@ -63,6 +72,43 @@ export const joinIndices: JoinIndexAutocompleteItem[] = [
     name: 'join_index_with_alias',
     mode: 'lookup',
     aliases: ['join_index_alias_1', 'join_index_alias_2'],
+  },
+  {
+    name: 'lookup_index',
+    mode: 'lookup',
+    aliases: [],
+  },
+];
+
+export const timeseriesIndices: IndexAutocompleteItem[] = [
+  {
+    name: 'timeseries_index',
+    mode: 'time_series',
+    aliases: [],
+  },
+  {
+    name: 'timeseries_index_with_alias',
+    mode: 'time_series',
+    aliases: ['timeseries_index_alias_1', 'timeseries_index_alias_2'],
+  },
+  {
+    name: 'time_series_index',
+    mode: 'time_series',
+    aliases: [],
+  },
+];
+
+export const editorExtensions = [
+  {
+    name: 'Logs Count by Host',
+    query: 'from logs* | STATS count(*) by host',
+  },
+];
+
+export const inferenceEndpoints: InferenceEndpointAutocompleteItem[] = [
+  {
+    inference_id: 'inference_1',
+    task_type: 'completion',
   },
 ];
 
@@ -75,9 +121,16 @@ export function getCallbackMocks(): ESQLCallbacks {
       if (/unsupported_index/.test(query)) {
         return unsupported_field;
       }
-      if (/dissect|grok/.test(query)) {
-        const field: ESQLRealField = { name: 'firstWord', type: 'text' };
+      if (/join_index/.test(query)) {
+        const field: ESQLFieldWithMetadata = {
+          name: 'keywordField',
+          type: 'unsupported',
+          hasConflict: true,
+        };
         return [field];
+      }
+      if (/METADATA/i.test(query)) {
+        return [...fields, ...metadataFields];
       }
       return fields;
     }),
@@ -90,5 +143,13 @@ export function getCallbackMocks(): ESQLCallbacks {
     ),
     getPolicies: jest.fn(async () => policies),
     getJoinIndices: jest.fn(async () => ({ indices: joinIndices })),
+    getTimeseriesIndices: jest.fn(async () => ({ indices: timeseriesIndices })),
+    getEditorExtensions: jest.fn(async (queryString: string) => {
+      if (queryString.includes('logs*')) {
+        return editorExtensions;
+      }
+      return [];
+    }),
+    getInferenceEndpoints: jest.fn(async (taskType: InferenceTaskType) => ({ inferenceEndpoints })),
   };
 }

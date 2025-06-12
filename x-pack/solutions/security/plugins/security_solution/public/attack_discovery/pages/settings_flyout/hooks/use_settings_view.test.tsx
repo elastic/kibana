@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
+import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { fireEvent, render, renderHook, screen } from '@testing-library/react';
+import React from 'react';
 
 import { useKibana } from '../../../../common/lib/kibana';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useSettingsView } from './use_settings_view';
 import { TestProviders } from '../../../../common/mock';
+
+const mockFilterManager = createFilterManagerMock();
 
 jest.mock('react-router', () => ({
   matchPath: jest.fn(),
@@ -24,9 +27,11 @@ jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../sourcerer/containers');
 
 const defaultProps = {
+  connectorId: undefined,
+  onConnectorIdSelected: jest.fn(),
+  onSettingsChanged: jest.fn(),
   onSettingsReset: jest.fn(),
   onSettingsSave: jest.fn(),
-  onSettingsChanged: jest.fn(),
   settings: {
     end: 'now',
     filters: [],
@@ -34,12 +39,13 @@ const defaultProps = {
     size: 100,
     start: 'now-15m',
   },
+  showConnectorSelector: true,
+  stats: null,
 };
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
-  typeof useSourcererDataView
->;
+const mockUseSourcererDataView: jest.MockedFunction<typeof useSourcererDataView> =
+  useSourcererDataView as jest.MockedFunction<typeof useSourcererDataView>;
 
 describe('useSettingsView', () => {
   beforeEach(() => {
@@ -47,6 +53,14 @@ describe('useSettingsView', () => {
 
     mockUseKibana.mockReturnValue({
       services: {
+        data: {
+          query: {
+            filterManager: mockFilterManager,
+          },
+        },
+        featureFlags: {
+          getBooleanValue: jest.fn().mockReturnValue(true),
+        },
         lens: {
           EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
         },

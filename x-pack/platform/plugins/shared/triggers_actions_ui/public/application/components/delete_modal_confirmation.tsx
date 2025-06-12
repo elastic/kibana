@@ -78,11 +78,6 @@ export const DeleteModalConfirmation = ({
 
         const numSuccesses = successes.length;
         const numErrors = errors.length;
-        if (numSuccesses > 0) {
-          toasts.addSuccess(
-            getSuccessfulDeletionNotificationText(numSuccesses, singleTitle, multipleTitle)
-          );
-        }
 
         if (numErrors > 0) {
           toasts.addDanger(
@@ -90,7 +85,13 @@ export const DeleteModalConfirmation = ({
           );
           await onErrors();
         }
-        await onDeleted(successes);
+
+        if (numSuccesses > 0) {
+          toasts.addSuccess(
+            getSuccessfulDeletionNotificationText(numSuccesses, singleTitle, multipleTitle)
+          );
+          await onDeleted(successes);
+        }
       }}
       cancelButtonText={CANCEL_BUTTON_TEXT}
       confirmButtonText={getConfirmDeletionButtonText(numIdsToDelete, singleTitle, multipleTitle)}

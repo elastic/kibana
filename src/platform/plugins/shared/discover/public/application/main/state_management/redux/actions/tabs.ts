@@ -8,26 +8,38 @@
  */
 
 import type { TabbedContentState } from '@kbn/unified-tabs/src/components/tabbed_content/tabbed_content';
-import { differenceBy } from 'lodash';
+import { cloneDeep, differenceBy, omit, pick } from 'lodash';
+import type { QueryState } from '@kbn/data-plugin/common';
 import type { TabState } from '../types';
-import { selectAllTabs, selectTab } from '../selectors';
+import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
 import {
   defaultTabState,
   internalStateSlice,
+  type TabActionPayload,
   type InternalStateThunkActionCreator,
 } from '../internal_state';
-import { createTabRuntimeState } from '../runtime_state';
+import {
+  createTabRuntimeState,
+  selectTabRuntimeState,
+  selectTabRuntimeAppState,
+  selectTabRuntimeGlobalState,
+} from '../runtime_state';
+import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
+import type { DiscoverAppState } from '../../discover_app_state_container';
+import { createTabItem } from '../utils';
 
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
 > =
   (params) =>
-  (dispatch, getState, { runtimeStateManager }) => {
-    const previousTabs = selectAllTabs(getState());
-    const removedTabs = differenceBy(previousTabs, params.allTabs, (tab) => tab.id);
-    const addedTabs = differenceBy(params.allTabs, previousTabs, (tab) => tab.id);
+  (dispatch, getState, { runtimeStateManager, tabsStorageManager }) => {
+    const previousState = getState();
+    const previousTabs = selectAllTabs(previousState);
+    const removedTabs = differenceBy(previousTabs, params.allTabs, differenceIterateeByTabId);
+    const addedTabs = differenceBy(params.allTabs, previousTabs, differenceIterateeByTabId);
 
     for (const tab of removedTabs) {
+      dispatch(disconnectTab({ tabId: tab.id }));
       delete runtimeStateManager.tabs.byId[tab.id];
     }
 
@@ -35,48 +47,166 @@ export const setTabs: InternalStateThunkActionCreator<
       runtimeStateManager.tabs.byId[tab.id] = createTabRuntimeState();
     }
 
-    dispatch(internalStateSlice.actions.setTabs(params));
+    dispatch(
+      internalStateSlice.actions.setTabs({
+        ...params,
+        recentlyClosedTabs: tabsStorageManager.getNRecentlyClosedTabs(
+          // clean up the recently closed tabs if the same ids are present in next open tabs
+          differenceBy(params.recentlyClosedTabs, params.allTabs, differenceIterateeByTabId),
+          removedTabs
+        ),
+      })
+    );
   };
 
-export interface UpdateTabsParams {
-  currentTabId: string;
-  updateState: TabbedContentState;
-  stopSyncing?: () => void;
-}
-
-export const updateTabs: InternalStateThunkActionCreator<[UpdateTabsParams], Promise<void>> =
-  ({ currentTabId, updateState: { items, selectedItem }, stopSyncing }) =>
-  async (dispatch, getState, { urlStateStorage }) => {
+export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], Promise<void>> =
+  ({ items, selectedItem }) =>
+  async (dispatch, getState, { services, runtimeStateManager, urlStateStorage }) => {
     const currentState = getState();
-    const currentTab = selectTab(currentState, currentTabId);
-    let updatedTabs = items.map<TabState>((item) => {
-      const existingTab = currentState.tabs.byId[item.id];
-      return existingTab ? { ...existingTab, ...item } : { ...defaultTabState, ...item };
+    const currentTab = selectTab(currentState, currentState.tabs.unsafeCurrentId);
+    const updatedTabs = items.map<TabState>((item) => {
+      const existingTab = selectTab(currentState, item.id);
+      return {
+        ...defaultTabState,
+        ...existingTab,
+        ...pick(item, 'id', 'label'),
+      };
     });
 
     if (selectedItem?.id !== currentTab.id) {
-      stopSyncing?.();
+      const previousTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTab.id);
+      const previousTabStateContainer = previousTabRuntimeState.stateContainer$.getValue();
 
-      updatedTabs = updatedTabs.map((tab) =>
-        tab.id === currentTab.id
-          ? {
-              ...tab,
-              globalState: urlStateStorage.get('_g') ?? undefined,
-              appState: urlStateStorage.get('_a') ?? undefined,
-            }
-          : tab
-      );
+      previousTabStateContainer?.actions.stopSyncing();
 
-      const existingTab = selectedItem ? currentState.tabs.byId[selectedItem.id] : undefined;
+      const nextTab = selectedItem ? selectTab(currentState, selectedItem.id) : undefined;
+      const nextTabRuntimeState = selectedItem
+        ? selectTabRuntimeState(runtimeStateManager, selectedItem.id)
+        : undefined;
+      const nextTabStateContainer = nextTabRuntimeState?.stateContainer$.getValue();
 
-      if (existingTab) {
-        await urlStateStorage.set('_g', existingTab.globalState);
-        await urlStateStorage.set('_a', existingTab.appState);
+      if (nextTab && nextTabStateContainer) {
+        const {
+          timeRange,
+          refreshInterval,
+          filters: globalFilters,
+        } = nextTab.lastPersistedGlobalState;
+        const appState = nextTabStateContainer.appState.getState();
+        const { filters: appFilters, query } = appState;
+
+        await urlStateStorage.set<QueryState>(GLOBAL_STATE_URL_KEY, {
+          time: timeRange,
+          refreshInterval,
+          filters: globalFilters,
+        });
+        await urlStateStorage.set<DiscoverAppState>(APP_STATE_URL_KEY, appState);
+
+        services.timefilter.setTime(timeRange ?? services.timefilter.getTimeDefaults());
+        services.timefilter.setRefreshInterval(
+          refreshInterval ?? services.timefilter.getRefreshIntervalDefaults()
+        );
+        services.filterManager.setGlobalFilters(cloneDeep(globalFilters ?? []));
+        services.filterManager.setAppFilters(cloneDeep(appFilters ?? []));
+        services.data.query.queryString.setQuery(
+          query ?? services.data.query.queryString.getDefaultQuery()
+        );
+
+        nextTabStateContainer.actions.initializeAndSync();
       } else {
-        await urlStateStorage.set('_g', {});
-        await urlStateStorage.set('_a', {});
+        await urlStateStorage.set(GLOBAL_STATE_URL_KEY, null);
+        await urlStateStorage.set(APP_STATE_URL_KEY, null);
       }
     }
 
-    dispatch(setTabs({ allTabs: updatedTabs }));
+    dispatch(
+      setTabs({
+        allTabs: updatedTabs,
+        selectedTabId: selectedItem?.id ?? currentTab.id,
+        recentlyClosedTabs: selectRecentlyClosedTabs(currentState),
+      })
+    );
   };
+
+export const updateTabAppStateAndGlobalState: InternalStateThunkActionCreator<[TabActionPayload]> =
+  ({ tabId }) =>
+  (dispatch, _, { runtimeStateManager }) => {
+    dispatch(
+      internalStateSlice.actions.setTabAppStateAndGlobalState({
+        tabId,
+        appState: selectTabRuntimeAppState(runtimeStateManager, tabId),
+        globalState: selectTabRuntimeGlobalState(runtimeStateManager, tabId),
+      })
+    );
+  };
+
+export const initializeTabs: InternalStateThunkActionCreator<
+  [{ userId: string; spaceId: string }]
+> =
+  ({ userId, spaceId }) =>
+  (dispatch, _, { tabsStorageManager }) => {
+    const initialTabsState = tabsStorageManager.loadLocally({
+      userId,
+      spaceId,
+      defaultTabState,
+    });
+
+    dispatch(setTabs(initialTabsState));
+  };
+
+export const clearAllTabs: InternalStateThunkActionCreator = () => (dispatch) => {
+  const defaultTab: TabState = {
+    ...defaultTabState,
+    ...createTabItem([]),
+  };
+
+  return dispatch(updateTabs({ items: [defaultTab], selectedItem: defaultTab }));
+};
+
+export const restoreTab: InternalStateThunkActionCreator<[{ restoreTabId: string }]> =
+  ({ restoreTabId }) =>
+  (dispatch, getState) => {
+    const currentState = getState();
+
+    if (restoreTabId === currentState.tabs.unsafeCurrentId) {
+      return;
+    }
+
+    const currentTabs = selectAllTabs(currentState);
+    const currentTab = selectTab(currentState, currentState.tabs.unsafeCurrentId);
+
+    let items = currentTabs;
+    // search among open tabs
+    let selectedItem = items.find((tab) => tab.id === restoreTabId);
+
+    if (!selectedItem) {
+      // search among recently closed tabs
+      const recentlyClosedTabs = selectRecentlyClosedTabs(currentState);
+      const closedTab = recentlyClosedTabs.find((tab) => tab.id === restoreTabId);
+      if (closedTab) {
+        // reopening one of the closed tabs
+        selectedItem = omit(closedTab, 'closedAt');
+        items = [...items, closedTab];
+      }
+    }
+
+    return dispatch(
+      updateTabs({
+        items,
+        selectedItem: selectedItem || currentTab,
+      })
+    );
+  };
+
+export const disconnectTab: InternalStateThunkActionCreator<[TabActionPayload]> =
+  ({ tabId }) =>
+  (_, __, { runtimeStateManager }) => {
+    const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+    const stateContainer = tabRuntimeState.stateContainer$.getValue();
+    stateContainer?.dataState.cancel();
+    stateContainer?.actions.stopSyncing();
+    tabRuntimeState.customizationService$.getValue()?.cleanup();
+  };
+
+function differenceIterateeByTabId(tab: TabState) {
+  return tab.id;
+}

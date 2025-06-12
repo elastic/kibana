@@ -37,6 +37,16 @@ describe('STATS', () => {
       ]);
     });
 
+    it("doesn't append an undefined arg with a trailing comma", () => {
+      const src = `
+      FROM employees
+        | STATS 123 ,`;
+      const query = EsqlQuery.fromSrc(src);
+
+      expect(query.ast.commands[1].args).toHaveLength(1);
+      expect(query.ast.commands[1].args.every((arg) => arg)).toBe(true);
+    });
+
     it('aggregation function with escaped values', () => {
       const src = `
         FROM employees

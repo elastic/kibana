@@ -65,4 +65,5 @@ toc:
       - file: dashboard-enhanced-plugin.md
       - file: enhanced-embeddables-plugin.md
       - file: translations-plugin.md
+  - file: dependencies-versions.md
   - file: development-telemetry.md

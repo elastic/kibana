@@ -12,6 +12,8 @@ import { isEmpty, merge, orderBy } from 'lodash';
 import type { ReactNode } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ProgressiveLoadingQuality, apmProgressiveLoading } from '@kbn/observability-plugin/common';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../links/url_helpers';
 import {
@@ -20,6 +22,12 @@ import {
 } from '../table_search_bar/table_search_bar';
 
 type SortDirection = 'asc' | 'desc';
+
+/**
+ * A tuple of the start and end indices for all visible/rendered items
+ * for the `ManagedTable` component.
+ */
+export type VisibleItemsStartEnd = readonly [number, number];
 
 export interface TableOptions<T> {
   page: { index: number; size: number };
@@ -45,7 +53,7 @@ export interface TableSearchBar<T> {
   fieldsToSearch: Array<keyof T>;
   maxCountExceeded: boolean;
   placeholder: string;
-  onChangeSearchQuery: (searchQuery: string) => void;
+  onChangeSearchQuery?: (searchQuery: string) => void;
   techPreview?: boolean;
 }
 
@@ -86,6 +94,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
   // onChange handlers
   onChangeRenderedItems?: (renderedItems: T[]) => void;
   onChangeSorting?: (sorting: TableOptions<T>['sort']) => void;
+  onChangeItemIndices?: (range: VisibleItemsStartEnd) => void;
 
   // sorting
   sortItems?: boolean;
@@ -97,6 +106,12 @@ function UnoptimizedManagedTable<T extends object>(props: {
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const history = useHistory();
+  const {
+    services: { uiSettings },
+  } = useKibana();
+  const progressiveLoadingQuality =
+    uiSettings?.get<ProgressiveLoadingQuality>(apmProgressiveLoading) ??
+    ProgressiveLoadingQuality.off;
 
   const {
     items,
@@ -115,8 +130,9 @@ function UnoptimizedManagedTable<T extends object>(props: {
     showPerPageOptions = true,
 
     // onChange handlers
-    onChangeRenderedItems = () => {},
-    onChangeSorting = () => {},
+    onChangeRenderedItems,
+    onChangeSorting,
+    onChangeItemIndices,
 
     // sorting
     sortItems = true,
@@ -157,7 +173,12 @@ function UnoptimizedManagedTable<T extends object>(props: {
   const [tableOptions, setTableOptions] = useState(getStateFromUrl());
 
   // update table options state when url params change
-  useEffect(() => setTableOptions(getStateFromUrl()), [getStateFromUrl]);
+  useEffect(() => {
+    // Prevent updates while data is loading, as this cause pagination issues when observability:apmProgressiveLoading is enabled
+    if (progressiveLoadingQuality === ProgressiveLoadingQuality.off || !isLoading) {
+      setTableOptions(getStateFromUrl());
+    }
+  }, [getStateFromUrl, progressiveLoadingQuality, isLoading]);
 
   // Clean up searchQuery when fast filter is toggled off
   useEffect(() => {
@@ -171,7 +192,10 @@ function UnoptimizedManagedTable<T extends object>(props: {
     (newTableOptions: Partial<TableOptions<T>>) => {
       setTableOptions((oldTableOptions) => merge({}, oldTableOptions, newTableOptions));
 
-      if (saveTableOptionsToUrl) {
+      if (
+        saveTableOptionsToUrl &&
+        (progressiveLoadingQuality === ProgressiveLoadingQuality.off || !isLoading)
+      ) {
         history.push({
           ...history.location,
           search: fromQuery({
@@ -184,7 +208,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
         });
       }
     },
-    [history, saveTableOptionsToUrl, setTableOptions]
+    [history, saveTableOptionsToUrl, setTableOptions, progressiveLoadingQuality, isLoading]
   );
 
   const filteredItems = useMemo(() => {
@@ -197,35 +221,43 @@ function UnoptimizedManagedTable<T extends object>(props: {
         });
   }, [items, searchQuery, tableSearchBar.fieldsToSearch]);
 
+  const renderedIndices = useMemo<VisibleItemsStartEnd>(
+    () => [
+      tableOptions.page.index * tableOptions.page.size,
+      (tableOptions.page.index + 1) * tableOptions.page.size,
+    ],
+    [tableOptions.page.index, tableOptions.page.size]
+  );
+
   const renderedItems = useMemo(() => {
     const sortedItems = sortItems
       ? sortFn(filteredItems, tableOptions.sort.field as keyof T, tableOptions.sort.direction)
       : filteredItems;
 
-    return sortedItems.slice(
-      tableOptions.page.index * tableOptions.page.size,
-      (tableOptions.page.index + 1) * tableOptions.page.size
-    );
+    return sortedItems.slice(...renderedIndices);
   }, [
     sortItems,
     sortFn,
     filteredItems,
     tableOptions.sort.field,
     tableOptions.sort.direction,
-    tableOptions.page.index,
-    tableOptions.page.size,
+    renderedIndices,
   ]);
 
   useEffect(() => {
-    onChangeRenderedItems(renderedItems);
+    onChangeRenderedItems?.(renderedItems);
   }, [onChangeRenderedItems, renderedItems]);
+
+  useEffect(() => {
+    onChangeItemIndices?.(renderedIndices);
+  }, [onChangeItemIndices, renderedIndices]);
 
   const sorting = useMemo(
     () => ({ sort: tableOptions.sort as TableOptions<T>['sort'] }),
     [tableOptions.sort]
   );
 
-  useEffect(() => onChangeSorting(sorting.sort), [onChangeSorting, sorting]);
+  useEffect(() => onChangeSorting?.(sorting.sort), [onChangeSorting, sorting]);
 
   const paginationProps = useMemo(() => {
     if (!pagination) {
@@ -256,7 +288,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
           oldSearchQuery: searchQuery,
         })
       ) {
-        tableSearchBar.onChangeSearchQuery(value);
+        tableSearchBar.onChangeSearchQuery?.(value);
       }
     },
     [searchQuery, tableSearchBar]

@@ -17,6 +17,8 @@ import { EsAnonymizationFieldsSchema } from '../ai_assistant_data_clients/anonym
 import { getAnonymizationFieldsSearchEsMock } from './anonymization_fields_schema.mock';
 import { getKnowledgeBaseEntrySearchEsMock } from './knowledge_base_entry_schema.mock';
 import { EsKnowledgeBaseEntrySchema } from '../ai_assistant_data_clients/knowledge_base/types';
+import { EsAlertSummarySchema } from '../ai_assistant_data_clients/alert_summary/types';
+import { getAlertSummarySearchEsMock } from './alert_summary.mock';
 
 export const responseMock = {
   create: httpServerMock.createResponseFactory,
@@ -49,6 +51,13 @@ export const getFindPromptsResultWithSingleHit = (): FindResponse<EsPromptsSchem
   perPage: 1,
   total: 1,
   data: getPromptsSearchEsMock(),
+});
+
+export const getFindAlertSummaryResultWithSingleHit = (): FindResponse<EsAlertSummarySchema> => ({
+  page: 1,
+  perPage: 1,
+  total: 1,
+  data: getAlertSummarySearchEsMock(),
 });
 
 export const getFindAnonymizationFieldsResultWithSingleHit =

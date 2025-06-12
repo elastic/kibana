@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { buildUrl } from './build_url';
-import type { Transaction } from '../../typings/es_schemas/ui/transaction';
+import { type ItemType, buildUrl } from './build_url';
 
 describe('buildUrl', () => {
   it('should return a full URL when all fields are provided', () => {
@@ -20,7 +19,7 @@ describe('buildUrl', () => {
         port: 443,
       },
     };
-    const result = buildUrl(item as unknown as Transaction);
+    const result = buildUrl(item);
     expect(result).toBe('ftp://example.com:443/some/path');
   });
 
@@ -34,7 +33,7 @@ describe('buildUrl', () => {
         address: 'example.org',
       },
     };
-    const result = buildUrl(item as Transaction);
+    const result = buildUrl(item);
     expect(result).toBe('http://example.org/another/path');
   });
 
@@ -48,7 +47,7 @@ describe('buildUrl', () => {
         port: 8443,
       },
     };
-    const result = buildUrl(item as unknown as Transaction);
+    const result = buildUrl(item);
     expect(result).toBe('https://example.net:8443/');
   });
 
@@ -62,7 +61,7 @@ describe('buildUrl', () => {
         port: 8080,
       },
     };
-    const result = buildUrl(item as unknown as Transaction);
+    const result = buildUrl(item);
     expect(result).toBeUndefined();
   });
 
@@ -76,7 +75,7 @@ describe('buildUrl', () => {
         port: 8080,
       },
     };
-    const result = buildUrl(item as unknown as Transaction);
+    const result = buildUrl(item);
     expect(result).toBeUndefined();
   });
 
@@ -90,17 +89,17 @@ describe('buildUrl', () => {
       },
       server: {
         address: 'example.com',
-        port: 'invalid-port',
+        port: 'invalid', // Invalid port
       },
     };
 
-    const result = buildUrl(item as unknown as Transaction);
+    const result = buildUrl(item as unknown as ItemType);
 
     expect(result).toBeUndefined();
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       'Failed to build URL',
       expect.objectContaining({
-        message: 'Invalid base URL: https://example.com:invalid-port',
+        message: 'Invalid base URL: https://example.com:invalid',
       })
     );
 
@@ -109,7 +108,7 @@ describe('buildUrl', () => {
 
   it('should handle an empty object gracefully', () => {
     const item = {};
-    const result = buildUrl(item as Transaction);
+    const result = buildUrl(item);
     expect(result).toBeUndefined();
   });
 });

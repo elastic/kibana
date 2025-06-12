@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -16,6 +15,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
@@ -29,6 +29,7 @@ import { sourcererActions } from '../../../../../sourcerer/store';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import * as i18n from '../translations';
 import type { Sorting } from '../types';
+import { useKibanaFeatureFlags } from '../../../use_kibana_feature_flags';
 
 export const ATTACK_DISCOVERY_SETTINGS_ALERTS_COUNT_ID = 'attack-discovery-settings-alerts-count';
 export const RESET_FIELD = 'kibana.alert.rule.name';
@@ -84,6 +85,8 @@ const PreviewTabComponent = ({
   tableStackBy0,
 }: Props) => {
   const { lens } = useKibana().services;
+  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
+
   const {
     euiTheme: { font },
   } = useEuiTheme();
@@ -190,7 +193,7 @@ const PreviewTabComponent = ({
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiSpacer size="s" />
+        <EuiSpacer size={attackDiscoveryAlertsEnabled ? 'l' : 's'} />
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
@@ -212,7 +215,7 @@ const PreviewTabComponent = ({
                 }
 
                 .euiDataGridRowCell {
-                  font-size: ${font.scale.s}${font.defaultUnits};
+                  font-size: ${attackDiscoveryAlertsEnabled ? font.scale.xs : font.scale.s}${font.defaultUnits} !important;
                 }
 
                 .expExpressionRenderer__expression {

@@ -22,12 +22,17 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { Conversation, ConversationAccess } from '@kbn/observability-ai-assistant-plugin/common';
+import {
+  ElasticLlmTourCallout,
+  getElasticManagedLlmConnector,
+  ElasticLlmCalloutKey,
+  useElasticLlmCalloutDismissed,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import { ChatActionsMenu } from './chat_actions_menu';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { FlyoutPositionMode } from './chat_flyout';
 import { ChatSharingMenu } from './chat_sharing_menu';
 import { ChatContextMenu } from './chat_context_menu';
-import { useConversationContextMenu } from '../hooks/use_conversation_context_menu';
 
 // needed to prevent InlineTextEdit component from expanding container
 const minWidthClassName = css`
@@ -58,14 +63,17 @@ export function ChatHeader({
   loading,
   title,
   isConversationOwnedByCurrentUser,
+  isConversationApp,
   onDuplicateConversation,
   onSaveTitle,
   onToggleFlyoutPositionMode,
   navigateToConversation,
-  setIsUpdatingConversationList,
-  refreshConversations,
   updateDisplayedConversation,
   handleConversationAccessUpdate,
+  copyConversationToClipboard,
+  copyUrl,
+  deleteConversation,
+  handleArchiveConversation,
 }: {
   connectors: UseGenAIConnectorsResult;
   conversationId?: string;
@@ -75,14 +83,17 @@ export function ChatHeader({
   loading: boolean;
   title: string;
   isConversationOwnedByCurrentUser: boolean;
+  isConversationApp: boolean;
   onDuplicateConversation: () => void;
   onSaveTitle: (title: string) => void;
   onToggleFlyoutPositionMode?: (newFlyoutPositionMode: FlyoutPositionMode) => void;
   navigateToConversation?: (nextConversationId?: string) => void;
-  setIsUpdatingConversationList: (isUpdating: boolean) => void;
-  refreshConversations: () => void;
   updateDisplayedConversation: (id?: string) => void;
   handleConversationAccessUpdate: (access: ConversationAccess) => Promise<void>;
+  deleteConversation: (id: string) => Promise<void>;
+  copyConversationToClipboard: (conversation: Conversation) => void;
+  copyUrl: (id: string) => void;
+  handleArchiveConversation: (id: string, isArchived: boolean) => Promise<void>;
 }) {
   const theme = useEuiTheme();
   const breakpoint = useCurrentEuiBreakpoint();
@@ -103,10 +114,11 @@ export function ChatHeader({
     }
   };
 
-  const { copyConversationToClipboard, copyUrl, deleteConversation } = useConversationContextMenu({
-    setIsUpdatingConversationList,
-    refreshConversations,
-  });
+  const elasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
+  const [tourCalloutDismissed, setTourCalloutDismissed] = useElasticLlmCalloutDismissed(
+    ElasticLlmCalloutKey.TOUR_CALLOUT,
+    false
+  );
 
   return (
     <EuiPanel
@@ -138,9 +150,11 @@ export function ChatHeader({
                 size={breakpoint === 'xs' ? 'xs' : 's'}
                 value={newTitle}
                 className={css`
-                  color: ${!!title
-                    ? theme.euiTheme.colors.textParagraph
-                    : theme.euiTheme.colors.textSubdued};
+                  .euiTitle {
+                    color: ${!conversation?.archived
+                      ? theme.euiTheme.colors.textParagraph
+                      : theme.euiTheme.colors.textSubdued};
+                  }
                 `}
                 inputAriaLabel={i18n.translate(
                   'xpack.aiAssistant.chatHeader.editConversationInput',
@@ -153,7 +167,8 @@ export function ChatHeader({
                   !connectors.selectedConnector ||
                   licenseInvalid ||
                   !Boolean(onSaveTitle) ||
-                  !isConversationOwnedByCurrentUser
+                  !isConversationOwnedByCurrentUser ||
+                  conversation?.archived
                 }
                 onChange={(e) => {
                   setNewTitle(e.currentTarget.nodeValue || '');
@@ -175,6 +190,7 @@ export function ChatHeader({
                 <EuiFlexItem grow={false}>
                   <ChatSharingMenu
                     isPublic={conversation.public}
+                    isArchived={!!conversation.archived}
                     onChangeConversationAccess={handleConversationAccessUpdate}
                     disabled={licenseInvalid || !isConversationOwnedByCurrentUser}
                   />
@@ -190,6 +206,10 @@ export function ChatHeader({
                     isConversationOwnedByCurrentUser={isConversationOwnedByCurrentUser}
                     onDuplicateConversationClick={onDuplicateConversation}
                     conversationTitle={conversation.conversation.title}
+                    onArchiveConversation={() =>
+                      handleArchiveConversation(conversationId, !conversation.archived)
+                    }
+                    isArchived={!!conversation.archived}
                   />
                 </EuiFlexItem>
               </>
@@ -261,7 +281,16 @@ export function ChatHeader({
               ) : null}
 
               <EuiFlexItem grow={false}>
-                <ChatActionsMenu connectors={connectors} disabled={licenseInvalid} />
+                {!!elasticManagedLlm && !tourCalloutDismissed ? (
+                  <ElasticLlmTourCallout
+                    zIndex={isConversationApp ? 999 : undefined}
+                    dismissTour={() => setTourCalloutDismissed(true)}
+                  >
+                    <ChatActionsMenu connectors={connectors} disabled={licenseInvalid} />
+                  </ElasticLlmTourCallout>
+                ) : (
+                  <ChatActionsMenu connectors={connectors} disabled={licenseInvalid} />
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

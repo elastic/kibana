@@ -436,7 +436,7 @@ export const sampleDocRiskScore = (riskScore?: unknown): SignalSourceHit => ({
   sort: [],
 });
 
-export const sampleEmptyDocSearchResults = (): SignalSearchResponse => ({
+export const sampleEmptyDocSearchResults = () => ({
   took: 10,
   timed_out: false,
   _shards: {
@@ -446,7 +446,10 @@ export const sampleEmptyDocSearchResults = (): SignalSearchResponse => ({
     skipped: 0,
   },
   hits: {
-    total: 0,
+    total: {
+      value: 0,
+      relation: 'eq' as const,
+    },
     max_score: 100,
     hits: [],
   },

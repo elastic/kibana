@@ -96,7 +96,7 @@ export interface UseAssistantContext {
   actionTypeRegistry: ActionTypeRegistryContract;
   alertsIndexPattern: string | undefined;
   assistantAvailability: AssistantAvailability;
-  assistantFeatures: AssistantFeatures;
+  assistantFeatures: Partial<AssistantFeatures>;
   assistantStreamingEnabled: boolean;
   assistantTelemetry?: AssistantTelemetry;
   augmentMessageCodeBlocks: (

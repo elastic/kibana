@@ -1,11 +1,32 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Subtitle it renders 1`] = `
-<Wrapper
-  className="siemSubtitle"
+.c0 .siemSubtitle__item {
+  color: #7a7f89;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+@media only screen and (min-width:575px) {
+  .c0 .siemSubtitle__item {
+    display: inline-block;
+    margin-right: 16px;
+  }
+
+  .c0 .siemSubtitle__item:last-child {
+    margin-right: 0;
+  }
+}
+
+<div
+  class="c0 siemSubtitle"
+  data-test-subj="subtitle"
 >
-  <SubtitleItem>
+  <p
+    class="siemSubtitle__item siemSubtitle__item--text"
+    data-test-subj="header-panel-subtitle"
+  >
     Test subtitle
-  </SubtitleItem>
-</Wrapper>
+  </p>
+</div>
 `;

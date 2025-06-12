@@ -8,5 +8,5 @@
 import { HttpStart } from '@kbn/core/public';
 
 export function getModelsManagementHref(http: HttpStart) {
-  return http!.basePath.prepend(`/app/ml/trained_models`);
+  return http!.basePath.prepend(`/app/management/ml/trained_models`);
 }

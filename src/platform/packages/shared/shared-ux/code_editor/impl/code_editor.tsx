@@ -20,6 +20,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   useEuiTheme,
+  UseEuiTheme,
 } from '@elastic/eui';
 import {
   monaco,
@@ -215,7 +216,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const isReadOnly = options?.readOnly ?? false;
 
   const [_editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor | null>(null);
-  const _placeholderWidget = useRef<PlaceholderWidget | null>(null);
   const isSuggestionMenuOpen = useRef(false);
   const editorHint = useRef<HTMLDivElement>(null);
   const textboxMutationObserver = useRef<MutationObserver | null>(null);
@@ -473,19 +473,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     };
   }, []);
 
-  useEffect(() => {
-    if (placeholder && !value && _editor) {
-      // Mounts editor inside constructor
-      _placeholderWidget.current = new PlaceholderWidget(placeholder, euiTheme, _editor);
-    }
-
-    return () => {
-      _placeholderWidget.current?.dispose();
-      _placeholderWidget.current = null;
-    };
-  }, [placeholder, value, euiTheme, _editor]);
-
   useFitToContent({ editor: _editor, fitToContent, isFullScreen });
+  usePlaceholder({ placeholder, euiTheme, editor: _editor, value });
 
   const { CopyButton } = useCopy({ isCopyable, value });
 
@@ -658,6 +647,54 @@ const useCopy = ({ isCopyable, value }: { isCopyable: boolean; value: string }) 
   };
 
   return { showCopyButton, CopyButton };
+};
+
+const usePlaceholder = ({
+  placeholder,
+  euiTheme,
+  editor,
+  value,
+}: {
+  placeholder: string | undefined;
+  euiTheme: UseEuiTheme['euiTheme'];
+  editor: monaco.editor.IStandaloneCodeEditor | null;
+  value: string;
+}) => {
+  useEffect(() => {
+    if (!placeholder || !editor) return;
+
+    let placeholderWidget: PlaceholderWidget | null = null;
+
+    const addPlaceholder = () => {
+      if (!placeholderWidget) {
+        placeholderWidget = new PlaceholderWidget(placeholder, euiTheme, editor);
+      }
+    };
+
+    const removePlaceholder = () => {
+      if (placeholderWidget) {
+        placeholderWidget.dispose();
+        placeholderWidget = null;
+      }
+    };
+
+    if (!value) {
+      addPlaceholder();
+    }
+
+    const onDidChangeContent = editor.getModel()?.onDidChangeContent(() => {
+      if (!editor.getModel()?.getValue()) {
+        addPlaceholder();
+      } else {
+        removePlaceholder();
+      }
+    });
+
+    return () => {
+      onDidChangeContent?.dispose();
+      removePlaceholder();
+    };
+  }, [placeholder, value, euiTheme, editor]);
 };
 
 const useFitToContent = ({

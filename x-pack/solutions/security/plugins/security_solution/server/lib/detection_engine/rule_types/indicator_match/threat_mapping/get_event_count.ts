@@ -22,7 +22,7 @@ export const getEventList = async ({
   eventListConfig,
   indexFields,
   sortOrder = 'desc',
-}: EventsOptions): Promise<estypes.SearchResponse<EventDoc>> => {
+}: EventsOptions): Promise<estypes.SearchResponse<EventDoc, unknown>> => {
   const {
     inputIndex,
     ruleExecutionLogger,
@@ -53,14 +53,13 @@ export const getEventList = async ({
     fields: indexFields,
   });
 
-  const { searchResult } = await singleSearchAfter({
+  const searchRequest = buildEventsSearchQuery({
+    aggregations: undefined,
     searchAfterSortIds: searchAfter,
     index: inputIndex,
     from: tuple.from.toISOString(),
     to: tuple.to.toISOString(),
-    services,
-    ruleExecutionLogger,
-    pageSize: calculatedPerPage,
+    size: calculatedPerPage,
     filter: queryFilter,
     primaryTimestamp,
     secondaryTimestamp,
@@ -68,6 +67,12 @@ export const getEventList = async ({
     trackTotalHits: false,
     runtimeMappings,
     overrideBody: eventListConfig,
+  });
+
+  const { searchResult } = await singleSearchAfter({
+    searchRequest,
+    services,
+    ruleExecutionLogger,
   });
 
   ruleExecutionLogger.debug(`Retrieved events items of size: ${searchResult.hits.hits.length}`);
@@ -98,6 +103,7 @@ export const getEventCount = async ({
     fields: indexFields,
   });
   const eventSearchQueryBodyQuery = buildEventsSearchQuery({
+    aggregations: undefined,
     index,
     from: tuple.from.toISOString(),
     to: tuple.to.toISOString(),

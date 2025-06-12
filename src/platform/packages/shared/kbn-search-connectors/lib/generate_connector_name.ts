@@ -32,9 +32,12 @@ export const toValidIndexName = (str: string): string => {
     // ES doesn't allow \, /, *, ?, ", <, >, |, comma, #, :
     .replace(/[\\/*?"<>|,#:]/g, '-')
     // Cannot start with -, _, +
-    .replace(/^[-_+]/, '')
-    // Remove trailing hyphens
-    .replace(/-+$/, '');
+    .replace(/^[-_+]/, '');
+
+  // Remove trailing hyphens
+  while (result.endsWith('-')) {
+    result = result.slice(0, -1);
+  }
 
   return result;
 };

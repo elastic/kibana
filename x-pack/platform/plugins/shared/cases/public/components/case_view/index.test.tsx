@@ -69,7 +69,7 @@ const useGetTagsMock = useGetTags as jest.Mock;
 const spacesUiApiMock = {
   redirectLegacyUrl: jest.fn().mockResolvedValue(undefined),
   components: {
-    getLegacyUrlConflict: jest.fn().mockReturnValue(<div data-test-subj="conflict-component" />),
+    getLegacyUrlConflict: jest.fn(() => <div data-test-subj="conflict-component" />),
   },
 };
 

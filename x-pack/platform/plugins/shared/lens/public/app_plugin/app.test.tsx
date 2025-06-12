@@ -28,7 +28,6 @@ import { buildExistsFilter, FilterStateStore } from '@kbn/es-query';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { serverlessMock } from '@kbn/serverless/public/mocks';
-import { cloneDeep } from 'lodash';
 import moment from 'moment';
 import { setState, LensAppState } from '../state_management';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -54,7 +53,7 @@ const waitToLoad = async () =>
   await act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
 
 function getLensDocumentMock(propsOverrides?: Partial<LensDocument>) {
-  return cloneDeep({ ...defaultDoc, ...propsOverrides });
+  return structuredClone({ ...defaultDoc, ...propsOverrides });
 }
 
 describe('Lens App', () => {
@@ -419,12 +418,14 @@ describe('Lens App', () => {
         references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
       });
 
-      await lensStore.dispatch(
-        setState({
-          query,
-          persistedDoc: document,
-        })
-      );
+      await act(async () => {
+        await lensStore.dispatch(
+          setState({
+            query,
+            persistedDoc: document,
+          })
+        );
+      });
 
       expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({

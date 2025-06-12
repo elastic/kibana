@@ -21,11 +21,10 @@ export const FieldParent = ({
     <EuiBadge color="hollow">
       <EuiLink
         data-test-subj="streamsAppFieldParentLink"
-        href={router.link('/{key}/{tab}/{subtab}', {
+        href={router.link('/{key}/management/{tab}', {
           path: {
             key: parent,
-            tab: 'management',
-            subtab: 'schemaEditor',
+            tab: 'schemaEditor',
           },
         })}
         target="_blank"

@@ -17,6 +17,10 @@ import {
   isAgentUpgradeAvailable,
 } from '../../../../../../../common/services';
 
+import { AUTO_UPGRADE_DEFAULT_RETRIES } from '../../../../../../../common/constants';
+
+import { useConfig } from '../../../../hooks';
+
 /**
  * Returns a user-friendly string for the estimated remaining time until the upgrade is scheduled.
  */
@@ -282,7 +286,7 @@ export const AgentUpgradeStatus: React.FC<{
   const status = useMemo(() => getStatusComponents(agent.upgrade_details), [agent.upgrade_details]);
   const minVersion = '8.12';
   const notUpgradeableMessage = getNotUpgradeableMessage(agent, latestAgentVersion);
-
+  const retryDelays = useConfig().autoUpgrades?.retryDelays ?? AUTO_UPGRADE_DEFAULT_RETRIES;
   if (agent.upgrade_details && status) {
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -297,6 +301,28 @@ export const AgentUpgradeStatus: React.FC<{
             <EuiIconTip type="warning" content={status.WarningTooltipText} color="warning" />
           </EuiFlexItem>
         )}
+      </EuiFlexGroup>
+    );
+  }
+  if (agent.upgrade_attempts && agent.upgrade_attempts.length > 1 && agent.status === 'updating') {
+    return (
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip
+            type="warning"
+            content={
+              <FormattedMessage
+                id="xpack.fleet.agentUpgradeStatusTooltip.retryingUpgrade"
+                defaultMessage="Retrying Upgrade ({retryCount}/{maxRetries} attempts)"
+                values={{
+                  retryCount: agent.upgrade_attempts.length,
+                  maxRetries: retryDelays.length,
+                }}
+              />
+            }
+            color="subdued"
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
     );
   }

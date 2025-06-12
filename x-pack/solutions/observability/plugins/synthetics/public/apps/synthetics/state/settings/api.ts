@@ -73,7 +73,3 @@ export const fetchActionTypes = async (): Promise<ActionType[]> => {
     feature_id: 'uptime',
   });
 };
-
-export const syncGlobalParamsAPI = async (): Promise<boolean> => {
-  return await apiService.get(SYNTHETICS_API_URLS.SYNC_GLOBAL_PARAMS);
-};

@@ -44,7 +44,7 @@ export const CreateCategorizationJobFlyout: FC<Props> = ({
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
-          <h3>
+          <h3 id="ml-flyout-layer-title">
             <FormattedMessage
               id="xpack.ml.embeddables.newJobFromPatternAnalysisFlyout.title"
               defaultMessage="Create anomaly detection job"

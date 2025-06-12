@@ -10,12 +10,12 @@ import {
   Axis,
   Chart,
   CurveType,
-  LEGACY_LIGHT_THEME,
   Position,
   ScaleType,
   Settings,
   Tooltip,
 } from '@elastic/charts';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
@@ -38,6 +38,7 @@ export const OverlapDistributionComparison = ({
   fieldType?: DataDriftField['type'];
   fieldName?: DataDriftField['field'];
 }) => {
+  const chartBaseTheme = useElasticChartsTheme();
   const xAxisFormatter = useFieldFormatter(getFieldFormatType(secondaryType));
   const yAxisFormatter = useFieldFormatter(FIELD_FORMAT_IDS.NUMBER);
   if (data.length === 0) return <NoChartsData textAlign="left" />;
@@ -61,8 +62,10 @@ export const OverlapDistributionComparison = ({
       />
 
       <Settings
-        // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-        baseTheme={LEGACY_LIGHT_THEME}
+        baseTheme={chartBaseTheme}
+        theme={{
+          axes: { gridLine: { horizontal: { visible: false }, vertical: { visible: false } } }, // Hide grid lines
+        }}
         showLegend={false}
         locale={i18n.getLocale()}
       />

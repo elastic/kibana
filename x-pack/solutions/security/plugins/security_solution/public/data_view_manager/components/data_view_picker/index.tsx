@@ -9,45 +9,91 @@ import { DataViewPicker as UnifiedDataViewPicker } from '@kbn/unified-search-plu
 import React, { useCallback, useRef, useMemo, memo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { DataView, type DataViewListItem } from '@kbn/data-views-plugin/public';
-import type { DataViewManagerScopeName } from '../../constants';
+import { DataView } from '@kbn/data-views-plugin/public';
+import type { SourcererUrlState } from '../../../sourcerer/store/model';
+import { useUpdateUrlParam } from '../../../common/utils/global_query_string';
+import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { useKibana } from '../../../common/lib/kibana';
-import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../../constants';
 import { useDataViewSpec } from '../../hooks/use_data_view_spec';
 import { sharedStateSelector } from '../../redux/selectors';
 import { sharedDataViewManagerSlice } from '../../redux/slices';
 import { useSelectDataView } from '../../hooks/use_select_data_view';
+import { DataViewManagerScopeName, DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../../constants';
+import { useManagedDataViews } from '../../hooks/use_managed_data_views';
+import { useSavedDataViews } from '../../hooks/use_saved_data_views';
+import { DEFAULT_SECURITY_DATA_VIEW, LOADING } from './translations';
+import { DATA_VIEW_PICKER_TEST_ID } from './constants';
 
-export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) => {
+interface DataViewPickerProps {
+  /**
+   * The scope of the data view picker
+   */
+  scope: DataViewManagerScopeName;
+  /**
+   * Optional callback when the data view picker is closed
+   */
+  onClosePopover?: () => void;
+  /**
+   * Force disable picker
+   */
+  disabled?: boolean;
+}
+
+export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataViewPickerProps) => {
   const dispatch = useDispatch();
   const selectDataView = useSelectDataView();
 
   const {
     services: { dataViewEditor, data, dataViewFieldEditor, fieldFormats },
   } = useKibana();
+
+  const canEditDataView = useMemo(
+    () => Boolean(dataViewEditor?.userPermissions.editDataView()),
+    [dataViewEditor]
+  );
+
   const closeDataViewEditor = useRef<() => void | undefined>();
   const closeFieldEditor = useRef<() => void | undefined>();
 
-  const { dataViewSpec, status } = useDataViewSpec(props.scope);
+  const { dataViewSpec, status } = useDataViewSpec(scope);
+
+  const isDefaultSourcerer = scope === DataViewManagerScopeName.default;
+  const updateUrlParam = useUpdateUrlParam<SourcererUrlState>(URL_PARAM_KEY.sourcerer);
 
   const dataViewId = dataViewSpec?.id;
+
+  // NOTE: this function is called in response to user interaction with the picker,
+  // hence - it is the only place where we should update the url param for the data view selection.
+  const handleChangeDataView = useCallback(
+    (id: string, indexPattern: string = '') => {
+      selectDataView({ id, scope });
+
+      if (isDefaultSourcerer) {
+        updateUrlParam({
+          [DataViewManagerScopeName.default]: {
+            id,
+            // NOTE: Boolean filter for removing empty patterns
+            selectedPatterns: indexPattern.split(',').filter(Boolean),
+          },
+        });
+      }
+    },
+    [isDefaultSourcerer, scope, selectDataView, updateUrlParam]
+  );
 
   const createNewDataView = useCallback(() => {
     closeDataViewEditor.current = dataViewEditor.openEditor({
       onSave: async (newDataView) => {
+        if (!newDataView.id) {
+          return;
+        }
+
         dispatch(sharedDataViewManagerSlice.actions.addDataView(newDataView));
-        selectDataView({ id: newDataView.id, scope: [props.scope] });
+        handleChangeDataView(newDataView.id, newDataView.getIndexPattern());
       },
       allowAdHocDataView: true,
     });
-  }, [dataViewEditor, dispatch, props.scope, selectDataView]);
-
-  const handleChangeDataView = useCallback(
-    (id: string) => {
-      selectDataView({ id, scope: [props.scope] });
-    },
-    [props.scope, selectDataView]
-  );
+  }, [dataViewEditor, dispatch, handleChangeDataView]);
 
   const editField = useCallback(
     async (fieldName?: string, _uiAction: 'edit' | 'add' = 'edit') => {
@@ -67,33 +113,41 @@ export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) 
             return;
           }
 
-          handleChangeDataView(dataViewInstance.id);
+          handleChangeDataView(dataViewInstance.id, dataViewInstance.getIndexPattern());
         },
       });
     },
     [dataViewId, data.dataViews, dataViewFieldEditor, handleChangeDataView]
   );
 
-  const handleAddField = useCallback(() => editField(undefined, 'add'), [editField]);
-
   /**
    * Selects data view again. After changes are made to the data view, this results in cache invalidation and will force the reload everywhere.
    */
-  const handleDataViewModified = useCallback(
-    (updatedDataView: DataView) => {
-      selectDataView({ id: updatedDataView.id, scope: [props.scope] });
-    },
-    [props.scope, selectDataView]
+  const handleDataViewModified = useMemo(() => {
+    if (!canEditDataView) {
+      return undefined;
+    }
+    return (updatedDataView: DataView) => {
+      if (!updatedDataView.id) {
+        return;
+      }
+      handleChangeDataView(updatedDataView.id, updatedDataView.getIndexPattern());
+    };
+  }, [canEditDataView, handleChangeDataView]);
+
+  const handleAddField = useMemo(
+    () => (canEditDataView ? () => editField(undefined, 'add') : undefined),
+    [editField, canEditDataView]
   );
 
   const triggerConfig = useMemo(() => {
     if (status === 'loading') {
-      return { label: 'Loading' };
+      return { label: LOADING };
     }
 
     if (dataViewSpec.id === DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID) {
       return {
-        label: 'Default Security Data View',
+        label: DEFAULT_SECURITY_DATA_VIEW,
       };
     }
 
@@ -102,34 +156,31 @@ export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) 
     };
   }, [dataViewSpec.id, dataViewSpec?.name, status]);
 
-  const { adhocDataViews: adhocDataViewSpecs, dataViews } = useSelector(sharedStateSelector);
-
-  const savedDataViews = useMemo(() => {
-    const managed: DataViewListItem[] = dataViews.map((spec) => ({
-      id: spec.id ?? '',
-      title: spec.title ?? '',
-      name: spec.name,
-    }));
-
-    return managed;
-  }, [dataViews]);
+  const { adhocDataViews: adhocDataViewSpecs } = useSelector(sharedStateSelector);
 
   const adhocDataViews = useMemo(() => {
     return adhocDataViewSpecs.map((spec) => new DataView({ spec, fieldFormats }));
   }, [adhocDataViewSpecs, fieldFormats]);
 
+  const managedDataViews = useManagedDataViews();
+  const savedDataViews = useSavedDataViews();
+
   return (
-    <UnifiedDataViewPicker
-      isDisabled={status !== 'ready'}
-      currentDataViewId={dataViewId || DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID}
-      trigger={triggerConfig}
-      onChangeDataView={handleChangeDataView}
-      onEditDataView={handleDataViewModified}
-      onAddField={handleAddField}
-      onDataViewCreated={createNewDataView}
-      adHocDataViews={adhocDataViews}
-      savedDataViews={savedDataViews}
-    />
+    <div data-test-subj={DATA_VIEW_PICKER_TEST_ID}>
+      <UnifiedDataViewPicker
+        isDisabled={status !== 'ready' || disabled}
+        currentDataViewId={dataViewId || DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID}
+        trigger={triggerConfig}
+        onChangeDataView={handleChangeDataView}
+        onEditDataView={handleDataViewModified}
+        onAddField={handleAddField}
+        onDataViewCreated={createNewDataView}
+        adHocDataViews={adhocDataViews}
+        savedDataViews={savedDataViews}
+        managedDataViews={managedDataViews}
+        onClosePopover={onClosePopover}
+      />
+    </div>
   );
 });
 

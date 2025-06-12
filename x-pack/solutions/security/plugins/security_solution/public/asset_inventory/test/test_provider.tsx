@@ -17,7 +17,9 @@ interface TestProviderProps {
  * A provider that wraps the necessary context for testing components.
  */
 export const TestProvider: React.FC<Partial<TestProviderProps>> = ({ children } = {}) => {
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
 
   return (
     <QueryClientProvider client={queryClient}>

@@ -16,9 +16,10 @@ import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { Disclaimer } from './disclaimer';
 import { WelcomeMessageConnectors } from './welcome_message_connectors';
-import { WelcomeMessageKnowledgeBase } from './welcome_message_knowledge_base';
+import { WelcomeMessageKnowledgeBase } from '../knowledge_base/welcome_message_knowledge_base';
 import { StarterPrompts } from './starter_prompts';
 import { useKibana } from '../hooks/use_kibana';
+import { ElasticLlmConversationCallout } from './elastic_llm_conversation_callout';
 
 const fullHeightClassName = css`
   height: 100%;
@@ -32,10 +33,12 @@ const centerMaxWidthClassName = css`
 export function WelcomeMessage({
   connectors,
   knowledgeBase,
+  showElasticLlmCalloutInChat,
   onSelectPrompt,
 }: {
   connectors: UseGenAIConnectorsResult;
   knowledgeBase: UseKnowledgeBaseResult;
+  showElasticLlmCalloutInChat: boolean;
   onSelectPrompt: (prompt: string) => void;
 }) {
   const breakpoint = useCurrentEuiBreakpoint();
@@ -60,10 +63,6 @@ export function WelcomeMessage({
     if (isSupportedConnectorType(createdConnector.actionTypeId)) {
       connectors.reloadConnectors();
     }
-
-    if (!knowledgeBase.status.value || knowledgeBase.status.value?.ready === false) {
-      knowledgeBase.install();
-    }
   };
 
   const ConnectorFlyout = useMemo(
@@ -79,6 +78,7 @@ export function WelcomeMessage({
         gutterSize="none"
         className={fullHeightClassName}
       >
+        {showElasticLlmCalloutInChat ? <ElasticLlmConversationCallout /> : null}
         <EuiFlexItem grow={false}>
           <AssistantBeacon backgroundColor="emptyShade" size="xl" />
         </EuiFlexItem>

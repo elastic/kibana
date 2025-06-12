@@ -8,10 +8,10 @@
  */
 
 import { parse } from '../parser';
+import { Parser } from '../parser/parser';
 import {
   ESQLColumn,
   ESQLCommand,
-  ESQLCommandMode,
   ESQLCommandOption,
   ESQLFunction,
   ESQLLiteral,
@@ -21,11 +21,14 @@ import {
   ESQLInlineCast,
   ESQLUnknownItem,
   ESQLIdentifier,
+  ESQLMap,
+  ESQLMapEntry,
+  ESQLAstRerankCommand,
 } from '../types';
 import { walk, Walker } from './walker';
 
 test('can walk all functions', () => {
-  const { root } = parse('METRICS index | EVAL a(b(c(foo)))');
+  const { root } = parse('TS index | EVAL a(b(c(foo)))');
   const functions: string[] = [];
 
   walk(root, {
@@ -36,7 +39,7 @@ test('can walk all functions', () => {
 });
 
 test('can find assignment expression', () => {
-  const query = 'METRICS source | STATS var0 = bucket(bytes, 1 hour)';
+  const query = 'TS source | STATS var0 = bucket(bytes, 1 hour)';
   const { root } = parse(query);
   const functions: ESQLFunction[] = [];
 
@@ -103,6 +106,21 @@ describe('structurally can walk all nodes', () => {
       expect(columns.map(({ name }) => name).sort()).toStrictEqual(['c', 'd']);
     });
 
+    test('can traverse SAMPLE command', () => {
+      const { root } = Parser.parse('FROM index | SAMPLE 0.25');
+      const commands: ESQLCommand[] = [];
+      const literals: ESQLLiteral[] = [];
+
+      walk(root, {
+        visitCommand: (cmd) => commands.push(cmd),
+        visitLiteral: (lit) => literals.push(lit),
+      });
+
+      expect(commands.map(({ name }) => name).sort()).toStrictEqual(['from', 'sample']);
+      expect(literals.length).toBe(1);
+      expect(literals[0].value).toBe(0.25);
+    });
+
     test('"visitAny" can capture command nodes', () => {
       const { ast } = parse('FROM index | STATS a = 123 | WHERE 123 | LIMIT 10');
       const commands: ESQLCommand[] = [];
@@ -149,34 +167,6 @@ describe('structurally can walk all nodes', () => {
       });
     });
 
-    describe('command mode', () => {
-      test('visits "mode" nodes', () => {
-        const { ast } = parse('FROM index | ENRICH a:b');
-        const modes: ESQLCommandMode[] = [];
-
-        walk(ast, {
-          visitCommandMode: (opt) => modes.push(opt),
-        });
-
-        expect(modes.length).toBe(1);
-        expect(modes[0].name).toBe('a');
-      });
-
-      test('"visitAny" can capture a mode node', () => {
-        const { ast } = parse('FROM index | ENRICH a:b');
-        const modes: ESQLCommandMode[] = [];
-
-        walk(ast, {
-          visitAny: (node) => {
-            if (node.type === 'mode') modes.push(node);
-          },
-        });
-
-        expect(modes.length).toBe(1);
-        expect(modes[0].name).toBe('a');
-      });
-    });
-
     describe('expressions', () => {
       describe('sources', () => {
         test('iterates through a single source', () => {
@@ -206,7 +196,7 @@ describe('structurally can walk all nodes', () => {
         });
 
         test('iterates through all sources', () => {
-          const { ast } = parse('METRICS index, index2, index3, index4');
+          const { ast } = parse('TS index, index2, index3, index4');
           const sources: ESQLSource[] = [];
 
           walk(ast, {
@@ -807,6 +797,48 @@ describe('structurally can walk all nodes', () => {
     });
   });
 
+  describe('expressions', () => {
+    test('can visit a "map" expression', () => {
+      const src = 'ROW f(0, {"a": 0})';
+      const { ast } = parse(src);
+      const nodes: ESQLMap[] = [];
+
+      walk(ast, {
+        visitMap: (node) => nodes.push(node),
+      });
+
+      expect(nodes).toMatchObject([
+        {
+          type: 'map',
+        },
+      ]);
+      expect(src.slice(nodes[0].location!.min, nodes[0].location!.max + 1)).toBe('{"a": 0}');
+    });
+
+    test('can visit a "map-entry" expression', () => {
+      const src = 'ROW f(0, {"a":0, "foo" : /* 1 */ "bar"})';
+      const { ast } = parse(src);
+      const nodes: ESQLMapEntry[] = [];
+
+      walk(ast, {
+        visitMapEntry: (node) => nodes.push(node),
+      });
+
+      expect(nodes).toMatchObject([
+        {
+          type: 'map-entry',
+        },
+        {
+          type: 'map-entry',
+        },
+      ]);
+      expect(src.slice(nodes[0].location!.min, nodes[0].location!.max + 1)).toBe('"a":0');
+      expect(src.slice(nodes[1].location!.min, nodes[1].location!.max + 1)).toBe(
+        '"foo" : /* 1 */ "bar"'
+      );
+    });
+  });
+
   describe('unknown nodes', () => {
     test('can iterate through "unknown" nodes', () => {
       const { ast } = parse('FROM index');
@@ -835,12 +867,15 @@ describe('structurally can walk all nodes', () => {
 
 describe('Walker.commands()', () => {
   test('can collect all commands', () => {
-    const { ast } = parse('FROM index | STATS a = 123 | WHERE 123 | LIMIT 10');
+    const { ast } = parse(
+      'FROM index | STATS a = 123 | WHERE 123 | LIMIT 10 | RERANK "query" ON field WITH id'
+    );
     const commands = Walker.commands(ast);
 
     expect(commands.map(({ name }) => name).sort()).toStrictEqual([
       'from',
       'limit',
+      'rerank',
       'stats',
       'where',
     ]);
@@ -1002,6 +1037,29 @@ describe('Walker.find()', () => {
     expect(fn).toMatchObject({
       type: 'function',
       name: 'bucket',
+    });
+  });
+
+  test('can find RERANK command by inference ID', () => {
+    const query =
+      'FROM b | RERANK "query" ON field WITH abc | RERANK "query" ON field WITH my_id | LIMIT 10';
+    const command = Walker.find(parse(query).root, (node) => {
+      if (node.type === 'command' && node.name === 'rerank') {
+        const cmd = node as ESQLAstRerankCommand;
+        if (cmd.inferenceId.name === 'my_id') {
+          return true;
+        }
+      }
+      return false;
+    });
+
+    expect(command).toMatchObject({
+      type: 'command',
+      name: 'rerank',
+      inferenceId: {
+        type: 'identifier',
+        name: 'my_id',
+      },
     });
   });
 

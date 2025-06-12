@@ -11,12 +11,12 @@ Array [
     style="width:300px"
   >
     <dt
-      class="euiDescriptionList__title eui-textNoWrap emotion-euiDescriptionList__title-column-reverse"
+      class="euiDescriptionList__title eui-textNoWrap e13zl77u0 emotion-euiDescriptionList__title-column-reverse-TitleItem"
     >
       Average page load duration
     </dt>
     <dd
-      class="euiDescriptionList__description emotion-euiDescriptionList__description-column-compressed"
+      class="euiDescriptionList__description e13zl77u1 emotion-euiDescriptionList__description-column-compressed-DescriptionItem"
     />
   </dl>,
 ]
@@ -37,12 +37,12 @@ exports[`Map Tooltip it shallow renders 1`] = `
     textStyle="reverse"
     type="column"
   >
-    <Styled(EuiDescriptionListTitle)
+    <TitleItem
       className="eui-textNoWrap"
     >
       Average page load duration
-    </Styled(EuiDescriptionListTitle)>
-    <Styled(EuiDescriptionListDescription) />
+    </TitleItem>
+    <DescriptionItem />
   </EuiDescriptionList>
 </EuiOutsideClickDetector>
 `;

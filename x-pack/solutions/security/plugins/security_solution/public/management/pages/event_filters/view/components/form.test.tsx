@@ -17,21 +17,16 @@ import userEvent from '@testing-library/user-event';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
-import type {
-  ArtifactFormComponentOnChangeCallbackProps,
-  ArtifactFormComponentProps,
-} from '../../../../components/artifact_list_page';
+import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { EventFiltersForm } from './form';
-import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
-import type { PolicyData } from '../../../../../../common/endpoint/types';
 import { MAX_COMMENT_LENGTH } from '../../../../../../common/constants';
 import {
-  BY_POLICY_ARTIFACT_TAG_PREFIX,
   FILTER_PROCESS_DESCENDANTS_TAG,
   GLOBAL_ARTIFACT_TAG,
 } from '../../../../../../common/endpoint/service/artifacts/constants';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { buildPerPolicyTag } from '../../../../../../common/endpoint/service/artifacts/utils';
 
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../common/containers/source');
@@ -83,7 +78,6 @@ const TestComponentWrapper: typeof EventFiltersForm = (formProps: ArtifactFormCo
 
 describe('Event filter form', () => {
   const formPrefix = 'eventFilters-form';
-  const generator = new EndpointDocGenerator('effected-policy-select');
 
   let formProps: jest.Mocked<ArtifactFormComponentProps>;
   let mockedContext: AppContextTestRender;
@@ -136,32 +130,6 @@ describe('Event filter form', () => {
     };
   }
 
-  function createOnChangeArgs(
-    overrides: Partial<ArtifactFormComponentOnChangeCallbackProps>
-  ): ArtifactFormComponentOnChangeCallbackProps {
-    const defaults = {
-      item: createItem(),
-      isValid: false,
-    };
-    return {
-      ...defaults,
-      ...overrides,
-    };
-  }
-
-  function createPolicies(): PolicyData[] {
-    const policies = [
-      generator.generatePolicyPackagePolicy(),
-      generator.generatePolicyPackagePolicy(),
-    ];
-    policies.map((p, i) => {
-      p.id = `id-${i}`;
-      p.name = `some-policy-${Math.random().toString(36).split('.').pop()}`;
-      return p;
-    });
-    return policies;
-  }
-
   const setValidItemForEditing = () => {
     formProps.mode = 'edit';
     formProps.item.name = 'item name';
@@ -195,12 +163,10 @@ describe('Event filter form', () => {
       mode: 'create',
       disabled: false,
       error: undefined,
-      policiesIsLoading: false,
       onChange: jest.fn((updates) => {
         latestUpdatedItem = updates.item;
         isLatestUpdatedItemValid = updates.isValid;
       }),
-      policies: [],
     };
   });
 
@@ -208,30 +174,14 @@ describe('Event filter form', () => {
     cleanup();
   });
 
-  describe('Details and Conditions', () => {
-    it('should render correctly without data', () => {
-      formProps.policies = createPolicies();
-      formProps.policiesIsLoading = true;
-      formProps.item.tags = [
-        formProps.policies.map((p) => `${BY_POLICY_ARTIFACT_TAG_PREFIX}${p.id}`)[0],
-      ];
-      formProps.item.entries = [];
-      render();
-      expect(renderResult.getByTestId('loading-spinner')).not.toBeNull();
-    });
-
-    it('should render correctly with data', async () => {
-      formProps.policies = createPolicies();
-      render();
-      expect(renderResult.queryByTestId('loading-spinner')).toBeNull();
-      expect(renderResult.getByTestId('exceptionsBuilderWrapper')).not.toBeNull();
-    });
-
+  // FLAKY: https://github.com/elastic/kibana/issues/214053
+  describe.skip('Details and Conditions', () => {
     it('should display sections', async () => {
       render();
       expect(renderResult.queryByText('Details')).not.toBeNull();
       expect(renderResult.queryByText('Conditions')).not.toBeNull();
       expect(renderResult.queryByText('Comments')).not.toBeNull();
+      expect(renderResult.getByTestId('eventFilters-form-effectedPolicies')).toBeTruthy();
     });
 
     it('should display name error only when on blur and empty name', async () => {
@@ -328,233 +278,6 @@ describe('Event filter form', () => {
     });
   });
 
-  describe('Policy section', () => {
-    beforeEach(() => {
-      formProps.policies = createPolicies();
-    });
-
-    afterEach(() => {
-      cleanup();
-    });
-
-    it('should display loader when policies are still loading', () => {
-      formProps.policiesIsLoading = true;
-      formProps.item.tags = [
-        formProps.policies.map((p) => `${BY_POLICY_ARTIFACT_TAG_PREFIX}${p.id}`)[0],
-      ];
-      render();
-      expect(renderResult.getByTestId('loading-spinner')).not.toBeNull();
-    });
-
-    it('should display the policy list when "per policy" is selected', async () => {
-      render();
-      await userEvent.click(
-        renderResult.getByTestId('eventFilters-form-effectedPolicies-perPolicy')
-      );
-      rerenderWithLatestProps();
-      // policy selector should show up
-      expect(
-        renderResult.getByTestId(`${formPrefix}-effectedPolicies-policiesSelectable`)
-      ).toBeTruthy();
-    });
-
-    it('should call onChange when a policy is selected from the policy selection', async () => {
-      formProps.item.tags = [
-        formProps.policies.map((p) => `${BY_POLICY_ARTIFACT_TAG_PREFIX}${p.id}`)[0],
-      ];
-      render();
-      const policyId = formProps.policies[0].id;
-      await userEvent.click(renderResult.getByTestId(`${formPrefix}-effectedPolicies-perPolicy`));
-      await userEvent.click(renderResult.getByTestId(`policy-${policyId}`));
-      formProps.item.tags = formProps.onChange.mock.calls[0][0].item.tags;
-      rerender();
-      const expected = createOnChangeArgs({
-        item: {
-          ...formProps.item,
-          tags: [`${BY_POLICY_ARTIFACT_TAG_PREFIX}${policyId}`],
-        },
-      });
-      expect(formProps.onChange).toHaveBeenCalledWith(expected);
-    });
-
-    it('should have global policy by default', async () => {
-      render();
-      expect(renderResult.getByTestId('eventFilters-form-effectedPolicies-global')).toHaveAttribute(
-        'aria-pressed',
-        'true'
-      );
-      expect(
-        renderResult.getByTestId('eventFilters-form-effectedPolicies-perPolicy')
-      ).toHaveAttribute('aria-pressed', 'false');
-    });
-
-    it('should retain the previous policy selection when switching from per-policy to global', async () => {
-      formProps.item.tags = [
-        formProps.policies.map((p) => `${BY_POLICY_ARTIFACT_TAG_PREFIX}${p.id}`)[0],
-      ];
-      render();
-      const policyId = formProps.policies[0].id;
-      // move to per-policy and select the first
-      await userEvent.click(
-        renderResult.getByTestId('eventFilters-form-effectedPolicies-perPolicy')
-      );
-      await userEvent.click(renderResult.getByTestId(`policy-${policyId}`));
-      formProps.item.tags = formProps.onChange.mock.calls[0][0].item.tags;
-      rerender();
-      expect(
-        renderResult.queryByTestId(`${formPrefix}-effectedPolicies-policiesSelectable`)
-      ).toBeTruthy();
-      expect(formProps.item.tags).toEqual([`${BY_POLICY_ARTIFACT_TAG_PREFIX}${policyId}`]);
-
-      // move back to global
-      await userEvent.click(renderResult.getByTestId('eventFilters-form-effectedPolicies-global'));
-      // eslint-disable-next-line require-atomic-updates
-      formProps.item.tags = [GLOBAL_ARTIFACT_TAG];
-      rerenderWithLatestProps();
-      expect(formProps.item.tags).toEqual([GLOBAL_ARTIFACT_TAG]);
-      expect(
-        renderResult.queryByTestId(`${formPrefix}-effectedPolicies-policiesSelectable`)
-      ).toBeFalsy();
-
-      // move back to per-policy
-      await userEvent.click(
-        renderResult.getByTestId('eventFilters-form-effectedPolicies-perPolicy')
-      );
-      // eslint-disable-next-line require-atomic-updates
-      formProps.item.tags = [`${BY_POLICY_ARTIFACT_TAG_PREFIX}${policyId}`];
-      rerender();
-      // on change called with the previous policy
-      expect(formProps.item.tags).toEqual([`${BY_POLICY_ARTIFACT_TAG_PREFIX}${policyId}`]);
-      // the previous selected policy should be selected
-      // expect(renderResult.getByTestId(`policy-${policyId}`)).toHaveAttribute(
-      //   'data-test-selected',
-      //   'true'
-      // );
-    });
-
-    it('should preserve other tags when updating artifact assignment', async () => {
-      formProps.item.tags = ['some:random_tag'];
-      render();
-      const policyId = formProps.policies[0].id;
-      // move to per-policy and select the first
-      await userEvent.click(
-        renderResult.getByTestId('eventFilters-form-effectedPolicies-perPolicy')
-      );
-      await userEvent.click(renderResult.getByTestId(`policy-${policyId}`));
-
-      expect(formProps.onChange).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          item: expect.objectContaining({
-            tags: ['some:random_tag', `${BY_POLICY_ARTIFACT_TAG_PREFIX}id-0`],
-          }),
-        })
-      );
-    });
-
-    describe('when opened for editing', () => {
-      beforeEach(() => {
-        setValidItemForEditing();
-      });
-
-      it('item should be valid after changing to global assignment', async () => {
-        formProps.item.tags = [];
-        render();
-        expect(isLatestUpdatedItemValid).toBe(false);
-
-        await userEvent.click(
-          renderResult.getByTestId('eventFilters-form-effectedPolicies-global')
-        );
-
-        expect(isLatestUpdatedItemValid).toBe(true);
-        expect(latestUpdatedItem.tags).toEqual([GLOBAL_ARTIFACT_TAG]);
-      });
-
-      it('item should be valid after changing to per policy assignment', async () => {
-        formProps.item.tags = [GLOBAL_ARTIFACT_TAG];
-        render();
-        expect(isLatestUpdatedItemValid).toBe(false);
-
-        await userEvent.click(
-          renderResult.getByTestId('eventFilters-form-effectedPolicies-perPolicy')
-        );
-
-        expect(isLatestUpdatedItemValid).toBe(true);
-        expect(latestUpdatedItem.tags).toEqual([]);
-      });
-
-      it('item should be valid after changing policy assignment', async () => {
-        formProps.item.tags = [];
-        render();
-        expect(isLatestUpdatedItemValid).toBe(false);
-
-        const policyId = formProps.policies[0].id;
-        await userEvent.click(renderResult.getByTestId(`policy-${policyId}`));
-
-        expect(isLatestUpdatedItemValid).toBe(true);
-        expect(latestUpdatedItem.tags).toEqual([`${BY_POLICY_ARTIFACT_TAG_PREFIX}${policyId}`]);
-      });
-    });
-  });
-
-  describe('Policy section with downgraded license', () => {
-    beforeEach(() => {
-      const policies = createPolicies();
-      formProps.policies = policies;
-      formProps.item.tags = [policies.map((p) => `${BY_POLICY_ARTIFACT_TAG_PREFIX}${p.id}`)[0]];
-      formProps.mode = 'edit';
-      // downgrade license
-      (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
-    });
-
-    it('should hide assignment section when no license', () => {
-      render();
-      formProps.item.tags = [GLOBAL_ARTIFACT_TAG];
-      rerender();
-      expect(renderResult.queryByTestId(`${formPrefix}-effectedPolicies`)).toBeNull();
-    });
-
-    it('should hide assignment section when create mode and no license even with by policy', () => {
-      render();
-      formProps.mode = 'create';
-      rerender();
-      expect(renderResult.queryByTestId(`${formPrefix}-effectedPolicies`)).toBeNull();
-    });
-
-    it('should show disabled assignment section when edit mode and no license with by policy', async () => {
-      render();
-      formProps.item.tags = [`${BY_POLICY_ARTIFACT_TAG_PREFIX}id-0`];
-      rerender();
-
-      expect(
-        renderResult.queryByTestId('eventFilters-form-effectedPolicies-perPolicy')
-      ).not.toBeNull();
-      expect(renderResult.getByTestId('policy-id-0').getAttribute('aria-disabled')).toBe('true');
-    });
-
-    it("allows the user to set the event filter entry to 'Global' in the edit option", async () => {
-      render();
-      const globalButtonInput = renderResult.getByTestId(
-        'eventFilters-form-effectedPolicies-global'
-      ) as HTMLButtonElement;
-      await userEvent.click(globalButtonInput);
-      formProps.item.tags = [GLOBAL_ARTIFACT_TAG];
-      rerender();
-      const expected = createOnChangeArgs({
-        item: {
-          ...formProps.item,
-          tags: [GLOBAL_ARTIFACT_TAG],
-        },
-      });
-      expect(formProps.onChange).toHaveBeenCalledWith(expected);
-
-      const policyItem = formProps.onChange.mock.calls[0][0].item.tags
-        ? formProps.onChange.mock.calls[0][0].item.tags[0]
-        : '';
-
-      expect(policyItem).toBe(GLOBAL_ARTIFACT_TAG);
-    });
-  });
-
   describe('Filter process descendants', () => {
     beforeEach(() => {
       mockedContext.setExperimentalFlag({ filterProcessDescendantsForEventFiltersEnabled: true });
@@ -631,20 +354,14 @@ describe('Event filter form', () => {
     });
 
     it('should add the tag always after policy assignment tags', async () => {
-      formProps.policies = createPolicies();
-      const perPolicyTags = formProps.policies.map(
-        (p) => `${BY_POLICY_ARTIFACT_TAG_PREFIX}${p.id}`
-      );
-      formProps.item.tags = perPolicyTags;
+      const perPolicyTag = buildPerPolicyTag('foo');
+      formProps.item.tags = [perPolicyTag];
       render();
 
       await userEvent.click(
         renderResult.getByTestId(`${formPrefix}-filterProcessDescendantsButton`)
       );
-      expect(latestUpdatedItem.tags).toStrictEqual([
-        ...perPolicyTags,
-        FILTER_PROCESS_DESCENDANTS_TAG,
-      ]);
+      expect(latestUpdatedItem.tags).toStrictEqual([perPolicyTag, FILTER_PROCESS_DESCENDANTS_TAG]);
 
       rerenderWithLatestProps();
       await userEvent.click(renderResult.getByTestId(`${formPrefix}-effectedPolicies-global`));
@@ -670,10 +387,7 @@ describe('Event filter form', () => {
       await userEvent.click(
         renderResult.getByTestId('eventFilters-form-effectedPolicies-perPolicy')
       );
-      expect(latestUpdatedItem.tags).toStrictEqual([
-        FILTER_PROCESS_DESCENDANTS_TAG,
-        ...perPolicyTags,
-      ]);
+      expect(latestUpdatedItem.tags).toStrictEqual([FILTER_PROCESS_DESCENDANTS_TAG, perPolicyTag]);
     });
 
     it('should display a tooltip to the user', async () => {

@@ -7,15 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Serializable } from '../serializable';
 import { Span } from './span';
 import { Transaction } from './transaction';
 import { generateLongId } from '../utils/generate_id';
 import { ApmFields } from './apm_fields';
+import { AbstractSpan } from './abstract_span';
 
-export class BaseSpan extends Serializable<ApmFields> {
-  private readonly _children: BaseSpan[] = [];
-
+export class BaseSpan extends AbstractSpan<ApmFields, BaseSpan> {
   constructor(fields: ApmFields) {
     super({
       ...fields,
@@ -41,20 +39,6 @@ export class BaseSpan extends Serializable<ApmFields> {
     return this;
   }
 
-  getChildren() {
-    return this._children;
-  }
-
-  children(...children: BaseSpan[]): this {
-    children.forEach((child) => {
-      child.parent(this);
-    });
-
-    this._children.push(...children);
-
-    return this;
-  }
-
   success(): this {
     this.fields['event.outcome'] = 'success';
     return this;
@@ -73,10 +57,6 @@ export class BaseSpan extends Serializable<ApmFields> {
   crash(): this {
     this.fields['event.name'] = 'crash';
     return this;
-  }
-
-  serialize(): ApmFields[] {
-    return [this.fields, ...this._children.flatMap((child) => child.serialize())];
   }
 
   isSpan(): this is Span {

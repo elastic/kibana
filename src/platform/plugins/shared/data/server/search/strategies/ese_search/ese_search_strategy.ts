@@ -166,12 +166,20 @@ export const enhancedEsSearchStrategyProvider = (
       throw new KbnSearchError(`"params.index" is required when performing a rollup search`, 400);
     }
 
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const { ignore_unavailable, preference, ...params } = {
+      ...querystring,
+      ...request.params,
+      index: request.params.index,
+    };
+
     try {
       const esResponse = await client.rollup.rollupSearch(
         {
-          ...querystring,
-          ...request.params,
-          index: request.params.index,
+          ...params,
+          // Not defined in the spec, and the client places it in the body.
+          // This workaround allows us to force it as a query parameter.
+          querystring: { ...params.querystring, ignore_unavailable, preference },
         },
         {
           signal: options?.abortSignal,

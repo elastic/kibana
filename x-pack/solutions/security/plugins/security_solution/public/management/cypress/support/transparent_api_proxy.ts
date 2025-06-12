@@ -13,6 +13,7 @@ import DebugProxy from '@cypress/debugging-proxy';
 import { ES_CERT_PATH, ES_KEY_PATH } from '@kbn/dev-utils';
 import type { UsageRecord } from '@kbn/security-solution-serverless/server/types';
 import { setupStackServicesUsingCypressConfig } from './common';
+import { type StartTransparentApiProxyOptions } from '../tasks/transparent_api_proxy';
 
 export const transparentApiProxy = (
   on: Cypress.PluginEvents,
@@ -22,7 +23,7 @@ export const transparentApiProxy = (
   const interceptedRequestBody: UsageRecord[][] = [];
 
   on('task', {
-    startTransparentApiProxy: async (options) => {
+    startTransparentApiProxy: async (options: StartTransparentApiProxyOptions) => {
       const { log } = await setupStackServicesUsingCypressConfig(config);
 
       const port = options?.port || 3623;
@@ -30,12 +31,18 @@ export const transparentApiProxy = (
       log.debug(`[Transparent API] Starting transparent API proxy on port ${port}`);
 
       try {
+        const httpsOptions = options?.useCert
+          ? {
+              https: {
+                key: fs.readFileSync(ES_KEY_PATH),
+                cert: fs.readFileSync(ES_CERT_PATH),
+              },
+            }
+          : {};
+
         proxy = new DebugProxy({
           keepRequests: true,
-          https: {
-            key: fs.readFileSync(ES_KEY_PATH),
-            cert: fs.readFileSync(ES_CERT_PATH),
-          },
+          ...httpsOptions,
           onRequest: (_: string, req: IncomingMessage, res: ServerResponse) => {
             let body = '';
 
@@ -46,6 +53,7 @@ export const transparentApiProxy = (
               try {
                 const parsedBody = JSON.parse(body);
                 interceptedRequestBody.push(parsedBody);
+                log.debug(`[Transparent API] received ${parsedBody.length} items.`);
               } catch (err) {
                 throw new Error(`[Transparent API] Failed to parse request body as JSON: ${err}`);
               }

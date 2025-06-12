@@ -11,7 +11,7 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { Header } from './header';
-import { ChatFormFields, PlaygroundPageMode, PlaygroundViewMode } from '../types';
+import { PlaygroundFormFields, PlaygroundPageMode, PlaygroundViewMode } from '../types';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiForm } from '@elastic/eui';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -28,13 +28,13 @@ jest.mock('../hooks/use_playground_parameters', () => ({
 const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
   const methods = useForm({
     values: {
-      [ChatFormFields.indices]: ['index1', 'index2'],
-      [ChatFormFields.queryFields]: { index1: ['field1'], index2: ['field1'] },
-      [ChatFormFields.sourceFields]: {
+      [PlaygroundFormFields.indices]: ['index1', 'index2'],
+      [PlaygroundFormFields.queryFields]: { index1: ['field1'], index2: ['field1'] },
+      [PlaygroundFormFields.sourceFields]: {
         index1: ['field1'],
         index2: ['field1'],
       },
-      [ChatFormFields.elasticsearchQuery]: {
+      [PlaygroundFormFields.elasticsearchQuery]: {
         retriever: {
           rrf: {
             retrievers: [
@@ -48,7 +48,7 @@ const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
   });
   return <FormProvider {...methods}>{children}</FormProvider>;
 };
-const MockChatForm = ({
+const MockPlaygroundForm = ({
   children,
   handleSubmit,
 }: {
@@ -74,9 +74,9 @@ describe('Header', () => {
     });
     render(
       <IntlProvider locale="en">
-        <MockChatForm handleSubmit={() => {}}>
+        <MockPlaygroundForm handleSubmit={() => {}}>
           <Header onModeChange={() => {}} onSelectPageModeChange={() => {}} />
-        </MockChatForm>
+        </MockPlaygroundForm>
       </IntlProvider>
     );
 
@@ -91,9 +91,9 @@ describe('Header', () => {
     });
     render(
       <IntlProvider locale="en">
-        <MockChatForm handleSubmit={() => {}}>
+        <MockPlaygroundForm handleSubmit={() => {}}>
           <Header onModeChange={() => {}} onSelectPageModeChange={() => {}} />
-        </MockChatForm>
+        </MockPlaygroundForm>
       </IntlProvider>
     );
 

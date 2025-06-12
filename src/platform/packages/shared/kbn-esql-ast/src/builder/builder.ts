@@ -9,6 +9,7 @@
 
 /* eslint-disable @typescript-eslint/no-namespace */
 
+import { isStringLiteral } from '../ast/helpers';
 import { LeafPrinter } from '../pretty_print';
 import {
   ESQLAstComment,
@@ -110,41 +111,73 @@ export namespace Builder {
       };
     };
 
-    export type SourceTemplate = { index: string } & Omit<AstNodeTemplate<ESQLSource>, 'name'>;
+    export namespace source {
+      export type SourceTemplate = {
+        prefix?: string | ESQLSource['prefix'];
+        index?: string | ESQLSource['index'];
+        selector?: string | ESQLSource['selector'];
+      } & Omit<AstNodeTemplate<ESQLSource>, 'name' | 'prefix' | 'index' | 'selector'> &
+        Partial<Pick<ESQLSource, 'name'>>;
 
-    export const source = (
-      indexOrTemplate: string | SourceTemplate,
-      fromParser?: Partial<AstNodeParserFields>
-    ): ESQLSource => {
-      const template: SourceTemplate =
-        typeof indexOrTemplate === 'string'
-          ? { sourceType: 'index', index: indexOrTemplate }
-          : indexOrTemplate;
-      const { index, cluster } = template;
-      return {
-        ...template,
-        ...Builder.parserFields(fromParser),
-        type: 'source',
-        name: (cluster ? cluster + ':' : '') + index,
-      };
-    };
+      export const node = (
+        indexOrTemplate: string | ESQLStringLiteral | SourceTemplate,
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLSource => {
+        const template: SourceTemplate =
+          typeof indexOrTemplate === 'string' || isStringLiteral(indexOrTemplate)
+            ? { sourceType: 'index', index: indexOrTemplate }
+            : indexOrTemplate;
+        const prefix: ESQLSource['prefix'] = !template.prefix
+          ? undefined
+          : typeof template.prefix === 'string'
+          ? Builder.expression.literal.string(template.prefix, { unquoted: true })
+          : template.prefix;
+        const index: ESQLSource['index'] = !template.index
+          ? undefined
+          : typeof template.index === 'string'
+          ? Builder.expression.literal.string(template.index, { unquoted: true })
+          : template.index;
+        const selector: ESQLSource['selector'] = !template.selector
+          ? undefined
+          : typeof template.selector === 'string'
+          ? Builder.expression.literal.string(template.selector, { unquoted: true })
+          : template.selector;
+        const sourceNode: ESQLSource = {
+          ...template,
+          ...Builder.parserFields(fromParser),
+          type: 'source',
+          prefix,
+          index,
+          selector,
+          name: template.name ?? '',
+        };
 
-    export const indexSource = (
-      index: string,
-      cluster?: string,
-      template?: Omit<AstNodeTemplate<ESQLSource>, 'name' | 'index' | 'cluster'>,
-      fromParser?: Partial<AstNodeParserFields>
-    ): ESQLSource => {
-      return {
-        ...template,
-        ...Builder.parserFields(fromParser),
-        index,
-        cluster,
-        sourceType: 'index',
-        type: 'source',
-        name: (cluster ? cluster + ':' : '') + index,
+        if (!sourceNode.name) {
+          sourceNode.name = LeafPrinter.source(sourceNode);
+        }
+
+        return sourceNode;
       };
-    };
+
+      export const index = (
+        indexName: string,
+        prefix?: string | ESQLSource['prefix'],
+        selector?: string | ESQLSource['selector'],
+        template?: Omit<AstNodeTemplate<ESQLSource>, 'name' | 'index' | 'prefix'>,
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLSource => {
+        return Builder.expression.source.node(
+          {
+            ...template,
+            index: indexName,
+            prefix,
+            selector,
+            sourceType: 'index',
+          },
+          fromParser
+        );
+      };
+    }
 
     export type ColumnTemplate = Omit<AstNodeTemplate<ESQLColumn>, 'name' | 'quoted' | 'parts'>;
 
@@ -406,15 +439,16 @@ export namespace Builder {
           Partial<Pick<ESQLStringLiteral, 'name'>>,
         fromParser?: Partial<AstNodeParserFields>
       ): ESQLStringLiteral => {
-        const value =
-          '"' +
-          valueUnquoted
-            .replace(/\\/g, '\\\\')
-            .replace(/"/g, '\\"')
-            .replace(/\n/g, '\\n')
-            .replace(/\r/g, '\\r')
-            .replace(/\t/g, '\\t') +
-          '"';
+        const value = !!template?.unquoted
+          ? valueUnquoted
+          : '"' +
+            valueUnquoted
+              .replace(/\\/g, '\\\\')
+              .replace(/"/g, '\\"')
+              .replace(/\n/g, '\\n')
+              .replace(/\r/g, '\\r')
+              .replace(/\t/g, '\\t') +
+            '"';
         const name = template?.name ?? value;
         const node: ESQLStringLiteral = {
           ...template,

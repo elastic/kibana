@@ -8,6 +8,7 @@
  */
 
 import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React, { FC, PropsWithChildren } from 'react';
 import { apm } from '@elastic/apm-rum';
 
@@ -44,7 +45,7 @@ describe('<KibanaSectionErrorBoundary>', () => {
     expect(res.getByText(inputText)).toBeInTheDocument();
   });
 
-  it('renders a recoverable prompt when a recoverable error is caught', () => {
+  it('renders a recoverable prompt when a recoverable error is caught', async () => {
     const reloadSpy = jest.spyOn(services, 'onClickRefresh');
 
     const { getByTestId, getByText } = render(
@@ -52,24 +53,24 @@ describe('<KibanaSectionErrorBoundary>', () => {
         <ChunkLoadErrorComponent />
       </Template>
     );
-    getByTestId('clickForErrorBtn').click();
+    await userEvent.click(getByTestId('clickForErrorBtn'));
 
     expect(getByText(strings.section.callout.recoverable.title('test section name'))).toBeVisible();
     expect(getByText(strings.section.callout.recoverable.body('test section name'))).toBeVisible();
     expect(getByText(strings.section.callout.recoverable.pageReloadButton())).toBeVisible();
 
-    getByTestId('sectionErrorBoundaryRecoverBtn').click();
+    await userEvent.click(getByTestId('sectionErrorBoundaryRecoverBtn'));
 
     expect(reloadSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('renders a fatal prompt when a fatal error is caught', () => {
+  it('renders a fatal prompt when a fatal error is caught', async () => {
     const { getByTestId, getByText } = render(
       <Template>
         <BadComponent />
       </Template>
     );
-    getByTestId('clickForErrorBtn').click();
+    await userEvent.click(getByTestId('clickForErrorBtn'));
 
     expect(getByText(strings.section.callout.fatal.title('test section name'))).toBeVisible();
     expect(getByText(strings.section.callout.fatal.body('test section name'))).toBeVisible();
@@ -87,12 +88,12 @@ describe('<KibanaSectionErrorBoundary>', () => {
         <BadComponent />
       </Template>
     );
-    (await findByTestId('clickForErrorBtn')).click();
+    await userEvent.click(await findByTestId('clickForErrorBtn'));
 
     expect(mockDeps.analytics.reportEvent.mock.calls[0][0]).toBe('fatal-error-react');
     expect(mockDeps.analytics.reportEvent.mock.calls[0][1]).toMatchObject({
       component_name: 'BadComponent',
-      error_message: 'FatalReactError: This is an error to show the test user!',
+      error_message: 'Error: This is an error to show the test user!',
     });
   });
 
@@ -107,14 +108,14 @@ describe('<KibanaSectionErrorBoundary>', () => {
         <BadComponent />
       </Template>
     );
-    (await findByTestId('clickForErrorBtn')).click();
+    await userEvent.click(await findByTestId('clickForErrorBtn'));
 
     expect(
       mockDeps.analytics.reportEvent.mock.calls[0][1].component_stack.includes('at BadComponent')
     ).toBe(true);
     expect(
       mockDeps.analytics.reportEvent.mock.calls[0][1].error_stack.startsWith(
-        'FatalReactError: This is an error to show the test user!'
+        'Error: This is an error to show the test user!'
       )
     ).toBe(true);
   });
@@ -125,19 +126,12 @@ describe('<KibanaSectionErrorBoundary>', () => {
         <BadComponent />
       </Template>
     );
-    (await findByTestId('clickForErrorBtn')).click();
+    await userEvent.click(await findByTestId('clickForErrorBtn'));
 
     expect(apm.captureError).toHaveBeenCalledTimes(1);
     expect(apm.captureError).toHaveBeenCalledWith(
-      new Error('This is an error to show the test user!')
-    );
-    expect(Object.keys((apm.captureError as jest.Mock).mock.calls[0][0])).toEqual([
-      'react_error_type',
-      'original_name',
-      'name',
-    ]);
-    expect((apm.captureError as jest.Mock).mock.calls[0][0].react_error_type).toEqual(
-      'fatal-error-react'
+      new Error('This is an error to show the test user!'),
+      { labels: { errorType: 'SectionFatalReactError' } }
     );
   });
 });

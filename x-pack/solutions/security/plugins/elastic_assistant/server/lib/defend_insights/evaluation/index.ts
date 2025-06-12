@@ -15,13 +15,14 @@ import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 import { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
-import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
-import { DefendInsightsCombinedPrompts } from '../graphs/default_defend_insights_graph/nodes/helpers/prompts/incompatible_antivirus';
+import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import { DefendInsightsCombinedPrompts } from '../graphs/default_defend_insights_graph/prompts/incompatible_antivirus';
 import { runDefendInsightsEvaluations } from './run_evaluations';
 import { DEFAULT_EVAL_ANONYMIZATION_FIELDS } from '../../attack_discovery/evaluation/constants';
 import { DefaultDefendInsightsGraph } from '../graphs/default_defend_insights_graph';
 import { DefendInsightsGraphMetadata } from '../../langchain/graphs';
 import { getLlmType } from '../../../routes/utils';
+import { createOrUpdateEvaluationResults, EvaluationStatus } from '../../../routes/evaluate/utils';
 
 interface ConnectorWithPrompts extends Connector {
   prompts: DefendInsightsCombinedPrompts;
@@ -35,6 +36,7 @@ export const evaluateDefendInsights = async ({
   connectorTimeout,
   datasetName,
   esClient,
+  esClientInternalUser,
   evaluationId,
   evaluatorConnectorId,
   langSmithApiKey,
@@ -50,6 +52,7 @@ export const evaluateDefendInsights = async ({
   connectorTimeout: number;
   datasetName: string;
   esClient: ElasticsearchClient;
+  esClientInternalUser: ElasticsearchClient;
   evaluationId: string;
   evaluatorConnectorId: string | undefined;
   langSmithApiKey: string | undefined;
@@ -122,5 +125,11 @@ export const evaluateDefendInsights = async ({
       langSmithApiKey,
       logger,
     });
+  });
+
+  await createOrUpdateEvaluationResults({
+    evaluationResults: [{ id: evaluationId, status: EvaluationStatus.COMPLETE }],
+    esClientInternalUser,
+    logger,
   });
 };

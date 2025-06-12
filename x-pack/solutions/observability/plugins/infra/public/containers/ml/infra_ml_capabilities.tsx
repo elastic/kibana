@@ -7,9 +7,9 @@
 
 import createContainer from 'constate';
 import { useMemo, useState, useEffect } from 'react';
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { identity } from 'fp-ts/lib/function';
+import { fold } from 'fp-ts/Either';
+import { pipe } from 'fp-ts/pipeable';
+import { identity } from 'fp-ts/function';
 import { throwErrors, createPlainError } from '@kbn/io-ts-utils';
 import { useTrackedPromise } from '../../hooks/use_tracked_promise';
 import type { GetMlCapabilitiesResponsePayload } from './api/ml_api_types';
