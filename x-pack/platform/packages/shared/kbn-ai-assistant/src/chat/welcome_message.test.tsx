@@ -97,6 +97,7 @@ describe('WelcomeMessage', () => {
         connectors={mockConnectors}
         onSelectPrompt={jest.fn()}
         showElasticLlmCalloutInChat={false}
+        showKnowledgeBaseReIndexingCallout={true}
       />
     );
 
@@ -129,6 +130,7 @@ describe('WelcomeMessage', () => {
           connectors={mockConnectors}
           onSelectPrompt={jest.fn()}
           showElasticLlmCalloutInChat={false}
+          showKnowledgeBaseReIndexingCallout={false}
         />
       );
     });
