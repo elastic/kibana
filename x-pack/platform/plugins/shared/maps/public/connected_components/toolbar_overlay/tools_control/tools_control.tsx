@@ -69,6 +69,14 @@ export class ToolsControl extends Component<Props, State> {
     isPopoverOpen: false,
   };
 
+  private cancelButtonRef = React.createRef<HTMLButtonElement>();
+
+  componentDidUpdate(prevProps: Props) {
+    if (!prevProps.filterModeActive && this.props.filterModeActive) {
+      this.cancelButtonRef.current?.focus();
+    }
+  }
+  
   _togglePopover = () => {
     this.setState((prevState) => ({
       isPopoverOpen: !prevState.isPopoverOpen,
@@ -242,7 +250,7 @@ export class ToolsControl extends Component<Props, State> {
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>{toolsPopoverButton}</EuiFlexItem>
         <EuiFlexItem>
-          <EuiButton size="s" fill onClick={this.props.cancelDraw}>
+          <EuiButton size="s" fill onClick={this.props.cancelDraw} buttonRef={this.cancelButtonRef}>
             <FormattedMessage
               id="xpack.maps.tooltip.toolsControl.cancelDrawButtonLabel"
               defaultMessage="Cancel"
