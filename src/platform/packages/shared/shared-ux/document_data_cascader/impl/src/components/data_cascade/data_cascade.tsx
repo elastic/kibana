@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useTransition } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,7 +26,7 @@ import {
   type Row,
   type ExpandedState,
 } from '@tanstack/react-table';
-import { useVirtualizer } from '@tanstack/react-virtual';
+import { useVirtualizer, type VirtualItem } from '@tanstack/react-virtual';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { SelectionDropdown } from '../selection_dropdown';
 import { useDataCascadeState, useDataCascadeDispatch } from '../../lib';
@@ -49,6 +49,112 @@ interface DataCascadeProps<T extends DataCascadeRow> {
   rowContentSlot: React.FC<{ row: Row<T> }>;
 }
 
+interface CascadeRowProps {
+  populateRowDataFn: () => Promise<void>;
+  rowInstance: Row<DataCascadeRow>;
+  virtualizerInstance: ReturnType<typeof useVirtualizer>;
+  virtualRow: VirtualItem;
+}
+
+function CascadeRow({
+  populateRowDataFn,
+  rowInstance,
+  virtualRow,
+  virtualizerInstance,
+}: CascadeRowProps) {
+  const { euiTheme } = useEuiTheme();
+  const [isPendingRowDataFetch, setRowDataFetch] = React.useState<boolean>(false);
+  const cascadeRowRef = React.useRef<HTMLLIElement | null>(null);
+
+  const fetchCascadeRowData = React.useCallback(() => {
+    setRowDataFetch(true);
+    populateRowDataFn().finally(() => {
+      setRowDataFetch(false);
+    });
+  }, [populateRowDataFn]);
+
+  return (
+    <li
+      key={rowInstance.id}
+      data-index={virtualRow.index}
+      data-row-type={rowInstance.depth === 0 ? 'root' : 'sub-group'}
+      ref={(el) => virtualizerInstance.measureElement((cascadeRowRef.current = el))}
+      style={{
+        display: 'flex',
+        position: 'absolute',
+        transform: `translateY(${virtualRow.start}px)`, // this should always be a `style` as it changes on scroll
+        width: '100%',
+      }}
+      css={{
+        padding: euiTheme.size.s,
+        backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+        borderLeft: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+        borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+        ...(!rowInstance.parentId
+          ? {
+              borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+            }
+          : {
+              paddingTop: 0,
+              paddingBottom: 0,
+            }),
+      }}
+    >
+      <EuiFlexGroup
+        direction="row"
+        gutterSize="s"
+        alignItems="flexStart"
+        justifyContent="spaceBetween"
+        css={{
+          ...(rowInstance.parentId && rowInstance.getIsAllParentsExpanded()
+            ? {
+                padding: `${euiTheme.base / 2}px ${
+                  (euiTheme.base / 2) * (rowInstance.depth + 1)
+                }px`,
+                borderLeft: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+                borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+                borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+                backgroundColor: euiTheme.colors.backgroundBasePlain,
+              }
+            : {}),
+          '[data-row-type="sub-group"]:has(+ [data-row-type="root"]) &': {
+            marginBottom: euiTheme.size.s,
+            borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+          },
+        }}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType={rowInstance.getIsExpanded() ? 'arrowDown' : 'arrowRight'}
+            onClick={() => {
+              rowInstance.toggleExpanded();
+              fetchCascadeRowData();
+            }}
+            aria-label={i18n.translate('sharedUXPackages.dataCascade.removeRowButtonLabel', {
+              defaultMessage: 'expand row',
+            })}
+            data-test-subj={`expand-row-${rowInstance.id}-button`}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <React.Fragment>
+            {isPendingRowDataFetch && <EuiProgress size="xs" color="accent" position="fixed" />}
+          </React.Fragment>
+          <React.Fragment>
+            {rowInstance.getVisibleCells().map((cell) => {
+              return (
+                <React.Fragment key={cell.id}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </React.Fragment>
+              );
+            })}
+          </React.Fragment>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </li>
+  );
+}
+
 export function DataCascade<T extends DataCascadeRow>({
   data,
   onGroupByChange,
@@ -59,7 +165,6 @@ export function DataCascade<T extends DataCascadeRow>({
 }: DataCascadeProps<T>) {
   // The scrollable element for your list
   const parentRef = React.useRef(null);
-  const { euiTheme } = useEuiTheme();
   const dispatch = useDataCascadeDispatch();
   const state = useDataCascadeState();
   const columnHelper = createColumnHelper<T>();
@@ -74,22 +179,23 @@ export function DataCascade<T extends DataCascadeRow>({
 
   const fetchSubRowData = useCallback(
     ({ row }: { row: Row<T> }) => {
-      if (onGroupByRowExpanded) {
-        const dataFetchFn = async () => {
-          const rowData = await onGroupByRowExpanded(row);
-          dispatch({
-            type: 'UPDATE_ROW_DATA',
-            payload: {
-              id: row.id,
-              data: rowData,
-            },
-          });
-        };
-        dataFetchFn().catch((error) => {
-          // eslint-disable-next-line no-console -- added for debugging purposes
-          console.error('Error fetching sub-row data:', error);
+      const dataFetchFn = async () => {
+        const rowData = await onGroupByRowExpanded?.(row);
+        if (!rowData) {
+          return;
+        }
+        dispatch({
+          type: 'UPDATE_ROW_DATA',
+          payload: {
+            id: row.id,
+            data: rowData,
+          },
         });
-      }
+      };
+      return dataFetchFn().catch((error) => {
+        // eslint-disable-next-line no-console -- added for debugging purposes
+        console.error('Error fetching data for row with ID: %s', row.id, error);
+      });
     },
     [dispatch, onGroupByRowExpanded]
   );
@@ -197,106 +303,13 @@ export function DataCascade<T extends DataCascadeRow>({
                   <ul>
                     {rowVirtualizer.getVirtualItems().map(function buildCascadeRows(virtualItem) {
                       const row = rows[virtualItem.index];
-
-                      return React.createElement(
-                        function CascadeRow() {
-                          const [isPendingRowDataFetch, startRowDataFetchTransition] =
-                            useTransition();
-                          const cascadeRowRef = React.useRef<HTMLLIElement | null>(null);
-
-                          return (
-                            <li
-                              key={row.id}
-                              data-index={virtualItem.index}
-                              data-row-type={row.depth === 0 ? 'root' : 'sub-group'}
-                              ref={(el) =>
-                                rowVirtualizer.measureElement((cascadeRowRef.current = el))
-                              }
-                              style={{
-                                display: 'flex',
-                                position: 'absolute',
-                                transform: `translateY(${virtualItem.start}px)`, // this should always be a `style` as it changes on scroll
-                                width: '100%',
-                              }}
-                              css={{
-                                padding: euiTheme.size.s,
-                                backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-                                borderLeft: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-                                borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-                                ...(!row.parentId
-                                  ? {
-                                      borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-                                    }
-                                  : {
-                                      paddingTop: 0,
-                                      paddingBottom: 0,
-                                    }),
-                              }}
-                            >
-                              <EuiFlexGroup
-                                direction="row"
-                                gutterSize="s"
-                                alignItems="flexStart"
-                                justifyContent="spaceBetween"
-                                css={{
-                                  ...(row.parentId && row.getIsAllParentsExpanded()
-                                    ? {
-                                        padding: `${euiTheme.base / 2}px ${
-                                          (euiTheme.base / 2) * (row.depth + 1)
-                                        }px`,
-                                        borderLeft: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-                                        borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-                                        borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-                                        backgroundColor: euiTheme.colors.backgroundBasePlain,
-                                      }
-                                    : {}),
-                                  '[data-row-type="sub-group"]:has(+ [data-row-type="root"]) &': {
-                                    marginBottom: euiTheme.size.s,
-                                    borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-                                  },
-                                }}
-                              >
-                                <EuiFlexItem grow={false}>
-                                  <EuiButtonIcon
-                                    iconType={row.getIsExpanded() ? 'arrowDown' : 'arrowRight'}
-                                    onClick={() => {
-                                      row.toggleExpanded();
-                                      startRowDataFetchTransition(() => fetchSubRowData({ row }));
-                                    }}
-                                    aria-label={i18n.translate(
-                                      'sharedUXPackages.dataCascade.removeRowButtonLabel',
-                                      {
-                                        defaultMessage: 'expand row',
-                                      }
-                                    )}
-                                    data-test-subj={`expand-row-${row.id}-button`}
-                                  />
-                                </EuiFlexItem>
-                                <EuiFlexItem>
-                                  <React.Fragment>
-                                    {isPendingRowDataFetch && (
-                                      <EuiProgress size="xs" color="accent" position="fixed" />
-                                    )}
-                                  </React.Fragment>
-                                  <React.Fragment>
-                                    {row.getVisibleCells().map((cell) => {
-                                      return (
-                                        <React.Fragment key={cell.id}>
-                                          {flexRender(
-                                            cell.column.columnDef.cell,
-                                            cell.getContext()
-                                          )}
-                                        </React.Fragment>
-                                      );
-                                    })}
-                                  </React.Fragment>
-                                </EuiFlexItem>
-                              </EuiFlexGroup>
-                            </li>
-                          );
-                        },
-                        { key: virtualItem.index }
-                      );
+                      return React.createElement(CascadeRow, {
+                        key: virtualItem.index,
+                        populateRowDataFn: fetchSubRowData.bind(null, { row }),
+                        rowInstance: row,
+                        virtualRow: virtualItem,
+                        virtualizerInstance: rowVirtualizer,
+                      });
                     })}
                   </ul>
                 </EuiFlexItem>
