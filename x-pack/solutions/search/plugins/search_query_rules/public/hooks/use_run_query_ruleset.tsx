@@ -8,22 +8,14 @@
 import React, { useMemo } from 'react';
 import dedent from 'dedent';
 import { TryInConsoleButton } from '@kbn/try-in-console';
+import { EuiButtonColor } from '@elastic/eui';
 import { useFetchQueryRuleset } from './use_fetch_query_ruleset';
 import { useKibana } from './use_kibana';
 export interface UseRunQueryRulesetProps {
   rulesetId: string;
   type?: 'link' | 'button' | 'emptyButton' | 'contextMenuItem';
   content?: string;
-  color?:
-    | 'primary'
-    | 'text'
-    | 'danger'
-    | 'accent'
-    | 'accentSecondary'
-    | 'success'
-    | 'warning'
-    | 'neutral'
-    | 'risk';
+  color?: EuiButtonColor;
   onClick?: () => void;
 }
 

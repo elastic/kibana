@@ -9,7 +9,13 @@
 
 import React from 'react';
 
-import { EuiLink, EuiButton, EuiButtonEmpty, EuiContextMenuItem } from '@elastic/eui';
+import {
+  EuiLink,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiContextMenuItem,
+  EuiButtonColor,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -28,16 +34,7 @@ export interface TryInConsoleButtonProps {
   consolePlugin?: ConsolePluginStart;
   sharePlugin?: SharePluginStart;
   content?: string | React.ReactElement;
-  color?:
-    | 'primary'
-    | 'text'
-    | 'danger'
-    | 'success'
-    | 'accent'
-    | 'warning'
-    | 'accentSecondary'
-    | 'neutral'
-    | 'risk';
+  color?: EuiButtonColor;
   showIcon?: boolean;
   iconType?: string;
   type?: 'link' | 'button' | 'emptyButton' | 'contextMenuItem';
