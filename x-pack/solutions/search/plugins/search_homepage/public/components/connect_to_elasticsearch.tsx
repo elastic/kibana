@@ -92,7 +92,6 @@ export const ConnectToElasticsearch = () => {
                         <EuiFieldText
                           value={LOCALHOST_URL}
                           readOnly
-                          style={{ width: 400 }}
                           data-test-subj="endpointValueField"
                         />
                       </EuiFlexItem>
@@ -163,7 +162,7 @@ export const ConnectToElasticsearch = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ maxWidth: 430 }}>
+      <EuiFlexItem grow={false}>
         <ConnectToElasticsearchSidePanel />
       </EuiFlexItem>
     </EuiFlexGroup>

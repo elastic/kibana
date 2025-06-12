@@ -47,15 +47,6 @@ export class SearchHomepagePlugin
     core: CoreSetup<SearchHomepageAppPluginStartDependencies, SearchHomepagePluginStart>
   ) {
     const queryClient = new QueryClient({
-      mutationCache: new MutationCache({
-        onError: (error) => {
-          core.notifications.toasts.addError(error as Error, {
-            title: (error as Error).name,
-            toastMessage: getErrorMessage(error),
-            toastLifeTimeMs: 1000,
-          });
-        },
-      }),
       queryCache: new QueryCache({
         onError: (error) => {
           // 404s are often functionally okay and shouldn't show toasts by default

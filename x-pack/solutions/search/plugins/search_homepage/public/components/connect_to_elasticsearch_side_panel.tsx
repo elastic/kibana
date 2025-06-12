@@ -42,6 +42,7 @@ export const ConnectToElasticsearchSidePanel = () => {
           footer={
             <EuiButtonEmpty
               href={http.basePath.prepend(UPLOAD_FILE_URL)}
+              target="_blank"
               iconType="importAction"
               data-test-subj="uploadFileButton"
             >
@@ -69,7 +70,12 @@ export const ConnectToElasticsearchSidePanel = () => {
             />
           }
           footer={
-            <EuiButtonEmpty iconType="importAction" data-test-subj="sampleDatasetButton">
+            <EuiButtonEmpty
+              href="#"
+              target="_blank"
+              iconType="importAction"
+              data-test-subj="sampleDatasetButton"
+            >
               {i18n.translate('xpack.searchHomepage.connectToElasticsearch.sampleDatasetButton', {
                 defaultMessage: 'Sample dataset',
               })}
