@@ -33,6 +33,14 @@ export default ({ getService }: FtrProviderContext) => {
         .expect(200);
     };
 
+    const uninstallPackage = ({ name, version }: IntegrationPackage) => {
+      return supertest
+        .delete(`/api/fleet/epm/packages/${name}/${version}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true })
+        .expect(200);
+    };
+
     async function createRemoteServiceToken(): Promise<string> {
       const { token } = await remoteEs.security.createServiceToken({
         namespace: 'elastic',
@@ -131,15 +139,19 @@ export default ({ getService }: FtrProviderContext) => {
       expect(resp.found).to.be(true);
     }
 
-    async function verifySyncIntegrationsStatus() {
+    async function verifySyncIntegrationsStatus(isUninstalled = false) {
       const resp = await supertest
         .get('/api/fleet/remote_synced_integrations/remote-elasticsearch1/remote_status')
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
       const respJson = JSON.parse(resp.text);
-      expect(
-        respJson.integrations.find((int: any) => int.package_name === 'nginx')?.sync_status
-      ).to.be('completed');
+      const nginxIntegration = respJson.integrations.find(
+        (int: any) => int.package_name === 'nginx'
+      );
+      expect(nginxIntegration?.sync_status).to.be('completed');
+      if (isUninstalled) {
+        expect(nginxIntegration?.install_status.remote).to.be('not_installed');
+      }
     }
 
     async function verifyPackageInstalledOnRemote() {
@@ -149,6 +161,17 @@ export default ({ getService }: FtrProviderContext) => {
       });
       expect(resp.found).to.be(true);
       expect((resp._source as any)?.['epm-packages'].install_status).to.be('installed');
+    }
+
+    async function verifyPackageUninstalledOnRemote() {
+      const resp = await remoteEs.get(
+        {
+          id: 'epm-packages:nginx',
+          index: '.kibana_ingest',
+        },
+        { ignore: [404] }
+      );
+      expect(resp.found).to.be(false);
     }
 
     it('should sync integrations to remote cluster when enabled on remote ES output', async () => {
@@ -171,6 +194,14 @@ export default ({ getService }: FtrProviderContext) => {
         await verifySyncIntegrationsStatus();
 
         await verifyPackageInstalledOnRemote();
+      });
+
+      // verify uninstalled packages are synced
+      await uninstallPackage({ name: 'nginx', version: '2.0.0' });
+
+      await retry.tryForTime(10000, async () => {
+        await verifySyncIntegrationsStatus(true);
+        await verifyPackageUninstalledOnRemote();
       });
     });
 

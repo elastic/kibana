@@ -6,8 +6,8 @@
  */
 
 import { services as kibanaFunctionalServices } from '@kbn/test-suites-src/functional/services';
-import { RemoteEsProvider } from './remote_es/remote_es';
-import { RemoteEsArchiverProvider } from './remote_es/remote_es_archiver';
+import { RemoteEsProvider } from '@kbn/test-suites-src/functional/services/remote_es/remote_es';
+import { RemoteEsArchiverProvider } from '@kbn/test-suites-src/functional/services/remote_es/remote_es_archiver';
 
 export const services = {
   ...kibanaFunctionalServices,
