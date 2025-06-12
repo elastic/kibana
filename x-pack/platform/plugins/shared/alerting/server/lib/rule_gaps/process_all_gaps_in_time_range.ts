@@ -28,7 +28,7 @@ interface ProcessAllGapsInTimeRangeParams {
   processGapsBatch: (gaps: Gap[]) => Promise<void>;
 }
 
-const DEFAULT_PAGE_SIZE = 500;
+export const PROCESS_GAPS_DEFAULT_PAGE_SIZE = 500;
 // Circuit breaker to prevent infinite loops
 // It should be enough to update 50,000,000 gaps
 // 100000 * 500 = 50,000,000 millions gaps
@@ -53,7 +53,7 @@ export const processAllGapsInTimeRange = async ({
   let gapsCount = 0;
 
   const {
-    pageSize = DEFAULT_PAGE_SIZE,
+    pageSize = PROCESS_GAPS_DEFAULT_PAGE_SIZE,
     maxIterations = DEFAULT_MAX_ITERATIONS,
     maxFetchedGaps,
   } = options ?? {};

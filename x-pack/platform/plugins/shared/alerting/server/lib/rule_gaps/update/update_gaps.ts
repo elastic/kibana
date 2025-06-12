@@ -17,7 +17,10 @@ import { adHocRunStatus } from '../../../../common/constants';
 import { calculateGapStateFromAllBackfills } from './calculate_gaps_state';
 import { updateGapFromSchedule } from './update_gap_from_schedule';
 import { mgetGaps } from '../mget_gaps';
-import { processAllGapsInTimeRange } from '../process_all_gaps_in_time_range';
+import {
+  PROCESS_GAPS_DEFAULT_PAGE_SIZE,
+  processAllGapsInTimeRange,
+} from '../process_all_gaps_in_time_range';
 
 interface UpdateGapsParams {
   ruleId: string;
@@ -250,7 +253,7 @@ export const updateGaps = async (params: UpdateGapsParams) => {
 
     if (gaps) {
       // If the list of gaps were passed into the function, proceed to update them
-      for (const gapsChunk of chunk(gaps, 500)) {
+      for (const gapsChunk of chunk(gaps, PROCESS_GAPS_DEFAULT_PAGE_SIZE)) {
         await processGapsBatch(gapsChunk);
       }
     } else {
