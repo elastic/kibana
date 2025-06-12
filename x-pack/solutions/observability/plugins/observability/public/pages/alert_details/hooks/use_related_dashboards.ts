@@ -24,12 +24,19 @@ export const fetchRelatedDashboards = async ({
   });
 };
 
-interface SuggestedDashboardResponse {
-  isLoadingSuggestedDashboards: boolean;
+interface RelatedDashboardResponse {
+  isLoadingRelatedDashboards: boolean;
   suggestedDashboards?: DashboardMetadata[];
+  linkedDashboards?: DashboardMetadata[];
 }
 
-export const useSuggestedDashboards = (alertId: string): SuggestedDashboardResponse => {
+const getDashboardMetadata = <T extends DashboardMetadata>({ description, id, title }: T) => ({
+  description,
+  id,
+  title,
+});
+
+export const useRelatedDashboards = (alertId: string): RelatedDashboardResponse => {
   const { http } = useKibana().services;
 
   const { data, isLoading } = useQuery<GetRelatedDashboardsResponse>({
@@ -38,9 +45,12 @@ export const useSuggestedDashboards = (alertId: string): SuggestedDashboardRespo
   });
 
   return {
-    isLoadingSuggestedDashboards: isLoading,
+    isLoadingRelatedDashboards: isLoading,
     suggestedDashboards: data?.suggestedDashboards
-      ? data.suggestedDashboards.map(({ id, title, description }) => ({ id, title, description }))
+      ? data.suggestedDashboards.map(getDashboardMetadata)
+      : undefined,
+    linkedDashboards: data?.linkedDashboards
+      ? data.linkedDashboards.map(getDashboardMetadata)
       : undefined,
   };
 };

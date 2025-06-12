@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useSuggestedDashboards } from './use_suggested_dashboards';
+import { useRelatedDashboards } from './use_related_dashboards';
 import { kibanaStartMock } from '../../../utils/kibana_react.mock';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
@@ -56,14 +56,14 @@ describe('useSuggestedDashboards', () => {
   });
 
   it('should have isLoadingSuggestedDashboards as true and suggestedDashboards as undefined when loading', () => {
-    const { result } = renderHook(() => useSuggestedDashboards(TEST_ALERT_ID));
+    const { result } = renderHook(() => useRelatedDashboards(TEST_ALERT_ID));
 
-    expect(result.current.isLoadingSuggestedDashboards).toBe(true);
+    expect(result.current.isLoadingRelatedDashboards).toBe(true);
     expect(result.current.suggestedDashboards).toBeUndefined();
   });
 
   it('should call http.get with the correct URL and parameters', async () => {
-    renderHook(() => useSuggestedDashboards(TEST_ALERT_ID));
+    renderHook(() => useRelatedDashboards(TEST_ALERT_ID));
 
     // Call the captured queryFn to trigger the HTTP request
     await capturedQueryFn!();
@@ -98,9 +98,9 @@ describe('useSuggestedDashboards', () => {
       isLoading: false,
     });
 
-    const { result } = renderHook(() => useSuggestedDashboards(TEST_ALERT_ID));
+    const { result } = renderHook(() => useRelatedDashboards(TEST_ALERT_ID));
 
-    expect(result.current.isLoadingSuggestedDashboards).toBe(false);
+    expect(result.current.isLoadingRelatedDashboards).toBe(false);
     expect(result.current.suggestedDashboards).toEqual([
       {
         id: TEST_DASHBOARD_1.id,

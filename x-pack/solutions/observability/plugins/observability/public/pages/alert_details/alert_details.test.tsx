@@ -57,8 +57,8 @@ jest.mock('./hooks/use_add_suggested_dashboard', () => ({
   }),
 }));
 
-jest.mock('./hooks/use_suggested_dashboards', () => ({
-  useSuggestedDashboards: () => ({
+jest.mock('./hooks/use_related_dashboards', () => ({
+  useRelatedDashboards: () => ({
     isLoadingSuggestedDashboards: false,
     suggestedDashboards: [
       {

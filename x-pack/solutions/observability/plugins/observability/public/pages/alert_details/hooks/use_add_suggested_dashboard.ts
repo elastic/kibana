@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useCallback } from 'react';
 import { useUpdateRule } from '@kbn/response-ops-rule-form/src/common/hooks';
 import { UpdateRuleBody } from '@kbn/response-ops-rule-form/src/common/apis';
 import { Rule, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
@@ -56,17 +57,20 @@ export const useAddSuggestedDashboards = ({
 
   const { mutateAsync: updateRule } = useUpdateRule({ http, onError, onSuccess });
 
-  const onClickAddSuggestedDashboard = (d: DashboardMetadata) => {
-    const updatedRule: UpdateRuleBody = {
-      ...rule,
-      artifacts: {
-        ...(rule.artifacts || {}),
-        dashboards: [...(rule.artifacts?.dashboards || []), { id: d.id }],
-      },
-    };
-    updateRule({ id: rule.id, formData: updatedRule });
-    setAddingDashboardId(d.id);
-  };
+  const onClickAddSuggestedDashboard = useCallback(
+    (d: DashboardMetadata) => {
+      const updatedRule: UpdateRuleBody = {
+        ...rule,
+        artifacts: {
+          ...(rule.artifacts || {}),
+          dashboards: [...(rule.artifacts?.dashboards || []), { id: d.id }],
+        },
+      };
+      updateRule({ id: rule.id, formData: updatedRule });
+      setAddingDashboardId(d.id);
+    },
+    [rule, updateRule]
+  );
 
   return { onClickAddSuggestedDashboard, addingDashboardId };
 };

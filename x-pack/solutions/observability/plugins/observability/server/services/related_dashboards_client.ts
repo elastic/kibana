@@ -354,6 +354,7 @@ export class RelatedDashboardsClient {
       id: d.id,
       title: d.attributes.title,
       matchedBy: { linked: true },
+      description: d.attributes.description,
     }));
   }
 
