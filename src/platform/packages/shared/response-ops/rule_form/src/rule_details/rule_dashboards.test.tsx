@@ -75,12 +75,14 @@ describe('RuleDashboards', () => {
       </IntlProvider>
     );
 
-    expect(screen.getByText('Related dashboards')).toBeInTheDocument();
-    expect(useRuleFormState).toHaveBeenCalled();
-    expect(useRuleFormDispatch).toHaveBeenCalled();
-    expect(mockDashboardServiceProvider).toHaveBeenCalledTimes(1);
-    expect(mockDashboardServiceProvider().fetchDashboards).toHaveBeenCalledTimes(1);
-    expect(mockDashboardServiceProvider().fetchDashboard).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(screen.getByText('Related dashboards')).toBeInTheDocument();
+      expect(useRuleFormState).toHaveBeenCalled();
+      expect(useRuleFormDispatch).toHaveBeenCalled();
+      expect(mockDashboardServiceProvider).toHaveBeenCalledTimes(1);
+      expect(mockDashboardServiceProvider().fetchDashboards).toHaveBeenCalledTimes(1);
+      expect(mockDashboardServiceProvider().fetchDashboard).not.toHaveBeenCalled();
+    });
   });
 
   it('fetches and displays dashboard titles', async () => {
@@ -145,15 +147,14 @@ describe('RuleDashboards', () => {
     }
     await userEvent.click(screen.getByText('Dashboard 2'));
 
-    expect(mockOnChange).toHaveBeenCalledWith({
-      type: 'setRuleProperty',
-      payload: {
-        property: 'artifacts',
-        value: { dashboards: [{ id: '1' }, { id: '2' }] },
-      },
-    });
-
     await waitFor(() => {
+      expect(mockOnChange).toHaveBeenCalledWith({
+        type: 'setRuleProperty',
+        payload: {
+          property: 'artifacts',
+          value: { dashboards: [{ id: '1' }, { id: '2' }] },
+        },
+      });
       expect(screen.getByText('Dashboard 1')).toBeInTheDocument();
       expect(screen.getByText('Dashboard 2')).toBeInTheDocument();
     });
@@ -179,15 +180,14 @@ describe('RuleDashboards', () => {
     );
 
     const searchInput = screen.getByPlaceholderText(ALERT_LINK_DASHBOARDS_PLACEHOLDER);
-    // Focus the input before typing
-    searchInput.focus();
 
     await userEvent.type(searchInput, 'Dashboard 1');
 
-    expect(searchInput).toHaveValue('Dashboard 1');
     // Assert that fetchDashboards was called with the correct search value
     // Wait for the next tick to allow state update and effect to run
     await waitFor(() => {
+      expect(searchInput).toHaveValue('Dashboard 1');
+
       expect(mockDashboardServiceProvider().fetchDashboards).toHaveBeenCalledWith(
         expect.objectContaining({ limit: 100, text: 'Dashboard 1*' })
       );
