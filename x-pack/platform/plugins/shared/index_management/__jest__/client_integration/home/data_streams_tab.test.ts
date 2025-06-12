@@ -460,11 +460,19 @@ describe('Data Streams tab', () => {
 
         const ds1 = createDataStreamPayload({
           name: 'dataStream1',
-          privileges: { delete_index: true, manage_data_stream_lifecycle: true, read_failure_store: true },
+          privileges: {
+            delete_index: true,
+            manage_data_stream_lifecycle: true,
+            read_failure_store: true,
+          },
         });
         const ds2 = createDataStreamPayload({
           name: 'dataStream2',
-          privileges: { delete_index: true, manage_data_stream_lifecycle: true, read_failure_store: true },
+          privileges: {
+            delete_index: true,
+            manage_data_stream_lifecycle: true,
+            read_failure_store: true,
+          },
         });
 
         setLoadDataStreamsResponse([ds1, ds2]);
