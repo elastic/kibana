@@ -11,11 +11,11 @@ import { loggerMock } from '@kbn/logging-mocks';
 
 import { deduplicateAttackDiscoveries } from '.';
 import { mockAttackDiscoveries } from '../../evaluation/__mocks__/mock_attack_discoveries';
-import { generateAttackDiscoveryAlertUuid } from '../transforms/transform_to_alert_documents';
+import { generateAttackDiscoveryAlertHash } from '../transforms/transform_to_alert_documents';
 
 jest.mock('../transforms/transform_to_alert_documents', () => ({
   ...jest.requireActual('../transforms/transform_to_alert_documents'),
-  generateAttackDiscoveryAlertUuid: jest.fn(),
+  generateAttackDiscoveryAlertHash: jest.fn(),
 }));
 
 const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -38,7 +38,7 @@ describe('deduplicateAttackDiscoveries', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockEsClient.search.mockResponse({ hits: { hits: [] } } as unknown as estypes.SearchResponse);
-    (generateAttackDiscoveryAlertUuid as jest.Mock).mockImplementation(({ attackDiscovery }) => {
+    (generateAttackDiscoveryAlertHash as jest.Mock).mockImplementation(({ attackDiscovery }) => {
       if (attackDiscovery === attack1) return uuid1;
       if (attackDiscovery === attack2) return uuid2;
       return 'unknown-uuid';

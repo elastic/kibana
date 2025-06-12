@@ -10,7 +10,7 @@ import { ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
 import { AttackDiscoveries } from '@kbn/elastic-assistant-common';
 
 import { AttackDiscoveryAlertDocument } from '../../schedules/types';
-import { generateAttackDiscoveryAlertUuid } from '../transforms/transform_to_alert_documents';
+import { generateAttackDiscoveryAlertHash } from '../transforms/transform_to_alert_documents';
 
 interface DeduplicateAttackDiscoveriesParams {
   attackDiscoveries: AttackDiscoveries;
@@ -37,15 +37,15 @@ export const deduplicateAttackDiscoveries = async ({
 
   // 1. Transform all attackDiscoveries to alert documents and collect alertUuids
   const alertDocs = attackDiscoveries.map((attack) => {
-    const alertUuid = generateAttackDiscoveryAlertUuid({
+    const alertHash = generateAttackDiscoveryAlertHash({
       attackDiscovery: attack,
       connectorId,
       ownerId,
       spaceId,
     });
-    return { attack, alertUuid };
+    return { attack, alertHash };
   });
-  const alertUuids = alertDocs.map((doc) => doc.alertUuid);
+  const alertUuids = alertDocs.map((doc) => doc.alertHash);
 
   // 2. Search for existing alerts in ES
   const searchResult = await esClient.search<AttackDiscoveryAlertDocument>({
@@ -61,7 +61,7 @@ export const deduplicateAttackDiscoveries = async ({
 
   // 4. Filter out duplicates
   const newDiscoveries = alertDocs
-    .filter((doc) => !foundIds.has(doc.alertUuid))
+    .filter((doc) => !foundIds.has(doc.alertHash))
     .map((doc) => doc.attack);
 
   const numDuplicates = attackDiscoveries.length - newDiscoveries.length;

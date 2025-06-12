@@ -24,7 +24,7 @@ import { generateAttackDiscoveries } from '../../../../routes/attack_discovery/h
 import { AttackDiscoveryExecutorOptions } from '../types';
 import { getIndexTemplateAndPattern } from '../../../data_stream/helpers';
 import {
-  generateAttackDiscoveryAlertUuid,
+  generateAttackDiscoveryAlertHash,
   transformToBaseAlertDocument,
 } from '../../persistence/transforms/transform_to_alert_documents';
 import { deduplicateAttackDiscoveries } from '../../persistence/deduplication';
@@ -132,7 +132,7 @@ export const attackDiscoveryScheduleExecutor = async ({
 
     await Promise.all(
       dedupedDiscoveries.map(async (attackDiscovery) => {
-        const alertInstanceId = generateAttackDiscoveryAlertUuid({
+        const alertInstanceId = generateAttackDiscoveryAlertHash({
           attackDiscovery,
           connectorId: params.apiConfig.connectorId,
           ownerId: rule.id,

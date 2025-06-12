@@ -64,7 +64,7 @@ type AttackDiscoveryAlertDocumentBase = Omit<
   keyof Omit<Alert, typeof ALERT_URL | typeof ALERT_UUID | typeof ALERT_INSTANCE_ID>
 >;
 
-export const generateAttackDiscoveryAlertUuid = ({
+export const generateAttackDiscoveryAlertHash = ({
   attackDiscovery,
   connectorId,
   ownerId,
@@ -193,7 +193,7 @@ export const transformToAlertDocuments = ({
   const { attackDiscoveries, generationUuid, ...restParams } = createAttackDiscoveryAlertsParams;
 
   return attackDiscoveries.map((attackDiscovery) => {
-    const alertUuid = generateAttackDiscoveryAlertUuid({
+    const alertHash = generateAttackDiscoveryAlertHash({
       attackDiscovery,
       connectorId: restParams.apiConfig.connectorId,
       ownerId,
@@ -201,8 +201,8 @@ export const transformToAlertDocuments = ({
     });
 
     const baseAlertDocument = transformToBaseAlertDocument({
-      alertDocId: alertUuid,
-      alertInstanceId: alertUuid,
+      alertDocId: alertHash,
+      alertInstanceId: alertHash,
       attackDiscovery,
       alertsParams: restParams,
       spaceId,

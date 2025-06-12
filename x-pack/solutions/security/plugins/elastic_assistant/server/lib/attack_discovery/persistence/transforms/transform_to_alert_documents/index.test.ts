@@ -33,7 +33,7 @@ import {
 } from '../../../schedules/fields/field_names';
 
 import {
-  generateAttackDiscoveryAlertUuid,
+  generateAttackDiscoveryAlertHash,
   transformToAlertDocuments,
   transformToBaseAlertDocument,
 } from '.';
@@ -387,7 +387,7 @@ describe('Transform attack discoveries to alert documents', () => {
     });
   });
 
-  describe('generateAttackDiscoveryAlertUuid', () => {
+  describe('generateAttackDiscoveryAlertHash', () => {
     const defaultProps = {
       spaceId: 'test-space-2',
       connectorId: 'test-connector-2',
@@ -395,11 +395,11 @@ describe('Transform attack discoveries to alert documents', () => {
     };
 
     it('generates a deterministic UUID for the same attack discovery and space', () => {
-      const uuid1a = generateAttackDiscoveryAlertUuid({
+      const uuid1a = generateAttackDiscoveryAlertHash({
         ...defaultProps,
         attackDiscovery: mockAttackDiscoveries[0],
       });
-      const uuid1b = generateAttackDiscoveryAlertUuid({
+      const uuid1b = generateAttackDiscoveryAlertHash({
         ...defaultProps,
         attackDiscovery: mockAttackDiscoveries[0],
       });
@@ -407,11 +407,11 @@ describe('Transform attack discoveries to alert documents', () => {
     });
 
     it('generates different UUIDs for different attack discoveries', () => {
-      const uuid1 = generateAttackDiscoveryAlertUuid({
+      const uuid1 = generateAttackDiscoveryAlertHash({
         ...defaultProps,
         attackDiscovery: mockAttackDiscoveries[0],
       });
-      const uuid2 = generateAttackDiscoveryAlertUuid({
+      const uuid2 = generateAttackDiscoveryAlertHash({
         ...defaultProps,
         attackDiscovery: mockAttackDiscoveries[1],
       });
@@ -419,12 +419,12 @@ describe('Transform attack discoveries to alert documents', () => {
     });
 
     it('generates different UUIDs for the same attack discovery in different spaces', () => {
-      const uuidDefault = generateAttackDiscoveryAlertUuid({
+      const uuidDefault = generateAttackDiscoveryAlertHash({
         ...defaultProps,
         attackDiscovery: mockAttackDiscoveries[0],
         spaceId: 'default',
       });
-      const uuidOther = generateAttackDiscoveryAlertUuid({
+      const uuidOther = generateAttackDiscoveryAlertHash({
         ...defaultProps,
         attackDiscovery: mockAttackDiscoveries[0],
         spaceId: 'other-space',
@@ -435,11 +435,11 @@ describe('Transform attack discoveries to alert documents', () => {
     it('is not affected by alertIds order (sorts internally)', () => {
       const attackDiscoveryA = { ...mockAttackDiscoveries[0], alertIds: ['b', 'a', 'c'] };
       const attackDiscoveryB = { ...mockAttackDiscoveries[0], alertIds: ['c', 'b', 'a'] };
-      const uuidA = generateAttackDiscoveryAlertUuid({
+      const uuidA = generateAttackDiscoveryAlertHash({
         ...defaultProps,
         attackDiscovery: attackDiscoveryA,
       });
-      const uuidB = generateAttackDiscoveryAlertUuid({
+      const uuidB = generateAttackDiscoveryAlertHash({
         ...defaultProps,
         attackDiscovery: attackDiscoveryB,
       });
