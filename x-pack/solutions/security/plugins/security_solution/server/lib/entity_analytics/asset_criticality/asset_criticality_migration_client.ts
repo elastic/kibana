@@ -75,7 +75,13 @@ export class AssetCriticalityMigrationClient {
         ...this.options,
         namespace: spaceId,
       });
-      await assetCriticalityDataClient.createOrUpdateIndex();
+      try {
+        await assetCriticalityDataClient.createOrUpdateIndex();
+      } catch (error) {
+        this.options.logger.error(
+          `Failed to create or update index for space ${spaceId}: ${error.message}`
+        );
+      }
     }
   };
 
