@@ -65,7 +65,7 @@ export class ServiceManager {
     const tools = this.services.tools.start({
       getRunner,
       logger,
-      elasticsearch
+      elasticsearch,
     });
 
     const agents = this.services.agents.start({
@@ -109,4 +109,3 @@ export class ServiceManager {
     return this.internalStart;
   }
 }
-

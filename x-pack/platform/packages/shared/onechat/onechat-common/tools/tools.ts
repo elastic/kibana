@@ -7,7 +7,6 @@
 
 import { createInternalError } from '../base/errors';
 
-
 /**
  * Represents a plain toolId, without source information attached to it.
  */
@@ -154,7 +153,6 @@ export interface ToolDescriptor {
    */
   meta: ToolDescriptorMeta;
 }
-
 
 /**
  * Metadata associated with a tool.

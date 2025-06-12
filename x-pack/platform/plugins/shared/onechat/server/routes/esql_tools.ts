@@ -5,13 +5,17 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import { esqlToolProviderId } from '@kbn/onechat-common';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
-import { esqlToolProviderId } from '@kbn/onechat-common';
-import { EsqlToolCreateRequest } from '@kbn/onechat-plugin/common/tools';
+import { EsqlToolCreateRequest } from '../../common/tools';
 import { apiPrivileges } from '../../common/features';
 
-export function registerESQLToolsRoutes({ router, getInternalServices, logger }: RouteDependencies) {
+export function registerESQLToolsRoutes({
+  router,
+  getInternalServices,
+  logger,
+}: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
   router.get(
@@ -34,7 +38,7 @@ export function registerESQLToolsRoutes({ router, getInternalServices, logger }:
 
         return response.ok({
           body: {
-            tool: tool,
+            tool,
           },
         });
       } catch (error) {
@@ -49,7 +53,7 @@ export function registerESQLToolsRoutes({ router, getInternalServices, logger }:
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
-      validate: false
+      validate: false,
     },
     wrapHandler(async (ctx, request, response) => {
       try {
@@ -60,7 +64,7 @@ export function registerESQLToolsRoutes({ router, getInternalServices, logger }:
 
         return response.ok({
           body: {
-            tools: tools,
+            tools,
           },
         });
       } catch (error) {
@@ -112,15 +116,15 @@ export function registerESQLToolsRoutes({ router, getInternalServices, logger }:
           created_at: now.toISOString(),
           updated_at: now.toISOString(),
         };
-        
+
         await client.create(tool);
 
         return response.ok({
           body: {
-            tool: {...request.body},
+            tool: { ...request.body },
           },
         });
-    } catch (error) {
+      } catch (error) {
         throw error;
       }
     })
@@ -140,17 +144,21 @@ export function registerESQLToolsRoutes({ router, getInternalServices, logger }:
           id: schema.maybe(schema.string()),
           description: schema.maybe(schema.string()),
           query: schema.maybe(schema.string()),
-          params: schema.maybe(schema.recordOf(
-            schema.string(),
+          params: schema.maybe(
+            schema.recordOf(
+              schema.string(),
+              schema.object({
+                type: schema.string(),
+                description: schema.string(),
+              })
+            )
+          ),
+          meta: schema.maybe(
             schema.object({
-              type: schema.string(),
-              description: schema.string(),
+              tags: schema.maybe(schema.arrayOf(schema.string())),
+              providerId: schema.maybe(schema.string()),
             })
-          )),
-          meta: schema.maybe(schema.object({
-            tags: schema.maybe(schema.arrayOf(schema.string())),
-            providerId: schema.maybe(schema.string()),
-          })),
+          ),
         }),
       },
     },
@@ -165,14 +173,14 @@ export function registerESQLToolsRoutes({ router, getInternalServices, logger }:
           ...(request.body.description && { description: request.body.description }),
           ...(request.body.query && { query: request.body.query }),
           ...(request.body.params && { params: request.body.params }),
-          ...(request.body.meta && { 
+          ...(request.body.meta && {
             meta: {
               ...(request.body.meta.tags && { tags: request.body.meta.tags }),
               ...(request.body.meta.providerId && { providerId: request.body.meta.providerId }),
-            }
+            },
           }),
         };
-        
+
         const updatedTool = await client.update(toolId, updates);
 
         return response.ok({
@@ -188,32 +196,32 @@ export function registerESQLToolsRoutes({ router, getInternalServices, logger }:
 
   router.delete(
     {
-        path: '/api/chat/tools/esql/{id}',
-        security: {
-          authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
-        },
-        validate: {
-            params: schema.object({
-                id: schema.string(),
-            }),
-        },
+      path: '/api/chat/tools/esql/{id}',
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+      },
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
     },
     wrapHandler(async (ctx, request, response) => {
-        try {
-            const { esql: esqlToolService } = getInternalServices();
-            const client = await esqlToolService.getScopedClient({ request });
+      try {
+        const { esql: esqlToolService } = getInternalServices();
+        const client = await esqlToolService.getScopedClient({ request });
 
-            const toolId = request.params.id;
-            const result = await client.delete(toolId);
+        const toolId = request.params.id;
+        const result = await client.delete(toolId);
 
-            return response.ok({
-              body: {
-                success: result,
-              },
-            });
-          } catch (error) {
-            throw error;
-          }
-        })
-);
+        return response.ok({
+          body: {
+            success: result,
+          },
+        });
+      } catch (error) {
+        throw error;
+      }
+    })
+  );
 }

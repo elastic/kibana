@@ -91,7 +91,6 @@ export class OnechatPlugin
     { elasticsearch, security }: CoreStart,
     { actions, inference }: OnechatStartDependencies
   ): OnechatPluginStart {
-    
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
       security,

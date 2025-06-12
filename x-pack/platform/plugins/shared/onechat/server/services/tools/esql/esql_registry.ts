@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import type {
-    KibanaRequest,
-    Logger,
-    ElasticsearchServiceStart,
-  } from '@kbn/core/server';
-  import { EsqlToolClient, createClient } from './client';
-  import { createStorage } from './storage';
-import { RegisteredToolProviderWithId } from '../types';
+import type { KibanaRequest, Logger, ElasticsearchServiceStart } from '@kbn/core/server';
 import { EsqlTool, RegisteredTool } from '@kbn/onechat-server';
 import { esqlToolProviderId } from '@kbn/onechat-common';
+import { EsqlToolClient, createClient } from './client';
+import { createStorage } from './storage';
+import { RegisteredToolProviderWithId } from '../types';
 import { esqlToolCreater } from './utils/execute_esql_query';
-  
+
 export interface EsqlToolRegistry extends RegisteredToolProviderWithId {
   getScopedClient(options: { request: KibanaRequest }): Promise<EsqlToolClient>;
 }
@@ -28,7 +24,7 @@ export class EsqlToolRegistryImpl implements EsqlToolRegistry {
 
   constructor({
     logger,
-    elasticsearch
+    elasticsearch,
   }: {
     logger: Logger;
     elasticsearch: ElasticsearchServiceStart;
@@ -50,20 +46,19 @@ export class EsqlToolRegistryImpl implements EsqlToolRegistry {
   async get(options: { toolId: string; request: KibanaRequest }): Promise<RegisteredTool> {
     const { toolId, request } = options;
     const client = await this.getScopedClient({ request });
-      try {
-          const document = await client.get(toolId);
-          const tool = document;
-          const executableTool = esqlToolCreater(tool);
+    try {
+      const document = await client.get(toolId);
+      const tool = document;
+      const executableTool = esqlToolCreater(tool);
 
-          return executableTool as EsqlTool;
-          
-      } catch (error) {
-          if (error.statusCode === 404) {
-              throw new Error(`Tool with ID ${toolId} not found`);
-          }
-          this.logger.error(`Error retrieving ESQL tool with ID ${toolId}: ${error}`);
-          throw error;
+      return executableTool as EsqlTool;
+    } catch (error) {
+      if (error.statusCode === 404) {
+        throw new Error(`Tool with ID ${toolId} not found`);
       }
+      this.logger.error(`Error retrieving ESQL tool with ID ${toolId}: ${error}`);
+      throw error;
+    }
   }
 
   async list(options: { request: KibanaRequest }): Promise<RegisteredTool[]> {
@@ -75,28 +70,24 @@ export class EsqlToolRegistryImpl implements EsqlToolRegistry {
       const executableTool = esqlToolCreater(tool);
       registeredTools.push(executableTool);
     }
-    return registeredTools
+    return registeredTools;
   }
 
   async getScopedClient({ request }: { request: KibanaRequest }): Promise<EsqlToolClient> {
     try {
-      const storage = createStorage({ 
-          logger: this.logger, 
-          esClient: this.elasticsearch.client.asScoped(request).asInternalUser,
+      const storage = createStorage({
+        logger: this.logger,
+        esClient: this.elasticsearch.client.asScoped(request).asInternalUser,
       });
 
-      const client = createClient({ 
-          storage
+      const client = createClient({
+        storage,
       });
 
       return client;
-  } catch (error) {
+    } catch (error) {
       this.logger.error(error);
       throw error;
-      }
+    }
   }
-
 }
-
-      
-    
