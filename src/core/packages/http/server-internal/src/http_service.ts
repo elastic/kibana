@@ -333,6 +333,7 @@ export class HttpService
             },
           },
         },
+        auth: false,
         cache: {
           privacy: 'public',
           otherwise: 'must-revalidate',
