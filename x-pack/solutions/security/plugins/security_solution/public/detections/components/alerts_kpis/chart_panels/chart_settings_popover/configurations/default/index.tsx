@@ -9,7 +9,7 @@ import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import type { Dispatch, SetStateAction } from 'react';
 import { useMemo, useState } from 'react';
 
-import { useInspect } from '../../../inspect/use_inspect';
+import { useInspect } from '../../../../../../../common/components/inspect/use_inspect';
 
 import * as i18n from './translations';
 
