@@ -241,6 +241,13 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
     solutionsRecommendedQueries,
   ]);
 
+  const esqlMenuPopoverStyles = css`
+    width: 240px;
+    max-height: 350px;
+    overflow-y: auto;
+    ${useEuiScrollBar()};
+  `;
+
   return (
     <>
       <EuiPopover
@@ -258,12 +265,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
         }
         panelProps={{
           ['data-test-subj']: 'esql-menu-popover',
-          css: css`
-            width: 240px;
-            max-height: 350px;
-            overflow-y: auto;
-            ${useEuiScrollBar()};
-          `,
+          css: esqlMenuPopoverStyles,
         }}
         isOpen={isESQLMenuPopoverOpen}
         closePopover={() => setIsESQLMenuPopoverOpen(false)}
