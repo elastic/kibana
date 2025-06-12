@@ -63,6 +63,7 @@ import { RelatedDashboards } from './components/related_dashboards';
 import { getAlertTitle } from '../../utils/format_alert_title';
 import { AlertSubtitle } from './components/alert_subtitle';
 import { ProximalAlertsCallout } from './proximal_alerts_callout';
+import { useGetTabId } from './hooks/use_get_tab_id';
 
 interface AlertDetailsPathParams {
   alertId: string;
@@ -111,6 +112,7 @@ export function AlertDetails() {
   const history = useHistory();
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { alertId } = useParams<AlertDetailsPathParams>();
+  const passedTab = useGetTabId();
   const [isLoading, alertDetail] = useFetchAlertDetail(alertId);
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
   const CasesContext = getCasesContext();
@@ -174,9 +176,9 @@ export function AlertDetails() {
     if (alertDetail) {
       setRuleTypeModel(ruleTypeRegistry.get(alertDetail?.formatted.fields[ALERT_RULE_TYPE_ID]!));
       setAlertStatus(alertDetail?.formatted?.fields[ALERT_STATUS] as AlertStatus);
-      setActiveTabId(OVERVIEW_TAB_ID);
+      if (passedTab === OVERVIEW_TAB_ID || passedTab === null) setActiveTabId(OVERVIEW_TAB_ID);
     }
-  }, [alertDetail, ruleTypeRegistry]);
+  }, [passedTab, alertDetail, ruleTypeRegistry]);
 
   useBreadcrumbs(
     [

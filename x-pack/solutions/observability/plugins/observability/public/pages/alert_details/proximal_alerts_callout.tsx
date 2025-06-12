@@ -18,10 +18,6 @@ interface Props {
 export function ProximalAlertsCallout({ alertDetail, switchTabs }: Props) {
   const { euiTheme } = useEuiTheme();
 
-  const handleClick = () => {
-    switchTabs();
-  };
-
   const { data, isError, isLoading } = useFindProximalAlerts(alertDetail);
 
   const count = data?.total;
@@ -33,7 +29,8 @@ export function ProximalAlertsCallout({ alertDetail, switchTabs }: Props) {
   return (
     <EuiCallOut>
       {i18n.translate('xpack.observability.alertDetails.proximalAlert.description', {
-        defaultMessage: '{count} alerts were triggered around the same time.',
+        defaultMessage:
+          '{count, plural, one {# alert was} other {# alerts were}} triggered around the same time.',
         values: {
           count,
         },
@@ -42,7 +39,7 @@ export function ProximalAlertsCallout({ alertDetail, switchTabs }: Props) {
         <EuiLink
           data-test-subj="see-proximal-alerts"
           css={{ marginLeft: euiTheme.size.s }}
-          onClick={() => handleClick()}
+          onClick={() => switchTabs()}
         >
           {i18n.translate('xpack.observability.alertDetails.proximalAlert.action', {
             defaultMessage: 'See more',
