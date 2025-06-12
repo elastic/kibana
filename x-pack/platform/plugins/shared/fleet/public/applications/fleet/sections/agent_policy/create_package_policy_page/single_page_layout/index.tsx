@@ -284,10 +284,11 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   }, [agentPolicyIds, selectedPolicyTab, isFleetEnabled]);
 
   useEffect(() => {
-    if (integration && integrationToEnable !== integration) {
+    if ((integration || integrationToEnable) && integrationToEnable !== integration) {
+      setFormState('LOADING');
       setIntegrationToEnable(integration);
     }
-  }, [integration, integrationToEnable]);
+  }, [integration, integrationToEnable, setFormState]);
 
   useEffect(() => {
     if (addIntegrationFlyoutProps?.isSubmitted && formState !== 'LOADING') {
