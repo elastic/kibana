@@ -1654,8 +1654,6 @@ describe('<CspPolicyTemplateForm />', () => {
             get: (key: string) => key === SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING,
           },
         },
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       const { getByTestId } = render(
