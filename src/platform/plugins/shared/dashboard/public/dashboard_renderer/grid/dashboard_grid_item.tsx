@@ -12,12 +12,11 @@ import { css, keyframes } from '@emotion/react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useLayoutEffect, useMemo } from 'react';
 import { useMemoizedStyles } from '@kbn/core/public';
 import { DashboardPanelState } from '../../../common';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
-import { presentationUtilService } from '../../services/kibana_services';
 import { DASHBOARD_MARGIN_SIZE } from './constants';
 import { printViewportVisStyles } from '../print_styles';
 
@@ -34,7 +33,7 @@ export interface Props extends DivProps {
   setDragHandles?: (refs: Array<HTMLElement | null>) => void;
 }
 
-export const Item = React.forwardRef<HTMLDivElement, Props>(
+export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
   (
     {
       appFixedViewport,
@@ -162,57 +161,6 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
     );
   }
 );
-
-export const ObservedItem = React.forwardRef<HTMLDivElement, Props>((props, panelRef) => {
-  const [intersection, updateIntersection] = useState<IntersectionObserverEntry>();
-  const [isRenderable, setIsRenderable] = useState(false);
-
-  const observerRef = useRef(
-    new window.IntersectionObserver(([value]) => updateIntersection(value), {
-      root: (panelRef as React.RefObject<HTMLDivElement>).current,
-    })
-  );
-
-  useEffect(() => {
-    const { current: currentObserver } = observerRef;
-    currentObserver.disconnect();
-    const { current } = panelRef as React.RefObject<HTMLDivElement>;
-
-    if (current) {
-      currentObserver.observe(current);
-    }
-
-    return () => currentObserver.disconnect();
-  }, [panelRef]);
-
-  useEffect(() => {
-    if (intersection?.isIntersecting && !isRenderable) {
-      setIsRenderable(true);
-    }
-  }, [intersection, isRenderable]);
-
-  return <Item ref={panelRef} isRenderable={isRenderable} {...props} />;
-});
-
-export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>((props, ref) => {
-  const dashboardApi = useDashboardApi();
-  const [focusedPanelId, viewMode] = useBatchedPublishingSubjects(
-    dashboardApi.focusedPanelId$,
-    dashboardApi.viewMode$
-  );
-
-  const deferBelowFoldEnabled = useMemo(
-    () => presentationUtilService.labsService.isProjectEnabled('labs:dashboard:deferBelowFold'),
-    []
-  );
-
-  const isEnabled =
-    viewMode !== 'print' &&
-    deferBelowFoldEnabled &&
-    (!focusedPanelId || focusedPanelId === props.id);
-
-  return isEnabled ? <ObservedItem ref={ref} {...props} /> : <Item ref={ref} {...props} />;
-});
 
 const dashboardGridItemStyles = {
   item: (context: UseEuiTheme) =>

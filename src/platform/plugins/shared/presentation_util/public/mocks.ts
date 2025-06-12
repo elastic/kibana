@@ -13,13 +13,6 @@ import { setStubKibanaServices } from './services/mocks';
 
 const createStartContract = (): PresentationUtilPluginStart => {
   const startContract: PresentationUtilPluginStart = {
-    labsService: {
-      getProjects: jest.fn(),
-      getProject: jest.fn(),
-      isProjectEnabled: jest.fn(),
-      reset: jest.fn(),
-      setProjectStatus: jest.fn(),
-    },
     registerExpressionsLanguage,
   };
   return startContract;
