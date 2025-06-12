@@ -46,12 +46,19 @@ export function BarDetails({
           min-width: ${Math.max(100 - left, 0)}%;
           position: absolute;
           right: 0;
+          max-width: 100%;
           & > div:last-child {
             margin-right: ${theme.euiTheme.size.s};
+            white-space: nowrap;
           }
         `}
       >
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            min-width: 0;
+          `}
+        >
           <EuiText css={{ overflow: 'hidden' }} size="s">
             <TruncateWithTooltip content={item.name} text={item.name} />
           </EuiText>
