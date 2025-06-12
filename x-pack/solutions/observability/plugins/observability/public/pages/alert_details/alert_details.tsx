@@ -276,11 +276,11 @@ export function AlertDetails() {
 
         <EuiSpacer size="m" />
         <EuiFlexGroup direction="column" gutterSize="m">
-          <SourceBar alert={alertDetail.formatted} sources={sources} />
           <ProximalAlertsCallout
             alertDetail={alertDetail}
             switchTabs={showRelatedAlertsFromCallout}
           />
+          <SourceBar alert={alertDetail.formatted} sources={sources} />
           <AlertDetailContextualInsights alert={alertDetail} />
           {rule && alertDetail.formatted && (
             <>
