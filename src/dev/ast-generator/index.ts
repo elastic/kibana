@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable no-console */
+
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreemen Licensed under the "Elastic License
@@ -16,470 +18,179 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseSync, Function } from 'oxc-parser';
-
-import { Node, TypeChecker, isVariableStatement } from 'typescript';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as cliProgress from 'cli-progress';
+import { Worker } from 'worker_threads';
+import { MultiBar, SingleBar, Presets } from 'cli-progress';
 import { getPackages } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
-// import { extractSchemaFromType } from './extract_schema_from_type';
+import path from 'path';
+import { createIndexInElasticsearch, createWorker, deleteWorker } from './utils';
 
-const ES_HOST = 'http://localhost:9200';
-const INDEX_NAME = 'kibana-ast';
-const AUTH = Buffer.from('elastic:changeme').toString('base64');
-
-const cwd = process.cwd();
+export interface FunctionInfo {
+  id: string;
+  name: string;
+  startLine: number;
+  parameters:
+    | Array<{
+        name: string;
+        type: string | undefined;
+        optional: boolean;
+      }>
+    | undefined;
+  returnType: string | undefined;
+  fullText: string;
+  normalizedCode: string;
+  astFeatures: {};
+  filePath: string;
+}
 
 const startTime = Date.now();
 
-const map = new Map<string, string[]>();
+const debug = process.env.NODE_ENV === 'dev';
 
 export async function generateAST() {
-  log('Generating AST for Kibana files...');
+  console.log('Generating AST for Kibana files...');
 
+  if (debug) deleteWorker();
+  if (!debug) createWorker();
+
+  console.log('hello?');
   await createIndexInElasticsearch();
 
   const packages = getPackages(REPO_ROOT);
 
   if (packages.length === 0) {
-    log('No packages found in the repository.');
+    console.log('No packages found in the repository.');
     return;
   }
 
-  const filtered = packages.filter((pkg) =>
-    pkg.directory.includes('x-pack/solutions/observability')
-  );
-  const progressBar = new cliProgress.MultiBar(
+  console.log(`Found ${packages.length} packages.`);
+
+  const progress = new MultiBar(
     {
-      format: ' {bar} | {name} | {value}/{total} | {foo} | {duration}s',
+      format: '{bar} | {value}/{total} | {duration_formatted} | {eta_formatted} | {name} | {stat}',
       forceRedraw: true,
+      stopOnComplete: true,
+      clearOnComplete: true,
+      autopadding: true,
+      fps: 60,
     },
-    cliProgress.Presets.shades_classic
+    Presets.shades_classic
   );
 
-  const packagesProgress = progressBar.create(filtered.length, 0);
-  const filesProgress = progressBar.create(0, 0);
+  const packagesBar = progress.create(packages.length, 0, {
+    name: 'Packages',
+    stat: '',
+  });
 
-  for (const { directory, manifest, id } of filtered) {
-    packagesProgress.increment(1, { name: id, foo: '' });
+  packagesBar?.start(packages.length, 0, { name: 'Processing packages...' });
 
-    const files = getAllFiles(directory);
+  // Run workers in parallel, but limit concurrency to avoid resource exhaustion
+  const maxWorkers = 10;
+  let running = 0;
+  let idx = 0;
+  let completed = 0;
 
-    filesProgress.setTotal(files.length);
-    filesProgress.update(0);
+  function runNext({ packageBar, map }: { packageBar: SingleBar; map: Map<string, true> }) {
+    packageBar?.setTotal(0);
 
-    if (files.length === 0) {
-      log('No .ts or .tsx files found in the specified directory.');
-      return;
-    }
+    if (idx >= packages.length) return;
 
-    for (const file of files) {
-      filesProgress.increment(1, {
-        name: path.relative(cwd, file),
-        foo: '',
-      });
-      // log(`Found file: ${file}`);
+    const { directory, id } = packages[idx++];
 
-      const contents = fs.readFileSync(file).toString();
+    packageBar?.update({ name: `Processing package ${id}...` });
 
-      // const result = parseSync(file, contents);
-      const result = parseSync(file, contents);
+    running++;
 
-      for (const node of result.program.body) {
-        const fileName = path.relative(cwd, file);
-        if (node.type === 'ExportNamedDeclaration') {
-          const declaration = node.declaration;
-          if (!declaration) continue;
+    const worker = new Worker(path.join(__dirname, 'process_package_worker'));
 
-          if (declaration.type === 'FunctionDeclaration' && declaration.id) {
-            const functionName = declaration.id.name;
-            // log(`Found function: ${functionName} in file: ${file}`);
-            // await handleFunction(functionName, node, result.program, kibanaConfigParsed.raw.id);
-            filesProgress.update({
-              foo: `Processing function ${functionName}`,
-            });
-            await handleFunction({
-              fileName,
-              packageName: manifest.id,
-              functionName,
-              node: declaration,
-              sourceFile: contents,
-              progress: filesProgress,
-            });
+    worker.postMessage({
+      action: 'processPackage',
+      data: {
+        directory,
+        id,
+        map: Array.from(map),
+      },
+    });
+
+    worker.on('message', (msg) => {
+      switch (msg.type) {
+        case 'create':
+          packageBar.start(0, 0, { name: id, stat: `🚀 ${msg.msg}` });
+          break;
+        case 'total':
+          packageBar.setTotal(msg.total);
+          break;
+        case 'update':
+          packageBar.update({ name: id, stat: `🚀 ${msg.msg || ''}` });
+          break;
+        case 'total':
+          packageBar.setTotal(msg.total);
+          break;
+        case 'processFile':
+          if (msg.filePath in map === false) {
+            map.set(msg.filePath, true);
           }
-        }
-
-        if (node.type === 'FunctionDeclaration' && node.id) {
-          const functionName = node.id.name;
-          // log(`Found function: ${functionName} in file: ${file}`);
-          // await handleFunction(functionName, node, result.program, kibanaConfigParsed.raw.id);
-          filesProgress.update({
-            foo: `Processing function ${functionName}`,
+          packageBar.increment(1, { name: id, stat: msg.msg || '' });
+          break;
+        case 'foundDuplicate':
+          packageBar.update({
+            stat: `⚠️ Duplicate file found: ${msg.filePath}`,
           });
-          await handleFunction({
-            fileName,
-            packageName: manifest.id,
-            functionName,
-            node,
-            sourceFile: contents,
-            progress: filesProgress,
+          break;
+        case 'done':
+          completed++;
+
+          packageBar.stop();
+          packageBar.update({ stat: `✅ Completed processing ${id}.` });
+
+          packagesBar.increment(1, { stat: `✅ Processed ${id}.` });
+          break;
+        case 'error':
+          completed++;
+
+          packagesBar.increment(1, {
+            name: id,
+            stat: `❌ Worker error for ${id}: ${msg.error}`,
           });
-        }
 
-        if (node.type === 'VariableDeclaration') {
-          if (node.declarations.length === 0) continue;
-          if (
-            node.declarations.length > 1 &&
-            node.declarations[0].type === 'VariableDeclarator' &&
-            node.declarations[0].init?.type === 'ArrowFunctionExpression'
-          ) {
-            const variableDeclaration = node.declarations[0];
-            const functionName =
-              variableDeclaration.id.type === 'Identifier'
-                ? variableDeclaration.id.name
-                : '<unknown>';
-
-            filesProgress.update({
-              foo: `Processing function ${functionName}`,
-            });
-            await handleFunction({
-              fileName,
-              functionName,
-              node: variableDeclaration.init as Function,
-              sourceFile: contents,
-              packageName: manifest.id,
-              progress: filesProgress,
-              // checker: result.program.getTypeChecker(),
-            });
-          }
-        }
+          break;
+        default:
+          console.warn(`Unknown message type from worker: ${msg.type}`);
       }
-    }
-
-    // const program = createProgram({
-    //   // rootNames: ['./x-pack/solutions/observability/plugins/apm/public/utils/build_url.ts'],
-    //   // rootNames: ['./src/core/packages/application/browser-internal/src/utils/append_app_path.ts'],
-    //   // rootNames: ['./src/platform/packages/shared/kbn-config-schema/src/byte_size_value/index.ts'],
-    //   rootNames: files,
-    //   options: parsed.options,
-    // });
-
-    // const checker = program.getTypeChecker();
-
-    // for (const sourceFile of program.getSourceFiles()) {
-    //   if (sourceFile.fileName.includes('node_modules')) continue;
-    //   if (sourceFile.fileName.includes('.d.ts')) continue;
-
-    //   log(`Processing file: ${sourceFile.fileName}`);
-
-    //   // Use an async recursive visitor
-    //   await visitAsync(sourceFile, sourceFile, checker, kibanaConfigParsed.raw.id);
-
-    //   const used = process.memoryUsage().heapUsed / 1024 / 1024;
-    //   log(`Memory used: ${used.toFixed(2)} MB`);
-    // }
-  }
-
-  progressBar.stop();
-}
-
-function findEnclosingVariableStatement(node: Node): Node | undefined {
-  let current: Node | undefined = node;
-  while (current) {
-    if (isVariableStatement(current)) {
-      return current;
-    }
-    current = current.parent;
-  }
-  return undefined;
-}
-
-// Get all .ts and .tsx files
-function getAllFiles(dir: string): string[] {
-  return fs.readdirSync(dir).flatMap((entry) => {
-    const fullPath = path.join(dir, entry);
-    return fs.statSync(fullPath).isDirectory()
-      ? getAllFiles(fullPath)
-      : /\.(ts|tsx)$/.test(fullPath)
-      ? [fullPath]
-      : [];
-  });
-}
-
-interface FunctionInfo {
-  id: string;
-  file: string;
-  line: number;
-  functionName: string;
-  functionIntent: string;
-  functionDescription: string;
-  packageName: string;
-  parameters?: Record<string, any>;
-  returnType?: any;
-}
-
-async function handleFunction({
-  fileName,
-  functionName,
-  node,
-  sourceFile,
-  checker,
-  packageName,
-  progress,
-}: {
-  fileName: string;
-  functionName: string;
-  sourceFile: string;
-  packageName: string;
-  node?: Function;
-  checker?: TypeChecker;
-  progress: cliProgress.SingleBar;
-}) {
-  const id = `${fileName.replaceAll('/', '-')}_${functionName}`;
-
-  if (map.has(id)) {
-    // log(`Skipping duplicate function: ${functionName} in ${fileName}`);
-    return;
-  }
-
-  map.set(id, [fileName, functionName]);
-
-  // const signature = checker.getSignatureFromDeclaration(node as SignatureDeclaration);
-
-  // if (!signature) return;
-
-  // const returnType = checker.getReturnTypeOfSignature(signature);
-
-  // const returnSchema = extractSchemaFromType({
-  //   type: returnType,
-  //   checker,
-  //   includeRequired: false,
-  //   seen: new Map(),
-  //   depth: 0,
-  // });
-
-  // const paramSchemas: Record<string, any> = {};
-
-  // for (const param of node.parameters) {
-  // const paramSymbol = checker.getSymbolAtLocation(param.name);
-
-  // if (!paramSymbol) continue;
-
-  // const paramType = checker.getTypeOfSymbolAtLocation(paramSymbol, param);
-
-  //   paramSchemas[paramSymbol.getName()] = extractSchemaFromType({
-  //     type: paramType,
-  //     checker,
-  //     includeRequired: false,
-  //     seen: new Map(),
-  //     depth: 0,
-  //   });
-  // }
-  const functionCode = sourceFile.slice(node?.start, node?.end);
-
-  const foo = await callOllama(functionName, functionCode, progress);
-
-  const { intent, description }: { intent: string; description: string } = foo;
-
-  const func = {
-    id,
-    file: fileName,
-    functionName,
-    functionIntent: intent,
-    functionDescription: description,
-    packageName,
-    line: node?.start ?? 0,
-    // parameters: paramSchemas,
-    // returnType: returnSchema,
-  };
-
-  await queueFunctionForBulkUpload(func);
-}
-
-function log(...args: any) {
-  // eslint-disable-next-line no-console
-  console.log(...args);
-}
-
-const BULK_BATCH_SIZE = 10;
-const bulkQueue: FunctionInfo[] = [];
-
-async function queueFunctionForBulkUpload(func: FunctionInfo) {
-  bulkQueue.push(func);
-  if (bulkQueue.length >= BULK_BATCH_SIZE) {
-    await flushBulkQueue();
-  }
-}
-
-// Call this one final time after everything is processed
-async function flushBulkQueue(progress?: cliProgress.SingleBar) {
-  if (bulkQueue.length === 0) return;
-
-  const bulkBody = bulkQueue.flatMap((func) => {
-    const { id, ...rest } = func;
-    return [{ index: { _index: INDEX_NAME, _id: id } }, rest];
-  });
-
-  progress?.update({
-    foo: `Flushing ${bulkQueue.length} functions to ES...`,
-  });
-  const res = await fetch(`${ES_HOST}/_bulk`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-ndjson',
-      Authorization: `Basic ${AUTH}`,
-    },
-    body: bulkBody.map((line) => JSON.stringify(line)).join('\n') + '\n',
-  });
-
-  if (!res.ok) {
-    const error = await res.text();
-    // log(`Failed to bulk upload. Status: ${res.status} - ${res.statusText}`);
-    progress?.update({
-      foo: `Failed to bulk upload functions: ${res.status} - ${res.statusText}`,
     });
-    log(error);
-  } else {
-    // log(`Uploaded ${bulkQueue.length} functions in bulk`);
-    progress?.update({
-      foo: `Uploaded ${bulkQueue.length} functions in bulk`,
+
+    worker.on('exit', () => {
+      running--;
+
+      if (completed >= packages.length) {
+        progress.stop();
+      } else {
+        runNext({ packageBar, map });
+      }
     });
   }
 
-  bulkQueue.length = 0; // Clear queue
-}
-
-async function callOllama(
-  functionName: string,
-  functionCode: string,
-  progress?: cliProgress.SingleBar
-) {
-  progress?.update({ foo: `Summarizing function ${functionName}...` });
-  const start = Date.now();
-  const response = await fetch('http://localhost:11434/api/generate', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'devstral:latest',
-      prompt: `Here is a typescript function:
-        ${functionCode}
-
-        Summarize this function.
-
-        Please provide the following information as **strict JSON**.
-        
-        The JSON should include: 
-        - "intent" (string): a concise description of the intent of the function. Start with "${functionName} is a function that ..." . Do not use more than 150 characters.>
-        - "description" (string) A detailed description of the function. Include the parameters and return variable names in your answer. Keep it to a maximum of 350 characters.
-
-        **Important:** 
-        - Do not include any explanations.
-        - DO NOT include your thinking process.
-        - NEVER include the function code in the response.
-        - Make sure the JSON is valid and parseable.
-        - Do not wrap the JSON in any other format, such as markdown or code blocks.
-
-        Correct:
-        {
-          "intent": "getVariables is a function that returns default variables with optional overrides.",
-          "description": "This function takes an optional array of feature IDs as input, checks their compatibility with AllAvailableConnectorFeatures, and returns the resulting set of compatible connector features.",
-        }
-
-        Incorrect:
-        \`\`\`json
-        {
-          "intent": "getVariables is a function that returns default variables with optional overrides.",
-          "description": "This function takes an optional array of feature IDs as input, checks their compatibility with AllAvailableConnectorFeatures, and returns the resulting set of compatible connector features.",
-        }
-        \`\`\`
-        `,
-
-      stream: false,
-    }),
-  });
-
-  const data = await response.json();
-
-  try {
-    const parsed = JSON.parse(data.response);
-    if (typeof parsed.intent !== 'string' || typeof parsed.description !== 'string') {
-      throw new Error('Invalid response format from Ollama');
-    }
-    const end = Date.now();
-    const elapsed = ((end - start) / 1000).toFixed(2);
-    progress?.update({ foo: `Got a summary in ${elapsed}s` });
-    return parsed;
-  } catch (error) {
-    log(`Error parsing Ollama response for ${functionName}:`, error);
-    return {
-      intent: `Failed to parse intent for ${functionName}`,
-      description: `Failed to parse description for ${functionName}`,
-    };
-  }
-}
-
-async function createIndexInElasticsearch() {
-  const indexExists = await fetch(`${ES_HOST}/${INDEX_NAME}`, {
-    method: 'HEAD',
-    headers: {
-      Authorization: `Basic ${AUTH}`,
-    },
-  });
-
-  if (indexExists.status === 200) {
-    log(`Index ${INDEX_NAME} already exists.`);
-
-    const deleteIndexResponse = await fetch(`${ES_HOST}/${INDEX_NAME}`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Basic ${AUTH}`,
-      },
-    });
-    if (!deleteIndexResponse.ok) {
-      throw new Error(
-        `Failed to delete index ${INDEX_NAME}: [${deleteIndexResponse.statusText}]:
-        ${await deleteIndexResponse.json()}`
-      );
-    }
-
-    log(`Index ${INDEX_NAME} deleted successfully.`);
-  }
-
-  const createIndexResponse = await fetch(`${ES_HOST}/${INDEX_NAME}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Basic ${AUTH}`,
-    },
-    body: JSON.stringify({
-      mappings: {
-        properties: {
-          functionDescription: {
-            type: 'semantic_text',
-          },
-        },
-      },
-      settings: {
-        'index.mapping.total_fields.limit': 100000,
-        'index.mapping.depth.limit': 100,
-      },
-    }),
-  });
-
-  if (!createIndexResponse.ok) {
-    throw new Error(
-      `Failed to create index ${INDEX_NAME}: [${createIndexResponse.statusText}]:
-      ${await createIndexResponse.json()}`
+  const map = new Map<string, true>();
+  // Start initial workers
+  for (let i = 0; i < Math.min(maxWorkers, packages.length); i++) {
+    const packageBar = progress.create(
+      0,
+      0,
+      {},
+      { autopadding: true, clearOnComplete: true, stopOnComplete: true, emptyOnZero: true }
     );
+
+    runNext({ packageBar, map });
   }
 
-  log(`Index ${INDEX_NAME} created successfully.`);
+  // Wait for all workers to finish
+  while (completed < packages.length) {
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
 }
 
 generateAST().then(() => {
   const endTime = Date.now();
   const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
-  log(`AST generation completed in ${elapsedTime} seconds`);
+  console.log(`AST generation completed in ${elapsedTime} seconds`);
 });
