@@ -5,20 +5,23 @@
  * 2.0.
  */
 import {
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
   EuiSuperDatePicker,
+  EuiText,
   EuiTitle,
-  OnRefreshProps,
   OnTimeChangeProps,
 } from '@elastic/eui';
 import DateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import React, { useMemo, useState } from 'react';
+import moment from 'moment';
+import React, { useEffect, useState } from 'react';
 import { ErrorRateChart } from '../../../../components/slo/error_rate_chart';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { toDuration } from '../../../../utils/slo/duration';
 import { TimeBounds } from '../../types';
 import { EventsChartPanel } from '../events_chart_panel/events_chart_panel';
 import { HistoricalDataCharts } from '../historical_data_charts';
@@ -28,56 +31,108 @@ export interface Props {
   isAutoRefreshing: boolean;
 }
 
+function getPeriodLabel(slo: SLOWithSummaryResponse, calendarPeriod: number): string {
+  const duration = toDuration(slo.timeWindow.duration);
+  const unit = duration.unit === 'w' ? 'week' : 'month';
+  const now = moment();
+  const start = moment
+    .utc(now)
+    .subtract(calendarPeriod, unit)
+    .startOf(duration.unit === 'w' ? 'isoWeek' : 'month');
+  const end = moment
+    .utc(now)
+    .subtract(calendarPeriod, unit)
+    .endOf(duration.unit === 'w' ? 'isoWeek' : 'month');
+  return `${start.format('LL')} - ${end.format('LL')}`;
+}
+
 export function SloDetailsHistory({ slo, isAutoRefreshing }: Props) {
   const { uiSettings } = useKibana().services;
-  const [start, setStart] = useState(`now-${slo.timeWindow.duration}`);
-  const [end, setEnd] = useState('now');
+  const [calendarPeriod, setCalendarPeriod] = useState<number>(0);
 
-  const onTimeChange = (val: OnTimeChangeProps) => {
-    setStart(val.start);
-    setEnd(val.end);
-  };
+  // TODO: refactor
+  const [range, setRange] = useState<TimeBounds>(() => {
+    if (slo.timeWindow.type === 'calendarAligned') {
+      const now = moment();
+      const duration = toDuration(slo.timeWindow.duration);
+      const unit = duration.unit === 'w' ? 'isoWeek' : 'months';
 
-  const onRefresh = (val: OnRefreshProps) => {};
+      return {
+        from: moment.utc(now).startOf(unit).toDate(),
+        to: moment.utc(now).endOf(unit).toDate(),
+      };
+    }
 
-  const range = useMemo(() => {
     return {
-      from: new Date(DateMath.parse(start)!.valueOf()),
-      to: new Date(DateMath.parse(end, { roundUp: true })!.valueOf()),
+      from: new Date(DateMath.parse(`now-${slo.timeWindow.duration}`)!.valueOf()),
+      to: new Date(DateMath.parse('now', { roundUp: true })!.valueOf()),
     };
-  }, [start, end]);
+  });
+
+  useEffect(() => {
+    if (slo.timeWindow.type === 'calendarAligned') {
+      const now = moment();
+      const duration = toDuration(slo.timeWindow.duration);
+      const unit = duration.unit === 'w' ? 'isoWeek' : 'month';
+      const durationUnit = duration.unit === 'w' ? 'week' : 'month';
+
+      return setRange({
+        from: moment.utc(now).subtract(calendarPeriod, durationUnit).startOf(unit).toDate(),
+        to: moment.utc(now).subtract(calendarPeriod, durationUnit).endOf(unit).toDate(),
+      });
+    }
+  }, [calendarPeriod, slo.timeWindow]);
 
   const onBrushed = ({ from, to }: TimeBounds) => {
-    setStart(from.toISOString());
-    setEnd(to.toISOString());
+    setRange({ from, to });
   };
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
-      <EuiFlexGroup justifyContent="flexEnd">
-        <EuiFlexItem
-          grow
-          css={{
-            maxWidth: 500,
-          }}
-        >
-          <EuiSuperDatePicker
-            isLoading={false}
-            start={start}
-            end={end}
-            onTimeChange={onTimeChange}
-            onRefresh={onRefresh}
-            width="full"
-            commonlyUsedRanges={uiSettings
-              .get('timepicker:quickRanges')
-              .map(({ from, to, display }: { from: string; to: string; display: string }) => {
-                return {
+      <EuiFlexGroup justifyContent="flexEnd" direction="row" gutterSize="s">
+        <EuiFlexItem grow css={{ maxWidth: 500 }}>
+          {slo.timeWindow.type === 'calendarAligned' ? (
+            <EuiFlexGroup direction="row" justifyContent="flexEnd" alignItems="center">
+              <EuiButton
+                onClick={() => {
+                  setCalendarPeriod((curr) => curr + 1);
+                }}
+              >
+                Previous
+              </EuiButton>
+              <EuiText size="s">
+                <p>{getPeriodLabel(slo, calendarPeriod)}</p>
+              </EuiText>
+              <EuiButton
+                disabled={calendarPeriod <= 0}
+                onClick={() => {
+                  setCalendarPeriod((curr) => curr - 1);
+                }}
+              >
+                Next
+              </EuiButton>
+            </EuiFlexGroup>
+          ) : (
+            <EuiSuperDatePicker
+              isLoading={false}
+              start={range.from.toISOString()}
+              end={range.to.toISOString()}
+              onTimeChange={(val: OnTimeChangeProps) => {
+                setRange({
+                  from: new Date(DateMath.parse(val.start)!.valueOf()),
+                  to: new Date(DateMath.parse(val.end, { roundUp: true })!.valueOf()),
+                });
+              }}
+              width="full"
+              commonlyUsedRanges={uiSettings
+                .get('timepicker:quickRanges')
+                .map(({ from, to, display }: { from: string; to: string; display: string }) => ({
                   start: from,
                   end: to,
                   label: display,
-                };
-              })}
-          />
+                }))}
+            />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
 

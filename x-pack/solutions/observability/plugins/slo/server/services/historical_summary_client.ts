@@ -428,8 +428,10 @@ function getDateRange(
   }
 
   if (calendarAlignedTimeWindowSchema.is(timeWindow)) {
-    const now = moment();
+    // If range is provided, we use the lower bound to calculate the calendar aligned range.
+    const now = moment(range?.from ?? new Date());
     const unit = toCalendarAlignedTimeWindowMomentUnit(timeWindow);
+
     const from = moment.utc(now).startOf(unit);
     const to = moment.utc(now).endOf(unit);
 
