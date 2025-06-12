@@ -22,7 +22,7 @@ const startMock = coreMock.createStart();
 startMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject('oblt'));
 const httpModule = {
   http: {
-    get: jest.fn().mockResolvedValue([]), // Mock the HTTP GET request
+    get: jest.fn().mockResolvedValue({ recommendedQueries: [] }), // Mock the HTTP GET request
   },
 };
 const services = {
@@ -66,14 +66,14 @@ describe('ESQLMenuPopover', () => {
     expect(screen.queryByTestId('esql-recommended-queries')).toBeInTheDocument();
   });
 
-  it('should fetch ESQL extensions when activeSolutionId and queryForRecommendedQueries are present', async () => {
+  it('should fetch ESQL extensions when activeSolutionId and queryForRecommendedQueries are present and the popover is open', async () => {
     const mockQueries = [
       { name: 'Count of logs', query: 'FROM logstash1 | STATS COUNT()' },
       { name: 'Average bytes', query: 'FROM logstash2 | STATS AVG(bytes) BY log.level' },
     ];
 
     // Configure the mock to resolve with mockQueries
-    httpModule.http.get.mockResolvedValueOnce(mockQueries);
+    httpModule.http.get.mockResolvedValueOnce({ recommendedQueries: mockQueries });
 
     renderESQLPopover(stubIndexPattern);
     const esqlQuery = `FROM ${stubIndexPattern.name}`;
@@ -92,7 +92,6 @@ describe('ESQLMenuPopover', () => {
     httpModule.http.get.mockRejectedValueOnce(new Error('Network error'));
 
     renderESQLPopover(stubIndexPattern);
-
     // Assert that http.get was called (even if it failed)
     await waitFor(() => {
       expect(httpModule.http.get).toHaveBeenCalledTimes(1);

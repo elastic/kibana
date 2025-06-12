@@ -71,14 +71,14 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
     const getESQLExtensions = async () => {
       try {
         // Fetch ESQL solutions recommended queries from the registry
-        const queriesFromRegistry: RecommendedQuery[] = await http.get(
+        const extensions: { recommendedQueries: RecommendedQuery[] } = await http.get(
           `${REGISTRY_EXTENSIONS_ROUTE}${activeSolutionId}/${queryForRecommendedQueries}`
         );
         // If the component is unmounted before the request completes, do not update the state
         if (cancelled) return;
 
-        if (!isEqual(queriesFromRegistry, solutionsRecommendedQueries)) {
-          setSolutionsRecommendedQueries(queriesFromRegistry);
+        if (!isEqual(extensions.recommendedQueries, solutionsRecommendedQueries)) {
+          setSolutionsRecommendedQueries(extensions.recommendedQueries);
         }
       } catch (error) {
         // Do nothing if the extensions are not available
