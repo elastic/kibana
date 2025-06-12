@@ -925,6 +925,19 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
+    async switchToVisualizationSubtype(subType: string, layerIndex: number = 0) {
+      if (!(await testSubjects.exists(`lns-layerPanel-${layerIndex} > lnsStackingOptionsButton`))) {
+        throw new Error('No subtype available for the current visualization');
+      }
+      await testSubjects.click(`lns-layerPanel-${layerIndex} > lnsStackingOptionsButton`);
+      await testSubjects.click(`lnsStackingOptionsButton${subType}`);
+    },
+
+    async getChartTypeFromChartSwitcher() {
+      const chartSwitcher = await testSubjects.find('lnsChartSwitchPopover');
+      return await chartSwitcher.getVisibleText();
+    },
+
     async openChartSwitchPopover(layerIndex = 0) {
       if (await testSubjects.exists('lnsChartSwitchList', { timeout: 50 })) {
         return;
@@ -1102,6 +1115,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
           }
         }
       }
+    },
+
+    async duplicateLayer(index: number = 0) {
+      await retry.try(async () => {
+        if (await testSubjects.exists(`lnsLayerSplitButton--${index}`)) {
+          await testSubjects.click(`lnsLayerSplitButton--${index}`);
+        }
+        await testSubjects.click(`lnsLayerClone--${index}`);
+      });
     },
 
     /**
@@ -1320,7 +1342,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await common.sleep(200);
       await testSubjects.setEuiSwitch(
         'lns_colorMappingOrLegacyPalette_switch',
-        isLegacy ? 'uncheck' : 'check'
+        isLegacy ? 'check' : 'uncheck'
       );
 
       await common.sleep(200);

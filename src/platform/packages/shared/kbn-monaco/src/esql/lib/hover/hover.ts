@@ -12,6 +12,7 @@ import {
   ESQLAstQueryExpression,
   ESQLFunction,
   ESQLSingleAstItem,
+  ESQLSource,
   isESQLNamedParamLiteral,
 } from '@kbn/esql-ast/src/types';
 import {
@@ -118,6 +119,7 @@ export async function getHoverItem(
   }
 
   if (node.type === 'source' && node.sourceType === 'policy') {
+    const source = node as ESQLSource;
     const { getPolicyMetadata } = getPolicyHelper(resourceRetriever);
     const policyMetadata = await getPolicyMetadata(node.name);
     if (policyMetadata) {
@@ -141,18 +143,22 @@ export async function getHoverItem(
         ]
       );
     }
-  }
 
-  if (node.type === 'mode') {
-    const mode = ENRICH_MODES.find(({ name }) => name === node!.name)!;
-    hoverContent.contents.push(
-      ...[
-        { value: modeDescription },
-        {
-          value: `**${mode.name}**: ${mode.description}`,
-        },
-      ]
-    );
+    if (!!source.prefix) {
+      const mode = ENRICH_MODES.find(
+        ({ name }) => '_' + name === source.prefix!.valueUnquoted.toLowerCase()
+      )!;
+      if (mode) {
+        hoverContent.contents.push(
+          ...[
+            { value: modeDescription },
+            {
+              value: `**${mode.name}**: ${mode.description}`,
+            },
+          ]
+        );
+      }
+    }
   }
 
   return hoverContent;

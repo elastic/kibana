@@ -12,12 +12,14 @@ import { mockSourcererScope } from '../containers/mocks';
 import { SourcererScopeName } from '../store/model';
 import type { UseGetScopedSourcererDataViewArgs } from './use_get_sourcerer_data_view';
 import { useGetScopedSourcererDataView } from './use_get_sourcerer_data_view';
+import { TestProviders } from '../../common/mock';
 
 const renderHookCustom = (args: UseGetScopedSourcererDataViewArgs) => {
   return renderHook(({ sourcererScope }) => useGetScopedSourcererDataView({ sourcererScope }), {
     initialProps: {
       ...args,
     },
+    wrapper: TestProviders,
   });
 };
 
@@ -37,7 +39,7 @@ describe('useGetScopedSourcererDataView', () => {
   it('should return undefined when no spec is provided', () => {
     mockGetSourcererDataView.mockReturnValueOnce({
       ...mockSourcererScope,
-      sourcererDataView: undefined,
+      sourcererDataView: {},
     });
     const { result } = renderHookCustom({ sourcererScope: SourcererScopeName.timeline });
     expect(result.current).toBeUndefined();
@@ -45,7 +47,7 @@ describe('useGetScopedSourcererDataView', () => {
   it('should return undefined when no spec is provided and should update the return when spec is updated to correct value', () => {
     mockGetSourcererDataView.mockReturnValueOnce({
       ...mockSourcererScope,
-      sourcererDataView: undefined,
+      sourcererDataView: {},
     });
     const { rerender, result } = renderHookCustom({ sourcererScope: SourcererScopeName.timeline });
     expect(result.current).toBeUndefined();

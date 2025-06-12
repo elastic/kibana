@@ -17,7 +17,12 @@ import {
 } from '@kbn/esql-ast';
 import { ESQLControlVariable } from '@kbn/esql-types';
 import { GetColumnsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
-import type { ESQLPolicy, ReferenceMaps, ESQLFieldWithMetadata } from '../validation/types';
+import type {
+  ESQLPolicy,
+  ReferenceMaps,
+  ESQLFieldWithMetadata,
+  ESQLUserDefinedColumn,
+} from '../validation/types';
 import { ESQLCallbacks, ESQLSourceResult } from '../shared/types';
 
 /**
@@ -65,9 +70,9 @@ export const isFieldType = (type: string | FunctionParameterType): type is Field
 export const dataTypes = [
   ...fieldTypes,
   'null',
-  'time_literal', // @TODO consider merging time_literal with time_duration
   'time_duration',
   'date_period',
+  'param', // Defines a named param such as ?value or ??field
 ] as const;
 
 export type SupportedDataType = (typeof dataTypes)[number];
@@ -155,10 +160,10 @@ export interface Signature {
      */
     acceptedValues?: string[];
     /**
-     * Must only be included _in addition to_ literalOptions.
+     * Must only be included _in addition to_ acceptedValues.
      *
      * If provided this is the list of suggested values that
-     * will show up in the autocomplete. If omitted, the literalOptions
+     * will show up in the autocomplete. If omitted, the acceptedValues
      * will be used as suggestions.
      *
      * This is useful for functions that accept
@@ -169,6 +174,8 @@ export interface Signature {
   }>;
   minParams?: number;
   returnType: FunctionReturnType;
+  // Not used yet, but we will in the future.
+  license?: string;
 }
 
 export enum FunctionDefinitionTypes {
@@ -250,6 +257,11 @@ export enum Location {
    * In the SHOW command
    */
   SHOW = 'show',
+
+  /**
+   * In the COMPLETION command
+   */
+  COMPLETION = 'completion',
 }
 
 const commandOptionNameToLocation: Record<string, Location> = {
@@ -265,6 +277,7 @@ const commandOptionNameToLocation: Record<string, Location> = {
   rename: Location.RENAME,
   join: Location.JOIN,
   show: Location.SHOW,
+  completion: Location.COMPLETION,
 };
 
 /**
@@ -363,7 +376,10 @@ export interface CommandSuggestParams<CommandName extends string> {
    * Generate a list of recommended queries
    * @returns
    */
-  getRecommendedQueriesSuggestions: (prefix?: string) => Promise<SuggestionRawDefinition[]>;
+  getRecommendedQueriesSuggestions: (
+    queryString: string,
+    prefix?: string
+  ) => Promise<SuggestionRawDefinition[]>;
   /**
    * The AST for the query behind the cursor.
    */
@@ -371,6 +387,10 @@ export interface CommandSuggestParams<CommandName extends string> {
   callbacks?: ESQLCallbacks;
   getVariables?: () => ESQLControlVariable[] | undefined;
   supportsControls?: boolean;
+  references?: {
+    fields: Map<string, ESQLFieldWithMetadata>;
+    userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>;
+  };
 }
 
 export type CommandSuggestFunction<CommandName extends string> = (

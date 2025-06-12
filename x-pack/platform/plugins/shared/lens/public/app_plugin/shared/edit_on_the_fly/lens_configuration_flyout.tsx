@@ -118,14 +118,14 @@ export function LensEditConfigurationFlyout({
 
     return !visualizationStateIsEqual;
   }, [
-    attributes.references,
+    datasourceStates,
     datasourceId,
     datasourceMap,
+    attributes.references,
+    visualization.state,
     isNewPanel,
-    datasourceStates,
     visualizationMap,
     annotationGroups,
-    visualization.state,
   ]);
 
   const onCancel = useCallback(() => {
@@ -363,7 +363,7 @@ export function LensEditConfigurationFlyout({
           direction="column"
           gutterSize="none"
         >
-          <div ref={editorContainer} />
+          <div ref={editorContainer} style={{ zIndex: 0 }} />
           <EuiFlexItem
             grow={isLayerAccordionOpen ? 1 : false}
             css={css`

@@ -13,21 +13,26 @@ import type { AlertFilterControlsProps } from '@kbn/alerts-ui-shared/src/alert_f
 import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
 import { useHistory } from 'react-router-dom';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
+import type { DataViewSpec } from '@kbn/data-plugin/common';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../common/lib/kibana';
 import { DEFAULT_DETECTION_PAGE_FILTERS } from '../../../../common/constants';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
-import type { SecuritySolutionDataViewBase } from '../../../common/types';
 import { SECURITY_ALERT_DATA_VIEW } from '../../constants';
 
 export type DetectionEngineFiltersProps = Pick<
   AlertFilterControlsProps,
   'filters' | 'onFiltersChange' | 'query' | 'timeRange' | 'onInit'
 > & {
-  indexPattern?: SecuritySolutionDataViewBase;
+  dataViewSpec?: DataViewSpec;
 };
 
-export const DetectionEngineFilters = ({ indexPattern, ...props }: DetectionEngineFiltersProps) => {
+export const DetectionEngineFilters = ({
+  dataViewSpec: indexPattern,
+  ...props
+}: DetectionEngineFiltersProps) => {
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { http, notifications, dataViews } = useKibana().services;
   const spaceId = useSpaceId();
   const history = useHistory();
@@ -72,6 +77,7 @@ export const DetectionEngineFilters = ({ indexPattern, ...props }: DetectionEngi
 
   return (
     <AlertFilterControls
+      preventCacheClearOnUnmount={newDataViewPickerEnabled}
       controlsUrlState={filterControlsUrlState}
       setControlsUrlState={setFilterControlsUrlState}
       spaceId={spaceId}

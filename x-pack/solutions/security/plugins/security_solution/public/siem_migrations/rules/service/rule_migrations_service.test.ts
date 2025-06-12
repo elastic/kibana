@@ -19,10 +19,7 @@ import {
   createRuleMigration,
   upsertMigrationResources,
   startRuleMigration as startRuleMigrationAPI,
-  getRuleMigrationStats,
   getRuleMigrationsStatsAll,
-  getMissingResources,
-  getIntegrations,
   addRulesToMigration,
 } from '../api';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
@@ -244,17 +241,6 @@ describe('SiemRulesMigrationsService', () => {
     });
   });
 
-  describe('getRuleMigrationStats', () => {
-    it('should return migration stats', async () => {
-      const stats = { id: 'mig-1', status: SiemMigrationTaskStatus.RUNNING };
-      (getRuleMigrationStats as jest.Mock).mockResolvedValue(stats);
-
-      const result = await service.getRuleMigrationStats('mig-1');
-      expect(getRuleMigrationStats).toHaveBeenCalledWith({ migrationId: 'mig-1' });
-      expect(result).toEqual(stats);
-    });
-  });
-
   describe('getRuleMigrationsStats', () => {
     it('should fetch and update latest stats', async () => {
       const statsArray = [
@@ -271,28 +257,6 @@ describe('SiemRulesMigrationsService', () => {
 
       const latestStats = await firstValueFrom(service.getLatestStats$());
       expect(latestStats).toEqual(result);
-    });
-  });
-
-  describe('getMissingResources', () => {
-    it('should return missing resources', async () => {
-      const resources = [{ resource: 'res1' }];
-      (getMissingResources as jest.Mock).mockResolvedValue(resources);
-
-      const result = await service.getMissingResources('mig-1');
-      expect(getMissingResources).toHaveBeenCalledWith({ migrationId: 'mig-1' });
-      expect(result).toEqual(resources);
-    });
-  });
-
-  describe('getIntegrations', () => {
-    it('should return integrations', async () => {
-      const integrations = { integration1: { id: 'int-1' } };
-      (getIntegrations as jest.Mock).mockResolvedValue(integrations);
-
-      const result = await service.getIntegrations();
-      expect(getIntegrations).toHaveBeenCalledWith({});
-      expect(result).toEqual(integrations);
     });
   });
 

@@ -5,11 +5,12 @@ pageLoadAssetSize:
   aiops: 18000
   alerting: 106936
   apm: 64385
+  apmSourcesAccess: 16765
   banners: 17946
   bfetch: 22837
   canvas: 29355
   cases: 180037
-  charts: 55000
+  charts: 60000
   cloud: 21076
   cloudDataMigration: 19170
   cloudDefend: 18697
@@ -19,7 +20,7 @@ pageLoadAssetSize:
   cloudSecurityPosture: 19109
   console: 46091
   contentManagement: 16254
-  controls: 12000
+  controls: 13000
   core: 564663
   crossClusterReplication: 65408
   customIntegrations: 22034
@@ -154,7 +155,7 @@ pageLoadAssetSize:
   serverlessSearch: 72995
   sessionView: 77750
   share: 88160
-  slo: 45000
+  slo: 73878
   snapshotRestore: 79032
   spaces: 57868
   stackAlerts: 58316
@@ -175,7 +176,7 @@ pageLoadAssetSize:
   unifiedHistogram: 19928
   unifiedSearch: 23000
   upgradeAssistant: 81241
-  uptime: 60000
+  uptime: 84992
   urlDrilldown: 30063
   urlForwarding: 32579
   usageCollection: 39762

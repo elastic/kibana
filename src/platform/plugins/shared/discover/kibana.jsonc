@@ -48,7 +48,8 @@
       "aiops",
       "fieldsMetadata",
       "logsDataAccess",
-      "embeddableEnhanced"
+      "embeddableEnhanced",
+      "apmSourcesAccess"
     ],
     "requiredBundles": [
       "kibanaUtils",

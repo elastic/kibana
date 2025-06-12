@@ -8,7 +8,6 @@
 import { get } from 'lodash/fp';
 import numeral from '@elastic/numeral';
 import React from 'react';
-import type { DataViewBase } from '@kbn/es-query';
 import {
   SecurityCellActions,
   CellActionsMode,
@@ -45,7 +44,6 @@ export type NetworkTopCountriesColumnsNetworkDetails = [
 ];
 
 export const getNetworkTopCountriesColumns = (
-  indexPattern: DataViewBase,
   flowTarget: FlowTargetSourceDest,
   type: networkModel.NetworkType,
   tableId: string
@@ -149,12 +147,11 @@ export const getNetworkTopCountriesColumns = (
 ];
 
 export const getCountriesColumnsCurated = (
-  indexPattern: DataViewBase,
   flowTarget: FlowTargetSourceDest,
   type: networkModel.NetworkType,
   tableId: string
 ): NetworkTopCountriesColumns | NetworkTopCountriesColumnsNetworkDetails => {
-  const columns = getNetworkTopCountriesColumns(indexPattern, flowTarget, type, tableId);
+  const columns = getNetworkTopCountriesColumns(flowTarget, type, tableId);
 
   // Columns to exclude from host details pages
   if (type === networkModel.NetworkType.details) {
