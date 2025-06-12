@@ -31,6 +31,7 @@ import {
 } from '../../utils/fetch_action_responses';
 import { createEsSearchIterable } from '../../../../utils/create_es_search_iterable';
 import {
+  ensureActionRequestsIndexIsConfigured,
   getActionCompletionInfo,
   getActionRequestExpiration,
   mapResponsesByActionId,
@@ -214,6 +215,36 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     this.log = options.endpointService.createLogger(
       this.constructor.name ?? 'ResponseActionsClient'
     );
+  }
+
+  /**
+   * Ensures that the Action Request Index is setup correctly (ex. has required mappings)
+   * @private
+   */
+  private async ensureActionRequestsIndexIsConfigured(): Promise<void> {
+    this.log.debug(`checking index [${ENDPOINT_ACTIONS_INDEX}] is configured as expected`);
+
+    const CACHE_KEY = 'ensureActionRequestsIndexIsConfigured';
+    const cachedResult = this.cache.get<Promise<void>>(CACHE_KEY);
+
+    if (cachedResult) {
+      this.log.debug(`Checking has already been done - returned cached result`);
+      return cachedResult;
+    }
+
+    this.cache.set(
+      CACHE_KEY,
+      new Promise(async (resolve, reject) => {
+        try {
+          await ensureActionRequestsIndexIsConfigured(this.options.endpointService);
+        } catch (error) {
+          reject(error);
+        }
+      })
+    );
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return this.cache.get(CACHE_KEY)!;
   }
 
   /**
@@ -625,6 +656,10 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         ? { rule: { id: actionRequest.ruleId, name: actionRequest.ruleName } }
         : {}),
     };
+
+    if (isSpacesEnabled) {
+      await this.ensureActionRequestsIndexIsConfigured();
+    }
 
     this.log.debug(() => `creating action request document:\n${stringify(doc)}`);
 

@@ -19,6 +19,7 @@ import type {
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { ensureActionRequestsIndexIsConfigured } from '../services';
 import { CROWDSTRIKE_HOST_INDEX_PATTERN } from '../../../common/endpoint/service/response_actions/crowdstrike';
 import { SENTINEL_ONE_AGENT_INDEX_PATTERN } from '../../../common/endpoint/service/response_actions/sentinel_one';
 import { MICROSOFT_DEFENDER_ENDPOINT_LOG_INDEX_PATTERN } from '../../../common/endpoint/service/response_actions/microsoft_defender';
@@ -842,49 +843,15 @@ const ensureResponseActionsIndexHasRequiredMappings = async (
   }
 
   // if we got this far, then endpoint package is installed. Ensure index exists and add mappings
-  if (!indexExists) {
-    await esClient.indices.createDataStream({ name: ENDPOINT_ACTIONS_INDEX }).catch((error) => {
-      // Ignore error if the index already exists
-      if (error.body?.error?.type !== 'resource_already_exists_exception') {
-        response.error = `Attempt to create [${ENDPOINT_ACTIONS_INDEX}] index failed with:${stringify(
-          error
-        )}`;
-        response.successful = false;
-        return response;
-      }
-    });
-  }
+  await ensureActionRequestsIndexIsConfigured(endpointService).catch((error) => {
+    response.error = `Attempt to add new mappings to [${ENDPOINT_ACTIONS_INDEX}] index failed with:${stringify(
+      error
+    )}`;
+    response.successful = false;
+    return response;
+  });
 
-  logger.info(
-    `Adding required new mappings to index [${ENDPOINT_ACTIONS_INDEX}] in support of space awareness`
-  );
-
-  await esClient.indices
-    .putMapping({
-      index: ENDPOINT_ACTIONS_INDEX,
-      properties: {
-        originSpaceId: { type: 'keyword', ignore_above: 1024 },
-        agent: {
-          properties: {
-            policy: {
-              properties: {
-                agentId: { type: 'keyword', ignore_above: 1024 },
-                elasticAgentId: { type: 'keyword', ignore_above: 1024 },
-                integrationPolicyId: { type: 'keyword', ignore_above: 1024 },
-                agentPolicyId: { type: 'keyword', ignore_above: 1024 },
-              },
-            },
-          },
-        },
-      },
-    })
-    .catch((error) => {
-      response.error = `Attempt to add new mappings to [${ENDPOINT_ACTIONS_INDEX}] index failed with:${stringify(
-        error
-      )}`;
-      response.successful = false;
-      return response;
-    });
+  response.indexExists = true;
 
   logger.debug(`New mappings to index [${ENDPOINT_ACTIONS_INDEX}] have been added successfully.`);
 
