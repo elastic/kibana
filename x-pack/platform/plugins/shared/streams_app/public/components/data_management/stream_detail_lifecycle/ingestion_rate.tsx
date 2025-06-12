@@ -153,13 +153,7 @@ function ChartAreaSeries({
         />
       </Chart>
 
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow>
-          <EuiText size="xs">
-            <b>per {ingestionRate.interval}</b>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <Legend interval={ingestionRate.interval} />
     </>
   );
 }
@@ -220,13 +214,24 @@ function ChartBarSeries({
         />
       </Chart>
 
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow>
-          <EuiText size="xs">
-            <b>per {ingestionRate.interval}</b>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <Legend interval={ingestionRate.interval} />
     </>
+  );
+}
+
+function Legend({ interval }: { interval: string }) {
+  return (
+    <EuiFlexGroup alignItems="center">
+      <EuiFlexItem grow>
+        <EuiText size="xs">
+          <b>
+            {i18n.translate('xpack.streams.streamDetailLifecycle.ingestionRateLegend', {
+              defaultMessage: 'per {interval}',
+              values: { interval },
+            })}
+          </b>
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
