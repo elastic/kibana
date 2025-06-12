@@ -23,11 +23,41 @@ export const comparisonFunctions: FunctionDefinition[] = operatorFunctionDefinit
     op.name === '>='
 );
 
-// Retrieve the definitions from the operatorFunctionDefinitions. In the operatorFunctionDefinitions there is no distinction between
-// other operators and the logican ones, so we do this here.
-export const logicalOperators: FunctionDefinition[] = operatorFunctionDefinitions.filter(
-  (op) => op.name === 'and' || op.name === 'or'
-);
+export const logicalOperators: FunctionDefinition[] = [
+  {
+    name: 'and',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.andDoc', {
+      defaultMessage: 'and',
+    }),
+  },
+  {
+    name: 'or',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.orDoc', {
+      defaultMessage: 'or',
+    }),
+  },
+].map(({ name, description }) => ({
+  type: FunctionDefinitionTypes.OPERATOR,
+  name,
+  description,
+  locationsAvailable: [
+    Location.EVAL,
+    Location.WHERE,
+    Location.ROW,
+    Location.SORT,
+    Location.STATS_BY,
+    Location.STATS_WHERE,
+  ],
+  signatures: [
+    {
+      params: [
+        { name: 'left', type: 'boolean' as const },
+        { name: 'right', type: 'boolean' as const },
+      ],
+      returnType: 'boolean',
+    },
+  ],
+}));
 
 const otherDefinitions: FunctionDefinition[] = [
   {
