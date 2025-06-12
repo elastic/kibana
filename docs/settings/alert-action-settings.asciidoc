@@ -135,6 +135,14 @@ A list of allowed email domains which can be used with the email connector. When
 +
 WARNING: This feature is available in {kib} 7.17.4 and 8.3.0 onwards but is not supported in {kib} 8.0, 8.1 or 8.2. As such, this setting should be removed before upgrading from 7.17 to 8.0, 8.1 or 8.2. It is possible to configure the settings in 7.17.4 and then upgrade to 8.3.0 directly.
 
+[[actions-config-email-services-ses-host]] `xpack.actions.email.services.ses.host`  {ess-icon}::
+The SMTP endpoint for an Amazon Simple Email Service (SES) service provider that can be used by email connectors.
++
+WARNING: This setting alone is insufficient for overriding system defaults for the SES SMTP endpoint. You must also configure the `xpack.actions.email.services.ses.port` setting
+
+[[actions-config-email-services-ses-port]] `xpack.actions.email.services.ses.port`  {ess-icon}::
+The port number for an Amazon Simple Email Service (SES) service provider that can be used by email connectors.
+
 `xpack.actions.enableFooterInEmail` {ess-icon}::
 A boolean value indicating that a footer with a relevant link should be added to emails sent as alerting actions. Default: true.
 
