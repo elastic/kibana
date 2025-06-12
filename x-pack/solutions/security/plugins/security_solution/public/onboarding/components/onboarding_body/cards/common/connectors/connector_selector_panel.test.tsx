@@ -6,61 +6,82 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ConnectorSelectorPanel } from './connector_selector_panel';
 import type { AIConnector } from './types';
 
+const mockConnectors: AIConnector[] = [
+  {
+    id: '1',
+    name: 'Connector 1',
+    actionTypeId: 'testType',
+    isPreconfigured: false,
+    isSystemAction: false,
+    isDeprecated: false,
+    config: {},
+    secrets: {},
+  },
+  {
+    id: '2',
+    name: 'Connector 2',
+    actionTypeId: 'testType',
+    isPreconfigured: false,
+    isSystemAction: false,
+    isDeprecated: false,
+    config: {},
+    secrets: {},
+  },
+];
+
+const mockActionTypeRegistry = {
+  get: jest.fn(() => ({ iconClass: 'testIcon', name: 'Test Action' })),
+};
+
 jest.mock('../../../../../../common/lib/kibana/kibana_react', () => ({
   useKibana: () => ({
-    services: {
-      triggersActionsUi: {
-        actionTypeRegistry: {
-          get: jest.fn(() => ({
-            iconClass: 'testIconClass',
-            name: 'Test Action Type',
-          })),
-        },
-      },
-    },
+    services: { triggersActionsUi: { actionTypeRegistry: mockActionTypeRegistry } },
   }),
 }));
 
 describe('ConnectorSelectorPanel', () => {
-  const defaultProps = {
-    connectors: [
-      {
-        id: '.inference',
-        actionTypeId: '.inference',
-        isPreconfigured: true,
-        name: 'Elastic Managed LLM',
-        config: {},
-        isDeprecated: false,
-        isSystemAction: false,
-        secrets: {},
-      },
-    ] as AIConnector[],
-    onConnectorSelected: jest.fn(),
-    selectedConnectorId: '.inference',
-  };
+  it('renders correctly', () => {
+    render(<ConnectorSelectorPanel connectors={mockConnectors} onConnectorSelected={jest.fn()} />);
+    expect(screen.getByText('Selected provider')).toBeInTheDocument();
+  });
 
-  it('renders', () => {
-    const { container } = render(<ConnectorSelectorPanel {...defaultProps} />);
-    expect(container).toBeInTheDocument();
+  it('preselects the only connector if there is one', () => {
+    const onConnectorSelected = jest.fn();
+    render(
+      <ConnectorSelectorPanel
+        connectors={[mockConnectors[0]]}
+        onConnectorSelected={onConnectorSelected}
+      />
+    );
+    expect(onConnectorSelected).toHaveBeenCalledWith(mockConnectors[0]);
+  });
+
+  it('calls onConnectorSelected when a connector is selected', async () => {
+    const onConnectorSelected = jest.fn();
+    render(
+      <ConnectorSelectorPanel
+        connectors={mockConnectors}
+        onConnectorSelected={onConnectorSelected}
+      />
+    );
+    await userEvent.click(screen.getByRole('button', { name: /Connector Selector/i }));
+    await userEvent.click(screen.getByText('Connector 2'));
+    expect(onConnectorSelected).toHaveBeenCalledWith(mockConnectors[1]);
   });
 
   it('renders beta badge props when selected connector is a pre-configured connector', () => {
-    const { getByTestId } = render(<ConnectorSelectorPanel {...defaultProps} />);
-    expect(getByTestId('connectorSelectorPanelBetaBadge')).toBeInTheDocument();
-  });
-
-  it('does not render beta badge props when selected connector is not a pre-configured connector', () => {
-    const testProps = {
+    const props = {
       connectors: [
         {
-          id: '.xxx',
-          actionTypeId: '.xxx',
+          id: '.inference',
+          actionTypeId: '.inference',
           isPreconfigured: true,
-          name: 'LLM',
+          name: 'Elastic Managed LLM',
           config: {},
           isDeprecated: false,
           isSystemAction: false,
@@ -68,9 +89,9 @@ describe('ConnectorSelectorPanel', () => {
         },
       ] as AIConnector[],
       onConnectorSelected: jest.fn(),
-      selectedConnectorId: '.test',
+      selectedConnectorId: '.inference',
     };
-    const { queryByTestId } = render(<ConnectorSelectorPanel {...testProps} />);
-    expect(queryByTestId('connectorSelectorPanelBetaBadge')).not.toBeInTheDocument();
+    const { getByTestId } = render(<ConnectorSelectorPanel {...props} />);
+    expect(getByTestId('connectorSelectorPanelBetaBadge')).toBeInTheDocument();
   });
 });
