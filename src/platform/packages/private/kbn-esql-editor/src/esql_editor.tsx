@@ -174,6 +174,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         // preventing a race condition in the inline editor mode
         // making sure functional tests don't fail in the non-inline mode, because resetting the query doesn't work
         setCode(value);
+        setCodeStateOnSubmission(value);
       }
       onTextLangQueryChange({ esql: value } as AggregateQuery);
     },
