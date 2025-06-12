@@ -10,7 +10,4 @@ import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plug
 
 export type SavedObjectTaggingPluginStart = SavedObjectsTaggingApi;
 
-export type StartServices = Pick<
-  CoreStart,
-  'overlays' | 'notifications' | 'analytics' | 'i18n' | 'theme' | 'userProfile'
->;
+export type StartServices = Pick<CoreStart, 'overlays' | 'notifications' | 'rendering'>;
