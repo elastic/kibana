@@ -182,11 +182,7 @@ export class ObservabilityAIAssistantClient {
     kibanaPublicUrl?: string;
     userInstructions?: Instruction[];
     simulateFunctionCalling?: boolean;
-    disableFunctions?:
-      | boolean
-      | {
-          except: string[];
-        };
+    disableFunctions?: boolean;
   }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
     return new LangTracer(context.active()).startActiveSpan(
       'complete',
@@ -230,17 +226,19 @@ export class ObservabilityAIAssistantClient {
                 tracer: completeTracer,
               }).pipe(shareReplay());
 
-        const systemMessage$ = kbUserInstructions$.pipe(
-          map((kbUserInstructions) => {
-            return getSystemMessageFromInstructions({
-              applicationInstructions: functionClient.getInstructions(),
-              kbUserInstructions,
-              apiUserInstructions,
-              availableFunctionNames: functionClient.getFunctions().map((fn) => fn.definition.name),
-            });
-          }),
-          shareReplay()
-        );
+      const systemMessage$ = kbUserInstructions$.pipe(
+        map((kbUserInstructions) =>
+          getSystemMessageFromInstructions({
+            applicationInstructions: functionClient.getInstructions(),
+            kbUserInstructions,
+            apiUserInstructions,
+            availableFunctionNames: disableFunctions
+              ? []
+              : functionClient.getFunctions().map((fn) => fn.definition.name),
+          })
+        ),
+        shareReplay()
+      );
 
         // we continue the conversation here, after resolving both the materialized
         // messages and the knowledge base instructions
@@ -474,7 +472,10 @@ export class ObservabilityAIAssistantClient {
 
     this.dependencies.logger.debug(
       () =>
-        `Calling inference client with for name: "${name}" with options: ${JSON.stringify(options)}`
+        `Options for inference client for name: "${name}" before anonymization: ${JSON.stringify({
+          ...options,
+          messages,
+        })}`
     );
 
     if (stream) {
