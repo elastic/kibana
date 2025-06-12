@@ -17,6 +17,7 @@ import { PLUGIN_ID } from '../common';
 
 import { SearchHomepage } from './embeddable';
 import { isHomepageEnabled } from './feature_flags';
+import { docLinks } from '../common/doc_links';
 import {
   SearchHomepageConfigType,
   SearchHomepagePluginSetup,
@@ -57,6 +58,7 @@ export class SearchHomepagePlugin
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, depsStart] = await core.getStartServices();
+        docLinks.setDocLinks(coreStart.docLinks.links);
         const startDeps: SearchHomepageServicesContext = {
           ...depsStart,
           history,
