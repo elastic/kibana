@@ -65,6 +65,7 @@ export async function bulkRequestDiagnostics(
 
   const res = await getAgentsByKuery(esClient, soClient, {
     kuery: options.kuery,
+    spaceId: currentSpaceId,
     showInactive: false,
     page: 1,
     perPage: batchSize,
