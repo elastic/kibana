@@ -142,7 +142,11 @@ export default function ({ getService }: FtrProviderContext) {
           ],
           lifecycle: expect.objectContaining({ enabled: true }),
           nextGenerationManagedBy: 'Data stream lifecycle',
-          privileges: { delete_index: true, manage_data_stream_lifecycle: true, read_failure_store: true },
+          privileges: {
+            delete_index: true,
+            manage_data_stream_lifecycle: true,
+            read_failure_store: true,
+          },
           timeStampField: { name: '@timestamp' },
         })
       );
