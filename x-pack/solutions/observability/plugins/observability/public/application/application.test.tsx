@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import { pricingServiceMock } from '@kbn/core-pricing-browser-mocks';
 import { noop } from 'lodash';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { Observable } from 'rxjs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -34,6 +34,8 @@ describe('renderApp', () => {
   afterAll(() => {
     global.console = originalConsole;
   });
+
+  let pricingStart: ReturnType<typeof pricingServiceMock.createStartContract>;
 
   const mockSearchSessionClear = jest.fn();
 
@@ -88,6 +90,14 @@ describe('renderApp', () => {
     },
   };
 
+  beforeEach(() => {
+    pricingStart = pricingServiceMock.createStartContract();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('renders', async () => {
     expect(() => {
       const unmount = renderApp({
@@ -130,9 +140,19 @@ describe('renderApp', () => {
     expect(mockSearchSessionClear).toBeCalled();
   });
 
-  it('should adjust routes for complete', () => {
-    const pricingStart = pricingServiceMock.createStartContract();
+  function AppWrapper({ children }: { children?: ReactNode }) {
+    return (
+      <KibanaRenderContextProvider {...core}>
+        <KibanaContextProvider services={{ pricing: pricingStart }}>
+          <MemoryRouter initialEntries={['/overview']}>
+            <App />
+          </MemoryRouter>
+        </KibanaContextProvider>
+      </KibanaRenderContextProvider>
+    );
+  }
 
+  it('should adjust routes for complete', () => {
     // Mock feature availability
     pricingStart.isFeatureAvailable.mockImplementation((featureId) => {
       if (featureId === 'observability:complete_overview') {
@@ -141,20 +161,11 @@ describe('renderApp', () => {
       return true;
     });
 
-    render(
-      <KibanaRenderContextProvider {...core}>
-        <KibanaContextProvider services={{ pricing: pricingStart }}>
-          <MemoryRouter initialEntries={['/overview']}>
-            <App />
-          </MemoryRouter>
-        </KibanaContextProvider>
-      </KibanaRenderContextProvider>
-    );
+    render(<App />, { wrapper: AppWrapper });
     expect(document.body.textContent).toContain('Unable to load page');
   });
-  it('should adjust routes for essentials', () => {
-    const pricingStart = pricingServiceMock.createStartContract();
 
+  it('should adjust routes for essentials', () => {
     // Mock feature availability
     pricingStart.isFeatureAvailable.mockImplementation((featureId) => {
       if (featureId === 'observability:complete_overview') {
@@ -163,15 +174,7 @@ describe('renderApp', () => {
       return true;
     });
 
-    render(
-      <KibanaRenderContextProvider {...core}>
-        <KibanaContextProvider services={{ pricing: pricingStart }}>
-          <MemoryRouter initialEntries={['/overview']}>
-            <App />
-          </MemoryRouter>
-        </KibanaContextProvider>
-      </KibanaRenderContextProvider>
-    );
+    render(<App />, { wrapper: AppWrapper });
     expect(document.body.textContent).not.toContain('Unable to load page');
   });
 });
