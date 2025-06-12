@@ -62,6 +62,7 @@ import {
 import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
 import type { ChatFunctionClient } from '../chat_function_client';
 import { KnowledgeBaseService, RecalledEntry } from '../knowledge_base_service';
+import { AnonymizationService } from '../anonymization';
 import { getAccessQuery } from '../util/get_access_query';
 import { getSystemMessageFromInstructions } from '../util/get_system_message_from_instructions';
 import { failOnNonExistingFunctionCall } from './operators/fail_on_non_existing_function_call';
@@ -101,6 +102,7 @@ export class ObservabilityAIAssistantClient {
       };
       knowledgeBaseService: KnowledgeBaseService;
       scopes: AssistantScope[];
+      anonymizationService: AnonymizationService;
     }
   ) {}
 
@@ -208,14 +210,11 @@ export class ObservabilityAIAssistantClient {
   }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
     return withInferenceSpan('run_tools', () => {
       const isConversationUpdate = persist && !!predefinedConversationId;
-
       const conversationId = persist ? predefinedConversationId || v4() : '';
 
       if (persist && !isConversationUpdate && kibanaPublicUrl) {
         functionClient.registerInstruction(
-          `This conversation will be persisted in Kibana and available at this url: ${
-            kibanaPublicUrl + `/app/observabilityAIAssistant/conversations/${conversationId}`
-          }.`
+          `This conversation will be persisted in Kibana and available at this url: ${kibanaPublicUrl}/app/observabilityAIAssistant/conversations/${conversationId}.`
         );
       }
 
@@ -339,9 +338,11 @@ export class ObservabilityAIAssistantClient {
               systemMessage$,
             ]).pipe(
               switchMap(([addedMessages, title, systemMessage]) => {
-                const initialMessagesWithAddedMessages = initialMessages.concat(addedMessages);
-
-                const lastMessage = last(initialMessagesWithAddedMessages);
+                const { unredactedMessages } =
+                  this.dependencies.anonymizationService.unredactMessages(
+                    initialMessages.concat(addedMessages)
+                  );
+                const lastMessage = last(unredactedMessages);
 
                 // if a function request is at the very end, close the stream to consumer
                 // without persisting or updating the conversation. we need to wait
@@ -364,7 +365,7 @@ export class ObservabilityAIAssistantClient {
                         omit(conversation._source, 'messages'),
 
                         // update messages and system message
-                        { messages: initialMessagesWithAddedMessages, systemMessage },
+                        { messages: unredactedMessages, systemMessage },
 
                         // update title
                         {
@@ -395,7 +396,7 @@ export class ObservabilityAIAssistantClient {
                     labels: {},
                     numeric_labels: {},
                     systemMessage,
-                    messages: initialMessagesWithAddedMessages,
+                    messages: unredactedMessages,
                     archived: false,
                   })
                 ).pipe(
@@ -424,13 +425,11 @@ export class ObservabilityAIAssistantClient {
                 () => `Added message: ${JSON.stringify(event.message)}`
               );
               break;
-
             case StreamingChatResponseEventType.ConversationCreate:
               this.dependencies.logger.debug(
                 () => `Created conversation: ${JSON.stringify(event.conversation)}`
               );
               break;
-
             case StreamingChatResponseEventType.ConversationUpdate:
               this.dependencies.logger.debug(
                 () => `Updated conversation: ${JSON.stringify(event.conversation)}`
@@ -489,7 +488,6 @@ export class ObservabilityAIAssistantClient {
     const options = {
       connectorId,
       system: systemMessage,
-      messages: convertMessagesForInference(messages, this.dependencies.logger),
       toolChoice,
       tools,
       functionCalling: (simulateFunctionCalling ? 'simulated' : 'auto') as FunctionCallingMode,
@@ -499,17 +497,28 @@ export class ObservabilityAIAssistantClient {
         },
       },
     };
-
-    this.dependencies.logger.debug(
-      () => `Calling inference client for name: "${name}" with options: ${JSON.stringify(options)}`
-    );
-
     if (stream) {
       return defer(() =>
-        this.dependencies.inferenceClient.chatComplete({
-          ...options,
-          stream: true,
-        })
+        from(this.dependencies.anonymizationService.redactMessages(messages)).pipe(
+          switchMap(({ redactedMessages }) => {
+            this.dependencies.logger.debug(
+              () =>
+                `Calling inference client for name: "${name}" with options: ${JSON.stringify(
+                  options
+                )}`
+            );
+            return (
+              this.dependencies.inferenceClient
+                .chatComplete({
+                  ...options,
+                  stream: true,
+                  messages: convertMessagesForInference(redactedMessages, this.dependencies.logger),
+                })
+                // unredact complete assistant response event
+                .pipe(this.dependencies.anonymizationService.unredactChatCompletionEvent())
+            );
+          })
+        )
       ).pipe(
         convertInferenceEventsToStreamingEvents(),
         failOnNonExistingFunctionCall({ functions }),
@@ -527,6 +536,7 @@ export class ObservabilityAIAssistantClient {
     } else {
       return this.dependencies.inferenceClient.chatComplete({
         ...options,
+        messages: convertMessagesForInference(messages, this.dependencies.logger),
         stream: false,
       }) as TStream extends true ? never : Promise<ChatCompleteResponse>;
     }
