@@ -528,6 +528,8 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
   logger.debug(`updating policy [${request.params.agentPolicyId}] in space [${spaceId}]`);
 
   try {
+    const requestSpaceId = spaceId;
+
     if (spaceIds?.length) {
       const authorizedSpaces = await checkAgentPoliciesAllPrivilegesForSpaces(
         request,
@@ -553,7 +555,7 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
       esClient,
       request.params.agentPolicyId,
       data,
-      { force, bumpRevision, user, spaceId }
+      { force, bumpRevision, user, spaceId, requestSpaceId }
     );
 
     let item: any = agentPolicy;
