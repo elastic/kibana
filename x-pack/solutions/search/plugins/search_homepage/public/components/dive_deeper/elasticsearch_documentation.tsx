@@ -31,7 +31,11 @@ export const ElasticsearchDocumentation: React.FC = () => (
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <span>
-        <EuiButton iconType={'documentation'} data-test-subj="viewDocumentationButton">
+        <EuiButton
+          href="https://www.elastic.co/docs/solutions/search/get-started"
+          iconType={'documentation'}
+          data-test-subj="viewDocumentationButton"
+        >
           {i18n.translate('xpack.searchHomepage.elasticsearchDocumentation.buttonText', {
             defaultMessage: 'View Documentation',
           })}
