@@ -156,10 +156,7 @@ function ChartAreaSeries({
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow>
           <EuiText size="xs">
-            <b>
-              {toLegendFormat(ingestionRate.start)} - {toLegendFormat(ingestionRate.end)} (interval:{' '}
-              {ingestionRate.interval})
-            </b>
+            <b>per {ingestionRate.interval}</b>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -226,17 +223,10 @@ function ChartBarSeries({
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow>
           <EuiText size="xs">
-            <b>
-              {toLegendFormat(ingestionRate.start)} - {toLegendFormat(ingestionRate.end)} (interval:{' '}
-              {ingestionRate.interval})
-            </b>
+            <b>per {ingestionRate.interval}</b>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
   );
-}
-
-function toLegendFormat(date: moment.Moment) {
-  return date.format('MMM DD, YYYY @ HH:mm:ss');
 }
