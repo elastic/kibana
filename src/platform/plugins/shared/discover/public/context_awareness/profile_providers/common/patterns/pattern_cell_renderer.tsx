@@ -76,6 +76,9 @@ export const PatternCellRenderer: FC<Props> = ({ row, columnId, isDetails }) => 
 export function extractGenericKeywords(regexString: string) {
   let cleanedString = regexString;
 
+  // Remove backslashes
+  cleanedString = cleanedString.replace(/\\/g, '');
+
   // Strip leading '.*?'
   if (cleanedString.startsWith('.*?')) {
     cleanedString = cleanedString.substring('.*?'.length);
