@@ -45,4 +45,12 @@ export const hostEntityEngineDescription: EntityDescription = {
     collect({ source: 'host.architecture' }),
     ...getCommonFieldDescriptions('host'),
   ],
+  pipeline: [
+    {
+      set: {
+        field: 'entity.type',
+        value: 'Host',
+      },
+    },
+  ],
 };

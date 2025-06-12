@@ -55,12 +55,9 @@ export interface EntityEngineInstallationDescriptor {
 
   /**
    * The ingest pipeline to apply to the entity data.
-   * This can be an array of processors which get appended to the default pipeline,
-   * or a function that takes the default processors and returns an array of processors.
+   * An array of processors which get appended to the default pipeline
    **/
-  pipeline?:
-    | IngestProcessorContainer[]
-    | ((defaultProcessors: IngestProcessorContainer[]) => IngestProcessorContainer[]);
+  pipeline?: IngestProcessorContainer[];
 
   /**
    * Whether the extracted entity data is dynamic.

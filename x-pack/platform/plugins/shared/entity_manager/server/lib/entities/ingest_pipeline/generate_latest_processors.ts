@@ -118,26 +118,6 @@ export function generateLatestProcessors(definition: EntityDefinition): IngestPr
         value: definition.type,
       },
     },
-    // Set entity.type values for specific entity stores
-    ...(definition.type === 'user'
-      ? [
-          {
-            set: {
-              field: 'entity.type',
-              value: 'Identity',
-            },
-          },
-        ]
-      : definition.type === 'host'
-      ? [
-          {
-            set: {
-              field: 'entity.type',
-              value: 'Host',
-            },
-          },
-        ]
-      : []),
     {
       set: {
         field: 'entity.definition_id',
@@ -206,6 +186,7 @@ export function generateLatestProcessors(definition: EntityDefinition): IngestPr
         value: `${generateLatestIndexName(definition)}`,
       },
     },
+    ...(definition.customIngestProcessors ?? []),
     ...getCustomIngestPipelines(definition),
   ];
 }
