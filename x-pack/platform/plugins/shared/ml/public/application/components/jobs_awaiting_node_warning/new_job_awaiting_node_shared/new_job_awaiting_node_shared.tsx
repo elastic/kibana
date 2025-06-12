@@ -17,6 +17,7 @@ import { mlApiProvider } from '../../../services/ml_api_service';
 import { HttpService } from '../../../services/http_service';
 import type { CloudInfo } from '../../../services/ml_server_info';
 import { extractDeploymentId } from '../../../services/ml_server_info';
+import { useEnabledFeatures } from '../../../contexts/ml';
 
 interface Props {
   jobIds: string[];
@@ -27,6 +28,7 @@ function isJobAwaitingNodeAssignment(job: estypes.MlJobStats) {
 }
 
 const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
+  const { showNodeInfo } = useEnabledFeatures();
   const { http } = useKibana().services;
   const mlApi = useMemo(() => mlApiProvider(new HttpService(http!)), [http]);
 
@@ -118,6 +120,7 @@ const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
           />
           <EuiSpacer size="s" />
           {cloudInfo &&
+            showNodeInfo &&
             (cloudInfo.isCloud ? (
               <>
                 <FormattedMessage
