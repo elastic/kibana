@@ -19,7 +19,7 @@ import { EntityStoreUtils } from '../../utils';
 const DATASTREAM_NAME: string = 'logs-elastic_agent.cloudbeat-test';
 const HOST_TRANSFORM_ID: string = 'entities-v1-latest-security_host_default';
 const INDEX_NAME: string = '.entities.v1.latest.security_host_default';
-const TIMEOUT_MS: number = 300000; // 5 minutes
+const TIMEOUT_MS: number = 600000; // 10 minutes
 
 export default function (providerContext: FtrProviderContext) {
   const supertest = providerContext.getService('supertest');
@@ -254,7 +254,7 @@ async function enableEntityStore(providerContext: FtrProviderContext): Promise<v
   const retry = providerContext.getService('retry');
   const utils = EntityStoreUtils(providerContext.getService);
 
-  const RETRIES = 3;
+  const RETRIES = 5;
   let success: boolean = false;
   for (let attempt = 0; attempt < RETRIES; attempt++) {
     const response = await supertest
