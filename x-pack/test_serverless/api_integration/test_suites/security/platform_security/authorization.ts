@@ -1936,7 +1936,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:security:reference-data/get",
                 "saved_object:security:reference-data/find",
                 "saved_object:security:reference-data/open_point_in_time",
-                "saved_object:security:reference-data/close_point_in_time"
+                "saved_object:security:reference-data/close_point_in_time",
                 "saved_object:csp_rule/bulk_get",
                 "saved_object:csp_rule/get",
                 "saved_object:csp_rule/find",
