@@ -18,15 +18,15 @@ import type {
 import type { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
 import { isDashboardSection, prefixReferencesFromPanel } from '../../../../../common';
 
-export async function transformPanelsIn(
+export function transformPanelsIn(
   widgets: DashboardAttributes['panels'] | undefined,
   embeddable: EmbeddableStart,
   dropSections: boolean = false
-): Promise<{
+): {
   panelsJSON: DashboardSavedObjectAttributes['panelsJSON'];
   sections: DashboardSavedObjectAttributes['sections'];
   references: SavedObjectReference[];
-}> {
+} {
   if (!widgets) return { panelsJSON: '[]', sections: [], references: [] };
 
   // Step 1: Add a panelIndex to each panel if necessary
@@ -42,7 +42,7 @@ export async function transformPanelsIn(
   const { panels: panelsWithSections, sections } = extractSections(extractedPanels, dropSections);
 
   // Step 4: Transform panels properties
-  const transformedPanels = await transformPanelsProperties(panelsWithSections, embeddable);
+  const transformedPanels = transformPanelsProperties(panelsWithSections, embeddable);
 
   // Step 5: Stringify panels
   const panelsJSON = JSON.stringify(transformedPanels);
@@ -89,7 +89,10 @@ function extractPanelReferences(
   widgets.forEach((widget) => {
     if (isDashboardSection(widget)) {
       const { panels: sectionPanels, ...restOfSection } = widget;
-      const { panels, references } = extractPanelReferences(sectionPanels, embeddable);
+      const { panels, references } = extractPanelReferences(
+        sectionPanels as DashboardPanel[],
+        embeddable
+      );
       // Filter the panels so only DashboardPanel objects are included in the section panels
       extractedPanels.push({
         ...restOfSection,
@@ -158,7 +161,7 @@ function extractSections(widgets: Array<DashboardPanel | DashboardSection>, drop
       const { panels: sectionPanels, ...restOfSection } = widget;
       sections.push(restOfSection);
       panels.push(
-        ...sectionPanels.map(({ gridData, ...restPanel }) => ({
+        ...(sectionPanels as DashboardPanel[]).map(({ gridData, ...restPanel }) => ({
           ...restPanel,
           gridData: { ...gridData, ...(!dropSections && { sectionId: restOfSection.gridData.i }) },
         }))
@@ -170,33 +173,29 @@ function extractSections(widgets: Array<DashboardPanel | DashboardSection>, drop
   return { panels, sections };
 }
 
-async function panelToSavedObject(
+function panelToSavedObject(
   panelConfig: DashboardPanel['panelConfig'],
   panelType: DashboardPanel['type'],
   embeddable: EmbeddableStart
 ) {
-  const embeddableCmDefintions = await embeddable.getEmbeddableContentManagementDefinition(
-    panelType
-  );
+  const embeddableCmDefintions = embeddable.getEmbeddableContentManagementDefinition(panelType);
   if (!embeddableCmDefintions) return panelConfig;
   const { itemToSavedObject } =
     embeddableCmDefintions.versions[embeddableCmDefintions.latestVersion];
   return itemToSavedObject?.(panelConfig) ?? panelConfig;
 }
 
-async function transformPanelsProperties(panels: DashboardPanel[], embeddable: EmbeddableStart) {
-  return Promise.all(
-    panels.map(
-      async ({ panelConfig, gridData, id, panelIndex, panelRefName, title, type, version }) => ({
-        gridData,
-        id,
-        embeddableConfig: await panelToSavedObject(panelConfig, type, embeddable),
-        panelIndex,
-        panelRefName,
-        title,
-        type,
-        version,
-      })
-    )
+function transformPanelsProperties(panels: DashboardPanel[], embeddable: EmbeddableStart) {
+  return panels.map(
+    ({ panelConfig, gridData, id, panelIndex, panelRefName, title, type, version }) => ({
+      gridData,
+      id,
+      embeddableConfig: panelToSavedObject(panelConfig, type, embeddable),
+      panelIndex,
+      panelRefName,
+      title,
+      type,
+      version,
+    })
   );
 }

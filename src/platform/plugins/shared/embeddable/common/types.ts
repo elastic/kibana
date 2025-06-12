@@ -61,9 +61,3 @@ export interface CommonEmbeddableStartContract {
   ) => PersistableState & { isContainerType: boolean };
   getEnhancement: (enhancementId: string) => PersistableState;
 }
-
-export interface CanGetEmbeddableContentManagementDefinition {
-  getEmbeddableContentManagementDefinition: (
-    id: string
-  ) => Promise<EmbeddableContentManagementDefinition | undefined>;
-}

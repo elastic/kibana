@@ -99,7 +99,7 @@ describe('loadDashboardApi', () => {
       await loadDashboardApi({
         getCreationOptions: async () => ({
           useSessionStorageIntegration: true,
-          getInitialInput: () => ({
+          getInitialInput: async () => ({
             query: queryFromUrl,
           }),
         }),
