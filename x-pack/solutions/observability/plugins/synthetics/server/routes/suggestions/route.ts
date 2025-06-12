@@ -61,63 +61,54 @@ export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
     query: QuerySchema,
   },
   handler: async (route): Promise<any> => {
-    const {
-      server: { logger },
-      monitorConfigRepository,
-    } = route;
+    const { monitorConfigRepository } = route;
     const { query } = route.request.query;
 
     const { filtersStr } = await getMonitorFilters(route);
     const { allLocations = [] } = await getAllLocations(route);
-    try {
-      const data = await monitorConfigRepository.find<EncryptedSyntheticsMonitorAttributes>({
-        perPage: 0,
-        filter: filtersStr ? `${filtersStr}` : undefined,
-        aggs,
-        search: query ? `${query}*` : undefined,
-        searchFields: SEARCH_FIELDS,
-      });
+    const data = await monitorConfigRepository.find<EncryptedSyntheticsMonitorAttributes>({
+      perPage: 0,
+      filter: filtersStr ? `${filtersStr}` : undefined,
+      aggs,
+      search: query ? `${query}*` : undefined,
+      searchFields: SEARCH_FIELDS,
+    });
 
-      const { monitorTypesAggs, tagsAggs, locationsAggs, projectsAggs, monitorIdsAggs } =
-        (data?.aggregations as AggsResponse) ?? {};
-      const allLocationsMap = new Map(allLocations.map((obj) => [obj.id, obj.label]));
+    const { monitorTypesAggs, tagsAggs, locationsAggs, projectsAggs, monitorIdsAggs } =
+      (data?.aggregations as AggsResponse) ?? {};
+    const allLocationsMap = new Map(allLocations.map((obj) => [obj.id, obj.label]));
 
-      return {
-        monitorIds: monitorIdsAggs?.buckets?.map(({ key, doc_count: count, name }) => ({
-          label: name?.hits?.hits[0]?._source?.[syntheticsMonitorType]?.[ConfigKey.NAME] || key,
+    return {
+      monitorIds: monitorIdsAggs?.buckets?.map(({ key, doc_count: count, name }) => ({
+        label: name?.hits?.hits[0]?._source?.[syntheticsMonitorType]?.[ConfigKey.NAME] || key,
+        value: key,
+        count,
+      })),
+      tags:
+        tagsAggs?.buckets?.map(({ key, doc_count: count }) => ({
+          label: key,
           value: key,
           count,
-        })),
-        tags:
-          tagsAggs?.buckets?.map(({ key, doc_count: count }) => ({
-            label: key,
-            value: key,
-            count,
-          })) ?? [],
-        locations:
-          locationsAggs?.buckets?.map(({ key, doc_count: count }) => ({
-            label: allLocationsMap.get(key) || key,
-            value: key,
-            count,
-          })) ?? [],
-        projects:
-          projectsAggs?.buckets?.map(({ key, doc_count: count }) => ({
-            label: key,
-            value: key,
-            count,
-          })) ?? [],
-        monitorTypes:
-          monitorTypesAggs?.buckets?.map(({ key, doc_count: count }) => ({
-            label: key,
-            value: key,
-            count,
-          })) ?? [],
-      };
-    } catch (error) {
-      // TODO Shouldn't we throw this error?
-      // What can go wrong here and should we log it as error?
-      logger.error(`Failed to fetch Synthetics suggestions: ${error}`, { error });
-    }
+        })) ?? [],
+      locations:
+        locationsAggs?.buckets?.map(({ key, doc_count: count }) => ({
+          label: allLocationsMap.get(key) || key,
+          value: key,
+          count,
+        })) ?? [],
+      projects:
+        projectsAggs?.buckets?.map(({ key, doc_count: count }) => ({
+          label: key,
+          value: key,
+          count,
+        })) ?? [],
+      monitorTypes:
+        monitorTypesAggs?.buckets?.map(({ key, doc_count: count }) => ({
+          label: key,
+          value: key,
+          count,
+        })) ?? [],
+    };
   },
 });
 

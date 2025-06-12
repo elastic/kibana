@@ -191,7 +191,6 @@ export class SyntheticsService {
                   await service.pushConfigs();
                 } else {
                   if (!service.isAllowed) {
-                    // TODO is this log needed?
                     service.logger.error(
                       'User is not allowed to access Synthetics service. Please contact support.'
                     );
