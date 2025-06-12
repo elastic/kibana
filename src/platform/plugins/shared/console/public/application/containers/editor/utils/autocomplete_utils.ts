@@ -33,7 +33,6 @@ import {
   newLineRegex,
   propertyNameRegex,
   propertyValueRegex,
-  queryRegex,
 } from './constants';
 
 /*
