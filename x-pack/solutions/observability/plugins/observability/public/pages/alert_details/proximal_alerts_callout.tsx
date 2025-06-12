@@ -22,7 +22,7 @@ export function ProximalAlertsCallout({ alertDetail, switchTabs }: Props) {
 
   const count = data?.total;
 
-  if (isLoading || isError || !count || count <= 0) {
+  if (isLoading || isError || count === undefined || count < 0) {
     return null;
   }
 
