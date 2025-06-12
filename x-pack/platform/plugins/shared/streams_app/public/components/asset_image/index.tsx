@@ -25,6 +25,20 @@ const imageSets = {
       defaultMessage: 'No results image for the streams app',
     }),
   },
+  addStreams: {
+    light: () => import('./add_streams_light.png'),
+    dark: () => import('./add_streams_dark.png'),
+    alt: i18n.translate('xpack.streams.streamDetailView.addStreamsImage', {
+      defaultMessage: 'Add streams image for the streams app',
+    }),
+  },
+  quickLinksEmpty: {
+    light: () => import('./quick_links_empty_light.png'),
+    dark: () => import('./quick_links_empty_dark.png'),
+    alt: i18n.translate('xpack.streams.streamDetailView.quickLinksEmptyImage', {
+      defaultMessage: 'Quick links empty image for the streams app',
+    }),
+  },
 };
 
 interface AssetImageProps extends Omit<EuiImageProps, 'src' | 'url' | 'alt'> {

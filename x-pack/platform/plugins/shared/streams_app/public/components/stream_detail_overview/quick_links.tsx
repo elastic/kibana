@@ -33,7 +33,7 @@ export function QuickLinks({ definition }: { definition?: Streams.ingest.all.Get
             `}
           >
             <EuiFlexGroup direction="column" gutterSize="s">
-              <AssetImage type="welcome" />
+              <AssetImage type="quickLinksEmpty" />
               <EuiText size="xs" textAlign="center" color="subdued">
                 {i18n.translate('xpack.streams.entityDetailOverview.linkDashboardsText', {
                   defaultMessage: 'Link dashboards to this stream for quick access',

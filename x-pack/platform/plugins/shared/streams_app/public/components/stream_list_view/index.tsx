@@ -7,7 +7,15 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiBetaBadge } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiBetaBadge,
+  EuiText,
+  EuiLink,
+  EuiPageHeader,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { StreamsTreeTable } from './tree_table';
@@ -33,12 +41,25 @@ export function StreamListView() {
     [streamsRepositoryClient]
   );
 
+  const theme = useEuiTheme();
   return (
     <>
-      <StreamsAppPageTemplate.Header
-        bottomBorder="extended"
+      <EuiPageHeader
+        paddingSize="l"
+        css={css`
+          background: ${theme.euiTheme.colors.backgroundBasePlain};
+          .euiSpacer--l {
+            display: none !important;
+          }
+        `}
         pageTitle={
-          <EuiFlexGroup alignItems="center" gutterSize="m">
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="m"
+            css={css`
+              margin-bottom: ${theme.euiTheme.size.s};
+            `}
+          >
             {i18n.translate('xpack.streams.streamsListView.pageHeaderTitle', {
               defaultMessage: 'Streams',
             })}
@@ -54,6 +75,22 @@ export function StreamListView() {
               size="s"
             />
           </EuiFlexGroup>
+        }
+        description={
+          <EuiText color="subdued" size="s">
+            {i18n.translate('xpack.streams.streamsListView.pageHeaderDescription', {
+              defaultMessage:
+                'Use Streams to organize and process your data into clear structured flows, and simplify routing, field extraction, and retention management.',
+            })}{' '}
+            <EuiLink
+              target="_blank"
+              href="https://www.elastic.co/docs/solutions/observability/logs/streams/streams"
+            >
+              {i18n.translate('xpack.streams.streamsListView.pageHeaderDocsLink', {
+                defaultMessage: 'See docs',
+              })}
+            </EuiLink>
+          </EuiText>
         }
       />
       <StreamsAppPageTemplate.Body grow>
