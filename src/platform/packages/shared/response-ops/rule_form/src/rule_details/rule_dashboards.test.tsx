@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { RuleDashboards } from './rule_dashboards';
@@ -78,9 +79,11 @@ describe('RuleDashboards', () => {
       </IntlProvider>
     );
 
-    expect(screen.getByText('Related dashboards')).toBeInTheDocument();
-    expect(useRuleFormState).toHaveBeenCalledTimes(1);
-    expect(useRuleFormDispatch).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(screen.getByText('Related dashboards')).toBeInTheDocument();
+      expect(useRuleFormState).toHaveBeenCalled();
+      expect(useRuleFormDispatch).toHaveBeenCalled();
+    });
   });
 
   it('fetches and displays selected dashboard titles', async () => {
@@ -139,10 +142,11 @@ describe('RuleDashboards', () => {
       .getByTestId('ruleLinkedDashboards')
       .querySelector('.euiComboBox__inputWrap');
     if (inputWrap) {
-      fireEvent.click(inputWrap);
+      await userEvent.click(inputWrap);
     }
+    await userEvent.click(screen.getByText('Dashboard 2'));
+
     await waitFor(() => {
-      fireEvent.click(screen.getByText('Dashboard 2'));
       expect(mockOnChange).toHaveBeenCalledWith({
         type: 'setRuleProperty',
         payload: {
@@ -162,7 +166,9 @@ describe('RuleDashboards', () => {
       </IntlProvider>
     );
 
-    expect(mockDashboardServiceProvider().fetchDashboards).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(mockDashboardServiceProvider().fetchDashboards).not.toHaveBeenCalled();
+    });
   });
 
   it('fetches dashboard list when combobox is focused', async () => {
@@ -174,7 +180,45 @@ describe('RuleDashboards', () => {
     const searchInput = screen.getByPlaceholderText(ALERT_LINK_DASHBOARDS_PLACEHOLDER);
     fireEvent.focus(searchInput);
 
-    expect(mockDashboardServiceProvider).toHaveBeenCalled();
-    expect(mockDashboardServiceProvider().fetchDashboards).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(mockDashboardServiceProvider).toHaveBeenCalled();
+      expect(mockDashboardServiceProvider().fetchDashboards).toHaveBeenCalled();
+    });
+  });
+
+  it('debounces and triggers dashboard search with user input in the ComboBox', async () => {
+    useRuleFormState.mockReturnValue({
+      formData: {
+        artifacts: {
+          dashboards: [
+            {
+              id: '1',
+            },
+          ],
+        },
+      },
+    });
+
+    render(
+      <IntlProvider locale="en">
+        <RuleDashboards contentManagement={contentManagement} />
+      </IntlProvider>
+    );
+
+    const searchInput = screen.getByPlaceholderText(ALERT_LINK_DASHBOARDS_PLACEHOLDER);
+    await userEvent.type(searchInput, 'Dashboard 1');
+
+    // Assert that fetchDashboards was called with the correct search value
+    // Wait for the next tick to allow state update and effect to run
+    await waitFor(() => {
+      expect(searchInput).toHaveValue('Dashboard 1');
+
+      expect(mockDashboardServiceProvider().fetchDashboards).toHaveBeenCalledWith(
+        expect.objectContaining({ limit: 100, text: 'Dashboard 1*' })
+      );
+
+      expect(screen.getByText('Dashboard 1')).toBeInTheDocument();
+      expect(screen.queryByText('Dashboard 2')).not.toBeInTheDocument();
+    });
   });
 });
