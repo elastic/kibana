@@ -48,6 +48,8 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
     Array<EuiComboBoxOptionOption<string>> | undefined
   >();
 
+  const [isComboBoxOpen, setIsComboBoxOpen] = useState(false);
+
   const fetchDashboardTitles = useCallback(async () => {
     if (!dashboardsFormData?.length || !contentManagement) {
       return;
@@ -146,8 +148,18 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
   }, [contentManagement, searchValue]);
 
   useEffect(() => {
-    loadDashboards();
-  }, [loadDashboards]);
+    if (isComboBoxOpen) {
+      loadDashboards();
+    }
+  }, [isComboBoxOpen, loadDashboards]);
+
+  // Only load dashboards when ComboBox is focused/opened
+  const handleComboBoxFocus = useCallback(() => {
+    if (!isComboBoxOpen) {
+      setIsComboBoxOpen(true);
+      loadDashboards();
+    }
+  }, [isComboBoxOpen, loadDashboards]);
 
   return (
     <>
@@ -167,6 +179,7 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
               selectedOptions={selectedDashboards}
               placeholder={ALERT_LINK_DASHBOARDS_PLACEHOLDER}
               onChange={onChange}
+              onFocus={handleComboBoxFocus}
               onSearchChange={onSearchChange}
               data-test-subj="ruleLinkedDashboards"
             />
