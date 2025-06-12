@@ -67,12 +67,16 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
   }, [adHocDataview]);
 
   useEffect(() => {
+    let cancelled = false;
     const getESQLExtensions = async () => {
       try {
         // Fetch ESQL solutions recommended queries from the registry
         const queriesFromRegistry: RecommendedQuery[] = await http.get(
           `/internal/esql_registry/extensions/${activeSolutionId}/${queryForRecommendedQueries}`
         );
+        // If the component is unmounted before the request completes, do not update the state
+        if (cancelled) return;
+
         if (!isEqual(queriesFromRegistry, solutionsRecommendedQueries)) {
           setSolutionsRecommendedQueries(queriesFromRegistry);
         }
@@ -85,6 +89,9 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
       // as they are solution-specific.
       getESQLExtensions();
     }
+    return () => {
+      cancelled = true;
+    };
   }, [
     activeSolutionId,
     http,
