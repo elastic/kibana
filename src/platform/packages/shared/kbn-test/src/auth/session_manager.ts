@@ -46,10 +46,6 @@ export interface GetCookieOptions {
   spaceId?: string;
 }
 
-export interface SessionInfo {
-  session: Session;
-  createdAt: number;
-}
 /**
  * Manages cookies associated with user roles
  */
@@ -60,7 +56,7 @@ export class SamlSessionManager {
   private readonly kbnClient: KbnClient;
   private readonly log: ToolingLog;
   private readonly roleToUserMap: Map<Role, User>;
-  private readonly sessionCache: Map<Role, SessionInfo>;
+  private readonly sessionCache: Map<Role, Session>;
   private readonly supportedRoles?: SupportedRoles;
   private readonly cloudHostName?: string;
   private readonly cloudUsersFilePath: string;
@@ -86,7 +82,7 @@ export class SamlSessionManager {
       }),
     });
     this.cloudUsersFilePath = options.cloudUsersFilePath;
-    this.sessionCache = new Map<Role, SessionInfo>();
+    this.sessionCache = new Map<Role, Session>();
     this.roleToUserMap = new Map<Role, User>();
     this.supportedRoles = options.supportedRoles;
     this.validateCloudSetting();
@@ -143,26 +139,6 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
     }
   };
 
-  /**
-   * Public method to set a session for a specific role.
-   * This is primarily intended for testing purposes.
-   */
-  public setSessionForRole(role: string, sessionInfo: SessionInfo) {
-    this.sessionCache.set(role, sessionInfo);
-  }
-
-  /**
-   * Public method to get a session for a specific role.
-   * Returns undefined if no session exists for the role.
-   */
-  public getSessionInfoForRole(role: string): SessionInfo {
-    const sessionInfo = this.sessionCache.get(role);
-    if (!sessionInfo) {
-      throw new Error(`No session found for role: ${role}`);
-    }
-    return sessionInfo;
-  }
-
   private getSessionByRole = async (options: GetSessionByRole): Promise<Session> => {
     const { role, forceNewSession, spaceId } = options;
 
@@ -178,7 +154,7 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
       const isSessionValid = Date.now() - cachedSession.createdAt < sessionLifetime;
 
       if (isSessionValid) {
-        return cachedSession.session; // Return valid cached session
+        return cachedSession; // Return valid cached session
       }
       this.log.debug(`Session for role '${role}' expired.`);
       this.sessionCache.delete(cacheKey); // Remove expired session
@@ -186,7 +162,7 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
 
     // Create a new session if no valid cached session exists
     const session = await this.createSessionForRole(role);
-    this.sessionCache.set(cacheKey, { session, createdAt: Date.now() });
+    this.sessionCache.set(cacheKey, session);
 
     if (forceNewSession) {
       this.log.debug(`Session for role '${role}' was force updated.`);

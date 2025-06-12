@@ -30,13 +30,19 @@ import {
 export class Session {
   readonly cookie;
   readonly email;
-  constructor(cookie: Cookie, email: string) {
+  readonly createdAt;
+  constructor(cookie: Cookie, email: string, createdAt: number = Date.now()) {
     this.cookie = cookie;
     this.email = email;
+    this.createdAt = createdAt;
   }
 
   getCookieValue() {
     return this.cookie.value;
+  }
+
+  getCreatedAt() {
+    return this.createdAt;
   }
 }
 

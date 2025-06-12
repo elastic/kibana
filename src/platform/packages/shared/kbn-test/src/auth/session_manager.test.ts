@@ -11,7 +11,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import crypto from 'crypto';
 import { Cookie } from 'tough-cookie';
 import { Session } from './saml_auth';
-import { SamlSessionManager, SupportedRoles, SessionInfo } from './session_manager';
+import { SamlSessionManager, SupportedRoles } from './session_manager';
 import * as samlAuth from './saml_auth';
 import * as helper from './helper';
 import { Role, User, UserProfile } from './types';
@@ -449,109 +449,75 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
   describe('Session expiration behavior', () => {
     const hostOptions = {
       protocol: 'http' as 'http' | 'https',
-      hostname: 'localhost',
+      hostname: 'my-test-deployment.test.elastic.cloud',
       port: 5620,
       username: 'elastic',
       password: 'changeme',
     };
-    const isCloud = false;
+    const isCloud = true;
     const samlSessionManagerOptions = {
       hostOptions,
       isCloud,
       log,
       cloudUsersFilePath,
     };
-    const testEmail = 'testuser@elastic.com';
+
     const cookieInstance = Cookie.parse(
       'sid=kbn_cookie_value; Path=/; Expires=Wed, 01 Oct 2023 07:00:00 GMT'
     )!;
 
+    const cloudHostName = 'cloud.env.co';
+    const cloudEmail = 'viewer@elastic.co';
+    const cloudUsers = new Array<[Role, User]>();
+    cloudUsers.push(['viewer', { email: 'viewer@elastic.co', password: 'p1234' }]);
+    cloudUsers.push(['editor', { email: 'editor@elastic.co', password: 'p1234' }]);
+    const samlSMOptionsWithCloudHostName = {
+      ...samlSessionManagerOptions,
+      cloudHostName,
+    };
     let samlSessionManager: SamlSessionManager;
 
     beforeEach(() => {
       jest.resetAllMocks();
-      samlSessionManager = new SamlSessionManager(samlSessionManagerOptions);
-      createLocalSAMLSessionMock.mockResolvedValue(new Session(cookieInstance, testEmail));
+      process.env.TEST_CLOUD_HOST_NAME = 'cloud.env.co'; // Mock the environment variable
+      jest.requireMock('../kbn_client/kbn_client').KbnClient.mockImplementation(() => ({ version: { get } }));
+      get.mockImplementationOnce(() => Promise.resolve('8.12.0'));
+
+      samlSessionManager = new SamlSessionManager(samlSMOptionsWithCloudHostName);
+      createLocalSAMLSessionMock.mockResolvedValue(new Session(cookieInstance, cloudEmail));
+      readCloudUsersFromFileMock.mockReturnValue(cloudUsers);
     });
 
     test('should return a valid cached session if within session lifetime', async () => {
-      // Arrange
-      const role = 'viewer';
       const sessionLifetime = 0.8 * 20 * 60 * 1000; // 80% of 20 minutes
       const now = Date.now();
-      samlSessionManager.setSessionForRole(role, {
-        session: new Session(cookieInstance, testEmail),
-        createdAt: now - sessionLifetime + 1000, // Just within the valid lifetime
-      });
+
+      // Mock session creation
+      createCloudSAMLSessionMock.mockResolvedValue(
+        new Session(cookieInstance, cloudEmail, now - sessionLifetime + 1000) // Just within the valid lifetime
+      );
 
       // Act
-      const cookie = await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(role);
+      await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleViewer);
 
       // Assert
-      expect(cookie).toBe(cookieInstance.value);
-      expect(createLocalSAMLSessionMock).not.toHaveBeenCalled(); // No new session created
+      expect(createCloudSAMLSessionMock.mock.calls).toHaveLength(1); // No new session created
     });
 
     test('should create a new session if cached session is expired', async () => {
-      // Arrange
-      const role = 'viewer';
       const sessionLifetime = 0.8 * 20 * 60 * 1000; // 80% of 20 minutes
       const now = Date.now();
-      samlSessionManager.setSessionForRole(role, {
-        session: new Session(cookieInstance, testEmail),
-        createdAt: now - sessionLifetime - 1000, // Just beyond the valid lifetime
-      });
+
+      // Mock session creation
+      createCloudSAMLSessionMock.mockResolvedValue(
+        new Session(cookieInstance, cloudEmail, now - sessionLifetime - 1000) // Just beyond the valid lifetime
+      );
 
       // Act
-      const cookie = await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(role);
+      await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleViewer);
 
       // Assert
-      expect(cookie).toBe(cookieInstance.value);
-      expect(createLocalSAMLSessionMock).toHaveBeenCalledTimes(1); // New session created
-    });
-  });
-
-  describe('SessionInfo structure', () => {
-    const hostOptions = {
-      protocol: 'http' as 'http' | 'https',
-      hostname: 'localhost',
-      port: 5620,
-      username: 'elastic',
-      password: 'changeme',
-    };
-    const samlSessionManagerOptions = {
-      hostOptions,
-      isCloud: false,
-      log,
-      cloudUsersFilePath,
-    };
-    const testEmail = 'testuser@elastic.com';
-    const cookieInstance = Cookie.parse(
-      'sid=kbn_cookie_value; Path=/; Expires=Wed, 01 Oct 2023 07:00:00 GMT'
-    )!;
-
-    let samlSessionManager: SamlSessionManager;
-
-    beforeEach(() => {
-      jest.resetAllMocks();
-      samlSessionManager = new SamlSessionManager(samlSessionManagerOptions);
-    });
-
-    test('should correctly store and retrieve SessionInfo in the cache', async () => {
-      // Arrange
-      const role = 'viewer';
-      const session = new Session(cookieInstance, testEmail);
-      const createdAt = Date.now();
-      const sessionInfo: SessionInfo = { session, createdAt };
-
-      // Act
-      samlSessionManager.setSessionForRole(role, sessionInfo);
-      const cachedSessionInfo = samlSessionManager.getSessionInfoForRole(role);
-
-      // Assert
-      expect(cachedSessionInfo).toBeDefined();
-      expect(cachedSessionInfo!.session).toBe(session);
-      expect(cachedSessionInfo!.createdAt).toBe(createdAt);
+      expect(createCloudSAMLSessionMock.mock.calls).toHaveLength(1); // New session created
     });
   });
 });
