@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS } from '@kbn/cloud-security-posture-common';
 import { createRule } from '../../tasks/api_calls/rules';
 import { getNewRule } from '../../objects/rule';
 import { getDataTestSubjectSelector } from '../../helpers/common';
@@ -19,6 +18,9 @@ import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { login } from '../../tasks/login';
 import { ALERTS_URL } from '../../urls/navigation';
 import { visit } from '../../tasks/navigation';
+
+export const CDR_MOCK_THIRD_PARTY_INDEX_PATTERN =
+  'security_solution-mockintegration.misconfiguration_latest';
 
 const CSP_INSIGHT_MISCONFIGURATION_TITLE = getDataTestSubjectSelector(
   'securitySolutionFlyoutInsightsMisconfigurationsTitleLink'
@@ -98,9 +100,7 @@ const mockFindingUserName = (matches: boolean) => {
 const createMockFinding = (isNameMatches: boolean, findingType: 'host.name' | 'user.name') => {
   return rootRequest({
     method: 'POST',
-    url: `${Cypress.env(
-      'ELASTICSEARCH_URL'
-    )}/${CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS}/_doc`,
+    url: `${Cypress.env('ELASTICSEARCH_URL')}/${CDR_MOCK_THIRD_PARTY_INDEX_PATTERN}/_doc`,
     body:
       findingType === 'host.name'
         ? mockFindingHostName(isNameMatches)
@@ -111,9 +111,7 @@ const createMockFinding = (isNameMatches: boolean, findingType: 'host.name' | 'u
 const deleteDataStream = () => {
   return rootRequest({
     method: 'DELETE',
-    url: `${Cypress.env(
-      'ELASTICSEARCH_URL'
-    )}/_data_stream/${CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS}`,
+    url: `${Cypress.env('ELASTICSEARCH_URL')}/_data_stream/${CDR_MOCK_THIRD_PARTY_INDEX_PATTERN}`,
   });
 };
 

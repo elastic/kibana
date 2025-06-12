@@ -19,6 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     {
       '@timestamp': new Date().toISOString(),
       resource: { id: chance.guid(), name: `kubelet`, sub_type: 'lower case sub type' },
+      data_stream: { dataset: 'cloud_security_posture.findings' },
       result: { evaluation: 'failed' },
       rule: {
         name: 'Upper case rule name',
