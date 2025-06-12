@@ -18,7 +18,7 @@ const UiSharedDepsNpm = require('.');
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
 const WEBPACK_SRC = require.resolve('webpack');
 
-const REPO_ROOT = Path.resolve(__dirname, '..', '..', '..', '..', '..');
+const { REPO_ROOT } = require('@kbn/repo-info');
 
 const useEuiAmsterdamRelease = process.env.EUI_AMSTERDAM === 'true';
 

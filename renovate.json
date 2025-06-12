@@ -1535,26 +1535,6 @@
       "enabled": true
     },
     {
-      "groupName": "bazel",
-      "matchDepNames": [],
-      "matchDepPatterns": [
-        "^@bazel"
-      ],
-      "reviewers": [
-        "team:kibana-operations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Operations",
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": false
-    },
-    {
       "groupName": "typescript",
       "matchDepNames": [
         "typescript"
@@ -4610,6 +4590,25 @@
       "groupName": "node-stdlib-browser",
       "matchDepNames": [
         "node-stdlib-browser"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Operations",
+        "backport:prev-minor",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "moonrepo",
+      "matchDepNames": [
+        "@moonrepo/cli"
       ],
       "reviewers": [
         "team:kibana-operations"
