@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   EuiComboBox,
   EuiFlexGroup,
@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
+import { debounce } from 'lodash';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { OptionalFieldLabel } from '../optional_field_label';
 import { dashboardServiceProvider, type DashboardItem } from '../common/services/dashboard_service';
@@ -40,6 +41,8 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
   );
 
   const [dashboardList, setDashboardList] = useState<DashboardOption[] | undefined>();
+  const [searchValue, setSearchValue] = useState<string>('');
+  const [isLoading, setLoading] = useState(false);
 
   const [selectedDashboards, setSelectedDashboards] = useState<
     Array<EuiComboBoxOptionOption<string>> | undefined
@@ -91,7 +94,7 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
     }
   }, [dashboardsFormData, contentManagement]);
 
-  useMemo(() => {
+  useEffect(() => {
     fetchDashboardTitles();
   }, [fetchDashboardTitles]);
 
@@ -113,6 +116,16 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
     });
   };
 
+  // Debounced search change handler to avoid excessive API calls
+  // useMemo is used instead of useCallback to avoid an eslint warning about exhaustive dependencies
+  const onSearchChange = useMemo(
+    () =>
+      debounce((value: string) => {
+        setSearchValue(value);
+      }, 300),
+    []
+  );
+
   const getDashboardItem = (dashboard: DashboardItem) => ({
     value: dashboard.id,
     label: dashboard.attributes.title,
@@ -120,17 +133,19 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
 
   const loadDashboards = useCallback(async () => {
     if (contentManagement) {
+      setLoading(true);
       const dashboards = await dashboardServiceProvider(contentManagement)
-        .fetchDashboards()
+        .fetchDashboards({ limit: 100, text: `${searchValue}*` })
         .catch(() => {});
       const dashboardOptions = (dashboards ?? []).map((dashboard: DashboardItem) =>
         getDashboardItem(dashboard)
       );
       setDashboardList(dashboardOptions);
+      setLoading(false);
     }
-  }, [contentManagement]);
+  }, [contentManagement, searchValue]);
 
-  useMemo(() => {
+  useEffect(() => {
     loadDashboards();
   }, [loadDashboards]);
 
@@ -145,11 +160,14 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
             labelAppend={OptionalFieldLabel}
           >
             <EuiComboBox
+              async
+              isLoading={isLoading}
               fullWidth
               options={dashboardList}
               selectedOptions={selectedDashboards}
               placeholder={ALERT_LINK_DASHBOARDS_PLACEHOLDER}
               onChange={onChange}
+              onSearchChange={onSearchChange}
               data-test-subj="ruleLinkedDashboards"
             />
           </EuiFormRow>
