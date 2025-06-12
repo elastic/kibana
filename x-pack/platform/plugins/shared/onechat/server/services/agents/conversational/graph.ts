@@ -12,14 +12,16 @@ import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { StructuredTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/core/server';
 import { InferenceChatModel } from '@kbn/inference-langchain';
-import { withSystemPrompt } from './system_prompt';
+import { withSystemPrompt, defaultSystemPrompt } from './system_prompt';
 
 export const createAgentGraph = async ({
   chatModel,
   tools,
+  systemPrompt = defaultSystemPrompt,
 }: {
   chatModel: InferenceChatModel;
   tools: StructuredTool[];
+  systemPrompt?: string;
   logger: Logger;
 }) => {
   const StateAnnotation = Annotation.Root({
@@ -44,6 +46,7 @@ export const createAgentGraph = async ({
   const callModel = async (state: typeof StateAnnotation.State) => {
     const response = await model.invoke(
       await withSystemPrompt({
+        systemPrompt,
         messages: [...state.initialMessages, ...state.addedMessages],
       })
     );
@@ -68,7 +71,7 @@ export const createAgentGraph = async ({
     };
   };
 
-  // note: the node names are used in the event convertion logic, they should not be changed
+  // note: the node names are used in the event convertion logic, they should *not* be changed
   const graph = new StateGraph(StateAnnotation)
     .addNode('agent', callModel)
     .addNode('tools', toolHandler)
