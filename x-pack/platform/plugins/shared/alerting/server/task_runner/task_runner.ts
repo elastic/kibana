@@ -814,7 +814,7 @@ export class TaskRunner<
       this.ruleConsumer = consumer;
     }
 
-    this.logger.debug(
+    this.logger.info(
       `Cancelling rule type ${this.ruleType.id} with id ${ruleId} - execution exceeded rule type timeout of ${this.ruleType.ruleTaskTimeout}`
     );
 

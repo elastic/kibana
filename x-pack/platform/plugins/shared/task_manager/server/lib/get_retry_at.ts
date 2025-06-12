@@ -15,9 +15,20 @@ export function getRetryAt(
   task: ConcreteTaskInstance,
   taskDefinition: TaskDefinition | undefined
 ): Date | undefined {
+  if (task.taskType.startsWith('alerting:')) {
+    console.log(`getRetryAt called for task ${task.taskType} at ${new Date().toISOString()}`);
+  }
   const taskTimeout = getTimeout(task, taskDefinition);
+  if (task.taskType.startsWith('alerting:')) {
+    console.log(`Task timeout for ${task.taskType} is ${taskTimeout}`);
+  }
   if (task.schedule) {
-    return maxIntervalFromDate(new Date(), task.schedule.interval, taskTimeout);
+    const val = maxIntervalFromDate(new Date(), task.schedule.interval, taskTimeout);
+    if (task.taskType.startsWith('alerting:')) {
+      console.log(`Task ${task.taskType} is scheduled with interval ${task.schedule.interval}`);
+      console.log(`Task ${task.taskType} retryAt set to ${val}`);
+    }
+    return val;
   }
 
   return getRetryDate({

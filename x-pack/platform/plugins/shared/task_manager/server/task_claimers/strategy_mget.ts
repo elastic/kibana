@@ -166,6 +166,9 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   const now = new Date();
   const taskUpdates: PartialConcreteTaskInstance[] = [];
   for (const task of tasksToRun) {
+    if (task.taskType.startsWith('alerting:')) {
+      console.log(`strategy_mget`);
+    }
     taskUpdates.push({
       id: task.id,
       version: task.version,
