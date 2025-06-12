@@ -10,7 +10,7 @@ import React from 'react';
 import type { MutableRefObject } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import rehypeSanitize from 'rehype-sanitize'
+import rehypeSanitize, { type Options } from 'rehype-sanitize';
 import rehypeRaw from 'rehype-raw';
 import { defaultSchema } from 'hast-util-sanitize';
 
@@ -41,7 +41,7 @@ export function Readme({
     [toRelativeImage, packageName, version]
   );
 
-  const customSchema = {
+  const customSchema: Options = {
     ...defaultSchema,
     tagNames: [...(defaultSchema.tagNames || []), 'details', 'summary'],
     attributes: {
@@ -57,7 +57,7 @@ export function Readme({
           <ReactMarkdown
             transformImageUri={handleImageUri}
             components={markdownRenderers(refs)}
-            rehypePlugins={[rehypeRaw, [rehypeSanitize as any, customSchema]]}
+            rehypePlugins={[rehypeRaw as any, [rehypeSanitize, customSchema]]}
             remarkPlugins={[remarkGfm]}
           >
             {markdown}

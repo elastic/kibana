@@ -116,13 +116,11 @@ export const markdownRenderers = (
       return <img style={{ maxWidth: '100%' }} {...props} alt={props.alt} />;
     },
     details: ({ children, node }) => {
-      const [summaryNode, ...bodyNodes] = React.Children.toArray(children).reduce<[React.ReactElement | null, React.ReactNode[]]>(
+      const [summaryNode, ...bodyNodes] = React.Children.toArray(children).reduce<
+        [React.ReactElement | null, React.ReactNode[]]
+      >(
         ([summary, body], child) => {
-          if (
-            summary === null &&
-            React.isValidElement(child) &&
-            child.type === 'summary'
-          ) {
+          if (summary === null && React.isValidElement(child) && child.type === 'summary') {
             return [child, body];
           }
           return [summary, [...body, child]];

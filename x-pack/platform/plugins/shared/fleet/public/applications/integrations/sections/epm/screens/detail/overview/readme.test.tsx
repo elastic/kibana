@@ -12,7 +12,7 @@ import { createIntegrationsTestRendererMock } from '../../../../../../../mock';
 import { Readme } from './readme';
 
 describe('Readme', () => {
-  function render(markdown:string) {
+  function render(markdown: string) {
     const refs = {
       current: {
         set: jest.fn(),
@@ -21,16 +21,11 @@ describe('Readme', () => {
     } as any;
     const testRenderer = createIntegrationsTestRendererMock();
     return testRenderer.render(
-      <Readme
-        packageName="test"
-        version="1.0.0"
-        markdown={markdown}
-        refs={refs}
-      />
+      <Readme packageName="test" version="1.0.0" markdown={markdown} refs={refs} />
     );
   }
   it('should render img tag with max width', () => {
-    const result = render("# Test ![Image](../img/image.png)>");
+    const result = render('# Test ![Image](../img/image.png)>');
 
     const img = result.getByAltText('Image');
 
@@ -52,4 +47,10 @@ describe('Readme', () => {
     expect(content).toBeInTheDocument();
     expect(content).not.toBeVisible();
   });
+
+  it('should remove script tags', () => {
+    const result = render('<script>alert("This should not run")</script>');
+
+    expect(result.queryByText('This should not run')).not.toBeInTheDocument();
+  })
 });
