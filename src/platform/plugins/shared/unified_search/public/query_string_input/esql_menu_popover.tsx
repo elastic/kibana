@@ -73,7 +73,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
     let cancelled = false;
     const getESQLExtensions = async () => {
       if (!activeSolutionId || !queryForRecommendedQueries) {
-        return; // Don't fetch if dependencies aren't ready
+        return; // Don't fetch if we don't have the active solution or query
       }
 
       try {
@@ -84,7 +84,6 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
         if (cancelled) return;
 
         // Only update state if the new data is actually different from the *last successfully set* data
-        // This is where the isEqual check becomes crucial.
         if (!isEqual(extensions.recommendedQueries, lastFetchedQueries.current)) {
           setSolutionsRecommendedQueries(extensions.recommendedQueries);
           lastFetchedQueries.current = extensions.recommendedQueries; // Update the ref with the new data
