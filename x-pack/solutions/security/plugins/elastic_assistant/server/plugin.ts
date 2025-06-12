@@ -8,10 +8,15 @@
 import { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
 
 import {
+  ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG,
+  ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID,
   ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG,
   AssistantFeatures,
 } from '@kbn/elastic-assistant-common';
 import { ReplaySubject, type Subject } from 'rxjs';
+import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
+import { Dataset, IRuleDataClient, IndexOptions } from '@kbn/rule-registry-plugin/server';
+import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { events } from './lib/telemetry/event_based_telemetry';
 import {
   AssistantTool,
@@ -32,6 +37,8 @@ import { CallbackIds, appContextService } from './services/app_context';
 import { removeLegacyQuickPrompt } from './ai_assistant_service/helpers';
 import { getAttackDiscoveryScheduleType } from './lib/attack_discovery/schedules/register_schedule/definition';
 import type { ConfigSchema } from './config_schema';
+import { attackDiscoveryAlertFieldMap } from './lib/attack_discovery/schedules/fields';
+import { ATTACK_DISCOVERY_ALERTS_CONTEXT } from './lib/attack_discovery/schedules/constants';
 
 export class ElasticAssistantPlugin
   implements
@@ -80,7 +87,6 @@ export class ElasticAssistantPlugin
         .getStartServices()
         .then(([_, { productDocBase }]) => productDocBase.management),
       pluginStop$: this.pluginStop$,
-      savedAttackDiscoveries: true,
     });
 
     const requestContextFactory = new RequestContextFactory({
@@ -116,17 +122,41 @@ export class ElasticAssistantPlugin
         // read all feature flags:
         void Promise.all([
           featureFlags.getBooleanValue(ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG, false),
+          featureFlags.getBooleanValue(ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG, false),
           // add more feature flags here
-        ]).then(([assistantAttackDiscoverySchedulingEnabled]) => {
+        ]).then(([assistantAttackDiscoverySchedulingEnabled, attackDiscoveryAlertsEnabled]) => {
           if (assistantAttackDiscoverySchedulingEnabled) {
             // Register Attack Discovery Schedule type
             plugins.alerting.registerType(
               getAttackDiscoveryScheduleType({
                 logger: this.logger,
+                publicBaseUrl: core.http.basePath.publicBaseUrl,
                 telemetry: core.analytics,
               })
             );
           }
+          let adhocAttackDiscoveryDataClient: IRuleDataClient | undefined;
+          if (attackDiscoveryAlertsEnabled) {
+            // Initialize index for ad-hoc generated attack discoveries
+            const { ruleDataService } = plugins.ruleRegistry;
+
+            const ruleDataServiceOptions: IndexOptions = {
+              feature: ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID,
+              registrationContext: ATTACK_DISCOVERY_ALERTS_CONTEXT,
+              dataset: Dataset.alerts,
+              additionalPrefix: '.adhoc',
+              componentTemplateRefs: [ECS_COMPONENT_TEMPLATE_NAME],
+              componentTemplates: [
+                {
+                  name: 'mappings',
+                  mappings: mappingFromFieldMap(attackDiscoveryAlertFieldMap),
+                },
+              ],
+            };
+            adhocAttackDiscoveryDataClient =
+              ruleDataService.initializeIndex(ruleDataServiceOptions);
+          }
+          requestContextFactory.setup(adhocAttackDiscoveryDataClient);
         });
       })
       .catch((error) => {
