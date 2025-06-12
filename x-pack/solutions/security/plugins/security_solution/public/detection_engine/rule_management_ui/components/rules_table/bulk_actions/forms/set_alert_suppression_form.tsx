@@ -33,6 +33,7 @@ import {
 } from '../../../../../rule_creation/components/alert_suppression_edit';
 import { AlertSuppressionDurationType } from '../../../../../common/types';
 import { bulkAlertSuppression as i18n } from '../translations';
+import { useTermsAggregationFields } from '../../../../../../common/hooks/use_terms_aggregation_fields';
 
 interface AlertSuppressionFormData {
   alertSuppressionFields: string[];
@@ -93,6 +94,7 @@ const SetAlertSuppressionFormComponent = ({
   const defaultPatterns = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
 
   const [_, { indexPatterns }] = useFetchIndex(defaultPatterns, false);
+  const suppressibleFields = useTermsAggregationFields(indexPatterns?.fields);
 
   const handleSubmit = async () => {
     const { data, isValid } = await form.submit();
@@ -136,7 +138,7 @@ const SetAlertSuppressionFormComponent = ({
       </EuiFlexGroup>
       <EuiSpacer size="l" />
 
-      <AlertSuppressionEdit suppressibleFields={indexPatterns.fields} />
+      <AlertSuppressionEdit suppressibleFields={suppressibleFields} />
     </BulkEditFormWrapper>
   );
 };
