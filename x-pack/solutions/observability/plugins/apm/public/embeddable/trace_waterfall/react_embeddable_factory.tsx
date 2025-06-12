@@ -37,7 +37,7 @@ export interface ApmTraceWaterfallEmbeddableEntryProps extends BaseProps, Serial
   displayLimit?: number;
   scrollElement?: Element;
   onNodeClick?: (nodeSpanId: string) => void;
-  getRelatedErrorsHref?: (traceId: string, docId: string) => string;
+  getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
 }
 
 export type ApmTraceWaterfallEmbeddableProps =

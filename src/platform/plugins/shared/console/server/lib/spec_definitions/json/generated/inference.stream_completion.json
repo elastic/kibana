@@ -1,0 +1,21 @@
+{
+  "inference.stream_completion": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_inference/completion/{inference_id}/_stream"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-stream-inference",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}
