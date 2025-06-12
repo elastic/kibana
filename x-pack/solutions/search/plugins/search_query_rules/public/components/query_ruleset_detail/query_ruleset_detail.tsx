@@ -40,12 +40,15 @@ import { useQueryRulesetDetailState } from './use_query_ruleset_detail_state';
 import { usePutRuleset } from '../../hooks/use_put_query_rules_ruleset';
 import { docLinks } from '../../../common/doc_links';
 
-export const QueryRulesetDetail: React.FC = () => {
+export interface QueryRulesetDetailProps {
+  createMode?: boolean;
+}
+
+export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMode = false }) => {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { application, http, history },
+    services: { application, http, history, overlays },
   } = useKibana();
-  const { overlays } = useKibana().services;
   const { rulesetId = '' } = useParams<{
     rulesetId?: string;
   }>();
@@ -64,6 +67,7 @@ export const QueryRulesetDetail: React.FC = () => {
     error,
   } = useQueryRulesetDetailState({
     rulesetId,
+    createMode,
   });
   const [isPopoverActionsOpen, setPopoverActions] = useState(false);
   const splitButtonPopoverActionsId = useGeneratedHtmlId({
