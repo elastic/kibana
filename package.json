@@ -1281,7 +1281,7 @@
     "p-retry": "^4.2.0",
     "p-settle": "4.1.1",
     "papaparse": "^5.5.2",
-    "pbf": "3.2.1",
+    "pbf": "4.0.1",
     "pdfmake": "^0.2.15",
     "polished": "^4.3.1",
     "pretty-ms": "6.0.0",

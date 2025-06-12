@@ -27,7 +27,9 @@ export function convertMapboxVectorTileToJson(response: VectorTile) {
         const properties = feature.properties;
         const geometry = feature.loadGeometry()[0];
         const typeName = VectorTileFeature.types[feature.type];
-        let coordinates = [];
+
+        // This type doesn't look great but is made necessary by the switch statement
+        let coordinates: Array<number | number[] | number[][]> = [];
 
         const coordinatesArray = [];
         for (const value of geometry) {

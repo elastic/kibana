@@ -150,7 +150,8 @@ export const MonacoEditorOutput: FunctionComponent = () => {
       <EuiFlexGroup
         className="conApp__outputActions"
         responsive={false}
-        style={editorActionsCss}
+        // @ts-expect-error not sure why this is not working, would be nice to fix
+        css={editorActionsCss}
         justifyContent="center"
         alignItems="center"
       >
