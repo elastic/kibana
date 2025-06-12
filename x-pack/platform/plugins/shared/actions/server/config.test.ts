@@ -238,7 +238,7 @@ describe('config validation', () => {
 
     config.email = {};
     expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-      `"[email.domain_allowlist]: expected value of type [array] but got [undefined]"`
+      `"[email]: Email configuration requires either domain_allowlist or recipient_allowlist to be specified (but not both)"`
     );
 
     config.email = { domain_allowlist: [] };
@@ -248,6 +248,55 @@ describe('config validation', () => {
     config.email = { domain_allowlist: ['a.com', 'b.c.com', 'd.e.f.com'] };
     result = configSchema.validate(config);
     expect(result.email?.domain_allowlist).toEqual(['a.com', 'b.c.com', 'd.e.f.com']);
+  });
+
+  test('validates email.recipient_allowlist', () => {
+    const config: Record<string, unknown> = {};
+    let result = configSchema.validate(config);
+    expect(result.email === undefined);
+
+    config.email = {};
+    expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+      `"[email]: Email configuration requires either domain_allowlist or recipient_allowlist to be specified (but not both)"`
+    );
+
+    config.email = { recipient_allowlist: [] };
+    result = configSchema.validate(config);
+    expect(result.email?.recipient_allowlist).toEqual([]);
+
+    config.email = {
+      recipient_allowlist: [
+        'a.com',
+        'b.c.com',
+        'd.e.f.com',
+        '*.bar@a.com',
+        'foo.bar@b.com',
+        '*@d.e.f.com',
+      ],
+    };
+    result = configSchema.validate(config);
+    expect(result.email?.recipient_allowlist).toEqual([
+      'a.com',
+      'b.c.com',
+      'd.e.f.com',
+      '*.bar@a.com',
+      'foo.bar@b.com',
+      '*@d.e.f.com',
+    ]);
+  });
+
+  test('throws when domain_allowlist and recipient_allowlist are used at the same time', () => {
+    const config: Record<string, unknown> = {};
+    const result = configSchema.validate(config);
+    expect(result.email === undefined);
+
+    config.email = {
+      domain_allowlist: ['a.com'],
+      recipient_allowlist: ['*.bar@a.com'],
+    };
+    expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+      `"[email]: Email configuration requires either domain_allowlist or recipient_allowlist to be specified (but not both)"`
+    );
   });
 });
 

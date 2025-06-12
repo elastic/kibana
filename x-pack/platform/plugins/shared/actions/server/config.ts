@@ -121,9 +121,22 @@ export const configSchema = schema.object({
   microsoftGraphApiScope: schema.string({ defaultValue: DEFAULT_MICROSOFT_GRAPH_API_SCOPE }),
   microsoftExchangeUrl: schema.string({ defaultValue: DEFAULT_MICROSOFT_EXCHANGE_URL }),
   email: schema.maybe(
-    schema.object({
-      domain_allowlist: schema.arrayOf(schema.string()),
-    })
+    schema.object(
+      {
+        domain_allowlist: schema.maybe(schema.arrayOf(schema.string())),
+        recipient_allowlist: schema.maybe(schema.arrayOf(schema.string())),
+      },
+      {
+        validate: (obj) => {
+          if (
+            (obj.domain_allowlist && obj.recipient_allowlist) ||
+            (!obj.domain_allowlist && !obj.recipient_allowlist)
+          ) {
+            return 'Email configuration requires either domain_allowlist or recipient_allowlist to be specified (but not both)';
+          }
+        },
+      }
+    )
   ),
   run: schema.maybe(
     schema.object({

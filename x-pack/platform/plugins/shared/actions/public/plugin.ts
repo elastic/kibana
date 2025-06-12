@@ -19,21 +19,24 @@ export interface ActionsPublicPluginSetup {
 export interface Config {
   email: {
     domain_allowlist: string[];
+    recipient_allowlist: string[];
   };
 }
 
 export class Plugin implements CorePlugin<ActionsPublicPluginSetup> {
   private readonly allowedEmailDomains: string[] | null = null;
+  private readonly recipientAllowlist: string[] | null = null;
 
   constructor(ctx: PluginInitializerContext<Config>) {
     const config = ctx.config.get();
     this.allowedEmailDomains = config.email?.domain_allowlist || null;
+    this.recipientAllowlist = config.email?.recipient_allowlist || null;
   }
 
   public setup(): ActionsPublicPluginSetup {
     return {
       validateEmailAddresses: (emails: string[], options: ValidateEmailAddressesOptions) =>
-        validateEmails(this.allowedEmailDomains, emails, options),
+        validateEmails(this.allowedEmailDomains, emails, options, this.recipientAllowlist),
     };
   }
 

@@ -134,6 +134,24 @@ $$$action-config-email-domain-allowlist$$$
 
     Data type: `string`
 
+`xpack.actions.email.recipient_allowlist` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+:    A list of allowed email recipient (`to`, `cc`, or `bcc`) patterns that can be used with email connectors. If you attempt to send an email to a recipient that does not match the allowed patterns, the action will fail. The failure message indicates that the email is not allowed.
+
+    ::::{warning}
+    This setting cannot be used with `xpack.actions.email.domain_allowlist`.
+    ::::
+
+    Data type: `string`
+
+    For example:
+
+    ```yaml
+    xpack.actions.email.recipient_allowlist: ["*.doe@example.com", "*@example.org"]
+    ```
+
+    Only "to", "cc", or "bcc" email addresses that match the listed patterns will be accepted. For example, "john.doe@example.com" or "johndoe@example.org".
+
+
 `xpack.actions.enableFooterInEmail` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   A boolean value indicating that a footer with a relevant link should be added to emails sent as alerting actions.
 
