@@ -58,7 +58,6 @@ import {
 import { AWS_SINGLE_ACCOUNT } from './policy_template_form';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 
-
 // Posture policies only support the default namespace
 export const POSTURE_NAMESPACE = 'default';
 
