@@ -85,7 +85,7 @@ describe('SecretFormRow', () => {
   });
 
   it('should call the onToggleSecretStorage function when the revert link is clicked', () => {
-    const { getByText } = renderReactTestingLibraryWithI18n(
+    const { getByText } = renderWithI18n(
       <SecretFormRow
         title={title}
         clear={clear}
