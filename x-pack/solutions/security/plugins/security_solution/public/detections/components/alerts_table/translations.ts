@@ -422,6 +422,6 @@ export const EVENT_RENDERED_VIEW_COLUMNS = {
 export const NOT_ENOUGH_PRIVILEGES = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.notEnoughPrivileges',
   {
-    defaultMessage: 'Not enough privileges',
+    defaultMessage: 'Insufficient privileges',
   }
 );
