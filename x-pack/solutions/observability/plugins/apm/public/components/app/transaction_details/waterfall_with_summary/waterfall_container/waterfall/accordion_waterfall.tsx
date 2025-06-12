@@ -20,13 +20,13 @@ import { WindowScroller, AutoSizer } from 'react-virtualized';
 import type { ListChildComponentProps } from 'react-window';
 import { areEqual, VariableSizeList as List } from 'react-window';
 import { css } from '@emotion/react';
-import type { ApmTraceWaterfallEmbeddableEntryProps } from '../../../../../../embeddable/trace_waterfall/react_embeddable_factory';
 import { asBigNumber } from '../../../../../../../common/utils/formatters';
 import type { Margins } from '../../../../../shared/charts/timeline';
 import type {
   IWaterfallNodeFlatten,
   IWaterfall,
   IWaterfallSpanOrTransaction,
+  IWaterfallGetRelatedErrorsHref,
 } from './waterfall_helpers/waterfall_helpers';
 import { WaterfallItem } from './waterfall_item';
 import { WaterfallContextProvider } from './context/waterfall_context';
@@ -39,12 +39,12 @@ interface AccordionWaterfallProps {
   waterfall: IWaterfall;
   timelineMargins: Margins;
   onClickWaterfallItem?: (item: IWaterfallSpanOrTransaction, flyoutDetailTab: string) => void;
-  onClickWaterfallError?: ApmTraceWaterfallEmbeddableEntryProps['onErrorClick'];
   showCriticalPath: boolean;
   maxLevelOpen: number;
   displayLimit?: number;
   isEmbeddable?: boolean;
   scrollElement?: Element;
+  getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
 }
 
 type WaterfallProps = Omit<
@@ -158,8 +158,7 @@ const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
     duration,
     waterfallItemId,
     onClickWaterfallItem,
-    onClickWaterfallError,
-
+    getRelatedErrorsHref,
     timelineMargins,
     node,
   } = props;
@@ -226,9 +225,9 @@ const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
               errorCount={errorCount}
               marginLeftLevel={marginLeftLevel}
               onClick={onWaterfallItemClick}
-              onErrorClick={onClickWaterfallError}
               segments={segments}
               isEmbeddable={isEmbeddable}
+              getRelatedErrorsHref={getRelatedErrorsHref}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

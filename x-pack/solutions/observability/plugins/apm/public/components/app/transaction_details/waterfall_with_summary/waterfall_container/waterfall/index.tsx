@@ -10,7 +10,6 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
-import type { ApmTraceWaterfallEmbeddableEntryProps } from '../../../../../../embeddable/trace_waterfall/react_embeddable_factory';
 import {
   TimelineAxisContainer,
   VerticalLinesContainer,
@@ -20,6 +19,7 @@ import { getErrorMarks } from '../marks/get_error_marks';
 import { AccordionWaterfall } from './accordion_waterfall';
 import type {
   IWaterfall,
+  IWaterfallGetRelatedErrorsHref,
   IWaterfallSpanOrTransaction,
 } from './waterfall_helpers/waterfall_helpers';
 
@@ -37,10 +37,10 @@ interface Props {
   waterfall: IWaterfall;
   showCriticalPath: boolean;
   onNodeClick?: (item: IWaterfallSpanOrTransaction, flyoutDetailTab: string) => void;
-  onErrorClick?: ApmTraceWaterfallEmbeddableEntryProps['onErrorClick'];
   displayLimit?: number;
   isEmbeddable?: boolean;
   scrollElement?: Element;
+  getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
 }
 
 function getWaterfallMaxLevel(waterfall: IWaterfall) {
@@ -78,10 +78,10 @@ export function Waterfall({
   waterfallItemId,
   showCriticalPath,
   onNodeClick,
-  onErrorClick,
   displayLimit,
   isEmbeddable,
   scrollElement,
+  getRelatedErrorsHref,
 }: Props) {
   const { euiTheme } = useEuiTheme();
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
@@ -182,7 +182,6 @@ export function Waterfall({
             waterfall={waterfall}
             timelineMargins={timelineMargins}
             onClickWaterfallItem={onNodeClick}
-            onClickWaterfallError={onErrorClick}
             showCriticalPath={showCriticalPath}
             maxLevelOpen={
               waterfall.traceDocsTotal > 500 ? MAX_DEPTH_OPEN_LIMIT : waterfall.traceDocsTotal
@@ -190,6 +189,7 @@ export function Waterfall({
             displayLimit={displayLimit}
             isEmbeddable={isEmbeddable}
             scrollElement={scrollElement}
+            getRelatedErrorsHref={getRelatedErrorsHref}
           />
         )}
       </WaterfallItemsContainer>

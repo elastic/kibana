@@ -10,7 +10,6 @@ import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
 import React, { useEffect, useRef, useState } from 'react';
-import type { ApmTraceWaterfallEmbeddableEntryProps } from '../../../../../../embeddable/trace_waterfall/react_embeddable_factory';
 import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
 import { isMobileAgentName, isRumAgentName } from '../../../../../../../common/agent_name';
 import { SPAN_ID, TRACE_ID, TRANSACTION_ID } from '../../../../../../../common/es_fields/apm';
@@ -25,7 +24,10 @@ import { SyncBadge } from './badge/sync_badge';
 import { FailureBadge } from './failure_badge';
 import { OrphanItemTooltipIcon } from './orphan_item_tooltip_icon';
 import { SpanMissingDestinationTooltip } from './span_missing_destination_tooltip';
-import type { IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
+import type {
+  IWaterfallGetRelatedErrorsHref,
+  IWaterfallSpanOrTransaction,
+} from './waterfall_helpers/waterfall_helpers';
 
 type ItemType = 'transaction' | 'span' | 'error';
 
@@ -127,7 +129,7 @@ interface IWaterfallItemProps {
     color: string;
   }>;
   onClick?: (flyoutDetailTab: string) => unknown;
-  onErrorClick?: ApmTraceWaterfallEmbeddableEntryProps['onErrorClick'];
+  getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
   isEmbeddable?: boolean;
 }
 
@@ -228,9 +230,9 @@ export function WaterfallItem({
   color,
   isSelected,
   errorCount,
+  getRelatedErrorsHref,
   marginLeftLevel,
   onClick,
-  onErrorClick,
   segments,
   isEmbeddable = false,
 }: IWaterfallItemProps) {
@@ -303,7 +305,11 @@ export function WaterfallItem({
 
         <Duration item={item} />
         {isEmbeddable ? (
-          <EmbeddableRelatedErrors item={item} errorCount={errorCount} onClick={onErrorClick} />
+          <EmbeddableRelatedErrors
+            item={item}
+            errorCount={errorCount}
+            getRelatedErrorsHref={getRelatedErrorsHref}
+          />
         ) : (
           <RelatedErrors item={item} errorCount={errorCount} />
         )}
@@ -326,11 +332,11 @@ export function WaterfallItem({
 function EmbeddableRelatedErrors({
   item,
   errorCount,
-  onClick,
+  getRelatedErrorsHref,
 }: {
   item: IWaterfallSpanOrTransaction;
   errorCount: number;
-  onClick?: ApmTraceWaterfallEmbeddableEntryProps['onErrorClick'];
+  getRelatedErrorsHref?: (traceId: string, docId: string) => string;
 }) {
   const { euiTheme } = useEuiTheme();
 
@@ -343,14 +349,16 @@ function EmbeddableRelatedErrors({
     }
   );
 
-  if (errorCount > 0) {
+  if (errorCount > 0 && getRelatedErrorsHref) {
     return (
+      // TODO error fix TS error
+      // eslint-disable-next-line @elastic/eui/href-or-on-click
       <EuiBadge
         color={euiTheme.colors.danger}
         iconType="arrowRight"
+        href={getRelatedErrorsHref(item.doc.trace.id, item.id)}
         onClick={(e: React.MouseEvent | React.KeyboardEvent) => {
           e.stopPropagation();
-          onClick?.({ traceId: item.doc.trace.id, docId: item.id });
         }}
         tabIndex={0}
         role="button"
