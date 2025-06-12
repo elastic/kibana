@@ -18,6 +18,7 @@ export interface EsqlToolClient{
     list(): Promise<EsqlToolCreateRequest[]>;
     create(esqlTool: EsqlToolCreateRequest): void;
     update(toolId: string, updates: Partial<EsqlToolCreateRequest>): Promise<EsqlToolCreateRequest>;
+    delete(toolId: string): Promise<boolean>;
   }
 
 export const createClient = ({
@@ -120,5 +121,22 @@ export const createClient = ({
             throw error;
         }
      }
+     async delete(id: string): Promise<boolean> {
+        try {
+            const document = await this.storage.getClient().get({ id: id });
+        
+            if (!document._source) {
+                throw new Error(`Tool with ID ${id} not found`);
+            }
+            
+            await this.storage.getClient().delete({ id: id });
+
+        } catch (error) {
+            logger.error(`Error deleting ESQL tool with ID ${id}: ${error}`);
+            throw error;
+        }
+        return true;
+     }
+
   }
     
