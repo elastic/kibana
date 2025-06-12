@@ -921,6 +921,10 @@ describe('data telemetry collection tasks', () => {
                     key: 'opentelemetry/java/elastic',
                     services: { value: 6 },
                   },
+                  {
+                    key: 'opentelemetry/dotnet/elastic',
+                    services: { value: 7 },
+                  },
                 ],
               },
             },

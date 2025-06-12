@@ -203,6 +203,12 @@ describe('filterByAgent', () => {
       );
     });
 
+    it('opentelemetry/dotnet/elastic', () => {
+      expect(getSettingKeysForAgent('opentelemetry/dotnet/elastic')).toEqual(
+        expect.arrayContaining(['logging_level'])
+      );
+    });
+
     it('"All" services (no agent name)', () => {
       expect(getSettingKeysForAgent(undefined)).toEqual(
         expect.arrayContaining(['transaction_max_spans', 'transaction_sample_rate'])
