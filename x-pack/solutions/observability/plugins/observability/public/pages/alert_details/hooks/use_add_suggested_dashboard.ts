@@ -27,33 +27,42 @@ export const useAddSuggestedDashboards = ({
 
   const [addingDashboardId, setAddingDashboardId] = useState<string>();
 
-  const onError = (error: IHttpFetchError<{ message: string }>) => {
-    setAddingDashboardId(undefined);
-    notifications.toasts.addError(error, {
-      title: i18n.translate('xpack.observability.alertDetails.addSuggestedDashboardError', {
-        defaultMessage: 'Error adding suggested dashboard',
-      }),
-    });
-  };
+  const onError = useCallback(
+    (error: IHttpFetchError<{ message: string }>) => {
+      setAddingDashboardId(undefined);
+      notifications.toasts.addError(error, {
+        title: i18n.translate('xpack.observability.alertDetails.addSuggestedDashboardError', {
+          defaultMessage: 'Error adding suggested dashboard',
+        }),
+      });
+    },
+    [notifications.toasts]
+  );
 
-  const onSuccess = async (data: Rule) => {
-    if (!addingDashboardId)
-      throw new Error('Adding dashboard id not defined, this should never occur');
-    await onSuccessAddSuggestedDashboard();
-    setAddingDashboardId(undefined);
-    notifications.toasts.addSuccess({
-      title: i18n.translate('xpack.observability.alertDetails.addSuggestedDashboardSuccess.title', {
-        defaultMessage: 'Added to linked dashboard',
-      }),
-      text: i18n.translate('xpack.observability.alertDetails.addSuggestedDashboardSuccess.text', {
-        defaultMessage:
-          'From now on this dashboard will be linked to all alerts related to {ruleName}',
-        values: {
-          ruleName: data.name,
-        },
-      }),
-    });
-  };
+  const onSuccess = useCallback(
+    async (data: Rule) => {
+      if (!addingDashboardId)
+        throw new Error('Adding dashboard id not defined, this should never occur');
+      await onSuccessAddSuggestedDashboard();
+      setAddingDashboardId(undefined);
+      notifications.toasts.addSuccess({
+        title: i18n.translate(
+          'xpack.observability.alertDetails.addSuggestedDashboardSuccess.title',
+          {
+            defaultMessage: 'Added to linked dashboard',
+          }
+        ),
+        text: i18n.translate('xpack.observability.alertDetails.addSuggestedDashboardSuccess.text', {
+          defaultMessage:
+            'From now on this dashboard will be linked to all alerts related to {ruleName}',
+          values: {
+            ruleName: data.name,
+          },
+        }),
+      });
+    },
+    [addingDashboardId, notifications.toasts, onSuccessAddSuggestedDashboard]
+  );
 
   const { mutateAsync: updateRule } = useUpdateRule({ http, onError, onSuccess });
 

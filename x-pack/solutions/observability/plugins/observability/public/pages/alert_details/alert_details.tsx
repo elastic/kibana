@@ -122,6 +122,11 @@ export function AlertDetails() {
   const { rule, refetch } = useFetchRule({
     ruleId,
   });
+
+  const onSuccessAddSuggestedDashboard = useCallback(async () => {
+    await Promise.all([refetchRelatedDashboard(), refetch()]);
+  }, [refetch, refetchRelatedDashboard]);
+
   const [alertStatus, setAlertStatus] = useState<AlertStatus>();
   const { euiTheme } = useEuiTheme();
   const [sources, setSources] = useState<AlertDetailsSource[]>();
@@ -290,7 +295,7 @@ export function AlertDetails() {
         linkedDashboards={linkedDashboards}
         isLoadingRelatedDashboards={isLoadingRelatedDashboards}
         rule={rule}
-        onSuccessAddSuggestedDashboard={refetchRelatedDashboard}
+        onSuccessAddSuggestedDashboard={onSuccessAddSuggestedDashboard}
       />
     ) : (
       <EuiLoadingSpinner />
