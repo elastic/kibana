@@ -16,6 +16,7 @@ export interface DataSources {
     logs: string;
     apm: {
       errors: string;
+      traces: string;
     };
   };
 }
