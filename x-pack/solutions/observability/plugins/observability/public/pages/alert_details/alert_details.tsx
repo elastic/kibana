@@ -10,7 +10,6 @@ import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FindDashboardsByIdResponse } from '@kbn/dashboard-plugin/public';
 import {
   EuiEmptyPrompt,
   EuiPanel,
@@ -35,7 +34,6 @@ import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import dedent from 'dedent';
 import { AlertFieldsTable } from '@kbn/alerts-ui-shared/src/alert_fields_table';
-import { dashboardServiceProvider } from '@kbn/response-ops-rule-form/src/common';
 import { css } from '@emotion/react';
 import { omit } from 'lodash';
 import { RelatedAlerts } from './components/related_alerts/related_alerts';
@@ -61,6 +59,7 @@ import StaleAlert from './components/stale_alert';
 import { RelatedDashboards } from './components/related_dashboards';
 import { getAlertTitle } from '../../utils/format_alert_title';
 import { AlertSubtitle } from './components/alert_subtitle';
+import { useRelatedDashboards } from './hooks/use_related_dashboards';
 
 interface AlertDetailsPathParams {
   alertId: string;
@@ -101,7 +100,6 @@ export function AlertDetails() {
     observabilityAIAssistant,
     uiSettings,
     serverless,
-    contentManagement,
   } = useKibana().services;
   const { onPageReady } = usePerformanceContext();
 
@@ -109,6 +107,9 @@ export function AlertDetails() {
   const history = useHistory();
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { alertId } = useParams<AlertDetailsPathParams>();
+  const { isLoadingRelatedDashboards, suggestedDashboards, linkedDashboards } =
+    useRelatedDashboards(alertId);
+
   const [isLoading, alertDetail] = useFetchAlertDetail(alertId);
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
   const CasesContext = getCasesContext();
@@ -125,10 +126,6 @@ export function AlertDetails() {
     const urlTabId = searchParams.get(ALERT_DETAILS_TAB_URL_STORAGE_KEY);
     return urlTabId && isTabId(urlTabId) ? urlTabId : 'overview';
   });
-  const [validDashboards, setValidDashboards] = useState<FindDashboardsByIdResponse[]>([]);
-  const [linkedDashboardsNo, setLinkedDashboardsNo] = useState(0);
-  const [isLoadingValidDashboards, setIsLoadingValidDashboards] = useState(true);
-  const linkedDashboards = React.useMemo(() => rule?.artifacts?.dashboards ?? [], [rule]);
   const handleSetTabId = async (tabId: TabId) => {
     setActiveTabId(tabId);
 
@@ -195,20 +192,6 @@ export function AlertDetails() {
       onPageReady();
     }
   }, [onPageReady, alertDetail, isLoading, activeTabId]);
-
-  useEffect(() => {
-    const fetchValidDashboards = async () => {
-      setIsLoadingValidDashboards(true);
-      const dashboardIds = linkedDashboards.map((dashboard: { id: string }) => dashboard.id);
-      const findDashboardsService = dashboardServiceProvider(contentManagement);
-      const existingDashboards = await findDashboardsService.fetchValidDashboards(dashboardIds);
-
-      setValidDashboards(existingDashboards.length ? existingDashboards : []);
-      setLinkedDashboardsNo(existingDashboards.length);
-      setIsLoadingValidDashboards(false);
-    };
-    if (rule) fetchValidDashboards();
-  }, [rule, contentManagement, linkedDashboards]);
 
   if (isLoading) {
     return <CenterJustifiedSpinner />;
@@ -296,17 +279,13 @@ export function AlertDetails() {
     </EuiPanel>
   );
 
-  const increaseLinkedDashboardNo = () => {
-    setLinkedDashboardsNo((v) => v + 1);
-  };
-
   const relatedDashboardsTab =
     alertDetail && rule ? (
       <RelatedDashboards
-        relatedDashboards={isLoadingValidDashboards ? undefined : validDashboards}
-        alertId={alertId}
+        suggestedDashboards={suggestedDashboards}
+        linkedDashboards={linkedDashboards}
+        isLoadingRelatedDashboards={isLoadingRelatedDashboards}
         rule={rule}
-        onAddLinkedDashboard={increaseLinkedDashboardNo}
       />
     ) : (
       <EuiLoadingSpinner />
@@ -373,11 +352,11 @@ export function AlertDetails() {
             id="xpack.observability.alertDetails.tab.relatedDashboardsLabel"
             defaultMessage="Related dashboards"
           />
-          {isLoadingValidDashboards ? (
+          {isLoadingRelatedDashboards ? (
             <EuiLoadingSpinner css={{ marginLeft: '5px' }} />
           ) : (
             <EuiNotificationBadge color="success" css={{ marginLeft: '5px' }}>
-              {linkedDashboardsNo}
+              {linkedDashboards?.length || 0}
             </EuiNotificationBadge>
           )}
         </>

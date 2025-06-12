@@ -14,13 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { useState } from 'react';
 import { DashboardMetadata } from '../components/related_dashboards/dashboard_tile';
 
-export const useAddSuggestedDashboards = ({
-  rule,
-  onSuccessAddSuggestedDashboard,
-}: {
-  rule: Rule;
-  onSuccessAddSuggestedDashboard: (addedDashboardId: string) => void;
-}) => {
+export const useAddSuggestedDashboards = ({ rule }: { rule: Rule }) => {
   const {
     services: { http, notifications },
   } = useKibana();
@@ -39,7 +33,6 @@ export const useAddSuggestedDashboards = ({
   const onSuccess = (data: Rule) => {
     if (!addingDashboardId)
       throw new Error('Adding dashboard id not defined, this should never occur');
-    onSuccessAddSuggestedDashboard(addingDashboardId);
     setAddingDashboardId(undefined);
     notifications.toasts.addSuccess({
       title: i18n.translate('xpack.observability.alertDetails.addSuggestedDashboardSuccess.title', {

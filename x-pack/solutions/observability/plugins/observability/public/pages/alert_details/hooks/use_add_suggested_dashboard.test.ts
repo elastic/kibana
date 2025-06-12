@@ -52,8 +52,6 @@ const mockRule = {
   },
 } as unknown as Rule;
 
-const mockOnSuccessAddSuggestedDashboard = jest.fn();
-
 const mockDashboard: DashboardMetadata = {
   id: TEST_DASHBOARD.id,
   title: TEST_DASHBOARD.title,
@@ -69,7 +67,6 @@ describe('useAddSuggestedDashboards', () => {
     const { result } = renderHook(() =>
       useAddSuggestedDashboards({
         rule: mockRule,
-        onSuccessAddSuggestedDashboard: mockOnSuccessAddSuggestedDashboard,
       })
     );
 
@@ -80,7 +77,6 @@ describe('useAddSuggestedDashboards', () => {
     const { result } = renderHook(() =>
       useAddSuggestedDashboards({
         rule: mockRule,
-        onSuccessAddSuggestedDashboard: mockOnSuccessAddSuggestedDashboard,
       })
     );
 
@@ -105,11 +101,10 @@ describe('useAddSuggestedDashboards', () => {
     });
   });
 
-  it('should call onSuccessAddSuggestedDashboard and reset addingDashboardId on success', () => {
+  it('should reset addingDashboardId on success', () => {
     const { result } = renderHook(() =>
       useAddSuggestedDashboards({
         rule: mockRule,
-        onSuccessAddSuggestedDashboard: mockOnSuccessAddSuggestedDashboard,
       })
     );
 
@@ -134,9 +129,6 @@ describe('useAddSuggestedDashboards', () => {
       capturedOnSuccess!(updatedRule);
     });
 
-    // Check that onSuccessAddSuggestedDashboard was called with the correct dashboard ID
-    expect(mockOnSuccessAddSuggestedDashboard).toHaveBeenCalledWith(TEST_DASHBOARD.id);
-
     // Check that addingDashboardId is reset to undefined
     expect(result.current.addingDashboardId).toBeUndefined();
 
@@ -151,7 +143,6 @@ describe('useAddSuggestedDashboards', () => {
     const { result } = renderHook(() =>
       useAddSuggestedDashboards({
         rule: mockRule,
-        onSuccessAddSuggestedDashboard: mockOnSuccessAddSuggestedDashboard,
       })
     );
 

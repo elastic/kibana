@@ -36,12 +36,15 @@ const getDashboardMetadata = <T extends DashboardMetadata>({ description, id, ti
   title,
 });
 
+export const getRelatedDashboardsQueryKey = (alertId: string) => ['relatedDashboards', alertId];
+
 export const useRelatedDashboards = (alertId: string): RelatedDashboardResponse => {
   const { http } = useKibana().services;
 
   const { data, isLoading } = useQuery<GetRelatedDashboardsResponse>({
-    queryKey: ['relatedDashboards', alertId],
+    queryKey: getRelatedDashboardsQueryKey(alertId),
     queryFn: () => fetchRelatedDashboards({ alertId, http }),
+    refetchOnWindowFocus: false, // Disable window focus refetching
   });
 
   return {

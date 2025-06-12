@@ -13,7 +13,6 @@ import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assist
 import { useBreadcrumbs, TagsList } from '@kbn/observability-shared-plugin/public';
 import { RuleTypeModel, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { ruleTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/rule_type_registry.mock';
-import { dashboardServiceProvider } from '@kbn/response-ops-rule-form/src/common';
 import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Chance } from 'chance';
@@ -67,14 +66,17 @@ jest.mock('./hooks/use_related_dashboards', () => ({
         description: 'A suggested dashboard for testing',
       },
     ],
+    linkedDashboards: [
+      {
+        id: 'dashboard-1',
+      },
+    ],
   }),
 }));
 
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
 const useKibanaMock = useKibana as jest.Mock;
-
-const dashboardServiceProviderMock = dashboardServiceProvider as jest.Mock;
 
 const mockObservabilityAIAssistant = observabilityAIAssistantPluginMock.createStartContract();
 
@@ -136,14 +138,6 @@ const useBreadcrumbsMock = useBreadcrumbs as jest.Mock;
 const TagsListMock = TagsList as jest.Mock;
 
 usePerformanceContextMock.mockReturnValue({ onPageReady: jest.fn() });
-
-dashboardServiceProviderMock.mockReturnValue({
-  fetchValidDashboards: jest.fn().mockResolvedValue([
-    {
-      id: 'dashboard-1',
-    },
-  ]),
-});
 
 const chance = new Chance();
 const params = {
