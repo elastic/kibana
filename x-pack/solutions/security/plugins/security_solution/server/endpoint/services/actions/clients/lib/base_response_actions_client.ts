@@ -232,19 +232,11 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       return cachedResult;
     }
 
-    this.cache.set(
-      CACHE_KEY,
-      new Promise(async (resolve, reject) => {
-        try {
-          await ensureActionRequestsIndexIsConfigured(this.options.endpointService);
-        } catch (error) {
-          reject(error);
-        }
-      })
-    );
+    const resultPromise = ensureActionRequestsIndexIsConfigured(this.options.endpointService);
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return this.cache.get(CACHE_KEY)!;
+    this.cache.set(CACHE_KEY, resultPromise);
+
+    return resultPromise;
   }
 
   /**
