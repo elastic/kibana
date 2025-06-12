@@ -135,11 +135,15 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should return metrics if available and called with withMetrics', async () => {
       const now = Date.now();
+      // We need to create data points in precise time buckets to ensure the derivative works properly
+      // 4 minutes ago (first data point for component1)
+      const fourMinutesAgo = new Date(now - 4 * 60 * 1000);
+      fourMinutesAgo.setSeconds(0, 0); // Set to exact minute boundary
       await es.index({
         index: 'metrics-elastic_agent.elastic_agent-default',
         refresh: 'wait_for',
         document: {
-          '@timestamp': new Date(now - 2 * 60 * 1000).toISOString(),
+          '@timestamp': fourMinutesAgo.toISOString(),
           data_stream: {
             namespace: 'default',
             type: 'metrics',
@@ -154,18 +158,52 @@ export default function ({ getService }: FtrProviderContext) {
               },
               cpu: {
                 total: {
-                  value: 500,
+                  value: 500, // Starting value
                 },
               },
             },
           },
         },
       });
+
+      // 3 minutes ago (second data point for component1)
+      const threeMinutesAgo = new Date(now - 3 * 60 * 1000);
+      threeMinutesAgo.setSeconds(0, 0); // Set to exact minute boundary
       await es.index({
         index: 'metrics-elastic_agent.elastic_agent-default',
         refresh: 'wait_for',
         document: {
-          '@timestamp': new Date(now - 1 * 60 * 1000).toISOString(),
+          '@timestamp': threeMinutesAgo.toISOString(),
+          data_stream: {
+            namespace: 'default',
+            type: 'metrics',
+            dataset: 'elastic_agent.elastic_agent',
+          },
+          elastic_agent: { id: 'agent1', process: 'elastic_agent' },
+          component: { id: 'component1' },
+          system: {
+            process: {
+              memory: {
+                size: 25510920,
+              },
+              cpu: {
+                total: {
+                  value: 1200, // Higher value to ensure derivative is positive
+                },
+              },
+            },
+          },
+        },
+      });
+
+      // 1 minute ago (data point for component2) - same agent but different component
+      const oneMinuteAgo = new Date(now - 1 * 60 * 1000);
+      oneMinuteAgo.setSeconds(0, 0); // Set to exact minute boundary
+      await es.index({
+        index: 'metrics-elastic_agent.elastic_agent-default',
+        refresh: 'wait_for',
+        document: {
+          '@timestamp': oneMinuteAgo.toISOString(),
           elastic_agent: { id: 'agent1', process: 'elastic_agent' },
           component: { id: 'component2' },
           data_stream: {
@@ -180,7 +218,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
               cpu: {
                 total: {
-                  value: 1500,
+                  value: 2500, // Even higher value
                 },
               },
             },
@@ -198,7 +236,7 @@ export default function ({ getService }: FtrProviderContext) {
       const agent1: Agent = apiResponse.items.find((agent: any) => agent.id === 'agent1');
       //  As both of the indexed items have the same agent id, and each one has its own memory/cpu item, the metrics should include both values combined as each is now uniquely counted towards total memory/cpu usage
       expect(agent1.metrics?.memory_size_byte_avg).to.eql('51021840');
-      expect(agent1.metrics?.cpu_avg).to.eql('0.06664');
+      expect(agent1.metrics?.cpu_avg).to.eql('0.01166');
 
       const agent2: Agent = apiResponse.items.find((agent: any) => agent.id === 'agent2');
       expect(agent2.metrics?.memory_size_byte_avg).equal(undefined);
