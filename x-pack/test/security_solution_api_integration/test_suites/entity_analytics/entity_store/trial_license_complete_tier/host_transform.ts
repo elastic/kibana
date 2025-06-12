@@ -55,22 +55,7 @@ export default function (providerContext: FtrProviderContext) {
 
       beforeEach(async () => {
         // Now we can enable the Entity Store...
-        const response = await supertest
-          .post('/api/entity_store/enable')
-          .set('kbn-xsrf', 'xxxx')
-          .send({});
-        expect(response.statusCode).to.eql(200);
-        expect(response.body.succeeded).to.eql(true);
-
-        // and wait for it to start up
-        await retry.waitForWithTimeout('Entity Store to initialize', TIMEOUT_MS, async () => {
-          const { body } = await supertest
-            .get('/api/entity_store/status')
-            .query({ include_components: true })
-            .expect(200);
-          expect(body.status).to.eql('running');
-          return true;
-        });
+        await enableEntityStore(providerContext);
       });
 
       afterEach(async () => {
@@ -262,6 +247,45 @@ async function createDocumentsAndTriggerTransform(
     expect(transform.stats.documents_processed).to.greaterThan(docsProcessed);
     return true;
   });
+}
+
+async function enableEntityStore(providerContext: FtrProviderContext): Promise<void> {
+  const supertest = providerContext.getService('supertest');
+  const retry = providerContext.getService('retry');
+  const utils = EntityStoreUtils(providerContext.getService);
+
+  const RETRIES = 3;
+  let success: boolean = false;
+  for (let attempt = 0; attempt < RETRIES; attempt++) {
+    const response = await supertest
+      .post('/api/entity_store/enable')
+      .set('kbn-xsrf', 'xxxx')
+      .send({});
+    expect(response.statusCode).to.eql(200);
+    expect(response.body.succeeded).to.eql(true);
+
+    // and wait for it to start up
+    await retry.waitForWithTimeout('Entity Store to initialize', TIMEOUT_MS, async () => {
+      const { body } = await supertest
+        .get('/api/entity_store/status')
+        .query({ include_components: true })
+        .expect(200);
+      if (body.status == 'error') {
+        console.log(`Expected body.status to be 'running', got 'error': ${body}`);
+        return false;
+      }
+      expect(body.status).to.eql('running');
+      success = true;
+      return true;
+    });
+
+    if (success) {
+      break;
+    } else {
+      await utils.cleanEngines();
+    }
+  }
+  expect(success).ok();
 }
 
 interface HostTransformResult {
