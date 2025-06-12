@@ -4,7 +4,7 @@
 pricing.tiers.enabled: true
 pricing.tiers.products:
   - name: observability
-    tier: complete
+    tier: complete  # Accepted values for this tier are: complete, logs_essentials
 
 # Make sure the plugins belonging to this project type are loaded
 plugins.allowlistPluginGroups: ['platform', 'observability']
@@ -83,9 +83,6 @@ xpack.uptime.service.tls.key: /mnt/elastic-internal/http-certs/tls.key
 
 # Fleet specific configuration
 xpack.fleet.internal.registry.capabilities: ['apm', 'observability', 'uptime']
-xpack.fleet.internal.registry.spec.min: '3.0'
-xpack.fleet.internal.registry.spec.max: '3.3'
-xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
 xpack.fleet.internal.registry.excludePackages: [
     # Security integrations
     'endpoint',
