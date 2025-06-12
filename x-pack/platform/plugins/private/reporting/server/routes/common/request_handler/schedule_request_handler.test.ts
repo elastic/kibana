@@ -20,10 +20,16 @@ import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mo
 import { JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { ReportingCore } from '../../..';
-import { createMockReportingCore } from '../../../test_helpers';
+import {
+  createMockPluginSetup,
+  createMockPluginStart,
+  createMockReportingCore,
+} from '../../../test_helpers';
 import { ReportingRequestHandlerContext, ReportingSetup } from '../../../types';
 import { ScheduleRequestHandler } from './schedule_request_handler';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { BehaviorSubject } from 'rxjs';
 
 const getMockContext = () =>
   ({
@@ -72,7 +78,25 @@ describe('Handle request to schedule', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
-    reportingCore = await createMockReportingCore(createMockConfigSchema({}));
+    const mockConfig = createMockConfigSchema({});
+    reportingCore = await createMockReportingCore(
+      mockConfig,
+      createMockPluginSetup({}),
+      await createMockPluginStart(
+        {
+          licensing: {
+            ...licensingMock.createStart(),
+            license$: new BehaviorSubject({
+              isAvailable: true,
+              isActive: true,
+              type: 'platinum',
+              getFeature: () => true,
+            }),
+          },
+        },
+        mockConfig
+      )
+    );
 
     mockRequest = getMockRequest();
 
@@ -626,7 +650,7 @@ describe('Handle request to schedule', () => {
 
     test('disallows unsupporting license', async () => {
       (reportingCore.getLicenseInfo as jest.Mock) = jest.fn(() => ({
-        csv_searchsource: {
+        scheduledReports: {
           enableLinks: false,
           message: `seeing this means the license isn't supported`,
         },
