@@ -229,6 +229,8 @@ describe('Space awareness migration', () => {
 
       esClientMock.bulk.mockResolvedValue({ errors: false, items: [], took: 1 });
 
+      esClientMock.indices.exists.mockResolvedValue(true);
+
       const fleetServices = endpointServiceMock.getInternalFleetServices();
       const agentClientMock = fleetServices.agent as jest.Mocked<AgentClient>;
 
@@ -236,6 +238,18 @@ describe('Space awareness migration', () => {
 
       (fleetServices.packagePolicy.list as jest.Mock).mockResolvedValue({
         items: [data.packagePolicy],
+      });
+
+      (fleetServices.packages.getInstalledPackages as jest.Mock).mockResolvedValue({
+        items: [
+          {
+            name: 'endpoint',
+            version: '9.1.0',
+            status: 'installed',
+            dataStreams: [],
+          },
+        ],
+        total: 1,
       });
     });
 
