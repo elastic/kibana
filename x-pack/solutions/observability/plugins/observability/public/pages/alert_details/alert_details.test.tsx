@@ -57,6 +57,17 @@ const dashboardServiceProviderMock = dashboardServiceProvider as jest.Mock;
 
 const mockObservabilityAIAssistant = observabilityAIAssistantPluginMock.createStartContract();
 
+const spacesUnsubscribeMock = jest.fn();
+const spacesSubscribeMock = jest.fn().mockReturnValue({ unsubscribe: spacesUnsubscribeMock });
+const mockSpaces = {
+  getActiveSpace$: jest.fn().mockReturnValue({
+    subscribe: spacesSubscribeMock,
+    pipe: () => ({
+      subscribe: spacesSubscribeMock,
+    }),
+  }),
+};
+
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
@@ -72,6 +83,7 @@ const mockKibana = () => {
       observabilityAIAssistant: mockObservabilityAIAssistant,
       theme: {},
       dashboard: {},
+      spaces: mockSpaces,
     },
   });
 };
