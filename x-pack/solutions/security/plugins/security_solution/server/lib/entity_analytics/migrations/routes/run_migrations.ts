@@ -44,6 +44,8 @@ export const entityAnalyticsRunMigrationsRoute = (
              * We cannot provide task manager here because the migrations require
              * the setup contract and we can only access the start contract.
              *
+             * The setup contarct is used to register kibana tasks.
+             *
              * This means the ECS migration will not be run by calling this endpoint.
              *
              * We could modify scheduleEntityAnalyticsMigration to optionally take
