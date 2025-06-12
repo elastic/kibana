@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiSuperSelectOption } from '@elastic/eui';
 import {
   EuiSpacer,
   EuiButton,
@@ -13,7 +12,6 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   useGeneratedHtmlId,
-  EuiSuperSelect,
   EuiFormRow,
   EuiSwitch,
   EuiText,
@@ -29,6 +27,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SecurityPageName } from '@kbn/deeplinks-security';
+import type { ConnectorSelectorProps } from '@kbn/security-solution-connectors';
+import { ConnectorSelector } from '@kbn/security-solution-connectors';
 import { useAIConnectors } from '../../../../../common/hooks/use_ai_connectors';
 import { getConnectorDescription } from '../../../../../common/utils/connectors/get_connector_description';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -79,24 +79,16 @@ export const StartRuleMigrationModal: FC<StartRuleMigrationModalProps> = React.m
 
     const modalTitleId = useGeneratedHtmlId();
 
-    const selectOptions: Array<EuiSuperSelectOption<string>> = useMemo(() => {
+    const connectorOptions: ConnectorSelectorProps['connectors'] = useMemo(() => {
       return aiConnectors.map((connector) => {
         const connectorDescription = getConnectorDescription({
           connector,
           actionTypeRegistry,
         });
         return {
-          value: connector.id,
-          inputDisplay: connector.name,
-          dropdownDisplay: (
-            <>
-              <strong>{connector.name}</strong>
-              <EuiText size="s" color="subdued">
-                <p>{connectorDescription}</p>
-              </EuiText>
-            </>
-          ),
-          'data-test-subj': `${DATA_TEST_SUBJ_PREFIX}-ConnectorOption`,
+          id: connector.id,
+          name: connector.name,
+          description: connectorDescription,
         };
       });
     }, [actionTypeRegistry, aiConnectors]);
@@ -163,13 +155,13 @@ export const StartRuleMigrationModal: FC<StartRuleMigrationModalProps> = React.m
                 }
                 isInvalid={!selectedConnectorId}
               >
-                <EuiSuperSelect
-                  options={selectOptions}
-                  valueOfSelected={selectedConnectorId}
+                <ConnectorSelector
+                  connectors={connectorOptions}
+                  selectedId={selectedConnectorId}
                   onChange={setSelectedConnectorId}
-                  data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-ConnectorSelector`}
                   isInvalid={!selectedConnectorId}
                   isLoading={isLoading}
+                  mode={'combobox'}
                 />
               </EuiFormRow>
               <EuiFormRow>

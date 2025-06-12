@@ -105,10 +105,8 @@ describe('StartMigrationModal', () => {
     expect(screen.getByTestId(`${DATA_TEST_SUBJ_PREFIX}-Title`)).toHaveTextContent(
       `Reprocess 10 rules`
     );
-    expect(screen.getByTestId(`${DATA_TEST_SUBJ_PREFIX}-ConnectorSelector`)).toBeVisible();
-    expect(screen.getByTestId(`${DATA_TEST_SUBJ_PREFIX}-ConnectorSelector`)).toHaveTextContent(
-      'Connector 1'
-    );
+    expect(screen.getByTestId(`connector-selector`)).toBeVisible();
+    expect(screen.getByTestId(`connector-selector`)).toHaveTextContent('Connector 1');
 
     expect(
       screen.getByTestId(`${DATA_TEST_SUBJ_PREFIX}-PrebuiltRulesMatchingSwitch`)
@@ -117,10 +115,10 @@ describe('StartMigrationModal', () => {
 
   it('should list all available connectors', () => {
     renderTestComponent();
-    const connectorSelector = screen.getByTestId(`${DATA_TEST_SUBJ_PREFIX}-ConnectorSelector`);
+    const connectorSelector = screen.getByTestId(`connector-selector`);
 
     fireEvent.click(connectorSelector);
-    const connectorOptions = screen.queryAllByTestId(`${DATA_TEST_SUBJ_PREFIX}-ConnectorOption`);
+    const connectorOptions = screen.queryAllByTestId(/^connector-option-/);
 
     expect(connectorOptions).toHaveLength(availableConnectorsMock.length);
     expect(connectorOptions[0].textContent).toBe('Connector 1');
@@ -158,16 +156,14 @@ describe('StartMigrationModal', () => {
   it('should trigger migration with changed settings when options are changed', async () => {
     renderTestComponent();
     // change connector and start
-    const connectorSelector = screen.getByTestId(`${DATA_TEST_SUBJ_PREFIX}-ConnectorSelector`);
+    const connectorSelector = screen.getByTestId(`connector-selector`);
     fireEvent.click(connectorSelector);
 
-    const connectorOptions = screen.queryAllByTestId(`${DATA_TEST_SUBJ_PREFIX}-ConnectorOption`);
+    const connectorOptions = screen.queryAllByTestId(/^connector-option-/);
     expect(connectorOptions).toHaveLength(availableConnectorsMock.length);
 
     fireEvent.click(connectorOptions[1]); // Select 'Connector 2'
-    expect(screen.getByTestId(`${DATA_TEST_SUBJ_PREFIX}-ConnectorSelector`)).toHaveTextContent(
-      'Connector 2'
-    );
+    expect(screen.getByTestId(`connector-selector`)).toHaveTextContent('Connector 2');
 
     // skip prebuilt rules matching
     const prebuiltRuleMatchCheckbox = screen.getByTestId(
@@ -196,9 +192,7 @@ describe('StartMigrationModal', () => {
       },
     });
 
-    expect(screen.getByTestId(`${DATA_TEST_SUBJ_PREFIX}-ConnectorSelector`)).toHaveTextContent(
-      'Connector 1'
-    );
+    expect(screen.getByTestId(`connector-selector`)).toHaveTextContent('Connector 1');
   });
 
   it('should show the stored connector if no lastConnectorId is provided', () => {
@@ -208,8 +202,6 @@ describe('StartMigrationModal', () => {
       },
     });
 
-    expect(screen.getByTestId(`${DATA_TEST_SUBJ_PREFIX}-ConnectorSelector`)).toHaveTextContent(
-      'Connector 2'
-    );
+    expect(screen.getByTestId(`connector-selector`)).toHaveTextContent('Connector 2');
   });
 });
