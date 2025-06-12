@@ -36,6 +36,11 @@ export interface ControlsContext {
   onCancelControl: () => void;
 }
 
+export interface DataErrorsControl {
+  enabled: boolean;
+  onChange: (value: boolean) => void;
+}
+
 export interface ESQLEditorProps {
   /** The aggregate type query */
   query: AggregateQuery;
@@ -91,6 +96,8 @@ export interface ESQLEditorProps {
   esqlVariables?: ESQLControlVariable[];
   /** Resize the editor to fit the initially passed query on mount */
   expandToFitQueryOnMount?: boolean;
+  /** Allows controlling the switch to toggle data errors in the UI. If not provided the switch will be hidden and data errors visible */
+  dataErrorsControl?: DataErrorsControl;
 }
 
 interface ESQLVariableService {
