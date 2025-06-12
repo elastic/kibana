@@ -23,11 +23,12 @@ import type { ConfigType } from './config';
 import { ALLOWED_MIME_TYPES } from '../common/constants/mime_types';
 import type { CasesServerSetupDependencies, CasesServerStartDependencies } from './types';
 
-function getConfig(overrides = {}) {
+function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
   return {
     markdownPlugins: { lens: true },
     files: { maxSize: 1, allowedMimeTypes: ALLOWED_MIME_TYPES },
     stack: { enabled: true },
+    incrementalIdService: { enabled: true },
     ...overrides,
   };
 }

@@ -60,12 +60,12 @@ export interface CasesContextProps
     | 'permissions'
     | 'externalReferenceAttachmentTypeRegistry'
     | 'persistableStateAttachmentTypeRegistry'
-    | 'settings'
   > {
   basePath?: string;
   features?: CasesFeatures;
   releasePhase?: ReleasePhase;
   getFilesClient: (scope: string) => ScopedFilesClient;
+  settings?: CasesContextValue['settings'];
 }
 
 export const CasesContext = React.createContext<CasesContextValue | undefined>(undefined);
