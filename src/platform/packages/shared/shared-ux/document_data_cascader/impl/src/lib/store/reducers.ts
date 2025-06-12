@@ -39,14 +39,23 @@ export type IDispatchAction =
       };
     };
 
-export interface IStoreState {
-  data: Array<Record<string, any>>;
+/**
+ * Represents a document with an ID field.
+ * Defines a base expectation to ensure that all documents in the store have a unique identifier.
+ */
+export type DocWithId = Record<string, any> & { id: string; children?: DocWithId[] };
+
+export interface IStoreState<T extends DocWithId> {
+  data: T[];
   currentQueryString: string;
   groupByColumns: string[] | null;
   currentGroupByColumn: string | null;
 }
 
-export const storeReducer = (state: IStoreState, action: IDispatchAction) => {
+export const storeReducer = <T extends DocWithId = DocWithId>(
+  state: IStoreState<T>,
+  action: IDispatchAction
+) => {
   switch (action.type) {
     case 'UPDATE_QUERY':
       return {
