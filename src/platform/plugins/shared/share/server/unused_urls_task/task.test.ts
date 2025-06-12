@@ -113,7 +113,6 @@ describe('unused_urls_task', () => {
 
   describe('fetchUnusedUrls', () => {
     it('should fetch unused URLs and determine hasMore correctly', async () => {
-      const filter = 'test-filter';
       const maxPageSize = 2;
       const savedObjects = [
         {
@@ -137,25 +136,35 @@ describe('unused_urls_task', () => {
 
       const result = await fetchUnusedUrls({
         savedObjectsRepository: mockSavedObjectsRepository,
-        filter,
+        urlExpirationDuration,
         maxPageSize,
       });
 
       expect(mockSavedObjectsRepository.find).toHaveBeenCalledWith({
         type: SAVED_OBJECT_TYPE,
-        filter,
+        filter: 'url.attributes.accessDate <= now-2592000s',
         perPage: maxPageSize,
         namespaces: ['*'],
         fields: ['type'],
       });
 
-      expect(result.unusedUrls).toEqual(savedObjects);
+      const savedObjectsDeleteObjects = [
+        {
+          id: '1',
+          type: SAVED_OBJECT_TYPE,
+        },
+        {
+          id: '2',
+          type: SAVED_OBJECT_TYPE,
+        },
+      ];
+
+      expect(result.unusedUrls).toEqual(savedObjectsDeleteObjects);
       expect(result.hasMore).toBe(true);
       expect(result.namespace).toBe('test-namespace');
     });
 
     it('should set hasMore to false if fewer items than maxPageSize are returned', async () => {
-      const filter = 'some-filter';
       const maxPageSize = 2;
       const savedObjects = [
         {
@@ -174,17 +183,23 @@ describe('unused_urls_task', () => {
 
       const result = await fetchUnusedUrls({
         savedObjectsRepository: mockSavedObjectsRepository,
-        filter,
+        urlExpirationDuration,
         maxPageSize,
       });
 
-      expect(result.unusedUrls).toEqual(savedObjects);
+      const savedObjectsDeleteObjects = [
+        {
+          id: '1',
+          type: SAVED_OBJECT_TYPE,
+        },
+      ];
+
+      expect(result.unusedUrls).toEqual(savedObjectsDeleteObjects);
       expect(result.hasMore).toBe(false);
       expect(result.namespace).toBe('test-namespace');
     });
 
     it('should return default namespace if first object has no namespaces', async () => {
-      const filter = 'some-filter';
       const maxPageSize = 10;
       const savedObjects = [
         {
@@ -202,7 +217,7 @@ describe('unused_urls_task', () => {
 
       const result = await fetchUnusedUrls({
         savedObjectsRepository: mockSavedObjectsRepository,
-        filter,
+        urlExpirationDuration,
         maxPageSize,
       });
 
@@ -261,10 +276,20 @@ describe('unused_urls_task', () => {
         logger: mockLogger,
       });
 
-      expect(mockSavedObjectsRepository.bulkDelete).toHaveBeenCalledWith(savedObjects, {
-        refresh: 'wait_for',
-        namespace: 'my-space',
-      });
+      const savedObjectsDeleteObjects = [
+        {
+          id: '1',
+          type: SAVED_OBJECT_TYPE,
+        },
+      ];
+
+      expect(mockSavedObjectsRepository.bulkDelete).toHaveBeenCalledWith(
+        savedObjectsDeleteObjects,
+        {
+          refresh: 'wait_for',
+          namespace: 'my-space',
+        }
+      );
     });
 
     it('should handle pagination and delete across multiple pages', async () => {
@@ -308,14 +333,37 @@ describe('unused_urls_task', () => {
       });
 
       expect(mockSavedObjectsRepository.bulkDelete).toHaveBeenCalledTimes(2);
-      expect(mockSavedObjectsRepository.bulkDelete).toHaveBeenNthCalledWith(1, page1, {
-        refresh: 'wait_for',
-        namespace: 'default',
-      });
-      expect(mockSavedObjectsRepository.bulkDelete).toHaveBeenNthCalledWith(2, page2, {
-        refresh: 'wait_for',
-        namespace: 'default',
-      });
+
+      const savedObjectsDeleteObjectsPage1 = [
+        {
+          id: '1',
+          type: SAVED_OBJECT_TYPE,
+        },
+      ];
+
+      const savedObjectsDeleteObjectsPage2 = [
+        {
+          id: '2',
+          type: SAVED_OBJECT_TYPE,
+        },
+      ];
+
+      expect(mockSavedObjectsRepository.bulkDelete).toHaveBeenNthCalledWith(
+        1,
+        savedObjectsDeleteObjectsPage1,
+        {
+          refresh: 'wait_for',
+          namespace: 'default',
+        }
+      );
+      expect(mockSavedObjectsRepository.bulkDelete).toHaveBeenNthCalledWith(
+        2,
+        savedObjectsDeleteObjectsPage2,
+        {
+          refresh: 'wait_for',
+          namespace: 'default',
+        }
+      );
     });
 
     it('should throw if deleteUnusedUrls fails', async () => {

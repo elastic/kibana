@@ -56,13 +56,15 @@ export const deleteUnusedUrls = async ({
 
 export const fetchUnusedUrls = async ({
   savedObjectsRepository,
-  filter,
+  urlExpirationDuration,
   maxPageSize,
 }: {
   savedObjectsRepository: ISavedObjectsRepository;
-  filter: string;
+  urlExpirationDuration: Duration;
   maxPageSize: number;
 }) => {
+  const filter = `url.attributes.accessDate <= now-${durationToSeconds(urlExpirationDuration)}`;
+
   const {
     saved_objects: savedObjects,
     total,
@@ -76,8 +78,17 @@ export const fetchUnusedUrls = async ({
     fields: ['type'],
   });
 
+  const savedObjectsByNamespace = savedObjects.filter(
+    (so) => so.namespaces === savedObjects[0].namespaces?.[0] || 'default'
+  );
+
+  const unusedUrls = savedObjectsByNamespace.map((so) => ({
+    id: so.id,
+    type: so.type,
+  }));
+
   return {
-    unusedUrls: savedObjects,
+    unusedUrls,
     hasMore: page * perPage < total,
     namespace: savedObjects[0]?.namespaces?.[0] || 'default',
   };
@@ -100,11 +111,9 @@ export const runDeleteUnusedUrlsTask = async ({
 
   const savedObjectsRepository = coreStart.savedObjects.createInternalRepository();
 
-  const filter = `url.attributes.accessDate <= now-${durationToSeconds(urlExpirationDuration)}`;
-
   let { unusedUrls, hasMore, namespace } = await fetchUnusedUrls({
     savedObjectsRepository,
-    filter,
+    urlExpirationDuration,
     maxPageSize,
   });
 
@@ -119,7 +128,7 @@ export const runDeleteUnusedUrlsTask = async ({
     if (hasMore) {
       const nextPageData = await fetchUnusedUrls({
         savedObjectsRepository,
-        filter,
+        urlExpirationDuration,
         maxPageSize,
       });
       unusedUrls = nextPageData.unusedUrls;
