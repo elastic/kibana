@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { HttpSetup, IToasts } from '@kbn/core/public';
-import { API_VERSIONS } from '@kbn/elastic-assistant-common';
+import { API_VERSIONS, DeleteAllConversationsResponse } from '@kbn/elastic-assistant-common';
 import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL } from '@kbn/elastic-assistant-common/constants';
 
 export const deleteAllConversations = async ({
@@ -19,21 +19,22 @@ export const deleteAllConversations = async ({
   signal?: AbortSignal | undefined;
 }) => {
   try {
-    const result = await http.fetch(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL, {
-      method: 'DELETE',
-      signal,
-      version: API_VERSIONS.public.v1,
-    });
-    if (!result.success) {
-      const serverError = result.attributes.errors
-        ?.map(
-          (e) =>
-            `${e.status_code ? `Error code: ${e.status_code}. ` : ''}Error message: ${
-              e.message
-            } for conversation ${e.conversations.map((c) => c.name).join(',')}`
-        )
-        .join(',\n');
-      throw new Error(serverError);
+    const result = await http.fetch<DeleteAllConversationsResponse>(
+      ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
+      {
+        method: 'DELETE',
+        signal,
+        version: API_VERSIONS.public.v1,
+      }
+    );
+    if (result?.failures) {
+      const error = new Error('Failed to delete all conversations');
+      toasts?.addError(error, {
+        title: i18n.translate('xpack.elasticAssistant.conversations.deleteAllError', {
+          defaultMessage: 'Failed to delete all conversations',
+        }),
+        toastMessage: result.failures.join(','),
+      });
     }
     return result;
   } catch (error) {

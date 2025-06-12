@@ -30,6 +30,13 @@ export type CreateConversationRequestBodyInput = z.input<typeof CreateConversati
 export type CreateConversationResponse = z.infer<typeof CreateConversationResponse>;
 export const CreateConversationResponse = ConversationResponse;
 
+export type DeleteAllConversationsResponse = z.infer<typeof DeleteAllConversationsResponse>;
+export const DeleteAllConversationsResponse = z.object({
+  success: z.boolean().optional(),
+  totalDeleted: z.number().optional(),
+  failures: z.array(z.string()).optional(),
+});
+
 export type DeleteConversationRequestParams = z.infer<typeof DeleteConversationRequestParams>;
 export const DeleteConversationRequestParams = z.object({
   /**

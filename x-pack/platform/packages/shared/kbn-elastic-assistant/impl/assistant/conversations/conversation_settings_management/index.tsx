@@ -21,7 +21,7 @@ import { css } from '@emotion/react';
 import { PromptTypeEnum } from '@kbn/elastic-assistant-common';
 import { useConversationsUpdater } from '../../settings/use_settings_updater/use_conversations_updater';
 import { Conversation } from '../../../assistant_context/types';
-import { ConversationTableItem, useConversationsTable } from './use_conversations_table';
+import { useConversationsTable } from './use_conversations_table';
 import { ConversationStreamingSwitch } from '../conversation_settings/conversation_streaming_switch';
 import { AIConnector } from '../../../connectorland/connector_selector';
 import * as i18n from './translations';
@@ -43,6 +43,7 @@ import {
 } from '../../common/components/assistant_settings_management/pagination/use_session_pagination';
 import { AssistantSettingsBottomBar } from '../../settings/assistant_settings_bottom_bar';
 import { Toolbar } from './tool_bar_component';
+import { ConversationTableItem } from './types';
 
 interface Props {
   connectors: AIConnector[] | undefined;
@@ -120,7 +121,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   } = useConversationsUpdater(conversations, conversationsLoaded);
 
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
-  const [isDeleteAll, setIsSelectedAll] = useState(false);
+  const [isDeleteAll, setIsDeleteAll] = useState(false);
   const handleSave = useCallback(
     async (param?: { callback?: () => void; bulkActions?: ConversationsBulkActions }) => {
       const { bulkActions, callback } = param ?? {};
@@ -134,7 +135,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
           title: SETTINGS_UPDATED_TOAST_TITLE,
         });
         setHasPendingChanges(false);
-        setIsSelectedAll(false);
+        setIsDeleteAll(false);
         setDeletedConversations(DEFAULT_EMPTY_DELETED_CONVERSATIONS_ARRAY);
         callback?.();
       } else {
@@ -234,22 +235,30 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     defaultConnector,
   });
 
-  const handlePageSelection = useCallback(() => {
+  const handleRowChecked = useCallback((selectedItem: ConversationTableItem) => {
+    setDeletedConversations((prev) => [...prev, selectedItem]);
+  }, []);
+
+  const handleRowUnChecked = useCallback((selectedItem: ConversationTableItem) => {
+    setDeletedConversations((prev) => prev.filter((item) => item.id !== selectedItem.id));
+  }, []);
+
+  const handlePageChecked = useCallback(() => {
     setDeletedConversations(conversationOptions);
   }, [conversationOptions]);
 
-  const handlePageUnselecting = useCallback(() => {
-    setIsSelectedAll(false);
+  const handlePageUnchecked = useCallback(() => {
+    setIsDeleteAll(false);
     setDeletedConversations(DEFAULT_EMPTY_DELETED_CONVERSATIONS_ARRAY);
   }, []);
 
-  const onSelectAll = useCallback(() => {
-    setIsSelectedAll(true);
+  const handleSelectAll = useCallback(() => {
+    setIsDeleteAll(true);
     setDeletedConversations(conversationOptions);
   }, [conversationOptions]);
 
   const handleUnselectAll = useCallback(() => {
-    setIsSelectedAll(false);
+    setIsDeleteAll(false);
     setDeletedConversations(DEFAULT_EMPTY_DELETED_CONVERSATIONS_ARRAY);
   }, []);
 
@@ -267,23 +276,26 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   const columns = useMemo(
     () =>
       getColumns({
+        conversationOptionsIds: conversationOptions.map((item) => item.id),
+        deletedConversationsIds: deletedConversations.map((item) => item.id),
+        handlePageChecked,
+        handlePageUnchecked,
+        handleRowChecked,
+        handleRowUnChecked,
+        isDeleteAll,
         isDeleteEnabled: () => !isDeleteAll && deletedConversations.length === 0,
         isEditEnabled: () => !isDeleteAll && deletedConversations.length === 0,
         onDeleteActionClicked,
         onEditActionClicked,
-        handlePageSelection,
-        handlePageUnselecting,
-        conversationOptionsIds: conversationOptions.map((item) => item.id),
-        deletedConversationsIds: deletedConversations.map((item) => item.id),
-        setDeletedConversations,
-        isDeleteAll,
       }),
     [
       conversationOptions,
       deletedConversations,
       getColumns,
-      handlePageSelection,
-      handlePageUnselecting,
+      handlePageChecked,
+      handlePageUnchecked,
+      handleRowChecked,
+      handleRowUnChecked,
       isDeleteAll,
       onDeleteActionClicked,
       onEditActionClicked,
@@ -327,7 +339,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
         <EuiSpacer size="s" />
         <Toolbar
           onConversationsBulkDeleted={onBulkDeleteActionClicked}
-          onSelectAll={onSelectAll}
+          handleSelectAll={handleSelectAll}
           handleUnselectAll={handleUnselectAll}
           selected={deletedConversations}
           totalConversations={totalItemCount}

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiBadge, EuiBasicTableColumn, EuiCheckbox, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
 
 import { FormattedDate } from '@kbn/i18n-react';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
@@ -18,6 +18,8 @@ import { getConnectorTypeTitle } from '../../../connectorland/helpers';
 import { getConversationApiConfig } from '../../use_conversation/helpers';
 import * as i18n from './translations';
 import { useInlineActions } from '../../common/components/assistant_settings_management/inline_actions';
+import { InputCheckbox, PageSelectionCheckbox } from './table_selection_checkbox';
+import { ConversationTableItem } from './types';
 
 const emptyConversations = {};
 
@@ -29,120 +31,33 @@ export interface GetConversationsListParams {
   defaultConnector?: AIConnector;
 }
 
-export type ConversationTableItem = Conversation & {
-  connectorTypeTitle?: string | null;
-  systemPromptTitle?: string | null;
-};
-
-const InputCheckbox = ({
-  conversation,
-  deletedConversationsIds,
-  setDeletedConversations,
-  isDeleteAll,
-}: {
-  conversation: ConversationTableItem;
-  deletedConversationsIds: string[];
-  setDeletedConversations: React.Dispatch<React.SetStateAction<ConversationTableItem[]>>;
-  isDeleteAll: boolean;
-}) => {
-  const [checked, setChecked] = useState(
-    isDeleteAll || deletedConversationsIds.includes(conversation.id)
-  );
-
-  useEffect(() => {
-    setChecked(isDeleteAll || deletedConversationsIds.includes(conversation.id));
-  }, [isDeleteAll, deletedConversationsIds, conversation.id]);
-
-  return (
-    <EuiCheckbox
-      data-test-subj={`conversationSelect-${conversation.id}`}
-      id={`conversationSelect-${conversation.id}`}
-      checked={checked}
-      disabled={isDeleteAll}
-      onChange={(e) => {
-        if (e.target.checked) {
-          setChecked(true);
-          setDeletedConversations((prev) => [...prev, conversation]);
-        } else {
-          setChecked(false);
-          setDeletedConversations((prev) => prev.filter(({ id }) => id !== conversation.id));
-        }
-      }}
-    />
-  );
-};
-
-const PageSelectionCheckbox = ({
-  conversationOptionsIds,
-  deletedConversationsIds,
-  handlePageSelection,
-  handlePageUnselecting,
-  isDeleteAll,
-}: {
-  conversationOptionsIds: string[];
-  deletedConversationsIds: string[];
-  handlePageSelection: () => void;
-  handlePageUnselecting: () => void;
-  isDeleteAll: boolean;
-}) => {
-  const [pageSelectionChecked, setPageSelectionChecked] = useState(
-    isDeleteAll || conversationOptionsIds.every((id) => deletedConversationsIds.includes(id))
-  );
-
-  useEffect(() => {
-    setPageSelectionChecked(
-      isDeleteAll || conversationOptionsIds.every((id) => deletedConversationsIds.includes(id))
-    );
-  }, [isDeleteAll, deletedConversationsIds, conversationOptionsIds]);
-
-  if (conversationOptionsIds.length === 0) {
-    return null;
-  }
-
-  return (
-    <EuiCheckbox
-      data-test-subj={`conversationPageSelect`}
-      id={`conversationPageSelect`}
-      checked={pageSelectionChecked}
-      disabled={isDeleteAll}
-      onChange={(e) => {
-        if (e.target.checked) {
-          setPageSelectionChecked(true);
-          handlePageSelection();
-        } else {
-          setPageSelectionChecked(false);
-          handlePageUnselecting();
-        }
-      }}
-    />
-  );
-};
-
 export const useConversationsTable = () => {
   const getActions = useInlineActions<ConversationTableItem>();
   const getColumns = useCallback(
     ({
+      conversationOptionsIds,
+      deletedConversationsIds,
+      handlePageChecked,
+      handlePageUnchecked,
+      handleRowChecked,
+      handleRowUnChecked,
+      isDeleteAll,
       isDeleteEnabled,
       isEditEnabled,
       onDeleteActionClicked,
       onEditActionClicked,
-      handlePageSelection,
-      handlePageUnselecting,
-      conversationOptionsIds,
-      deletedConversationsIds,
-      setDeletedConversations,
-      isDeleteAll,
     }: {
+      conversationOptionsIds: string[];
+      deletedConversationsIds: string[];
+      handlePageChecked: () => void;
+      handlePageUnchecked: () => void;
+      handleRowChecked: (conversation: ConversationTableItem) => void;
+      handleRowUnChecked: (conversation: ConversationTableItem) => void;
+      isDeleteAll: boolean;
       isDeleteEnabled: (conversation: ConversationTableItem) => boolean;
       isEditEnabled: (conversation: ConversationTableItem) => boolean;
       onDeleteActionClicked: (conversation: ConversationTableItem) => void;
       onEditActionClicked: (conversation: ConversationTableItem) => void;
-      handlePageSelection: () => void;
-      handlePageUnselecting: () => void;
-      conversationOptionsIds: string[];
-      deletedConversationsIds: string[];
-      setDeletedConversations: React.Dispatch<React.SetStateAction<ConversationTableItem[]>>;
-      isDeleteAll: boolean;
     }): Array<EuiBasicTableColumn<ConversationTableItem>> => {
       return [
         {
@@ -152,15 +67,16 @@ export const useConversationsTable = () => {
               isDeleteAll={isDeleteAll}
               conversationOptionsIds={conversationOptionsIds}
               deletedConversationsIds={deletedConversationsIds}
-              handlePageSelection={handlePageSelection}
-              handlePageUnselecting={handlePageUnselecting}
+              handlePageChecked={handlePageChecked}
+              handlePageUnchecked={handlePageUnchecked}
             />
           ),
           render: (conversation: ConversationTableItem) => (
             <InputCheckbox
               conversation={conversation}
               deletedConversationsIds={deletedConversationsIds}
-              setDeletedConversations={setDeletedConversations}
+              handleRowChecked={handleRowChecked}
+              handleRowUnChecked={handleRowUnChecked}
               isDeleteAll={isDeleteAll}
             />
           ),

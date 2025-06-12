@@ -16,7 +16,7 @@ import { deleteAllConversations } from '../../api/conversations/delete_all_conve
 
 export type SaveConversationsSettingsParams =
   | {
-      isDeleteAll: boolean;
+      isDeleteAll?: boolean;
       bulkActions?: ConversationsBulkActions;
     }
   | undefined;

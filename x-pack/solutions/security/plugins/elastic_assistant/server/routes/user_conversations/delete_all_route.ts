@@ -44,11 +44,16 @@ export const deleteAllConversationsRoute = (router: ElasticAssistantPluginRouter
           }
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
 
-          await dataClient?.deleteAllConversations();
+          const result = await dataClient?.deleteAllConversations();
 
           return response.ok({
             body: {
               success: true,
+              totalDeleted: result?.total,
+              failures:
+                result?.failures && result.failures.length > 0
+                  ? result.failures.map((failure) => failure.cause.reason)
+                  : null,
             },
           });
         } catch (err) {

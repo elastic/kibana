@@ -90,6 +90,13 @@ paths:
                   success:
                     type: boolean
                     example: true
+                  totalDeleted:
+                    type: number
+                    example: 10
+                  failures:
+                    type: array
+                    items:
+                      type: string
               example:
                 success: true
         400:

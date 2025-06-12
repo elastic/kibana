@@ -12,6 +12,7 @@ import {
   ConversationUpdateProps,
   Message,
 } from '@kbn/elastic-assistant-common';
+import { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { createConversation } from './create_conversation';
 import { updateConversation } from './update_conversation';
 import { getConversation } from './get_conversation';
@@ -163,7 +164,7 @@ export class AIAssistantConversationsDataClient extends AIAssistantDataClient {
    * Deletes all conversations in the index.
    * @returns The number of conversations deleted
    */
-  public deleteAllConversations = async (): Promise<number | undefined> => {
+  public deleteAllConversations = async (): Promise<DeleteByQueryResponse | undefined> => {
     const esClient = await this.options.elasticsearchClientPromise;
     return deleteAllConversations({
       esClient,

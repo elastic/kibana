@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 export interface DeleteAllConversationsParams {
@@ -16,7 +17,7 @@ export const deleteAllConversations = async ({
   esClient,
   conversationIndex,
   logger,
-}: DeleteAllConversationsParams): Promise<number | undefined> => {
+}: DeleteAllConversationsParams): Promise<DeleteByQueryResponse | undefined> => {
   try {
     const response = await esClient.deleteByQuery({
       query: {
@@ -31,7 +32,7 @@ export const deleteAllConversations = async ({
       logger.error('No conversation has been deleted');
       throw Error('No conversation has been deleted');
     }
-    return response.deleted;
+    return response;
   } catch (err) {
     logger.error(`Error deleting all conversations: ${err}`);
     throw err;
