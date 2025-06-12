@@ -94,22 +94,30 @@ export function SloDetailsHistory({ slo, isAutoRefreshing }: Props) {
           {slo.timeWindow.type === 'calendarAligned' ? (
             <EuiFlexGroup direction="row" justifyContent="flexEnd" alignItems="center">
               <EuiButton
+                size="s"
+                data-test-subj="sloSloDetailsHistoryPreviousButton"
                 onClick={() => {
                   setCalendarPeriod((curr) => curr + 1);
                 }}
               >
-                Previous
+                {i18n.translate('xpack.slo.sloDetailsHistory.previousPeriodButtonLabel', {
+                  defaultMessage: 'Previous',
+                })}
               </EuiButton>
               <EuiText size="s">
                 <p>{getPeriodLabel(slo, calendarPeriod)}</p>
               </EuiText>
               <EuiButton
+                size="s"
+                data-test-subj="sloSloDetailsHistoryNextButton"
                 disabled={calendarPeriod <= 0}
                 onClick={() => {
                   setCalendarPeriod((curr) => curr - 1);
                 }}
               >
-                Next
+                {i18n.translate('xpack.slo.sloDetailsHistory.nextPeriodButtonLabel', {
+                  defaultMessage: 'Next',
+                })}
               </EuiButton>
             </EuiFlexGroup>
           ) : (
