@@ -33,16 +33,18 @@ export interface Props {
 
 function getPeriodLabel(slo: SLOWithSummaryResponse, calendarPeriod: number): string {
   const duration = toDuration(slo.timeWindow.duration);
-  const unit = duration.unit === 'w' ? 'week' : 'month';
-  const now = moment();
-  const start = moment
-    .utc(now)
-    .subtract(calendarPeriod, unit)
-    .startOf(duration.unit === 'w' ? 'isoWeek' : 'month');
-  const end = moment
-    .utc(now)
-    .subtract(calendarPeriod, unit)
-    .endOf(duration.unit === 'w' ? 'isoWeek' : 'month');
+  const isWeeklyCalendarAligned = duration.unit === 'w';
+  const now = moment().utc();
+
+  const start = now
+    .clone()
+    .subtract(calendarPeriod, isWeeklyCalendarAligned ? 'week' : 'month')
+    .startOf(isWeeklyCalendarAligned ? 'isoWeek' : 'month');
+  const end = now
+    .clone()
+    .subtract(calendarPeriod, isWeeklyCalendarAligned ? 'week' : 'month')
+    .endOf(isWeeklyCalendarAligned ? 'isoWeek' : 'month');
+
   return `${start.format('LL')} - ${end.format('LL')}`;
 }
 
