@@ -10,8 +10,12 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { TransactionSummaryTitle } from './transaction_summary_title';
 
+const fieldHoverActionPopoverDataTestSubj = 'FieldHoverActionPopover';
+
 jest.mock('../../components/field_with_actions/field_hover_popover_action', () => ({
-  FieldHoverActionPopover: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  FieldHoverActionPopover: ({ children }: { children: React.ReactNode }) => (
+    <div data-test-subj={fieldHoverActionPopoverDataTestSubj}>{children}</div>
+  ),
 }));
 
 jest.mock('../../components/highlight_field.tsx', () => ({
@@ -83,7 +87,6 @@ describe('TransactionSummaryTitle', () => {
     );
 
     expect(getByText('Test Transaction')).toBeInTheDocument();
-
     expect(getByText('123')).toBeInTheDocument();
   });
 
@@ -107,5 +110,33 @@ describe('TransactionSummaryTitle', () => {
 
     expect(getByText('123')).toBeInTheDocument();
     expect(container.querySelector('span')?.innerHTML).toBe('<mark>123</mark>');
+  });
+
+  it('renders FieldHoverActionPopover if showActions is undefined', () => {
+    const { container } = render(<TransactionSummaryTitle serviceName="Test Service" />);
+
+    expect(
+      container.querySelector(`[data-test-subj="${fieldHoverActionPopoverDataTestSubj}"]`)
+    ).not.toBeNull();
+  });
+
+  it('renders FieldHoverActionPopover if showActions is true', () => {
+    const { container } = render(
+      <TransactionSummaryTitle serviceName="Test Service" showActions={true} />
+    );
+
+    expect(
+      container.querySelector(`[data-test-subj="${fieldHoverActionPopoverDataTestSubj}"]`)
+    ).not.toBeNull();
+  });
+
+  it('does not render FieldHoverActionPopover if showActions is false', () => {
+    const { container } = render(
+      <TransactionSummaryTitle serviceName="Test Service" showActions={false} />
+    );
+
+    expect(
+      container.querySelector(`[data-test-subj="${fieldHoverActionPopoverDataTestSubj}"]`)
+    ).toBeNull();
   });
 });
