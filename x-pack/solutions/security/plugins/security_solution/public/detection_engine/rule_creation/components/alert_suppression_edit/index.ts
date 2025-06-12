@@ -7,7 +7,5 @@
 
 export * from './components/alert_suppression_edit';
 export * from './components/suppression_duration_selector';
-export * from './components/suppression_fields_selector';
-export * from './components/missing_fields_strategy_selector';
 export * from './constants/fields';
 export * from './constants/default_duration';
