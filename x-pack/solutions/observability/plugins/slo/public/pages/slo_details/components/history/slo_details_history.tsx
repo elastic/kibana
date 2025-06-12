@@ -78,6 +78,7 @@ export function SloDetailsHistory({ slo, isAutoRefreshing }: Props) {
                 });
               }}
               width="full"
+              showUpdateButton={false}
               commonlyUsedRanges={uiSettings
                 .get('timepicker:quickRanges')
                 .map(({ from, to, display }: { from: string; to: string; display: string }) => ({
