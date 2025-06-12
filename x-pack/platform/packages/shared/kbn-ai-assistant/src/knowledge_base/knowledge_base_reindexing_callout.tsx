@@ -30,7 +30,7 @@ export const KnowledgeBaseReindexingCallout = () => {
     >
       {i18n.translate('xpack.aiAssistant.knowledgeBase.reindexingCalloutBody', {
         defaultMessage:
-          'Knowledge base is currently being re-indexed. Some entries will be unavailable until the operation completes.',
+          'Knowledge base is currently being re-indexed. If you have entries, some may be unavailable until the operation completes.',
       })}
     </EuiCallOut>
   );

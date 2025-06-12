@@ -65,6 +65,9 @@ export function KnowledgeBaseTab() {
   const dateFormat = uiSettings.get('dateFormat');
 
   const knowledgeBase = useKnowledgeBase();
+
+  // eslint-disable-next-line no-console
+  console.log(knowledgeBase);
   const { euiTheme } = useEuiTheme();
 
   const columns: Array<EuiBasicTableColumn<KnowledgeBaseEntryCategory>> = [
