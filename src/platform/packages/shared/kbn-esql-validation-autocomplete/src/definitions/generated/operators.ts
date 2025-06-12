@@ -1828,7 +1828,7 @@ const inDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'boolean[]',
+          type: 'boolean',
           optional: false,
         },
       ],
@@ -1844,7 +1844,7 @@ const inDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'cartesian_point[]',
+          type: 'cartesian_point',
           optional: false,
         },
       ],
@@ -1860,7 +1860,7 @@ const inDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'cartesian_shape[]',
+          type: 'cartesian_shape',
           optional: false,
         },
       ],
@@ -1876,7 +1876,7 @@ const inDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'double[]',
+          type: 'double',
           optional: false,
         },
       ],
@@ -1892,7 +1892,7 @@ const inDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'geo_point[]',
+          type: 'geo_point',
           optional: false,
         },
       ],
@@ -1908,7 +1908,7 @@ const inDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'geo_shape[]',
+          type: 'geo_shape',
           optional: false,
         },
       ],
@@ -1924,7 +1924,7 @@ const inDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'integer[]',
+          type: 'integer',
           optional: false,
         },
       ],
@@ -1940,7 +1940,7 @@ const inDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'ip[]',
+          type: 'ip',
           optional: false,
         },
       ],
@@ -1956,7 +1956,7 @@ const inDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'keyword[]',
+          type: 'keyword',
           optional: false,
         },
       ],
@@ -1972,7 +1972,7 @@ const inDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'text[]',
+          type: 'text',
           optional: false,
         },
       ],
@@ -1988,7 +1988,7 @@ const inDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'long[]',
+          type: 'long',
           optional: false,
         },
       ],
@@ -2004,7 +2004,7 @@ const inDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'keyword[]',
+          type: 'keyword',
           optional: false,
         },
       ],
@@ -2020,7 +2020,7 @@ const inDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'text[]',
+          type: 'text',
           optional: false,
         },
       ],
@@ -2036,7 +2036,7 @@ const inDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'version[]',
+          type: 'version',
           optional: false,
         },
       ],
@@ -2044,14 +2044,7 @@ const inDefinition: FunctionDefinition = {
       minParams: 2,
     },
   ],
-  locationsAvailable: [
-    Location.EVAL,
-    Location.WHERE,
-    Location.SORT,
-    Location.ROW,
-    Location.STATS_WHERE,
-    Location.COMPLETION,
-  ],
+  locationsAvailable: [Location.STATS],
   validate: undefined,
   examples: ['ROW a = 1, b = 4, c = 3\n| WHERE c-a IN (3, b / 2, a)'],
 };
@@ -4198,7 +4191,7 @@ const notInDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'boolean',
+          type: 'boolean[]',
           optional: false,
         },
       ],
@@ -4214,7 +4207,7 @@ const notInDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'cartesian_point',
+          type: 'cartesian_point[]',
           optional: false,
         },
       ],
@@ -4230,7 +4223,7 @@ const notInDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'cartesian_shape',
+          type: 'cartesian_shape[]',
           optional: false,
         },
       ],
@@ -4246,7 +4239,7 @@ const notInDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'double',
+          type: 'double[]',
           optional: false,
         },
       ],
@@ -4262,7 +4255,7 @@ const notInDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'geo_point',
+          type: 'geo_point[]',
           optional: false,
         },
       ],
@@ -4278,7 +4271,7 @@ const notInDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'geo_shape',
+          type: 'geo_shape[]',
           optional: false,
         },
       ],
@@ -4294,7 +4287,7 @@ const notInDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'integer',
+          type: 'integer[]',
           optional: false,
         },
       ],
@@ -4310,7 +4303,7 @@ const notInDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'ip',
+          type: 'ip[]',
           optional: false,
         },
       ],
@@ -4326,7 +4319,7 @@ const notInDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'keyword',
+          type: 'keyword[]',
           optional: false,
         },
       ],
@@ -4342,7 +4335,7 @@ const notInDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'text',
+          type: 'text[]',
           optional: false,
         },
       ],
@@ -4358,7 +4351,7 @@ const notInDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'long',
+          type: 'long[]',
           optional: false,
         },
       ],
@@ -4374,7 +4367,7 @@ const notInDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'keyword',
+          type: 'keyword[]',
           optional: false,
         },
       ],
@@ -4390,7 +4383,7 @@ const notInDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'text',
+          type: 'text[]',
           optional: false,
         },
       ],
@@ -4406,7 +4399,7 @@ const notInDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'version',
+          type: 'version[]',
           optional: false,
         },
       ],
@@ -4414,7 +4407,14 @@ const notInDefinition: FunctionDefinition = {
       minParams: 2,
     },
   ],
-  locationsAvailable: [Location.STATS],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.WHERE,
+    Location.SORT,
+    Location.ROW,
+    Location.STATS_WHERE,
+    Location.COMPLETION,
+  ],
   validate: undefined,
   examples: [],
 };
