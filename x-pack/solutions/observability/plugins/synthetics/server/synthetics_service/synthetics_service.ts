@@ -677,6 +677,7 @@ export class SyntheticsService {
 
     return this.formatConfigs(configDataList) as MonitorFields[];
   }
+
   checkMissingSchedule(state: Record<string, string>) {
     try {
       const lastRunAt = state.lastRunAt;
