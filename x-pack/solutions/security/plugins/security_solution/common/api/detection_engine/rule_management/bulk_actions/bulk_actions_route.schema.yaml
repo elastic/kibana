@@ -359,6 +359,47 @@ paths:
                               eventAction: trigger
                               timestamp: 2023-10-31T00:00:00Z
                             group: default3
+              example27:
+                summary: Edit - Set alert suppression to rules (idempotent)
+                description: The following request set alert suppression to the rules with the specified IDs.
+                value:
+                  ids:
+                    - '12345678-1234-1234-1234-1234567890ab'
+                    - '87654321-4321-4321-4321-0987654321ba'
+                  action: 'edit'
+                  edit:
+                    - type: 'set_alert_suppression'
+                      value:
+                        group_by:
+                          - 'source.ip'
+                        duration:
+                          value: 1
+                          unit: 'h'
+                        missing_fields_strategy: 'suppress'    
+              example28:
+                summary: Edit - Set alert suppression to threshold rules (idempotent)
+                description: The following request set alert suppression to threshold rules with the specified IDs.
+                value:
+                  ids:
+                    - '12345678-1234-1234-1234-1234567890ab'
+                    - '87654321-4321-4321-4321-0987654321ba'
+                  action: 'edit'
+                  edit:
+                    - type: 'set_alert_suppression_for_threshold'
+                      value:
+                        duration:
+                          value: 1
+                          unit: 'h'
+              example29:
+                summary: Edit - Removes alert suppression from rules (idempotent)
+                description: The following request removes alert suppression from the rules with the specified IDs. If the rules do not have alert suppression, no changes are made.
+                value:
+                  ids:
+                    - '12345678-1234-1234-1234-1234567890ab'
+                    - '87654321-4321-4321-4321-0987654321ba'
+                  action: 'edit'
+                  edit:
+                    - type: 'delete_alert_suppression'
       responses:
         200:
           description: OK
