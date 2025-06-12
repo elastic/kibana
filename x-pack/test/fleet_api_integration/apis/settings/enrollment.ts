@@ -133,7 +133,7 @@ export default function (providerContext: FtrProviderContext) {
                 is_default_fleet_server: false,
                 is_managed: false,
                 name: 'Fleet Server Policy 2',
-                space_ids: [],
+                space_ids: ['default'],
               },
             ],
             has_active: true,
