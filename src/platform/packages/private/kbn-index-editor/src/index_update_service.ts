@@ -10,14 +10,19 @@
 import type { HttpStart } from '@kbn/core/public';
 import {
   BehaviorSubject,
-  Observable,
-  Subject,
   debounceTime,
   filter,
   from,
+  map,
+  Observable,
+  of,
   scan,
   shareReplay,
+  Subject,
   switchMap,
+  takeUntil,
+  takeWhile,
+  timer,
 } from 'rxjs';
 
 const BUFFER_TIMEOUT_MS = 5000; // 5 seconds
@@ -54,6 +59,20 @@ export class IndexUpdateService {
       }
     }, []),
     shareReplay(1) // keep latest buffer for retries
+  );
+
+  // Observable to track the number of milliseconds left to allow undo of the last change
+  public readonly undoTimer$: Observable<number> = this.actions$.pipe(
+    filter((action) => action.type === 'add' || action.type === 'undo'),
+    switchMap((action) =>
+      action.type === 'add'
+        ? timer(0, 100).pipe(
+            map((elapsed) => Math.max(BUFFER_TIMEOUT_MS - elapsed * 100, 0)),
+            takeUntil(this.actions$.pipe(filter((a) => a.type === 'undo'))),
+            takeWhile((remaining) => remaining > 0, true)
+          )
+        : of(0)
+    )
   );
 
   private listenForUpdates() {

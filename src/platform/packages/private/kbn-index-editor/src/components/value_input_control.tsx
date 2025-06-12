@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FC, type PropsWithChildren, useCallback, useRef, useEffect } from 'react';
+import React, {
+  type FC,
+  type PropsWithChildren,
+  type FunctionComponent,
+  useCallback,
+  useRef,
+  useEffect,
+  useState,
+} from 'react';
 import {
   EuiFieldText,
   EuiForm,
@@ -20,12 +28,82 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { type DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import type { DataTableRecord } from '@kbn/discover-utils';
 
 interface EditCellValueProps {
   value: any;
   onSave: (updatedValue: Record<string, any>) => void;
   onCancel: () => void;
 }
+
+export interface ValuePosition {
+  row: number;
+  col: string;
+}
+
+export type OnCellValueChange = (docId: string, update: any) => void;
+
+export const getCellValueRenderer =
+  (
+    rows: DataTableRecord[],
+    editingCell: { row: number | null; col: string | null },
+    onEditStart: (update: { row: number | null; col: number | null }) => void,
+    onValueChange: OnCellValueChange
+  ): FunctionComponent<DataGridCellValueElementProps> =>
+  ({ rowIndex, columnId }) => {
+    const row = rows[rowIndex];
+    const docId = row.id;
+    const cellValue = row.flattened[columnId];
+    if (cellValue == null) {
+      return null;
+    }
+
+    const [editValue, setEditValue] = useState(cellValue);
+
+    const isEditing = editingCell.row === rowIndex && editingCell.col === columnId;
+
+    if (isEditing) {
+      return (
+        <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+          <EuiFieldText
+            name="test123"
+            autoFocus
+            placeholder="Placeholder text"
+            value={editValue}
+            aria-label="Use aria labels when no actual label is in use"
+            onChange={(e) => {
+              const newValue = e.target.value;
+              setEditValue(newValue);
+            }}
+            onBlur={() => {
+              onEditStart({ row: null, col: null });
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                // Submit the value change
+                onValueChange(docId, { [columnId]: editValue });
+              }
+            }}
+          />
+        </div>
+      );
+    }
+    return (
+      <span
+        tabIndex={0}
+        style={{
+          cursor: 'pointer',
+        }}
+        onClick={() => onEditStart({ row: rowIndex, col: columnId })}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') onEditStart({ row: rowIndex, col: columnId });
+        }}
+      >
+        {cellValue}
+      </span>
+    );
+  };
 
 export const EditCellValue: FC<PropsWithChildren<EditCellValueProps>> = ({
   onCancel,

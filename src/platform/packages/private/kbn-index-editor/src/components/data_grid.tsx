@@ -35,7 +35,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { INDEX_EDITOR_CELL_ACTION_TRIGGER_ID } from '../ui_action';
 import { KibanaContextExtra } from '../types';
 import { RowViewer } from './row_viewer_lazy';
-import { EditCellValue } from './value_input_control';
+import { EditCellValue, getCellValueRenderer } from './value_input_control';
 
 interface ESQLDataGridProps {
   rows: DataTableRecord[];
@@ -80,6 +80,9 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     props.initialRowHeight ?? DEFAULT_INITIAL_ROW_HEIGHT
   );
   const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_ROWS_PER_PAGE);
+
+  // Track which cell is being edited
+  const [editingCell, setEditingCell] = useState({ row: null, col: null });
 
   const onSetColumns = useCallback((columns: string[]) => {
     setActiveColumns(columns);
@@ -211,6 +214,28 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     };
   }, [indexUpdateService, rows]);
 
+  const onValueChange = useCallback(
+    (docId: string, update: any) => {
+      // reset editing cell
+      setEditingCell({ row: null, col: null });
+      // make a call to update the doc with the new value
+      indexUpdateService.updateDoc(docId, update);
+      // update rows to reflect the change
+    },
+    [rows, editingCell, setEditingCell, indexUpdateService]
+  );
+
+  const CellValueRenderer = useMemo(() => {
+    return getCellValueRenderer(rows, editingCell, setEditingCell, onValueChange);
+  }, [rows, editingCell, setEditingCell, onValueChange]);
+
+  const externalCustomRenderers: CustomCellRenderer = useMemo(() => {
+    return activeColumns.reduce((acc, columnId) => {
+      acc[columnId] = CellValueRenderer;
+      return acc;
+    }, {} as CustomCellRenderer);
+  }, [CellValueRenderer, activeColumns]);
+
   return (
     <>
       <UnifiedDataTable
@@ -225,7 +250,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         // cellContext={cellContext}
         services={services}
         enableInTableSearch
-        // externalCustomRenderers={externalCustomRenderers}
+        externalCustomRenderers={externalCustomRenderers}
         isPlainRecord
         isSortEnabled
         showMultiFields={false}

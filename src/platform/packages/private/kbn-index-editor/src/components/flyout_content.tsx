@@ -30,6 +30,7 @@ import type { FC } from 'react';
 import React, { lazy, useCallback, useEffect, useMemo, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import { FlyoutFooter } from './flyout_footer';
 import type { EditLookupIndexContentContext, EditLookupIndexFlyoutDeps } from '../types';
 
 export interface FlyoutContentProps {
@@ -185,44 +186,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
           </CellActionsProvider>
         </EuiFlyoutBody>
 
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="cross" onClick={() => {}} flush="left">
-                <FormattedMessage
-                  id="xpack.dataVisualizer.file.uploadView.closeButton"
-                  defaultMessage="Close"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={true} />
-            <EuiFlexItem grow={false}>
-              {false ? (
-                <EuiFlexGroup gutterSize="none" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiLoadingSpinner size="m" />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiButtonEmpty onClick={() => {}} disabled={true}>
-                      <FormattedMessage
-                        id="indexEditor.flyout.footer.primaryButtonLabel.saving"
-                        defaultMessage="Saving..."
-                      />
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              ) : null}
-              {true ? (
-                <EuiButton onClick={() => {}}>
-                  <FormattedMessage
-                    id="indexEditor.flyout.footer.primaryButtonLabel.save"
-                    defaultMessage="Save"
-                  />
-                </EuiButton>
-              ) : null}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
+        <FlyoutFooter indexUpdateService={deps.indexUpdateService} />
       </>
     </KibanaContextProvider>
   );
