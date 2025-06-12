@@ -32,6 +32,7 @@ export class IncrementalIdTaskManager {
       [CASES_INCREMENTAL_ID_SYNC_TASK_TYPE]: {
         title: 'Cases Numerical ID assignment',
         description: 'Applying incremental numeric ids to cases',
+        timeout: '10m',
         createTaskRunner: () => {
           return {
             run: async () => {
