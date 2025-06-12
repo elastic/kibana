@@ -197,18 +197,105 @@ const FileTreeComponent: React.FC<FileTreeProps> = ({
       if (node.type === 'directory') {
         const isExpanded = expandedNodeIds.includes(node.id);
         if (isExpanded) {
+          // Collapse directory - local operation only
           setExpandedNodeIds((prev) => prev.filter((id) => id !== node.id));
         } else {
+          // Expand directory - local operation only
           setExpandedNodeIds((prev) => [...prev, node.id]);
-        }
-        
-        if (onPathNavigation) {
-          onPathNavigation(node.path);
+          // NOTE: Removed onPathNavigation call that was causing refetching
         }
       }
     },
-    [expandedNodeIds, onPathNavigation]
+    [expandedNodeIds]
   );
+
+  const buildTreeStructure = useCallback((files: FileTreeNode[]) => {
+    const pathMap = new Map<string, FileTreeNode>();
+    const rootNodes: FileTreeNode[] = [];
+
+    // Sort files to process directories first
+    const sortedFiles = [...files].sort((a, b) => {
+      if (a.type === 'directory' && b.type === 'file') return -1;
+      if (a.type === 'file' && b.type === 'directory') return 1;
+      return a.path.localeCompare(b.path);
+    });
+
+    sortedFiles.forEach((file) => {
+      const pathParts = file.path.split('/').filter(Boolean);
+      
+      if (pathParts.length === 1) {
+        // Root level file/directory
+        rootNodes.push({
+          ...file,
+          children: file.type === 'directory' ? [] : undefined
+        });
+        pathMap.set(file.path, file);
+      } else {
+        // Nested file/directory - find parent
+        const parentPath = pathParts.slice(0, -1).join('/');
+        const parent = pathMap.get('/' + parentPath) || pathMap.get(parentPath);
+        
+        if (parent && parent.children) {
+          parent.children.push({
+            ...file,
+            children: file.type === 'directory' ? [] : undefined
+          });
+        }
+        pathMap.set(file.path, file);
+      }
+    });
+
+    return rootNodes;
+  }, []);
+
+  const renderTreeNode = useCallback((node: FileTreeNode, level: number = 0): React.ReactElement => {
+    const isExpanded = expandedNodeIds.includes(node.id);
+    const hasChildren = node.children && node.children.length > 0;
+    
+    return (
+      <div key={node.id}>
+        <div
+          style={{
+            padding: '8px',
+            paddingLeft: `${8 + level * 20}px`,
+            borderBottom: '1px solid #eee',
+            cursor: node.type === 'directory' ? 'pointer' : 'default',
+            backgroundColor: isExpanded ? '#f7f9fc' : 'transparent'
+          }}
+          onClick={() => onNodeClick(node)}
+        >
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            {node.type === 'directory' && (
+              <EuiFlexItem grow={false}>
+                <span style={{ fontSize: '12px', color: '#666' }}>
+                  {isExpanded ? '📂' : '📁'}
+                </span>
+              </EuiFlexItem>
+            )}
+            {node.type === 'file' && (
+              <EuiFlexItem grow={false}>
+                <span style={{ fontSize: '12px' }}>📄</span>
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem>
+              <EuiText size="s" style={{ fontFamily: 'monospace' }}>
+                {node.label}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+        
+        {/* Render children if expanded */}
+        {node.type === 'directory' && isExpanded && hasChildren && (
+          <div>
+            {node.children!.map((child) => renderTreeNode(child, level + 1))}
+          </div>
+        )}
+      </div>
+    );
+  }, [expandedNodeIds, onNodeClick]);
+
+  const treeStructure = useMemo(() => buildTreeStructure(fileTreeData), [fileTreeData, buildTreeStructure]);
 
   useEffect(
     () =>
@@ -283,25 +370,8 @@ const FileTreeComponent: React.FC<FileTreeProps> = ({
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
-              {/* Temporarily using simple list instead of EuiTreeView to debug corruption */}
               <div style={{ maxHeight: '600px', overflow: 'auto' }}>
-                {fileTreeData.map((node) => (
-                  <div 
-                    key={node.id}
-                    style={{ 
-                      padding: '8px',
-                      borderBottom: '1px solid #eee',
-                      cursor: node.type === 'directory' ? 'pointer' : 'default'
-                    }}
-                    onClick={() => node.type === 'directory' && onNodeClick(node)}
-                  >
-                    <EuiText size="s">
-                      <span style={{ fontFamily: 'monospace' }}>
-                        {node.type === 'directory' ? '📁' : '📄'} {node.label}
-                      </span>
-                    </EuiText>
-                  </div>
-                ))}
+                {treeStructure.map((node) => renderTreeNode(node))}
               </div>
             </EuiFlexItem>
           </EuiFlexGroup>
