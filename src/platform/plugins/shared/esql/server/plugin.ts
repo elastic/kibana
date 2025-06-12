@@ -39,6 +39,24 @@ export class EsqlServerPlugin implements Plugin<EsqlServerPluginSetup> {
       }),
     });
 
+    this.extensionsRegistry.setRecommendedQueries(
+      [
+        {
+          name: 'Logs count by log level',
+          query: 'from logs* | STATS count(*) by log_level',
+        },
+        {
+          name: 'Apache logs counts',
+          query: 'from logs-apache_error | STATS count(*)',
+        },
+        {
+          name: 'Another index, not logs',
+          query: 'from movies | STATS count(*)',
+        },
+      ],
+      'oblt'
+    );
+
     registerRoutes(core, this.extensionsRegistry, initContext);
 
     return {
