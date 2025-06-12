@@ -153,7 +153,20 @@ describe('CasesIncrementalIdService', () => {
       const so1 = { attributes: { last_id: 10 } };
       const so2 = { attributes: { last_id: 100 } };
       const so3 = { attributes: { last_id: 1000 } };
-      const incrementerSOs = [so3, so1, so2];
+      const incrementerSOs = [so1, so2, so3];
+
+      // @ts-expect-error: SO client types are not correct
+      const result = await service.resolveMultipleIncrementerSO(incrementerSOs, 20, 'default');
+
+      expect(savedObjectsClient.bulkDelete).toHaveBeenCalledWith([so1, so2]);
+      expect(result.attributes.last_id).toBe(so3.attributes.last_id);
+    });
+
+    it('should return the correct incrementer SO when SOs come in a random order', async () => {
+      const so1 = { attributes: { last_id: 10 } };
+      const so2 = { attributes: { last_id: 100 } };
+      const so3 = { attributes: { last_id: 1000 } };
+      const incrementerSOs = [so1, so3, so2];
 
       // @ts-expect-error: SO client types are not correct
       const result = await service.resolveMultipleIncrementerSO(incrementerSOs, 20, 'default');

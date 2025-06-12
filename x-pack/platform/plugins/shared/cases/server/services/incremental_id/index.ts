@@ -253,19 +253,35 @@ export class CasesIncrementalIdService {
     latestAppliedId: number,
     namespace: string
   ) {
-    // Find the incrementer with the highest ID
-    const incrementerWithHighestId = incrementerQueryResponse.reduce<
-      SavedObjectsFindResult<CaseIdIncrementerPersistedAttributes>
-    >((maxIncrementer, currIncrementer) => {
-      return currIncrementer.attributes.last_id > maxIncrementer.attributes.last_id
-        ? currIncrementer
-        : maxIncrementer;
-    }, incrementerQueryResponse[0]);
-
-    // Gather the incrementers with lower ID values and delete them
-    const incrementersToDelete = incrementerQueryResponse.filter(
-      (incrementer) => incrementer !== incrementerWithHighestId
+    // Find the incrementer with the highest ID and the incrementers to delete
+    const { incrementerWithHighestId, incrementersToDelete } = incrementerQueryResponse.reduce(
+      (result, currIncrementer) => {
+        if (result.incrementerWithHighestId === currIncrementer) {
+          // don't do anything if we're comparing the same objects
+          return result;
+        } else {
+          // the current incrementer has a higher value, it becomes the new highest one
+          // the previous highest one is scheduled for deletion
+          if (
+            currIncrementer.attributes.last_id > result.incrementerWithHighestId.attributes.last_id
+          ) {
+            result.incrementersToDelete.push(result.incrementerWithHighestId);
+            result.incrementerWithHighestId = currIncrementer;
+          } else {
+            // the current incrementer is not higher than the highest one, we're deleting it
+            result.incrementersToDelete.push(currIncrementer);
+          }
+          return result;
+        }
+      },
+      {
+        incrementerWithHighestId: incrementerQueryResponse[0],
+        incrementersToDelete: [] as Array<
+          SavedObjectsFindResult<CaseIdIncrementerPersistedAttributes>
+        >,
+      }
     );
+
     await this.internalSavedObjectsClient.bulkDelete(incrementersToDelete);
 
     // If a max incrementer exists, update it with the max value found
