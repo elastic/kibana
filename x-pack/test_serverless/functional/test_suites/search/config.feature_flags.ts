@@ -41,6 +41,9 @@ export default createTestConfig({
     searchSynonyms: {
       pathname: '/app/elasticsearch/search_synonyms',
     },
+    searchQueryRules: {
+      pathname: '/app/elasticsearch/query_rules',
+    },
     elasticsearchStart: {
       pathname: '/app/elasticsearch/start',
     },

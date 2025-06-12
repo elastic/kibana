@@ -94,6 +94,11 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           pageTestSubject: 'searchSynonymsOverviewPage',
         },
         {
+          deepLinkId: 'searchQueryRules',
+          breadcrumbs: ['Relevance', 'Query Rules'],
+          pageTestSubject: 'searchQueryRulesOverviewPage',
+        },
+        {
           deepLinkId: 'discover',
           breadcrumbs: ['Analyze', 'Discover'],
           pageTestSubject: 'queryInput',
@@ -254,6 +259,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         'relevance',
         'searchInferenceEndpoints',
         'searchSynonyms',
+        'searchQueryRules',
         'otherTools',
         'maps',
         'search_project_nav_footer',

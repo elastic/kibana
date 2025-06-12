@@ -30,6 +30,7 @@ export default createTestConfig({
     `--xpack.dataUsage.autoops.api.tls.certificate=${KBN_CERT_PATH}`,
     `--xpack.dataUsage.autoops.api.tls.key=${KBN_KEY_PATH}`,
     '--xpack.searchSynonyms.enabled=true',
+    '--xpack.searchQueryRules.enabled=true',
   ],
   apps: {
     serverlessElasticsearch: {
