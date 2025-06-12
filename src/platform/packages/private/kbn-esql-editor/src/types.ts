@@ -23,6 +23,7 @@ import type {
   IndicesAutocompleteResult,
   RecommendedQuery,
 } from '@kbn/esql-types';
+import { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
 
 export interface ControlsContext {
   /** The editor supports the creation of controls,
@@ -107,9 +108,10 @@ export interface EsqlPluginStartBase {
   getEditorExtensionsAutocomplete: (
     queryString: string,
     activeSolutionId: string
-  ) => Promise<RecommendedQuery[]>;
+  ) => Promise<{ recommendedQueries: RecommendedQuery[] }>;
   variablesService: ESQLVariableService;
   getLicense: () => Promise<ILicense | undefined>;
+  getInferenceEndpointsAutocomplete: () => Promise<InferenceEndpointsAutocompleteResult>;
 }
 
 export interface ESQLEditorDeps {
