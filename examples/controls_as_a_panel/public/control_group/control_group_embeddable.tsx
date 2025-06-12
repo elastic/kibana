@@ -22,6 +22,8 @@ import {
 
 import { CONTROL_PANEL_ID } from './constants';
 import { ControlGroupApi, ControlGroupSerializedState, ControlsGroupInternalState } from './types';
+import { OptionsList } from './controls/options_list_control';
+import { RangeSlider } from './controls/range_slider_control';
 
 const controlComparators: StateComparators<ControlsGroupInternalState> = {
   controls: 'deepEquality',
@@ -112,22 +114,28 @@ export const controlPanelEmbeddableFactory: EmbeddableFactory<
                 repositionOnScroll={false}
               >
                 <div css={styles}>
-                  {Object.values(initialState.rawState.controls).map(({ width }, i) => {
-                    return (
-                      <div key={`control-${i}`} className={`singleControl singleControl-${width}`}>
-                        {width}
-                      </div>
-                    );
+                  {Object.values(initialState.rawState.controls).map(({ type }, i) => {
+                    switch (type) {
+                      case 'optionsList': {
+                        return <OptionsList key={`control-${i}`} />;
+                      }
+                      case 'rangeSlider': {
+                        return <RangeSlider key={`control-${i}`} />;
+                      }
+                    }
                   })}
                 </div>
               </EuiPopover>
             ) : (
-              Object.values(initialState.rawState.controls).map(({ width }, i) => {
-                return (
-                  <div key={`control-${i}`} className={`singleControl singleControl-${width}`}>
-                    {width}
-                  </div>
-                );
+              Object.values(initialState.rawState.controls).map(({ type }, i) => {
+                switch (type) {
+                  case 'optionsList': {
+                    return <OptionsList key={`control-${i}`} />;
+                  }
+                  case 'rangeSlider': {
+                    return <RangeSlider key={`control-${i}`} />;
+                  }
+                }
               })
             )}
           </div>
@@ -145,20 +153,4 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
     alignContent: 'flex-start',
     padding: euiTheme.size.s,
     gap: euiTheme.size.s,
-    '.singleControl': {
-      width: '100%',
-      height: euiTheme.size.xl,
-      '&-small': {
-        maxWidth: `calc(${euiTheme.size.xl} * 7)`, // 224px
-        backgroundColor: euiTheme.colors.backgroundBaseAccent,
-      },
-      '&-medium': {
-        maxWidth: `calc(${euiTheme.size.xxl} * 10)`, // 400px
-        backgroundColor: euiTheme.colors.backgroundBaseWarning,
-      },
-      '&-large': {
-        maxWidth: `calc(${euiTheme.size.xxl} * 20)`, // 800px
-        backgroundColor: euiTheme.colors.backgroundBaseAccentSecondary,
-      },
-    },
   });
