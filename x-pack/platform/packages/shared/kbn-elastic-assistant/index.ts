@@ -175,3 +175,11 @@ export {
   /** Your anonymization settings will apply to these alerts (label) */
   YOUR_ANONYMIZATION_SETTINGS,
 } from './impl/knowledge_base/translations';
+export { SearchAILakeConfigurationsSettingsManagement } from './impl/assistant/settings/search_ai_lake_configurations_settings_management';
+export { CONVERSATIONS_TAB } from './impl/assistant/settings/const';
+export type { ManagementSettingsTabs } from './impl/assistant/settings/types';
+
+export { getNewSelectedPromptContext } from './impl/data_anonymization/get_new_selected_prompt_context';
+export { getCombinedMessage } from './impl/assistant/prompt/helpers';
+export { useChatComplete } from './impl/assistant/api/chat_complete/use_chat_complete';
+export { useFetchAnonymizationFields } from './impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';

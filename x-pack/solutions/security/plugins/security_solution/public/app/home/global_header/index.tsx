@@ -16,6 +16,7 @@ import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal'
 import { i18n } from '@kbn/i18n';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { SECURITY_FEATURE_ID } from '../../../../common';
 import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
@@ -43,7 +44,13 @@ const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.butt
  */
 export const GlobalHeader = React.memo(() => {
   const portalNode = useMemo(() => createHtmlPortalNode(), []);
-  const { theme, setHeaderActionMenu, i18n: kibanaServiceI18n } = useKibana().services;
+  const {
+    theme,
+    setHeaderActionMenu,
+    i18n: kibanaServiceI18n,
+    application: { capabilities },
+  } = useKibana().services;
+  const hasSearchAILakeConfigurations = capabilities[SECURITY_FEATURE_ID]?.configurations === true;
   const { pathname } = useLocation();
 
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -100,15 +107,17 @@ export const GlobalHeader = React.memo(() => {
 
         <EuiHeaderSectionItem>
           <EuiHeaderLinks>
-            <EuiHeaderLink
-              color="primary"
-              data-test-subj="add-data"
-              href={href}
-              iconType="indexOpen"
-              onClick={onClick}
-            >
-              {BUTTON_ADD_DATA}
-            </EuiHeaderLink>
+            {!hasSearchAILakeConfigurations && (
+              <EuiHeaderLink
+                color="primary"
+                data-test-subj="add-data"
+                href={href}
+                iconType="indexOpen"
+                onClick={onClick}
+              >
+                {BUTTON_ADD_DATA}
+              </EuiHeaderLink>
+            )}
             {showSourcerer && !showTimeline && dataViewPicker}
           </EuiHeaderLinks>
         </EuiHeaderSectionItem>

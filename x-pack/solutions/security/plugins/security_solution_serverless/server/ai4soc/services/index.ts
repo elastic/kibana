@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
-
-export function getConnectorsManagementHref(http: HttpStart) {
-  return http!.basePath.prepend(
-    `/app/management/insightsAndAlerting/triggersActionsConnectors/connectors`
-  );
-}
+export { ai4SocMeteringService } from './metering_service';
