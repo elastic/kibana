@@ -11,7 +11,7 @@ import {
   formatESQLColumns,
   mapVariableToColumn,
 } from '@kbn/esql-utils';
-import { isEqual, cloneDeep } from 'lodash';
+import { isEqual } from 'lodash';
 import { type AggregateQuery, buildEsQuery } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ESQLRow } from '@kbn/es-types';
@@ -197,7 +197,7 @@ export const injectESQLQueryIntoLensLayers = (
     return attributes;
   }
 
-  const datasourceState = cloneDeep(attributes.state.datasourceStates[datasourceId]);
+  const datasourceState = structuredClone(attributes.state.datasourceStates[datasourceId]);
 
   if (datasourceState && datasourceState.layers) {
     Object.values(datasourceState.layers).forEach((layer) => {
