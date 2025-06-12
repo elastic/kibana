@@ -39,7 +39,6 @@ export function getMockConfig() {
     false,
     true,
     true,
-    {},
     {}
   );
 }
