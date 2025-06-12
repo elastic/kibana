@@ -37,6 +37,7 @@ export function ProximalAlertsCallout({ alertDetail, switchTabs }: Props) {
       })}
       {count > 0 && (
         <EuiLink
+          data-test-id="see-proximal-alerts"
           data-test-subj="see-proximal-alerts"
           css={{ marginLeft: euiTheme.size.s }}
           onClick={() => switchTabs()}
