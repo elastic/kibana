@@ -54,7 +54,7 @@ export function useFetchChartData(options: UseTopAssetsOptions) {
       return transformAssetAggregationToChartData(aggregations);
     },
     {
-      enabled: options.enabled,
+      enabled: options.enabled && !!dataViewIndexPattern,
       keepPreviousData: true,
       onError: (err: Error) => showErrorToast(toasts, err),
     }
