@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { KPIsSection } from './kpis_section';
 import { ALERTS_BY_HOST_PANEL } from './alerts_progress_bar_by_host_name_panel';
 import { TestProviders } from '../../../../common/mock';
@@ -27,9 +27,8 @@ describe('<KPIsSection />', () => {
       </TestProviders>
     );
 
-      expect(getByTestId('severty-level-panel')).toBeInTheDocument();
-      expect(getByTestId('alerts-by-rule-panel')).toBeInTheDocument();
-      expect(getByTestId(ALERTS_BY_HOST_PANEL)).toBeInTheDocument();
-    });
+    expect(getByTestId('severty-level-panel')).toBeInTheDocument();
+    expect(getByTestId('alerts-by-rule-panel')).toBeInTheDocument();
+    expect(getByTestId(ALERTS_BY_HOST_PANEL)).toBeInTheDocument();
   });
 });
