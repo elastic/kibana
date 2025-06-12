@@ -7,7 +7,13 @@
 
 import expect from 'expect';
 
-import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
+import {
+  ALERT_ORIGINAL_DATA_STREAM_DATASET,
+  ALERT_ORIGINAL_DATA_STREAM_NAMESPACE,
+  ALERT_ORIGINAL_DATA_STREAM_TYPE,
+  ALERT_ORIGINAL_TIME,
+} from '@kbn/security-solution-plugin/common/field_maps/field_names';
+import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import {
   createRule,
   deleteAllAlerts,
@@ -17,6 +23,7 @@ import {
   waitForAlertsToBePresent,
   waitForRuleSuccess,
 } from '../../../../../../../common/utils/security_solution';
+import { searchAlerts } from '../../../../../../../common/utils/security_solution/detections_response/alerts/search_alerts';
 import { getPreviewAlerts, previewRule } from '../../../../utils';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
@@ -63,6 +70,44 @@ export default ({ getService }: FtrProviderContext) => {
             'kibana.alert.original_data_stream.namespace': 'default',
           })
         );
+      });
+
+      it('generates alerts are able to be queried by copied data_stream fields', async () => {
+        const rule = getRuleForAlertTesting(['ecs_fields_duplicated_for_alerts']);
+        const { id } = await createRule(supertest, log, rule);
+        await waitForRuleSuccess({ supertest, log, id });
+        await waitForAlertsToBePresent(supertest, log, 3, [id]);
+
+        const alertsByDataStream = await searchAlerts(supertest, log, {
+          query: {
+            bool: {
+              must: [
+                {
+                  terms: {
+                    [ALERT_RULE_UUID]: [id],
+                  },
+                },
+                {
+                  match: {
+                    [ALERT_ORIGINAL_DATA_STREAM_DATASET]: 'dataset_name_1',
+                  },
+                },
+                {
+                  match: {
+                    [ALERT_ORIGINAL_DATA_STREAM_NAMESPACE]: 'default',
+                  },
+                },
+                {
+                  match: {
+                    [ALERT_ORIGINAL_DATA_STREAM_TYPE]: 'logs',
+                  },
+                },
+              ],
+            },
+          },
+        });
+
+        expect(alertsByDataStream.hits.hits).toHaveLength(3);
       });
     });
 
