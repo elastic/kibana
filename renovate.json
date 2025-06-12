@@ -2210,7 +2210,7 @@
         "release_note:skip",
         "backport:prev-minor"
       ],
-      "recreateWhen": "never",
+      "dependencyDashboardApproval": true,
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
