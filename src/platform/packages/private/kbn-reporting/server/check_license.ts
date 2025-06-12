@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ILicense } from '@kbn/licensing-plugin/server';
+import { ILicense, LicenseType } from '@kbn/licensing-plugin/server';
+import {
+  LICENSE_TYPE_CLOUD_STANDARD,
+  LICENSE_TYPE_ENTERPRISE,
+  LICENSE_TYPE_GOLD,
+  LICENSE_TYPE_PLATINUM,
+  LICENSE_TYPE_TRIAL,
+} from '@kbn/reporting-common';
 import type { ExportType } from '.';
 import { ExportTypesRegistry } from './export_types_registry';
 
@@ -17,6 +24,14 @@ export interface LicenseCheckResult {
   message?: string;
   jobTypes?: string[];
 }
+
+const scheduledReportValidLicenses: LicenseType[] = [
+  LICENSE_TYPE_TRIAL,
+  LICENSE_TYPE_CLOUD_STANDARD,
+  LICENSE_TYPE_GOLD,
+  LICENSE_TYPE_PLATINUM,
+  LICENSE_TYPE_ENTERPRISE,
+];
 
 const messages = {
   getUnavailable: () => {
@@ -55,6 +70,42 @@ const makeManagementFeature = (exportTypes: ExportType[]) => {
         showLinks: validJobTypes.length > 0,
         enableLinks: validJobTypes.length > 0,
         jobTypes: validJobTypes,
+      };
+    },
+  };
+};
+
+const makeScheduledReportsFeature = () => {
+  return {
+    id: 'scheduledReports',
+    checkLicense: (license?: ILicense) => {
+      if (!license || !license.type) {
+        return {
+          showLinks: true,
+          enableLinks: false,
+          message: messages.getUnavailable(),
+        };
+      }
+
+      if (!license.isActive) {
+        return {
+          showLinks: true,
+          enableLinks: false,
+          message: messages.getExpired(license),
+        };
+      }
+
+      if (!scheduledReportValidLicenses.includes(license.type)) {
+        return {
+          showLinks: false,
+          enableLinks: false,
+          message: `Your ${license.type} license does not support Scheduled reports. Please upgrade your license.`,
+        };
+      }
+
+      return {
+        showLinks: true,
+        enableLinks: true,
       };
     },
   };
@@ -104,6 +155,7 @@ export function checkLicense(
   const reportingFeatures = [
     ...exportTypes.map(makeExportTypeFeature),
     makeManagementFeature(exportTypes),
+    makeScheduledReportsFeature(),
   ];
 
   return reportingFeatures.reduce((result, feature) => {

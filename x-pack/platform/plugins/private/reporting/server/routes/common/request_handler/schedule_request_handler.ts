@@ -10,6 +10,7 @@ import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import { isEmpty, omit } from 'lodash';
 import { RruleSchedule, scheduleRruleSchema } from '@kbn/task-manager-plugin/server';
+import { IKibanaResponse } from '@kbn/core/server';
 import { RawNotification } from '../../../saved_objects/scheduled_report/schemas/latest';
 import { rawNotificationSchema } from '../../../saved_objects/scheduled_report/schemas/v1';
 import {
@@ -48,6 +49,20 @@ export class ScheduleRequestHandler extends RequestHandler<
   (typeof validation)['body'],
   ScheduledReportApiJSON
 > {
+  protected async checkLicenseAndTimezone(
+    exportTypeId: string,
+    browserTimezone: string
+  ): Promise<IKibanaResponse | null> {
+    const { reporting, res } = this.opts;
+    const licenseInfo = await reporting.getLicenseInfo();
+    const licenseResults = licenseInfo.scheduledReports;
+
+    if (!licenseResults.enableLinks) {
+      return res.forbidden({ body: licenseResults.message });
+    }
+    return super.checkLicenseAndTimezone(exportTypeId, browserTimezone);
+  }
+
   public static getValidation() {
     return validation;
   }
