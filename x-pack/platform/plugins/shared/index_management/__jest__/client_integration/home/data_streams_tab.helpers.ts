@@ -308,6 +308,7 @@ export const createDataStreamPayload = (dataStream: Partial<DataStream>): DataSt
   privileges: {
     delete_index: true,
     manage_data_stream_lifecycle: true,
+    read_failure_store: true,
   },
   hidden: false,
   lifecycle: {

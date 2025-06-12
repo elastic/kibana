@@ -539,18 +539,22 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
               },
             ]
           : []),
-        {
-          key: 'configureFailureStore',
-          name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.configureFailureStore', {
-            defaultMessage: 'Configure failure store',
-          }),
-          'data-test-subj': 'configureFailureStoreButton',
-          icon: <EuiIcon type="gear" size="m" />,
-          onClick: () => {
-            closePopover();
-            setIsConfiguringFailureStore(true);
-          },
-        },
+        ...(dataStream?.privileges?.read_failure_store
+          ? [
+              {
+                key: 'configureFailureStore',
+                name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.configureFailureStore', {
+                  defaultMessage: 'Configure failure store',
+                }),
+                'data-test-subj': 'configureFailureStoreButton',
+                icon: <EuiIcon type="gear" size="m" />,
+                onClick: () => {
+                  closePopover();
+                  setIsConfiguringFailureStore(true);
+                },
+              },
+            ]
+          : []),
         ...(dataStream?.privileges?.delete_index
           ? [
               {
