@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import type { FC, PropsWithChildren } from 'react';
+import { useAssetInventoryRoutes } from '../../hooks/use_asset_inventory_routes';
 import { GetStarted } from './get_started';
 import { AssetInventoryLoading } from '../asset_inventory_loading';
 import { useAssetInventoryStatus } from '../../hooks/use_asset_inventory_status';
@@ -21,12 +22,29 @@ import { PermissionDenied } from './permission_denied';
  */
 export const AssetInventoryOnboarding: FC<PropsWithChildren> = ({ children }) => {
   const { data, isLoading } = useAssetInventoryStatus();
+  const { installAssetInventoryDataView } = useAssetInventoryRoutes();
+
+  useEffect(() => {
+    const installAssetInventoryDataView = async () => {
+      if (!isLoading && data) {
+        const { status } = data;
+
+        // For these statuses to appear, the Entity Store needs to be enabled
+        if (status === 'empty' || status === 'ready') {
+          // If its enabled, we check if the Asset Inventory Data View is installed, if not, we install it
+          await installAssetInventoryDataView();
+        }
+      }
+    };
+
+    installAssetInventoryDataView();
+  }, [isLoading, data, installAssetInventoryDataView]);
+
   if (isLoading || !data) {
     return <AssetInventoryLoading />;
   }
 
   const { status, privileges } = data;
-
   // Render different screens based on the onboarding status.
   switch (status) {
     case 'inactive_feature':
