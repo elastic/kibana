@@ -497,6 +497,7 @@ export const getCloudConnectorRemoteRoleTemplate = ({
   // Decode the base64 encoded cloudId
   // region-1.cloudprovider.env.example.com:443$es-cluster-id-1234567890abcdef$deployment-id-abcdef1234567890
   const decodedCloudId = atob(encodedCloudId);
+  consol.log('decodedCloudId', decodedCloudId);
   const providerMatch = decodedCloudId.match(/\.(aws|gcp|azure)\./);
   if (!providerMatch) return undefined;
   // Extract the cloud provider from the match
