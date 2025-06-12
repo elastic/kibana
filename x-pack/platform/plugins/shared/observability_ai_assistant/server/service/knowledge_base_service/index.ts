@@ -504,9 +504,6 @@ export class KnowledgeBaseService {
           concurrency: 10,
           retries: 3,
           onDrop(doc) {
-            console.error(
-              `Indexing failed for document. Status: ${doc.status}, Error: ${doc.error}, Id: ${doc.document.id}}`
-            );
             throw Error(
               `Indexing failed for document. Status: ${doc.status}, Error: ${doc.error}, Id: ${doc.document.id}}`
             );
