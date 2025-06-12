@@ -11,6 +11,7 @@ import type { FormulaPublicApi, TypedLensByValueInput } from '@kbn/lens-plugin/p
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { DataViewsCommon } from './config_builder';
+import { CustomPaletteParams } from '@kbn/coloring';
 
 export type LensAttributes = TypedLensByValueInput['attributes'];
 export const DEFAULT_LAYER_ID = 'layer_0';
@@ -40,10 +41,22 @@ export interface TimeRange {
   type: 'relative' | 'absolute';
 }
 
+export interface ValueFormatConfig {
+  id: string;
+  params?: {
+    decimals: number;
+    suffix?: string;
+    compact?: boolean;
+    pattern?: string;
+    fromUnit?: string;
+    toUnit?: string;
+  };
+}
+
 export interface LensLayerQueryConfig {
   query: string;
   scale?: 'ordinal' | 'interval' | 'ratio' | 'nominal';
-  format?: any; // TODO: define format type
+  format?: ValueFormatConfig;
   label?: string; 
 }
 
@@ -70,7 +83,7 @@ export interface LensBaseConfig {
 export interface LensColorConfig {
   type: 'static' | 'palette';
   color?: string;
-  palette?: string;
+  params?: CustomPaletteParams;
 }
 
 export interface LensBaseLayer {
@@ -170,7 +183,11 @@ export interface LensMetricConfigBase {
   queryMaxValue?: LensLayerQuery;
   /** field name to apply breakdown based on field type or full breakdown configuration */
   breakdown?: LensBreakdownConfig;
-  trendLine?: boolean;
+  trendLine?: boolean | {
+    maxCols?: number;
+    progressDirection?: 'horizontal' | 'vertical';
+    type?: 'bar' | 'line';
+  };
   subtitle?: string;
   secondaryMetricPrefix?: string;
   secondaryMetricColor?: string | LensColorConfig;
@@ -316,6 +333,7 @@ type LensFormula = Parameters<FormulaPublicApi['insertOrReplaceFormulaColumn']>[
 
 export type FormulaValueConfig = LensFormula & {
   color?: string;
+  scale?: 'ordinal' | 'interval' | 'ratio';
 };
 
 interface ChartTypeLensMap {

@@ -31,14 +31,13 @@ import {
   LensBaseConfig,
   LensBaseLayer,
   LensBaseXYLayer,
-  LensConfig,
   LensDataset,
   LensDatatableDataset,
   LensESQLDataset,
   LensLayerQuery,
   LensLayerQueryConfig,
 } from './types';
-import { getObjKey } from '@kbn/core/packages/saved-objects/import-export-server-internal/src/export/utils';
+import { FormattedIndexPatternColumn } from '@kbn/lens-plugin/public/datasources/form_based/operations/definitions/column_types';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -72,7 +71,7 @@ export function mapToFormula(layer: LensBaseLayer): FormulaValueConfig {
     : undefined;
 
   return {
-    formula: value,
+    formula: typeof(value) === 'string' ? value : value?.query,
     label,
     timeScale: normalizeByUnit,
     format: formulaFormat,
@@ -358,8 +357,8 @@ export const buildQuery = (
     params.scale = column.scale;
   }
   
-  if (column.params?.format) {
-    params.format = column.params.format;
+  if ((column as FormattedIndexPatternColumn).params?.format) {
+    params.format = (column as FormattedIndexPatternColumn).params?.format;
   }
 
   if (Object.keys(params).length > 0) {

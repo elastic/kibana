@@ -30,6 +30,8 @@ export function getFormulaColumn(
     throw new Error('Error generating the data layer for the chart');
   }
 
+  formulaLayer.columns[id].scale = rest.scale || 'ratio';
+
   return formulaLayer;
 }
 

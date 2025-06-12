@@ -8,6 +8,7 @@
  */
 
 import type {
+  FieldBasedIndexPatternColumn,
   FormBasedLayer,
   FormBasedPersistedState,
   FormulaPublicApi,
@@ -19,11 +20,9 @@ import { BuildDependencies, DEFAULT_LAYER_ID, LensAttributes, LensMetricConfig }
 import {
   addLayerColumn,
   addLayerFormulaColumns,
-  buildBreakdownConfig,
   buildDatasourceStates,
   buildQuery,
   buildReferences,
-  fromDatasourceStates,
   getAdhocDataviews,
   mapToFormula,
 } from '../utils';
@@ -46,22 +45,24 @@ function getAccessorName(type: 'max' | 'breakdown' | 'secondary') {
 function buildVisualizationState(config: LensMetricConfig): MetricVisualizationState {
   const layer = config;
 
-  // missing features:
-  // layer.customLabel
-  // layer.scale
-  // layer.params.format
-
-  // vis.icon
-  // vis.secondaryMetricPrefix
-  // vis.secondaryMetricColor
-
   return {
     layerId: DEFAULT_LAYER_ID,
     layerType: 'data',
     metricAccessor: ACCESSOR,
-    color: layer.seriesColor,
+    color: typeof(layer.seriesColor) === 'string' ? layer.seriesColor : layer.seriesColor?.color,
     subtitle: layer.subtitle,
-    showBar: false,
+    showBar: typeof(layer.trendLine) === 'object' && layer.trendLine?.type === 'bar',
+    icon: layer.icon,
+    maxCols: typeof(layer.trendLine) === 'object' ? layer.trendLine.maxCols : undefined,
+    progressDirection: typeof(layer.trendLine) === 'object' ? layer.trendLine.progressDirection : undefined,
+
+    secondaryPrefix: layer.secondaryMetricPrefix,
+    secondaryTrend: layer.secondaryMetricColor
+      ? {
+          type: 'static',
+          color: typeof(layer.secondaryMetricColor) === 'string' ? layer.secondaryMetricColor : layer.secondaryMetricColor.color!,
+        }
+      : undefined,
 
     ...(layer.querySecondaryMetric
       ? {
@@ -125,15 +126,13 @@ function reverseBuildVisualizationState(
   } as LensMetricConfig['dataset'];
 
   const query = buildQuery(visualization.metricAccessor, layer, dataViews, formulaAPI);
-  const breakdown = visualization.breakdownByAccessor ? fromBreakdownColumn(layer.columns[visualization.breakdownByAccessor]) : undefined ;
+  const breakdown = visualization.breakdownByAccessor ? fromBreakdownColumn(layer.columns[visualization.breakdownByAccessor] as FieldBasedIndexPatternColumn) : undefined ;
   const querySecondaryMetric = buildQuery(visualization.secondaryMetricAccessor, layer, dataViews, formulaAPI);
   const queryMaxValue = buildQuery(visualization.maxAccessor, layer, dataViews, formulaAPI);
   
   const props: Partial<LensMetricConfig> = {};
 
-  if (visualization.showBar) {
-    props.trendLine = visualization.showBar;
-  }
+  
 
   if (visualization.color) {
     props.seriesColor = visualization.color;
@@ -156,7 +155,19 @@ function reverseBuildVisualizationState(
   }
 
   if (visualization.trendlineMetricAccessor) {
-    // implement all the trendline properties (should be possible)
+    if (visualization.showBar) {
+      props.trendLine = { type: 'bar' };
+    } else {
+      props.trendLine = { type: 'line' };
+    }
+
+    if (visualization.maxCols) {
+      props.trendLine.maxCols = visualization.maxCols;
+    }
+
+    if (visualization.progressDirection) {
+      props.trendLine.progressDirection = visualization.progressDirection;
+    }
   }
 
   return {
@@ -192,7 +203,8 @@ function buildFormulaLayer(
         },
       }),
     },
-    sampling: 1,
+    sampling: layer.randomSampling || 1,
+    ignoreGlobalFilters: layer.useGlobalFilter === false,
   };
 
   const layers: {
@@ -238,7 +250,7 @@ function buildFormulaLayer(
     const columnName = getAccessorName('secondary');
     const formulaColumn = getFormulaColumn(
       columnName,
-      { formula: layer.querySecondaryMetric },
+      { formula: typeof(layer.querySecondaryMetric) === 'string' ? layer.querySecondaryMetric : layer.querySecondaryMetric.query },
       dataView,
       formulaAPI
     );
@@ -253,7 +265,7 @@ function buildFormulaLayer(
     const columnName = getAccessorName('max');
     const formulaColumn = getFormulaColumn(
       columnName,
-      { formula: layer.queryMaxValue },
+      { formula: typeof(layer.queryMaxValue) === 'string' ? layer.queryMaxValue : layer.queryMaxValue.query },
       dataView,
       formulaAPI
     );
@@ -275,12 +287,12 @@ function getValueColumns(layer: LensMetricConfig) {
     ...(layer.breakdown
       ? [getValueColumn(getAccessorName('breakdown'), layer.breakdown as string)]
       : []),
-    getValueColumn(ACCESSOR, layer.value, 'number'),
+    getValueColumn(ACCESSOR, typeof(layer.value) === 'string' ? layer.value : layer.value.query, 'number'),
     ...(layer.queryMaxValue
-      ? [getValueColumn(getAccessorName('max'), layer.queryMaxValue, 'number')]
+      ? [getValueColumn(getAccessorName('max'), typeof(layer.queryMaxValue) === 'string' ? layer.queryMaxValue : layer.queryMaxValue.query, 'number')]
       : []),
     ...(layer.querySecondaryMetric
-      ? [getValueColumn(getAccessorName('secondary'), layer.querySecondaryMetric)]
+      ? [getValueColumn(getAccessorName('secondary'), typeof(layer.querySecondaryMetric) === 'string' ? layer.querySecondaryMetric : layer.querySecondaryMetric.query)]
       : []),
   ];
 }
