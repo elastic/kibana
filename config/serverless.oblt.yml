@@ -4,7 +4,7 @@
 pricing.tiers.enabled: true
 pricing.tiers.products:
   - name: observability
-    tier: complete
+    tier: complete  # Accepted values for this tier are: complete, logs_essentials
 
 # Make sure the plugins belonging to this project type are loaded
 plugins.allowlistPluginGroups: ['platform', 'observability']
