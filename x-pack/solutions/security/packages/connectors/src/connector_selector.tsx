@@ -64,7 +64,7 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
             <EuiFlexItem grow={true}>
               <EuiButtonEmpty
                 data-test-subj="addNewConnectorButton"
-                onClick={onNewConnectorClicked}
+                href="#"
                 isDisabled={isDisabled}
                 iconType="plus"
                 size="xs"
@@ -79,7 +79,7 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
           </EuiFlexGroup>
         ),
       };
-    }, [isDisabled, styles?.offset, onNewConnectorClicked]);
+    }, [isDisabled, styles?.offset]);
 
     const connectorExists = useMemo(
       () => some(connectors, ['id', selectedId]),
