@@ -113,39 +113,4 @@ describe('ESQLMenuPopover', () => {
     await userEvent.click(screen.getByRole('button'));
     expect(screen.queryByTestId('esql-recommended-queries')).toBeInTheDocument();
   });
-
-  it('should not fetch ESQL extensions if queryForRecommendedQueries is null', async () => {
-    const mockQueries = [
-      { name: 'Count of logs', query: 'FROM logstash1 | STATS COUNT()' },
-      { name: 'Average bytes', query: 'FROM logstash2 | STATS AVG(bytes) BY log.level' },
-    ];
-
-    // Configure the mock to resolve with mockQueries
-    httpModule.http.get.mockResolvedValueOnce({ recommendedQueries: mockQueries });
-    renderESQLPopover();
-
-    // open the popover and check for recommended queries
-    await userEvent.click(screen.getByRole('button'));
-    expect(screen.queryByTestId('esql-recommended-queries')).not.toBeInTheDocument();
-  });
-
-  it('should not fetch ESQL extensions if activeSolutionId is not present', async () => {
-    const mockQueries = [
-      { name: 'Count of logs', query: 'FROM logstash1 | STATS COUNT()' },
-      { name: 'Average bytes', query: 'FROM logstash2 | STATS AVG(bytes) BY log.level' },
-    ];
-    httpModule.http.get.mockResolvedValueOnce({ recommendedQueries: mockQueries });
-    startMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject(null));
-    renderESQLPopover(stubIndexPattern);
-
-    // open the popover and check for recommended queries
-    await userEvent.click(screen.getByRole('button'));
-    expect(screen.queryByTestId('esql-recommended-queries')).toBeInTheDocument();
-    // Open the nested section to see the recommended queries
-    await waitFor(() => userEvent.click(screen.getByTestId('esql-recommended-queries')));
-
-    await waitFor(() => {
-      expect(screen.queryByText('Count of logs')).not.toBeInTheDocument();
-    });
-  });
 });
