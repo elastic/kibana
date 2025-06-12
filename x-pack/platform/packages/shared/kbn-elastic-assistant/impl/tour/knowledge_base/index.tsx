@@ -25,6 +25,23 @@ export interface TourState {
   currentTourStep: number;
   isTourActive: boolean;
 }
+
+const navigateToKnowledgeBasePage = (
+  navigateToApp: ReturnType<typeof useAssistantContext>['navigateToApp'],
+  hasSearchAILakeConfigurations: boolean
+) => {
+  if (hasSearchAILakeConfigurations) {
+    return navigateToApp('securitySolutionUI', {
+      deepLinkId: SecurityPageName.configurationsAiSettings,
+      path: `?tab=${KNOWLEDGE_BASE_TAB}`,
+      openInNewTab: true,
+    });
+  }
+  return navigateToApp('management', {
+    path: `kibana/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}`,
+  });
+};
+
 const KnowledgeBaseTourComp: React.FC<{
   children?: EuiTourStepProps['children'];
   isKbSettingsPage?: boolean;
@@ -61,19 +78,15 @@ const KnowledgeBaseTourComp: React.FC<{
   );
   const { assistantAvailability } = useAssistantContext();
 
-  const navigateToKnowledgeBase = useCallback(() => {
-    if (assistantAvailability.hasSearchAILakeConfigurations) {
-      navigateToApp('securitySolutionUI', {
-        deepLinkId: SecurityPageName.configurationsAiSettings,
-        path: `?tab=${KNOWLEDGE_BASE_TAB}`,
-        openInNewTab: true,
-      });
-    } else {
-      navigateToApp('management', {
-        path: `kibana/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}`,
-      });
-    }
-  }, [assistantAvailability.hasSearchAILakeConfigurations, navigateToApp]);
+  const navigateToKnowledgeBase = useCallback(
+    () =>
+      navigateToKnowledgeBasePage(
+        navigateToApp,
+        assistantAvailability.hasSearchAILakeConfigurations
+      ),
+
+    [assistantAvailability.hasSearchAILakeConfigurations, navigateToApp]
+  );
 
   const nextStep = useCallback(() => {
     if (tourState?.currentTourStep === 1) {
