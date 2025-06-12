@@ -153,10 +153,8 @@ const enrichOperators = (
     const arePredicates =
       op.operator?.toLowerCase() === 'is null' || op.operator?.toLowerCase() === 'is not null';
 
-    const isInOperator = op.name === 'in' || op.name === 'not_in';
+    const isInOperator = op.name === 'in' || op.name === 'not in';
     const isLikeOperator = /like/i.test(op.name);
-    const isNotOperator =
-      op.name?.toLowerCase()?.startsWith('not_') && (isInOperator || isLikeOperator);
 
     let signatures = op.signatures.map((s) => ({
       ...s,
@@ -198,7 +196,7 @@ const enrichOperators = (
         signatures.push(...mathOperatorsExtraSignatures);
       }
     }
-    if (isInOperator || isLikeOperator || isNotOperator || arePredicates) {
+    if (isInOperator || isLikeOperator || arePredicates) {
       locationsAvailable = [
         Location.EVAL,
         Location.WHERE,
@@ -229,7 +227,6 @@ const enrichOperators = (
       locationsAvailable,
       type: FunctionDefinitionTypes.OPERATOR,
       validate: mathValidators[op.name],
-      ...(isNotOperator ? { ignoreAsSuggestion: true } : {}),
     };
   });
 };
@@ -282,9 +279,6 @@ function printGeneratedFunctionsFile(
       functionDefinition;
 
     let functionName = operator?.toLowerCase() ?? name.toLowerCase();
-    if (functionName.includes('not') && functionName !== 'is not null') {
-      functionName = name;
-    }
     if (name.toLowerCase() === 'match') {
       functionName = 'match';
     }
@@ -432,7 +426,6 @@ export const esqlFunctionNames = ${JSON.stringify(functionNames, null, 2)};
     }
 
     const functionDefinition = getFunctionDefinition(ESDefinition);
-    const isLikeOperator = functionDefinition.name.toLowerCase().includes('like');
     const arePredicates = functionDefinition.name.toLowerCase().includes('predicates');
     if (arePredicates) {
       continue;
@@ -446,10 +439,10 @@ export const esqlFunctionNames = ${JSON.stringify(functionNames, null, 2)};
       continue;
     }
 
-    if (functionDefinition.type === FunctionDefinitionTypes.OPERATOR || isLikeOperator) {
+    if (functionDefinition.type === FunctionDefinitionTypes.OPERATOR) {
       operatorDefinitions.push(functionDefinition);
     }
-    if (functionDefinition.type === FunctionDefinitionTypes.SCALAR && !isLikeOperator) {
+    if (functionDefinition.type === FunctionDefinitionTypes.SCALAR) {
       scalarFunctionDefinitions.push(functionDefinition);
     } else if (functionDefinition.type === FunctionDefinitionTypes.AGG) {
       aggFunctionDefinitions.push(functionDefinition);

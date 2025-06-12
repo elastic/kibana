@@ -1935,7 +1935,7 @@ const dateTruncDefinition: FunctionDefinition = {
       params: [
         {
           name: 'interval',
-          type: 'date_period',
+          type: 'time_duration',
           optional: false,
         },
         {
@@ -10674,6 +10674,7 @@ const stGeohexToStringDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.STATS_WHERE,
     Location.COMPLETION,
   ],
   validate: undefined,
