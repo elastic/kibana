@@ -57,14 +57,14 @@ export const getViewInAppUrl = ({
   } else if (searchConfigurationQuery) {
     query.query = searchConfigurationQuery;
   }
-  let dataViewSpecTest;
+  let dataViewSpec;
   if (searchConfiguration?.index && !isEmpty(searchConfiguration?.index)) {
-    dataViewSpecTest = searchConfiguration.index as DataViewSpec;
+    dataViewSpec = searchConfiguration.index as DataViewSpec;
   }
   return logsLocator.getRedirectUrl(
     {
       dataViewId,
-      dataViewSpec: dataViewSpecTest,
+      dataViewSpec,
       timeRange,
       query,
       filters: [...searchConfigurationFilters, ...groupFilters],
