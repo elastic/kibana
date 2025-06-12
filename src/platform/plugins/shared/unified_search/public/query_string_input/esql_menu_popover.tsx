@@ -92,13 +92,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
     return () => {
       cancelled = true;
     };
-  }, [
-    activeSolutionId,
-    http,
-    isLanguageComponentOpen,
-    queryForRecommendedQueries,
-    solutionsRecommendedQueries,
-  ]);
+  }, [activeSolutionId, http, queryForRecommendedQueries, solutionsRecommendedQueries]);
 
   const toggleLanguageComponent = useCallback(() => {
     setIsLanguageComponentOpen(!isLanguageComponentOpen);
