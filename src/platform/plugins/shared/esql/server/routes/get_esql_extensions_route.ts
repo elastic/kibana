@@ -12,7 +12,7 @@ import {
   KIBANA_PROJECTS as VALID_SOLUTION_IDS,
 } from '@kbn/projects-solutions-groups';
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
-import { type ResolveIndexResponse, REGISTRY_EXTENSIONS_ROUTE } from '@kbn/esql-types';
+import type { ResolveIndexResponse } from '@kbn/esql-types';
 import type { ESQLExtensionsRegistry } from '../extensions_registry';
 
 /**
@@ -39,7 +39,7 @@ export const registerESQLExtensionsRoute = (
 ) => {
   router.get(
     {
-      path: `${REGISTRY_EXTENSIONS_ROUTE}{solutionId}/{query}`,
+      path: '/internal/esql_registry/extensions/{solutionId}/{query}',
       security: {
         authz: {
           enabled: false,
