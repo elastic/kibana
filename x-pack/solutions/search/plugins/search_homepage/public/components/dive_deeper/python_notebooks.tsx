@@ -32,7 +32,11 @@ export const PythonNotebooks: React.FC = () => (
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <span>
-        <EuiButton data-test-subj="openNotebooksButton">
+        <EuiButton
+          href="https://www.elastic.co/search-labs/tutorials/examples"
+          target="_blank"
+          data-test-subj="openNotebooksButton"
+        >
           {i18n.translate('xpack.searchHomepage.pythonNotebooks.buttonText', {
             defaultMessage: 'Open notebooks',
           })}

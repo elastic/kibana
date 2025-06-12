@@ -95,7 +95,7 @@ export const ConnectToElasticsearchSidePanel = () => (
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiLink
-            href="https://www.elastic.co/contact/support"
+            href="https://www.elastic.co/contact/ce-help"
             target="_blank"
             data-test-subj="customerEngineerRequestFormLink"
           >

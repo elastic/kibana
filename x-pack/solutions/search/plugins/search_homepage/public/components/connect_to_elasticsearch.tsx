@@ -22,10 +22,15 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { ConnectToElasticsearchSidePanel } from './connect_to_elasticsearch_side_panel';
 import { AISearchCapabilities } from './ai_search_capabilities/ai_search_capabilities';
+import { useKibana } from '../hooks/use_kibana';
 
 const LOCALHOST_URL = 'http://localhost:9200/';
+const MANAGEMENT_API_KEYS = '/app/management/security/api_keys';
+const CREATE_API_KEY = '/app/management/security/api_keys/create';
 
 export const ConnectToElasticsearch = () => {
+  const { http } = useKibana().services;
+
   return (
     <>
       <EuiFlexGroup>
@@ -111,7 +116,12 @@ export const ConnectToElasticsearch = () => {
                     <EuiFlexItem grow={false}>
                       <EuiFlexGroup gutterSize="s" alignItems="baseline">
                         <EuiFlexItem grow={false}>
-                          <EuiButton iconType="key" data-test-subj="createApiKeyButton">
+                          <EuiButton
+                            href={http.basePath.prepend(CREATE_API_KEY)}
+                            target="_blank"
+                            iconType="key"
+                            data-test-subj="createApiKeyButton"
+                          >
                             {i18n.translate(
                               'xpack.searchHomepage.connectToElasticsearch.createApiKey',
                               {
@@ -121,7 +131,12 @@ export const ConnectToElasticsearch = () => {
                           </EuiButton>
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
-                          <EuiButtonEmpty iconType="gear" data-test-subj="manageApiKeysButton">
+                          <EuiButtonEmpty
+                            iconType="gear"
+                            href={http.basePath.prepend(MANAGEMENT_API_KEYS)}
+                            target="_blank"
+                            data-test-subj="manageApiKeysButton"
+                          >
                             Manage API keys
                           </EuiButtonEmpty>
                         </EuiFlexItem>

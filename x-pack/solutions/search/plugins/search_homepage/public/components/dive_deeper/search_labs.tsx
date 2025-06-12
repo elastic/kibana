@@ -31,7 +31,13 @@ export const SearchLabs: React.FC = () => (
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <span>
-        <EuiButton iconType={'popout'} iconSide="right" data-test-subj="searchLabsButton">
+        <EuiButton
+          iconType={'popout'}
+          href="https://www.elastic.co/search-labs/tutorials"
+          target="_blank"
+          iconSide="right"
+          data-test-subj="searchLabsButton"
+        >
           {i18n.translate('xpack.searchHomepage.searchLabs.buttonText', {
             defaultMessage: 'Visit Search Labs',
           })}
