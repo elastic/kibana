@@ -25,7 +25,7 @@ export const PatternCellRenderer: FC<Props> = ({ row, columnId, isDetails }) => 
 
   const keywordStyle = {
     marginRight: euiTheme.size.xs,
-    marginBottom: euiTheme.size.xs,
+    marginBottom: '6px', // find a suitable eui variable for this
     display: 'inline-block',
     padding: `${euiTheme.size.xxs} ${euiTheme.size.s}`,
     backgroundColor: euiTheme.colors.lightestShade,
