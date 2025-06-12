@@ -24,7 +24,7 @@ import {
   NOOP_PROVIDER,
 } from '@openfeature/server-sdk';
 import deepMerge from 'deepmerge';
-import { filter, switchMap, startWith, Subject, BehaviorSubject, pairwise } from 'rxjs';
+import { filter, switchMap, startWith, Subject, BehaviorSubject, pairwise, takeUntil } from 'rxjs';
 import { get } from 'lodash';
 import { createOpenFeatureLogger } from './create_open_feature_logger';
 import { setProviderWithRetries } from './set_provider_with_retries';
@@ -48,6 +48,7 @@ export interface InternalFeatureFlagsSetup extends FeatureFlagsSetup {
 export class FeatureFlagsService {
   private readonly featureFlagsClient: Client;
   private readonly logger: Logger;
+  private readonly stop$ = new Subject<void>();
   private readonly overrides$ = new BehaviorSubject<Record<string, unknown>>({});
   private context: MultiContextEvaluationContext = { kind: 'multi' };
 
@@ -107,7 +108,8 @@ export class FeatureFlagsService {
     const observeFeatureFlag$ = (flagName: string) =>
       featureFlagsChanged$.pipe(
         filter((flagNames) => flagNames.includes(flagName)),
-        startWith([flagName]) // only to emit on the first call
+        startWith([flagName]), // only to emit on the first call
+        takeUntil(this.stop$) // stop the observable when the service stops
       );
 
     return {
@@ -164,6 +166,8 @@ export class FeatureFlagsService {
   public async stop() {
     await OpenFeature.close();
     this.overrides$.complete();
+    this.stop$.next();
+    this.stop$.complete();
   }
 
   /**
