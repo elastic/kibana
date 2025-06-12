@@ -13,7 +13,6 @@ import { omit } from 'lodash';
 import {
   ChatActionClickPayload,
   ChatState,
-  KnowledgeBaseState,
   type Feedback,
   type Message,
   type ObservabilityAIAssistantChatService,
@@ -21,7 +20,6 @@ import {
   aiAssistantAnonymizationRules,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { AnonymizationRule } from '@kbn/observability-ai-assistant-plugin/common';
-import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import { ChatItem } from './chat_item';
 import { ChatConsolidatedItems } from './chat_consolidated_items';
 import { getTimelineItemsfromConversation } from '../utils/get_timeline_items_from_conversation';
@@ -55,7 +53,6 @@ export interface ChatTimelineItem
 export interface ChatTimelineProps {
   conversationId?: string;
   messages: Message[];
-  knowledgeBase: UseKnowledgeBaseResult;
   chatService: ObservabilityAIAssistantChatService;
   hasConnector: boolean;
   chatState: ChatState;
@@ -63,6 +60,7 @@ export interface ChatTimelineProps {
   isArchived: boolean;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   showElasticLlmCalloutInChat: boolean;
+  showKnowledgeBaseReIndexingCallout: boolean;
   onEdit: (message: Message, messageAfterEdit: Message) => void;
   onFeedback: (feedback: Feedback) => void;
   onRegenerate: (message: Message) => void;
@@ -115,7 +113,7 @@ export function ChatTimeline({
   isConversationOwnedByCurrentUser,
   isArchived,
   showElasticLlmCalloutInChat,
-  knowledgeBase,
+  showKnowledgeBaseReIndexingCallout,
   onEdit,
   onFeedback,
   onRegenerate,
@@ -205,10 +203,6 @@ export function ChatTimeline({
     anonymizationEnabled,
   ]);
 
-  const showKnowledgeBaseReIndexingCallout =
-    knowledgeBase.status.value?.enabled &&
-    knowledgeBase.status.value?.kbState === KnowledgeBaseState.READY &&
-    knowledgeBase.status.value?.isReIndexing;
   return (
     <EuiCommentList className={euiCommentListClassName}>
       <div className={stickyCalloutContainerClassName}>

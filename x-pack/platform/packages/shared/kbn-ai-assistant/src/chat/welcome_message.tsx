@@ -12,7 +12,6 @@ import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { GenerativeAIForObservabilityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { isSupportedConnectorType } from '@kbn/inference-common';
 import { AssistantBeacon } from '@kbn/ai-assistant-icon';
-import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { Disclaimer } from './disclaimer';
@@ -36,11 +35,13 @@ export function WelcomeMessage({
   connectors,
   knowledgeBase,
   showElasticLlmCalloutInChat,
+  showKnowledgeBaseReIndexingCallout,
   onSelectPrompt,
 }: {
   connectors: UseGenAIConnectorsResult;
   knowledgeBase: UseKnowledgeBaseResult;
   showElasticLlmCalloutInChat: boolean;
+  showKnowledgeBaseReIndexingCallout: boolean;
   onSelectPrompt: (prompt: string) => void;
 }) {
   const breakpoint = useCurrentEuiBreakpoint();
@@ -71,11 +72,6 @@ export function WelcomeMessage({
     () => triggersActionsUi.getAddConnectorFlyout,
     [triggersActionsUi]
   );
-
-  const showKnowledgeBaseReIndexingCallout =
-    knowledgeBase.status.value?.enabled &&
-    knowledgeBase.status.value?.kbState === KnowledgeBaseState.READY &&
-    knowledgeBase.status.value?.isReIndexing;
 
   return (
     <>
