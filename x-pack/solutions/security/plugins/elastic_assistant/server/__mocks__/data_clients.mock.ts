@@ -47,6 +47,7 @@ export const conversationsDataClientMock: {
 const createAttackDiscoveryDataClientMock = (): AttackDiscoveryDataClientMock => ({
   bulkUpdateAttackDiscoveryAlerts: jest.fn(),
   createAttackDiscovery: jest.fn(),
+  getScheduledAndAdHocIndexPattern: jest.fn(),
   createAttackDiscoveryAlerts: jest.fn(),
   findAllAttackDiscoveries: jest.fn(),
   getAlertConnectorNames: jest.fn(),
