@@ -41,7 +41,12 @@ import { buildResponse } from '../../lib/build_response';
 import { AssistantDataClients } from '../../lib/langchain/executors/types';
 import { AssistantToolParams, ElasticAssistantRequestHandlerContext } from '../../types';
 import { DEFAULT_PLUGIN_NAME, performChecks } from '../helpers';
-import { fetchLangSmithDataset } from './utils';
+import {
+  createOrUpdateEvaluationResults,
+  EvaluationStatus,
+  fetchLangSmithDataset,
+  setupEvaluationIndex,
+} from './utils';
 import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
 import { evaluateAttackDiscovery } from '../../lib/attack_discovery/evaluation';
@@ -158,6 +163,15 @@ export const postEvaluateRoute = (
           // Setup graph params
           // Get a scoped esClient for esStore + writing results to the output index
           const esClient = ctx.core.elasticsearch.client.asCurrentUser;
+          const esClientInternalUser = ctx.core.elasticsearch.client.asInternalUser;
+
+          // Create output index for writing results and write current eval as RUNNING
+          await setupEvaluationIndex({ esClientInternalUser, logger });
+          await createOrUpdateEvaluationResults({
+            evaluationResults: [{ id: evaluationId, status: EvaluationStatus.RUNNING }],
+            esClientInternalUser,
+            logger,
+          });
 
           const inference = ctx.elasticAssistant.inference;
           const productDocsAvailable =
@@ -223,6 +237,7 @@ export const postEvaluateRoute = (
                 connectorTimeout: RESPONSE_TIMEOUT,
                 datasetName,
                 esClient,
+                esClientInternalUser,
                 evaluationId,
                 evaluatorConnectorId,
                 langSmithApiKey,
@@ -267,6 +282,7 @@ export const postEvaluateRoute = (
                 connectorTimeout: ROUTE_HANDLER_TIMEOUT,
                 datasetName,
                 esClient,
+                esClientInternalUser,
                 evaluationId,
                 evaluatorConnectorId,
                 langSmithApiKey,
@@ -499,6 +515,11 @@ export const postEvaluateRoute = (
               maxConcurrency: 3,
             })
               .then((output) => {
+                void createOrUpdateEvaluationResults({
+                  evaluationResults: [{ id: evaluationId, status: EvaluationStatus.COMPLETE }],
+                  esClientInternalUser,
+                  logger,
+                });
                 logger.debug(`runResp:\n ${JSON.stringify(output, null, 2)}`);
               })
               .catch((err) => {
