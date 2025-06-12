@@ -39855,13 +39855,29 @@ paths:
                         updated_at:
                           type: string
                         warning:
-                          type: string
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            message:
+                              type: string
+                            title:
+                              type: string
+                          required:
+                            - title
                       required:
                         - sync_status
                         - install_status
                     type: array
                   warning:
-                    type: string
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                      title:
+                        type: string
+                    required:
+                      - title
                 required:
                   - integrations
         '400':
@@ -39966,13 +39982,29 @@ paths:
                         updated_at:
                           type: string
                         warning:
-                          type: string
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            message:
+                              type: string
+                            title:
+                              type: string
+                          required:
+                            - title
                       required:
                         - sync_status
                         - install_status
                     type: array
                   warning:
-                    type: string
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                      title:
+                        type: string
+                    required:
+                      - title
                 required:
                   - integrations
         '400':
