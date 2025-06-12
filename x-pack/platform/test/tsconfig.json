@@ -83,5 +83,10 @@
     "@kbn/task-manager-plugin",
     "@kbn/alerting-state-types",
     "@kbn/std",
+    "@kbn/saved-objects-management-plugin",
+    "@kbn/repo-info",
+    "@kbn/es",
+    "@kbn/mock-idp-utils",
+    "@kbn/test-suites-xpack",
   ]
 }
