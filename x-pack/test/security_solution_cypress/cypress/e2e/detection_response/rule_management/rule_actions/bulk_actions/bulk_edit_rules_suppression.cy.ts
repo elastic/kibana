@@ -97,7 +97,7 @@ describe(
 
           confirmBulkEditAction();
 
-          cy.get(RULES_BULK_EDIT_FORM_TITLE).should('have.text', 'Set alert suppression');
+          cy.get(RULES_BULK_EDIT_FORM_TITLE).should('have.text', 'Apply alert suppression');
 
           fillAlertSuppressionFields(['source.ip']);
           selectAlertSuppressionPerInterval();
@@ -134,7 +134,7 @@ describe(
 
           cy.get(RULES_BULK_EDIT_FORM_TITLE).should(
             'have.text',
-            'Set alert suppression for threshold rule types only'
+            'Apply alert suppression to threshold rules'
           );
 
           setAlertSuppressionDuration(50, 'm');
@@ -184,7 +184,7 @@ describe(
           clickDeleteAlertSuppressionMenuItem();
 
           cy.get(MODAL_CONFIRMATION_BODY).contains(
-            `This action will try to delete alert suppression in 7 rules. Click "Delete" to continue.`
+            `This action will remove alert suppression from 7 rules. Click Delete to continue.`
           );
 
           confirmBulkEditAction();
