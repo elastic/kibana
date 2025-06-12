@@ -79,7 +79,7 @@ export const CreateRulesetModal = ({ onClose }: CreateRulesetModalProps) => {
           <EuiFormRow
             fullWidth
             label={i18n.translate('xpack.queryRules.createRulesetModal.nameLabel', {
-              defaultMessage: 'Ruleset ID',
+              defaultMessage: 'Ruleset Name',
             })}
             helpText={
               !!rawName && !conflictError

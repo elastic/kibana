@@ -7,6 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
+import { QUERY_RULES_QUERY_RULESET_EXISTS_KEY } from '../../common/constants';
 import { useKibana } from './use_kibana';
 
 export const useFetchQueryRulesetExist = (
@@ -19,7 +20,7 @@ export const useFetchQueryRulesetExist = (
   } = useKibana();
 
   return useQuery<boolean, { body: KibanaServerError }>({
-    queryKey: ['QUERY_RULES_QUERY_RULESET_EXISTS', rulesetId],
+    queryKey: [QUERY_RULES_QUERY_RULESET_EXISTS_KEY, rulesetId],
     queryFn: async () => {
       const { exists } = await http.get<{ exists: boolean }>(
         `/internal/search_query_rules/ruleset/${rulesetId}/exists`

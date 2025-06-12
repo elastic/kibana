@@ -33,16 +33,16 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Controller, useFieldArray, useFormContext, useWatch } from 'react-hook-form';
-import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
 import { useFetchIndexNames } from '../../../hooks/use_fetch_index_names';
+import { useKibana } from '../../../hooks/use_kibana';
 import { QueryRuleEditorForm, SearchQueryRulesQueryRule } from '../../../types';
-import { DocumentSelector } from './document_selector/document_selector';
 import { isCriteriaAlways } from '../../../utils/query_rules_utils';
 import { QueryRuleFlyoutBody, QueryRuleFlyoutPanel } from '../styles';
+import { DocumentSelector } from './document_selector/document_selector';
 import { QueryRuleMetadataEditor } from './query_rule_metadata_editor';
-import { useKibana } from '../../../hooks/use_kibana';
 
 export interface QueryRuleFlyoutProps {
   rules: SearchQueryRulesQueryRule[];
@@ -51,6 +51,7 @@ export interface QueryRuleFlyoutProps {
   ruleId: string;
   rulesetId: string;
   setIsFormDirty?: (isDirty: boolean) => void;
+  createMode?: boolean;
 }
 
 export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
@@ -60,10 +61,12 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
   ruleId,
   rulesetId,
   setIsFormDirty,
+  createMode = false,
 }) => {
   const {
     services: { application },
   } = useKibana();
+
   const [isFlyoutDirty, setIsFlyoutDirty] = useState<boolean>(false);
   const { control, getValues, reset, setValue } = useFormContext<QueryRuleEditorForm>();
   const { fields, remove, replace, update, append } = useFieldArray({
@@ -115,6 +118,34 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
       );
     }
   }, [ruleFromRuleset, reset, getValues, rulesetId, ruleId]);
+
+  useEffect(() => {
+    if (createMode) {
+      reset({
+        criteria: [
+          {
+            type: 'exact',
+            metadata: '',
+            values: [],
+          },
+        ],
+        type: 'pinned',
+        actions: {
+          docs: [
+            {
+              _id: '',
+              _index: '',
+            },
+          ],
+          ids: [],
+        },
+        mode: 'create',
+        ruleId,
+      });
+      setIsAlways(false);
+    }
+  }, [createMode, reset, ruleId]);
+
   const handleAddCriteria = () => {
     setIsFlyoutDirty(true);
     append({
@@ -143,9 +174,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
       if (isAlways) {
         replace([
           {
-            metadata: 'always',
             type: 'always',
-            values: ['always'],
           },
         ]);
       }
@@ -162,18 +191,43 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
       }
       const updatedRule = {
         rule_id: ruleId,
-        criteria: fields.map((criteria) => {
-          const normalizedCriteria = {
-            values: criteria.values,
-            metadata: criteria.metadata,
-            type: criteria.type,
-          };
-          return normalizedCriteria;
-        }),
+        criteria: isAlways
+          ? [{ type: 'always' } as QueryRuleEditorForm['criteria'][0]]
+          : fields.map((criteria) => {
+              const normalizedCriteria = {
+                values: criteria.values,
+                metadata: criteria.metadata,
+                type: criteria.type,
+              };
+              return normalizedCriteria;
+            }),
         type: getValues('type'),
         actions,
       };
       onSave(updatedRule);
+    } else {
+      onSave({
+        rule_id: ruleId,
+        criteria: isAlways
+          ? [{ type: 'always' }]
+          : fields.map((criteria) => {
+              const normalizedCriteria = {
+                values: criteria.values,
+                metadata: criteria.metadata,
+                type: criteria.type,
+              };
+              return normalizedCriteria;
+            }),
+        type: getValues('type'),
+        actions: isDocRule
+          ? {
+              docs: actionFields.map((doc) => ({
+                _id: doc._id,
+                _index: doc._index,
+              })),
+            }
+          : { ids: actionIdsFields },
+      });
     }
   };
   const CRITERIA_CALLOUT_STORAGE_KEY = 'queryRules.criteriaCalloutState';
@@ -213,10 +267,17 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
           <EuiFlexItem>
             <EuiTitle size="m" id="flyoutTitle">
               <h2>
-                <FormattedMessage
-                  id="xpack.search.queryRulesetDetail.queryRuleFlyoutTitle.edit"
-                  defaultMessage="Edit rule"
-                />
+                {createMode ? (
+                  <FormattedMessage
+                    id="xpack.search.queryRulesetDetail.queryRuleFlyoutTitle.create"
+                    defaultMessage="Create rule"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.search.queryRulesetDetail.queryRuleFlyoutTitle.edit"
+                    defaultMessage="Edit rule"
+                  />
+                )}
               </h2>
             </EuiTitle>
           </EuiFlexItem>
@@ -373,7 +434,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               >
                 <EuiDragDropContext
                   onDragEnd={({ source, destination }) => {
-                    if (source && destination && ruleFromRuleset) {
+                    if (source && destination && (ruleFromRuleset || createMode)) {
                       setIsFlyoutDirty(true);
                       if (isDocRule) {
                         const newActions = euiDragDropReorder(
@@ -454,7 +515,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                                   removeAction(index);
                                 }}
                                 onIndexSelectorChange={(indexName) => {
-                                  if (ruleFromRuleset) {
+                                  if (ruleFromRuleset || createMode) {
                                     setIsFlyoutDirty(true);
                                     const updatedActions = actionFields.map((action, i) =>
                                       i === index ? { ...action, _index: indexName } : action
@@ -463,7 +524,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                                   }
                                 }}
                                 onIdSelectorChange={(id) => {
-                                  if (ruleFromRuleset) {
+                                  if (ruleFromRuleset || createMode) {
                                     setIsFlyoutDirty(true);
                                     const updatedActions = actionFields.map((action, i) =>
                                       i === index ? { ...action, _id: id } : action
@@ -607,7 +668,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                   <EuiSpacer size="m" />
                 </>
               ) : null}
-              {ruleFromRuleset &&
+              {(createMode || ruleFromRuleset) &&
                 !isAlways &&
                 fields.map((field, index) => (
                   <React.Fragment key={field.id}>
@@ -627,7 +688,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                   </React.Fragment>
                 ))}
 
-              {ruleFromRuleset && !isAlways && (
+              {(createMode || ruleFromRuleset) && !isAlways && (
                 <EuiButton
                   data-test-subj="searchQueryRulesQueryRuleMetadataEditorAddCriteriaButton"
                   onClick={handleAddCriteria}
@@ -667,10 +728,17 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               onClick={handleSave}
               disabled={!isFlyoutDirty}
             >
-              <FormattedMessage
-                id="xpack.search.queryRulesetDetail.queryRuleFlyout.updateButton"
-                defaultMessage="Update rule"
-              />
+              {createMode ? (
+                <FormattedMessage
+                  id="xpack.search.queryRulesetDetail.queryRuleFlyout.createButton"
+                  defaultMessage="Create rule"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.search.queryRulesetDetail.queryRuleFlyout.updateButton"
+                  defaultMessage="Update rule"
+                />
+              )}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

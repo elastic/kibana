@@ -34,12 +34,12 @@ export const useQueryRulesetDetailState = ({
   const [rules, setRules] = useState<SearchQueryRulesQueryRule[]>([]);
 
   useEffect(() => {
-    if (!createMode && data) {
+    if (!createMode && !isError && data) {
       const normalizedRuleset = normalizeQueryRuleset(data);
       setQueryRuleset(normalizedRuleset);
       setRules(normalizedRuleset.rules);
     }
-  }, [data, setRules, setQueryRuleset, createMode]);
+  }, [data, setRules, setQueryRuleset, createMode, isError]);
 
   const updateRule = (updatedRule: SearchQueryRulesQueryRule) => {
     const newRules = rules.map((rule) =>
@@ -47,16 +47,12 @@ export const useQueryRulesetDetailState = ({
     );
     setRules([...newRules]);
   };
-  const addNewRule = (newRuleId: string) => {
+
+  const addNewRule = (newRule: SearchQueryRulesQueryRule) => {
     setRules((prevRules) => [
       ...prevRules,
       {
-        rule_id: newRuleId,
-        criteria: [],
-        type: 'pinned',
-        actions: {
-          docs: [],
-        },
+        ...newRule,
       },
     ]);
   };
