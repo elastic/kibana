@@ -16,7 +16,6 @@ import {
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   fields as TECHNICAL_ALERT_FIELDS,
 } from '@kbn/rule-data-utils';
-import { ThresholdParams } from '../../common/custom_threshold_rule/types';
 
 export class AlertData {
   constructor(private alert: Awaited<ReturnType<AlertsClient['get']>>) {}
@@ -37,7 +36,7 @@ export class AlertData {
     }
     switch (this.getRuleTypeId()) {
       case OBSERVABILITY_THRESHOLD_RULE_TYPE_ID:
-        const customThresholdParams = ruleParameters as ThresholdParams;
+        const customThresholdParams = ruleParameters as CustomThresholdParams;
         const metrics = customThresholdParams.criteria[0].metrics;
         metrics.forEach((metric) => {
           if (metric.field) {
