@@ -51,7 +51,7 @@ interface CascadeRowProps<T extends DocWithId> {
   virtualRow: VirtualItem;
 }
 
-function CascadeRow<T>({
+function CascadeRow<T extends DocWithId>({
   populateRowDataFn,
   rowInstance,
   virtualRow,
@@ -93,6 +93,14 @@ function CascadeRow<T>({
               paddingTop: 0,
               paddingBottom: 0,
             }),
+        '&[data-row-type="root"]:first-of-type': {
+          borderTopLeftRadius: euiTheme.border.radius.small,
+          borderTopRightRadius: euiTheme.border.radius.small,
+        },
+        '&[data-row-type="root"]:last-of-type': {
+          borderBottomLeftRadius: euiTheme.border.radius.small,
+          borderBottomRightRadius: euiTheme.border.radius.small,
+        },
       }}
     >
       <EuiFlexGroup
@@ -113,8 +121,14 @@ function CascadeRow<T>({
                 backgroundColor: euiTheme.colors.backgroundBasePlain,
               }
             : {}),
+          '[data-row-type="root"] + [data-row-type="sub-group"] &': {
+            borderTopLeftRadius: euiTheme.border.radius.small,
+            borderTopRightRadius: euiTheme.border.radius.small,
+          },
           '[data-row-type="sub-group"]:has(+ [data-row-type="root"]) &': {
             marginBottom: euiTheme.size.s,
+            borderBottomLeftRadius: euiTheme.border.radius.small,
+            borderBottomRightRadius: euiTheme.border.radius.small,
             borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
           },
         }}

@@ -49,6 +49,7 @@ export function DataCascadeProvider<T extends DocWithId>({
   const createInitialState = useCallback(
     (state: IStoreContext<T>['state']) => {
       if (query !== state.currentQueryString) {
+        // TODO: Eyo - move this logic out of the provider so the component itself becomes even more generic
         const columns = getStatsGroupByColumnsFromQuery(query);
         return {
           ...state,

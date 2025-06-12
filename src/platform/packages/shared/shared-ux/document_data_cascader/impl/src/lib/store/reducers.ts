@@ -29,7 +29,7 @@ export type IDispatchAction =
     }
   | {
       type: Extract<DispatchActionType, 'EMPTY_GROUP_BY_COLUMN_SELECTION'>;
-      payload?: never;
+      payload?: string;
     }
   | {
       type: Extract<DispatchActionType, 'UPDATE_ROW_DATA'>;
