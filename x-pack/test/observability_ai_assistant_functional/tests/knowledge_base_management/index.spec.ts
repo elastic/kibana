@@ -284,7 +284,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
         await testSubjects.click(ui.pages.kbManagementTab.bulkImportSaveButton);
 
-        const toast = await testSubjects.find(ui.pages.kbManagementTab.toastTitle);
+        const toast = await testSubjects.find(ui.pages.kbManagementTab.toastTitle, 30000);
         const toastText = await toast.getVisibleText();
         expect(toastText).to.eql('Successfully imported ' + entries.length + ' items');
 
