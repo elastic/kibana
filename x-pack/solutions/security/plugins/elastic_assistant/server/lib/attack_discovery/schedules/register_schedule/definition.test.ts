@@ -6,6 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import { analyticsServiceMock } from '@kbn/core/server/mocks';
 import {
   ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
   AttackDiscoveryScheduleParams,
@@ -16,18 +17,23 @@ import { ATTACK_DISCOVERY_ALERTS_AAD_CONFIG } from '../constants';
 
 describe('getAttackDiscoveryScheduleType', () => {
   const mockLogger = loggerMock.create();
+  const mockTelemetry = analyticsServiceMock.createAnalyticsServiceSetup();
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('should return schedule type definition', async () => {
-    const scheduleType = getAttackDiscoveryScheduleType({ logger: mockLogger });
+    const scheduleType = getAttackDiscoveryScheduleType({
+      logger: mockLogger,
+      publicBaseUrl: undefined,
+      telemetry: mockTelemetry,
+    });
 
     expect(scheduleType).toEqual({
       id: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
       name: 'Attack Discovery Schedule',
-      ruleTaskTimeout: '30m',
+      ruleTaskTimeout: '10m',
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
       category: 'securitySolution',

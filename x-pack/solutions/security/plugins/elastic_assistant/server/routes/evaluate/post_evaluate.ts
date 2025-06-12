@@ -29,19 +29,24 @@ import { getDefaultArguments } from '@kbn/langchain/server';
 import { StructuredTool } from '@langchain/core/tools';
 import { AgentFinish } from 'langchain/agents';
 import { omit } from 'lodash/fp';
-import { getDefendInsightsPrompt } from '../../lib/defend_insights/graphs/default_defend_insights_graph/nodes/helpers/prompts';
+import { getDefendInsightsPrompt } from '../../lib/defend_insights/graphs/default_defend_insights_graph/prompts';
 import { evaluateDefendInsights } from '../../lib/defend_insights/evaluation';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../lib/prompt/tool_prompts';
 import { promptGroupId } from '../../lib/prompt/local_prompt_object';
 import { getFormattedTime, getModelOrOss } from '../../lib/prompt/helpers';
-import { getAttackDiscoveryPrompts } from '../../lib/attack_discovery/graphs/default_attack_discovery_graph/nodes/helpers/prompts';
+import { getAttackDiscoveryPrompts } from '../../lib/attack_discovery/graphs/default_attack_discovery_graph/prompts';
 import { formatPrompt } from '../../lib/langchain/graphs/default_assistant_graph/prompts';
 import { getPrompt as localGetPrompt, promptDictionary } from '../../lib/prompt';
 import { buildResponse } from '../../lib/build_response';
 import { AssistantDataClients } from '../../lib/langchain/executors/types';
 import { AssistantToolParams, ElasticAssistantRequestHandlerContext } from '../../types';
 import { DEFAULT_PLUGIN_NAME, performChecks } from '../helpers';
-import { fetchLangSmithDataset } from './utils';
+import {
+  createOrUpdateEvaluationResults,
+  EvaluationStatus,
+  fetchLangSmithDataset,
+  setupEvaluationIndex,
+} from './utils';
 import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
 import { evaluateAttackDiscovery } from '../../lib/attack_discovery/evaluation';
@@ -158,6 +163,15 @@ export const postEvaluateRoute = (
           // Setup graph params
           // Get a scoped esClient for esStore + writing results to the output index
           const esClient = ctx.core.elasticsearch.client.asCurrentUser;
+          const esClientInternalUser = ctx.core.elasticsearch.client.asInternalUser;
+
+          // Create output index for writing results and write current eval as RUNNING
+          await setupEvaluationIndex({ esClientInternalUser, logger });
+          await createOrUpdateEvaluationResults({
+            evaluationResults: [{ id: evaluationId, status: EvaluationStatus.RUNNING }],
+            esClientInternalUser,
+            logger,
+          });
 
           const inference = ctx.elasticAssistant.inference;
           const productDocsAvailable =
@@ -223,6 +237,7 @@ export const postEvaluateRoute = (
                 connectorTimeout: RESPONSE_TIMEOUT,
                 datasetName,
                 esClient,
+                esClientInternalUser,
                 evaluationId,
                 evaluatorConnectorId,
                 langSmithApiKey,
@@ -267,6 +282,7 @@ export const postEvaluateRoute = (
                 connectorTimeout: ROUTE_HANDLER_TIMEOUT,
                 datasetName,
                 esClient,
+                esClientInternalUser,
                 evaluationId,
                 evaluatorConnectorId,
                 langSmithApiKey,
@@ -445,6 +461,14 @@ export const postEvaluateRoute = (
                   logger,
                   actionsClient,
                   savedObjectsClient,
+                  telemetry: ctx.elasticAssistant.telemetry,
+                  telemetryParams: {
+                    assistantStreamingEnabled: false,
+                    actionTypeId: connector.actionTypeId,
+                    model: connector.config?.defaultModel,
+                    isEnabledKnowledgeBase,
+                    eventType: 'unused but required', // stub value
+                  },
                   tools,
                   replacements: {},
                   getFormattedTime: () =>
@@ -491,6 +515,11 @@ export const postEvaluateRoute = (
               maxConcurrency: 3,
             })
               .then((output) => {
+                void createOrUpdateEvaluationResults({
+                  evaluationResults: [{ id: evaluationId, status: EvaluationStatus.COMPLETE }],
+                  esClientInternalUser,
+                  logger,
+                });
                 logger.debug(`runResp:\n ${JSON.stringify(output, null, 2)}`);
               })
               .catch((err) => {

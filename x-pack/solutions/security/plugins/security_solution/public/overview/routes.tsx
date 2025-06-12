@@ -49,34 +49,24 @@ const DataQualityRoutes = () => (
 export const routes: SecuritySubPluginRoutes = [
   {
     path: OVERVIEW_PATH,
-    component: withSecurityRoutePageWrapper(OverviewRoutes, SecurityPageName.overview, {
-      redirectOnMissing: true,
-    }),
+    component: withSecurityRoutePageWrapper(OverviewRoutes, SecurityPageName.overview),
   },
   {
     path: DETECTION_RESPONSE_PATH,
     component: withSecurityRoutePageWrapper(
       DetectionResponseRoutes,
-      SecurityPageName.detectionAndResponse,
-      {
-        redirectOnMissing: true,
-      }
+      SecurityPageName.detectionAndResponse
     ),
   },
   {
     path: ENTITY_ANALYTICS_PATH,
     component: withSecurityRoutePageWrapper(
       EntityAnalyticsRoutes,
-      SecurityPageName.entityAnalytics,
-      {
-        redirectOnMissing: true,
-      }
+      SecurityPageName.entityAnalytics
     ),
   },
   {
     path: DATA_QUALITY_PATH,
-    component: withSecurityRoutePageWrapper(DataQualityRoutes, SecurityPageName.dataQuality, {
-      redirectOnMissing: true,
-    }),
+    component: withSecurityRoutePageWrapper(DataQualityRoutes, SecurityPageName.dataQuality),
   },
 ];

@@ -1306,6 +1306,23 @@
         "children": [
           {
             "parentPluginId": "alerting",
+            "id": "def-server.AlertingApiRequestHandlerContext.getAlertDeletionClient",
+            "type": "Function",
+            "tags": [],
+            "label": "getAlertDeletionClient",
+            "description": [],
+            "signature": [
+              "() => ",
+              "AlertDeletionClient"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-server.AlertingApiRequestHandlerContext.getRulesClient",
             "type": "Function",
             "tags": [],
@@ -10156,6 +10173,21 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.ALL_ALERT_DELETE_SETTINGS_SUB_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ALL_ALERT_DELETE_SETTINGS_SUB_FEATURE_ID",
+        "description": [],
+        "signature": [
+          "\"allAlertDeleteSettings\""
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting/common/rules_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.ALL_FLAPPING_SETTINGS_SUB_FEATURE_ID",
         "type": "string",
         "tags": [],
@@ -11161,6 +11193,21 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.READ_ALERT_DELETE_SETTINGS_SUB_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "READ_ALERT_DELETE_SETTINGS_SUB_FEATURE_ID",
+        "description": [],
+        "signature": [
+          "\"readAlertDeleteSettings\""
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting/common/rules_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.READ_FLAPPING_SETTINGS_SUB_FEATURE_ID",
         "type": "string",
         "tags": [],
@@ -11330,7 +11377,16 @@
             "docId": "kibKbnAlertingTypesPluginApi",
             "section": "def-common.AlertsFilterTimeframe",
             "text": "AlertsFilterTimeframe"
-          }
+          },
+          " | { kql: string; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; dsl?: string | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/rule.ts",
         "deprecated": false,
@@ -13970,6 +14026,28 @@
             "type": "string",
             "tags": [],
             "label": "WRITE_QUERY_DELAY_SETTINGS",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/alerting/common/rules_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.API_PRIVILEGES.READ_ALERT_DELETE_SETTINGS",
+            "type": "string",
+            "tags": [],
+            "label": "READ_ALERT_DELETE_SETTINGS",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/alerting/common/rules_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.API_PRIVILEGES.WRITE_ALERT_DELETE_SETTINGS",
+            "type": "string",
+            "tags": [],
+            "label": "WRITE_ALERT_DELETE_SETTINGS",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting/common/rules_settings.ts",
             "deprecated": false,

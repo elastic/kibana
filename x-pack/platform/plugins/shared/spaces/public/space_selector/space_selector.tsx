@@ -27,7 +27,6 @@ import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -272,15 +271,10 @@ export class SpaceSelector extends Component<Props, State> {
 }
 
 export const renderSpaceSelectorApp = (
-  services: Pick<CoreStart, 'analytics' | 'i18n' | 'theme' | 'userProfile'>,
+  services: Pick<CoreStart, 'analytics' | 'i18n' | 'theme' | 'userProfile' | 'rendering'>,
   { element }: Pick<AppMountParameters, 'element'>,
   props: Props
 ) => {
-  ReactDOM.render(
-    <KibanaRenderContextProvider {...services}>
-      <SpaceSelector {...props} />
-    </KibanaRenderContextProvider>,
-    element
-  );
+  ReactDOM.render(services.rendering.addContext(<SpaceSelector {...props} />), element);
   return () => ReactDOM.unmountComponentAtNode(element);
 };

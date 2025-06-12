@@ -28,6 +28,7 @@ import {
   ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS,
   ACTION_CONVERT_TO_LENS,
   DASHBOARD_VISUALIZATION_PANEL_TRIGGER,
+  ACTION_CONVERT_AGG_BASED_TO_LENS,
   VisualizationsSetup,
   VisualizationsStart,
 } from '@kbn/visualizations-plugin/public';
@@ -69,6 +70,8 @@ import { i18n } from '@kbn/i18n';
 import type { ChartType } from '@kbn/visualization-utils';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -129,7 +132,6 @@ import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
 import type { SaveModalContainerProps } from './app_plugin/save_modal_container';
 
 import { setupExpressions } from './expressions';
-import { getSearchProvider } from './search_provider';
 import { OpenInDiscoverDrilldown } from './trigger_actions/open_in_discover_drilldown';
 import { ChartInfoApi } from './chart_info_api';
 import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator/locator';
@@ -191,6 +193,7 @@ export interface LensPluginStartDependencies {
   serverless?: ServerlessPluginStart;
   licensing?: LicensingPluginStart;
   embeddableEnhanced?: EmbeddableEnhancedPluginStart;
+  fieldsMetadata?: FieldsMetadataPublicStart;
 }
 
 export interface LensPublicSetup {
@@ -399,15 +402,18 @@ export class LensPlugin {
       // Let Dashboard know about the Lens panel type
       embeddable.registerAddFromLibraryType<LensSavedObjectAttributes>({
         onAdd: async (container, savedObject) => {
-          container.addNewPanel({
-            panelType: LENS_EMBEDDABLE_TYPE,
-            serializedState: {
-              rawState: {
-                savedObjectId: savedObject.id,
+          container.addNewPanel(
+            {
+              panelType: LENS_EMBEDDABLE_TYPE,
+              serializedState: {
+                rawState: {
+                  savedObjectId: savedObject.id,
+                },
+                references: savedObject.references,
               },
-              references: savedObject.references,
             },
-          });
+            true
+          );
         },
         savedObjectType: LENS_EMBEDDABLE_TYPE,
         savedObjectName: i18n.translate('xpack.lens.mapSavedObjectLabel', {
@@ -473,7 +479,9 @@ export class LensPlugin {
     core.application.register({
       id: APP_ID,
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
-      visibleIn: [],
+      visibleIn: ['globalSearch'],
+      category: DEFAULT_APP_CATEGORIES.kibana,
+      euiIconType: 'logoKibana',
       mount: async (params: AppMountParameters) => {
         const { core: coreStart, plugins: deps } = startServices();
 
@@ -510,20 +518,6 @@ export class LensPlugin {
         });
       },
     });
-
-    if (globalSearch) {
-      globalSearch.registerResultProvider(
-        getSearchProvider(
-          core.getStartServices().then(
-            ([
-              {
-                application: { capabilities },
-              },
-            ]) => capabilities
-          )
-        )
-      );
-    }
 
     urlForwarding.forwardApp(APP_ID, APP_ID);
 
@@ -679,11 +673,11 @@ export class LensPlugin {
 
     startDependencies.uiActions.addTriggerActionAsync(
       AGG_BASED_VISUALIZATION_TRIGGER,
-      ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS,
+      ACTION_CONVERT_AGG_BASED_TO_LENS,
       async () => {
         const { convertToLensActionFactory } = await import('./async_services');
         const action = convertToLensActionFactory(
-          ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS,
+          ACTION_CONVERT_AGG_BASED_TO_LENS,
           i18n.translate('xpack.lens.visualizeAggBasedLegend', {
             defaultMessage: 'Visualize agg based chart',
           }),
@@ -730,6 +724,7 @@ export class LensPlugin {
       return getAddLensPanelAction(startDependencies);
     });
     startDependencies.uiActions.attachAction(ADD_PANEL_TRIGGER, 'addLensPanelAction');
+
     if (startDependencies.uiActions.hasTrigger('ADD_CANVAS_ELEMENT_TRIGGER')) {
       // Because Canvas is not enabled in Serverless, this trigger might not be registered - only attach
       // the create action if the Canvas-specific trigger does indeed exist.

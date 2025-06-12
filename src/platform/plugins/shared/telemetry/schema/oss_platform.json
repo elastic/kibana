@@ -10773,6 +10773,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "securitySolution:enableCloudConnector": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "search:includeFrozen": {
           "type": "boolean",
           "_meta": {
@@ -11301,6 +11307,12 @@
             }
           }
         },
+        "onechat:mcpServer:enabled": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "banners:placement": {
           "type": "keyword",
           "_meta": {
@@ -11403,12 +11415,6 @@
             "description": "Default value of the setting was changed."
           }
         },
-        "observability:apmLabsButton": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
         "observability:apmProgressiveLoading": {
           "type": "keyword",
           "_meta": {
@@ -11417,12 +11423,6 @@
         },
         "observability:apmServiceGroupMaxNumberOfServices": {
           "type": "long",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
-        "observability:apmEnableProfilingIntegration": {
-          "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
           }
@@ -11459,12 +11459,6 @@
         },
         "observability:profilingDatacenterPUE": {
           "type": "integer",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
-        "observability:enableInfrastructureProfilingIntegration": {
-          "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
           }
@@ -11655,6 +11649,16 @@
                 "version": {
                   "type": "keyword"
                 }
+              }
+            }
+          }
+        },
+        "start-local": {
+          "properties": {
+            "version": {
+              "type": "keyword",
+              "_meta": {
+                "description": "version of the start-local script used to launch Kibana"
               }
             }
           }

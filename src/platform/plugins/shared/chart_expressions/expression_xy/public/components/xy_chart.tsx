@@ -46,7 +46,6 @@ import { EmptyPlaceholder, LegendToggle } from '@kbn/charts-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common';
 import { ChartsPluginSetup, ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
-import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import {
   getAccessorByDimension,
   getColumnByAccessor,
@@ -58,6 +57,8 @@ import {
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import { getOverridesFor, ChartSizeSpec } from '@kbn/chart-expressions-common';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import { AlertRuleFromVisUIActionData } from '@kbn/alerts-ui-shared';
 import type {
   FilterEvent,
   BrushEvent,
@@ -128,6 +129,8 @@ declare global {
   }
 }
 
+const MULTILAYER_TIME_AXIS_TICKLINE_PADDING = 4;
+
 export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   chartsThemeService: ChartsPluginSetup['theme'];
   chartsActiveCursorService: ChartsPluginStart['activeCursor'];
@@ -135,11 +138,11 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   paletteService: PaletteRegistry;
   formatFactory: FormatFactory;
   timeZone: string;
-  useLegacyTimeAxis: boolean;
   minInterval: number | undefined;
   interactive?: boolean;
   onClickValue: (data: FilterEvent['data']) => void;
   onClickMultiValue: (data: MultiFilterEvent['data']) => void;
+  onCreateAlertRule: (data: AlertRuleFromVisUIActionData) => void;
   layerCellValueActions: LayerCellValueActions;
   onSelectRange: (data: BrushEvent['data']) => void;
   renderMode: RenderMode;
@@ -203,6 +206,7 @@ export function XYChart({
   minInterval,
   onClickValue,
   onClickMultiValue,
+  onCreateAlertRule,
   layerCellValueActions,
   onSelectRange,
   setChartSize,
@@ -210,7 +214,6 @@ export function XYChart({
   syncColors,
   syncTooltips,
   syncCursor,
-  useLegacyTimeAxis,
   renderComplete,
   uiState,
   timeFormat,
@@ -230,10 +233,12 @@ export function XYChart({
     splitRowAccessor,
     singleTable,
     annotations,
+    pointVisibility,
   } = args;
+
   const chartRef = useRef<Chart>(null);
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
-  const darkMode = chartsThemeService.useDarkMode();
+  const darkMode = useKibanaIsDarkMode();
   const palettes = useKbnPalettes();
   const appFixedViewport = useAppFixedViewport();
   const filteredLayers = getFilteredLayers(layers);
@@ -656,12 +661,16 @@ export function XYChart({
         ? getAccessorByDimension(dataLayers[0].xAccessor, table.columns)
         : undefined;
     const xAxisColumnIndex = table.columns.findIndex((el) => el.id === xAccessor);
-
     const context: BrushEvent['data'] = {
       range: [min, max],
       table,
       column: xAxisColumnIndex,
-      ...(isEsqlMode ? { timeFieldName: table.columns[xAxisColumnIndex].name } : {}),
+      ...(isEsqlMode
+        ? {
+            timeFieldName:
+              table.columns[xAxisColumnIndex].meta.sourceParams?.sourceField?.toString(),
+          }
+        : {}),
     };
     onSelectRange(context);
   };
@@ -679,8 +688,7 @@ export function XYChart({
       isHistogram && (isStacked || seriesType !== SeriesTypes.BAR || !chartHasMoreThanOneBarSeries)
   );
 
-  const shouldUseNewTimeAxis =
-    isTimeViz && isHistogramModeEnabled && !useLegacyTimeAxis && !shouldRotate;
+  const isHorizontalTimeAxis = isTimeViz && isHistogramModeEnabled && !shouldRotate;
 
   const defaultXAxisPosition = shouldRotate ? Position.Left : Position.Bottom;
 
@@ -688,16 +696,13 @@ export function XYChart({
     visible: xAxisConfig?.showGridLines,
     strokeWidth: 1,
   };
-  const xAxisStyle: RecursivePartial<AxisStyle> = shouldUseNewTimeAxis
+  const xAxisStyle: RecursivePartial<AxisStyle> = isHorizontalTimeAxis
     ? {
-        ...MULTILAYER_TIME_AXIS_STYLE,
         tickLabel: {
-          ...MULTILAYER_TIME_AXIS_STYLE.tickLabel,
           visible: Boolean(xAxisConfig?.showLabels),
           fill: xAxisConfig?.labelColor,
         },
         tickLine: {
-          ...MULTILAYER_TIME_AXIS_STYLE.tickLine,
           visible: Boolean(xAxisConfig?.showLabels),
         },
         axisTitle: {
@@ -752,6 +757,9 @@ export function XYChart({
   const applicationQuery = data.query.queryString.getQuery();
   const canCreateFilters =
     !isEsqlMode || (isEsqlMode && applicationQuery && isOfAggregateQueryType(applicationQuery));
+  // ES|QL charts are allowed to create alert rules only in dashboards
+  const canCreateAlerts =
+    isEsqlMode && applicationQuery && !isOfAggregateQueryType(applicationQuery);
 
   return (
     <>
@@ -793,11 +801,14 @@ export function XYChart({
               actions={getTooltipActions(
                 dataLayers,
                 onClickMultiValue,
+                onCreateAlertRule,
                 fieldFormats,
                 formattedDatatables,
                 xAxisFormatter,
                 formatFactory,
-                interactive && !args.detailedTooltip && !isEsqlMode
+                isEsqlMode,
+                canCreateAlerts,
+                interactive && !args.detailedTooltip
               )}
               customTooltip={
                 args.detailedTooltip
@@ -929,7 +940,6 @@ export function XYChart({
               style={xAxisStyle}
               showOverlappingLabels={xAxisConfig?.showOverlappingLabels}
               showDuplicatedTicks={xAxisConfig?.showDuplicates}
-              timeAxisLayerCount={shouldUseNewTimeAxis ? 2 : 0}
               {...getOverridesFor(overrides, 'axisX')}
             />
             {isSplitChart && splitTable && (
@@ -1013,6 +1023,7 @@ export function XYChart({
                 uiState={uiState}
                 singleTable={singleTable}
                 isDarkMode={darkMode}
+                pointVisibility={pointVisibility}
               />
             )}
             {referenceLineLayers.length ? (
@@ -1040,9 +1051,8 @@ export function XYChart({
                 outsideDimension={
                   rangeAnnotations.length && shouldHideDetails
                     ? OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION
-                    : shouldUseNewTimeAxis
-                    ? Number(MULTILAYER_TIME_AXIS_STYLE.tickLine?.padding ?? 0) +
-                      chartBaseTheme.axes.tickLabel.fontSize
+                    : isHorizontalTimeAxis
+                    ? MULTILAYER_TIME_AXIS_TICKLINE_PADDING + chartBaseTheme.axes.tickLabel.fontSize
                     : Math.max(chartBaseTheme.axes.tickLine.size, OUTSIDE_RECT_ANNOTATION_WIDTH)
                 }
               />

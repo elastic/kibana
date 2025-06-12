@@ -7,19 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { has } from 'lodash';
-
 import { injectSearchSourceReferences } from '@kbn/data-plugin/public';
 import { Filter, Query } from '@kbn/es-query';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
+import { has } from 'lodash';
 
-import { cleanFiltersForSerialize } from '../../../utils/clean_filters_for_serialize';
 import { getDashboardContentManagementCache } from '..';
-import { convertPanelsArrayToPanelMap } from '../../../../common/lib/dashboard_panel_converters';
 import { injectReferences } from '../../../../common/dashboard_saved_object/persistable_state/dashboard_saved_object_references';
+import { convertPanelsArrayToPanelSectionMaps } from '../../../../common/lib/dashboard_panel_converters';
 import type { DashboardGetIn, DashboardGetOut } from '../../../../server/content_management';
-import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
 import { DEFAULT_DASHBOARD_STATE } from '../../../dashboard_api/default_dashboard_state';
+import { cleanFiltersForSerialize } from '../../../utils/clean_filters_for_serialize';
+import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
 import {
   contentManagementService,
   dataService,
@@ -74,6 +73,7 @@ export const loadDashboardState = async ({
   let resolveMeta: DashboardGetOut['meta'];
 
   const cachedDashboard = dashboardContentManagementCache.fetchDashboard(id);
+
   if (cachedDashboard) {
     /** If the dashboard exists in the cache, use the cached version to load the dashboard */
     ({ item: rawDashboardContent, meta: resolveMeta } = cachedDashboard);
@@ -85,7 +85,11 @@ export const loadDashboardState = async ({
         id,
       })
       .catch((e) => {
-        throw new SavedObjectNotFound(DASHBOARD_CONTENT_ID, id);
+        if (e.response?.status === 404) {
+          throw new SavedObjectNotFound(DASHBOARD_CONTENT_ID, id);
+        }
+        const message = (e.body as { message?: string })?.message ?? e.message;
+        throw new Error(message);
       });
 
     ({ item: rawDashboardContent, meta: resolveMeta } = result);
@@ -136,7 +140,7 @@ export const loadDashboardState = async ({
         references
       ) as DashboardSearchSource;
       return await dataSearchService.searchSource.create(searchSourceValues);
-    } catch (error: any) {
+    } catch (error) {
       return await dataSearchService.searchSource.create();
     }
   })();
@@ -146,7 +150,6 @@ export const loadDashboardState = async ({
   const query = migrateLegacyQuery(
     searchSource?.getOwnField('query') || queryString.getDefaultQuery() // TODO SAVED DASHBOARDS determine if migrateLegacyQuery is still needed
   );
-
   const {
     refreshInterval,
     description,
@@ -167,7 +170,9 @@ export const loadDashboardState = async ({
         }
       : undefined;
 
-  const panelMap = convertPanelsArrayToPanelMap(panels ?? []);
+  const { panels: panelMap, sections: sectionsMap } = convertPanelsArrayToPanelSectionMaps(
+    panels ?? []
+  );
 
   return {
     managed,
@@ -184,6 +189,7 @@ export const loadDashboardState = async ({
       panels: panelMap,
       query,
       title,
+      sections: sectionsMap,
 
       viewMode: 'view', // dashboards loaded from saved object default to view mode. If it was edited recently, the view mode from session storage will override this.
       tags:

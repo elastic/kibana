@@ -225,6 +225,7 @@
         "playwright",
         "playwright-chromium",
         "pngjs",
+        "qs",
         "react-test-renderer",
         "rxjs-marbles",
         "sharp",
@@ -1007,8 +1008,7 @@
         "diff",
         "fastest-levenshtein",
         "usng.js",
-        "react-reverse-portal",
-        "@types/diff"
+        "react-reverse-portal"
       ],
       "reviewers": [
         "team:kibana-data-discovery"
@@ -2170,12 +2170,7 @@
       "groupName": "@elastic/kibana-visualizations Color related modules",
       "matchDepNames": [
         "chroma-js",
-        "color",
-        "tinycolor2",
-        "tinygradient",
-        "@types/chroma-js",
-        "@types/color",
-        "@types/tinycolor2"
+        "@types/chroma-js"
       ],
       "reviewers": [
         "team:kibana-visualizations"
@@ -2216,6 +2211,7 @@
         "release_note:skip",
         "backport:prev-minor"
       ],
+      "dependencyDashboardApproval": true,
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -3431,7 +3427,6 @@
         "uuid",
         "xml-crypto",
         "@elastic/node-crypto",
-        "@kayahr/text-encoding",
         "@types/js-yaml",
         "@types/lodash",
         "@types/minimist",
@@ -3440,6 +3435,25 @@
         "@types/tough-cookie",
         "@types/uuid",
         "@types/xml-crypto"
+      ],
+      "reviewers": [
+        "team:kibana-security"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Security",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "platform security modules - ESM required",
+      "matchDepNames": [
+        "@kayahr/text-encoding"
       ],
       "reviewers": [
         "team:kibana-security"
@@ -4307,7 +4321,10 @@
         "@opentelemetry/exporter-trace-otlp-proto",
         "@opentelemetry/otlp-exporter-base",
         "@opentelemetry/sdk-node",
-        "@opentelemetry/sdk-trace-node"
+        "@opentelemetry/sdk-trace-node",
+        "@opentelemetry/instrumentation",
+        "@opentelemetry/instrumentation-http",
+        "@opentelemetry/instrumentation-undici"
       ],
       "reviewers": [
         "team:stack-monitoring",

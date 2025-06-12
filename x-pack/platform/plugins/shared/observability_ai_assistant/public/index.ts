@@ -49,6 +49,8 @@ export { FailedToLoadResponse } from './components/message_panel/failed_to_load_
 
 export { MessageText } from './components/message_panel/message_text';
 
+export { ElasticLlmTourCallout } from './components/tour_callout/elastic_llm_tour_callout';
+
 export {
   type ChatActionClickHandler,
   ChatActionClickType,
@@ -69,6 +71,11 @@ export {
   ConversationAccess,
   KnowledgeBaseType,
   KnowledgeBaseState,
+  ELSER_ON_ML_NODE_INFERENCE_ID,
+  ELSER_IN_EIS_INFERENCE_ID,
+  E5_SMALL_INFERENCE_ID,
+  E5_LARGE_IN_EIS_INFERENCE_ID,
+  EIS_PRECONFIGURED_INFERENCE_IDS,
 } from '../common';
 
 export type {
@@ -86,6 +93,7 @@ export { ObservabilityAIAssistantTelemetryEventType } from './analytics/telemetr
 
 export { createFunctionRequestMessage } from '../common/utils/create_function_request_message';
 export { createFunctionResponseMessage } from '../common/utils/create_function_response_message';
+export { redactEntities, unhashString } from '../common/utils/anonymization/redaction';
 
 export type {
   ObservabilityAIAssistantAPIClientRequestParamsOf,
@@ -94,13 +102,20 @@ export type {
 } from './api';
 
 export type { UseChatResult } from './hooks/use_chat';
+export { useKibana } from './hooks/use_kibana';
 
 export {
   aiAssistantLogsIndexPattern,
   aiAssistantSimulatedFunctionCalling,
+  aiAssistantAnonymizationRules,
   aiAssistantSearchConnectorIndexPattern,
   aiAssistantPreferredAIAssistantType,
 } from '../common/ui_settings/settings_keys';
+
+export {
+  getElasticManagedLlmConnector,
+  INFERENCE_CONNECTOR_ACTION_TYPE_ID,
+} from './utils/get_elastic_managed_llm_connector';
 
 export const elasticAiAssistantImage = elasticAiAssistantImg;
 
@@ -111,3 +126,15 @@ export const plugin: PluginInitializer<
   ObservabilityAIAssistantPluginStartDependencies
 > = (pluginInitializerContext: PluginInitializerContext<ConfigSchema>) =>
   new ObservabilityAIAssistantPlugin(pluginInitializerContext);
+
+export {
+  getConnectorsManagementHref,
+  navigateToConnectorsManagementApp,
+} from './utils/navigate_to_connectors';
+
+export { navigateToSettingsManagementApp } from './utils/navigate_to_settings';
+
+export {
+  useElasticLlmCalloutDismissed,
+  ElasticLlmCalloutKey,
+} from './hooks/use_elastic_llm_callout_dismissed';

@@ -15,6 +15,13 @@ import type {
   UnresolvedContentReferenceNode,
 } from '../content_reference_parser';
 
+jest.mock('@kbn/elastic-assistant', () => ({
+  useAssistantContext: () => ({
+    assistantAvailability: {
+      hasSearchAILakeConfigurations: true,
+    },
+  }),
+}));
 jest.mock('../../../../common/lib/kibana', () => ({
   useNavigation: jest.fn().mockReturnValue({
     navigateTo: jest.fn(),
@@ -73,6 +80,13 @@ describe('contentReferenceComponentFactory', () => {
       {
         id: '1',
         type: 'SecurityAlertsPage',
+      } as ContentReference,
+    ],
+    [
+      'HrefReference',
+      {
+        id: '1',
+        type: 'Href',
       } as ContentReference,
     ],
   ])(

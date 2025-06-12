@@ -134,6 +134,22 @@ $$$action-config-email-domain-allowlist$$$
 
     Data type: `string`
 
+`xpack.actions.email.services.ses.host` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+:    The SMTP endpoint for an Amazon Simple Email Service (SES) service provider that can be used by email connectors.
+
+    ::::{warning}
+    This setting alone is insufficient for overriding system defaults for the SES SMTP endpoint. You must also configure the `xpack.actions.email.services.ses.port` setting
+    ::::
+
+    Data type: `string`
+    Default: `email-smtp.us-east-1.amazonaws.com`
+
+`xpack.actions.email.services.ses.port` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+:   The port number for an Amazon Simple Email Service (SES) service provider that can be used by email connectors.
+
+    Data type: `int`
+    Default: `465`
+
 `xpack.actions.enableFooterInEmail` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   A boolean value indicating that a footer with a relevant link should be added to emails sent as alerting actions.
 
@@ -467,7 +483,10 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
 `xpack.actions.preconfigured.<connector-id>.config.defaultModel`
 :   The default model to use for requests, which varies by connector:
 
-    * For an [{{bedrock}} connector](/reference/connectors-kibana/bedrock-action-type.md), current support is for the Anthropic Claude models. Defaults to `anthropic.claude-3-5-sonnet-20240620-v1:0`.
+    * For an [{{bedrock}} connector](/reference/connectors-kibana/bedrock-action-type.md), current support is for the Anthropic Claude models.
+       * In {{serverless-full}}, the default is `us.anthropic.claude-3-7-sonnet-20250219-v1:0`.
+       * In {{stack}} 9.0, the default is `anthropic.claude-3-5-sonnet-20240620-v1:0`.
+       * In {{stack}} 9.1 and later, the default is `us.anthropic.claude-3-7-sonnet-20250219-v1:0`. {applies_to}`stack: planned 9.1`
     * For a [{{gemini}} connector](/reference/connectors-kibana/gemini-action-type.md), current support is for the Gemini models. Defaults to `gemini-1.5-pro-002`.
     * For a [OpenAI connector](/reference/connectors-kibana/openai-action-type.md), it is optional and applicable only when `xpack.actions.preconfigured.<connector-id>.config.apiProvider` is `OpenAI`.
 

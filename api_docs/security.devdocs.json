@@ -1158,6 +1158,8 @@
           "ThemeServiceSetup",
           "; userProfile: ",
           "UserProfileService",
+          "; rendering: ",
+          "RenderingService",
           "; }"
         ],
         "path": "x-pack/platform/plugins/shared/security/public/index.ts",
@@ -1880,6 +1882,10 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/routes/app/index.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/lib/has_required_privilege_granted_in_all_spaces.ts"
               },
               {
                 "plugin": "profiling",

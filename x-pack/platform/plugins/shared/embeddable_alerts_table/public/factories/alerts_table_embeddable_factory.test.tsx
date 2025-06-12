@@ -8,82 +8,89 @@
 // Write a test that verifies that the `AlertsTableEmbeddable` component renders the `AlertsTable` component with the correct props.
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import type { EmbeddableAlertsTablePublicStartDependencies } from '../types';
 import { coreMock } from '@kbn/core/public/mocks';
+import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
+import { EmbeddableAlertsTable } from '../components/embeddable_alerts_table';
 import { getAlertsTableEmbeddableFactory } from './alerts_table_embeddable_factory';
-import { LOCAL_STORAGE_KEY_PREFIX } from '../constants';
+import { PERSISTED_TABLE_CONFIG_KEY_PREFIX } from '../constants';
+import type { InternalRuleType } from '@kbn/response-ops-rules-apis/apis/get_internal_rule_types';
+import { getInternalRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_internal_rule_types';
 
 const core = coreMock.createStart();
-jest.mock('@kbn/response-ops-alerts-table', () => ({
-  AlertsTable: jest.fn(() => <div data-test-subj="alertsTable" />),
-}));
-const { AlertsTable: mockAlertsTable } = jest.requireMock('@kbn/response-ops-alerts-table');
+const mockPresentationContainer = getMockPresentationContainer();
+jest.mock('../components/embeddable_alerts_table');
+const mockEmbeddableAlertsTable = jest.mocked(EmbeddableAlertsTable).mockReturnValue(<div />);
+const mockGetInternalRuleTypes = jest.mocked(getInternalRuleTypes);
+jest.mock('@kbn/response-ops-rules-apis/apis/get_internal_rule_types');
+mockGetInternalRuleTypes.mockResolvedValue([
+  { solution: 'observability' } as unknown as InternalRuleType,
+]);
+const mockRemoveLocalStorageItem = jest.fn();
+Object.defineProperty(window, 'localStorage', {
+  value: {
+    removeItem: mockRemoveLocalStorageItem,
+  },
+  writable: true,
+});
 
-const uuid = 'test-uuid';
+const UUID = 'test-uuid';
+const TABLE_ID = `${PERSISTED_TABLE_CONFIG_KEY_PREFIX}-${UUID}`;
 
 describe('getEmbeddableAlertsTableFactory', () => {
   const factory = getAlertsTableEmbeddableFactory(
     core,
     {} as EmbeddableAlertsTablePublicStartDependencies
   );
-
-  it('renders AlertsTable with correct props', async () => {
-    const { Component } = await factory.buildEmbeddable({
-      initialState: {
-        rawState: {
-          timeRange: {
-            from: '2025-01-01T00:00:00.000Z',
-            to: '2025-01-01T01:00:00.000Z',
+  const embeddableParams: Parameters<typeof factory.buildEmbeddable>[0] = {
+    initialState: {
+      rawState: {
+        timeRange: {
+          from: '2025-01-01T00:00:00.000Z',
+          to: '2025-01-01T01:00:00.000Z',
+        },
+        title: 'Test embeddable alerts table',
+        tableConfig: {
+          solution: 'observability',
+          query: {
+            type: 'alertsFilters',
+            filters: [{ filter: {} }],
           },
-          title: 'Test embeddable alerts table',
         },
       },
-      finalizeApi: (apiRegistration) => apiRegistration as any,
-      uuid,
-      // parentApi is unused by our factory
-      parentApi: {} as any,
-    });
+    },
+    finalizeApi: (apiRegistration) => ({
+      ...(apiRegistration as any),
+      parentApi: mockPresentationContainer,
+    }),
+    uuid: UUID,
+    parentApi: {} as any,
+  };
 
+  it('should render AlertsTable with the correct props', async () => {
+    const { Component, api } = await factory.buildEmbeddable(embeddableParams);
+
+    expect(api.isEditingEnabled()).toBeTruthy();
     render(<Component />);
-
-    expect(screen.getByTestId('alertsTable')).toBeInTheDocument();
-    expect(mockAlertsTable).toHaveBeenCalledWith(
+    expect(mockEmbeddableAlertsTable).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: `${LOCAL_STORAGE_KEY_PREFIX}-${uuid}`,
-        // Hard-coded for now
-        ruleTypeIds: ['.es-query'],
-        query: {
-          bool: {
-            minimum_should_match: 1,
-            should: [
-              {
-                range: {
-                  'kibana.alert.time_range': {
-                    format: 'strict_date_optional_time',
-                    gte: '2025-01-01T00:00:00.000Z',
-                    lte: '2025-01-01T01:00:00.000Z',
-                  },
-                },
-              },
-              {
-                range: {
-                  '@timestamp': {
-                    format: 'strict_date_optional_time',
-                    gte: '2025-01-01T00:00:00.000Z',
-                    lte: '2025-01-01T01:00:00.000Z',
-                  },
-                },
-              },
-            ],
-          },
+        id: TABLE_ID,
+        timeRange: {
+          from: '2025-01-01T00:00:00.000Z',
+          to: '2025-01-01T01:00:00.000Z',
         },
-        showAlertStatusWithFlapping: true,
-        toolbarVisibility: {
-          showFullScreenSelector: false,
-        },
+        solution: 'observability',
+        query: { type: 'alertsFilters', filters: [{ filter: {} }] },
       }),
       {}
     );
+  });
+
+  it("should disable editing when the user cannot access any rule type from the panel's solution", async () => {
+    mockGetInternalRuleTypes.mockResolvedValueOnce([]);
+    const { api } = await factory.buildEmbeddable(embeddableParams);
+
+    expect(api.isEditingEnabled()).toBeFalsy();
   });
 });

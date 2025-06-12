@@ -24,14 +24,9 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
       isCollapsible: false,
       children: [
         {
-          breadcrumbStatus: 'hidden',
-          children: [
-            {
-              link: 'discover',
-            },
-            defaultNavigationTree.dashboards(),
-          ],
+          link: 'discover',
         },
+        defaultNavigationTree.dashboards(),
         {
           breadcrumbStatus: 'hidden',
           children: [
@@ -123,6 +118,7 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
                     { link: 'management:cross_cluster_replication' },
                     { link: 'management:remote_clusters' },
                     { link: 'management:migrate_data' },
+                    { link: 'management:content_connectors' },
                   ],
                 },
                 {

@@ -18,5 +18,7 @@ export default ({ loadTestFile }: FtrProviderContext) => {
     loadTestFile(require.resolve('./rules_settings'));
     loadTestFile(require.resolve('./stack_alerts_page'));
     loadTestFile(require.resolve('./maintenance_windows'));
+    loadTestFile(require.resolve('./email'));
+    loadTestFile(require.resolve('./alert_deletion'));
   });
 };

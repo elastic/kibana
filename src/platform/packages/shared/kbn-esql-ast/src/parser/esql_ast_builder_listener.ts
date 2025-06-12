@@ -8,8 +8,8 @@
  */
 
 import type { ErrorNode, ParserRuleContext, TerminalNode } from 'antlr4';
+import { createCompletionCommand } from './factories/completion';
 import {
-  IndexPatternContext,
   InlinestatsCommandContext,
   JoinCommandContext,
   type ChangePointCommandContext,
@@ -32,16 +32,14 @@ import {
   type StatsCommandContext,
   type TimeSeriesCommandContext,
   type WhereCommandContext,
+  RerankCommandContext,
+  CompletionCommandContext,
+  RrfCommandContext,
+  SampleCommandContext,
 } from '../antlr/esql_parser';
 import { default as ESQLParserListener } from '../antlr/esql_parser_listener';
-import type { ESQLAst, ESQLAstTimeseriesCommand } from '../types';
-import {
-  createAstBaseItem,
-  createCommand,
-  createFunction,
-  textExistsAndIsValid,
-  visitSource,
-} from './factories';
+import type { ESQLAst } from '../types';
+import { createCommand, createFunction, createLiteral, textExistsAndIsValid } from './factories';
 import { createChangePointCommand } from './factories/change_point';
 import { createDissectCommand } from './factories/dissect';
 import { createEvalCommand } from './factories/eval';
@@ -58,12 +56,12 @@ import { getPosition } from './helpers';
 import {
   collectAllAggFields,
   collectAllColumnIdentifiers,
-  getEnrichClauses,
-  getMatchField,
-  getPolicyName,
   visitByOption,
   visitRenameClauses,
 } from './walkers';
+import { createTimeseriesCommand } from './factories/timeseries';
+import { createRerankCommand } from './factories/rerank';
+import { createEnrichCommand } from './factories/enrich';
 
 export class ESQLAstBuilderListener implements ESQLParserListener {
   private ast: ESQLAst = [];
@@ -138,17 +136,8 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitTimeSeriesCommand(ctx: TimeSeriesCommandContext): void {
-    const node: ESQLAstTimeseriesCommand = {
-      ...createAstBaseItem('ts', ctx),
-      type: 'command',
-      args: [],
-      sources: ctx
-        .indexPatternAndMetadataFields()
-        .getTypedRuleContexts(IndexPatternContext)
-        .map((sourceCtx) => visitSource(sourceCtx)),
-    };
-    this.ast.push(node);
-    node.args.push(...node.sources);
+    const command = createTimeseriesCommand(ctx);
+    this.ast.push(command);
   }
 
   /**
@@ -296,9 +285,9 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitEnrichCommand(ctx: EnrichCommandContext) {
-    const command = createCommand('enrich', ctx);
+    const command = createEnrichCommand(ctx);
+
     this.ast.push(command);
-    command.args.push(...getPolicyName(ctx), ...getMatchField(ctx), ...getEnrichClauses(ctx));
   }
 
   /**
@@ -346,6 +335,61 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
   exitChangePointCommand(ctx: ChangePointCommandContext): void {
     const command = createChangePointCommand(ctx);
 
+    this.ast.push(command);
+  }
+
+  /**
+   * Exit a parse tree produced by `esql_parser.rerankCommand`.
+   *
+   * Parse the RERANK command:
+   *
+   * RERANK <query> ON <fields> WITH <referenceId>
+   *
+   * @param ctx the parse tree
+   */
+  exitRerankCommand(ctx: RerankCommandContext): void {
+    const command = createRerankCommand(ctx);
+
+    this.ast.push(command);
+  }
+
+  /**
+   * Exit a parse tree produced by `esql_parser.completionCommand`.
+   *
+   * Parse the COMPLETION command:
+   *
+   * COMPLETION <prompt> WITH <inferenceId> [ AS <targetField> ]
+   *
+   * @param ctx the parse tree
+   */
+  exitCompletionCommand(ctx: CompletionCommandContext): void {
+    const command = createCompletionCommand(ctx);
+    this.ast.push(command);
+  }
+
+  exitSampleCommand(ctx: SampleCommandContext): void {
+    const command = createCommand('sample', ctx);
+    this.ast.push(command);
+
+    if (ctx._probability) {
+      command.args.push(createLiteral('double', ctx._probability.DECIMAL_LITERAL()));
+    }
+    if (ctx._seed) {
+      command.args.push(createLiteral('integer', ctx._seed.INTEGER_LITERAL()));
+    }
+  }
+
+  /**
+   * Exit a parse tree produced by `esql_parser.rrfCommand`.
+   *
+   * Parse the RRF (Reciprocal Rank Fusion) command:
+   *
+   * RRF
+   *
+   * @param ctx the parse tree
+   */
+  exitRrfCommand(ctx: RrfCommandContext): void {
+    const command = createCommand('rrf', ctx);
     this.ast.push(command);
   }
 

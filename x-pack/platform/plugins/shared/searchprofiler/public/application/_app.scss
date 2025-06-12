@@ -1,5 +1,3 @@
-@import '../../../../../../../src/core/public/mixins';
-
 .prfDevTool__page {
   flex: 1 1 auto;
 
@@ -24,15 +22,6 @@
   &__bodyGroup {
     height: 100%;
   }
-}
-
-// adding dev tool top bar to the body offset
-$bodyOffset: $euiSize * 3;
-
-.appRoot {
-  @include kibanaFullBodyHeight($bodyOffset);
-  overflow: hidden;
-  flex-shrink: 1;
 }
 
 .prfDevTool__main {

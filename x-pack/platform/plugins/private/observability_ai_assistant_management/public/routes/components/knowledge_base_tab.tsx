@@ -38,6 +38,7 @@ import {
 import { useKnowledgeBase } from '@kbn/ai-assistant/src/hooks';
 import { KnowledgeBaseInstallationStatusPanel } from '@kbn/ai-assistant/src/knowledge_base/knowledge_base_installation_status_panel';
 import { SettingUpKnowledgeBase } from '@kbn/ai-assistant/src/knowledge_base/setting_up_knowledge_base';
+import { InspectKnowledgeBasePopover } from '@kbn/ai-assistant/src/knowledge_base/inspect_knowlegde_base_popover';
 import { useGetKnowledgeBaseEntries } from '../../hooks/use_get_knowledge_base_entries';
 import { categorizeEntries, KnowledgeBaseEntryCategory } from '../../helpers/categorize_entries';
 import { KnowledgeBaseEditManualEntryFlyout } from './knowledge_base_edit_manual_entry_flyout';
@@ -241,7 +242,7 @@ export function KnowledgeBaseTab() {
     setQuery(e?.currentTarget.value || '');
   };
 
-  if (knowledgeBase.status.loading && !knowledgeBase.isInstalling) {
+  if (knowledgeBase.status.loading && !knowledgeBase.isPolling) {
     return (
       <EuiFlexGroup alignItems="center" direction="column">
         <EuiFlexItem grow>
@@ -450,7 +451,10 @@ export function KnowledgeBaseTab() {
       <EuiPanel hasBorder paddingSize="xl" grow={false} className={panelClassname}>
         <EuiFlexItem grow className={centerMaxWidthClassName}>
           {knowledgeBase.isInstalling ? (
-            <SettingUpKnowledgeBase />
+            <>
+              <SettingUpKnowledgeBase />
+              <InspectKnowledgeBasePopover knowledgeBase={knowledgeBase} />
+            </>
           ) : (
             <KnowledgeBaseInstallationStatusPanel knowledgeBase={knowledgeBase} />
           )}

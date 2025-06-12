@@ -92,7 +92,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
           is_missing_secrets: false,
           config: {
             ...config,
-            defaultModel: 'gpt-4o',
+            defaultModel: 'gpt-4.1',
           },
         });
       });
@@ -215,6 +215,174 @@ export default function genAiTest({ getService }: FtrProviderContext) {
                 'error validating action type secrets: [apiKey]: expected value of type [string] but got [undefined]',
             });
           });
+      });
+
+      it('should return error when creating the connector with PKI auth that has missing crt', async () => {
+        await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name,
+            connector_type_id: connectorTypeId,
+            config,
+            secrets: {
+              privateKeyData: Buffer.from(
+                '-----BEGIN PRIVATE KEY-----key-----END PRIVATE KEY-----'
+              ).toString('base64'),
+            },
+          })
+          .expect(400)
+          .then((resp: any) => {
+            expect(resp.body).to.eql({
+              statusCode: 400,
+              error: 'Bad Request',
+              message:
+                'error validating action type secrets: Certificate data must be provided for PKI',
+            });
+          });
+      });
+
+      it('should return error when creating the connector with PKI auth that has missing key', async () => {
+        await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name,
+            connector_type_id: connectorTypeId,
+            config,
+            secrets: {
+              certificateData: Buffer.from(
+                '-----BEGIN CERTIFICATE-----cert-----END CERTIFICATE-----'
+              ).toString('base64'),
+            },
+          })
+          .expect(400)
+          .then((resp: any) => {
+            expect(resp.body).to.eql({
+              statusCode: 400,
+              error: 'Bad Request',
+              message:
+                'error validating action type secrets: Private key data must be provided for PKI',
+            });
+          });
+      });
+      it('should return error when creating the connector with PKI auth that has bad crt', async () => {
+        await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name,
+            connector_type_id: connectorTypeId,
+            config,
+            secrets: {
+              certificateData: Buffer.from('invalid crt format').toString('base64'),
+              privateKeyData: Buffer.from(
+                '-----BEGIN PRIVATE KEY-----key-----END PRIVATE KEY-----'
+              ).toString('base64'),
+            },
+          })
+          .expect(400)
+          .then((resp: any) => {
+            expect(resp.body).to.eql({
+              statusCode: 400,
+              error: 'Bad Request',
+              message:
+                'error validating action type secrets: Invalid Certificate data file format: The file must be a PEM-encoded certificate beginning with "-----BEGIN CERTIFICATE-----".',
+            });
+          });
+      });
+      it('should return error when creating the connector with PKI auth that has bad key', async () => {
+        await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name,
+            connector_type_id: connectorTypeId,
+            config,
+            secrets: {
+              certificateData: Buffer.from(
+                '-----BEGIN CERTIFICATE-----cert-----END CERTIFICATE-----'
+              ).toString('base64'),
+              privateKeyData: Buffer.from('invalid key format').toString('base64'),
+            },
+          })
+          .expect(400)
+          .then((resp: any) => {
+            expect(resp.body).to.eql({
+              statusCode: 400,
+              error: 'Bad Request',
+              message:
+                'error validating action type secrets: Invalid Private key data file format: The file must be a PEM-encoded private key beginning with "-----BEGIN PRIVATE KEY-----" or "-----BEGIN RSA PRIVATE KEY-----".',
+            });
+          });
+      });
+
+      it('should create the connector with PKI auth when both certificate and key are valid', async () => {
+        const validCert = Buffer.from(
+          '-----BEGIN CERTIFICATE-----\nMIIC+zCCAeOgAwIBAgIJAKKpPKItestcert\n-----END CERTIFICATE-----'
+        ).toString('base64');
+        const validKey = Buffer.from(
+          '-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASC\n-----END PRIVATE KEY-----'
+        ).toString('base64');
+        const { body: createdAction } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: `${name} PKI`,
+            connector_type_id: connectorTypeId,
+            config: {
+              ...config,
+              apiProvider: 'Other',
+              defaultModel: 'gpt-3.5-turbo',
+            },
+            secrets: {
+              certificateData: validCert,
+              privateKeyData: validKey,
+            },
+          })
+          .expect(200);
+        expect(createdAction).to.have.property('id');
+        expect(createdAction.config.apiProvider).to.equal('Other');
+      });
+
+      it('should execute successfully with valid PKI certificate and key', async () => {
+        const validCert = Buffer.from(
+          '-----BEGIN CERTIFICATE-----\nMIIC+zCCAeOgAwIBAgIJAKKpPKItestcert\n-----END CERTIFICATE-----'
+        ).toString('base64');
+        const validKey = Buffer.from(
+          '-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASC\n-----END PRIVATE KEY-----'
+        ).toString('base64');
+        const { body: createdAction } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: `${name} PKI exec`,
+            connector_type_id: connectorTypeId,
+            config: {
+              ...config,
+              apiProvider: 'Other',
+              defaultModel: 'gpt-3.5-turbo',
+            },
+            secrets: {
+              certificateData: validCert,
+              privateKeyData: validKey,
+            },
+          })
+          .expect(200);
+        const { body } = await supertest
+          .post(`/api/actions/connector/${createdAction.id}/_execute`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            params: {
+              subAction: 'test',
+              subActionParams: {
+                body: '{"model":"gpt-3.5-turbo","messages":[{"role":"user","content":"Hello world"}]}',
+              },
+            },
+          })
+          .expect(200);
+        expect(body.status).to.equal('ok');
+        expect(body.connector_id).to.equal(createdAction.id);
       });
     });
 

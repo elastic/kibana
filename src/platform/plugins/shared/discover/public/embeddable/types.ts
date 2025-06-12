@@ -17,6 +17,7 @@ import type {
   HasSupportedTriggers,
   PublishesBlockingError,
   PublishesDataLoading,
+  PublishesDescription,
   PublishesSavedObjectId,
   PublishesWritableTitle,
   PublishesWritableUnifiedSearch,
@@ -102,8 +103,9 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerialize
   PublishesSavedObjectId &
   PublishesDataLoading &
   PublishesBlockingError &
-  PublishesWritableTitle &
-  PublishesSavedSearch &
+  Required<PublishesWritableTitle> &
+  Required<PublishesDescription> &
+  PublishesWritableSavedSearch &
   PublishesWritableDataViews &
   PublishesWritableUnifiedSearch &
   HasLibraryTransforms &
@@ -115,6 +117,10 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerialize
 
 export interface PublishesSavedSearch {
   savedSearch$: PublishingSubject<SavedSearch>;
+}
+
+export interface PublishesWritableSavedSearch extends PublishesSavedSearch {
+  setColumns: (columns: string[] | undefined) => void;
 }
 
 export const apiPublishesSavedSearch = (

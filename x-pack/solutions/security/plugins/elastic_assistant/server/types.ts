@@ -35,7 +35,7 @@ import {
   Replacements,
   ContentReferencesStore,
 } from '@kbn/elastic-assistant-common';
-import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import {
   LicensingApiRequestHandlerContext,
   LicensingPluginStart,
@@ -52,6 +52,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
 import { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { IEventLogger, IEventLogService } from '@kbn/event-log-plugin/server';
+import type { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import type { GetAIAssistantKnowledgeBaseDataClientParams } from './ai_assistant_data_clients/knowledge_base';
 import { AttackDiscoveryDataClient } from './lib/attack_discovery/persistence';
 import {
@@ -126,6 +127,7 @@ export interface ElasticAssistantPluginSetupDependencies {
   alerting: AlertingServerSetup;
   eventLog: IEventLogService; // for writing to the event log
   ml: MlPluginSetup;
+  ruleRegistry: RuleRegistryPluginSetupContract;
   taskManager: TaskManagerSetupContract;
   spaces?: SpacesPluginSetup;
 }
@@ -193,7 +195,6 @@ export interface AssistantResourceNames {
     prompts: string;
     anonymizationFields: string;
     attackDiscovery: string;
-    attackDiscoveryAlerts: string;
     defendInsights: string;
   };
   indexTemplate: {
@@ -203,7 +204,6 @@ export interface AssistantResourceNames {
     prompts: string;
     anonymizationFields: string;
     attackDiscovery: string;
-    attackDiscoveryAlerts: string;
     defendInsights: string;
   };
   aliases: {
@@ -213,7 +213,6 @@ export interface AssistantResourceNames {
     prompts: string;
     anonymizationFields: string;
     attackDiscovery: string;
-    attackDiscoveryAlerts: string;
     defendInsights: string;
   };
   indexPatterns: {
@@ -223,7 +222,6 @@ export interface AssistantResourceNames {
     prompts: string;
     anonymizationFields: string;
     attackDiscovery: string;
-    attackDiscoveryAlerts: string;
     defendInsights: string;
   };
   pipelines: {

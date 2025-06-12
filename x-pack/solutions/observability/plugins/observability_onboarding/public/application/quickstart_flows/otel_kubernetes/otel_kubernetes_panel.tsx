@@ -78,9 +78,6 @@ export const OtelKubernetesPanel: React.FC = () => {
 
   const elasticEndpointVarName = isServerless ? 'elastic_otlp_endpoint' : 'elastic_endpoint';
   const valuesFileSubfolder = isServerless ? '/managed_otlp' : '';
-  const dockerImageOverride = isServerless
-    ? '--set defaultCRConfig.image.repository="docker.elastic.co/elastic-agent/elastic-agent"'
-    : '';
 
   const otelKubeStackValuesFileUrl = data
     ? `https://raw.githubusercontent.com/elastic/elastic-agent/refs/tags/v${data.elasticAgentVersionInfo.agentBaseVersion}/deploy/helm/edot-collector/kube-stack${valuesFileSubfolder}/values.yaml`
@@ -95,7 +92,7 @@ kubectl create secret generic elastic-secret-otel \\
   --from-literal=elastic_api_key='${data.apiKeyEncoded}'
 helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
   --namespace ${namespace} \\
-  --values '${otelKubeStackValuesFileUrl}' ${dockerImageOverride} \\
+  --values '${otelKubeStackValuesFileUrl}' \\
   --version '${OTEL_KUBE_STACK_VERSION}'`
     : undefined;
 
@@ -378,7 +375,7 @@ kubectl describe pod <myapp-pod-name> -n my-namespace`}
                     'xpack.observability_onboarding.otelKubernetesPanel.onceYourKubernetesInfrastructureLabel',
                     {
                       defaultMessage:
-                        'Analyse your Kubernetes cluster’s health and monitor your container workloads.',
+                        'Analyze your Kubernetes cluster’s health and monitor your container workloads.',
                     }
                   )}
                 </p>

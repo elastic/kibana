@@ -77,8 +77,10 @@ export async function getServiceLocations(server: SyntheticsServerSetup) {
     ) as ThrottlingOptions;
 
     return { throttling, locations };
-  } catch (e) {
-    server.logger.error(e);
+  } catch (error) {
+    server.logger.error(`Error getting available Synthetics locations, Error: ${error.message}`, {
+      error,
+    });
     return { locations: [] };
   }
 }

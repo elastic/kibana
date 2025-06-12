@@ -8,7 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
-import { RowHeightSettings, ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
+import { DataGridDensity, RowHeightSettings, ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import { ToolbarPopover } from '../../../shared_components';
 import type { VisualizationToolbarProps } from '../../../types';
 import type { DatatableVisualizationState } from '../visualization';
@@ -21,6 +21,7 @@ import {
   DEFAULT_ROW_HEIGHT_LINES,
   ROW_HEIGHT_LINES_KEYS,
 } from './constants';
+import { DensitySettings } from './density_settings';
 
 type LineCounts = {
   [key in keyof typeof ROW_HEIGHT_LINES_KEYS]: number;
@@ -86,6 +87,16 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
     });
   }, [setState, state]);
 
+  const onChangeDensity = useCallback(
+    (density: DataGridDensity) => {
+      setState({
+        ...state,
+        density,
+      });
+    },
+    [setState, state]
+  );
+
   return (
     <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
       <ToolbarPopover
@@ -97,6 +108,10 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
         buttonDataTestSubj="lnsVisualOptionsButton"
         data-test-subj="lnsVisualOptionsPopover"
       >
+        <DensitySettings
+          dataGridDensity={state.density ?? DataGridDensity.NORMAL}
+          onChange={onChangeDensity}
+        />
         <RowHeightSettings
           rowHeight={state.headerRowHeight ?? DEFAULT_HEADER_ROW_HEIGHT}
           label={i18n.translate('xpack.lens.table.visualOptionsHeaderRowHeightLabel', {
