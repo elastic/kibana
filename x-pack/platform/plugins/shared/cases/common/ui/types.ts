@@ -342,3 +342,7 @@ export interface CasesCapabilities {
   [CASES_REOPEN_CAPABILITY]: boolean;
   [ASSIGN_CASE_CAPABILITY]: boolean;
 }
+
+export interface CasesSettings {
+  displayIncrementalCaseId: boolean;
+}

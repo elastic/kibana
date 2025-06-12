@@ -19,13 +19,18 @@ import type {
   CasesFeaturesAllRequired,
   CasesFeatures,
   CasesPermissions,
+  CasesSettings,
 } from '../../containers/types';
 import type { ReleasePhase } from '../types';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 
 import { CasesGlobalComponents } from './cases_global_components';
-import { DEFAULT_FEATURES } from '../../../common/constants';
+import {
+  CASES_UI_SETTING_ID_DISPLAY_INCREMENTAL_ID,
+  DEFAULT_FEATURES,
+} from '../../../common/constants';
+import { useKibana } from '../../common/lib/kibana';
 import { constructFileKindIdByOwner } from '../../../common/files';
 import { DEFAULT_BASE_PATH } from '../../common/navigation';
 import type { CasesContextStoreAction } from './state/cases_context_reducer';
@@ -45,6 +50,7 @@ export interface CasesContextValue {
   features: CasesFeaturesAllRequired;
   releasePhase: ReleasePhase;
   dispatch: CasesContextValueDispatch;
+  settings: CasesSettings;
 }
 
 export interface CasesContextProps
@@ -54,6 +60,7 @@ export interface CasesContextProps
     | 'permissions'
     | 'externalReferenceAttachmentTypeRegistry'
     | 'persistableStateAttachmentTypeRegistry'
+    | 'settings'
   > {
   basePath?: string;
   features?: CasesFeatures;
@@ -79,9 +86,14 @@ export const CasesProvider: FC<
     features = {},
     releasePhase = 'ga',
     getFilesClient,
+    settings,
   },
   queryClient = casesQueryClient,
 }) => {
+  const {
+    settings: { client },
+  } = useKibana().services;
+  const displayIncrementalCaseId = client.get(CASES_UI_SETTING_ID_DISPLAY_INCREMENTAL_ID);
   const [state, dispatch] = useReducer(casesContextReducer, getInitialCasesContextState());
 
   const value: CasesContextValue = useMemo(
@@ -114,6 +126,9 @@ export const CasesProvider: FC<
       ),
       releasePhase,
       dispatch,
+      settings: settings ?? {
+        displayIncrementalCaseId,
+      },
     }),
     /**
      * We want to trigger a rerender only when the permissions will change.

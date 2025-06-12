@@ -19,6 +19,7 @@ import {
   renderWithTestingProviders,
 } from '../../common/mock';
 import { useGetCasesMockState, connectorsMock } from '../../containers/mock';
+import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 import { SortFieldCase } from '../../../common/ui/types';
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
@@ -79,12 +80,15 @@ const useGetCategoriesMock = useGetCategories as jest.Mock;
 const useSuggestUserProfilesMock = useSuggestUserProfiles as jest.Mock;
 
 const mockTriggersActionsUiService = triggersActionsUiMock.createStart();
+let mockSettingsService = settingsServiceMock.createStartContract();
 
 const mockKibana = () => {
+  mockSettingsService = settingsServiceMock.createStartContract();
   useKibanaMock.mockReturnValue({
     services: {
       ...createStartServicesMock(),
       triggersActionsUi: mockTriggersActionsUiService,
+      settings: mockSettingsService,
     },
   } as unknown as ReturnType<typeof useKibana>);
 };
@@ -144,6 +148,9 @@ describe('AllCasesListGeneric', () => {
     userProfiles: new Map(),
     currentUserProfile: undefined,
     selectedColumns: [],
+    settings: {
+      displayIncrementalCaseId: false,
+    },
   };
 
   const removeMsFromDate = (value: string) => moment(value).format('YYYY-MM-DDTHH:mm:ss[Z]');
@@ -151,7 +158,10 @@ describe('AllCasesListGeneric', () => {
   beforeAll(() => {
     patchGetComputedStyle();
     mockKibana();
-    const actionTypeRegistry = useKibanaMock().services.triggersActionsUi.actionTypeRegistry;
+    const {
+      triggersActionsUi: { actionTypeRegistry },
+    } = useKibanaMock().services;
+
     registerConnectorsToMockActionRegistry(actionTypeRegistry, connectorsMock);
   });
 
@@ -182,6 +192,7 @@ describe('AllCasesListGeneric', () => {
   });
 
   it('should render AllCasesList', async () => {
+    (mockSettingsService.client.get as jest.Mock).mockReturnValue(true);
     useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
     renderWithTestingProviders(<AllCasesList />);
 
@@ -216,6 +227,17 @@ describe('AllCasesListGeneric', () => {
 
     expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
     expect(screen.queryByTestId('all-cases-clear-filters-link-icon')).not.toBeInTheDocument();
+  });
+
+  it('should not render incremental id if setting is disabled', async () => {
+    (mockSettingsService.client.get as jest.Mock).mockReturnValue(false);
+    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
+    renderWithTestingProviders(<AllCasesList />);
+
+    await screen.findAllByTestId('case-details-link');
+
+    const incrementalIdTextElements = screen.queryAllByTestId('cases-incremental-id-text');
+    expect(incrementalIdTextElements).toHaveLength(0);
   });
 
   it("should show a tooltip with the assignee's email when hover over the assignee avatar", async () => {

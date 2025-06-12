@@ -48,13 +48,15 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   incrementalId,
   'data-test-subj': dataTestSubj,
 }) => {
-  const { releasePhase } = useCasesContext();
+  const { releasePhase, settings } = useCasesContext();
   const { euiTheme } = useEuiTheme();
 
   return (
     <header css={getHeaderCss(euiTheme, border)} data-test-subj={dataTestSubj}>
       <EuiFlexGroup alignItems="center" gutterSize="s">
-        {incrementalId && <IncrementalIdText incrementalId={incrementalId} />}
+        {settings.displayIncrementalCaseId && incrementalId && (
+          <IncrementalIdText incrementalId={incrementalId} />
+        )}
         <EuiFlexItem
           css={css`
             overflow: hidden;

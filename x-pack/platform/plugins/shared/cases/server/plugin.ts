@@ -14,12 +14,14 @@ import type {
   CoreStart,
   Plugin,
 } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
+import { schema } from '@kbn/config-schema';
 
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { APP_ID } from '../common/constants';
+import { APP_ID, CASES_UI_SETTING_ID_DISPLAY_INCREMENTAL_ID } from '../common/constants';
 
 import type { CasesClient } from './client';
 import type {
@@ -118,6 +120,21 @@ export class CasePlugin
         core,
       })
     );
+
+    core.uiSettings.register({
+      [CASES_UI_SETTING_ID_DISPLAY_INCREMENTAL_ID]: {
+        description: i18n.translate('cases.uiSettings.displayIncrementalId.description', {
+          defaultMessage: 'Shows the incremental id of a case in the relevant pages',
+        }),
+        name: i18n.translate('cases.uiSettings.displayIncrementalId.name', {
+          defaultMessage: 'Show incremental id',
+        }),
+        schema: schema.boolean(),
+        value: false,
+        readonly: false,
+        category: ['cases'],
+      },
+    });
 
     if (plugins.taskManager) {
       this.incrementalIdTaskManager = new IncrementalIdTaskManager(
