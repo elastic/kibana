@@ -1640,15 +1640,22 @@ describe('<CspPolicyTemplateForm />', () => {
       jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
         services: {
           cloud: {
-            cloudId:
-              'cloud_connector_cspm:dXMtZWFzdC0xLmF3cy5zdGFnaW5nLmZvdW5kaXQubm86NDQzJDYyMjExNzI5MDhjZTQ0YmE5YWNkOGFmN2NlYmUyYmVjJGZmYmUyNDc2NGFkNTQwODJhZTkyYjU1NDQ0ZDI3NzA5',
-            serverless: { projectId: '' },
+            kibanaUrl: 'https://my-deployment.kb.us-east-1.aws.elastic.cloud',
+            deploymentUrl: undefined,
             isCloudEnabled: true,
+            isServerlessEnabled: true,
+            serverless: {
+              projectId: 'project-xyz123',
+              projectName: 'cloudconnectoraws',
+              projectType: 'security',
+            },
           },
           uiSettings: {
             get: (key: string) => key === SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING,
           },
         },
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       const { getByTestId } = render(

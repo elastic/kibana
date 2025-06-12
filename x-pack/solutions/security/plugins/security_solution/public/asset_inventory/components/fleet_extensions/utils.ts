@@ -85,7 +85,10 @@ const getAssetType = (policyTemplateInput: AssetInput) => {
 
 export interface GetCloudConnectorRemoteRoleTemplateParams {
   input: NewPackagePolicyAssetInput;
-  cloud: Pick<CloudStart, 'isCloudEnabled' | 'cloudId' | 'serverless'>;
+  cloud: Pick<
+    CloudStart,
+    'isCloudEnabled' | 'kibanaUrl' | 'deploymentUrl' | 'serverless' | 'isServerlessEnabled'
+  >;
   packageInfo: PackageInfo;
 }
 
@@ -544,6 +547,19 @@ export const getCloudCredentialVarsConfig = ({
     [credentialType]: { value: optionId },
   };
 };
+export const getCloudProviderFromKibanaUrl = (
+  kibanaUrl: string | undefined
+): string | undefined => {
+  if (!kibanaUrl) return undefined;
+  const match = kibanaUrl.match(/\.(aws|gcp|azure)\.elastic\.cloud/);
+  return match?.[1];
+};
+
+export const getDeploymentIdFromUrl = (url: string | undefined): string | undefined => {
+  if (!url) return undefined;
+  const match = url.match(/\/deployments\/([^/?#]+)/);
+  return match?.[1];
+};
 
 export const getCloudConnectorRemoteRoleTemplate = ({
   input,
@@ -551,27 +567,20 @@ export const getCloudConnectorRemoteRoleTemplate = ({
   packageInfo,
 }: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
   const accountType = input?.streams?.[0]?.vars?.['aws.account_type']?.value ?? AWS_SINGLE_ACCOUNT;
-  const encodedCloudId = cloud?.cloudId?.split(':')[1];
-  if (!encodedCloudId) return undefined;
 
-  // Decode the base64 encoded cloudId
-  // region-1.cloudprovider.env.example.com:443$es-cluster-id-1234567890abcdef$deployment-id-abcdef1234567890
-  const decodedCloudId = atob(encodedCloudId);
-  const providerMatch = decodedCloudId.match(/\.(aws|gcp|azure)\./);
-  if (!providerMatch) return undefined;
-  // Extract the cloud provider from the match
-  const cloudProvider = providerMatch?.[1];
-  // Split the decodedCloudId by '$' to get the cloud resources include cluster uuid and deployment id
-  const cloudResources = decodedCloudId.split('$');
+  const provider = getCloudProviderFromKibanaUrl(cloud?.kibanaUrl);
+  if (!provider || provider !== 'aws') return undefined;
 
-  if (!cloudProvider || cloudResources.length < 2) return undefined;
-  // The last part of the decodedCloudId is the deployment ID
-  const deploymentId = cloudResources[cloudResources.length - 1];
+  const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
+  let elasticResourceId: string | undefined;
 
-  const elasticResourceId =
-    cloud?.isCloudEnabled && cloudProvider === 'aws' && !!deploymentId
-      ? deploymentId
-      : cloud?.serverless?.projectId;
+  if (cloud?.isServerlessEnabled && cloud?.serverless?.projectId) {
+    elasticResourceId = cloud.serverless.projectId;
+  }
+
+  if (cloud?.isCloudEnabled && deploymentId) {
+    elasticResourceId = deploymentId;
+  }
 
   if (!elasticResourceId) return undefined;
 
