@@ -36,6 +36,7 @@
     "@kbn/core-http-browser",
     "@kbn/features-plugin",
     "@kbn/core-logging-server-mocks",
-    "@kbn/i18n"
+    "@kbn/i18n",
+    "@kbn/onechat-plugin"
   ]
 }
