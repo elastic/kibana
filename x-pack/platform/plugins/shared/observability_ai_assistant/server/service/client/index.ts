@@ -248,17 +248,11 @@ export class ObservabilityAIAssistantClient {
             applicationInstructions: functionClient.getInstructions(),
             kbUserInstructions,
             apiUserInstructions,
-<<<<<<< HEAD
-            availableFunctionNames: functionClient.getFunctions().map((fn) => fn.definition.name),
-          });
-        }),
-=======
             availableFunctionNames: disableFunctions
               ? []
               : functionClient.getFunctions().map((fn) => fn.definition.name),
-          })
-        ),
->>>>>>> 2ae790506fc ([Obs AI Assistant] Avoid adding tool instructions to the system message when tools are disabled (#223278))
+          });
+        }),
         shareReplay()
       );
 
@@ -502,10 +496,7 @@ export class ObservabilityAIAssistantClient {
 
     this.dependencies.logger.debug(
       () =>
-        `Options for inference client for name: "${name}" before anonymization: ${JSON.stringify({
-          ...options,
-          messages,
-        })}`
+        `Calling inference client with for name: "${name}" with options: ${JSON.stringify(options)}`
     );
 
     if (stream) {
