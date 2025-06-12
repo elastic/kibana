@@ -23,7 +23,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { FEEDBACK_LINK } from '@kbn/esql-utils';
-import type { RecommendedQuery } from '@kbn/esql-types';
+import { type RecommendedQuery, REGISTRY_EXTENSIONS_ROUTE } from '@kbn/esql-types';
 import {
   getRecommendedQueries,
   getRecommendedQueriesTemplatesFromExtensions,
@@ -72,7 +72,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
       try {
         // Fetch ESQL solutions recommended queries from the registry
         const queriesFromRegistry: RecommendedQuery[] = await http.get(
-          `/internal/esql_registry/extensions/${activeSolutionId}/${queryForRecommendedQueries}`
+          `${REGISTRY_EXTENSIONS_ROUTE}${activeSolutionId}/${queryForRecommendedQueries}`
         );
         // If the component is unmounted before the request completes, do not update the state
         if (cancelled) return;
@@ -100,7 +100,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
     solutionsRecommendedQueries,
   ]);
 
-  const toggleLanguageComponent = useCallback(async () => {
+  const toggleLanguageComponent = useCallback(() => {
     setIsLanguageComponentOpen(!isLanguageComponentOpen);
     setIsESQLMenuPopoverOpen(false);
   }, [isLanguageComponentOpen]);

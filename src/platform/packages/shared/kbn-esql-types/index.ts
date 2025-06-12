@@ -34,3 +34,5 @@ export {
   type InferenceEndpointsAutocompleteResult,
   type InferenceEndpointAutocompleteItem,
 } from './src/inference_endpoint_autocomplete_types';
+
+export { REGISTRY_EXTENSIONS_ROUTE } from './src/constants';
