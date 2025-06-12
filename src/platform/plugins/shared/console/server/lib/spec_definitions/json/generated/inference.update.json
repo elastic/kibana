@@ -1,0 +1,31 @@
+{
+  "inference.update": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "url_components": {
+      "task_type": [
+        "sparse_embedding",
+        "text_embedding",
+        "rerank",
+        "completion",
+        "chat_completion"
+      ]
+    },
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_inference/{inference_id}/_update",
+      "_inference/{task_type}/{inference_id}/_update"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-update",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}
