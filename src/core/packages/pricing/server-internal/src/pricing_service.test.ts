@@ -106,6 +106,17 @@ describe('PricingService', () => {
       expect(registry.get('feature1')).toBeDefined();
       expect(registry.get('feature2')).toBeDefined();
     });
+
+    it('allows checking if a product is active', async () => {
+      await service.preboot({ http: prebootHttp });
+      const setup = await service.setup({ http: setupHttp });
+
+      const isActiveObservabilityComplete = setup.isActiveProduct({
+        name: 'observability',
+        tier: 'complete',
+      });
+      expect(isActiveObservabilityComplete).toBe(true);
+    });
   });
 
   describe('#start()', () => {

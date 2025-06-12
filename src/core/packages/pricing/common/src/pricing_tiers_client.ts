@@ -33,17 +33,6 @@ export class PricingTiersClient implements IPricingTiersClient {
   ) {}
 
   /**
-   * Checks if a product is active in the current pricing tier configuration.
-   *
-   * @param product - The product to check
-   * @returns True if the product is active, false otherwise
-   * @private
-   */
-  private isActiveProduct = (product: PricingProduct) => {
-    return Boolean(this.tiers.products?.some((currentProduct) => isEqual(currentProduct, product)));
-  };
-
-  /**
    * Checks if pricing tiers are enabled in the current configuration.
    *
    * @returns True if pricing tiers are enabled, false otherwise
@@ -51,6 +40,16 @@ export class PricingTiersClient implements IPricingTiersClient {
    */
   private isEnabled = () => {
     return this.tiers.enabled;
+  };
+
+  /**
+   * Checks if a product is active in the current pricing tier configuration.
+   *
+   * @param product - The product to check
+   * @returns True if the product is active, false otherwise
+   */
+  isActiveProduct = (product: PricingProduct) => {
+    return Boolean(this.tiers.products?.some((currentProduct) => isEqual(currentProduct, product)));
   };
 
   /**

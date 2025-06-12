@@ -59,20 +59,12 @@ Here's an example of how to consume the pricing service in a plugin:
 ```typescript
 // my-plugin/server/plugin.ts
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import { PricingServiceSetup, PricingServiceStart } from '@kbn/core-pricing-server';
-
-interface MyPluginSetupDeps {
-  pricing: PricingServiceSetup;
-}
-
-interface MyPluginStartDeps {
-  pricing: PricingServiceStart;
-}
 
 export class MyPlugin implements Plugin {
-  public setup(core: CoreSetup, { pricing }: MyPluginSetupDeps) {
+  public setup(core: CoreSetup) {
     // Register features that your plugin provides
-    pricing.registerProductFeatures([
+
+    core.pricing.registerProductFeatures([
       {
         id: 'my-plugin:feature1',
         description: 'A feature for observability products',
@@ -88,12 +80,14 @@ export class MyPlugin implements Plugin {
         ],
       },
     ]);
+
+    const isActiveObservabilityComplete = core.pricing.isActiveProduct({ name: 'observability', tier: 'complete' });
   }
 
-  public start(core: CoreStart, { pricing }: MyPluginStartDeps) {
+  public start(core: CoreStart) {
     // Check if a feature is available based on the current pricing tier
-    const isFeature1Available = pricing.isFeatureAvailable('my-plugin:feature1');
-    const isFeature2Available = pricing.isFeatureAvailable('my-plugin:feature2');
+    const isFeature1Available = core.pricing.isFeatureAvailable('my-plugin:feature1');
+    const isFeature2Available = core.pricing.isFeatureAvailable('my-plugin:feature2');
     
     // Conditionally enable features based on availability
     if (isFeature1Available) {
