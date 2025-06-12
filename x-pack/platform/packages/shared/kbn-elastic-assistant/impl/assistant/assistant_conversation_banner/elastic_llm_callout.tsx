@@ -54,7 +54,7 @@ export const ElasticLlmCallout = ({ showEISCallout }: { showEISCallout: boolean 
       onDismiss={onDismiss}
       iconType="iInCircle"
       title={i18n.translate('xpack.elasticAssistant.assistant.connectors.elasticLlmCallout.title', {
-        defaultMessage: 'You are now using the Elastic-managed LLM connector',
+        defaultMessage: 'You are now using the Elastic Managed LLM connector',
       })}
       size="s"
       css={css`
