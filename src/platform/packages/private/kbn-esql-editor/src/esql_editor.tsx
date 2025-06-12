@@ -172,9 +172,8 @@ export const ESQLEditor = memo(function ESQLEditor({
     (value: string) => {
       if (!editorIsInline) {
         // preventing a race condition in the inline editor mode
-        // making sure functional tests don't fail in the non-inline mode mode, because resetting the query doesn't work
+        // making sure functional tests don't fail in the non-inline mode, because resetting the query doesn't work
         setCode(value);
-        setCodeStateOnSubmission(value);
       }
       onTextLangQueryChange({ esql: value } as AggregateQuery);
     },
@@ -230,7 +229,7 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   useEffect(() => {
     if (editor1.current) {
-      if (code !== fixedQuery && (!editorIsInline || fixedQuery !== codeWhenSubmitted)) {
+      if (code !== fixedQuery && (editorIsInline === true || fixedQuery !== codeWhenSubmitted)) {
         setCode(fixedQuery);
       }
     }
