@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { ReservedPrivilegesSet } from '@kbn/core-http-server';
 
 import type { RouteDefinitionParams } from '..';
 
@@ -39,7 +40,7 @@ export function defineInvalidateSessionsRoutes({
       },
       security: {
         authz: {
-          requiredPrivileges: ['sessionManagement'],
+          requiredPrivileges: [ReservedPrivilegesSet.superuser],
         },
       },
       options: {

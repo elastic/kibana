@@ -7,23 +7,26 @@
 
 import { i18n } from '@kbn/i18n';
 import { curry } from 'lodash';
-import axios, { AxiosError, AxiosResponse } from 'axios';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { map, getOrElse } from 'fp-ts/lib/Option';
-import { Logger } from '@kbn/core/server';
-import { ActionType, ActionTypeExecutorOptions } from '@kbn/actions-plugin/server';
+import type { AxiosError, AxiosResponse } from 'axios';
+import axios from 'axios';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import { pipe } from 'fp-ts/pipeable';
+import { map, getOrElse } from 'fp-ts/Option';
+import type { Logger } from '@kbn/core/server';
+import type { ActionType, ActionTypeExecutorOptions } from '@kbn/actions-plugin/server';
 import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
-  ActionTypeExecutorResult,
 } from '@kbn/actions-plugin/common';
 import { renderMustacheObject } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
-import { ValidatorServices } from '@kbn/actions-plugin/server/types';
+import type { ActionTypeExecutorResult, ValidatorServices } from '@kbn/actions-plugin/server/types';
+import { isValidTorqHostName } from '../../../common/torq';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
-import { promiseResult, isOk, Result } from '../lib/result_type';
+import type { Result } from '../lib/result_type';
+import { promiseResult, isOk } from '../lib/result_type';
 
 export type TorqActionType = ActionType<
   ActionTypeConfigType,
@@ -128,11 +131,11 @@ function validateActionTypeConfig(
     );
   }
 
-  if (configureUrlObj.hostname !== 'hooks.torq.io' && configureUrlObj.hostname !== 'localhost') {
+  if (!isValidTorqHostName(configureUrlObj.hostname) && configureUrlObj.hostname !== 'localhost') {
     throw new Error(
       i18n.translate('xpack.stackConnectors.torq.torqConfigurationErrorInvalidHostname', {
         defaultMessage:
-          'error configuring send to Torq action: url must begin with https://hooks.torq.io',
+          'error configuring send to Torq action: url must begin with https://hooks.torq.io or https://hooks.eu.torq.io',
       })
     );
   }

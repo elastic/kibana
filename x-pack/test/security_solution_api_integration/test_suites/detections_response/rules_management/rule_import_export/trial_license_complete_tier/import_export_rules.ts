@@ -16,7 +16,10 @@ import {
   getCreateExceptionListDetectionSchemaMock,
   getCreateExceptionListMinimalSchemaMock,
 } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
-import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import {
+  DETECTION_ENGINE_RULES_IMPORT_URL,
+  DETECTION_ENGINE_RULES_URL,
+} from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { binaryToString, getCustomQueryRuleParams } from '../../../utils';
 import {
@@ -121,7 +124,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .parse(binaryToString);
 
         await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true&overwrite_exceptions=true`)
+          .post(`${DETECTION_ENGINE_RULES_IMPORT_URL}?overwrite=true&overwrite_exceptions=true`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .attach('file', Buffer.from(body), 'rules.ndjson')
@@ -203,7 +206,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .parse(binaryToString);
 
         await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true&overwrite_exceptions=true`)
+          .post(`${DETECTION_ENGINE_RULES_IMPORT_URL}?overwrite=true&overwrite_exceptions=true`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .attach('file', Buffer.from(body), 'rules.ndjson')
@@ -294,7 +297,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .parse(binaryToString);
 
         await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true&overwrite_exceptions=true`)
+          .post(`${DETECTION_ENGINE_RULES_IMPORT_URL}?overwrite=true&overwrite_exceptions=true`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .attach('file', Buffer.from(body), 'rules.ndjson')
@@ -376,7 +379,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .parse(binaryToString);
 
         await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true&overwrite_exceptions=true`)
+          .post(`${DETECTION_ENGINE_RULES_IMPORT_URL}?overwrite=true&overwrite_exceptions=true`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .attach('file', Buffer.from(body), 'rules.ndjson')

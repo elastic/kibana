@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ComponentType, ReactWrapper, mount } from 'enzyme';
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { coreServices } from '../services/kibana_services';
@@ -29,102 +28,72 @@ jest.mock('./confirm_overlays', () => {
   };
 });
 
-const makeDefaultProps = (): DashboardListingEmptyPromptProps => ({
-  createItem: jest.fn(),
-  unsavedDashboardIds: [],
-  goToDashboard: jest.fn(),
-  setUnsavedDashboardIds: jest.fn(),
-  useSessionStorageIntegration: true,
-  disableCreateDashboardButton: false,
-});
+const renderDashboardListingEmptyPrompt = (props: Partial<DashboardListingEmptyPromptProps> = {}) =>
+  render(
+    <DashboardListingEmptyPrompt
+      createItem={jest.fn()}
+      goToDashboard={jest.fn()}
+      setUnsavedDashboardIds={jest.fn()}
+      unsavedDashboardIds={[]}
+      useSessionStorageIntegration={true}
+      disableCreateDashboardButton={false}
+      {...props}
+    />,
+    { wrapper: I18nProvider }
+  );
 
-function mountWith({
-  props: incomingProps,
-}: {
-  props?: Partial<DashboardListingEmptyPromptProps>;
-}) {
-  const props = { ...makeDefaultProps(), ...incomingProps };
-  const wrappingComponent: React.FC<{
-    children: React.ReactNode;
-  }> = ({ children }) => {
-    return <I18nProvider>{children}</I18nProvider>;
-  };
-  const component = mount(<DashboardListingEmptyPrompt {...props} />, {
-    wrappingComponent: wrappingComponent as ComponentType<{}>,
-  });
-  return { component, props };
-}
-
-test('renders readonly empty prompt when showWriteControls is off', async () => {
-  (coreServices.application.capabilities as any).dashboard.showWriteControls = false;
-
-  let component: ReactWrapper;
-  await act(async () => {
-    ({ component } = mountWith({}));
-  });
-
-  component!.update();
-  expect(component!.find('EuiLink').length).toBe(0);
-});
-
-test('renders empty prompt with link when showWriteControls is on', async () => {
-  (coreServices.application.capabilities as any).dashboard.showWriteControls = true;
-
-  let component: ReactWrapper;
-  await act(async () => {
-    ({ component } = mountWith({}));
-  });
-
-  component!.update();
-  expect(component!.find('EuiLink').length).toBe(1);
-});
+test.each([
+  [false, false],
+  [true, true],
+])(
+  'renders sample data link empty prompt with link when showWriteControls is true only',
+  async (showWriteControls, shouldBeInDocument) => {
+    (coreServices.application.capabilities as any).dashboard_v2.showWriteControls =
+      showWriteControls;
+    renderDashboardListingEmptyPrompt();
+    const button = screen.queryByRole('button', { name: /add some sample data/i });
+    if (shouldBeInDocument) {
+      expect(button).toBeInTheDocument();
+    } else {
+      expect(button).not.toBeInTheDocument();
+    }
+  }
+);
 
 test('renders disabled action button when disableCreateDashboardButton is true', async () => {
-  (coreServices.application.capabilities as any).dashboard.showWriteControls = true;
-
-  let component: ReactWrapper;
-  await act(async () => {
-    ({ component } = mountWith({ props: { disableCreateDashboardButton: true } }));
-  });
-
-  component!.update();
-
-  expect(component!.find(`[data-test-subj="newItemButton"]`).first().prop('disabled')).toEqual(
-    true
-  );
+  (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = true;
+  renderDashboardListingEmptyPrompt({ disableCreateDashboardButton: true });
+  expect(screen.getByTestId('newItemButton')).toBeDisabled();
 });
 
 test('renders continue button when no dashboards exist but one is in progress', async () => {
-  (coreServices.application.capabilities as any).dashboard.showWriteControls = true;
-  let component: ReactWrapper;
-  let props: DashboardListingEmptyPromptProps;
-  await act(async () => {
-    ({ component, props } = mountWith({
-      props: { unsavedDashboardIds: ['newDashboard'], useSessionStorageIntegration: true },
-    }));
-  });
-  component!.update();
-  await act(async () => {
-    // EuiButton is used for the Continue button
-    const continueButton = component!.find('EuiButton');
-    expect(continueButton.length).toBe(1);
-    continueButton.find('button').simulate('click');
-  });
-  expect(props!.goToDashboard).toHaveBeenCalled();
+  (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = true;
+
+  const props = {
+    goToDashboard: jest.fn(),
+    unsavedDashboardIds: ['newDashboard'],
+    useSessionStorageIntegration: true,
+  };
+
+  renderDashboardListingEmptyPrompt(props);
+
+  // EuiButton is rendered as a button with text "Continue editing"
+  const continueButton = screen.getByRole('button', { name: /continue editing/i });
+  await userEvent.click(continueButton);
+
+  expect(props.goToDashboard).toHaveBeenCalled();
 });
 
 test('renders discard button when no dashboards exist but one is in progress', async () => {
-  (coreServices.application.capabilities as any).dashboard.showWriteControls = true;
-  let component: ReactWrapper;
-  await act(async () => {
-    ({ component } = mountWith({
-      props: { unsavedDashboardIds: ['coolId'], useSessionStorageIntegration: true },
-    }));
+  (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = true;
+
+  renderDashboardListingEmptyPrompt({
+    unsavedDashboardIds: ['coolId'],
+    useSessionStorageIntegration: true,
   });
-  component!.update();
-  await act(async () => {
-    // EuiButtonEmpty is used for the discard button
-    component!.find('EuiButtonEmpty').simulate('click');
-  });
+
+  const discardButton = screen.getByRole('button', { name: /reset changes/i });
+  await userEvent.click(discardButton);
+
   expect(confirmDiscardUnsavedChanges).toHaveBeenCalled();
 });

@@ -15,10 +15,9 @@ import {
   ImportRulesRequestQuery,
   ImportRulesResponse,
 } from '../../../../../../../common/api/detection_engine/rule_management';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
+import { DETECTION_ENGINE_RULES_IMPORT_URL } from '../../../../../../../common/constants';
 import type { ConfigType } from '../../../../../../config';
 import type { HapiReadableStream, SecuritySolutionPluginRouter } from '../../../../../../types';
-import type { ImportRuleResponse } from '../../../../routes/utils';
 import {
   buildSiemResponse,
   createBulkErrorObject,
@@ -27,10 +26,10 @@ import {
 } from '../../../../routes/utils';
 import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { importRuleActionConnectors } from '../../../logic/import/action_connectors/import_rule_action_connectors';
+import { validateRuleActions } from '../../../logic/import/action_connectors/validate_rule_actions';
 import { createRuleSourceImporter } from '../../../logic/import/rule_source_importer';
 import { importRules } from '../../../logic/import/import_rules';
-// eslint-disable-next-line no-restricted-imports
-import { importRulesLegacy } from '../../../logic/import/import_rules_legacy';
+
 import { createPromiseFromRuleImportStream } from '../../../logic/import/create_promise_from_rule_import_stream';
 import { importRuleExceptions } from '../../../logic/import/import_rule_exceptions';
 import { isRuleToImport } from '../../../logic/import/utils';
@@ -39,6 +38,7 @@ import {
   migrateLegacyActionsIds,
 } from '../../../utils/utils';
 import { RULE_MANAGEMENT_IMPORT_EXPORT_SOCKET_TIMEOUT_MS } from '../../timeouts';
+import { createPrebuiltRuleObjectsClient } from '../../../../prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
 
 const CHUNK_PARSED_OBJECT_SIZE = 50;
 
@@ -46,7 +46,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
   router.versioned
     .post({
       access: 'public',
-      path: `${DETECTION_ENGINE_RULES_URL}/_import`,
+      path: DETECTION_ENGINE_RULES_IMPORT_URL,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution'],
@@ -85,7 +85,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             'licensing',
           ]);
 
-          const { prebuiltRulesCustomizationEnabled } = config.experimentalFeatures;
+          const rulesClient = await ctx.alerting.getRulesClient();
           const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
           const actionsClient = ctx.actions.getActionsClient();
           const actionSOClient = ctx.core.savedObjects.getClient({
@@ -124,13 +124,9 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             maxExceptionsImportSize: objectLimit,
           });
           // report on duplicate rules
-          const [duplicateIdErrors, parsedObjectsWithoutDuplicateErrors] =
-            getTupleDuplicateErrorsAndUniqueRules(rules, request.query.overwrite);
-
-          const migratedParsedObjectsWithoutDuplicateErrors = await migrateLegacyActionsIds(
-            parsedObjectsWithoutDuplicateErrors,
-            actionSOClient,
-            actionsClient
+          const [duplicateIdErrors, rulesToImportOrErrors] = getTupleDuplicateErrorsAndUniqueRules(
+            rules,
+            request.query.overwrite
           );
 
           // import actions-connectors
@@ -139,49 +135,46 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             success: actionConnectorSuccess,
             warnings: actionConnectorWarnings,
             errors: actionConnectorErrors,
-            rulesWithMigratedActions,
           } = await importRuleActionConnectors({
             actionConnectors,
-            actionsClient,
             actionsImporter,
-            rules: migratedParsedObjectsWithoutDuplicateErrors,
             overwrite: request.query.overwrite_action_connectors,
           });
 
-          // rulesWithMigratedActions: Is returned only in case connectors were exported from different namespace and the
-          // original rules actions' ids were replaced with new destinationIds
-          const parsedRuleStream = actionConnectorErrors.length
-            ? []
-            : rulesWithMigratedActions || migratedParsedObjectsWithoutDuplicateErrors;
+          const migratedRulesToImportOrErrors = await migrateLegacyActionsIds(
+            rulesToImportOrErrors,
+            actionSOClient,
+            actionsClient
+          );
 
           const ruleSourceImporter = createRuleSourceImporter({
-            config,
             context: ctx.securitySolution,
             prebuiltRuleAssetsClient: createPrebuiltRuleAssetsClient(savedObjectsClient),
+            prebuiltRuleObjectsClient: createPrebuiltRuleObjectsClient(rulesClient),
           });
 
-          const [parsedRules, parsedRuleErrors] = partition(isRuleToImport, parsedRuleStream);
-          const ruleChunks = chunk(CHUNK_PARSED_OBJECT_SIZE, parsedRules);
+          const [parsedRules, parsedRuleErrors] = partition(
+            isRuleToImport,
+            migratedRulesToImportOrErrors
+          );
 
-          let importRuleResponse: ImportRuleResponse[] = [];
+          // After importing the actions and migrating action IDs on rules to import,
+          // validate that all actions referenced by rules exist
+          // Filter out rules that reference non-existent actions
+          const { validatedActionRules, missingActionErrors } = await validateRuleActions({
+            actionsClient,
+            rules: parsedRules,
+          });
 
-          if (prebuiltRulesCustomizationEnabled) {
-            importRuleResponse = await importRules({
-              ruleChunks,
-              overwriteRules: request.query.overwrite,
-              allowMissingConnectorSecrets: !!actionConnectors.length,
-              ruleSourceImporter,
-              detectionRulesClient,
-            });
-          } else {
-            importRuleResponse = await importRulesLegacy({
-              ruleChunks,
-              overwriteRules: request.query.overwrite,
-              allowMissingConnectorSecrets: !!actionConnectors.length,
-              detectionRulesClient,
-              savedObjectsClient,
-            });
-          }
+          const ruleChunks = chunk(CHUNK_PARSED_OBJECT_SIZE, validatedActionRules);
+
+          const importRuleResponse = await importRules({
+            ruleChunks,
+            overwriteRules: request.query.overwrite,
+            allowMissingConnectorSecrets: !!actionConnectors.length,
+            ruleSourceImporter,
+            detectionRulesClient,
+          });
 
           const parseErrors = parsedRuleErrors.map((error) =>
             createBulkErrorObject({
@@ -192,9 +185,9 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
           const importErrors = importRuleResponse.filter(isBulkError);
           const errors = [
             ...parseErrors,
-            ...actionConnectorErrors,
             ...duplicateIdErrors,
             ...importErrors,
+            ...missingActionErrors,
           ];
 
           const successes = importRuleResponse.filter((resp) => {

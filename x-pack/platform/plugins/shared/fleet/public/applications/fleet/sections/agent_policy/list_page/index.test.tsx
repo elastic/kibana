@@ -19,8 +19,18 @@ jest.mock('../../../hooks', () => ({
   useGetAgentPoliciesQuery: jest.fn().mockReturnValue({
     data: {
       items: [
-        { id: 'not_managed_policy', is_managed: false, updated_at: '2023-04-06T07:19:29.892Z' },
-        { id: 'managed_policy', is_managed: true, updated_at: '2023-04-07T07:19:29.892Z' },
+        {
+          id: 'not_managed_policy',
+          is_managed: false,
+          updated_at: '2023-04-06T07:19:29.892Z',
+          agents: 1,
+        },
+        {
+          id: 'managed_policy',
+          is_managed: true,
+          updated_at: '2023-04-07T07:19:29.892Z',
+          agents: 1,
+        },
       ],
       total: 2,
     } as GetAgentPoliciesResponse,

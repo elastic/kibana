@@ -2068,7 +2068,7 @@ describe('Lens migrations', () => {
         );
       });
 
-      it('should migrate disabled fitRowToContent to new rowHeight: "single"', () => {
+      it('should migrate disabled fitRowToContent to new rowHeight: "custom" with 1 line height', () => {
         const result = SavedObjectsUtils.getMigrationFunction(migrations['8.2.0'])(
           getExample(false),
           context
@@ -2078,7 +2078,7 @@ describe('Lens migrations', () => {
 
         expect(result.attributes.state.visualization as VisState820).toEqual(
           expect.objectContaining({
-            rowHeight: 'single',
+            rowHeight: 'custom',
             rowHeightLines: 1,
           })
         );

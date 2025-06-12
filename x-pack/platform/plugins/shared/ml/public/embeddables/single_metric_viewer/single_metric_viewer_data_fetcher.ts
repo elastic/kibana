@@ -31,8 +31,6 @@ interface SingleMetricViewerData {
 
 export const initializeSingleMetricViewerDataFetcher = (
   api: SingleMetricViewerEmbeddableApi,
-  dataLoading: BehaviorSubject<boolean | undefined>,
-  blockingError: BehaviorSubject<Error | undefined>,
   timefilter: TimefilterContract
 ) => {
   const singleMetricViewerData$ = new BehaviorSubject<SingleMetricViewerData>({

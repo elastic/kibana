@@ -10,10 +10,10 @@ import { isEmpty } from 'lodash';
 import type { GetLensAttributes, LensEmbeddableDataTableColumn } from '../../../types';
 import { COUNT_OF, TOP_VALUE } from '../../../translations';
 
-const layerId = uuidv4();
-const topValuesOfStackByFieldColumnId = uuidv4();
-const countColumnId = uuidv4();
-const topValuesOfBreakdownFieldColumnId = uuidv4();
+const layerId = `layer-id-${uuidv4()}`;
+const topValuesOfStackByFieldColumnId = `top-values-of-stack-by-field-column-id-${uuidv4()}`;
+const countColumnId = `count-column-id-${uuidv4()}`;
+const topValuesOfBreakdownFieldColumnId = `top-values-of-breakdown-field-column-id-${uuidv4()}`;
 const defaultColumns = [
   {
     columnId: topValuesOfStackByFieldColumnId,

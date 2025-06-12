@@ -3,7 +3,7 @@
 exports[`get_signals_template backwards compatibility mappings for version 45 should match snapshot 1`] = `
 Object {
   "_meta": Object {
-    "aliases_version": 4,
+    "aliases_version": 5,
     "version": 45,
   },
   "dynamic": false,
@@ -531,6 +531,20 @@ Object {
       },
       "type": "keyword",
     },
+    "kibana.alert.rule.consumer": Object {
+      "script": Object {
+        "source": "emit('siem')",
+      },
+      "type": "keyword",
+    },
+    "kibana.alert.rule.rule_type_id": Object {
+      "script": Object {
+        "source": "
+  String rule_type = doc['kibana.alert.rule.type'].value;
+  if (rule_type == 'eql') return emit('siem.eqlRule');if (rule_type == 'esql') return emit('siem.esqlRule');if (rule_type == 'machine_learning') return emit('siem.mlRule');if (rule_type == 'query') return emit('siem.queryRule');if (rule_type == 'saved_query') return emit('siem.savedQueryRule');if (rule_type == 'threat_match') return emit('siem.indicatorRule');if (rule_type == 'threshold') return emit('siem.thresholdRule');if (rule_type == 'new_terms') return emit('siem.newTermsRule');",
+      },
+      "type": "keyword",
+    },
   },
 }
 `;
@@ -538,7 +552,7 @@ Object {
 exports[`get_signals_template backwards compatibility mappings for version 57 should match snapshot 1`] = `
 Object {
   "_meta": Object {
-    "aliases_version": 4,
+    "aliases_version": 5,
     "version": 57,
   },
   "dynamic": false,
@@ -1059,6 +1073,22 @@ Object {
       "type": "object",
     },
   },
+  "runtime": Object {
+    "kibana.alert.rule.consumer": Object {
+      "script": Object {
+        "source": "emit('siem')",
+      },
+      "type": "keyword",
+    },
+    "kibana.alert.rule.rule_type_id": Object {
+      "script": Object {
+        "source": "
+  String rule_type = doc['kibana.alert.rule.type'].value;
+  if (rule_type == 'eql') return emit('siem.eqlRule');if (rule_type == 'esql') return emit('siem.esqlRule');if (rule_type == 'machine_learning') return emit('siem.mlRule');if (rule_type == 'query') return emit('siem.queryRule');if (rule_type == 'saved_query') return emit('siem.savedQueryRule');if (rule_type == 'threat_match') return emit('siem.indicatorRule');if (rule_type == 'threshold') return emit('siem.thresholdRule');if (rule_type == 'new_terms') return emit('siem.newTermsRule');",
+      },
+      "type": "keyword",
+    },
+  },
 }
 `;
 
@@ -1075,8 +1105,8 @@ Object {
     },
     "mappings": Object {
       "_meta": Object {
-        "aliases_version": 4,
-        "version": 77,
+        "aliases_version": 5,
+        "version": 87,
       },
       "dynamic": false,
       "properties": Object {
@@ -6739,6 +6769,22 @@ Object {
           },
         },
       },
+      "runtime": Object {
+        "kibana.alert.rule.consumer": Object {
+          "script": Object {
+            "source": "emit('siem')",
+          },
+          "type": "keyword",
+        },
+        "kibana.alert.rule.rule_type_id": Object {
+          "script": Object {
+            "source": "
+  String rule_type = doc['kibana.alert.rule.type'].value;
+  if (rule_type == 'eql') return emit('siem.eqlRule');if (rule_type == 'esql') return emit('siem.esqlRule');if (rule_type == 'machine_learning') return emit('siem.mlRule');if (rule_type == 'query') return emit('siem.queryRule');if (rule_type == 'saved_query') return emit('siem.savedQueryRule');if (rule_type == 'threat_match') return emit('siem.indicatorRule');if (rule_type == 'threshold') return emit('siem.thresholdRule');if (rule_type == 'new_terms') return emit('siem.newTermsRule');",
+          },
+          "type": "keyword",
+        },
+      },
     },
     "settings": Object {
       "index": Object {
@@ -6754,6 +6800,6 @@ Object {
       },
     },
   },
-  "version": 77,
+  "version": 87,
 }
 `;

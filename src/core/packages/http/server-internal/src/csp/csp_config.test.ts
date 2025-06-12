@@ -36,7 +36,7 @@ describe('CspConfig', () => {
         "disableEmbedding": false,
         "disableUnsafeEval": true,
         "header": "script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'",
-        "reportOnlyHeader": "form-action 'report-sample' 'self'",
+        "reportOnlyHeader": "form-action 'report-sample' 'self'; object-src 'report-sample' 'none'",
         "strict": true,
         "warnLegacyBrowsers": true,
       }

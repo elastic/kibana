@@ -18,6 +18,7 @@ import {
   EuiProgress,
   useEuiBackgroundColor,
   useEuiPaddingSize,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
@@ -39,12 +40,13 @@ const aggregationToggleButtons = [
 ];
 
 export const OptionsListPopoverFooter = () => {
-  const { api, stateManager } = useOptionsListContext();
+  const { euiTheme } = useEuiTheme();
+  const { componentApi } = useOptionsListContext();
 
   const [exclude, loading, allowExpensiveQueries] = useBatchedPublishingSubjects(
-    stateManager.exclude,
-    api.dataLoading,
-    api.parentApi.allowExpensiveQueries$
+    componentApi.exclude$,
+    componentApi.dataLoading$,
+    componentApi.parentApi.allowExpensiveQueries$
   );
 
   return (
@@ -79,7 +81,9 @@ export const OptionsListPopoverFooter = () => {
               legend={OptionsListStrings.popover.getIncludeExcludeLegend()}
               options={aggregationToggleButtons}
               idSelected={exclude ? 'optionsList__excludeResults' : 'optionsList__includeResults'}
-              onChange={(optionId) => api.setExclude(optionId === 'optionsList__excludeResults')}
+              onChange={(optionId) =>
+                componentApi.setExclude(optionId === 'optionsList__excludeResults')
+              }
               buttonSize="compressed"
               data-test-subj="optionsList__includeExcludeButtonGroup"
             />
@@ -88,7 +92,7 @@ export const OptionsListPopoverFooter = () => {
             <EuiFlexItem data-test-subj="optionsList-allow-expensive-queries-warning" grow={false}>
               <EuiIconTip
                 type="warning"
-                color="warning"
+                color={euiTheme.colors.textWarning}
                 content={OptionsListStrings.popover.getAllowExpensiveQueriesWarning()}
                 aria-label={OptionsListStrings.popover.getAllowExpensiveQueriesWarning()}
               />

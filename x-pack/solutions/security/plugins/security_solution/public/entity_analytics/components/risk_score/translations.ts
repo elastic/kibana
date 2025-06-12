@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { EntityType } from '../../../../common/entity_analytics/types';
 
 export const HOST = i18n.translate('xpack.securitySolution.riskScore.overview.hostTitle', {
   defaultMessage: 'Host',
@@ -24,6 +24,14 @@ export const USERS = i18n.translate('xpack.securitySolution.riskScore.overview.u
   defaultMessage: 'Users',
 });
 
+export const SERVICE = i18n.translate('xpack.securitySolution.riskScore.overview.serviceTitle', {
+  defaultMessage: 'Service',
+});
+
+export const SERVICES = i18n.translate('xpack.securitySolution.riskScore.overview.services', {
+  defaultMessage: 'Services',
+});
+
 export const ENTITY = i18n.translate('xpack.securitySolution.riskScore.overview.entityTitle', {
   defaultMessage: 'Entity',
 });
@@ -32,7 +40,7 @@ export const ENTITIES = i18n.translate('xpack.securitySolution.riskScore.overvie
   defaultMessage: 'Entities',
 });
 
-export const RISK_SCORE_TITLE = (riskEntity: RiskScoreEntity) =>
+export const RISK_SCORE_TITLE = (riskEntity: EntityType) =>
   i18n.translate('xpack.securitySolution.riskScore.overview.riskScoreTitle', {
     defaultMessage: '{riskEntity} Risk Score',
     values: {
@@ -47,7 +55,7 @@ export const RISK_SCORING_TITLE = i18n.translate(
   }
 );
 
-export const ENTITY_RISK_LEVEL = (riskEntity?: RiskScoreEntity) =>
+export const ENTITY_RISK_LEVEL = (riskEntity?: EntityType) =>
   riskEntity
     ? i18n.translate('xpack.securitySolution.entityAnalytics.riskDashboard.riskLevelTitle', {
         defaultMessage: '{riskEntity} risk level',
@@ -63,7 +71,7 @@ export const ENTITY_RISK_LEVEL = (riskEntity?: RiskScoreEntity) =>
       );
 
 export const getRiskEntityTranslation = (
-  riskEntity?: RiskScoreEntity,
+  riskEntity?: EntityType,
   lowercase = false,
   plural = false
 ) => {
@@ -72,14 +80,16 @@ export const getRiskEntityTranslation = (
 };
 
 export const getRiskEntityTranslationText = (
-  riskEntity: RiskScoreEntity | undefined,
+  riskEntity: EntityType | undefined,
   plural: boolean
 ) => {
   switch (riskEntity) {
-    case RiskScoreEntity.host:
+    case EntityType.host:
       return plural ? HOSTS : HOST;
-    case RiskScoreEntity.user:
+    case EntityType.user:
       return plural ? USERS : USER;
+    case EntityType.service:
+      return plural ? SERVICES : SERVICE;
     default:
       return plural ? ENTITIES : ENTITY;
   }

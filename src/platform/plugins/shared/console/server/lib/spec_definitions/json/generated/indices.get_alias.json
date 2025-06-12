@@ -29,7 +29,7 @@
       "{index}/_alias/{name}",
       "{index}/_alias"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-aliases.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-alias",
     "availability": {
       "stack": true,
       "serverless": true

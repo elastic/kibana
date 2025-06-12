@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { EuiIcon, EuiIconProps } from '@elastic/eui';
-import { dynamic } from '@kbn/shared-ux-utility';
+// TODO: can be removed once added to EUI.
+import assistantIcon from './svg/assistant';
 
 /**
  * Props for the AI Assistant icon.
@@ -18,7 +19,5 @@ export type AssistantIconProps = Omit<EuiIconProps, 'type'>;
  * Default Elastic AI Assistant icon.
  */
 export const AssistantIcon = ({ size = 'm', ...rest }: AssistantIconProps) => {
-  // TODO: can be removed once added to EUI.
-  const type = dynamic(() => import('./svg/assistant'));
-  return <EuiIcon {...{ type, size, ...rest }} />;
+  return <EuiIcon {...{ type: assistantIcon, size, ...rest }} />;
 };

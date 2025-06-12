@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { SavedObjectsBulkResponse, SavedObjectsClientContract, Logger } from '@kbn/core/server';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { RawAction, ActionTypeRegistryContract, InMemoryConnector } from './types';
+import type {
+  SavedObjectsBulkResponse,
+  SavedObjectsClientContract,
+  Logger,
+} from '@kbn/core/server';
+import type { TaskPriority, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { RawAction, ActionTypeRegistryContract, InMemoryConnector } from './types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
-import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
+import type { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
 import { extractSavedObjectReferences, isSavedObjectExecutionSource } from './lib';
-import { ActionsConfigurationUtilities } from './actions_config';
+import type { ActionsConfigurationUtilities } from './actions_config';
 import { hasReachedTheQueuedActionsLimit } from './lib/has_reached_queued_actions_limit';
 
 interface CreateExecuteFunctionOptions {
@@ -28,9 +32,11 @@ export interface ExecuteOptions
   id: string;
   uuid?: string;
   spaceId: string;
+  apiKeyId?: string;
   apiKey: string | null;
   executionId: string;
   actionTypeId: string;
+  priority?: TaskPriority;
 }
 
 interface ActionTaskParams
@@ -166,15 +172,17 @@ export function createBulkExecutionEnqueuerFunction({
           executionId: actionToExecute.executionId,
           consumer: actionToExecute.consumer,
           relatedSavedObjects: relatedSavedObjectWithRefs,
+          apiKeyId: actionToExecute.apiKeyId,
           ...(actionToExecute.source ? { source: actionToExecute.source.type } : {}),
         },
         references: taskReferences,
       };
     });
+
     const actionTaskParamsRecords: SavedObjectsBulkResponse<ActionTaskParams> =
       await unsecuredSavedObjectsClient.bulkCreate(actions, { refresh: false });
 
-    const taskInstances = actionTaskParamsRecords.saved_objects.map((so) => {
+    const taskInstances = actionTaskParamsRecords.saved_objects.map((so, index) => {
       const actionId = so.attributes.actionId;
       return {
         taskType: `actions:${actionTypeIds[actionId]}`,
@@ -184,6 +192,7 @@ export function createBulkExecutionEnqueuerFunction({
         },
         state: {},
         scope: ['actions'],
+        ...(runnableActions[index]?.priority ? { priority: runnableActions[index].priority } : {}),
       };
     });
 

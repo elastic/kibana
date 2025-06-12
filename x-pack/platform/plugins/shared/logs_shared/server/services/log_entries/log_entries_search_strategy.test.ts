@@ -16,7 +16,7 @@ import {
 import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 import { ISearchStrategy, SearchStrategyDependencies } from '@kbn/data-plugin/server';
 import { createSearchSessionsClientMock } from '@kbn/data-plugin/server/search/mocks';
-import { createResolvedLogViewMock } from '../../../common/log_views/resolved_log_view.mock';
+import { createResolvedLogViewLazyMock } from '../../../common/log_views/resolved_log_view.mock';
 import { createLogViewsClientMock } from '../log_views/log_views_client.mock';
 import { createLogViewsServiceStartMock } from '../log_views/log_views_service.mock';
 import {
@@ -39,7 +39,7 @@ describe('LogEntries search strategy', () => {
 
     const dataMock = createDataPluginMock(esSearchStrategyMock);
     const logViewsClientMock = createLogViewsClientMock();
-    logViewsClientMock.getResolvedLogView.mockResolvedValue(createResolvedLogViewMock());
+    logViewsClientMock.getResolvedLogView.mockResolvedValue(createResolvedLogViewLazyMock());
     const logViewsMock = createLogViewsServiceStartMock();
     logViewsMock.getScopedClient.mockReturnValue(logViewsClientMock);
     const mockDependencies = createSearchStrategyDependenciesMock();
@@ -70,17 +70,15 @@ describe('LogEntries search strategy', () => {
       expect.objectContaining({
         params: expect.objectContaining({
           index: 'log-indices-*',
-          body: expect.objectContaining({
-            fields: expect.arrayContaining(['event.dataset', 'message']),
-            runtime_mappings: {
-              runtime_field: {
-                type: 'keyword',
-                script: {
-                  source: 'emit("runtime value")',
-                },
+          fields: expect.arrayContaining(['event.dataset', 'message']),
+          runtime_mappings: {
+            runtime_field: {
+              type: 'keyword',
+              script: {
+                source: 'emit("runtime value")',
               },
             },
-          }),
+          },
         }),
       }),
       expect.anything(),
@@ -122,7 +120,7 @@ describe('LogEntries search strategy', () => {
     });
     const dataMock = createDataPluginMock(esSearchStrategyMock);
     const logViewsClientMock = createLogViewsClientMock();
-    logViewsClientMock.getResolvedLogView.mockResolvedValue(createResolvedLogViewMock());
+    logViewsClientMock.getResolvedLogView.mockResolvedValue(createResolvedLogViewLazyMock());
     const logViewsMock = createLogViewsServiceStartMock();
     logViewsMock.getScopedClient.mockReturnValue(logViewsClientMock);
     const mockDependencies = createSearchStrategyDependenciesMock();
@@ -206,7 +204,7 @@ describe('LogEntries search strategy', () => {
     });
     const dataMock = createDataPluginMock(esSearchStrategyMock);
     const logViewsClientMock = createLogViewsClientMock();
-    logViewsClientMock.getResolvedLogView.mockResolvedValue(createResolvedLogViewMock());
+    logViewsClientMock.getResolvedLogView.mockResolvedValue(createResolvedLogViewLazyMock());
     const logViewsMock = createLogViewsServiceStartMock();
     logViewsMock.getScopedClient.mockReturnValue(logViewsClientMock);
     const mockDependencies = createSearchStrategyDependenciesMock();
@@ -246,7 +244,7 @@ describe('LogEntries search strategy', () => {
     });
     const dataMock = createDataPluginMock(esSearchStrategyMock);
     const logViewsClientMock = createLogViewsClientMock();
-    logViewsClientMock.getResolvedLogView.mockResolvedValue(createResolvedLogViewMock());
+    logViewsClientMock.getResolvedLogView.mockResolvedValue(createResolvedLogViewLazyMock());
     const logViewsMock = createLogViewsServiceStartMock();
     logViewsMock.getScopedClient.mockReturnValue(logViewsClientMock);
 

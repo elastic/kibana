@@ -8,10 +8,13 @@
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { BoundChatCompleteOptions } from '@kbn/inference-common';
-import type { BoundInferenceClient, InferenceClient } from './types';
+import type {
+  BoundChatCompleteOptions,
+  BoundInferenceClient,
+  InferenceClient,
+} from '@kbn/inference-common';
 import { createInferenceClient } from './inference_client';
-import { bindClient } from './bind_client';
+import { bindClient } from '../../common/inference_client/bind_client';
 
 interface UnboundOptions {
   request: KibanaRequest;
@@ -29,7 +32,7 @@ export function createClient(
   options: UnboundOptions | BoundOptions
 ): BoundInferenceClient | InferenceClient {
   const { actions, request, logger } = options;
-  const client = createInferenceClient({ request, actions, logger });
+  const client = createInferenceClient({ request, actions, logger: logger.get('client') });
   if ('bindTo' in options) {
     return bindClient(client, options.bindTo);
   } else {

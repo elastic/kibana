@@ -58,7 +58,7 @@ describe('createRegisteredAttachmentUserActionBuilder', () => {
 
   registry.register(item);
 
-  const comment = builderArgs.comments[0];
+  const attachment = builderArgs.attachments[0];
 
   const userActionBuilderArgs = {
     userAction: builderArgs.userAction,
@@ -68,7 +68,7 @@ describe('createRegisteredAttachmentUserActionBuilder', () => {
     getId,
     getAttachmentViewProps,
     isLoading: false,
-    comment,
+    attachment,
     registry,
   };
 
@@ -97,7 +97,7 @@ describe('createRegisteredAttachmentUserActionBuilder', () => {
     expect(getAttachmentViewProps).toHaveBeenCalled();
     expect(getAttachmentViewObject).toBeCalledWith({
       ...viewProps,
-      attachmentId: comment.id,
+      attachmentId: attachment.id,
       caseData: { id: builderArgs.caseData.id, title: builderArgs.caseData.title },
     });
   });
@@ -156,6 +156,7 @@ describe('createRegisteredAttachmentUserActionBuilder', () => {
     const userAction =
       createRegisteredAttachmentUserActionBuilder(userActionBuilderArgs).build()[0];
 
+    // eslint-disable-next-line testing-library/no-node-access
     render(userAction.children);
 
     expect(await screen.findByText('My component')).toBeInTheDocument();

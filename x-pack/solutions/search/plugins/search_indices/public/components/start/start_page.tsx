@@ -8,16 +8,18 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiLoadingLogo, EuiPageTemplate } from '@elastic/eui';
+import { EuiLoadingLogo } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { useKibana } from '../../hooks/use_kibana';
+import { generateRandomIndexName } from '../../utils/indices';
+import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
 import { useIndicesStatusQuery } from '../../hooks/api/use_indices_status';
 
 import { useIndicesRedirect } from './hooks/use_indices_redirect';
 import { ElasticsearchStart } from './elasticsearch_start';
 import { LoadIndicesStatusError } from '../shared/load_indices_status_error';
-import { IndexManagementBreadcrumbs } from '../shared/breadcrumbs';
+import { useIndexManagementBreadcrumbs } from '../../hooks/use_index_management_breadcrumbs';
 import { usePageChrome } from '../../hooks/use_page_chrome';
 
 const PageTitle = i18n.translate('xpack.searchIndices.startPage.docTitle', {
@@ -25,7 +27,9 @@ const PageTitle = i18n.translate('xpack.searchIndices.startPage.docTitle', {
 });
 
 export const ElasticsearchStartPage = () => {
-  const { console: consolePlugin } = useKibana().services;
+  const { console: consolePlugin, history, searchNavigation } = useKibana().services;
+  const indexName = useMemo(() => generateRandomIndexName(), []);
+  const { data: userPrivileges } = useUserPrivilegesQuery(indexName);
   const {
     data: indicesData,
     isInitialLoading,
@@ -33,22 +37,30 @@ export const ElasticsearchStartPage = () => {
     error: indicesFetchError,
   } = useIndicesStatusQuery();
 
-  usePageChrome(PageTitle, [...IndexManagementBreadcrumbs, { text: PageTitle }]);
+  const indexManagementBreadcrumbs = useIndexManagementBreadcrumbs();
+  usePageChrome(PageTitle, [
+    ...indexManagementBreadcrumbs,
+    {
+      text: PageTitle,
+    },
+  ]);
 
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
   );
-  useIndicesRedirect(indicesData);
+
+  useIndicesRedirect(indicesData, userPrivileges);
 
   return (
-    <EuiPageTemplate
+    <KibanaPageTemplate
       offset={0}
       restrictWidth={false}
       data-test-subj="elasticsearchStartPage"
       grow={false}
+      solutionNav={searchNavigation?.useClassicNavigation(history)}
     >
-      <KibanaPageTemplate.Section alignment="center" restrictWidth={false} grow>
+      <KibanaPageTemplate.Section alignment="top" restrictWidth={false} grow>
         {isInitialLoading && <EuiLoadingLogo />}
         {hasIndicesStatusFetchError && <LoadIndicesStatusError error={indicesFetchError} />}
         {!isInitialLoading && !hasIndicesStatusFetchError && (
@@ -56,6 +68,6 @@ export const ElasticsearchStartPage = () => {
         )}
       </KibanaPageTemplate.Section>
       {embeddableConsole}
-    </EuiPageTemplate>
+    </KibanaPageTemplate>
   );
 };

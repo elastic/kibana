@@ -4,13 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { isEmpty } from 'lodash';
 import type { OverrideBodyQuery } from '../types';
 import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
 
-interface BuildEventsSearchQuery {
-  aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
+interface BuildEventsSearchQuery<
+  TAggs extends Record<string, estypes.AggregationsAggregationContainer> | undefined = undefined
+> {
+  aggregations: TAggs;
   index: string[];
   from: string;
   to: string;
@@ -99,7 +101,9 @@ export const buildTimeRangeFilter = ({
       };
 };
 
-export const buildEventsSearchQuery = ({
+export const buildEventsSearchQuery = <
+  TAggs extends Record<string, estypes.AggregationsAggregationContainer> | undefined
+>({
   aggregations,
   index,
   from,
@@ -114,7 +118,7 @@ export const buildEventsSearchQuery = ({
   trackTotalHits,
   additionalFilters,
   overrideBody,
-}: BuildEventsSearchQuery) => {
+}: BuildEventsSearchQuery<TAggs>) => {
   const timestamps = secondaryTimestamp
     ? [primaryTimestamp, secondaryTimestamp]
     : [primaryTimestamp];
@@ -154,38 +158,32 @@ export const buildEventsSearchQuery = ({
 
   const searchQuery = {
     allow_no_indices: true,
-    runtime_mappings: runtimeMappings,
     index,
-    size,
     ignore_unavailable: true,
     track_total_hits: trackTotalHits,
-    body: {
-      query: {
-        bool: {
-          filter: filterWithTime,
-        },
+    size,
+    query: {
+      bool: {
+        filter: filterWithTime,
       },
-      fields: [
-        {
-          field: '*',
-          include_unmapped: true,
-        },
-        ...docFields,
-      ],
-      ...(aggregations ? { aggregations } : {}),
-      runtime_mappings: runtimeMappings,
-      sort,
-      ...overrideBody,
     },
+    fields: [
+      {
+        field: '*',
+        include_unmapped: true,
+      },
+      ...docFields,
+    ],
+    aggregations,
+    runtime_mappings: runtimeMappings,
+    sort,
+    ...overrideBody,
   };
 
   if (searchAfterSortIds != null && !isEmpty(searchAfterSortIds)) {
     return {
       ...searchQuery,
-      body: {
-        ...searchQuery.body,
-        search_after: searchAfterSortIds,
-      },
+      search_after: searchAfterSortIds,
     };
   }
   return searchQuery;

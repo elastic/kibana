@@ -1,0 +1,156 @@
+openapi: 3.0.0
+info:
+  title: Find Attack discoveries API endpoint
+  version: '1'
+paths:
+  /internal/elastic_assistant/attack_discovery/_find:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: AttackDiscoveryFind
+      description: Get Attack discoveries that match the search criteria
+      summary: Get Attack discoveries
+      tags:
+        - attack_discovery
+        - attack_discovery_find
+      parameters:
+        - name: 'alert_ids'
+          description: filter by alert ids within attack discovery
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+        - name: 'connector_names'
+          description: filter by connector names
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+        - name: 'end'
+          description: filter by end date (relative or absolute)
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: 'ids'
+          description: filter by Attack discovery IDs
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+        - name: 'page'
+          description: Page number
+          in: query
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: integer
+        - name: 'per_page'
+          description: Attack discoveries per page
+          in: query
+          required: false
+          schema:
+            default: 10
+            minimum: 0
+            type: integer
+        - name: 'search'
+          description: filter by search query
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: 'shared'
+          description: '`undefined`: show both shared, and only visible to me Attack discoveries. `true`: show only shared Attack discoveries. `false`: show only visible to me Attack discoveries.'
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: 'sort_field'
+          description: Field to sort by
+          in: query
+          required: false
+          schema:
+            default: '@timestamp'
+            $ref: '#/components/schemas/AttackDiscoveryFindSortField'
+        - name: 'sort_order'
+          description: Sort order
+          in: query
+          required: false
+          schema:
+            default: 'desc'
+            $ref: '../common_attributes.schema.yaml#/components/schemas/SortOrder'
+        - name: 'start'
+          description: filter by start date (relative or absolute)
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: 'status'
+          description: filter by kibana.alert.workflow.status
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - 'acknowledged'
+                - 'closed'
+                - 'open'
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  connector_names:
+                    type: array
+                    items:
+                      type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: './attack_discovery_alert.schema.yaml#/components/schemas/AttackDiscoveryAlert'
+                  page:
+                    type: integer
+                  per_page:
+                    type: integer
+                  total:
+                    type: integer
+                  unique_alert_ids_count:
+                    type: integer
+                required:
+                  - connector_names
+                  - data
+                  - page
+                  - perPage
+                  - total
+                  - unique_alert_ids_count
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+components:
+  schemas:
+    AttackDiscoveryFindSortField:
+      type: string
+      enum:
+        - '@timestamp'

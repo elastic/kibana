@@ -50,7 +50,7 @@ export function SelectRuleAction({
   }
 
   return (
-    <div className="select-rule-action">
+    <div>
       {rules.length > 0 && (
         <React.Fragment>
           <DetectorDescriptionList job={job} detector={detector} anomaly={anomaly} />

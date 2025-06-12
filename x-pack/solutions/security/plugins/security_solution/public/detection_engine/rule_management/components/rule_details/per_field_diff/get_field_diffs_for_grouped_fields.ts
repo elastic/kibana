@@ -7,11 +7,17 @@
 
 import stringify from 'json-stable-stringify';
 import type {
+  RuleSchedule,
+  SimpleRuleSchedule,
+} from '../../../../../../common/api/detection_engine/model/rule_schema/rule_schedule';
+import { toSimpleRuleSchedule } from '../../../../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
+import type {
   AllFieldsDiff,
   RuleFieldsDiffWithDataSource,
   RuleFieldsDiffWithEqlQuery,
   RuleFieldsDiffWithEsqlQuery,
   RuleFieldsDiffWithKqlQuery,
+  ThreeWayDiff,
 } from '../../../../../../common/api/detection_engine';
 import type { FieldDiff } from '../../../model/rule_details/rule_field_diff';
 
@@ -277,34 +283,75 @@ export const getFieldDiffsForThreatQuery = (
 };
 
 export const getFieldDiffsForRuleSchedule = (
-  ruleScheduleThreeWayDiff: AllFieldsDiff['rule_schedule']
+  ruleScheduleThreeWayDiff: ThreeWayDiff<RuleSchedule | undefined>
 ): FieldDiff[] => {
-  return [
-    ...(ruleScheduleThreeWayDiff.current_version?.interval !==
-    ruleScheduleThreeWayDiff.target_version?.interval
-      ? [
-          {
-            fieldName: 'interval',
-            currentVersion: sortAndStringifyJson(
-              ruleScheduleThreeWayDiff.current_version?.interval
-            ),
-            targetVersion: sortAndStringifyJson(ruleScheduleThreeWayDiff.target_version?.interval),
-          },
-        ]
-      : []),
-    ...(ruleScheduleThreeWayDiff.current_version?.lookback !==
-    ruleScheduleThreeWayDiff.target_version?.lookback
-      ? [
-          {
-            fieldName: 'lookback',
-            currentVersion: sortAndStringifyJson(
-              ruleScheduleThreeWayDiff.current_version?.lookback
-            ),
-            targetVersion: sortAndStringifyJson(ruleScheduleThreeWayDiff.target_version?.lookback),
-          },
-        ]
-      : []),
-  ];
+  const fieldsDiff: FieldDiff[] = [];
+
+  const current = ruleScheduleThreeWayDiff.current_version;
+  const target = ruleScheduleThreeWayDiff.target_version;
+
+  const currentSimpleRuleSchedule = current ? toSimpleRuleSchedule(current) : undefined;
+  const targetSimpleRuleSchedule = target ? toSimpleRuleSchedule(target) : undefined;
+
+  const isCurrentSimpleRuleScheduleValid = !current || (current && currentSimpleRuleSchedule);
+  const isTargetSimpleRuleScheduleValid = !target || (target && targetSimpleRuleSchedule);
+
+  // Show simple rule schedule diff only when current and target versions are convertable
+  // to simple rule schedule or one of the versions is undefined.
+  if (isCurrentSimpleRuleScheduleValid && isTargetSimpleRuleScheduleValid) {
+    return getFieldDiffsForSimpleRuleSchedule(currentSimpleRuleSchedule, targetSimpleRuleSchedule);
+  }
+
+  if (current?.interval !== target?.interval) {
+    fieldsDiff.push({
+      fieldName: 'interval',
+      currentVersion: sortAndStringifyJson(current?.interval),
+      targetVersion: sortAndStringifyJson(target?.interval),
+    });
+  }
+
+  if (current?.from !== target?.from) {
+    fieldsDiff.push({
+      fieldName: 'from',
+      currentVersion: sortAndStringifyJson(current?.from),
+      targetVersion: sortAndStringifyJson(target?.from),
+    });
+  }
+
+  if (current?.to !== target?.to) {
+    fieldsDiff.push({
+      fieldName: 'to',
+      currentVersion: sortAndStringifyJson(current?.to),
+      targetVersion: sortAndStringifyJson(target?.to),
+    });
+  }
+
+  return fieldsDiff;
+};
+
+const getFieldDiffsForSimpleRuleSchedule = (
+  current: SimpleRuleSchedule | undefined,
+  target: SimpleRuleSchedule | undefined
+): FieldDiff[] => {
+  const fieldsDiff: FieldDiff[] = [];
+
+  if (current?.interval !== target?.interval) {
+    fieldsDiff.push({
+      fieldName: 'interval',
+      currentVersion: sortAndStringifyJson(current?.interval),
+      targetVersion: sortAndStringifyJson(target?.interval),
+    });
+  }
+
+  if (current?.lookback !== target?.lookback) {
+    fieldsDiff.push({
+      fieldName: 'lookback',
+      currentVersion: sortAndStringifyJson(current?.lookback),
+      targetVersion: sortAndStringifyJson(target?.lookback),
+    });
+  }
+
+  return fieldsDiff;
 };
 
 export const getFieldDiffsForRuleNameOverride = (

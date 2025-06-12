@@ -209,7 +209,6 @@ export const EditVar: FC<Props> = ({ variables, selectedVar, onCancel, onSave })
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiButton
-                color="success"
                 size="s"
                 fill
                 onClick={() =>

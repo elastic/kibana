@@ -45,7 +45,7 @@
           },
           " | undefined"
         ],
-        "path": "packages/kbn-ci-stats-core/src/ci_stats_config.ts",
+        "path": "src/platform/packages/private/kbn-ci-stats-core/src/ci_stats_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -65,7 +65,7 @@
                 "text": "SomeDevLog"
               }
             ],
-            "path": "packages/kbn-ci-stats-core/src/ci_stats_config.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-core/src/ci_stats_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -85,7 +85,7 @@
         "description": [
           "Container for metadata that can be attached to different ci-stats objects"
         ],
-        "path": "packages/kbn-ci-stats-core/src/ci_stats_metadata.ts",
+        "path": "src/platform/packages/private/kbn-ci-stats-core/src/ci_stats_metadata.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -101,7 +101,7 @@
             "signature": [
               "[key: string]:  string | number | boolean | string[] | undefined"
             ],
-            "path": "packages/kbn-ci-stats-core/src/ci_stats_metadata.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-core/src/ci_stats_metadata.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -117,7 +117,7 @@
         "description": [
           "\nInformation about how CiStatsReporter should talk to the ci-stats service. Normally\nit is read from a JSON environment variable using the `parseConfig()` function\nexported by this module."
         ],
-        "path": "packages/kbn-ci-stats-core/src/ci_stats_config.ts",
+        "path": "src/platform/packages/private/kbn-ci-stats-core/src/ci_stats_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -130,7 +130,7 @@
             "description": [
               "ApiToken necessary for writing build data to ci-stats service"
             ],
-            "path": "packages/kbn-ci-stats-core/src/ci_stats_config.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-core/src/ci_stats_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -143,7 +143,7 @@
             "description": [
               "\nuuid which should be obtained by first creating a build with the\nci-stats service and then passing it to all subsequent steps"
             ],
-            "path": "packages/kbn-ci-stats-core/src/ci_stats_config.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-core/src/ci_stats_config.ts",
             "deprecated": false,
             "trackAdoption": false
           }

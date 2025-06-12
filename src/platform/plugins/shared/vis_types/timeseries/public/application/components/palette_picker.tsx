@@ -12,6 +12,7 @@ import type { PaletteRegistry, PaletteOutput } from '@kbn/coloring';
 import { getActivePaletteName } from '@kbn/coloring';
 import { EuiColorPalettePicker } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getAppendedTag } from '@kbn/palettes';
 import { rainbowColors } from '../lib/rainbow_colors';
 import { computeGradientFinalColor } from '../lib/compute_gradient_final_color';
 import { PALETTES } from '../../../common/enums';
@@ -36,10 +37,11 @@ export function PalettePicker({ activePalette, palettes, setPalette, color }: Pa
         ...palettes
           .getAll()
           .filter(({ internal }) => !internal)
-          .map(({ id, title, getCategoricalColors }) => {
+          .map(({ id, title, tag, getCategoricalColors }) => {
             return {
               value: id,
               title,
+              append: getAppendedTag(tag),
               type: 'fixed' as const,
               palette: getCategoricalColors(10),
             };

@@ -9,8 +9,10 @@
 
 export {
   MIGRATION_CLIENT_OPTIONS,
+  REMOVED_TYPES,
   SavedObjectsService,
   CoreSavedObjectsRouteHandlerContext,
+  SAVED_OBJECT_TYPES_COUNT,
 } from './src';
 export type {
   InternalSavedObjectsServiceStart,
@@ -21,8 +23,6 @@ export type {
 
 // only used by integration tests
 export { registerDeleteUnknownTypesRoute } from './src/routes/deprecations';
-export { registerLegacyExportRoute } from './src/routes/legacy_import_export/export';
-export { registerLegacyImportRoute } from './src/routes/legacy_import_export/import';
 export { registerBulkCreateRoute } from './src/routes/bulk_create';
 export { registerBulkGetRoute } from './src/routes/bulk_get';
 export { registerBulkResolveRoute } from './src/routes/bulk_resolve';

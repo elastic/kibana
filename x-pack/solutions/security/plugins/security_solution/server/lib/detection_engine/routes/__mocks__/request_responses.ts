@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
@@ -25,10 +25,8 @@ import {
   DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
   DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
   DETECTION_ENGINE_RULES_BULK_ACTION,
-  DETECTION_ENGINE_RULES_BULK_UPDATE,
-  DETECTION_ENGINE_RULES_BULK_DELETE,
-  DETECTION_ENGINE_RULES_BULK_CREATE,
   DETECTION_ENGINE_RULES_URL_FIND,
+  DETECTION_ENGINE_RULES_IMPORT_URL,
 } from '../../../../../common/constants';
 import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../../common/api/detection_engine/rule_management/urls';
 
@@ -116,27 +114,6 @@ export const getFindRequest = () =>
     path: DETECTION_ENGINE_RULES_URL_FIND,
   });
 
-export const getReadBulkRequest = () =>
-  requestMock.create({
-    method: 'post',
-    path: DETECTION_ENGINE_RULES_BULK_CREATE,
-    body: [getCreateRulesSchemaMock()],
-  });
-
-export const getUpdateBulkRequest = () =>
-  requestMock.create({
-    method: 'put',
-    path: DETECTION_ENGINE_RULES_BULK_UPDATE,
-    body: [getCreateRulesSchemaMock()],
-  });
-
-export const getPatchBulkRequest = () =>
-  requestMock.create({
-    method: 'patch',
-    path: DETECTION_ENGINE_RULES_BULK_UPDATE,
-    body: [getCreateRulesSchemaMock()],
-  });
-
 export const getBulkDisableRuleActionRequest = () =>
   requestMock.create({
     method: 'patch',
@@ -149,34 +126,6 @@ export const getBulkActionEditRequest = () =>
     method: 'patch',
     path: DETECTION_ENGINE_RULES_BULK_ACTION,
     body: getPerformBulkActionEditSchemaMock(),
-  });
-
-export const getDeleteBulkRequest = () =>
-  requestMock.create({
-    method: 'delete',
-    path: DETECTION_ENGINE_RULES_BULK_DELETE,
-    body: [{ rule_id: 'rule-1' }],
-  });
-
-export const getDeleteBulkRequestById = () =>
-  requestMock.create({
-    method: 'delete',
-    path: DETECTION_ENGINE_RULES_BULK_DELETE,
-    body: [{ id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
-  });
-
-export const getDeleteAsPostBulkRequestById = () =>
-  requestMock.create({
-    method: 'post',
-    path: DETECTION_ENGINE_RULES_BULK_DELETE,
-    body: [{ id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
-  });
-
-export const getDeleteAsPostBulkRequest = () =>
-  requestMock.create({
-    method: 'post',
-    path: DETECTION_ENGINE_RULES_BULK_DELETE,
-    body: [{ rule_id: 'rule-1' }],
   });
 
 export const getPrivilegeRequest = (options: { auth?: { isAuthenticated: boolean } } = {}) =>
@@ -260,14 +209,14 @@ export const getFindResultWithMultiHits = ({
 export const getImportRulesRequest = (hapiStream?: HapiReadableStream) =>
   requestMock.create({
     method: 'post',
-    path: `${DETECTION_ENGINE_RULES_URL}/_import`,
+    path: DETECTION_ENGINE_RULES_IMPORT_URL,
     body: { file: hapiStream },
   });
 
 export const getImportRulesRequestOverwriteTrue = (hapiStream?: HapiReadableStream) =>
   requestMock.create({
     method: 'post',
-    path: `${DETECTION_ENGINE_RULES_URL}/_import`,
+    path: DETECTION_ENGINE_RULES_IMPORT_URL,
     body: { file: hapiStream },
     query: { overwrite: true },
   });

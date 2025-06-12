@@ -37,6 +37,7 @@ import { NavigationalSearchPageObject } from './navigational_search';
 import { ObservabilityLogsExplorerPageObject } from './observability_logs_explorer';
 import { DatasetQualityPageObject } from './dataset_quality';
 import { ObservabilityPageProvider } from './observability_page';
+import { AlertControlsProvider } from './alert_controls';
 import { RemoteClustersPageProvider } from './remote_clusters_page';
 import { ReportingPageObject } from './reporting_page';
 import { RoleMappingsPageProvider } from './role_mappings_page';
@@ -48,15 +49,18 @@ import { SnapshotRestorePageProvider } from './snapshot_restore_page';
 import { SpaceSelectorPageObject } from './space_selector_page';
 import { StatusPageObject } from './status_page';
 import { TagManagementPageObject } from './tag_management_page';
-import { UpgradeAssistantPageObject } from './upgrade_assistant_page';
+import { UpgradeAssistantFlyoutObject } from './upgrade_assistant_page';
 import { UptimePageObject } from './uptime_page';
 import { UserProfilePageProvider } from './user_profile_page';
 import { WatcherPageObject } from './watcher_page';
 import { SearchProfilerPageProvider } from './search_profiler_page';
 import { SearchPlaygroundPageProvider } from './search_playground_page';
+import { SearchSynonymsPageProvider } from './search_synonyms_page';
 import { SearchClassicNavigationProvider } from './search_classic_navigation';
+import { SearchStartProvider } from './search_start';
 import { SearchApiKeysProvider } from './search_api_keys';
 import { SearchIndexDetailPageProvider } from './search_index_details_page';
+import { SearchOverviewProvider } from './search_overview_page';
 import { SearchNavigationProvider } from './search_navigation';
 
 // just like services, PageObjects are defined as a map of
@@ -93,16 +97,20 @@ export const pageObjects = {
   observabilityLogsExplorer: ObservabilityLogsExplorerPageObject,
   datasetQuality: DatasetQualityPageObject,
   observability: ObservabilityPageProvider,
+  alertControls: AlertControlsProvider,
   remoteClusters: RemoteClustersPageProvider,
   reporting: ReportingPageObject,
   roleMappings: RoleMappingsPageProvider,
   rollup: RollupPageObject,
   searchApiKeys: SearchApiKeysProvider,
   searchClassicNavigation: SearchClassicNavigationProvider,
+  searchStart: SearchStartProvider,
   searchIndexDetailsPage: SearchIndexDetailPageProvider,
   searchNavigation: SearchNavigationProvider,
+  searchOverview: SearchOverviewProvider,
   searchProfiler: SearchProfilerPageProvider,
   searchPlayground: SearchPlaygroundPageProvider,
+  searchSynonyms: SearchSynonymsPageProvider,
   searchSessionsManagement: SearchSessionsPageProvider,
   security: SecurityPageObject,
   shareSavedObjectsToSpace: ShareSavedObjectsToSpacePageProvider,
@@ -110,7 +118,7 @@ export const pageObjects = {
   spaceSelector: SpaceSelectorPageObject,
   statusPage: StatusPageObject,
   tagManagement: TagManagementPageObject,
-  upgradeAssistant: UpgradeAssistantPageObject,
+  upgradeAssistant: UpgradeAssistantFlyoutObject,
   uptime: UptimePageObject,
   userProfiles: UserProfilePageProvider,
   watcher: WatcherPageObject,

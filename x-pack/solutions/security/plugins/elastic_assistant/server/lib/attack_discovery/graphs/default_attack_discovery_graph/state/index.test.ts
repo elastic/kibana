@@ -5,111 +5,189 @@
  * 2.0.
  */
 
-import { getDefaultGraphState } from '.';
+import { getDefaultGraphAnnotation } from '.';
 import {
   DEFAULT_MAX_GENERATION_ATTEMPTS,
   DEFAULT_MAX_HALLUCINATION_FAILURES,
   DEFAULT_MAX_REPEATED_GENERATIONS,
 } from '../constants';
-import { getDefaultAttackDiscoveryPrompt } from '../nodes/helpers/get_default_attack_discovery_prompt';
-import { getDefaultRefinePrompt } from '../nodes/refine/helpers/get_default_refine_prompt';
+import {
+  ATTACK_DISCOVERY_CONTINUE,
+  ATTACK_DISCOVERY_DEFAULT,
+  ATTACK_DISCOVERY_REFINE,
+} from '../../../../prompt/prompts';
 
-const defaultAttackDiscoveryPrompt = getDefaultAttackDiscoveryPrompt();
-const defaultRefinePrompt = getDefaultRefinePrompt();
-
+const defaultAttackDiscoveryPrompt = ATTACK_DISCOVERY_DEFAULT;
+const defaultRefinePrompt = ATTACK_DISCOVERY_REFINE;
+const prompts = {
+  continue: ATTACK_DISCOVERY_CONTINUE,
+  default: defaultAttackDiscoveryPrompt,
+  refine: defaultRefinePrompt,
+};
 describe('getDefaultGraphState', () => {
   it('returns the expected default attackDiscoveries', () => {
-    const state = getDefaultGraphState();
+    const graphAnnotation = getDefaultGraphAnnotation({ prompts });
 
-    expect(state.attackDiscoveries?.default?.()).toBeNull();
+    expect(graphAnnotation.spec.insights.value).toBeNull();
   });
 
   it('returns the expected default attackDiscoveryPrompt', () => {
-    const state = getDefaultGraphState();
+    const graphAnnotation = getDefaultGraphAnnotation({ prompts });
 
-    expect(state.attackDiscoveryPrompt?.default?.()).toEqual(defaultAttackDiscoveryPrompt);
+    expect(graphAnnotation.spec.prompt.value).toEqual(defaultAttackDiscoveryPrompt);
   });
 
   it('returns the expected default empty collection of anonymizedAlerts', () => {
-    const state = getDefaultGraphState();
+    const graphAnnotation = getDefaultGraphAnnotation({ prompts });
 
-    expect(state.anonymizedAlerts?.default?.()).toHaveLength(0);
+    expect(graphAnnotation.spec.anonymizedDocuments.value).toHaveLength(0);
   });
 
   it('returns the expected default combinedGenerations state', () => {
-    const state = getDefaultGraphState();
+    const graphAnnotation = getDefaultGraphAnnotation({ prompts });
 
-    expect(state.combinedGenerations?.default?.()).toBe('');
+    expect(graphAnnotation.spec.combinedGenerations.value).toBe('');
   });
 
   it('returns the expected default combinedRefinements state', () => {
-    const state = getDefaultGraphState();
+    const graphAnnotation = getDefaultGraphAnnotation({ prompts });
 
-    expect(state.combinedRefinements?.default?.()).toBe('');
+    expect(graphAnnotation.spec.combinedRefinements.value).toBe('');
   });
 
   it('returns the expected default errors state', () => {
-    const state = getDefaultGraphState();
+    const graphAnnotation = getDefaultGraphAnnotation({ prompts });
 
-    expect(state.errors?.default?.()).toHaveLength(0);
+    expect(graphAnnotation.spec.errors.value).toHaveLength(0);
   });
 
   it('return the expected default generationAttempts state', () => {
-    const state = getDefaultGraphState();
+    const graphAnnotation = getDefaultGraphAnnotation({ prompts });
 
-    expect(state.generationAttempts?.default?.()).toBe(0);
+    expect(graphAnnotation.spec.generationAttempts.value).toBe(0);
   });
 
   it('returns the expected default generations state', () => {
-    const state = getDefaultGraphState();
+    const graphAnnotation = getDefaultGraphAnnotation({ prompts });
 
-    expect(state.generations?.default?.()).toHaveLength(0);
+    expect(graphAnnotation.spec.generations.value).toHaveLength(0);
   });
 
   it('returns the expected default hallucinationFailures state', () => {
-    const state = getDefaultGraphState();
+    const graphAnnotation = getDefaultGraphAnnotation({ prompts });
 
-    expect(state.hallucinationFailures?.default?.()).toBe(0);
+    expect(graphAnnotation.spec.hallucinationFailures.value).toBe(0);
   });
 
   it('returns the expected default refinePrompt state', () => {
-    const state = getDefaultGraphState();
+    const graphAnnotation = getDefaultGraphAnnotation({ prompts });
 
-    expect(state.refinePrompt?.default?.()).toEqual(defaultRefinePrompt);
+    expect(graphAnnotation.spec.refinePrompt.value).toEqual(defaultRefinePrompt);
   });
 
   it('returns the expected default maxGenerationAttempts state', () => {
-    const state = getDefaultGraphState();
+    const graphAnnotation = getDefaultGraphAnnotation({ prompts });
 
-    expect(state.maxGenerationAttempts?.default?.()).toBe(DEFAULT_MAX_GENERATION_ATTEMPTS);
+    expect(graphAnnotation.spec.maxGenerationAttempts.value).toBe(DEFAULT_MAX_GENERATION_ATTEMPTS);
   });
 
   it('returns the expected default maxHallucinationFailures state', () => {
-    const state = getDefaultGraphState();
-    expect(state.maxHallucinationFailures?.default?.()).toBe(DEFAULT_MAX_HALLUCINATION_FAILURES);
+    const graphAnnotation = getDefaultGraphAnnotation({ prompts });
+    expect(graphAnnotation.spec.maxHallucinationFailures.value).toBe(
+      DEFAULT_MAX_HALLUCINATION_FAILURES
+    );
   });
 
   it('returns the expected default maxRepeatedGenerations state', () => {
-    const state = getDefaultGraphState();
+    const graphAnnotation = getDefaultGraphAnnotation({ prompts });
 
-    expect(state.maxRepeatedGenerations?.default?.()).toBe(DEFAULT_MAX_REPEATED_GENERATIONS);
+    expect(graphAnnotation.spec.maxRepeatedGenerations.value).toBe(
+      DEFAULT_MAX_REPEATED_GENERATIONS
+    );
   });
 
   it('returns the expected default refinements state', () => {
-    const state = getDefaultGraphState();
+    const graphAnnotation = getDefaultGraphAnnotation({ prompts });
 
-    expect(state.refinements?.default?.()).toHaveLength(0);
+    expect(graphAnnotation.spec.refinements.value).toHaveLength(0);
   });
 
   it('returns the expected default replacements state', () => {
-    const state = getDefaultGraphState();
+    const graphAnnotation = getDefaultGraphAnnotation({ prompts });
 
-    expect(state.replacements?.default?.()).toEqual({});
+    expect(graphAnnotation.spec.replacements.value).toEqual({});
   });
 
   it('returns the expected default unrefinedResults state', () => {
-    const state = getDefaultGraphState();
+    const graphAnnotation = getDefaultGraphAnnotation({ prompts });
 
-    expect(state.unrefinedResults?.default?.()).toBeNull();
+    expect(graphAnnotation.spec.unrefinedResults.value).toBeNull();
+  });
+
+  it('returns the expected default continuePrompt state', () => {
+    const graphAnnotation = getDefaultGraphAnnotation({ prompts });
+
+    expect(graphAnnotation.spec.continuePrompt.value).toBe(prompts.continue);
+  });
+
+  it('returns the expected default end', () => {
+    const graphAnnotation = getDefaultGraphAnnotation({ prompts });
+
+    expect(graphAnnotation.spec.end.value).toBeUndefined();
+  });
+
+  it('returns the expected end when it is provided', () => {
+    const end = '2025-01-02T00:00:00.000Z';
+
+    const graphAnnotation = getDefaultGraphAnnotation({ prompts, end });
+
+    expect(graphAnnotation.spec.end.value).toEqual(end);
+  });
+
+  it('returns the expected default filter to be undefined', () => {
+    const graphAnnotation = getDefaultGraphAnnotation({ prompts });
+
+    expect(graphAnnotation.spec.filter.value).toBeUndefined();
+  });
+
+  it('returns the expected filter when it is provided', () => {
+    const filter = {
+      bool: {
+        must: [],
+        filter: [
+          {
+            match_phrase: {
+              'user.name': 'root',
+            },
+          },
+        ],
+        should: [],
+        must_not: [
+          {
+            match_phrase: {
+              'host.name': 'foo',
+            },
+          },
+        ],
+      },
+    };
+
+    const graphAnnotation = getDefaultGraphAnnotation({ prompts, filter });
+
+    expect(graphAnnotation.spec.filter.value).toEqual(filter);
+  });
+
+  it('returns the expected default start to be undefined', () => {
+    const graphAnnotation = getDefaultGraphAnnotation({ prompts });
+
+    expect(graphAnnotation.spec.start.value).toBeUndefined();
+  });
+
+  it('returns the expected start when it is provided', () => {
+    const start = '2025-01-01T00:00:00.000Z';
+
+    const graphAnnotation = getDefaultGraphAnnotation({ prompts, start });
+
+    expect(graphAnnotation.spec.start.value).toEqual(start);
   });
 });

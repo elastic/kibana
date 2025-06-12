@@ -25,7 +25,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
 
 import { QueryLanguageSwitcher } from './language_switcher';
-import QueryStringInput from './query_string_input';
+import { QueryStringInput } from './query_string_input';
 import { unifiedSearchPluginMock } from '../mocks';
 
 jest.useFakeTimers({ legacyFakeTimers: true });
@@ -197,7 +197,7 @@ describe('QueryStringInput', () => {
       })
     );
 
-    const instance = component.find('QueryStringInputUI').instance() as QueryStringInput;
+    const instance = component.find('QueryStringInput').instance() as QueryStringInput;
     const input = instance.inputRef;
     const inputWrapper = component.find(EuiTextArea).find('textarea');
     inputWrapper.simulate('keyDown', { target: input, keyCode: 13, key: 'Enter', metaKey: true });
@@ -338,7 +338,7 @@ describe('QueryStringInput', () => {
       })
     );
 
-    const instance = component.find('QueryStringInputUI').instance() as QueryStringInput;
+    const instance = component.find('QueryStringInput').instance() as QueryStringInput;
     const input = instance.inputRef;
     const inputWrapper = component.find(EuiTextArea).find('textarea');
     inputWrapper.simulate('keyDown', { target: input, keyCode: 13, key: 'Enter', metaKey: true });
@@ -415,7 +415,7 @@ describe('QueryStringInput', () => {
       })
     );
 
-    const instance = component.find('QueryStringInputUI').instance() as QueryStringInput;
+    const instance = component.find('QueryStringInput').instance() as QueryStringInput;
     const input = instance.inputRef;
     const inputWrapper = component.find(EuiTextArea).find('textarea');
     input!.value = 'foo\u00A0bar';

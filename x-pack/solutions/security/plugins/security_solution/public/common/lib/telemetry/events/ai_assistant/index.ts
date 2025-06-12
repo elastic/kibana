@@ -11,13 +11,6 @@ import { AssistantEventTypes } from './types';
 export const assistantInvokedEvent: AssistantTelemetryEvent = {
   eventType: AssistantEventTypes.AssistantInvoked,
   schema: {
-    conversationId: {
-      type: 'keyword',
-      _meta: {
-        description: 'Active conversation ID',
-        optional: false,
-      },
-    },
     invokedBy: {
       type: 'keyword',
       _meta: {
@@ -31,13 +24,6 @@ export const assistantInvokedEvent: AssistantTelemetryEvent = {
 export const assistantMessageSentEvent: AssistantTelemetryEvent = {
   eventType: AssistantEventTypes.AssistantMessageSent,
   schema: {
-    conversationId: {
-      type: 'keyword',
-      _meta: {
-        description: 'Active conversation ID',
-        optional: false,
-      },
-    },
     role: {
       type: 'keyword',
       _meta: {
@@ -78,13 +64,6 @@ export const assistantMessageSentEvent: AssistantTelemetryEvent = {
 export const assistantQuickPrompt: AssistantTelemetryEvent = {
   eventType: AssistantEventTypes.AssistantQuickPrompt,
   schema: {
-    conversationId: {
-      type: 'keyword',
-      _meta: {
-        description: 'Active conversation ID',
-        optional: false,
-      },
-    },
     promptTitle: {
       type: 'keyword',
       _meta: {

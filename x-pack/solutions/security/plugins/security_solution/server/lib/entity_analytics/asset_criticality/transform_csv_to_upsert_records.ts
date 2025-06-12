@@ -5,23 +5,27 @@
  * 2.0.
  */
 import { Transform } from 'stream';
-import type { AssetCriticalityUpsert } from '../../../../common/entity_analytics/asset_criticality/types';
+import type { ExperimentalFeatures } from '../../../../common';
+import type { AssetCriticalityUpsertForBulkUpload } from '../../../../common/entity_analytics/asset_criticality/types';
 import {
   parseAssetCriticalityCsvRow,
   isErrorResult,
 } from '../../../../common/entity_analytics/asset_criticality';
 
 class TransformCSVToUpsertRecords extends Transform {
-  constructor() {
+  experimentalFeatures: ExperimentalFeatures;
+  constructor(experimentalFeatures: ExperimentalFeatures) {
     super({
       objectMode: true,
     });
+
+    this.experimentalFeatures = experimentalFeatures;
   }
 
   public _transform(
     chunk: string[],
     encoding: string,
-    callback: (error: Error | null, data?: AssetCriticalityUpsert | Error) => void
+    callback: (error: Error | null, data?: AssetCriticalityUpsertForBulkUpload | Error) => void
   ) {
     try {
       const parseResult = parseAssetCriticalityCsvRow(chunk);
@@ -37,4 +41,5 @@ class TransformCSVToUpsertRecords extends Transform {
   }
 }
 
-export const transformCSVToUpsertRecords = () => new TransformCSVToUpsertRecords();
+export const transformCSVToUpsertRecords = (experimentalFeatures: ExperimentalFeatures) =>
+  new TransformCSVToUpsertRecords(experimentalFeatures);

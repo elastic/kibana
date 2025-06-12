@@ -145,22 +145,16 @@ export const bulkCreateRuleAssets = ({
   const bulkIndexRequestBody = rules.reduce((body, rule) => {
     const document = JSON.stringify(rule);
     const documentId = `security-rule:${rule['security-rule'].rule_id}`;
-    const historicalDocumentId = `${documentId}_${rule['security-rule'].version}`;
+    const documentIdWithVersion = `${documentId}_${rule['security-rule'].version}`;
 
-    const indexRuleAsset = `${JSON.stringify({
-      index: {
-        _index: index,
-        _id: documentId,
-      },
-    })}\n${document}\n`;
     const indexHistoricalRuleAsset = `${JSON.stringify({
       index: {
         _index: index,
-        _id: historicalDocumentId,
+        _id: documentIdWithVersion,
       },
     })}\n${document}\n`;
 
-    return body.concat(indexRuleAsset, indexHistoricalRuleAsset);
+    return body.concat(indexHistoricalRuleAsset);
   }, '');
 
   cy.task('putMapping', index);
@@ -189,7 +183,7 @@ export const getRuleAssets = (index: string | undefined = '.kibana_security_solu
 /* during e2e tests, and allow for manual installation of mock rules instead. */
 export const preventPrebuiltRulesPackageInstallation = () => {
   cy.log('Prevent prebuilt rules package installation');
-  cy.intercept('POST', BOOTSTRAP_PREBUILT_RULES_URL, {});
+  cy.intercept('POST', BOOTSTRAP_PREBUILT_RULES_URL, { packages: [] });
 };
 
 /**

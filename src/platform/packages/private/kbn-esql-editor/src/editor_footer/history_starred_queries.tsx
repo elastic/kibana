@@ -53,9 +53,6 @@ export function QueryHistoryAction({
   isSpaceReduced?: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
-  // get history items from local storage
-  const items: QueryHistoryItem[] = getHistoryItems('desc');
-  if (!items.length) return null;
   return (
     <>
       {isSpaceReduced && (
@@ -90,6 +87,7 @@ export function QueryHistoryAction({
           <EuiButtonEmpty
             size="xs"
             color="primary"
+            flush="both"
             onClick={toggleHistory}
             css={css`
               padding-inline: 0;
@@ -197,6 +195,11 @@ export const getTableColumns = (
       name: i18n.translate('esqlEditor.query.recentQueriesColumnLabel', {
         defaultMessage: 'Query',
       }),
+      css: css`
+        .euiTableCellContent {
+          align-items: flex-start;
+        }
+      `,
       render: (queryString: QueryHistoryItem['queryString']) => (
         <QueryColumn
           queryString={queryString}
@@ -411,9 +414,9 @@ export function QueryColumn({
   useEffect(() => {
     if (containerRef.current) {
       const textIsOverlapping = containerRef.current.offsetWidth < containerRef.current.scrollWidth;
-      setIsExpandable(textIsOverlapping);
+      setIsExpandable(textIsOverlapping || isRowExpanded);
     }
-  }, [containerWidth]);
+  }, [containerWidth, isRowExpanded, queryString]);
 
   return (
     <>

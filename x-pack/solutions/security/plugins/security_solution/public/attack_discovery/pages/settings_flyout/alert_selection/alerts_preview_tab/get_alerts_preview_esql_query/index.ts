@@ -15,8 +15,8 @@ export const getAlertsPreviewEsqlQuery = ({
   alertsIndexPattern: string;
   maxAlerts: number;
   tableStackBy0: string;
-}): string => `FROM ${alertsIndexPattern} METADATA _id, _index, _version
-| WHERE kibana.alert.workflow_status IN ("open", "acknowledged") AND kibana.alert.rule.building_block_type IS NULL
+}): string => `FROM ${alertsIndexPattern} METADATA _id, _index, _version, _ignored
+| WHERE kibana.alert.workflow_status IN ("open", "acknowledged") AND kibana.alert.building_block_type IS NULL
 | SORT kibana.alert.risk_score DESC, @timestamp DESC
 | LIMIT ${maxAlerts}
 ${getEsqlKeepStatement(tableStackBy0)}

@@ -15,31 +15,57 @@ import { convertPrebuiltRuleAssetToRuleResponse } from '../../converters/convert
 interface CalculateIsCustomizedArgs {
   baseRule: PrebuiltRuleAsset | undefined;
   nextRule: RuleResponse;
-  isRuleCustomizationEnabled: boolean;
+  // Current rule can be undefined in case of importing a prebuilt rule that is not installed
+  currentRule: RuleResponse | undefined;
 }
 
 export function calculateIsCustomized({
   baseRule,
   nextRule,
-  isRuleCustomizationEnabled,
+  currentRule,
 }: CalculateIsCustomizedArgs) {
-  if (!isRuleCustomizationEnabled) {
-    // We don't want to accidentally mark rules as customized when customization is disabled.
+  if (baseRule) {
+    // Base version is available, so we can determine the customization status
+    // by comparing the base version with the next version
+    return areRulesEqual(convertPrebuiltRuleAssetToRuleResponse(baseRule), nextRule) === false;
+  }
+  // Base version is not available, apply a heuristic to determine the
+  // customization status
+
+  if (currentRule == null) {
+    // Current rule is not installed and base rule is not available, so we can't
+    // determine if the rule is customized. Defaulting to false.
     return false;
   }
 
-  if (baseRule == null) {
-    // If the base version is missing, we consider the rule to be customized
+  if (
+    currentRule.rule_source.type === 'external' &&
+    currentRule.rule_source.is_customized === true
+  ) {
+    // If the rule was previously customized, there's no way to determine
+    // whether the customization remained or was reverted. Keeping it as
+    // customized in this case.
     return true;
   }
 
-  const baseRuleWithDefaults = convertPrebuiltRuleAssetToRuleResponse(baseRule);
+  // If the rule has not been customized before, its customization status can be
+  // determined by comparing the current version with the next version.
+  return areRulesEqual(currentRule, nextRule) === false;
+}
 
+/**
+ * A helper function to determine if two rules are equal
+ *
+ * @param ruleA
+ * @param ruleB
+ * @returns true if all rule fields are equal, false otherwise
+ */
+function areRulesEqual(ruleA: RuleResponse, ruleB: RuleResponse) {
   const fieldsDiff = calculateRuleFieldsDiff({
     base_version: MissingVersion,
-    current_version: convertRuleToDiffable(baseRuleWithDefaults),
-    target_version: convertRuleToDiffable(nextRule),
+    current_version: convertRuleToDiffable(ruleA),
+    target_version: convertRuleToDiffable(ruleB),
   });
 
-  return Object.values(fieldsDiff).some((diff) => diff.has_update);
+  return Object.values(fieldsDiff).every((diff) => diff.has_update === false);
 }

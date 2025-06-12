@@ -19,7 +19,6 @@ interface Props {
   field: string;
   fieldType?: string;
   isAggregatable?: boolean;
-  isDraggable: boolean;
   showSeparator: boolean;
   scopeId: string;
   value: string | number | null | undefined;
@@ -31,7 +30,6 @@ const AlertFieldBadgeComponent: React.FC<Props> = ({
   field,
   fieldType = DEFAULT_FIELD_TYPE,
   isAggregatable = true,
-  isDraggable,
   showSeparator,
   scopeId,
   value,
@@ -49,7 +47,6 @@ const AlertFieldBadgeComponent: React.FC<Props> = ({
         field={field}
         fieldType={fieldType}
         isAggregatable={isAggregatable}
-        isDraggable={isDraggable}
         scopeId={scopeId}
         value={value}
       />

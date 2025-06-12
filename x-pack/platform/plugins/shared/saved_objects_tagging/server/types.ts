@@ -9,8 +9,9 @@ import type {
   IRouter,
   CustomRequestHandlerContext,
   SavedObjectsClientContract,
+  SavedObjectReference,
 } from '@kbn/core/server';
-import type { ITagsClient } from '../common/types';
+import type { ITagsClient, Tag } from '../common/types';
 import type { IAssignmentService } from './services';
 
 export interface ITagsRequestHandlerContext {
@@ -47,6 +48,15 @@ export interface SavedObjectTaggingStart {
   createInternalAssignmentService: (
     options: CreateTagAssignmentServiceOptions
   ) => IAssignmentService;
+  convertTagNameToId: (tagName: string, allTags: Tag[]) => string | undefined;
+  getTagsFromReferences: (
+    references: SavedObjectReference[],
+    allTags: Tag[]
+  ) => { tags: Tag[]; missingRefs: SavedObjectReference[] };
+  replaceTagReferences: (
+    references: SavedObjectReference[],
+    newTagIds: string[]
+  ) => SavedObjectReference[];
 }
 
 /**

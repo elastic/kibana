@@ -47,6 +47,12 @@ export const AssetTitleMap: Record<
   map: i18n.translate('xpack.fleet.epm.assetTitles.maps', {
     defaultMessage: 'Maps',
   }),
+  'security-ai-prompt': i18n.translate('xpack.fleet.epm.assetTitles.securityAIPrompt', {
+    defaultMessage: 'Security AI prompt',
+  }),
+  security_ai_prompt: i18n.translate('xpack.fleet.epm.assetTitles.securityAIPrompt', {
+    defaultMessage: 'Security AI prompt',
+  }),
   'security-rule': i18n.translate('xpack.fleet.epm.assetTitles.securityRules', {
     defaultMessage: 'Security rules',
   }),

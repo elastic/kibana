@@ -34,6 +34,7 @@ import type {
 } from '@kbn/elastic-assistant-common';
 import { isEmpty } from 'lodash/fp';
 
+import moment from 'moment';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../../assistant_context';
 import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '../../../assistant_context/constants';
@@ -50,12 +51,14 @@ const AS_PLAIN_TEXT: EuiComboBoxSingleSelectionShape = { asPlainText: true };
  */
 export const EvaluationSettings: React.FC = React.memo(() => {
   const { actionTypeRegistry, http, setTraceOptions, toasts, traceOptions } = useAssistantContext();
-  const { data: connectors } = useLoadConnectors({ http });
+  const { data: connectors } = useLoadConnectors({ http, inferenceEnabled: true });
   const { mutate: performEvaluation, isLoading: isPerformingEvaluation } = usePerformEvaluation({
     http,
     toasts,
   });
-  const { data: evalData } = useEvaluationData({ http });
+  const { data: evalData } = useEvaluationData({
+    http,
+  });
   const defaultGraphs = useMemo(() => (evalData as GetEvaluateResponse)?.graphs ?? [], [evalData]);
   const datasets = useMemo(() => (evalData as GetEvaluateResponse)?.datasets ?? [], [evalData]);
 
@@ -210,6 +213,9 @@ export const EvaluationSettings: React.FC = React.memo(() => {
       langSmithProject,
       runName,
       size: Number(size),
+      screenContext: {
+        timeZone: moment.tz.guess(),
+      },
     };
     performEvaluation(evalParams);
   }, [
@@ -391,6 +397,7 @@ export const EvaluationSettings: React.FC = React.memo(() => {
             onCreateOption={onGraphOptionsCreate}
             options={graphOptions}
             selectedOptions={selectedGraphOptions}
+            singleSelection // Remove once post_evaluate support running multiple graphs
             onChange={onGraphOptionsChange}
           />
         </EuiFormRow>

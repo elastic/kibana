@@ -21,9 +21,12 @@ import { registerUpgradeStatusRoute } from './status';
 import { registerRemoteClustersRoute } from './remote_clusters';
 import { registerNodeDiskSpaceRoute } from './node_disk_space';
 import { registerClusterSettingsRoute } from './cluster_settings';
+import { registerMigrateDataStreamRoutes } from './migrate_data_streams';
+import { registerUpdateIndexRoute } from './update_index';
 
 export function registerRoutes(dependencies: RouteDependencies, getWorker: () => ReindexWorker) {
   registerAppRoutes(dependencies);
+
   registerCloudBackupStatusRoutes(dependencies);
   registerClusterUpgradeStatusRoutes(dependencies);
   registerSystemIndicesMigrationRoutes(dependencies);
@@ -38,4 +41,10 @@ export function registerRoutes(dependencies: RouteDependencies, getWorker: () =>
   registerRemoteClustersRoute(dependencies);
   registerNodeDiskSpaceRoute(dependencies);
   registerClusterSettingsRoute(dependencies);
+
+  // Data streams reindexing
+  registerMigrateDataStreamRoutes(dependencies);
+
+  // Mark index as read-only and unfreeze it
+  registerUpdateIndexRoute(dependencies);
 }

@@ -6,27 +6,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { tryCatch, map, mapNullable, getOrElse } from 'fp-ts/lib/Option';
+import { tryCatch, map, mapNullable, getOrElse } from 'fp-ts/Option';
 import url from 'url';
 import { curry } from 'lodash';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/pipeable';
 
-import {
-  ActionsConfig,
-  AllowedHosts,
-  EnabledActionTypes,
-  CustomHostSettings,
-  DEFAULT_QUEUED_MAX,
-} from './config';
+import type { ActionsConfig, CustomHostSettings } from './config';
+import { AllowedHosts, EnabledActionTypes, DEFAULT_QUEUED_MAX } from './config';
 import { getCanonicalCustomHostUrl } from './lib/custom_host_settings';
 import { ActionTypeDisabledError } from './lib';
-import { ProxySettings, ResponseSettings, SSLSettings } from './types';
+import type { ProxySettings, ResponseSettings, SSLSettings } from './types';
 import { getSSLSettingsFromConfig } from './lib/get_node_ssl_options';
-import {
-  ValidateEmailAddressesOptions,
-  validateEmailAddresses,
-  invalidEmailsAsMessage,
-} from '../common';
+import type { ValidateEmailAddressesOptions } from '../common';
+import { validateEmailAddresses, invalidEmailsAsMessage } from '../common';
 export { AllowedHosts, EnabledActionTypes } from './config';
 
 enum AllowListingField {
@@ -34,7 +26,7 @@ enum AllowListingField {
   hostname = 'hostname',
 }
 
-export const DEFAULT_MAX_ATTEMPTS: number = 3;
+export const DEFAULT_MAX_ATTEMPTS = 3;
 
 export interface ActionsConfigurationUtilities {
   isHostnameAllowed: (hostname: string) => boolean;

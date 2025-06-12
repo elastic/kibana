@@ -25,11 +25,17 @@ const connectorId = '123';
 const mockServices = {
   http: mockHttp,
   notifications: { toasts: mockToasts },
-  dashboard: {
-    locator: {
-      getRedirectUrl: mockGetRedirectUrl.mockImplementation(
-        ({ dashboardId }) => `http://localhost:5601/app/dashboards#/view/${dashboardId}`
-      ),
+  share: {
+    url: {
+      locators: {
+        get: () => {
+          return {
+            getRedirectUrl: mockGetRedirectUrl.mockImplementation(
+              ({ dashboardId }) => `http://localhost:5601/app/dashboards#/view/${dashboardId}`
+            ),
+          };
+        },
+      },
     },
   },
   spaces: {

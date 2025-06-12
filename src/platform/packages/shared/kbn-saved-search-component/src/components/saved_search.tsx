@@ -8,15 +8,15 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import type {
   SearchEmbeddableSerializedState,
-  SearchEmbeddableRuntimeState,
   SearchEmbeddableApi,
 } from '@kbn/discover-plugin/public';
-import { SerializedPanelState } from '@kbn/presentation-containers';
+import { SerializedPanelState } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
+import { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { SavedSearchComponentProps } from '../types';
 import { SavedSearchComponentErrorContent } from './error';
 
@@ -37,10 +37,12 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
     filters,
     index,
     timestampField,
+    columns,
     height,
   } = props;
 
   const {
+    solutionNavIdOverride,
     enableDocumentViewer: documentViewerEnabled = true,
     enableFilters: filtersEnabled = true,
   } = props.displayOptions ?? {};
@@ -65,16 +67,18 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
           searchSource.setField('filter', filters);
           const { searchSourceJSON, references } = searchSource.serialize();
           // By-value saved object structure
-          const attributes = {
+          const attributes: Partial<SavedSearchAttributes> = {
             kibanaSavedObjectMeta: {
               searchSourceJSON,
             },
+            columns,
           };
           setInitialSerializedState({
             rawState: {
               attributes: { ...attributes, references },
               timeRange,
               nonPersistedDisplayOptions: {
+                solutionNavIdOverride,
                 enableDocumentViewer: documentViewerEnabled,
                 enableFilters: filtersEnabled,
               },
@@ -93,6 +97,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
       abortController.abort();
     };
   }, [
+    columns,
     dataViews,
     documentViewerEnabled,
     filters,
@@ -100,6 +105,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
     index,
     query,
     searchSourceService,
+    solutionNavIdOverride,
     timeRange,
     timestampField,
   ]);
@@ -135,6 +141,7 @@ const SavedSearchComponentTable: React.FC<
     timeRange,
     timestampField,
     index,
+    columns,
   } = props;
   const embeddableApi = useRef<SearchEmbeddableApi | undefined>(undefined);
 
@@ -196,12 +203,16 @@ const SavedSearchComponentTable: React.FC<
     [timeRange]
   );
 
+  useEffect(
+    function syncColumns() {
+      if (!embeddableApi.current) return;
+      embeddableApi.current.setColumns(columns);
+    },
+    [columns]
+  );
+
   return (
-    <ReactEmbeddableRenderer<
-      SearchEmbeddableSerializedState,
-      SearchEmbeddableRuntimeState,
-      SearchEmbeddableApi
-    >
+    <EmbeddableRenderer<SearchEmbeddableSerializedState, SearchEmbeddableApi>
       maybeId={undefined}
       type={SEARCH_EMBEDDABLE_TYPE}
       getParentApi={() => parentApi}

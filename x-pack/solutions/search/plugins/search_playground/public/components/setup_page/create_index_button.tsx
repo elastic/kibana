@@ -5,37 +5,42 @@
  * 2.0.
  */
 
+import React, { useCallback } from 'react';
 import { EuiButton, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useMemo } from 'react';
+import { SEARCH_INDICES, SEARCH_INDICES_CREATE_INDEX } from '@kbn/deeplinks-search/constants';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../hooks/use_kibana';
 
 export const CreateIndexButton: React.FC = () => {
   const {
-    services: { application, share },
+    services: { application, chrome },
   } = useKibana();
-  const createIndexLocator = useMemo(
-    () =>
-      share.url.locators.get('CREATE_INDEX_LOCATOR_ID') ??
-      share.url.locators.get('SEARCH_CREATE_INDEX'),
-    [share.url.locators]
-  );
-  const handleNavigateToIndex = useCallback(async () => {
-    const createIndexUrl = await createIndexLocator?.getUrl({});
 
-    if (createIndexUrl) {
+  const createIndexUrl = chrome.navLinks.get(
+    `${SEARCH_INDICES}:${SEARCH_INDICES_CREATE_INDEX}`
+  )?.url;
+
+  const handleCreateIndexClick = useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement>) => {
+      event.preventDefault();
+
+      if (!createIndexUrl) {
+        return;
+      }
+
       application?.navigateToUrl(createIndexUrl);
-    }
-  }, [application, createIndexLocator]);
+    },
+    [application, createIndexUrl]
+  );
 
-  return createIndexLocator ? (
+  return createIndexUrl ? (
+    // eslint-disable-next-line @elastic/eui/href-or-on-click
     <EuiButton
-      color="primary"
       iconType="plusInCircle"
-      fill
-      onClick={handleNavigateToIndex}
       data-test-subj="createIndexButton"
+      href={createIndexUrl}
+      onClick={handleCreateIndexClick}
     >
       <FormattedMessage
         id="xpack.searchPlayground.createIndexButton"

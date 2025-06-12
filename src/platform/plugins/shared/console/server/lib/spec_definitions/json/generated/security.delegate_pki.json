@@ -1,0 +1,21 @@
+{
+  "security.delegate_pki": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_security/delegate_pki"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-delegate-pki",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

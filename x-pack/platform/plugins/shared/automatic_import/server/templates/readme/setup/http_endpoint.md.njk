@@ -1,0 +1,3 @@
+### Collecting logs from HTTP endpoint
+
+Specify the address and port that will be used to initialize a listening HTTP server that collects incoming HTTP POST requests containing a JSON body. The body must be either an object or an array of objects. Any other data types will result in an HTTP 400 (Bad Request) response. For arrays, one document is created for each object in the array.

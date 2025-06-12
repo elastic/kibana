@@ -65,6 +65,10 @@ console.log(src); // FROM index METADATA _lang, _id
     - `.byIndex()` &mdash; Find a `STATS` command by index.
     - `.summarize()` &mdash; Summarize all `STATS` commands.
     - `.summarizeCommand()` &mdash; Summarize a specific `STATS` command.
+  - `.join`
+    - `.list()` &mdash; List all `JOIN` commands.
+    - `.byIndex()` &mdash; Find a `JOIN` command by index.
+    - `.summarize()` &mdash; Summarize all `JOIN` commands.
 
 
 ## Examples

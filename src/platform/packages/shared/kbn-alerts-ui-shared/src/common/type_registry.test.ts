@@ -8,7 +8,12 @@
  */
 
 import { TypeRegistry } from './type_registry';
-import { ActionTypeModel, GenericValidationResult, RuleTypeModel, ValidationResult } from './types';
+import type {
+  ActionTypeModel,
+  GenericValidationResult,
+  RuleTypeModel,
+  ValidationResult,
+} from './types';
 import { actionTypeRegistryMock } from './test_utils/action_type_registry.mock';
 
 export const ExpressionComponent: React.FunctionComponent = () => {

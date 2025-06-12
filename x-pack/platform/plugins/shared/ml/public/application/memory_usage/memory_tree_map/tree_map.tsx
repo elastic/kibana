@@ -16,14 +16,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import type { MemoryUsageInfo } from '../../../../common/types/trained_models';
 import type { JobType, MlSavedObjectType } from '../../../../common/types/saved_objects';
-import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
 import { LoadingWrapper } from '../../jobs/new_job/pages/components/charts/loading_wrapper';
 import { useFieldFormatter } from '../../contexts/kibana';
 
-import { useRefresh } from '../../routing/use_refresh';
 import { getMemoryItemColor } from '../memory_item_colors';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { useEnabledFeatures } from '../../contexts/ml';
+import { useMemoryUsage } from '../use_memory_usage';
 
 interface Props {
   node?: string;
@@ -60,13 +59,10 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
 
   const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
   const { displayErrorToast } = useToastNotificationService();
-  const refresh = useRefresh();
+  const { loading, data: allData, error } = useMemoryUsage(node, type);
   const chartHeight = height ?? DEFAULT_CHART_HEIGHT;
 
-  const trainedModelsApiService = useTrainedModelsApiService();
-  const [allData, setAllData] = useState<MemoryUsageInfo[]>([]);
   const [data, setData] = useState<MemoryUsageInfo[]>([]);
-  const [loading, setLoading] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState<EuiComboBoxOptionOption[] | null>(null);
   const typeOptions = useMemo(() => {
     return Object.entries(TYPE_LABELS)
@@ -107,34 +103,25 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
     [selectedOptions]
   );
 
-  const loadJobMemorySize = useCallback(async () => {
-    setLoading(true);
-    try {
-      const resp = await trainedModelsApiService.memoryUsage(type, node);
-      setAllData(resp);
-    } catch (error) {
-      displayErrorToast(
-        error,
-        i18n.translate('xpack.ml.memoryUsage.treeMap.fetchFailedErrorMessage', {
-          defaultMessage: 'Error loading model memory usage data',
-        })
-      );
-    }
-    setLoading(false);
-  }, [trainedModelsApiService, type, node, displayErrorToast]);
+  useEffect(
+    function handleError() {
+      if (error) {
+        displayErrorToast(
+          error,
+          i18n.translate('xpack.ml.memoryUsage.treeMap.fetchFailedErrorMessage', {
+            defaultMessage: 'Error loading model memory usage data',
+          })
+        );
+      }
+    },
+    [error, displayErrorToast]
+  );
 
   useEffect(
     function redrawOnFilterChange() {
       setData(filterData(allData));
     },
     [selectedOptions, allData, filterData]
-  );
-
-  useEffect(
-    function updateOnTimerRefresh() {
-      loadJobMemorySize();
-    },
-    [loadJobMemorySize, refresh]
   );
 
   return (

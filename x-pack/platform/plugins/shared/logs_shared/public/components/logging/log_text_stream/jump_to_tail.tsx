@@ -9,7 +9,7 @@ import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import * as React from 'react';
 
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 
 interface LogTextStreamJumpToTailProps {
   onClickJump?: () => void;
@@ -45,16 +45,16 @@ export class LogTextStreamJumpToTail extends React.PureComponent<LogTextStreamJu
   }
 }
 
-const JumpToTailWrapper = euiStyled.div<{ width: number }>`
+const JumpToTailWrapper = styled.div<{ width: number }>`
   align-items: center;
   display: flex;
-  min-height: ${(props) => props.theme.eui.euiSizeXXL};
+  min-height: ${(props) => props.theme.euiTheme.size.xxl};
   width: ${(props) => props.width}px;
   position: fixed;
   bottom: 0;
-  background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
+  background-color: ${(props) => props.theme.euiTheme.colors.emptyShade};
 `;
 
-const MessageWrapper = euiStyled.div`
+const MessageWrapper = styled.div`
   padding: 8px 16px;
 `;

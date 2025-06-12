@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { euiLightVars as theme } from '@kbn/ui-theme';
 import type { APMConfig } from '../../..';
 import {
   FAAS_BILLED_DURATION,
@@ -57,33 +56,31 @@ export async function getComputeUsageChart({
     apm: {
       events: [ProcessorEvent.metric],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            { exists: { field: FAAS_BILLED_DURATION } },
-            ...termQuery(METRICSET_NAME, 'app'),
-            ...termQuery(FAAS_ID, serverlessId),
-          ],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          { term: { [SERVICE_NAME]: serviceName } },
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+          { exists: { field: FAAS_BILLED_DURATION } },
+          ...termQuery(METRICSET_NAME, 'app'),
+          ...termQuery(FAAS_ID, serverlessId),
+        ],
       },
-      aggs: {
-        timeseriesData: {
-          date_histogram: getMetricsDateHistogramParams({
-            start,
-            end,
-            metricsInterval: config.metricsInterval,
-          }),
-          aggs,
-        },
-        ...aggs,
+    },
+    aggs: {
+      timeseriesData: {
+        date_histogram: getMetricsDateHistogramParams({
+          start,
+          end,
+          metricsInterval: config.metricsInterval,
+        }),
+        aggs,
       },
+      ...aggs,
     },
   };
 
@@ -115,7 +112,6 @@ export async function getComputeUsageChart({
                   computeUsageBytesMs: aggregations?.avgComputeUsageBytesMs.value,
                   countInvocations: aggregations?.countInvocations.value,
                 }) ?? 0,
-              color: theme.euiColorVis0,
               data: timeseriesData.buckets.map((bucket) => {
                 const computeUsage =
                   convertComputeUsageToGbSec({

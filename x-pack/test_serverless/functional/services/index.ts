@@ -8,6 +8,7 @@
 import { ComboBoxService } from '@kbn/test-suites-src/functional/services/combo_box';
 import { services as deploymentAgnosticFunctionalServices } from './deployment_agnostic_services';
 import { services as svlSharedServices } from '../../shared/services';
+import { SvlChatNavigationServiceProvider } from './svl_chat_navigation';
 import { SvlCommonNavigationServiceProvider } from './svl_common_navigation';
 import { SvlObltNavigationServiceProvider } from './svl_oblt_navigation';
 import { SvlSearchNavigationServiceProvider } from './svl_search_navigation';
@@ -25,6 +26,7 @@ export const services = {
 
   // serverless FTR services
   ...svlSharedServices,
+  svlChatNavigation: SvlChatNavigationServiceProvider,
   svlCommonNavigation: SvlCommonNavigationServiceProvider,
   svlObltNavigation: SvlObltNavigationServiceProvider,
   svlSearchNavigation: SvlSearchNavigationServiceProvider,

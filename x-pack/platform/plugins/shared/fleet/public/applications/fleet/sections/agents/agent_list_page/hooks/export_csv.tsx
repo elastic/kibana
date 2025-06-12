@@ -27,12 +27,12 @@ import type { ExportField } from '../../components/agent_export_csv_modal';
 
 import { getSortFieldForAPI } from './use_fetch_agents_data';
 
-export function useExportCSV(enableExportCSV?: boolean) {
+export function useExportCSV() {
   const startServices = useStartServices();
   const { notifications, http, uiSettings } = startServices;
   const kibanaVersion = useKibanaVersion();
   const { data: runtimeFieldsResponse } = useGetAgentStatusRuntimeFieldQuery({
-    enabled: enableExportCSV,
+    enabled: true,
   });
   const runtimeFields = runtimeFieldsResponse ? runtimeFieldsResponse : 'emit("")';
 

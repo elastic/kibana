@@ -15,10 +15,20 @@ export const registerPrebootStatusRoute = ({ router }: { router: IRouter }) => {
   router.get(
     {
       path: '/api/status',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Preboot status route should be accessible without authorization.',
+        },
+        authc: {
+          enabled: false,
+          reason: 'Preboot status route should be accessible without authentication.',
+        },
+      },
       options: {
-        authRequired: false,
         tags: ['api'],
         access: 'public', // needs to be public to allow access from "system" users like k8s readiness probes.
+        excludeFromRateLimiter: true,
       },
       validate: false,
     },

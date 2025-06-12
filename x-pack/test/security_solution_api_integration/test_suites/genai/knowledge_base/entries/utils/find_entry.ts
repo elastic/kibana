@@ -12,6 +12,7 @@ import {
   FindKnowledgeBaseEntriesResponse,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
   FindKnowledgeBaseEntriesRequestQuery,
+  API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
 import type { User } from './auth/types';
 
@@ -39,7 +40,7 @@ export const findEntries = async ({
   const response = await supertest
     .get(route)
     .set('kbn-xsrf', 'true')
-    .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+    .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
     .send();
   if (response.status !== 200) {
     throw new Error(
@@ -78,7 +79,7 @@ export const findEntriesForUser = async ({
     .get(route)
     .auth(user.username, user.password)
     .set('kbn-xsrf', 'true')
-    .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+    .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
     .send();
   if (response.status !== 200) {
     throw new Error(

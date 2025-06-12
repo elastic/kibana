@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { ValidatorServices } from '@kbn/actions-plugin/server/types';
-import {
+import type { TypeOf } from '@kbn/config-schema';
+import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
+import type {
   ExecutorSubActionPushParamsSchema,
   ExternalIncidentServiceConfigurationSchema,
   ExternalIncidentServiceSecretConfigurationSchema,
@@ -21,7 +21,9 @@ export interface ExternalServiceCredentials {
 }
 
 export interface ExternalServiceValidation {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   config: (configObject: any, validatorServices: ValidatorServices) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   secrets: (secrets: any, validatorServices: ValidatorServices) => void;
 }
 

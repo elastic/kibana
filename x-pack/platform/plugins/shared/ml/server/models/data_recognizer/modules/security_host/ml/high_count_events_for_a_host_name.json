@@ -2,7 +2,7 @@
   "description": "Security: Host - Looks for a sudden spike in host based traffic. This can be due to a range of security issues, such as a compromised system, DDoS attacks, malware infections, privilege escalation, or data exfiltration.",
   "groups": ["security", "host"],
   "analysis_config": {
-    "bucket_span": "3h",
+    "bucket_span": "1h",
     "detectors": [
       {
         "detector_description": "high count of host based events",

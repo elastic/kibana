@@ -17,23 +17,28 @@ type IEmbedTab = IModalTabDeclaration<{ url: string; isNotSaved: boolean }>;
 
 const EmbedTabContent: NonNullable<IEmbedTab['content']> = ({ state, dispatch }) => {
   const {
-    embedUrlParamExtensions,
     shareableUrlForSavedObject,
     shareableUrl,
     objectType,
     objectTypeMeta,
     isDirty,
-  } = useShareTabsContext()!;
+    allowShortUrl,
+    shareableUrlLocatorParams,
+    shareMenuItems,
+  } = useShareTabsContext('embed');
 
   return (
     <EmbedContent
       {...{
-        embedUrlParamExtensions,
         shareableUrlForSavedObject,
         shareableUrl,
         objectType,
-        objectConfig: objectTypeMeta?.config?.embed,
+        objectConfig: objectTypeMeta?.config,
         isDirty,
+        allowShortUrl,
+        anonymousAccess: shareMenuItems.config.anonymousAccess,
+        shortUrlService: shareMenuItems.config.shortUrlService,
+        shareableUrlLocatorParams,
       }}
     />
   );

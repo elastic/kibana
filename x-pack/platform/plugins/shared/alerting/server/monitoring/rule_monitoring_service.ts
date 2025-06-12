@@ -6,7 +6,7 @@
  */
 
 import { getDefaultMonitoring, getExecutionDurationPercentiles } from '../lib/monitoring';
-import { RuleMonitoring, RuleMonitoringHistory, PublicRuleMonitoringService } from '../types';
+import type { RuleMonitoring, RuleMonitoringHistory, PublicRuleMonitoringService } from '../types';
 
 export class RuleMonitoringService {
   private monitoring: RuleMonitoring = getDefaultMonitoring(new Date().toISOString());
@@ -63,6 +63,7 @@ export class RuleMonitoringService {
       setLastRunMetricsTotalAlertsDetected: this.setLastRunMetricsTotalAlertsDetected.bind(this),
       setLastRunMetricsTotalAlertsCreated: this.setLastRunMetricsTotalAlertsCreated.bind(this),
       setLastRunMetricsGapDurationS: this.setLastRunMetricsGapDurationS.bind(this),
+      setLastRunMetricsGapRange: this.setLastRunMetricsGapRange.bind(this),
     };
   }
 
@@ -84,6 +85,10 @@ export class RuleMonitoringService {
 
   private setLastRunMetricsGapDurationS(gapDurationS: number) {
     this.monitoring.run.last_run.metrics.gap_duration_s = gapDurationS;
+  }
+
+  private setLastRunMetricsGapRange(gap: { lte: string; gte: string } | null) {
+    this.monitoring.run.last_run.metrics.gap_range = gap;
   }
 
   private buildExecutionSuccessRatio() {

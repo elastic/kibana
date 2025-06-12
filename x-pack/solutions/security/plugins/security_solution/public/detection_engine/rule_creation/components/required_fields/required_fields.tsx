@@ -16,7 +16,7 @@ import { RequiredFieldsHelpInfo } from './required_fields_help_info';
 import * as defineRuleI18n from '../../../rule_creation_ui/components/step_define_rule/translations';
 import { OptionalFieldLabel } from '../optional_field_label';
 import { RequiredFieldRow } from './required_fields_row';
-import { getFlattenedArrayFieldNames } from './utils';
+import { getFlattenedArrayFieldNames } from '../utils';
 import * as i18n from './translations';
 
 interface RequiredFieldsComponentProps {
@@ -179,6 +179,7 @@ const RequiredFieldsList = ({
         }
         hasChildLabel={false}
         labelType="legend"
+        data-test-subj="requiredFieldsFormRow"
       >
         <>
           {items.map((item) => (

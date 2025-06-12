@@ -9,6 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import type { Writable } from '@kbn/utility-types';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import {
   type UiSettingsParams,
@@ -17,18 +18,17 @@ import {
   SUPPORTED_THEME_NAMES,
   DEFAULT_THEME_NAME,
 } from '@kbn/core-ui-settings-common';
+import { defaultThemeSchema } from '../ui_settings_config';
 
 interface ThemeInfo {
   defaultDarkMode: boolean;
-  defaultThemeName: ThemeName;
 }
 
-const getThemeInfo = ({ isDist, isServerless }: GetThemeSettingsOptions): ThemeInfo => {
+const getThemeInfo = ({ isDist }: GetThemeSettingsOptions): ThemeInfo => {
   const themeTags = parseThemeTags(process.env.KBN_OPTIMIZER_THEMES);
 
   const themeInfo: ThemeInfo = {
     defaultDarkMode: false,
-    defaultThemeName: DEFAULT_THEME_NAME,
   };
 
   if (!isDist) {
@@ -36,30 +36,20 @@ const getThemeInfo = ({ isDist, isServerless }: GetThemeSettingsOptions): ThemeI
     themeInfo.defaultDarkMode = themeTags[0]?.endsWith('dark') || false;
   }
 
-  if (!isServerless) {
-    // Default to Borealis theme in non-serverless
-    themeInfo.defaultThemeName = 'borealis';
-  }
-
   return themeInfo;
 };
 
 export interface GetThemeSettingsOptions {
-  isServerless: boolean;
   isDist: boolean;
   isThemeSwitcherEnabled: boolean | undefined;
+  defaultTheme?: ThemeName;
 }
 
 export const getThemeSettings = (
   options: GetThemeSettingsOptions
 ): Record<string, UiSettingsParams> => {
-  const { defaultDarkMode, defaultThemeName } = getThemeInfo(options);
-
-  // Make `theme:name` readonly in serverless unless the theme switcher is enabled
-  let isThemeNameReadonly = options.isServerless;
-  if (options.isThemeSwitcherEnabled !== undefined) {
-    isThemeNameReadonly = !options.isThemeSwitcherEnabled;
-  }
+  const { defaultDarkMode } = getThemeInfo(options);
+  const defaultTheme = options.defaultTheme ?? DEFAULT_THEME_NAME;
 
   return {
     'theme:darkMode': {
@@ -122,7 +112,8 @@ export const getThemeSettings = (
         defaultMessage: 'Theme',
       }),
       type: 'select',
-      options: SUPPORTED_THEME_NAMES,
+      // Cast to a mutable array to satisfy the `UiSettingsParams.options` type
+      options: SUPPORTED_THEME_NAMES as Writable<typeof SUPPORTED_THEME_NAMES>,
       optionLabels: {
         amsterdam: i18n.translate('core.ui_settings.params.themeName.options.amsterdam', {
           defaultMessage: 'Amsterdam',
@@ -131,15 +122,10 @@ export const getThemeSettings = (
           defaultMessage: 'Borealis',
         }),
       },
-      value: defaultThemeName,
-      readonly: isThemeNameReadonly,
+      value: defaultTheme,
+      readonly: !options.isThemeSwitcherEnabled,
       requiresPageReload: true,
-      schema: schema.oneOf([
-        schema.literal('amsterdam'),
-        schema.literal('borealis'),
-        // Allow experimental themes
-        schema.string(),
-      ]),
+      schema: defaultThemeSchema,
     },
   };
 };

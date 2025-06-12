@@ -25,46 +25,50 @@ const argTypes = {
 
 type KnownSolutionParams = Pick<KnownSolutionProps, 'size' | 'name'>;
 
-export const SolutionType = (params: KnownSolutionParams) => {
-  return <KibanaSolutionAvatar {...params} />;
-};
-
-SolutionType.argTypes = {
-  name: {
-    control: 'select',
-    options: ['Cloud', 'Elastic', 'Kibana', 'Observability', 'Security', 'Enterprise Search'],
-    defaultValue: 'Elastic',
+export const SolutionType = {
+  render: (params: KnownSolutionParams) => {
+    return <KibanaSolutionAvatar {...params} />;
   },
-  ...argTypes,
+
+  argTypes: {
+    name: {
+      control: 'select',
+      options: ['Cloud', 'Elastic', 'Kibana', 'Observability', 'Security', 'Enterprise Search'],
+      defaultValue: 'Elastic',
+    },
+    ...argTypes,
+  },
 };
 
 type IconTypeParams = Pick<IconTypeProps, 'size' | 'name' | 'iconType'>;
 
-export const IconType = (params: IconTypeParams) => {
-  return <KibanaSolutionAvatar {...params} />;
-};
+export const IconType = {
+  render: (params: IconTypeParams) => {
+    return <KibanaSolutionAvatar {...params} />;
+  },
 
-IconType.argTypes = {
-  iconType: {
-    control: 'select',
-    options: [
-      'logoCloud',
-      'logoElastic',
-      'logoElasticsearch',
-      'logoElasticStack',
-      'logoKibana',
-      'logoObservability',
-      'logoSecurity',
-      'logoSiteSearch',
-      'logoWorkplaceSearch',
-      'machineLearningApp',
-      'managementApp',
-    ],
-    defaultValue: 'logoElastic',
+  argTypes: {
+    iconType: {
+      control: 'select',
+      options: [
+        'logoCloud',
+        'logoElastic',
+        'logoElasticsearch',
+        'logoElasticStack',
+        'logoKibana',
+        'logoObservability',
+        'logoSecurity',
+        'logoSiteSearch',
+        'logoWorkplaceSearch',
+        'machineLearningApp',
+        'managementApp',
+      ],
+      defaultValue: 'logoElastic',
+    },
+    name: {
+      control: 'text',
+      defaultValue: 'Solution Name',
+    },
+    ...argTypes,
   },
-  name: {
-    control: 'text',
-    defaultValue: 'Solution Name',
-  },
-  ...argTypes,
 };

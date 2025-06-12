@@ -5,27 +5,33 @@
  * 2.0.
  */
 
-import type { RuleMigrationPrebuiltRule } from '../../types';
+import type { PrebuildRuleVersionsMap } from '../../data/rule_migrations_data_prebuilt_rules_client';
+import type { RuleSemanticSearchResult } from '../../types';
 import type { RuleMigrationsRetrieverClients } from './rule_migrations_retriever';
 
 export class PrebuiltRulesRetriever {
+  private rulesMap?: PrebuildRuleVersionsMap;
+
   constructor(private readonly clients: RuleMigrationsRetrieverClients) {}
 
-  // TODO:
-  // 1. Implement the `initialize` method to retrieve prebuilt rules and keep them in memory.
-  // 2. Improve the `retrieveRules` method to return the real prebuilt rules instead of the ELSER index doc.
-
   public async populateIndex() {
-    return this.clients.data.prebuiltRules.create({
-      rulesClient: this.clients.rules,
-      soClient: this.clients.savedObjects,
-    });
+    if (!this.rulesMap) {
+      this.rulesMap = await this.clients.data.prebuiltRules.getRuleVersionsMap();
+    }
+    return this.clients.data.prebuiltRules.populate(this.rulesMap);
   }
 
-  public async getRules(
+  public async search(
     semanticString: string,
     techniqueIds: string
-  ): Promise<RuleMigrationPrebuiltRule[]> {
-    return this.clients.data.prebuiltRules.retrieveRules(semanticString, techniqueIds);
+  ): Promise<RuleSemanticSearchResult[]> {
+    if (!this.rulesMap) {
+      this.rulesMap = await this.clients.data.prebuiltRules.getRuleVersionsMap();
+    }
+    const results = await this.clients.data.prebuiltRules.search(semanticString, techniqueIds);
+    return results.map((rule) => {
+      const versions = this.rulesMap?.get(rule.rule_id) ?? {};
+      return { ...rule, ...versions };
+    });
   }
 }

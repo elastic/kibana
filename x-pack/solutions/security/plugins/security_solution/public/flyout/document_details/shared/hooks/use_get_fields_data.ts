@@ -17,7 +17,7 @@ import type { SearchHit } from '../../../../../common/search_strategy';
  * This should be generally fine, but given the flattened nature of the top level key, utilities like `get` or `getOr` won't work since the path isn't actually nested
  * This utility allows users to not only get simple fields, but if they provide a path like `kibana.alert.parameters.index`, it will return an array of all index values
  * for each object in the parameters array. As an added note, this work stemmed from a hope to be able to purely use the fields api in place of the data produced by
- * `getDataFromFieldsHits` found in `x-pack/solutions/security/plugins/timelines/common/utils/field_formatters.ts`
+ * `getDataFromFieldsHits` found in `x-pack/platform/plugins/shared/timelines/common/utils/field_formatters.ts`
  */
 const getAllDotIndicesInReverse = (dotField: string): number[] => {
   const dotRegx = RegExp('[.]', 'g');

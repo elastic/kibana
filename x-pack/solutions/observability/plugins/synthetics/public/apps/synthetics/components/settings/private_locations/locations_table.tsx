@@ -18,12 +18,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CopyName } from './copy_name';
 import { ViewLocationMonitors } from './view_location_monitors';
 import { TableTitle } from '../../common/components/table_title';
 import { TAGS_LABEL } from '../components/tags_field';
 import { useSyntheticsSettingsContext } from '../../../contexts';
-import { setAddingNewPrivateLocation } from '../../../state/private_locations';
 import { PrivateLocationDocsLink, START_ADDING_LOCATIONS_DESCRIPTION } from './empty_locations';
 import { PrivateLocation } from '../../../../../../common/runtime_types';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
@@ -31,6 +31,8 @@ import { DeleteLocation } from './delete_location';
 import { useLocationMonitors } from './hooks/use_location_monitors';
 import { PolicyName } from './policy_name';
 import { LOCATION_NAME_LABEL } from './location_form';
+import { setIsCreatePrivateLocationFlyoutVisible } from '../../../state/private_locations/actions';
+import { ClientPluginsStart } from '../../../../../plugin';
 
 interface ListItem extends PrivateLocation {
   monitors: number;
@@ -41,7 +43,7 @@ export const PrivateLocationsTable = ({
   onDelete,
   privateLocations,
 }: {
-  deleteLoading: boolean;
+  deleteLoading?: boolean;
   onDelete: (id: string) => void;
   privateLocations: PrivateLocation[];
 }) => {
@@ -53,6 +55,10 @@ export const PrivateLocationsTable = ({
   const { locationMonitors, loading } = useLocationMonitors();
 
   const { canSave, canManagePrivateLocations } = useSyntheticsSettingsContext();
+
+  const { services } = useKibana<ClientPluginsStart>();
+
+  const LazySpaceList = services.spaces?.ui.components.getSpaceList ?? (() => null);
 
   const tagsList = privateLocations.reduce((acc, item) => {
     const tags = item.tags || [];
@@ -98,6 +104,14 @@ export const PrivateLocationsTable = ({
       },
     },
     {
+      name: 'Spaces',
+      field: 'spaces',
+      sortable: true,
+      render: (spaces: string[]) => {
+        return <LazySpaceList namespaces={spaces} behaviorContext="outside-space" />;
+      },
+    },
+    {
       name: ACTIONS_LABEL,
       actions: [
         {
@@ -124,7 +138,7 @@ export const PrivateLocationsTable = ({
     monitors: locationMonitors?.find((l) => l.id === location.id)?.count ?? 0,
   }));
 
-  const setIsAddingNew = (val: boolean) => dispatch(setAddingNewPrivateLocation(val));
+  const setIsAddingNew = (val: boolean) => dispatch(setIsCreatePrivateLocationFlyoutVisible(val));
 
   const renderToolRight = () => {
     return [

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Rule, RuleTypeParams } from '../../types';
+import type { Rule, RuleTypeParams } from '../../types';
 
 export interface CreateRuleBody<Params extends RuleTypeParams = RuleTypeParams> {
   name: Rule<Params>['name'];
@@ -22,4 +22,5 @@ export interface CreateRuleBody<Params extends RuleTypeParams = RuleTypeParams> 
   notifyWhen?: Rule<Params>['notifyWhen'];
   alertDelay?: Rule<Params>['alertDelay'];
   flapping?: Rule<Params>['flapping'];
+  artifacts?: Rule<Params>['artifacts'];
 }

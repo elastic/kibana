@@ -6,7 +6,7 @@
  */
 
 import { useInfiniteQuery } from '@tanstack/react-query';
-import type { FindCaseUserActions, CaseUserActionTypeWithAll } from '../../common/ui/types';
+import type { InternalFindCaseUserActions, CaseUserActionTypeWithAll } from '../../common/ui/types';
 import { findCaseUserActions } from './api';
 import type { ServerError } from '../types';
 import { useCasesToast } from '../common/use_cases_toast';
@@ -25,7 +25,7 @@ export const useInfiniteFindCaseUserActions = (
   const { showErrorToast } = useCasesToast();
   const abortCtrlRef = new AbortController();
 
-  return useInfiniteQuery<FindCaseUserActions, ServerError>(
+  return useInfiniteQuery<InternalFindCaseUserActions, ServerError>(
     casesQueriesKeys.caseUserActions(caseId, params),
     async ({ pageParam = 1 }) => {
       return findCaseUserActions(caseId, { ...params, page: pageParam }, abortCtrlRef.signal);

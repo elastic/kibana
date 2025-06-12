@@ -6,7 +6,6 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { ColorPalette } from '../color_palette';
 
@@ -29,26 +28,51 @@ class Interactive extends React.Component<{}, { value: string }> {
   }
 }
 
-storiesOf('components/Color/ColorPalette', module)
-  .add('three colors', () => (
+export default {
+  title: 'components/Color/ColorPalette',
+};
+
+export const ThreeColors = {
+  render: () => (
     <>
       <ColorPalette key="1" onChange={action('onChange')} colors={THREE_COLORS} />
       <ColorPalette key="2" value="#fff" onChange={action('onChange')} colors={THREE_COLORS} />
     </>
-  ))
-  .add('six colors', () => (
+  ),
+
+  name: 'three colors',
+};
+
+export const SixColors = {
+  render: () => (
     <>
       <ColorPalette key="1" onChange={action('onChange')} colors={SIX_COLORS} />
       <ColorPalette key="2" value="#fff" onChange={action('onChange')} colors={SIX_COLORS} />
     </>
-  ))
-  .add('six colors, wrap at 4', () => (
+  ),
+
+  name: 'six colors',
+};
+
+export const SixColorsWrapAt4 = {
+  render: () => (
     <ColorPalette value="#fff" onChange={action('onChange')} colors={SIX_COLORS} colorsPerRow={4} />
-  ))
-  .add('six colors, value missing', () => (
-    <ColorPalette value="#f00" onChange={action('onChange')} colors={SIX_COLORS} />
-  ))
-  .add('interactive', () => <Interactive />, {
+  ),
+
+  name: 'six colors, wrap at 4',
+};
+
+export const SixColorsValueMissing = {
+  render: () => <ColorPalette value="#f00" onChange={action('onChange')} colors={SIX_COLORS} />,
+
+  name: 'six colors, value missing',
+};
+
+export const _Interactive = {
+  render: () => <Interactive />,
+  name: 'interactive',
+
+  parameters: {
     info: {
       inline: true,
       source: false,
@@ -62,4 +86,5 @@ storiesOf('components/Color/ColorPalette', module)
         },
       },
     },
-  });
+  },
+};

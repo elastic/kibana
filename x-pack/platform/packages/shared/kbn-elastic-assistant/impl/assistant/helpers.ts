@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { isEmpty, some } from 'lodash';
 import { AIConnector } from '../connectorland/connector_selector';
-import { FetchConnectorExecuteResponse, FetchConversationsResponse } from './api';
-import { Conversation } from '../..';
+import { FetchConnectorExecuteResponse } from './api';
 import type { ClientMessage } from '../assistant_context/types';
 
 export const getMessageFromRawResponse = (
@@ -25,6 +23,7 @@ export const getMessageFromRawResponse = (
       timestamp: dateTimeString,
       isError,
       traceData: rawResponse.traceData,
+      metadata: rawResponse.metadata,
     };
   } else {
     return {
@@ -36,23 +35,6 @@ export const getMessageFromRawResponse = (
   }
 };
 
-export const mergeBaseWithPersistedConversations = (
-  baseConversations: Record<string, Conversation>,
-  conversationsData: FetchConversationsResponse
-): Record<string, Conversation> => {
-  return [...(conversationsData?.data ?? []), ...Object.values(baseConversations)].reduce<
-    Record<string, Conversation>
-  >((transformed, conversation) => {
-    if (!isEmpty(conversation.id)) {
-      transformed[conversation.id] = conversation;
-    } else {
-      if (!some(Object.values(transformed), ['title', conversation.title])) {
-        transformed[conversation.title] = conversation;
-      }
-    }
-    return transformed;
-  }, {});
-};
 /**
  * Returns a default connector if there is only one connector
  * @param connectors

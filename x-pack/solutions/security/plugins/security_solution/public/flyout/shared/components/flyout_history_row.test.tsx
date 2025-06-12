@@ -6,31 +6,36 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import {
-  FlyoutHistoryRow,
-  RuleHistoryRow,
   DocumentDetailsHistoryRow,
+  FlyoutHistoryRow,
   GenericHistoryRow,
+  RuleHistoryRow,
 } from './flyout_history_row';
 import { TestProviders } from '../../../common/mock';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
-import { useExpandableFlyoutApi, type ExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import {
+  type ExpandableFlyoutApi,
+  type FlyoutPanelHistory,
+  useExpandableFlyoutApi,
+} from '@kbn/expandable-flyout';
 import { useRuleDetails } from '../../rule_details/hooks/use_rule_details';
 import { useBasicDataFromDetailsData } from '../../document_details/shared/hooks/use_basic_data_from_details_data';
+import { useEventDetails } from '../../document_details/shared/hooks/use_event_details';
 import { DocumentDetailsRightPanelKey } from '../../document_details/shared/constants/panel_keys';
 import { RulePanelKey } from '../../rule_details/right';
-import { UserPanelKey } from '../../entity_details/user_right';
-import { HostPanelKey } from '../../entity_details/host_right';
 import { NetworkPanelKey } from '../../network_details';
 import {
   DOCUMENT_DETAILS_HISTORY_ROW_TEST_ID,
-  RULE_HISTORY_ROW_TEST_ID,
-  HOST_HISTORY_ROW_TEST_ID,
-  USER_HISTORY_ROW_TEST_ID,
-  NETWORK_HISTORY_ROW_TEST_ID,
   GENERIC_HISTORY_ROW_TEST_ID,
+  HOST_HISTORY_ROW_TEST_ID,
+  NETWORK_HISTORY_ROW_TEST_ID,
+  RULE_HISTORY_ROW_TEST_ID,
+  USER_HISTORY_ROW_TEST_ID,
+  HISTORY_ROW_LOADING_TEST_ID,
 } from './test_ids';
+import { HostPanelKey, UserPanelKey } from '../../entity_details/shared/constants';
 
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),
@@ -42,35 +47,57 @@ jest.mock('@kbn/expandable-flyout', () => ({
 jest.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 jest.mock('../../document_details/shared/hooks/use_basic_data_from_details_data');
 jest.mock('../../rule_details/hooks/use_rule_details');
+jest.mock('../../document_details/shared/hooks/use_event_details');
 
 const flyoutContextValue = {
   openFlyout: jest.fn(),
 } as unknown as ExpandableFlyoutApi;
 
-const rowItems = {
+const rowItems: { [id: string]: FlyoutPanelHistory } = {
   alert: {
-    id: DocumentDetailsRightPanelKey,
-    params: {
-      id: 'eventId',
-      indexName: 'indexName',
-      scopeId: 'scopeId',
+    lastOpen: Date.now(),
+    panel: {
+      id: DocumentDetailsRightPanelKey,
+      params: {
+        id: 'eventId',
+        indexName: 'indexName',
+        scopeId: 'scopeId',
+      },
     },
   },
   rule: {
-    id: RulePanelKey,
-    params: { ruleId: 'ruleId' },
+    lastOpen: Date.now(),
+    panel: {
+      id: RulePanelKey,
+      params: { ruleId: 'ruleId' },
+    },
   },
   host: {
-    id: HostPanelKey,
-    params: { hostName: 'host name' },
+    lastOpen: Date.now(),
+    panel: {
+      id: HostPanelKey,
+      params: { hostName: 'host name' },
+    },
   },
   user: {
-    id: UserPanelKey,
-    params: { userName: 'user name' },
+    lastOpen: Date.now(),
+    panel: {
+      id: UserPanelKey,
+      params: { userName: 'user name' },
+    },
   },
   network: {
-    id: NetworkPanelKey,
-    params: { ip: 'ip' },
+    lastOpen: Date.now(),
+    panel: {
+      id: NetworkPanelKey,
+      params: { ip: 'ip' },
+    },
+  },
+  unsupported: {
+    lastOpen: Date.now(),
+    panel: {
+      id: 'key',
+    },
   },
 };
 
@@ -88,11 +115,17 @@ describe('FlyoutHistoryRow', () => {
     jest.mocked(useRuleDetails).mockReturnValue({
       ...mockedRuleResponse,
       rule: { name: 'rule name' } as RuleResponse,
+      loading: false,
+    });
+    (useEventDetails as jest.Mock).mockReturnValue({
+      dataFormattedForFieldBrowser: {},
+      getFieldsData: jest.fn(),
+      loading: false,
     });
     (useBasicDataFromDetailsData as jest.Mock).mockReturnValue({ isAlert: false });
   });
 
-  it('renders document details history row when key is alert', () => {
+  it('should render document details history row when key is alert', () => {
     (useBasicDataFromDetailsData as jest.Mock).mockReturnValue({
       isAlert: true,
       ruleName: 'rule name',
@@ -106,7 +139,7 @@ describe('FlyoutHistoryRow', () => {
     expect(getByTestId(`${0}-${DOCUMENT_DETAILS_HISTORY_ROW_TEST_ID}`)).toBeInTheDocument();
   });
 
-  it('renders rule history row when key is rule', () => {
+  it('should render rule history row when key is rule', () => {
     const { getByTestId } = render(
       <TestProviders>
         <FlyoutHistoryRow item={rowItems.rule} index={1} />
@@ -115,7 +148,7 @@ describe('FlyoutHistoryRow', () => {
     expect(getByTestId(`${1}-${RULE_HISTORY_ROW_TEST_ID}`)).toBeInTheDocument();
   });
 
-  it('renders generic host history row when key is host', () => {
+  it('should render generic host history row when key is host', () => {
     const { getByTestId } = render(
       <TestProviders>
         <FlyoutHistoryRow item={rowItems.host} index={2} />
@@ -125,7 +158,7 @@ describe('FlyoutHistoryRow', () => {
     expect(getByTestId(`${2}-${HOST_HISTORY_ROW_TEST_ID}`)).toHaveTextContent('Host: host name');
   });
 
-  it('renders generic user history row when key is user', () => {
+  it('should render generic user history row when key is user', () => {
     const { getByTestId } = render(
       <TestProviders>
         <FlyoutHistoryRow item={rowItems.user} index={3} />
@@ -135,7 +168,7 @@ describe('FlyoutHistoryRow', () => {
     expect(getByTestId(`${3}-${USER_HISTORY_ROW_TEST_ID}`)).toHaveTextContent('User: user name');
   });
 
-  it('renders generic network history row when key is network', () => {
+  it('should render generic network history row when key is network', () => {
     const { getByTestId } = render(
       <TestProviders>
         <FlyoutHistoryRow item={rowItems.network} index={4} />
@@ -145,10 +178,10 @@ describe('FlyoutHistoryRow', () => {
     expect(getByTestId(`${4}-${NETWORK_HISTORY_ROW_TEST_ID}`)).toHaveTextContent('Network: ip');
   });
 
-  it('renders null when key is not supported', () => {
+  it('should render null when key is not supported', () => {
     const { container } = render(
       <TestProviders>
-        <FlyoutHistoryRow item={{ id: 'key' }} index={5} />
+        <FlyoutHistoryRow item={rowItems.unsupported} index={5} />
       </TestProviders>
     );
     expect(container).toBeEmptyDOMElement();
@@ -158,9 +191,14 @@ describe('FlyoutHistoryRow', () => {
 describe('DocumentDetailsHistoryRow', () => {
   beforeEach(() => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
+    (useEventDetails as jest.Mock).mockReturnValue({
+      dataFormattedForFieldBrowser: {},
+      getFieldsData: jest.fn(),
+      loading: false,
+    });
   });
 
-  it('renders alert title when isAlert is true and rule name is defined', () => {
+  it('should render alert title when isAlert is true and rule name is defined', () => {
     (useBasicDataFromDetailsData as jest.Mock).mockReturnValue({
       isAlert: true,
       ruleName: 'rule name',
@@ -176,7 +214,7 @@ describe('DocumentDetailsHistoryRow', () => {
     );
   });
 
-  it('renders default alert title when isAlert is true and rule name is undefined', () => {
+  it('should render default alert title when isAlert is true and rule name is undefined', () => {
     (useBasicDataFromDetailsData as jest.Mock).mockReturnValue({ isAlert: true });
 
     const { getByTestId } = render(
@@ -189,7 +227,7 @@ describe('DocumentDetailsHistoryRow', () => {
     );
   });
 
-  it('renders event title when isAlert is false', () => {
+  it('should render event title when isAlert is false', () => {
     (useBasicDataFromDetailsData as jest.Mock).mockReturnValue({ isAlert: false });
 
     const { getByTestId } = render(
@@ -202,7 +240,7 @@ describe('DocumentDetailsHistoryRow', () => {
     );
   });
 
-  it('opens document details flyout when clicked', () => {
+  it('should open document details flyout when clicked', () => {
     (useBasicDataFromDetailsData as jest.Mock).mockReturnValue({ isAlert: true });
 
     const { getByTestId } = render(
@@ -211,7 +249,7 @@ describe('DocumentDetailsHistoryRow', () => {
       </TestProviders>
     );
     fireEvent.click(getByTestId(`${0}-${DOCUMENT_DETAILS_HISTORY_ROW_TEST_ID}`));
-    expect(flyoutContextValue.openFlyout).toHaveBeenCalledWith({ right: rowItems.alert });
+    expect(flyoutContextValue.openFlyout).toHaveBeenCalledWith({ right: rowItems.alert.panel });
   });
 });
 
@@ -225,24 +263,24 @@ describe('RuleHistoryRow', () => {
     });
   });
 
-  it('renders', () => {
+  it('should render the rule row component', () => {
     const { getByTestId } = render(
       <TestProviders>
         <RuleHistoryRow item={rowItems.rule} index={0} />
       </TestProviders>
     );
     expect(getByTestId(`${0}-${RULE_HISTORY_ROW_TEST_ID}`)).toHaveTextContent('Rule: rule name');
-    expect(useRuleDetails).toHaveBeenCalledWith({ ruleId: rowItems.rule.params.ruleId });
+    expect(useRuleDetails).toHaveBeenCalledWith({ ruleId: rowItems.rule.panel.params?.ruleId });
   });
 
-  it('opens rule details flyout when clicked', () => {
+  it('should open rule details flyout when clicked', () => {
     const { getByTestId } = render(
       <TestProviders>
         <RuleHistoryRow item={rowItems.rule} index={0} />
       </TestProviders>
     );
     fireEvent.click(getByTestId(`${0}-${RULE_HISTORY_ROW_TEST_ID}`));
-    expect(flyoutContextValue.openFlyout).toHaveBeenCalledWith({ right: rowItems.rule });
+    expect(flyoutContextValue.openFlyout).toHaveBeenCalledWith({ right: rowItems.rule.panel });
   });
 });
 
@@ -251,7 +289,7 @@ describe('GenericHistoryRow', () => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
   });
 
-  it('renders', () => {
+  it('should render the generic row component', () => {
     const { getByTestId } = render(
       <TestProviders>
         <GenericHistoryRow
@@ -265,6 +303,37 @@ describe('GenericHistoryRow', () => {
     );
     expect(getByTestId(`${0}-${GENERIC_HISTORY_ROW_TEST_ID}`)).toHaveTextContent('Row name: title');
     fireEvent.click(getByTestId(`${0}-${GENERIC_HISTORY_ROW_TEST_ID}`));
-    expect(flyoutContextValue.openFlyout).toHaveBeenCalledWith({ right: rowItems.host });
+  });
+
+  it('should render empty context menu item when isLoading is true', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <GenericHistoryRow
+          item={rowItems.host}
+          name="Row name"
+          icon={'user'}
+          title="title"
+          index={0}
+          isLoading
+        />
+      </TestProviders>
+    );
+    expect(getByTestId(HISTORY_ROW_LOADING_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should open the flyout when clicked', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <GenericHistoryRow
+          item={rowItems.host}
+          name="Row name"
+          icon={'user'}
+          title="title"
+          index={0}
+        />
+      </TestProviders>
+    );
+    fireEvent.click(getByTestId(`${0}-${GENERIC_HISTORY_ROW_TEST_ID}`));
+    expect(flyoutContextValue.openFlyout).toHaveBeenCalledWith({ right: rowItems.host.panel });
   });
 });

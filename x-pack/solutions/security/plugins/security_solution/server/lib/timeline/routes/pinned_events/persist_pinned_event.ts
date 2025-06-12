@@ -28,7 +28,7 @@ export const persistPinnedEventRoute = (router: SecuritySolutionPluginRouter) =>
       path: PINNED_EVENT_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: ['timeline_write'],
         },
       },
       access: 'public',

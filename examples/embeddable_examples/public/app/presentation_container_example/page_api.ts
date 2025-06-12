@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, Subject, combineLatest, map, merge } from 'rxjs';
+import { BehaviorSubject, Subject, combineLatest, map, merge, tap } from 'rxjs';
 import { v4 as generateId } from 'uuid';
 import { TimeRange } from '@kbn/es-query';
 import {
   PanelPackage,
-  apiHasSerializableState,
   childrenUnsavedChanges$,
   combineCompatibleChildrenApis,
 } from '@kbn/presentation-containers';
@@ -20,53 +19,72 @@ import { isEqual, omit } from 'lodash';
 import {
   PublishesDataLoading,
   PublishingSubject,
+  SerializedPanelState,
   ViewMode,
+  apiHasSerializableState,
   apiPublishesDataLoading,
   apiPublishesUnsavedChanges,
 } from '@kbn/presentation-publishing';
-import { DEFAULT_STATE, lastSavedStateSessionStorage } from './session_storage/last_saved_state';
+import { lastSavedStateSessionStorage } from './session_storage/last_saved_state';
 import { unsavedChangesSessionStorage } from './session_storage/unsaved_changes';
-import { LastSavedState, PageApi, UnsavedChanges } from './types';
+import { PageApi, PageState } from './types';
+
+function deserializePanels(panels: PageState['panels']) {
+  const layout: Array<{ id: string; type: string }> = [];
+  const childState: { [uuid: string]: SerializedPanelState | undefined } = {};
+  panels.forEach(({ id, type, serializedState }) => {
+    layout.push({ id, type });
+    childState[id] = serializedState;
+  });
+  return { layout, childState };
+}
 
 export function getPageApi() {
-  const initialUnsavedChanges = unsavedChangesSessionStorage.load();
-  const initialSavedState = lastSavedStateSessionStorage.load();
-  let newPanels: Record<string, object> = {};
-  const lastSavedState$ = new BehaviorSubject<
-    LastSavedState & { panels: Array<{ id: string; type: string }> }
-  >({
-    ...initialSavedState,
-    panels: initialSavedState.panelsState.map(({ id, type }) => {
-      return { id, type };
-    }),
-  });
+  const initialUnsavedState = unsavedChangesSessionStorage.load();
+  const initialState = lastSavedStateSessionStorage.load();
+  const lastSavedState$ = new BehaviorSubject<PageState>(initialState);
   const children$ = new BehaviorSubject<{ [key: string]: unknown }>({});
-  const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
-  const panels$ = new BehaviorSubject<Array<{ id: string; type: string }>>(
-    initialUnsavedChanges.panels ?? lastSavedState$.value.panels
+  const { layout: initialLayout, childState: initialChildState } = deserializePanels(
+    initialUnsavedState?.panels ?? lastSavedState$.value.panels
   );
-  const timeRange$ = new BehaviorSubject<TimeRange | undefined>(
-    initialUnsavedChanges.timeRange ?? initialSavedState.timeRange
-  );
+  const layout$ = new BehaviorSubject<Array<{ id: string; type: string }>>(initialLayout);
+  let currentChildState = initialChildState; // childState is the source of truth for the state of each panel.
 
+  const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
+  const timeRange$ = new BehaviorSubject<TimeRange>(
+    initialUnsavedState?.timeRange ?? initialState.timeRange
+  );
   const reload$ = new Subject<void>();
 
-  const saveNotification$ = new Subject<void>();
+  function serializePage() {
+    return {
+      timeRange: timeRange$.value,
+      panels: layout$.value.map((layout) => ({
+        ...layout,
+        serializedState: currentChildState[layout.id],
+      })),
+    };
+  }
 
-  function untilChildLoaded(childId: string): unknown | Promise<unknown | undefined> {
+  function getLastSavedStateForChild(childId: string) {
+    const panel = lastSavedState$.value.panels.find(({ id }) => id === childId);
+    return panel?.serializedState;
+  }
+
+  async function getChildApi(childId: string): Promise<unknown | undefined> {
     if (children$.value[childId]) {
       return children$.value[childId];
     }
 
     return new Promise((resolve) => {
-      const subscription = merge(children$, panels$).subscribe(() => {
+      const subscription = merge(children$, layout$).subscribe(() => {
         if (children$.value[childId]) {
           subscription.unsubscribe();
           resolve(children$.value[childId]);
           return;
         }
 
-        const panelExists = panels$.value.some(({ id }) => id === childId);
+        const panelExists = layout$.value.some(({ id }) => id === childId);
         if (!panelExists) {
           // panel removed before finished loading.
           subscription.unsubscribe();
@@ -81,7 +99,7 @@ export function getPageApi() {
     boolean | undefined
   >(
     { children$ },
-    'dataLoading',
+    'dataLoading$',
     apiPublishesDataLoading,
     undefined,
     // flatten method
@@ -92,49 +110,57 @@ export function getPageApi() {
     dataLoading$.next(isAtLeastOneChildLoading);
   });
 
-  // One could use `initializeUnsavedChanges` to set up unsaved changes observable.
-  // Instead, decided to manually setup unsaved changes observable
-  // since only timeRange and panels array need to be monitored.
-  const timeRangeUnsavedChanges$ = combineLatest([timeRange$, lastSavedState$]).pipe(
+  const hasTimeRangeChanges$ = combineLatest([timeRange$, lastSavedState$]).pipe(
     map(([currentTimeRange, lastSavedState]) => {
-      const hasChanges = !isEqual(currentTimeRange, lastSavedState.timeRange);
-      return hasChanges ? { timeRange: currentTimeRange } : undefined;
+      return !isEqual(currentTimeRange, lastSavedState.timeRange);
     })
   );
-  const panelsUnsavedChanges$ = combineLatest([panels$, lastSavedState$]).pipe(
-    map(([currentPanels, lastSavedState]) => {
-      const hasChanges = !isEqual(currentPanels, lastSavedState.panels);
-      return hasChanges ? { panels: currentPanels } : undefined;
-    })
-  );
-  const unsavedChanges$ = combineLatest([
-    timeRangeUnsavedChanges$,
-    panelsUnsavedChanges$,
-    childrenUnsavedChanges$(children$),
+  const hasLayoutChanges$ = combineLatest([
+    layout$,
+    lastSavedState$.pipe(map((lastSavedState) => deserializePanels(lastSavedState.panels).layout)),
   ]).pipe(
-    map(([timeRangeUnsavedChanges, panelsChanges, childrenUnsavedChanges]) => {
-      const nextUnsavedChanges: UnsavedChanges = {};
-      if (timeRangeUnsavedChanges) {
-        nextUnsavedChanges.timeRange = timeRangeUnsavedChanges.timeRange;
+    map(([currentLayout, lastSavedLayout]) => {
+      return !isEqual(currentLayout, lastSavedLayout);
+    })
+  );
+  const hasPanelChanges$ = childrenUnsavedChanges$(children$).pipe(
+    tap((childrenWithChanges) => {
+      // propagate the latest serialized state back to currentChildState.
+      for (const { uuid, hasUnsavedChanges } of childrenWithChanges) {
+        const childApi = children$.value[uuid];
+        if (hasUnsavedChanges && apiHasSerializableState(childApi)) {
+          currentChildState[uuid] = childApi.serializeState();
+        }
       }
-      if (panelsChanges) {
-        nextUnsavedChanges.panels = panelsChanges.panels;
-      }
-      if (childrenUnsavedChanges) {
-        nextUnsavedChanges.panelUnsavedChanges = childrenUnsavedChanges;
-      }
-      return Object.keys(nextUnsavedChanges).length ? nextUnsavedChanges : undefined;
+    }),
+    map((childrenWithChanges) => {
+      return childrenWithChanges.some(({ hasUnsavedChanges }) => hasUnsavedChanges);
     })
   );
 
-  const unsavedChangesSubscription = unsavedChanges$.subscribe((nextUnsavedChanges) => {
-    unsavedChangesSessionStorage.save(nextUnsavedChanges ?? {});
+  const hasUnsavedChanges$ = combineLatest([
+    hasTimeRangeChanges$,
+    hasLayoutChanges$,
+    hasPanelChanges$,
+  ]).pipe(
+    map(([hasTimeRangeChanges, hasLayoutChanges, hasPanelChanges]) => {
+      return hasTimeRangeChanges || hasLayoutChanges || hasPanelChanges;
+    })
+  );
+
+  const hasUnsavedChangesSubscription = hasUnsavedChanges$.subscribe((hasUnsavedChanges) => {
+    if (!hasUnsavedChanges) {
+      unsavedChangesSessionStorage.clear();
+      return;
+    }
+
+    unsavedChangesSessionStorage.save(serializePage());
   });
 
   return {
     cleanUp: () => {
       childrenDataLoadingSubscripiton.unsubscribe();
-      unsavedChangesSubscription.unsubscribe();
+      hasUnsavedChangesSubscription.unsubscribe();
     },
     /**
      * api's needed by component that should not be shared with children
@@ -144,36 +170,14 @@ export function getPageApi() {
         reload$.next();
       },
       onSave: async () => {
-        const panelsState: LastSavedState['panelsState'] = [];
-        panels$.value.forEach(({ id, type }) => {
-          try {
-            const childApi = children$.value[id];
-            if (apiHasSerializableState(childApi)) {
-              panelsState.push({
-                id,
-                type,
-                panelState: childApi.serializeState(),
-              });
-            }
-          } catch (error) {
-            // Unable to serialize panel state, just ignore since this is an example
-          }
-        });
-
-        const savedState = {
-          timeRange: timeRange$.value ?? DEFAULT_STATE.timeRange,
-          panelsState,
-        };
-        lastSavedState$.next({
-          ...savedState,
-          panels: panelsState.map(({ id, type }) => {
-            return { id, type };
-          }),
-        });
-        lastSavedStateSessionStorage.save(savedState);
-        saveNotification$.next();
+        const serializedPage = serializePage();
+        // simulate save await
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        lastSavedState$.next(serializedPage);
+        lastSavedStateSessionStorage.save(serializedPage);
+        unsavedChangesSessionStorage.clear();
       },
-      panels$,
+      layout$,
       setChild: (id: string, api: unknown) => {
         children$.next({
           ...children$.value,
@@ -185,20 +189,21 @@ export function getPageApi() {
       },
     },
     pageApi: {
-      addNewPanel: async ({ panelType, initialState }: PanelPackage) => {
+      addNewPanel: async ({ panelType, serializedState }: PanelPackage) => {
         const id = generateId();
-        panels$.next([...panels$.value, { id, type: panelType }]);
-        newPanels[id] = initialState ?? {};
-        return await untilChildLoaded(id);
+        layout$.next([...layout$.value, { id, type: panelType }]);
+        currentChildState[id] = serializedState;
+        return await getChildApi(id);
       },
       canRemovePanels: () => true,
+      getChildApi,
       children$,
-      dataLoading: dataLoading$,
+      dataLoading$,
       executionContext: {
         type: 'presentationContainerEmbeddableExample',
       },
       getPanelCount: () => {
-        return panels$.value.length;
+        return layout$.value.length;
       },
       replacePanel: async (idToRemove: string, newPanel: PanelPackage<object>) => {
         // TODO remove method from interface? It should not be required
@@ -206,53 +211,41 @@ export function getPageApi() {
       },
       reload$: reload$ as unknown as PublishingSubject<void>,
       removePanel: (id: string) => {
-        panels$.next(panels$.value.filter(({ id: panelId }) => panelId !== id));
+        layout$.next(layout$.value.filter(({ id: panelId }) => panelId !== id));
         children$.next(omit(children$.value, id));
+        delete currentChildState[id];
       },
-      saveNotification$,
-      viewMode: new BehaviorSubject<ViewMode>('edit'),
-      /**
-       * return last saved embeddable state
-       */
-      getSerializedStateForChild: (childId: string) => {
-        const panel = initialSavedState.panelsState.find(({ id }) => {
-          return id === childId;
-        });
-        return panel ? panel.panelState : undefined;
-      },
-      /**
-       * return previous session's unsaved changes for embeddable
-       */
-      getRuntimeStateForChild: (childId: string) => {
-        return newPanels[childId] ?? initialUnsavedChanges.panelUnsavedChanges?.[childId];
-      },
+      viewMode$: new BehaviorSubject<ViewMode>('edit'),
+      getSerializedStateForChild: (childId: string) => currentChildState[childId],
+      lastSavedStateForChild$: (panelId: string) =>
+        lastSavedState$.pipe(map(() => getLastSavedStateForChild(panelId))),
+      getLastSavedStateForChild,
       resetUnsavedChanges: () => {
-        timeRange$.next(lastSavedState$.value.timeRange);
-        panels$.next(lastSavedState$.value.panels);
-        lastSavedState$.value.panels.forEach(({ id }) => {
-          const childApi = children$.value[id];
-          if (apiPublishesUnsavedChanges(childApi)) {
-            childApi.resetUnsavedChanges();
+        const lastSavedState = lastSavedState$.value;
+        timeRange$.next(lastSavedState.timeRange);
+        const { layout: lastSavedLayout, childState: lastSavedChildState } = deserializePanels(
+          lastSavedState.panels
+        );
+        layout$.next(lastSavedLayout);
+        currentChildState = lastSavedChildState;
+        let childrenModified = false;
+        const currentChildren = { ...children$.value };
+        for (const uuid of Object.keys(currentChildren)) {
+          const existsInLastSavedLayout = lastSavedLayout.some(({ id }) => id === uuid);
+          if (existsInLastSavedLayout) {
+            const child = currentChildren[uuid];
+            if (apiPublishesUnsavedChanges(child)) child.resetUnsavedChanges();
+          } else {
+            // if reset resulted in panel removal, we need to update the list of children
+            delete currentChildren[uuid];
+            delete currentChildState[uuid];
+            childrenModified = true;
           }
-        });
-        const nextPanelIds = lastSavedState$.value.panels.map(({ id }) => id);
-        const children = { ...children$.value };
-        let modifiedChildren = false;
-        Object.keys(children).forEach((controlId) => {
-          if (!nextPanelIds.includes(controlId)) {
-            // remove children that no longer exist after reset
-            delete children[controlId];
-            modifiedChildren = true;
-          }
-        });
-        if (modifiedChildren) {
-          children$.next(children);
         }
-        newPanels = {};
-        return true;
+        if (childrenModified) children$.next(currentChildren);
       },
       timeRange$,
-      unsavedChanges: unsavedChanges$ as PublishingSubject<object | undefined>,
+      hasUnsavedChanges$,
     } as PageApi,
   };
 }

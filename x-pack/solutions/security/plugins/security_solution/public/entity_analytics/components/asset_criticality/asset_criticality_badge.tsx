@@ -4,23 +4,36 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React from 'react';
-import { EuiHealth } from '@elastic/eui';
-import { euiLightVars } from '@kbn/ui-theme';
+import { EuiHealth, useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
+import type { CSSObject } from '@emotion/react';
 import { CRITICALITY_LEVEL_TITLE } from './translations';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 
-export const CRITICALITY_LEVEL_COLOR: Record<CriticalityLevelWithUnassigned, string> = {
-  extreme_impact: '#E7664C',
-  high_impact: '#DA8B45',
-  medium_impact: 'D6BF57',
-  low_impact: '#54B399',
-  unassigned: euiLightVars.euiColorMediumShade,
+/*
+ * Map Asset Criticality status to EUI severity color pattern as per spec:
+ * https://eui.elastic.co/docs/patterns/severity/index.html#use-cases
+ */
+export const getCriticalityLevelColor = (
+  euiTheme: EuiThemeComputed,
+  criticalityLevel: CriticalityLevelWithUnassigned
+) => {
+  const { danger, risk, warning, neutral, unknown } = euiTheme.colors.severity;
+  const map = {
+    extreme_impact: danger,
+    high_impact: risk,
+    medium_impact: warning,
+    low_impact: neutral,
+    unassigned: unknown,
+  };
+
+  return map[criticalityLevel] || map.unassigned;
 };
 
 export const AssetCriticalityBadge: React.FC<{
   criticalityLevel?: CriticalityLevelWithUnassigned;
-  style?: React.CSSProperties;
+  style?: CSSObject;
   className?: string;
   dataTestSubj?: string;
 }> = ({
@@ -29,11 +42,12 @@ export const AssetCriticalityBadge: React.FC<{
   dataTestSubj = 'asset-criticality-badge',
   className,
 }) => {
+  const { euiTheme } = useEuiTheme();
   return (
     <EuiHealth
       data-test-subj={dataTestSubj}
-      color={CRITICALITY_LEVEL_COLOR[criticalityLevel]}
-      style={style}
+      color={getCriticalityLevelColor(euiTheme, criticalityLevel)}
+      css={style}
       className={className}
     >
       {CRITICALITY_LEVEL_TITLE[criticalityLevel]}

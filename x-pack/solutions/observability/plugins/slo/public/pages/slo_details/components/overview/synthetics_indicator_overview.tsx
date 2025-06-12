@@ -9,9 +9,12 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { syntheticsAvailabilityIndicatorSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
-import { syntheticsMonitorDetailLocatorID } from '@kbn/observability-plugin/common';
+import {
+  syntheticsMonitorDetailLocatorID,
+  syntheticsMonitorLocationQueryLocatorID,
+} from '@kbn/observability-plugin/common';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { OverviewItem } from './overview_item';
+import { DefinitionItem } from '../definition/definition_item';
 
 interface Props {
   slo: SLOWithSummaryResponse;
@@ -24,25 +27,28 @@ export function SyntheticsIndicatorOverview({ slo }: Props) {
     },
   } = useKibana().services;
 
-  const locator = locators.get(syntheticsMonitorDetailLocatorID);
+  const monitorLocator = locators.get(syntheticsMonitorDetailLocatorID);
+  const regionLocator = locators.get(syntheticsMonitorLocationQueryLocatorID);
 
   const { 'monitor.name': name, 'observer.geo.name': location } = slo.groupings;
-  const { configId, locationId } = slo.meta?.synthetics || {};
+
+  const { locationId, monitorId } = slo.meta?.synthetics || {};
 
   const indicator = slo.indicator;
   if (!syntheticsAvailabilityIndicatorSchema.is(indicator)) {
     return null;
   }
 
-  const onMonitorClick = () => locator?.navigate({ configId, locationId });
-  const showOverviewItem = name || location;
+  const onMonitorClick = () => monitorLocator?.navigate({ configId: monitorId, locationId });
+  const onLocationClick = () => regionLocator?.navigate({ locationId: location });
+  const showDefinitionItem = name || location;
 
-  if (!showOverviewItem) {
+  if (!showDefinitionItem) {
     return null;
   }
 
   return (
-    <OverviewItem
+    <DefinitionItem
       title={MONITOR_LABEL}
       subtitle={
         <EuiFlexGroup direction="row" alignItems="flexStart" gutterSize="s" responsive={false} wrap>
@@ -64,7 +70,13 @@ export function SyntheticsIndicatorOverview({ slo }: Props) {
           )}
           {location && (
             <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">
+              <EuiBadge
+                color="hollow"
+                onClick={onLocationClick}
+                iconOnClick={onLocationClick}
+                onClickAriaLabel={LOCATION_ARIA_LABEL}
+                iconOnClickAriaLabel={LOCATION_ARIA_LABEL}
+              >
                 {i18n.translate('xpack.slo.sloDetails.overview.syntheticsMonitor.locationName', {
                   defaultMessage: 'Location: {value}',
                   values: { value: location },
@@ -86,5 +98,12 @@ const MONITOR_ARIA_LABEL = i18n.translate(
   'xpack.slo.sloDetails.overview.syntheticsMonitorDetails',
   {
     defaultMessage: 'Synthetics monitor details',
+  }
+);
+
+const LOCATION_ARIA_LABEL = i18n.translate(
+  'xpack.slo.sloDetails.overview.syntheticsLocationGroup',
+  {
+    defaultMessage: 'View all monitors in this location',
   }
 );

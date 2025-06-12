@@ -7,6 +7,7 @@
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import React, { useCallback, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useTraceExplorerSamples } from '../../../hooks/use_trace_explorer_samples';
@@ -18,7 +19,7 @@ import type { TransactionTab } from '../transaction_details/waterfall_with_summa
 
 export function TraceExplorerWaterfall() {
   const history = useHistory();
-
+  const { onPageReady } = usePerformanceContext();
   const traceSamplesFetchResult = useTraceExplorerSamples();
 
   const {
@@ -54,6 +55,21 @@ export function TraceExplorerWaterfall() {
     start,
     end,
   });
+
+  useEffect(() => {
+    if (waterfallFetchResult.status === FETCH_STATUS.SUCCESS) {
+      onPageReady({
+        meta: {
+          rangeFrom,
+          rangeTo,
+        },
+        customMetrics: {
+          key1: 'traceDocsTotal',
+          value1: waterfallFetchResult.waterfall.traceDocsTotal,
+        },
+      });
+    }
+  }, [waterfallFetchResult, onPageReady, rangeFrom, rangeTo]);
 
   const onSampleClick = useCallback(
     (sample: any) => {

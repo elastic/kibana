@@ -6,12 +6,13 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
-import { ExecuteOptions as EnqueueExecutionOptions } from '@kbn/actions-plugin/server/create_execute_function';
-import { IAlertsClient } from '../../alerts_client/types';
-import { Alert } from '../../alert';
-import {
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
+import type { ExecuteOptions as EnqueueExecutionOptions } from '@kbn/actions-plugin/server/create_execute_function';
+import type { TaskPriority } from '@kbn/task-manager-plugin/server';
+import type { IAlertsClient } from '../../alerts_client/types';
+import type { Alert } from '../../alert';
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleTypeParams,
@@ -22,15 +23,19 @@ import {
   RuleSystemAction,
   ThrottledActions,
 } from '../../../common';
-import { NormalizedRuleType } from '../../rule_type_registry';
-import { CombinedSummarizedAlerts, RawRule } from '../../types';
-import { RuleRunMetricsStore } from '../../lib/rule_run_metrics_store';
-import {
+import type { NormalizedRuleType } from '../../rule_type_registry';
+import type { CombinedSummarizedAlerts, RawRule } from '../../types';
+import type { RuleRunMetricsStore } from '../../lib/rule_run_metrics_store';
+import type {
   ActionOpts,
   AlertingEventLogger,
 } from '../../lib/alerting_event_logger/alerting_event_logger';
-import { RuleTaskInstance, TaskRunnerContext } from '../types';
+import type { RuleTaskInstance, TaskRunnerContext } from '../types';
 
+export type ActionSchedulerRule<Params extends RuleTypeParams> = Omit<
+  SanitizedRule<Params>,
+  'executionStatus'
+>;
 export interface ActionSchedulerOptions<
   Params extends RuleTypeParams,
   ExtractedParams extends RuleTypeParams,
@@ -53,10 +58,11 @@ export interface ActionSchedulerOptions<
   >;
   logger: Logger;
   alertingEventLogger: PublicMethodsOf<AlertingEventLogger>;
-  rule: SanitizedRule<Params>;
+  rule: ActionSchedulerRule<Params>;
   taskRunnerContext: TaskRunnerContext;
   taskInstance: RuleTaskInstance;
   ruleRunMetricsStore: RuleRunMetricsStore;
+  apiKeyId?: string;
   apiKey: RawRule['apiKey'];
   ruleConsumer: string;
   executionId: string;
@@ -64,6 +70,7 @@ export interface ActionSchedulerOptions<
   previousStartedAt: Date | null;
   actionsClient: PublicMethodsOf<ActionsClient>;
   alertsClient: IAlertsClient<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>;
+  priority?: TaskPriority;
 }
 
 export type Executable<
@@ -90,8 +97,8 @@ export interface GetActionsToScheduleOpts<
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 > {
-  activeCurrentAlerts?: Record<string, Alert<State, Context, ActionGroupIds>>;
-  recoveredCurrentAlerts?: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
+  activeAlerts?: Record<string, Alert<State, Context, ActionGroupIds>>;
+  recoveredAlerts?: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
   throttledSummaryActions?: ThrottledActions;
 }
 

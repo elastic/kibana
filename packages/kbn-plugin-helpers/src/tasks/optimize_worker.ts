@@ -42,7 +42,7 @@ process.on('message', (msg: any) => {
         return;
       }
 
-      if (stats.hasErrors()) {
+      if (stats?.hasErrors()) {
         send.call(process, {
           success: false,
           error: `Failed to compile with webpack:\n${stats.toString()}`,
@@ -52,7 +52,7 @@ process.on('message', (msg: any) => {
 
       send.call(process, {
         success: true,
-        warnings: stats.hasWarnings() ? stats.toString() : '',
+        warnings: stats?.hasWarnings() ? stats.toString() : '',
       });
     }
   );

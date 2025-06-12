@@ -139,7 +139,7 @@
   "id": "conflict_2_default",
   "originId": "conflict_2",
   "references": [],
-  "type": "sharedtype",
+  "type": "event-annotation-group",
   "updated_at": "2017-09-21T18:59:16.270Z",
   "version": "WzUxMCwxXQ=="
 }
@@ -151,7 +151,7 @@
   "id": "conflict_2_all",
   "originId": "conflict_2",
   "references": [],
-  "type": "sharedtype",
+  "type": "event-annotation-group",
   "updated_at": "2017-09-21T18:59:16.270Z",
   "version": "WzUxMSwxXQ=="
 }
@@ -163,7 +163,7 @@
   "id": "conflict_1b_default",
   "originId": "conflict_1b_space_2",
   "references": [],
-  "type": "sharedtype",
+  "type": "event-annotation-group",
   "updated_at": "2017-09-21T18:59:16.270Z",
   "version": "WzUwMywxXQ=="
 }
@@ -175,7 +175,7 @@
   "id": "conflict_1a_default",
   "originId": "conflict_1a",
   "references": [],
-  "type": "sharedtype",
+  "type": "event-annotation-group",
   "updated_at": "2017-09-21T18:59:16.270Z",
   "version": "WzUwMCwxXQ=="
 }
@@ -186,7 +186,7 @@
   },
   "id": "my_isolated_object",
   "references": [],
-  "type": "isolatedtype",
+  "type": "url",
   "updated_at": "2017-09-21T18:49:16.270Z",
   "version": "WzQ4NywxXQ=="
 }
@@ -197,7 +197,7 @@
   },
   "id": "all_spaces",
   "references": [],
-  "type": "sharedtype",
+  "type": "event-annotation-group",
   "updated_at": "2017-09-21T18:59:16.270Z",
   "version": "WzQ5NywxXQ=="
 }
@@ -211,10 +211,10 @@
     {
       "id": "each_space",
       "name": "refname",
-      "type": "sharedtype"
+      "type": "event-annotation-group"
     }
   ],
-  "type": "sharedtype",
+  "type": "event-annotation-group",
   "updated_at": "2017-09-21T18:59:16.270Z",
   "version": "WzQ4OCwxXQ=="
 }
@@ -228,25 +228,25 @@
     {
       "id": "default_only",
       "name": "refname",
-      "type": "sharedtype"
+      "type": "event-annotation-group"
     },
     {
       "id": "space_1_only",
       "name": "refname",
-      "type": "sharedtype"
+      "type": "event-annotation-group"
     },
     {
       "id": "space_2_only",
       "name": "refname",
-      "type": "sharedtype"
+      "type": "event-annotation-group"
     },
     {
       "id": "all_spaces",
       "name": "refname",
-      "type": "sharedtype"
+      "type": "event-annotation-group"
     }
   ],
-  "type": "sharedtype",
+  "type": "event-annotation-group",
   "updated_at": "2017-09-21T18:59:16.270Z",
   "version": "WzQ5NiwxXQ=="
 }
@@ -257,7 +257,7 @@
   },
   "id": "conflict_1c_default_and_space_1",
   "references": [],
-  "type": "sharedtype",
+  "type": "event-annotation-group",
   "updated_at": "2017-09-21T18:59:16.270Z",
   "version": "WzUwNiwxXQ=="
 }
@@ -268,7 +268,7 @@
   },
   "id": "default_and_space_1",
   "references": [],
-  "type": "sharedtype",
+  "type": "event-annotation-group",
   "updated_at": "2017-09-21T18:59:16.270Z",
   "version": "WzQ5MywxXQ=="
 }
@@ -279,7 +279,7 @@
   },
   "id": "default_and_space_2",
   "references": [],
-  "type": "sharedtype",
+  "type": "event-annotation-group",
   "updated_at": "2017-09-21T18:59:16.270Z",
   "version": "WzQ5NCwxXQ=="
 }
@@ -291,7 +291,7 @@
   "id": "space_2_only_matching_origin",
   "originId": "space_2_only",
   "references": [],
-  "type": "sharedtype",
+  "type": "event-annotation-group",
   "updated_at": "2017-09-21T18:59:16.270Z",
   "version": "WzQ5MiwxXQ=="
 }
@@ -302,7 +302,7 @@
   },
   "id": "alias_delete_inclusive",
   "references": [],
-  "type": "sharedtype",
+  "type": "event-annotation-group",
   "updated_at": "2017-09-21T18:59:16.270Z",
   "version": "WzQ5OCwxXQ=="
 }
@@ -313,7 +313,7 @@
   },
   "id": "alias_delete_exclusive",
   "references": [],
-  "type": "sharedtype",
+  "type": "event-annotation-group",
   "updated_at": "2017-09-21T18:59:16.270Z",
   "version": "WzQ5OSwxXQ=="
 }
@@ -324,7 +324,7 @@
   },
   "id": "space_1_and_space_2",
   "references": [],
-  "type": "sharedtype",
+  "type": "event-annotation-group",
   "updated_at": "2017-09-21T18:59:16.270Z",
   "version": "WzQ5NSwxXQ=="
 }

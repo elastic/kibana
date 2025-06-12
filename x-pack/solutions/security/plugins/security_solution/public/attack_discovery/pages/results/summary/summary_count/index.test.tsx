@@ -48,4 +48,18 @@ describe('SummaryCount', () => {
 
     expect(lastGenerated).not.toBeInTheDocument();
   });
+
+  it.each([
+    [0, '0 alerts'],
+    [1, '1 alert'],
+    [999, '999 alerts'],
+    [1000, '1000+ alerts'],
+    [1001, '1001+ alerts'],
+  ])('renders the expected alerts text for %p alert(s)', (count, expected) => {
+    render(<SummaryCount {...defaultProps} alertsCount={count} />);
+
+    const alertsCount = screen.getByTestId('alertsCount');
+
+    expect(alertsCount).toHaveTextContent(expected);
+  });
 });

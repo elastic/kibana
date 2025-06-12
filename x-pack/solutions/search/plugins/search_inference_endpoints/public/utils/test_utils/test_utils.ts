@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { FieldType } from '@kbn/search-connectors/types';
-import { InferenceProvider } from '../../types';
+import { FieldType, InferenceProvider } from '@kbn/inference-endpoint-ui-common';
 
 export const mockProviders: InferenceProvider[] = [
   {
@@ -22,6 +21,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: true,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'rerank', 'completion'],
       },
       'rate_limit.requests_per_minute': {
         default_value: null,
@@ -31,6 +31,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.INTEGER,
+        supported_task_types: ['text_embedding', 'rerank', 'completion'],
       },
     },
   },
@@ -47,6 +48,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.INTEGER,
+        supported_task_types: ['sparse_embedding'],
       },
       model_id: {
         default_value: null,
@@ -56,6 +58,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['sparse_embedding'],
       },
       max_input_tokens: {
         default_value: null,
@@ -65,6 +68,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.INTEGER,
+        supported_task_types: ['sparse_embedding'],
       },
     },
   },
@@ -81,6 +85,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding'],
       },
       model_id: {
         default_value: null,
@@ -90,6 +95,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding'],
       },
       api_version: {
         default_value: null,
@@ -99,6 +105,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding'],
       },
       max_input_tokens: {
         default_value: null,
@@ -108,6 +115,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.INTEGER,
+        supported_task_types: ['text_embedding'],
       },
       url: {
         default_value: null,
@@ -117,6 +125,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding'],
       },
     },
   },
@@ -133,6 +142,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'completion'],
       },
       provider: {
         default_value: null,
@@ -142,6 +152,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'completion'],
       },
       api_key: {
         default_value: null,
@@ -151,6 +162,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: true,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'completion'],
       },
       'rate_limit.requests_per_minute': {
         default_value: null,
@@ -160,6 +172,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.INTEGER,
+        supported_task_types: ['text_embedding', 'completion'],
       },
       target: {
         default_value: null,
@@ -169,6 +182,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'completion'],
       },
     },
   },
@@ -185,6 +199,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: true,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'sparse_embedding'],
       },
       'rate_limit.requests_per_minute': {
         default_value: null,
@@ -194,6 +209,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.INTEGER,
+        supported_task_types: ['text_embedding', 'sparse_embedding'],
       },
       url: {
         default_value: 'https://api.openai.com/v1/embeddings',
@@ -203,6 +219,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'sparse_embedding'],
       },
     },
   },
@@ -219,6 +236,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: true,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'completion'],
       },
       provider: {
         default_value: null,
@@ -228,6 +246,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'completion'],
       },
       access_key: {
         default_value: null,
@@ -237,6 +256,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: true,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'completion'],
       },
       model: {
         default_value: null,
@@ -246,6 +266,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'completion'],
       },
       'rate_limit.requests_per_minute': {
         default_value: null,
@@ -256,6 +277,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.INTEGER,
+        supported_task_types: ['text_embedding', 'completion'],
       },
       region: {
         default_value: null,
@@ -265,6 +287,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'completion'],
       },
     },
   },
@@ -281,6 +304,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: true,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['completion'],
       },
       'rate_limit.requests_per_minute': {
         default_value: null,
@@ -291,6 +315,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.INTEGER,
+        supported_task_types: ['completion'],
       },
       model_id: {
         default_value: null,
@@ -300,6 +325,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['completion'],
       },
     },
   },
@@ -316,6 +342,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: true,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'completion'],
       },
       'rate_limit.requests_per_minute': {
         default_value: null,
@@ -325,6 +352,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.INTEGER,
+        supported_task_types: ['text_embedding', 'completion'],
       },
       model_id: {
         default_value: null,
@@ -334,6 +362,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'completion'],
       },
     },
   },
@@ -351,6 +380,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.INTEGER,
+        supported_task_types: ['text_embedding', 'sparse_embedding', 'rerank'],
       },
       num_threads: {
         default_value: 2,
@@ -360,6 +390,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.INTEGER,
+        supported_task_types: ['text_embedding', 'sparse_embedding', 'rerank'],
       },
       model_id: {
         default_value: '.multilingual-e5-small',
@@ -369,6 +400,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'sparse_embedding', 'rerank'],
       },
     },
   },
@@ -386,6 +418,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: true,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'completion'],
       },
       organization_id: {
         default_value: null,
@@ -395,6 +428,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'completion'],
       },
       'rate_limit.requests_per_minute': {
         default_value: null,
@@ -405,6 +439,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.INTEGER,
+        supported_task_types: ['text_embedding', 'completion'],
       },
       model_id: {
         default_value: null,
@@ -414,6 +449,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'completion'],
       },
       url: {
         default_value: 'https://api.openai.com/v1/chat/completions',
@@ -424,6 +460,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'completion'],
       },
     },
   },
@@ -440,6 +477,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: true,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'completion'],
       },
       entra_id: {
         default_value: null,
@@ -449,6 +487,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: true,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'completion'],
       },
       'rate_limit.requests_per_minute': {
         default_value: null,
@@ -459,6 +498,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.INTEGER,
+        supported_task_types: ['text_embedding', 'completion'],
       },
       deployment_id: {
         default_value: null,
@@ -468,6 +508,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'completion'],
       },
       resource_name: {
         default_value: null,
@@ -477,6 +518,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'completion'],
       },
       api_version: {
         default_value: null,
@@ -486,6 +528,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'completion'],
       },
     },
   },
@@ -502,6 +545,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: true,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding'],
       },
       model: {
         default_value: null,
@@ -512,6 +556,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding'],
       },
       'rate_limit.requests_per_minute': {
         default_value: null,
@@ -521,6 +566,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.INTEGER,
+        supported_task_types: ['text_embedding'],
       },
       max_input_tokens: {
         default_value: null,
@@ -530,6 +576,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.INTEGER,
+        supported_task_types: ['text_embedding'],
       },
     },
   },
@@ -546,6 +593,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: true,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'rerank'],
       },
       project_id: {
         default_value: null,
@@ -556,6 +604,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'rerank'],
       },
       location: {
         default_value: null,
@@ -566,6 +615,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'rerank'],
       },
       'rate_limit.requests_per_minute': {
         default_value: null,
@@ -575,6 +625,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.INTEGER,
+        supported_task_types: ['text_embedding', 'rerank'],
       },
       model_id: {
         default_value: null,
@@ -584,6 +635,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'rerank'],
       },
     },
   },
@@ -600,6 +652,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'sparse_embedding', 'rerank', 'completion'],
       },
       api_key: {
         default_value: null,
@@ -609,6 +662,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: true,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'sparse_embedding', 'rerank', 'completion'],
       },
       service_id: {
         default_value: null,
@@ -618,6 +672,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'sparse_embedding', 'rerank', 'completion'],
       },
       host: {
         default_value: null,
@@ -628,6 +683,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'sparse_embedding', 'rerank', 'completion'],
       },
       'rate_limit.requests_per_minute': {
         default_value: null,
@@ -637,6 +693,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.INTEGER,
+        supported_task_types: ['text_embedding', 'sparse_embedding', 'rerank', 'completion'],
       },
       http_schema: {
         default_value: null,
@@ -646,6 +703,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'sparse_embedding', 'rerank', 'completion'],
       },
     },
   },

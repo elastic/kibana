@@ -37,6 +37,9 @@ export interface RootAggregation<T> {
   unitsCountWithoutNull?: {
     value?: number | null;
   };
+  nullGroupItems?: {
+    doc_count?: number;
+  };
 }
 
 export type ParsedRootAggregation<T> = RootAggregation<T> & {

@@ -16,7 +16,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...functionalConfig.getAll(),
     testFiles: [require.resolve('..')],
     junit: {
-      reportName: 'Rules Management - Rule Patch Integration Tests - ESS Env - Basic License',
+      reportName:
+        'Rules Management - Rule Import/Export Integration Tests - ESS Env - Basic License',
     },
   };
 }

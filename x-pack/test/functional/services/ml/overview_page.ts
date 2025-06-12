@@ -11,18 +11,38 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function MachineLearningOverviewPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
+  const find = getService('find');
 
   return {
     async assertADEmptyStateExists() {
       await testSubjects.existOrFail('mlAnomalyDetectionEmptyState');
     },
 
-    async assertADCreateJobButtonExists() {
-      await testSubjects.existOrFail('mlCreateNewJobButton');
+    async assertADCardExists() {
+      await retry.tryForTime(5 * 1000, async () => {
+        await testSubjects.existOrFail('mlOverviewAnomalyDetectionCard');
+      });
     },
 
-    async assertADCreateJobButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlCreateNewJobButton');
+    async assertADCreateJobButtonExists(expectExists: boolean = true) {
+      if (expectExists) {
+        await testSubjects.existOrFail('mlCreateNewJobButton');
+      } else {
+        await testSubjects.missingOrFail('mlCreateNewJobButton');
+      }
+    },
+
+    async assertADManageJobsButtonExists(expectExists: boolean = true) {
+      if (expectExists) {
+        await testSubjects.existOrFail('manageJobsButton');
+      } else {
+        await testSubjects.missingOrFail('manageJobsButton');
+      }
+    },
+
+    async assertADJobButtonEnabled(subject: string, expectedValue: boolean) {
+      const isEnabled = await testSubjects.isEnabled(subject);
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected AD "Create job" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
@@ -39,8 +59,59 @@ export function MachineLearningOverviewPageProvider({ getService }: FtrProviderC
       await testSubjects.existOrFail('mlNoDataFrameAnalyticsFound');
     },
 
-    async assertDFACreateJobButtonExists() {
-      await testSubjects.existOrFail('mlAnalyticsCreateFirstButton');
+    async assertIndexDataVisualizerCardExists() {
+      await testSubjects.existOrFail('mlDataVisualizerCardIndexData');
+    },
+
+    async assertLogPatternAnalysisCardExists() {
+      await testSubjects.existOrFail('mlOverviewCardLogPatternAnalysis');
+    },
+
+    async assertChangePointDetectionCardExists() {
+      await testSubjects.existOrFail('mlOverviewCardChangePointDetection');
+    },
+
+    async assertTryESQLCardExists() {
+      await testSubjects.existOrFail('mlDataVisualizerSelectESQLCard');
+    },
+
+    async assertDataVisualizerImportCardExists() {
+      await testSubjects.existOrFail('mlDataVisualizerCardImportData');
+    },
+
+    async assertDataVisualizerImportIndexCardExists() {
+      await testSubjects.existOrFail('mlDataVisualizerCardIndexData');
+    },
+
+    async assertDataDriftCardExists() {
+      await testSubjects.existOrFail('mlDataVisualizerCardDataDriftData');
+    },
+
+    async assertDFACreateJobButtonExists(expectExists: boolean = true) {
+      if (expectExists) {
+        await testSubjects.existOrFail('mlAnalyticsCreateFirstButton');
+      } else {
+        await testSubjects.missingOrFail('mlAnalyticsCreateFirstButton');
+      }
+    },
+
+    async assertAnomalyDetectionPanelExists() {
+      await testSubjects.existOrFail('mlAnomalyDetectionPanel');
+    },
+
+    async assertDFAPanelExists(expectPanelExits: boolean = true) {
+      if (expectPanelExits) {
+        await testSubjects.existOrFail('mlDataFrameAnalyticsPanel');
+      } else {
+        await testSubjects.missingOrFail('mlDataFrameAnalyticsPanel');
+      }
+    },
+
+    async assertAnomalyDetectionPanelTableRowCount(count: number) {
+      const rows = await find.allByCssSelector(
+        `[data-test-subj="mlOverviewTableAnomalyDetection"] .euiTableRow`
+      );
+      expect(rows.length).to.eql(count);
     },
 
     async assertDFACreateJobButtonEnabled(expectedValue: boolean) {

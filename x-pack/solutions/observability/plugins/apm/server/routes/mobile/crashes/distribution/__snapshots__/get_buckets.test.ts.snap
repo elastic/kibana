@@ -5,58 +5,56 @@ Array [
   Array [
     "get_error_distribution_buckets",
     Object {
+      "aggs": Object {
+        "distribution": Object {
+          "histogram": Object {
+            "extended_bounds": Object {
+              "max": 1528977600000,
+              "min": 1528113600000,
+            },
+            "field": "@timestamp",
+            "interval": 10,
+            "min_doc_count": 0,
+          },
+        },
+      },
       "apm": Object {
         "events": Array [
           "error",
         ],
       },
-      "body": Object {
-        "aggs": Object {
-          "distribution": Object {
-            "histogram": Object {
-              "extended_bounds": Object {
-                "max": 1528977600000,
-                "min": 1528113600000,
+      "query": Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "term": Object {
+                "error.type": "crash",
               },
-              "field": "@timestamp",
-              "interval": 10,
-              "min_doc_count": 0,
             },
-          },
+            Object {
+              "term": Object {
+                "service.name": "myServiceName",
+              },
+            },
+            Object {
+              "range": Object {
+                "@timestamp": Object {
+                  "format": "epoch_millis",
+                  "gte": 1528113600000,
+                  "lte": 1528977600000,
+                },
+              },
+            },
+            Object {
+              "term": Object {
+                "service.environment": "prod",
+              },
+            },
+          ],
         },
-        "query": Object {
-          "bool": Object {
-            "filter": Array [
-              Object {
-                "term": Object {
-                  "error.type": "crash",
-                },
-              },
-              Object {
-                "term": Object {
-                  "service.name": "myServiceName",
-                },
-              },
-              Object {
-                "range": Object {
-                  "@timestamp": Object {
-                    "format": "epoch_millis",
-                    "gte": 1528113600000,
-                    "lte": 1528977600000,
-                  },
-                },
-              },
-              Object {
-                "term": Object {
-                  "service.environment": "prod",
-                },
-              },
-            ],
-          },
-        },
-        "size": 0,
-        "track_total_hits": false,
       },
+      "size": 0,
+      "track_total_hits": false,
     },
   ],
 ]

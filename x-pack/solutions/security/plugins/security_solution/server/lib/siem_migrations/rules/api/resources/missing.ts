@@ -14,6 +14,7 @@ import {
 } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SIEM_RULE_MIGRATION_RESOURCES_MISSING_PATH } from '../../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
+import { authz } from '../util/authz';
 import { withLicense } from '../util/with_license';
 
 export const registerSiemRuleMigrationsResourceGetMissingRoute = (
@@ -24,7 +25,7 @@ export const registerSiemRuleMigrationsResourceGetMissingRoute = (
     .get({
       path: SIEM_RULE_MIGRATION_RESOURCES_MISSING_PATH,
       access: 'internal',
-      security: { authz: { requiredPrivileges: ['securitySolution'] } },
+      security: { authz },
     })
     .addVersion(
       {

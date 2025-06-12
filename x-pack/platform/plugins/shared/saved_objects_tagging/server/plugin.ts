@@ -21,6 +21,7 @@ import { TagsRequestHandlerContext } from './request_handler_context';
 import { registerRoutes } from './routes';
 import { createTagUsageCollector } from './usage';
 import { TagsClient, AssignmentService } from './services';
+import { convertTagNameToId, getTagsFromReferences, replaceTagReferences } from '../common';
 
 interface SetupDeps {
   features: FeaturesPluginSetup;
@@ -36,7 +37,7 @@ export class SavedObjectTaggingPlugin
   implements Plugin<{}, SavedObjectTaggingStart, SetupDeps, StartDeps>
 {
   public setup(
-    { savedObjects, http, getStartServices }: CoreSetup,
+    { savedObjects, http, getStartServices }: CoreSetup<StartDeps, SavedObjectTaggingStart>,
     { features, usageCollection, security }: SetupDeps
   ) {
     savedObjects.registerType(tagType);
@@ -69,7 +70,7 @@ export class SavedObjectTaggingPlugin
     return {};
   }
 
-  public start(core: CoreStart, { security }: StartDeps) {
+  public start(core: CoreStart, { security }: StartDeps): SavedObjectTaggingStart {
     return {
       createTagClient: ({ client }: CreateTagClientOptions) => {
         return new TagsClient({ client });
@@ -82,6 +83,9 @@ export class SavedObjectTaggingPlugin
           internal: true,
         });
       },
+      convertTagNameToId,
+      getTagsFromReferences,
+      replaceTagReferences,
     };
   }
 }

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { ComponentStory } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { CellActionsProvider } from '../context/cell_actions_context';
 import { makeAction } from '../mocks/helpers';
@@ -50,33 +50,35 @@ export default {
   ],
 };
 
-const CellActionsTemplate: ComponentStory<React.FC<CellActionsProps>> = (args) => (
+const CellActionsTemplate: StoryFn<React.FC<CellActionsProps>> = (args) => (
   <CellActions {...args}>{'Field value'}</CellActions>
 );
 
-export const DefaultWithControls = CellActionsTemplate.bind({});
+export const DefaultWithControls = {
+  render: CellActionsTemplate,
 
-DefaultWithControls.argTypes = {
-  mode: {
-    options: [CellActionsMode.HOVER_DOWN, CellActionsMode.INLINE],
-    defaultValue: CellActionsMode.HOVER_DOWN,
-    control: {
-      type: 'radio',
+  argTypes: {
+    mode: {
+      options: [CellActionsMode.HOVER_DOWN, CellActionsMode.INLINE],
+      defaultValue: CellActionsMode.HOVER_DOWN,
+      control: {
+        type: 'radio',
+      },
     },
   },
-};
 
-DefaultWithControls.args = {
-  showActionTooltips: true,
-  mode: CellActionsMode.INLINE,
-  triggerId: TRIGGER_ID,
-  data: [
-    {
-      field: FIELD,
-      value: '',
-    },
-  ],
-  visibleCellActions: 3,
+  args: {
+    showActionTooltips: true,
+    mode: CellActionsMode.INLINE,
+    triggerId: TRIGGER_ID,
+    data: [
+      {
+        field: FIELD,
+        value: '',
+      },
+    ],
+    visibleCellActions: 3,
+  },
 };
 
 export const CellActionInline = () => (
@@ -89,6 +91,23 @@ export const CellActionInline = () => (
         value: VALUE,
       },
     ]}
+  >
+    {'Field value'}
+  </CellActions>
+);
+
+export const CellActionInlineCustomStyle = () => (
+  <CellActions
+    mode={CellActionsMode.INLINE}
+    triggerId={TRIGGER_ID}
+    data={[
+      {
+        field: FIELD,
+        value: VALUE,
+      },
+    ]}
+    extraActionsIconType="boxesVertical"
+    extraActionsColor="text"
   >
     {'Field value'}
   </CellActions>

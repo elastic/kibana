@@ -7,67 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
-import { pick, omit } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiCodeBlock,
-  EuiText,
-  EuiTextColor,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiModal,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
-import { BASE_ALERTING_API_PATH } from '../constants';
-import { RuleFormData } from '../types';
-import {
-  CreateRuleBody,
-  UPDATE_FIELDS_WITH_ACTIONS,
-  UpdateRuleBody,
-  transformCreateRuleBody,
-  transformUpdateRuleBody,
-} from '../common/apis';
-import { useRuleFormState } from '../hooks';
-
-const stringifyBodyRequest = ({
-  formData,
-  isEdit,
-}: {
-  formData: RuleFormData;
-  isEdit: boolean;
-}): string => {
-  try {
-    const request = isEdit
-      ? transformUpdateRuleBody(pick(formData, UPDATE_FIELDS_WITH_ACTIONS) as UpdateRuleBody)
-      : transformCreateRuleBody(omit(formData, 'id') as CreateRuleBody);
-    return JSON.stringify(request, null, 2);
-  } catch {
-    return SHOW_REQUEST_MODAL_ERROR;
-  }
-};
+import React, { useCallback } from 'react';
+import { RequestCodeBlock } from '../components';
+import { SHOW_REQUEST_MODAL_SUBTITLE, SHOW_REQUEST_MODAL_TITLE } from '../translations';
+import { useRuleFormScreenContext } from '../hooks';
 
 export interface RulePageShowRequestModalProps {
-  onClose: () => void;
   isEdit?: boolean;
 }
 
 export const RulePageShowRequestModal = (props: RulePageShowRequestModalProps) => {
-  const { onClose, isEdit = false } = props;
+  const { isEdit = false } = props;
+  const { setIsShowRequestScreenVisible } = useRuleFormScreenContext();
 
-  const { formData, id, multiConsumerSelection } = useRuleFormState();
-
-  const formattedRequest = useMemo(() => {
-    return stringifyBodyRequest({
-      formData: {
-        ...formData,
-        ...(multiConsumerSelection ? { consumer: multiConsumerSelection } : {}),
-      },
-      isEdit,
-    });
-  }, [formData, isEdit, multiConsumerSelection]);
+  const onClose = useCallback(() => {
+    setIsShowRequestScreenVisible(false);
+  }, [setIsShowRequestScreenVisible]);
 
   return (
     <EuiModal
@@ -92,61 +57,8 @@ export const RulePageShowRequestModal = (props: RulePageShowRequestModalProps) =
         </EuiFlexGroup>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiCodeBlock language="json" isCopyable data-test-subj="modalRequestCodeBlock">
-          {`${isEdit ? 'PUT' : 'POST'} kbn:${BASE_ALERTING_API_PATH}/rule${
-            isEdit ? `/${id}` : ''
-          }\n${formattedRequest}`}
-        </EuiCodeBlock>
+        <RequestCodeBlock isEdit={isEdit} data-test-subj="modalRequestCodeBlock" />
       </EuiModalBody>
     </EuiModal>
   );
 };
-
-const SHOW_REQUEST_MODAL_EDIT = i18n.translate(
-  'responseOpsRuleForm.ruleForm.showRequestModal.subheadingTitleEdit',
-  {
-    defaultMessage: 'edit',
-  }
-);
-
-const SHOW_REQUEST_MODAL_CREATE = i18n.translate(
-  'responseOpsRuleForm.ruleForm.showRequestModal.subheadingTitleCreate',
-  {
-    defaultMessage: 'create',
-  }
-);
-
-const SHOW_REQUEST_MODAL_SUBTITLE = (edit: boolean) =>
-  i18n.translate('responseOpsRuleForm.ruleForm.showRequestModal.subheadingTitle', {
-    defaultMessage: 'This Kibana request will {requestType} this rule.',
-    values: { requestType: edit ? SHOW_REQUEST_MODAL_EDIT : SHOW_REQUEST_MODAL_CREATE },
-  });
-
-const SHOW_REQUEST_MODAL_TITLE_EDIT = i18n.translate(
-  'responseOpsRuleForm.ruleForm.showRequestModal.headerTitleEdit',
-  {
-    defaultMessage: 'Edit',
-  }
-);
-
-const SHOW_REQUEST_MODAL_TITLE_CREATE = i18n.translate(
-  'responseOpsRuleForm.ruleForm.showRequestModal.headerTitleCreate',
-  {
-    defaultMessage: 'Create',
-  }
-);
-
-const SHOW_REQUEST_MODAL_TITLE = (edit: boolean) =>
-  i18n.translate('responseOpsRuleForm.ruleForm.showRequestModal.headerTitle', {
-    defaultMessage: '{requestType} alerting rule request',
-    values: {
-      requestType: edit ? SHOW_REQUEST_MODAL_TITLE_EDIT : SHOW_REQUEST_MODAL_TITLE_CREATE,
-    },
-  });
-
-const SHOW_REQUEST_MODAL_ERROR = i18n.translate(
-  'responseOpsRuleForm.ruleForm.showRequestModal.somethingWentWrongDescription',
-  {
-    defaultMessage: 'Sorry about that, something went wrong.',
-  }
-);

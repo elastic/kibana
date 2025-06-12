@@ -15,9 +15,10 @@ import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
 import { render, screen, waitFor } from '@testing-library/react';
-import { useLicense } from '../../../../common/hooks/use_license';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 jest.mock('../../../../common/hooks/use_license');
+jest.mock('../../../../common/components/user_privileges');
 
 const mockUseUiSetting = jest.fn().mockReturnValue([false]);
 jest.mock('@kbn/kibana-react-plugin/public', () => {
@@ -67,8 +68,7 @@ describe('Timeline', () => {
       expect(screen.getByTestId(esqlTabSubj)).toBeVisible();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/194510
-    describe.skip('no existing esql query is present', () => {
+    describe('no existing esql query is present', () => {
       it('should not show the esql tab when the advanced setting is disabled', async () => {
         useEsqlAvailabilityMock.mockReturnValue({
           isEsqlAdvancedSettingEnabled: false,
@@ -111,30 +111,35 @@ describe('Timeline', () => {
     });
   });
 
-  describe('analyzer tab and session view tab', () => {
-    const analyzerTabSubj = `timelineTabs-${TimelineTabs.graph}`;
-    const sessionViewTabSubj = `timelineTabs-${TimelineTabs.session}`;
-    it('should show the analyzer tab when the advanced setting is disabled', () => {
-      (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
+  describe('privileges', () => {
+    it('should show notes and pinned tabs for users with the required privileges', () => {
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        timelinePrivileges: { read: true },
+        notesPrivileges: { read: true },
+      });
+
       render(
         <TestProviders>
           <TabsContent {...defaultProps} />
         </TestProviders>
       );
-      expect(screen.getByTestId(analyzerTabSubj)).toBeInTheDocument();
-      expect(screen.getByTestId(sessionViewTabSubj)).toBeInTheDocument();
+      expect(screen.getByTestId('timelineTabs-notes')).not.toBeDisabled();
+      expect(screen.getByTestId('timelineTabs-pinned')).not.toBeDisabled();
     });
 
-    it('should not show the analyzer tab when the advanced setting is enabled', async () => {
-      mockUseUiSetting.mockReturnValue([true]);
-      (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
+    it('should not show notes and pinned tabs for users with the insufficient privileges', () => {
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        timelinePrivileges: { read: false },
+        notesPrivileges: { read: false },
+      });
+
       render(
         <TestProviders>
           <TabsContent {...defaultProps} />
         </TestProviders>
       );
-      expect(screen.queryByTestId(analyzerTabSubj)).not.toBeInTheDocument();
-      expect(screen.queryByTestId(sessionViewTabSubj)).not.toBeInTheDocument();
+      expect(screen.getByTestId('timelineTabs-notes')).toBeDisabled();
+      expect(screen.getByTestId('timelineTabs-pinned')).toBeDisabled();
     });
   });
 });

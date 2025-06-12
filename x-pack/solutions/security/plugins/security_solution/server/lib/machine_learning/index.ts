@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { MlAnomalyRecordDoc as Anomaly } from '@kbn/ml-anomaly-utils';
 import type { Filter } from '@kbn/es-query';
@@ -30,41 +30,41 @@ export const getAnomalies = async (
   params: AnomaliesSearchParams,
   mlAnomalySearch: MlAnomalySearch
 ): Promise<AnomalyResults> => {
+  const queryRequest = buildAnomalyQuery(params);
+  return mlAnomalySearch(queryRequest, params.jobIds);
+};
+
+export const buildAnomalyQuery = (params: AnomaliesSearchParams): estypes.SearchRequest => {
   const boolCriteria = buildCriteria(params);
-  return mlAnomalySearch(
-    {
-      body: {
-        size: params.maxRecords || 100,
-        query: {
-          bool: {
-            filter: [
-              {
-                query_string: {
-                  query: 'result_type:record',
-                  analyze_wildcard: false,
-                },
-              },
-              { term: { is_interim: false } },
-              {
-                bool: {
-                  must: boolCriteria,
-                },
-              },
-            ],
-            must_not: params.exceptionFilter?.query,
-          },
-        },
-        fields: [
+  return {
+    size: params.maxRecords || 100,
+    query: {
+      bool: {
+        filter: [
           {
-            field: '*',
-            include_unmapped: true,
+            query_string: {
+              query: 'result_type:record',
+              analyze_wildcard: false,
+            },
+          },
+          { term: { is_interim: false } },
+          {
+            bool: {
+              must: boolCriteria,
+            },
           },
         ],
-        sort: [{ record_score: { order: 'desc' as const } }],
+        must_not: params.exceptionFilter?.query,
       },
     },
-    params.jobIds
-  );
+    fields: [
+      {
+        field: '*',
+        include_unmapped: true,
+      },
+    ],
+    sort: [{ record_score: { order: 'desc' as const } }],
+  };
 };
 
 const buildCriteria = (params: AnomaliesSearchParams): object[] => {

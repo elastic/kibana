@@ -10,6 +10,9 @@ import { render } from '@testing-library/react';
 import { mockTimelineModel, TestProviders } from '../../../common/mock';
 import { AddToFavoritesButton } from '.';
 import { TimelineStatusEnum } from '../../../../common/api/timeline';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
+
+jest.mock('../../../common/components/user_privileges');
 
 const mockGetState = jest.fn();
 jest.mock('react-redux', () => {
@@ -38,6 +41,14 @@ const renderAddFavoritesButton = () =>
   );
 
 describe('AddToFavoritesButton', () => {
+  beforeEach(() => {
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      timelinePrivileges: {
+        crud: true,
+      },
+    });
+  });
+
   it('should render favorite button enabled and unchecked', () => {
     mockGetState.mockReturnValue({
       ...mockTimelineModel,
@@ -52,6 +63,21 @@ describe('AddToFavoritesButton', () => {
     expect(button).toHaveProperty('id', '');
     expect(button.firstChild).toHaveAttribute('data-euiicon-type', 'starEmpty');
     expect(queryByTestId('timeline-favorite-filled-star')).not.toBeInTheDocument();
+  });
+
+  it('should render favorite button disabled for users without write access to timeline', () => {
+    mockGetState.mockReturnValue({
+      ...mockTimelineModel,
+      status: TimelineStatusEnum.active,
+    });
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      timelinePrivileges: {
+        crud: false,
+      },
+    });
+
+    const { getByTestId } = renderAddFavoritesButton();
+    expect(getByTestId('timeline-favorite-empty-star')).toHaveProperty('disabled');
   });
 
   it('should render favorite button disabled for a draft timeline', () => {

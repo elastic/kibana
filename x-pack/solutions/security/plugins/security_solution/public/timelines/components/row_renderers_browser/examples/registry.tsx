@@ -22,7 +22,6 @@ const RegistryExampleComponent: React.FC = () => {
     <>
       {registryRowRenderer.renderRow({
         data: demoEndpointRegistryModificationEvent,
-        isDraggable: false,
         scopeId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
       })}
     </>

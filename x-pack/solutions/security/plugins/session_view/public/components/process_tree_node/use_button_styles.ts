@@ -6,12 +6,11 @@
  */
 
 import { useMemo } from 'react';
-import { transparentize } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
 import { useEuiTheme } from '../../hooks';
 
 export const useButtonStyles = () => {
-  const { euiTheme, euiVars } = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
     const { border, colors, size, font } = euiTheme;
@@ -27,9 +26,9 @@ export const useButtonStyles = () => {
       marginRight: size.xs,
       minWidth: 0,
       padding: `${size.s} ${size.xxs}`,
-      color: euiVars.euiColorVis6_asText,
-      background: transparentize(euiVars.euiColorVis6, 0.04),
-      border: `${border.width.thin} solid ${transparentize(euiVars.euiColorVis6, 0.48)}`,
+      color: colors.textPrimary,
+      background: colors.backgroundBasePrimary,
+      border: `${border.width.thin} solid ${colors.borderBasePrimary}`,
       '&& > span': {
         padding: `0px ${size.xxs}`,
         svg: {
@@ -37,17 +36,19 @@ export const useButtonStyles = () => {
         },
       },
       '&&:hover, &&:focus': {
-        background: transparentize(euiVars.euiColorVis6, 0.12),
+        background: colors.backgroundLightPrimary,
         textDecoration: 'none',
       },
       '&.isExpanded > span svg:not(.alertIcon)': {
         transform: `rotate(180deg)`,
       },
       '&.isExpanded': {
-        color: colors.ghost,
-        background: euiVars.euiColorVis6,
+        color: colors.textInverse,
+        background: colors.backgroundFilledPrimary,
+        borderColor: colors.borderStrongPrimary,
         '&:hover, &:focus': {
-          background: euiVars.euiColorVis6,
+          background: colors.backgroundFilledPrimary,
+          borderColor: colors.borderStrongPrimary,
         },
       },
     };
@@ -57,18 +58,20 @@ export const useButtonStyles = () => {
     };
     const alertButton: CSSObject = {
       ...button,
-      color: euiVars.euiColorDanger,
-      background: transparentize(euiVars.euiColorDanger, 0.04),
-      border: `${border.width.thin} solid ${transparentize(euiVars.euiColorDanger, 0.48)}`,
+      color: colors.textDanger,
+      background: colors.backgroundBaseDanger,
+      border: `${border.width.thin} solid ${colors.borderBaseDanger}`,
       '&&:hover, &&:focus': {
-        background: transparentize(euiVars.euiColorDanger, 0.12),
+        background: colors.backgroundLightDanger,
         textDecoration: 'none',
       },
       '&.isExpanded': {
-        color: colors.ghost,
-        background: euiVars.euiColorDanger,
+        color: colors.textInverse,
+        background: colors.backgroundFilledDanger,
+        borderColor: colors.borderStrongDanger,
         '&:hover, &:focus': {
-          background: `${euiVars.euiColorDanger}`,
+          background: `${colors.backgroundFilledDanger}`,
+          borderColor: colors.borderStrongDanger,
         },
       },
 
@@ -83,18 +86,18 @@ export const useButtonStyles = () => {
 
     const outputButton: CSSObject = {
       ...button,
-      color: euiVars.euiColorVis1,
-      background: transparentize(euiVars.euiColorVis1, 0.04),
-      border: `${border.width.thin} solid ${transparentize(euiVars.euiColorVis1, 0.48)}`,
+      color: colors.textAccentSecondary,
+      background: colors.backgroundBaseAccentSecondary,
+      border: `${border.width.thin} solid ${colors.borderBaseAccentSecondary}`,
       '&&:hover, &&:focus': {
-        background: transparentize(euiVars.euiColorVis1, 0.12),
+        background: colors.backgroundLightAccentSecondary,
         textDecoration: 'none',
       },
       '&.isExpanded': {
         color: colors.ghost,
-        background: euiVars.euiColorVis1,
+        background: colors.backgroundFilledAccentSecondary,
         '&:hover, &:focus': {
-          background: `${euiVars.euiColorVis1}`,
+          background: `${colors.backgroundFilledAccentSecondary}`,
         },
       },
     };
@@ -102,12 +105,12 @@ export const useButtonStyles = () => {
     const userChangedButton: CSSObject = {
       ...button,
       cursor: 'default',
-      color: euiVars.euiColorGhost,
-      background: euiVars.euiColorVis3,
-      border: `${border.width.thin} solid ${transparentize(euiVars.euiColorVis3, 0.48)}`,
+      color: colors.textAccent,
+      background: colors.backgroundBaseAccent,
+      border: `${border.width.thin} solid ${colors.borderBaseAccent}`,
       '&&:hover, &&:focus': {
-        color: euiVars.euiColorGhost,
-        background: euiVars.euiColorVis3,
+        color: colors.textAccent,
+        background: colors.backgroundBaseAccent,
         textDecoration: 'none',
         transform: 'none',
         animation: 'none',
@@ -126,7 +129,7 @@ export const useButtonStyles = () => {
       userChangedButton,
       buttonSize,
     };
-  }, [euiTheme, euiVars]);
+  }, [euiTheme]);
 
   return cached;
 };

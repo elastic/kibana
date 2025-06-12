@@ -8,10 +8,10 @@
 import Boom from '@hapi/boom';
 import { getConnectorSo } from '../../../../data/connector';
 import { connectorSchema } from '../../schemas';
-import { Connector } from '../../types';
+import type { Connector } from '../../types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { isConnectorDeprecated } from '../../lib';
-import { GetParams } from './types';
+import type { GetParams } from './types';
 
 export async function get({
   context,
@@ -66,6 +66,10 @@ export async function get({
       isSystemAction: foundInMemoryConnector.isSystemAction,
       isDeprecated: isConnectorDeprecated(foundInMemoryConnector),
     };
+
+    if (foundInMemoryConnector.exposeConfig) {
+      connector.config = foundInMemoryConnector.config;
+    }
   } else {
     const result = await getConnectorSo({
       unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,

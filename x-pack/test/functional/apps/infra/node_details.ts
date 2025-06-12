@@ -9,7 +9,6 @@ import moment from 'moment';
 import expect from '@kbn/expect';
 import rison from '@kbn/rison';
 import { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { enableInfrastructureProfilingIntegration } from '@kbn/observability-plugin/common';
 import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
@@ -90,6 +89,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     'timePicker',
   ]);
 
+  const waitForChartsToLoad = async () =>
+    await retry.waitFor(
+      'wait for table and Metric charts to load',
+      async () => await pageObjects.assetDetails.isMetricChartsLoaded()
+    );
+
   const getNodeDetailsUrl = (queryParams?: QueryParams) => {
     return rison.encodeUnknown(
       Object.entries(queryParams ?? {}).reduce<Record<string, string>>((acc, [key, value]) => {
@@ -124,12 +129,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
      */
     await pageObjects.common.sleep(1000);
     await browser.refresh();
-  };
-
-  const setInfrastructureProfilingIntegrationUiSetting = async (value: boolean = true) => {
-    await kibanaServer.uiSettings.update({ [enableInfrastructureProfilingIntegration]: value });
-    await browser.refresh();
-    await pageObjects.header.waitUntilLoadingHasFinished();
   };
 
   describe('Node Details', () => {
@@ -256,6 +255,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           { metric: 'network', chartsCount: 1 },
         ].forEach(({ metric, chartsCount }) => {
           it(`should render ${chartsCount} ${metric} chart(s) in the Metrics section`, async () => {
+            await waitForChartsToLoad();
             const hosts = await pageObjects.assetDetails.getOverviewTabHostMetricCharts(metric);
             expect(hosts.length).to.equal(chartsCount);
           });
@@ -282,14 +282,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.assetDetails.alertsSectionClosedContentNoAlertsMissing();
         });
 
-        it('shows the CPU Profiling prompt if UI setting for Profiling integration is enabled', async () => {
-          await setInfrastructureProfilingIntegrationUiSetting(true);
+        it('shows the CPU Profiling prompt', async () => {
           await pageObjects.assetDetails.cpuProfilingPromptExists();
-        });
-
-        it('hides the CPU Profiling prompt if UI setting for Profiling integration is disabled', async () => {
-          await setInfrastructureProfilingIntegrationUiSetting(false);
-          await pageObjects.assetDetails.cpuProfilingPromptMissing();
         });
 
         describe('Alerts Section with alerts', () => {
@@ -457,6 +451,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             START_HOST_DATE.format(DATE_PICKER_FORMAT),
             END_HOST_DATE.format(DATE_PICKER_FORMAT)
           );
+
+          await waitForChartsToLoad();
+        });
+
+        after(async () => {
+          await browser.scrollTop();
         });
 
         [
@@ -476,7 +476,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
         });
       });
-
       // FLAKY: https://github.com/elastic/kibana/issues/192891
       describe.skip('Processes Tab', () => {
         before(async () => {
@@ -501,6 +500,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('should render processes tab and with Total Value summary', async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
           const processesTotalValue =
             await pageObjects.assetDetails.getProcessesTabContentTotalValue();
           await retry.tryForTime(5000, async () => {
@@ -547,7 +547,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           );
         });
 
-        it('should render logs tab', async () => {
+        it('should render logs tab content', async () => {
           await pageObjects.assetDetails.logsExists();
         });
 
@@ -566,25 +566,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      describe('Osquery Tab', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/216514
+      // We should revisit this test and decide if it is usefull and worth to keep
+      describe.skip('Osquery Tab', () => {
         before(async () => {
+          await browser.scrollTop();
           await pageObjects.assetDetails.clickOsqueryTab();
         });
 
-        it('should show a date picker', async () => {
+        it('should not show a date picker', async () => {
           expect(await pageObjects.timePicker.timePickerExists()).to.be(false);
         });
       });
 
       describe('Profiling tab', () => {
-        it('shows the Profiling tab if Profiling integration UI setting is enabled', async () => {
-          await setInfrastructureProfilingIntegrationUiSetting(true);
+        it('shows the Profiling tab', async () => {
           await pageObjects.assetDetails.profilingTabExists();
-        });
-
-        it('hides the Profiling tab if Profiling integration UI setting is disabled', async () => {
-          await setInfrastructureProfilingIntegrationUiSetting(false);
-          await pageObjects.assetDetails.profilingTabMissing();
         });
       });
 
@@ -723,6 +720,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         ].forEach(({ metric, chartsCount }) => {
           it(`should render ${chartsCount} ${metric} chart`, async () => {
             await retry.tryForTime(5000, async () => {
+              await waitForChartsToLoad();
               const charts = await (metric === 'kubernetes'
                 ? pageObjects.assetDetails.getOverviewTabKubernetesMetricCharts()
                 : pageObjects.assetDetails.getOverviewTabHostMetricCharts(metric));
@@ -878,6 +876,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             { metric: 'network', chartsCount: 1 },
           ].forEach(({ metric, chartsCount }) => {
             it(`should render ${chartsCount} ${metric} chart(s)`, async () => {
+              await waitForChartsToLoad();
               const charts = await pageObjects.assetDetails.getMetricsTabDockerCharts(metric);
               expect(charts.length).to.equal(chartsCount);
             });

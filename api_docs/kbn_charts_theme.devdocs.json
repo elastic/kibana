@@ -32,7 +32,7 @@
           "() => ",
           "Theme"
         ],
-        "path": "packages/kbn-charts-theme/index.ts",
+        "path": "src/platform/packages/shared/kbn-charts-theme/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

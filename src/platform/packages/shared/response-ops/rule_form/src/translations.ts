@@ -103,6 +103,20 @@ export const ALERT_FLAPPING_DETECTION_DESCRIPTION = i18n.translate(
   }
 );
 
+export const ALERT_LINK_DASHBOARDS_TITLE = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleDefinition.alertLinkDashboardsTitle',
+  {
+    defaultMessage: 'Related dashboards',
+  }
+);
+
+export const ALERT_LINK_DASHBOARDS_PLACEHOLDER = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleDefinition.alertLinkDashboardsTitle',
+  {
+    defaultMessage: 'Link related dashboards for investigation',
+  }
+);
+
 export const SCHEDULE_TITLE_PREFIX = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleSchedule.scheduleTitlePrefix',
   {
@@ -213,6 +227,13 @@ export const RULE_ALERT_DELAY_BELOW_MINIMUM_TEXT = i18n.translate(
   }
 );
 
+export const RULE_INVESTIGATION_GUIDE_TOO_LONG_TEXT = (length: number, maxLength: number) =>
+  i18n.translate('responseOpsRuleForm.ruleForm.error.investigationGuideTooLongText', {
+    defaultMessage:
+      'Investigation guide is too long. Current length: {length}. Max length: {maxLength}.',
+    values: { length, maxLength },
+  });
+
 export const INTERVAL_MINIMUM_TEXT = (minimum: string) =>
   i18n.translate('responseOpsRuleForm.ruleForm.error.belowMinimumText', {
     defaultMessage: 'Interval must be at least {minimum}.',
@@ -233,14 +254,25 @@ export const ADD_ACTION_TEXT = i18n.translate(
   }
 );
 
-export const RULE_DETAILS_TITLE = i18n.translate('responseOpsRuleForm.ruleForm.ruleDetails.title', {
-  defaultMessage: 'Rule name and tags',
-});
-
-export const RULE_DETAILS_DESCRIPTION = i18n.translate(
-  'responseOpsRuleForm.ruleForm.ruleDetails.description',
+export const ADD_ACTION_HEADER = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleActions.addActionHeader',
   {
-    defaultMessage: 'Define a name and tags for your rule.',
+    defaultMessage: 'Add an action',
+  }
+);
+
+export const OPTIONAL_LABEL = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleActions.addActionOptionalText',
+  {
+    defaultMessage: 'Optional',
+  }
+);
+
+export const ADD_ACTION_DESCRIPTION_TEXT = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleActions.addActionDescriptionText',
+  {
+    defaultMessage:
+      'Select a connector and configure the actions to be performed when an alert is triggered',
   }
 );
 
@@ -269,6 +301,13 @@ export const RULE_TAG_PLACEHOLDER = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDetails.ruleTagsPlaceholder',
   {
     defaultMessage: 'Add tags',
+  }
+);
+
+export const RULE_INVESTIGATION_GUIDE_LABEL = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleDetails.investigationGuide.editor.title',
+  {
+    defaultMessage: 'Investigation guide',
   }
 );
 
@@ -304,6 +343,62 @@ export const RULE_PAGE_FOOTER_SAVE_TEXT = i18n.translate(
   'responseOpsRuleForm.ruleForm.rulePageFooter.saveText',
   {
     defaultMessage: 'Save rule',
+  }
+);
+
+export const RULE_FLYOUT_HEADER_CREATE_TITLE = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleFlyoutHeader.createTitle',
+  {
+    defaultMessage: 'Create rule',
+  }
+);
+
+export const RULE_FLYOUT_HEADER_EDIT_TITLE = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleFlyoutHeader.editTitle',
+  {
+    defaultMessage: 'Edit rule',
+  }
+);
+
+export const RULE_FLYOUT_HEADER_BACK_TEXT = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleFlyoutHeader.backText',
+  {
+    defaultMessage: 'Back',
+  }
+);
+
+export const RULE_FLYOUT_FOOTER_CANCEL_TEXT = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleFlyoutFooter.cancelText',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const RULE_FLYOUT_FOOTER_BACK_TEXT = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleFlyoutFooter.backText',
+  {
+    defaultMessage: 'Back',
+  }
+);
+
+export const RULE_FLYOUT_FOOTER_NEXT_TEXT = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleFlyoutFooter.nextText',
+  {
+    defaultMessage: 'Next',
+  }
+);
+
+export const RULE_FLYOUT_FOOTER_CREATE_TEXT = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleFlyoutFooter.createText',
+  {
+    defaultMessage: 'Create rule',
+  }
+);
+
+export const RULE_FLYOUT_FOOTER_SAVE_TEXT = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleFlyoutFooter.saveText',
+  {
+    defaultMessage: 'Save changes',
   }
 );
 
@@ -486,7 +581,14 @@ export const CONFIRM_RULE_SAVE_MESSAGE_TEXT = i18n.translate(
 export const RULE_FORM_PAGE_RULE_DEFINITION_TITLE = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDefinitionTitle',
   {
-    defaultMessage: 'Rule definition',
+    defaultMessage: 'Definition',
+  }
+);
+
+export const RULE_FORM_PAGE_RULE_DEFINITION_TITLE_SHORT = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleDefinitionTitleShort',
+  {
+    defaultMessage: 'Definition',
   }
 );
 
@@ -514,7 +616,14 @@ export const RULE_FORM_PAGE_RULE_ACTIONS_NO_PERMISSION_DESCRIPTION = i18n.transl
 export const RULE_FORM_PAGE_RULE_DETAILS_TITLE = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDetailsTitle',
   {
-    defaultMessage: 'Rule details',
+    defaultMessage: 'Details',
+  }
+);
+
+export const RULE_FORM_PAGE_RULE_DETAILS_TITLE_SHORT = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleDetailsTitleShort',
+  {
+    defaultMessage: 'Details',
   }
 );
 
@@ -546,7 +655,7 @@ export const RULE_FORM_CANCEL_MODAL_CONFIRM = i18n.translate(
 export const RULE_FORM_CANCEL_MODAL_CANCEL = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleFormCancelModalCancel',
   {
-    defaultMessage: 'Cancel',
+    defaultMessage: 'Keep editing',
   }
 );
 
@@ -575,6 +684,13 @@ export const ACTION_TYPE_MODAL_FILTER_ALL = i18n.translate(
   'responseOpsRuleForm.ruleForm.actionTypeModalFilterAll',
   {
     defaultMessage: 'All',
+  }
+);
+
+export const ACTION_TYPE_MODAL_FILTER_LIST_TITLE = i18n.translate(
+  'responseOpsRuleForm.ruleForm.actionTypeModalFilterListTitle',
+  {
+    defaultMessage: 'Filter',
   }
 );
 
@@ -645,3 +761,58 @@ export const DISABLED_ACTIONS_WARNING_TITLE = i18n.translate(
     defaultMessage: 'This rule has actions that are disabled',
   }
 );
+
+export const SHOW_REQUEST_MODAL_EDIT = i18n.translate(
+  'responseOpsRuleForm.ruleForm.showRequestModal.subheadingTitleEdit',
+  {
+    defaultMessage: 'edit',
+  }
+);
+
+export const SHOW_REQUEST_MODAL_CREATE = i18n.translate(
+  'responseOpsRuleForm.ruleForm.showRequestModal.subheadingTitleCreate',
+  {
+    defaultMessage: 'create',
+  }
+);
+
+export const SHOW_REQUEST_MODAL_SUBTITLE = (edit: boolean) =>
+  i18n.translate('responseOpsRuleForm.ruleForm.showRequestModal.subheadingTitle', {
+    defaultMessage: 'This Kibana request will {requestType} this rule.',
+    values: { requestType: edit ? SHOW_REQUEST_MODAL_EDIT : SHOW_REQUEST_MODAL_CREATE },
+  });
+
+export const SHOW_REQUEST_MODAL_TITLE_EDIT = i18n.translate(
+  'responseOpsRuleForm.ruleForm.showRequestModal.headerTitleEdit',
+  {
+    defaultMessage: 'Edit',
+  }
+);
+
+export const SHOW_REQUEST_MODAL_TITLE_CREATE = i18n.translate(
+  'responseOpsRuleForm.ruleForm.showRequestModal.headerTitleCreate',
+  {
+    defaultMessage: 'Create',
+  }
+);
+
+export const SHOW_REQUEST_MODAL_TITLE = (edit: boolean) =>
+  i18n.translate('responseOpsRuleForm.ruleForm.showRequestModal.headerTitle', {
+    defaultMessage: '{requestType} alerting rule request',
+    values: {
+      requestType: edit ? SHOW_REQUEST_MODAL_TITLE_EDIT : SHOW_REQUEST_MODAL_TITLE_CREATE,
+    },
+  });
+
+export const SHOW_REQUEST_MODAL_ERROR = i18n.translate(
+  'responseOpsRuleForm.ruleForm.showRequestModal.somethingWentWrongDescription',
+  {
+    defaultMessage: 'Sorry about that, something went wrong.',
+  }
+);
+
+export const DEFAULT_RULE_NAME = (ruleTypeName: string) =>
+  i18n.translate('responseOpsRuleForm.ruleForm.defaultRuleName', {
+    defaultMessage: `{ruleTypeName} rule`,
+    values: { ruleTypeName },
+  });

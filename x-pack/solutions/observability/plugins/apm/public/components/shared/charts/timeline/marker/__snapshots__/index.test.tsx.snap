@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Marker renders agent marker 1`] = `
-<Styled(div)
+<MarkerContainer
   style={
     Object {
       "left": 4.5,
@@ -18,11 +18,11 @@ exports[`Marker renders agent marker 1`] = `
       }
     }
   />
-</Styled(div)>
+</MarkerContainer>
 `;
 
 exports[`Marker renders error marker 1`] = `
-<Styled(div)
+<MarkerContainer
   style={
     Object {
       "left": 4.5,
@@ -54,5 +54,5 @@ exports[`Marker renders error marker 1`] = `
       }
     }
   />
-</Styled(div)>
+</MarkerContainer>
 `;

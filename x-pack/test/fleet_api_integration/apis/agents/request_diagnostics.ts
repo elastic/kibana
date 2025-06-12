@@ -122,7 +122,7 @@ export default function (providerContext: FtrProviderContext) {
             clearInterval(intervalId);
             resolve({});
           }
-        }, 1000);
+        }, 3000);
       }).catch((e) => {
         throw e;
       });
@@ -138,9 +138,7 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
       const actionsRes = await es.search({
         index: '.fleet-actions',
-        body: {
-          sort: [{ '@timestamp': { order: 'desc' } }],
-        },
+        sort: [{ '@timestamp': { order: 'desc' } }],
       });
       const action: any = actionsRes.hits.hits[0]._source;
       expect(action.data.additional_metrics).contain('CPU');
@@ -158,9 +156,7 @@ export default function (providerContext: FtrProviderContext) {
 
       const actionsRes = await es.search({
         index: '.fleet-actions',
-        body: {
-          sort: [{ '@timestamp': { order: 'desc' } }],
-        },
+        sort: [{ '@timestamp': { order: 'desc' } }],
       });
       const action: any = actionsRes.hits.hits[0]._source;
       expect(action.data.additional_metrics).contain('CPU');

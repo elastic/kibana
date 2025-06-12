@@ -23,7 +23,7 @@ export const createRuleExecutionSummary = (
     // In the rule type the monitoring object is optional because in some cases rules client returns a rule without it.
     // For instance, when we call RulesClient.create(). Despite the fact that it's always in the rule saved object,
     // even when it was just created:
-    // https://github.com/elastic/kibana/blob/26eddec70844ffb65e5d3521a7adb52e643c4534/x-pack/platform/plugins/shared/alerting/server/rules_client/methods/create.ts#L155
+    // https://github.com/elastic/kibana/blob/8.9/x-pack/plugins/alerting/server/rules_client/methods/create.ts#L158
     return null;
   }
 

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { TheHiveConnectorType, getConnectorType } from '.';
+import type { TheHiveConnectorType } from '.';
+import { getConnectorType } from '.';
 
 let connectorType: TheHiveConnectorType;
 

@@ -7,7 +7,8 @@
 
 import { isUndefined, pick, omitBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import moment from 'moment';
 import type {
   ActionType as ConnectorType,
@@ -19,7 +20,7 @@ import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
-} from '@kbn/actions-plugin/common/types';
+} from '@kbn/actions-plugin/common';
 import { postPagerduty } from './post_pagerduty';
 import { convertTimestamp } from '../lib/convert_timestamp';
 

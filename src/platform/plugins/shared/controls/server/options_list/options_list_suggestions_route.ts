@@ -29,17 +29,17 @@ export const setupOptionsListSuggestionsRoute = (
     .post({
       access: 'internal',
       path: '/internal/controls/optionsList/{index}',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because permissions will be checked by elasticsearch.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because permissions will be checked by elasticsearch.',
-          },
-        },
         validate: {
           request: {
             params: schema.object(
@@ -145,7 +145,10 @@ export const setupOptionsListSuggestionsRoute = (
     /**
      * Run ES query
      */
-    const rawEsResult = await esClient.search({ index, body }, { signal: abortController.signal });
+    const rawEsResult = await esClient.search(
+      { index, ...body },
+      { signal: abortController.signal }
+    );
 
     /**
      * Parse ES response into Options List Response

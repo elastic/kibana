@@ -9,19 +9,26 @@ components:
     AlertIds:
       type: array
       items:
-        $ref: './primitives.schema.yaml#/components/schemas/NonEmptyString'
+        type: string
+        minLength: 1
+        format: nonempty
       minItems: 1
-      description: A list of alerts ids.
+      description: A list of alerts `id`s.
 
     AlertTag:
-      $ref: './primitives.schema.yaml#/components/schemas/NonEmptyString'
+      type: string
+      format: nonempty
+      minLength: 1
+      description: Use alert tags to organize related alerts into categories that you can filter and group.
 
     AlertTags:
       type: array
+      description: List of keywords to organize related alerts into categories that you can filter and group.
       items:
         $ref: '#/components/schemas/AlertTag'
 
     AlertStatus:
+      description: The status of an alert, which can be `open`, `acknowledged`, `in-progress`, or `closed`.
       type: string
       enum:
         - open

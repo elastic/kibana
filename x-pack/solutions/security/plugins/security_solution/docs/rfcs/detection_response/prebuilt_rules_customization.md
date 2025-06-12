@@ -403,9 +403,9 @@ Since the migration of rules will be performed as the user calls the pertinent e
 
 All endpoints belonging to Detection Rules Management that create and update -including upgrade of prebuilt rules to new version- use three CRUD methods under the hood:
 
-- [`createRules`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/logic/crud/create_rules.ts)
-- [`patchRules`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/logic/crud/patch_rules.ts)
-- [`updateRules`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/logic/crud/update_rules.ts)
+- [`createRules`](https://github.com/elastic/kibana/blob/8.0/x-pack/plugins/security_solution/server/lib/detection_engine/rules/create_rules.ts)
+- [`patchRules`](https://github.com/elastic/kibana/blob/8.0/x-pack/plugins/security_solution/server/lib/detection_engine/rules/patch_rules.ts)
+- [`updateRules`](https://github.com/elastic/kibana/blob/8.0/x-pack/plugins/security_solution/server/lib/detection_engine/rules/update_rules.ts)
 
 This "overuse" of these 3 methods for a variety of user actions makes their logic tightly coupled and creates a considerable amount of complexity to CRUD functions that should remain logically simple.
 
@@ -464,7 +464,7 @@ The **normalization on read** will be carried out by a new `normalizeRuleSourceS
 
 Inside this method, we will use `normalizeRuleSourceSchemaOnRuleRead` to calculate the normalized values of `rule_source` and `immutable`.
 
-_Source: [x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/normalization/rule_converters.ts](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/normalization/rule_converters.ts)_
+_Source: [rule_converters.ts](https://github.com/elastic/kibana/blob/8.0/x-pack/plugins/security_solution/server/lib/detection_engine/schemas/rule_converters.ts)_
 
 ```ts
 export const internalRuleToAPIResponse = (rule) => {
@@ -948,7 +948,7 @@ export const convertPrebuiltRuleAssetToRuleResponse = (
 
 - [**Perform Rule Installation** - `POST /prebuilt_rules/installation/_install` (Internal)](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_route.ts)
 
-To install a new prebuilt rule, this endpoint uses the [`createPrebuiltRules` method](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/logic/rule_objects/create_prebuilt_rules.ts), which in turn calls the [`createRules` method](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/logic/crud/create_rules.ts).
+To install a new prebuilt rule, this endpoint uses the [`createPrebuiltRules` method](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/logic/rule_objects/create_prebuilt_rules.ts), which in turn calls the [`createRules` method](https://github.com/elastic/kibana/blob/8.0/x-pack/plugins/security_solution/server/lib/detection_engine/rules/create_rules.ts).
 
 This endpoint also suffers from the issue of tightly coupled logic explained above: using th `createRules` method for creating, importing and upgrading -in some cases- rules. We need to create a new CRUD method specifically for installing prebuilt rules, that extracts that responsibility out of the `createRules` method.
 

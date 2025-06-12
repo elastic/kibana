@@ -41,7 +41,7 @@ export class DataViewFieldEditorPlugin implements Plugin<void, void, SetupDeps, 
       links: [
         {
           label: 'README',
-          href: 'https://github.com/elastic/kibana/blob/main/src/plugins/data_view_field_editor/README.md',
+          href: 'https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/data_view_field_editor/README.md',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',

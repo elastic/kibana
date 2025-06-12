@@ -8,7 +8,10 @@
  */
 
 import { upperFirst, isFunction, omit } from 'lodash';
+
+import { css } from '@emotion/react';
 import React, { MouseEvent } from 'react';
+
 import {
   EuiToolTip,
   EuiButton,
@@ -16,7 +19,9 @@ import {
   EuiBetaBadge,
   EuiButtonColor,
   EuiButtonIcon,
+  useEuiTheme,
 } from '@elastic/eui';
+import { getRouterLinkProps } from '@kbn/router-utils';
 import { TopNavMenuData } from './top_nav_menu_data';
 
 export interface TopNavMenuItemProps extends TopNavMenuData {
@@ -35,11 +40,27 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
     return val!;
   }
 
-  function getButtonContainer() {
+  function ButtonContainer() {
+    const { euiTheme } = useEuiTheme();
     if (props.badge) {
       return (
         <>
-          <EuiBetaBadge className="kbnTopNavMenu__betaBadgeItem" {...props.badge} size="s" />
+          <EuiBetaBadge
+            css={css`
+              margin-right: ${euiTheme.size.s};
+              vertical-align: middle;
+
+              button:hover &,
+              button:focus & {
+                text-decoration: underline;
+              }
+              button:hover & {
+                cursor: pointer;
+              }
+            `}
+            {...props.badge}
+            size="s"
+          />
           {upperFirst(props.label || props.id!)}
         </>
       );
@@ -48,23 +69,28 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
     }
   }
 
-  function handleClick(e: MouseEvent<HTMLButtonElement>) {
+  function handleClick(event: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) {
     if (isDisabled()) return;
-    props.run(e.currentTarget);
+
+    props.run(event.currentTarget);
     if (props.isMobileMenu) {
       props.closePopover();
     }
   }
 
+  const routerLinkProps = props.href
+    ? getRouterLinkProps({ href: props.href, onClick: handleClick })
+    : { onClick: handleClick };
+
   const commonButtonProps = {
     isDisabled: isDisabled(),
-    onClick: handleClick,
     isLoading: props.isLoading,
     iconType: props.iconType,
     iconSide: props.iconSide,
     'data-test-subj': props.testId,
     className: props.className,
     color: (props.color ?? 'primary') as EuiButtonColor,
+    ...routerLinkProps,
   };
 
   // If the item specified a href, then override the suppress the onClick
@@ -77,7 +103,18 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
   const btn =
     props.iconOnly && props.iconType && !props.isMobileMenu ? (
       // icon only buttons are not supported by EuiHeaderLink
-      <EuiToolTip content={upperFirst(props.label || props.id!)} position="bottom" delay="long">
+      React.createElement(
+        props.disableButton ? React.Fragment : EuiToolTip,
+        // @ts-expect-error - EuiToolTip does not accept `key` prop, we pass to react Fragment
+        {
+          ...(props.disableButton
+            ? { key: props.label || props.id! }
+            : {
+                content: upperFirst(props.label || props.id!),
+                position: 'bottom',
+                delay: 'long',
+              }),
+        },
         <EuiButtonIcon
           size="s"
           {...omit(commonButtonProps, 'iconSide')}
@@ -85,7 +122,7 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
           display={props.emphasize && (props.fill ?? true) ? 'fill' : undefined}
           aria-label={upperFirst(props.label || props.id!)}
         />
-      </EuiToolTip>
+      )
     ) : props.emphasize ? (
       // fill is not compatible with EuiHeaderLink
       <EuiButton
@@ -94,11 +131,11 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
         {...commonButtonProps}
         fill={props.fill ?? true}
       >
-        {getButtonContainer()}
+        <ButtonContainer />
       </EuiButton>
     ) : (
       <EuiHeaderLink size="s" {...commonButtonProps} {...overrideProps}>
-        {getButtonContainer()}
+        <ButtonContainer />
       </EuiHeaderLink>
     );
 

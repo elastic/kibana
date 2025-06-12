@@ -6,7 +6,6 @@
  */
 
 import React, { type FC, useMemo } from 'react';
-import './_index.scss';
 import ReactDOM from 'react-dom';
 import { pick } from 'lodash';
 
@@ -19,6 +18,8 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import useLifecycles from 'react-use/lib/useLifecycles';
 import useObservable from 'react-use/lib/useObservable';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { ExperimentalFeatures, MlFeatures, NLPSettings } from '../../common/constants/app';
 import { ML_STORAGE_KEYS } from '../../common/types/storage';
 import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
@@ -28,6 +29,8 @@ import type { PageDependencies } from './routing/router';
 import { EnabledFeaturesContextProvider, MlServerInfoContextProvider } from './contexts/ml';
 import type { StartServices } from './contexts/kibana';
 import { getMlGlobalServices } from './util/get_services';
+import { MlTelemetryContextProvider } from './contexts/ml/ml_telemetry_context';
+import type { ManagementSectionId } from './management';
 
 export type MlDependencies = Omit<
   MlSetupDependencies,
@@ -38,11 +41,12 @@ export type MlDependencies = Omit<
 interface AppProps {
   coreStart: CoreStart;
   deps: MlDependencies;
-  appMountParams: AppMountParameters;
+  appMountParams: ManagementAppMountParams | AppMountParameters;
   isServerless: boolean;
   mlFeatures: MlFeatures;
   experimentalFeatures: ExperimentalFeatures;
   nlpSettings: NLPSettings;
+  entryPoint?: ManagementSectionId;
 }
 
 const localStorage = new Storage(window.localStorage);
@@ -53,7 +57,7 @@ export interface MlServicesContext {
 
 export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
 
-const App: FC<AppProps> = ({
+export const App: FC<AppProps> = ({
   coreStart,
   deps,
   appMountParams,
@@ -61,10 +65,13 @@ const App: FC<AppProps> = ({
   mlFeatures,
   experimentalFeatures,
   nlpSettings,
+  entryPoint,
 }) => {
   const pageDeps: PageDependencies = {
     history: appMountParams.history,
-    setHeaderActionMenu: appMountParams.setHeaderActionMenu,
+    setHeaderActionMenu: isPopulatedObject(appMountParams, ['setHeaderActionMenu'])
+      ? appMountParams.setHeaderActionMenu
+      : undefined,
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
   };
 
@@ -100,6 +107,8 @@ const App: FC<AppProps> = ({
       unifiedSearch: deps.unifiedSearch,
       usageCollection: deps.usageCollection,
       mlServices: getMlGlobalServices(coreStart, deps.data.dataViews, deps.usageCollection),
+      spaces: deps.spaces,
+      fieldsMetadata: deps.fieldsMetadata,
     };
   }, [deps, coreStart]);
 
@@ -153,7 +162,9 @@ const App: FC<AppProps> = ({
                 experimentalFeatures={experimentalFeatures}
               >
                 <MlServerInfoContextProvider nlpSettings={nlpSettings}>
-                  <MlRouter pageDeps={pageDeps} />
+                  <MlTelemetryContextProvider telemetryClient={deps.telemetry}>
+                    <MlRouter pageDeps={pageDeps} entryPoint={entryPoint} />
+                  </MlTelemetryContextProvider>
                 </MlServerInfoContextProvider>
               </EnabledFeaturesContextProvider>
             </DatePickerContextProvider>

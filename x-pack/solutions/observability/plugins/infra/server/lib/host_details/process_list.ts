@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { TIMESTAMP_FIELD, SYSTEM_PROCESS_CMDLINE_FIELD } from '../../../common/constants';
+import {
+  TIMESTAMP_FIELD,
+  PROCESS_COMMANDLINE_FIELD,
+  MANDATORY_PROCESS_FIELDS,
+  TOP_N,
+} from '../../../common/constants';
 import type {
   ProcessListAPIRequest,
   ProcessListAPIQueryAggregation,
@@ -13,13 +18,18 @@ import type {
 import type { ESSearchClient } from '../metrics/types';
 import type { InfraSourceConfiguration } from '../sources';
 
-const TOP_N = 10;
+const mandatoryFieldsFilter = MANDATORY_PROCESS_FIELDS.map((field) => ({
+  exists: {
+    field,
+  },
+}));
 
 export const getProcessList = async (
   search: ESSearchClient,
   sourceConfiguration: InfraSourceConfiguration,
   { hostTerm, to, sortBy, searchFilter }: ProcessListAPIRequest
 ) => {
+  const filter = searchFilter ? searchFilter : [{ match_all: {} }];
   const body = {
     size: 0,
     query: {
@@ -66,13 +76,13 @@ export const getProcessList = async (
       processes: {
         filter: {
           bool: {
-            must: searchFilter ?? [{ match_all: {} }],
+            must: [...filter, ...mandatoryFieldsFilter],
           },
         },
         aggs: {
           filteredProcs: {
             terms: {
-              field: SYSTEM_PROCESS_CMDLINE_FIELD,
+              field: PROCESS_COMMANDLINE_FIELD,
               size: TOP_N,
               order: {
                 [sortBy.name]: sortBy.isAscending ? 'asc' : 'desc',
@@ -104,7 +114,12 @@ export const getProcessList = async (
                       },
                     },
                   ],
-                  _source: ['system.process.state', 'user.name', 'process.pid'],
+                  _source: [
+                    'system.process.state',
+                    'user.name',
+                    'process.pid',
+                    'process.command_line',
+                  ],
                 },
               },
             },
@@ -133,11 +148,10 @@ export const getProcessList = async (
       };
     });
 
-    let summary: { [p: string]: number } = {};
-    if (result.aggregations!.summaryEvent.summary.hits.hits.length) {
-      summary =
-        result.aggregations!.summaryEvent.summary.hits.hits[0]._source.system.process.summary;
-    }
+    const summary: { [p: string]: number } = result.aggregations!.summaryEvent.summary.hits.hits
+      .length
+      ? result.aggregations!.summaryEvent.summary.hits.hits[0]._source.system.process.summary
+      : {};
 
     return {
       processList,

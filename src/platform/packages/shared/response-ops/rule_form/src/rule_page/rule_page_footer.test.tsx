@@ -23,15 +23,18 @@ jest.mock('../validation/validate_form', () => ({
 
 jest.mock('../hooks', () => ({
   useRuleFormState: jest.fn(),
+  useRuleFormScreenContext: jest.fn(),
 }));
 
 const { hasRuleErrors } = jest.requireMock('../validation/validate_form');
-const { useRuleFormState } = jest.requireMock('../hooks');
+const { useRuleFormState, useRuleFormScreenContext } = jest.requireMock('../hooks');
 
 const onSave = jest.fn();
 const onCancel = jest.fn();
 
 hasRuleErrors.mockReturnValue(false);
+
+const mockSetIsShowRequestScreenVisible = jest.fn();
 
 describe('rulePageFooter', () => {
   beforeEach(() => {
@@ -50,6 +53,9 @@ describe('rulePageFooter', () => {
       formData: {
         actions: [],
       },
+    });
+    useRuleFormScreenContext.mockReturnValue({
+      setIsShowRequestScreenVisible: mockSetIsShowRequestScreenVisible,
     });
   });
 
@@ -77,14 +83,14 @@ describe('rulePageFooter', () => {
     render(<RulePageFooter onSave={onSave} onCancel={onCancel} />);
 
     fireEvent.click(screen.getByTestId('rulePageFooterShowRequestButton'));
-    expect(screen.getByTestId('rulePageShowRequestModal')).toBeInTheDocument();
+    expect(mockSetIsShowRequestScreenVisible).toHaveBeenCalledWith(true);
   });
 
   test('should show create rule confirmation', () => {
     render(<RulePageFooter onSave={onSave} onCancel={onCancel} />);
 
     fireEvent.click(screen.getByTestId('rulePageFooterSaveButton'));
-    expect(screen.getByTestId('rulePageConfirmCreateRule')).toBeInTheDocument();
+    expect(screen.getByTestId('confirmCreateRuleModal')).toBeInTheDocument();
   });
 
   test('should not show creat rule confirmation if user cannot read actions', () => {
@@ -107,7 +113,7 @@ describe('rulePageFooter', () => {
 
     render(<RulePageFooter onSave={onSave} onCancel={onCancel} />);
     fireEvent.click(screen.getByTestId('rulePageFooterSaveButton'));
-    expect(screen.queryByTestId('rulePageConfirmCreateRule')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('confirmCreateRuleModal')).not.toBeInTheDocument();
     expect(onSave).toHaveBeenCalled();
   });
 

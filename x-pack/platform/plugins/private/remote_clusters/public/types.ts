@@ -27,6 +27,11 @@ export interface ClientConfigType {
   };
 }
 
+export interface RequestError {
+  message: string;
+  cause?: string[];
+}
+
 export type { RegisterManagementAppArgs };
 
 export type { I18nStart };

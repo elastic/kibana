@@ -14,8 +14,10 @@ import {
   EuiSpacer,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
+import { useCasesLocalStorage } from '../../../common/use_cases_local_storage';
 import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
 import { useGetCaseUsers } from '../../../containers/use_get_case_users';
 import { useGetCaseConnectors } from '../../../containers/use_get_case_connectors';
@@ -40,7 +42,10 @@ import { useGetCaseUserActionsStats } from '../../../containers/use_get_case_use
 import { AssignUsers } from './assign_users';
 import { UserActionsActivityBar } from '../../user_actions_activity_bar';
 import type { Assignee } from '../../user_profiles/types';
-import type { UserActivityParams } from '../../user_actions_activity_bar/types';
+import type {
+  UserActivityParams,
+  UserActivitySortOrder,
+} from '../../user_actions_activity_bar/types';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import { CaseViewTabs } from '../case_view_tabs';
 import { Description } from '../../description';
@@ -48,6 +53,8 @@ import { EditCategory } from './edit_category';
 import { parseCaseUsers } from '../../utils';
 import { CustomFields } from './custom_fields';
 import { useReplaceCustomField } from '../../../containers/use_replace_custom_field';
+
+const LOCALSTORAGE_SORT_ORDER_KEY = 'cases.userActivity.sortOrder';
 
 export const CaseViewActivity = ({
   ruleDetailsNavigation,
@@ -62,9 +69,14 @@ export const CaseViewActivity = ({
   showAlertDetails?: (alertId: string, index: string) => void;
   useFetchAlertData: UseFetchAlertData;
 }) => {
+  const [sortOrder, setSortOrder] = useCasesLocalStorage<UserActivitySortOrder>(
+    LOCALSTORAGE_SORT_ORDER_KEY,
+    'asc'
+  );
+
   const [userActivityQueryParams, setUserActivityQueryParams] = useState<UserActivityParams>({
     type: 'all',
-    sortOrder: 'asc',
+    sortOrder,
     page: 1,
     perPage: 10,
   });
@@ -167,6 +179,7 @@ export const CaseViewActivity = ({
 
   const handleUserActionsActivityChanged = useCallback(
     (params: UserActivityParams) => {
+      setSortOrder(params.sortOrder);
       setUserActivityQueryParams((oldParams) => ({
         ...oldParams,
         page: 1,
@@ -174,7 +187,7 @@ export const CaseViewActivity = ({
         sortOrder: params.sortOrder,
       }));
     },
-    [setUserActivityQueryParams]
+    [setSortOrder, setUserActivityQueryParams]
   );
 
   const showUserActions =
@@ -192,7 +205,12 @@ export const CaseViewActivity = ({
 
   return (
     <>
-      <EuiFlexItem grow={6}>
+      <EuiFlexItem
+        grow={6}
+        css={css`
+          max-width: 75%;
+        `}
+      >
         <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ACTIVITY} />
         <Description
           isLoadingDescription={isLoadingDescription}

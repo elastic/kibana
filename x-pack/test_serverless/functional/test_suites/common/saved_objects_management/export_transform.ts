@@ -26,7 +26,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('root objects export transforms', () => {
       before(async () => {
         await esArchiver.load(
-          'test/functional/fixtures/es_archiver/saved_objects_management/export_transform'
+          'src/platform/test/functional/fixtures/es_archiver/saved_objects_management/export_transform'
         );
         await pageObjects.svlCommonPage.loginAsAdmin();
         await pageObjects.common.navigateToApp('management');
@@ -36,7 +36,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await esArchiver.unload(
-          'test/functional/fixtures/es_archiver/saved_objects_management/export_transform'
+          'src/platform/test/functional/fixtures/es_archiver/saved_objects_management/export_transform'
         );
         await kibanaServer.savedObjects.cleanStandardList();
       });
@@ -147,7 +147,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('nested export transforms', () => {
       before(async () => {
         await esArchiver.load(
-          'test/functional/fixtures/es_archiver/saved_objects_management/nested_export_transform'
+          'src/platform/test/functional/fixtures/es_archiver/saved_objects_management/nested_export_transform'
         );
         await pageObjects.svlCommonPage.loginAsAdmin();
         await pageObjects.common.navigateToApp('management');
@@ -157,7 +157,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await esArchiver.unload(
-          'test/functional/fixtures/es_archiver/saved_objects_management/nested_export_transform'
+          'src/platform/test/functional/fixtures/es_archiver/saved_objects_management/nested_export_transform'
         );
         await kibanaServer.savedObjects.cleanStandardList();
       });
@@ -194,7 +194,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('isExportable API', () => {
       before(async () => {
         await esArchiver.load(
-          'test/functional/fixtures/es_archiver/saved_objects_management/export_exclusion'
+          'src/platform/test/functional/fixtures/es_archiver/saved_objects_management/export_exclusion'
         );
         await pageObjects.svlCommonPage.loginAsAdmin();
         await pageObjects.common.navigateToApp('management');
@@ -204,7 +204,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await esArchiver.unload(
-          'test/functional/fixtures/es_archiver/saved_objects_management/export_exclusion'
+          'src/platform/test/functional/fixtures/es_archiver/saved_objects_management/export_exclusion'
         );
         await kibanaServer.savedObjects.cleanStandardList();
       });

@@ -78,7 +78,7 @@ test('updates identifier, initials and color when name is changed', () => {
     id: 'space-2',
     name: 'Space 2',
     initials: 'S2',
-    color: '#9170B8',
+    color: '#BFDBFF',
   });
 });
 

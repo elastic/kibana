@@ -6,34 +6,11 @@
  */
 
 import type { IconSize, IconType } from '@elastic/eui';
-import { EuiIcon, EuiLink } from '@elastic/eui';
+import { EuiIcon, EuiLink, useEuiTheme } from '@elastic/eui';
 import type { LinkAnchorProps } from '@elastic/eui/src/components/link/link';
 import type { ReactNode } from 'react';
 import React from 'react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
-
-function getStyles(iconSide: string) {
-  return {
-    link: css`
-      align-items: center;
-      display: inline-flex;
-      vertical-align: top;
-      white-space: nowrap;
-      flex-direction: ${iconSide === 'left' ? 'row' : 'row-reverse'};
-    `,
-    leftSide: css`
-      margin-right: ${euiThemeVars.euiSizeXS};
-    `,
-    rightSide: css`
-      flex-direction: row-reverse;
-
-      .euiIcon {
-        margin-left: ${euiThemeVars.euiSizeXS};
-      }
-    `,
-  };
-}
 
 export interface LinkIconProps {
   children: string | ReactNode;
@@ -60,11 +37,17 @@ export const LinkIcon = React.memo<LinkIconProps>(
     onClick,
     ...rest
   }) => {
-    const styles = getStyles(iconSide);
+    const { euiTheme } = useEuiTheme();
 
     return (
       <EuiLink
-        css={styles.link}
+        css={css`
+          align-items: center;
+          display: inline-flex;
+          vertical-align: top;
+          white-space: nowrap;
+          flex-direction: ${iconSide === 'left' ? 'row' : 'row-reverse'};
+        `}
         color={color}
         data-test-subj={dataTestSubj}
         disabled={disabled}
@@ -73,7 +56,19 @@ export const LinkIcon = React.memo<LinkIconProps>(
         {...rest}
       >
         <EuiIcon
-          css={iconSide === 'left' ? styles.leftSide : styles.rightSide}
+          css={
+            iconSide === 'left'
+              ? css`
+                  margin-right: ${euiTheme.size.xs};
+                `
+              : css`
+                  flex-direction: row-reverse;
+
+                  .euiIcon {
+                    margin-left: ${euiTheme.size.xs};
+                  }
+                `
+          }
           data-test-subj="link-icon"
           size={iconSize}
           type={iconType}

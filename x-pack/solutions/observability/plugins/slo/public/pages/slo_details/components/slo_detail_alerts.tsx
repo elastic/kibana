@@ -5,31 +5,24 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React, { Fragment } from 'react';
 import { AlertConsumers, SLO_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
+import React, { Fragment } from 'react';
 
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
-import { useKibana } from '../../../hooks/use_kibana';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ObservabilityAlertsTable } from '@kbn/observability-plugin/public';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
 }
 
 export function SloDetailsAlerts({ slo }: Props) {
-  const {
-    triggersActionsUi: { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable },
-    observability: { observabilityRuleTypeRegistry },
-  } = useKibana().services;
-
   return (
     <Fragment>
       <EuiSpacer size="l" />
       <EuiFlexGroup direction="column" gutterSize="xl">
         <EuiFlexItem>
-          <AlertsStateTable
-            alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-            configurationId={AlertConsumers.OBSERVABILITY}
+          <ObservabilityAlertsTable
             id={SLO_ALERTS_TABLE_ID}
             data-test-subj="alertTable"
             ruleTypeIds={SLO_RULE_TYPE_IDS}
@@ -38,13 +31,11 @@ export function SloDetailsAlerts({ slo }: Props) {
               bool: {
                 filter: [
                   { term: { 'slo.id': slo.id } },
-                  { term: { 'slo.instanceId': slo.instanceId ?? ALL_VALUE } },
+                  { term: { 'slo.instanceId': slo.instanceId } },
                 ],
               },
             }}
-            showAlertStatusWithFlapping
             initialPageSize={100}
-            cellContext={{ observabilityRuleTypeRegistry }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

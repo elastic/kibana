@@ -166,7 +166,11 @@ Below is a document in the expected structure, with descriptions of the fields:
             total_search_duration_ms: "total time spent performing ES searches as measured by Kibana; includes network latency and time spent serializing/deserializing request/response",
             total_indexing_duration_ms: "total time spent indexing documents during current rule execution cycle",
             total_enrichment_duration_ms: "total time spent enriching documents during current rule execution cycle",
-            execution_gap_duration_s: "duration in seconds of execution gap"
+            execution_gap_duration_s: "duration in seconds of execution gap",
+            gap_range: {
+              gte: "Gap range start date",
+              lte: "Gap range end date",
+            }
           }
         }
       }
@@ -441,16 +445,16 @@ yarn test:jest x-pack/platform/plugins/shared/event_log --watch
 
 ### API Integration tests
 
-See: [`x-pack/test/plugin_api_integration/test_suites/event_log`](https://github.com/elastic/kibana/tree/main/x-pack/test/plugin_api_integration/test_suites/event_log).
+See: [`x-pack/platform/test/plugin_api_integration/test_suites/event_log`](https://github.com/elastic/kibana/tree/main/x-pack/platform/test/plugin_api_integration/test_suites/event_log).
 
 To develop integration tests, first start the test server from the root of the repo:
 
 ```sh
-node scripts/functional_tests_server --config x-pack/test/plugin_api_integration/config.ts
+node scripts/functional_tests_server --config x-pack/platform/test/plugin_api_integration/config.ts
 ```
 
 Then start the test runner:
 
 ```sh
-node scripts/functional_test_runner --config x-pack/test/plugin_api_integration/config.ts --include x-pack/test/plugin_api_integration/test_suites/event_log/index.ts
+node scripts/functional_test_runner --config x-pack/platform/test/plugin_api_integration/config.ts --include x-pack/platform/test/plugin_api_integration/test_suites/event_log/index.ts
 ```

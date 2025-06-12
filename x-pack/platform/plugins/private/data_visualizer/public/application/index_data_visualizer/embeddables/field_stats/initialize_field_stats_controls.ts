@@ -11,14 +11,16 @@
  * 2.0.
  */
 
-import type { AggregateQuery } from '@kbn/es-query';
-import type { StateComparators } from '@kbn/presentation-publishing';
-import { BehaviorSubject } from 'rxjs';
-import fastIsEqual from 'fast-deep-equal';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
-import { FieldStatsInitializerViewType } from '../grid_embeddable/types';
+import {
+  initializeStateManager,
+  type WithAllKeys,
+  type StateComparators,
+} from '@kbn/presentation-publishing';
+import { BehaviorSubject } from 'rxjs';
 import type { FieldStatsInitialState } from '../grid_embeddable/types';
+import { FieldStatsInitializerViewType } from '../grid_embeddable/types';
 import type { FieldStatsControlsApi } from './types';
 
 export const initializeFieldStatsControls = (
@@ -29,69 +31,63 @@ export const initializeFieldStatsControls = (
   const defaultType = isEsqlEnabled
     ? FieldStatsInitializerViewType.ESQL
     : FieldStatsInitializerViewType.DATA_VIEW;
-  const viewType$ = new BehaviorSubject<FieldStatsInitializerViewType | undefined>(
-    rawState.viewType ?? defaultType
-  );
-  const dataViewId$ = new BehaviorSubject<string | undefined>(rawState.dataViewId);
-  const query$ = new BehaviorSubject<AggregateQuery | undefined>(rawState.query);
-  const showDistributions$ = new BehaviorSubject<boolean | undefined>(rawState.showDistributions);
-  const resetData$ = new BehaviorSubject<number>(Date.now());
 
+  const defaults: WithAllKeys<FieldStatsInitialState> = {
+    showDistributions: false,
+    viewType: defaultType,
+    dataViewId: undefined,
+    query: undefined,
+  };
+  const fieldStatsStateManager = initializeStateManager(rawState, defaults);
+
+  const resetData$ = new BehaviorSubject<number>(Date.now());
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
-  const blockingError = new BehaviorSubject<Error | undefined>(undefined);
+  const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
   const updateUserInput = (update: FieldStatsInitialState, shouldResetData = false) => {
     if (shouldResetData) {
       resetData$.next(Date.now());
     }
-    viewType$.next(update.viewType);
-    dataViewId$.next(update.dataViewId);
-    query$.next(update.query);
-  };
-
-  const serializeFieldStatsChartState = (): FieldStatsInitialState => {
-    return {
-      viewType: viewType$.getValue(),
-      dataViewId: dataViewId$.getValue(),
-      query: query$.getValue(),
-      showDistributions: showDistributions$.getValue(),
-    };
+    fieldStatsStateManager.api.setViewType(update.viewType);
+    fieldStatsStateManager.api.setDataViewId(update.dataViewId);
+    fieldStatsStateManager.api.setQuery(update.query);
   };
 
   const fieldStatsControlsComparators: StateComparators<FieldStatsInitialState> = {
-    viewType: [viewType$, (arg) => viewType$.next(arg)],
-    dataViewId: [dataViewId$, (arg) => dataViewId$.next(arg)],
-    query: [query$, (arg) => query$.next(arg), fastIsEqual],
-    showDistributions: [showDistributions$, (arg) => showDistributions$.next(arg)],
+    viewType: 'referenceEquality',
+    dataViewId: 'referenceEquality',
+    query: 'deepEquality',
+    showDistributions: 'referenceEquality',
   };
 
   const onRenderComplete = () => dataLoading$.next(false);
   const onLoading = (v: boolean) => dataLoading$.next(v);
-  const onError = (error?: Error) => blockingError.next(error);
+  const onError = (error?: Error) => blockingError$.next(error);
 
   return {
     fieldStatsControlsApi: {
-      viewType$,
-      dataViewId$,
-      query$,
       updateUserInput,
-      showDistributions$,
+      query$: fieldStatsStateManager.api.query$,
+      viewType$: fieldStatsStateManager.api.viewType$,
+      dataViewId$: fieldStatsStateManager.api.dataViewId$,
+      showDistributions$: fieldStatsStateManager.api.showDistributions$,
     } as unknown as FieldStatsControlsApi,
     dataLoadingApi: {
-      dataLoading: dataLoading$,
+      dataLoading$,
+      blockingError$,
       onRenderComplete,
       onLoading,
       onError,
-      blockingError,
     },
+    fieldStatsStateManager,
     // Reset data is internal state management, so no need to expose this in api
     resetData$,
-    serializeFieldStatsChartState,
+    serializeFieldStatsChartState: () => fieldStatsStateManager.getLatestState(),
     fieldStatsControlsComparators,
     onFieldStatsTableDestroy: () => {
-      viewType$.complete();
-      dataViewId$.complete();
-      query$.complete();
+      fieldStatsStateManager.api.viewType$.complete();
+      fieldStatsStateManager.api.dataViewId$.complete();
+      fieldStatsStateManager.api.query$.complete();
       resetData$.complete();
     },
   };

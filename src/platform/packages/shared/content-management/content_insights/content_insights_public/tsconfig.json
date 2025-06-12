@@ -29,5 +29,6 @@
     "@kbn/content-management-content-insights-server",
     "@kbn/content-management-table-list-view-common",
     "@kbn/charts-theme",
+    "@kbn/logging",
   ]
 }

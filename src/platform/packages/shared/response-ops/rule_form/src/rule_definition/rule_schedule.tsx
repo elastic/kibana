@@ -121,7 +121,7 @@ export const RuleSchedule = () => {
       isInvalid={hasIntervalError}
       error={baseErrors?.interval}
     >
-      <EuiFlexGroup gutterSize="s">
+      <EuiFlexGroup gutterSize="s" responsive={false}>
         <EuiFlexItem grow={2}>
           <EuiFieldNumber
             fullWidth
@@ -132,6 +132,9 @@ export const RuleSchedule = () => {
             data-test-subj="ruleScheduleNumberInput"
             onChange={onIntervalNumberChange}
             onKeyDown={onKeyDown}
+            id="ruleScheduleNumberInput"
+            itemID="ruleScheduleNumberInput"
+            aria-label={SCHEDULE_TITLE_PREFIX}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={3}>

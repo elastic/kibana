@@ -48,6 +48,7 @@
     "@kbn/code-editor",
     "@kbn/shared-ux-markdown",
     "@kbn/react-kibana-context-render",
+    "@kbn/palettes",
   ],
   "exclude": [
     "target/**/*",

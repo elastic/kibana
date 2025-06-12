@@ -58,7 +58,7 @@ export function ObservabilityUsersProvider({ getPageObject, getService }: FtrPro
  */
 const defineBasicObservabilityRole = (
   features: Partial<{
-    observabilityCasesV2: string[];
+    observabilityCasesV3: string[];
     apm: string[];
     logs: string[];
     infrastructure: string[];

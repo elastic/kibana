@@ -13,20 +13,22 @@ import { waitFor } from '@testing-library/react';
 
 describe('childrenUnsavedChanges$', () => {
   const child1Api = {
-    unsavedChanges: new BehaviorSubject<object | undefined>(undefined),
-    resetUnsavedChanges: () => true,
+    uuid: 'child1',
+    hasUnsavedChanges$: new BehaviorSubject<boolean>(false),
+    resetUnsavedChanges: () => undefined,
   };
   const child2Api = {
-    unsavedChanges: new BehaviorSubject<object | undefined>(undefined),
-    resetUnsavedChanges: () => true,
+    uuid: 'child2',
+    hasUnsavedChanges$: new BehaviorSubject<boolean>(false),
+    resetUnsavedChanges: () => undefined,
   };
   const children$ = new BehaviorSubject<{ [key: string]: unknown }>({});
   const onFireMock = jest.fn();
 
   beforeEach(() => {
     onFireMock.mockReset();
-    child1Api.unsavedChanges.next(undefined);
-    child2Api.unsavedChanges.next(undefined);
+    child1Api.hasUnsavedChanges$.next(false);
+    child2Api.hasUnsavedChanges$.next(false);
     children$.next({
       child1: child1Api,
       child2: child2Api,
@@ -40,7 +42,18 @@ describe('childrenUnsavedChanges$', () => {
       () => {
         expect(onFireMock).toHaveBeenCalledTimes(1);
         const childUnsavedChanges = onFireMock.mock.calls[0][0];
-        expect(childUnsavedChanges).toBeUndefined();
+        expect(childUnsavedChanges).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "hasUnsavedChanges": false,
+              "uuid": "child1",
+            },
+            Object {
+              "hasUnsavedChanges": false,
+              "uuid": "child2",
+            },
+          ]
+        `);
       },
       {
         interval: DEBOUNCE_TIME + 1,
@@ -61,19 +74,24 @@ describe('childrenUnsavedChanges$', () => {
       }
     );
 
-    child1Api.unsavedChanges.next({
-      key1: 'modified value',
-    });
+    child1Api.hasUnsavedChanges$.next(true);
 
     await waitFor(
       () => {
         expect(onFireMock).toHaveBeenCalledTimes(2);
         const childUnsavedChanges = onFireMock.mock.calls[1][0];
-        expect(childUnsavedChanges).toEqual({
-          child1: {
-            key1: 'modified value',
-          },
-        });
+        expect(childUnsavedChanges).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "hasUnsavedChanges": true,
+              "uuid": "child1",
+            },
+            Object {
+              "hasUnsavedChanges": false,
+              "uuid": "child2",
+            },
+          ]
+        `);
       },
       {
         interval: DEBOUNCE_TIME + 1,
@@ -98,8 +116,9 @@ describe('childrenUnsavedChanges$', () => {
     children$.next({
       ...children$.value,
       child3: {
-        unsavedChanges: new BehaviorSubject<object | undefined>({ key1: 'modified value' }),
-        resetUnsavedChanges: () => true,
+        uuid: 'child3',
+        hasUnsavedChanges$: new BehaviorSubject<boolean>(true),
+        resetUnsavedChanges: () => undefined,
       },
     });
 
@@ -107,11 +126,22 @@ describe('childrenUnsavedChanges$', () => {
       () => {
         expect(onFireMock).toHaveBeenCalledTimes(2);
         const childUnsavedChanges = onFireMock.mock.calls[1][0];
-        expect(childUnsavedChanges).toEqual({
-          child3: {
-            key1: 'modified value',
-          },
-        });
+        expect(childUnsavedChanges).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "hasUnsavedChanges": false,
+              "uuid": "child1",
+            },
+            Object {
+              "hasUnsavedChanges": false,
+              "uuid": "child2",
+            },
+            Object {
+              "hasUnsavedChanges": true,
+              "uuid": "child3",
+            },
+          ]
+        `);
       },
       {
         interval: DEBOUNCE_TIME + 1,

@@ -74,6 +74,7 @@ describe('StepDefinePackagePolicy', () => {
   const validationResults = {
     name: null,
     description: null,
+    additional_datastreams_permissions: null,
     namespace: null,
     inputs: {},
     vars: {
@@ -158,10 +159,9 @@ describe('StepDefinePackagePolicy', () => {
       await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
 
       await waitFor(() => {
-        expect(renderResult.getByTestId('comboBoxSearchInput')).toHaveAttribute(
-          'placeholder',
-          'ns'
-        );
+        expect(
+          renderResult.getByTestId('packagePolicyNamespaceInput').querySelector('input')
+        ).toHaveAttribute('placeholder', 'ns');
       });
     });
 
@@ -174,10 +174,9 @@ describe('StepDefinePackagePolicy', () => {
       await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
 
       await waitFor(() => {
-        expect(renderResult.getByTestId('comboBoxSearchInput')).toHaveAttribute(
-          'placeholder',
-          'default'
-        );
+        expect(
+          renderResult.getByTestId('packagePolicyNamespaceInput').querySelector('input')
+        ).toHaveAttribute('placeholder', 'default');
       });
     });
   });

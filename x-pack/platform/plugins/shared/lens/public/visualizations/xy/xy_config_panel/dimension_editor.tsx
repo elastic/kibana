@@ -11,7 +11,7 @@ import { useDebouncedValue } from '@kbn/visualization-utils';
 import { ColorPicker } from '@kbn/visualization-ui-components';
 
 import { EuiButtonGroup, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
-import { PaletteRegistry, ColorMapping, PaletteOutput } from '@kbn/coloring';
+import { PaletteRegistry, ColorMapping, PaletteOutput, canCreateCustomMatch } from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import type { ValuesType } from 'utility-types';
 import { KbnPalette, KbnPalettes } from '@kbn/palettes';
@@ -102,7 +102,7 @@ export function DataDimensionEditor(
   );
   const setPalette = useCallback(
     (palette: PaletteOutput) => {
-      updateLayerState(index, { palette });
+      updateLayerState(index, { palette, colorMapping: undefined });
     },
     [updateLayerState, index]
   );
@@ -132,11 +132,13 @@ export function DataDimensionEditor(
     ).color;
   }, [props.frame, props.paletteService, state.layers, accessor, props.formatFactory, layer]);
 
-  const table = props.frame.activeData?.[layer.layerId];
-  const { splitAccessor } = layer;
-  const splitCategories = getColorCategories(table?.rows ?? [], splitAccessor);
-
   if (props.groupId === 'breakdown') {
+    const currentData = props.frame.activeData?.[layer.layerId];
+    const splitCategories = getColorCategories(currentData?.rows, layer.splitAccessor);
+    const columnMeta = currentData?.columns?.find(({ id }) => id === layer.splitAccessor)?.meta;
+    const allowCustomMatch = canCreateCustomMatch(columnMeta);
+    const formatter = props.formatFactory(columnMeta?.params);
+
     return !layer.collapseFn ? (
       <ColorMappingByTerms
         isDarkMode={isDarkMode}
@@ -149,6 +151,8 @@ export function DataDimensionEditor(
         palettes={props.palettes}
         panelRef={props.panelRef}
         categories={splitCategories}
+        formatter={formatter}
+        allowCustomMatch={allowCustomMatch}
       />
     ) : null;
   }

@@ -25,12 +25,9 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
-import {
-  ActionTypeRegistryContract,
-  AlertsTableConfigurationRegistryContract,
-  RuleTypeRegistryContract,
-} from '../types';
+import { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../types';
 
 import { setDataViewsService } from '../common/lib/data_apis';
 import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
@@ -56,12 +53,12 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
   ruleTypeRegistry: RuleTypeRegistryContract;
-  alertsTableConfigurationRegistry: AlertsTableConfigurationRegistryContract;
   history: ScopedHistory;
   kibanaFeatures: KibanaFeature[];
   element: HTMLElement;
   theme$: Observable<CoreTheme>;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  share: SharePluginStart;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {

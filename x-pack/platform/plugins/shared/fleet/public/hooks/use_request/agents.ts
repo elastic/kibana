@@ -19,6 +19,8 @@ import type {
   PostRequestDiagnosticsResponse,
   DeleteAgentUploadResponse,
   UpdateAgentRequest,
+  MigrateSingleAgentRequest,
+  MigrateSingleAgentResponse,
 } from '../../../common/types';
 
 import { API_VERSIONS } from '../../../common/constants';
@@ -351,6 +353,21 @@ export function sendGetAgentsAvailableVersions() {
   });
 }
 
+export function useGetAgentsAvailableVersionsQuery(options: Partial<{ enabled: boolean }> = {}) {
+  return useQuery(
+    ['available_versions'],
+    () =>
+      sendRequestForRq<GetAvailableVersionsResponse>({
+        method: 'get',
+        path: agentRouteService.getAvailableVersionsPath(),
+        version: API_VERSIONS.public.v1,
+      }),
+    {
+      enabled: options.enabled,
+    }
+  );
+}
+
 export function sendGetAgentStatusRuntimeField() {
   return sendRequestForRq<string>({
     method: 'get',
@@ -362,5 +379,17 @@ export function sendGetAgentStatusRuntimeField() {
 export function useGetAgentStatusRuntimeFieldQuery(options: Partial<{ enabled: boolean }> = {}) {
   return useQuery(['status_runtime_field'], () => sendGetAgentStatusRuntimeField(), {
     enabled: options.enabled,
+  });
+}
+export function useMigrateSingleAgent(options: MigrateSingleAgentRequest['body']) {
+  return sendRequest<MigrateSingleAgentResponse>({
+    path: agentRouteService.postMigrateSingleAgent(options.id),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body: {
+      enrollment_token: options.enrollment_token,
+      uri: options.uri,
+      settings: options.settings ?? {},
+    },
   });
 }

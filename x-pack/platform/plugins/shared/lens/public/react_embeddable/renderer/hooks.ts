@@ -29,7 +29,7 @@ export function useMessages({ messages$ }: LensInternalApi) {
 export function useDispatcher(hasRendered: boolean, api: LensApi) {
   const rootRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    if (!rootRef.current || api.blockingError?.getValue()) {
+    if (!rootRef.current || api.blockingError$?.getValue()) {
       return;
     }
     if (hasRendered) {
@@ -37,6 +37,6 @@ export function useDispatcher(hasRendered: boolean, api: LensApi) {
     } else {
       dispatchRenderStart(rootRef.current);
     }
-  }, [hasRendered, api.blockingError, rootRef]);
+  }, [hasRendered, api.blockingError$, rootRef]);
   return rootRef;
 }

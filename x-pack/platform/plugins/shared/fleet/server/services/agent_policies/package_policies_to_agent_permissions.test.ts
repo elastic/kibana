@@ -38,6 +38,7 @@ packageInfoCache.set('test_package-0.0.0', {
       index_pattern: [],
       map: [],
       lens: [],
+      security_ai_prompt: [],
       security_rule: [],
       ml_module: [],
       tag: [],
@@ -122,6 +123,7 @@ packageInfoCache.set('osquery_manager-0.3.0', {
       index_pattern: [],
       map: [],
       lens: [],
+      security_ai_prompt: [],
       security_rule: [],
       ml_module: [],
       tag: [],
@@ -172,6 +174,7 @@ packageInfoCache.set('profiler_symbolizer-8.8.0-preview', {
       index_pattern: [],
       map: [],
       lens: [],
+      security_ai_prompt: [],
       security_rule: [],
       ml_module: [],
       tag: [],
@@ -222,6 +225,7 @@ packageInfoCache.set('profiler_collector-8.9.0-preview', {
       index_pattern: [],
       map: [],
       lens: [],
+      security_ai_prompt: [],
       security_rule: [],
       ml_module: [],
       tag: [],
@@ -264,6 +268,7 @@ packageInfoCache.set('apm-8.9.0-preview', {
       index_pattern: [],
       map: [],
       lens: [],
+      security_ai_prompt: [],
       security_rule: [],
       ml_module: [],
       tag: [],
@@ -306,6 +311,7 @@ packageInfoCache.set('elastic_connectors-1.0.0', {
       index_pattern: [],
       map: [],
       lens: [],
+      security_ai_prompt: [],
       security_rule: [],
       ml_module: [],
       tag: [],
@@ -396,6 +402,70 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         indices: [
           {
             names: ['logs-some-logs-test'],
+            privileges: ['auto_configure', 'create_doc'],
+          },
+        ],
+      },
+    });
+  });
+
+  it('Add additional_datastream_permissions', async () => {
+    const packagePolicies: PackagePolicy[] = [
+      {
+        id: 'package-policy-uuid-test-123',
+        name: 'test-policy',
+        namespace: 'test',
+        enabled: true,
+        package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
+        inputs: [
+          {
+            type: 'test-logs',
+            enabled: true,
+            streams: [
+              {
+                id: 'test-logs',
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'some-logs' },
+              },
+            ],
+          },
+          {
+            type: 'test-metrics',
+            enabled: false,
+            streams: [
+              {
+                id: 'test-logs',
+                enabled: false,
+                data_stream: { type: 'metrics', dataset: 'some-metrics' },
+              },
+            ],
+          },
+        ],
+        additional_datastreams_permissions: ['logs-test-default', 'metrics-test-default'],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        policy_ids: [''],
+      },
+    ];
+
+    const permissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      'test',
+      packagePolicies
+    );
+    expect(permissions).toMatchObject({
+      'package-policy-uuid-test-123': {
+        indices: [
+          {
+            names: ['logs-some-logs-test'],
+            privileges: ['auto_configure', 'create_doc'],
+          },
+          {
+            names: ['logs-test-default', 'metrics-test-default'],
             privileges: ['auto_configure', 'create_doc'],
           },
         ],

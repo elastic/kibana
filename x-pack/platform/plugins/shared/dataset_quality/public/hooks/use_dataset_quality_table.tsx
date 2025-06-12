@@ -17,6 +17,7 @@ import { useDatasetQualityContext } from '../components/dataset_quality/context'
 import { useKibanaContextForPlugin } from '../utils';
 import { filterInactiveDatasets, isActiveDataset } from '../utils/filter_inactive_datasets';
 import { SortDirection } from '../../common/types';
+import { useDatasetQualityState } from './use_dataset_quality_state';
 
 export type DatasetTableSortField = keyof DataStreamStat;
 
@@ -25,6 +26,7 @@ const sortingOverrides: Partial<{
 }> = {
   ['title']: 'name',
   ['size']: DataStreamStat.calculateFilteredSize,
+  ['quality']: (item) => Math.max(item.degradedDocs.percentage, item.failedDocs.percentage),
 };
 
 export const useDatasetQualityTable = () => {
@@ -36,6 +38,7 @@ export const useDatasetQualityTable = () => {
   } = useKibanaContextForPlugin();
 
   const { service } = useDatasetQualityContext();
+  const { canUserReadFailureStore: canReadFailureStore } = useDatasetQualityState();
 
   const { page, rowsPerPage, sort } = useSelector(service, (state) => state.context.table);
 
@@ -65,14 +68,22 @@ export const useDatasetQualityTable = () => {
     service,
     (state) =>
       state.matches('stats.datasets.fetching') ||
+      state.matches('stats.docsStats.fetching') ||
       state.matches('integrations.fetching') ||
-      state.matches('stats.degradedDocs.fetching')
+      state.matches('stats.degradedDocs.fetching') ||
+      state.matches('stats.failedDocs.fetching')
   );
   const loadingDataStreamStats = useSelector(service, (state) =>
     state.matches('stats.datasets.fetching')
   );
+  const loadingDocStats = useSelector(service, (state) =>
+    state.matches('stats.docsStats.fetching')
+  );
   const loadingDegradedStats = useSelector(service, (state) =>
     state.matches('stats.degradedDocs.fetching')
+  );
+  const loadingFailedStats = useSelector(service, (state) =>
+    state.matches('stats.failedDocs.fetching')
   );
 
   const datasets = useSelector(service, (state) => state.context.datasets);
@@ -99,22 +110,28 @@ export const useDatasetQualityTable = () => {
         canUserMonitorDataset,
         canUserMonitorAnyDataStream,
         loadingDataStreamStats,
+        loadingDocStats,
         loadingDegradedStats,
+        loadingFailedStats,
         showFullDatasetNames,
         isActiveDataset: isActive,
         timeRange,
         urlService: url,
+        canReadFailureStore,
       }),
     [
       fieldFormats,
       canUserMonitorDataset,
       canUserMonitorAnyDataStream,
       loadingDataStreamStats,
+      loadingDocStats,
       loadingDegradedStats,
+      loadingFailedStats,
       showFullDatasetNames,
       isActive,
       timeRange,
       url,
+      canReadFailureStore,
     ]
   );
 

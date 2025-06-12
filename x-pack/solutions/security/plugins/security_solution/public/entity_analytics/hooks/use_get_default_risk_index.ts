@@ -5,24 +5,15 @@
  * 2.0.
  */
 
-import {
-  RiskScoreEntity,
-  getHostRiskIndex,
-  getUserRiskIndex,
-} from '../../../common/search_strategy';
+import { getRiskIndex } from '../../../common/search_strategy';
 import { useSpaceId } from '../../common/hooks/use_space_id';
 
-export const useGetDefaulRiskIndex = (
-  riskEntity: RiskScoreEntity,
-  onlyLatest: boolean = true
-): string | undefined => {
+export const useGetDefaultRiskIndex = (onlyLatest: boolean = true): string | undefined => {
   const spaceId = useSpaceId();
 
   if (!spaceId) {
     return undefined;
   }
 
-  return riskEntity === RiskScoreEntity.host
-    ? getHostRiskIndex(spaceId, onlyLatest)
-    : getUserRiskIndex(spaceId, onlyLatest);
+  return getRiskIndex(spaceId, onlyLatest);
 };

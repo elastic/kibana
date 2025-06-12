@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import moment from 'moment';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 
@@ -66,39 +66,37 @@ export async function fetchElasticsearchStats(
       'hits.hits._source.stack_stats',
       'hits.hits._source.elasticsearch',
     ],
-    body: {
-      size: maxBucketSize,
-      query: {
-        bool: {
-          filter: [
-            /*
-             * Note: Unlike most places, we don't care about the old _type: cluster_stats because it would NOT
-             * have the license in it (that used to be in the .monitoring-data-2 index in cluster_info)
-             */
-            {
-              bool: {
-                should: [
-                  { term: { type: 'cluster_stats' } },
-                  { term: { 'metricset.name': 'cluster_stats' } },
-                ],
+    size: maxBucketSize,
+    query: {
+      bool: {
+        filter: [
+          /*
+           * Note: Unlike most places, we don't care about the old _type: cluster_stats because it would NOT
+           * have the license in it (that used to be in the .monitoring-data-2 index in cluster_info)
+           */
+          {
+            bool: {
+              should: [
+                { term: { type: 'cluster_stats' } },
+                { term: { 'metricset.name': 'cluster_stats' } },
+              ],
+            },
+          },
+          { terms: { cluster_uuid: clusterUuids } },
+          {
+            range: {
+              timestamp: {
+                format: 'epoch_millis',
+                gte: moment.utc(start).valueOf(),
+                lte: moment.utc(end).valueOf(),
               },
             },
-            { terms: { cluster_uuid: clusterUuids } },
-            {
-              range: {
-                timestamp: {
-                  format: 'epoch_millis',
-                  gte: moment.utc(start).valueOf(),
-                  lte: moment.utc(end).valueOf(),
-                },
-              },
-            },
-          ],
-        },
+          },
+        ],
       },
-      collapse: { field: 'cluster_uuid' },
-      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
     },
+    collapse: { field: 'cluster_uuid' },
+    sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
   };
 
   return await callCluster.search<ESClusterStats>(params);

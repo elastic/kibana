@@ -36,5 +36,6 @@
     "@kbn/spaces-plugin",
     "@kbn/test-suites-xpack/security_solution_cypress/cypress",
     "@kbn/elastic-assistant-common",
+    "@kbn/actions-plugin",
   ]
 }

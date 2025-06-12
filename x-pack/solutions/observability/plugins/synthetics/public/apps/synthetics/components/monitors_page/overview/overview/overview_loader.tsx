@@ -6,22 +6,28 @@
  */
 
 import React from 'react';
-import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, EuiFlexGridProps } from '@elastic/eui';
 import { OverviewGridItemLoader } from './overview_grid_item_loader';
 
-export const OverviewLoader = ({ rows }: { rows?: number }) => {
+export const OverviewLoader = ({
+  rows,
+  columns,
+  style,
+}: {
+  rows?: number;
+  columns?: EuiFlexGridProps['columns'];
+  style?: { height: string };
+}) => {
   const ROWS = rows ?? 4;
-  const COLUMNS = 4;
+  const COLUMNS = columns ?? 4;
   const loaders = Array(ROWS * COLUMNS).fill(null);
   return (
-    <>
-      <EuiFlexGrid gutterSize="m" columns={COLUMNS}>
-        {loaders.map((_, i) => (
-          <EuiFlexItem key={i}>
-            <OverviewGridItemLoader />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGrid>
-    </>
+    <EuiFlexGrid gutterSize="m" columns={COLUMNS} css={style}>
+      {loaders.map((_, i) => (
+        <EuiFlexItem key={i}>
+          <OverviewGridItemLoader />
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGrid>
   );
 };

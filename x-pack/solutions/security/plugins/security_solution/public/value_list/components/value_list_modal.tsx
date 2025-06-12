@@ -6,6 +6,7 @@
  */
 import React, { useState, useCallback } from 'react';
 import { css } from '@emotion/css';
+import styled from '@emotion/styled';
 import type { EuiSearchBarProps } from '@elastic/eui';
 import {
   EuiModal,
@@ -19,7 +20,6 @@ import {
   EuiSearchBar,
 } from '@elastic/eui';
 import { useFindListItems, useGetListById } from '@kbn/securitysolution-list-hooks';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { FormattedDate } from '../../common/components/formatted_date';
 import { useKibana } from '../../common/lib/kibana';
 import { AddListItemPopover } from './add_list_item_popover';
@@ -35,9 +35,9 @@ import {
   getInfoTotalItems,
 } from '../translations';
 
-const modalBodyStyle = css`
+const ModalBody = styled(EuiFlexGroup)`
   overflow: hidden;
-  padding: ${euiThemeVars.euiSize};
+  padding: ${({ theme }) => theme.euiTheme.size.base};
 `;
 
 const modalWindow = css`
@@ -148,7 +148,7 @@ export const ValueListModal = ({ listId, onCloseModal, canWriteIndex }: ValueLis
             </EuiFlexGroup>
           )}
         </EuiModalHeader>
-        <EuiFlexGroup className={modalBodyStyle} direction="column">
+        <ModalBody direction="column">
           <EuiFlexItem grow={false}>
             <EuiSearchBar
               onChange={onQueryChange}
@@ -175,7 +175,7 @@ export const ValueListModal = ({ listId, onCloseModal, canWriteIndex }: ValueLis
               />
             )}
           </EuiFlexItem>
-        </EuiFlexGroup>
+        </ModalBody>
       </>
     </EuiModal>
   );

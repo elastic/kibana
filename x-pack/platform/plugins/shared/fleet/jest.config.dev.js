@@ -6,12 +6,12 @@
  */
 
 module.exports = {
-  preset: '@kbn/test/jest',
+  preset: '@kbn/test',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/platform/plugins/shared/fleet'],
   projects: [
-    '<rootDir>/x-pack/platform/plugins/shared/fleet/common/*/jest.config.js',
-    '<rootDir>/x-pack/platform/plugins/shared/fleet/server/*/jest.config.js',
-    '<rootDir>/x-pack/platform/plugins/shared/fleet/public/*/jest.config.js',
+    '<rootDir>/x-pack/platform/plugins/shared/fleet/common/jest.config.js',
+    '<rootDir>/x-pack/platform/plugins/shared/fleet/server/jest.config.js',
+    '<rootDir>/x-pack/platform/plugins/shared/fleet/public/jest.config.js',
   ],
 };

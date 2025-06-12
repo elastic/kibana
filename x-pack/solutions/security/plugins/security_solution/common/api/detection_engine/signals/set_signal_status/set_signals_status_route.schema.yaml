@@ -21,6 +21,42 @@ paths:
               oneOf:
                 - $ref: '#/components/schemas/SetAlertsStatusByIds'
                 - $ref: '#/components/schemas/SetAlertsStatusByQuery'
+            examples:
+              byId:
+                value:
+                  status: closed
+                  signal_ids: ['80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1']
+              byQuery:
+                value:
+                  conflicts: proceed
+                  status: closed
+                  query:
+                    bool:
+                      must: []
+                      filter:
+                        - range:
+                          '@timestamp':
+                            gte: 2024-10-23T07:00:00.000Z
+                            lte: 2025-01-21T20:12:11.704Z
+                            format: strict_date_optional_time
+                        - bool:
+                            filter:
+                              bool:
+                                must: []
+                                filter:
+                                  - match_phrase:
+                                      kibana.alert.workflow_status: open
+                                  - range:
+                                    '@timestamp':
+                                      gte: 2024-10-23T07:00:00.000Z
+                                      lte: 2025-01-21T20:12:11.704Z
+                                      format: strict_date_optional_time
+                                should: []
+                                must_not:
+                                  - exists:
+                                      field: kibana.alert.building_block_type
+                      should: []
+                      must_not: []
       responses:
         200:
           description: Successful response
@@ -30,6 +66,41 @@ paths:
                 type: object
                 additionalProperties: true
                 description: Elasticsearch update by query response
+              examples:
+                byId:
+                  value:
+                    took: 81
+                    timed_out: false
+                    total: 1
+                    updated: 1
+                    deleted: 0
+                    batches: 1
+                    version_conflicts: 0
+                    noops: 0
+                    retries:
+                      bulk: 0
+                      search: 0
+                    throttled_millis: 0
+                    requests_per_second: -1
+                    throttled_until_millis: 0
+                    failures: []
+                byQuery:
+                  value:
+                    took: 100
+                    timed_out: false
+                    total: 17
+                    updated: 17
+                    deleted: 0
+                    batches: 1
+                    version_conflicts: 0
+                    noops: 0
+                    retries:
+                      bulk: 0
+                      search: 0
+                    throttled_millis: 0
+                    requests_per_second: -1
+                    throttled_until_millis: 0
+                    failures: []
         400:
           description: Invalid input data response
           content:
@@ -58,8 +129,11 @@ components:
       properties:
         signal_ids:
           type: array
+          description: List of alert `id`s.
           items:
-            $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+            type: string
+            format: nonempty
+            minLength: 1
           minItems: 1
         status:
           $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertStatus'

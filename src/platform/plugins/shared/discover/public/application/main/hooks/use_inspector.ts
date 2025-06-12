@@ -8,13 +8,14 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import {
+import type {
   InspectorSession,
   RequestAdapter,
   Start as InspectorPublicPluginStart,
 } from '@kbn/inspector-plugin/public';
-import { DiscoverStateContainer } from '../state_management/discover_state';
+import type { DiscoverStateContainer } from '../state_management/discover_state';
 import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';
+import { internalStateActions, useInternalStateDispatch } from '../state_management/redux';
 
 export interface InspectorAdapters {
   requests: RequestAdapter;
@@ -28,11 +29,13 @@ export function useInspector({
   inspector: InspectorPublicPluginStart;
   stateContainer: DiscoverStateContainer;
 }) {
+  const dispatch = useInternalStateDispatch();
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
 
   const onOpenInspector = useCallback(() => {
     // prevent overlapping
-    stateContainer.internalState.transitions.setExpandedDoc(undefined);
+    dispatch(internalStateActions.setExpandedDoc({ expandedDoc: undefined }));
+
     const inspectorAdapters = stateContainer.dataState.inspectorAdapters;
 
     const requestAdapters = inspectorAdapters.lensRequests
@@ -45,7 +48,12 @@ export function useInspector({
     );
 
     setInspectorSession(session);
-  }, [stateContainer, inspector]);
+  }, [
+    dispatch,
+    stateContainer.dataState.inspectorAdapters,
+    stateContainer.savedSearchState,
+    inspector,
+  ]);
 
   useEffect(() => {
     return () => {

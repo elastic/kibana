@@ -13,15 +13,19 @@ import {
   GLOBAL_ARTIFACT_TAG,
 } from './constants';
 import {
+  buildSpaceOwnerIdTag,
   createExceptionListItemForCreate,
+  getArtifactOwnerSpaceIds,
   getArtifactTagsByPolicySelection,
   getEffectedPolicySelectionByTags,
   getPolicyIdsFromArtifact,
+  hasArtifactOwnerSpaceId,
   isArtifactByPolicy,
   isArtifactGlobal,
   isFilterProcessDescendantsEnabled,
   isFilterProcessDescendantsTag,
   isPolicySelectionTag,
+  setArtifactOwnerSpaceId,
 } from './utils';
 
 describe('Endpoint artifact utilities', () => {
@@ -191,6 +195,49 @@ describe('Endpoint artifact utilities', () => {
         type: 'simple',
         os_types: ['windows'],
       });
+    });
+  });
+
+  describe('when using `buildSpaceOwnerIdTag()`', () => {
+    it('should return an artifact tag', () => {
+      expect(buildSpaceOwnerIdTag('abc')).toEqual(`ownerSpaceId:abc`);
+    });
+  });
+
+  describe('when using `getArtifactOwnerSpaceIds()`', () => {
+    it.each`
+      name                                     | tags                                                                    | expectedResult
+      ${'expected array of values'}            | ${{ tags: [buildSpaceOwnerIdTag('abc'), buildSpaceOwnerIdTag('123')] }} | ${['abc', '123']}
+      ${'empty array if no tags'}              | ${{}}                                                                   | ${[]}
+      ${'empty array if no ownerSpaceId tags'} | ${{ tags: ['one', 'two'] }}                                             | ${[]}
+    `('should return $name', ({ tags, expectedResult }) => {
+      expect(getArtifactOwnerSpaceIds(tags)).toEqual(expectedResult);
+    });
+  });
+
+  describe('when using `hasArtifactOwnerSpaceId()`', () => {
+    it.each`
+      name                                          | tags                                       | expectedResult
+      ${'artifact has tag with space id'}           | ${{ tags: [buildSpaceOwnerIdTag('abc')] }} | ${true}
+      ${'artifact does not have tag with space id'} | ${{ tags: ['123'] }}                       | ${false}
+    `('should return $expectedResult when $name', ({ tags, expectedResult }) => {
+      expect(hasArtifactOwnerSpaceId(tags)).toEqual(expectedResult);
+    });
+  });
+
+  describe('when using `setArtifactOwnerSpaceId()`', () => {
+    it('should set owner space ID if item does not currently have one matching the space id', () => {
+      const item = { tags: [buildSpaceOwnerIdTag('foo')] };
+      setArtifactOwnerSpaceId(item, 'abc');
+
+      expect(item).toEqual({ tags: [buildSpaceOwnerIdTag('foo'), buildSpaceOwnerIdTag('abc')] });
+    });
+
+    it('should not add another owner space ID if item already has one that matches the space id', () => {
+      const item = { tags: [buildSpaceOwnerIdTag('abc')] };
+      setArtifactOwnerSpaceId(item, 'abc');
+
+      expect(item).toEqual({ tags: [buildSpaceOwnerIdTag('abc')] });
     });
   });
 });

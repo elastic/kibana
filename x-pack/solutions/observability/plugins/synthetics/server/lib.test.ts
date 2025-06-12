@@ -93,18 +93,14 @@ describe('SyntheticsEsClient', () => {
   describe('search', () => {
     it('should call baseESClient.search with correct parameters', async () => {
       const mockSearchParams = {
-        body: {
-          query: {
-            match_all: {},
-          },
+        query: {
+          match_all: {},
         },
       };
 
       const result = await syntheticsEsClient.search({
-        body: {
-          query: {
-            match_all: {},
-          },
+        query: {
+          match_all: {},
         },
       });
 
@@ -128,10 +124,8 @@ describe('SyntheticsEsClient', () => {
 
     it('should throw an error if baseESClient.search throws an error', async () => {
       const mockSearchParams = {
-        body: {
-          query: {
-            match_all: {},
-          },
+        query: {
+          match_all: {},
         },
       };
       const mockError = new Error('Search error');

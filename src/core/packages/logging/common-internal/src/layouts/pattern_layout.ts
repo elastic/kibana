@@ -15,12 +15,13 @@ import {
   MetaConversion,
   MessageConversion,
   DateConversion,
+  ErrorConversion,
 } from './conversions';
 
 /**
  * Default pattern used by PatternLayout if it's not overridden in the configuration.
  */
-const DEFAULT_PATTERN = `[%date][%level][%logger] %message`;
+const DEFAULT_PATTERN = `[%date][%level][%logger] %message %error`;
 
 const DEFAULT_CONVERSIONS: Conversion[] = [
   LoggerConversion,
@@ -28,6 +29,7 @@ const DEFAULT_CONVERSIONS: Conversion[] = [
   LevelConversion,
   MetaConversion,
   DateConversion,
+  ErrorConversion,
 ];
 
 export interface PatternLayoutOptions {
@@ -69,6 +71,6 @@ export class PatternLayout implements Layout {
       );
     }
 
-    return recordString;
+    return recordString.trim();
   }
 }

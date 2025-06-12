@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { Query } from '@kbn/data-plugin/common/query';
-import {
+import type { Query } from '@kbn/data-plugin/common/query';
+import type {
   RuleType,
   RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
   RuleTypeParams,
 } from '@kbn/alerting-plugin/server';
-import { ActionGroupId, RecoveryActionGroupId } from './constants';
+import type { StackAlertType } from '../types';
+import type { ActionGroupId, RecoveryActionGroupId } from './constants';
 
 export interface BoundariesRequestMeta {
   geoField: string;
@@ -82,5 +83,6 @@ export type GeoContainmentRuleType = RuleType<
   GeoContainmentAlertInstanceState,
   GeoContainmentAlertInstanceContext,
   typeof ActionGroupId,
-  typeof RecoveryActionGroupId
+  typeof RecoveryActionGroupId,
+  StackAlertType
 >;

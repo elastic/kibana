@@ -55,7 +55,7 @@ export async function installIndexTemplatesAndPipelines({
     packageInstallContext,
     onlyForDataStreams
   );
-  const preparedIndexTemplates = prepareToInstallTemplates(
+  const preparedIndexTemplates = await prepareToInstallTemplates(
     packageInstallContext,
     esReferences,
     experimentalDataStreamFeatures,

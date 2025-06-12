@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { LicenseGetLicenseInformation } from '@elastic/elasticsearch/lib/api/types';
 import { INDEX_PATTERN_ELASTICSEARCH, USAGE_FETCH_INTERVAL } from '../../common/constants';
 
@@ -42,32 +42,30 @@ export async function fetchLicenses(
     index: INDEX_PATTERN_ELASTICSEARCH,
     ignore_unavailable: true,
     filter_path: ['hits.hits._source.cluster_uuid', 'hits.hits._source.license'],
-    body: {
-      size: maxBucketSize,
-      query: {
-        bool: {
-          filter: [
-            /*
-             * Note: Unlike most places, we don't care about the old _type: cluster_stats because it would NOT
-             * have the license in it (that used to be in the .monitoring-data-2 index in cluster_info)
-             */
-            { term: { type: 'cluster_stats' } },
-            { terms: { cluster_uuid: clusterUuids } },
-            {
-              range: {
-                timestamp: {
-                  format: 'epoch_millis',
-                  gte: timestamp - USAGE_FETCH_INTERVAL,
-                  lte: timestamp,
-                },
+    size: maxBucketSize,
+    query: {
+      bool: {
+        filter: [
+          /*
+           * Note: Unlike most places, we don't care about the old _type: cluster_stats because it would NOT
+           * have the license in it (that used to be in the .monitoring-data-2 index in cluster_info)
+           */
+          { term: { type: 'cluster_stats' } },
+          { terms: { cluster_uuid: clusterUuids } },
+          {
+            range: {
+              timestamp: {
+                format: 'epoch_millis',
+                gte: timestamp - USAGE_FETCH_INTERVAL,
+                lte: timestamp,
               },
             },
-          ],
-        },
+          },
+        ],
       },
-      collapse: { field: 'cluster_uuid' },
-      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
     },
+    collapse: { field: 'cluster_uuid' },
+    sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
   };
 
   return await callCluster.search<ESClusterStatsWithLicense>(params);

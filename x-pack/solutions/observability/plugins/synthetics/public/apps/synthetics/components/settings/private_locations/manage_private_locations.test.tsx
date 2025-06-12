@@ -12,7 +12,6 @@ import * as locationHooks from './hooks/use_locations_api';
 import * as settingsHooks from '../../../contexts/synthetics_settings_context';
 import type { SyntheticsSettingsContextValues } from '../../../contexts';
 import { ManagePrivateLocations } from './manage_private_locations';
-import { PrivateLocation } from '../../../../../../common/runtime_types';
 import { fireEvent } from '@testing-library/react';
 
 jest.mock('../../../hooks');
@@ -28,12 +27,12 @@ describe('<ManagePrivateLocations />', () => {
       canCreateAgentPolicies: false,
     });
     jest.spyOn(locationHooks, 'usePrivateLocationsAPI').mockReturnValue({
-      formData: {} as PrivateLocation,
       loading: false,
       onSubmit: jest.fn(),
       privateLocations: [],
       onDelete: jest.fn(),
       deleteLoading: false,
+      createLoading: false,
     });
     jest.spyOn(permissionsHooks, 'useEnablement').mockReturnValue({
       isServiceAllowed: true,
@@ -59,8 +58,9 @@ describe('<ManagePrivateLocations />', () => {
             data: [],
             loading: false,
             error: null,
-            isManageFlyoutOpen: false,
-            isAddingNewPrivateLocation: false,
+          },
+          privateLocations: {
+            isCreatePrivateLocationFlyoutVisible: false,
           },
         },
       });
@@ -93,8 +93,9 @@ describe('<ManagePrivateLocations />', () => {
             data: [{}],
             loading: false,
             error: null,
-            isManageFlyoutOpen: false,
-            isAddingNewPrivateLocation: false,
+          },
+          privateLocations: {
+            isCreatePrivateLocationFlyoutVisible: false,
           },
         },
       });
@@ -123,7 +124,6 @@ describe('<ManagePrivateLocations />', () => {
       } as SyntheticsSettingsContextValues);
 
       jest.spyOn(locationHooks, 'usePrivateLocationsAPI').mockReturnValue({
-        formData: {} as PrivateLocation,
         loading: false,
         onSubmit: jest.fn(),
         privateLocations: [
@@ -136,6 +136,7 @@ describe('<ManagePrivateLocations />', () => {
         ],
         onDelete: jest.fn(),
         deleteLoading: false,
+        createLoading: false,
       });
       const { getByText, getByRole, findByText } = render(<ManagePrivateLocations />, {
         state: {
@@ -143,8 +144,9 @@ describe('<ManagePrivateLocations />', () => {
             data: [{}],
             loading: false,
             error: null,
-            isManageFlyoutOpen: false,
-            isAddingNewPrivateLocation: false,
+          },
+          privateLocations: {
+            isCreatePrivateLocationFlyoutVisible: false,
           },
         },
       });

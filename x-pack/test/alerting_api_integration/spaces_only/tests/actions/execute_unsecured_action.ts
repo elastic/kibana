@@ -7,9 +7,9 @@
 
 import getPort from 'get-port';
 import expect from '@kbn/expect';
-import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { getWebhookServer } from '@kbn/actions-simulators-plugin/server/plugin';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ObjectRemover } from '../../../common/lib';
 import { Spaces } from '../../scenarios';
 import { createWebhookConnector } from './connector_types/stack/webhook';
@@ -90,12 +90,25 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
 
     it('should successfully execute email action for custom space', async () => {
       const testStart = new Date().toISOString();
+
+      const { body: createdConnector } = await supertest
+        .post(`/s/${Spaces.other.id}/api/actions/connector`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'An email action',
+          connector_type_id: '.email',
+          config: { service: '__json', from: 'bob@example.org', hasAuth: true },
+          secrets: { user: 'bob', password: 'supersecret' },
+        });
+      const connectorId = createdConnector.id;
+      objectRemover.add(Spaces.other.id, connectorId, 'connector', 'actions');
+
       const response = await supertest
         .post(`/api/execute_unsecured_action`)
         .set('kbn-xsrf', 'xxx')
         .send({
           requesterId: 'background_task',
-          id: 'my-test-email',
+          id: connectorId,
           params: {
             to: ['you@test.com'],
             subject: 'hello from Kibana!',
@@ -112,10 +125,10 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
         })
         .expect(200);
       expect(response.body.status).to.eql('success');
-      expect(response.body.result.actionId).to.eql('my-test-email');
+      expect(response.body.result.actionId).to.eql(connectorId);
       expect(response.body.result.status).to.eql('ok');
 
-      const query = getEventLogExecuteQuery(testStart, 'my-test-email');
+      const query = getEventLogExecuteQuery(testStart, connectorId);
       await retry.try(async () => {
         const searchResult = await es.search(query);
         expect((searchResult.hits.total as SearchTotalHits).value).to.eql(1);
@@ -125,7 +138,7 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
         expect(hit?._source?.event?.outcome).to.eql('success');
         // @ts-expect-error _source: unknown
         expect(hit?._source?.message).to.eql(
-          `action executed: .email:my-test-email: TestEmail#xyz`
+          `action executed: .email:${connectorId}: An email action`
         );
         // @ts-expect-error _source: unknown
         expect(hit?._source?.kibana?.action?.execution?.source).to.eql('background_task');
@@ -274,54 +287,52 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
   function getEventLogExecuteQuery(start: string, actionId: string) {
     return {
       index: '.kibana-event-log*',
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  'event.provider': {
-                    value: 'actions',
-                  },
+      query: {
+        bool: {
+          filter: [
+            {
+              term: {
+                'event.provider': {
+                  value: 'actions',
                 },
               },
-              {
-                term: {
-                  'event.action': 'execute',
+            },
+            {
+              term: {
+                'event.action': 'execute',
+              },
+            },
+            {
+              range: {
+                '@timestamp': {
+                  gte: start,
                 },
               },
-              {
-                range: {
-                  '@timestamp': {
-                    gte: start,
-                  },
-                },
-              },
-              {
-                nested: {
-                  path: 'kibana.saved_objects',
-                  query: {
-                    bool: {
-                      filter: [
-                        {
-                          term: {
-                            'kibana.saved_objects.id': {
-                              value: actionId,
-                            },
+            },
+            {
+              nested: {
+                path: 'kibana.saved_objects',
+                query: {
+                  bool: {
+                    filter: [
+                      {
+                        term: {
+                          'kibana.saved_objects.id': {
+                            value: actionId,
                           },
                         },
-                        {
-                          term: {
-                            'kibana.saved_objects.type': 'action',
-                          },
+                      },
+                      {
+                        term: {
+                          'kibana.saved_objects.type': 'action',
                         },
-                      ],
-                    },
+                      },
+                    ],
                   },
                 },
               },
-            ],
-          },
+            },
+          ],
         },
       },
     };

@@ -1,5 +1,3 @@
-@import './components/index';
-
 /*
  [1] When the <CreateField /> component is embedded inside the tree, we need
  to add some extra indent to make room for the child "L" bullet on the left.
@@ -13,11 +11,6 @@
 }
 
 .mappingsEditor {
-  &__createFieldWrapper {
-    background-color: $euiColorLightestShade;
-    padding: $euiSize;
-  }
-
   &__createFieldContent {
     position: relative;
 
@@ -44,6 +37,7 @@
 }
 
 .mappingsEditor__fieldsList {
+
   .mappingsEditor__fieldsList .mappingsEditor__fieldsListItem__content,
   .mappingsEditor__createFieldContent {
     &::before {
@@ -54,6 +48,7 @@
       top: 50%;
       width: $euiSizeS;
     }
+
     &::after {
       border-left: 1px solid $euiColorMediumShade;
       content: '';
@@ -74,7 +69,8 @@
       .mappingsEditor__createFieldContent {
         padding-left: $euiSize;
 
-        &::before, &::after {
+        &::before,
+        &::after {
           content: none;
         }
       }
@@ -90,8 +86,11 @@
   .mappingsEditor__fieldsList .mappingsEditor__fieldsListItem__content {
     padding-left: $euiSizeXL; // [2]
 
-    &--toggle, &--multiField {
-      &::before, &::after {
+    &--toggle,
+    &--multiField {
+
+      &::before,
+      &::after {
         content: none;
       }
     }
@@ -127,7 +126,7 @@ ul.esUiTree {
     position: relative;
 
     &::before {
-      content:'';
+      content: '';
       position: absolute;
       top: 0;
       left: -1px;
@@ -139,11 +138,11 @@ ul.esUiTree {
     }
   }
 
-  > li.esUiTreeItem:first-child {
+  >li.esUiTreeItem:first-child {
     padding-top: $euiSizeS;
   }
 
-  > li.esUiTreeItem:last-child {
+  >li.esUiTreeItem:last-child {
     border-left-color: transparent;
     padding-bottom: 0;
   }

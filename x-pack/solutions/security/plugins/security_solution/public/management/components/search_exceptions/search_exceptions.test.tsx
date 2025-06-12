@@ -6,10 +6,9 @@
  */
 
 import React from 'react';
-import { act, fireEvent } from '@testing-library/react';
+import { act, fireEvent, waitFor } from '@testing-library/react';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 import type { SearchExceptionsProps } from '.';
@@ -18,6 +17,7 @@ import { getEndpointPrivilegesInitialStateMock } from '../../../common/component
 import type { UserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
 import { initialUserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
 import type { EndpointPrivileges } from '../../../../common/endpoint/types';
+import { allFleetHttpMocks } from '../../mocks';
 
 jest.mock('../../../common/components/user_privileges');
 
@@ -45,6 +45,8 @@ describe('Search exceptions', () => {
   beforeEach(() => {
     onSearchMock = jest.fn();
     appTestContext = createAppRootMockRenderer();
+
+    allFleetHttpMocks(appTestContext.coreStart.http);
 
     render = (overrideProps = {}) => {
       const props: SearchExceptionsProps = {
@@ -106,24 +108,58 @@ describe('Search exceptions', () => {
   });
 
   it('should hide policies selector when no license', () => {
-    const generator = new EndpointDocGenerator('policy-list');
-    const policy = generator.generatePolicyPackagePolicy();
     mockUseUserPrivileges.mockReturnValue(
       loadedUserPrivilegesState({ canCreateArtifactsByPolicy: false })
     );
-    const element = render({ policyList: [policy], hasPolicyFilter: true });
+    const element = render({ hasPolicyFilter: true });
 
     expect(element.queryByTestId('policiesSelectorButton')).toBeNull();
   });
 
   it('should display policies selector when right license', () => {
-    const generator = new EndpointDocGenerator('policy-list');
-    const policy = generator.generatePolicyPackagePolicy();
-    mockUseUserPrivileges.mockReturnValue(
-      loadedUserPrivilegesState({ canCreateArtifactsByPolicy: true })
-    );
-    const element = render({ policyList: [policy], hasPolicyFilter: true });
+    const element = render({ hasPolicyFilter: true });
 
     expect(element.queryByTestId('policiesSelectorButton')).not.toBeNull();
+  });
+
+  it('should display additional policy selection items', async () => {
+    const element = render({ hasPolicyFilter: true });
+    act(() => {
+      fireEvent.click(element.getByTestId(`policiesSelectorButton`));
+    });
+    await waitFor(() => {
+      expect(element.queryByTestId('policiesSelectorButton-policySelector-isFetching')).toBeNull();
+    });
+
+    expect(element.getByTestId('globalOption')).toBeTruthy();
+    expect(element.getByTestId('unassignedOption')).toBeTruthy();
+  });
+
+  it('should include global option in onSearch call when user clicks on it', async () => {
+    const element = render({ hasPolicyFilter: true });
+    act(() => {
+      fireEvent.click(element.getByTestId(`policiesSelectorButton`));
+    });
+    await waitFor(() => {
+      expect(element.queryByTestId('policiesSelectorButton-policySelector-isFetching')).toBeNull();
+    });
+    act(() => {
+      fireEvent.click(element.getByTestId(`globalOption`));
+    });
+
+    expect(onSearchMock).toHaveBeenCalledWith('', 'global', false);
+  });
+
+  it('should show global and unassigned policy options checked', async () => {
+    const element = render({ hasPolicyFilter: true, defaultIncludedPolicies: 'global,unassigned' });
+    act(() => {
+      fireEvent.click(element.getByTestId(`policiesSelectorButton`));
+    });
+    await waitFor(() => {
+      expect(element.queryByTestId('policiesSelectorButton-policySelector-isFetching')).toBeNull();
+    });
+
+    expect(element.getByTestId('globalOption').getAttribute('aria-checked')).toEqual('true');
+    expect(element.getByTestId('unassignedOption').getAttribute('aria-checked')).toEqual('true');
   });
 });

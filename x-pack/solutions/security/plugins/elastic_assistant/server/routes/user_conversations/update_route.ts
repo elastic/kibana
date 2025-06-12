@@ -14,8 +14,8 @@ import {
 import {
   ConversationResponse,
   ConversationUpdateProps,
-} from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
-import { UpdateConversationRequestParams } from '@kbn/elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen';
+  UpdateConversationRequestParams,
+} from '@kbn/elastic-assistant-common/impl/schemas';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
@@ -48,7 +48,7 @@ export const updateConversationRoute = (router: ElasticAssistantPluginRouter) =>
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
           // Perform license and authenticated user checks
-          const checkResponse = performChecks({
+          const checkResponse = await performChecks({
             context: ctx,
             request,
             response,
@@ -68,7 +68,7 @@ export const updateConversationRoute = (router: ElasticAssistantPluginRouter) =>
             });
           }
           const conversation = await dataClient?.updateConversation({
-            conversationUpdateProps: request.body,
+            conversationUpdateProps: { ...request.body, id },
           });
           if (conversation == null) {
             return assistantResponse.error({

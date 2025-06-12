@@ -6,14 +6,14 @@
  */
 
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
-import {
+import type {
   SavedObjectMigrationContext,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
-import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { IsMigrationNeededPredicate } from '@kbn/encrypted-saved-objects-plugin/server';
 
-import { RawRule } from '../../types';
+import type { RawRule } from '../../types';
 
 type AlertMigration = (
   doc: SavedObjectUnsanitizedDoc<RawRule>,

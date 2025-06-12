@@ -1,17 +1,15 @@
 openapi: 3.0.0
 info:
   title: Bulk Knowledge Base Actions API endpoint
-  version: '1'
+  version: '2023-10-31'
 paths:
-  /internal/elastic_assistant/knowledge_base/entries/_bulk_action:
+  /api/security_ai_assistant/knowledge_base/entries/_bulk_action:
     post:
       x-codegen-enabled: true
-      # Targeted to update to public by 8.18
-      x-internal: true
       x-labels: [ess, serverless]
       operationId: PerformKnowledgeBaseEntryBulkAction
       summary: Applies a bulk action to multiple Knowledge Base Entries
-      description: The bulk action is applied to all Knowledge Base Entries that match the filter or to the list of Knowledge Base Entries by their IDs
+      description: The bulk action is applied to all Knowledge Base Entries that match the filter or to the list of Knowledge Base Entries by their IDs.
       tags:
         - Knowledge Base Entries Bulk API
       requestBody:
@@ -26,10 +24,25 @@ paths:
                   type: array
                   items:
                     $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryCreateProps'
+                  description: List of Knowledge Base Entries to create.
+                  example: [
+                    {
+                      "title": "New Entry",
+                      "content": "This is the content of the new entry."
+                    }
+                  ]
                 update:
                   type: array
                   items:
                     $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryUpdateProps'
+                  description: List of Knowledge Base Entries to update.
+                  example: [
+                    {
+                      "id": "123",
+                      "title": "Updated Entry",
+                      "content": "Updated content."
+                    }
+                  ]
       responses:
         200:
           description: Successful bulk operation request
@@ -50,14 +63,19 @@ components:
       type: string
       enum:
         - KNOWLEDGE_BASE_ENTRY_NOT_MODIFIED
+      description: Reason why a Knowledge Base Entry was skipped during the bulk action.
 
     KnowledgeBaseEntryBulkActionSkipResult:
       type: object
       properties:
         id:
           type: string
+          description: ID of the skipped Knowledge Base Entry.
+          example: "123"
         name:
           type: string
+          description: Name of the skipped Knowledge Base Entry.
+          example: "Skipped Entry"
         skip_reason:
           $ref: '#/components/schemas/KnowledgeBaseEntryBulkActionSkipReason'
       required:
@@ -69,8 +87,12 @@ components:
       properties:
         id:
           type: string
+          description: ID of the Knowledge Base Entry that encountered an error.
+          example: "456"
         name:
           type: string
+          description: Name of the Knowledge Base Entry that encountered an error.
+          example: "Error Entry"
       required:
         - id
 
@@ -79,14 +101,21 @@ components:
       properties:
         message:
           type: string
+          description: Error message describing the issue.
+          example: "Failed to update entry."
         statusCode:
           type: integer
+          description: HTTP status code associated with the error.
+          example: 400
         err_code:
           type: string
+          description: Specific error code for the issue.
+          example: "UPDATE_FAILED"
         knowledgeBaseEntries:
           type: array
           items:
             $ref: '#/components/schemas/KnowledgeBaseEntryDetailsInError'
+          description: List of Knowledge Base Entries that encountered the error.
       required:
         - message
         - statusCode
@@ -99,18 +128,44 @@ components:
           type: array
           items:
             $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryResponse'
+          description: List of Knowledge Base Entries that were successfully updated.
+          example: [
+            {
+              "id": "123",
+              "title": "Updated Entry",
+              "content": "Updated content."
+            }
+          ]
         created:
           type: array
           items:
             $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryResponse'
+          description: List of Knowledge Base Entries that were successfully created.
+          example: [
+            {
+              "id": "456",
+              "title": "New Entry",
+              "content": "This is the content of the new entry."
+            }
+          ]
         deleted:
           type: array
           items:
             type: string
+          description: List of IDs of Knowledge Base Entries that were successfully deleted.
+          example: ["789"]
         skipped:
           type: array
           items:
             $ref: '#/components/schemas/KnowledgeBaseEntryBulkActionSkipResult'
+          description: List of Knowledge Base Entries that were skipped during the bulk action.
+          example: [
+            {
+              "id": "123",
+              "name": "Skipped Entry",
+              "skip_reason": "KNOWLEDGE_BASE_ENTRY_NOT_MODIFIED"
+            }
+          ]
       required:
         - updated
         - created
@@ -122,12 +177,20 @@ components:
       properties:
         failed:
           type: integer
+          description: Number of Knowledge Base Entries that failed during the bulk action.
+          example: 2
         skipped:
           type: integer
+          description: Number of Knowledge Base Entries that were skipped during the bulk action.
+          example: 1
         succeeded:
           type: integer
+          description: Number of Knowledge Base Entries that were successfully processed during the bulk action.
+          example: 5
         total:
           type: integer
+          description: Total number of Knowledge Base Entries involved in the bulk action.
+          example: 8
       required:
         - failed
         - skipped
@@ -139,12 +202,20 @@ components:
       properties:
         success:
           type: boolean
+          description: Indicates whether the bulk action was successful.
+          example: true
         statusCode:
           type: integer
+          description: HTTP status code of the response.
+          example: 200
         message:
           type: string
+          description: Message describing the result of the bulk action.
+          example: "Bulk action completed successfully."
         knowledgeBaseEntriesCount:
           type: integer
+          description: Total number of Knowledge Base Entries processed.
+          example: 8
         attributes:
           type: object
           properties:
@@ -156,12 +227,25 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/NormalizedKnowledgeBaseEntryError'
+              description: List of errors encountered during the bulk action.
+              example: [
+                {
+                  "message": "Failed to update entry.",
+                  "statusCode": 400,
+                  "err_code": "UPDATE_FAILED",
+                  "knowledgeBaseEntries": [
+                    {
+                      "id": "456",
+                      "name": "Error Entry"
+                    }
+                  ]
+                }
+              ]
           required:
             - results
             - summary
       required:
         - attributes
-
 
     KnowledgeBaseEntryBulkActionBase:
       x-inline: true
@@ -169,10 +253,12 @@ components:
       properties:
         query:
           type: string
-          description: Query to filter Knowledge Base Entries
+          description: Query to filter Knowledge Base Entries.
+          example: "status:active AND category:technology"
         ids:
           type: array
-          description: Array of Knowledge base Entry IDs
+          description: Array of Knowledge Base Entry IDs.
           minItems: 1
           items:
             type: string
+          example: ["123", "456", "789"]

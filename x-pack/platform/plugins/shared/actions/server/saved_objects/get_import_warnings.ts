@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SavedObject, SavedObjectsImportWarning } from '@kbn/core/server';
-import { RawAction } from '../types';
+import type { SavedObject, SavedObjectsImportWarning } from '@kbn/core/server';
+import type { RawAction } from '../types';
 
 export function getImportWarnings(
   connectors: Array<SavedObject<RawAction>>

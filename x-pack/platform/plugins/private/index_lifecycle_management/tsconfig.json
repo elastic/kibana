@@ -40,7 +40,6 @@
     "@kbn/unsaved-changes-prompt",
     "@kbn/shared-ux-table-persist",
     "@kbn/index-lifecycle-management-common-shared",
-    "@kbn/ui-theme",
   ],
   "exclude": [
     "target/**/*",

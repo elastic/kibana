@@ -7,17 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const aggregationGroups = [
-  'x-pack/plugins',
+import { KIBANA_SOLUTIONS } from '@kbn/projects-solutions-groups';
+
+export const aggregationGroups: string[] = [
+  ...KIBANA_SOLUTIONS.flatMap((solution) => [
+    `x-pack/solutions/${solution}/plugins`,
+    `x-pack/solutions/${solution}/packages`,
+  ]),
+  'x-pack/platform/plugins',
+  'x-pack/platform/packages',
   'x-pack/packages',
-  'src/plugins',
+  'src/platform/plugins',
+  'src/platform/packages',
+  'src/core/packages',
   'packages',
   'src',
   'x-pack/test',
   'x-pack/test_serverless',
+  'test',
 ];
 
-export const excludePaths = [
+export const excludePaths: string[] = [
   '(^|/)target($|/)',
   '^kbn',
   '^@kbn',

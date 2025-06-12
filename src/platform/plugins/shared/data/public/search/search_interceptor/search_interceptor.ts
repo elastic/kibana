@@ -31,7 +31,12 @@ import {
   takeUntil,
   tap,
 } from 'rxjs';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
+import type {
+  AsyncSearchGetResponse,
+  ErrorResponseBase,
+  SqlGetAsyncResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
@@ -60,10 +65,10 @@ import type {
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
 import type { IKibanaSearchResponse, ISearchOptions } from '@kbn/search-types';
 import {
-  AsyncSearchGetResponse,
-  ErrorResponseBase,
-  SqlGetAsyncResponse,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+  EVENT_TYPE_DATA_SEARCH_TIMEOUT,
+  EVENT_PROPERTY_SEARCH_TIMEOUT_MS,
+  EVENT_PROPERTY_EXECUTION_CONTEXT,
+} from '../constants';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   ESQL_ASYNC_SEARCH_STRATEGY,
@@ -398,10 +403,18 @@ export class SearchInterceptor {
       catchError((e: Error) => {
         // If we aborted (search:timeout advanced setting) and there was a partial response, return it instead of just erroring out
         if (searchAbortController.isTimeout()) {
+          this.startRenderServices.analytics.reportEvent(EVENT_TYPE_DATA_SEARCH_TIMEOUT, {
+            [EVENT_PROPERTY_SEARCH_TIMEOUT_MS]: this.searchTimeout,
+            [EVENT_PROPERTY_EXECUTION_CONTEXT]: options.executionContext,
+          });
           return from(
             this.runSearch({ id, ...request }, { ...options, retrieveResults: true })
           ).pipe(
-            map(toPartialResponseAfterTimeout),
+            map((response) =>
+              options.strategy === ENHANCED_ES_SEARCH_STRATEGY
+                ? toPartialResponseAfterTimeout(response)
+                : response
+            ),
             tap(async () => {
               await sendCancelRequest();
               this.handleSearchError(e, request?.params?.body ?? {}, options, true);
@@ -443,7 +456,7 @@ export class SearchInterceptor {
         {
           version: '1',
           signal: abortSignal,
-          context: executionContext,
+          context: this.deps.executionContext.withGlobalContext(executionContext),
           body: JSON.stringify({
             ...request,
             ...searchOptions,
@@ -502,6 +515,7 @@ export class SearchInterceptor {
               rawResponse: esqlResponse,
               isPartial: esqlResponse.is_partial,
               isRunning: esqlResponse.is_running,
+              requestParams,
               warning,
             };
           default:
@@ -622,6 +636,8 @@ export class SearchInterceptor {
     this.deps.toasts.addDanger({
       title: 'Timed out',
       text: toMountPoint(e.getErrorMessage(this.application), this.startRenderServices),
+      // TODO: explore possibility of "Infinity" without hiding the toast on mouse leave (see https://github.com/elastic/kibana/pull/210576#discussion_r1952215353)
+      toastLifeTimeMs: 1000 * 60 * 60 * 24 * 7, // 7 days
     });
   };
 

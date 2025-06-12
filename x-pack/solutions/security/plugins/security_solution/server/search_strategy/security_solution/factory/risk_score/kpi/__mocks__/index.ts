@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { RiskScoreKpiRequestOptionsInput } from '../../../../../../../common/api/search_strategy';
-import { RiskScoreEntity, RiskQueries } from '../../../../../../../common/search_strategy';
+import {
+  EntityRiskQueries,
+  type RiskScoreKpiRequestOptionsInput,
+} from '../../../../../../../common/api/search_strategy';
+import { EntityType } from '../../../../../../../common/search_strategy';
 
 export const mockOptions: RiskScoreKpiRequestOptionsInput = {
   defaultIndex: [
@@ -19,8 +22,8 @@ export const mockOptions: RiskScoreKpiRequestOptionsInput = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  factoryQueryType: RiskQueries.kpiRiskScore,
+  factoryQueryType: EntityRiskQueries.kpi,
   filterQuery:
     '{"bool":{"must":[],"filter":[{"match_all":{}},{"bool":{"filter":[{"bool":{"should":[{"exists":{"field":"host.name"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}',
-  entity: RiskScoreEntity.host,
+  entity: EntityType.host,
 };

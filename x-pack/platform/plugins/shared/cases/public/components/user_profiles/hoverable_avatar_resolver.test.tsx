@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { CaseUser } from '../../containers/types';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
@@ -62,7 +62,7 @@ describe('HoverableAvatarResolver', () => {
 
     fireEvent.mouseOver(screen.getByText('DR'));
 
-    await waitFor(() => screen.getByTestId('user-profile-tooltip'));
+    await screen.findByTestId('user-profile-tooltip');
 
     expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
   });

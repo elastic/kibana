@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         describe('indices with data', () => {
           before(async () => {
             await esArchiver.loadIfNeeded(
-              'test/functional/fixtures/es_archiver/logstash_functional'
+              'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
             );
             await kibanaServer.uiSettings.update({
               defaultIndex: 'logstash-*',
@@ -42,7 +42,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await PageObjects.settings.navigateTo();
           });
           after(async () => {
-            await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+            await esArchiver.unload(
+              'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+            );
           });
           it('index list', async () => {
             await a11y.testAppSnapshot();

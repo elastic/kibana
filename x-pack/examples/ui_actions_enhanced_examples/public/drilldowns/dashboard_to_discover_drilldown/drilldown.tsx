@@ -61,7 +61,7 @@ export class DashboardToDiscoverDrilldown
       !!config.customIndexPattern && !!config.indexPatternId ? config.indexPatternId : '';
 
     if (!indexPatternId) {
-      const dataViews = (context?.embeddable as ActionApi).dataViews?.value;
+      const dataViews = (context?.embeddable as ActionApi).dataViews$?.value;
       if (dataViews?.[0].id) {
         indexPatternId = dataViews[0].id;
       }

@@ -29,32 +29,30 @@ export async function getTimeOfLastEvent({
     index: apmIndexPattern,
     size: 1,
     ignore_unavailable: true,
-    body: {
-      _source: ['beats_stats.timestamp', '@timestamp'],
-      sort: [
+    _source: ['beats_stats.timestamp', '@timestamp'],
+    sort: [
+      {
+        timestamp: {
+          order: 'desc',
+          unmapped_type: 'long',
+        },
+      },
+    ],
+    query: createApmQuery({
+      start,
+      end,
+      clusterUuid,
+      metric: ApmClusterMetric.getMetricFields(),
+      filters: [
         {
-          timestamp: {
-            order: 'desc',
-            unmapped_type: 'long',
+          range: {
+            'beats_stats.metrics.libbeat.output.events.acked': {
+              gt: 0,
+            },
           },
         },
       ],
-      query: createApmQuery({
-        start,
-        end,
-        clusterUuid,
-        metric: ApmClusterMetric.getMetricFields(),
-        filters: [
-          {
-            range: {
-              'beats_stats.metrics.libbeat.output.events.acked': {
-                gt: 0,
-              },
-            },
-          },
-        ],
-      }),
-    },
+    }),
   };
 
   const response = await callWithRequest(req, 'search', params);

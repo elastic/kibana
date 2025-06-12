@@ -16,7 +16,7 @@ describe('Cluster settings deprecation flyout', () => {
   let testBed: ElasticsearchTestBed;
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
-  const clusterSettingDeprecation = esDeprecationsMockResponse.deprecations[4];
+  const clusterSettingDeprecation = esDeprecationsMockResponse.migrationsDeprecations[4];
 
   beforeEach(async () => {
     const mockEnvironment = setupEnvironment();

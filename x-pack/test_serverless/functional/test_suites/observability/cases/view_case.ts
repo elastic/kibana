@@ -36,7 +36,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   // https://github.com/elastic/kibana/pull/190690
   // fails after missing `awaits` were added
-  describe.skip('Case View', function () {
+  describe('Case View', function () {
     before(async () => {
       await svlCommonPage.loginWithPrivilegedRole();
     });
@@ -235,6 +235,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await cases.common.selectSeverity(CaseSeverity.MEDIUM);
 
+        await header.waitUntilLoadingHasFinished();
+
         await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
 
         await header.waitUntilLoadingHasFinished();
@@ -272,7 +274,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     // FLAKY
-    describe.skip('Lens visualization', () => {
+    describe('Lens visualization', () => {
       before(async () => {
         await cases.testResources.installKibanaSampleData('logs');
         await createAndNavigateToCase(getPageObject, getService, owner);

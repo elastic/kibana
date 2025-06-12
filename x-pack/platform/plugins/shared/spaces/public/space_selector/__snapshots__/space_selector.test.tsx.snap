@@ -2,7 +2,7 @@
 
 exports[`it renders with custom logo 1`] = `
 <_KibanaPageTemplate
-  className="spcSpaceSelector"
+  css="unknown styles"
   data-test-subj="kibanaSpaceSelector"
 >
   <EuiPortal>
@@ -34,8 +34,8 @@ exports[`it renders with custom logo 1`] = `
         color="subdued"
       >
         <h1
-          className="eui spcSpaceSelector__pageHeader"
-          tabIndex={0}
+          css="unknown styles"
+          tabIndex={-1}
         >
           <MemoizedFormattedMessage
             defaultMessage="Select your space"
@@ -62,7 +62,7 @@ exports[`it renders with custom logo 1`] = `
 
 exports[`it renders without crashing 1`] = `
 <_KibanaPageTemplate
-  className="spcSpaceSelector"
+  css="unknown styles"
   data-test-subj="kibanaSpaceSelector"
 >
   <EuiPortal>
@@ -93,8 +93,8 @@ exports[`it renders without crashing 1`] = `
         color="subdued"
       >
         <h1
-          className="eui spcSpaceSelector__pageHeader"
-          tabIndex={0}
+          css="unknown styles"
+          tabIndex={-1}
         >
           <MemoizedFormattedMessage
             defaultMessage="Select your space"

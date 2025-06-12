@@ -24,7 +24,9 @@ This tool is developed for our team working on the Elastic Observability platfor
 This will evaluate all existing scenarios, and write the evaluation results to the terminal.
 
 #### To run the evaluation using a hosted deployment:
+
 - Add the credentials of Elasticsearch to `kibana.dev.yml` as follows:
+
 ```
 elasticsearch.hosts: https://<hosted-url>:<port>
 elasticsearch.username: <username>
@@ -32,6 +34,7 @@ elasticsearch.password: <password>
 elasticsearch.ssl.verificationMode: none
 elasticsearch.ignoreVersionMismatch: true
 ```
+
 - Start Kibana
 - Run this command to start evaluating: `node x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/evaluation/index.js --kibana http://<username>:<password>@localhost:5601`
 
@@ -41,6 +44,7 @@ E.g.: `node x-pack/solutions/observability/plugins/observability_ai_assistant_ap
 The `--kibana` and `--es` flags override the default credentials. Only basic auth is supported.
 
 ## Other (optional) configuration flags
+
 - `--connectorId` - Specify a generative AI connector to use. If none are given, it will prompt you to select a connector based on the ones that are available. If only a single supported connector is found, it will be used without prompting.
 - `--evaluateWith`: The connector ID to evaluate with. Leave empty to use the same connector, use "other" to get a selection menu.
 - `--spaceId` - Specify the space ID if you want to use a specific space.

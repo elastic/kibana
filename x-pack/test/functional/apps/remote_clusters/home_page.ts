@@ -14,6 +14,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Home page', function () {
     before(async () => {
+      this.tags('skipCloud');
       await security.testUser.setRoles(['global_ccr_role']);
       await pageObjects.common.navigateToApp('remoteClusters');
     });

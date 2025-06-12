@@ -14,10 +14,7 @@ import type {
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
-import {
-  AlertingConnectorFeatureId,
-  UptimeConnectorFeatureId,
-} from '@kbn/actions-plugin/common/connector_feature_config';
+import { AlertingConnectorFeatureId, UptimeConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { ConnectorAdapter } from '@kbn/alerting-plugin/server';
 
 // see: https://en.wikipedia.org/wiki/Unicode_control_characters

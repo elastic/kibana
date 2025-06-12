@@ -22,6 +22,7 @@ import {
 
 import { debounce } from 'lodash';
 import { context } from '@kbn/kibana-react-plugin/public';
+import { FILE_FORMATS } from '@kbn/file-upload-common';
 import { ResultsLinks } from '../../../common/components/results_links';
 import { FilebeatConfigFlyout } from '../../../common/components/filebeat_config_flyout';
 import { ImportProgress, IMPORT_STATUS } from '../import_progress';
@@ -36,7 +37,6 @@ import {
 } from '../../../common/components/combined_fields';
 import { MODE as DATAVISUALIZER_MODE } from '../file_data_visualizer_view/constants';
 import { importData } from './import';
-import { FILE_FORMATS } from '../../../../../common/constants';
 
 const DEFAULT_INDEX_SETTINGS = {};
 const CONFIG_MODE = { SIMPLE: 0, ADVANCED: 1 };
@@ -79,6 +79,7 @@ const DEFAULT_STATE = {
   createPipeline: true,
   initializeDeployment: false,
   initializeDeploymentStatus: IMPORT_STATUS.INCOMPLETE,
+  inferenceId: null,
 };
 
 export class ImportView extends Component {

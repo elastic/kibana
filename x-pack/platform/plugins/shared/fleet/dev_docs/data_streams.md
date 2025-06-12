@@ -41,7 +41,7 @@ example:
 
 ## Making Changes to Template Structure
 
-When making changes to the template structure (e.g [#124013](https://github.com/elastic/kibana/pull/124013)), this will need to be applied to all installed packages on upgrade to retain consistency. On startup we have [a check](https://github.com/elastic/kibana/blob/a52ba7cefe1a04ef6eafa32d5e410a3a901169b2/x-pack/platform/plugins/shared/fleet/server/services/setup.ts#L151) to see if any of the global assets have changed. If they have changed then we attempt to reinstall every package. This will in most cases cause a rollover of all datastreams so shouldn't be treated lightly.
+When making changes to the template structure (e.g [#124013](https://github.com/elastic/kibana/pull/124013)), this will need to be applied to all installed packages on upgrade to retain consistency. On startup we have [a check](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/fleet/server/services/setup.ts#L151) to see if any of the global assets have changed. If they have changed then we attempt to reinstall every package. This will in most cases cause a rollover of all datastreams so shouldn't be treated lightly.
 
 
 ## Pre 8.2 Template Structure

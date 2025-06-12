@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { StackProductUsage } from '../types';
 
 interface ESIndicesBucket {
@@ -37,49 +37,47 @@ export async function fetchESUsage(
       'hits.hits._source.cluster_stats.nodes.count.total',
       'aggregations.indices.buckets',
     ],
-    body: {
-      size: 1,
-      sort: [
-        {
-          timestamp: {
-            order: 'desc',
-            unmapped_type: 'long',
-          },
-        },
-      ],
-      query: {
-        bool: {
-          must: [
-            {
-              term: {
-                type: {
-                  value: 'cluster_stats',
-                },
-              },
-            },
-            {
-              term: {
-                cluster_uuid: {
-                  value: clusterUuid,
-                },
-              },
-            },
-            {
-              range: {
-                timestamp: {
-                  gte: 'now-1h',
-                },
-              },
-            },
-          ],
+    size: 1,
+    sort: [
+      {
+        timestamp: {
+          order: 'desc',
+          unmapped_type: 'long',
         },
       },
-      aggs: {
-        indices: {
-          terms: {
-            field: '_index',
-            size: 2,
+    ],
+    query: {
+      bool: {
+        must: [
+          {
+            term: {
+              type: {
+                value: 'cluster_stats',
+              },
+            },
           },
+          {
+            term: {
+              cluster_uuid: {
+                value: clusterUuid,
+              },
+            },
+          },
+          {
+            range: {
+              timestamp: {
+                gte: 'now-1h',
+              },
+            },
+          },
+        ],
+      },
+    },
+    aggs: {
+      indices: {
+        terms: {
+          field: '_index',
+          size: 2,
         },
       },
     },

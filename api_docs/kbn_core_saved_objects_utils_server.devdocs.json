@@ -301,6 +301,104 @@
             "returnComment": [
               "A migration function."
             ]
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-server.SavedObjectsUtils.getName",
+            "type": "Function",
+            "tags": [],
+            "label": "getName",
+            "description": [],
+            "signature": [
+              "(nameAttribute: string, savedObject?: Pick<",
+              "SavedObject",
+              "<unknown>, \"attributes\"> | null | undefined) => string | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-server.SavedObjectsUtils.getName.$1",
+                "type": "string",
+                "tags": [],
+                "label": "nameAttribute",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_utils.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-server.SavedObjectsUtils.getName.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "savedObject",
+                "description": [],
+                "signature": [
+                  "Pick<",
+                  "SavedObject",
+                  "<unknown>, \"attributes\"> | null | undefined"
+                ],
+                "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_utils.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-server.SavedObjectsUtils.getIncludedNameFields",
+            "type": "Function",
+            "tags": [],
+            "label": "getIncludedNameFields",
+            "description": [],
+            "signature": [
+              "(type: string, nameAttribute: string) => string[]"
+            ],
+            "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-server.SavedObjectsUtils.getIncludedNameFields.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_utils.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-server.SavedObjectsUtils.getIncludedNameFields.$2",
+                "type": "string",
+                "tags": [],
+                "label": "nameAttribute",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/core/packages/saved-objects/utils-server/src/saved_objects_utils.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

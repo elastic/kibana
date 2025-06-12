@@ -7,48 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  apiHasRuntimeChildState,
-  apiIsPresentationContainer,
-  HasSerializedChildState,
-  HasSnapshottableState,
-  initializeUnsavedChanges,
-  SerializedPanelState,
-} from '@kbn/presentation-containers';
+import { apiIsPresentationContainer, HasSerializedChildState } from '@kbn/presentation-containers';
 import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
-import { ComparatorDefinition, StateComparators } from '@kbn/presentation-publishing';
-import React, { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
-import { BehaviorSubject, combineLatest, debounceTime, map, skip, Subscription } from 'rxjs';
+import React, { useImperativeHandle, useMemo, useRef } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { v4 as generateId } from 'uuid';
-import { getReactEmbeddableFactory } from './react_embeddable_registry';
-import {
-  BuildReactEmbeddableApiRegistration,
-  DefaultEmbeddableApi,
-  SetReactEmbeddableApiRegistration,
-} from './types';
 import { PhaseTracker } from './phase_tracker';
-
-const ON_STATE_CHANGE_DEBOUNCE = 100;
+import { getReactEmbeddableFactory } from './react_embeddable_registry';
+import { DefaultEmbeddableApi, EmbeddableApiRegistration } from './types';
 
 /**
  * Renders a component from the React Embeddable registry into a Presentation Panel.
- *
- * TODO: Rename this to simply `Embeddable` when the legacy Embeddable system is removed.
  */
-export const ReactEmbeddableRenderer = <
+export const EmbeddableRenderer = <
   SerializedState extends object = object,
-  RuntimeState extends object = SerializedState,
-  Api extends DefaultEmbeddableApi<SerializedState, RuntimeState> = DefaultEmbeddableApi<
-    SerializedState,
-    RuntimeState
-  >,
+  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
   ParentApi extends HasSerializedChildState<SerializedState> = HasSerializedChildState<SerializedState>
 >({
   type,
   maybeId,
   getParentApi,
   panelProps,
-  onAnyStateChange,
   onApiAvailable,
   hidePanelChrome,
 }: {
@@ -69,13 +48,7 @@ export const ReactEmbeddableRenderer = <
     | 'getActions'
   >;
   hidePanelChrome?: boolean;
-  /**
-   * This `onAnyStateChange` callback allows the parent to keep track of the state of the embeddable
-   * as it changes. This is **not** expected to change over the lifetime of the component.
-   */
-  onAnyStateChange?: (state: SerializedPanelState<SerializedState>) => void;
 }) => {
-  const cleanupFunction = useRef<(() => void) | null>(null);
   const phaseTracker = useRef(new PhaseTracker());
 
   const componentPromise = useMemo(
@@ -83,29 +56,16 @@ export const ReactEmbeddableRenderer = <
       const uuid = maybeId ?? generateId();
 
       /**
-       * Build the embeddable promise
+       * Build the embeddable
        */
       return (async () => {
         const parentApi = getParentApi();
-        const subscriptions = new Subscription();
 
         const buildEmbeddable = async () => {
-          const factory = await getReactEmbeddableFactory<SerializedState, RuntimeState, Api>(type);
-          const serializedState = parentApi.getSerializedStateForChild(uuid);
-          const lastSavedRuntimeState = serializedState
-            ? await factory.deserializeState(serializedState)
-            : ({} as RuntimeState);
+          const factory = await getReactEmbeddableFactory<SerializedState, Api>(type);
 
-          // If the parent provides runtime state for the child (usually as a state backup or cache),
-          // we merge it with the last saved runtime state.
-          const partialRuntimeState = apiHasRuntimeChildState<RuntimeState>(parentApi)
-            ? parentApi.getRuntimeStateForChild(uuid) ?? ({} as Partial<RuntimeState>)
-            : ({} as Partial<RuntimeState>);
-
-          const initialRuntimeState = { ...lastSavedRuntimeState, ...partialRuntimeState };
-
-          const setApi = (
-            apiRegistration: SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>
+          const finalizeApi = (
+            apiRegistration: EmbeddableApiRegistration<SerializedState, Api>
           ) => {
             const hasLockedHoverActions$ = new BehaviorSubject(false);
             return {
@@ -121,62 +81,15 @@ export const ReactEmbeddableRenderer = <
             } as unknown as Api;
           };
 
-          const buildApi = (
-            apiRegistration: BuildReactEmbeddableApiRegistration<
-              SerializedState,
-              RuntimeState,
-              Api
-            >,
-            comparators: StateComparators<RuntimeState>
-          ) => {
-            if (onAnyStateChange) {
-              /**
-               * To avoid unnecessary re-renders, only subscribe to the comparator publishing subjects if
-               * an `onAnyStateChange` callback is provided
-               */
-              const comparatorDefinitions: Array<
-                ComparatorDefinition<RuntimeState, keyof RuntimeState>
-              > = Object.values(comparators);
-              subscriptions.add(
-                combineLatest(comparatorDefinitions.map((comparator) => comparator[0]))
-                  .pipe(
-                    skip(1),
-                    debounceTime(ON_STATE_CHANGE_DEBOUNCE),
-                    map(() => apiRegistration.serializeState())
-                  )
-                  .subscribe((nextSerializedState) => {
-                    onAnyStateChange(nextSerializedState);
-                  })
-              );
-            }
-
-            const unsavedChanges = initializeUnsavedChanges<RuntimeState>(
-              lastSavedRuntimeState,
-              parentApi,
-              comparators
-            );
-
-            const fullApi = setApi({
-              ...apiRegistration,
-              ...unsavedChanges.api,
-            } as unknown as SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>);
-
-            cleanupFunction.current = () => {
-              subscriptions.unsubscribe();
-              phaseTracker.current.cleanup();
-              unsavedChanges.cleanup();
-            };
-            return fullApi as Api & HasSnapshottableState<RuntimeState>;
+          const initialState = parentApi.getSerializedStateForChild(uuid) ?? {
+            rawState: {} as SerializedState,
           };
-
-          const { api, Component } = await factory.buildEmbeddable(
-            initialRuntimeState,
-            buildApi,
+          const { api, Component } = await factory.buildEmbeddable({
+            initialState,
+            finalizeApi,
             uuid,
             parentApi,
-            setApi,
-            lastSavedRuntimeState
-          );
+          });
 
           phaseTracker.current.trackPhaseEvents(uuid, api);
 
@@ -199,7 +112,7 @@ export const ReactEmbeddableRenderer = <
            * */
           const errorApi = {
             uuid,
-            blockingError: new BehaviorSubject(e),
+            blockingError$: new BehaviorSubject(e),
           } as unknown as Api;
           if (apiIsPresentationContainer(parentApi)) {
             errorApi.parentApi = parentApi;
@@ -219,12 +132,6 @@ export const ReactEmbeddableRenderer = <
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [type]
   );
-
-  useEffect(() => {
-    return () => {
-      cleanupFunction.current?.();
-    };
-  }, []);
 
   return (
     <PresentationPanel<Api, {}>

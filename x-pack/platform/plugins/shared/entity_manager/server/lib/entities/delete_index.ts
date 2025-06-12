@@ -19,7 +19,8 @@ export async function deleteIndices(
     await esClient.indices.delete({ index, ignore_unavailable: true });
   } catch (e) {
     logger.error(
-      `Unable to remove entity definition index ${index} for definition [${definition.id}]`
+      `Unable to remove entity definition index ${index} for definition [${definition.id}]`,
+      { error: e }
     );
     throw e;
   }

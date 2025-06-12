@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import moment from 'moment';
 
@@ -22,10 +22,15 @@ import { getMockVersionInfo } from '../__fixtures__/version';
 
 const { currentMajor, prevMajor } = getMockVersionInfo();
 
+jest.mock('../rollup_job', () => ({
+  getRollupJobByIndexName: jest.fn(),
+}));
+
 describe('ReindexActions', () => {
   let client: jest.Mocked<any>;
   let clusterClient: ScopedClusterClientMock;
   let actions: ReindexActions;
+  const log = loggingSystemMock.createLogger();
 
   const unimplemented = (name: string) => () =>
     Promise.reject(`Mock function ${name} was not implemented!`);
@@ -45,7 +50,7 @@ describe('ReindexActions', () => {
       ) as any,
     };
     clusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    actions = reindexActionsFactory(client, clusterClient.asCurrentUser);
+    actions = reindexActionsFactory(client, clusterClient.asCurrentUser, log);
   });
 
   describe('createReindexOp', () => {

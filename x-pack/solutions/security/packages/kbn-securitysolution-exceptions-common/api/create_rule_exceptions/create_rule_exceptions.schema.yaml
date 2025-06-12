@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Create rule exception list items API endpoint
+  title: Create rule exception items API endpoint
   version: '2023-10-31'
 paths:
   /api/detection_engine/rules/{id}/exceptions:
@@ -8,7 +8,7 @@ paths:
       x-labels: [serverless, ess]
       operationId: CreateRuleExceptionListItems
       x-codegen-enabled: true
-      summary: Create rule exception list items
+      summary: Create rule exception items
       description: Create exception items that apply to a single detection rule.
       parameters:
         - name: id
@@ -17,8 +17,11 @@ paths:
           description: Detection rule's identifier
           schema:
             $ref: '#/components/schemas/RuleId'
+          examples:
+            id:
+              value: 330bdd28-eedf-40e1-bed0-f10176c7f9e0
       requestBody:
-        description: Rule exception list items
+        description: Rule exception items.
         required: true
         content:
           application/json:
@@ -30,6 +33,24 @@ paths:
                   items:
                     $ref: '#/components/schemas/CreateRuleExceptionListItemProps'
               required: [items]
+              example:
+                items:
+                  - item_id: simple_list_item
+                    list_id: simple_list
+                    type: simple
+                    name: Sample Exception List Item
+                    description: This is a sample detection type exception item.
+                    entries:
+                      - type: exists
+                        field: actingProcess.file.signer
+                        operator: excluded
+                      - type: match_any
+                        field: host.name
+                        value: [saturn, jupiter]
+                        operator: included
+                    namespace_type: single
+                    os_types: [linux]
+                    tags: [malware]
       responses:
         200:
           description: Successful response
@@ -39,6 +60,33 @@ paths:
                 type: array
                 items:
                   $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItem'
+              examples:
+                ruleExceptionItems:
+                  value:
+                    - id: 71a9f4b2-c85c-49b4-866f-c71eb9e67da2
+                      item_id: simple_list_item
+                      list_id: simple_list
+                      type: simple
+                      name: Sample Exception List Item
+                      description: This is a sample detection type exception item.
+                      entries:
+                        - type: exists
+                          field: actingProcess.file.signer
+                          operator: excluded
+                        - type: match_any
+                          field: host.name
+                          value: [saturn, jupiter]
+                          operator: included
+                      namespace_type: single
+                      os_types: [linux]
+                      tags: [malware]
+                      comments: []
+                      _version: WzQsMV0=
+                      tie_breaker_id: 09434836-9db9-4942-a234-5a9268e0b34c
+                      created_at: 2025-01-07T20:07:33.119Z
+                      created_by: elastic
+                      updated_at: 2025-01-07T20:07:33.119Z
+                      updated_by: elastic
         400:
           description: Invalid input data response
           content:
@@ -47,24 +95,51 @@ paths:
                 oneOf:
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: '[request params]: id: Invalid uuid'
+                badPayload:
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: 'Invalid request payload JSON format'
         401:
           description: Unsuccessful authentication response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]'
         403:
           description: Not enough privileges response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    message: 'Unable to create exception-list'
+                    status_code: 403
         500:
           description: Internal server error response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
 
 components:
   schemas:

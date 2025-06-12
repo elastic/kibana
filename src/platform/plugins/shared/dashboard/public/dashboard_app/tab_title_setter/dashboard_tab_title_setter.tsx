@@ -16,8 +16,8 @@ import { coreServices } from '../../services/kibana_services';
 
 export const DashboardTabTitleSetter = ({ dashboardApi }: { dashboardApi: DashboardApi }) => {
   const [title, lastSavedId] = useBatchedPublishingSubjects(
-    dashboardApi.panelTitle,
-    dashboardApi.savedObjectId
+    dashboardApi.title$,
+    dashboardApi.savedObjectId$
   );
 
   /**

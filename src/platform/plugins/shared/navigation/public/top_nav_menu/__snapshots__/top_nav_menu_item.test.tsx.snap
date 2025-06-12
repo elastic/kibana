@@ -4,6 +4,7 @@ exports[`TopNavMenu Should render an icon-only item 1`] = `
 <EuiToolTip
   content="Test"
   delay="long"
+  disableScreenReaderOutput={false}
   display="inlineBlock"
   position="bottom"
 >
@@ -28,6 +29,6 @@ exports[`TopNavMenu Should render emphasized item which should be clickable 1`] 
   onClick={[Function]}
   size="s"
 >
-  Test
+  <ButtonContainer />
 </EuiButton>
 `;

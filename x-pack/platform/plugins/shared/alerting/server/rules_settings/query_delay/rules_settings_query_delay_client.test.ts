@@ -7,17 +7,15 @@
 
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { RulesSettings } from '../../../common';
 import {
   RULES_SETTINGS_FEATURE_ID,
   RULES_SETTINGS_SAVED_OBJECT_TYPE,
   RULES_SETTINGS_QUERY_DELAY_SAVED_OBJECT_ID,
-  RulesSettings,
   DEFAULT_QUERY_DELAY_SETTINGS,
 } from '../../../common';
-import {
-  RulesSettingsQueryDelayClient,
-  RulesSettingsQueryDelayClientConstructorOptions,
-} from './rules_settings_query_delay_client';
+import type { RulesSettingsQueryDelayClientConstructorOptions } from './rules_settings_query_delay_client';
+import { RulesSettingsQueryDelayClient } from './rules_settings_query_delay_client';
 
 const mockDateString = '2019-02-12T21:01:22.479Z';
 

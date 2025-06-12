@@ -7,14 +7,69 @@
 
 // TODO: https://github.com/elastic/kibana/issues/110895
 
-export * from './types';
-export * from './alert_history_schema';
-export * from './rewrite_request_case';
-export * from './mustache_template';
-export * from './validate_email_addresses';
-export * from './connector_feature_config';
-export * from './execution_log_types';
-export * from './validate_empty_strings';
+export type {
+  SubFeature,
+  ActionType,
+  ValidatedEmail,
+  ActionTypeExecutorResult,
+  ActionTypeExecutorRawResult,
+  ActionsPublicConfigType,
+} from './types';
+export { InvalidEmailReason, isActionTypeExecutorResult } from './types';
+export {
+  ALERT_HISTORY_PREFIX,
+  AlertHistoryDefaultIndexName,
+  AlertHistoryEsIndexConnectorId,
+  buildAlertHistoryDocument,
+  AlertHistoryDocumentTemplate,
+} from './alert_history_schema';
+export type {
+  AsApiContract,
+  RewriteRequestCase,
+  RewriteResponseCase,
+} from './rewrite_request_case';
+export {
+  MustacheInEmailRegExp,
+  hasMustacheTemplate,
+  withoutMustacheTemplate,
+} from './mustache_template';
+export type { ValidateEmailAddressesOptions } from './validate_email_addresses';
+export {
+  validateEmailAddressesAsAlwaysValid,
+  validateEmailAddresses,
+  invalidEmailsAsMessage,
+} from './validate_email_addresses';
+export {
+  AlertingConnectorFeatureId,
+  CasesConnectorFeatureId,
+  UptimeConnectorFeatureId,
+  SecurityConnectorFeatureId,
+  GenerativeAIForSecurityConnectorFeatureId,
+  GenerativeAIForObservabilityConnectorFeatureId,
+  GenerativeAIForSearchPlaygroundConnectorFeatureId,
+  EndpointSecurityConnectorFeatureId,
+  AlertingConnectorFeature,
+  CasesConnectorFeature,
+  UptimeConnectorFeature,
+  SecuritySolutionFeature,
+  GenerativeAIForSecurityFeature,
+  GenerativeAIForObservabilityFeature,
+  GenerativeAIForSearchPlaygroundFeature,
+  EndpointSecurityConnectorFeature,
+  areValidFeatures,
+  getConnectorFeatureName,
+  getConnectorCompatibility,
+} from './connector_feature_config';
+export type {
+  IExecutionLog,
+  IExecutionLogResult,
+  GetGlobalExecutionLogParams,
+  GetGlobalExecutionKPIParams,
+  IExecutionKPIResult,
+  ExecutionLogSortFields,
+} from './execution_log_types';
+export { EMPTY_EXECUTION_KPI_RESULT, executionLogSortableColumns } from './execution_log_types';
+export { validateEmptyStrings } from './validate_empty_strings';
 
 export const BASE_ACTION_API_PATH = '/api/actions';
 export const INTERNAL_BASE_ACTION_API_PATH = '/internal/actions';

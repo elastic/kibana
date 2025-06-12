@@ -69,7 +69,7 @@ import type {
 } from '@kbn/fleet-plugin/common';
 import { createMockPolicyData } from '../endpoint/services/feature_usage/mocks';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../common/endpoint/service/artifacts/constants';
-import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import * as PolicyConfigHelpers from '../../common/endpoint/models/policy_config_helpers';
 import { disableProtections } from '../../common/endpoint/models/policy_config_helpers';
 import type { ProductFeaturesService } from '../lib/product_features_service/product_features_service';
@@ -83,6 +83,7 @@ import type {
 import type { EndpointMetadataService } from '../endpoint/services/metadata';
 import { createEndpointMetadataServiceTestContextMock } from '../endpoint/services/metadata/mocks';
 import { createPolicyDataStreamsIfNeeded as _createPolicyDataStreamsIfNeeded } from './handlers/create_policy_datastreams';
+import { createTelemetryConfigProviderMock } from '../../common/telemetry_config/mocks';
 
 jest.mock('uuid', () => ({
   v4: (): string => 'NEW_UUID',
@@ -118,6 +119,7 @@ describe('Fleet integrations', () => {
   });
   const generator = new EndpointDocGenerator();
   const cloudService = cloudMock.createSetup();
+  const telemetryConfigProviderMock = createTelemetryConfigProviderMock();
   let productFeaturesService: ProductFeaturesService;
   let endpointMetadataService: EndpointMetadataService;
   let logger: Logger;
@@ -157,7 +159,8 @@ describe('Fleet integrations', () => {
       licenseUuid = 'updated-uid',
       clusterUuid = '',
       clusterName = '',
-      isServerlessEnabled = cloudService.isServerlessEnabled
+      isServerlessEnabled = cloudService.isServerlessEnabled,
+      isTelemetryEnabled = true
     ) => ({
       type: 'endpoint',
       enabled: true,
@@ -166,14 +169,15 @@ describe('Fleet integrations', () => {
         integration_config: {},
         policy: {
           value: disableProtections(
-            policyFactory(
+            policyFactory({
               license,
               cloud,
               licenseUuid,
               clusterUuid,
               clusterName,
-              isServerlessEnabled
-            )
+              serverless: isServerlessEnabled,
+              isGlobalTelemetryEnabled: isTelemetryEnabled,
+            })
           ),
         },
         artifact_manifest: { value: manifest },
@@ -187,9 +191,9 @@ describe('Fleet integrations', () => {
         requestContextFactoryMock.create(),
         endpointAppContextStartContract.alerting,
         licenseService,
-        exceptionListClient,
         cloudService,
-        productFeaturesService
+        productFeaturesService,
+        telemetryConfigProviderMock
       );
 
       return callback(
@@ -365,6 +369,19 @@ describe('Fleet integrations', () => {
 
       isBillablePolicySpy.mockRestore();
     });
+
+    it.each([false, true])(
+      'should correctly set `global_telemetry_enabled` to %s',
+      async (targetValue) => {
+        const manifestManager = buildManifestManagerMock();
+        telemetryConfigProviderMock.getIsOptedIn.mockReturnValue(targetValue);
+
+        const packagePolicy = await invokeCallback(manifestManager);
+
+        const policyConfig: PolicyConfig = packagePolicy.inputs[0].config!.policy.value;
+        expect(policyConfig.global_telemetry_enabled).toBe(targetValue);
+      }
+    );
   });
 
   describe('package policy post create callback', () => {
@@ -378,9 +395,14 @@ describe('Fleet integrations', () => {
       soClient = savedObjectsClientMock.create();
       esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       endpointAppContextServiceMock = createMockEndpointAppContextService();
+      jest.clearAllMocks();
       endpointAppContextServiceMock.getExceptionListsClient.mockReturnValue(exceptionListClient);
       callback = getPackagePolicyPostCreateCallback(endpointAppContextServiceMock);
       policyConfig = generator.generatePolicyPackagePolicy() as PackagePolicy;
+      // By default, simulate that the event filter list does not exist
+      (exceptionListClient.getExceptionList as jest.Mock).mockResolvedValue(null);
+      (exceptionListClient.createExceptionList as jest.Mock).mockResolvedValue({});
+      (exceptionListClient.createExceptionListItem as jest.Mock).mockResolvedValue({});
     });
 
     it('should create the Endpoint Event Filters List and add the correct Event Filters List Item attached to the policy given nonInteractiveSession parameter on integration config eventFilters', async () => {
@@ -402,13 +424,19 @@ describe('Fleet integrations', () => {
         req
       );
 
+      // Wait for all async code in createEventFilters to complete
+      await new Promise(process.nextTick);
+
       expect(exceptionListClient.createExceptionList).toHaveBeenCalledWith(
-        expect.objectContaining({ listId: ENDPOINT_EVENT_FILTERS_LIST_ID })
+        expect.objectContaining({
+          listId: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
+          meta: undefined,
+        })
       );
 
       expect(exceptionListClient.createExceptionListItem).toHaveBeenCalledWith(
         expect.objectContaining({
-          listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
+          listId: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
           tags: [`policy:${postCreatedPolicyConfig.id}`],
           osTypes: ['linux'],
           entries: [
@@ -421,6 +449,56 @@ describe('Fleet integrations', () => {
           ],
           itemId: 'NEW_UUID',
           namespaceType: 'agnostic',
+          meta: undefined,
+        })
+      );
+    });
+
+    it('should NOT create the Event Filters List if it already exists, but should add the Event Filters List Item', async () => {
+      const integrationConfig = {
+        type: 'cloud',
+        eventFilters: {
+          nonInteractiveSession: true,
+        },
+      };
+
+      policyConfig.inputs[0]!.config!.integration_config = {
+        value: integrationConfig,
+      };
+
+      // Mock getExceptionList to return a non-null value (list already exists)
+      (exceptionListClient.getExceptionList as jest.Mock).mockResolvedValue({
+        id: 'existing-list-id',
+        listId: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
+      });
+
+      const postCreatedPolicyConfig = await callback(
+        policyConfig,
+        soClient,
+        esClient,
+        requestContextMock.convertContext(ctx),
+        req
+      );
+
+      // Should NOT attempt to create the list
+      expect(exceptionListClient.createExceptionList).not.toHaveBeenCalled();
+      // Should still create the event filter item
+      expect(exceptionListClient.createExceptionListItem).toHaveBeenCalledWith(
+        expect.objectContaining({
+          listId: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
+          tags: [`policy:${postCreatedPolicyConfig.id}`],
+          osTypes: ['linux'],
+          entries: [
+            {
+              field: 'process.entry_leader.interactive',
+              operator: 'included',
+              type: 'match',
+              value: 'false',
+            },
+          ],
+          itemId: 'NEW_UUID',
+          namespaceType: 'agnostic',
+          meta: undefined,
         })
       );
     });
@@ -557,6 +635,17 @@ describe('Fleet integrations', () => {
   });
 
   describe('package policy update callback', () => {
+    let endpointAppContextServiceMock: ReturnType<typeof createMockEndpointAppContextService>;
+
+    beforeEach(() => {
+      endpointAppContextServiceMock = createMockEndpointAppContextService();
+      endpointAppContextServiceMock.getExceptionListsClient.mockReturnValue(exceptionListClient);
+      endpointAppContextServiceMock.getLicenseService.mockReturnValue(licenseService);
+      (
+        endpointAppContextServiceMock.getInternalFleetServices().packagePolicy.get as jest.Mock
+      ).mockResolvedValue(createMockPolicyData());
+    });
+
     describe('when the license is below platinum', () => {
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -567,12 +656,8 @@ describe('Fleet integrations', () => {
       it('returns an error if paid features are turned on in the policy', async () => {
         const mockPolicy = policyFactory(); // defaults with paid features on
         const callback = getPackagePolicyUpdateCallback(
-          logger,
-          licenseService,
-          endpointAppContextStartContract.featureUsageService,
-          endpointMetadataService,
+          endpointAppContextServiceMock,
           cloudService,
-          esClient,
           productFeaturesService
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
@@ -587,12 +672,8 @@ describe('Fleet integrations', () => {
         const mockPolicy = policyFactoryWithoutPaidFeatures();
         mockPolicy.windows.malware.mode = ProtectionModes.detect;
         const callback = getPackagePolicyUpdateCallback(
-          logger,
-          licenseService,
-          endpointAppContextStartContract.featureUsageService,
-          endpointMetadataService,
+          endpointAppContextServiceMock,
           cloudService,
-          esClient,
           productFeaturesService
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
@@ -621,12 +702,8 @@ describe('Fleet integrations', () => {
           ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_protection_updates')
         );
         const callback = getPackagePolicyUpdateCallback(
-          logger,
-          licenseService,
-          endpointAppContextStartContract.featureUsageService,
-          endpointMetadataService,
+          endpointAppContextServiceMock,
           cloudService,
-          esClient,
           productFeaturesService
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
@@ -643,12 +720,8 @@ describe('Fleet integrations', () => {
           ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_custom_notification')
         );
         const callback = getPackagePolicyUpdateCallback(
-          logger,
-          licenseService,
-          endpointAppContextStartContract.featureUsageService,
-          endpointMetadataService,
+          endpointAppContextServiceMock,
           cloudService,
-          esClient,
           productFeaturesService
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
@@ -699,12 +772,8 @@ describe('Fleet integrations', () => {
         async ({ date, message }) => {
           const mockPolicy = policyFactory(); // defaults with paid features on
           const callback = getPackagePolicyUpdateCallback(
-            logger,
-            licenseService,
-            endpointAppContextStartContract.featureUsageService,
-            endpointMetadataService,
+            endpointAppContextServiceMock,
             cloudService,
-            esClient,
             productFeaturesService
           );
           const policyConfig = generator.generatePolicyPackagePolicy();
@@ -764,12 +833,8 @@ describe('Fleet integrations', () => {
         async ({ date, message }) => {
           const mockPolicy = policyFactory(); // defaults with paid features on
           const callback = getPackagePolicyUpdateCallback(
-            logger,
-            licenseService,
-            endpointAppContextStartContract.featureUsageService,
-            endpointMetadataService,
+            endpointAppContextServiceMock,
             cloudService,
-            esClient,
             productFeaturesService
           );
           const policyConfig = generator.generatePolicyPackagePolicy();
@@ -807,12 +872,8 @@ describe('Fleet integrations', () => {
         const mockPolicy = policyFactory();
         mockPolicy.windows.popup.malware.message = 'paid feature';
         const callback = getPackagePolicyUpdateCallback(
-          logger,
-          licenseService,
-          endpointAppContextStartContract.featureUsageService,
-          endpointMetadataService,
+          endpointAppContextServiceMock,
           cloudService,
-          esClient,
           productFeaturesService
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
@@ -832,12 +893,8 @@ describe('Fleet integrations', () => {
           ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_policy_protections')
         );
         const callback = getPackagePolicyUpdateCallback(
-          logger,
-          licenseService,
-          endpointAppContextStartContract.featureUsageService,
-          endpointMetadataService,
+          endpointAppContextServiceMock,
           cloudService,
-          esClient,
           productFeaturesService
         );
 
@@ -911,12 +968,8 @@ describe('Fleet integrations', () => {
         mockPolicy.meta.serverless = false;
         mockPolicy.meta.billable = false;
         const callback = getPackagePolicyUpdateCallback(
-          logger,
-          licenseService,
-          endpointAppContextStartContract.featureUsageService,
-          endpointMetadataService,
+          endpointAppContextServiceMock,
           cloudService,
-          esClient,
           productFeaturesService
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
@@ -949,12 +1002,8 @@ describe('Fleet integrations', () => {
         mockPolicy.meta.serverless = false;
         mockPolicy.meta.billable = false;
         const callback = getPackagePolicyUpdateCallback(
-          logger,
-          licenseService,
-          endpointAppContextStartContract.featureUsageService,
-          endpointMetadataService,
+          endpointAppContextServiceMock,
           cloudService,
-          esClient,
           productFeaturesService
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
@@ -991,12 +1040,8 @@ describe('Fleet integrations', () => {
         licenseEmitter.next(Platinum);
 
         callback = getPackagePolicyUpdateCallback(
-          logger,
-          licenseService,
-          endpointAppContextStartContract.featureUsageService,
-          endpointMetadataService,
+          endpointAppContextServiceMock,
           cloudService,
-          esClient,
           productFeaturesService
         );
 
@@ -1090,12 +1135,8 @@ describe('Fleet integrations', () => {
       licenseEmitter.next(Enterprise);
 
       const callback = getPackagePolicyUpdateCallback(
-        logger,
-        licenseService,
-        endpointAppContextStartContract.featureUsageService,
-        endpointMetadataService,
+        endpointAppContextServiceMock,
         cloudService,
-        esClient,
         productFeaturesService
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
@@ -1128,19 +1169,22 @@ describe('Fleet integrations', () => {
   });
 
   describe('package policy delete callback', () => {
-    const soClient = savedObjectsClientMock.create();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-
-    const invokeDeleteCallback = async (): Promise<void> => {
-      const callback = getPackagePolicyDeleteCallback(exceptionListClient, soClient);
-      await callback(deletePackagePolicyMock(), soClient, esClient);
-    };
-
+    let endpointServicesMock: ReturnType<typeof createMockEndpointAppContextService>;
     let removedPolicies: PostDeletePackagePoliciesResponse;
     let policyId: string;
     let fakeArtifact: ExceptionListSchema;
+    const invokeDeleteCallback = async (): Promise<void> => {
+      const callback = getPackagePolicyDeleteCallback(endpointServicesMock);
+      await callback(
+        deletePackagePolicyMock(),
+        endpointServicesMock.savedObjects.createInternalScopedSoClient(),
+        endpointServicesMock.getInternalEsClient()
+      );
+    };
 
     beforeEach(() => {
+      endpointServicesMock = createMockEndpointAppContextService();
+      endpointServicesMock.getExceptionListsClient.mockReturnValue(exceptionListClient);
       removedPolicies = deletePackagePolicyMock();
       policyId = removedPolicies[0].id;
       fakeArtifact = {
@@ -1157,7 +1201,9 @@ describe('Fleet integrations', () => {
     });
 
     it('removes policy from artifact', async () => {
-      soClient.find.mockResolvedValueOnce({
+      const soClientMock = endpointServicesMock.savedObjects.createInternalScopedSoClient();
+
+      (soClientMock.find as jest.Mock).mockResolvedValueOnce({
         total: 1,
         saved_objects: [
           {
@@ -1199,7 +1245,9 @@ describe('Fleet integrations', () => {
         tags: [],
       });
 
-      expect(soClient.delete).toBeCalledWith('policy-settings-protection-updates-note', 'id');
+      expect(
+        endpointServicesMock.savedObjects.createInternalScopedSoClient().delete
+      ).toBeCalledWith('policy-settings-protection-updates-note', 'id', { force: true });
     });
   });
 });

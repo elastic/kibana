@@ -6,7 +6,7 @@
  */
 
 import { setMockValues } from '../../../../../__mocks__/kea_logic';
-import { crawlerIndex } from '../../../../__mocks__/view_index.mock';
+import { connectorIndex } from '../../../../__mocks__/view_index.mock';
 
 import React from 'react';
 
@@ -20,14 +20,14 @@ import { IngestPipelinesCard } from './ingest_pipelines_card';
 
 const DEFAULT_VALUES = {
   // IndexViewLogic
-  indexName: crawlerIndex.name,
-  ingestionMethod: 'crawler',
+  indexName: connectorIndex.name,
+  ingestionMethod: 'connector',
   // FetchCustomPipelineApiLogic
   data: undefined,
   // PipelinesLogic
   canSetPipeline: true,
   hasIndexIngestionPipeline: false,
-  index: crawlerIndex,
+  index: connectorIndex,
   pipelineName: DEFAULT_PIPELINE_NAME,
   pipelineState: {
     extract_binary_content: true,

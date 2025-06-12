@@ -17,6 +17,10 @@ import { buildGlobalTags, createOpIdGenerator } from './util';
 
 export const openApiVersion = '3.0.0';
 
+export interface Env {
+  serverless: boolean;
+}
+
 export interface GenerateOpenApiDocumentOptionsFilters {
   pathStartsWith?: string[];
   excludePathsMatching?: string[];
@@ -36,13 +40,14 @@ export interface GenerateOpenApiDocumentOptions {
   baseUrl: string;
   docsUrl?: string;
   tags?: string[];
+  env?: Env;
   filters?: GenerateOpenApiDocumentOptionsFilters;
 }
 
-export const generateOpenApiDocument = (
+export const generateOpenApiDocument = async (
   appRouters: { routers: Router[]; versionedRouters: CoreVersionedRouter[] },
   opts: GenerateOpenApiDocumentOptions
-): OpenAPIV3.Document => {
+): Promise<OpenAPIV3.Document> => {
   let { filters = { access: 'public' } } = opts;
   if (filters.access === 'public' && !filters.version) {
     filters = { ...filters, version: SERVERLESS_VERSION_2023_10_31 };
@@ -50,12 +55,25 @@ export const generateOpenApiDocument = (
   const converter = new OasConverter();
   const paths: OpenAPIV3.PathsObject = {};
   const getOpId = createOpIdGenerator();
+  const env = opts.env || { serverless: false };
   for (const router of appRouters.routers) {
-    const result = processRouter(router, converter, getOpId, filters);
+    const result = await processRouter({
+      appRouter: router,
+      converter,
+      getOpId,
+      filters,
+      env,
+    });
     Object.assign(paths, result.paths);
   }
   for (const router of appRouters.versionedRouters) {
-    const result = processVersionedRouter(router, converter, getOpId, filters);
+    const result = await processVersionedRouter({
+      appRouter: router,
+      converter,
+      getOpId,
+      filters,
+      env,
+    });
     Object.assign(paths, result.paths);
   }
   const tags = buildGlobalTags(paths, opts.tags);

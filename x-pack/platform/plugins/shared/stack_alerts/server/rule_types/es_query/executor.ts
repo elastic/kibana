@@ -7,9 +7,13 @@
 
 import { sha256 } from 'js-sha256';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup } from '@kbn/core/server';
-import { getEcsGroups } from '@kbn/observability-alerting-rule-utils';
-import { isGroupAggregation, UngroupedGroupId } from '@kbn/triggers-actions-ui-plugin/common';
+import type { CoreSetup } from '@kbn/core/server';
+import { getEcsGroups } from '@kbn/alerting-rule-utils';
+import {
+  isGroupAggregation,
+  isPerRowAggregation,
+  UngroupedGroupId,
+} from '@kbn/triggers-actions-ui-plugin/common';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -18,22 +22,20 @@ import {
 } from '@kbn/rule-data-utils';
 
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
+import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 
-import { ComparatorFns } from '../../../common';
-import {
-  addMessages,
-  EsQueryRuleActionContext,
-  getContextConditionsDescription,
-} from './action_context';
-import {
+import { ComparatorFns } from '@kbn/response-ops-rule-params/common';
+import { unflattenObject } from '@kbn/object-utils';
+import type { EsQueryRuleActionContext } from './action_context';
+import { addMessages, getContextConditionsDescription } from './action_context';
+import type {
   ExecutorOptions,
   OnlyEsQueryRuleParams,
   OnlySearchSourceRuleParams,
   OnlyEsqlQueryRuleParams,
 } from './types';
-import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
+import { ActionGroupId, ConditionMetAlertInstanceId } from '../../../common/es_query';
 import { fetchEsQuery } from './lib/fetch_es_query';
-import { EsQueryRuleParams } from './rule_type_params';
 import { fetchSearchSourceQuery } from './lib/fetch_search_source_query';
 import { isEsqlQueryRule, isSearchSourceRule } from './util';
 import { fetchEsqlQuery } from './lib/fetch_esql_query';
@@ -57,14 +59,14 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     throw new AlertsClientError();
   }
   const currentTimestamp = new Date().toISOString();
-  const publicBaseUrl = core.http.basePath.publicBaseUrl ?? '';
-  const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
+  const spacePrefix = spaceId !== 'default' ? spaceId : '';
   const alertLimit = alertsClient.getAlertLimitValue();
   const compareFn = ComparatorFns.get(params.thresholdComparator);
   if (compareFn == null) {
     throw new Error(getInvalidComparatorError(params.thresholdComparator));
   }
-  const isGroupAgg = isGroupAggregation(params.termField);
+  const isGroupAgg =
+    isGroupAggregation(params.termField) || (esqlQueryRule && isPerRowAggregation(params.groupBy));
   // For ungrouped queries, we run the configured query during each rule run, get a hit count
   // and retrieve up to params.size hits. We evaluate the threshold condition using the
   // value of the hit count. If the threshold condition is met, the hits are counted
@@ -98,11 +100,11 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         alertLimit,
         params: params as OnlyEsqlQueryRuleParams,
         spacePrefix,
-        publicBaseUrl,
         services: {
           share,
           scopedClusterClient,
           logger,
+          ruleResultService,
         },
         dateStart,
         dateEnd,
@@ -113,9 +115,9 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         alertLimit,
         params: params as OnlyEsQueryRuleParams,
         timestamp: latestTimestamp,
-        publicBaseUrl,
         spacePrefix,
         services: {
+          share,
           scopedClusterClient,
           logger,
           ruleResultService,
@@ -123,8 +125,17 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         dateStart,
         dateEnd,
       });
+
+  const resultGroupSet = new Set<string>();
+  for (const result of parsedResults.results) {
+    resultGroupSet.add(result.group);
+  }
+
   const unmetGroupValues: Record<string, number> = {};
   for (const result of parsedResults.results) {
+    const groupingObject = result.groupingObject
+      ? unflattenObject(result.groupingObject)
+      : undefined;
     const alertId = result.group;
     const value = result.value ?? result.count;
 
@@ -143,6 +154,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       hits: result.hits,
       link,
       sourceFields: result.sourceFields,
+      grouping: groupingObject,
     };
     const baseActiveContext: EsQueryRuleActionContext = {
       ...baseContext,
@@ -170,7 +182,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     alertsClient.report({
       id,
       actionGroup: ActionGroupId,
-      state: { latestTimestamp, dateStart, dateEnd },
+      state: { latestTimestamp, dateStart, dateEnd, grouping: groupingObject },
       context: actionContext,
       payload: {
         [ALERT_URL]: actionContext.link,
@@ -186,6 +198,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     if (!isGroupAgg) {
       // update the timestamp based on the current search results
       const firstValidTimefieldSort = getValidTimefieldSort(
+        // @ts-expect-error `sort` now depends on `FieldValue` that is too broad
         result.hits.find((hit) => getValidTimefieldSort(hit.sort))?.sort
       );
       if (firstValidTimefieldSort) {
@@ -196,8 +209,13 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
   alertsClient.setAlertLimitReached(parsedResults.truncated);
 
   const { getRecoveredAlerts } = alertsClient;
-  for (const recoveredAlert of getRecoveredAlerts()) {
+
+  const recoveredAlerts = getRecoveredAlerts() ?? [];
+
+  for (const recoveredAlert of recoveredAlerts) {
     const alertId = recoveredAlert.alert.getId();
+    const recoveredAlertState = recoveredAlert.alert.getState();
+
     const baseRecoveryContext: EsQueryRuleActionContext = {
       title: name,
       date: currentTimestamp,
@@ -214,6 +232,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         ...(isGroupAgg ? { group: alertId } : {}),
       }),
       sourceFields: [],
+      grouping: recoveredAlertState?.grouping,
     } as EsQueryRuleActionContext;
     const recoveryContext = addMessages({
       ruleName: name,

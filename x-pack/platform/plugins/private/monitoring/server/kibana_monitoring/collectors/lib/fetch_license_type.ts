@@ -7,7 +7,7 @@
 
 import { get } from 'lodash';
 import { ElasticsearchClient } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../common/constants';
 import { getCcsIndexPattern } from '../../../lib/alerts/get_ccs_index_pattern';
 
@@ -23,35 +23,33 @@ export async function fetchLicenseType(
   const params: estypes.SearchRequest = {
     index,
     filter_path: ['hits.hits._source.license'],
-    body: {
-      size: 1,
-      sort: [
-        {
-          timestamp: {
-            order: 'desc',
-            unmapped_type: 'long',
+    size: 1,
+    sort: [
+      {
+        timestamp: {
+          order: 'desc',
+          unmapped_type: 'long',
+        },
+      },
+    ],
+    query: {
+      bool: {
+        must: [
+          {
+            term: {
+              cluster_uuid: {
+                value: clusterUuid,
+              },
+            },
           },
-        },
-      ],
-      query: {
-        bool: {
-          must: [
-            {
-              term: {
-                cluster_uuid: {
-                  value: clusterUuid,
-                },
+          {
+            term: {
+              type: {
+                value: 'cluster_stats',
               },
             },
-            {
-              term: {
-                type: {
-                  value: 'cluster_stats',
-                },
-              },
-            },
-          ],
-        },
+          },
+        ],
       },
     },
   };

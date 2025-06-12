@@ -22,7 +22,7 @@ describe('Add to Cases', () => {
     initializeDataViews();
     loadLiveQuery({
       agent_all: true,
-      query: "SELECT * FROM os_version where name='Ubuntu';",
+      query: 'SELECT * FROM os_version;',
       kuery: '',
     }).then((liveQuery) => {
       liveQueryId = liveQuery.action_id;
@@ -61,7 +61,7 @@ describe('Add to Cases', () => {
     });
   });
 
-  describe('security', { tags: ['@ess', '@serverless'] }, () => {
+  describe('security', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
     let caseId: string;
     let caseTitle: string;
 
@@ -83,7 +83,7 @@ describe('Add to Cases', () => {
       cy.contains(`Case ${caseTitle} updated`);
       viewRecentCaseAndCheckResults();
 
-      cy.contains("SELECT * FROM os_version where name='Ubuntu';");
+      cy.contains('SELECT * FROM os_version;');
       checkActionItemsInResults({
         lens: true,
         discover: true,

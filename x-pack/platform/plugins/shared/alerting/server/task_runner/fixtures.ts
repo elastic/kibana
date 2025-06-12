@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import type { TaskPriority } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import { SavedObject } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import {
+import type {
   Rule,
   RuleTypeParams,
-  RecoveredActionGroup,
   RuleMonitoring,
-  RuleLastRunOutcomeOrderMap,
   RuleLastRunOutcomes,
   SanitizedRule,
   SanitizedRuleAction,
 } from '../../common';
+import { RecoveredActionGroup, RuleLastRunOutcomeOrderMap } from '../../common';
 import { getDefaultMonitoring } from '../lib/monitoring';
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { EVENT_LOG_ACTIONS } from '../plugin';
-import { AlertHit, RawRule } from '../types';
+import type { AlertHit, RawRule } from '../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 
 interface GeneratorParams {
@@ -100,6 +100,8 @@ export const generateRuleUpdateParams = ({
               metrics: {
                 duration: 0,
                 gap_duration_s: null,
+                // TODO: uncomment after intermidiate release
+                // gap_range: null,
                 total_alerts_created: null,
                 total_alerts_detected: null,
                 total_indexing_duration_ms: null,
@@ -152,6 +154,7 @@ export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   executor: jest.fn(),
   category: 'test',
   producer: 'alerts',
+  solution: 'stack',
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
   autoRecoverAlerts: true,
@@ -295,6 +298,16 @@ export const mockedRule: SanitizedRule<typeof mockedRawRuleSO.attributes.params>
     } as SanitizedRuleAction;
   }),
   isSnoozedUntil: undefined,
+  artifacts: {
+    dashboards: [
+      {
+        id: 'dashboard-1',
+      },
+    ],
+    investigation_guide: {
+      blob: '## Summary',
+    },
+  },
 };
 
 export const mockTaskInstance = () => ({
@@ -325,7 +338,7 @@ export const generateAlertOpts = ({
   maintenanceWindowIds,
 }: GeneratorParams = {}) => {
   id = id ?? '1';
-  let message: string = '';
+  let message = '';
   switch (action) {
     case EVENT_LOG_ACTIONS.newInstance:
       message = `test:1: 'rule-name' created new alert: '${id}'`;
@@ -366,6 +379,7 @@ export const generateRunnerResult = ({
   alertRecoveredInstances = {},
   summaryActions = {},
   taskRunError,
+  trackedExecutions = ['5f6aa57d-3e22-484e-bae8-cbed868f4d28'],
 }: GeneratorParams = {}) => {
   return {
     monitoring: {
@@ -379,6 +393,8 @@ export const generateRunnerResult = ({
           metrics: {
             duration: 0,
             gap_duration_s: null,
+            // TODO: uncomment after intermidiate release
+            // gap_range: null,
             total_alerts_created: null,
             total_alerts_detected: null,
             total_indexing_duration_ms: null,
@@ -397,6 +413,7 @@ export const generateRunnerResult = ({
       ...(state && { alertTypeState: {} }),
       ...(state && { previousStartedAt: new Date('1970-01-01T00:00:00.000Z').toISOString() }),
       ...(state && { summaryActions }),
+      ...(state && { trackedExecutions }),
     },
     taskRunError,
   };
@@ -408,14 +425,20 @@ export const generateEnqueueFunctionInput = ({
   isBulk = false,
   isResolved,
   foo,
+  consumer,
   actionTypeId,
+  priority,
+  apiKeyId,
 }: {
   uuid?: string;
   id: string;
   isBulk?: boolean;
   isResolved?: boolean;
   foo?: boolean;
+  consumer?: string;
   actionTypeId?: string;
+  priority?: TaskPriority;
+  apiKeyId?: string;
 }) => {
   const input = {
     actionTypeId: actionTypeId || 'action',
@@ -427,7 +450,7 @@ export const generateEnqueueFunctionInput = ({
       ...(isResolved !== undefined ? { isResolved } : {}),
       ...(foo !== undefined ? { foo } : {}),
     },
-    consumer: 'bar',
+    consumer: consumer ?? 'bar',
     relatedSavedObjects: [
       {
         id: '1',
@@ -444,6 +467,8 @@ export const generateEnqueueFunctionInput = ({
       type: 'SAVED_OBJECT',
     },
     spaceId: 'default',
+    ...(priority && { priority }),
+    ...(apiKeyId && { apiKeyId }),
   };
   return isBulk ? [input] : input;
 };

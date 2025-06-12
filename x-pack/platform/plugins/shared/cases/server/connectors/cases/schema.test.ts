@@ -107,6 +107,12 @@ describe('CasesConnectorRunParamsSchema', () => {
       ).toThrow();
     });
 
+    it('throws if the timeWindow is less than 5 minutes', () => {
+      expect(() =>
+        CasesConnectorRunParamsSchema.validate(getParams({ timeWindow: '3m' }))
+      ).toThrow();
+    });
+
     it('throws if there is a non valid letter at the end', () => {
       expect(() =>
         CasesConnectorRunParamsSchema.validate(getParams({ timeWindow: '10d#' }))
@@ -137,13 +143,13 @@ describe('CasesConnectorRunParamsSchema', () => {
       ).not.toThrow();
     });
 
-    it.each(['s', 'm', 'H', 'h', 'M', 'y'])('does not allow time unit %s', (unit) => {
+    it.each(['s', 'y', 'M', 'H'])('does not allow time unit %s', (unit) => {
       expect(() =>
         CasesConnectorRunParamsSchema.validate(getParams({ timeWindow: `5${unit}` }))
       ).toThrow();
     });
 
-    it.each(['d', 'w'])('allows time unit %s', (unit) => {
+    it.each(['d', 'w', 'h', 'm'])('allows time unit %s', (unit) => {
       expect(() =>
         CasesConnectorRunParamsSchema.validate(getParams({ timeWindow: `5${unit}` }))
       ).not.toThrow();

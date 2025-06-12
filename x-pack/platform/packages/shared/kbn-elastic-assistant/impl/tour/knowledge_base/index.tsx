@@ -20,7 +20,7 @@ import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../const';
 import { knowledgeBaseTourStepOne, tourConfig } from './step_config';
 import * as i18n from './translations';
 
-interface TourState {
+export interface TourState {
   currentTourStep: number;
   isTourActive: boolean;
 }

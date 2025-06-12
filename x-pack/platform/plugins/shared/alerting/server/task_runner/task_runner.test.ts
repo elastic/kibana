@@ -7,26 +7,28 @@
 
 import sinon from 'sinon';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
-import {
+import type {
   RuleExecutorOptions,
   RuleTypeParams,
   RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
-  RuleExecutionStatusWarningReasons,
   Rule,
   RuleAction,
   RuleAlertData,
+} from '../types';
+import {
+  RuleExecutionStatusWarningReasons,
   DEFAULT_FLAPPING_SETTINGS,
   DEFAULT_QUERY_DELAY_SETTINGS,
 } from '../types';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import {
-  ConcreteTaskInstance,
   createTaskRunError,
   isUnrecoverableError,
   TaskErrorSource,
 } from '@kbn/task-manager-plugin/server';
-import { TaskRunnerContext } from './types';
+import type { TaskRunnerContext } from './types';
 import { TaskRunner } from './task_runner';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
@@ -38,11 +40,11 @@ import {
   elasticsearchServiceMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { actionsMock, actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { alertsMock } from '../mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
-import { IEventLogger } from '@kbn/event-log-plugin/server';
+import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { omit } from 'lodash';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
@@ -74,15 +76,13 @@ import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IN_MEMORY_METRICS } from '../monitoring';
 import { translations } from '../constants/translations';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
-import {
-  AlertingEventLogger,
-  ContextOpts,
-} from '../lib/alerting_event_logger/alerting_event_logger';
+import type { ContextOpts } from '../lib/alerting_event_logger/alerting_event_logger';
+import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { getAlertFromRaw } from '../rules_client/lib/get_alert_from_raw';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
-import { SharePluginStart } from '@kbn/share-plugin/server';
+import type { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
@@ -90,14 +90,16 @@ import { alertsClientMock } from '../alerts_client/alerts_client.mock';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { RuleResultService } from '../monitoring/rule_result_service';
+import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { ruleResultServiceMock } from '../monitoring/rule_result_service.mock';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import * as getExecutorServicesModule from './get_executor_services';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
 import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
-import { MaintenanceWindow } from '../application/maintenance_window/types';
+import type { MaintenanceWindow } from '../application/maintenance_window/types';
 import { ErrorWithType } from '../lib/error_with_type';
+import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -195,6 +197,7 @@ describe('Task Runner', () => {
     uiSettings: uiSettingsService,
     usageCounter: mockUsageCounter,
     isServerless: false,
+    getEventLogClient: jest.fn().mockReturnValue(eventLogClientMock.create()),
   };
 
   beforeEach(() => {
@@ -339,6 +342,33 @@ describe('Task Runner', () => {
     expect(
       jest.requireMock('../lib/wrap_scoped_cluster_client').createWrappedScopedClusterClientFactory
     ).toHaveBeenCalled();
+  });
+
+  test('throws error when schedule.interval is not provided', async () => {
+    mockGetAlertFromRaw.mockReturnValue({ ...mockedRuleTypeSavedObject, schedule: {} } as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      ...mockedRawRuleSO,
+      attributes: { ...mockedRawRuleSO.attributes, schedule: {} },
+    });
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+        },
+        // @ts-ignore
+        schedule: {},
+      },
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+      internalSavedObjectsRepository,
+    });
+
+    await expect(taskRunner.run()).rejects.toThrowErrorMatchingInlineSnapshot(
+      '"Interval is required to calculate next run"'
+    );
   });
 
   test('actionsPlugin.execute is called per alert alert that is scheduled', async () => {
@@ -1627,8 +1657,9 @@ describe('Task Runner', () => {
       ongoing: { count: 0, data: [] },
       recovered: { count: 0, data: [] },
     });
+    alertsClient.getTrackedExecutions.mockResolvedValue([]);
 
-    alertsClient.getAlertsToSerialize.mockResolvedValueOnce({ state: {}, meta: {} });
+    alertsClient.getRawAlertInstancesForState.mockResolvedValueOnce({ state: {}, meta: {} });
     alertsService.createAlertsClient.mockImplementation(() => alertsClient);
 
     const taskRunner = new TaskRunner({
@@ -3222,7 +3253,44 @@ describe('Task Runner', () => {
     expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.USER);
   });
 
-  test('reschedules when persistAlerts returns a cluster_block_exception', async () => {
+  test('when there is a gap, report it to alert event log', async () => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+    jest.spyOn(RuleMonitoringService.prototype, 'getMonitoring').mockImplementation(() => {
+      return {
+        run: {
+          history: [],
+          calculated_metrics: {
+            success_ratio: 0,
+          },
+          last_run: {
+            timestamp: '2021-09-01T00:00:00.000Z',
+            metrics: {
+              gap_range: {
+                gte: '2021-09-01T00:00:00.000Z',
+                lte: '2021-09-01T00:00:00.001Z',
+              },
+            },
+          },
+        },
+      };
+    });
+
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+      internalSavedObjectsRepository,
+    });
+
+    await taskRunner.run();
+
+    expect(alertingEventLogger.reportGap).toHaveBeenCalledWith({
+      gap: { gte: '2021-09-01T00:00:00.000Z', lte: '2021-09-01T00:00:00.001Z' },
+    });
+  });
+
+  test('reschedules when persistAlerts returns an exception', async () => {
     const err = new ErrorWithType({
       message: 'Index is blocked',
       type: 'cluster_block_exception',
@@ -3253,6 +3321,78 @@ describe('Task Runner', () => {
         tags: ['1', 'test', 'rule-run-failed', 'framework-error'],
       }
     );
+  });
+
+  test('reschedules when getting tracked alerts returns an exception', async () => {
+    const err = new Error(GENERIC_ERROR_MESSAGE);
+    alertsClient.initializeExecution.mockRejectedValueOnce(err);
+    alertsService.createAlertsClient.mockImplementation(() => alertsClient);
+
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+      internalSavedObjectsRepository,
+    });
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(mockedRawRuleSO);
+
+    const runnerResult = await taskRunner.run();
+
+    expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.FRAMEWORK);
+    expect(runnerResult.state).toEqual(mockedTaskInstance.state);
+    expect(runnerResult.schedule!.interval).toEqual('10s');
+    expect(runnerResult.taskRunError).toMatchInlineSnapshot('[Error: GENERIC ERROR MESSAGE]');
+    expect(logger.debug).toHaveBeenCalledWith(
+      'ruleRunStatus for test:1: {"outcome":"failed","outcomeOrder":20,"warning":"unknown","outcomeMsg":["GENERIC ERROR MESSAGE"],"alertsCount":{}}',
+      {
+        tags: ['1', 'test'],
+      }
+    );
+  });
+
+  test('should remove the oldest execution id and return the tracked executions', async () => {
+    alertsClient.getTrackedExecutions.mockReturnValue(['1111', '2222', '3333', '4444', '5555']);
+    alertsClient.getProcessedAlerts.mockReturnValue({});
+    alertsClient.getSummarizedAlerts.mockResolvedValue({
+      new: {
+        count: 1,
+        data: [mockAAD],
+      },
+      ongoing: { count: 0, data: [] },
+      recovered: { count: 0, data: [] },
+    });
+
+    alertsClient.getRawAlertInstancesForState.mockResolvedValueOnce({ state: {}, meta: {} });
+    alertsService.createAlertsClient.mockImplementation(() => alertsClient);
+
+    rulesSettingsService.getSettings.mockResolvedValue({
+      flappingSettings: { ...DEFAULT_FLAPPING_SETTINGS, lookBackWindow: 5 },
+      queryDelaySettings: DEFAULT_QUERY_DELAY_SETTINGS,
+    });
+
+    alertsService.createAlertsClient.mockImplementation(() => alertsClient);
+
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+      internalSavedObjectsRepository,
+    });
+    expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
+
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+    const runnerResult = await taskRunner.run();
+    expect(runnerResult.state.trackedExecutions).toEqual([
+      '2222',
+      '3333',
+      '4444',
+      '5555',
+      '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+    ]);
   });
 
   function testAlertingEventLogCalls({

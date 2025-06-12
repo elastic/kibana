@@ -8,11 +8,13 @@
  */
 
 import type { SavedObjectsType } from './saved_objects_type';
-
 /**
  * Registry holding information about all the registered {@link SavedObjectsType | saved object types}.
  */
 export interface ISavedObjectTypeRegistry {
+  /** Return legacy types, this types can't be registered */
+  getLegacyTypes(): string[];
+
   /**
    * Return the {@link SavedObjectsType | type} definition for given type name.
    */
@@ -90,4 +92,10 @@ export interface ISavedObjectTypeRegistry {
    * `false` if the type is not registered or does not define a management section.
    */
   isImportableAndExportable(type: string): boolean;
+
+  /**
+   * Returns the `nameAttribute` property for given type, or `unknown` if
+   * the property/type is not registered.
+   */
+  getNameAttribute(type: string): string;
 }

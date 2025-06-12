@@ -8,21 +8,43 @@
 import { i18n } from '@kbn/i18n';
 import { IngestDataCodeExamples } from '../types';
 
-import { JSServerlessIngestVectorDataExample } from './javascript';
-import { PythonServerlessVectorsIngestDataExample } from './python';
-import { ConsoleVectorsIngestDataExample } from './sense';
-import { CurlVectorsIngestDataExample } from './curl';
+import { JSIngestDataExample, JSSemanticIngestDataExample } from './javascript';
+import { PythonIngestDataExample, PythonSemanticIngestDataExample } from './python';
+import { ConsoleIngestDataExample, ConsoleSemanticIngestDataExample } from './sense';
+import { CurlIngestDataExample } from './curl';
 import { INSTALL_INSTRUCTIONS_TITLE, INSTALL_INSTRUCTIONS_DESCRIPTION } from './constants';
 
-export const DenseVectorServerlessCodeExamples: IngestDataCodeExamples = {
+const addMappingsTitle = i18n.translate(
+  'xpack.searchIndices.codeExamples.serverless.denseVector.mappingsTitle',
+  {
+    defaultMessage: 'Define field mappings',
+  }
+);
+
+export const DefaultIngestDataCodeExamples: IngestDataCodeExamples = {
   installTitle: INSTALL_INSTRUCTIONS_TITLE,
   installDescription: INSTALL_INSTRUCTIONS_DESCRIPTION,
-  addMappingsTitle: i18n.translate(
-    'xpack.searchIndices.codeExamples.serverless.denseVector.mappingsTitle',
+  addMappingsTitle,
+  addMappingsDescription: i18n.translate(
+    'xpack.searchIndices.codeExamples.serverless.default.mappingsDescription',
     {
-      defaultMessage: 'Define field mappings',
+      defaultMessage:
+        'This example defines one field: a text field that will provide full-text search capabilities. You can add more field types by modifying the mappings in your API call, or in the mappings tab.',
     }
   ),
+  defaultMapping: {
+    text: { type: 'text' },
+  },
+  sense: ConsoleIngestDataExample,
+  curl: CurlIngestDataExample,
+  python: PythonIngestDataExample,
+  javascript: JSIngestDataExample,
+};
+
+export const DenseVectorIngestDataCodeExamples: IngestDataCodeExamples = {
+  installTitle: INSTALL_INSTRUCTIONS_TITLE,
+  installDescription: INSTALL_INSTRUCTIONS_DESCRIPTION,
+  addMappingsTitle,
   addMappingsDescription: i18n.translate(
     'xpack.searchIndices.codeExamples.serverless.denseVector.mappingsDescription',
     {
@@ -34,8 +56,28 @@ export const DenseVectorServerlessCodeExamples: IngestDataCodeExamples = {
     vector: { type: 'dense_vector', dims: 3 },
     text: { type: 'text' },
   },
-  sense: ConsoleVectorsIngestDataExample,
-  curl: CurlVectorsIngestDataExample,
-  python: PythonServerlessVectorsIngestDataExample,
-  javascript: JSServerlessIngestVectorDataExample,
+  sense: ConsoleIngestDataExample,
+  curl: CurlIngestDataExample,
+  python: PythonIngestDataExample,
+  javascript: JSIngestDataExample,
+};
+
+export const SemanticIngestDataCodeExamples: IngestDataCodeExamples = {
+  installTitle: INSTALL_INSTRUCTIONS_TITLE,
+  installDescription: INSTALL_INSTRUCTIONS_DESCRIPTION,
+  addMappingsTitle,
+  addMappingsDescription: i18n.translate(
+    'xpack.searchIndices.codeExamples.serverless.denseVector.mappingsDescription',
+    {
+      defaultMessage:
+        'This example defines one field: a semantic text field that will provide vector search capabilities using the default ELSER model. You can add more field types by modifying the mappings in your API call, or in the mappings tab.',
+    }
+  ),
+  defaultMapping: {
+    text: { type: 'semantic_text' },
+  },
+  sense: ConsoleSemanticIngestDataExample,
+  curl: CurlIngestDataExample,
+  python: PythonSemanticIngestDataExample,
+  javascript: JSSemanticIngestDataExample,
 };

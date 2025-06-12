@@ -203,6 +203,40 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/rrule",
+            "id": "def-common.RRule.isValid",
+            "type": "Function",
+            "tags": [],
+            "label": "isValid",
+            "description": [],
+            "signature": [
+              "(options: ",
+              "ConstructorOptions",
+              ") => boolean"
+            ],
+            "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/rrule",
+                "id": "def-common.RRule.isValid.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "ConstructorOptions"
+                ],
+                "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

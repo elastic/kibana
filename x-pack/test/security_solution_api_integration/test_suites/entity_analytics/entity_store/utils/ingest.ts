@@ -6,7 +6,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import { ToolingLog } from '@kbn/tooling-log';
 
 export const applyIngestProcessorToDoc = async (
@@ -20,23 +20,26 @@ export const applyIngestProcessorToDoc = async (
     _id: 'id',
     _source: docSource,
   };
+  try {
+    const res = await es.ingest.simulate({
+      pipeline: {
+        description: 'test',
+        processors: steps,
+      },
+      docs: [doc],
+    });
 
-  const res = await es.ingest.simulate({
-    pipeline: {
-      description: 'test',
-      processors: steps,
-    },
-    docs: [doc],
-  });
+    const firstDoc = res.docs?.[0];
 
-  const firstDoc = res.docs?.[0];
-
-  const error = firstDoc?.error;
-  if (error) {
-    log.error('Full painless error below: ');
-    log.error(JSON.stringify(error, null, 2));
-    throw new Error('Painless error running pipeline see logs for full detail : ' + error?.type);
+    const error = firstDoc?.error;
+    if (error) {
+      log.error('Full painless error below: ');
+      log.error(JSON.stringify(error, null, 2));
+      throw new Error('Painless error running pipeline see logs for full detail : ' + error?.type);
+    }
+    return firstDoc?.doc?._source;
+  } catch (e) {
+    log.error('Error running pipeline');
+    throw e;
   }
-
-  return firstDoc?.doc?._source;
 };

@@ -48,3 +48,17 @@ export const EDIT = i18n.translate(
     defaultMessage: 'Edit',
   }
 );
+
+export const READONLY_MODE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.readonlyMode',
+  {
+    defaultMessage: 'Field view',
+  }
+);
+
+export const EDIT_MODE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.editMode',
+  {
+    defaultMessage: 'Field editing view',
+  }
+);

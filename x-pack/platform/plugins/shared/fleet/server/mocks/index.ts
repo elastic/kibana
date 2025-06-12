@@ -59,6 +59,45 @@ export * from '../services/actions/mocks';
 
 export * from './package_policy.mocks';
 
+export const createSavedObjectClientMock = () => {
+  const soClientMock = savedObjectsClientMock.create();
+
+  // The SO client mock does not return promises for async methods, so we mock those here in order
+  // to avoid basic errors in tests (those where the methods are called, but the return value is
+  // never used/checked
+  [
+    'create',
+    'bulkCreate',
+    'checkConflicts',
+    'bulkUpdate',
+    'delete',
+    'bulkDelete',
+    'bulkGet',
+    'find',
+    'get',
+    'closePointInTime',
+    'createPointInTimeFinder',
+    'bulkResolve',
+    'resolve',
+    'update',
+  ].forEach((methodName) => {
+    let response: any;
+
+    switch (methodName) {
+      case 'find':
+      case 'bulkGet':
+        response = { saved_objects: [] };
+        break;
+    }
+
+    (soClientMock[methodName as keyof typeof soClientMock] as jest.Mock).mockReturnValue(
+      Promise.resolve(response)
+    );
+  });
+
+  return soClientMock;
+};
+
 export interface MockedFleetAppContext extends FleetAppContext {
   elasticsearch: ReturnType<typeof elasticsearchServiceMock.createStart>;
   data: ReturnType<typeof dataPluginMock.createStartContract>;
@@ -90,9 +129,10 @@ export const createAppContextStartContractMock = (
 
   const mockedSavedObject = savedObjectsServiceMock.createStartContract();
 
-  const internalSoClient = soClients.internal ?? savedObjectsClientMock.create();
+  const internalSoClient = soClients.internal ?? createSavedObjectClientMock();
+
   const internalSoClientWithoutSpaceExtension =
-    soClients.withoutSpaceExtensions ?? savedObjectsClientMock.create();
+    soClients.withoutSpaceExtensions ?? createSavedObjectClientMock();
 
   mockedSavedObject.getScopedClient.mockImplementation((request, options) => {
     if (options?.excludedExtensions?.includes(SPACES_EXTENSION_ID)) {
@@ -112,11 +152,7 @@ export const createAppContextStartContractMock = (
     securitySetup: securityMock.createSetup(),
     securityStart: securityMock.createStart(),
     logger: loggingSystemMock.create().get(),
-    experimentalFeatures: {
-      agentTamperProtectionEnabled: true,
-      diagnosticFileUploadEnabled: true,
-      enableReusableIntegrationPolicies: true,
-    } as ExperimentalFeatures,
+    experimentalFeatures: {} as ExperimentalFeatures,
     isProductionMode: true,
     configInitialValue: {
       agents: { enabled: true, elasticsearch: {} },
@@ -144,6 +180,9 @@ export const createAppContextStartContractMock = (
       : {}),
     unenrollInactiveAgentsTask: {} as any,
     deleteUnenrolledAgentsTask: {} as any,
+    updateAgentlessDeploymentsTask: {} as any,
+    syncIntegrationsTask: {} as any,
+    automaticAgentUpgradeTask: {} as any,
   };
 };
 
@@ -164,7 +203,7 @@ export const createFleetRequestHandlerContextMock = (): jest.Mocked<
     uninstallTokenService: {
       asCurrentUser: createUninstallTokenServiceMock(),
     },
-    internalSoClient: savedObjectsClientMock.create(),
+    internalSoClient: createSavedObjectClientMock(),
     spaceId: 'default',
     limitedToPackages: undefined,
   };
@@ -195,12 +234,12 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
     listIds: jest.fn(),
     update: jest.fn(),
     bulkUpdate: jest.fn(),
+    bulkUpgrade: jest.fn(),
     runExternalCallbacks: jest.fn(),
     runDeleteExternalCallbacks: jest.fn(),
     runPostDeleteExternalCallbacks: jest.fn(),
     upgrade: jest.fn(),
     getUpgradeDryRunDiff: jest.fn(),
-    getUpgradePackagePolicyInfo: jest.fn(),
     enrichPolicyWithDefaultsFromPackage: jest.fn(),
     findAllForAgentPolicy: jest.fn(),
     fetchAllItems: jest.fn((..._) => {
@@ -294,6 +333,7 @@ export const createFleetStartContractMock = (): DeeplyMockedKeys<FleetStartContr
 
   const startContract: DeeplyMockedKeys<FleetStartContract> = {
     fleetSetupCompleted: jest.fn(async () => {}),
+    agentless: { enabled: false },
     authz: { fromRequest: jest.fn(async (_) => fleetAuthzMock) },
     packageService: createMockPackageService(),
     agentService: createMockAgentService(),

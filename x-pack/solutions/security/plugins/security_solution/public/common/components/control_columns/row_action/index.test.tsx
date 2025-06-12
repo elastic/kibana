@@ -19,6 +19,8 @@ import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_detail
 import type { ExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { createExpandableFlyoutApiMock } from '../../../mock/expandable_flyout';
+import { useUserPrivileges } from '../../user_privileges';
+import { initialUserPrivilegesState } from '../../user_privileges/user_privileges_context';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -56,6 +58,8 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   };
 });
 jest.mock('../../guided_onboarding_tour/tour_step');
+
+jest.mock('../../user_privileges');
 
 const mockRouteSpy: RouteSpyState = {
   pageName: SecurityPageName.overview,
@@ -138,6 +142,42 @@ describe('RowAction', () => {
           scopeId: 'table-test',
         },
       },
+    });
+  });
+
+  describe('privileges', () => {
+    test('should show notes and timeline buttons when the user has the required privileges', () => {
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        ...initialUserPrivilegesState(),
+        notesPrivileges: { read: true },
+        timelinePrivileges: { read: true },
+      });
+
+      const wrapper = render(
+        <TestProviders>
+          <RowAction {...defaultProps} />
+        </TestProviders>
+      );
+
+      expect(wrapper.queryByTestId('timeline-notes-button-small')).toBeInTheDocument();
+      expect(wrapper.queryByTestId('send-alert-to-timeline-button')).toBeInTheDocument();
+    });
+
+    test('should not show notes and timeline buttons when the user does not have the required privileges', () => {
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        ...initialUserPrivilegesState(),
+        notesPrivileges: { read: false },
+        timelinePrivileges: { read: false },
+      });
+
+      const wrapper = render(
+        <TestProviders>
+          <RowAction {...defaultProps} />
+        </TestProviders>
+      );
+
+      expect(wrapper.queryByTestId('timeline-notes-button-small')).not.toBeInTheDocument();
+      expect(wrapper.queryByTestId('send-alert-to-timeline-button')).not.toBeInTheDocument();
     });
   });
 });

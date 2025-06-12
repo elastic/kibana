@@ -4,31 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common/app_locator';
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import type { InventoryEntity } from '../../common/entities';
-import { useAdHocDataView } from './use_adhoc_data_view';
-import { useFetchEntityDefinition } from './use_fetch_entity_definition';
 import { useKibana } from './use_kibana';
-
+import { useUnifiedSearchContext } from './use_unified_search_context';
 export const useDiscoverRedirect = (entity: InventoryEntity) => {
   const {
     services: { share, application, entityManager },
   } = useKibana();
-  const { entityDefinitions, isEntityDefinitionLoading } = useFetchEntityDefinition(
-    entity.entityDefinitionId as string
-  );
-
-  const title = useMemo(
-    () =>
-      !isEntityDefinitionLoading && entityDefinitions && entityDefinitions?.length > 0
-        ? entityDefinitions[0]?.indexPatterns?.join(',')
-        : '',
-    [entityDefinitions, isEntityDefinitionLoading]
-  );
-
-  const { dataView } = useAdHocDataView(title);
-
-  const discoverLocator = share.url.locators.get('DISCOVER_APP_LOCATOR');
+  const { discoverDataview } = useUnifiedSearchContext();
+  const { dataView } = discoverDataview;
+  const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
 
   const getDiscoverEntitiesRedirectUrl = useCallback(() => {
     const entityKqlFilter = entity
@@ -37,19 +25,19 @@ export const useDiscoverRedirect = (entity: InventoryEntity) => {
         })
       : '';
 
-    return application.capabilities.discover?.show
+    return application.capabilities.discover_v2?.show
       ? discoverLocator?.getRedirectUrl({
-          indexPatternId: dataView?.id ?? '',
+          dataViewSpec: dataView?.toMinimalSpec?.(),
           query: { query: entityKqlFilter, language: 'kuery' },
         })
       : undefined;
   }, [
-    application.capabilities.discover?.show,
-    dataView?.id,
+    application.capabilities.discover_v2?.show,
+    dataView,
     discoverLocator,
     entity,
     entityManager.entityClient,
   ]);
 
-  return { getDiscoverEntitiesRedirectUrl, isEntityDefinitionLoading };
+  return { getDiscoverEntitiesRedirectUrl };
 };

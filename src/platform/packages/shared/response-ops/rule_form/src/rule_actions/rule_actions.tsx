@@ -7,83 +7,48 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { EuiButton, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { v4 as uuidv4 } from 'uuid';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiImage, EuiSpacer, EuiText } from '@elastic/eui';
 import { RuleSystemAction } from '@kbn/alerting-types';
-import { ActionConnector } from '@kbn/alerts-ui-shared';
-import { ADD_ACTION_TEXT } from '../translations';
-import { RuleActionsConnectorsModal } from './rule_actions_connectors_modal';
-import { useRuleFormDispatch, useRuleFormState } from '../hooks';
-import { RuleAction, RuleFormParamsErrors } from '../common/types';
-import { DEFAULT_FREQUENCY, MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
+import React, { useCallback, useMemo, useState } from 'react';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { RuleAction } from '../common/types';
+import { MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
+import { useRuleFormState, useRuleFormScreenContext } from '../hooks';
+import {
+  ADD_ACTION_DESCRIPTION_TEXT,
+  ADD_ACTION_HEADER,
+  OPTIONAL_LABEL,
+  ADD_ACTION_TEXT,
+} from '../translations';
 import { RuleActionsItem } from './rule_actions_item';
 import { RuleActionsSystemActionsItem } from './rule_actions_system_actions_item';
-import { getDefaultParams } from '../utils';
+
+const useRuleActionsIllustration = () => {
+  const [imageData, setImageData] = useState('');
+  useEffectOnce(() => {
+    const fetchImage = async () => {
+      const image = await import('./rule_actions_illustration.svg');
+      setImageData(image.default);
+    };
+    fetchImage();
+  });
+  return imageData;
+};
 
 export const RuleActions = () => {
-  const [isConnectorModalOpen, setIsConnectorModalOpen] = useState<boolean>(false);
+  const ruleActionsIllustration = useRuleActionsIllustration();
+  const { setIsConnectorsScreenVisible } = useRuleFormScreenContext();
 
   const {
     formData: { actions, consumer },
-    plugins: { actionTypeRegistry },
     multiConsumerSelection,
     selectedRuleType,
     connectorTypes,
   } = useRuleFormState();
 
-  const dispatch = useRuleFormDispatch();
-
   const onModalOpen = useCallback(() => {
-    setIsConnectorModalOpen(true);
-  }, []);
-
-  const onModalClose = useCallback(() => {
-    setIsConnectorModalOpen(false);
-  }, []);
-
-  const onSelectConnector = useCallback(
-    async (connector: ActionConnector) => {
-      const { id, actionTypeId } = connector;
-      const uuid = uuidv4();
-      const group = selectedRuleType.defaultActionGroupId;
-      const actionTypeModel = actionTypeRegistry.get(actionTypeId);
-
-      const params =
-        getDefaultParams({
-          group,
-          ruleType: selectedRuleType,
-          actionTypeModel,
-        }) || {};
-
-      dispatch({
-        type: 'addAction',
-        payload: {
-          id,
-          actionTypeId,
-          uuid,
-          params,
-          group,
-          frequency: DEFAULT_FREQUENCY,
-        },
-      });
-
-      const res: { errors: RuleFormParamsErrors } = await actionTypeRegistry
-        .get(actionTypeId)
-        ?.validateParams(params);
-
-      dispatch({
-        type: 'setActionParamsError',
-        payload: {
-          uuid,
-          errors: res.errors,
-        },
-      });
-
-      onModalClose();
-    },
-    [dispatch, onModalClose, selectedRuleType, actionTypeRegistry]
-  );
+    setIsConnectorsScreenVisible(true);
+  }, [setIsConnectorsScreenVisible]);
 
   const producerId = useMemo(() => {
     if (MULTI_CONSUMER_RULE_TYPE_IDS.includes(selectedRuleType.id)) {
@@ -91,6 +56,8 @@ export const RuleActions = () => {
     }
     return selectedRuleType.producer;
   }, [consumer, multiConsumerSelection, selectedRuleType]);
+
+  const hasActions = actions.length > 0;
 
   return (
     <>
@@ -120,18 +87,49 @@ export const RuleActions = () => {
           );
         })}
       </EuiFlexGroup>
-      <EuiSpacer />
-      <EuiButton
-        data-test-subj="ruleActionsAddActionButton"
-        iconType="push"
-        iconSide="left"
-        onClick={onModalOpen}
-      >
-        {ADD_ACTION_TEXT}
-      </EuiButton>
-      {isConnectorModalOpen && (
-        <RuleActionsConnectorsModal onClose={onModalClose} onSelectConnector={onSelectConnector} />
+      {!hasActions && (
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexGroup
+            alignItems="center"
+            direction="column"
+            gutterSize="m"
+            style={{ maxWidth: 356 }}
+          >
+            <EuiImage
+              alt="Rule actions illustration"
+              width={198}
+              height={180}
+              url={ruleActionsIllustration}
+            />
+            <EuiFlexItem>
+              <EuiText textAlign="center">
+                <h3>{ADD_ACTION_HEADER}</h3>
+              </EuiText>
+              <EuiText size="s" textAlign="center" color="subdued">
+                {OPTIONAL_LABEL}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="s" textAlign="center" color="subdued">
+                {ADD_ACTION_DESCRIPTION_TEXT}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexGroup>
       )}
+      <EuiSpacer />
+      <EuiFlexGroup justifyContent={!hasActions ? 'center' : 'flexStart'}>
+        <EuiFlexItem grow={0}>
+          <EuiButton
+            data-test-subj="ruleActionsAddActionButton"
+            iconType="push"
+            iconSide="left"
+            onClick={onModalOpen}
+          >
+            {ADD_ACTION_TEXT}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 };

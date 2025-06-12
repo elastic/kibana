@@ -21,21 +21,36 @@ function AlertSearchbarWithUrlSync(props: AlertSearchBarWithUrlSyncProps) {
   const { urlStorageKey, defaultState = DEFAULT_STATE, ...searchBarProps } = props;
   const stateProps = useAlertSearchBarStateContainer(urlStorageKey, undefined, defaultState);
   const {
-    data: {
-      query: {
-        timefilter: { timefilter: timeFilterService },
-      },
-    },
+    data,
     triggersActionsUi: { getAlertsSearchBar: AlertsSearchBar },
     uiSettings,
+    http,
+    dataViews,
+    spaces,
+    notifications,
   } = useKibana().services;
+  const {
+    query: {
+      timefilter: { timefilter: timeFilterService },
+    },
+  } = data;
 
   return (
     <ObservabilityAlertSearchBar
       {...stateProps}
       {...searchBarProps}
       showFilterBar
-      services={{ timeFilterService, AlertsSearchBar, useToasts, uiSettings }}
+      services={{
+        timeFilterService,
+        AlertsSearchBar,
+        http,
+        data,
+        dataViews,
+        notifications,
+        spaces,
+        useToasts,
+        uiSettings,
+      }}
     />
   );
 }

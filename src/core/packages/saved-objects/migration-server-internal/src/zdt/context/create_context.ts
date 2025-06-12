@@ -8,7 +8,6 @@
  */
 
 import { getVirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
-import { REMOVED_TYPES } from '../../core';
 import type { MigrateIndexOptions } from '../migrate_index';
 import type { MigratorContext } from './types';
 
@@ -42,7 +41,7 @@ export const createContext = ({
     serializer,
     maxRetryAttempts: migrationConfig.retryAttempts,
     migrationDocLinks: docLinks.links.kibanaUpgradeSavedObjects,
-    deletedTypes: REMOVED_TYPES,
+    deletedTypes: typeRegistry.getLegacyTypes(),
     batchSize: migrationConfig.batchSize,
     discardCorruptObjects: Boolean(migrationConfig.discardCorruptObjects),
     nodeRoles,

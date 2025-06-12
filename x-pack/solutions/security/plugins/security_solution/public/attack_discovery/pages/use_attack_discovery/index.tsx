@@ -14,7 +14,8 @@ import type {
 } from '@kbn/elastic-assistant-common';
 import {
   AttackDiscoveryPostResponse,
-  ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+  API_VERSIONS,
+  ATTACK_DISCOVERY,
 } from '@kbn/elastic-assistant-common';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -23,8 +24,11 @@ import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assista
 import { usePollApi } from './use_poll_api/use_poll_api';
 import { useKibana } from '../../../common/lib/kibana';
 import { getErrorToastText } from '../helpers';
-import { CONNECTOR_ERROR, ERROR_GENERATING_ATTACK_DISCOVERIES } from '../translations';
 import { getGenAiConfig, getRequestBody } from './helpers';
+import { CONNECTOR_ERROR, ERROR_GENERATING_ATTACK_DISCOVERIES } from '../translations';
+import * as i18n from './translations';
+import { useInvalidateGetAttackDiscoveryGenerations } from '../use_get_attack_discovery_generations';
+import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
 
 interface FetchAttackDiscoveriesOptions {
   end?: string;
@@ -51,13 +55,16 @@ export interface UseAttackDiscovery {
 
 export const useAttackDiscovery = ({
   connectorId,
+  connectorName,
   size,
   setLoadingConnectorId,
 }: {
   connectorId: string | undefined;
+  connectorName?: string;
   size: number;
   setLoadingConnectorId?: (loadingConnectorId: string | null) => void;
 }): UseAttackDiscovery => {
+  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
   // get Kibana services and connectors
   const {
     http,
@@ -113,6 +120,7 @@ export const useAttackDiscovery = ({
 
   useEffect(() => {
     if (
+      !attackDiscoveryAlertsEnabled &&
       connectorId != null &&
       connectorId !== '' &&
       aiConnectors != null &&
@@ -128,9 +136,20 @@ export const useAttackDiscovery = ({
       setGenerationIntervals([]);
       setPollStatus(null);
     }
-  }, [aiConnectors, connectorId, pollApi, setLoadingConnectorId, setPollStatus]);
+  }, [
+    aiConnectors,
+    attackDiscoveryAlertsEnabled,
+    connectorId,
+    pollApi,
+    setLoadingConnectorId,
+    setPollStatus,
+  ]);
 
   useEffect(() => {
+    if (attackDiscoveryAlertsEnabled) {
+      return;
+    }
+
     if (pollStatus === 'running') {
       setIsLoading(true);
       setLoadingConnectorId?.(connectorId ?? null);
@@ -138,9 +157,13 @@ export const useAttackDiscovery = ({
       setIsLoading(false);
       setLoadingConnectorId?.(null);
     }
-  }, [pollStatus, connectorId, setLoadingConnectorId]);
+  }, [pollStatus, connectorId, setLoadingConnectorId, attackDiscoveryAlertsEnabled]);
 
   useEffect(() => {
+    if (attackDiscoveryAlertsEnabled) {
+      return;
+    }
+
     if (pollData !== null && pollData.connectorId === connectorId) {
       if (pollData.alertsContextCount != null) setAlertsContextCount(pollData.alertsContextCount);
       if (pollData.attackDiscoveries.length && pollData.attackDiscoveries[0].timestamp != null) {
@@ -156,7 +179,9 @@ export const useAttackDiscovery = ({
       setAttackDiscoveries(pollData.attackDiscoveries);
       setGenerationIntervals(pollData.generationIntervals);
     }
-  }, [connectorId, pollData]);
+  }, [attackDiscoveryAlertsEnabled, connectorId, pollData]);
+
+  const invalidateGetAttackDiscoveryGenerations = useInvalidateGetAttackDiscoveryGenerations();
 
   /** The callback when users click the Generate button */
   const fetchAttackDiscoveries = useCallback(
@@ -172,6 +197,7 @@ export const useAttackDiscovery = ({
 
         const bodyWithOverrides = {
           ...requestBody,
+          connectorName,
           end,
           filter,
           size,
@@ -191,15 +217,23 @@ export const useAttackDiscovery = ({
         setApproximateFutureTime(null);
 
         // call the internal API to generate attack discoveries:
-        const rawResponse = await http.post('/internal/elastic_assistant/attack_discovery', {
+        const rawResponse = await http.post(ATTACK_DISCOVERY, {
           body: JSON.stringify(bodyWithOverrides),
-          version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+          version: API_VERSIONS.internal.v1,
         });
+
         setIsLoadingPost(false);
         const parsedResponse = AttackDiscoveryPostResponse.safeParse(rawResponse);
 
         if (!parsedResponse.success) {
           throw new Error('Failed to parse the response');
+        }
+
+        if (attackDiscoveryAlertsEnabled) {
+          toasts?.addSuccess({
+            title: i18n.GENERATION_STARTED_TITLE,
+            text: i18n.GENERATION_STARTED_TEXT(connectorName),
+          });
         }
       } catch (error) {
         setIsLoadingPost(false);
@@ -208,9 +242,22 @@ export const useAttackDiscovery = ({
           title: ERROR_GENERATING_ATTACK_DISCOVERIES,
           text: getErrorToastText(error),
         });
+      } finally {
+        invalidateGetAttackDiscoveryGenerations();
       }
     },
-    [connectorId, http, requestBody, setLoadingConnectorId, setPollStatus, size, toasts]
+    [
+      attackDiscoveryAlertsEnabled,
+      connectorId,
+      connectorName,
+      http,
+      invalidateGetAttackDiscoveryGenerations,
+      requestBody,
+      setLoadingConnectorId,
+      setPollStatus,
+      size,
+      toasts,
+    ]
   );
 
   return {

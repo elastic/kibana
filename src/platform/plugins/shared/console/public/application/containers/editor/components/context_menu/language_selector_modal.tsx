@@ -88,7 +88,7 @@ export const LanguageSelectorModal = ({
     const language = selectedOption?.key || selectedLanguage;
 
     // If the default language is changed, update the local storage setting
-    if (currentLanguage !== language) {
+    if (currentLanguage !== selectedLanguage) {
       changeDefaultLanguage(selectedLanguage);
     }
 

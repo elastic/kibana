@@ -42,8 +42,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       beforeEach(async () => {
         await dashboard.navigateToApp();
         await dashboard.clickNewDashboard();
-        await dashboardAddPanel.clickEditorMenuButton();
-        await dashboardAddPanel.clickVisType('maps');
+        await dashboardAddPanel.clickAddMapPanel();
         await header.waitUntilLoadingHasFinished();
         await maps.waitForLayersToLoad();
       });

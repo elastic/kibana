@@ -11,7 +11,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Entity Analytics - Entity Store', function () {
     loadTestFile(require.resolve('./entities_list'));
     loadTestFile(require.resolve('./entity_store'));
-    loadTestFile(require.resolve('./field_retention_operators'));
     loadTestFile(require.resolve('./entity_store_nondefault_spaces'));
+    loadTestFile(require.resolve('./field_retention_operators'));
+    loadTestFile(require.resolve('./host_transform'));
   });
 }

@@ -35,9 +35,16 @@ export const TRANSLATION_TAB_LABEL = i18n.translate(
   }
 );
 
-export const DISMISS_BUTTON_LABEL = i18n.translate(
+export const CLOSE_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.translationDetails.dismissButtonLabel',
   {
-    defaultMessage: 'Dismiss',
+    defaultMessage: 'Close',
+  }
+);
+
+export const LAST_UPDATED_LABEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.translationDetails.lastUpdatedLabel',
+  {
+    defaultMessage: 'Last updated',
   }
 );

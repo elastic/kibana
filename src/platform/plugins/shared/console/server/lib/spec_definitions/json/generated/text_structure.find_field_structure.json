@@ -1,12 +1,46 @@
 {
   "text_structure.find_field_structure": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "column_names": "",
+      "delimiter": "",
+      "documents_to_sample": [
+        "1000"
+      ],
+      "ecs_compatibility": [
+        "disabled",
+        "v1"
+      ],
+      "explain": "__flag__",
+      "field": "",
+      "format": [
+        "delimited",
+        "ndjson",
+        "semi_structured_text",
+        "xml"
+      ],
+      "grok_pattern": "",
+      "index": "",
+      "quote": "",
+      "should_trim_fields": "__flag__",
+      "timeout": [
+        "25s",
+        "-1",
+        "0"
+      ],
+      "timestamp_field": "",
+      "timestamp_format": ""
+    },
     "methods": [
       "GET"
     ],
     "patterns": [
       "_text_structure/find_field_structure"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/find-field-structure.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-text_structure",
     "availability": {
       "stack": true,
       "serverless": false

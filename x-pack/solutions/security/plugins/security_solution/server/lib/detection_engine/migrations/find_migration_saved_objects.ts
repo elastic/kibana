@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/Either';
+import { pipe } from 'fp-ts/pipeable';
 
 import type { SavedObjectsClientContract, SavedObjectsFindOptions } from '@kbn/core/server';
 import { validateEither } from '@kbn/securitysolution-io-ts-utils';

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import type { EuiBasicTableProps } from '@elastic/eui';
 import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiHideFor } from '@elastic/eui';
 
@@ -14,8 +14,8 @@ import type { AndOr } from '../and_or_badge';
 import { AndOrBadge } from '../and_or_badge';
 
 const AndOrBadgeContainer = styled(EuiFlexItem)`
-  padding-top: ${({ theme }) => theme.eui.euiSizeXL};
-  padding-bottom: ${({ theme }) => theme.eui.euiSizeS};
+  padding-top: ${({ theme }) => theme.euiTheme.size.xl};
+  padding-bottom: ${({ theme }) => theme.euiTheme.size.s};
 `;
 
 type ConditionsTableProps<T extends object> = EuiBasicTableProps<T> & {

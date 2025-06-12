@@ -32,11 +32,13 @@ const urlServiceMock = {
         state: {},
       }),
       getUrl: async ({ policyName }: { policyName: string }) => `/test/${policyName}`,
+      getRedirectUrl: () => '/app/path',
       navigate: async () => {},
       useUrl: () => '',
     }),
   },
 };
+jest.mock('react-use/lib/useObservable', () => () => jest.fn());
 
 describe('Data Streams - Project level max retention', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();

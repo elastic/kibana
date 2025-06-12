@@ -6,22 +6,22 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import {
+import type {
   AlertInstanceState,
   AlertInstanceContext,
   ThrottledActions,
 } from '@kbn/alerting-state-types';
-import { RuleTypeParams, SanitizedRule } from '@kbn/alerting-types';
+import type { RuleTypeParams, SanitizedRule } from '@kbn/alerting-types';
 import { schema } from '@kbn/config-schema';
-import { KibanaRequest } from '@kbn/core-http-server';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import { ActionsClient, PluginStartContract } from '@kbn/actions-plugin/server';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { RuleAlertData, RuleTypeState } from '../../../common';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import type { ActionsClient, PluginStartContract } from '@kbn/actions-plugin/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { RuleAlertData, RuleTypeState } from '../../../common';
 import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
-import { NormalizedRuleType } from '../../rule_type_registry';
-import { TaskRunnerContext } from '../types';
-import { AlertingEventLogger } from '../../lib/alerting_event_logger/alerting_event_logger';
+import type { NormalizedRuleType } from '../../rule_type_registry';
+import type { TaskRunnerContext } from '../types';
+import type { AlertingEventLogger } from '../../lib/alerting_event_logger/alerting_event_logger';
 import { Alert } from '../../alert';
 
 const apiKey = Buffer.from('123:abc').toString('base64');
@@ -155,6 +155,7 @@ export const getRuleType = (): NormalizedRuleType<
   executor: jest.fn(),
   category: 'test',
   producer: 'alerts',
+  solution: 'stack',
   validate: {
     params: schema.any(),
   },
@@ -178,6 +179,7 @@ export const getDefaultSchedulerContext = <
   alertingEventLoggerMock: jest.Mocked<AlertingEventLogger>,
   actionsClientMock: jest.Mocked<PublicMethodsOf<ActionsClient>>,
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   alertsClientMock: jest.Mocked<any>
 ) => ({
   rule: getRule(),

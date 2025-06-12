@@ -11,9 +11,11 @@ import {
   defineDockerServersConfig,
 } from '@kbn/test';
 
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { ServerlessProjectType } from '@kbn/es';
 import path from 'path';
 import { DeploymentAgnosticCommonServices, services } from '../services';
+import { LOCAL_PRODUCT_DOC_PATH } from './common_paths';
 
 interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
   serverlessProject: ServerlessProjectType;
@@ -35,6 +37,7 @@ const esServerArgsFromController = {
     'xpack.ml.dfa.enabled=false',
   ],
   security: ['xpack.security.authc.api_key.cache.max_keys=70000'],
+  chat: [],
 };
 
 // include settings from kibana controller
@@ -54,6 +57,7 @@ const kbnServerArgsFromController = {
     // disable fleet task that writes to metrics.fleet_server.* data streams, impacting functional tests
     `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
   ],
+  chat: [],
 };
 
 export function createServerlessTestConfig<T extends DeploymentAgnosticCommonServices>(
@@ -85,6 +89,7 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
     return {
       ...svlSharedConfig.getAll(),
 
+      testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       services: {
         // services can be customized, but must extend DeploymentAgnosticCommonServices
         ...(options.services || services),
@@ -97,7 +102,7 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
           port: dockerRegistryPort,
           args: dockerArgs,
           waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 2 * 1000, // 2 minutes
+          waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
         },
       }),
       esTestCluster: {
@@ -117,16 +122,27 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           ...kbnServerArgsFromController[options.serverlessProject],
           `--serverless=${options.serverlessProject}`,
-          // defined in MKI control plane. Necessary for Synthetics app testing
-          '--xpack.uptime.service.password=test',
-          '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
-          '--xpack.uptime.service.devUrl=mockDevUrl',
-          '--xpack.uptime.service.manifestUrl=mockDevUrl',
+          ...(options.serverlessProject === 'oblt'
+            ? [
+                // defined in MKI control plane. Necessary for Synthetics app testing
+                '--xpack.uptime.service.password=test',
+                '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
+                '--xpack.uptime.service.devUrl=mockDevUrl',
+                '--xpack.uptime.service.manifestUrl=mockDevUrl',
+                `--xpack.productDocBase.artifactRepositoryUrl=file:///${LOCAL_PRODUCT_DOC_PATH}`,
+              ]
+            : []),
+          ...(dockerRegistryPort
+            ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
+            : []),
         ],
       },
       testFiles: options.testFiles,
       junit: options.junit,
-      suiteTags: options.suiteTags,
+      suiteTags: {
+        include: options.suiteTags?.include,
+        exclude: [...(options.suiteTags?.exclude || []), 'skipServerless'],
+      },
     };
   };
 }

@@ -22,6 +22,12 @@
     "@kbn/search-navigation",
     "@kbn/doc-links",
     "@kbn/shared-ux-page-kibana-template",
+    "@kbn/core-http-server",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/logging",
+    "@kbn/analytics",
+    "@kbn/usage-collection-plugin",
+    "@kbn/core-chrome-browser",
   ],
   "exclude": [
     "target/**/*",

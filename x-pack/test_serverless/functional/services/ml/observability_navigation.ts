@@ -12,19 +12,40 @@ export function MachineLearningNavigationProviderObservability({
   getPageObject,
 }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
 
-  async function navigateToArea(id: string) {
-    await svlCommonNavigation.sidenav.openPanel('machine_learning-landing', { button: 'link' });
-    await testSubjects.existOrFail(`~panelNavItem-id-ml:${id}`, {
-      timeout: 60 * 1000,
+  async function navigateToArea(id: string, expectedTestSubject: string) {
+    await svlCommonNavigation.sidenav.openSection(
+      'observability_project_nav_footer.project_settings_project_nav'
+    );
+    await retry.tryForTime(5 * 1000, async () => {
+      await svlCommonNavigation.sidenav.clickLink({ navId: 'management' });
+      await svlCommonNavigation.sidenav.clickPanelLink(id);
+      await testSubjects.existOrFail(expectedTestSubject, { timeout: 2500 });
     });
-    await testSubjects.click(`~panelNavItem-id-ml:${id}`);
   }
 
   return {
     async navigateToAnomalyDetection() {
-      await navigateToArea('anomalyDetection');
+      await navigateToArea('management:anomaly_detection', 'ml-jobs-list');
+    },
+    async navigateToDataFrameAnalytics() {
+      await navigateToArea('management:analytics', 'mlAnalyticsJobList');
+    },
+    async navigateToTrainedModels() {
+      await navigateToArea('management:trained_models', 'mlTrainedModelsList');
+    },
+    async navigateToMemoryUsage() {
+      await navigateToArea('management:overview', 'mlStackManagementOverviewPage');
+      await testSubjects.existOrFail('mlMemoryUsagePanel', { timeout: 2500 });
+    },
+    async navigateToNotifications() {
+      await navigateToArea('management:overview', 'mlStackManagementOverviewPage');
+      await retry.tryForTime(5 * 1000, async () => {
+        await testSubjects.click('mlManagementOverviewPageTabs notifications');
+        await testSubjects.existOrFail('mlNotificationsTable loaded');
+      });
     },
   };
 }

@@ -7,37 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import fastIsEqual from 'fast-deep-equal';
-import React, { useEffect } from 'react';
-import { BehaviorSubject } from 'rxjs';
-
 import { DataView } from '@kbn/data-views-plugin/common';
-import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { ESQLControlVariable } from '@kbn/esql-types';
+import { PublishesESQLVariable, apiPublishesESQLVariable } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
-import {
-  apiHasSaveNotification,
-  combineCompatibleChildrenApis,
-} from '@kbn/presentation-containers';
+import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import {
   PublishesDataViews,
   apiPublishesDataViews,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-
-import type {
-  ControlGroupChainingSystem,
-  ControlGroupRuntimeState,
-  ControlGroupSerializedState,
-  ControlLabelPosition,
-  ControlPanelsState,
-  ParentIgnoreSettings,
-} from '../../common';
-import {
-  CONTROL_GROUP_TYPE,
-  DEFAULT_CONTROL_CHAINING,
-  DEFAULT_CONTROL_LABEL_POSITION,
-} from '../../common';
+import React, { useEffect } from 'react';
+import { BehaviorSubject } from 'rxjs';
+import type { ControlGroupSerializedState } from '../../common';
+import { CONTROL_GROUP_TYPE } from '../../common';
 import { openDataControlEditor } from '../controls/data_controls/open_data_control_editor';
 import { coreServices, dataViewsService } from '../services/kibana_services';
 import { ControlGroup } from './components/control_group';
@@ -48,125 +33,84 @@ import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
 import { initSelectionsManager } from './selections_manager';
 import type { ControlGroupApi } from './types';
 import { deserializeControlGroup } from './utils/serialization_utils';
+import { initializeEditorStateManager } from './initialize_editor_state_manager';
 
 export const getControlGroupEmbeddableFactory = () => {
-  const controlGroupEmbeddableFactory: ReactEmbeddableFactory<
+  const controlGroupEmbeddableFactory: EmbeddableFactory<
     ControlGroupSerializedState,
-    ControlGroupRuntimeState,
     ControlGroupApi
   > = {
     type: CONTROL_GROUP_TYPE,
-    deserializeState: (state) => deserializeControlGroup(state),
-    buildEmbeddable: async (
-      initialRuntimeState,
-      buildApi,
-      uuid,
-      parentApi,
-      setApi,
-      lastSavedRuntimeState
-    ) => {
-      const {
-        labelPosition: initialLabelPosition,
-        chainingSystem,
-        autoApplySelections,
-        ignoreParentSettings,
-      } = initialRuntimeState;
+    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+      const initialRuntimeState = deserializeControlGroup(initialState);
 
-      const autoApplySelections$ = new BehaviorSubject<boolean>(autoApplySelections);
+      const editorStateManager = initializeEditorStateManager(initialState?.rawState);
+
       const defaultDataViewId = await dataViewsService.getDefaultId();
-      const lastSavedControlsState$ = new BehaviorSubject<ControlPanelsState>(
-        lastSavedRuntimeState.initialChildControlState
-      );
-      const controlsManager = initControlsManager(
-        initialRuntimeState.initialChildControlState,
-        lastSavedControlsState$
-      );
+
+      const controlsManager = initControlsManager(initialRuntimeState.initialChildControlState);
       const selectionsManager = initSelectionsManager({
         ...controlsManager.api,
-        autoApplySelections$,
+        autoApplySelections$: editorStateManager.api.autoApplySelections$,
       });
-      const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
-      const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>(
-        chainingSystem ?? DEFAULT_CONTROL_CHAINING
-      );
-      const ignoreParentSettings$ = new BehaviorSubject<ParentIgnoreSettings | undefined>(
-        ignoreParentSettings
-      );
-      const labelPosition$ = new BehaviorSubject<ControlLabelPosition>(
-        initialLabelPosition ?? DEFAULT_CONTROL_LABEL_POSITION
-      );
+      const esqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
+      const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
+
       const allowExpensiveQueries$ = new BehaviorSubject<boolean>(true);
       const disabledActionIds$ = new BehaviorSubject<string[] | undefined>(undefined);
 
-      const unsavedChanges = initializeControlGroupUnsavedChanges(
-        selectionsManager.applySelections,
-        controlsManager.api.children$,
-        {
-          ...controlsManager.comparators,
-          autoApplySelections: [
-            autoApplySelections$,
-            (next: boolean) => autoApplySelections$.next(next),
-          ],
-          chainingSystem: [
-            chainingSystem$,
-            (next: ControlGroupChainingSystem) => chainingSystem$.next(next),
-            (a, b) => (a ?? DEFAULT_CONTROL_CHAINING) === (b ?? DEFAULT_CONTROL_CHAINING),
-          ],
-          ignoreParentSettings: [
-            ignoreParentSettings$,
-            (next: ParentIgnoreSettings | undefined) => ignoreParentSettings$.next(next),
-            fastIsEqual,
-          ],
-          labelPosition: [
-            labelPosition$,
-            (next: ControlLabelPosition) => labelPosition$.next(next),
-          ],
-        },
-        controlsManager.snapshotControlsRuntimeState,
-        controlsManager.resetControlsUnsavedChanges,
-        parentApi,
-        lastSavedRuntimeState
-      );
+      function serializeState() {
+        const { controls, references } = controlsManager.serializeControls();
+        return {
+          rawState: {
+            ...editorStateManager.getLatestState(),
+            controls,
+          },
+          references,
+        };
+      }
 
-      const api = setApi({
+      const unsavedChanges = initializeControlGroupUnsavedChanges({
+        applySelections: selectionsManager.applySelections,
+        children$: controlsManager.api.children$,
+        controlGroupId: uuid,
+        editorStateManager,
+        layout$: controlsManager.controlsInOrder$,
+        parentApi,
+        resetControlsUnsavedChanges: controlsManager.resetControlsUnsavedChanges,
+        serializeControlGroupState: serializeState,
+      });
+
+      const api = finalizeApi({
         ...controlsManager.api,
-        disabledActionIds: disabledActionIds$,
+        esqlVariables$,
+        disabledActionIds$,
         ...unsavedChanges.api,
         ...selectionsManager.api,
-        controlFetch$: (controlUuid: string) =>
+        controlFetch$: (controlUuid: string, onReload?: () => void) =>
           controlFetch$(
             chaining$(
               controlUuid,
-              chainingSystem$,
+              editorStateManager.api.chainingSystem$,
               controlsManager.controlsInOrder$,
               controlsManager.api.children$
             ),
-            controlGroupFetch$(ignoreParentSettings$, parentApi ? parentApi : {})
+            controlGroupFetch$(
+              editorStateManager.api.ignoreParentSettings$,
+              parentApi ? parentApi : {},
+              onReload
+            )
           ),
-        ignoreParentSettings$,
-        autoApplySelections$,
+        ignoreParentSettings$: editorStateManager.api.ignoreParentSettings$,
+        autoApplySelections$: editorStateManager.api.autoApplySelections$,
         allowExpensiveQueries$,
-        snapshotRuntimeState: () => {
-          return {
-            chainingSystem: chainingSystem$.getValue(),
-            labelPosition: labelPosition$.getValue(),
-            autoApplySelections: autoApplySelections$.getValue(),
-            ignoreParentSettings: ignoreParentSettings$.getValue(),
-            initialChildControlState: controlsManager.snapshotControlsRuntimeState(),
-          };
-        },
         onEdit: async () => {
-          openEditControlGroupFlyout(api, {
-            chainingSystem: chainingSystem$,
-            labelPosition: labelPosition$,
-            autoApplySelections: autoApplySelections$,
-            ignoreParentSettings: ignoreParentSettings$,
-          });
+          openEditControlGroupFlyout(api, editorStateManager);
         },
         isEditingEnabled: () => true,
         openAddDataControlFlyout: (settings) => {
           const parentDataViewId = apiPublishesDataViews(parentApi)
-            ? parentApi.dataViews.value?.[0]?.id
+            ? parentApi.dataViews$.value?.[0]?.id
             : undefined;
           const newControlState = controlsManager.getNewControlState();
 
@@ -176,36 +120,23 @@ export const getControlGroupEmbeddableFactory = () => {
               dataViewId:
                 newControlState.dataViewId ?? parentDataViewId ?? defaultDataViewId ?? undefined,
             },
-            onSave: ({ type: controlType, state: initialState }) => {
+            onSave: ({ type: controlType, state: onSaveState }) => {
               controlsManager.api.addNewPanel({
                 panelType: controlType,
-                initialState: settings?.controlStateTransform
-                  ? settings.controlStateTransform(initialState, controlType)
-                  : initialState,
+                serializedState: {
+                  rawState: settings?.controlStateTransform
+                    ? settings.controlStateTransform(onSaveState, controlType)
+                    : onSaveState,
+                },
               });
               settings?.onSave?.();
             },
             controlGroupApi: api,
           });
         },
-        serializeState: () => {
-          const { controls, references } = controlsManager.serializeControls();
-          return {
-            rawState: {
-              chainingSystem: chainingSystem$.getValue(),
-              labelPosition: labelPosition$.getValue(),
-              autoApplySelections: autoApplySelections$.getValue(),
-              ignoreParentSettings: ignoreParentSettings$.getValue(),
-              controls,
-            },
-            references,
-          };
-        },
-        dataViews,
-        labelPosition: labelPosition$,
-        saveNotification$: apiHasSaveNotification(parentApi)
-          ? parentApi.saveNotification$
-          : undefined,
+        serializeState,
+        dataViews$,
+        labelPosition: editorStateManager.api.labelPosition$,
         reload$: apiPublishesReload(parentApi) ? parentApi.reload$ : undefined,
 
         /** Public getters */
@@ -214,43 +145,34 @@ export const getControlGroupEmbeddableFactory = () => {
             defaultMessage: 'Controls',
           }),
         getEditorConfig: () => initialRuntimeState.editorConfig,
-        getLastSavedControlState: (controlUuid: string) => {
-          return lastSavedRuntimeState.initialChildControlState[controlUuid] ?? {};
-        },
 
         /** Public setters */
         setDisabledActionIds: (ids) => disabledActionIds$.next(ids),
-        setChainingSystem: (newChainingSystem) => chainingSystem$.next(newChainingSystem),
+        setChainingSystem: editorStateManager.api.setChainingSystem,
       });
 
       /** Subscribe to all children's output data views, combine them, and output them */
       const childrenDataViewsSubscription = combineCompatibleChildrenApis<
         PublishesDataViews,
         DataView[]
-      >(api, 'dataViews', apiPublishesDataViews, []).subscribe((newDataViews) =>
-        dataViews.next(newDataViews)
+      >(api, 'dataViews$', apiPublishesDataViews, []).subscribe((newDataViews) =>
+        dataViews$.next(newDataViews)
       );
 
-      const saveNotificationSubscription = apiHasSaveNotification(parentApi)
-        ? parentApi.saveNotification$.subscribe(() => {
-            lastSavedControlsState$.next(controlsManager.snapshotControlsRuntimeState());
-
-            if (
-              typeof autoApplySelections$.value === 'boolean' &&
-              !autoApplySelections$.value &&
-              selectionsManager.hasUnappliedSelections$.value
-            ) {
-              selectionsManager.applySelections();
-            }
-          })
-        : undefined;
+      /** Combine ESQL variables from all children that publish them. */
+      const childrenESQLVariablesSubscription = combineCompatibleChildrenApis<
+        PublishesESQLVariable,
+        ESQLControlVariable[]
+      >(api, 'esqlVariable$', apiPublishesESQLVariable, []).subscribe((newESQLVariables) => {
+        esqlVariables$.next(newESQLVariables);
+      });
 
       return {
         api,
         Component: () => {
           const [hasUnappliedSelections, labelPosition] = useBatchedPublishingSubjects(
             selectionsManager.hasUnappliedSelections$,
-            labelPosition$
+            editorStateManager.api.labelPosition$
           );
 
           useEffect(() => {
@@ -275,7 +197,7 @@ export const getControlGroupEmbeddableFactory = () => {
             return () => {
               selectionsManager.cleanup();
               childrenDataViewsSubscription.unsubscribe();
-              saveNotificationSubscription?.unsubscribe();
+              childrenESQLVariablesSubscription.unsubscribe();
             };
           }, []);
 

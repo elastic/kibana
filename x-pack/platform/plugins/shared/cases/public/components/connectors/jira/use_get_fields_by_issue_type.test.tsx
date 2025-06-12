@@ -11,8 +11,7 @@ import { useKibana, useToasts } from '../../../common/lib/kibana';
 import { connector } from '../mock';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import * as api from './api';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
+import { TestProviders } from '../../../common/mock';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('./api');
@@ -21,10 +20,8 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('useGetFieldsByIssueType', () => {
   const { http } = useKibanaMock().services;
-  let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
@@ -37,7 +34,7 @@ describe('useGetFieldsByIssueType', () => {
           connector,
           issueType: '1',
         }),
-      { wrapper: appMockRender.AppWrapper }
+      { wrapper: TestProviders }
     );
 
     await waitFor(() => result.current.isSuccess);
@@ -58,7 +55,7 @@ describe('useGetFieldsByIssueType', () => {
           http,
           issueType: '1',
         }),
-      { wrapper: appMockRender.AppWrapper }
+      { wrapper: TestProviders }
     );
 
     expect(spy).not.toHaveBeenCalledWith();
@@ -73,7 +70,7 @@ describe('useGetFieldsByIssueType', () => {
           connector,
           issueType: null,
         }),
-      { wrapper: appMockRender.AppWrapper }
+      { wrapper: TestProviders }
     );
 
     expect(spy).not.toHaveBeenCalledWith();
@@ -95,7 +92,7 @@ describe('useGetFieldsByIssueType', () => {
           connector,
           issueType: '1',
         }),
-      { wrapper: appMockRender.AppWrapper }
+      { wrapper: TestProviders }
     );
 
     await waitFor(() => {
@@ -121,7 +118,7 @@ describe('useGetFieldsByIssueType', () => {
           connector,
           issueType: '1',
         }),
-      { wrapper: appMockRender.AppWrapper }
+      { wrapper: TestProviders }
     );
 
     await waitFor(() => {

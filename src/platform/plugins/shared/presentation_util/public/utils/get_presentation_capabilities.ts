@@ -17,7 +17,11 @@ interface PresentationCapabilities {
 }
 
 export const getPresentationCapabilities = (): PresentationCapabilities => {
-  const { dashboard, visualize, advancedSettings } = coreServices.application.capabilities;
+  const {
+    dashboard_v2: dashboard,
+    visualize_v2: visualize,
+    advancedSettings,
+  } = coreServices.application.capabilities;
 
   return {
     canAccessDashboards: Boolean(dashboard.show),

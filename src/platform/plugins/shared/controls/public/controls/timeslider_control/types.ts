@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PublishesPanelTitle, PublishesTimeslice } from '@kbn/presentation-publishing';
+import type { PublishesTitle, PublishesTimeslice } from '@kbn/presentation-publishing';
 import type { DefaultControlState } from '../../../common';
 import type { DefaultControlApi } from '../types';
 
@@ -21,5 +21,5 @@ export interface TimesliderControlState extends DefaultControlState {
 }
 
 export type TimesliderControlApi = DefaultControlApi &
-  Pick<PublishesPanelTitle, 'defaultPanelTitle'> &
+  Pick<PublishesTitle, 'defaultTitle$'> &
   PublishesTimeslice;

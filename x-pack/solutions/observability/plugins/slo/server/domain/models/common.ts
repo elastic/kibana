@@ -11,7 +11,6 @@ import {
   groupBySchema,
   groupingsSchema,
   groupSummarySchema,
-  historicalSummarySchema,
   metaSchema,
   objectiveSchema,
   sloSettingsSchema,
@@ -22,7 +21,6 @@ import {
 type Objective = t.TypeOf<typeof objectiveSchema>;
 type Status = t.TypeOf<typeof statusSchema>;
 type DateRange = t.TypeOf<typeof dateRangeSchema>;
-type HistoricalSummary = t.TypeOf<typeof historicalSummarySchema>;
 type Summary = t.TypeOf<typeof summarySchema>;
 type Groupings = t.TypeOf<typeof groupingsSchema>;
 type Meta = t.TypeOf<typeof metaSchema>;
@@ -35,7 +33,6 @@ export type {
   Objective,
   DateRange,
   Groupings,
-  HistoricalSummary,
   Meta,
   Status,
   Summary,

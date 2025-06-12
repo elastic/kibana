@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { showEmptyPrompt, showNoAlertsPrompt, showWelcomePrompt } from './helpers';
+import { getDefaultQuery, showEmptyPrompt, showNoAlertsPrompt, showWelcomePrompt } from './helpers';
 
 describe('helpers', () => {
   describe('showNoAlertsPrompt', () => {
@@ -147,6 +147,14 @@ describe('helpers', () => {
       });
 
       expect(result).toBe(false);
+    });
+  });
+
+  describe('getDefaultQuery', () => {
+    it('returns the expected default', () => {
+      const result = getDefaultQuery();
+
+      expect(result).toEqual({ language: 'kuery', query: '' });
     });
   });
 });

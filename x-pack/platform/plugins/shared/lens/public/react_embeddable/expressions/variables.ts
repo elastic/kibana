@@ -6,7 +6,7 @@
  */
 
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import type { TextBasedPersistedState } from '../../datasources/text_based/types';
+import type { TextBasedPersistedState } from '../../datasources/form_based/esql_layer/types';
 import { LensApi, LensRuntimeState } from '../types';
 
 function getInternalTables(states: Record<string, unknown>) {
@@ -28,7 +28,7 @@ function getInternalTables(states: Record<string, unknown>) {
  */
 export function getVariables(api: LensApi, state: LensRuntimeState) {
   return {
-    embeddableTitle: api.defaultPanelTitle?.getValue(),
+    embeddableTitle: api.defaultTitle$?.getValue(),
     ...(state.palette ? { theme: { palette: state.palette } } : {}),
     ...('overrides' in state ? { overrides: state.overrides } : {}),
     ...getInternalTables(state.attributes.state.datasourceStates),

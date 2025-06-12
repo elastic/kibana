@@ -28,8 +28,8 @@ export const COMMENT_EVENT_TRANSLATED = i18n.translate(
   }
 );
 
-export const COMMENT_EVENT_FAILED = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.translationDetails.summaryTab.commentEvent.failedLabel',
+export const COMMENT_EVENT_UNTRANSLATABLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.translationDetails.summaryTab.commentEvent.untranslatableLabel',
   {
     defaultMessage: 'failed to translate',
   }

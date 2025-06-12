@@ -8,6 +8,8 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { ServiceProvider } from './service_provider';
+import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 
 jest.mock('@kbn/ml-trained-models-utils', () => ({
   ...jest.requireActual('@kbn/ml-trained-models-utils'),
@@ -20,8 +22,14 @@ jest.mock('@kbn/ml-trained-models-utils', () => ({
 }));
 
 describe('ServiceProvider component', () => {
+  const renderComponent = (
+    service: ServiceProviderKeys,
+    endpointInfo: InferenceInferenceEndpointInfo
+  ) => {
+    render(<ServiceProvider service={service} endpointInfo={endpointInfo} />);
+  };
   describe('with HuggingFace service', () => {
-    const mockEndpoint = {
+    const mockEndpoint: InferenceInferenceEndpointInfo = {
       inference_id: 'my-hugging-face',
       service: 'hugging_face',
       service_settings: {
@@ -29,9 +37,10 @@ describe('ServiceProvider component', () => {
         url: 'https://dummy.huggingface.com',
       },
       task_settings: {},
-    } as any;
+      task_type: 'sparse_embedding',
+    };
     it('renders the component with service and model details', () => {
-      render(<ServiceProvider providerEndpoint={mockEndpoint} />);
+      renderComponent(ServiceProviderKeys.hugging_face, mockEndpoint);
 
       expect(screen.getByText('Hugging Face')).toBeInTheDocument();
       const icon = screen.getByTestId('table-column-service-provider-hugging_face');
@@ -41,7 +50,7 @@ describe('ServiceProvider component', () => {
   });
 
   describe('with openai service', () => {
-    const mockEndpoint = {
+    const mockEndpoint: InferenceInferenceEndpointInfo = {
       inference_id: 'my-openai-endpoint',
       service: 'openai',
       service_settings: {
@@ -49,9 +58,10 @@ describe('ServiceProvider component', () => {
         model_id: 'text-embedding-3-small',
       },
       task_settings: {},
-    } as any;
+      task_type: 'text_embedding',
+    };
     it('renders the component with service and model details', () => {
-      render(<ServiceProvider providerEndpoint={mockEndpoint} />);
+      renderComponent(ServiceProviderKeys.openai, mockEndpoint);
 
       expect(screen.getByText('OpenAI')).toBeInTheDocument();
       const icon = screen.getByTestId('table-column-service-provider-openai');
@@ -61,7 +71,7 @@ describe('ServiceProvider component', () => {
   });
 
   describe('with cohere service', () => {
-    const mockEndpoint = {
+    const mockEndpoint: InferenceInferenceEndpointInfo = {
       inference_id: 'cohere-2',
       service: 'cohere',
       service_settings: {
@@ -74,10 +84,11 @@ describe('ServiceProvider component', () => {
         embedding_type: 'byte',
       },
       task_settings: {},
-    } as any;
+      task_type: 'sparse_embedding',
+    };
 
     it('renders the component with service and model details', () => {
-      render(<ServiceProvider providerEndpoint={mockEndpoint} />);
+      renderComponent(ServiceProviderKeys.cohere, mockEndpoint);
 
       expect(screen.getByText('Cohere')).toBeInTheDocument();
       const icon = screen.getByTestId('table-column-service-provider-cohere');
@@ -90,14 +101,14 @@ describe('ServiceProvider component', () => {
         ...mockEndpoint,
         service_settings: { ...mockEndpoint.service_settings, model_id: undefined },
       };
-      render(<ServiceProvider providerEndpoint={modifiedEndpoint} />);
+      renderComponent(ServiceProviderKeys.cohere, modifiedEndpoint);
 
       expect(screen.queryByText('embed-english-light-v3.0')).not.toBeInTheDocument();
     });
   });
 
   describe('with azureaistudio service', () => {
-    const mockEndpoint = {
+    const mockEndpoint: InferenceInferenceEndpointInfo = {
       inference_id: 'azure-ai-1',
       service: 'azureaistudio',
       service_settings: {
@@ -105,10 +116,11 @@ describe('ServiceProvider component', () => {
         provider: 'microsoft_phi',
         endpoint_type: 'realtime',
       },
-    } as any;
+      task_type: 'sparse_embedding',
+    };
 
     it('renders the component with endpoint details', () => {
-      render(<ServiceProvider providerEndpoint={mockEndpoint} />);
+      renderComponent(ServiceProviderKeys.azureaistudio, mockEndpoint);
 
       expect(screen.getByText('Azure AI Studio')).toBeInTheDocument();
       const icon = screen.getByTestId('table-column-service-provider-azureaistudio');
@@ -121,7 +133,7 @@ describe('ServiceProvider component', () => {
         ...mockEndpoint,
         service_settings: {},
       };
-      render(<ServiceProvider providerEndpoint={modifiedEndpoint} />);
+      renderComponent(ServiceProviderKeys.azureaistudio, modifiedEndpoint);
 
       expect(screen.getByText('Azure AI Studio')).toBeInTheDocument();
       const icon = screen.getByTestId('table-column-service-provider-azureaistudio');
@@ -131,7 +143,7 @@ describe('ServiceProvider component', () => {
   });
 
   describe('with azureopenai service', () => {
-    const mockEndpoint = {
+    const mockEndpoint: InferenceInferenceEndpointInfo = {
       inference_id: 'azure-openai-1',
       service: 'azureopenai',
       service_settings: {
@@ -139,10 +151,11 @@ describe('ServiceProvider component', () => {
         deployment_id: 'deployment-123',
         api_version: 'v1',
       },
-    } as any;
+      task_type: 'sparse_embedding',
+    };
 
     it('renders the component with all required endpoint details', () => {
-      render(<ServiceProvider providerEndpoint={mockEndpoint} />);
+      renderComponent(ServiceProviderKeys.azureopenai, mockEndpoint);
 
       expect(screen.getByText('Azure OpenAI')).toBeInTheDocument();
       const icon = screen.getByTestId('table-column-service-provider-azureopenai');
@@ -152,7 +165,7 @@ describe('ServiceProvider component', () => {
   });
 
   describe('with mistral service', () => {
-    const mockEndpoint = {
+    const mockEndpoint: InferenceInferenceEndpointInfo = {
       inference_id: 'mistral-ai-1',
       service: 'mistral',
       service_settings: {
@@ -162,10 +175,11 @@ describe('ServiceProvider component', () => {
           requests_per_minute: 1000,
         },
       },
-    } as any;
+      task_type: 'sparse_embedding',
+    };
 
     it('renders the component with endpoint details', () => {
-      render(<ServiceProvider providerEndpoint={mockEndpoint} />);
+      renderComponent(ServiceProviderKeys.mistral, mockEndpoint);
 
       expect(screen.getByText('Mistral')).toBeInTheDocument();
       const icon = screen.getByTestId('table-column-service-provider-mistral');
@@ -178,7 +192,7 @@ describe('ServiceProvider component', () => {
         ...mockEndpoint,
         service_settings: {},
       };
-      render(<ServiceProvider providerEndpoint={modifiedEndpoint} />);
+      renderComponent(ServiceProviderKeys.mistral, modifiedEndpoint);
 
       const icon = screen.getByTestId('table-column-service-provider-mistral');
       expect(icon).toBeInTheDocument();
@@ -188,7 +202,7 @@ describe('ServiceProvider component', () => {
   });
 
   describe('with elasticsearch service', () => {
-    const mockEndpoint = {
+    const mockEndpoint: InferenceInferenceEndpointInfo = {
       inference_id: 'model-123',
       service: 'elasticsearch',
       service_settings: {
@@ -196,10 +210,11 @@ describe('ServiceProvider component', () => {
         num_threads: 10,
         model_id: 'settings-model-123',
       },
-    } as any;
+      task_type: 'sparse_embedding',
+    };
 
     it('renders the component with endpoint model_id', () => {
-      render(<ServiceProvider providerEndpoint={mockEndpoint} />);
+      renderComponent(ServiceProviderKeys.elasticsearch, mockEndpoint);
 
       expect(screen.getByText('Elasticsearch')).toBeInTheDocument();
       const icon = screen.getByTestId('table-column-service-provider-elasticsearch');
@@ -212,7 +227,7 @@ describe('ServiceProvider component', () => {
         ...mockEndpoint,
         service_settings: { ...mockEndpoint.service_settings, model_id: 'model-with-mit-license' },
       };
-      render(<ServiceProvider providerEndpoint={modifiedEndpoint} />);
+      renderComponent(ServiceProviderKeys.elasticsearch, modifiedEndpoint);
 
       const mitBadge = screen.getByTestId('mit-license-badge');
       expect(mitBadge).toBeInTheDocument();
@@ -220,14 +235,14 @@ describe('ServiceProvider component', () => {
     });
 
     it('does not render the MIT license badge if the model is not eligible', () => {
-      render(<ServiceProvider providerEndpoint={mockEndpoint} />);
+      renderComponent(ServiceProviderKeys.elasticsearch, mockEndpoint);
 
       expect(screen.queryByTestId('mit-license-badge')).not.toBeInTheDocument();
     });
   });
 
   describe('with googleaistudio service', () => {
-    const mockEndpoint = {
+    const mockEndpoint: InferenceInferenceEndpointInfo = {
       inference_id: 'google-ai-1',
       service: 'googleaistudio',
       service_settings: {
@@ -236,10 +251,11 @@ describe('ServiceProvider component', () => {
           requests_per_minute: 500,
         },
       },
-    } as any;
+      task_type: 'sparse_embedding',
+    };
 
     it('renders the component with service and model details', () => {
-      render(<ServiceProvider providerEndpoint={mockEndpoint} />);
+      renderComponent(ServiceProviderKeys.googleaistudio, mockEndpoint);
 
       expect(screen.getByText('Google AI Studio')).toBeInTheDocument();
       const icon = screen.getByTestId('table-column-service-provider-googleaistudio');
@@ -249,7 +265,7 @@ describe('ServiceProvider component', () => {
   });
 
   describe('with amazonbedrock service', () => {
-    const mockEndpoint = {
+    const mockEndpoint: InferenceInferenceEndpointInfo = {
       inference_id: 'amazon-bedrock-1',
       service: 'amazonbedrock',
       service_settings: {
@@ -257,10 +273,11 @@ describe('ServiceProvider component', () => {
         provider: 'AMAZONTITAN',
         model: 'model-bedrock-xyz',
       },
-    } as any;
+      task_type: 'sparse_embedding',
+    };
 
     it('renders the component with model and service details', () => {
-      render(<ServiceProvider providerEndpoint={mockEndpoint} />);
+      renderComponent(ServiceProviderKeys.amazonbedrock, mockEndpoint);
 
       expect(screen.getByText('Amazon Bedrock')).toBeInTheDocument();
       const icon = screen.getByTestId('table-column-service-provider-amazonbedrock');
@@ -270,7 +287,7 @@ describe('ServiceProvider component', () => {
   });
 
   describe('with alibabacloud-ai-search service', () => {
-    const mockEndpoint = {
+    const mockEndpoint: InferenceInferenceEndpointInfo = {
       inference_id: 'alibabacloud-ai-search-1',
       service: 'alibabacloud-ai-search',
       service_settings: {
@@ -278,10 +295,11 @@ describe('ServiceProvider component', () => {
         host: 'host-123',
         workspace: 'default-123',
       },
-    } as any;
+      task_type: 'sparse_embedding',
+    };
 
     it('renders the component with endpoint details', () => {
-      render(<ServiceProvider providerEndpoint={mockEndpoint} />);
+      renderComponent(ServiceProviderKeys['alibabacloud-ai-search'], mockEndpoint);
 
       expect(screen.getByText('AlibabaCloud AI Search')).toBeInTheDocument();
       const icon = screen.getByTestId('table-column-service-provider-alibabacloud-ai-search');

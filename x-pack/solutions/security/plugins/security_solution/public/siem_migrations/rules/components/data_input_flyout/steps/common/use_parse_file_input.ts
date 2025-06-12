@@ -20,11 +20,11 @@ export const useParseFileInput = (onFileParsed: OnFileParsed) => {
 
   const parseFile = useCallback(
     (files: FileList | null) => {
-      if (!files) {
+      setError(undefined);
+
+      if (!files || files.length === 0) {
         return;
       }
-
-      setError(undefined);
 
       const file = files[0];
       const reader = new FileReader();

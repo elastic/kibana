@@ -31,50 +31,25 @@ export const conditions = {
     return { bool: { must_not: conditions.isUntranslatable() } };
   },
   isInstalled(): QueryDslQueryContainer {
-    return {
-      nested: {
-        path: 'elastic_rule',
-        query: { exists: { field: 'elastic_rule.id' } },
-      },
-    };
+    return { exists: { field: 'elastic_rule.id' } };
   },
   isNotInstalled(): QueryDslQueryContainer {
-    return {
-      nested: {
-        path: 'elastic_rule',
-        query: { bool: { must_not: { exists: { field: 'elastic_rule.id' } } } },
-      },
-    };
+    return { bool: { must_not: conditions.isInstalled() } };
   },
   isPrebuilt(): QueryDslQueryContainer {
-    return {
-      nested: {
-        path: 'elastic_rule',
-        query: { exists: { field: 'elastic_rule.prebuilt_rule_id' } },
-      },
-    };
+    return { exists: { field: 'elastic_rule.prebuilt_rule_id' } };
   },
   isCustom(): QueryDslQueryContainer {
-    return {
-      nested: {
-        path: 'elastic_rule',
-        query: { bool: { must_not: { exists: { field: 'elastic_rule.prebuilt_rule_id' } } } },
-      },
-    };
+    return { bool: { must_not: conditions.isPrebuilt() } };
   },
   matchTitle(title: string): QueryDslQueryContainer {
-    return {
-      nested: {
-        path: 'elastic_rule',
-        query: { match: { 'elastic_rule.title': title } },
-      },
-    };
+    return { match: { 'elastic_rule.title': title } };
   },
   isInstallable(): QueryDslQueryContainer[] {
-    return [this.isFullyTranslated(), this.isNotInstalled()];
+    return [conditions.isFullyTranslated(), conditions.isNotInstalled()];
   },
   isNotInstallable(): QueryDslQueryContainer[] {
-    return [this.isNotFullyTranslated(), this.isInstalled()];
+    return [conditions.isNotFullyTranslated(), conditions.isInstalled()];
   },
   isFailed(): QueryDslQueryContainer {
     return { term: { status: SiemMigrationStatus.FAILED } };

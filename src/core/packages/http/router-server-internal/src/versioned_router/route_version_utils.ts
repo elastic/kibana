@@ -60,12 +60,14 @@ export interface RequestLike {
 }
 
 export function hasQueryVersion(
-  request: Mutable<KibanaRequest>
+  request: RequestLike
 ): request is Mutable<KibanaRequestWithQueryVersion> {
   return isObject(request.query) && ELASTIC_HTTP_VERSION_QUERY_PARAM in request.query;
 }
-export function removeQueryVersion(request: Mutable<KibanaRequestWithQueryVersion>): void {
-  delete request.query[ELASTIC_HTTP_VERSION_QUERY_PARAM];
+export function removeQueryVersion(request: RequestLike): void {
+  if (request.query) {
+    delete (request.query as { [key: string]: string })[ELASTIC_HTTP_VERSION_QUERY_PARAM];
+  }
 }
 
 function readQueryVersion(request: RequestLike): undefined | ApiVersion {

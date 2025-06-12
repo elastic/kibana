@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RouteOptions } from '../../..';
+import type { RouteOptions } from '../../..';
 import type {
   CreateRuleRequestBodyV1,
   CreateRuleRequestParamsV1,
@@ -14,9 +14,11 @@ import type {
 import {
   createBodySchemaV1,
   createParamsSchemaV1,
+  createRuleParamsExamplesV1,
 } from '../../../../../common/routes/rule/apis/create';
-import { RuleParamsV1, ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
-import { Rule } from '../../../../application/rule/types';
+import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
+import { ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
+import type { Rule } from '../../../../application/rule/types';
 import { RuleTypeDisabledError } from '../../../../lib';
 import { BASE_ALERTING_API_PATH } from '../../../../types';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
@@ -38,6 +40,7 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
         access: 'public',
         summary: `Create a rule`,
         tags: ['oas-tag:alerting'],
+        oasOperationObject: createRuleParamsExamplesV1,
       },
       validate: {
         request: {

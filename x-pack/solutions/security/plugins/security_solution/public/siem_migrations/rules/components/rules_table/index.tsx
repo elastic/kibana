@@ -19,14 +19,15 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 
 import type { RelatedIntegration, RuleResponse } from '../../../../../common/api/detection_engine';
+import { isMigrationPrebuiltRule } from '../../../../../common/siem_migrations/rules/utils';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { EmptyMigration } from './empty_migration';
 import { useMigrationRulesTableColumns } from '../../hooks/use_migration_rules_table_columns';
 import { useMigrationRuleDetailsFlyout } from '../../hooks/use_migration_rule_preview_flyout';
+import { useInstallMigrationRule } from '../../logic/use_install_migration_rule';
 import { useInstallMigrationRules } from '../../logic/use_install_migration_rules';
 import { useGetMigrationRules } from '../../logic/use_get_migration_rules';
-import { useInstallTranslatedMigrationRules } from '../../logic/use_install_translated_migration_rules';
 import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
 import { useGetMigrationPrebuiltRules } from '../../logic/use_get_migration_prebuilt_rules';
 import * as logicI18n from '../../logic/translations';
@@ -37,10 +38,11 @@ import {
   SiemMigrationRetryFilter,
 } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
-import { useRetryRuleMigration } from '../../service/hooks/use_retry_rules';
-import type { FilterOptions } from './filters';
+import { useStartMigration } from '../../service/hooks/use_start_migration';
+import type { FilterOptions } from '../../types';
 import { MigrationRulesFilter } from './filters';
-import { convertFilterOptions } from './helpers';
+import { convertFilterOptions } from './utils/filters';
+import { SiemTranslatedRulesTour } from '../tours/translation_guide';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
@@ -77,7 +79,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
 
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
-    const [sortField, setSortField] = useState<keyof RuleMigration>(DEFAULT_SORT_FIELD);
+    const [sortField, setSortField] = useState<keyof RuleMigrationRule>(DEFAULT_SORT_FIELD);
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
     const [searchTerm, setSearchTerm] = useState<string | undefined>();
 
@@ -91,7 +93,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       useGetMigrationPrebuiltRules(migrationId);
 
     const {
-      data: { ruleMigrations, total } = { ruleMigrations: [], total: 0 },
+      data: { migrationRules, total } = { migrationRules: [], total: 0 },
       isLoading: isDataLoading,
     } = useGetMigrationRules({
       migrationId,
@@ -99,17 +101,19 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       perPage: pageSize,
       sortField,
       sortDirection,
-      searchTerm,
-      ...convertFilterOptions(filterOptions),
+      filters: {
+        searchTerm,
+        ...convertFilterOptions(filterOptions),
+      },
     });
 
-    const [selectedRuleMigrations, setSelectedRuleMigrations] = useState<RuleMigration[]>([]);
-    const tableSelection: EuiTableSelectionType<RuleMigration> = useMemo(
+    const [selectedMigrationRules, setSelectedMigrationRules] = useState<RuleMigrationRule[]>([]);
+    const tableSelection: EuiTableSelectionType<RuleMigrationRule> = useMemo(
       () => ({
-        selectable: (item: RuleMigration) => {
+        selectable: (item: RuleMigrationRule) => {
           return !item.elastic_rule?.id && item.translation_result === RuleTranslationResult.FULL;
         },
-        selectableMessage: (selectable: boolean, item: RuleMigration) => {
+        selectableMessage: (selectable: boolean, item: RuleMigrationRule) => {
           if (selectable) {
             return '';
           }
@@ -117,10 +121,10 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
             ? i18n.ALREADY_TRANSLATED_RULE_TOOLTIP
             : i18n.NOT_FULLY_TRANSLATED_RULE_TOOLTIP;
         },
-        onSelectionChange: setSelectedRuleMigrations,
-        selected: selectedRuleMigrations,
+        onSelectionChange: setSelectedMigrationRules,
+        selected: selectedMigrationRules,
       }),
-      [selectedRuleMigrations]
+      [selectedMigrationRules]
     );
 
     const pagination = useMemo(() => {
@@ -140,33 +144,70 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       };
     }, [sortDirection, sortField]);
 
-    const onTableChange = useCallback(({ page, sort }: CriteriaWithPagination<RuleMigration>) => {
-      if (page) {
-        setPageIndex(page.index);
-        setPageSize(page.size);
-      }
-      if (sort) {
-        const { field, direction } = sort;
-        setSortField(field);
-        setSortDirection(direction);
-      }
-    }, []);
+    const onTableChange = useCallback(
+      ({ page, sort }: CriteriaWithPagination<RuleMigrationRule>) => {
+        if (page) {
+          setPageIndex(page.index);
+          setPageSize(page.size);
+        }
+        if (sort) {
+          const { field, direction } = sort;
+          setSortField(field);
+          setSortDirection(direction);
+        }
+      },
+      []
+    );
 
     const handleOnSearch = useCallback((value: string) => {
       setSearchTerm(value.trim());
     }, []);
 
-    const { mutateAsync: installMigrationRules } = useInstallMigrationRules(migrationId);
-    const { mutateAsync: installTranslatedMigrationRules } =
-      useInstallTranslatedMigrationRules(migrationId);
-    const { retryRuleMigration, isLoading: isRetryLoading } = useRetryRuleMigration(refetchData);
+    const { mutateAsync: installMigrationRule } = useInstallMigrationRule(migrationId);
+    const { mutateAsync: installMigrationRules } = useInstallMigrationRules(
+      migrationId,
+      translationStats
+    );
+    const { startMigration, isLoading: isRetryLoading } = useStartMigration(refetchData);
 
     const [isTableLoading, setTableLoading] = useState(false);
     const installSingleRule = useCallback(
-      async (migrationRule: RuleMigration, enabled = false) => {
+      async (migrationRule: RuleMigrationRule, enabled?: boolean) => {
         setTableLoading(true);
         try {
-          await installMigrationRules({ ids: [migrationRule.id], enabled });
+          await installMigrationRule({ migrationRule, enabled });
+        } catch (error) {
+          addError(error, { title: logicI18n.INSTALL_MIGRATION_RULES_FAILURE });
+        } finally {
+          setTableLoading(false);
+        }
+      },
+      [addError, installMigrationRule]
+    );
+
+    const installSelectedRule = useCallback(
+      async (enabled?: boolean) => {
+        setTableLoading(true);
+        try {
+          await installMigrationRules({
+            ids: selectedMigrationRules.map((rule) => rule.id),
+            enabled,
+          });
+        } catch (error) {
+          addError(error, { title: logicI18n.INSTALL_MIGRATION_RULES_FAILURE });
+        } finally {
+          setTableLoading(false);
+          setSelectedMigrationRules([]);
+        }
+      },
+      [addError, installMigrationRules, selectedMigrationRules]
+    );
+
+    const installTranslatedRules = useCallback(
+      async (enabled?: boolean) => {
+        setTableLoading(true);
+        try {
+          await installMigrationRules({ enabled });
         } catch (error) {
           addError(error, { title: logicI18n.INSTALL_MIGRATION_RULES_FAILURE });
         } finally {
@@ -176,58 +217,26 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       [addError, installMigrationRules]
     );
 
-    const installSelectedRule = useCallback(
-      async (enabled = false) => {
-        setTableLoading(true);
-        try {
-          await installMigrationRules({
-            ids: selectedRuleMigrations.map((rule) => rule.id),
-            enabled,
-          });
-        } catch (error) {
-          addError(error, { title: logicI18n.INSTALL_MIGRATION_RULES_FAILURE });
-        } finally {
-          setTableLoading(false);
-          setSelectedRuleMigrations([]);
-        }
-      },
-      [addError, installMigrationRules, selectedRuleMigrations]
-    );
-
-    const installTranslatedRules = useCallback(
-      async (enable?: boolean) => {
-        setTableLoading(true);
-        try {
-          await installTranslatedMigrationRules();
-        } catch (error) {
-          addError(error, { title: logicI18n.INSTALL_MIGRATION_RULES_FAILURE });
-        } finally {
-          setTableLoading(false);
-        }
-      },
-      [addError, installTranslatedMigrationRules]
-    );
-
     const reprocessFailedRules = useCallback(async () => {
-      retryRuleMigration(migrationId, SiemMigrationRetryFilter.FAILED);
-    }, [migrationId, retryRuleMigration]);
+      startMigration(migrationId, SiemMigrationRetryFilter.FAILED);
+    }, [migrationId, startMigration]);
 
-    const isLoading =
-      isStatsLoading || isPrebuiltRulesLoading || isDataLoading || isTableLoading || isRetryLoading;
+    const isRulesLoading =
+      isPrebuiltRulesLoading || isDataLoading || isTableLoading || isRetryLoading;
 
     const ruleActionsFactory = useCallback(
-      (ruleMigration: RuleMigration, closeRulePreview: () => void) => {
+      (migrationRule: RuleMigrationRule, closeRulePreview: () => void) => {
         const canMigrationRuleBeInstalled =
-          !isLoading &&
-          !ruleMigration.elastic_rule?.id &&
-          ruleMigration.translation_result === RuleTranslationResult.FULL;
+          !isRulesLoading &&
+          !migrationRule.elastic_rule?.id &&
+          migrationRule.translation_result === RuleTranslationResult.FULL;
         return (
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiButton
                 disabled={!canMigrationRuleBeInstalled}
                 onClick={() => {
-                  installSingleRule(ruleMigration);
+                  installSingleRule(migrationRule);
                   closeRulePreview();
                 }}
                 data-test-subj="installMigrationRuleFromFlyoutButton"
@@ -235,61 +244,62 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                 {i18n.INSTALL_WITHOUT_ENABLING_BUTTON_LABEL}
               </EuiButton>
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiButton
-                disabled={!canMigrationRuleBeInstalled}
-                onClick={() => {
-                  installSingleRule(ruleMigration, true);
-                  closeRulePreview();
-                }}
-                fill
-                data-test-subj="installAndEnableMigrationRuleFromFlyoutButton"
-              >
-                {i18n.INSTALL_AND_ENABLE_BUTTON_LABEL}
-              </EuiButton>
-            </EuiFlexItem>
+            {isMigrationPrebuiltRule(migrationRule.elastic_rule) && (
+              <EuiFlexItem>
+                <EuiButton
+                  disabled={!canMigrationRuleBeInstalled}
+                  onClick={() => {
+                    installSingleRule(migrationRule, true);
+                    closeRulePreview();
+                  }}
+                  fill
+                  data-test-subj="installAndEnableMigrationRuleFromFlyoutButton"
+                >
+                  {i18n.INSTALL_AND_ENABLE_BUTTON_LABEL}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         );
       },
-      [installSingleRule, isLoading]
+      [installSingleRule, isRulesLoading]
     );
 
     const getMigrationRuleData = useCallback(
       (ruleId: string) => {
-        if (!isLoading && ruleMigrations.length) {
-          const ruleMigration = ruleMigrations.find((item) => item.id === ruleId);
+        if (!isRulesLoading && migrationRules.length) {
+          const migrationRule = migrationRules.find((item) => item.id === ruleId);
           let matchedPrebuiltRule: RuleResponse | undefined;
-          const relatedIntegrations: RelatedIntegration[] = [];
-          if (ruleMigration) {
+          let relatedIntegrations: RelatedIntegration[] = [];
+          if (migrationRule) {
             // Find matched prebuilt rule if any and prioritize its installed version
-            const matchedPrebuiltRuleVersion = ruleMigration.elastic_rule?.prebuilt_rule_id
-              ? prebuiltRules[ruleMigration.elastic_rule.prebuilt_rule_id]
-              : undefined;
-            matchedPrebuiltRule =
-              matchedPrebuiltRuleVersion?.current ?? matchedPrebuiltRuleVersion?.target;
+            const prebuiltRuleId = migrationRule.elastic_rule?.prebuilt_rule_id;
+            const prebuiltRuleVersions = prebuiltRuleId ? prebuiltRules[prebuiltRuleId] : undefined;
+            matchedPrebuiltRule = prebuiltRuleVersions?.current ?? prebuiltRuleVersions?.target;
 
-            if (integrations) {
-              if (matchedPrebuiltRule?.related_integrations) {
-                relatedIntegrations.push(...matchedPrebuiltRule.related_integrations);
-              } else if (ruleMigration.elastic_rule?.integration_id) {
-                const integration = integrations[ruleMigration.elastic_rule.integration_id];
-                if (integration) {
-                  relatedIntegrations.push(integration);
-                }
-              }
+            const integrationIds = migrationRule.elastic_rule?.integration_ids;
+            if (integrations && integrationIds) {
+              relatedIntegrations = integrationIds
+                .map((integrationId) => integrations[integrationId])
+                .filter((integration) => integration != null);
             }
           }
-          return { ruleMigration, matchedPrebuiltRule, relatedIntegrations, isIntegrationsLoading };
+          return {
+            migrationRule,
+            matchedPrebuiltRule,
+            relatedIntegrations,
+            isIntegrationsLoading,
+          };
         }
       },
-      [integrations, isIntegrationsLoading, isLoading, prebuiltRules, ruleMigrations]
+      [integrations, isIntegrationsLoading, isRulesLoading, prebuiltRules, migrationRules]
     );
 
     const {
       migrationRuleDetailsFlyout: rulePreviewFlyout,
       openMigrationRuleDetails: openRulePreview,
     } = useMigrationRuleDetailsFlyout({
-      isLoading,
+      isLoading: isRulesLoading,
       getMigrationRuleData,
       ruleActionsFactory,
     });
@@ -303,8 +313,10 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
 
     return (
       <>
+        {!isStatsLoading && translationStats?.rules.total && <SiemTranslatedRulesTour />}
+
         <EuiSkeletonLoading
-          isLoading={isDataLoading}
+          isLoading={isStatsLoading}
           loadingContent={
             <>
               <EuiSkeletonTitle />
@@ -316,7 +328,12 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
               <EmptyMigration />
             ) : (
               <>
-                <EuiFlexGroup gutterSize="m" justifyContent="flexEnd" wrap>
+                <EuiFlexGroup
+                  data-test-subj="siemMigrationsRulesTable"
+                  gutterSize="m"
+                  justifyContent="flexEnd"
+                  wrap
+                >
                   <EuiFlexItem>
                     <SearchField initialValue={searchTerm} onSearch={handleOnSearch} />
                   </EuiFlexItem>
@@ -328,10 +345,10 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <BulkActions
-                      isTableLoading={isLoading}
+                      isTableLoading={isRulesLoading}
                       numberOfFailedRules={translationStats.rules.failed}
                       numberOfTranslatedRules={translationStats.rules.success.installable}
-                      numberOfSelectedRules={selectedRuleMigrations.length}
+                      numberOfSelectedRules={selectedMigrationRules.length}
                       installTranslatedRule={installTranslatedRules}
                       installSelectedRule={installSelectedRule}
                       reprocessFailedRules={reprocessFailedRules}
@@ -339,9 +356,9 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size="m" />
-                <EuiBasicTable<RuleMigration>
+                <EuiBasicTable<RuleMigrationRule>
                   loading={isTableLoading}
-                  items={ruleMigrations}
+                  items={migrationRules}
                   pagination={pagination}
                   sorting={sorting}
                   onChange={onTableChange}

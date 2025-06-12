@@ -7,7 +7,7 @@
 import { EuiEmptyPrompt, EuiPanel, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { RiskScoreEntity } from '../../../../common/search_strategy';
+import type { EntityType } from '../../../../common/search_strategy';
 import { HeaderSection } from '../../../common/components/header_section';
 import * as i18n from './translations';
 import { EntityAnalyticsLearnMoreLink } from '../entity_analytics_learn_more_link';
@@ -20,7 +20,7 @@ const EnableRiskScoreComponent = ({
   entityType,
 }: {
   isDisabled: boolean;
-  entityType: RiskScoreEntity;
+  entityType: EntityType;
 }) => {
   if (!isDisabled) {
     return null;

@@ -17,5 +17,7 @@
   ],
   "kbn_references": [
     "@kbn/repo-info",
+    "@kbn/dev-cli-runner",
+    "@kbn/dev-cli-errors",
   ],
 }

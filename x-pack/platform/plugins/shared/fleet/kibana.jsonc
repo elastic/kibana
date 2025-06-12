@@ -42,7 +42,7 @@
       "discover",
       "ingestPipelines",
       "guidedOnboarding",
-      "integrationAssistant"
+      "automaticImport"
     ],
     "requiredBundles": [
       "kibanaReact",

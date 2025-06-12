@@ -96,13 +96,14 @@ describe('<TemplateClone />', () => {
         actions.clickNextButton();
       });
 
-      const { template, priority, version, _kbnMeta, allowAutoCreate } = templateToClone;
+      const { template, indexMode, priority, version, _kbnMeta, allowAutoCreate } = templateToClone;
       expect(httpSetup.post).toHaveBeenLastCalledWith(
         `${API_BASE_PATH}/index_templates`,
         expect.objectContaining({
           body: JSON.stringify({
             name: `${templateToClone.name}-copy`,
             indexPatterns: DEFAULT_INDEX_PATTERNS,
+            indexMode,
             priority,
             version,
             allowAutoCreate,

@@ -36,11 +36,19 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
   let getLastFormComponentProps: ReturnType<
     typeof getFormComponentMock
   >['getLastFormComponentProps'];
+  let setExperimentalFlag: AppContextTestRender['setExperimentalFlag'];
 
   beforeEach(() => {
     const renderSetup = getArtifactListPageRenderingSetup();
 
-    ({ history, coreStart, mockedApi, FormComponentMock, getLastFormComponentProps } = renderSetup);
+    ({
+      history,
+      coreStart,
+      mockedApi,
+      FormComponentMock,
+      getLastFormComponentProps,
+      setExperimentalFlag,
+    } = renderSetup);
 
     history.push('somepage?show=create');
 
@@ -109,9 +117,37 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
         },
         mode: 'create',
         onChange: expect.any(Function),
-        policies: expect.any(Array),
-        policiesIsLoading: false,
       },
+      expect.anything()
+    );
+  });
+
+  it('should initialize form with a per-policy artifact when user does not have global artifact privilege and spaces is enabeld', async () => {
+    setExperimentalFlag({ endpointManagementSpaceAwarenessEnabled: true });
+    useUserPrivileges.mockReturnValue({
+      ...useUserPrivileges(),
+      endpointPrivileges: getEndpointPrivilegesInitialStateMock({
+        canManageGlobalArtifacts: false,
+      }),
+    });
+    await render();
+
+    expect(FormComponentMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        item: {
+          comments: [],
+          description: '',
+          entries: [],
+          item_id: undefined,
+          list_id: 'endpoint_trusted_apps',
+          meta: expect.any(Object),
+          name: '',
+          namespace_type: 'agnostic',
+          os_types: ['windows'],
+          tags: [],
+          type: 'simple',
+        },
+      }),
       expect.anything()
     );
   });
@@ -144,9 +180,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
       let getByTestId: (typeof renderResult)['getByTestId'];
 
       beforeEach(async () => {
-        await act(async () => {
-          await render();
-        });
+        await render();
 
         getByTestId = renderResult.getByTestId;
 
@@ -186,9 +220,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
 
     describe('and submit is successful', () => {
       beforeEach(async () => {
-        await act(async () => {
-          await render();
-        });
+        await render();
 
         await userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
 
@@ -268,9 +300,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
           return new ExceptionsListItemGenerator().generateTrustedApp(item);
         });
 
-        await act(async () => {
-          await render({ onFormSubmit: handleSubmitCallback });
-        });
+        await render({ onFormSubmit: handleSubmitCallback });
 
         await userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
       });
@@ -422,9 +452,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
     it('should show error toast and close flyout if item for edit does not exist', async () => {
       mockedApi.responseProvider.trustedApp.mockRejectedValue(new Error('does not exist') as never);
 
-      await act(async () => {
-        await render();
-      });
+      await render();
 
       await waitFor(() => {
         expect(mockedApi.responseProvider.trustedApp).toHaveBeenCalled();

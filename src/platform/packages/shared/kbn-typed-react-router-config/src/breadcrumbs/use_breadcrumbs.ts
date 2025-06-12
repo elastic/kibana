@@ -13,11 +13,12 @@ import { MouseEvent, useEffect, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import useObservable from 'react-use/lib/useObservable';
 
 function addClickHandlers(
   breadcrumbs: ChromeBreadcrumb[],
   navigateToHref?: (url: string) => Promise<void>
-) {
+): ChromeBreadcrumb[] {
   return breadcrumbs.map((bc) => ({
     ...bc,
     ...(bc.href
@@ -49,13 +50,21 @@ export const useBreadcrumbs = (
 
   const {
     services: {
-      chrome: { docTitle, setBreadcrumbs: chromeSetBreadcrumbs, setBreadcrumbsAppendExtension },
+      chrome: {
+        docTitle,
+        setBreadcrumbs: chromeSetBreadcrumbs,
+        setBreadcrumbsAppendExtension,
+        getChromeStyle$,
+      },
       application: { getUrlForApp, navigateToUrl },
     },
   } = useKibana<{
     application: ApplicationStart;
     chrome: ChromeStart;
   }>();
+
+  const chromeStyle = useObservable(getChromeStyle$());
+  const isProjectNavigation = chromeStyle === 'project';
 
   const setTitle = docTitle.change;
   const appPath = getUrlForApp(app?.id ?? 'observability-overview') ?? '';
@@ -67,17 +76,12 @@ export const useBreadcrumbs = (
 
   useEffect(() => {
     if (breadcrumbsAppendExtension) {
-      setBreadcrumbsAppendExtension(breadcrumbsAppendExtension);
+      return setBreadcrumbsAppendExtension(breadcrumbsAppendExtension);
     }
-    return () => {
-      if (breadcrumbsAppendExtension) {
-        setBreadcrumbsAppendExtension(undefined);
-      }
-    };
   }, [breadcrumbsAppendExtension, setBreadcrumbsAppendExtension]);
 
   useEffect(() => {
-    const breadcrumbs = serverless
+    const breadcrumbs = isProjectNavigation
       ? extraCrumbs
       : [
           {
@@ -92,10 +96,25 @@ export const useBreadcrumbs = (
         ];
 
     if (setBreadcrumbs) {
-      setBreadcrumbs(addClickHandlers(breadcrumbs, navigateToUrl));
+      const breadcrumbsWithClickHandlers = addClickHandlers(breadcrumbs, navigateToUrl);
+      setBreadcrumbs(breadcrumbsWithClickHandlers, {
+        project: {
+          value: breadcrumbsWithClickHandlers,
+          absolute: true,
+        },
+      });
     }
     if (setTitle) {
       setTitle(getTitleFromBreadCrumbs(breadcrumbs));
     }
-  }, [app?.label, appPath, extraCrumbs, navigateToUrl, serverless, setBreadcrumbs, setTitle]);
+  }, [
+    app?.label,
+    isProjectNavigation,
+    appPath,
+    extraCrumbs,
+    navigateToUrl,
+    serverless,
+    setBreadcrumbs,
+    setTitle,
+  ]);
 };

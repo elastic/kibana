@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import { shallow, mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import { render } from '@testing-library/react';
 
 import {
-  StepRuleDescription,
   addFilterStateIfNotThere,
   buildListItems,
   getDescriptionItem,
+  StepRuleDescription,
 } from '.';
 
 import { FilterManager, UI_SETTINGS } from '@kbn/data-plugin/public';
@@ -29,7 +29,7 @@ import * as i18n from './translations';
 
 import { schema } from '../step_about_rule/schema';
 import type { ListItems } from './types';
-import type { AboutStepRule } from '../../../../detections/pages/detection_engine/rules/types';
+import type { AboutStepRule } from '../../../common/types';
 import { createLicenseServiceMock } from '../../../../../common/license/mocks';
 import {
   ALERT_SUPPRESSION_DURATION_FIELD_NAME,

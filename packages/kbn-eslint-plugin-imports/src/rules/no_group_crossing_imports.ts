@@ -39,8 +39,8 @@ export const NoGroupCrossingImportsRule: Rule.RuleModule = {
     return visitAllImportStatements((req, { node }) => {
       if (
         req === null ||
-        // we can ignore imports using the raw-loader, they will need to be resolved but can be managed on a case by case basis
-        req.startsWith('!!raw-loader')
+        // we can ignore imports using the ?raw (replacing legacy raw-loader), they will need to be resolved but can be managed on a case by case basis
+        req.endsWith('?raw')
       ) {
         return;
       }

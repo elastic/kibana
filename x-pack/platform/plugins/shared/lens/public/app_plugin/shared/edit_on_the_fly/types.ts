@@ -28,6 +28,7 @@ export interface FlyoutWrapperProps {
   onCancel?: () => void;
   onApply?: () => void;
   navigateToLensEditor?: () => void;
+  isReadOnly?: boolean;
 }
 
 export interface EditConfigPanelProps {
@@ -86,10 +87,19 @@ export interface EditConfigPanelProps {
   // in cases where the embeddable is not filtered by time
   // (e.g. through unified search) set this property to true
   hideTimeFilterInfo?: boolean;
+  // Lens panels allow read-only "edit" where the user can look and tweak the existing chart, without
+  // persisting the changes. This is useful for dashboards where the user wants to see the configuration behind
+  isReadOnly?: boolean;
+  /** The dashboard api, important for creating controls from the ES|QL editor */
+  parentApi?: unknown;
 }
 
 export interface LayerConfigurationProps {
   attributes: TypedLensSerializedState['attributes'];
+  /** Embeddable output observable, useful for dashboard flyout  */
+  dataLoading$?: PublishingSubject<boolean | undefined>;
+  /** Contains the active data, necessary for some panel configuration such as coloring */
+  lensAdapters?: ReturnType<LensInspector['getInspectorAdapters']>;
   coreStart: CoreStart;
   startDependencies: LensPluginStartDependencies;
   visualizationMap: VisualizationMap;
@@ -100,4 +110,12 @@ export interface LayerConfigurationProps {
   setIsInlineFlyoutVisible: (flag: boolean) => void;
   getUserMessages: UserMessagesGetter;
   onlyAllowSwitchToSubtypes?: boolean;
+  updateSuggestion?: (attrs: TypedLensSerializedState['attributes']) => void;
+  /** Set the attributes state */
+  setCurrentAttributes?: (attrs: TypedLensSerializedState['attributes']) => void;
+  parentApi?: unknown;
+  panelId?: string;
+  closeFlyout?: () => void;
+  canEditTextBasedQuery?: boolean;
+  editorContainer?: HTMLElement;
 }

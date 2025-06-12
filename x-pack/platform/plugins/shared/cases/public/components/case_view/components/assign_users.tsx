@@ -180,7 +180,7 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
           <SidebarTitle title={i18n.ASSIGNEES} />
         </EuiFlexItem>
         {isLoading && <EuiLoadingSpinner data-test-subj="case-view-assignees-button-loading" />}
-        {!isLoading && permissions.update && (
+        {!isLoading && permissions.assign && (
           <EuiFlexItem data-test-subj="case-view-assignees-edit" grow={false}>
             <SuggestUsersPopover
               assignedUsersWithProfiles={assigneesWithProfiles}

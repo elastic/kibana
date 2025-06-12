@@ -15,12 +15,13 @@
 //
 
 import React, { useCallback } from 'react';
-import { monaco, XJsonLang } from '@kbn/monaco';
+import { monaco } from '@kbn/monaco';
 
 import {
   CodeEditor as KibanaReactCodeEditor,
   type CodeEditorProps as KibanaReactCodeEditorProps,
-  MarkdownLang,
+  MARKDOWN_LANG_ID,
+  XJSON_LANG_ID,
 } from '@kbn/code-editor';
 
 type Props = Pick<KibanaReactCodeEditorProps, 'aria-label' | 'value' | 'onChange'>;
@@ -103,7 +104,7 @@ export const CodeEditor = ({ onChange, type, isReadOnly, name, ...props }: CodeE
   return (
     <KibanaReactCodeEditor
       {...{ onChange, editorDidMount, options, ...props }}
-      languageId={type === 'json' ? XJsonLang.ID : MarkdownLang}
+      languageId={type === 'json' ? XJSON_LANG_ID : MARKDOWN_LANG_ID}
       width="100%"
     />
   );

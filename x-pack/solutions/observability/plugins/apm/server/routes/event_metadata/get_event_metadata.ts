@@ -28,17 +28,15 @@ export async function getEventMetadata({
     apm: {
       events: [processorEvent],
     },
-    body: {
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter: [...rangeQuery(start, end), { term: { [fieldName]: id } }],
-        },
+    track_total_hits: false,
+    query: {
+      bool: {
+        filter: [...rangeQuery(start, end), { term: { [fieldName]: id } }],
       },
-      size: 1,
-      _source: false,
-      fields: [{ field: '*', include_unmapped: true }],
     },
+    size: 1,
+    _source: false,
+    fields: [{ field: '*', include_unmapped: true }],
     terminate_after: 1,
   });
 

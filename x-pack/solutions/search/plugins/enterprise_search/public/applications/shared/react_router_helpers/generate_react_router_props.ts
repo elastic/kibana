@@ -19,7 +19,7 @@ import { letBrowserHandleEvent, createHref } from '.';
  * Generates the `href` and `onClick` props for React-Router-friendly links
  *
  * Based off of EUI's recommendations for handling React Router:
- * https://github.com/elastic/eui/blob/master/wiki/react-router.md#react-router-51
+ * https://github.com/elastic/eui/blob/main/wiki/consuming-eui/react-router.md#react-router-51
  *
  * but separated out from EuiLink portion as we use this for multiple EUI components
  */

@@ -7,7 +7,7 @@
 
 import * as React from 'react';
 import numeral from '@elastic/numeral';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { useContext, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiToolTip, EuiIconTip } from '@elastic/eui';
 import { useClientMetricsQuery } from '../../../../hooks/use_client_metrics_query';

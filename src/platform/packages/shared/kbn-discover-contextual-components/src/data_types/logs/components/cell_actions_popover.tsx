@@ -17,7 +17,6 @@ import {
   EuiPopoverFooter,
   EuiText,
   EuiButtonIcon,
-  EuiTextTruncate,
   EuiButtonEmpty,
   EuiCopy,
   useEuiTheme,
@@ -37,16 +36,19 @@ import {
   filterOutText,
   openCellActionPopoverAriaText,
 } from './translations';
+import { truncateAndPreserveHighlightTags } from './utils';
 
 interface CellActionsPopoverProps {
   onFilter?: DocViewFilterFn;
-  /* ECS mapping for the key */
+  /** ECS mapping for the key */
   property: string;
-  /* Value for the mapping, which will be displayed */
+  /** Formatted value from the mapping, which will be displayed */
   value: string;
-  /* Optional callback to render the value */
+  /** The raw value from the mapping, can be an object */
+  rawValue: unknown;
+  /** Optional callback to render the formatted value */
   renderValue?: (value: string) => React.ReactNode;
-  /* Props to forward to the trigger Badge */
+  /** Props to forward to the trigger Badge */
   renderPopoverTrigger: (props: {
     popoverTriggerProps: {
       onClick: () => void;
@@ -60,6 +62,7 @@ export function CellActionsPopover({
   onFilter,
   property,
   value,
+  rawValue,
   renderValue,
   renderPopoverTrigger,
 }: CellActionsPopoverProps) {
@@ -68,7 +71,7 @@ export function CellActionsPopover({
 
   const makeFilterHandlerByOperator = (operator: '+' | '-') => () => {
     if (onFilter) {
-      onFilter(property, value, operator);
+      onFilter(property, rawValue, operator);
     }
   };
 
@@ -94,12 +97,17 @@ export function CellActionsPopover({
         <EuiFlexItem style={{ maxWidth: '200px' }}>
           <EuiText
             size="s"
+            className="eui-textBreakWord"
             css={css`
               font-family: ${euiTheme.font.familyCode};
             `}
           >
             <strong>{property}</strong>{' '}
-            {typeof renderValue === 'function' ? renderValue(value) : value}
+            {typeof renderValue === 'function'
+              ? renderValue(value)
+              : rawValue != null && typeof rawValue !== 'object'
+              ? (rawValue as React.ReactNode)
+              : value}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -160,8 +168,12 @@ export function CellActionsPopover({
 }
 
 export interface FieldBadgeWithActionsProps
-  extends Pick<CellActionsPopoverProps, 'onFilter' | 'property' | 'value' | 'renderValue'> {
+  extends Pick<
+    CellActionsPopoverProps,
+    'onFilter' | 'property' | 'value' | 'rawValue' | 'renderValue'
+  > {
   icon?: EuiBadgeProps['iconType'];
+  color?: string;
 }
 
 interface FieldBadgeWithActionsDependencies {
@@ -178,16 +190,26 @@ export function FieldBadgeWithActions({
   property,
   renderValue,
   value,
+  rawValue,
+  color = 'hollow',
 }: FieldBadgeWithActionsPropsAndDependencies) {
+  const MAX_LENGTH = 20;
+
   return (
     <CellActionsPopover
       onFilter={onFilter}
       property={property}
       value={value}
+      rawValue={rawValue}
       renderValue={renderValue}
       renderPopoverTrigger={({ popoverTriggerProps }) => (
-        <EuiBadge {...popoverTriggerProps} color="hollow" iconType={icon} iconSide="left">
-          <EuiTextTruncate text={value} truncation="middle" width={120} />
+        <EuiBadge {...popoverTriggerProps} color={color} iconType={icon} iconSide="left">
+          <span
+            // eslint-disable-next-line react/no-danger
+            dangerouslySetInnerHTML={{
+              __html: truncateAndPreserveHighlightTags(value, MAX_LENGTH),
+            }}
+          />
         </EuiBadge>
       )}
     />

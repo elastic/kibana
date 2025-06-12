@@ -45,7 +45,17 @@ export const EntryTitle = ({ onClick, title }: EntryTitleProps) => {
         },
       })}
     >
-      <EuiLink data-test-subj="hostsViewTableEntryTitleLink" {...link}>
+      <EuiLink
+        data-test-subj="hostsViewTableEntryTitleLink"
+        aria-label={i18n.translate(
+          'xpack.infra.hostsViewPage.table.openHostDetailsLink.ariaLabel',
+          {
+            defaultMessage: 'Open host details {hostName}',
+            values: { hostName: name },
+          }
+        )}
+        {...link}
+      >
         <EuiFlexGroup
           className="eui-textTruncate"
           alignItems="center"

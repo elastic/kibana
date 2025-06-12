@@ -9,7 +9,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@el
 import { css, SerializedStyles } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { statusColors } from '@kbn/cloud-security-posture';
+import { MISCONFIGURATION_STATUS } from '@kbn/cloud-security-posture-common';
+import { useGetMisconfigurationStatusColor } from '@kbn/cloud-security-posture';
 import { calculatePostureScore } from '../../common/utils/helpers';
 import {
   CSP_FINDINGS_COMPLIANCE_SCORE,
@@ -33,6 +34,7 @@ export const ComplianceScoreBar = ({
   overrideCss?: SerializedStyles;
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { getMisconfigurationStatusColor } = useGetMisconfigurationStatusColor();
   const complianceScore = calculatePostureScore(totalPassed, totalFailed);
 
   // ensures the compliance bar takes full width of its parent
@@ -68,7 +70,7 @@ export const ComplianceScoreBar = ({
               <EuiFlexItem
                 css={css`
                   flex: 1;
-                  background: ${statusColors.unknown};
+                  background: ${getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.UNKNOWN)};
                 `}
                 data-test-subj={COMPLIANCE_SCORE_BAR_UNKNOWN}
               />
@@ -77,7 +79,7 @@ export const ComplianceScoreBar = ({
               <EuiFlexItem
                 css={css`
                   flex: ${totalPassed};
-                  background: ${statusColors.passed};
+                  background: ${getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.PASSED)};
                 `}
                 data-test-subj={COMPLIANCE_SCORE_BAR_PASSED}
               />
@@ -86,7 +88,7 @@ export const ComplianceScoreBar = ({
               <EuiFlexItem
                 css={css`
                   flex: ${totalFailed};
-                  background: ${statusColors.failed};
+                  background: ${getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.FAILED)};
                 `}
                 data-test-subj={COMPLIANCE_SCORE_BAR_FAILED}
               />

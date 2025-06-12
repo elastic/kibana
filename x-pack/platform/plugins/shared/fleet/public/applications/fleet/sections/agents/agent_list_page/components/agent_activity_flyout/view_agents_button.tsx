@@ -29,7 +29,6 @@ export const ViewAgentsButton: React.FunctionComponent<{
     <EuiButtonEmpty
       size="m"
       onClick={() => onClickViewAgents(action)}
-      flush="left"
       data-test-subj="agentActivityFlyout.viewAgentsButton"
       disabled={isDisabled}
     >

@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { ILicenseState } from '../lib';
-import { ActionsRequestHandlerContext } from '../types';
-import {
-  GetGlobalExecutionLogParams,
-  INTERNAL_BASE_ACTION_API_PATH,
-  RewriteRequestCase,
-} from '../../common';
+import type { ILicenseState } from '../lib';
+import type { ActionsRequestHandlerContext } from '../types';
+import type { GetGlobalExecutionLogParams, RewriteRequestCase } from '../../common';
+import { INTERNAL_BASE_ACTION_API_PATH } from '../../common';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { rewriteNamespaces } from './rewrite_namespaces';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from './constants';

@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import moment from 'moment';
 import { createQuery } from './create_query';
 import { mapToList } from './get_high_level_stats';
@@ -120,7 +120,7 @@ export class LogstashAgentMonitoring implements LogstashMonitoring {
           }
         }
 
-        const thisCollectionType = hit._source?.agent?.type || 'agent';
+        const thisCollectionType = 'agent';
         if (!Object.hasOwn(clusterStats, 'collection_types')) {
           clusterStats.collection_types = {};
         }
@@ -201,32 +201,30 @@ export class LogstashAgentMonitoring implements LogstashMonitoring {
       index: INDEX_PATTERN_LOGSTASH_METRICS_NODE,
       ignore_unavailable: true,
       filter_path: filterPath,
-      body: {
-        query: createQuery({
-          filters: [
-            {
-              bool: {
-                should: [{ term: { 'data_stream.dataset': 'logstash.node' } }],
+      query: createQuery({
+        filters: [
+          {
+            bool: {
+              should: [{ term: { 'data_stream.dataset': 'logstash.node' } }],
+            },
+          },
+          {
+            range: {
+              '@timestamp': {
+                format: 'epoch_millis',
+                gte: moment.utc(start).valueOf(),
+                lte: moment.utc(end).valueOf(),
               },
             },
-            {
-              range: {
-                '@timestamp': {
-                  format: 'epoch_millis',
-                  gte: moment.utc(start).valueOf(),
-                  lte: moment.utc(end).valueOf(),
-                },
-              },
-            },
-          ],
-        }) as estypes.QueryDslQueryContainer,
-        collapse: {
-          field: 'host.id',
-        },
-        sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'long' } }],
-        from: page * HITS_SIZE,
-        size: HITS_SIZE,
+          },
+        ],
+      }) as estypes.QueryDslQueryContainer,
+      collapse: {
+        field: 'host.id',
       },
+      sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'long' } }],
+      from: page * HITS_SIZE,
+      size: HITS_SIZE,
     };
 
     const results = await callCluster.search<LogstashStats>(params, {
@@ -284,14 +282,12 @@ export class LogstashAgentMonitoring implements LogstashMonitoring {
         index: INDEX_PATTERN_LOGSTASH_METRICS_PLUGINS,
         ignore_unavailable: true,
         filter_path: ['hits.hits._source.logstash.pipeline'],
-        body: {
-          query: createQuery({
-            filters,
-          }) as estypes.QueryDslQueryContainer,
-          collapse: { field: `logstash.pipeline.plugin.${pluginType}.id` },
-          sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'long' } }],
-          size: HITS_SIZE,
-        },
+        query: createQuery({
+          filters,
+        }) as estypes.QueryDslQueryContainer,
+        collapse: { field: `logstash.pipeline.plugin.${pluginType}.id` },
+        sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'long' } }],
+        size: HITS_SIZE,
       };
 
       const results = await callCluster.search<LogstashState>(params, {

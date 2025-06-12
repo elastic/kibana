@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
-import * as rt from 'io-ts';
+import { fold } from 'fp-ts/Either';
+import { pipe } from 'fp-ts/pipeable';
+import type * as rt from 'io-ts';
 import { exactCheck } from '@kbn/securitysolution-io-ts-utils';
-import { identity } from 'fp-ts/lib/function';
+import { identity } from 'fp-ts/function';
 import { isObject } from 'lodash';
 
 const formatErrors = (errors: rt.Errors): string[] => {

@@ -26,11 +26,11 @@ export interface RuleType<
     | 'defaultScheduleInterval'
     | 'doesSetRecoveryContext'
     | 'category'
+    | 'isExportable'
   > {
   actionVariables: ActionVariables;
   authorizedConsumers: Record<string, { read: boolean; all: boolean }>;
   enabledInLicense: boolean;
-  hasFieldsForAAD?: boolean;
   hasAlertsMappings?: boolean;
 }
 

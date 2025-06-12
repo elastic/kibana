@@ -12,20 +12,26 @@ import { keys } from 'lodash';
 import type { RangeFilter } from '../build_filters';
 import type { TimeRange } from './types';
 
+const isRelativeTime = (value: string | number | undefined): boolean => {
+  return typeof value === 'string' && !moment(value).isValid();
+};
+
 export function convertRangeFilterToTimeRange(filter: RangeFilter) {
   const key = keys(filter.query.range)[0];
   const values = filter.query.range[key];
 
+  const from = values.gt || values.gte;
+  const to = values.lt || values.lte;
   return {
-    from: moment(values.gt || values.gte),
-    to: moment(values.lt || values.lte),
+    from: from && isRelativeTime(from) ? String(from) : moment(from),
+    to: to && isRelativeTime(to) ? String(to) : moment(to),
   };
 }
 
 export function convertRangeFilterToTimeRangeString(filter: RangeFilter): TimeRange {
   const { from, to } = convertRangeFilterToTimeRange(filter);
   return {
-    from: from?.toISOString(),
-    to: to?.toISOString(),
+    from: moment.isMoment(from) ? from?.toISOString() : from,
+    to: moment.isMoment(to) ? to?.toISOString() : to,
   };
 }

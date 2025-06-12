@@ -11,7 +11,7 @@ import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-
 import { DataViewBase, DataViewFieldBase, getDataViewFieldSubtypeNested } from '@kbn/es-query';
 
 // TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/100715
-// import { AutocompleteStart } from '../../../../../../../../../../../src/platform/plugins/shared/unified_search/public';
+// import { AutocompleteStart } from '@kbn/unified-search-plugin/public';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AutocompleteStart = any;
 

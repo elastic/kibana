@@ -25,7 +25,7 @@ export const copyTimelineRoute = (router: SecuritySolutionPluginRouter) => {
       path: TIMELINE_COPY_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: ['timeline_write'],
         },
       },
       access: 'internal',

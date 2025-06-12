@@ -13,6 +13,7 @@ export default createTestConfig({
   junit: {
     reportName: 'Serverless Search Discover Context Awareness Functional Tests',
   },
+  suiteTags: { exclude: ['skipSvlSearch'] },
   kbnServerArgs: [
     `--discover.experimental.enabledProfiles=${JSON.stringify([
       'example-root-profile',

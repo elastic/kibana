@@ -8,6 +8,7 @@
  */
 
 export interface RenovatePackageRule {
+  groupName: string;
   matchPackageNames?: string[];
   matchDepNames?: string[];
   matchPackagePatterns?: string[];
@@ -19,9 +20,15 @@ export interface RenovatePackageRule {
 }
 
 export function ruleFilter(rule: RenovatePackageRule) {
+  // Explicit list of rules that are allowed to be disabled.
+  const allowedDisabledRules = [
+    'bazel', // Per operations team. This is slated for removal, and does not make sense to track.
+    'typescript', // These updates are always handled manually
+    'webpack', // While we are in the middle of a webpack upgrade. TODO: Remove this once we are done.
+  ];
   return (
-    // Only include rules that are enabled
-    rule.enabled !== false &&
+    // Only include rules that are enabled or explicitly allowed to be disabled
+    (allowedDisabledRules.includes(rule.groupName) || rule.enabled !== false) &&
     // Only include rules that have a team reviewer
     rule.reviewers?.some((reviewer) => reviewer.startsWith('team:'))
   );
@@ -34,6 +41,7 @@ export function packageFilter(pkg: string) {
     !pkg.startsWith('@kbn/') &&
     // The EUI team owns the EUI packages, and are not covered by renovate
     pkg !== '@elastic/eui' &&
+    pkg !== '@elastic/eui-amsterdam' &&
     pkg !== '@elastic/eui-theme-borealis' &&
     // Operations owns node, and is not covered by renovate
     pkg !== '@types/node'

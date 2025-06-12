@@ -265,12 +265,12 @@
           {
             "parentPluginId": "@kbn/product-doc-common",
             "id": "def-common.ProductDocumentationAttributes.content_body",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "content_body",
             "description": [],
             "signature": [
-              "SemanticTextField"
+              "string | SemanticTextField"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/documents.ts",
             "deprecated": false,
@@ -348,12 +348,12 @@
           {
             "parentPluginId": "@kbn/product-doc-common",
             "id": "def-common.ProductDocumentationAttributes.ai_summary",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "ai_summary",
             "description": [],
             "signature": [
-              "SemanticTextField"
+              "string | SemanticTextField"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/documents.ts",
             "deprecated": false,
@@ -362,12 +362,12 @@
           {
             "parentPluginId": "@kbn/product-doc-common",
             "id": "def-common.ProductDocumentationAttributes.ai_questions_answered",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "ai_questions_answered",
             "description": [],
             "signature": [
-              "SemanticTextArrayField"
+              "string[] | SemanticTextArrayField"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/documents.ts",
             "deprecated": false,
@@ -406,6 +406,21 @@
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "@kbn/product-doc-common",
+        "id": "def-common.LATEST_MANIFEST_FORMAT_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "LATEST_MANIFEST_FORMAT_VERSION",
+        "description": [],
+        "signature": [
+          "\"2.0.0\""
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/product-doc-common/src/manifest.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/product-doc-common",
         "id": "def-common.productDocIndexPattern",

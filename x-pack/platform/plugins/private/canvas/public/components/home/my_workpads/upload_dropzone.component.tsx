@@ -6,7 +6,6 @@
  */
 
 import React, { FC, PropsWithChildren } from 'react';
-// @ts-expect-error untyped library
 import Dropzone from 'react-dropzone';
 
 import './upload_dropzone.scss';
@@ -21,14 +20,23 @@ export const UploadDropzone: FC<PropsWithChildren<Props>> = ({
   disabled,
   children,
 }) => {
+  const dropFn = (acceptedFiles: File[]) => {
+    const fileList = acceptedFiles as unknown as FileList;
+    onDrop(fileList);
+  };
   return (
-    <Dropzone
-      {...{ onDrop, disabled }}
-      disableClick
-      className="canvasWorkpad__dropzone"
-      activeClassName="canvasWorkpad__dropzone--active"
-    >
-      {children}
+    <Dropzone {...{ onDrop: dropFn, disabled }} noClick>
+      {({ getRootProps, isDragActive }) => (
+        <div
+          {...getRootProps({
+            className: `canvasWorkpad__dropzone${
+              isDragActive ? ' canvasWorkpad__dropzone--active' : ''
+            }`,
+          })}
+        >
+          {children}
+        </div>
+      )}
     </Dropzone>
   );
 };

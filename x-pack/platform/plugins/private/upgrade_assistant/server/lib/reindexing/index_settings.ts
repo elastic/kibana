@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { flow, omit } from 'lodash';
-import { ReindexWarning } from '../../../common/types';
+import { IndexWarning } from '../../../common/types';
 import { versionService } from '../version';
 import { FlatSettings } from './types';
 export interface ParsedIndexName {
@@ -26,17 +25,6 @@ const deprecatedSettings = [
   'index.max_adjacency_matrix_filters',
   'index.soft_deletes.enabled',
 ];
-
-/**
- * Validates, and updates deprecated settings and mappings to be applied to the
- * new updated index.
- */
-export const transformFlatSettings = (flatSettings: FlatSettings) => {
-  const settings = transformSettings(flatSettings.settings);
-  const mappings = transformMappings(flatSettings.mappings);
-
-  return { settings, mappings };
-};
 
 /**
  * Provides the assumed source of the index name stripping any prefixing
@@ -77,7 +65,7 @@ export const generateNewIndexName = (indexName: string): string => {
 
 export const getDeprecatedSettingWarning = (
   flatSettings: FlatSettings
-): ReindexWarning | undefined => {
+): IndexWarning | undefined => {
   const { settings } = flatSettings;
 
   const deprecatedSettingsInUse = Object.keys(settings || {}).filter((setting) => {
@@ -100,6 +88,7 @@ export const getDeprecatedSettingWarning = (
 
   if (deprecatedSettingsInUse.length) {
     return {
+      flow: 'all',
       warningType: 'indexSetting',
       meta: {
         deprecatedSettings: deprecatedSettingsInUse,
@@ -112,8 +101,8 @@ export const getDeprecatedSettingWarning = (
  * Returns an array of warnings that should be displayed to user before reindexing begins.
  * @param flatSettings
  */
-export const getReindexWarnings = (flatSettings: FlatSettings): ReindexWarning[] => {
-  const warnings = [] as ReindexWarning[];
+export const getReindexWarnings = (flatSettings: FlatSettings): IndexWarning[] => {
+  const warnings = [] as IndexWarning[];
 
   if (versionService.getMajorVersion() === 8) {
     const deprecatedSettingWarning = getDeprecatedSettingWarning(flatSettings);
@@ -125,63 +114,3 @@ export const getReindexWarnings = (flatSettings: FlatSettings): ReindexWarning[]
 
   return warnings;
 };
-
-const removeUnsettableSettings = (settings: FlatSettings['settings']) =>
-  omit(settings, [
-    // Private ES settings
-    'index.allocation.existing_shards_allocator',
-    'index.blocks.write',
-    'index.creation_date',
-    'index.frozen',
-    'index.history.uuid',
-    'index.merge.enabled',
-    'index.provided_name',
-    'index.resize.source.name',
-    'index.resize.source.uuid',
-    'index.routing.allocation.initial_recovery._id',
-    'index.search.throttled',
-    'index.source_only',
-    'index.shrink.source.name',
-    'index.shrink.source.uuid',
-    'index.store.snapshot.repository_name',
-    'index.store.snapshot.snapshot_name',
-    'index.store.snapshot.snapshot_uuid',
-    'index.store.snapshot.index_name',
-    'index.store.snapshot.index_uuid',
-    'index.uuid',
-    'index.verified_before_close',
-    'index.version.created',
-
-    // Ignored since 6.x and forbidden in 7.x
-    'index.mapper.dynamic',
-
-    // Deprecated in 9.0
-    'index.version.upgraded',
-  ]);
-
-const removeDeprecatedSettings = (settings: FlatSettings['settings']) => {
-  const updatedSettings = { ...settings };
-
-  // Translog settings are only marked as deprecated if soft deletes is enabled
-  if (updatedSettings['index.soft_deletes.enabled'] === 'true') {
-    if (updatedSettings['index.translog.retention.size']) {
-      delete updatedSettings['index.translog.retention.size'];
-    }
-
-    // @ts-expect-error @elastic/elasticsearch doesn't declare such a setting
-    if (settings['index.translog.retention.age']) {
-      delete updatedSettings['index.translog.retention.age'];
-    }
-  }
-
-  return omit(updatedSettings, deprecatedSettings);
-};
-
-// Use `flow` to pipe the settings through each function.
-const transformSettings = flow(removeUnsettableSettings, removeDeprecatedSettings);
-
-const updateFixableMappings = (mappings: FlatSettings['mappings']) => {
-  return mappings;
-};
-
-const transformMappings = flow(updateFixableMappings);

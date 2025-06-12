@@ -6,7 +6,6 @@
  */
 
 import { sum, round } from 'lodash';
-import { euiLightVars as theme } from '@kbn/ui-theme';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { isFiniteNumber } from '../../../../../../common/utils/is_finite_number';
@@ -23,7 +22,6 @@ import {
   SERVICE_NAME,
 } from '../../../../../../common/es_fields/apm';
 import { getBucketSize } from '../../../../../../common/utils/get_bucket_size';
-import { getVizColorForIndex } from '../../../../../../common/viz_colors';
 import { JAVA_AGENT_NAMES } from '../../../../../../common/agent_name';
 import {
   environmentQuery,
@@ -86,50 +84,48 @@ export async function fetchAndTransformGcMetrics({
     apm: {
       events: [ProcessorEvent.metric],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            ...serviceNodeNameQuery(serviceNodeName),
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            { exists: { field: targetField } },
-            { terms: { [AGENT_NAME]: JAVA_AGENT_NAMES } },
-          ],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          { term: { [SERVICE_NAME]: serviceName } },
+          ...serviceNodeNameQuery(serviceNodeName),
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+          { exists: { field: targetField } },
+          { terms: { [AGENT_NAME]: JAVA_AGENT_NAMES } },
+        ],
       },
-      aggs: {
-        per_pool: {
-          terms: {
-            field: `${groupByField}`,
-          },
-          aggs: {
-            timeseries: {
-              date_histogram: getMetricsDateHistogramParams({
-                start,
-                end,
-                metricsInterval: config.metricsInterval,
-              }),
-              aggs: {
-                // get the max value
-                max: fieldAggregation,
-                // get the derivative, which is the delta y
+    },
+    aggs: {
+      per_pool: {
+        terms: {
+          field: `${groupByField}`,
+        },
+        aggs: {
+          timeseries: {
+            date_histogram: getMetricsDateHistogramParams({
+              start,
+              end,
+              metricsInterval: config.metricsInterval,
+            }),
+            aggs: {
+              // get the max value
+              max: fieldAggregation,
+              // get the derivative, which is the delta y
+              derivative: {
                 derivative: {
-                  derivative: {
-                    buckets_path: 'max',
-                  },
+                  buckets_path: 'max',
                 },
-                // if a gc counter is reset, the delta will be >0 and
-                // needs to be excluded
-                value: {
-                  bucket_script: {
-                    buckets_path: { value: 'derivative' },
-                    script: 'params.value > 0.0 ? params.value : 0.0',
-                  },
+              },
+              // if a gc counter is reset, the delta will be >0 and
+              // needs to be excluded
+              value: {
+                bucket_script: {
+                  buckets_path: { value: 'derivative' },
+                  script: 'params.value > 0.0 ? params.value : 0.0',
                 },
               },
             },
@@ -179,7 +175,6 @@ export async function fetchAndTransformGcMetrics({
       title: label,
       key: label,
       type: chartBase.type,
-      color: getVizColorForIndex(i, theme),
       overallValue,
       data,
     };

@@ -18,7 +18,7 @@ import { useFetchIndex } from '../../../common/containers/source';
 
 import * as i18n from '../../../common/containers/source/translations';
 import { useRuleIndices } from '../../rule_management/logic/use_rule_indices';
-import { getMachineLearningJobId } from '../../../detections/pages/detection_engine/rules/helpers';
+import { getMachineLearningJobId } from '../../common/helpers';
 
 export interface ReturnUseFetchExceptionFlyoutData {
   isLoading: boolean;
@@ -130,7 +130,6 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
       }
       try {
         extendedFields = await data.dataViews.getFieldsForIndexPattern(dv, {
-          pattern: '',
           includeUnmapped: true,
           fields,
         });

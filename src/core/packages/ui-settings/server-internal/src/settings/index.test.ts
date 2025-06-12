@@ -17,7 +17,6 @@ import { getStateSettings } from './state';
 import { getAnnouncementsSettings } from './announcements';
 
 const defaultOptions: GetCoreSettingsOptions = {
-  isServerless: false,
   isDist: true,
   isThemeSwitcherEnabled: undefined,
 };

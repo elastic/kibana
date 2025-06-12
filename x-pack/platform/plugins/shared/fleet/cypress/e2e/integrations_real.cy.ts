@@ -16,6 +16,8 @@ import {
   AGENT_POLICY_NAME_LINK,
   FLYOUT_CLOSE_BTN_SEL,
   getIntegrationCard,
+  INSTALLED_INTEGRATIONS_DASHBOARDS_LINK,
+  INSTALLED_INTEGRATIONS_TABLE_ROW,
   INTEGRATION_NAME_LINK,
   LATEST_VERSION,
   PACKAGE_VERSION,
@@ -27,11 +29,12 @@ import {
   INTEGRATION_POLICIES_UPGRADE_CHECKBOX,
   INTEGRATION_LIST,
   getIntegrationCategories,
+  ADD_INTEGRATION_FLYOUT,
 } from '../screens/integrations';
 import { LOADING_SPINNER, CONFIRM_MODAL } from '../screens/navigation';
 import { ADD_PACKAGE_POLICY_BTN } from '../screens/fleet';
 import { cleanupAgentPolicies } from '../tasks/cleanup';
-import { request } from '../tasks/common';
+import { request, visit } from '../tasks/common';
 import { login } from '../tasks/login';
 
 function setupIntegrations() {
@@ -141,7 +144,7 @@ describe('Add Integration - Real API', () => {
     });
 
     request({ url: '/api/fleet/agent_policies' }).then((response: any) => {
-      cy.visit(`/app/fleet/policies/${agentPolicyId}`);
+      visit(`/app/fleet/policies/${agentPolicyId}`);
 
       cy.intercept(
         '/api/fleet/epm/packages?*',
@@ -155,17 +158,19 @@ describe('Add Integration - Real API', () => {
           });
         }
       ).as('packages');
+      cy.intercept('/api/fleet/epm/packages/1password/*').as('1passwordPackage');
 
       cy.getBySel(ADD_PACKAGE_POLICY_BTN).click();
       cy.wait('@packages');
-      cy.getBySel(LOADING_SPINNER).should('not.exist');
-      cy.getBySel(INTEGRATIONS_SEARCHBAR.INPUT).clear().type('Apache');
-      cy.getBySel(getIntegrationCard(integration)).click();
-      addIntegration({ useExistingPolicy: true });
+      const packageComboBox = cy.getBySel(ADD_INTEGRATION_FLYOUT.SELECT_INTEGRATION_COMBOBOX);
+      packageComboBox.click();
+      cy.wait('@1passwordPackage');
+      cy.wait(100);
+      cy.get('[title="1Password"]').click();
+      cy.getBySel(ADD_INTEGRATION_FLYOUT.PASSWORD_INPUT).type('test');
+      cy.getBySel(ADD_INTEGRATION_FLYOUT.SUBMIT_BTN).click();
       cy.get('.euiBasicTable-loading').should('not.exist');
-      cy.get('.euiTitle').contains('Agent policy 1');
-      clickIfVisible(FLYOUT_CLOSE_BTN_SEL);
-      cy.get('.euiLink').contains('apache-1');
+      cy.get('.euiLink').contains('1password-1');
     });
   });
 
@@ -210,5 +215,31 @@ describe('Add Integration - Real API', () => {
     });
     cy.getBySel(INTEGRATIONS_SEARCHBAR.REMOVE_BADGE_BUTTON).click();
     cy.getBySel(INTEGRATIONS_SEARCHBAR.BADGE).should('not.exist');
+  });
+});
+
+// Enable when we are ready to provide more testing for the tabular view of installed integrations.
+describe.skip('Dashboards link for installed integration - Real API', () => {
+  const integration = 'apache';
+  const expectedIntegrationDashboard = '[Metrics Apache] Overview';
+  const unexpectedIntegrationDashboard = '[Elastic Agent]';
+  beforeEach(() => {
+    login();
+  });
+
+  it('should navigate to the dashboards list filtered by the integration name', () => {
+    setupIntegrations();
+    cy.getBySel(LOADING_SPINNER).should('not.exist');
+    cy.getBySel(INTEGRATIONS_SEARCHBAR.INPUT).clear().type('Apache');
+    cy.getBySel(getIntegrationCard(integration)).click();
+    addIntegration();
+    cy.visit('/app/integrations/installed');
+    cy.getBySel(INSTALLED_INTEGRATIONS_TABLE_ROW)
+      .contains('Apache')
+      .parents('tr')
+      .find(`[data-test-subj="${INSTALLED_INTEGRATIONS_DASHBOARDS_LINK}"]`)
+      .click();
+    cy.contains(expectedIntegrationDashboard).should('exist');
+    cy.contains(unexpectedIntegrationDashboard).should('not.exist');
   });
 });

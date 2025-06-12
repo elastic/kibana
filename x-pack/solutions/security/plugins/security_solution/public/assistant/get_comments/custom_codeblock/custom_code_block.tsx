@@ -8,7 +8,7 @@ import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '
 import { css } from '@emotion/css';
 import React from 'react';
 
-export const CustomCodeBlock = ({ value }: { value: string }) => {
+export const CustomCodeBlock = ({ value, lang }: { value: string; lang: string }) => {
   const theme = useEuiTheme();
 
   return (
@@ -31,7 +31,7 @@ export const CustomCodeBlock = ({ value }: { value: string }) => {
     >
       <EuiFlexGroup direction="column" gutterSize="xs">
         <EuiFlexItem grow={false}>
-          <EuiCodeBlock isCopyable fontSize="m">
+          <EuiCodeBlock isCopyable fontSize="m" language={lang}>
             {value}
           </EuiCodeBlock>
         </EuiFlexItem>

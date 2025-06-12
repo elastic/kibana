@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  DETECTION_ENGINE_RULES_BULK_ACTION,
-  BulkActionsDryRunErrCode,
-} from '../../../../../../../common/constants';
+import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../../../common/constants';
 import { mlServicesMock } from '../../../../../machine_learning/mocks';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import {
@@ -18,37 +15,28 @@ import {
   getFindResultWithSingleHit,
   getFindResultWithMultiHits,
 } from '../../../../routes/__mocks__/request_responses';
-import {
-  createMockConfig,
-  requestContextMock,
-  serverMock,
-  requestMock,
-} from '../../../../routes/__mocks__';
+import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
 import { performBulkActionRoute } from './route';
 import {
   getPerformBulkActionEditSchemaMock,
   getBulkDisableRuleActionSchemaMock,
 } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { readRules } from '../../../logic/detection_rules_client/read_rules';
+import { BulkActionsDryRunErrCodeEnum } from '../../../../../../../common/api/detection_engine';
 
 jest.mock('../../../../../machine_learning/authz');
 jest.mock('../../../logic/detection_rules_client/read_rules', () => ({ readRules: jest.fn() }));
 
 describe('Perform bulk action route', () => {
   const readRulesMock = readRules as jest.Mock;
-  let config: ReturnType<typeof createMockConfig>;
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   const mockRule = getFindResultWithSingleHit().data[0];
 
   beforeEach(() => {
     server = serverMock.create();
-    logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
-    config = createMockConfig();
     ml = mlServicesMock.createSetupContract();
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
@@ -57,7 +45,7 @@ describe('Perform bulk action route', () => {
       errors: [],
       total: 1,
     });
-    performBulkActionRoute(server.router, config, ml, logger);
+    performBulkActionRoute(server.router, ml);
   });
 
   describe('status codes', () => {
@@ -184,7 +172,7 @@ describe('Perform bulk action route', () => {
           errors: [
             {
               message: 'mocked validation message',
-              err_code: BulkActionsDryRunErrCode.MACHINE_LEARNING_AUTH,
+              err_code: BulkActionsDryRunErrCodeEnum.MACHINE_LEARNING_AUTH,
               status_code: 403,
               rules: [
                 {
@@ -224,7 +212,7 @@ describe('Perform bulk action route', () => {
           errors: [
             {
               message: 'mocked validation message',
-              err_code: BulkActionsDryRunErrCode.MACHINE_LEARNING_AUTH,
+              err_code: BulkActionsDryRunErrCodeEnum.MACHINE_LEARNING_AUTH,
               status_code: 403,
               rules: [
                 {
@@ -640,6 +628,93 @@ describe('Perform bulk action route', () => {
         expect.stringContaining(
           "dry_run: Invalid enum value. Expected 'true' | 'false', received 'invalid', dry_run: Expected boolean, received string"
         )
+      );
+    });
+
+    it('rejects payload if both ids and gap range are defined', async () => {
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getBulkDisableRuleActionSchemaMock(),
+          query: undefined,
+          ids: ['id'],
+          gaps_range_start: '2025-01-01T00:00:00.000Z',
+          gaps_range_end: '2025-01-02T00:00:00.000Z',
+        },
+      });
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(response.status).toEqual(400);
+      expect(response.body.message).toEqual(
+        'Cannot use both ids and gaps_range_start/gaps_range_end in request payload.'
+      );
+    });
+
+    it('rejects payload if only gaps_range_start is defined without gaps_range_end', async () => {
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getBulkDisableRuleActionSchemaMock(),
+          query: '',
+          gaps_range_start: '2025-01-01T00:00:00.000Z',
+        },
+      });
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(response.status).toEqual(400);
+      expect(response.body.message).toEqual(
+        'Both gaps_range_start and gaps_range_end must be provided together.'
+      );
+    });
+
+    it('rejects payload if only gaps_range_end is defined without gaps_range_start', async () => {
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getBulkDisableRuleActionSchemaMock(),
+          query: '',
+          gaps_range_end: '2025-01-02T00:00:00.000Z',
+        },
+      });
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(response.status).toEqual(400);
+      expect(response.body.message).toEqual(
+        'Both gaps_range_start and gaps_range_end must be provided together.'
+      );
+    });
+  });
+
+  describe('gap range functionality', () => {
+    it('passes gap range to rules find when provided with query', async () => {
+      const gapStartDate = '2025-01-01T00:00:00.000Z';
+      const gapEndDate = '2025-01-02T00:00:00.000Z';
+
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getBulkDisableRuleActionSchemaMock(),
+          query: '',
+          gaps_range_start: gapStartDate,
+          gaps_range_end: gapEndDate,
+        },
+      });
+
+      await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(clients.rulesClient.getRuleIdsWithGaps).toHaveBeenCalledWith(
+        expect.objectContaining({
+          start: gapStartDate,
+          end: gapEndDate,
+          statuses: ['unfilled', 'partially_filled'],
+        })
       );
     });
   });

@@ -32,6 +32,7 @@ export enum AppIds {
   DATA_QUALITY = 'data_quality',
   SPACES = 'spaces',
   DATA_USAGE = 'data_usage',
+  CONTENT_CONNECTORS = 'content_connectors',
 }
 
 // Create new type that is a union of all the appId values

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import { AsApiContract } from '@kbn/actions-types';
-import { RulesSettingsFlapping } from '@kbn/alerting-types';
+import type { HttpSetup } from '@kbn/core/public';
+import type { AsApiContract } from '@kbn/actions-types';
+import type { RulesSettingsFlapping } from '@kbn/alerting-types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 import { transformFlappingSettingsResponse } from './transform_flapping_settings_response';
 

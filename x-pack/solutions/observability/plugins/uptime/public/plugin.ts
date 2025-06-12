@@ -68,6 +68,8 @@ import {
   uptimeAlertTypeInitializers,
 } from './legacy_uptime/lib/alert_types';
 import { setStartServices } from './kibana_services';
+import { UptimeOverviewLocatorDefinition } from './locators/overview';
+import { UptimeDataHelper } from './legacy_uptime/app/uptime_overview_fetcher';
 
 export interface ClientPluginsSetup {
   home?: HomePublicPluginSetup;
@@ -146,8 +148,6 @@ export class UptimePlugin
     }
     const getUptimeDataHelper = async () => {
       const [coreStart] = await core.getStartServices();
-      const { UptimeDataHelper } = await import('./legacy_uptime/app/uptime_overview_fetcher');
-
       return UptimeDataHelper(coreStart);
     };
 
@@ -243,7 +243,6 @@ export class UptimePlugin
 function registerUptimeRoutesWithNavigation(coreStart: CoreStart, plugins: ClientPluginsStart) {
   async function getUptimeSections() {
     if (coreStart.application.capabilities.uptime?.show) {
-      const { UptimeOverviewLocatorDefinition } = await import('./locators/overview');
       plugins.share.url.locators.create(new UptimeOverviewLocatorDefinition());
 
       return [
@@ -304,29 +303,27 @@ function setUptimeAppStatus(
   pluginsStart: ClientPluginsStart,
   updater: BehaviorSubject<AppUpdater>
 ) {
-  import('./legacy_uptime/app/uptime_overview_fetcher').then(({ UptimeDataHelper }) => {
-    const isEnabled = coreStart.uiSettings.get<boolean>(enableLegacyUptimeApp);
-    if (isEnabled) {
-      registerUptimeRoutesWithNavigation(coreStart, pluginsStart);
-      registerAlertRules(coreStart, pluginsStart, stackVersion, false);
-      updater.next(() => ({ status: AppStatus.accessible }));
-    } else {
-      const hasUptimePrivileges = coreStart.application.capabilities.uptime?.show;
-      if (hasUptimePrivileges) {
-        const indexStatusPromise = UptimeDataHelper(coreStart).indexStatus('now-7d/d', 'now/d');
-        indexStatusPromise.then((indexStatus) => {
-          if (indexStatus.indexExists) {
-            registerUptimeRoutesWithNavigation(coreStart, pluginsStart);
-            updater.next(() => ({ status: AppStatus.accessible }));
-            registerAlertRules(coreStart, pluginsStart, stackVersion, false);
-          } else {
-            updater.next(() => ({ status: AppStatus.inaccessible }));
-            registerAlertRules(coreStart, pluginsStart, stackVersion, true);
-          }
-        });
-      }
+  const isEnabled = coreStart.uiSettings.get<boolean>(enableLegacyUptimeApp);
+  if (isEnabled) {
+    registerUptimeRoutesWithNavigation(coreStart, pluginsStart);
+    registerAlertRules(coreStart, pluginsStart, stackVersion, false);
+    updater.next(() => ({ status: AppStatus.accessible }));
+  } else {
+    const hasUptimePrivileges = coreStart.application.capabilities.uptime?.show;
+    if (hasUptimePrivileges) {
+      const indexStatusPromise = UptimeDataHelper(coreStart).indexStatus('now-7d/d', 'now/d');
+      indexStatusPromise.then((indexStatus) => {
+        if (indexStatus.indexExists) {
+          registerUptimeRoutesWithNavigation(coreStart, pluginsStart);
+          updater.next(() => ({ status: AppStatus.accessible }));
+          registerAlertRules(coreStart, pluginsStart, stackVersion, false);
+        } else {
+          updater.next(() => ({ status: AppStatus.inaccessible }));
+          registerAlertRules(coreStart, pluginsStart, stackVersion, true);
+        }
+      });
     }
-  });
+  }
 }
 
 function registerAlertRules(

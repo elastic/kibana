@@ -14,8 +14,8 @@ import {
   EntityDetailsLeftPanelTab,
 } from '../../shared/components/left_panel/left_panel_header';
 import { HostDetailsPanelKey } from '../../host_details_left';
-import { HostPanelKey } from '..';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
+import { HostPanelKey } from '../../shared/constants';
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../common/hooks/use_experimental_features');
@@ -53,10 +53,10 @@ const mockOpenLeftPanel = jest.fn();
 const mockOpenFlyout = jest.fn();
 
 describe('useNavigateToHostDetails', () => {
-  describe('when preview navigation is enabled', () => {
+  describe('when newExpandableFlyoutNavigationDisabled is false', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
       (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
         openLeftPanel: mockOpenLeftPanel,
         openFlyout: mockOpenFlyout,
@@ -99,7 +99,6 @@ describe('useNavigateToHostDetails', () => {
             contextID: mockProps.contextID,
             scopeId: mockProps.scopeId,
             hostName: mockProps.hostName,
-            isDraggable: undefined,
           },
         },
         left: {
@@ -119,10 +118,10 @@ describe('useNavigateToHostDetails', () => {
     });
   });
 
-  describe('when preview navigation is not enabled', () => {
+  describe('when newExpandableFlyoutNavigationDisabled is true', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
       (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
         openLeftPanel: mockOpenLeftPanel,
         openFlyout: mockOpenFlyout,

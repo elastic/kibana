@@ -81,7 +81,8 @@ describe('TransformManager', () => {
       const generators: Record<IndicatorTypes, TransformGenerator> = {
         'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(
           spaceId,
-          dataViewsService
+          dataViewsService,
+          false
         ),
       };
       const transformManager = new DefaultTransformManager(
@@ -106,7 +107,8 @@ describe('TransformManager', () => {
       const generators: Record<IndicatorTypes, TransformGenerator> = {
         'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(
           spaceId,
-          dataViewsService
+          dataViewsService,
+          false
         ),
       };
       const transformManager = new DefaultTransformManager(
@@ -129,7 +131,8 @@ describe('TransformManager', () => {
       const generators: Record<IndicatorTypes, TransformGenerator> = {
         'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(
           spaceId,
-          dataViewsService
+          dataViewsService,
+          false
         ),
       };
       const transformManager = new DefaultTransformManager(
@@ -152,7 +155,8 @@ describe('TransformManager', () => {
       const generators: Record<IndicatorTypes, TransformGenerator> = {
         'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(
           spaceId,
-          dataViewsService
+          dataViewsService,
+          false
         ),
       };
       const transformManager = new DefaultTransformManager(
@@ -175,7 +179,8 @@ describe('TransformManager', () => {
       const generators: Record<IndicatorTypes, TransformGenerator> = {
         'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(
           spaceId,
-          dataViewsService
+          dataViewsService,
+          false
         ),
       };
       const transformManager = new DefaultTransformManager(
@@ -199,7 +204,8 @@ describe('TransformManager', () => {
       const generators: Record<IndicatorTypes, TransformGenerator> = {
         'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(
           spaceId,
-          dataViewsService
+          dataViewsService,
+          false
         ),
       };
       const transformManager = new DefaultTransformManager(

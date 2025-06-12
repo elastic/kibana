@@ -33,7 +33,7 @@
           "PromiseState",
           "<Result, unknown>, (...args: Arguments) => Promise<Result>, () => void]"
         ],
-        "path": "packages/kbn-use-tracked-promise/use_tracked_promise.ts",
+        "path": "src/platform/packages/shared/kbn-use-tracked-promise/use_tracked_promise.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -47,7 +47,7 @@
             "signature": [
               "UseTrackedPromiseArgs<Arguments, Result>"
             ],
-            "path": "packages/kbn-use-tracked-promise/use_tracked_promise.ts",
+            "path": "src/platform/packages/shared/kbn-use-tracked-promise/use_tracked_promise.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -62,7 +62,7 @@
             "signature": [
               "React.DependencyList"
             ],
-            "path": "packages/kbn-use-tracked-promise/use_tracked_promise.ts",
+            "path": "src/platform/packages/shared/kbn-use-tracked-promise/use_tracked_promise.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

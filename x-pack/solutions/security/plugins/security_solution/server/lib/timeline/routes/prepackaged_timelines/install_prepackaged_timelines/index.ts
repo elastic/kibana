@@ -36,7 +36,7 @@ export const installPrepackedTimelinesRoute = (
       path: `${TIMELINE_PREPACKAGED_URL}`,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: ['timeline_write'],
         },
       },
       options: {

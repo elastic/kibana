@@ -11,7 +11,7 @@ import { SERVICE_ENVIRONMENT } from './es_fields/apm';
 import type { Environment } from './environment_rt';
 
 export const ENVIRONMENT_ALL_VALUE = 'ENVIRONMENT_ALL' as const;
-const ENVIRONMENT_NOT_DEFINED_VALUE = 'ENVIRONMENT_NOT_DEFINED' as const;
+export const ENVIRONMENT_NOT_DEFINED_VALUE = 'ENVIRONMENT_NOT_DEFINED' as const;
 
 export const allOptionText = i18n.translate('xpack.apm.filter.environment.allLabel', {
   defaultMessage: 'All',
@@ -41,12 +41,8 @@ export const ENVIRONMENT_NOT_DEFINED = {
   label: getEnvironmentLabel(ENVIRONMENT_NOT_DEFINED_VALUE),
 };
 
-function isEnvironmentDefined(environment: string) {
-  return (
-    environment &&
-    environment !== ENVIRONMENT_NOT_DEFINED_VALUE &&
-    environment !== ENVIRONMENT_ALL_VALUE
-  );
+export function isEnvironmentDefined(environment: string) {
+  return environment && environment !== ENVIRONMENT_ALL_VALUE;
 }
 
 export function getEnvironmentEsField(environment: string) {

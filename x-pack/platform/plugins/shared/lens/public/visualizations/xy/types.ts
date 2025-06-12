@@ -20,6 +20,7 @@ import type {
   IconPosition,
   FillStyle,
   YAxisConfig,
+  PointVisibility,
 } from '@kbn/expression-xy-plugin/common';
 import { EventAnnotationConfig, EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import {
@@ -34,6 +35,7 @@ import {
   IconChartBarPercentage,
   IconChartBarHorizontal,
 } from '@kbn/chart-icons';
+import type { AxesSettingsConfig } from '@kbn/visualizations-plugin/common';
 
 import { CollapseFunction } from '../../../common/expressions';
 import type { VisualizationType } from '../../types';
@@ -63,11 +65,6 @@ export const defaultSeriesType = SeriesTypes.BAR_STACKED;
 
 export type YAxisMode = $Values<typeof YAxisModes>;
 export type SeriesType = $Values<typeof SeriesTypes>;
-export interface AxesSettingsConfig {
-  x: boolean;
-  yRight: boolean;
-  yLeft: boolean;
-}
 
 export interface AxisConfig extends Omit<YAxisConfig, 'extent'> {
   extent?: AxisExtentConfig;
@@ -100,6 +97,9 @@ export interface XYDataLayerConfig {
   simpleView?: boolean;
   yConfig?: YConfig[];
   splitAccessor?: string;
+  /**
+   * @deprecated use `colorMapping` config
+   */
   palette?: PaletteOutput;
   collapseFn?: CollapseFunction;
   xScaleType?: XScaleType;
@@ -177,6 +177,7 @@ export interface XYState {
   minBarHeight?: number;
   hideEndzones?: boolean;
   showCurrentTimeMarker?: boolean;
+  pointVisibility?: PointVisibility;
 }
 
 export type State = XYState;

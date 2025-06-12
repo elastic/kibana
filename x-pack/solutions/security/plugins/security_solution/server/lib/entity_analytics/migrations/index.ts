@@ -9,8 +9,11 @@ import type { AuditLogger, Logger, StartServicesAccessor } from '@kbn/core/serve
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { StartPlugins } from '../../../plugin';
 import { scheduleAssetCriticalityEcsCompliancyMigration } from '../asset_criticality/migrations/schedule_ecs_compliancy_migration';
+import { assetCrticalityCopyTimestampToEventIngested } from './asset_criticality_copy_timestamp_to_event_ingested';
+import { riskScoreCopyTimestampToEventIngested } from './risk_score_copy_timestamp_to_event_ingested';
 import { updateAssetCriticalityMappings } from '../asset_criticality/migrations/update_asset_criticality_mappings';
 import { updateRiskScoreMappings } from '../risk_engine/migrations/update_risk_score_mappings';
+import { renameRiskScoreComponentTemplate } from '../risk_engine/migrations/rename_risk_score_component_templates';
 
 export interface EntityAnalyticsMigrationsParams {
   taskManager?: TaskManagerSetupContract;
@@ -41,5 +44,24 @@ export const scheduleEntityAnalyticsMigration = async (params: EntityAnalyticsMi
 
   await updateAssetCriticalityMappings({ ...params, logger: scopedLogger });
   await scheduleAssetCriticalityEcsCompliancyMigration({ ...params, logger: scopedLogger });
+  await renameRiskScoreComponentTemplate({ ...params, logger: scopedLogger });
   await updateRiskScoreMappings({ ...params, logger: scopedLogger });
+};
+
+export const scheduleAssetCriticalityCopyTimestampToEventIngested = async (
+  params: EntityAnalyticsMigrationsParams
+) => {
+  const scopedLogger = params.logger.get(
+    'entityAnalytics.assetCriticality.copyTimestampToEventIngested'
+  );
+
+  await assetCrticalityCopyTimestampToEventIngested({ ...params, logger: scopedLogger });
+};
+
+export const scheduleRiskScoreCopyTimestampToEventIngested = async (
+  params: EntityAnalyticsMigrationsParams
+) => {
+  const scopedLogger = params.logger.get('entityAnalytics.riskScore.copyTimestampToEventIngested');
+
+  await riskScoreCopyTimestampToEventIngested({ ...params, logger: scopedLogger });
 };

@@ -21,7 +21,6 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewType, RuntimeField, DataView } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SavedObjectRelation } from '@kbn/saved-objects-management-plugin/public';
@@ -76,6 +75,7 @@ import {
   defaultIndexSelector,
   fieldsSelector,
 } from '../../management_app/data_view_mgmt_selectors';
+import { deleteModalMsg } from '../index_pattern_table/delete_modal_msg';
 
 export const EditIndexPattern = withRouter(
   ({ indexPattern, history, location }: EditIndexPatternProps) => {
@@ -186,26 +186,6 @@ export const EditIndexPattern = withRouter(
 
     const userEditPermission = dataViews.getCanSaveSync();
 
-    const warning =
-      (indexPattern.namespaces && indexPattern.namespaces.length > 1) ||
-      indexPattern.namespaces.includes('*') ? (
-        <FormattedMessage
-          id="indexPatternManagement.editDataView.deleteWarningWithNamespaces"
-          defaultMessage="Delete the data view {dataViewName} from every space it is shared in. You can't undo this action."
-          values={{
-            dataViewName: <EuiCode>{indexPattern.getName()}</EuiCode>,
-          }}
-        />
-      ) : (
-        <FormattedMessage
-          id="indexPatternManagement.editDataView.deleteWarning"
-          defaultMessage="The data view {dataViewName} will be deleted. You can't undo this action."
-          values={{
-            dataViewName: <EuiCode>{indexPattern.getName()}</EuiCode>,
-          }}
-        />
-      );
-
     return (
       <div data-test-subj="editIndexPattern" role="region" aria-label={headingAriaLabel}>
         {dataView && (
@@ -214,7 +194,10 @@ export const EditIndexPattern = withRouter(
             setDefault={() => dataViewMgmtService.setDefaultDataView()}
             editIndexPatternClick={editPattern}
             deleteIndexPatternClick={() =>
-              removeHandler([indexPattern as RemoveDataViewProps], <div>{warning}</div>)
+              removeHandler(
+                [dataView as RemoveDataViewProps],
+                deleteModalMsg([dataView as RemoveDataViewProps], Boolean(dataView.namespaces))
+              )
             }
             defaultIndex={defaultIndex}
             canSave={userEditPermission}

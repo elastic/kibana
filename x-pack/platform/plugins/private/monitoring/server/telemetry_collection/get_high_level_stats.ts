@@ -7,7 +7,7 @@
 
 import { get } from 'lodash';
 import { ElasticsearchClient } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { createQuery } from './create_query';
 import {
   INDEX_PATTERN_KIBANA,
@@ -317,20 +317,18 @@ export async function fetchHighLevelStats<
       `hits.hits._source.${product}_stats.cloud.region`,
       `hits.hits._source.${product}_stats.cloud.zone`,
     ],
-    body: {
-      size: maxBucketSize,
-      query: createQuery({
-        start,
-        end,
-        type: `${product}_stats`,
-        filters,
-      }) as estypes.QueryDslQueryContainer,
-      collapse: {
-        // a more ideal field would be the concatenation of the uuid + transport address for duped UUIDs (copied installations)
-        field: `${product}_stats.${product}.uuid`,
-      },
-      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
+    size: maxBucketSize,
+    query: createQuery({
+      start,
+      end,
+      type: `${product}_stats`,
+      filters,
+    }) as estypes.QueryDslQueryContainer,
+    collapse: {
+      // a more ideal field would be the concatenation of the uuid + transport address for duped UUIDs (copied installations)
+      field: `${product}_stats.${product}.uuid`,
     },
+    sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
   };
 
   const response = await callCluster.search<T>(params, {

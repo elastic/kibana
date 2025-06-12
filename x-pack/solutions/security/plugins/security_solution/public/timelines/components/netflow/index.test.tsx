@@ -7,8 +7,9 @@
 
 import { get } from 'lodash/fp';
 import React from 'react';
+// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import 'jest-styled-components';
 import { render, screen, within } from '@testing-library/react';
-
 import { asArrayIfExists } from '../../../common/lib/helpers';
 import { TestProviders } from '../../../common/mock/test_providers';
 import {
@@ -45,7 +46,6 @@ import {
   SOURCE_PACKETS_FIELD_NAME,
 } from '../../../explore/network/components/source_destination/source_destination_arrows';
 import * as i18n from '../timeline/body/renderers/translations';
-
 import { Netflow } from '.';
 import {
   EVENT_END_FIELD_NAME,
@@ -54,13 +54,14 @@ import {
 import { PROCESS_NAME_FIELD_NAME, USER_NAME_FIELD_NAME } from './netflow_columns/user_process';
 import {
   NETWORK_BYTES_FIELD_NAME,
-  NETWORK_DIRECTION_FIELD_NAME,
   NETWORK_COMMUNITY_ID_FIELD_NAME,
+  NETWORK_DIRECTION_FIELD_NAME,
   NETWORK_PACKETS_FIELD_NAME,
   NETWORK_PROTOCOL_FIELD_NAME,
   NETWORK_TRANSPORT_FIELD_NAME,
 } from '../../../explore/network/components/source_destination/field_names';
 import { getMockNetflowData } from '../../../common/mock/netflow';
+import { CellActionsWrapper } from '../../../common/components/drag_and_drop/cell_actions_wrapper';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -72,8 +73,19 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+jest.mock('../../../common/components/drag_and_drop/cell_actions_wrapper', () => {
+  return {
+    CellActionsWrapper: jest.fn(),
+  };
+});
+
+const MockedCellActionsWrapper = jest.fn(({ children }) => {
+  return <div data-test-subj="mock-cell-action-wrapper">{children}</div>;
+});
+
 const getNetflowInstance = () => (
   <Netflow
+    scopeId="some_scope"
     contextId="test"
     destinationBytes={asArrayIfExists(get(DESTINATION_BYTES_FIELD_NAME, getMockNetflowData()))}
     destinationGeoContinentName={asArrayIfExists(
@@ -136,6 +148,10 @@ const getNetflowInstance = () => (
 jest.mock('../../../common/components/links/link_props');
 
 describe('Netflow', () => {
+  beforeEach(() => {
+    (CellActionsWrapper as unknown as jest.Mock).mockImplementation(MockedCellActionsWrapper);
+  });
+
   test('renders correctly against snapshot', () => {
     const { asFragment } = render(<TestProviders>{getNetflowInstance()}</TestProviders>);
     expect(asFragment()).toMatchSnapshot();
@@ -156,7 +172,7 @@ describe('Netflow', () => {
   test('it renders destination.geo.continent_name', () => {
     render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(screen.getByTestId('draggable-content-destination.geo.continent_name').textContent).toBe(
+    expect(screen.getByTestId('render-content-destination.geo.continent_name').textContent).toBe(
       'North America'
     );
   });
@@ -164,7 +180,7 @@ describe('Netflow', () => {
   test('it renders destination.geo.country_name', () => {
     render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(screen.getByTestId('draggable-content-destination.geo.country_name').textContent).toBe(
+    expect(screen.getByTestId('render-content-destination.geo.country_name').textContent).toBe(
       'United States'
     );
   });
@@ -172,15 +188,15 @@ describe('Netflow', () => {
   test('it renders destination.geo.country_iso_code', () => {
     render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(
-      screen.getByTestId('draggable-content-destination.geo.country_iso_code').textContent
-    ).toBe('US');
+    expect(screen.getByTestId('render-content-destination.geo.country_iso_code').textContent).toBe(
+      'US'
+    );
   });
 
   test('it renders destination.geo.region_name', () => {
     render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(screen.getByTestId('draggable-content-destination.geo.region_name').textContent).toBe(
+    expect(screen.getByTestId('render-content-destination.geo.region_name').textContent).toBe(
       'New York'
     );
   });
@@ -188,7 +204,7 @@ describe('Netflow', () => {
   test('it renders destination.geo.city_name', () => {
     render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(screen.getByTestId('draggable-content-destination.geo.city_name').textContent).toBe(
+    expect(screen.getByTestId('render-content-destination.geo.city_name').textContent).toBe(
       'New York'
     );
   });
@@ -225,7 +241,7 @@ describe('Netflow', () => {
   test('it renders event.end', () => {
     render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(screen.getByTestId('draggable-content-event.end').textContent).toBe(
+    expect(screen.getByTestId('render-content-event.end').textContent).toBe(
       'Nov 12, 2018 @ 19:03:25.936'
     );
   });
@@ -233,7 +249,7 @@ describe('Netflow', () => {
   test('it renders event.start', () => {
     render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(screen.getByTestId('draggable-content-event.start').textContent).toBe(
+    expect(screen.getByTestId('render-content-event.start').textContent).toBe(
       'Nov 12, 2018 @ 19:03:25.836'
     );
   });
@@ -289,7 +305,7 @@ describe('Netflow', () => {
   test('it renders source.geo.continent_name', () => {
     render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(screen.getByTestId('draggable-content-source.geo.continent_name').textContent).toBe(
+    expect(screen.getByTestId('render-content-source.geo.continent_name').textContent).toBe(
       'North America'
     );
   });
@@ -297,7 +313,7 @@ describe('Netflow', () => {
   test('it renders source.geo.country_name', () => {
     render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(screen.getByTestId('draggable-content-source.geo.country_name').textContent).toBe(
+    expect(screen.getByTestId('render-content-source.geo.country_name').textContent).toBe(
       'United States'
     );
   });
@@ -305,25 +321,19 @@ describe('Netflow', () => {
   test('it renders source.geo.country_iso_code', () => {
     render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(screen.getByTestId('draggable-content-source.geo.country_iso_code').textContent).toBe(
-      'US'
-    );
+    expect(screen.getByTestId('render-content-source.geo.country_iso_code').textContent).toBe('US');
   });
 
   test('it renders source.geo.region_name', () => {
     render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(screen.getByTestId('draggable-content-source.geo.region_name').textContent).toBe(
-      'Georgia'
-    );
+    expect(screen.getByTestId('render-content-source.geo.region_name').textContent).toBe('Georgia');
   });
 
   test('it renders source.geo.city_name', () => {
     render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
-    expect(screen.getByTestId('draggable-content-source.geo.city_name').textContent).toBe(
-      'Atlanta'
-    );
+    expect(screen.getByTestId('render-content-source.geo.city_name').textContent).toBe('Atlanta');
   });
 
   test('it renders the source ip and port, separated with a colon', () => {
@@ -375,5 +385,16 @@ describe('Netflow', () => {
     render(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(screen.getByText('first.last')).toBeInTheDocument();
+  });
+
+  test('should passing correct scopeId to cell actions', () => {
+    render(<TestProviders>{getNetflowInstance()}</TestProviders>);
+
+    expect(MockedCellActionsWrapper).toHaveBeenCalledWith(
+      expect.objectContaining({
+        scopeId: 'some_scope',
+      }),
+      {}
+    );
   });
 });

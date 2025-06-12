@@ -16,13 +16,20 @@ const integrationsRoute = createDatasetQualityServerRoute({
   options: {
     tags: [],
   },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
+  },
   async handler(resources): Promise<{
     integrations: IntegrationType[];
   }> {
-    const { plugins, logger } = resources;
+    const { plugins, logger, request } = resources;
 
     const fleetPluginStart = await plugins.fleet.start();
-    const packageClient = fleetPluginStart.packageService.asInternalUser;
+    const packageClient = fleetPluginStart.packageService.asScoped(request);
 
     const integrations = await getIntegrations({ packageClient, logger });
 
@@ -40,13 +47,20 @@ const integrationDashboardsRoute = createDatasetQualityServerRoute({
   options: {
     tags: [],
   },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
+  },
   async handler(resources): Promise<IntegrationDashboardsResponse> {
-    const { context, params, plugins } = resources;
+    const { context, params, plugins, request } = resources;
     const { integration } = params.path;
     const { savedObjects } = await context.core;
 
     const fleetPluginStart = await plugins.fleet.start();
-    const packageClient = fleetPluginStart.packageService.asInternalUser;
+    const packageClient = fleetPluginStart.packageService.asScoped(request);
 
     const integrationDashboards = await getIntegrationDashboards(
       packageClient,

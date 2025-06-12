@@ -76,7 +76,7 @@ export const AddTimelineButton = React.memo<AddTimelineButtonComponentProps>(({ 
         <EuiPopover
           button={plusButton}
           isOpen={isPopoverOpen}
-          closePopover={() => setPopover}
+          closePopover={() => setPopover(false)}
           repositionOnScroll
         >
           <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">

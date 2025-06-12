@@ -8,11 +8,9 @@
 import type { PropsWithChildren } from 'react';
 import React, { createContext, useCallback, useContext, useMemo } from 'react';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
-import type { OnboardingTopicId, OnboardingCardId } from '../constants';
-import { OnboardingHubEventTypes } from '../../common/lib/telemetry';
+import type { OnboardingTopicId } from '../constants';
 import { useLicense } from '../../common/hooks/use_license';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
-
 import { hasCapabilities } from '../../common/lib/capabilities';
 import type {
   OnboardingConfigAvailabilityProps,
@@ -20,12 +18,7 @@ import type {
   TopicConfig,
 } from '../types';
 import { onboardingConfig } from '../config';
-
-export interface OnboardingTelemetry {
-  reportCardOpen: (cardId: OnboardingCardId, options?: { auto?: boolean }) => void;
-  reportCardComplete: (cardId: OnboardingCardId, options?: { auto?: boolean }) => void;
-  reportCardLinkClicked: (cardId: OnboardingCardId, linkId: string) => void;
-}
+import { useOnboardingTelemetry, type OnboardingTelemetry } from './onboarding_telemetry';
 
 export type OnboardingConfig = Map<OnboardingTopicId, TopicConfig>;
 export interface OnboardingContextValue {
@@ -72,6 +65,12 @@ const useFilteredConfig = (): OnboardingConfig => {
       if (item.experimentalFlagRequired && !experimentalFeatures[item.experimentalFlagRequired]) {
         return false;
       }
+      if (
+        item.disabledExperimentalFlagRequired &&
+        experimentalFeatures[item.disabledExperimentalFlagRequired]
+      ) {
+        return false;
+      }
       if (item.licenseTypeRequired && !license.isAtLeast(item.licenseTypeRequired)) {
         return false;
       }
@@ -109,31 +108,4 @@ const useFilteredConfig = (): OnboardingConfig => {
   );
 
   return filteredConfig;
-};
-
-const useOnboardingTelemetry = (): OnboardingTelemetry => {
-  const { telemetry } = useKibana().services;
-  return useMemo(
-    () => ({
-      reportCardOpen: (cardId, { auto = false } = {}) => {
-        telemetry.reportEvent(OnboardingHubEventTypes.OnboardingHubStepOpen, {
-          stepId: cardId,
-          trigger: auto ? 'navigation' : 'click',
-        });
-      },
-      reportCardComplete: (cardId, { auto = false } = {}) => {
-        telemetry.reportEvent(OnboardingHubEventTypes.OnboardingHubStepFinished, {
-          stepId: cardId,
-          trigger: auto ? 'auto_check' : 'click',
-        });
-      },
-      reportCardLinkClicked: (cardId, linkId: string) => {
-        telemetry.reportEvent(OnboardingHubEventTypes.OnboardingHubStepLinkClicked, {
-          originStepId: cardId,
-          stepLinkId: linkId,
-        });
-      },
-    }),
-    [telemetry]
-  );
 };

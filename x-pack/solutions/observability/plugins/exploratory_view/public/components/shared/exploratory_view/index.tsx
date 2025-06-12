@@ -16,6 +16,7 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useBreadcrumbs, useTrackPageview } from '@kbn/observability-shared-plugin/public';
+import { LastUpdated } from './header/last_updated';
 import { ExploratoryView } from './exploratory_view';
 import { useKibana } from './hooks/use_kibana';
 import { DataViewContextProvider } from './hooks/use_app_data_view';
@@ -76,7 +77,7 @@ export function ExploratoryViewPage({
       <ObservabilityPageTemplate
         pageHeader={{
           pageTitle: PAGE_TITLE,
-          rightSideItems: [<RefreshButton />],
+          rightSideItems: [<RefreshButton />, <LastUpdated />],
         }}
       >
         <DataViewContextProvider>

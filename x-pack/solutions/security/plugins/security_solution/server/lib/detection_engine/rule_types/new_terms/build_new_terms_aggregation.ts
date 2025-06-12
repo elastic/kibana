@@ -11,29 +11,19 @@ import type { SignalSource } from '../types';
 import type { GenericBulkCreateResponse } from '../factories/bulk_create_factory';
 import type { NewTermsFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
 
-export type RecentTermsAggResult = ESSearchResponse<
-  SignalSource,
-  { body: { aggregations: ReturnType<typeof buildRecentTermsAgg> } }
->;
-
-export type NewTermsAggResult = ESSearchResponse<
-  SignalSource,
-  { body: { aggregations: ReturnType<typeof buildNewTermsAgg> } }
->;
-
 export type CompositeDocFetchAggResult = ESSearchResponse<
   SignalSource,
-  { body: { aggregations: ReturnType<typeof buildCompositeDocFetchAgg> } }
+  { aggregations: ReturnType<typeof buildCompositeDocFetchAgg> }
 >;
 
 export type CompositeNewTermsAggResult = ESSearchResponse<
   SignalSource,
-  { body: { aggregations: ReturnType<typeof buildCompositeNewTermsAgg> } }
+  { aggregations: ReturnType<typeof buildCompositeNewTermsAgg> }
 >;
 
 export type DocFetchAggResult = ESSearchResponse<
   SignalSource,
-  { body: { aggregations: ReturnType<typeof buildDocFetchAgg> } }
+  { aggregations: ReturnType<typeof buildDocFetchAgg> }
 >;
 
 export type CreateAlertsHook = (

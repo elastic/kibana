@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchClusters } from './fetch_clusters';
 
@@ -75,7 +75,7 @@ describe('fetchClusters', () => {
     const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
     await fetchClusters(esClient);
     const params = esClient.search.mock.calls[0][0] as any;
-    expect(params?.body?.query.bool.filter[1].range.timestamp.gte).toBe('now-2m');
+    expect(params?.query.bool.filter[1].range.timestamp.gte).toBe('now-2m');
   });
 
   it('should call ES with correct query', async () => {
@@ -91,31 +91,29 @@ describe('fetchClusters', () => {
         'hits.hits._source.cluster_name',
         'hits.hits._source.elasticsearch.cluster.name',
       ],
-      body: {
-        size: 1000,
-        query: {
-          bool: {
-            filter: [
-              {
-                bool: {
-                  should: [
-                    { term: { type: 'cluster_stats' } },
-                    { term: { 'metricset.name': 'cluster_stats' } },
-                    {
-                      term: {
-                        'data_stream.dataset': 'elasticsearch.stack_monitoring.cluster_stats',
-                      },
+      size: 1000,
+      query: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [
+                  { term: { type: 'cluster_stats' } },
+                  { term: { 'metricset.name': 'cluster_stats' } },
+                  {
+                    term: {
+                      'data_stream.dataset': 'elasticsearch.stack_monitoring.cluster_stats',
                     },
-                  ],
-                  minimum_should_match: 1,
-                },
+                  },
+                ],
+                minimum_should_match: 1,
               },
-              { range: { timestamp: { gte: 'now-2m' } } },
-            ],
-          },
+            },
+            { range: { timestamp: { gte: 'now-2m' } } },
+          ],
         },
-        collapse: { field: 'cluster_uuid' },
       },
+      collapse: { field: 'cluster_uuid' },
     });
   });
   it('should call ES with correct query when ccs disabled', async () => {

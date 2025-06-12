@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { EsQueryConfig } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
@@ -32,6 +33,7 @@ export type Evaluation = CustomMetricExpressionParams & {
   shouldFire: boolean;
   isNoData: boolean;
   bucketKey: Record<string, string>;
+  flattenGrouping?: Record<string, any>;
   context?: AdditionalContext;
 };
 
@@ -45,6 +47,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
   logger: Logger,
   timeframe: { start: string; end: string },
   esQueryConfig: EsQueryConfig,
+  runtimeMappings?: estypes.MappingRuntimeFields,
   lastPeriodEnd?: number,
   missingGroups: MissingGroupsRecord[] = []
 ): Promise<Array<Record<string, Evaluation>>> => {
@@ -77,6 +80,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         alertOnGroupDisappear,
         calculatedTimerange,
         logger,
+        runtimeMappings,
         lastPeriodEnd
       );
 
@@ -90,7 +94,8 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         logger,
         calculatedTimerange,
         esQueryConfig,
-        missingGroups
+        missingGroups,
+        runtimeMappings
       );
 
       for (const missingGroup of verifiedMissingGroups) {
@@ -114,6 +119,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
             shouldFire: result.trigger,
             isNoData: result.value === null,
             bucketKey: result.bucketKey,
+            flattenGrouping: result.flattenGrouping,
             context: {
               cloud: result.cloud,
               host: result.host,

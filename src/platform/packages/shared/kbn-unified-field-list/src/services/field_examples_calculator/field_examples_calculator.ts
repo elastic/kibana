@@ -10,7 +10,7 @@
 // Adapted from src/platform/plugins/shared/discover/public/application/main/components/sidebar/lib/field_calculator.js
 
 import { map, sortBy, defaults, isObject, pick } from 'lodash';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { flattenHit } from '@kbn/data-service/src/search/tabify';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';

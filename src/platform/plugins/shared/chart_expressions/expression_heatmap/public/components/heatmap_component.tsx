@@ -43,6 +43,7 @@ import { i18n } from '@kbn/i18n';
 import { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { IconChartHeatmap } from '@kbn/chart-icons';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
 import {
   applyPaletteParams,
@@ -57,7 +58,6 @@ import {
 import { defaultPaletteParams } from '../constants';
 import { ChartSplit } from './chart_split';
 import { getSplitDimensionAccessor, createSplitPoint } from '../utils/get_split_dimension_utils';
-import './index.scss';
 
 declare global {
   interface Window {
@@ -157,7 +157,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     overrides,
   }) => {
     const chartRef = useRef<Chart>(null);
-    const isDarkTheme = chartsThemeService.useDarkMode();
+    const isDarkTheme = useKibanaIsDarkMode();
     // legacy heatmap legend is handled by the uiState
     const [showLegend, setShowLegend] = useState<boolean>(() => {
       const bwcLegendStateDefault = args.legend.isVisible ?? true;
@@ -572,6 +572,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
           // eui color subdued
           textColor: chartBaseTheme.axes.tickLabel.fill,
           padding: xAxisColumn?.name ? 8 : 0,
+          rotation:
+            args.gridConfig.xAxisLabelRotation && Math.abs(args.gridConfig.xAxisLabelRotation), // rotation is a positive value
         },
         brushMask: {
           fill: isDarkTheme ? 'rgb(30,31,35,80%)' : 'rgb(247,247,247,50%)',

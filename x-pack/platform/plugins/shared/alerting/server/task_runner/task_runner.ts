@@ -7,19 +7,20 @@
 
 import apm from 'elastic-apm-node';
 import { omit } from 'lodash';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
-import { ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import {
-  ConcreteTaskInstance,
   createTaskRunError,
   TaskErrorSource,
   throwUnrecoverableError,
 } from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { getErrorSource, isUserError } from '@kbn/task-manager-plugin/server/task_running';
+import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import { ActionScheduler, type RunResult } from './action_scheduler';
-import {
+import type {
   RuleRunnerErrorStackTraceLog,
   RuleTaskInstance,
   RuleTaskRunResult,
@@ -28,34 +29,36 @@ import {
   TaskRunnerContext,
 } from './types';
 import { getExecutorServices } from './get_executor_services';
-import { ElasticsearchError, getNextRun, isRuleSnoozed, ruleExecutionStatusToRaw } from '../lib';
-import {
+import type { ElasticsearchError } from '../lib';
+import { getNextRun, isRuleSnoozed, ruleExecutionStatusToRaw } from '../lib';
+import type {
   IntervalSchedule,
   RawRuleExecutionStatus,
   RawRuleLastRun,
   RawRuleMonitoring,
   RuleExecutionStatus,
-  RuleExecutionStatusErrorReasons,
   RuleTaskState,
   RuleTypeRegistry,
 } from '../types';
-import { asErr, asOk, isErr, isOk, map, resolveErr, Result } from '../lib/result_type';
+import { RuleExecutionStatusErrorReasons } from '../types';
+import type { Result } from '../lib/result_type';
+import { asErr, asOk, isErr, isOk, map, resolveErr } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
 import { partiallyUpdateRuleWithEs, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
-  parseDuration,
   RawAlertInstance,
   RuleAlertData,
-  RuleLastRunOutcomeOrderMap,
   RuleTypeParams,
   RuleTypeState,
 } from '../../common';
-import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
+import { parseDuration, RuleLastRunOutcomeOrderMap } from '../../common';
+import type { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
-import { IN_MEMORY_METRICS, InMemoryMetrics } from '../monitoring';
+import type { InMemoryMetrics } from '../monitoring';
+import { IN_MEMORY_METRICS } from '../monitoring';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { getDecryptedRule, validateRuleAndCreateFakeRequest } from './rule_loader';
@@ -73,6 +76,7 @@ import {
   clearExpiredSnoozes,
 } from './lib';
 import { isClusterBlockError } from '../lib/error_with_type';
+import { getTrackedExecutions } from './lib/get_tracked_execution';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -202,7 +206,6 @@ export class TaskRunner<
       AlertData
     >({
       context: this.context,
-      logger: this.logger,
       task: this.taskInstance,
       timer: this.timer,
     });
@@ -311,6 +314,7 @@ export class TaskRunner<
     const ruleTypeRunnerContext = {
       alertingEventLogger: this.alertingEventLogger,
       flappingSettings,
+      logger: this.logger,
       maintenanceWindowsService: this.context.maintenanceWindowsService,
       namespace: this.context.spaceIdToNamespace(spaceId),
       queryDelaySec: queryDelaySettings.delay,
@@ -365,6 +369,8 @@ export class TaskRunner<
       ruleTaskTimeout: this.ruleType.ruleTaskTimeout,
     });
 
+    const actionsClient = await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest);
+
     const {
       state: updatedRuleTypeState,
       error,
@@ -372,6 +378,8 @@ export class TaskRunner<
     } = await this.ruleTypeRunner.run({
       context: ruleTypeRunnerContext,
       alertsClient,
+      actionsClient:
+        this.ruleType.id === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID ? actionsClient : undefined,
       executionId: this.executionId,
       executorServices,
       rule,
@@ -400,7 +408,7 @@ export class TaskRunner<
       ruleLabel,
       previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
       alertingEventLogger: this.alertingEventLogger,
-      actionsClient: await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest),
+      actionsClient,
       alertsClient,
     });
 
@@ -417,8 +425,8 @@ export class TaskRunner<
           this.countUsageOfActionExecutionAfterRuleCancellation();
         } else {
           actionSchedulerResult = await actionScheduler.run({
-            activeCurrentAlerts: alertsClient.getProcessedAlerts('activeCurrent'),
-            recoveredCurrentAlerts: alertsClient.getProcessedAlerts('recoveredCurrent'),
+            activeAlerts: alertsClient.getProcessedAlerts('active'),
+            recoveredAlerts: alertsClient.getProcessedAlerts('recovered'),
           });
         }
       })
@@ -430,10 +438,9 @@ export class TaskRunner<
     // Only serialize alerts into task state if we're auto-recovering, otherwise
     // we don't need to keep this information around.
     if (this.ruleType.autoRecoverAlerts) {
-      const { alertsToReturn: alerts, recoveredAlertsToReturn: recovered } =
-        alertsClient.getAlertsToSerialize();
-      alertsToReturn = alerts;
-      recoveredAlertsToReturn = recovered;
+      const alerts = alertsClient.getRawAlertInstancesForState(true);
+      alertsToReturn = alerts.rawActiveAlerts;
+      recoveredAlertsToReturn = alerts.rawRecoveredAlerts;
     }
 
     return {
@@ -442,6 +449,11 @@ export class TaskRunner<
       alertInstances: alertsToReturn,
       alertRecoveredInstances: recoveredAlertsToReturn,
       summaryActions: actionSchedulerResult.throttledSummaryActions,
+      trackedExecutions: getTrackedExecutions({
+        trackedExecutions: alertsClient.getTrackedExecutions(),
+        currentExecution: this.executionId,
+        limit: flappingSettings.lookBackWindow,
+      }),
     };
   }
 
@@ -540,6 +552,10 @@ export class TaskRunner<
       // Set rule monitoring data
       this.ruleMonitoring.setMonitoring(runRuleParams.rule.monitoring);
 
+      // Clear gap range that was persisted in the rule SO
+      if (this.ruleMonitoring.getMonitoring()?.run?.last_run?.metrics?.gap_range) {
+        this.ruleMonitoring.getLastRunMetricsSetters().setLastRunMetricsGapRange(null);
+      }
       (async () => {
         try {
           await clearExpiredSnoozes({
@@ -577,6 +593,7 @@ export class TaskRunner<
         if (isOk(schedule)) {
           nextRun = getNextRun({ startDate: startedAt, interval: schedule.value.interval });
         } else if (taskSchedule) {
+          // rules cannot use rrule for scheduling yet
           nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });
         }
 
@@ -608,6 +625,13 @@ export class TaskRunner<
           runDate: this.runDate,
         });
 
+        const gap = this.ruleMonitoring.getMonitoring()?.run?.last_run?.metrics?.gap_range;
+        if (gap) {
+          this.alertingEventLogger.reportGap({
+            gap,
+          });
+        }
+
         if (!this.cancelled) {
           this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_EXECUTIONS);
           if (outcome === 'failure') {
@@ -620,6 +644,7 @@ export class TaskRunner<
               )} - ${JSON.stringify(lastRun)}`
             );
           }
+
           await this.updateRuleSavedObjectPostRun(ruleId, {
             executionStatus: ruleExecutionStatusToRaw(executionStatus),
             nextRun,
@@ -804,6 +829,7 @@ export class TaskRunner<
 
     let nextRun: string | null = null;
     if (taskSchedule) {
+      // rules cannot use rrule for scheduling yet
       nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });
     }
 

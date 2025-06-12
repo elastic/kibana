@@ -133,6 +133,13 @@ export const fleetAgentsSchema: RootSchema<any> = {
           description: 'Number of agents enrolled that use this output type as monitoring output',
         },
       },
+      sync_integrations: {
+        type: 'boolean',
+        _meta: {
+          description:
+            'Boolean field, indicates if remote sync integrations feature is enabled on the remote elasticsearch output',
+        },
+      },
     },
   },
   agents_per_privileges: {
@@ -350,6 +357,12 @@ export const fleetUsagesSchema: RootSchema<any> = {
         type: 'long',
         _meta: {
           description: 'Number of agent policies using global data tags',
+        },
+      },
+      count_with_non_default_space: {
+        type: 'long',
+        _meta: {
+          description: 'Number of agent policies using another space than the default one',
         },
       },
       avg_number_global_data_tags_per_policy: {

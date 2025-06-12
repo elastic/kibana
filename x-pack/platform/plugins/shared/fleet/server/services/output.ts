@@ -58,6 +58,7 @@ import {
   FLEET_SYNTHETICS_PACKAGE,
   FLEET_SERVER_PACKAGE,
 } from '../../common/constants';
+import type { ValueOf } from '../../common/types';
 import { normalizeHostsForAgents } from '../../common/services';
 import {
   FleetEncryptedSavedObjectEncryptionKeyRequired,
@@ -80,7 +81,12 @@ import {
   extractAndWriteOutputSecrets,
   isOutputSecretStorageEnabled,
 } from './secrets';
+import { findAgentlessPolicies } from './outputs/helpers';
 import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpers';
+import {
+  canEnableSyncIntegrations,
+  createOrUpdateFleetSyncedIntegrationsIndex,
+} from './setup/fleet_synced_integrations';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
 
@@ -120,13 +126,21 @@ export function outputIdToUuid(id: string) {
   return uuidv5(id, uuidv5.DNS);
 }
 
-function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): Output {
-  const { output_id: outputId, ssl, proxy_id: proxyId, ...atributes } = so.attributes;
+export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): Output {
+  const logger = appContextService.getLogger();
+  const { output_id: outputId, ssl, proxy_id: proxyId, ...attributes } = so.attributes;
 
+  let parsedSsl;
+  try {
+    parsedSsl = typeof ssl === 'string' ? JSON.parse(ssl) : undefined;
+  } catch (e) {
+    logger.warn(`Unable to parse ssl for output ${so.id}: ${e.message}`);
+    logger.warn(`ssl value: ${ssl}`);
+  }
   return {
     id: outputId ?? so.id,
-    ...atributes,
-    ...(ssl ? { ssl: JSON.parse(ssl as string) } : {}),
+    ...attributes,
+    ...(parsedSsl ? { ssl: parsedSsl } : {}),
     ...(proxyId ? { proxy_id: proxyId } : {}),
   };
 }
@@ -178,7 +192,7 @@ async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean)
   ];
   const agentPoliciesFromPackagePolicies = await agentPolicyService.getByIds(
     internalSoClientWithoutSpaceExtension,
-    agentPolicyIdsFromPackagePolicies
+    agentPolicyIdsFromPackagePolicies.map((id) => ({ id, spaceId: '*' }))
   );
 
   const agentPoliciesIndexedById = indexBy(
@@ -247,7 +261,7 @@ async function findPoliciesWithFleetServerOrSynthetics(outputId?: string, isDefa
     if (agentPolicyIds.length) {
       agentPolicies = await agentPolicyService.getByIds(
         internalSoClientWithoutSpaceExtension,
-        agentPolicyIds
+        agentPolicyIds.map((id) => ({ id, spaceId: '*' }))
       );
       for (const packagePolicy of packagePolicies) {
         for (const policyId of packagePolicy.policy_ids) {
@@ -272,7 +286,7 @@ async function findPoliciesWithFleetServerOrSynthetics(outputId?: string, isDefa
 
 function validateOutputNotUsedInPolicy(
   agentPolicies: AgentPolicy[],
-  dataOutputType: OutputType['Logstash'] | OutputType['Kafka'],
+  dataOutputType: ValueOf<OutputType>,
   integrationName: string
 ) {
   // Validate no policy with this integration uses that output
@@ -300,26 +314,30 @@ async function validateTypeChanges(
   const mergedIsDefault = data.is_default ?? originalOutput.is_default;
   const { policiesWithFleetServer, policiesWithSynthetics } =
     await findPoliciesWithFleetServerOrSynthetics(id, mergedIsDefault);
+  const agentlessPolicies = await findAgentlessPolicies(id);
 
   if (data.type === outputType.Logstash || originalOutput.type === outputType.Logstash) {
     await validateLogstashOutputNotUsedInAPMPolicy(id, mergedIsDefault);
   }
-  // prevent changing an ES output to logstash or kafka if it's used by fleet server or synthetics policies
+  // prevent changing an ES output to a non-local ES output if it's used by an invalid policy
   if (
     originalOutput.type === outputType.Elasticsearch &&
-    (data?.type === outputType.Logstash || data?.type === outputType.Kafka)
+    data?.type !== outputType.Elasticsearch &&
+    data.type
   ) {
-    // Validate no policy with fleet server use that policy
+    // Validate no policy with fleet server, synthetics, or agentless policies use that output
     validateOutputNotUsedInPolicy(policiesWithFleetServer, data.type, 'Fleet Server');
     validateOutputNotUsedInPolicy(policiesWithSynthetics, data.type, 'Synthetics');
+    validateOutputNotUsedInPolicy(agentlessPolicies, data.type, 'agentless');
   }
+
   await updateAgentPoliciesDataOutputId(
     internalSoClientWithoutSpaceExtension,
     esClient,
     data,
     mergedIsDefault,
     defaultDataOutputId,
-    _.uniq([...policiesWithFleetServer, ...policiesWithSynthetics]),
+    _.uniq([...policiesWithFleetServer, ...policiesWithSynthetics, ...agentlessPolicies]),
     fromPreconfiguration
   );
 }
@@ -333,10 +351,10 @@ async function updateAgentPoliciesDataOutputId(
   agentPolicies: AgentPolicy[],
   fromPreconfiguration: boolean
 ) {
-  // if a logstash output is updated to become default
-  // if fleet server policies don't have data_output_id
-  // update them to use the default output
-  if ((data?.type === outputType.Logstash || data?.type === outputType.Kafka) && isDefault) {
+  // if a non-local ES output is about to be updated to become default
+  // and fleet server, synthetics, or agentless policies don't have
+  // data_output_id set, update them to use the current default output ID
+  if (data?.type !== outputType.Elasticsearch && isDefault) {
     for (const policy of agentPolicies) {
       if (!policy.data_output_id) {
         await agentPolicyService.update(
@@ -350,6 +368,21 @@ async function updateAgentPoliciesDataOutputId(
         );
       }
     }
+  }
+}
+
+async function remoteSyncIntegrationsCheck(
+  esClient: ElasticsearchClient,
+  output: Partial<NewOutput>
+) {
+  const syncIntegrationsEnabled =
+    output.type === outputType.RemoteElasticsearch && output.sync_integrations === true;
+  if (syncIntegrationsEnabled && !canEnableSyncIntegrations()) {
+    throw new OutputUnauthorizedError(
+      'Remote sync integrations require at least an Enterprise license.'
+    );
+  } else if (syncIntegrationsEnabled) {
+    await createOrUpdateFleetSyncedIntegrationsIndex(esClient);
   }
 }
 
@@ -369,6 +402,7 @@ class OutputService {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'get',
         id: output.id,
+        name: output.attributes.name,
         savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
       });
     }
@@ -387,6 +421,7 @@ class OutputService {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'get',
         id: output.id,
+        name: output.attributes.name,
         savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
       });
     }
@@ -411,6 +446,7 @@ class OutputService {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
       id: outputIdToUuid(defaultDataOutputId),
+      name: originalOutput.name,
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
     });
 
@@ -537,23 +573,26 @@ class OutputService {
 
     const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
 
-    if (output.type === outputType.Logstash || output.type === outputType.Kafka) {
+    if (output.type === outputType.Logstash) {
       await validateLogstashOutputNotUsedInAPMPolicy(undefined, data.is_default);
-      if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
-        throw new FleetEncryptedSavedObjectEncryptionKeyRequired(
-          `${output.type} output needs encrypted saved object api key to be set`
-        );
-      }
     }
+
+    if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
+      throw new FleetEncryptedSavedObjectEncryptionKeyRequired(
+        `${output.type} output needs encrypted saved object api key to be set`
+      );
+    }
+
     const { policiesWithFleetServer, policiesWithSynthetics } =
       await findPoliciesWithFleetServerOrSynthetics();
+    const agentlessPolicies = await findAgentlessPolicies();
     await updateAgentPoliciesDataOutputId(
       soClient,
       esClient,
       data,
       data.is_default,
       defaultDataOutputId,
-      _.uniq([...policiesWithFleetServer, ...policiesWithSynthetics]),
+      _.uniq([...policiesWithFleetServer, ...policiesWithSynthetics, ...agentlessPolicies]),
       options?.fromPreconfiguration ?? false
     );
 
@@ -659,6 +698,8 @@ class OutputService {
       }
     }
 
+    await remoteSyncIntegrationsCheck(esClient, output);
+
     const id = options?.id ? outputIdToUuid(options.id) : SavedObjectsUtils.generateId();
 
     // Store secret values if enabled; if not, store plain text values
@@ -671,16 +712,13 @@ class OutputService {
 
       if (outputWithSecrets.secrets) data.secrets = outputWithSecrets.secrets;
     } else {
-      if (output.type === outputType.Logstash && data.type === outputType.Logstash) {
-        if (!output.ssl?.key && output.secrets?.ssl?.key) {
-          data.ssl = JSON.stringify({ ...output.ssl, ...output.secrets.ssl });
-        }
-      } else if (output.type === outputType.Kafka && data.type === outputType.Kafka) {
+      if (!output.ssl?.key && output.secrets?.ssl?.key) {
+        data.ssl = JSON.stringify({ ...output.ssl, ...output.secrets.ssl });
+      }
+
+      if (output.type === outputType.Kafka && data.type === outputType.Kafka) {
         if (!output.password && output.secrets?.password) {
           data.password = output.secrets?.password as string;
-        }
-        if (!output.ssl?.key && output.secrets?.ssl?.key) {
-          data.ssl = JSON.stringify({ ...output.ssl, ...output.secrets.ssl });
         }
       } else if (
         output.type === outputType.RemoteElasticsearch &&
@@ -695,9 +733,9 @@ class OutputService {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'create',
       id,
+      name: data.name,
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
     });
-
     const newSo = await this.encryptedSoClient.create<OutputSOAttributes>(SAVED_OBJECT_TYPE, data, {
       overwrite: options?.overwrite || options?.fromPreconfiguration,
       id,
@@ -738,6 +776,7 @@ class OutputService {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'get',
         id: output.id,
+        name: output.attributes.name,
         savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
       });
     }
@@ -763,6 +802,7 @@ class OutputService {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'get',
         id: output.id,
+        name: output.attributes.name,
         savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
       });
     }
@@ -784,6 +824,7 @@ class OutputService {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'get',
       id: outputSO.id,
+      name: outputSO?.attributes?.name,
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
     });
 
@@ -835,6 +876,7 @@ class OutputService {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'delete',
       id: outputIdToUuid(id),
+      name: originalOutput.name,
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
     });
 
@@ -943,11 +985,7 @@ class OutputService {
         updateData.ca_trusted_fingerprint = null;
         updateData.ca_sha256 = null;
         delete (updateData as Nullable<OutputSoRemoteElasticsearchAttributes>).service_token;
-      }
-
-      if (data.type !== outputType.Logstash) {
-        // remove logstash specific field
-        updateData.ssl = null;
+        delete (updateData as Nullable<OutputSoRemoteElasticsearchAttributes>).kibana_api_key;
       }
 
       if (data.type === outputType.Kafka && updateData.type === outputType.Kafka) {
@@ -1019,11 +1057,11 @@ class OutputService {
       if (!data.username) {
         updateData.username = null;
       }
-      if (!data.ssl) {
-        updateData.ssl = null;
-      }
       if (!data.sasl) {
         updateData.sasl = null;
+      }
+      if (!data.ssl) {
+        updateData.ssl = null;
       }
     }
 
@@ -1065,6 +1103,9 @@ class OutputService {
       if (!data.service_token) {
         updateData.service_token = null;
       }
+      if (!data.kibana_api_key) {
+        updateData.kibana_api_key = null;
+      }
     }
 
     if (!data.preset && data.type === outputType.Elasticsearch) {
@@ -1083,6 +1124,7 @@ class OutputService {
         updateData.shipper = null;
       }
     }
+    await remoteSyncIntegrationsCheck(esClient, data);
 
     // Store secret values if enabled; if not, store plain text values
     if (await isOutputSecretStorageEnabled(esClient, soClient)) {
@@ -1096,16 +1138,12 @@ class OutputService {
       updateData.secrets = secretsRes.outputUpdate.secrets;
       secretsToDelete = secretsRes.secretsToDelete;
     } else {
-      if (data.type === outputType.Logstash && updateData.type === outputType.Logstash) {
-        if (!data.ssl?.key && data.secrets?.ssl?.key) {
-          updateData.ssl = JSON.stringify({ ...data.ssl, ...data.secrets.ssl });
-        }
-      } else if (data.type === outputType.Kafka && updateData.type === outputType.Kafka) {
+      if (!data.ssl?.key && data.secrets?.ssl?.key) {
+        updateData.ssl = JSON.stringify({ ...data.ssl, ...data.secrets.ssl });
+      }
+      if (data.type === outputType.Kafka && updateData.type === outputType.Kafka) {
         if (!data.password && data.secrets?.password) {
           updateData.password = data.secrets?.password as string;
-        }
-        if (!data.ssl?.key && data.secrets?.ssl?.key) {
-          updateData.ssl = JSON.stringify({ ...data.ssl, ...data.secrets.ssl });
         }
       } else if (
         data.type === outputType.RemoteElasticsearch &&
@@ -1122,6 +1160,7 @@ class OutputService {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
       id: outputIdToUuid(id),
+      name: originalOutput.name,
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
     });
 

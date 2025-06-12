@@ -256,6 +256,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     },
     metrics: {
       collectionInterval: deps.metrics.collectionInterval,
+      getEluMetrics$: deps.metrics.getEluMetrics$,
       getOpsMetrics$: deps.metrics.getOpsMetrics$,
     },
     savedObjects: {
@@ -289,6 +290,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     plugins: {
       onSetup: (...dependencyNames) => runtimeResolver.onSetup(plugin.name, dependencyNames),
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
+    },
+    pricing: {
+      registerProductFeatures: deps.pricing.registerProductFeatures,
     },
     security: {
       registerSecurityDelegate: (api) => deps.security.registerSecurityDelegate(api),
@@ -373,6 +377,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     },
     metrics: {
       collectionInterval: deps.metrics.collectionInterval,
+      getEluMetrics$: deps.metrics.getEluMetrics$,
       getOpsMetrics$: deps.metrics.getOpsMetrics$,
     },
     uiSettings: {
@@ -383,6 +388,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     plugins: {
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },
+    pricing: deps.pricing,
     security: {
       authc: deps.security.authc,
       audit: deps.security.audit,

@@ -14,29 +14,20 @@ interface StylesDeps {
   isFullScreen?: boolean;
 }
 
-export const useStyles = ({ height = 500, isFullScreen }: StylesDeps) => {
-  const { euiTheme, euiVars } = useEuiTheme();
+export const useStyles = ({ height = 500 }: StylesDeps) => {
+  const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
     const { border, size } = euiTheme;
 
     // 118px = Session View Toolbar height + Close Session button height + spacing margin at the bottom
     const sessionView: CSSObject = {
-      height: `${isFullScreen ? 'calc(100vh - 118px)' : height + 'px'}`,
+      height: `${height + 'px'}`,
     };
 
     const processTree: CSSObject = {
       ...sessionView,
       position: 'relative',
-    };
-
-    const detailPanel: CSSObject = {
-      ...sessionView,
-      borderRightWidth: '0px',
-    };
-
-    const resizeHandle: CSSObject = {
-      zIndex: 2,
     };
 
     const nonGrowGroup: CSSObject = {
@@ -50,24 +41,22 @@ export const useStyles = ({ height = 500, isFullScreen }: StylesDeps) => {
       border: border.thin,
       borderRadius: border.radius.medium,
       '> .sessionViewerToolbar': {
-        backgroundColor: `${euiVars.euiFormBackgroundDisabledColor}`,
+        backgroundColor: `${euiTheme.components.forms.backgroundDisabled}`,
         padding: `${size.m} ${size.base}`,
       },
     };
 
     const fakeDisabled: CSSObject = {
-      color: euiVars.euiButtonColorDisabledText,
+      color: euiTheme.colors.disabled,
     };
 
     return {
       processTree,
-      detailPanel,
       nonGrowGroup,
-      resizeHandle,
       fakeDisabled,
       sessionViewerComponent,
     };
-  }, [euiTheme, isFullScreen, height, euiVars]);
+  }, [euiTheme, height]);
 
   return cached;
 };

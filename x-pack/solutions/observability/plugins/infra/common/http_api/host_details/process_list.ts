@@ -58,6 +58,7 @@ export const ProcessListAPIQueryAggregationRT = rt.type({
                   _source: rt.type({
                     process: rt.type({
                       pid: rt.number,
+                      command_line: rt.string,
                     }),
                     system: rt.type({
                       process: rt.type({

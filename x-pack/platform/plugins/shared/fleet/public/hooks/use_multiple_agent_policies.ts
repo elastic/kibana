@@ -6,7 +6,6 @@
  */
 
 import { LICENCE_FOR_MULTIPLE_AGENT_POLICIES } from '../../common/constants';
-import { ExperimentalFeaturesService } from '../services';
 
 import { licenseService } from './use_license';
 
@@ -15,9 +14,7 @@ export function useMultipleAgentPolicies() {
 }
 
 export function canUseMultipleAgentPolicies() {
-  const { enableReusableIntegrationPolicies } = ExperimentalFeaturesService.get();
-
   const hasEnterpriseLicence = licenseService.hasAtLeast(LICENCE_FOR_MULTIPLE_AGENT_POLICIES);
 
-  return Boolean(enableReusableIntegrationPolicies && hasEnterpriseLicence);
+  return Boolean(hasEnterpriseLicence);
 }

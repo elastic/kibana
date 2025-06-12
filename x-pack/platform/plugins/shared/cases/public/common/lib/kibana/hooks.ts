@@ -15,7 +15,7 @@ import type { NavigateToAppOptions } from '@kbn/core/public';
 import { getUICapabilities } from '../../../client/helpers/capabilities';
 import { convertToCamelCase } from '../../../api/utils';
 import {
-  FEATURE_ID_V2,
+  FEATURE_ID_V3,
   DEFAULT_DATE_FORMAT,
   DEFAULT_DATE_FORMAT_TZ,
 } from '../../../../common/constants';
@@ -166,7 +166,7 @@ interface Capabilities {
 }
 interface UseApplicationCapabilities {
   actions: Capabilities;
-  generalCasesV2: CasesPermissions;
+  generalCasesV3: CasesPermissions;
   visualize: Capabilities;
   dashboard: Capabilities;
 }
@@ -178,13 +178,13 @@ interface UseApplicationCapabilities {
 
 export const useApplicationCapabilities = (): UseApplicationCapabilities => {
   const capabilities = useKibana().services?.application?.capabilities;
-  const casesCapabilities = capabilities[FEATURE_ID_V2];
+  const casesCapabilities = capabilities[FEATURE_ID_V3];
   const permissions = getUICapabilities(casesCapabilities);
 
   return useMemo(
     () => ({
       actions: { crud: !!capabilities.actions?.save, read: !!capabilities.actions?.show },
-      generalCasesV2: {
+      generalCasesV3: {
         all: permissions.all,
         create: permissions.create,
         read: permissions.read,
@@ -195,20 +195,24 @@ export const useApplicationCapabilities = (): UseApplicationCapabilities => {
         settings: permissions.settings,
         reopenCase: permissions.reopenCase,
         createComment: permissions.createComment,
+        assign: permissions.assign,
       },
-      visualize: { crud: !!capabilities.visualize?.save, read: !!capabilities.visualize?.show },
+      visualize: {
+        crud: !!capabilities.visualize_v2?.save,
+        read: !!capabilities.visualize_v2?.show,
+      },
       dashboard: {
-        crud: !!capabilities.dashboard?.createNew,
-        read: !!capabilities.dashboard?.show,
+        crud: !!capabilities.dashboard_v2?.createNew,
+        read: !!capabilities.dashboard_v2?.show,
       },
     }),
     [
       capabilities.actions?.save,
       capabilities.actions?.show,
-      capabilities.dashboard?.createNew,
-      capabilities.dashboard?.show,
-      capabilities.visualize?.save,
-      capabilities.visualize?.show,
+      capabilities.dashboard_v2?.createNew,
+      capabilities.dashboard_v2?.show,
+      capabilities.visualize_v2?.save,
+      capabilities.visualize_v2?.show,
       permissions.all,
       permissions.create,
       permissions.read,
@@ -219,6 +223,7 @@ export const useApplicationCapabilities = (): UseApplicationCapabilities => {
       permissions.settings,
       permissions.reopenCase,
       permissions.createComment,
+      permissions.assign,
     ]
   );
 };

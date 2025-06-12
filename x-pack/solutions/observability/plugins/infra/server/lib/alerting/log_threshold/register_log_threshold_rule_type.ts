@@ -11,16 +11,12 @@ import type {
   GetViewInAppRelativeUrlFnOpts,
   AlertingServerSetup,
 } from '@kbn/alerting-plugin/server';
-import { observabilityPaths } from '@kbn/observability-plugin/common';
-import { decodeOrThrow } from '@kbn/io-ts-utils';
+import { observabilityFeatureId, observabilityPaths } from '@kbn/observability-plugin/common';
+import { logThresholdParamsSchema } from '@kbn/response-ops-rule-params/log_threshold';
 import type { InfraConfig } from '../../../../common/plugin_config_types';
-import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
 import { extractReferences, injectReferences } from './log_threshold_references_manager';
-import {
-  LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
-  ruleParamsRT,
-} from '../../../../common/alerting/logs/log_threshold';
+import { LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '../../../../common/alerting/logs/log_threshold';
 import type { InfraBackendLibs } from '../../infra_types';
 import {
   alertDetailUrlActionVariableDescription,
@@ -126,9 +122,7 @@ export function registerLogThresholdRuleType(
       defaultMessage: 'Log threshold',
     }),
     validate: {
-      params: {
-        validate: (params) => decodeOrThrow(ruleParamsRT)(params),
-      },
+      params: logThresholdParamsSchema,
     },
     defaultActionGroupId: FIRED_ACTIONS.id,
     actionGroups: [FIRED_ACTIONS],
@@ -172,12 +166,12 @@ export function registerLogThresholdRuleType(
     },
     category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: 'logs',
+    solution: observabilityFeatureId,
     useSavedObjectReferences: {
       extractReferences,
       injectReferences,
     },
     alerts: LogsRulesTypeAlertDefinition,
-    fieldsForAAD: O11Y_AAD_FIELDS,
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
   });

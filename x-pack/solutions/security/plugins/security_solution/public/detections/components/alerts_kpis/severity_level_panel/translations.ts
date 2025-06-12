@@ -13,13 +13,6 @@ export const SEVERITY_LEVELS_TITLE = i18n.translate(
   }
 );
 
-export const UNKNOWN_SEVERITY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.severity.unknown',
-  {
-    defaultMessage: 'Unknown',
-  }
-);
-
 export const SEVERITY_LEVEL_COLUMN_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.severity.severityTableLevelColumn',
   { defaultMessage: 'Levels' }

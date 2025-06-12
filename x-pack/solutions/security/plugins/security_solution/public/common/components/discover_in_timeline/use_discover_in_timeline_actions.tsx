@@ -121,9 +121,7 @@ export const useDiscoverInTimelineActions = (
       if (newSavedSearchId && discoverStateContainer.current) {
         let savedSearch;
         try {
-          savedSearch = await discoverStateContainer.current?.savedSearchState.load(
-            newSavedSearchId
-          );
+          savedSearch = await savedSearchService.get(newSavedSearchId);
           const savedSearchState = savedSearch ? getAppStateFromSavedSearch(savedSearch) : null;
           discoverStateContainer.current?.appState.initAndSync();
           await discoverStateContainer.current?.appState.replaceUrlState(
@@ -148,7 +146,7 @@ export const useDiscoverInTimelineActions = (
         });
       }
     },
-    [discoverStateContainer, getAppStateFromSavedSearch, setDiscoverAppState]
+    [discoverStateContainer, getAppStateFromSavedSearch, savedSearchService, setDiscoverAppState]
   );
 
   const persistSavedSearch = useCallback(

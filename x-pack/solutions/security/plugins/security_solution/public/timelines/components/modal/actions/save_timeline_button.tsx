@@ -55,7 +55,7 @@ export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(
     // TODO: User may have Crud privileges but they may not have access to timeline index.
     // Do we need to check that?
     const {
-      kibanaSecuritySolutionsPrivileges: { crud: canEditTimelinePrivilege },
+      timelinePrivileges: { crud: canEditTimelinePrivilege },
     } = useUserPrivileges();
 
     const { status, isSaving } = useSelector((state: State) =>

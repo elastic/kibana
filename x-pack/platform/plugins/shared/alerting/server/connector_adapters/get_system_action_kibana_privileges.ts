@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RuleSystemAction } from '../types';
-import { ConnectorAdapterRegistry } from './connector_adapter_registry';
+import type { RuleSystemAction } from '../types';
+import type { ConnectorAdapterRegistry } from './connector_adapter_registry';
 
 interface Args {
   connectorAdapterRegistry: ConnectorAdapterRegistry;

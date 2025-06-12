@@ -4,44 +4,87 @@ info:
   title: Overlays that are applicable to both serverless and non-serverless documentas
   version: 0.0.1
 actions:
-# Add some spaces API examples
+  # Add some tag descriptions and displayNames
+  - target: '$.tags[?(@.name=="maintenance-window")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        You can schedule single or recurring maintenance windows to temporarily reduce rule notifications.
+        For example, a maintenance window prevents false alarms during planned outages.
+      externalDocs:
+        description: Maintenance window documentation
+        url: https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts/maintenance-windows
+      x-displayName: 'Maintenance windows'
+  - target: '$.tags[?(@.name=="alerting")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Alerting enables you to define rules, which detect complex conditions within your data.
+        When a condition is met, the rule tracks it as an alert and runs the actions that are defined in the rule.
+        Actions typically involve the use of connectors to interact with Kibana services or third party integrations.
+      externalDocs:
+        description: Alerting documentation
+        url: https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts
+      x-displayName: 'Alerting'
+  - target: '$.tags[?(@.name=="cases")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Cases are used to open and track issues.
+        You can add assignees and tags to your cases, set their severity and status, and add alerts, comments, and visualizations.
+        You can also send cases to external incident management systems by configuring connectors.
+      externalDocs:
+        description: Cases documentation
+        url: https://www.elastic.co/docs/explore-analyze/alerts-cases/cases
+      x-displayName: 'Cases'
+  - target: '$.tags[?(@.name=="connectors")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems.
+        Alerting rules can use connectors to run actions when rule conditions are met.
+      externalDocs:
+        description: Connector documentation
+        url: https://www.elastic.co/docs/reference/kibana/connectors-kibana
+      x-displayName: 'Connectors'
+  # Add some spaces API examples
   - target: "$.paths['/api/spaces/space']['post']"
-    description: "Add example to create space API"
-    update: 
-      requestBody: 
-        content: 
-          application/json; Elastic-Api-Version=2023-10-31: 
+    description: 'Add example to create space API'
+    update:
+      requestBody:
+        content:
+          application/json:
             examples:
               createSpaceRequest:
-                $ref: "../examples/create_space_request.yaml"
+                $ref: '../examples/create_space_request.yaml'
   - target: "$.paths['/api/spaces/space/{id}']['put']"
-    description: "Add example to update space API"
-    update: 
-      requestBody: 
-        content: 
-          application/json; Elastic-Api-Version=2023-10-31: 
+    description: 'Add example to update space API'
+    update:
+      requestBody:
+        content:
+          application/json:
             examples:
               updateSpaceRequest:
-                $ref: "../examples/update_space_request.yaml"
+                $ref: '../examples/update_space_request.yaml'
   - target: "$.paths['/api/spaces/space/{id}']['get']"
-    description: "Add example to get space API"
-    update: 
+    description: 'Add example to get space API'
+    update:
       responses:
-        200: 
-          content: 
-            application/json; Elastic-Api-Version=2023-10-31: 
+        200:
+          content:
+            application/json:
               examples:
                 getSpaceResponseExample:
-                  $ref: "../examples/get_space_response.yaml"
+                  $ref: '../examples/get_space_response.yaml'
   - target: "$.paths['/api/spaces/space']['get']"
-    description: "Add example to get all spaces API"
-    update: 
+    description: 'Add example to get all spaces API'
+    update:
       responses:
-        200: 
-          content: 
-            application/json; Elastic-Api-Version=2023-10-31: 
+        200:
+          content:
+            application/json:
               examples:
                 getSpacesResponseExample1:
-                  $ref: "../examples/get_spaces_response1.yaml"
+                  $ref: '../examples/get_spaces_response1.yaml'
                 getSpacesResponseExample2:
-                  $ref: "../examples/get_spaces_response2.yaml"
+                  $ref: '../examples/get_spaces_response2.yaml'

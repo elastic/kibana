@@ -10,5 +10,8 @@
 import { DEFAULT_ALLOWED_LOGS_BASE_PATTERNS_REGEXP, getLogsContextService } from '../data_types';
 
 export const createLogsContextServiceMock = () => {
-  return getLogsContextService([DEFAULT_ALLOWED_LOGS_BASE_PATTERNS_REGEXP]);
+  return getLogsContextService({
+    allLogsIndexPattern: 'logs-*',
+    allowedDataSources: [DEFAULT_ALLOWED_LOGS_BASE_PATTERNS_REGEXP],
+  });
 };

@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 import type SuperTest from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
-import type {
-  AggregationsAggregate,
-  SearchResponse,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { RetryService } from '@kbn/ftr-common-functional-services';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { retry } from '../../common/retry';
 
 const TIMEOUT = 70_000;
@@ -82,7 +79,7 @@ export async function waitForDocumentInIndex<T>({
         index: indexName,
         rest_total_hits_as_int: true,
         ignore_unavailable: true,
-        body: filters
+        ...(filters
           ? {
               query: {
                 bool: {
@@ -90,7 +87,7 @@ export async function waitForDocumentInIndex<T>({
                 },
               },
             }
-          : undefined,
+          : undefined),
       });
       if (!response.hits.total || (response.hits.total as number) < docCountTarget) {
         logger.debug(`Document count is ${response.hits.total}, should be ${docCountTarget}`);
@@ -131,18 +128,16 @@ export async function waitForAlertInIndex<T>({
     testFn: async () => {
       const response = await esClient.search<T>({
         index: indexName,
-        body: {
-          query: {
-            bool: {
-              filter: [
-                {
-                  term: {
-                    'kibana.alert.rule.uuid': ruleId,
-                  },
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  'kibana.alert.rule.uuid': ruleId,
                 },
-                ...filters,
-              ],
-            },
+              },
+              ...filters,
+            ],
           },
         },
       });

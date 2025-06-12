@@ -10,12 +10,14 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { GetEntityStoreStatusResponse } from '../../../../../common/api/entity_analytics/entity_store/status.gen';
-import type { InitEntityStoreResponse } from '../../../../../common/api/entity_analytics/entity_store/enable.gen';
+import type {
+  InitEntityStoreRequestBodyInput,
+  InitEntityStoreResponse,
+} from '../../../../../common/api/entity_analytics/entity_store/enable.gen';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import type { EntityType } from '../../../../../common/api/entity_analytics';
 import {
   type DeleteEntityEngineResponse,
-  type InitEntityEngineResponse,
   type StopEntityEngineResponse,
 } from '../../../../../common/api/entity_analytics';
 import { useEntityStoreRoutes } from '../../../api/entity_store';
@@ -47,18 +49,28 @@ export const useEntityStoreStatus = (opts: Options = {}) => {
 };
 
 export const ENABLE_STORE_STATUS_KEY = ['POST', 'ENABLE_ENTITY_STORE'];
-export const useEnableEntityStoreMutation = (options?: UseMutationOptions<{}>) => {
+export const useEnableEntityStoreMutation = (
+  options?: UseMutationOptions<
+    InitEntityStoreResponse,
+    ResponseError,
+    InitEntityStoreRequestBodyInput
+  >
+) => {
   const { telemetry } = useKibana().services;
   const queryClient = useQueryClient();
   const { enableEntityStore } = useEntityStoreRoutes();
 
-  return useMutation<InitEntityStoreResponse, ResponseError>(
-    () => {
+  return useMutation<
+    InitEntityStoreResponse,
+    ResponseError,
+    Partial<InitEntityStoreRequestBodyInput>
+  >(
+    (params) => {
       telemetry?.reportEvent(EntityEventTypes.EntityStoreEnablementToggleClicked, {
         timestamp: new Date().toISOString(),
         action: 'start',
       });
-      return enableEntityStore();
+      return enableEntityStore(params);
     },
     {
       mutationKey: ENABLE_STORE_STATUS_KEY,
@@ -69,23 +81,6 @@ export const useEnableEntityStoreMutation = (options?: UseMutationOptions<{}>) =
 };
 
 export const INIT_ENTITY_ENGINE_STATUS_KEY = ['POST', 'INIT_ENTITY_ENGINE'];
-/**
- * @deprecated
- * It will be deleted on a follow-up PR
- */
-export const useInitEntityEngineMutation = (options?: UseMutationOptions<{}>) => {
-  const queryClient = useQueryClient();
-
-  const { initEntityEngine } = useEntityStoreRoutes();
-  return useMutation<InitEntityEngineResponse[]>(
-    () => Promise.all([initEntityEngine('user'), initEntityEngine('host')]),
-    {
-      mutationKey: INIT_ENTITY_ENGINE_STATUS_KEY,
-      onSuccess: () => queryClient.refetchQueries({ queryKey: ENTITY_STORE_STATUS }),
-      ...options,
-    }
-  );
-};
 
 export const STOP_ENTITY_ENGINE_STATUS_KEY = ['POST', 'STOP_ENTITY_ENGINE'];
 export const useStopEntityEngineMutation = (entityTypes: EntityType[]) => {

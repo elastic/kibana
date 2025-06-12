@@ -16,10 +16,11 @@ import {
   EuiLoadingSpinner,
   EuiPopover,
   EuiPopoverTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/css';
 import type { DataViewBase } from '@kbn/es-query';
 import type { DebouncedFunc } from 'lodash';
 import { debounce, isEmpty } from 'lodash';
@@ -42,30 +43,6 @@ export interface EqlQueryBarFooterProps {
 
 type SizeVoidFunc = (newSize: number) => void;
 
-const Container = styled(EuiFlexGroup)`
-  border-radius: 0;
-  border-bottom-left-radius: 6px;
-  border-bottom-right-radius: 6px;
-  background: ${({ theme }) => theme.eui.euiColorLightestShade};
-  padding: ${({ theme }) => theme.eui.euiSizeXS} ${({ theme }) => theme.eui.euiSizeS};
-`;
-
-const FlexGroup = styled(EuiFlexGroup)`
-  min-height: ${({ theme }) => theme.eui.euiSizeXL};
-`;
-
-const FlexItemLeftBorder = styled(EuiFlexItem)`
-  border-left: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
-`;
-
-const FlexItemWithMarginRight = styled(EuiFlexItem)`
-  margin-right: ${({ theme }) => theme.eui.euiSizeS};
-`;
-
-const Spinner = styled(EuiLoadingSpinner)`
-  margin: 0 ${({ theme }) => theme.eui.euiSizeS};
-`;
-
 const singleSelection = { asPlainText: true };
 
 export const EqlQueryBarFooter: FC<EqlQueryBarFooterProps> = ({
@@ -79,6 +56,41 @@ export const EqlQueryBarFooter: FC<EqlQueryBarFooterProps> = ({
   const [openEqlSettings, setIsOpenEqlSettings] = useState(false);
   const [localSize, setLocalSize] = useState<number>(eqlOptions?.size ?? 100);
   const debounceSize = useRef<DebouncedFunc<SizeVoidFunc>>();
+
+  const { euiTheme } = useEuiTheme();
+  const containerStyles = useMemo(
+    () => css`
+      border-bottom-left-radius: ${euiTheme.border.radius.small};
+      border-bottom-right-radius: ${euiTheme.border.radius.small};
+      border: ${euiTheme.border.thin};
+      border-top: 0;
+      background: ${euiTheme.colors.backgroundBaseFormsPrepend};
+    `,
+    [euiTheme.border.radius.small, euiTheme.border.thin, euiTheme.colors.backgroundBaseFormsPrepend]
+  );
+  const groupStyles = useMemo(
+    () => css`
+      min-height: ${euiTheme.size.xl};
+    `,
+    [euiTheme.size.xl]
+  );
+  const groupItemStyles = useMemo(
+    () => css`
+      :not(:last-child) {
+        margin-right: ${euiTheme.size.s};
+      }
+      :last-child {
+        border-left: ${euiTheme.border.thin};
+      }
+    `,
+    [euiTheme.border.thin, euiTheme.size.s]
+  );
+  const spinnerStyles = useMemo(
+    () => css`
+      margin-left: ${euiTheme.size.s};
+    `,
+    [euiTheme.size.s]
+  );
 
   const { keywordFields, nonDateFields, dateFields } = useMemo(
     () =>
@@ -178,9 +190,10 @@ export const EqlQueryBarFooter: FC<EqlQueryBarFooterProps> = ({
   );
 
   return (
-    <Container>
-      <FlexGroup
+    <EuiFlexGroup className={containerStyles}>
+      <EuiFlexGroup
         alignItems="center"
+        className={groupStyles}
         justifyContent="spaceBetween"
         gutterSize="none"
         responsive={false}
@@ -194,7 +207,13 @@ export const EqlQueryBarFooter: FC<EqlQueryBarFooterProps> = ({
                   errors={errors}
                 />
               )}
-              {isLoading && <Spinner data-test-subj="eql-validation-loading" size="m" />}
+              {isLoading && (
+                <EuiLoadingSpinner
+                  className={spinnerStyles}
+                  data-test-subj="eql-validation-loading"
+                  size="m"
+                />
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -208,10 +227,10 @@ export const EqlQueryBarFooter: FC<EqlQueryBarFooterProps> = ({
 
             {onEqlOptionsChange && (
               <>
-                <FlexItemWithMarginRight grow={false}>
+                <EuiFlexItem className={groupItemStyles} grow={false}>
                   <EqlOverviewLink />
-                </FlexItemWithMarginRight>
-                <FlexItemLeftBorder grow={false}>
+                </EuiFlexItem>
+                <EuiFlexItem className={groupItemStyles} grow={false}>
                   <EuiPopover
                     button={
                       <EuiButtonIcon
@@ -281,12 +300,12 @@ export const EqlQueryBarFooter: FC<EqlQueryBarFooterProps> = ({
                       </EuiFormRow>
                     </div>
                   </EuiPopover>
-                </FlexItemLeftBorder>
+                </EuiFlexItem>
               </>
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-      </FlexGroup>
-    </Container>
+      </EuiFlexGroup>
+    </EuiFlexGroup>
   );
 };

@@ -13,13 +13,19 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiFontSize,
   useEuiTheme,
 } from '@elastic/eui';
+
 import { css } from '@emotion/css';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage, useI18n } from '@kbn/i18n-react';
 
-import { euiThemeVars } from '@kbn/ui-theme';
+import type { EntityType } from '../../../../../common/entity_analytics/types';
+import { useEntityAnalyticsTypes } from '../../../hooks/use_enabled_entity_types';
+import { EntityTypeToIdentifierField } from '../../../../../common/entity_analytics/types';
+
 import {
   CRITICALITY_CSV_MAX_SIZE_BYTES,
   ValidCriticalityLevels,
@@ -33,19 +39,40 @@ interface AssetCriticalityFilePickerStepProps {
   errorMessage?: string;
 }
 
-const sampleCSVContent = `user,user-001,low_impact\nuser,user-002,medium_impact\nhost,host-001,extreme_impact`;
+type SupportedEntityType = EntityType.user | EntityType.host | EntityType.service;
 
-const listStyle = css`
-  list-style-type: disc;
-  margin-bottom: ${euiThemeVars.euiSizeL};
-  margin-left: ${euiThemeVars.euiSizeL};
-  line-height: ${euiThemeVars.euiLineHeight};
-`;
+const entityCSVMap: Record<SupportedEntityType, string> = {
+  user: `user,user-001,low_impact\nuser,user-002,medium_impact`,
+  host: `host,host-001,extreme_impact`,
+  service: `service,service-001,extreme_impact`,
+};
 
 export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePickerStepProps> =
   React.memo(({ onFileChange, errorMessage, isLoading }) => {
+    const { formatListToParts } = useI18n();
+
     const formatBytes = useFormatBytes();
     const { euiTheme } = useEuiTheme();
+
+    const listStyle = css`
+      list-style-type: disc;
+      margin-bottom: ${euiTheme.size.l};
+      margin-left: ${euiTheme.size.l};
+      line-height: ${useEuiFontSize('s').lineHeight};
+    `;
+
+    const entityTypes = useEntityAnalyticsTypes();
+
+    const sampleCSVContent = entityTypes
+      .filter((entity): entity is SupportedEntityType => entity in entityCSVMap)
+      .map((entity) => entityCSVMap[entity])
+      .join('\n');
+
+    const i18nOrList = (items: string[]) =>
+      formatListToParts(items, {
+        type: 'disjunction',
+      }).map(({ type, value }) => (type === 'element' ? <b>{value}</b> : value)); // bolded list items
+
     return (
       <>
         <EuiSpacer size="m" />
@@ -94,22 +121,22 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
           <ul className={listStyle}>
             <li>
               <FormattedMessage
-                defaultMessage="Entity type: Indicate whether the entity is a {host} or a {user}."
+                defaultMessage="Entity type: Indicate whether the entity is a {entityTypes}"
                 id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetTypeDescription"
                 values={{
-                  host: <b>{'host'}</b>,
-                  user: <b>{'user'}</b>,
+                  entityTypes: i18nOrList(entityTypes),
                 }}
               />
             </li>
             <li>
               {
                 <FormattedMessage
-                  defaultMessage="Identifier: Specify the entity's {hostName} or {userName}."
+                  defaultMessage="Identifier: Specify the entity's {fieldsName}"
                   id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetIdentifierDescription"
                   values={{
-                    hostName: <b>{'host.name'}</b>,
-                    userName: <b>{'user.name'}</b>,
+                    fieldsName: i18nOrList(
+                      entityTypes.map((type) => EntityTypeToIdentifierField[type])
+                    ),
                   }}
                 />
               }
@@ -155,6 +182,12 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
           onChange={onFileChange}
           isInvalid={!!errorMessage}
           isLoading={isLoading}
+          aria-label={i18n.translate(
+            'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.filePickerAriaLabel',
+            {
+              defaultMessage: 'Asset criticality file picker',
+            }
+          )}
         />
         <br />
         {errorMessage && (

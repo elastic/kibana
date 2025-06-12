@@ -25,11 +25,11 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { VegaVisualizationDependencies } from './plugin';
 import React from 'react';
 import { TimeCache } from './data_model/time_cache';
-import { scheme } from 'vega';
 
 jest.mock('./default_spec', () => ({
   getDefaultSpec: () => jest.requireActual('./test_utils/default.spec.json'),
 }));
+const theme = { darkMode: false, name: 'borealis' };
 
 describe('VegaVisualizations', () => {
   let domNode: HTMLDivElement;
@@ -99,7 +99,8 @@ describe('VegaVisualizations', () => {
           }),
           new TimeCache(dataPluginStart.query.timefilter.timefilter, 0),
           {},
-          mockGetServiceSettings
+          mockGetServiceSettings,
+          theme
         );
         await vegaParser.parseAsync();
         await vegaVis.render(vegaParser);
@@ -123,8 +124,8 @@ describe('VegaVisualizations', () => {
     test('should show vega graph (may fail in dev env)', async () => {
       let vegaVis;
       try {
-        scheme('elastic', ['blue', 'yellow']);
         vegaVis = new VegaVisualization(domNode, jest.fn());
+
         const vegaParser = new VegaParser(
           JSON.stringify(vegaGraph),
           new SearchAPI({
@@ -134,7 +135,8 @@ describe('VegaVisualizations', () => {
           }),
           new TimeCache(dataPluginStart.query.timefilter.timefilter, 0),
           {},
-          mockGetServiceSettings
+          mockGetServiceSettings,
+          theme
         );
         await vegaParser.parseAsync();
         await vegaVis.render(vegaParser);

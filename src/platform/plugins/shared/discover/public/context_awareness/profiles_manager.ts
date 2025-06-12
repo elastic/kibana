@@ -25,7 +25,7 @@ import type {
   DocumentContext,
 } from './profiles';
 import type { ContextWithProfileId } from './profile_service';
-import type { DiscoverEBTManager } from '../services/discover_ebt_manager';
+import type { DiscoverEBTManager } from '../plugin_imports/discover_ebt_manager';
 import type { AppliedProfile } from './composable_profile';
 
 interface SerializedRootProfileParams {
@@ -49,6 +49,20 @@ export interface GetProfilesOptions {
    * The data table record to use for the document profile
    */
   record?: DataTableRecord;
+}
+
+/**
+ * Result of resolving the root profile
+ */
+export interface ResolveRootProfileResult {
+  /**
+   * Render app wrapper accessor
+   */
+  getRenderAppWrapper: AppliedProfile['getRenderAppWrapper'];
+  /**
+   * Default ad hoc data views accessor
+   */
+  getDefaultAdHocDataViews: AppliedProfile['getDefaultAdHocDataViews'];
 }
 
 export enum ContextualProfileLevel {
@@ -94,11 +108,16 @@ export class ProfilesManager {
    * Resolves the root context profile
    * @param params The root profile provider parameters
    */
-  public async resolveRootProfile(params: RootProfileProviderParams) {
+  public async resolveRootProfile(
+    params: RootProfileProviderParams
+  ): Promise<ResolveRootProfileResult> {
     const serializedParams = serializeRootProfileParams(params);
 
     if (isEqual(this.prevRootProfileParams, serializedParams)) {
-      return { getRenderAppWrapper: this.rootProfile.getRenderAppWrapper };
+      return {
+        getRenderAppWrapper: this.rootProfile.getRenderAppWrapper,
+        getDefaultAdHocDataViews: this.rootProfile.getDefaultAdHocDataViews,
+      };
     }
 
     const abortController = new AbortController();
@@ -114,13 +133,19 @@ export class ProfilesManager {
     }
 
     if (abortController.signal.aborted) {
-      return { getRenderAppWrapper: this.rootProfile.getRenderAppWrapper };
+      return {
+        getRenderAppWrapper: this.rootProfile.getRenderAppWrapper,
+        getDefaultAdHocDataViews: this.rootProfile.getDefaultAdHocDataViews,
+      };
     }
 
     this.rootContext$.next(context);
     this.prevRootProfileParams = serializedParams;
 
-    return { getRenderAppWrapper: this.rootProfile.getRenderAppWrapper };
+    return {
+      getRenderAppWrapper: this.rootProfile.getRenderAppWrapper,
+      getDefaultAdHocDataViews: this.rootProfile.getDefaultAdHocDataViews,
+    };
   }
 
   /**

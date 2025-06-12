@@ -18,6 +18,7 @@ import {
   mockStop,
 } from './rules/__mocks__/mocks';
 import type { ConfigType } from '../../config';
+import type { SiemRuleMigrationsClientDependencies } from './rules/types';
 
 jest.mock('./rules/siem_rule_migrations_service');
 
@@ -26,6 +27,8 @@ jest.mock('rxjs', () => ({
   ...jest.requireActual('rxjs'),
   ReplaySubject: jest.fn().mockImplementation(() => mockReplaySubject$),
 }));
+
+const dependencies = {} as SiemRuleMigrationsClientDependencies;
 
 describe('SiemMigrationsService', () => {
   let siemMigrationsService: SiemMigrationsService;
@@ -39,17 +42,17 @@ describe('SiemMigrationsService', () => {
     jest.clearAllMocks();
   });
 
-  describe('with siemMigrationsEnabled flag', () => {
+  describe('with experimental flag enabled', () => {
     beforeEach(() => {
       siemMigrationsService = new SiemMigrationsService(
-        { experimentalFeatures: { siemMigrationsEnabled: true } } as ConfigType,
+        { experimentalFeatures: { siemMigrationsDisabled: false } } as ConfigType,
         logger,
         kibanaVersion
       );
     });
 
     it('should instantiate the rule migrations service', async () => {
-      expect(MockSiemRuleMigrationsService).toHaveBeenCalledWith(logger, kibanaVersion);
+      expect(MockSiemRuleMigrationsService).toHaveBeenCalledWith(logger, kibanaVersion, undefined);
     });
 
     describe('when setup is called', () => {
@@ -70,6 +73,7 @@ describe('SiemMigrationsService', () => {
           spaceId: 'default',
           request: httpServerMock.createKibanaRequest(),
           currentUser,
+          dependencies,
         };
         siemMigrationsService.createRulesClient(createRulesClientParams);
         expect(mockCreateClient).toHaveBeenCalledWith(createRulesClientParams);
@@ -86,17 +90,17 @@ describe('SiemMigrationsService', () => {
     });
   });
 
-  describe('without siemMigrationsEnabled flag', () => {
+  describe('without experimental flag disabled', () => {
     beforeEach(() => {
       siemMigrationsService = new SiemMigrationsService(
-        { experimentalFeatures: { siemMigrationsEnabled: false } } as ConfigType,
+        { experimentalFeatures: { siemMigrationsDisabled: true } } as ConfigType,
         logger,
         kibanaVersion
       );
     });
 
     it('should instantiate the rule migrations service', async () => {
-      expect(MockSiemRuleMigrationsService).toHaveBeenCalledWith(logger, kibanaVersion);
+      expect(MockSiemRuleMigrationsService).toHaveBeenCalledWith(logger, kibanaVersion, undefined);
     });
 
     describe('when setup is called', () => {

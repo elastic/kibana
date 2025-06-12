@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
+import type { BulkActionsDryRunErrCode } from '../../../../../../common/api/detection_engine';
 
 /**
  * Error instance that has properties: errorCode & statusCode to use within run_dry

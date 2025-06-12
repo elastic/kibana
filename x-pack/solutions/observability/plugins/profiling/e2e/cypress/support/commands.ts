@@ -59,14 +59,13 @@ Cypress.Commands.add(
   'addKqlFilter',
   ({ key, value, dataTestSubj = 'profilingUnifiedSearchBar', waitForSuggestion = true }) => {
     cy.getByTestSubj(dataTestSubj).type(key);
-    cy.contains(key);
-    cy.getByTestSubj(`autocompleteSuggestion-field-${key}-`).click();
-    // Do not close quotes here as it will not display the suggestion box
-    cy.getByTestSubj(dataTestSubj).type(`: "${value}`);
+
+    cy.getByTestSubj(`autocompleteSuggestion-field-${key}-`).should('be.visible');
+    cy.getByTestSubj(dataTestSubj).type(` : ${value}`);
     if (waitForSuggestion) {
-      cy.getByTestSubj(
-        Cypress.$.escapeSelector(`autocompleteSuggestion-value-"${value}"-`)
-      ).click();
+      cy.getByTestSubj(`autocompleteSuggestion-value-\\"${value}\\"-`)
+        .should('be.visible')
+        .click({ force: true });
     }
     cy.getByTestSubj(dataTestSubj).type('{enter}');
   }

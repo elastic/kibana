@@ -11,12 +11,11 @@ import { noop } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { useErrorToast } from '../../../common/hooks/use_error_toast';
 import type { CriticalityLevels } from '../../../../common/constants';
-import type { RiskSeverity } from '../../../../common/search_strategy';
+import { type RiskSeverity } from '../../../../common/search_strategy';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { Direction } from '../../../../common/search_strategy/common';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
-import { EntityType } from '../../../../common/api/entity_analytics/entity_store/common.gen';
 import type { Criteria } from '../../../explore/components/paginated_table';
 import { PaginatedTable } from '../../../explore/components/paginated_table';
 import { SeverityFilter } from '../severity/severity_filter';
@@ -27,6 +26,7 @@ import { useEntitiesListQuery } from './hooks/use_entities_list_query';
 import { ENTITIES_LIST_TABLE_ID, rowItems } from './constants';
 import { useEntitiesListColumns } from './hooks/use_entities_list_columns';
 import type { EntitySourceTag } from './types';
+import { useEntityStoreTypes } from '../../hooks/use_enabled_entity_types';
 
 export const EntitiesList: React.FC = () => {
   const { deleteQuery, setQuery, isInitializing, from, to } = useGlobalTime();
@@ -37,7 +37,7 @@ export const EntitiesList: React.FC = () => {
     field: '@timestamp',
     direction: Direction.desc,
   });
-
+  const entityTypes = useEntityStoreTypes();
   const [selectedSeverities, setSelectedSeverities] = useState<RiskSeverity[]>([]);
   const [selectedCriticalities, setSelectedCriticalities] = useState<CriticalityLevels[]>([]);
   const [selectedSources, setSelectedSources] = useState<EntitySourceTag[]>([]);
@@ -69,7 +69,7 @@ export const EntitiesList: React.FC = () => {
 
   const searchParams = useMemo(
     () => ({
-      entitiesTypes: [EntityType.Enum.user, EntityType.Enum.host],
+      entityTypes,
       page: activePage + 1,
       perPage: limit,
       sortField: sorting.field,
@@ -81,7 +81,7 @@ export const EntitiesList: React.FC = () => {
         },
       }),
     }),
-    [activePage, limit, querySkip, sorting, filter]
+    [entityTypes, activePage, limit, sorting.field, sorting.direction, querySkip, filter]
   );
   const { data, isLoading, isRefetching, refetch, error } = useEntitiesListQuery(searchParams);
 

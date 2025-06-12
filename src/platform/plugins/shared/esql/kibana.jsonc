@@ -11,14 +11,15 @@
     "optionalPlugins": [
       "indexManagement",
       "fieldsMetadata",
-      "usageCollection"
+      "usageCollection",
+      "licensing"
     ],
     "requiredPlugins": [
       "data",
       "expressions",
       "dataViews",
       "uiActions",
-      "contentManagement"
+      "contentManagement",
     ],
     "requiredBundles": [
       "kibanaReact",

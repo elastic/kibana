@@ -1,0 +1,3 @@
+type: object
+description: >
+  This object summarizes the work load across the cluster, including the tasks in the system, their types, and current status.

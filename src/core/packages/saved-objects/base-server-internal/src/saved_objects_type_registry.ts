@@ -10,6 +10,10 @@
 import { deepFreeze } from '@kbn/std';
 import type { SavedObjectsType, ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 
+export interface SavedObjectTypeRegistryConfig {
+  legacyTypes?: string[];
+}
+
 /**
  * Core internal implementation of {@link ISavedObjectTypeRegistry}.
  *
@@ -17,6 +21,11 @@ import type { SavedObjectsType, ISavedObjectTypeRegistry } from '@kbn/core-saved
  */
 export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
   private readonly types = new Map<string, SavedObjectsType>();
+  private readonly legacyTypesMap: Set<string>;
+
+  constructor({ legacyTypes = [] }: SavedObjectTypeRegistryConfig = {}) {
+    this.legacyTypesMap = new Set(legacyTypes);
+  }
 
   /**
    * Register a {@link SavedObjectsType | type} inside the registry.
@@ -28,8 +37,18 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
     if (this.types.has(type.name)) {
       throw new Error(`Type '${type.name}' is already registered`);
     }
+    if (this.legacyTypesMap.has(type.name)) {
+      throw new Error(
+        `Type '${type.name}' can't be used because it's been added to the legacy types`
+      );
+    }
     validateType(type);
     this.types.set(type.name, deepFreeze(type) as SavedObjectsType);
+  }
+
+  /** {@inheritDoc ISavedObjectTypeRegistry.getLegacyTypes} */
+  public getLegacyTypes() {
+    return Array.from(this.legacyTypesMap);
   }
 
   /** {@inheritDoc ISavedObjectTypeRegistry.getType} */
@@ -97,6 +116,10 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
   /** {@inheritDoc ISavedObjectTypeRegistry.isImportableAndExportable} */
   public isImportableAndExportable(type: string) {
     return this.types.get(type)?.management?.importableAndExportable ?? false;
+  }
+
+  public getNameAttribute(type: string) {
+    return this.types.get(type)?.nameAttribute || 'unknown';
   }
 }
 

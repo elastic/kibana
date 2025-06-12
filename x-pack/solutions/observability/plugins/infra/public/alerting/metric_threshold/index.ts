@@ -42,7 +42,9 @@ const metricThresholdDefaultActionMessage = i18n.translate(
 const metricThresholdDefaultRecoveryMessage = i18n.translate(
   'xpack.infra.metrics.alerting.metric.threshold.defaultRecoveryMessage',
   {
-    defaultMessage: `'{{rule.name}}' has recovered.
+    defaultMessage: `Recovered: '{{context.reason}}'
+    
+  '{{rule.name}}' has recovered.
 
 - Affected: '{{context.group}}'
 - Metric: '{{context.metric}}'

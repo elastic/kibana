@@ -25,6 +25,7 @@ import {
 import type { ConfigType } from '../../../../config';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { ExperimentalFeatures } from '../../../../../common';
+import { EntityType } from '../../../../../common/search_strategy';
 
 const ISO_8601_PATTERN = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
 
@@ -209,7 +210,7 @@ describe('Risk Scoring Task', () => {
         dataViewId: 'data_view_id',
         enabled: true,
         filter: {},
-        identifierType: 'host',
+        identifierType: EntityType.host,
         interval: '1h',
         pageSize: 10_000,
         range: { start: 'now-30d', end: 'now' },
@@ -295,7 +296,7 @@ describe('Risk Scoring Task', () => {
           filter: {
             term: { 'host.name': 'SUSPICIOUS' },
           },
-          identifierType: 'host',
+          identifierType: EntityType.host,
           interval: '2h',
           pageSize: 11_111,
           range: { start: 'now-30d', end: 'now' },
@@ -347,10 +348,16 @@ describe('Risk Scoring Task', () => {
           // add additional mock responses for the additional identifier calls
           mockRiskScoreService.calculateAndPersistScores
             .mockResolvedValueOnce({
+              // first call - host entity type
               after_keys: { host: { 'user.name': 'value' } },
               scores_written: 5,
               errors: [],
-            })
+            }) // second call - user entity type
+            .mockResolvedValueOnce({
+              after_keys: {},
+              scores_written: 5,
+              errors: [],
+            }) // third call - service entity type
             .mockResolvedValueOnce({
               after_keys: {},
               scores_written: 5,
@@ -368,7 +375,7 @@ describe('Risk Scoring Task', () => {
             entityAnalyticsConfig,
             experimentalFeatures: mockExperimentalFeatures,
           });
-          expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledTimes(4);
+          expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledTimes(5);
 
           expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledWith(
             expect.objectContaining({

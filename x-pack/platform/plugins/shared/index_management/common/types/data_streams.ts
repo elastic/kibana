@@ -33,7 +33,7 @@ export type DataStreamIndexFromEs = IndicesDataStreamIndex;
 
 export type Health = 'green' | 'yellow' | 'red';
 
-export type IndexMode = 'standard' | 'logsdb' | 'time_series';
+export type IndexMode = 'standard' | 'logsdb' | 'time_series' | 'lookup';
 
 export interface EnhancedDataStreamFromEs extends IndicesDataStream {
   global_max_retention?: string;
@@ -89,4 +89,11 @@ export interface DataRetention {
   infiniteDataRetention?: boolean;
   value?: number;
   unit?: string;
+}
+
+export interface DataStreamOptions {
+  failure_store?: {
+    enabled: boolean;
+  };
+  [key: string]: unknown;
 }

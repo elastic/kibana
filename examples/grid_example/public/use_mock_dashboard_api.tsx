@@ -15,10 +15,12 @@ import { v4 } from 'uuid';
 import { TimeRange } from '@kbn/es-query';
 import { PanelPackage } from '@kbn/presentation-containers';
 
+import { ViewMode } from '@kbn/presentation-publishing';
 import {
+  MockDashboardApi,
   MockSerializedDashboardState,
   MockedDashboardPanelMap,
-  MockedDashboardRowMap,
+  MockedDashboardSectionMap,
 } from './types';
 
 const DASHBOARD_GRID_COLUMN_COUNT = 48;
@@ -29,10 +31,11 @@ export const useMockDashboardApi = ({
   savedState,
 }: {
   savedState: MockSerializedDashboardState;
-}) => {
+}): MockDashboardApi => {
   const mockDashboardApi = useMemo(() => {
     const panels$ = new BehaviorSubject<MockedDashboardPanelMap>(savedState.panels);
     const expandedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
+    const viewMode$ = new BehaviorSubject<ViewMode>('edit');
 
     return {
       getSerializedStateForChild: (id: string) => {
@@ -48,10 +51,14 @@ export const useMockDashboardApi = ({
       }),
       filters$: new BehaviorSubject([]),
       query$: new BehaviorSubject(''),
-      viewMode: new BehaviorSubject('edit'),
+      viewMode$,
+      setViewMode: (viewMode: ViewMode) => viewMode$.next(viewMode),
       panels$,
-      rows$: new BehaviorSubject<MockedDashboardRowMap>(savedState.rows),
-      expandedPanelId: expandedPanelId$,
+      getPanelCount: () => {
+        return Object.keys(panels$.getValue()).length;
+      },
+      sections$: new BehaviorSubject<MockedDashboardSectionMap>(savedState.sections),
+      expandedPanelId$,
       expandPanel: (id: string) => {
         if (expandedPanelId$.getValue()) {
           expandedPanelId$.next(undefined);
@@ -64,7 +71,7 @@ export const useMockDashboardApi = ({
         delete panels[id]; // the grid layout component will handle compacting, if necessary
         mockDashboardApi.panels$.next(panels);
       },
-      replacePanel: (id: string, newPanel: PanelPackage) => {
+      replacePanel: async (id: string, newPanel: PanelPackage): Promise<string> => {
         const currentPanels = mockDashboardApi.panels$.getValue();
         const otherPanels = { ...currentPanels };
         const oldPanel = currentPanels[id];
@@ -72,11 +79,12 @@ export const useMockDashboardApi = ({
         const newId = v4();
         otherPanels[newId] = {
           ...oldPanel,
-          explicitInput: { ...newPanel.initialState, id: newId },
+          explicitInput: { ...(newPanel.serializedState?.rawState ?? {}), id: newId },
         };
         mockDashboardApi.panels$.next(otherPanels);
+        return newId;
       },
-      addNewPanel: async (panelPackage: PanelPackage) => {
+      addNewPanel: async (panelPackage: PanelPackage): Promise<undefined> => {
         // we are only implementing "place at top" here, for demo purposes
         const currentPanels = mockDashboardApi.panels$.getValue();
         const otherPanels = { ...currentPanels };
@@ -91,7 +99,6 @@ export const useMockDashboardApi = ({
           [newId]: {
             type: panelPackage.panelType,
             gridData: {
-              row: 0,
               x: 0,
               y: 0,
               w: DEFAULT_PANEL_WIDTH,
@@ -99,13 +106,16 @@ export const useMockDashboardApi = ({
               i: newId,
             },
             explicitInput: {
-              ...panelPackage.initialState,
+              ...(panelPackage.serializedState?.rawState ?? {}),
               id: newId,
             },
           },
         });
       },
       canRemovePanels: () => true,
+      getChildApi: () => {
+        throw new Error('getChildApi implemenation not provided');
+      },
     };
     // only run onMount
     // eslint-disable-next-line react-hooks/exhaustive-deps

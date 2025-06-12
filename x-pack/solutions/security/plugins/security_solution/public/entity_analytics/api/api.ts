@@ -27,6 +27,7 @@ import type {
 import type {
   AssetCriticalityRecord,
   EntityAnalyticsPrivileges,
+  SearchPrivilegesIndicesResponse,
 } from '../../../common/api/entity_analytics';
 import {
   RISK_ENGINE_STATUS_URL,
@@ -89,7 +90,7 @@ export const useEntityAnalyticsRoutes = () => {
         version: API_VERSIONS.public.v1,
         method: 'GET',
         query: {
-          entities_types: params.entitiesTypes,
+          entity_types: params.entityTypes,
           sort_field: params.sortField,
           sort_order: params.sortOrder,
           page: params.page,
@@ -182,6 +183,25 @@ export const useEntityAnalyticsRoutes = () => {
         version: '1',
         method: 'GET',
       });
+
+    /**
+     * Search indices for privilege monitoring import
+     */
+    const searchPrivMonIndices = async (params: {
+      query: string | undefined;
+      signal?: AbortSignal;
+    }) =>
+      http.fetch<SearchPrivilegesIndicesResponse>(
+        '/api/entity_analytics/monitoring/privileges/indices',
+        {
+          version: API_VERSIONS.public.v1,
+          method: 'GET',
+          query: {
+            searchQuery: params.query,
+          },
+          signal: params.signal,
+        }
+      );
 
     /**
      * Create asset criticality
@@ -294,6 +314,7 @@ export const useEntityAnalyticsRoutes = () => {
       fetchRiskEnginePrivileges,
       fetchAssetCriticalityPrivileges,
       fetchEntityStorePrivileges,
+      searchPrivMonIndices,
       createAssetCriticality,
       deleteAssetCriticality,
       fetchAssetCriticality,

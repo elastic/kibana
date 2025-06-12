@@ -21,6 +21,7 @@ export enum ReadOperations {
   GetRuleExecutionKPI = 'getRuleExecutionKPI',
   GetBackfill = 'getBackfill',
   FindBackfill = 'findBackfill',
+  FindGaps = 'findGaps',
 }
 
 export enum WriteOperations {
@@ -43,4 +44,5 @@ export enum WriteOperations {
   RunSoon = 'runSoon',
   ScheduleBackfill = 'scheduleBackfill',
   DeleteBackfill = 'deleteBackfill',
+  FillGaps = 'fillGaps',
 }

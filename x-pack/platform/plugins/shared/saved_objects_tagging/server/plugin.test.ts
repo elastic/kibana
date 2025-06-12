@@ -79,6 +79,9 @@ describe('SavedObjectTaggingPlugin', () => {
       expect(contract).toEqual({
         createTagClient: expect.any(Function),
         createInternalAssignmentService: expect.any(Function),
+        convertTagNameToId: expect.any(Function),
+        getTagsFromReferences: expect.any(Function),
+        replaceTagReferences: expect.any(Function),
       });
     });
   });

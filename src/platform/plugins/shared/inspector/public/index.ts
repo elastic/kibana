@@ -7,10 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// TODO: https://github.com/elastic/kibana/issues/109900
-
-import './index.scss';
-
 import { PluginInitializerContext } from '@kbn/core/public';
 import { InspectorPublicPlugin } from './plugin';
 
@@ -32,4 +28,9 @@ export {
 } from './adapters/has_inspector_adapters';
 export { InspectorPublicPlugin as Plugin } from './plugin';
 export type { Setup, Start } from './plugin';
-export * from './types';
+export type {
+  InspectorViewProps,
+  InspectorViewDescription,
+  InspectorOptions,
+  InspectorSession,
+} from './types';

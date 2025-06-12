@@ -13,7 +13,7 @@ import { PublishingSubject } from '../publishing_subject';
  * This API publishes a saved object id which can be used to determine which saved object this API is linked to.
  */
 export interface PublishesSavedObjectId {
-  savedObjectId: PublishingSubject<string | undefined>;
+  savedObjectId$: PublishingSubject<string | undefined>;
 }
 
 /**
@@ -22,5 +22,7 @@ export interface PublishesSavedObjectId {
 export const apiPublishesSavedObjectId = (
   unknownApi: null | unknown
 ): unknownApi is PublishesSavedObjectId => {
-  return Boolean(unknownApi && (unknownApi as PublishesSavedObjectId)?.savedObjectId !== undefined);
+  return Boolean(
+    unknownApi && (unknownApi as PublishesSavedObjectId)?.savedObjectId$ !== undefined
+  );
 };

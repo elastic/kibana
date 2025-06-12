@@ -18,8 +18,7 @@ import {
   getCaseUsersMockResponse,
   getUserAction,
 } from '../../../containers/mock';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer, noUpdateCasesPermissions } from '../../../common/mock';
+import { noUpdateCasesPermissions, renderWithTestingProviders } from '../../../common/mock';
 import { CaseViewActivity } from './case_view_activity';
 import type { CaseUI } from '../../../../common';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
@@ -38,7 +37,7 @@ import { useGetCaseUserActionsStats } from '../../../containers/use_get_case_use
 import { useInfiniteFindCaseUserActions } from '../../../containers/use_infinite_find_case_user_actions';
 import { useOnUpdateField } from '../use_on_update_field';
 import { useCasesFeatures } from '../../../common/use_cases_features';
-import { ConnectorTypes, UserActionTypes } from '../../../../common/types/domain';
+import { AttachmentType, ConnectorTypes, UserActionTypes } from '../../../../common/types/domain';
 import { CaseMetricsFeature } from '../../../../common/types/api';
 import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
@@ -147,8 +146,9 @@ const useOnUpdateFieldMock = useOnUpdateField as jest.Mock;
 const useCasesFeaturesMock = useCasesFeatures as jest.Mock;
 const useReplaceCustomFieldMock = useReplaceCustomField as jest.Mock;
 
+const localStorageKey = `${basicCase.owner}.cases.userActivity.sortOrder`;
+
 describe('Case View Page activity tab', () => {
-  let appMockRender: AppMockRenderer;
   const caseConnectors = getCaseConnectorsMockResponse();
   const platinumLicense = licensingMock.createLicense({
     license: { type: 'platinum' },
@@ -215,15 +215,17 @@ describe('Case View Page activity tab', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
+
+    localStorage.clear();
 
     useGetCaseUsersMock.mockReturnValue({ isLoading: false, data: caseUsers });
     useCasesFeaturesMock.mockReturnValue(useGetCasesFeaturesRes);
   });
 
   it('should render the activity content and main components', async () => {
-    appMockRender = createAppMockRenderer({ license: platinumLicense });
-    appMockRender.render(<CaseViewActivity {...caseProps} />);
+    renderWithTestingProviders(<CaseViewActivity {...caseProps} />, {
+      wrapperProps: { license: platinumLicense },
+    });
 
     const caseViewActivity = await screen.findByTestId('case-view-activity');
     expect(await within(caseViewActivity).findAllByTestId('user-actions-list')).toHaveLength(2);
@@ -242,8 +244,9 @@ describe('Case View Page activity tab', () => {
   });
 
   it('should call use get user actions as per top and bottom actions list', async () => {
-    appMockRender = createAppMockRenderer({ license: platinumLicense });
-    appMockRender.render(<CaseViewActivity {...caseProps} />);
+    renderWithTestingProviders(<CaseViewActivity {...caseProps} />, {
+      wrapperProps: { license: platinumLicense },
+    });
 
     const lastPageForAll = Math.ceil(userActionsStats.total / userActivityQueryParams.perPage);
 
@@ -253,21 +256,19 @@ describe('Case View Page activity tab', () => {
         userActivityQueryParams,
         true
       );
-      expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
-        caseData.id,
-        { ...userActivityQueryParams, page: lastPageForAll },
-        true
-      );
     });
+
+    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
+      caseData.id,
+      { ...userActivityQueryParams, page: lastPageForAll },
+      true
+    );
   });
 
   it('should not render the case view status button when the user does not have update permissions', async () => {
-    appMockRender = createAppMockRenderer({
-      permissions: noUpdateCasesPermissions(),
-      license: platinumLicense,
+    renderWithTestingProviders(<CaseViewActivity {...caseProps} />, {
+      wrapperProps: { license: platinumLicense, permissions: noUpdateCasesPermissions() },
     });
-
-    appMockRender.render(<CaseViewActivity {...caseProps} />);
 
     expect(screen.queryByTestId('case-view-status-action-button')).not.toBeInTheDocument();
 
@@ -275,12 +276,9 @@ describe('Case View Page activity tab', () => {
   });
 
   it('should disable the severity selector when the user does not have update permissions', async () => {
-    appMockRender = createAppMockRenderer({
-      permissions: noUpdateCasesPermissions(),
-      license: platinumLicense,
+    renderWithTestingProviders(<CaseViewActivity {...caseProps} />, {
+      wrapperProps: { license: platinumLicense, permissions: noUpdateCasesPermissions() },
     });
-
-    appMockRender.render(<CaseViewActivity {...caseProps} />);
 
     expect(await screen.findByTestId('case-severity-selection')).toBeDisabled();
 
@@ -289,7 +287,9 @@ describe('Case View Page activity tab', () => {
 
   it('should show a loading when loading user actions stats', async () => {
     useGetCaseUserActionsStatsMock.mockReturnValue({ isLoading: true });
-    appMockRender.render(<CaseViewActivity {...caseProps} />);
+
+    renderWithTestingProviders(<CaseViewActivity {...caseProps} />);
+
     expect(await screen.findByTestId('case-view-loading-content')).toBeInTheDocument();
     expect(screen.queryByTestId('case-view-activity')).not.toBeInTheDocument();
     expect(screen.queryByTestId('user-actions-list')).not.toBeInTheDocument();
@@ -298,7 +298,7 @@ describe('Case View Page activity tab', () => {
   it('should show a loading when updating severity ', async () => {
     useOnUpdateFieldMock.mockReturnValue({ isLoading: true, loadingKey: 'severity' });
 
-    appMockRender.render(<CaseViewActivity {...caseProps} />);
+    renderWithTestingProviders(<CaseViewActivity {...caseProps} />);
 
     expect(
       (await screen.findByTestId('case-severity-selection')).classList.contains(
@@ -310,7 +310,7 @@ describe('Case View Page activity tab', () => {
   it('should not show a loading for severity when updating tags', async () => {
     useOnUpdateFieldMock.mockReturnValue({ isLoading: true, loadingKey: 'tags' });
 
-    appMockRender.render(<CaseViewActivity {...caseProps} />);
+    renderWithTestingProviders(<CaseViewActivity {...caseProps} />);
 
     expect(
       (await screen.findByTestId('case-severity-selection')).classList.contains(
@@ -325,16 +325,18 @@ describe('Case View Page activity tab', () => {
       caseAssignmentAuthorized: false,
     });
 
-    appMockRender = createAppMockRenderer({ license: basicLicense });
+    renderWithTestingProviders(<CaseViewActivity {...caseProps} />, {
+      wrapperProps: { license: basicLicense },
+    });
 
-    appMockRender.render(<CaseViewActivity {...caseProps} />);
     expect(screen.queryByTestId('case-view-assignees')).not.toBeInTheDocument();
   });
 
   it('should render the assignees on platinum license', async () => {
-    appMockRender = createAppMockRenderer({ license: platinumLicense });
+    renderWithTestingProviders(<CaseViewActivity {...caseProps} />, {
+      wrapperProps: { license: platinumLicense },
+    });
 
-    appMockRender.render(<CaseViewActivity {...caseProps} />);
     expect(await screen.findByTestId('case-view-assignees')).toBeInTheDocument();
 
     await waitForComponentToUpdate();
@@ -346,16 +348,17 @@ describe('Case View Page activity tab', () => {
       pushToServiceAuthorized: false,
     });
 
-    appMockRender = createAppMockRenderer({ license: basicLicense });
+    renderWithTestingProviders(<CaseViewActivity {...caseProps} />, {
+      wrapperProps: { license: basicLicense },
+    });
 
-    appMockRender.render(<CaseViewActivity {...caseProps} />);
     expect(screen.queryByTestId('case-view-edit-connector')).not.toBeInTheDocument();
   });
 
   it('should render the connector on platinum license', async () => {
-    appMockRender = createAppMockRenderer({ license: platinumLicense });
-
-    appMockRender.render(<CaseViewActivity {...caseProps} />);
+    renderWithTestingProviders(<CaseViewActivity {...caseProps} />, {
+      wrapperProps: { license: platinumLicense },
+    });
 
     expect(await screen.findByTestId('case-view-edit-connector')).toBeInTheDocument();
   });
@@ -367,7 +370,8 @@ describe('Case View Page activity tab', () => {
         observableTypes: [],
       },
     });
-    appMockRender.render(
+
+    renderWithTestingProviders(
       <CaseViewActivity
         {...caseProps}
         caseData={{
@@ -391,6 +395,29 @@ describe('Case View Page activity tab', () => {
     expect(await screen.findByTestId('case-view-edit-connector')).toBeInTheDocument();
   });
 
+  it('should save sortOrder in localstorage', async () => {
+    (useGetCaseConfiguration as jest.Mock).mockReturnValue({
+      data: {
+        customFields: [customFieldsConfigurationMock[1]],
+        observableTypes: [],
+      },
+    });
+
+    renderWithTestingProviders(
+      <CaseViewActivity
+        {...caseProps}
+        caseData={{
+          ...caseProps.caseData,
+          customFields: [customFieldsMock[1]],
+        }}
+      />
+    );
+
+    await userEvent.selectOptions(await screen.findByTestId('user-actions-sort-select'), 'desc');
+
+    expect(localStorage.getItem(localStorageKey)).toBe('"desc"');
+  });
+
   describe('filter activity', () => {
     beforeEach(() => {
       jest.clearAllMocks();
@@ -403,7 +430,7 @@ describe('Case View Page activity tab', () => {
     });
 
     it('should call user action hooks correctly when filtering for all', async () => {
-      appMockRender.render(<CaseViewActivity {...caseProps} />);
+      renderWithTestingProviders(<CaseViewActivity {...caseProps} />);
 
       const lastPageForAll = Math.ceil(userActionsStats.total / userActivityQueryParams.perPage);
 
@@ -425,7 +452,7 @@ describe('Case View Page activity tab', () => {
     });
 
     it('should call user action hooks correctly when filtering for comments', async () => {
-      appMockRender.render(<CaseViewActivity {...caseProps} />);
+      renderWithTestingProviders(<CaseViewActivity {...caseProps} />);
 
       const lastPageForComment = Math.ceil(
         userActionsStats.totalComments / userActivityQueryParams.perPage
@@ -449,7 +476,7 @@ describe('Case View Page activity tab', () => {
     });
 
     it('should call user action hooks correctly when filtering for history', async () => {
-      appMockRender.render(<CaseViewActivity {...caseProps} />);
+      renderWithTestingProviders(<CaseViewActivity {...caseProps} />);
 
       const lastPageForHistory = Math.ceil(
         userActionsStats.totalOtherActions / userActivityQueryParams.perPage
@@ -476,8 +503,7 @@ describe('Case View Page activity tab', () => {
   describe('Case users', () => {
     describe('Assignees', () => {
       it('should render assignees in the participants section', async () => {
-        appMockRender = createAppMockRenderer({ license: platinumLicense });
-        appMockRender.render(
+        renderWithTestingProviders(
           <CaseViewActivity
             {...caseProps}
             caseData={{
@@ -486,7 +512,10 @@ describe('Case View Page activity tab', () => {
                 uid: assignee.uid ?? 'not-valid',
               })),
             }}
-          />
+          />,
+          {
+            wrapperProps: { license: platinumLicense },
+          }
         );
 
         const assigneesSection = within(await screen.findByTestId('case-view-assignees'));
@@ -507,8 +536,7 @@ describe('Case View Page activity tab', () => {
           },
         });
 
-        appMockRender = createAppMockRenderer();
-        appMockRender.render(<CaseViewActivity {...caseProps} />);
+        renderWithTestingProviders(<CaseViewActivity {...caseProps} />);
 
         const userActions = within((await screen.findAllByTestId('user-actions-list'))[1]);
 
@@ -533,8 +561,7 @@ describe('Case View Page activity tab', () => {
           },
         });
 
-        appMockRender = createAppMockRenderer();
-        appMockRender.render(<CaseViewActivity {...caseProps} />);
+        renderWithTestingProviders(<CaseViewActivity {...caseProps} />);
 
         const userActions = within((await screen.findAllByTestId('user-actions-list'))[1]);
 
@@ -543,6 +570,14 @@ describe('Case View Page activity tab', () => {
       });
 
       it('renders the user action users correctly', async () => {
+        const commentUpdate = getUserAction('comment', 'update', {
+          createdBy: {
+            ...caseUsers.participants[1].user,
+            fullName: caseUsers.participants[1].user.full_name,
+            profileUid: caseUsers.participants[1].uid,
+          },
+        });
+
         useFindCaseUserActionsMock.mockReturnValue({
           ...defaultUseFindCaseUserActions,
           data: {
@@ -555,13 +590,7 @@ describe('Case View Page activity tab', () => {
                   profileUid: caseUsers.participants[0].uid,
                 },
               }),
-              getUserAction('comment', 'update', {
-                createdBy: {
-                  ...caseUsers.participants[1].user,
-                  fullName: caseUsers.participants[1].user.full_name,
-                  profileUid: caseUsers.participants[1].uid,
-                },
-              }),
+              commentUpdate,
               getUserAction('description', 'update', {
                 createdBy: {
                   ...caseUsers.participants[2].user,
@@ -584,11 +613,29 @@ describe('Case View Page activity tab', () => {
                 },
               }),
             ],
+            latestAttachments:
+              commentUpdate.type === 'comment' &&
+              commentUpdate.payload.comment?.type === AttachmentType.user
+                ? [
+                    {
+                      comment: commentUpdate.payload.comment.comment,
+                      createdAt: commentUpdate.createdAt,
+                      createdBy: commentUpdate.createdBy,
+                      id: commentUpdate.commentId,
+                      owner: commentUpdate.owner,
+                      pushed_at: null,
+                      pushed_by: null,
+                      type: 'user',
+                      updated_at: null,
+                      updated_by: null,
+                      version: commentUpdate.version,
+                    },
+                  ]
+                : [],
           },
         });
 
-        appMockRender = createAppMockRenderer();
-        appMockRender.render(<CaseViewActivity {...caseProps} />);
+        renderWithTestingProviders(<CaseViewActivity {...caseProps} />);
 
         const userActions = within((await screen.findAllByTestId('user-actions-list'))[1]);
 
@@ -602,7 +649,7 @@ describe('Case View Page activity tab', () => {
 
     describe('Category', () => {
       it('should show the category correctly', async () => {
-        appMockRender.render(
+        renderWithTestingProviders(
           <CaseViewActivity
             {...caseProps}
             caseData={{

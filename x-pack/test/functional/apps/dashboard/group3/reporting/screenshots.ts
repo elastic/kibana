@@ -16,7 +16,7 @@ export default function ({
   getService,
   updateBaselines,
 }: FtrProviderContext & { updateBaselines: boolean }) {
-  const { reporting, dashboard, share } = getPageObjects(['reporting', 'dashboard', 'share']);
+  const { reporting, dashboard, exports } = getPageObjects(['reporting', 'dashboard', 'exports']);
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const browser = getService('browser');
@@ -69,32 +69,32 @@ export default function ({
 
       await security.testUser.setRoles(['test_dashboard_user']);
     });
+
     after('clean up archives', async () => {
-      await share.closeShareModal();
       await unloadEcommerce();
       await es.deleteByQuery({
         index: '.reporting-*',
         refresh: true,
-        body: { query: { match_all: {} } },
+        query: { match_all: {} },
       });
       await security.testUser.restoreDefaults();
     });
 
     describe('Print PDF button', () => {
       afterEach(async () => {
-        await share.closeShareModal();
+        await exports.closeExportFlyout();
       });
 
       it('is available if new', async () => {
         await dashboard.navigateToApp();
         await dashboard.clickNewDashboard();
-        await reporting.openExportTab();
+        await reporting.selectExportItem('PDF');
         expect(await reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
 
       it('is available when saved', async () => {
         await dashboard.saveDashboard('My PDF Dashboard');
-        await reporting.openExportTab();
+        await reporting.selectExportItem('PDF');
         expect(await reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
     });
@@ -113,7 +113,7 @@ export default function ({
         this.timeout(300000);
         await dashboard.navigateToApp();
         await dashboard.loadSavedDashboard('Ecom Dashboard');
-        await reporting.openExportTab();
+        await reporting.selectExportItem('PDF');
         await reporting.checkUsePrintLayout();
         await reporting.clickGenerateReportButton();
 
@@ -122,7 +122,7 @@ export default function ({
 
         expect(res.status).to.equal(200);
         expect(res.get('content-type')).to.equal('application/pdf');
-        await share.closeShareModal();
+        await exports.closeExportFlyout();
       });
 
       it('provides a button to copy POST URL', async () => {
@@ -133,11 +133,12 @@ export default function ({
 
         await dashboard.navigateToApp();
         await dashboard.loadSavedDashboard('Ecom Dashboard');
-        await reporting.openExportTab();
+        await reporting.selectExportItem('PDF');
         await reporting.checkUsePrintLayout();
-        await testSubjects.click('shareReportingCopyURL');
 
-        const postUrl = await browser.getClipboardValue();
+        await reporting.copyReportingPOSTURLValueToClipboard();
+
+        const postUrl = decodeURIComponent(await browser.getClipboardValue());
         expect(postUrl).to.contain('printablePdfV2');
 
         const [, jobParams] = postUrl.split('jobParams=');
@@ -165,16 +166,14 @@ export default function ({
       it('is available if new', async () => {
         await dashboard.navigateToApp();
         await dashboard.clickNewDashboard();
-        await reporting.openExportTab();
-        await testSubjects.click('pngV2-radioOption');
+        await reporting.selectExportItem('PNG');
         expect(await reporting.isGenerateReportButtonDisabled()).to.be(null);
-        await share.closeShareModal();
+        await exports.closeExportFlyout();
       });
 
       it('is available when saved', async () => {
         await dashboard.saveDashboard('My PNG Dash');
-        await reporting.openExportTab();
-        await testSubjects.click('pngV2-radioOption');
+        await reporting.selectExportItem('PNG');
         expect(await reporting.isGenerateReportButtonDisabled()).to.be(null);
         await (await testSubjects.find('kibanaChrome')).clickMouseButton(); // close popover
       });
@@ -187,11 +186,10 @@ export default function ({
 
         await dashboard.navigateToApp();
         await dashboard.loadSavedDashboard('Ecom Dashboard');
-        await reporting.openExportTab();
-        await testSubjects.click('pngV2-radioOption');
-        await testSubjects.click('shareReportingCopyURL');
+        await reporting.selectExportItem('PNG');
+        await reporting.copyReportingPOSTURLValueToClipboard();
 
-        const postUrl = await browser.getClipboardValue();
+        const postUrl = decodeURIComponent(await browser.getClipboardValue());
         expect(postUrl).to.contain('pngV2');
 
         const [, jobParams] = postUrl.split('jobParams=');
@@ -221,12 +219,12 @@ export default function ({
         this.timeout(300000);
         await dashboard.navigateToApp();
         await dashboard.loadSavedDashboard('Ecom Dashboard');
-        await reporting.openExportTab();
+        await reporting.selectExportItem('PDF');
         await reporting.clickGenerateReportButton();
 
         const url = await reporting.getReportURL(60000);
         const res = await reporting.getResponse(url ?? '');
-        await share.closeShareModal();
+        await exports.closeExportFlyout();
 
         expect(res.status).to.equal(200);
         expect(res.get('content-type')).to.equal('application/pdf');
@@ -241,10 +239,10 @@ export default function ({
 
         await dashboard.navigateToApp();
         await dashboard.loadSavedDashboard('Ecom Dashboard');
-        await reporting.openExportTab();
-        await testSubjects.click('shareReportingCopyURL');
+        await reporting.selectExportItem('PDF');
+        await reporting.copyReportingPOSTURLValueToClipboard();
 
-        const postUrl = await browser.getClipboardValue();
+        const postUrl = decodeURIComponent(await browser.getClipboardValue());
         expect(postUrl).to.contain('printablePdfV2');
 
         const [, jobParams] = postUrl.split('jobParams=');
@@ -279,8 +277,7 @@ export default function ({
         await dashboard.navigateToApp();
         await dashboard.loadSavedDashboard('[K7.6-eCommerce] Revenue Dashboard');
 
-        await reporting.openExportTab();
-        await testSubjects.click('pngV2-radioOption');
+        await reporting.selectExportItem('PNG');
         await reporting.forceSharedItemsContainerSize({ width: 1405 });
         await reporting.clickGenerateReportButton();
         await reporting.removeForceSharedItemsContainerSize();

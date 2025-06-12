@@ -334,9 +334,7 @@ const TopNav = ({
             ]
           : undefined
       }
-      saveQueryMenuVisibility={
-        services.visualizeCapabilities.saveQuery ? 'allowed_by_app_privilege' : 'globally_managed'
-      }
+      allowSavingQueries
       dataViewPickerComponentProps={
         shouldShowDataViewPicker && vis.data.indexPattern
           ? {
@@ -375,7 +373,6 @@ const TopNav = ({
       setMenuMountPoint={setHeaderActionMenu}
       indexPatterns={indexPatterns}
       showSearchBar
-      saveQueryMenuVisibility="hidden"
       showDatePicker={false}
       showQueryInput={false}
     />

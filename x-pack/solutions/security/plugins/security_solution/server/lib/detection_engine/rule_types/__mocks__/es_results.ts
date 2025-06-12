@@ -6,15 +6,7 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
-import type {
-  SignalSourceHit,
-  SignalSearchResponse,
-  BulkResponse,
-  BulkItem,
-  SignalHit,
-  AlertSourceHit,
-} from '../types';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { SignalSourceHit, SignalSearchResponse, SignalHit, AlertSourceHit } from '../types';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import {
   ALERT_BUILDING_BLOCK_TYPE,
@@ -444,7 +436,7 @@ export const sampleDocRiskScore = (riskScore?: unknown): SignalSourceHit => ({
   sort: [],
 });
 
-export const sampleEmptyDocSearchResults = (): SignalSearchResponse => ({
+export const sampleEmptyDocSearchResults = () => ({
   took: 10,
   timed_out: false,
   _shards: {
@@ -454,7 +446,10 @@ export const sampleEmptyDocSearchResults = (): SignalSearchResponse => ({
     skipped: 0,
   },
   hits: {
-    total: 0,
+    total: {
+      value: 0,
+      relation: 'eq' as const,
+    },
     max_score: 100,
     hits: [],
   },
@@ -726,70 +721,3 @@ export const sampleDocSearchResultsWithSortId = (
 
 export const sampleRuleGuid = '04128c15-0d1b-4716-a4c5-46997ac7f3bd';
 export const sampleIdGuid = 'e1e08ddc-5e37-49ff-a258-5393aa44435a';
-
-export const mockLogger = loggingSystemMock.createLogger();
-
-export const sampleBulkErrorItem = (
-  {
-    status,
-    reason,
-  }: {
-    status: number;
-    reason: string;
-  } = { status: 400, reason: 'Invalid call' }
-): BulkItem => {
-  return {
-    create: {
-      _index: 'mock_index',
-      _id: '123',
-      _version: 1,
-      status,
-      _shards: {
-        total: 1,
-        successful: 0,
-        failed: 1,
-      },
-      error: {
-        type: 'Invalid',
-        reason,
-        shard: 'shard 123',
-        index: 'mock_index',
-      },
-    },
-  };
-};
-
-export const sampleBulkItem = (): BulkItem => {
-  return {
-    create: {
-      _index: 'mock_index',
-      _id: '123',
-      _version: 1,
-      status: 200,
-      result: 'some result here',
-      _shards: {
-        total: 1,
-        successful: 1,
-        failed: 0,
-      },
-    },
-  };
-};
-
-export const sampleEmptyBulkResponse = (): BulkResponse => ({
-  took: 0,
-  errors: false,
-  items: [],
-});
-
-export const sampleBulkError = (): BulkResponse => ({
-  took: 0,
-  errors: true,
-  items: [sampleBulkErrorItem()],
-});
-
-export const sampleBulkResponse = (): BulkResponse => ({
-  took: 0,
-  errors: true,
-  items: [sampleBulkItem()],
-});

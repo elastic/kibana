@@ -64,6 +64,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
       true,
       searchConfiguration,
       esQueryConfig,
+      undefined,
       void 0,
       groupBy
     );
@@ -121,6 +122,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
       true,
       currentSearchConfiguration,
       esQueryConfig,
+      undefined,
       void 0,
       groupBy
     );
@@ -233,6 +235,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
       true,
       currentSearchConfiguration,
       esQueryConfig,
+      undefined,
       void 0,
       groupBy
     );

@@ -12,6 +12,8 @@ import { SavedObjectsType } from '@kbn/core/server';
 
 import { dashboardAttributesSchema as dashboardAttributesSchemaV1 } from './schema/v1';
 import { dashboardAttributesSchema as dashboardAttributesSchemaV2 } from './schema/v2';
+import { dashboardAttributesSchema as dashboardAttributesSchemaV3 } from './schema/v3';
+
 import {
   createDashboardSavedObjectTypeMigrations,
   DashboardSavedObjectTypeMigrationsDeps,
@@ -39,7 +41,7 @@ export const createDashboardSavedObjectType = ({
     getInAppUrl(obj) {
       return {
         path: `/app/dashboards#/view/${encodeURIComponent(obj.id)}`,
-        uiCapabilitiesPath: 'dashboard.show',
+        uiCapabilitiesPath: 'dashboard_v2.show',
       };
     },
   },
@@ -69,8 +71,23 @@ export const createDashboardSavedObjectType = ({
         create: dashboardAttributesSchemaV2,
       },
     },
+    3: {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            sections: { properties: {}, dynamic: false },
+          },
+        },
+      ],
+      schemas: {
+        forwardCompatibility: dashboardAttributesSchemaV3.extends({}, { unknowns: 'ignore' }),
+        create: dashboardAttributesSchemaV3,
+      },
+    },
   },
   mappings: {
+    dynamic: false,
     properties: {
       description: { type: 'text' },
       hits: { type: 'integer', index: false, doc_values: false },
@@ -79,6 +96,10 @@ export const createDashboardSavedObjectType = ({
       },
       optionsJSON: { type: 'text', index: false },
       panelsJSON: { type: 'text', index: false },
+      sections: {
+        properties: {},
+        dynamic: false,
+      },
       refreshInterval: {
         properties: {
           display: { type: 'keyword', index: false, doc_values: false },

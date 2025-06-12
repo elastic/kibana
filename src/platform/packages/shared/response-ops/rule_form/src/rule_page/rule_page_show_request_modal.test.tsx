@@ -14,9 +14,10 @@ import { RuleFormData } from '../types';
 
 jest.mock('../hooks', () => ({
   useRuleFormState: jest.fn(),
+  useRuleFormScreenContext: jest.fn(),
 }));
 
-const { useRuleFormState } = jest.requireMock('../hooks');
+const { useRuleFormState, useRuleFormScreenContext } = jest.requireMock('../hooks');
 
 const formData: RuleFormData = {
   params: {
@@ -46,6 +47,13 @@ const formData: RuleFormData = {
 const onCloseMock = jest.fn();
 
 describe('rulePageShowRequestModal', () => {
+  beforeEach(() => {
+    useRuleFormScreenContext.mockReturnValue({
+      isShowRequestScreenVisible: false,
+      setIsShowRequestScreenVisible: onCloseMock,
+    });
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -53,7 +61,7 @@ describe('rulePageShowRequestModal', () => {
   test('renders create request correctly', async () => {
     useRuleFormState.mockReturnValue({ formData, multiConsumerSelection: 'logs' });
 
-    render(<RulePageShowRequestModal onClose={onCloseMock} />);
+    render(<RulePageShowRequestModal />);
 
     expect(screen.getByTestId('modalHeaderTitle').textContent).toBe('Create alerting rule request');
     expect(screen.getByTestId('modalSubtitle').textContent).toBe(
@@ -103,7 +111,7 @@ describe('rulePageShowRequestModal', () => {
       id: 'test-id',
     });
 
-    render(<RulePageShowRequestModal isEdit onClose={onCloseMock} />);
+    render(<RulePageShowRequestModal isEdit />);
 
     expect(screen.getByTestId('modalHeaderTitle').textContent).toBe('Edit alerting rule request');
     expect(screen.getByTestId('modalSubtitle').textContent).toBe(
@@ -151,7 +159,7 @@ describe('rulePageShowRequestModal', () => {
       id: 'test-id',
     });
 
-    render(<RulePageShowRequestModal isEdit onClose={onCloseMock} />);
+    render(<RulePageShowRequestModal isEdit />);
     fireEvent.click(screen.getByLabelText('Closes this modal window'));
     expect(onCloseMock).toHaveBeenCalled();
   });

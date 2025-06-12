@@ -11,6 +11,7 @@ import { ruleCoversDependency } from './rule';
 
 describe('ruleCoversDependency', () => {
   const mockRule = {
+    groupName: 'mock',
     matchPackageNames: ['lodash'],
     matchPackagePatterns: ['^react'],
     matchDepNames: ['@testing-library/react'],

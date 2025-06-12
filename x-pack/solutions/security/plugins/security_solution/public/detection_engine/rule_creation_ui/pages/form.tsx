@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useState, useMemo, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
 import { useFormWithWarnings } from '../../../common/hooks/use_form_with_warnings';
 import type {
@@ -13,8 +13,8 @@ import type {
   ActionsStepRule,
   DefineStepRule,
   ScheduleStepRule,
-} from '../../../detections/pages/detection_engine/rules/types';
-import { DataSourceType } from '../../../detections/pages/detection_engine/rules/types';
+} from '../../common/types';
+import { DataSourceType } from '../../common/types';
 import { useKibana } from '../../../common/lib/kibana';
 import type { FormHook } from '../../../shared_imports';
 import { useFormData } from '../../../shared_imports';

@@ -5,20 +5,21 @@
  * 2.0.
  */
 import {
-  getUnchangingComparator,
   type PublishesBlockingError,
   type PublishesDataLoading,
   type PublishesDataViews,
   type PublishesSavedObjectId,
-  type StateComparators,
   type PublishesRendered,
+  StateComparators,
 } from '@kbn/presentation-publishing';
 import { noop } from 'lodash';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { BehaviorSubject } from 'rxjs';
-import type { IntegrationCallbacks, LensInternalApi, LensRuntimeState } from '../types';
-import { buildObservableVariable } from '../helper';
-import { SharingSavedObjectProps } from '../../types';
+import { BehaviorSubject, Observable, map, merge } from 'rxjs';
+import type {
+  IntegrationCallbacks,
+  LensInternalApi,
+  LensRuntimeState,
+  LensSerializedState,
+} from '../types';
 
 export interface StateManagementConfig {
   api: Pick<IntegrationCallbacks, 'updateAttributes' | 'updateSavedObjectId'> &
@@ -27,13 +28,10 @@ export interface StateManagementConfig {
     PublishesDataLoading &
     PublishesRendered &
     PublishesBlockingError;
-  serialize: () => Pick<LensRuntimeState, 'attributes' | 'savedObjectId'>;
-  comparators: StateComparators<
-    Pick<LensRuntimeState, 'attributes' | 'savedObjectId' | 'abortController'> & {
-      managed?: boolean | undefined;
-      sharingSavedObjectProps?: SharingSavedObjectProps | undefined;
-    }
-  >;
+  anyStateChange$: Observable<void>;
+  getComparators: () => StateComparators<Pick<LensSerializedState, 'attributes' | 'savedObjectId'>>;
+  reinitializeRuntimeState: (lastSavedRuntimeState: LensRuntimeState) => void;
+  getLatestState: () => Pick<LensRuntimeState, 'attributes' | 'savedObjectId'>;
   cleanup: () => void;
 }
 
@@ -45,58 +43,36 @@ export function initializeStateManagement(
   initialState: LensRuntimeState,
   internalApi: LensInternalApi
 ): StateManagementConfig {
-  const [attributes$, attributesComparator] = buildObservableVariable<
-    LensRuntimeState['attributes']
-  >(internalApi.attributes$);
+  const savedObjectId$ = new BehaviorSubject<LensRuntimeState['savedObjectId']>(
+    initialState.savedObjectId
+  );
 
-  const [savedObjectId$, savedObjectIdComparator] = buildObservableVariable<
-    LensRuntimeState['savedObjectId']
-  >(initialState.savedObjectId);
-
-  const [dataViews$] = buildObservableVariable<DataView[] | undefined>(internalApi.dataViews);
-  const [dataLoading$] = buildObservableVariable<boolean | undefined>(internalApi.dataLoading$);
-  const [rendered$] = buildObservableVariable<boolean>(internalApi.hasRenderCompleted$);
-  const [abortController$, abortControllerComparator] = buildObservableVariable<
-    AbortController | undefined
-  >(internalApi.expressionAbortController$);
-
-  // This is the way to communicate to the embeddable panel to render a blocking error with the
-  // default panel error component - i.e. cannot find a Lens SO type of thing.
-  // For Lens specific errors, we use a Lens specific error component.
-  const [blockingError$] = buildObservableVariable<Error | undefined>(internalApi.blockingError$);
   return {
     api: {
       updateAttributes: internalApi.updateAttributes,
       updateSavedObjectId: (newSavedObjectId: LensRuntimeState['savedObjectId']) =>
         savedObjectId$.next(newSavedObjectId),
-      savedObjectId: savedObjectId$,
-      dataViews: dataViews$,
-      dataLoading: dataLoading$,
-      blockingError: blockingError$,
-      rendered$,
+      savedObjectId$,
+      dataViews$: internalApi.dataViews$,
+      dataLoading$: internalApi.dataLoading$,
+      blockingError$: internalApi.blockingError$,
+      rendered$: internalApi.hasRenderCompleted$,
     },
-    serialize: () => {
+    anyStateChange$: merge(internalApi.attributes$).pipe(map(() => undefined)),
+    getComparators: () => {
       return {
-        attributes: attributes$.getValue(),
-        savedObjectId: savedObjectId$.getValue(),
-        abortController: abortController$.getValue(),
+        attributes: initialState.savedObjectId === undefined ? 'deepEquality' : 'skip',
+        savedObjectId: 'skip',
       };
     },
-    comparators: {
-      // need to force cast this to make it pass the type check
-      // @TODO: workout why this is needed
-      attributes: attributesComparator as [
-        BehaviorSubject<LensRuntimeState['attributes']>,
-        (newValue: LensRuntimeState['attributes'] | undefined) => void,
-        (
-          a: LensRuntimeState['attributes'] | undefined,
-          b: LensRuntimeState['attributes'] | undefined
-        ) => boolean
-      ],
-      savedObjectId: savedObjectIdComparator,
-      abortController: abortControllerComparator,
-      sharingSavedObjectProps: getUnchangingComparator(),
-      managed: getUnchangingComparator(),
+    getLatestState: () => {
+      return {
+        attributes: internalApi.attributes$.getValue(),
+        savedObjectId: savedObjectId$.getValue(),
+      };
+    },
+    reinitializeRuntimeState: (lastSavedRuntimeState: LensRuntimeState) => {
+      internalApi.updateAttributes(lastSavedRuntimeState.attributes);
     },
     cleanup: noop,
   };

@@ -10,7 +10,7 @@ import type { IEventLogService } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import type { LogLevel } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
-  logLevelFromExecutionStatus,
+  eventLogLevelFromExecutionStatus,
   logLevelToNumber,
   ruleExecutionStatusToNumber,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
@@ -107,7 +107,7 @@ export const createEventLogWriter = (eventLogService: IEventLogService): IEventL
     },
 
     logStatusChange: (args: StatusChangeArgs): void => {
-      const logLevel = logLevelFromExecutionStatus(args.newStatus);
+      const logLevel = eventLogLevelFromExecutionStatus(args.newStatus);
       eventLogger.logEvent({
         '@timestamp': nowISO(),
         message: args.message,

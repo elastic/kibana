@@ -31,6 +31,7 @@ import { PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING } from '@kbn/management-settings-ids';
 import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
 import { SubscriptionNotAllowed } from '../subscription_not_allowed';
 import { CspRadioGroupProps, RadioGroup } from './csp_boxed_radio_group';
@@ -52,6 +53,9 @@ import {
   type NewPackagePolicyPostureInput,
   POSTURE_NAMESPACE,
   POLICY_TEMPLATE_FORM_DTS,
+  hasErrors,
+  getCloudDefaultAwsCredentialConfig,
+  getCloudConnectorRemoteRoleTemplate,
 } from './utils';
 import {
   PolicyTemplateInfo,
@@ -62,14 +66,12 @@ import {
 import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
 import {
   GCP_CREDENTIALS_TYPE,
-  GCP_SETUP_ACCESS,
   gcpField,
   getInputVarsFields,
 } from './gcp_credentials_form/gcp_credential_form';
 import { SetupTechnologySelector } from './setup_technology_selector/setup_technology_selector';
 import { useSetupTechnology } from './setup_technology_selector/use_setup_technology';
 import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form/azure_credentials_form';
-import { AWS_CREDENTIALS_TYPE } from './aws_credentials_form/aws_credentials_form';
 import { useKibana } from '../../common/hooks/use_kibana';
 
 const DEFAULT_INPUT_TYPE = {
@@ -197,7 +199,7 @@ const AwsAccountTypeSelect = ({
 }: {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;
   newPolicy: NewPackagePolicy;
-  updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
+  updatePolicy: (updatedPolicy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
   packageInfo: PackageInfo;
   disabled: boolean;
 }) => {
@@ -303,7 +305,7 @@ const GcpAccountTypeSelect = ({
 }: {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>;
   newPolicy: NewPackagePolicy;
-  updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
+  updatePolicy: (updatedPolicy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
   packageInfo: PackageInfo;
   disabled: boolean;
 }) => {
@@ -443,7 +445,7 @@ const AzureAccountTypeSelect = ({
 }: {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>;
   newPolicy: NewPackagePolicy;
-  updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
+  updatePolicy: (updatedPolicy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
   disabled: boolean;
   packageInfo: PackageInfo;
   setupTechnology: SetupTechnology;
@@ -548,7 +550,7 @@ const useEnsureDefaultNamespace = ({
 }: {
   newPolicy: NewPackagePolicy;
   input: NewPackagePolicyPostureInput;
-  updatePolicy: (policy: NewPackagePolicy) => void;
+  updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
 }) => {
   useEffect(() => {
     if (newPolicy.namespace === POSTURE_NAMESPACE) return;
@@ -572,7 +574,7 @@ const usePolicyTemplateInitialName = ({
   integration: CloudSecurityPolicyTemplate | undefined;
   newPolicy: NewPackagePolicy;
   packagePolicyList: PackagePolicy[] | undefined;
-  updatePolicy: (policy: NewPackagePolicy) => void;
+  updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
   setCanFetchIntegration: (canFetch: boolean) => void;
 }) => {
   useEffect(() => {
@@ -586,14 +588,18 @@ const usePolicyTemplateInitialName = ({
 
     const currentIntegrationName = getMaxPackageName(integration, packagePolicyListByIntegration);
 
-    if (newPolicy.name === currentIntegrationName) {
-      return;
-    }
-
-    updatePolicy({
-      ...newPolicy,
-      name: currentIntegrationName,
-    });
+    /*
+     * If 'packagePolicyListByIntegration' is undefined it means policies were still not feteched - Array.isArray(undefined) = false
+     * if policie were fetched its an array - the check will return true
+     */
+    const isPoliciesLoaded = Array.isArray(packagePolicyListByIntegration);
+    updatePolicy(
+      {
+        ...newPolicy,
+        name: currentIntegrationName,
+      },
+      isPoliciesLoaded
+    );
     setCanFetchIntegration(false);
     // since this useEffect should only run on initial mount updatePolicy and newPolicy shouldn't re-trigger it
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -629,7 +635,7 @@ const useCloudFormationTemplate = ({
 }: {
   packageInfo: PackageInfo;
   newPolicy: NewPackagePolicy;
-  updatePolicy: (policy: NewPackagePolicy) => void;
+  updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
 }) => {
   useEffect(() => {
     const templateUrl = getVulnMgmtCloudFormationDefaultValue(packageInfo);
@@ -669,15 +675,23 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     packageInfo,
     handleSetupTechnologyChange,
     isAgentlessEnabled,
+    defaultSetupTechnology,
+    integrationToEnable,
+    setIntegrationToEnable,
   }) => {
     const integrationParam = useParams<{ integration: CloudSecurityPolicyTemplate }>().integration;
-    const integration = SUPPORTED_POLICY_TEMPLATES.includes(integrationParam)
-      ? integrationParam
-      : undefined;
-    const isParentSecurityPosture = !integration;
+    const integration =
+      integrationToEnable &&
+      SUPPORTED_POLICY_TEMPLATES.includes(integrationToEnable as CloudSecurityPolicyTemplate)
+        ? integrationToEnable
+        : undefined;
+    const isParentSecurityPosture = !integrationParam;
     // Handling validation state
     const [isValid, setIsValid] = useState(true);
-    const { cloud } = useKibana().services;
+    const { cloud, uiSettings } = useKibana().services;
+    const cloudConnectorsEnabled =
+      uiSettings.get(SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING) || false;
+
     const isServerless = !!cloud.serverless.projectType;
     const input = getSelectedOption(newPolicy.inputs, integration);
     const getIsSubscriptionValid = useIsSubscriptionStatusValid();
@@ -687,6 +701,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       isAgentlessEnabled,
       handleSetupTechnologyChange,
       isEditPage,
+      defaultSetupTechnology,
     });
 
     const shouldRenderAgentlessSelector =
@@ -703,24 +718,21 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         Extract<PostureInput, 'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'>,
         {
           [key: string]: {
-            value: string;
-            type: 'text';
+            value: string | boolean;
+            type: 'text' | 'bool';
           };
         }
       > = {
-        'cloudbeat/cis_aws': {
-          'aws.credentials.type': {
-            value: isAgentless
-              ? AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS
-              : AWS_CREDENTIALS_TYPE.CLOUD_FORMATION,
-            type: 'text',
-          },
-        },
+        'cloudbeat/cis_aws': getCloudDefaultAwsCredentialConfig({
+          isAgentless,
+          showCloudConnectors,
+          packageInfo,
+        }),
         'cloudbeat/cis_gcp': {
           'gcp.credentials.type': {
             value: isAgentless
               ? GCP_CREDENTIALS_TYPE.CREDENTIALS_JSON
-              : GCP_SETUP_ACCESS.CLOUD_SHELL,
+              : GCP_CREDENTIALS_TYPE.CREDENTIALS_NONE,
             type: 'text',
           },
         },
@@ -738,11 +750,19 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     };
 
     const updatePolicy = useCallback(
-      (updatedPolicy: NewPackagePolicy) => {
-        onChange({ isValid, updatedPolicy });
+      (updatedPolicy: NewPackagePolicy, isExtensionLoaded?: boolean) => {
+        onChange({ isValid, updatedPolicy, isExtensionLoaded });
       },
       [onChange, isValid]
     );
+
+    const cloudConnectorRemoteRoleTemplate = getCloudConnectorRemoteRoleTemplate({
+      input,
+      cloud,
+      packageInfo,
+    });
+    const showCloudConnectors =
+      cloud.csp === 'aws' && cloudConnectorsEnabled && !!cloudConnectorRemoteRoleTemplate;
 
     /**
      * - Updates policy inputs by user selection
@@ -750,17 +770,23 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
      */
     const setEnabledPolicyInput = useCallback(
       (inputType: PostureInput) => {
-        const inputVars = getPostureInputHiddenVars(inputType, packageInfo, setupTechnology);
+        const inputVars = getPostureInputHiddenVars(
+          inputType,
+          packageInfo,
+          setupTechnology,
+          showCloudConnectors
+        );
         const policy = getPosturePolicy(newPolicy, inputType, inputVars);
         updatePolicy(policy);
       },
-      [setupTechnology, packageInfo, newPolicy, updatePolicy]
+      [packageInfo, newPolicy, setupTechnology, updatePolicy, showCloudConnectors]
     );
 
     // search for non null fields of the validation?.vars object
     const validationResultsNonNullFields = Object.keys(validationResults?.vars || {}).filter(
       (key) => (validationResults?.vars || {})[key] !== null
     );
+    const hasInvalidRequiredVars = !!hasErrors(validationResults);
 
     const [isLoading, setIsLoading] = useState(validationResultsNonNullFields.length > 0);
     const [canFetchIntegration, setCanFetchIntegration] = useState(true);
@@ -799,12 +825,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       // Required for mount only to ensure a single input type is selected
       // This will remove errors in validationResults.vars
       setEnabledPolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
-
-      // When the integration is the parent Security Posture (!integration) we need to
-      // reset the setup technology when the integration option changes if it was set to agentless for CSPM
-      if (isParentSecurityPosture && input.policy_template !== 'cspm') {
-        updateSetupTechnology(SetupTechnology.AGENT_BASED);
-      }
       refetch();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isLoading, input.policy_template, isEditPage]);
@@ -815,6 +835,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       }
 
       setEnabledPolicyInput(input.type);
+      setIntegrationToEnable?.(input.policy_template);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [setupTechnology]);
 
@@ -830,7 +851,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       packagePolicyList: packagePolicyList?.items,
       isEditPage,
       isLoading,
-      integration,
+      integration: integration as CloudSecurityPolicyTemplate,
       newPolicy,
       updatePolicy,
       setCanFetchIntegration,
@@ -879,12 +900,15 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       <>
         {isEditPage && <EditScreenStepTitle />}
         {/* Defines the enabled policy template */}
-        {!integration && (
+        {isParentSecurityPosture && (
           <>
             <PolicyTemplateSelector
               selectedTemplate={input.policy_template}
               policy={newPolicy}
-              setPolicyTemplate={(template) => setEnabledPolicyInput(DEFAULT_INPUT_TYPE[template])}
+              setPolicyTemplate={(template) => {
+                setEnabledPolicyInput(DEFAULT_INPUT_TYPE[template]);
+                setIntegrationToEnable?.(template);
+              }}
               disabled={isEditPage}
             />
             <EuiSpacer size="l" />
@@ -970,8 +994,10 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
 
         {shouldRenderAgentlessSelector && (
           <SetupTechnologySelector
+            showLimitationsMessage={!isServerless}
             disabled={isEditPage}
             setupTechnology={setupTechnology}
+            isAgentless={!!newPolicy?.supports_agentless}
             onSetupTechnologyChange={(value) => {
               updateSetupTechnology(value);
               updatePolicy(
@@ -1002,6 +1028,8 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           disabled={isEditPage}
           setupTechnology={setupTechnology}
           isEditPage={isEditPage}
+          hasInvalidRequiredVars={hasInvalidRequiredVars}
+          showCloudConnectors={showCloudConnectors}
         />
         <EuiSpacer />
       </>

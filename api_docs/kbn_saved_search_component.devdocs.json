@@ -21,7 +21,7 @@
           },
           " & React.RefAttributes<{}>>"
         ],
-        "path": "packages/kbn-saved-search-component/index.ts",
+        "path": "src/platform/packages/shared/kbn-saved-search-component/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -52,7 +52,7 @@
         "tags": [],
         "label": "SavedSearchComponentDependencies",
         "description": [],
-        "path": "packages/kbn-saved-search-component/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-saved-search-component/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -72,7 +72,7 @@
                 "text": "EmbeddableStart"
               }
             ],
-            "path": "packages/kbn-saved-search-component/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-saved-search-component/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -92,7 +92,7 @@
                 "text": "ISearchStartSearchSource"
               }
             ],
-            "path": "packages/kbn-saved-search-component/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-saved-search-component/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -112,7 +112,7 @@
                 "text": "DataViewsServicePublic"
               }
             ],
-            "path": "packages/kbn-saved-search-component/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-saved-search-component/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -126,7 +126,7 @@
         "tags": [],
         "label": "SavedSearchComponentProps",
         "description": [],
-        "path": "packages/kbn-saved-search-component/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-saved-search-component/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -146,7 +146,7 @@
                 "text": "SavedSearchComponentDependencies"
               }
             ],
-            "path": "packages/kbn-saved-search-component/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-saved-search-component/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -157,7 +157,7 @@
             "tags": [],
             "label": "index",
             "description": [],
-            "path": "packages/kbn-saved-search-component/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-saved-search-component/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -178,7 +178,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-saved-search-component/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-saved-search-component/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -199,7 +199,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-saved-search-component/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-saved-search-component/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -220,7 +220,7 @@
               },
               "[] | undefined"
             ],
-            "path": "packages/kbn-saved-search-component/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-saved-search-component/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -234,7 +234,21 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-saved-search-component/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-saved-search-component/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/saved-search-component",
+            "id": "def-public.SavedSearchComponentProps.columns",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-saved-search-component/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -249,7 +263,7 @@
               "Property",
               ".Height<string | number> | undefined"
             ],
-            "path": "packages/kbn-saved-search-component/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-saved-search-component/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -270,7 +284,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-saved-search-component/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-saved-search-component/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }

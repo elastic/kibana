@@ -11,18 +11,15 @@ Authorization is an important aspect of API design. It must be considered for al
 
 Table of contents:
 1.  [API authorization](#api-authorization)
-2.  [[Deprecated] Adding API authorization with `access` tags](#deprecated-adding-api-authorization-with-access-tags)
-    - [Why not add `access` tags to all routes by default?](#why-not-add-access-tags-to-all-routes-by-default)
-3.  [Adding API authorization with `security` configuration](#adding-api-authorization-with-security-configuration)
+2.  [Adding API authorization with `security` configuration](#adding-api-authorization-with-security-configuration)
     - [Key features](#key-features)
     - [Configuring authorization on routes](#configuring-authorization-on-routes)
     - [Opting out of authorization for specific routes](#opting-out-of-authorization-for-specific-routes)
     - [Classic router security configuration examples](#classic-router-security-configuration-examples)
     - [Versioned router security configuration examples](#versioned-router-security-configuration-examples)
-4. [Authorization response available in route handlers](#authorization-response-available-in-route-handlers)
-5. [OpenAPI specification (OAS) documentation](#openapi-specification-oas-documentation)
-6. [Migrating from `access` tags to `security` configuration](#migrating-from-access-tags-to-security-configuration)
-7. [Questions?](#questions)
+3. [Authorization response available in route handlers](#authorization-response-available-in-route-handlers)
+4. [OpenAPI specification (OAS) documentation](#openapi-specification-oas-documentation)
+5. [Questions?](#questions)
 
 ## API authorization
 Kibana API routes do not have any authorization checks applied by default. This means that your APIs are accessible to anyone with valid credentials, regardless of their permissions. This includes users with no roles assigned.
@@ -37,29 +34,6 @@ This is **especially** important if your route does any of the following:
 2. Calls Elasticsearch APIs using the internal `kibana_system` user.
 3. Calls a third-party service.
 4. Exposes any non-public information to the caller, such as system configuration or state, as part of the successful or even error response.
-
-## [Deprecated] Adding API authorization with `access` tags
-**Note**: `access` tags were deprecated in favour of `security` configuration.
-
-`access` tags are used to restrict access to API routes. They are used to ensure that only users with the required privileges can access the route.
-
-Example configuration:
-```ts
-router.get({
-  path: '/api/path',
-  options: {
-    tags: ['access:<privilege_1>', 'access:<privilege_2>'],
-  },
-  ...
-}, handler);
-```
-
-More information on adding `access` tags to your routes can be found temporarily in the [legacy documentation](https://www.elastic.co/guide/en/kibana/current/development-security.html#development-plugin-feature-registration)
-
-### Why not add `access` tags to all routes by default?
-Each authorization check that we perform involves a round-trip to Elasticsearch, so they are not as cheap as we'd like. Therefore, we want to keep the number of authorization checks we perform within a single route to a minimum.
-Adding an `access` tag to routes that leverage the Saved Objects Service would be redundant in most cases, since the Saved Objects Service will be performing authorization anyway.
-
 
 ## Adding API authorization with `security` configuration
 `KibanaRouteOptions` provides a security configuration at the route definition level, offering robust security configurations for both **Classic** and **Versioned** routes.
@@ -78,18 +52,6 @@ Adding an `access` tag to routes that leverage the Saved Objects Service would b
 
 
 ### Configuring authorization on routes
-**Before migration:**
-```ts
-router.get({
-  path: '/api/path',
-  options: {
-    tags: ['access:<privilege_1>', 'access:<privilege_2>'],
-  },
-  ...
-}, handler);
-```
-
-**After migration:**
 ```ts
 router.get({
   path: '/api/path',
@@ -101,6 +63,23 @@ router.get({
   ...
 }, handler);
 ```
+
+### Naming conventions for privileges
+1. **Privilege should start with a valid `ApiOperation`**:
+   - **Valid operations**: `manage`, `read`, `update`, `delete`, `create`.
+   - Use the corresponding methods from the `ApiPrivileges` utility class: `ApiPrivileges.manage`, `ApiPrivileges.read`, etc.
+2. **Use `_` as the separator** between the operation and the subject.
+
+**Examples**:
+Incorrect privilege names ❌
+- `read-entity-a`: Uses `-` instead of `_`.
+- `delete_entity-a`: Mixes `_` and `-`.
+- `entity_manage`: Places the subject name before the operation.
+
+Correct privilege names ✅
+- `read_entity_a`
+- `delete_entity_a`
+- `manage_entity`
 
 ### Configuring operator and superuser privileges
 We have two special predefined privilege sets that can be used in security configuration:
@@ -195,6 +174,48 @@ router.get({
   security: {
     authz: {
       requiredPrivileges: [{ allRequired: ['<privilege_1>', '<privilege_2>'], anyRequired: ['<privilege_3>', '<privilege_4>'] }],
+    },
+  },
+  ...
+}, handler);
+```
+
+**Example 4: Complex configuration with nested `allOf`.**
+Requires (`<privilege_1>` AND `<privilege_2>`) OR (`<privilege_3>` AND `<privilege_4>`) to access the route.
+```ts
+router.get({
+  path: '/api/path',
+  security: {
+    authz: {
+      requiredPrivileges: [
+        { 
+          anyRequired: [
+            { allOf: ['<privilege_1>', '<privilege_2>']}, 
+            { allOf: ['<privilege_3>', '<privilege_4>']}
+          ],
+        }
+      ],
+    },
+  },
+  ...
+}, handler);
+```
+
+**Example 5: Complex configuration with nested `anyOf`.**
+Requires (`<privilege_1>` OR `<privilege_2>`) AND (`<privilege_3>` OR `<privilege_4>`) to access the route.
+```ts
+router.get({
+  path: '/api/path',
+  security: {
+    authz: {
+      requiredPrivileges: [
+        { 
+          allRequired: [
+            { anyOf: ['<privilege_1>', '<privilege_2>']}, 
+            { anyOf: ['<privilege_3>', '<privilege_4>']}
+          ],
+        }
+      ],
     },
   },
   ...
@@ -318,48 +339,6 @@ This makes it easy to view the security requirements of each endpoint in a stand
 To check the OAS documentation for a specific API route and see its security details, you can use the following command:
 ```sh
 GET /api/oas?pathStartsWith=/your/api/path
-```
-
-## Migrating from `access` tags to `security` configuration
-We aim to use the same privileges that are currently defined with tags `access:<privilege_name>`.
-To assist with this migration, we have created eslint rule `no_deprecated_authz_config`, that will automatically convert your `access` tags to the new `security` configuration.
-It scans route definitions and converts `access` tags to the new `requiredPrivileges` configuration.
-
-Note: The rule is disabled by default to avoid automatic migrations without an oversight. You can perform migrations by running:
-
-**Migrate routes with defined authorization**
-```sh
-MIGRATE_DISABLED_AUTHZ=false MIGRATE_ENABLED_AUTHZ=true npx eslint --ext .ts --fix path/to/your/folder
-```
-
-**Migrate routes opted out from authorization**
-```sh
-MIGRATE_DISABLED_AUTHZ=true MIGRATE_ENABLED_AUTHZ=false npx eslint --ext .ts --fix path/to/your/folder
-```
-We encourage you to migrate routes that are opted out from authorization to new config and provide legitimate reason for disabled authorization.
-It is better to migrate routes opted out from authorization iteratively and elaborate on the reasoning. 
-Routes without a compelling reason to opt-out of authorization should plan to introduce them as soon as possible.
-
-**Migrate all routes**
-```sh
-MIGRATE_DISABLED_AUTHZ=true MIGRATE_ENABLED_AUTHZ=true npx eslint --ext .ts --fix path/to/your/folder
-```
-
-**How to migrate if you have an utility function for route creation?**
-If you have utility function that creates routes, i.e `createApmServerRoute` or `createObservabilityOnboardingServerRoute`, you can easily modify the eslint rule to handle your case.
-For example, you register the route with `access` tags in your utility function:
-```ts
-createApmServerRoute({
-  endpoint: 'GET /your/route/path',
-  options: { tags: ['access:apm'] },
-  handler: async (resources):  => {
-    // your handler logic
-  },
-})
-```
-You can modify [the rule](https://github.com/elastic/kibana/blob/6a50066e00ae38a64c5365fd66b4dc32857ba1fc/packages/kbn-eslint-plugin-eslint/rules/no_deprecated_authz_config.js#L312-#L315) to handle your case by adding the following code:
-```ts
-callee.type === 'Identifier' && callee.name === 'createApmServerRoute'
 ```
 
 ## Questions?

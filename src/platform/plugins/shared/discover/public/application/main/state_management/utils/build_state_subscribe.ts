@@ -8,16 +8,13 @@
  */
 
 import { isEqual } from 'lodash';
-import type { DiscoverInternalStateContainer } from '../discover_internal_state_container';
+import type { InternalStateStore, RuntimeStateManager } from '../redux';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverSavedSearchContainer } from '../discover_saved_search_container';
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
 import type { DiscoverStateContainer } from '../discover_state';
-import {
-  DiscoverAppState,
-  DiscoverAppStateContainer,
-  isEqualState,
-} from '../discover_app_state_container';
+import type { DiscoverAppState, DiscoverAppStateContainer } from '../discover_app_state_container';
+import { isEqualState } from '../discover_app_state_container';
 import { addLog } from '../../../../utils/add_log';
 import { FetchStatus } from '../../../types';
 import { loadAndResolveDataView } from './resolve_data_view';
@@ -38,13 +35,15 @@ export const buildStateSubscribe =
     appState,
     dataState,
     internalState,
+    runtimeStateManager,
     savedSearchState,
     services,
     setDataView,
   }: {
     appState: DiscoverAppStateContainer;
     dataState: DiscoverDataStateContainer;
-    internalState: DiscoverInternalStateContainer;
+    internalState: InternalStateStore;
+    runtimeStateManager: RuntimeStateManager;
     savedSearchState: DiscoverSavedSearchContainer;
     services: DiscoverServices;
     setDataView: DiscoverStateContainer['actions']['setDataView'];
@@ -85,10 +84,9 @@ export const buildStateSubscribe =
       }
     }
 
-    const { hideChart, interval, breakdownField, sampleSize, sort, dataSource } = prevState;
+    const { interval, breakdownField, sampleSize, sort, dataSource } = prevState;
     // Cast to boolean to avoid false positives when comparing
     // undefined and false, which would trigger a refetch
-    const chartDisplayChanged = Boolean(nextState.hideChart) !== Boolean(hideChart);
     const chartIntervalChanged = nextState.interval !== interval && !isEsqlMode;
     const breakdownFieldChanged = nextState.breakdownField !== breakdownField;
     const sampleSizeChanged = nextState.sampleSize !== sampleSize;
@@ -103,10 +101,14 @@ export const buildStateSubscribe =
         ? nextState.dataSource.dataViewId
         : undefined;
 
-      const { dataView: nextDataView, fallback } = await loadAndResolveDataView(
-        { id: dataViewId, savedSearch, isEsqlMode },
-        { internalStateContainer: internalState, services }
-      );
+      const { dataView: nextDataView, fallback } = await loadAndResolveDataView({
+        dataViewId,
+        savedSearch,
+        isEsqlMode,
+        internalState,
+        runtimeStateManager,
+        services,
+      });
 
       // If the requested data view is not found, don't try to load it,
       // and instead reset the app state to the fallback data view
@@ -137,7 +139,6 @@ export const buildStateSubscribe =
     }
 
     if (
-      chartDisplayChanged ||
       chartIntervalChanged ||
       breakdownFieldChanged ||
       sampleSizeChanged ||
@@ -146,7 +147,6 @@ export const buildStateSubscribe =
       queryChanged
     ) {
       const logData = {
-        chartDisplayChanged: logEntry(chartDisplayChanged, hideChart, nextState.hideChart),
         chartIntervalChanged: logEntry(chartIntervalChanged, interval, nextState.interval),
         breakdownFieldChanged: logEntry(
           breakdownFieldChanged,

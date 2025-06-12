@@ -11,6 +11,7 @@ import React, { Component } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
 import { isEqual } from 'lodash';
+import { FileSizeChecker, isTikaType } from '@kbn/file-upload/file_upload_manager';
 
 import { AboutPanel, LoadingPanel } from '../about_panel';
 import { ResultsView } from '../results_view';
@@ -31,8 +32,6 @@ import {
 import { analyzeTikaFile } from './tika_analyzer';
 
 import { MODE } from './constants';
-import { FileSizeChecker } from './file_size_check';
-import { isTikaType } from '../../../../../common/utils/tika_utils';
 
 export class FileDataVisualizerView extends Component {
   constructor(props) {
@@ -103,7 +102,7 @@ export class FileDataVisualizerView extends Component {
 
   async loadFile(file) {
     this.fileSizeChecker = new FileSizeChecker(this.props.fileUpload, file);
-    if (this.fileSizeChecker.check()) {
+    if (this.fileSizeChecker.isValid()) {
       try {
         const { data, fileContents } = await readFile(file);
         if (isTikaType(file.type)) {
@@ -366,6 +365,7 @@ export class FileDataVisualizerView extends Component {
               mode={mode}
               onChangeMode={this.changeMode}
               onCancel={this.onCancel}
+              setUploadResults={this.props.setUploadResults}
             />
           </>
         )}

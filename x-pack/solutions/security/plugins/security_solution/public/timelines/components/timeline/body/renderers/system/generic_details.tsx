@@ -26,7 +26,6 @@ interface Props {
   contextId: string;
   hostName: string | null | undefined;
   id: string;
-  isDraggable?: boolean;
   message: string | null | undefined;
   outcome: string | null | undefined;
   packageName: string | null | undefined;
@@ -41,6 +40,7 @@ interface Props {
   userDomain: string | null | undefined;
   userName: string | null | undefined;
   workingDirectory: string | null | undefined;
+  scopeId: string;
 }
 
 export const SystemGenericLine = React.memo<Props>(
@@ -48,7 +48,6 @@ export const SystemGenericLine = React.memo<Props>(
     contextId,
     hostName,
     id,
-    isDraggable,
     message,
     outcome,
     packageName,
@@ -63,14 +62,15 @@ export const SystemGenericLine = React.memo<Props>(
     userDomain,
     userName,
     workingDirectory,
+    scopeId,
   }) => (
     <>
       <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="none" wrap={true}>
         <UserHostWorkingDir
+          scopeId={scopeId}
           contextId={contextId}
           eventId={id}
           hostName={hostName}
-          isDraggable={isDraggable}
           userDomain={userDomain}
           userName={userName}
           workingDirectory={workingDirectory}
@@ -80,11 +80,11 @@ export const SystemGenericLine = React.memo<Props>(
         </TokensFlexItem>
         <TokensFlexItem grow={false} component="span">
           <ProcessDraggable
+            scopeId={scopeId}
             contextId={contextId}
             endgamePid={undefined}
             endgameProcessName={undefined}
             eventId={id}
-            isDraggable={isDraggable}
             processPid={processPid}
             processName={processName}
             processExecutable={processExecutable}
@@ -97,10 +97,10 @@ export const SystemGenericLine = React.memo<Props>(
         )}
         <TokensFlexItem grow={false} component="span">
           <DraggableBadge
+            scopeId={scopeId}
             contextId={contextId}
             eventId={id}
             field="event.outcome"
-            isDraggable={isDraggable}
             queryValue={outcome}
             value={outcome}
             isAggregatable={true}
@@ -108,16 +108,16 @@ export const SystemGenericLine = React.memo<Props>(
           />
         </TokensFlexItem>
         <AuthSsh
+          scopeId={scopeId}
           contextId={contextId}
           eventId={id}
-          isDraggable={isDraggable}
           sshSignature={sshSignature}
           sshMethod={sshMethod}
         />
         <Package
+          scopeId={scopeId}
           contextId={contextId}
           eventId={id}
-          isDraggable={isDraggable}
           packageName={packageName}
           packageSummary={packageSummary}
           packageVersion={packageVersion}
@@ -144,13 +144,12 @@ SystemGenericLine.displayName = 'SystemGenericLine';
 interface GenericDetailsProps {
   contextId: string;
   data: Ecs;
-  isDraggable?: boolean;
   text: string;
   timelineId: string;
 }
 
 export const SystemGenericDetails = React.memo<GenericDetailsProps>(
-  ({ contextId, data, isDraggable, text, timelineId }) => {
+  ({ contextId, data, text, timelineId }) => {
     const id = data._id;
     const message: string | null = data.message != null ? data.message[0] : null;
     const hostName: string | null | undefined = get('host.name[0]', data);
@@ -170,10 +169,10 @@ export const SystemGenericDetails = React.memo<GenericDetailsProps>(
     return (
       <Details>
         <SystemGenericLine
+          scopeId={timelineId}
           contextId={contextId}
           hostName={hostName}
           id={id}
-          isDraggable={isDraggable}
           message={message}
           outcome={outcome}
           packageName={packageName}
@@ -190,7 +189,7 @@ export const SystemGenericDetails = React.memo<GenericDetailsProps>(
           workingDirectory={workingDirectory}
         />
         <EuiSpacer size="s" />
-        <NetflowRenderer data={data} isDraggable={isDraggable} timelineId={timelineId} />
+        <NetflowRenderer data={data} timelineId={timelineId} />
       </Details>
     );
   }

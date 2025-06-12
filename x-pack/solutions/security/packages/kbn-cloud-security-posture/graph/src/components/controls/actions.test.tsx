@@ -6,13 +6,17 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
-import { Actions, ActionsProps } from './actions';
+import { render, fireEvent, waitFor } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
+import { Actions, ActionsProps } from './actions';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID,
   GRAPH_ACTIONS_TOGGLE_SEARCH_ID,
 } from '../test_ids';
+
+jest.mock('react-use/lib/useLocalStorage', () => jest.fn().mockReturnValue([false, jest.fn()]));
+const SEARCH_BAR_TOUR_TITLE = 'Refine your view with search';
 
 const defaultProps: ActionsProps = {
   showToggleSearch: true,
@@ -89,13 +93,124 @@ describe('Actions component', () => {
     expect(getByText('5')).toBeInTheDocument();
   });
 
-  it('renders "9" in search filter counter badge when searchFilterCounter is equal to 9', () => {
-    const { getByText } = renderWithProviders({ ...defaultProps, searchFilterCounter: 9 });
-    expect(getByText('9')).toBeInTheDocument();
+  it('renders "99" in search filter counter badge when searchFilterCounter is equal to 99', () => {
+    const { getByText } = renderWithProviders({ ...defaultProps, searchFilterCounter: 99 });
+    expect(getByText('99')).toBeInTheDocument();
   });
 
-  it('renders "9+" in search filter counter badge when searchFilterCounter is greater than 9', () => {
-    const { getByText } = renderWithProviders({ ...defaultProps, searchFilterCounter: 10 });
-    expect(getByText('9+')).toBeInTheDocument();
+  it('renders "99+" in search filter counter badge when searchFilterCounter is greater than 99', () => {
+    const { getByText } = renderWithProviders({ ...defaultProps, searchFilterCounter: 100 });
+    expect(getByText('99+')).toBeInTheDocument();
+  });
+
+  describe('search warning message', () => {
+    it('should show search warning message when searchWarningMessage is provided', async () => {
+      const { getByTestId, getByText, container } = renderWithProviders({
+        ...defaultProps,
+        searchWarningMessage: {
+          title: 'Warning title',
+          content: 'Warning content',
+        },
+      });
+      expect(container.querySelector('.euiBeacon')).toBeInTheDocument();
+
+      getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID).focus();
+      await waitFor(() => {
+        expect(getByText('Warning title')).toBeInTheDocument();
+        expect(getByText('Warning content')).toBeInTheDocument();
+      });
+    });
+
+    it('should show search warning message when search button is toggled', async () => {
+      const { getByTestId, getByText, container } = renderWithProviders({
+        ...defaultProps,
+        searchToggled: true,
+        searchWarningMessage: {
+          title: 'Warning title',
+          content: 'Warning content',
+        },
+      });
+
+      expect(container.querySelector('.euiBeacon')).toBeInTheDocument();
+
+      getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID).focus();
+      await waitFor(() => {
+        expect(getByText('Warning title')).toBeInTheDocument();
+        expect(getByText('Warning content')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('search bar tour', () => {
+    it('opens the search bar tour when searchFilterCounter is greater than 0 and shouldShowSearchBarButtonTour is true', () => {
+      let shouldShowSearchBarButtonTour = true;
+      const setShouldShowSearchBarButtonTourMock = jest.fn(
+        (value: boolean) => (shouldShowSearchBarButtonTour = value)
+      );
+      (useLocalStorage as jest.Mock).mockImplementation(() => [
+        shouldShowSearchBarButtonTour,
+        setShouldShowSearchBarButtonTourMock,
+      ]);
+      const { getByText } = renderWithProviders({
+        ...defaultProps,
+        searchFilterCounter: 3,
+      });
+
+      expect(getByText(SEARCH_BAR_TOUR_TITLE)).toBeInTheDocument();
+      expect(setShouldShowSearchBarButtonTourMock).toBeCalled();
+      expect(setShouldShowSearchBarButtonTourMock).toBeCalledWith(false);
+    });
+
+    it('does not open the search bar tour when searchFilterCounter is greater than 0 and shouldShowSearchBarButtonTour is false', () => {
+      const setShouldShowSearchBarButtonTourMock = jest.fn();
+      (useLocalStorage as jest.Mock).mockReturnValue([false, setShouldShowSearchBarButtonTourMock]);
+      const { queryByText } = renderWithProviders({
+        ...defaultProps,
+        searchFilterCounter: 2,
+      });
+
+      expect(queryByText(SEARCH_BAR_TOUR_TITLE)).not.toBeInTheDocument();
+      expect(setShouldShowSearchBarButtonTourMock).not.toBeCalled();
+    });
+
+    it('should not show the tour if user already toggled the search bar', () => {
+      const setShouldShowSearchBarButtonTourMock = jest.fn();
+      (useLocalStorage as jest.Mock).mockReturnValue([true, setShouldShowSearchBarButtonTourMock]);
+      renderWithProviders({
+        ...defaultProps,
+        searchFilterCounter: 0,
+        searchToggled: true,
+      });
+
+      expect(defaultProps.onSearchToggle).toHaveBeenCalledWith(true);
+      expect(setShouldShowSearchBarButtonTourMock).toBeCalled();
+      expect(setShouldShowSearchBarButtonTourMock).toBeCalledWith(false);
+    });
+
+    it('closes the search bar tour when the search toggle button is clicked', async () => {
+      let shouldShowSearchBarButtonTourState = true;
+      const setShouldShowSearchBarButtonTourMock = jest.fn(
+        (value: boolean) => (shouldShowSearchBarButtonTourState = value)
+      );
+      (useLocalStorage as jest.Mock).mockImplementation(() => [
+        shouldShowSearchBarButtonTourState,
+        setShouldShowSearchBarButtonTourMock,
+      ]);
+      const { getByTestId, getByText, queryByText } = renderWithProviders({
+        ...defaultProps,
+        searchFilterCounter: 1,
+      });
+
+      expect(getByText(SEARCH_BAR_TOUR_TITLE)).toBeInTheDocument();
+
+      fireEvent.click(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID));
+
+      await waitFor(() => {
+        expect(queryByText(SEARCH_BAR_TOUR_TITLE)).not.toBeInTheDocument();
+      });
+
+      expect(setShouldShowSearchBarButtonTourMock).toBeCalled();
+      expect(setShouldShowSearchBarButtonTourMock).toBeCalledWith(false);
+    });
   });
 });

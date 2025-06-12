@@ -6,10 +6,6 @@
  */
 
 import { z } from '@kbn/zod';
+import { EntityType } from '../../../../entity_analytics/types';
 
-export enum RiskScoreEntity {
-  host = 'host',
-  user = 'user',
-}
-
-export const riskScoreEntity = z.enum([RiskScoreEntity.host, RiskScoreEntity.user]);
+export const riskScoreEntity = z.nativeEnum(EntityType);

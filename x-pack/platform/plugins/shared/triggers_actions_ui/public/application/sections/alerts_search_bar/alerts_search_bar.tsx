@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { compareFilters, Query, TimeRange } from '@kbn/es-query';
 import { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
 import { isSiemRuleType } from '@kbn/rule-data-utils';
@@ -16,7 +15,7 @@ import { isQuickFiltersGroup, QuickFiltersMenuItem } from './quick_filters';
 import { NO_INDEX_PATTERNS } from './constants';
 import { SEARCH_BAR_PLACEHOLDER } from './translations';
 import { AlertsSearchBarProps, QueryLanguageType } from './types';
-import { TriggersAndActionsUiServices } from '../../..';
+import { useKibana } from '../../../common/lib/kibana';
 
 const SA_ALERTS = { type: 'alerts', fields: {} } as SuggestionsAbstraction;
 
@@ -50,7 +49,7 @@ export function AlertsSearchBar({
       ui: { SearchBar },
     },
     data: dataService,
-  } = useKibana<TriggersAndActionsUiServices>().services;
+  } = useKibana().services;
 
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
   const { dataView } = useAlertsDataView({
@@ -180,7 +179,7 @@ export function AlertsSearchBar({
       onRefresh={onRefresh}
       showDatePicker={showDatePicker}
       showQueryInput={true}
-      saveQueryMenuVisibility="allowed_by_app_privilege"
+      allowSavingQueries
       showSubmitButton={showSubmitButton}
       submitOnBlur={submitOnBlur}
       onQueryChange={onSearchQueryChange}

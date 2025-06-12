@@ -688,5 +688,46 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
     });
+
+    describe('preview logged requests', () => {
+      const rule: ThresholdRuleCreateProps = {
+        ...getThresholdRuleForAlertTesting(['auditbeat-*']),
+        threshold: {
+          field: 'host.id',
+          value: 100,
+        },
+      };
+
+      it('should not return requests property when not enabled', async () => {
+        const { logs } = await previewRule({
+          supertest,
+          rule,
+        });
+
+        expect(logs[0].requests).toEqual(undefined);
+      });
+      it('should return requests property when enable_logged_requests set to true', async () => {
+        const { logs } = await previewRule({
+          supertest,
+          rule,
+          enableLoggedRequests: true,
+        });
+
+        const requests = logs[0].requests;
+
+        expect(requests).toHaveLength(2);
+        expect(requests![0].description).toBe('Find all terms that exceeds threshold value');
+
+        const requestWithoutSpaces = requests![0].request?.replace(/\s/g, '');
+        expect(requestWithoutSpaces).toContain(
+          `aggregations":{"thresholdTerms":{"composite":{"sources":[{"host.id":{"terms":{"field":"host.id"}}}],"size":10000},"aggs":{"max_timestamp":{"max":{"field":"@timestamp"}},"min_timestamp":{"min":{"field":"@timestamp"}},"count_check":{"bucket_selector":{"buckets_path":{"docCount":"_count"},"script":"params.docCount>=100"}}}}`
+        );
+        expect(requests![0].request).toContain('POST /auditbeat-*/_search?allow_no_indices=true');
+        expect(requests![0].request_type).toBe('findThresholdBuckets');
+        expect(requests![1].description).toBe(
+          'Find all terms that exceeds threshold value after host.id: f9c7ca2d33f548a8b37667f6fffc59ce'
+        );
+      });
+    });
   });
 };

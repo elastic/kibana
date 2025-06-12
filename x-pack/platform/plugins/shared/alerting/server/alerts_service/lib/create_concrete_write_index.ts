@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { IndicesSimulateIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { IndicesSimulateIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { get, sortBy } from 'lodash';
-import { IIndexPatternString } from '../resource_installer_utils';
+import type { IIndexPatternString } from '../resource_installer_utils';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
-import { DataStreamAdapter } from './data_stream_adapter';
+import type { DataStreamAdapter } from './data_stream_adapter';
+import { updateIndexTemplateFieldsLimit } from './update_index_template_fields_limit';
 
 export interface ConcreteIndexInfo {
   index: string;
@@ -31,7 +32,10 @@ interface UpdateIndexOpts {
   esClient: ElasticsearchClient;
   totalFieldsLimit: number;
   concreteIndexInfo: ConcreteIndexInfo;
+  attempt?: number;
 }
+
+const MAX_FIELDS_LIMIT_INCREASE_ATTEMPTS = 100;
 
 const updateTotalFieldLimitSetting = async ({
   logger,
@@ -45,7 +49,10 @@ const updateTotalFieldLimitSetting = async ({
       () =>
         esClient.indices.putSettings({
           index,
-          body: { 'index.mapping.total_fields.limit': totalFieldsLimit },
+          settings: {
+            'index.mapping.total_fields.limit': totalFieldsLimit,
+            'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+          },
         }),
       { logger }
     );
@@ -66,6 +73,7 @@ const updateUnderlyingMapping = async ({
   logger,
   esClient,
   concreteIndexInfo,
+  attempt = 1,
 }: UpdateIndexOpts) => {
   const { index, alias } = concreteIndexInfo;
   let simulatedIndexMapping: IndicesSimulateIndexTemplateResponse;
@@ -90,12 +98,44 @@ const updateUnderlyingMapping = async ({
 
   try {
     await retryTransientEsErrors(
-      () => esClient.indices.putMapping({ index, body: simulatedMapping }),
+      () => esClient.indices.putMapping({ index, ...simulatedMapping }),
       { logger }
     );
 
     return;
   } catch (err) {
+    if (attempt <= MAX_FIELDS_LIMIT_INCREASE_ATTEMPTS) {
+      try {
+        const newLimit = await increaseFieldsLimit({
+          err,
+          esClient,
+          concreteIndexInfo,
+          logger,
+          increment: attempt,
+        });
+        if (newLimit) {
+          logger.debug(
+            `Retrying PUT mapping for ${alias} with increased total_fields.limit of ${newLimit}. Attempt: ${attempt}`
+          );
+          await updateUnderlyingMapping({
+            logger,
+            esClient,
+            concreteIndexInfo,
+            totalFieldsLimit: newLimit,
+            attempt: attempt + 1,
+          });
+          return;
+        }
+      } catch (e) {
+        logger.error(
+          `An error occured while increasing total_fields.limit of ${alias} - ${e.message}`,
+          e
+        );
+        // Throw the original error
+        throw err;
+      }
+    }
+
     logger.error(`Failed to PUT mapping for ${alias}: ${err.message}`);
     throw err;
   }
@@ -183,18 +223,16 @@ export async function setConcreteWriteIndex(opts: SetConcreteWriteIndexOpts) {
     await retryTransientEsErrors(
       () =>
         esClient.indices.updateAliases({
-          body: {
-            actions: [
-              { remove: { index: concreteIndex.index, alias: concreteIndex.alias } },
-              {
-                add: {
-                  index: concreteIndex.index,
-                  alias: concreteIndex.alias,
-                  is_write_index: true,
-                },
+          actions: [
+            { remove: { index: concreteIndex.index, alias: concreteIndex.alias } },
+            {
+              add: {
+                index: concreteIndex.index,
+                alias: concreteIndex.alias,
+                is_write_index: true,
               },
-            ],
-          },
+            },
+          ],
         }),
       { logger }
     );
@@ -207,3 +245,59 @@ export async function setConcreteWriteIndex(opts: SetConcreteWriteIndexOpts) {
     );
   }
 }
+
+const increaseFieldsLimit = async ({
+  err,
+  esClient,
+  concreteIndexInfo,
+  logger,
+  increment,
+}: {
+  err: Error;
+  esClient: ElasticsearchClient;
+  concreteIndexInfo: ConcreteIndexInfo;
+  logger: Logger;
+  increment: number;
+}): Promise<number | undefined> => {
+  const { alias } = concreteIndexInfo;
+  const match = err.message
+    ? err.message.match(/Limit of total fields \[(\d+)\] has been exceeded/)
+    : null;
+
+  if (match !== null) {
+    const exceededLimit = parseInt(match[1], 10);
+    const newLimit = exceededLimit + increment;
+
+    const { index_templates: indexTemplates } = await retryTransientEsErrors(
+      () =>
+        esClient.indices.getIndexTemplate({
+          name: `${alias}-index-template`,
+        }),
+      { logger }
+    );
+
+    if (indexTemplates.length <= 0) {
+      logger.error(`No index template found for ${alias}`);
+      return;
+    }
+    const template = indexTemplates[0];
+
+    // Update the limit in the index
+    await updateTotalFieldLimitSetting({
+      logger,
+      esClient,
+      totalFieldsLimit: newLimit,
+      concreteIndexInfo,
+    });
+    // Update the limit in the index template
+    await retryTransientEsErrors(
+      () => updateIndexTemplateFieldsLimit({ esClient, template, limit: newLimit }),
+      { logger }
+    );
+    logger.info(
+      `total_fields.limit of ${alias} has been increased from ${exceededLimit} to ${newLimit}`
+    );
+
+    return newLimit;
+  }
+};

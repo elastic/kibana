@@ -35,9 +35,7 @@ export const registerHitsStatusRoute = (router: IRouter) => {
         const body = await client.asCurrentUser.search({
           index,
           size: 1,
-          body: {
-            query,
-          },
+          query,
         });
         const count = body.hits.hits.length;
 

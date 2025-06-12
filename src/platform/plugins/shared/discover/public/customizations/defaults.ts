@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DiscoverCustomizationContext } from './types';
+import type { DiscoverCustomizationContext } from './types';
 
 export const defaultCustomizationContext: DiscoverCustomizationContext = {
   displayMode: 'standalone',
-  inlineTopNav: {
-    enabled: false,
-    showLogsExplorerTabs: false,
-  },
 };

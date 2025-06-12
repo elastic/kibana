@@ -9,6 +9,8 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
 } from '@kbn/core-saved-objects-api-server';
+import { merge } from 'lodash/fp';
+import type { InitEntityEngineRequestBody } from '../../../../../common/api/entity_analytics/entity_store/engine/init.gen';
 import type {
   EngineDescriptor,
   EngineStatus,
@@ -17,12 +19,14 @@ import type {
 
 import { entityEngineDescriptorTypeName } from './engine_descriptor_type';
 import { getByEntityTypeQuery } from '../utils';
-import { ENGINE_STATUS } from '../constants';
+import { ENGINE_STATUS, defaultOptions } from '../constants';
 
 interface EngineDescriptorDependencies {
   soClient: SavedObjectsClientContract;
   namespace: string;
 }
+
+type InitOptions = InitEntityEngineRequestBody;
 
 export class EngineDescriptorClient {
   constructor(private readonly deps: EngineDescriptorDependencies) {}
@@ -31,14 +35,8 @@ export class EngineDescriptorClient {
     return `entity-engine-descriptor-${entityType}-${this.deps.namespace}`;
   }
 
-  async init(
-    entityType: EntityType,
-    {
-      filter,
-      fieldHistoryLength,
-      indexPattern,
-    }: { filter: string; fieldHistoryLength: number; indexPattern: string }
-  ) {
+  async init(entityType: EntityType, options: InitOptions) {
+    const opts: typeof defaultOptions = merge(defaultOptions, options);
     const engineDescriptor = await this.find(entityType);
 
     if (engineDescriptor.total > 1) {
@@ -51,9 +49,7 @@ export class EngineDescriptorClient {
         ...old,
         error: undefined, // if the engine is being re-initialized, clear any previous error
         status: ENGINE_STATUS.INSTALLING,
-        filter,
-        fieldHistoryLength,
-        indexPattern,
+        ...opts,
       };
       await this.deps.soClient.update<EngineDescriptor>(
         entityEngineDescriptorTypeName,
@@ -70,9 +66,7 @@ export class EngineDescriptorClient {
       {
         status: ENGINE_STATUS.INSTALLING,
         type: entityType,
-        indexPattern,
-        filter,
-        fieldHistoryLength,
+        ...opts,
       },
       { id: this.getSavedObjectId(entityType) }
     );

@@ -7,8 +7,8 @@
 
 import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import { EntityType } from '../../../../common/search_strategy';
 import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
-import type { IdentifierType } from '../../../../common/entity_analytics/risk_engine';
 
 interface WriterBulkResponse {
   errors: string[];
@@ -73,25 +73,25 @@ export class RiskEngineDataWriter implements RiskEngineDataWriter {
     const hostBody =
       params.host?.flatMap((score) => [
         { create: { _index: this.options.index } },
-        this.scoreToEcs(score, 'host'),
+        this.scoreToEcs(score, EntityType.host),
       ]) ?? [];
 
     const userBody =
       params.user?.flatMap((score) => [
         { create: { _index: this.options.index } },
-        this.scoreToEcs(score, 'user'),
+        this.scoreToEcs(score, EntityType.user),
       ]) ?? [];
 
     const serviceBody =
       params.service?.flatMap((score) => [
         { create: { _index: this.options.index } },
-        this.scoreToEcs(score, 'service'),
+        this.scoreToEcs(score, EntityType.service),
       ]) ?? [];
-
+    // TODO get enabled entity types and loop through them to build the array
     return [...hostBody, ...userBody, ...serviceBody] as BulkOperationContainer[];
   };
 
-  private scoreToEcs = (score: EntityRiskScoreRecord, identifierType: IdentifierType): unknown => {
+  private scoreToEcs = (score: EntityRiskScoreRecord, identifierType: EntityType): unknown => {
     const { '@timestamp': _, ...rest } = score;
     return {
       '@timestamp': score['@timestamp'],

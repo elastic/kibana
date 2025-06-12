@@ -81,7 +81,7 @@ jest.mock('../../common/lib/kibana', () => ({
     services: {
       application: {
         capabilities: {
-          siem: {
+          siemV2: {
             crud: true,
           },
         },

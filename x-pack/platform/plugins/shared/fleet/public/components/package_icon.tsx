@@ -30,6 +30,20 @@ export const PackageIcon: React.FunctionComponent<
   return <Icon size="s" type={iconType} {...euiIconProps} loading="lazy" />;
 };
 
+export const TableIcon: React.FunctionComponent<UsePackageIconType & Omit<EuiIconProps, 'type'>> = (
+  props
+) => {
+  const { icons } = props;
+  if (icons && icons.length === 1 && icons[0].type === 'eui') {
+    return <EuiIcon type={icons[0].src} {...props} />;
+  } else if (icons && icons.length === 1 && icons[0].type === 'svg') {
+    // @ts-expect-error loading="lazy" is not supported by EuiIcon
+    return <EuiIcon type={icons[0].src} {...props} loading="lazy" />;
+  } else {
+    return <PackageIcon {...props} />;
+  }
+};
+
 export const CardIcon: React.FunctionComponent<UsePackageIconType & Omit<EuiIconProps, 'type'>> = (
   props
 ) => {

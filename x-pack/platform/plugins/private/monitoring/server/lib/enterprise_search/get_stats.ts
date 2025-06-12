@@ -38,14 +38,12 @@ export async function getStats(
     filter_path: entSearchAggFilterPath,
     size: 0,
     ignore_unavailable: true,
-    body: {
-      query: createEnterpriseSearchQuery({
-        start,
-        end,
-        uuid: clusterUuid,
-      }),
-      aggs: entSearchUuidsAgg(maxBucketSize),
-    },
+    query: createEnterpriseSearchQuery({
+      start,
+      end,
+      uuid: clusterUuid,
+    }),
+    aggs: entSearchUuidsAgg(maxBucketSize),
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

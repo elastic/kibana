@@ -42,7 +42,7 @@ export const getCanvasNotifyService = (): CanvasNotifyService => {
   return {
     /*
      * @param {(string | Object)} err: message or Error object
-     * @param {Object} opts: option to override toast title or icon, see https://github.com/elastic/kibana/blob/main/src/legacy/ui/public/notify/toasts/TOAST_NOTIFICATIONS.md
+     * @param {Object} opts: option to override toast title or icon, see https://github.com/elastic/eui/blob/main/packages/eui/src/components/toast/toast.tsx#L26
      */
     error(err, opts) {
       toasts.addDanger(getToast(err, opts));

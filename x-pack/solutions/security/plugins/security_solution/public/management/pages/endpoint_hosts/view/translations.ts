@@ -13,7 +13,7 @@ export const OVERVIEW = i18n.translate('xpack.securitySolution.endpointDetails.o
 
 export const WORKFLOW_INSIGHTS = {
   title: i18n.translate('xpack.securitySolution.endpointDetails.workflowInsights.sectionTitle', {
-    defaultMessage: 'Issues',
+    defaultMessage: 'Automatic Troubleshooting',
   }),
   titleRight: i18n.translate(
     'xpack.securitySolution.endpointDetails.workflowInsights.extraAction',
@@ -23,7 +23,7 @@ export const WORKFLOW_INSIGHTS = {
   ),
   scan: {
     title: i18n.translate('xpack.securitySolution.endpointDetails.workflowInsights.scan.title', {
-      defaultMessage: 'AI-Powered issue scan',
+      defaultMessage: 'Automatic Troubleshooting',
     }),
     button: i18n.translate('xpack.securitySolution.endpointDetails.workflowInsights.scan.button', {
       defaultMessage: 'Scan',
@@ -43,12 +43,26 @@ export const WORKFLOW_INSIGHTS = {
   },
   issues: {
     title: i18n.translate('xpack.securitySolution.endpointDetails.workflowInsights.issues.title', {
-      defaultMessage: 'Issues',
+      defaultMessage: 'Insights',
     }),
+    survey: {
+      description: i18n.translate(
+        'xpack.securitySolution.endpointDetails.workflowInsights.survey.text',
+        {
+          defaultMessage: 'How is Automatic Troubleshooting working for you? ',
+        }
+      ),
+      callToAction: i18n.translate(
+        'xpack.securitySolution.endpointDetails.workflowInsights.survey.callToAction',
+        {
+          defaultMessage: 'Provide feedback',
+        }
+      ),
+    },
     emptyResults: i18n.translate(
       'xpack.securitySolution.endpointDetails.workflowInsights.issues.emptyResults',
       {
-        defaultMessage: 'No issues had been found',
+        defaultMessage: 'Troubleshooting scan complete, no issues found.',
       }
     ),
     remediationButton: {
@@ -65,7 +79,7 @@ export const WORKFLOW_INSIGHTS = {
         }
       ),
       tooltipNoPermissions: i18n.translate(
-        'xpack.securitySolution.endpointDetails.workflowInsights.issues.insighRemediationButtonTooltipNoPermissions',
+        'xpack.securitySolution.endpointDetails.workflowInsights.issues.insightRemediationButtonTooltipNoPermissions',
         {
           defaultMessage: 'You do not have the privileges required to perform this operation.',
         }
@@ -95,6 +109,12 @@ export const WORKFLOW_INSIGHTS = {
       'xpack.securitySolution.endpointDetails.workflowInsights.toast.updateInsightError',
       {
         defaultMessage: 'Failed to mark insight as remediated',
+      }
+    ),
+    maxFetchAttemptsReached: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.toast.maxFetchAttemptsReached',
+      {
+        defaultMessage: 'Failed to fetch insights after multiple attempts',
       }
     ),
   },

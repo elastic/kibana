@@ -6,7 +6,7 @@
  */
 
 import { chunk, get } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, IKibanaResponse } from '@kbn/core/server';
 import {
   transformError,
@@ -102,9 +102,20 @@ export const createDetectionIndex = async (
   const aadIndexAliasName = ruleDataService.getResourceName(`security.alerts-${spaceId}`);
 
   if (await templateNeedsUpdate({ alias: index, esClient })) {
+    const reIndexedIndexPatterns = await getReIndexedV8IndexPatterns({ index, esClient });
+    const template = getSignalsTemplate(index, aadIndexAliasName, spaceId) as Record<
+      string,
+      unknown
+    >;
+
+    // addresses https://github.com/elastic/security-team/issues/11440
+    if (reIndexedIndexPatterns.length > 0 && Array.isArray(template.index_patterns)) {
+      template.index_patterns.push(...reIndexedIndexPatterns);
+    }
+
     await esClient.indices.putIndexTemplate({
       name: index,
-      body: getSignalsTemplate(index, aadIndexAliasName, spaceId) as Record<string, unknown>,
+      body: template,
     });
   }
   // Check if the old legacy siem signals template exists and remove it
@@ -207,5 +218,27 @@ const addIndexAliases = async ({
       };
     }),
   };
-  await esClient.indices.updateAliases({ body: aliasActions });
+  await esClient.indices.updateAliases(aliasActions);
+};
+
+/**
+ * checks if indices under alias were reIndexed from v7 to v8(prefixed with '.reindexed-v8-')
+ * returns wildcard index patterns to include these indices and possible rollovers in index template
+ */
+const getReIndexedV8IndexPatterns = async ({
+  esClient,
+  index,
+}: {
+  esClient: ElasticsearchClient;
+  index: string;
+}): Promise<string[]> => {
+  const V8_PREFIX = '.reindexed-v8-';
+  const indices = await esClient.indices.getAlias({ index: `${index}-*`, name: index });
+  return Object.keys(indices).reduce<string[]>((acc, concreteIndexName) => {
+    if (concreteIndexName.startsWith(V8_PREFIX)) {
+      acc.push(`${V8_PREFIX}${index.replace(/^\./, '')}-*`);
+    }
+
+    return acc;
+  }, []);
 };

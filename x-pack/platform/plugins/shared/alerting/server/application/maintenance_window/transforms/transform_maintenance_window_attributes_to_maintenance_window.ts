@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { MaintenanceWindow } from '../types';
-import { MaintenanceWindowAttributes } from '../../../data/maintenance_window/types';
+import type { MaintenanceWindow } from '../types';
+import type { MaintenanceWindowAttributes } from '../../../data/maintenance_window/types';
 import { getMaintenanceWindowDateAndStatus } from '../lib';
 
 export interface TransformMaintenanceWindowAttributesMaintenanceWindowParams {

@@ -39,6 +39,7 @@ export const ResultDetailsSuccessful = ({
     });
     // FIXME: Dario is not sure what step._id is being used for,
     // so he'll leave it in place
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timestamp, monitorId, stepIndex, location, step._id]);
 
   const { currentStep } = useJourneySteps(

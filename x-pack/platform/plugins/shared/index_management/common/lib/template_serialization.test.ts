@@ -62,6 +62,36 @@ describe('Template serialization', () => {
           ).toHaveProperty('indexMode', value ?? STANDARD_INDEX_MODE);
         });
       });
+
+      describe('with logs-*-* index pattern', () => {
+        test('deserializes to logsdb index mode when logsdb is enabled', () => {
+          expect(
+            deserializeTemplate(
+              {
+                ...defaultSerializedTemplate,
+                index_patterns: ['logs-*-*'],
+                name: 'my_template',
+              },
+              undefined,
+              true
+            )
+          ).toHaveProperty('indexMode', LOGSDB_INDEX_MODE);
+        });
+
+        test('deserializes to standard index mode when logsdb is disabled', () => {
+          expect(
+            deserializeTemplate(
+              {
+                ...defaultSerializedTemplate,
+                index_patterns: ['logs-*-*'],
+                name: 'my_template',
+              },
+              undefined,
+              false
+            )
+          ).toHaveProperty('indexMode', STANDARD_INDEX_MODE);
+        });
+      });
     });
 
     describe('serializeTemplate()', () => {
@@ -86,6 +116,11 @@ describe('Template serialization', () => {
             })
           ).toHaveProperty('template.settings.index.mode', value);
         });
+      });
+      test(`correctly serializes data_stream_options`, () => {
+        expect(
+          serializeTemplate(defaultDeserializedTemplate, { failure_store: { enabled: true } })
+        ).toHaveProperty('template.data_stream_options', { failure_store: { enabled: true } });
       });
     });
   });

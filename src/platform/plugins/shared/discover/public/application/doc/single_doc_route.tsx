@@ -18,7 +18,7 @@ import { Doc } from './components/doc';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDataView } from '../../hooks/use_data_view';
-import { DocHistoryLocationState } from './locator';
+import type { DocHistoryLocationState } from './locator';
 import { useRootProfile } from '../../context_awareness';
 
 export interface DocUrlParams {

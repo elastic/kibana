@@ -10,8 +10,7 @@ import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_
 import { userProfiles, userProfilesMap } from '../../../containers/user_profiles/api.mock';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer, noUpdateCasesPermissions } from '../../../common/mock';
+import { noAssignCasesPermissions, renderWithTestingProviders } from '../../../common/mock';
 import type { AssignUsersProps } from './assign_users';
 import { AssignUsers } from './assign_users';
 import { waitForEuiPopoverClose, waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -25,7 +24,6 @@ const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;
 const currentUserProfile = userProfiles[0];
 
 describe('AssignUsers', () => {
-  let appMockRender: AppMockRenderer;
   let defaultProps: AssignUsersProps;
 
   beforeEach(() => {
@@ -39,47 +37,49 @@ describe('AssignUsers', () => {
 
     useSuggestUserProfilesMock.mockReturnValue({ data: userProfiles, isLoading: false });
     useGetCurrentUserProfileMock.mockReturnValue({ data: currentUserProfile, isLoading: false });
-
-    appMockRender = createAppMockRenderer();
   });
 
   it('does not show any assignees when there are none assigned', () => {
-    appMockRender.render(<AssignUsers {...defaultProps} />);
+    renderWithTestingProviders(<AssignUsers {...defaultProps} />);
 
     expect(screen.getByText('No users are assigned')).toBeInTheDocument();
   });
 
-  it('does not show the suggest users edit button when the user does not have update permissions', () => {
-    appMockRender = createAppMockRenderer({ permissions: noUpdateCasesPermissions() });
-    appMockRender.render(<AssignUsers {...defaultProps} />);
+  it('does not show the suggest users edit button when the user does not have assign permissions', () => {
+    renderWithTestingProviders(<AssignUsers {...defaultProps} />, {
+      wrapperProps: { permissions: noAssignCasesPermissions() },
+    });
 
     expect(screen.queryByText('case-view-assignees-edit')).not.toBeInTheDocument();
   });
 
-  it('does not show the assign users link when the user does not have update permissions', () => {
-    appMockRender = createAppMockRenderer({ permissions: noUpdateCasesPermissions() });
-    appMockRender.render(<AssignUsers {...defaultProps} />);
+  it('does not show the assign users link when the user does not have assign permissions', () => {
+    renderWithTestingProviders(<AssignUsers {...defaultProps} />, {
+      wrapperProps: { permissions: noAssignCasesPermissions() },
+    });
 
     expect(screen.queryByTestId('assign yourself')).not.toBeInTheDocument();
     expect(screen.queryByTestId('Assign a user')).not.toBeInTheDocument();
   });
 
   it('does not show the suggest users edit button when the component is still loading', () => {
-    appMockRender.render(<AssignUsers {...{ ...defaultProps, isLoading: true }} />);
+    renderWithTestingProviders(<AssignUsers {...{ ...defaultProps, isLoading: true }} />);
 
     expect(screen.queryByTestId('case-view-assignees-edit')).not.toBeInTheDocument();
     expect(screen.getByTestId('case-view-assignees-button-loading')).toBeInTheDocument();
   });
 
   it('does not show the assign yourself link when the current profile is undefined', () => {
-    appMockRender.render(<AssignUsers {...{ ...defaultProps, currentUserProfile: undefined }} />);
+    renderWithTestingProviders(
+      <AssignUsers {...{ ...defaultProps, currentUserProfile: undefined }} />
+    );
 
     expect(screen.queryByText('assign yourself')).not.toBeInTheDocument();
     expect(screen.getByText('Assign a user')).toBeInTheDocument();
   });
 
   it('shows the suggest users edit button when the user has update permissions', () => {
-    appMockRender.render(<AssignUsers {...defaultProps} />);
+    renderWithTestingProviders(<AssignUsers {...defaultProps} />);
 
     expect(screen.getByTestId('case-view-assignees-edit')).toBeInTheDocument();
   });
@@ -90,7 +90,7 @@ describe('AssignUsers', () => {
       caseAssignees: userProfiles.slice(0, 2),
       userProfiles: userProfilesMap,
     };
-    appMockRender.render(<AssignUsers {...props} />);
+    renderWithTestingProviders(<AssignUsers {...props} />);
 
     expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
     expect(screen.getByText('Physical Dinosaur')).toBeInTheDocument();
@@ -100,7 +100,7 @@ describe('AssignUsers', () => {
   });
 
   it('shows the rerendered assignees', () => {
-    const { rerender } = appMockRender.render(<AssignUsers {...defaultProps} />);
+    const { rerender } = renderWithTestingProviders(<AssignUsers {...defaultProps} />);
 
     const props = {
       ...defaultProps,
@@ -121,7 +121,7 @@ describe('AssignUsers', () => {
       ...defaultProps,
       userProfiles: userProfilesMap,
     };
-    appMockRender.render(<AssignUsers {...props} />);
+    renderWithTestingProviders(<AssignUsers {...props} />);
 
     fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
     await waitForEuiPopoverOpen();
@@ -137,7 +137,7 @@ describe('AssignUsers', () => {
       ...defaultProps,
       userProfiles: userProfilesMap,
     };
-    appMockRender.render(<AssignUsers {...props} />);
+    renderWithTestingProviders(<AssignUsers {...props} />);
 
     fireEvent.click(screen.getByText('Assign a user'));
     await waitForEuiPopoverOpen();
@@ -155,7 +155,7 @@ describe('AssignUsers', () => {
       onAssigneesChanged,
       userProfiles: userProfilesMap,
     };
-    appMockRender.render(<AssignUsers {...props} />);
+    renderWithTestingProviders(<AssignUsers {...props} />);
 
     fireEvent.click(screen.getByText('assign yourself'));
 
@@ -185,7 +185,7 @@ describe('AssignUsers', () => {
       onAssigneesChanged,
       userProfiles: userProfilesMap,
     };
-    appMockRender.render(<AssignUsers {...props} />);
+    renderWithTestingProviders(<AssignUsers {...props} />);
 
     fireEvent.mouseEnter(
       screen.getByTestId(`user-profile-assigned-user-${userProfiles[0].user.username}-remove-group`)
@@ -208,7 +208,7 @@ describe('AssignUsers', () => {
       onAssigneesChanged,
       userProfiles: userProfilesMap,
     };
-    appMockRender.render(<AssignUsers {...props} />);
+    renderWithTestingProviders(<AssignUsers {...props} />);
 
     fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
     await waitForEuiPopoverOpen();
@@ -248,7 +248,7 @@ describe('AssignUsers', () => {
       onAssigneesChanged,
       userProfiles: userProfilesMap,
     };
-    appMockRender.render(<AssignUsers {...props} />);
+    renderWithTestingProviders(<AssignUsers {...props} />);
 
     fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
     await waitForEuiPopoverOpen();
@@ -268,7 +268,7 @@ describe('AssignUsers', () => {
       onAssigneesChanged,
       userProfiles: userProfilesMap,
     };
-    appMockRender.render(<AssignUsers {...props} />);
+    renderWithTestingProviders(<AssignUsers {...props} />);
 
     fireEvent.mouseEnter(screen.getByTestId(`user-profile-assigned-user-unknownId1-remove-group`));
     fireEvent.click(screen.getByTestId(`user-profile-assigned-user-unknownId1-remove-button`));
@@ -290,7 +290,7 @@ describe('AssignUsers', () => {
       caseAssignees: [{ uid: 'unknownId1' }, { uid: 'unknownId2' }, { uid: userProfiles[0].uid }],
       userProfiles: userProfilesMap,
     };
-    appMockRender.render(<AssignUsers {...props} />);
+    renderWithTestingProviders(<AssignUsers {...props} />);
 
     expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
     expect(
@@ -309,7 +309,7 @@ describe('AssignUsers', () => {
       onAssigneesChanged,
       userProfiles: userProfilesMap,
     };
-    appMockRender.render(<AssignUsers {...props} />);
+    renderWithTestingProviders(<AssignUsers {...props} />);
 
     fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
     await waitForEuiPopoverOpen();
@@ -355,7 +355,7 @@ describe('AssignUsers', () => {
       onAssigneesChanged,
       userProfiles: userProfilesMap,
     };
-    appMockRender.render(<AssignUsers {...props} />);
+    renderWithTestingProviders(<AssignUsers {...props} />);
 
     fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
     await waitForEuiPopoverOpen();

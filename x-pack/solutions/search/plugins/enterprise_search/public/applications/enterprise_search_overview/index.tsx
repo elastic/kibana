@@ -12,15 +12,11 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { InitialAppData } from '../../../common/types';
 
 import { ProductSelector } from './components/product_selector';
-import { SetupGuide } from './components/setup_guide';
-import { ROOT_PATH, SETUP_GUIDE_PATH } from './routes';
+import { ROOT_PATH } from './routes';
 
 export const EnterpriseSearchOverview: React.FC<InitialAppData> = ({}) => {
   return (
     <Routes>
-      <Route exact path={SETUP_GUIDE_PATH}>
-        <SetupGuide />
-      </Route>
       <Route exact path={ROOT_PATH}>
         <ProductSelector />
       </Route>

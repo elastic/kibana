@@ -6,13 +6,12 @@
  */
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import { Conversation } from '../..';
+import { ClientMessage, Conversation } from '../..';
 
 export const alertConvo: Conversation = {
-  id: '',
+  id: 'alert-convo',
   title: 'Alert summary',
   category: 'assistant',
-  isDefault: true,
   messages: [
     {
       content:
@@ -33,11 +32,24 @@ export const alertConvo: Conversation = {
   },
 };
 
+export const messageWithContentReferences: ClientMessage = {
+  content: 'You have 1 alert.{reference(abcde)}',
+  role: 'user',
+  timestamp: '2023-03-19T18:59:18.174Z',
+  metadata: {
+    contentReferences: {
+      abcde: {
+        id: 'abcde',
+        type: 'SecurityAlertsPage',
+      },
+    },
+  },
+};
+
 export const emptyWelcomeConvo: Conversation = {
   id: '',
   title: 'Welcome',
   category: 'assistant',
-  isDefault: true,
   messages: [],
   replacements: {},
   apiConfig: {
@@ -47,8 +59,14 @@ export const emptyWelcomeConvo: Conversation = {
   },
 };
 
+export const conversationWithContentReferences: Conversation = {
+  ...emptyWelcomeConvo,
+  messages: [messageWithContentReferences],
+};
+
 export const welcomeConvo: Conversation = {
   ...emptyWelcomeConvo,
+  id: 'has-an-id',
   messages: [
     {
       content:
@@ -69,7 +87,6 @@ export const customConvo: Conversation = {
   id: '',
   category: 'assistant',
   title: 'Custom option',
-  isDefault: false,
   messages: [],
   replacements: {},
   apiConfig: {

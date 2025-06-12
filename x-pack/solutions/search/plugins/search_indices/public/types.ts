@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { RetrieverContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { ConsolePluginSetup, ConsolePluginStart } from '@kbn/console-plugin/public';
+import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type {
@@ -50,6 +52,7 @@ export interface SearchIndicesAppPluginStartDependencies {
   serverless?: ServerlessPluginStart;
   usageCollection?: UsageCollectionStart;
   indexManagement: IndexManagementPluginStart;
+  searchNavigation?: SearchNavigationPluginStart;
 }
 
 export interface SearchIndicesServicesContextDeps {
@@ -77,6 +80,7 @@ export interface CodeSnippetParameters {
   indexName?: string;
   apiKey?: string;
   elasticsearchURL: string;
+  isServerless?: boolean;
 }
 
 export type CodeSnippetFunction = (params: CodeSnippetParameters) => string;
@@ -113,6 +117,12 @@ export interface IngestCodeSnippetParameters extends CodeSnippetParameters {
 
 export type IngestCodeSnippetFunction = (params: IngestCodeSnippetParameters) => string;
 
+export interface SearchCodeSnippetParameters extends CodeSnippetParameters {
+  indexName: string;
+  queryObject: { retriever: RetrieverContainer };
+}
+export type SearchCodeSnippetFunction = (params: SearchCodeSnippetParameters) => string;
+
 export interface IngestDataCodeDefinition {
   installCommand?: string;
   ingestCommand: IngestCodeSnippetFunction;
@@ -129,6 +139,17 @@ export interface IngestDataCodeExamples {
   curl: IngestDataCodeDefinition;
   python: IngestDataCodeDefinition;
   javascript: IngestDataCodeDefinition;
+}
+
+export interface SearchCodeDefinition {
+  searchCommand: SearchCodeSnippetFunction;
+}
+
+export interface SearchCodeExamples {
+  sense: SearchCodeDefinition;
+  curl: SearchCodeDefinition;
+  python: SearchCodeDefinition;
+  javascript: SearchCodeDefinition;
 }
 
 export interface CreateIndexFormState {

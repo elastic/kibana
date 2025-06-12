@@ -21,20 +21,48 @@ export function registerSloUsageCollector(usageCollection?: UsageCollectionSetup
         total: {
           type: 'long',
           _meta: {
-            description: 'The total number of slos in the cluster',
+            description: 'The total number of SLOs in the cluster',
+          },
+        },
+        definitions: {
+          total: {
+            type: 'long',
+            _meta: {
+              description: 'The total number of SLO definitions in the cluster',
+            },
+          },
+          total_with_ccs: {
+            type: 'long',
+            _meta: {
+              description: 'The total number of SLO definitions using CCS in the cluster',
+            },
+          },
+          total_with_groups: {
+            type: 'long',
+            _meta: {
+              description: 'The total number of SLO definitions using groups in the cluster',
+            },
+          },
+        },
+        instances: {
+          total: {
+            type: 'long',
+            _meta: {
+              description: 'The total number of SLO instances in the cluster',
+            },
           },
         },
         by_status: {
           enabled: {
             type: 'long',
             _meta: {
-              description: 'The number of enabled slos in the cluster',
+              description: 'The number of enabled SLOs in the cluster',
             },
           },
           disabled: {
             type: 'long',
             _meta: {
-              description: 'The number of disabled slos in the cluster',
+              description: 'The number of disabled SLOs in the cluster',
             },
           },
         },
@@ -42,7 +70,7 @@ export function registerSloUsageCollector(usageCollection?: UsageCollectionSetup
           DYNAMIC_KEY: {
             type: 'long',
             _meta: {
-              description: 'The number of slos by sli type in the cluster',
+              description: 'The number of SLOs by sli type in the cluster',
             },
           },
         },
@@ -50,7 +78,7 @@ export function registerSloUsageCollector(usageCollection?: UsageCollectionSetup
           DYNAMIC_KEY: {
             type: 'long',
             _meta: {
-              description: 'The number of slos by rolling duration in the cluster',
+              description: 'The number of SLOs by rolling duration in the cluster',
             },
           },
         },
@@ -58,7 +86,7 @@ export function registerSloUsageCollector(usageCollection?: UsageCollectionSetup
           DYNAMIC_KEY: {
             type: 'long',
             _meta: {
-              description: 'The number of slos by calendar aligned duration in the cluster',
+              description: 'The number of SLOs by calendar aligned duration in the cluster',
             },
           },
         },
@@ -66,13 +94,13 @@ export function registerSloUsageCollector(usageCollection?: UsageCollectionSetup
           occurrences: {
             type: 'long',
             _meta: {
-              description: 'The number of slos by timeslices budgeting method in the cluster',
+              description: 'The number of SLOs by timeslices budgeting method in the cluster',
             },
           },
           timeslices: {
             type: 'long',
             _meta: {
-              description: 'The number of slos by occurrences budgeting method in the cluster',
+              description: 'The number of SLOs by occurrences budgeting method in the cluster',
             },
           },
         },

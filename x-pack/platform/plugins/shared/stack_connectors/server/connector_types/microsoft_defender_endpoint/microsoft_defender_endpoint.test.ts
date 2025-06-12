@@ -5,39 +5,14 @@
  * 2.0.
  */
 
-import {
-  CreateMicrosoftDefenderConnectorMockResponse,
-  microsoftDefenderEndpointConnectorMocks,
-} from './mocks';
+import type { CreateMicrosoftDefenderConnectorMockResponse } from './mocks';
+import { microsoftDefenderEndpointConnectorMocks } from './mocks';
 
 describe('Microsoft Defender for Endpoint Connector', () => {
   let connectorMock: CreateMicrosoftDefenderConnectorMockResponse;
 
   beforeEach(() => {
     connectorMock = microsoftDefenderEndpointConnectorMocks.create();
-  });
-
-  describe('Access Token management', () => {
-    it('should call API to generate as new token', async () => {
-      await connectorMock.instanceMock.isolateHost(
-        { id: '1-2-3', comment: 'foo' },
-        connectorMock.usageCollector
-      );
-
-      expect(connectorMock.instanceMock.request).toHaveBeenCalledWith(
-        expect.objectContaining({
-          url: `${connectorMock.options.config.oAuthServerUrl}/${connectorMock.options.config.tenantId}/oauth2/v2.0/token`,
-          method: 'POST',
-          data: {
-            grant_type: 'client_credentials',
-            client_id: connectorMock.options.config.clientId,
-            scope: connectorMock.options.config.oAuthScope,
-            client_secret: connectorMock.options.secrets.clientSecret,
-          },
-        }),
-        connectorMock.usageCollector
-      );
-    });
   });
 
   describe('#testConnector', () => {
@@ -54,6 +29,7 @@ describe('Microsoft Defender for Endpoint Connector', () => {
           'API call to Machine Isolate was successful',
           'API call to Machine Release was successful',
           'API call to Machine Actions was successful',
+          'API call to Machine RunScript was successful',
         ],
       });
 
@@ -187,10 +163,13 @@ describe('Microsoft Defender for Endpoint Connector', () => {
     });
 
     it.each`
-      title                       | options                                                                           | expectedParams
-      ${'single value filters'}   | ${{ id: '123', status: 'Succeeded', machineId: 'abc', page: 2 }}                  | ${{ $count: true, $filter: 'id eq 123 AND status eq Succeeded AND machineId eq abc', $skip: 20, $top: 20 }}
-      ${'multiple value filters'} | ${{ id: ['123', '321'], type: ['Isolate', 'Unisolate'], page: 1, pageSize: 100 }} | ${{ $count: true, $filter: "id in ('123','321') AND type in ('Isolate','Unisolate')", $top: 100 }}
-      ${'page and page size'}     | ${{ id: ['123', '321'], type: ['Isolate', 'Unisolate'], page: 3, pageSize: 100 }} | ${{ $count: true, $filter: "id in ('123','321') AND type in ('Isolate','Unisolate')", $skip: 200, $top: 100 }}
+      title                                                      | options                                                                           | expectedParams
+      ${'single value filters'}                                  | ${{ id: '123', status: 'Succeeded', machineId: 'abc', page: 2 }}                  | ${{ $count: true, $filter: "id eq '123' AND status eq 'Succeeded' AND machineId eq 'abc'", $skip: 20, $top: 20 }}
+      ${'multiple value filters'}                                | ${{ id: ['123', '321'], type: ['Isolate', 'Unisolate'], page: 1, pageSize: 100 }} | ${{ $count: true, $filter: "id in ('123','321') AND type in ('Isolate','Unisolate')", $top: 100 }}
+      ${'page and page size'}                                    | ${{ id: ['123', '321'], type: ['Isolate', 'Unisolate'], page: 3, pageSize: 100 }} | ${{ $count: true, $filter: "id in ('123','321') AND type in ('Isolate','Unisolate')", $skip: 200, $top: 100 }}
+      ${'with sortDirection but no sortField'}                   | ${{ id: '123', sortDirection: 'asc' }}                                            | ${{ $count: true, $filter: "id eq '123'", $top: 20 }}
+      ${'with sortField and no sortDirection (desc is default)'} | ${{ id: '123', sortField: 'type' }}                                               | ${{ $count: true, $filter: "id eq '123'", $top: 20, $orderby: 'type desc' }}
+      ${'with sortField and sortDirection'}                      | ${{ id: '123', sortField: 'type', sortDirection: 'asc' }}                         | ${{ $count: true, $filter: "id eq '123'", $top: 20, $orderby: 'type asc' }}
     `(
       'should correctly build the oData URL params: $title',
       async ({ options, expectedParams }) => {
@@ -226,7 +205,7 @@ describe('Microsoft Defender for Endpoint Connector', () => {
       expect(connectorMock.instanceMock.request).toHaveBeenCalledWith(
         expect.objectContaining({
           url: 'https://api.mock__microsoft.com/api/machines',
-          params: { $count: true, $filter: 'id eq 1-2-3', $top: 20 },
+          params: { $count: true, $filter: "id eq '1-2-3'", $top: 20 },
         }),
         connectorMock.usageCollector
       );

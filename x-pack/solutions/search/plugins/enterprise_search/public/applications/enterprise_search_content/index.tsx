@@ -11,26 +11,16 @@ import { Redirect } from 'react-router-dom';
 import { Route, Routes } from '@kbn/shared-ux-router';
 
 import { InitialAppData } from '../../../common/types';
-import { SetupGuide } from '../enterprise_search_overview/components/setup_guide';
 
 import { ConnectorsRouter } from './components/connectors/connectors_router';
 import { CrawlersRouter } from './components/connectors/crawlers_router';
 import { NotFound } from './components/not_found';
 import { SearchIndicesRouter } from './components/search_indices';
-import {
-  CONNECTORS_PATH,
-  CRAWLERS_PATH,
-  ROOT_PATH,
-  SEARCH_INDICES_PATH,
-  SETUP_GUIDE_PATH,
-} from './routes';
+import { CONNECTORS_PATH, CRAWLERS_PATH, ROOT_PATH, SEARCH_INDICES_PATH } from './routes';
 
 export const EnterpriseSearchContent: React.FC<InitialAppData> = (props) => {
   return (
     <Routes>
-      <Route exact path={SETUP_GUIDE_PATH}>
-        <SetupGuide />
-      </Route>
       <Route>
         <EnterpriseSearchContentConfigured {...(props as Required<InitialAppData>)} />
       </Route>

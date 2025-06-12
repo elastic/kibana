@@ -76,12 +76,16 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
   }, [docLinkVersion]);
 
   const autoIndentCallback = useCallback(async () => {
-    return actionsProvider.current!.autoIndent();
-  }, []);
+    return actionsProvider.current!.autoIndent(context);
+  }, [context]);
 
   const sendRequestsCallback = useCallback(async () => {
     await actionsProvider.current?.sendRequests(dispatch, context);
   }, [dispatch, context]);
+
+  const isKbnRequestSelectedCallback = useCallback(async () => {
+    return actionsProvider.current!.isKbnRequestSelected();
+  }, []);
 
   const editorDidMountCallback = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
@@ -99,7 +103,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
       registerKeyboardCommands({
         editor: editorInstance,
         sendRequest: sendRequestsCallback,
-        autoIndent: async () => await actionsProvider.current?.autoIndent(),
+        autoIndent: async () => await actionsProvider.current?.autoIndent(context),
         getDocumentationLink: getDocumenationLink,
         moveToPreviousRequestEdge: async () =>
           await actionsProvider.current?.moveToPreviousRequestEdge(),
@@ -115,6 +119,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
     registerKeyboardCommands,
     unregisterKeyboardCommands,
     settings.isKeyboardShortcutsEnabled,
+    context,
   ]);
 
   const editorWillUnmountCallback = useCallback(() => {
@@ -195,6 +200,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
             getDocumentation={getDocumenationLink}
             autoIndent={autoIndentCallback}
             notifications={notifications}
+            getIsKbnRequestSelected={isKbnRequestSelectedCallback}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -216,6 +222,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
           hover: {
             above: false,
           },
+          lineHeight: 24,
         }}
         suggestionProvider={suggestionProvider}
         enableFindAction={true}

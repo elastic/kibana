@@ -1,0 +1,517 @@
+{
+  "queries": [
+    {
+      "id": "accepted_password",
+      "title": "Accepted password for SSH",
+      "description": "Logs indicating a successful SSH login using a password.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Accepted password for from port ssh2",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "connection_closed_preauth",
+      "title": "Connection closed by preauth",
+      "description": "Logs indicating a connection closed by the client before authentication.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Connection closed by [preauth]",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "no_identification_string",
+      "title": "No identification string received",
+      "description": "Logs indicating that the server did not receive an identification string from the client.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Did not receive identification string from",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "too_many_auth_failures_admin",
+      "title": "Too many authentication failures for admin",
+      "description": "Logs indicating too many authentication failures for the admin user.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Disconnecting: Too many authentication failures for admin [preauth]",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "too_many_auth_failures_root",
+      "title": "Too many authentication failures for root",
+      "description": "Logs indicating too many authentication failures for the root user.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Disconnecting: Too many authentication failures for root [preauth]",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "auth_fail_jsch_exception",
+      "title": "Auth fail JSchException",
+      "description": "Logs indicating an authentication failure with a JSchException.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "error: Received disconnect from com.jcraft.jsch.JSchException: Auth fail [preauth]",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "no_more_auth_methods",
+      "title": "No more user authentication methods",
+      "description": "Logs indicating no more user authentication methods are available.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "error: Received disconnect from No more user authentication methods available. [preauth]",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "failed_none_invalid_user",
+      "title": "Failed none for invalid user",
+      "description": "Logs indicating a failed authentication attempt for an invalid user.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Failed none for invalid user from port ssh2",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "failed_password",
+      "title": "Failed password",
+      "description": "Logs indicating a failed password authentication attempt.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Failed password for from port ssh2",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "failed_password_invalid_user",
+      "title": "Failed password for invalid user",
+      "description": "Logs indicating a failed password authentication attempt for an invalid user.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Failed password for invalid user from port ssh2",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "write_failed_connection_reset",
+      "title": "Write failed: Connection reset by peer",
+      "description": "Logs indicating a connection reset by peer error.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "fatal: Write failed: Connection reset by peer [preauth]",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "invalid_user_preauth",
+      "title": "Invalid user preauth",
+      "description": "Logs indicating an invalid user authentication request before authentication.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "input_userauth_request: invalid user [preauth]",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "invalid_user",
+      "title": "Invalid user",
+      "description": "Logs indicating an invalid user authentication attempt.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Invalid user from",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "message_repeated",
+      "title": "Message repeated",
+      "description": "Logs indicating repeated messages of failed password attempts for root.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "message repeated times: [ Failed password for root from port ]",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "pam_auth_failure",
+      "title": "PAM authentication failure",
+      "description": "Logs indicating a PAM authentication failure.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "PAM more authentication failure; logname= uid= euid= tty=ssh ruser= rhost=",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "pam_auth_failures",
+      "title": "PAM authentication failures",
+      "description": "Logs indicating multiple PAM authentication failures.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "PAM more authentication failures; logname= uid= euid= tty=ssh ruser= rhost=",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "pam_auth_failures_root",
+      "title": "PAM authentication failures for root",
+      "description": "Logs indicating multiple PAM authentication failures for the root user.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "PAM more authentication failures; logname= uid= euid= tty=ssh ruser= rhost= user=root",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "pam_ignoring_max_retries",
+      "title": "PAM ignoring max retries",
+      "description": "Logs indicating that the PAM service is ignoring max retries.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "PAM service(sshd) ignoring max retries;",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "pam_unix_auth_failure",
+      "title": "PAM Unix authentication failure",
+      "description": "Logs indicating a PAM Unix authentication failure.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "pam_unix(sshd:auth): authentication failure; logname= uid= euid= tty=ssh ruser= rhost=",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "pam_unix_auth_failure_user",
+      "title": "PAM Unix authentication failure for user",
+      "description": "Logs indicating a PAM Unix authentication failure for a specific user.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "pam_unix(sshd:auth): authentication failure; logname= uid= euid= tty=ssh ruser= rhost= user=",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "pam_unix_check_pass",
+      "title": "PAM Unix check pass",
+      "description": "Logs indicating a PAM Unix check pass for an unknown user.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "pam_unix(sshd:auth): check pass; user unknown",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "pam_unix_session_closed",
+      "title": "PAM Unix session closed",
+      "description": "Logs indicating a PAM Unix session closed for a user.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "pam_unix(sshd:session): session closed for user",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "pam_unix_session_opened",
+      "title": "PAM Unix session opened",
+      "description": "Logs indicating a PAM Unix session opened for a user.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "pam_unix(sshd:session): session opened for user by (uid=)",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "received_disconnect_bye_bye",
+      "title": "Received disconnect: Bye Bye",
+      "description": "Logs indicating a received disconnect with the message 'Bye Bye'.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Received disconnect from Bye Bye [preauth]",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "received_disconnect_user_request",
+      "title": "Received disconnect: User request",
+      "description": "Logs indicating a received disconnect due to user request.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Received disconnect from Closed due to user request. [preauth]",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "received_disconnect_disconnected_by_user",
+      "title": "Received disconnect: Disconnected by user",
+      "description": "Logs indicating a received disconnect by the user.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Received disconnect from disconnected by user",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "reverse_mapping_failed",
+      "title": "Reverse mapping failed",
+      "description": "Logs indicating a failed reverse mapping check, suggesting a possible break-in attempt.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "reverse mapping checking getaddrinfo for failed - POSSIBLE BREAK-IN ATTEMPT!",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

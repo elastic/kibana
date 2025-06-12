@@ -14,7 +14,7 @@
         "tags": [],
         "label": "coreLifecycleMock",
         "description": [],
-        "path": "packages/core/lifecycle/core-lifecycle-browser-mocks/src/index.ts",
+        "path": "src/core/packages/lifecycle/browser-mocks/src/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -69,13 +69,7 @@
               ">; featureFlags: jest.Mocked<",
               "FeatureFlagsStart",
               ">; http: ",
-              {
-                "pluginId": "@kbn/core-http-browser-mocks",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserMocksPluginApi",
-                "section": "def-public.HttpSetupMock",
-                "text": "HttpSetupMock"
-              },
+              "HttpSetupMock",
               "; i18n: jest.Mocked<",
               "I18nStart",
               ">; notifications: ",
@@ -116,21 +110,19 @@
               "SecurityServiceStart",
               ">; userProfile: jest.Mocked<",
               "UserProfileService",
+              ">; rendering: jest.Mocked<",
+              "RenderingService",
+              ">; pricing: jest.Mocked<",
+              "PricingServiceStart",
               ">; plugins: { onStart: jest.Mock<any, any, any>; }; }, any, any]>, [], any>; http: ",
-              {
-                "pluginId": "@kbn/core-http-browser-mocks",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserMocksPluginApi",
-                "section": "def-public.HttpSetupMock",
-                "text": "HttpSetupMock"
-              },
+              "HttpSetupMock",
               "; notifications: ",
               {
                 "pluginId": "@kbn/utility-types-jest",
                 "scope": "common",
                 "docId": "kibKbnUtilityTypesJestPluginApi",
-                "section": "def-common.MockedKeys",
-                "text": "MockedKeys"
+                "section": "def-common.DeeplyMockedKeys",
+                "text": "DeeplyMockedKeys"
               },
               "<",
               "NotificationsSetup",
@@ -148,7 +140,7 @@
               "UserProfileServiceSetup",
               ">; plugins: { onSetup: jest.Mock<any, any, any>; onStart: jest.Mock<any, any, any>; }; }"
             ],
-            "path": "packages/core/lifecycle/core-lifecycle-browser-mocks/src/index.ts",
+            "path": "src/core/packages/lifecycle/browser-mocks/src/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -163,7 +155,7 @@
                 "signature": [
                   "{ basePath?: string | undefined; pluginStartDeps?: object | undefined; pluginStartContract?: any; }"
                 ],
-                "path": "packages/core/lifecycle/core-lifecycle-browser-mocks/src/core_setup.mock.ts",
+                "path": "src/core/packages/lifecycle/browser-mocks/src/core_setup.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -204,13 +196,7 @@
               ">; featureFlags: jest.Mocked<",
               "FeatureFlagsStart",
               ">; http: ",
-              {
-                "pluginId": "@kbn/core-http-browser-mocks",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserMocksPluginApi",
-                "section": "def-public.HttpSetupMock",
-                "text": "HttpSetupMock"
-              },
+              "HttpSetupMock",
               "; i18n: jest.Mocked<",
               "I18nStart",
               ">; notifications: ",
@@ -251,9 +237,13 @@
               "SecurityServiceStart",
               ">; userProfile: jest.Mocked<",
               "UserProfileService",
+              ">; rendering: jest.Mocked<",
+              "RenderingService",
+              ">; pricing: jest.Mocked<",
+              "PricingServiceStart",
               ">; plugins: { onStart: jest.Mock<any, any, any>; }; }"
             ],
-            "path": "packages/core/lifecycle/core-lifecycle-browser-mocks/src/index.ts",
+            "path": "src/core/packages/lifecycle/browser-mocks/src/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -268,7 +258,7 @@
                 "signature": [
                   "{ basePath?: string | undefined; }"
                 ],
-                "path": "packages/core/lifecycle/core-lifecycle-browser-mocks/src/core_start.mock.ts",
+                "path": "src/core/packages/lifecycle/browser-mocks/src/core_start.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

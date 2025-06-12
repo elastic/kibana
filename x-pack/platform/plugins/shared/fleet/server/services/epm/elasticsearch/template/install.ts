@@ -32,7 +32,7 @@ import type {
   ExperimentalDataStreamFeature,
 } from '../../../../types';
 import type { Fields } from '../../fields/field';
-import { loadDatastreamsFieldsFromYaml, processFields } from '../../fields/field';
+import { isFields, loadDatastreamsFieldsFromYaml, processFields } from '../../fields/field';
 import { getAssetFromAssetsMap, getPathParts } from '../../archive';
 import {
   FLEET_COMPONENT_TEMPLATES,
@@ -48,7 +48,7 @@ import {
   forEachMappings,
 } from '../../../experimental_datastream_features_helper';
 import { appContextService } from '../../../app_context';
-import type { PackageInstallContext } from '../../../../../common/types';
+import type { AssetsMap, PackageInstallContext } from '../../../../../common/types';
 
 import {
   generateMappings,
@@ -62,16 +62,16 @@ import { isUserSettingsTemplate } from './utils';
 
 const FLEET_COMPONENT_TEMPLATE_NAMES = FLEET_COMPONENT_TEMPLATES.map((tmpl) => tmpl.name);
 
-export const prepareToInstallTemplates = (
+export const prepareToInstallTemplates = async (
   packageInstallContext: PackageInstallContext,
   esReferences: EsAssetReference[],
   experimentalDataStreamFeatures: ExperimentalDataStreamFeature[] = [],
   onlyForDataStreams?: RegistryDataStream[]
-): {
+): Promise<{
   assetsToAdd: EsAssetReference[];
   assetsToRemove: EsAssetReference[];
   install: (esClient: ElasticsearchClient, logger: Logger) => Promise<IndexTemplateEntry[]>;
-} => {
+}> => {
   const { packageInfo } = packageInstallContext;
   // remove package installation's references to index templates
   const assetsToRemove = esReferences.filter(
@@ -79,6 +79,13 @@ export const prepareToInstallTemplates = (
       type === ElasticsearchAssetType.indexTemplate ||
       type === ElasticsearchAssetType.componentTemplate
   );
+
+  const fieldAssetsMap: AssetsMap = new Map();
+  await packageInstallContext.archiveIterator.traverseEntries(async (entry) => {
+    if (entry.buffer) {
+      fieldAssetsMap.set(entry.path, entry.buffer);
+    }
+  }, isFields);
 
   // build templates per data stream from yml files
   const dataStreams = onlyForDataStreams || packageInfo.data_streams;
@@ -90,7 +97,12 @@ export const prepareToInstallTemplates = (
         datastreamFeature.data_stream === getRegistryDataStreamAssetBaseName(dataStream)
     );
 
-    return prepareTemplate({ packageInstallContext, dataStream, experimentalDataStreamFeature });
+    return prepareTemplate({
+      packageInstallContext,
+      fieldAssetsMap,
+      dataStream,
+      experimentalDataStreamFeature,
+    });
   });
 
   const assetsToAdd = getAllTemplateRefs(templates.map((template) => template.indexTemplate));
@@ -131,14 +143,23 @@ const installPreBuiltTemplates = async (
 ) => {
   const templatePaths = packageInstallContext.paths.filter((path) => isTemplate(path));
   try {
+    const templateAssetsMap: AssetsMap = new Map();
+    await packageInstallContext.archiveIterator.traverseEntries(
+      async (entry) => {
+        if (!entry.buffer) {
+          return;
+        }
+
+        templateAssetsMap.set(entry.path, entry.buffer);
+      },
+      (path) => templatePaths.includes(path)
+    );
     await pMap(
       templatePaths,
       async (path) => {
         const { file } = getPathParts(path);
         const templateName = file.substr(0, file.lastIndexOf('.'));
-        const content = JSON.parse(
-          getAssetFromAssetsMap(packageInstallContext.assetsMap, path).toString('utf8')
-        );
+        const content = JSON.parse(getAssetFromAssetsMap(templateAssetsMap, path).toString('utf8'));
 
         const esClientParams = { name: templateName, body: content };
         const esClientRequestOptions = { ignore: [404] };
@@ -175,18 +196,27 @@ const installPreBuiltComponentTemplates = async (
 ) => {
   const templatePaths = packageInstallContext.paths.filter((path) => isComponentTemplate(path));
   try {
+    const templateAssetsMap: AssetsMap = new Map();
+    await packageInstallContext.archiveIterator.traverseEntries(
+      async (entry) => {
+        if (!entry.buffer) {
+          return;
+        }
+
+        templateAssetsMap.set(entry.path, entry.buffer);
+      },
+      (path) => templatePaths.includes(path)
+    );
     await pMap(
       templatePaths,
       async (path) => {
         const { file } = getPathParts(path);
         const templateName = file.substr(0, file.lastIndexOf('.'));
-        const content = JSON.parse(
-          getAssetFromAssetsMap(packageInstallContext.assetsMap, path).toString('utf8')
-        );
+        const content = JSON.parse(getAssetFromAssetsMap(templateAssetsMap, path).toString('utf8'));
 
         const esClientParams = {
           name: templateName,
-          body: content,
+          ...content,
         };
 
         return retryTransientEsErrors(
@@ -443,6 +473,15 @@ export function buildComponentTemplates(params: {
       _meta,
     };
   }
+  if (packageName) {
+    const customTemplateName = `${packageName}${USER_SETTINGS_TEMPLATE_SUFFIX}`;
+    templatesMap[customTemplateName] = {
+      template: {
+        settings: {},
+      },
+      _meta,
+    };
+  }
 
   // return empty/stub template
   templatesMap[userSettingsTemplateName] = {
@@ -572,15 +611,21 @@ function countFields(fields: Fields): number {
 
 export function prepareTemplate({
   packageInstallContext,
+  fieldAssetsMap,
   dataStream,
   experimentalDataStreamFeature,
 }: {
   packageInstallContext: PackageInstallContext;
+  fieldAssetsMap: AssetsMap;
   dataStream: RegistryDataStream;
   experimentalDataStreamFeature?: ExperimentalDataStreamFeature;
 }): { componentTemplates: TemplateMap; indexTemplate: IndexTemplateEntry } {
   const { name: packageName, version: packageVersion } = packageInstallContext.packageInfo;
-  const fields = loadDatastreamsFieldsFromYaml(packageInstallContext, dataStream.path);
+  const fields = loadDatastreamsFieldsFromYaml(
+    packageInstallContext,
+    fieldAssetsMap,
+    dataStream.path
+  );
 
   const isIndexModeTimeSeries =
     dataStream.elasticsearch?.index_mode === 'time_series' ||
@@ -649,7 +694,7 @@ async function installTemplate({
   // TODO: Check return values for errors
   const esClientParams = {
     name: template.templateName,
-    body: template.indexTemplate,
+    ...template.indexTemplate,
   };
   await retryTransientEsErrors(
     () => esClient.indices.putIndexTemplate(esClientParams, { ignore: [404] }),

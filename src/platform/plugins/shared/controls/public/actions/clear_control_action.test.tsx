@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, take } from 'rxjs';
 import { getMockedControlGroupApi } from '../controls/mocks/control_mocks';
 import { ClearControlAction } from './clear_control_action';
 
 import type { ViewMode } from '@kbn/presentation-publishing';
 
 const dashboardApi = {
-  viewMode: new BehaviorSubject<ViewMode>('view'),
+  viewMode$: new BehaviorSubject<ViewMode>('view'),
 };
 const controlGroupApi = getMockedControlGroupApi(dashboardApi, {
   removePanel: jest.fn(),
@@ -46,13 +46,12 @@ describe('ClearControlAction', () => {
     }).rejects.toThrow(Error);
   });
 
-  test('should call onChange when isCompatible changes', () => {
-    const onChange = jest.fn();
-
+  test('should call onChange when isCompatible changes', (done) => {
+    const subject = clearControlAction.getCompatibilityChangesSubject({ embeddable: controlApi });
+    subject?.pipe(take(1)).subscribe(() => {
+      done();
+    });
     hasSelections$.next(true);
-    clearControlAction.subscribeToCompatibilityChanges({ embeddable: controlApi }, onChange);
-
-    expect(onChange).toHaveBeenCalledWith(true, clearControlAction);
   });
 
   describe('Clear control button compatibility', () => {

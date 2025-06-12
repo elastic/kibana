@@ -5,22 +5,18 @@
  * 2.0.
  */
 
-import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { RuleVersions } from '../../../detection_engine/prebuilt_rules/logic/diff/calculate_rule_diff';
 import { createPrebuiltRuleAssetsClient } from '../../../detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../../detection_engine/prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
 import { fetchRuleVersionsTriad } from '../../../detection_engine/prebuilt_rules/logic/rule_versions/fetch_rule_versions_triad';
 import type { RuleMigrationPrebuiltRule } from '../types';
 import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
 
-interface RetrievePrebuiltRulesParams {
-  soClient: SavedObjectsClientContract;
-  rulesClient: RulesClient;
-}
-
-/* The minimum score required for a integration to be considered correct, might need to change this later */
+export type { RuleVersions };
+export type PrebuildRuleVersionsMap = Map<string, RuleVersions>;
+/* The minimum score required for a prebuilt rule to be considered correct */
 const MIN_SCORE = 40 as const;
-/* The number of integrations the RAG will return, sorted by score */
+/* The number of prebuilt rules the RAG will return, sorted by score */
 const RETURNED_RULES = 5 as const;
 
 /* BULK_MAX_SIZE defines the number to break down the bulk operations by.
@@ -29,19 +25,18 @@ const RETURNED_RULES = 5 as const;
 const BULK_MAX_SIZE = 500 as const;
 
 export class RuleMigrationsDataPrebuiltRulesClient extends RuleMigrationsDataBaseClient {
-  /** Indexes an array of integrations to be used with ELSER semantic search queries */
-  async create({ soClient, rulesClient }: RetrievePrebuiltRulesParams): Promise<void> {
-    const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
-    const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
+  async getRuleVersionsMap(): Promise<PrebuildRuleVersionsMap> {
+    const ruleAssetsClient = createPrebuiltRuleAssetsClient(this.dependencies.savedObjectsClient);
+    const ruleObjectsClient = createPrebuiltRuleObjectsClient(this.dependencies.rulesClient);
+    return fetchRuleVersionsTriad({ ruleAssetsClient, ruleObjectsClient });
+  }
 
-    const ruleVersionsMap = await fetchRuleVersionsTriad({
-      ruleAssetsClient,
-      ruleObjectsClient,
-    });
-
+  /** Indexes an array of prebuilt rules to be used with ELSER semantic search queries */
+  async populate(ruleVersionsMap: PrebuildRuleVersionsMap): Promise<void> {
     const filteredRules: RuleMigrationPrebuiltRule[] = [];
+
     ruleVersionsMap.forEach((ruleVersions) => {
-      const rule = ruleVersions.target || ruleVersions.current;
+      const rule = ruleVersions.target;
       if (rule) {
         const mitreAttackIds = rule?.threat?.flatMap(
           ({ technique }) => technique?.map(({ id }) => id) ?? []
@@ -50,7 +45,6 @@ export class RuleMigrationsDataPrebuiltRulesClient extends RuleMigrationsDataBas
         filteredRules.push({
           rule_id: rule.rule_id,
           name: rule.name,
-          installed_rule_id: ruleVersions.current?.id,
           description: rule.description,
           elser_embedding: `${rule.name} - ${rule.description}`,
           ...(mitreAttackIds?.length && { mitre_attack_ids: mitreAttackIds }),
@@ -77,20 +71,24 @@ export class RuleMigrationsDataPrebuiltRulesClient extends RuleMigrationsDataBas
               },
             ]),
           },
-          { requestTimeout: 10 * 60 * 1000 }
+          { requestTimeout: 10 * 60 * 1000 } // 10 minutes
         )
+        .then((response) => {
+          if (response.errors) {
+            // use the first error to throw
+            const reason = response.items.find((item) => item.update?.error)?.update?.error?.reason;
+            throw new Error(reason ?? 'Unknown error');
+          }
+        })
         .catch((error) => {
-          this.logger.error(`Error preparing prebuilt rules for SIEM migration: ${error.message}`);
+          this.logger.error(`Error indexing prebuilt rules embeddings: ${error.message}`);
           throw error;
         });
     }
   }
 
   /** Based on a LLM generated semantic string, returns the 5 best results with a score above 40 */
-  async retrieveRules(
-    semanticString: string,
-    techniqueIds: string
-  ): Promise<RuleMigrationPrebuiltRule[]> {
+  async search(semanticString: string, techniqueIds: string): Promise<RuleMigrationPrebuiltRule[]> {
     const index = await this.getIndexName();
     const query = {
       bool: {
@@ -126,7 +124,7 @@ export class RuleMigrationsDataPrebuiltRulesClient extends RuleMigrationsDataBas
         size: RETURNED_RULES,
         min_score: MIN_SCORE,
       })
-      .then(this.processResponseHits.bind(this))
+      .then((response) => this.processResponseHits(response))
       .catch((error) => {
         this.logger.error(`Error querying prebuilt rule details for ELSER: ${error.message}`);
         throw error;

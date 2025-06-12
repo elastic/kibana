@@ -34,16 +34,16 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import { indexModeLabels } from '../../../../lib/index_mode_labels';
 import { DiscoverLink } from '../../../../lib/discover_link';
 import { getLifecycleValue } from '../../../../lib/data_streams';
-import { SectionLoading, reactRouterNavigate } from '../../../../../shared_imports';
+import { SectionLoading } from '../../../../../shared_imports';
 import { SectionError, Error, DataHealth } from '../../../../components';
 import { useLoadDataStream } from '../../../../services/api';
 import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirmation_modal';
 import { EditDataRetentionModal } from '../edit_data_retention_modal';
 import { humanizeTimeStamp } from '../humanize_time_stamp';
-import { getIndexListUri, getTemplateDetailsLink } from '../../../../services/routing';
 import { ILM_PAGES_POLICY_EDIT } from '../../../../constants';
 import {
   isDataStreamFullyManagedByILM,
@@ -52,6 +52,8 @@ import {
 import { useAppContext } from '../../../../app_context';
 import { DataStreamsBadges } from '../data_stream_badges';
 import { useIlmLocator } from '../../../../services/use_ilm_locator';
+import { StreamsPromotion } from './streams_promotion';
+import { INDEX_MANAGEMENT_LOCATOR_ID } from '../../../../..';
 
 interface Detail {
   name: string;
@@ -130,8 +132,10 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
 
   const { error, data: dataStream, isLoading } = useLoadDataStream(dataStreamName);
 
+  const { url } = useAppContext();
+  const locator = url.locators.get<IndexManagementLocatorParams>(INDEX_MANAGEMENT_LOCATOR_ID);
   const ilmPolicyLink = useIlmLocator(ILM_PAGES_POLICY_EDIT, dataStream?.ilmPolicyName);
-  const { history, config, core } = useAppContext();
+  const { config, core } = useAppContext();
   let indicesLink;
 
   let content;
@@ -168,6 +172,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
       meteringDocsCount,
       lifecycle,
       indexMode,
+      hidden,
     } = dataStream;
 
     const getManagementDetails = () => {
@@ -229,7 +234,12 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
 
     indicesLink = (
       <EuiLink
-        {...reactRouterNavigate(history, getIndexListUri(`data_stream="${dataStreamName}"`, true))}
+        href={
+          locator?.getRedirectUrl({
+            page: 'data_stream_index_list',
+            dataStreamName,
+          }) || ''
+        }
       >
         {indices.length}
       </EuiLink>
@@ -348,7 +358,12 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         content: (
           <EuiLink
             data-test-subj={'indexTemplateLink'}
-            {...reactRouterNavigate(history, getTemplateDetailsLink(indexTemplateName))}
+            href={
+              locator?.getRedirectUrl({
+                page: 'index_template',
+                indexTemplate: indexTemplateName,
+              }) || ''
+            }
           >
             {indexTemplateName}
           </EuiLink>
@@ -454,6 +469,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         )}
 
         <DetailsList details={details} />
+        {!hidden && <StreamsPromotion dataStreamName={dataStreamName} />}
       </>
     );
   }

@@ -8,7 +8,7 @@
  */
 
 import { parse } from '../../parser';
-import { ESQLFunction } from '../../types';
+import { ESQLFunction, ESQLMap } from '../../types';
 import { Walker } from '../../walker';
 import { BasicPrettyPrinter, BasicPrettyPrinterMultilineOptions } from '../basic_pretty_printer';
 
@@ -133,20 +133,183 @@ describe('single line query', () => {
         );
       });
 
-      test('supports aliases', () => {
-        const { text } = reprint(`
-          FROM employees | LEFT JOIN languages_lookup AS something ON language_code`);
-
-        expect(text).toBe(
-          'FROM employees | LEFT JOIN languages_lookup AS something ON language_code'
-        );
-      });
-
       test('supports multiple conditions', () => {
         const { text } = reprint(`
           FROM employees | LEFT JOIN a ON b, c, d.e.f`);
 
         expect(text).toBe('FROM employees | LEFT JOIN a ON b, c, d.e.f');
+      });
+    });
+
+    describe('ENRICH', () => {
+      test('policy name with colon', () => {
+        const { text } = reprint(
+          'FROM a | ENRICH _coordinator:woof ON category WITH col0 = category'
+        );
+
+        expect(text).toBe('FROM a | ENRICH _coordinator:woof ON category WITH col0 = category');
+      });
+    });
+
+    describe('CHANGE_POINT', () => {
+      test('value only', () => {
+        const { text } = reprint(`FROM a | CHANGE_POINT value`);
+
+        expect(text).toBe('FROM a | CHANGE_POINT value');
+      });
+
+      test('value and key', () => {
+        const { text } = reprint(`FROM a | CHANGE_POINT value ON key`);
+
+        expect(text).toBe('FROM a | CHANGE_POINT value ON key');
+      });
+
+      test('value and target', () => {
+        const { text } = reprint(`FROM a | CHANGE_POINT value AS type, pvalue`);
+
+        expect(text).toBe('FROM a | CHANGE_POINT value AS type, pvalue');
+      });
+
+      test('value, key, and target', () => {
+        const { text } = reprint(`FROM a | CHANGE_POINT value ON key AS type, pvalue`);
+
+        expect(text).toBe('FROM a | CHANGE_POINT value ON key AS type, pvalue');
+      });
+
+      test('example from docs', () => {
+        const { text } = reprint(`
+          FROM k8s
+            | STATS count=COUNT() BY @timestamp=BUCKET(@timestamp, 1 MINUTE)
+            | CHANGE_POINT count ON @timestamp AS type, pvalue
+            | LIMIT 123
+        `);
+
+        expect(text).toBe(
+          'FROM k8s | STATS count = COUNT() BY @timestamp = BUCKET(@timestamp, 1 MINUTE) | CHANGE_POINT count ON @timestamp AS type, pvalue | LIMIT 123'
+        );
+      });
+    });
+
+    describe('RERANK', () => {
+      test('single field', () => {
+        const { text } = reprint(`FROM a | RERANK "query" ON field1 WITH some_id`);
+
+        expect(text).toBe('FROM a | RERANK "query" ON field1 WITH some_id');
+      });
+
+      test('two fields', () => {
+        const { text } = reprint(`FROM a | RERANK "query" ON field1,field2 WITH some_id`);
+
+        expect(text).toBe('FROM a | RERANK "query" ON field1, field2 WITH some_id');
+      });
+
+      test('param as query', () => {
+        const { text } = reprint(`FROM a | RERANK ?param ON field1,field2 WITH some_id`);
+
+        expect(text).toBe('FROM a | RERANK ?param ON field1, field2 WITH some_id');
+      });
+
+      test('param as field part', () => {
+        const { text } = reprint(`FROM a | RERANK ?param ON nested.?par, field2 WITH some_id`);
+
+        expect(text).toBe('FROM a | RERANK ?param ON nested.?par, field2 WITH some_id');
+      });
+
+      test('param as inference ID', () => {
+        const { text } = reprint(`FROM a | RERANK ?param ON nested.?par, field2 WITH ?`);
+
+        expect(text).toBe('FROM a | RERANK ?param ON nested.?par, field2 WITH ?');
+      });
+    });
+
+    describe('FORK', () => {
+      test('from single line', () => {
+        const { text } =
+          reprint(`FROM index | FORK (WHERE keywordField != "" | LIMIT 100) (SORT doubleField ASC NULLS LAST)
+          `);
+
+        expect(text).toBe(
+          'FROM index | FORK (WHERE keywordField != "" | LIMIT 100) (SORT doubleField ASC NULLS LAST)'
+        );
+      });
+
+      test('from multiline', () => {
+        const { text } = reprint(`FROM index
+| FORK
+    (WHERE keywordField != "" | LIMIT 100)
+    (SORT doubleField ASC NULLS LAST)
+          `);
+
+        expect(text).toBe(
+          'FROM index | FORK (WHERE keywordField != "" | LIMIT 100) (SORT doubleField ASC NULLS LAST)'
+        );
+      });
+    });
+
+    describe('SAMPLE', () => {
+      test('from single line', () => {
+        const { text } = reprint(`FROM index | SAMPLE 0.1 123`);
+
+        expect(text).toBe('FROM index | SAMPLE 0.1 123');
+      });
+
+      test('from multiline', () => {
+        const { text } = reprint(`FROM index
+| SAMPLE 0.1 123
+          `);
+
+        expect(text).toBe('FROM index | SAMPLE 0.1 123');
+      });
+    });
+
+    describe('RRF', () => {
+      test('from single line', () => {
+        const { text } =
+          reprint(`FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | RRF | KEEP title, _score
+        `);
+
+        expect(text).toBe(
+          'FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | RRF | KEEP title, _score'
+        );
+      });
+
+      test('from multiline', () => {
+        const { text } = reprint(`FROM search-movies METADATA _score, _id, _index
+  | FORK
+    (WHERE semantic_title : "Shakespeare" | SORT _score)
+    (WHERE title : "Shakespeare" | SORT _score)
+  | RRF
+  | KEEP title, _score
+          `);
+
+        expect(text).toBe(
+          'FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | RRF | KEEP title, _score'
+        );
+      });
+    });
+
+    describe('COMPLETION', () => {
+      test('from single line', () => {
+        const { text } =
+          reprint(`FROM search-movies | COMPLETION "Shakespeare" WITH inferenceId AS result
+        `);
+
+        expect(text).toBe(
+          'FROM search-movies | COMPLETION "Shakespeare" WITH inferenceId AS result'
+        );
+      });
+
+      test('from multiline', () => {
+        const { text } = reprint(
+          `FROM kibana_sample_data_ecommerce
+                 | COMPLETION "prompt" WITH \`openai-completion\` AS result
+                 | LIMIT 2
+          `
+        );
+
+        expect(text).toBe(
+          'FROM kibana_sample_data_ecommerce | COMPLETION "prompt" WITH `openai-completion` AS result | LIMIT 2'
+        );
       });
     });
   });
@@ -180,13 +343,31 @@ describe('single line query', () => {
       test('quoted source', () => {
         const { text } = reprint('FROM "quoted"');
 
-        expect(text).toBe('FROM quoted');
+        expect(text).toBe('FROM "quoted"');
       });
 
       test('triple-quoted source', () => {
         const { text } = reprint('FROM """quoted"""');
 
-        expect(text).toBe('FROM quoted');
+        expect(text).toBe('FROM "quoted"');
+      });
+
+      test('source selector', () => {
+        const { text } = reprint('FROM index::selector');
+
+        expect(text).toBe('FROM index::selector');
+      });
+
+      test('single-double quoted source selector', () => {
+        const { text } = reprint('FROM index::"selector"');
+
+        expect(text).toBe('FROM index::"selector"');
+      });
+
+      test('triple-double quoted source selector', () => {
+        const { text } = reprint('FROM index::"""say "jump"!"""');
+
+        expect(text).toBe('FROM index::"say \\"jump\\"!"');
       });
     });
 
@@ -367,6 +548,44 @@ describe('single line query', () => {
 
           expect(text).toBe('FROM a | WHERE (1 + 1 + 2) * ((3 - 4) / (5 + 6 + 7) + 1)');
         });
+
+        test('formats WHERE binary-expression', () => {
+          const { text } = reprint('FROM a | STATS a WHERE b');
+
+          expect(text).toBe('FROM a | STATS a WHERE b');
+        });
+
+        test('formats complex WHERE binary-expression', () => {
+          const { text } = reprint('FROM a | STATS a = agg(123) WHERE b == test(c, 123)');
+
+          expect(text).toBe('FROM a | STATS a = AGG(123) WHERE b == TEST(c, 123)');
+        });
+      });
+    });
+
+    describe('map expressions', () => {
+      test('empty map', () => {
+        const src = 'ROW fn(1, {"foo": "bar"})';
+        const { root } = parse(src);
+        const node = Walker.match(root, { type: 'map' })! as ESQLMap;
+
+        node.entries = [];
+
+        const text = BasicPrettyPrinter.print(root);
+
+        expect(text).toBe('ROW FN(1, {})');
+      });
+
+      test('one entry in map expression', () => {
+        const { text } = reprint('ROW fn(1, {"booyaka": [1, 2, 42]})');
+
+        expect(text).toBe('ROW FN(1, {"booyaka": [1, 2, 42]})');
+      });
+
+      test('two entries in map expression', () => {
+        const { text } = reprint('ROW fn(1, {"foo": "bar", "baz": null})');
+
+        expect(text).toBe('ROW FN(1, {"foo": "bar", "baz": NULL})');
       });
     });
 
@@ -567,6 +786,17 @@ describe('multiline query', () => {
     const text = multiline(query, { pipeTab: '' }).text;
 
     expect(text).toBe(query);
+  });
+
+  test('keeps FORK branches on single lines', () => {
+    const { text } = multiline(
+      `FROM index| FORK (WHERE keywordField != "" | LIMIT 100)(SORT doubleField ASC NULLS LAST)`
+    );
+
+    expect(text).toBe(`FROM index
+  | FORK
+    (WHERE keywordField != "" | LIMIT 100)
+    (SORT doubleField ASC NULLS LAST)`);
   });
 });
 

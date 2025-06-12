@@ -32,7 +32,6 @@ export const SourceDestinationWithArrows = React.memo<SourceDestinationWithArrow
     destinationPackets,
     destinationPort,
     eventId,
-    isDraggable,
     sourceBytes,
     sourceGeoContinentName,
     sourceGeoCountryName,
@@ -42,10 +41,12 @@ export const SourceDestinationWithArrows = React.memo<SourceDestinationWithArrow
     sourcePackets,
     sourceIp,
     sourcePort,
+    scopeId,
   }) => (
     <EuiFlexGroup justifyContent="center" gutterSize="none">
       <EuiFlexItem grow={false}>
         <SourceDestinationIp
+          scopeId={scopeId}
           contextId={contextId}
           destinationGeoContinentName={destinationGeoContinentName}
           destinationGeoCountryName={destinationGeoCountryName}
@@ -55,7 +56,6 @@ export const SourceDestinationWithArrows = React.memo<SourceDestinationWithArrow
           destinationIp={destinationIp}
           destinationPort={destinationPort}
           eventId={eventId}
-          isDraggable={isDraggable}
           sourceGeoContinentName={sourceGeoContinentName}
           sourceGeoCountryName={sourceGeoCountryName}
           sourceGeoCountryIsoCode={sourceGeoCountryIsoCode}
@@ -68,17 +68,18 @@ export const SourceDestinationWithArrows = React.memo<SourceDestinationWithArrow
       </EuiFlexItem>
 
       <SourceDestinationArrows
+        scopeId={scopeId}
         contextId={contextId}
         destinationBytes={destinationBytes}
         destinationPackets={destinationPackets}
         eventId={eventId}
-        isDraggable={isDraggable}
         sourceBytes={sourceBytes}
         sourcePackets={sourcePackets}
       />
 
       <EuiFlexItem grow={false}>
         <SourceDestinationIp
+          scopeId={scopeId}
           contextId={contextId}
           destinationGeoContinentName={destinationGeoContinentName}
           destinationGeoCountryName={destinationGeoCountryName}
@@ -88,7 +89,6 @@ export const SourceDestinationWithArrows = React.memo<SourceDestinationWithArrow
           destinationIp={destinationIp}
           destinationPort={destinationPort}
           eventId={eventId}
-          isDraggable={isDraggable}
           sourceGeoContinentName={sourceGeoContinentName}
           sourceGeoCountryName={sourceGeoCountryName}
           sourceGeoCountryIsoCode={sourceGeoCountryIsoCode}

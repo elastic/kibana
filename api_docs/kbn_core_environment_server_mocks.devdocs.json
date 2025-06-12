@@ -22,7 +22,7 @@
         "tags": [],
         "label": "environmentServiceMock",
         "description": [],
-        "path": "packages/core/environment/core-environment-server-mocks/src/environment_service.mock.ts",
+        "path": "src/core/packages/environment/server-mocks/src/environment_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36,7 +36,7 @@
             "signature": [
               "() => jest.Mocked<EnvironmentServiceContract>"
             ],
-            "path": "packages/core/environment/core-environment-server-mocks/src/environment_service.mock.ts",
+            "path": "src/core/packages/environment/server-mocks/src/environment_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -54,7 +54,7 @@
               "InternalEnvironmentServicePreboot",
               ">"
             ],
-            "path": "packages/core/environment/core-environment-server-mocks/src/environment_service.mock.ts",
+            "path": "src/core/packages/environment/server-mocks/src/environment_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -72,7 +72,7 @@
               "InternalEnvironmentServicePreboot",
               ">"
             ],
-            "path": "packages/core/environment/core-environment-server-mocks/src/environment_service.mock.ts",
+            "path": "src/core/packages/environment/server-mocks/src/environment_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

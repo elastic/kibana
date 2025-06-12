@@ -14,7 +14,7 @@ import { registerControlFactory } from '../../control_factory_registry';
 export function registerTimeSliderControl() {
   registerControlFactory(TIME_SLIDER_CONTROL, async () => {
     const [{ getTimesliderControlFactory }] = await Promise.all([
-      import('./get_timeslider_control_factory'),
+      import('../../controls_module'),
       untilPluginStartServicesReady(),
     ]);
     return getTimesliderControlFactory();

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import './app.scss';
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { TimeRange } from '@kbn/es-query';
@@ -13,6 +12,7 @@ import { EuiConfirmModal } from '@elastic/eui';
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import { css } from '@emotion/react';
 import { LensAppProps, LensAppServices } from './types';
 import { LensTopNavMenu } from './lens_top_nav';
 import { AddUserMessages, EditorFrameInstance, Simplify, UserMessagesGetter } from '../types';
@@ -137,10 +137,12 @@ export function App({
   // Used to show a popover that guides the user towards changing the date range when no data is available.
   const [indicateNoData, setIndicateNoData] = useState(false);
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
-  const [lastKnownDoc, setLastKnownDoc] = useState<LensDocument | undefined>(undefined);
-  const [initialDocFromContext, setInitialDocFromContext] = useState<LensDocument | undefined>(
-    undefined
-  );
+  // keeping the initial doc state created by the context
+  const initialDocFromContextRef = useRef<LensDocument | undefined>(undefined);
+  if (!initialDocFromContextRef.current && currentDoc) {
+    initialDocFromContextRef.current = currentDoc;
+  }
+
   const [shouldCloseAndSaveTextBasedQuery, setShouldCloseAndSaveTextBasedQuery] = useState(false);
   const savedObjectId = initialInput?.savedObjectId;
 
@@ -154,12 +156,6 @@ export function App({
       ? initialContext.vizEditorOriginatingAppUrl
       : undefined;
   const initialContextIsEmbedded = Boolean(legacyEditorAppName);
-
-  useEffect(() => {
-    if (currentDoc) {
-      setLastKnownDoc(currentDoc);
-    }
-  }, [currentDoc]);
 
   const showNoDataPopover = useCallback(() => {
     setIndicateNoData(true);
@@ -176,7 +172,6 @@ export function App({
       setIndicateNoData(false);
     }
   }, [setIndicateNoData, indicateNoData, searchSessionId]);
-
   const getIsByValueMode = useCallback(
     () => Boolean(isLinkedToOriginatingApp && !savedObjectId),
     [isLinkedToOriginatingApp, savedObjectId]
@@ -188,20 +183,20 @@ export function App({
     (refDoc: LensDocument | undefined) => {
       return isLensEqual(
         refDoc,
-        lastKnownDoc,
+        currentDoc,
         data.query.filterManager.inject.bind(data.query.filterManager),
         datasourceMap,
         visualizationMap,
         annotationGroups
       );
     },
-    [annotationGroups, data.query.filterManager, datasourceMap, lastKnownDoc, visualizationMap]
+    [annotationGroups, data.query.filterManager, datasourceMap, currentDoc, visualizationMap]
   );
 
   useEffect(() => {
     onAppLeave((actions) => {
       if (
-        application.capabilities.visualize.save &&
+        application.capabilities.visualize_v2.save &&
         !isLensEqualWrapper(persistedDoc) &&
         (isSaveable || persistedDoc)
       ) {
@@ -224,10 +219,10 @@ export function App({
     });
   }, [
     onAppLeave,
-    lastKnownDoc,
+    currentDoc,
     isSaveable,
     persistedDoc,
-    application.capabilities.visualize.save,
+    application.capabilities.visualize_v2.save,
     data.query.filterManager,
     datasourceMap,
     visualizationMap,
@@ -309,7 +304,7 @@ export function App({
       try {
         const newState = await runSaveLensVisualization(
           {
-            lastKnownDoc,
+            lastKnownDoc: currentDoc,
             savedObjectsTagging,
             initialInput,
             redirectToOrigin,
@@ -339,7 +334,7 @@ export function App({
       visualization.state,
       activeVisualization,
       dispatch,
-      lastKnownDoc,
+      currentDoc,
       savedObjectsTagging,
       initialInput,
       redirectToOrigin,
@@ -354,13 +349,6 @@ export function App({
     ]
   );
 
-  // keeping the initial doc state created by the context
-  useEffect(() => {
-    if (lastKnownDoc && !initialDocFromContext) {
-      setInitialDocFromContext(lastKnownDoc);
-    }
-  }, [lastKnownDoc, initialDocFromContext]);
-
   const {
     shouldShowGoBackToVizEditorModal,
     goBackToOriginatingApp,
@@ -371,7 +359,7 @@ export function App({
     onAppLeave,
     legacyEditorAppName,
     legacyEditorAppUrl,
-    initialDocFromContext,
+    initialDocFromContext: initialDocFromContextRef.current,
     persistedDoc,
     isLensEqual: isLensEqualWrapper,
   });
@@ -437,7 +425,18 @@ export function App({
 
   return (
     <>
-      <div className="lnsApp" data-test-subj="lnsApp" role="main">
+      <div
+        data-test-subj="lnsApp"
+        className="lnsApp"
+        role="main"
+        css={css`
+          flex: 1 1 auto;
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+          overflow: hidden;
+        `}
+      >
         <LensTopNavMenu
           initialInput={initialInput}
           redirectToOrigin={redirectToOrigin}
@@ -489,7 +488,7 @@ export function App({
             setIsSaveModalVisible(false);
           }}
           getAppNameFromId={() => getOriginatingAppName()}
-          lastKnownDoc={lastKnownDoc}
+          lastKnownDoc={currentDoc}
           onAppLeave={onAppLeave}
           persistedDoc={persistedDoc}
           initialInput={initialInput}

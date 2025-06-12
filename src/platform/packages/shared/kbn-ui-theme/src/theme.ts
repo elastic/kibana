@@ -7,14 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable-next-line @kbn/eslint/module_migration */
 import { default as v8Light } from '@elastic/eui/dist/eui_theme_amsterdam_light.json';
-/* eslint-disable-next-line @kbn/eslint/module_migration */
 import { default as v8Dark } from '@elastic/eui/dist/eui_theme_amsterdam_dark.json';
 
-/* eslint-disable-next-line @kbn/eslint/module_migration */
 import { default as borealisLight } from '@elastic/eui/dist/eui_theme_borealis_light.json';
-/* eslint-disable-next-line @kbn/eslint/module_migration */
 import { default as borealisDark } from '@elastic/eui/dist/eui_theme_borealis_dark.json';
 
 const globals: any = typeof window === 'undefined' ? {} : window;
@@ -67,3 +63,10 @@ export const euiThemeVars: Theme = new Proxy(
     },
   }
 );
+
+export function getEuiThemeVars(theme: { name: string; darkMode: boolean }) {
+  if (theme.name === `borealis`) {
+    return theme.darkMode ? borealisDark : borealisLight;
+  }
+  return theme.darkMode ? v8Dark : v8Light;
+}

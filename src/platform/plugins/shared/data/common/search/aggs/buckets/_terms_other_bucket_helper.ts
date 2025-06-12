@@ -9,7 +9,7 @@
 
 import { isNumber, keys, values, find, each, cloneDeep, flatten } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import {
   buildExistsFilter,
   buildPhrasesFilter,

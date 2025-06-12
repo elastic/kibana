@@ -17,11 +17,9 @@ import {
   EuiHighlight,
   EuiOutsideClickDetector,
   useEuiTheme,
-  useEuiBackgroundColor,
 } from '@elastic/eui';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { AddMessageVariables } from '@kbn/alerts-ui-shared';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { filterSuggestions } from './lib/filter_suggestions_for_autocomplete';
 import { templateActionVariable } from './lib/template_action_variable';
 
@@ -48,7 +46,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
   paramsProperty,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const backgroundColor = useEuiBackgroundColor('plain');
+  const backgroundColor = euiTheme.colors.backgroundBasePlain;
 
   const textAreaRef = React.useRef<HTMLTextAreaElement | null>(null);
   const selectableRef = React.useRef<EuiSelectable | null>(null);
@@ -272,12 +270,13 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
       left: popupPosition.left,
       border: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
       background: backgroundColor,
-      zIndex: euiThemeVars.euiZLevel1,
+      zIndex: euiTheme.levels.flyout,
     }),
     [
       backgroundColor,
       euiTheme.border.color,
       euiTheme.border.width.thin,
+      euiTheme.levels.flyout,
       popupPosition.left,
       popupPosition.top,
       popupPosition.width,

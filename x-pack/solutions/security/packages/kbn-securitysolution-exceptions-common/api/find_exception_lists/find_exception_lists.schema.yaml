@@ -9,7 +9,7 @@ paths:
       operationId: FindExceptionLists
       x-codegen-enabled: true
       summary: Get exception lists
-      description: Get a list of all exception lists.
+      description: Get a list of all exception list containers.
       parameters:
         - name: filter
           in: query
@@ -34,6 +34,11 @@ paths:
             items:
               $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionNamespaceType'
             default: [single]
+          examples:
+            single:
+              value: single
+            agnostic:
+              value: agnostic
         - name: page
           in: query
           required: false
@@ -41,6 +46,7 @@ paths:
           schema:
             type: integer
             minimum: 1
+            example: 1
         - name: per_page
           in: query
           required: false
@@ -48,19 +54,22 @@ paths:
           schema:
             type: integer
             minimum: 1
+            example: 20
         - name: sort_field
           in: query
           required: false
-          description: Determines which field is used to sort the results
+          description: Determines which field is used to sort the results.
           schema:
             type: string
+            example: 'name'
         - name: sort_order
           in: query
           required: false
-          description: Determines the sort order, which can be `desc` or `asc`
+          description: Determines the sort order, which can be `desc` or `asc`.
           schema:
             type: string
             enum: [desc, asc]
+            example: 'desc'
       responses:
         200:
           description: Successful response
@@ -87,6 +96,29 @@ paths:
                   - page
                   - per_page
                   - total
+              examples:
+                simpleLists:
+                  value:
+                    data:
+                      - id: '9e5fc75a-a3da-46c5-96e3-a2ec59c6bb85'
+                        list_id: 'simple_list'
+                        type: 'detection'
+                        name: 'Detection Exception List'
+                        description: 'This is a sample detection type exception list.'
+                        immutable: false
+                        namespace_type: 'single'
+                        os_types: []
+                        tags: ['malware']
+                        version: 1
+                        _version: 'WzIsMV0='
+                        tie_breaker_id: '78f1aca1-f8ee-4eb5-9ceb-f5c3ee656cb3'
+                        created_at: 2025-01-07T19:34:27.942Z
+                        created_by: 'elastic'
+                        updated_at: 2025-01-07T19:34:27.942Z
+                        updated_by: 'elastic'
+                    page: 1
+                    per_page: 20
+                    total: 1
         400:
           description: Invalid input data response
           content:
@@ -95,26 +127,50 @@ paths:
                 oneOf:
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
         401:
           description: Unsuccessful authentication response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]'
         403:
           description: Not enough privileges response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'API [GET /api/exception_lists/_find?namespace_type=single] is unauthorized for user, this action is granted by the Kibana privileges [lists-read]'
         500:
           description: Internal server error response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
 
 components:
   schemas:
     FindExceptionListsFilter:
       type: string
+      example: exception-list.attributes.name:%Detection%20List

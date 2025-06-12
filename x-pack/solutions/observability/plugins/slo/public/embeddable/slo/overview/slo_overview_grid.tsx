@@ -114,7 +114,7 @@ export function SloCardChartList({ sloId }: { sloId: string }) {
 
     const historicalSummary =
       historicalSummaries.find(
-        (hist) => hist.sloId === slo.id && hist.instanceId === (slo.instanceId ?? ALL_VALUE)
+        (hist) => hist.sloId === slo.id && hist.instanceId === slo.instanceId
       )?.data ?? [];
 
     const lastArray = chartsData[chartsData.length - 1];

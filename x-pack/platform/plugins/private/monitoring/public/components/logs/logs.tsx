@@ -209,7 +209,7 @@ export class LogsContent extends PureComponent<LogsContentProps> {
 
   renderCallout() {
     const { capabilities: uiCapabilities, kibanaServices } = Legacy.shims;
-    const show = uiCapabilities.discover && uiCapabilities.discover.show;
+    const show = uiCapabilities.discover_v2 && uiCapabilities.discover_v2.show;
 
     const {
       logs: { enabled },
@@ -239,7 +239,7 @@ export class LogsContent extends PureComponent<LogsContentProps> {
             defaultMessage="Visit {link} to dive deeper."
             values={{
               link: (
-                <EuiLink href={discoverLink}>
+                <EuiLink href={discoverLink} data-test-subj="monitoringLogsLink">
                   {i18n.translate('xpack.monitoring.logs.listing.calloutLinkText', {
                     defaultMessage: 'Discover',
                   })}
@@ -288,7 +288,7 @@ export class LogsContent extends PureComponent<LogsContentProps> {
     }
 
     return (
-      <div>
+      <div data-test-subj="monitoringLogs">
         <EuiTitle>
           <h1>
             {i18n.translate('xpack.monitoring.logs.listing.pageTitle', {

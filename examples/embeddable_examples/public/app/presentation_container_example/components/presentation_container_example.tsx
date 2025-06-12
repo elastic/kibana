@@ -17,7 +17,7 @@ import {
   EuiSuperDatePicker,
 } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { getPageApi } from '../page_api';
 import { AddButton } from './add_button';
@@ -36,9 +36,9 @@ export const PresentationContainerExample = ({ uiActions }: { uiActions: UiActio
     };
   }, [cleanUp]);
 
-  const [dataLoading, panels, timeRange] = useBatchedPublishingSubjects(
-    pageApi.dataLoading,
-    componentApi.panels$,
+  const [dataLoading, layout, timeRange] = useBatchedPublishingSubjects(
+    pageApi.dataLoading$,
+    componentApi.layout$,
     pageApi.timeRange$
   );
 
@@ -53,7 +53,7 @@ export const PresentationContainerExample = ({ uiActions }: { uiActions: UiActio
         <p>
           New embeddable state is provided to the page by calling{' '}
           <strong>pageApi.addNewPanel</strong>. The page provides new embeddable state to the
-          embeddable with <strong>pageApi.getRuntimeStateForChild</strong>.
+          embeddable with <strong>pageApi.getSerializedStateForChild</strong>.
         </p>
         <p>
           This example uses session storage to persist saved state and unsaved changes while a
@@ -95,17 +95,17 @@ export const PresentationContainerExample = ({ uiActions }: { uiActions: UiActio
           <TopNav
             onSave={componentApi.onSave}
             resetUnsavedChanges={pageApi.resetUnsavedChanges}
-            unsavedChanges$={pageApi.unsavedChanges}
+            hasUnsavedChanges$={pageApi.hasUnsavedChanges$}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
 
-      {panels.map(({ id, type }) => {
+      {layout.map(({ id, type }) => {
         return (
           <div key={id} style={{ height: '200' }}>
-            <ReactEmbeddableRenderer
+            <EmbeddableRenderer
               type={type}
               maybeId={id}
               getParentApi={() => pageApi}

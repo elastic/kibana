@@ -8,6 +8,7 @@
 /* eslint-disable @elastic/eui/href-or-on-click */
 
 import {
+  COLOR_MODES_STANDARD,
   EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -22,7 +23,6 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useTheme } from '../../hooks/use_theme';
 
 interface AddDataPanelContent {
   title: string;
@@ -78,11 +78,10 @@ export function AddDataPanel({
   onAddData,
   'data-test-subj': dataTestSubj,
 }: AddDataPanelProps) {
-  const { euiTheme } = useEuiTheme();
-  const theme = useTheme();
-  const imgSrc = `${content.img?.baseFolderPath}/${theme.darkMode ? 'dark' : 'light'}/${
-    content.img?.name
-  }`;
+  const { euiTheme, colorMode } = useEuiTheme();
+  const imgSrc = `${content.img?.baseFolderPath}/${
+    colorMode === COLOR_MODES_STANDARD.dark ? 'dark' : 'light'
+  }/${content.img?.name}`;
 
   return (
     <>

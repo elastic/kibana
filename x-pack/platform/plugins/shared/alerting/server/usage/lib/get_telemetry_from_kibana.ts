@@ -10,21 +10,20 @@ import type {
   AggregationsCardinalityAggregate,
   AggregationsTermsAggregateBase,
   AggregationsStringTermsBucketKeys,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient, Logger, ISavedObjectsRepository } from '@kbn/core/server';
+} from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient, Logger, ISavedObjectsRepository } from '@kbn/core/server';
 
-import {
-  ConnectorsByConsumersBucket,
-  groupConnectorsByConsumers,
-} from './group_connectors_by_consumers';
+import type { ConnectorsByConsumersBucket } from './group_connectors_by_consumers';
+import { groupConnectorsByConsumers } from './group_connectors_by_consumers';
 import { groupRulesByNotifyWhen } from './group_rules_by_notify_when';
 import { groupRulesByStatus } from './group_rules_by_status';
-import { AlertingUsage } from '../types';
+import type { AlertingUsage } from '../types';
 import { NUM_ALERTING_RULE_TYPES } from '../alerting_usage_collector';
 import { parseSimpleRuleTypeBucket } from './parse_simple_rule_type_bucket';
 import { groupRulesBySearchType } from './group_rules_by_search_type';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../common';
-import { MaintenanceWindowAttributes } from '../../data/maintenance_window/types';
+import type { MaintenanceWindowAttributes } from '../../data/maintenance_window/types';
+import { parseAndLogError } from './parse_and_log_error';
 
 interface Opts {
   esClient: ElasticsearchClient;
@@ -46,8 +45,12 @@ type GetTotalCountsResults = Pick<
   | 'count_rules_by_notify_when'
   | 'count_rules_with_tags'
   | 'count_rules_snoozed'
+  | 'count_rules_snoozed_by_type'
   | 'count_rules_muted'
+  | 'count_rules_muted_by_type'
   | 'count_rules_with_muted_alerts'
+  | 'count_rules_with_linked_dashboards'
+  | 'count_rules_with_investigation_guide'
   | 'count_connector_types_by_consumers'
   | 'throttle_time'
   | 'schedule_time'
@@ -83,18 +86,17 @@ export async function getTotalCountAggregations({
     const query = {
       index: alertIndex,
       size: 0,
-      body: {
-        query: {
-          bool: {
-            // Aggregate over all rule saved objects
-            filter: [{ term: { type: 'alert' } }],
-          },
+      query: {
+        bool: {
+          // Aggregate over all rule saved objects
+          filter: [{ term: { type: 'alert' } }],
         },
-        runtime_mappings: {
-          rule_action_count: {
-            type: 'long',
-            script: {
-              source: `
+      },
+      runtime_mappings: {
+        rule_action_count: {
+          type: 'long' as const,
+          script: {
+            source: `
                 def alert = params._source['alert'];
                 if (alert != null) {
                   def actions = alert.actions;
@@ -104,13 +106,13 @@ export async function getTotalCountAggregations({
                     emit(0);
                   }
                 }`,
-            },
           },
-          // Convert schedule interval duration string from rule saved object to interval in seconds
-          rule_schedule_interval: {
-            type: 'long',
-            script: {
-              source: `
+        },
+        // Convert schedule interval duration string from rule saved object to interval in seconds
+        rule_schedule_interval: {
+          type: 'long' as const,
+          script: {
+            source: `
                 int parsed = 0;
                 if (doc['alert.schedule.interval'].size() > 0) {
                   def interval = doc['alert.schedule.interval'].value;
@@ -140,13 +142,13 @@ export async function getTotalCountAggregations({
                 }
                 emit(parsed);
               `,
-            },
           },
-          // Convert throttle interval duration string from rule saved object to interval in seconds
-          rule_throttle_interval: {
-            type: 'long',
-            script: {
-              source: `
+        },
+        // Convert throttle interval duration string from rule saved object to interval in seconds
+        rule_throttle_interval: {
+          type: 'long' as const,
+          script: {
+            source: `
                 int parsed = 0;
                 if (doc['alert.throttle'].size() > 0) {
                 def throttle = doc['alert.throttle'].value;
@@ -176,12 +178,12 @@ export async function getTotalCountAggregations({
               }
               emit(parsed);
               `,
-            },
           },
-          rule_with_tags: {
-            type: 'long',
-            script: {
-              source: `
+        },
+        rule_with_tags: {
+          type: 'long' as const,
+          script: {
+            source: `
                def rule = params._source['alert'];
                 if (rule != null && rule.tags != null) {
                   if (rule.tags.size() > 0) {
@@ -190,12 +192,12 @@ export async function getTotalCountAggregations({
                     emit(0);
                   }
                 }`,
-            },
           },
-          rule_snoozed: {
-            type: 'long',
-            script: {
-              source: `
+        },
+        rule_snoozed: {
+          type: 'long' as const,
+          script: {
+            source: `
                 def rule = params._source['alert'];
                 if (rule != null && rule.snoozeSchedule != null) {
                   if (rule.snoozeSchedule.size() > 0) {
@@ -204,23 +206,23 @@ export async function getTotalCountAggregations({
                     emit(0);
                   }
                 }`,
-            },
           },
-          rule_muted: {
-            type: 'long',
-            script: {
-              source: `
+        },
+        rule_muted: {
+          type: 'long' as const,
+          script: {
+            source: `
                 if (doc['alert.muteAll'].value == true) {
                   emit(1);
                 } else {
                   emit(0);
                 }`,
-            },
           },
-          rule_with_muted_alerts: {
-            type: 'long',
-            script: {
-              source: `
+        },
+        rule_with_muted_alerts: {
+          type: 'long' as const,
+          script: {
+            source: `
                 def rule = params._source['alert'];
                 if (rule != null && rule.mutedInstanceIds != null) {
                   if (rule.mutedInstanceIds.size() > 0) {
@@ -229,64 +231,117 @@ export async function getTotalCountAggregations({
                     emit(0);
                   }
                 }`,
-            },
           },
         },
-        aggs: {
-          by_rule_type_id: {
-            terms: {
-              field: 'alert.alertTypeId',
-              size: NUM_ALERTING_RULE_TYPES,
-            },
+        rule_with_linked_dashboards: {
+          type: 'long' as const,
+          script: {
+            source: `
+               def rule = params._source['alert'];
+                if (rule != null && rule.artifacts != null && rule.artifacts.dashboards != null) {
+                  if (rule.artifacts.dashboards.size() > 0) {
+                    emit(1);
+                  } else {
+                    emit(0);
+                  }
+                }`,
           },
-          max_throttle_time: { max: { field: 'rule_throttle_interval' } },
-          min_throttle_time: { min: { field: 'rule_throttle_interval' } },
-          avg_throttle_time: { avg: { field: 'rule_throttle_interval' } },
-          max_interval_time: { max: { field: 'rule_schedule_interval' } },
-          min_interval_time: { min: { field: 'rule_schedule_interval' } },
-          avg_interval_time: { avg: { field: 'rule_schedule_interval' } },
-          max_actions_count: { max: { field: 'rule_action_count' } },
-          min_actions_count: { min: { field: 'rule_action_count' } },
-          avg_actions_count: { avg: { field: 'rule_action_count' } },
-          by_execution_status: {
-            terms: {
-              field: 'alert.executionStatus.status',
-            },
+        },
+        rule_with_investigation_guide: {
+          type: 'long' as const,
+          script: {
+            source: `
+               def rule = params._source['alert'];
+                if (rule != null && rule.artifacts != null && rule.artifacts.investigation_guide != null && rule.artifacts.investigation_guide.blob != null) {
+                  if (rule.artifacts.investigation_guide.blob.trim() != '') {
+                    emit(1);
+                  } else {
+                    emit(0);
+                  }
+                }`,
           },
-          by_notify_when: {
-            terms: {
-              field: 'alert.notifyWhen',
-            },
+        },
+      },
+      aggs: {
+        by_rule_type_id: {
+          terms: {
+            field: 'alert.alertTypeId',
+            size: NUM_ALERTING_RULE_TYPES,
           },
-          connector_types_by_consumers: {
-            terms: {
-              field: 'alert.consumer',
-            },
-            aggs: {
-              actions: {
-                nested: {
-                  path: 'alert.actions',
-                },
-                aggs: {
-                  connector_types: {
-                    terms: {
-                      field: 'alert.actions.actionTypeId',
-                    },
+        },
+        max_throttle_time: { max: { field: 'rule_throttle_interval' } },
+        min_throttle_time: { min: { field: 'rule_throttle_interval' } },
+        avg_throttle_time: { avg: { field: 'rule_throttle_interval' } },
+        max_interval_time: { max: { field: 'rule_schedule_interval' } },
+        min_interval_time: { min: { field: 'rule_schedule_interval' } },
+        avg_interval_time: { avg: { field: 'rule_schedule_interval' } },
+        max_actions_count: { max: { field: 'rule_action_count' } },
+        min_actions_count: { min: { field: 'rule_action_count' } },
+        avg_actions_count: { avg: { field: 'rule_action_count' } },
+        by_execution_status: {
+          terms: {
+            field: 'alert.executionStatus.status',
+          },
+        },
+        by_notify_when: {
+          terms: {
+            field: 'alert.notifyWhen',
+          },
+        },
+        connector_types_by_consumers: {
+          terms: {
+            field: 'alert.consumer',
+          },
+          aggs: {
+            actions: {
+              nested: {
+                path: 'alert.actions',
+              },
+              aggs: {
+                connector_types: {
+                  terms: {
+                    field: 'alert.actions.actionTypeId',
                   },
                 },
               },
             },
           },
-          by_search_type: {
-            terms: {
-              field: 'alert.params.searchType',
+        },
+        by_search_type: {
+          terms: {
+            field: 'alert.params.searchType',
+          },
+        },
+        sum_rules_with_tags: { sum: { field: 'rule_with_tags' } },
+        sum_rules_snoozed: { sum: { field: 'rule_snoozed' } },
+        sum_rules_snoozed_by_type: {
+          filter: {
+            term: { rule_snoozed: 1 },
+          },
+          aggs: {
+            by_alert_type: {
+              terms: {
+                field: 'alert.alertTypeId',
+              },
             },
           },
-          sum_rules_with_tags: { sum: { field: 'rule_with_tags' } },
-          sum_rules_snoozed: { sum: { field: 'rule_snoozed' } },
-          sum_rules_muted: { sum: { field: 'rule_muted' } },
-          sum_rules_with_muted_alerts: { sum: { field: 'rule_with_muted_alerts' } },
         },
+        sum_rules_muted: { sum: { field: 'rule_muted' } },
+        sum_rules_muted_by_type: {
+          filter: {
+            term: { rule_muted: 1 },
+          },
+          aggs: {
+            by_alert_type: {
+              terms: {
+                field: 'alert.alertTypeId',
+              },
+            },
+          },
+        },
+        sum_rules_with_muted_alerts: { sum: { field: 'rule_with_muted_alerts' } },
+        sum_rules_with_linked_dashboards: { sum: { field: 'rule_with_linked_dashboards' } },
+        sum_rules_with_investigation_guide: { sum: { field: 'rule_with_investigation_guide' } },
       },
     };
 
@@ -312,8 +367,16 @@ export async function getTotalCountAggregations({
       by_search_type: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
       sum_rules_with_tags: AggregationsSingleMetricAggregateBase;
       sum_rules_snoozed: AggregationsSingleMetricAggregateBase;
+      sum_rules_snoozed_by_type: {
+        by_alert_type: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
+      };
       sum_rules_muted: AggregationsSingleMetricAggregateBase;
+      sum_rules_muted_by_type: {
+        by_alert_type: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
+      };
       sum_rules_with_muted_alerts: AggregationsSingleMetricAggregateBase;
+      sum_rules_with_linked_dashboards: AggregationsSingleMetricAggregateBase;
+      sum_rules_with_investigation_guide: AggregationsSingleMetricAggregateBase;
     };
 
     const totalRulesCount =
@@ -346,8 +409,17 @@ export async function getTotalCountAggregations({
       count_rules_with_tags: aggregations.sum_rules_with_tags.value ?? 0,
       count_rules_by_notify_when: countRulesByNotifyWhen,
       count_rules_snoozed: aggregations.sum_rules_snoozed.value ?? 0,
+      count_rules_snoozed_by_type: {
+        ...parseSimpleRuleTypeBucket(aggregations.sum_rules_snoozed_by_type.by_alert_type.buckets),
+      },
+      count_rules_muted_by_type: {
+        ...parseSimpleRuleTypeBucket(aggregations.sum_rules_muted_by_type.by_alert_type.buckets),
+      },
       count_rules_muted: aggregations.sum_rules_muted.value ?? 0,
       count_rules_with_muted_alerts: aggregations.sum_rules_with_muted_alerts.value ?? 0,
+      count_rules_with_linked_dashboards: aggregations.sum_rules_with_linked_dashboards.value ?? 0,
+      count_rules_with_investigation_guide:
+        aggregations.sum_rules_with_investigation_guide.value ?? 0,
       count_connector_types_by_consumers: countConnectorTypesByConsumers,
       throttle_time: {
         min: `${aggregations.min_throttle_time.value ?? 0}s`,
@@ -376,15 +448,8 @@ export async function getTotalCountAggregations({
       },
     };
   } catch (err) {
-    const errorMessage = err && err.message ? err.message : err.toString();
+    const errorMessage = parseAndLogError(err, `getTotalCountAggregations`, logger);
 
-    logger.warn(
-      `Error executing alerting telemetry task: getTotalCountAggregations - ${JSON.stringify(err)}`,
-      {
-        tags: ['alerting', 'telemetry-failed'],
-        error: { stack_trace: err.stack },
-      }
-    );
     return {
       hasErrors: true,
       errorMessage,
@@ -400,7 +465,11 @@ export async function getTotalCountAggregations({
       count_rules_snoozed: 0,
       count_rules_muted: 0,
       count_rules_with_muted_alerts: 0,
+      count_rules_with_linked_dashboards: 0,
+      count_rules_with_investigation_guide: 0,
       count_connector_types_by_consumers: {},
+      count_rules_snoozed_by_type: {},
+      count_rules_muted_by_type: {},
       throttle_time: {
         min: '0s',
         avg: '0s',
@@ -439,25 +508,23 @@ export async function getTotalCountInUse({
     const query = {
       index: alertIndex,
       size: 0,
-      body: {
-        query: {
-          bool: {
-            // Aggregate over only enabled rule saved objects
-            filter: [{ term: { type: 'alert' } }, { term: { 'alert.enabled': true } }],
+      query: {
+        bool: {
+          // Aggregate over only enabled rule saved objects
+          filter: [{ term: { type: 'alert' } }, { term: { 'alert.enabled': true } }],
+        },
+      },
+      aggs: {
+        namespaces_count: { cardinality: { field: 'namespaces' } },
+        by_rule_type_id: {
+          terms: {
+            field: 'alert.alertTypeId',
+            size: NUM_ALERTING_RULE_TYPES,
           },
         },
-        aggs: {
-          namespaces_count: { cardinality: { field: 'namespaces' } },
-          by_rule_type_id: {
-            terms: {
-              field: 'alert.alertTypeId',
-              size: NUM_ALERTING_RULE_TYPES,
-            },
-          },
-          by_search_type: {
-            terms: {
-              field: 'alert.params.searchType',
-            },
+        by_search_type: {
+          terms: {
+            field: 'alert.params.searchType',
           },
         },
       },
@@ -491,14 +558,8 @@ export async function getTotalCountInUse({
       countNamespaces: aggregations.namespaces_count.value ?? 0,
     };
   } catch (err) {
-    const errorMessage = err && err.message ? err.message : err.toString();
-    logger.warn(
-      `Error executing alerting telemetry task: getTotalCountInUse - ${JSON.stringify(err)}`,
-      {
-        tags: ['alerting', 'telemetry-failed'],
-        error: { stack_trace: err.stack },
-      }
-    );
+    const errorMessage = parseAndLogError(err, `getTotalCountInUse`, logger);
+
     return {
       hasErrors: true,
       errorMessage,
@@ -548,14 +609,8 @@ export async function getMWTelemetry({
       count_mw_with_filter_alert_toggle_on: countMWWithFilterAlertToggleON,
     };
   } catch (err) {
-    const errorMessage = err?.message ? err.message : err.toString();
-    logger.warn(
-      `Error executing alerting telemetry task: getTotalMWCount - ${JSON.stringify(err)}`,
-      {
-        tags: ['alerting', 'telemetry-failed'],
-        error: { stack_trace: err?.stack },
-      }
-    );
+    const errorMessage = parseAndLogError(err, `getTotalMWCount`, logger);
+
     return {
       hasErrors: true,
       errorMessage,

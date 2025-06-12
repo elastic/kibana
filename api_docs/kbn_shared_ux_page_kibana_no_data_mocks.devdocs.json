@@ -76,13 +76,26 @@
                   {
                     "parentPluginId": "@kbn/shared-ux-page-kibana-no-data-mocks",
                     "id": "def-common.StorybookMock.propArguments.solution.control",
-                    "type": "string",
+                    "type": "Object",
                     "tags": [],
                     "label": "control",
                     "description": [],
                     "path": "src/platform/packages/private/shared-ux/page/kibana_no_data/mocks/src/storybook.ts",
                     "deprecated": false,
-                    "trackAdoption": false
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/shared-ux-page-kibana-no-data-mocks",
+                        "id": "def-common.StorybookMock.propArguments.solution.control.control",
+                        "type": "string",
+                        "tags": [],
+                        "label": "control",
+                        "description": [],
+                        "path": "src/platform/packages/private/shared-ux/page/kibana_no_data/mocks/src/storybook.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
                   },
                   {
                     "parentPluginId": "@kbn/shared-ux-page-kibana-no-data-mocks",
@@ -121,10 +134,10 @@
                     "children": [
                       {
                         "parentPluginId": "@kbn/shared-ux-page-kibana-no-data-mocks",
-                        "id": "def-common.StorybookMock.propArguments.logo.control.type",
+                        "id": "def-common.StorybookMock.propArguments.logo.control.control",
                         "type": "string",
                         "tags": [],
-                        "label": "type",
+                        "label": "control",
                         "description": [],
                         "path": "src/platform/packages/private/shared-ux/page/kibana_no_data/mocks/src/storybook.ts",
                         "deprecated": false,
@@ -189,13 +202,26 @@
                   {
                     "parentPluginId": "@kbn/shared-ux-page-kibana-no-data-mocks",
                     "id": "def-common.StorybookMock.serviceArguments.hasESData.control",
-                    "type": "string",
+                    "type": "Object",
                     "tags": [],
                     "label": "control",
                     "description": [],
                     "path": "src/platform/packages/private/shared-ux/page/kibana_no_data/mocks/src/storybook.ts",
                     "deprecated": false,
-                    "trackAdoption": false
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/shared-ux-page-kibana-no-data-mocks",
+                        "id": "def-common.StorybookMock.serviceArguments.hasESData.control.control",
+                        "type": "string",
+                        "tags": [],
+                        "label": "control",
+                        "description": [],
+                        "path": "src/platform/packages/private/shared-ux/page/kibana_no_data/mocks/src/storybook.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
                   },
                   {
                     "parentPluginId": "@kbn/shared-ux-page-kibana-no-data-mocks",
@@ -224,13 +250,26 @@
                   {
                     "parentPluginId": "@kbn/shared-ux-page-kibana-no-data-mocks",
                     "id": "def-common.StorybookMock.serviceArguments.hasUserDataView.control",
-                    "type": "string",
+                    "type": "Object",
                     "tags": [],
                     "label": "control",
                     "description": [],
                     "path": "src/platform/packages/private/shared-ux/page/kibana_no_data/mocks/src/storybook.ts",
                     "deprecated": false,
-                    "trackAdoption": false
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/shared-ux-page-kibana-no-data-mocks",
+                        "id": "def-common.StorybookMock.serviceArguments.hasUserDataView.control.control",
+                        "type": "string",
+                        "tags": [],
+                        "label": "control",
+                        "description": [],
+                        "path": "src/platform/packages/private/shared-ux/page/kibana_no_data/mocks/src/storybook.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
                   },
                   {
                     "parentPluginId": "@kbn/shared-ux-page-kibana-no-data-mocks",

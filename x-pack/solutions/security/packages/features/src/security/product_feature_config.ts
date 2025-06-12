@@ -19,6 +19,7 @@ import type { DefaultSecurityProductFeaturesConfig } from './types';
  * - `subFeatureIds`: the ids of the sub-features that will be added into the Security subFeatures entry.
  * - `subFeaturesPrivileges`: the privileges that will be added into the existing Security subFeature with the privilege `id` specified.
  */
+
 export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeaturesConfig = {
   [ProductFeatureSecurityKey.advancedInsights]: {
     privileges: {
@@ -32,6 +33,38 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
       },
     },
   },
+
+  [ProductFeatureSecurityKey.externalDetections]: {
+    privileges: {
+      all: {
+        ui: ['external_detections'],
+        api: [],
+      },
+      read: {
+        ui: ['external_detections'],
+        api: [],
+      },
+    },
+  },
+  [ProductFeatureSecurityKey.detections]: {
+    privileges: {
+      all: {
+        ui: ['detections'],
+        api: [
+          'cloud-security-posture-all',
+          'cloud-security-posture-read',
+          'cloud-defend-all',
+          'cloud-defend-read',
+          'bulkGetUserProfiles',
+        ],
+      },
+      read: {
+        ui: ['detections'],
+        api: ['cloud-security-posture-read', 'cloud-defend-read', 'bulkGetUserProfiles'],
+      },
+    },
+  },
+
   [ProductFeatureSecurityKey.investigationGuide]: {
     privileges: {
       all: {
@@ -39,6 +72,18 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
       },
       read: {
         ui: ['investigation-guide'],
+      },
+    },
+  },
+  [ProductFeatureSecurityKey.configurations]: {
+    privileges: {
+      all: {
+        ui: ['configurations'],
+        api: [],
+      },
+      read: {
+        ui: [],
+        api: [],
       },
     },
   },
@@ -66,6 +111,10 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
     },
   },
 
+  [ProductFeatureSecurityKey.endpointHostIsolation]: {
+    subFeatureIds: [SecuritySubFeatureId.hostIsolation],
+  },
+
   [ProductFeatureSecurityKey.endpointHostManagement]: {
     subFeatureIds: [SecuritySubFeatureId.endpointList],
   },
@@ -83,6 +132,7 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
       SecuritySubFeatureId.trustedApplications,
       SecuritySubFeatureId.blocklist,
       SecuritySubFeatureId.eventFilters,
+      SecuritySubFeatureId.globalArtifactManagement,
     ],
   },
 
@@ -134,5 +184,6 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
   [ProductFeatureSecurityKey.cloudSecurityPosture]: {},
 
   // Security PLIs
-  [ProductFeatureSecurityKey.integrationAssistant]: {},
+  [ProductFeatureSecurityKey.automaticImport]: {},
+  [ProductFeatureSecurityKey.prebuiltRuleCustomization]: {},
 };

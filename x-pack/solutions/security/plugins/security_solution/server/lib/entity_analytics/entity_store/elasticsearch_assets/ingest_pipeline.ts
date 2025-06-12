@@ -20,6 +20,7 @@ import { getFieldRetentionEnrichPolicyName } from './enrich_policy';
 
 import { fieldOperatorToIngestProcessor } from '../field_retention';
 import type { EntityEngineInstallationDescriptor } from '../installation/types';
+import { dynamicNewestRetentionSteps } from '../field_retention/dynamic_retention';
 
 const getPlatformPipelineId = (descriptionId: string) => {
   return `${descriptionId}-latest@platform`;
@@ -57,13 +58,6 @@ const buildIngestPipeline = ({
 
   const processors = [
     {
-      enrich: {
-        policy_name: enrichPolicyName,
-        field: description.identityField,
-        target_field: ENRICH_FIELD,
-      },
-    },
-    {
       set: {
         field: '@timestamp',
         value: '{{entity.last_seen_timestamp}}',
@@ -72,7 +66,31 @@ const buildIngestPipeline = ({
     {
       set: {
         field: 'entity.name',
+        override: false,
         value: `{{${description.identityField}}}`,
+      },
+    },
+    ...(debugMode
+      ? [
+          {
+            set: {
+              field: 'debug.collected',
+              value: '{{collected.metadata}}',
+            },
+          },
+          {
+            set: {
+              field: 'debug._source',
+              value: '{{_source}}',
+            },
+          },
+        ]
+      : []),
+    {
+      enrich: {
+        policy_name: enrichPolicyName,
+        field: description.identityField,
+        target_field: ENRICH_FIELD,
       },
     },
     ...getDotExpanderSteps(allEntityFields),
@@ -81,6 +99,9 @@ const buildIngestPipeline = ({
     ),
     ...getRemoveEmptyFieldSteps([...allEntityFields, 'asset', `${description.entityType}.risk`]),
     removeEntityDefinitionFieldsStep(),
+    ...(description.dynamic
+      ? [dynamicNewestRetentionSteps(description.fields.map((field) => field.destination))]
+      : []),
     ...(!debugMode
       ? [
           {
@@ -93,12 +114,9 @@ const buildIngestPipeline = ({
       : []),
   ];
 
-  const extraSteps =
-    (typeof description.pipeline === 'function'
-      ? description.pipeline(processors)
-      : description.pipeline) ?? [];
-
-  return [...(debugMode ? [debugDeepCopyContextStep()] : []), ...processors, ...extraSteps];
+  return typeof description.pipeline === 'function'
+    ? description.pipeline(processors)
+    : [...(debugMode ? [debugDeepCopyContextStep()] : []), ...processors];
 };
 
 // developing the pipeline is a bit tricky, so we have a debug mode
@@ -121,20 +139,18 @@ export const createPlatformPipeline = async ({
 
   const pipeline = {
     id: getPlatformPipelineId(description.id),
-    body: {
-      _meta: {
-        managed_by: 'entity_store',
-        managed: true,
-      },
-      description: `Ingest pipeline for entity definition ${description.id}`,
-      processors: buildIngestPipeline({
-        namespace: options.namespace,
-        description,
-        version: description.version,
-        allEntityFields,
-        debugMode,
-      }),
+    _meta: {
+      managed_by: 'entity_store',
+      managed: true,
     },
+    description: `Ingest pipeline for entity definition ${description.id}`,
+    processors: buildIngestPipeline({
+      namespace: options.namespace,
+      description,
+      version: description.version,
+      allEntityFields,
+      debugMode,
+    }),
   };
 
   logger.debug(`Attempting to create pipeline: ${JSON.stringify(pipeline)}`);

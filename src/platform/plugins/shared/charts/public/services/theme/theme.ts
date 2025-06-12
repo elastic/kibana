@@ -11,8 +11,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Observable, BehaviorSubject } from 'rxjs';
 
 import { CoreSetup, CoreTheme } from '@kbn/core/public';
-import { DARK_THEME, LIGHT_THEME, PartialTheme, Theme } from '@elastic/charts';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { LIGHT_THEME, PartialTheme, Theme, getChartsTheme } from '@elastic/charts';
 
 export class ThemeService {
   /** Returns default charts theme */
@@ -24,7 +23,11 @@ export class ThemeService {
   /** An observable of the current charts base theme */
   public chartsBaseTheme$ = this._chartsBaseTheme$.asObservable();
 
-  /** An observable boolean for dark mode of kibana */
+  /**
+   * An observable boolean for dark mode of kibana
+   *
+   * @deprecated use `useKibanaIsDarkMode`
+   */
   public get darkModeEnabled$(): Observable<CoreTheme> {
     if (!this.theme$) {
       throw new Error('ThemeService not initialized');
@@ -33,7 +36,11 @@ export class ThemeService {
     return this.theme$;
   }
 
-  /** A React hook for consuming the dark mode value */
+  /**
+   * A React hook for consuming the dark mode value
+   *
+   * @deprecated use `useKibanaIsDarkMode`
+   */
   public useDarkMode = (): boolean => {
     const [value, update] = useState(false);
 
@@ -104,20 +111,7 @@ export class ThemeService {
   public init(theme: CoreSetup['theme']) {
     this.theme$ = theme.theme$;
     this.theme$.subscribe((newTheme) => {
-      this._chartsBaseTheme$.next(getChartTheme(newTheme));
+      this._chartsBaseTheme$.next(getChartsTheme(newTheme));
     });
   }
-}
-
-// TODO: define these overrides in elastic/charts when Borealis becomes default
-function getChartTheme(theme: CoreTheme): Theme {
-  const chartTheme = theme.darkMode ? DARK_THEME : LIGHT_THEME;
-
-  if (theme.name !== 'amsterdam') {
-    const backgroundColor = euiThemeVars.euiColorEmptyShade;
-    chartTheme.background.color = backgroundColor;
-    chartTheme.background.fallbackColor = backgroundColor;
-  }
-
-  return chartTheme;
 }

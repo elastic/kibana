@@ -29,9 +29,9 @@ const renderDisplaySettings = (
     <UnifiedDataTableAdditionalDisplaySettings
       sampleSize={10}
       rowHeight={RowHeightMode.custom}
-      rowHeightLines={10}
+      lineCountInput={10}
       headerRowHeight={RowHeightMode.custom}
-      headerRowHeightLines={5}
+      headerLineCountInput={5}
       {...props}
     />
   );
@@ -47,9 +47,9 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
           sampleSize={10}
           onChangeSampleSize={onChangeSampleSizeMock}
           rowHeight={RowHeightMode.custom}
-          rowHeightLines={10}
+          lineCountInput={10}
           headerRowHeight={RowHeightMode.custom}
-          headerRowHeightLines={5}
+          headerLineCountInput={5}
         />
       );
       const input = findTestSubject(component, 'unifiedDataTableSampleSizeInput').last();
@@ -84,9 +84,9 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
           sampleSize={50}
           onChangeSampleSize={onChangeSampleSizeMock}
           rowHeight={RowHeightMode.custom}
-          rowHeightLines={10}
+          lineCountInput={10}
           headerRowHeight={RowHeightMode.custom}
-          headerRowHeightLines={5}
+          headerLineCountInput={5}
         />
       );
       const input = findTestSubject(component, 'unifiedDataTableSampleSizeInput').last();
@@ -118,9 +118,9 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
           sampleSize={200}
           onChangeSampleSize={onChangeSampleSizeMock}
           rowHeight={RowHeightMode.custom}
-          rowHeightLines={10}
+          lineCountInput={10}
           headerRowHeight={RowHeightMode.custom}
-          headerRowHeightLines={5}
+          headerLineCountInput={5}
         />
       );
 
@@ -155,9 +155,9 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
           sampleSize={50}
           onChangeSampleSize={onChangeSampleSizeMock}
           rowHeight={RowHeightMode.custom}
-          rowHeightLines={10}
+          lineCountInput={10}
           headerRowHeight={RowHeightMode.custom}
-          headerRowHeightLines={5}
+          headerLineCountInput={5}
         />
       );
       const input = findTestSubject(component, 'unifiedDataTableSampleSizeInput').last();
@@ -191,9 +191,9 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
           maxAllowedSampleSize={customSampleSize}
           onChangeSampleSize={onChangeSampleSizeMock}
           rowHeight={RowHeightMode.custom}
-          rowHeightLines={10}
+          lineCountInput={10}
           headerRowHeight={RowHeightMode.custom}
-          headerRowHeightLines={5}
+          headerLineCountInput={5}
         />
       );
 
@@ -230,9 +230,9 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
           sampleSize={customSampleSize}
           onChangeSampleSize={onChangeSampleSizeMock}
           rowHeight={RowHeightMode.custom}
-          rowHeightLines={10}
+          lineCountInput={10}
           headerRowHeight={RowHeightMode.custom}
-          headerRowHeightLines={5}
+          headerLineCountInput={5}
         />
       );
       let input = findTestSubject(component, 'unifiedDataTableSampleSizeInput').last();
@@ -264,12 +264,12 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
         onChangeRowHeight: jest.fn(),
         onChangeRowHeightLines: jest.fn(),
       });
-      expect(screen.getByLabelText('Cell row height')).toBeInTheDocument();
+      expect(screen.getByLabelText('Body cell lines')).toBeInTheDocument();
     });
 
     it('should not render rowHeight if onChangeRowHeight and onChangeRowHeightLines are undefined', () => {
       renderDisplaySettings();
-      expect(screen.queryByLabelText('Cell row height')).not.toBeInTheDocument();
+      expect(screen.queryByLabelText('Body cell lines')).not.toBeInTheDocument();
     });
 
     it('should call onChangeRowHeight and onChangeRowHeightLines when the rowHeight changes', async () => {
@@ -280,9 +280,9 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
         onChangeRowHeight,
         onChangeRowHeightLines,
       });
-      fireEvent.change(screen.getByRole('slider', { hidden: true }), { target: { value: 5 } });
+      fireEvent.change(screen.getByRole('spinbutton'), { target: { value: 5 } });
       expect(onChangeRowHeightLines).toHaveBeenCalledWith(5);
-      await userEvent.click(screen.getByRole('button', { name: 'Auto fit' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Auto' }));
       expect(onChangeRowHeight).toHaveBeenCalledWith('auto');
     });
   });
@@ -293,12 +293,12 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
         onChangeHeaderRowHeight: jest.fn(),
         onChangeHeaderRowHeightLines: jest.fn(),
       });
-      expect(screen.getByLabelText('Header row height')).toBeInTheDocument();
+      expect(screen.getByLabelText('Max header cell lines')).toBeInTheDocument();
     });
 
     it('should not render headerRowHeight if onChangeHeaderRowHeight and onChangeHeaderRowHeightLines are undefined', () => {
       renderDisplaySettings();
-      expect(screen.queryByLabelText('Header row height')).not.toBeInTheDocument();
+      expect(screen.queryByLabelText('Max header cell lines')).not.toBeInTheDocument();
     });
 
     it('should call onChangeHeaderRowHeight and onChangeHeaderRowHeightLines when the headerRowHeight changes', async () => {
@@ -309,9 +309,9 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
         onChangeHeaderRowHeight,
         onChangeHeaderRowHeightLines,
       });
-      fireEvent.change(screen.getByRole('slider', { hidden: true }), { target: { value: 3 } });
+      fireEvent.change(screen.getByRole('spinbutton'), { target: { value: 3 } });
       expect(onChangeHeaderRowHeightLines).toHaveBeenCalledWith(3);
-      await userEvent.click(screen.getByRole('button', { name: 'Auto fit' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Auto' }));
       expect(onChangeHeaderRowHeight).toHaveBeenCalledWith('auto');
     });
   });

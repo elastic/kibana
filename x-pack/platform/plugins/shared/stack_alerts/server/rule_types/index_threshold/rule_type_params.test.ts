@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { ParamsSchema, Params } from './rule_type_params';
-import { ObjectType, TypeOf } from '@kbn/config-schema';
+import {
+  ParamsSchema,
+  type Params,
+  type CoreQueryParams,
+} from '@kbn/response-ops-rule-params/index_threshold';
+import { MAX_GROUPS } from '@kbn/response-ops-rule-params/common';
+import type { ObjectType, TypeOf } from '@kbn/config-schema';
 import type { Writable } from '@kbn/utility-types';
-import { CoreQueryParams, MAX_GROUPS } from '@kbn/triggers-actions-ui-plugin/server';
 import { Comparator } from '../../../common/comparator_types';
 
 const DefaultParams: Writable<Partial<Params>> = {
@@ -25,6 +29,7 @@ const DefaultParams: Writable<Partial<Params>> = {
 describe('ruleType Params validate()', () => {
   runTests(ParamsSchema, DefaultParams);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let params: any;
   beforeEach(() => {
     params = { ...DefaultParams };
@@ -80,6 +85,7 @@ describe('ruleType Params validate()', () => {
 });
 
 export function runTests(schema: ObjectType, defaultTypeParams: Record<string, unknown>): void {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let params: any;
 
   const CoreDefaultParams: Writable<Partial<CoreQueryParams>> = {

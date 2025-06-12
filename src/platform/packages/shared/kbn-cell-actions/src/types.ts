@@ -15,6 +15,7 @@ import type {
 } from '@kbn/ui-actions-plugin/public';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import type { Serializable } from '@kbn/utility-types';
+import type { EuiButtonIconProps } from '@elastic/eui';
 import type { CellActionsMode } from './constants';
 
 export * from './actions/types';
@@ -85,8 +86,18 @@ export type CellActionsProps = PropsWithChildren<{
    * This data is sent directly to actions.
    */
   metadata?: Metadata;
-
+  /**
+   * The class name for the cell actions.
+   */
   className?: string;
+  /**
+   * The icon type for the extra actions button.
+   */
+  extraActionsIconType?: EuiButtonIconProps['iconType'];
+  /**
+   * The color for the extra actions button.
+   */
+  extraActionsColor?: EuiButtonIconProps['color'];
 }>;
 
 export interface CellActionExecutionContext extends ActionExecutionContext {

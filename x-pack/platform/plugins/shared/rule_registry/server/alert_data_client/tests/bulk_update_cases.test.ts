@@ -15,7 +15,8 @@ import {
   ALERT_RULE_TYPE_ID,
   MAX_CASES_PER_ALERT,
 } from '@kbn/rule-data-utils';
-import { AlertsClient, ConstructorOptions } from '../alerts_client';
+import type { ConstructorOptions } from '../alerts_client';
+import { AlertsClient } from '../alerts_client';
 import { ruleDataServiceMock } from '../../rule_data_plugin_service/rule_data_plugin_service.mock';
 
 describe('bulkUpdateCases', () => {

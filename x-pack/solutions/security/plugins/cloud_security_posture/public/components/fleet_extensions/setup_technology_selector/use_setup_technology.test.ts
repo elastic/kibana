@@ -83,10 +83,7 @@ describe('useSetupTechnology', () => {
       });
 
       expect(result.current.setupTechnology).toBe(SetupTechnology.AGENTLESS);
-      expect(handleSetupTechnologyChangeMock).toHaveBeenCalledWith(
-        SetupTechnology.AGENTLESS,
-        inputPackage.policy_template
-      );
+      expect(handleSetupTechnologyChangeMock).toHaveBeenCalledWith(SetupTechnology.AGENTLESS);
     });
   });
 

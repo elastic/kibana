@@ -16,6 +16,11 @@ import { Router } from '@kbn/core-http-router-server-internal';
 import { HttpServer, HttpConfig } from '@kbn/core-http-server-internal';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import type { Logger } from '@kbn/logging';
+import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';
+
+const options = getEnvOptions();
+options.cliArgs.dev = false;
+const env = createTestEnv({ envOptions: options });
 
 describe('Http server', () => {
   let server: HttpServer;
@@ -60,7 +65,7 @@ describe('Http server', () => {
       innerServerListener = innerServer.listener;
 
       const router = new Router('', logger, enhanceWithContext, {
-        isDev: false,
+        env,
         versionedRouterOptions: {
           defaultHandlerResolutionStrategy: 'oldest',
         },
@@ -68,6 +73,7 @@ describe('Http server', () => {
       router.post(
         {
           path: '/',
+          security: { authz: { enabled: false, reason: '' } },
           validate: false,
           options: { body: { accepts: 'application/json' } },
         },
@@ -100,8 +106,8 @@ describe('Http server', () => {
       expect(response.header.connection).toBe('close');
     });
 
-    test('any requests triggered while stopping should be rejected', async () => {
-      await Promise.all([
+    test('any requests triggered while stopping should be rejected with 503', async () => {
+      const [, , response] = await Promise.all([
         // Trigger a request that should hold the server from stopping until fulfilled (otherwise the server will stop straight away)
         supertest(innerServerListener).post('/'),
         // Stop the server while the request is in progress
@@ -112,11 +118,16 @@ describe('Http server', () => {
         // Trigger a new request while shutting down (should be rejected)
         (async () => {
           await new Promise((resolve) => setTimeout(resolve, (2 * shutdownTimeout) / 3));
-          const request = supertest(innerServerListener).post('/');
-          await expect(request).rejects.toThrow('socket hang up');
-          await request.catch((err) => expect(err.code).toBe('ECONNRESET'));
+          return supertest(innerServerListener).post('/');
         })(),
       ]);
+      expect(response.status).toBe(503);
+      expect(response.body).toStrictEqual({
+        statusCode: 503,
+        error: 'Service Unavailable',
+        message: 'Kibana is shutting down and not accepting new incoming requests',
+      });
+      expect(response.header.connection).toBe('close');
     });
 
     test('when no ongoing connections, the server should stop without waiting any longer', async () => {

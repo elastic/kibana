@@ -7,10 +7,12 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import type { Document } from '@langchain/core/documents';
+import type { DefendInsights } from '@kbn/elastic-assistant-common';
 import moment from 'moment';
-
 import {
-  DEFEND_INSIGHTS_TOOL_ID,
+  ContentReferencesStore,
+  DEFEND_INSIGHTS_ID,
   DefendInsightStatus,
   DefendInsightType,
 } from '@kbn/elastic-assistant-common';
@@ -26,7 +28,15 @@ import {
   handleToolError,
   updateDefendInsights,
   updateDefendInsightLastViewedAt,
+  runExternalCallbacks,
 } from './helpers';
+import { appContextService } from '../../services/app_context';
+
+jest.mock('../../services/app_context', () => ({
+  appContextService: {
+    getRegisteredCallbacks: jest.fn(),
+  },
+}));
 
 describe('defend insights route helpers', () => {
   afterEach(() => {
@@ -35,9 +45,9 @@ describe('defend insights route helpers', () => {
 
   describe('getAssistantTool', () => {
     it('should return the defend-insights tool', () => {
-      const getRegisteredTools = jest.fn().mockReturnValue([{ id: DEFEND_INSIGHTS_TOOL_ID }]);
+      const getRegisteredTools = jest.fn().mockReturnValue([{ id: DEFEND_INSIGHTS_ID }]);
       const result = getAssistantTool(getRegisteredTools, 'pluginName');
-      expect(result).toEqual({ id: DEFEND_INSIGHTS_TOOL_ID });
+      expect(result).toEqual({ id: DEFEND_INSIGHTS_ID });
     });
   });
 
@@ -58,6 +68,7 @@ describe('defend insights route helpers', () => {
         latestReplacements: {},
         onNewReplacements: jest.fn(),
         request: {} as any,
+        contentReferencesStore: {} as ContentReferencesStore,
       };
       const result = getAssistantToolParams(params);
 
@@ -103,6 +114,7 @@ describe('defend insights route helpers', () => {
   describe('updateDefendInsights', () => {
     it('should update defend insights', async () => {
       const params = {
+        anonymizedEvents: [{}, {}, {}, {}, {}] as any as Document[],
         apiConfig: {
           connectorId: 'connector-id1',
           actionTypeId: 'action-type-id1',
@@ -110,6 +122,7 @@ describe('defend insights route helpers', () => {
           provider: OpenAiProviderType.OpenAi,
         },
         defendInsightId: 'insight-id1',
+        insights: ['insight1', 'insight2'] as any as DefendInsights,
         authenticatedUser: {} as any,
         dataClient: {
           getDefendInsight: jest.fn().mockResolvedValueOnce({
@@ -124,6 +137,7 @@ describe('defend insights route helpers', () => {
         rawDefendInsights: '{"eventsContextCount": 5, "insights": ["insight1", "insight2"]}',
         startTime: moment(),
         telemetry: { reportEvent: jest.fn() } as any,
+        insightType: DefendInsightType.Enum.incompatible_antivirus,
       };
       await updateDefendInsights(params);
 
@@ -155,101 +169,103 @@ describe('defend insights route helpers', () => {
         expect.any(Object)
       );
     });
-
-    it('should handle error if rawDefendInsights is null', async () => {
-      const params = {
-        apiConfig: {
-          connectorId: 'connector-id1',
-          actionTypeId: 'action-type-id1',
-          model: 'model',
-          provider: OpenAiProviderType.OpenAi,
-        },
-        defendInsightId: 'id',
-        authenticatedUser: {} as any,
-        dataClient: {
-          getDefendInsight: jest.fn().mockResolvedValueOnce({
-            status: DefendInsightStatus.Enum.running,
-            backingIndex: 'index',
-            generationIntervals: [],
-          }),
-          updateDefendInsight: jest.fn(),
-        } as any,
-        latestReplacements: {},
-        logger: { error: jest.fn() } as any,
-        rawDefendInsights: null,
-        startTime: moment(),
-        telemetry: { reportEvent: jest.fn() } as any,
-      };
-      await updateDefendInsights(params);
-
-      expect(params.logger.error).toHaveBeenCalledTimes(1);
-      expect(params.telemetry.reportEvent).toHaveBeenCalledTimes(1);
-      expect(params.telemetry.reportEvent).toHaveBeenCalledWith(
-        DEFEND_INSIGHT_ERROR_EVENT.eventType,
-        expect.any(Object)
-      );
-    });
   });
 
   describe('updateDefendInsightLastViewedAt', () => {
-    it('should update lastViewedAt time', async () => {
+    it('should update lastViewedAt time for a single insight', async () => {
       // ensure difference regardless of processing speed
       const startTime = new Date().getTime() - 1;
       const insightId = 'defend-insight-id1';
       const backingIndex = 'backing-index';
-      const params = {
+
+      const insight: any = {
         id: insightId,
+        backingIndex,
+      };
+
+      const params = {
+        defendInsights: [insight],
         authenticatedUser: {} as any,
         dataClient: {
-          findDefendInsightsByParams: jest
-            .fn()
-            .mockResolvedValueOnce([{ id: insightId, backingIndex }]),
           updateDefendInsights: jest.fn().mockResolvedValueOnce([{ id: insightId }]),
         } as any,
       };
+
       const result = await updateDefendInsightLastViewedAt(params);
 
-      expect(params.dataClient.findDefendInsightsByParams).toHaveBeenCalledTimes(1);
-      expect(params.dataClient.findDefendInsightsByParams).toHaveBeenCalledWith({
-        params: { ids: [insightId] },
-        authenticatedUser: params.authenticatedUser,
-      });
       expect(params.dataClient.updateDefendInsights).toHaveBeenCalledTimes(1);
       expect(params.dataClient.updateDefendInsights).toHaveBeenCalledWith({
         defendInsightsUpdateProps: [
           expect.objectContaining({
             id: insightId,
             backingIndex,
+            lastViewedAt: expect.any(String),
           }),
         ],
         authenticatedUser: params.authenticatedUser,
       });
-      expect(
-        new Date(
-          params.dataClient.updateDefendInsights.mock.calls[0][0].defendInsightsUpdateProps[0].lastViewedAt
-        ).getTime()
-      ).toBeGreaterThan(startTime);
+
+      const updatedAt = new Date(
+        params.dataClient.updateDefendInsights.mock.calls[0][0].defendInsightsUpdateProps[0].lastViewedAt
+      ).getTime();
+      expect(updatedAt).toBeGreaterThan(startTime);
+
       expect(result).toEqual({ id: insightId });
     });
 
-    it('should return undefined if defend insight not found', async () => {
-      const insightId = 'defend-insight-id1';
+    it('should return undefined if no insights were provided', async () => {
       const params = {
-        id: insightId,
+        defendInsights: [],
         authenticatedUser: {} as any,
         dataClient: {
-          findDefendInsightsByParams: jest.fn().mockResolvedValueOnce([]),
-          updateDefendInsight: jest.fn(),
+          updateDefendInsights: jest.fn(),
         } as any,
       };
+
       const result = await updateDefendInsightLastViewedAt(params);
 
-      expect(params.dataClient.findDefendInsightsByParams).toHaveBeenCalledTimes(1);
-      expect(params.dataClient.findDefendInsightsByParams).toHaveBeenCalledWith({
-        params: { ids: [insightId] },
-        authenticatedUser: params.authenticatedUser,
-      });
+      expect(params.dataClient.updateDefendInsights).not.toHaveBeenCalled();
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe('runExternalCallbacks', () => {
+    it('should call all registered callbacks with provided arguments', async () => {
+      const mockCallback1 = jest.fn();
+      const mockCallback2 = jest.fn();
+      const mockRequest = {} as any;
+
+      (appContextService.getRegisteredCallbacks as jest.Mock).mockReturnValue([
+        mockCallback1,
+        mockCallback2,
+      ]);
+
+      await runExternalCallbacks('some-callback-id' as any, mockRequest);
+
+      expect(mockCallback1).toHaveBeenCalledWith(mockRequest);
+      expect(mockCallback2).toHaveBeenCalledWith(mockRequest);
+    });
+
+    it('should support callbacks with two arguments', async () => {
+      const mockCallback = jest.fn();
+      const mockRequest = {} as any;
+      const mockArg = { extra: true };
+
+      (appContextService.getRegisteredCallbacks as jest.Mock).mockReturnValue([mockCallback]);
+
+      await runExternalCallbacks('some-callback-id' as any, mockRequest, mockArg);
+
+      expect(mockCallback).toHaveBeenCalledWith(mockRequest, mockArg);
+    });
+
+    it('should handle empty callback list gracefully', async () => {
+      const mockRequest = {} as any;
+
+      (appContextService.getRegisteredCallbacks as jest.Mock).mockReturnValue([]);
+
+      await expect(
+        runExternalCallbacks('some-callback-id' as any, mockRequest)
+      ).resolves.not.toThrow();
     });
   });
 });

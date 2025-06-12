@@ -14,7 +14,7 @@ import {
   profilingAzureCostDiscountRate,
   profilingShowErrorFrames,
 } from '@kbn/observability-plugin/common';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { CoreRequestHandlerContext, ElasticsearchClient } from '@kbn/core/server';
 import type { AggregationField, ESTopNFunctions, TopNFunctions } from '@kbn/profiling-utils';
 import { convertTonsToKgs } from '@kbn/profiling-utils';

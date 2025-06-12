@@ -15,6 +15,11 @@ import {
   IStorageWrapper,
   createStartServicesGetter,
 } from '@kbn/kibana-utils-plugin/public';
+import {
+  EVENT_PROPERTY_EXECUTION_CONTEXT,
+  EVENT_PROPERTY_SEARCH_TIMEOUT_MS,
+  EVENT_TYPE_DATA_SEARCH_TIMEOUT,
+} from './search/constants';
 import type { ConfigSchema } from '../server/config';
 import type {
   DataPublicPluginSetup,
@@ -113,6 +118,25 @@ export class DataPublicPlugin
       )
     );
 
+    core.analytics.registerEventType({
+      eventType: EVENT_TYPE_DATA_SEARCH_TIMEOUT,
+      schema: {
+        [EVENT_PROPERTY_SEARCH_TIMEOUT_MS]: {
+          type: 'long',
+          _meta: {
+            description:
+              'The time (in ms) before the search request was aborted due to timeout (search:timeout advanced setting)',
+          },
+        },
+        [EVENT_PROPERTY_EXECUTION_CONTEXT]: {
+          type: 'pass_through',
+          _meta: {
+            description: 'Execution context of the search request that timed out',
+          },
+        },
+      },
+    });
+
     return {
       search: searchService,
       query: queryService,
@@ -143,26 +167,21 @@ export class DataPublicPlugin
     });
     setSearchService(search);
 
-    uiActions.addTriggerAction(
-      'SELECT_RANGE_TRIGGER',
-      createSelectRangeActionDefinition(() => ({
-        uiActions,
-      }))
-    );
+    const rangeSelectAction = createSelectRangeActionDefinition(() => ({
+      uiActions,
+    }));
+    uiActions.addTriggerAction('SELECT_RANGE_TRIGGER', rangeSelectAction);
 
-    uiActions.addTriggerAction(
-      'VALUE_CLICK_TRIGGER',
-      createValueClickActionDefinition(() => ({
-        uiActions,
-      }))
-    );
+    const valueClickAction = createValueClickActionDefinition(() => ({
+      uiActions,
+    }));
 
-    uiActions.addTriggerAction(
-      'MULTI_VALUE_CLICK_TRIGGER',
-      createMultiValueClickActionDefinition(() => ({
-        query,
-      }))
-    );
+    uiActions.addTriggerAction('VALUE_CLICK_TRIGGER', valueClickAction);
+
+    const multiValueClickAction = createMultiValueClickActionDefinition(() => ({
+      query,
+    }));
+    uiActions.addTriggerAction('MULTI_VALUE_CLICK_TRIGGER', multiValueClickAction);
 
     const datatableUtilities = new DatatableUtilitiesService(search.aggs, dataViews, fieldFormats);
     const dataServices = {

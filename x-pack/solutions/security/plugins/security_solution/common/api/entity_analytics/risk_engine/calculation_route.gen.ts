@@ -47,6 +47,10 @@ export const RiskScoresCalculationResponse = z.object({
        */
       service: z.array(EntityRiskScoreRecord).optional(),
       /**
+       * A list of generic risk scores
+       */
+      generic: z.array(EntityRiskScoreRecord).optional(),
+      /**
        * If 'wait_for' the request will wait for the index refresh.
        */
       refresh: z.literal('wait_for').optional(),

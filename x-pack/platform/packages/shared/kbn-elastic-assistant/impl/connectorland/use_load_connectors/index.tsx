@@ -11,8 +11,10 @@ import type { ServerError } from '@kbn/cases-plugin/public/types';
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { HttpSetup } from '@kbn/core-http-browser';
+import { isInferenceEndpointExists } from '@kbn/inference-endpoint-ui-common';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { ActionConnector } from '@kbn/cases-plugin/public/containers/configure/types';
 import { AIConnector } from '../connector_selector';
 import * as i18n from '../translations';
 
@@ -44,12 +46,18 @@ export const useLoadConnectors = ({
     async () => {
       const queryResult = await loadConnectors({ http });
       return queryResult.reduce(
-        (acc: AIConnector[], connector) => [
-          ...acc,
+        async (acc: Promise<AIConnector[]>, connector) => [
+          ...(await acc),
           ...(!connector.isMissingSecrets &&
           actionTypes.includes(connector.actionTypeId) &&
           // only include preconfigured .inference connectors
-          (connector.actionTypeId !== '.inference' || connector.isPreconfigured)
+          (connector.actionTypeId !== '.inference' ||
+            (connector.actionTypeId === '.inference' &&
+              connector.isPreconfigured &&
+              (await isInferenceEndpointExists(
+                http,
+                (connector as ActionConnector)?.config?.inferenceId
+              ))))
             ? [
                 {
                   ...connector,
@@ -63,7 +71,7 @@ export const useLoadConnectors = ({
               ]
             : []),
         ],
-        []
+        Promise.resolve([])
       );
     },
     {

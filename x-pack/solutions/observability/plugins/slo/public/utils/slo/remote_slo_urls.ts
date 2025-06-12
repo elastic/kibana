@@ -6,7 +6,7 @@
  */
 
 import { encode } from '@kbn/rison';
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import path from 'path';
 import { paths } from '../../../common/locators/paths';
 
@@ -19,10 +19,7 @@ function createBaseRemoteSloDetailsUrl(
   }
 
   const spacePath = spaceId !== 'default' ? `/s/${spaceId}` : '';
-  const detailsPath = paths.sloDetails(
-    slo.id,
-    ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined
-  );
+  const detailsPath = paths.sloDetails(slo.id, slo.instanceId);
 
   const remoteUrl = new URL(path.join(spacePath, detailsPath), slo.remote.kibanaUrl);
   return remoteUrl;

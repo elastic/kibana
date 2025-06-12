@@ -17,7 +17,6 @@ import {
   useDispatch,
   useSelector,
 } from '../store/redux';
-import { RightSection } from './right_section';
 import { useSections } from '../hooks/use_sections';
 import { useExpandableFlyoutState } from '../hooks/use_expandable_flyout_state';
 import { useExpandableFlyoutApi } from '../hooks/use_expandable_flyout_api';
@@ -153,18 +152,21 @@ export const Container: React.FC<ContainerProps> = memo(
 
     const flyoutWidth = useMemo(() => {
       if (showCollapsed) {
-        return flyoutWidths.collapsedWidth || defaultWidths.rightWidth;
+        return flyoutWidths.collapsedWidth || defaultWidths[type].rightWidth;
       }
       if (showExpanded) {
-        return flyoutWidths.expandedWidth || defaultWidths.rightWidth + defaultWidths.leftWidth;
+        return (
+          flyoutWidths.expandedWidth ||
+          defaultWidths[type].rightWidth + defaultWidths[type].leftWidth
+        );
       }
     }, [
-      showCollapsed,
-      showExpanded,
+      defaultWidths,
       flyoutWidths.collapsedWidth,
       flyoutWidths.expandedWidth,
-      defaultWidths.rightWidth,
-      defaultWidths.leftWidth,
+      showCollapsed,
+      showExpanded,
+      type,
     ]);
 
     // callback function called when user changes the flyout's width
@@ -189,6 +191,16 @@ export const Container: React.FC<ContainerProps> = memo(
       [dispatch, showCollapsed, showExpanded]
     );
 
+    const onClose = useCallback(
+      (e: MouseEvent | TouchEvent | KeyboardEvent) => {
+        closeFlyout();
+        if (flyoutProps.onClose) {
+          flyoutProps.onClose(e);
+        }
+      },
+      [closeFlyout, flyoutProps]
+    );
+
     // don't need to render if the windowWidth is 0 or if nothing needs to be rendered
     if (!showExpanded && !showCollapsed && !showPreview) {
       return null;
@@ -202,25 +214,16 @@ export const Container: React.FC<ContainerProps> = memo(
         type={flyoutType}
         size={flyoutWidth}
         ownFocus={false}
-        onClose={(e) => {
-          closeFlyout();
-          if (flyoutProps.onClose) {
-            flyoutProps.onClose(e);
-          }
-        }}
+        onClose={onClose}
         css={customStyles}
         onResize={onResize}
         minWidth={minFlyoutWidth}
       >
-        {showCollapsed && <RightSection component={rightComponent as React.ReactElement} />}
-
-        {showExpanded && (
-          <ResizableContainer
-            leftComponent={leftComponent as React.ReactElement}
-            rightComponent={rightComponent as React.ReactElement}
-            showPreview={showPreview}
-          />
-        )}
+        <ResizableContainer
+          leftComponent={leftComponent as React.ReactElement}
+          rightComponent={rightComponent as React.ReactElement}
+          showLeft={showExpanded}
+        />
 
         {showPreview && (
           <PreviewSection

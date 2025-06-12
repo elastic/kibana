@@ -6,8 +6,7 @@
  */
 
 import React, { memo } from 'react';
-
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { TimeFormat, useFormattedTime } from '../../formatted_time';
 import { LogEntryColumnContent } from './log_entry_column';
 
@@ -25,8 +24,8 @@ export const LogEntryTimestampColumn = memo<LogEntryTimestampColumnProps>(
   }
 );
 
-const TimestampColumnContent = euiStyled(LogEntryColumnContent)`
-  color: ${(props) => props.theme.eui.euiColorDarkShade};
+const TimestampColumnContent = styled(LogEntryColumnContent)`
+  color: ${(props) => props.theme.euiTheme.colors.darkShade};
   overflow: hidden;
   text-overflow: clip;
   white-space: pre;

@@ -8,7 +8,7 @@
  */
 
 import { IUiSettingsClient } from '@kbn/core/server';
-import { AsyncSearchGetRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { AsyncSearchGetRequest } from '@elastic/elasticsearch/lib/api/types';
 import { AsyncSearchSubmitRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ISearchOptions } from '@kbn/search-types';
 import { UI_SETTINGS } from '../../../../common';

@@ -9,15 +9,19 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
 
-import type { AxiosError } from 'axios';
+import type { AxiosError, AxiosResponse } from 'axios';
 import axios from 'axios';
 
 import { AgentlessAgentConfigError } from '../../errors';
 import type { AgentPolicy, NewAgentPolicy } from '../../types';
+import {
+  type AgentlessApiDeploymentResponse,
+  AgentlessApiDeploymentResponseCode,
+} from '../../../common/types';
 
 import { appContextService } from '../app_context';
 import { listEnrollmentApiKeys } from '../api_keys';
-import { listFleetServerHosts } from '../fleet_server_host';
+import { fleetServerHostService } from '../fleet_server_host';
 
 import { agentlessAgentService } from './agentless_agent';
 
@@ -48,8 +52,8 @@ mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
 const mockedListEnrollmentApiKeys = listEnrollmentApiKeys as jest.Mock<
   ReturnType<typeof listEnrollmentApiKeys>
 >;
-const mockedListFleetServerHosts = listFleetServerHosts as jest.Mock<
-  ReturnType<typeof listFleetServerHosts>
+const mockedFleetServerHostService = fleetServerHostService as jest.Mocked<
+  typeof fleetServerHostService
 >;
 
 function getAgentPolicyCreateMock() {
@@ -65,6 +69,13 @@ function getAgentPolicyCreateMock() {
   return soClient;
 }
 let mockedLogger: jest.Mocked<Logger>;
+
+const mockAgentlessDeploymentResponse: Partial<AxiosResponse<AgentlessApiDeploymentResponse>> = {
+  data: {
+    code: AgentlessApiDeploymentResponseCode.Success,
+    error: null,
+  },
+};
 
 jest.mock('@kbn/server-http-tools', () => ({
   ...jest.requireActual('@kbn/server-http-tools'),
@@ -89,12 +100,9 @@ describe('Agentless Agent service', () => {
   });
 
   it('should create agentless agent for ESS', async () => {
-    const returnValue = {
-      id: 'mocked',
-      regional_id: 'mocked',
-    };
-
-    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(returnValue);
+    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(
+      mockAgentlessDeploymentResponse
+    );
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -115,7 +123,7 @@ describe('Agentless Agent service', () => {
     jest
       .spyOn(appContextService, 'getKibanaVersion')
       .mockReturnValue('mocked-kibana-version-infinite');
-    mockedListFleetServerHosts.mockResolvedValue({
+    mockedFleetServerHostService.list.mockResolvedValue({
       items: [
         {
           id: 'mocked-fleet-server-id',
@@ -162,7 +170,7 @@ describe('Agentless Agent service', () => {
     );
 
     expect(axios).toHaveBeenCalledTimes(1);
-    expect(createAgentlessAgentReturnValue).toEqual(returnValue);
+    expect(createAgentlessAgentReturnValue).toEqual(mockAgentlessDeploymentResponse);
     expect(axios).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
@@ -187,12 +195,9 @@ describe('Agentless Agent service', () => {
   });
 
   it('should create agentless agent for serverless', async () => {
-    const returnValue = {
-      id: 'mocked',
-      regional_id: 'mocked',
-    };
-
-    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(returnValue);
+    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(
+      mockAgentlessDeploymentResponse
+    );
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -215,7 +220,7 @@ describe('Agentless Agent service', () => {
     jest
       .spyOn(appContextService, 'getKibanaVersion')
       .mockReturnValue('mocked-kibana-version-infinite');
-    mockedListFleetServerHosts.mockResolvedValue({
+    mockedFleetServerHostService.list.mockResolvedValue({
       items: [
         {
           id: 'mocked-fleet-server-id',
@@ -262,7 +267,7 @@ describe('Agentless Agent service', () => {
     );
 
     expect(axios).toHaveBeenCalledTimes(1);
-    expect(createAgentlessAgentReturnValue).toEqual(returnValue);
+    expect(createAgentlessAgentReturnValue).toEqual(mockAgentlessDeploymentResponse);
     expect(axios).toHaveBeenCalledWith(
       expect.objectContaining({
         data: {
@@ -285,13 +290,238 @@ describe('Agentless Agent service', () => {
     );
   });
 
-  it('should create agentless agent when no labels are given', async () => {
-    const returnValue = {
-      id: 'mocked',
-      regional_id: 'mocked',
-    };
+  it('should create agentless agent with resources', async () => {
+    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(
+      mockAgentlessDeploymentResponse
+    );
+    const soClient = getAgentPolicyCreateMock();
+    // ignore unrelated unique name constraint
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'http://api.agentless.com',
+          tls: {
+            certificate: '/path/to/cert',
+            key: '/path/to/key',
+            ca: '/path/to/ca',
+          },
+        },
+      },
+    } as any);
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ isCloudEnabled: true, isServerlessEnabled: true } as any);
+    jest
+      .spyOn(appContextService, 'getKibanaVersion')
+      .mockReturnValue('mocked-kibana-version-infinite');
+    mockedFleetServerHostService.list.mockResolvedValue({
+      items: [
+        {
+          id: 'mocked-fleet-server-id',
+          host: 'http://fleetserver:8220',
+          active: true,
+          is_default: true,
+          host_urls: ['http://fleetserver:8220'],
+        },
+      ],
+    } as any);
+    mockedListEnrollmentApiKeys.mockResolvedValue({
+      items: [
+        {
+          id: 'mocked-fleet-enrollment-token-id',
+          policy_id: 'mocked-fleet-enrollment-policy-id',
+          api_key: 'mocked-fleet-enrollment-api-key',
+        },
+      ],
+    } as any);
 
-    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(returnValue);
+    const createAgentlessAgentReturnValue = await agentlessAgentService.createAgentlessAgent(
+      esClient,
+      soClient,
+      {
+        id: 'mocked-agentless-agent-policy-id',
+        name: 'agentless agent policy',
+        namespace: 'default',
+        supports_agentless: true,
+        agentless: {
+          resources: {
+            requests: {
+              memory: '1Gi',
+              cpu: '500m',
+            },
+          },
+        },
+        global_data_tags: [
+          {
+            name: 'organization',
+            value: 'elastic',
+          },
+          {
+            name: 'division',
+            value: 'cloud',
+          },
+          {
+            name: 'team',
+            value: 'fleet',
+          },
+        ],
+      } as AgentPolicy
+    );
+
+    expect(axios).toHaveBeenCalledTimes(1);
+    expect(createAgentlessAgentReturnValue).toEqual(mockAgentlessDeploymentResponse);
+    expect(axios).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: {
+          fleet_token: 'mocked-fleet-enrollment-api-key',
+          fleet_url: 'http://fleetserver:8220',
+          policy_id: 'mocked-agentless-agent-policy-id',
+          resources: {
+            requests: {
+              memory: '1Gi',
+              cpu: '500m',
+            },
+          },
+          labels: {
+            owner: {
+              org: 'elastic',
+              division: 'cloud',
+              team: 'fleet',
+            },
+          },
+        },
+        headers: expect.anything(),
+        httpsAgent: expect.anything(),
+        method: 'POST',
+        url: 'http://api.agentless.com/api/v1/serverless/deployments',
+      })
+    );
+  });
+
+  it('should create agentless agent with cloud_connectors', async () => {
+    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(
+      mockAgentlessDeploymentResponse
+    );
+    const soClient = getAgentPolicyCreateMock();
+    // ignore unrelated unique name constraint
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'http://api.agentless.com',
+          tls: {
+            certificate: '/path/to/cert',
+            key: '/path/to/key',
+            ca: '/path/to/ca',
+          },
+        },
+      },
+    } as any);
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ isCloudEnabled: true, isServerlessEnabled: true } as any);
+    jest
+      .spyOn(appContextService, 'getKibanaVersion')
+      .mockReturnValue('mocked-kibana-version-infinite');
+    mockedFleetServerHostService.list.mockResolvedValue({
+      items: [
+        {
+          id: 'mocked-fleet-server-id',
+          host: 'http://fleetserver:8220',
+          active: true,
+          is_default: true,
+          host_urls: ['http://fleetserver:8220'],
+        },
+      ],
+    } as any);
+    mockedListEnrollmentApiKeys.mockResolvedValue({
+      items: [
+        {
+          id: 'mocked-fleet-enrollment-token-id',
+          policy_id: 'mocked-fleet-enrollment-policy-id',
+          api_key: 'mocked-fleet-enrollment-api-key',
+        },
+      ],
+    } as any);
+
+    const createAgentlessAgentReturnValue = await agentlessAgentService.createAgentlessAgent(
+      esClient,
+      soClient,
+      {
+        id: 'mocked-agentless-agent-policy-id',
+        name: 'agentless agent policy',
+        namespace: 'default',
+        supports_agentless: true,
+        agentless: {
+          resources: {
+            requests: {
+              memory: '1Gi',
+              cpu: '500m',
+            },
+          },
+          cloud_connectors: {
+            target_csp: 'aws',
+            enabled: true,
+          },
+        },
+        global_data_tags: [
+          {
+            name: 'organization',
+            value: 'elastic',
+          },
+          {
+            name: 'division',
+            value: 'cloud',
+          },
+          {
+            name: 'team',
+            value: 'fleet',
+          },
+        ],
+      } as AgentPolicy
+    );
+
+    expect(axios).toHaveBeenCalledTimes(1);
+    expect(createAgentlessAgentReturnValue).toEqual(mockAgentlessDeploymentResponse);
+    expect(axios).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: {
+          fleet_token: 'mocked-fleet-enrollment-api-key',
+          fleet_url: 'http://fleetserver:8220',
+          policy_id: 'mocked-agentless-agent-policy-id',
+          resources: {
+            requests: {
+              memory: '1Gi',
+              cpu: '500m',
+            },
+          },
+          cloud_connectors: {
+            target_csp: 'aws',
+            enabled: true,
+          },
+          labels: {
+            owner: {
+              org: 'elastic',
+              division: 'cloud',
+              team: 'fleet',
+            },
+          },
+        },
+        headers: expect.anything(),
+        httpsAgent: expect.anything(),
+        method: 'POST',
+        url: 'http://api.agentless.com/api/v1/serverless/deployments',
+      })
+    );
+  });
+
+  it('should create agentless agent when no labels are given', async () => {
+    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(
+      mockAgentlessDeploymentResponse
+    );
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -312,7 +542,7 @@ describe('Agentless Agent service', () => {
     jest
       .spyOn(appContextService, 'getKibanaVersion')
       .mockReturnValue('mocked-kibana-version-infinite');
-    mockedListFleetServerHosts.mockResolvedValue({
+    mockedFleetServerHostService.list.mockResolvedValue({
       items: [
         {
           id: 'mocked-fleet-server-id',
@@ -345,7 +575,7 @@ describe('Agentless Agent service', () => {
     );
 
     expect(axios).toHaveBeenCalledTimes(1);
-    expect(createAgentlessAgentReturnValue).toEqual(returnValue);
+    expect(createAgentlessAgentReturnValue).toEqual(mockAgentlessDeploymentResponse);
     expect(axios).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
@@ -399,6 +629,43 @@ describe('Agentless Agent service', () => {
     );
   });
 
+  it('should upgraded agentless agent for ESS', async () => {
+    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(
+      mockAgentlessDeploymentResponse
+    );
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'http://api.agentless.com',
+          tls: {
+            certificate: '/path/to/cert',
+            key: '/path/to/key',
+            ca: '/path/to/ca',
+          },
+        },
+      },
+    } as any);
+    jest.spyOn(appContextService, 'getKibanaVersion').mockReturnValue('8.18.0');
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+
+    await agentlessAgentService.upgradeAgentlessDeployment('mocked-agentless-agent-policy-id');
+
+    expect(axios).toHaveBeenCalledTimes(1);
+
+    expect(axios).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: expect.anything(),
+        httpsAgent: expect.anything(),
+        method: 'PUT',
+        data: {
+          stack_version: '8.18.0',
+        },
+        url: 'http://api.agentless.com/api/v1/ess/deployments/mocked-agentless-agent-policy-id',
+      })
+    );
+  });
+
   it('should delete agentless agent for serverless', async () => {
     const returnValue = {
       id: 'mocked',
@@ -439,12 +706,9 @@ describe('Agentless Agent service', () => {
   });
 
   it('should redact sensitive information from debug logs', async () => {
-    const returnValue = {
-      id: 'mocked',
-      regional_id: 'mocked',
-    };
-
-    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(returnValue);
+    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(
+      mockAgentlessDeploymentResponse
+    );
     const soClient = getAgentPolicyCreateMock();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
@@ -466,7 +730,7 @@ describe('Agentless Agent service', () => {
       .spyOn(appContextService, 'getKibanaVersion')
       .mockReturnValue('mocked-kibana-version-infinite');
 
-    mockedListFleetServerHosts.mockResolvedValue({
+    mockedFleetServerHostService.list.mockResolvedValue({
       items: [
         {
           id: 'mocked-fleet-server-id',
@@ -505,12 +769,9 @@ describe('Agentless Agent service', () => {
   });
 
   it('should log "undefined" on debug logs when tls configuration is missing', async () => {
-    const returnValue = {
-      id: 'mocked',
-      regional_id: 'mocked',
-    };
-
-    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(returnValue);
+    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(
+      mockAgentlessDeploymentResponse
+    );
     const soClient = getAgentPolicyCreateMock();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
@@ -527,7 +788,7 @@ describe('Agentless Agent service', () => {
       .spyOn(appContextService, 'getKibanaVersion')
       .mockReturnValue('mocked-kibana-version-infinite');
 
-    mockedListFleetServerHosts.mockResolvedValue({
+    mockedFleetServerHostService.list.mockResolvedValue({
       items: [
         {
           id: 'mocked-fleet-server-id',
@@ -583,7 +844,7 @@ describe('Agentless Agent service', () => {
     } as any);
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
 
-    mockedListFleetServerHosts.mockResolvedValue({
+    mockedFleetServerHostService.list.mockResolvedValue({
       items: [
         {
           id: 'mocked-fleet-server-id',
@@ -626,12 +887,9 @@ describe('Agentless Agent service', () => {
   });
 
   it(`should have x-elastic-internal-origin in the headers when the request is internal`, async () => {
-    const returnValue = {
-      id: 'mocked',
-      regional_id: 'mocked',
-    };
-
-    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(returnValue);
+    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(
+      mockAgentlessDeploymentResponse
+    );
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -652,7 +910,7 @@ describe('Agentless Agent service', () => {
     jest
       .spyOn(appContextService, 'getKibanaVersion')
       .mockReturnValue('mocked-kibana-version-infinite');
-    mockedListFleetServerHosts.mockResolvedValue({
+    mockedFleetServerHostService.list.mockResolvedValue({
       items: [
         {
           id: 'mocked-fleet-server-id',
@@ -792,7 +1050,7 @@ describe('Agentless Agent service', () => {
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      mockedListFleetServerHosts.mockResolvedValue({ items: [] } as any);
+      mockedFleetServerHostService.list.mockResolvedValue({ items: [] } as any);
       mockedListEnrollmentApiKeys.mockResolvedValue({
         items: [
           {
@@ -830,7 +1088,7 @@ describe('Agentless Agent service', () => {
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      mockedListFleetServerHosts.mockResolvedValue({
+      mockedFleetServerHostService.list.mockResolvedValue({
         items: [
           {
             id: 'mocked',
@@ -871,7 +1129,7 @@ describe('Agentless Agent service', () => {
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      mockedListFleetServerHosts.mockResolvedValue({
+      mockedFleetServerHostService.list.mockResolvedValue({
         items: [
           {
             id: 'mocked-fleet-server-id',
@@ -931,7 +1189,7 @@ describe('Agentless Agent service', () => {
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      mockedListFleetServerHosts.mockResolvedValue({
+      mockedFleetServerHostService.list.mockResolvedValue({
         items: [
           {
             id: 'mocked-fleet-server-id',
@@ -991,7 +1249,7 @@ describe('Agentless Agent service', () => {
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      mockedListFleetServerHosts.mockResolvedValue({
+      mockedFleetServerHostService.list.mockResolvedValue({
         items: [
           {
             id: 'mocked-fleet-server-id',
@@ -1051,7 +1309,7 @@ describe('Agentless Agent service', () => {
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      mockedListFleetServerHosts.mockResolvedValue({
+      mockedFleetServerHostService.list.mockResolvedValue({
         items: [
           {
             id: 'mocked-fleet-server-id',
@@ -1111,7 +1369,7 @@ describe('Agentless Agent service', () => {
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      mockedListFleetServerHosts.mockResolvedValue({
+      mockedFleetServerHostService.list.mockResolvedValue({
         items: [
           {
             id: 'mocked-fleet-server-id',
@@ -1171,7 +1429,7 @@ describe('Agentless Agent service', () => {
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      mockedListFleetServerHosts.mockResolvedValue({
+      mockedFleetServerHostService.list.mockResolvedValue({
         items: [
           {
             id: 'mocked-fleet-server-id',
@@ -1231,7 +1489,7 @@ describe('Agentless Agent service', () => {
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      mockedListFleetServerHosts.mockResolvedValue({
+      mockedFleetServerHostService.list.mockResolvedValue({
         items: [
           {
             id: 'mocked-fleet-server-id',
@@ -1291,7 +1549,7 @@ describe('Agentless Agent service', () => {
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      mockedListFleetServerHosts.mockResolvedValue({
+      mockedFleetServerHostService.list.mockResolvedValue({
         items: [
           {
             id: 'mocked-fleet-server-id',

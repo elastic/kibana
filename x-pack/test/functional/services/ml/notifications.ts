@@ -16,6 +16,7 @@ export function NotificationsProvider(
   tableService: MlTableService
 ) {
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
 
   return {
     async assertNotificationIndicatorExist(expectExist = true) {
@@ -29,6 +30,21 @@ export function NotificationsProvider(
     async assertNotificationErrorsCount(expectedCount: number) {
       const actualCount = await testSubjects.getVisibleText('mlNotificationErrorsIndicator');
       expect(actualCount).to.greaterThan(expectedCount);
+    },
+
+    // This is a workaround for receiving available filter dropdown options,
+    // since EUI doesn't allow testSubjects for filters.
+    async getAvailableTypeFilters() {
+      const filterButton = await find.byCssSelector(
+        '.euiFilterGroup > *:nth-child(2) .euiFilterButton'
+      );
+      await filterButton.click();
+      const optionElements = await find.allByCssSelector('li[role="option"].euiSelectableListItem');
+      const optionTexts = await Promise.all(
+        optionElements.map(async (element) => await element.getVisibleText())
+      );
+
+      return optionTexts;
     },
 
     table: tableService.getServiceInstance(

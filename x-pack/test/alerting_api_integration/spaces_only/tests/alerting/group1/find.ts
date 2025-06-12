@@ -6,11 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { Agent as SuperTestAgent } from 'supertest';
+import type { Agent as SuperTestAgent } from 'supertest';
 import { fromKueryExpression } from '@kbn/es-query';
 import { Spaces } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 async function createAlert(
   objectRemover: ObjectRemover,
@@ -334,6 +334,36 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           error: 'Bad Request',
           message: '[request query.consumers]: definition for this key is missing',
         });
+      });
+    });
+
+    describe('artifacts', () => {
+      it('does not return artifacts when present', async () => {
+        const expectedArtifacts = {
+          artifacts: {
+            investigation_guide: { blob: 'Sample investigation guide' },
+            dashboards: [{ id: 'dashboard-1' }],
+          },
+        };
+        const { body: createdAlert } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData(expectedArtifacts))
+          .expect(200);
+
+        objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+
+        const { id } = createdAlert;
+
+        const response = await supertest.get(
+          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rules/_find`
+        );
+
+        expect(response.status).to.eql(200);
+
+        const foundAlert = response.body.data.find((obj: any) => obj.id === id);
+        expect(foundAlert).not.to.be(undefined);
+        expect(foundAlert.artifacts).to.be(undefined);
       });
     });
   });

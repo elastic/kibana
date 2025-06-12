@@ -63,8 +63,8 @@ export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
     const { euiTheme } = useEuiTheme();
 
     const history = useExpandableFlyoutHistory();
-    const isNewNavigationEnabled = useIsExperimentalFeatureEnabled(
-      'newExpandableFlyoutNavigationEnabled'
+    const isNewNavigationEnabled = !useIsExperimentalFeatureEnabled(
+      'newExpandableFlyoutNavigationDisabled'
     );
     const historyArray = useMemo(() => getProcessedHistory({ history, maxCount: 10 }), [history]);
     // Don't show history in rule preview

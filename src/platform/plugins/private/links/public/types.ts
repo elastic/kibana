@@ -9,38 +9,38 @@
 
 import {
   HasEditCapabilities,
-  HasInPlaceLibraryTransforms,
+  HasLibraryTransforms,
   HasType,
-  PublishesPanelDescription,
-  PublishesPanelTitle,
+  PublishesDescription,
+  PublishesTitle,
   PublishesSavedObjectId,
   PublishesUnifiedSearch,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
 import { LocatorPublic } from '@kbn/share-plugin/common';
-import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '@kbn/dashboard-plugin/public';
+import { DASHBOARD_API_TYPE } from '@kbn/dashboard-plugin/public';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import type { DashboardAttributes } from '@kbn/dashboard-plugin/server';
 
 import { CONTENT_ID } from '../common';
 import { Link, LinksAttributes, LinksLayoutType } from '../common/content_management';
 
 export type LinksParentApi = PresentationContainer &
-  HasType<typeof DASHBOARD_CONTAINER_TYPE> &
+  HasType<typeof DASHBOARD_API_TYPE> &
   HasSerializedChildState<LinksSerializedState> &
   PublishesSavedObjectId &
-  PublishesPanelTitle &
-  PublishesPanelDescription &
+  PublishesTitle &
+  PublishesDescription &
   PublishesUnifiedSearch & {
     locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
   };
 
 export type LinksApi = HasType<typeof CONTENT_ID> &
-  DefaultEmbeddableApi<LinksSerializedState, LinksRuntimeState> &
+  DefaultEmbeddableApi<LinksSerializedState> &
   HasEditCapabilities &
-  HasInPlaceLibraryTransforms<LinksRuntimeState>;
+  HasLibraryTransforms<LinksByReferenceSerializedState, LinksByValueSerializedState>;
 
 export interface LinksByReferenceSerializedState {
   savedObjectId: string;
@@ -51,17 +51,15 @@ export interface LinksByValueSerializedState {
 }
 
 export type LinksSerializedState = SerializedTitles &
-  Partial<DynamicActionsSerializedState> &
   (LinksByReferenceSerializedState | LinksByValueSerializedState);
 
 export interface LinksRuntimeState
   extends Partial<LinksByReferenceSerializedState>,
     SerializedTitles {
-  error?: Error;
   links?: ResolvedLink[];
   layout?: LinksLayoutType;
-  defaultPanelTitle?: string;
-  defaultPanelDescription?: string;
+  defaultTitle?: string;
+  defaultDescription?: string;
 }
 
 export type ResolvedLink = Link & {

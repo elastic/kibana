@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import './chart_switch.scss';
 import React, { useState, memo } from 'react';
 import { EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ChartSwitchTrigger } from '@kbn/visualization-ui-components';
+import { css } from '@emotion/react';
 import { useLensSelector, selectVisualization } from '../../../../state_management';
 import { ChartSwitch, ChartSwitchProps } from './chart_switch';
 
@@ -31,27 +31,29 @@ export const ChartSwitchPopover = memo(function ChartSwitchPopover(
   };
 
   return (
-    <div className="lnsChartSwitch__header">
-      <EuiPopover
-        id="lnsChartSwitchPopover"
-        ownFocus
-        initialFocus=".lnsChartSwitch__popoverPanel"
-        panelClassName="lnsChartSwitch__popoverPanel"
-        panelPaddingSize="none"
-        button={
-          <ChartSwitchTrigger
-            icon={icon}
-            label={label}
-            dataTestSubj="lnsChartSwitchPopover"
-            onClick={() => setFlyoutOpen(!flyoutOpen)}
-          />
-        }
-        isOpen={flyoutOpen}
-        closePopover={() => setFlyoutOpen(false)}
-        anchorPosition="downLeft"
-      >
-        {flyoutOpen ? <ChartSwitch {...props} onChartSelect={() => setFlyoutOpen(false)} /> : null}
-      </EuiPopover>
-    </div>
+    <EuiPopover
+      css={css`
+        display: flex;
+      `}
+      id="lnsChartSwitchPopover"
+      ownFocus
+      initialFocus=".lnsChartSwitch__popoverPanel"
+      panelClassName="lnsChartSwitch__popoverPanel"
+      panelPaddingSize="none"
+      repositionOnScroll
+      button={
+        <ChartSwitchTrigger
+          icon={icon}
+          label={label}
+          dataTestSubj="lnsChartSwitchPopover"
+          onClick={() => setFlyoutOpen(!flyoutOpen)}
+        />
+      }
+      isOpen={flyoutOpen}
+      closePopover={() => setFlyoutOpen(false)}
+      anchorPosition="downLeft"
+    >
+      {flyoutOpen ? <ChartSwitch {...props} onChartSelect={() => setFlyoutOpen(false)} /> : null}
+    </EuiPopover>
   );
 });

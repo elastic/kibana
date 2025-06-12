@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  DEFAULT_EMS_ROADMAP_DESATURATED_ID,
+  DEFAULT_EMS_ROADMAP_ID,
+} from '@kbn/maps-ems-plugin/common';
 import { setEmsTmsDefaultModes } from './set_ems_tms_default_modes';
 
 describe('setEmsTmsDefaultModes', () => {
@@ -31,7 +35,7 @@ describe('setEmsTmsDefaultModes', () => {
     };
     expect(setEmsTmsDefaultModes({ attributes })).toEqual({
       title: 'my map',
-      layerListJSON: '[{"sourceDescriptor":{"type":"EMS_TMS","lightModeDefault":"road_map"}}]',
+      layerListJSON: `[{"sourceDescriptor":{"type":"EMS_TMS","lightModeDefault":"${DEFAULT_EMS_ROADMAP_ID}"}}]`,
     });
   });
 
@@ -41,7 +45,7 @@ describe('setEmsTmsDefaultModes', () => {
       {
         sourceDescriptor: {
           type: 'EMS_TMS',
-          lightModeDefault: 'road_map_desaturated',
+          lightModeDefault: DEFAULT_EMS_ROADMAP_DESATURATED_ID,
         },
       },
     ]);
@@ -51,8 +55,7 @@ describe('setEmsTmsDefaultModes', () => {
     };
     expect(setEmsTmsDefaultModes({ attributes })).toEqual({
       title: 'my map',
-      layerListJSON:
-        '[{"sourceDescriptor":{"type":"EMS_TMS","lightModeDefault":"road_map_desaturated"}}]',
+      layerListJSON: `[{"sourceDescriptor":{"type":"EMS_TMS","lightModeDefault":"${DEFAULT_EMS_ROADMAP_DESATURATED_ID}"}}]`,
     });
   });
 });

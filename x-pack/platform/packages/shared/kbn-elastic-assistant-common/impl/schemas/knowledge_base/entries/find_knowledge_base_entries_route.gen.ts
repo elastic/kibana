@@ -11,7 +11,7 @@
  *
  * info:
  *   title: Find Knowledge Base Entries API endpoint
- *   version: 1
+ *   version: 2023-10-31
  */
 
 import { z } from '@kbn/zod';
@@ -20,6 +20,9 @@ import { ArrayFromString } from '@kbn/zod-helpers';
 import { SortOrder } from '../../common_attributes.gen';
 import { KnowledgeBaseEntryResponse } from './common_attributes.gen';
 
+/**
+ * Fields available for sorting Knowledge Base Entries.
+ */
 export type FindKnowledgeBaseEntriesSortField = z.infer<typeof FindKnowledgeBaseEntriesSortField>;
 export const FindKnowledgeBaseEntriesSortField = z.enum([
   'created_at',
@@ -34,25 +37,28 @@ export type FindKnowledgeBaseEntriesRequestQuery = z.infer<
   typeof FindKnowledgeBaseEntriesRequestQuery
 >;
 export const FindKnowledgeBaseEntriesRequestQuery = z.object({
+  /**
+   * A list of fields to include in the response. If not provided, all fields will be included.
+   */
   fields: ArrayFromString(z.string()).optional(),
   /**
-   * Search query
+   * Search query to filter Knowledge Base Entries by specific criteria.
    */
   filter: z.string().optional(),
   /**
-   * Field to sort by
+   * Field to sort the Knowledge Base Entries by.
    */
   sort_field: FindKnowledgeBaseEntriesSortField.optional(),
   /**
-   * Sort order
+   * Sort order for the results, either asc or desc.
    */
   sort_order: SortOrder.optional(),
   /**
-   * Page number
+   * Page number for paginated results. Defaults to 1.
    */
   page: z.coerce.number().int().min(1).optional().default(1),
   /**
-   * Knowledge Base Entries per page
+   * Number of Knowledge Base Entries to return per page. Defaults to 20.
    */
   per_page: z.coerce.number().int().min(0).optional().default(20),
 });
@@ -62,8 +68,20 @@ export type FindKnowledgeBaseEntriesRequestQueryInput = z.input<
 
 export type FindKnowledgeBaseEntriesResponse = z.infer<typeof FindKnowledgeBaseEntriesResponse>;
 export const FindKnowledgeBaseEntriesResponse = z.object({
+  /**
+   * The current page number.
+   */
   page: z.number().int(),
+  /**
+   * The number of Knowledge Base Entries returned per page.
+   */
   perPage: z.number().int(),
+  /**
+   * The total number of Knowledge Base Entries available.
+   */
   total: z.number().int(),
+  /**
+   * The list of Knowledge Base Entries for the current page.
+   */
   data: z.array(KnowledgeBaseEntryResponse),
 });

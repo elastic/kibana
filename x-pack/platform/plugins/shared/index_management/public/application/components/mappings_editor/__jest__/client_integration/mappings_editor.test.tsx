@@ -29,6 +29,17 @@ describe('Mappings editor: core', () => {
   let getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
   let testBed: MappingsEditorTestBed;
   const appDependencies = {
+    core: { application: {}, http: {} },
+    services: {
+      notificationService: { toasts: {} },
+    },
+    docLinks: {
+      links: {
+        inferenceManagement: {
+          inferenceAPIDocumentation: 'https://abc.com/inference-api-create',
+        },
+      },
+    },
     plugins: {
       ml: { mlApi: {} },
     },
@@ -470,6 +481,78 @@ describe('Mappings editor: core', () => {
       delete updatedMappings.date_detection;
       delete updatedMappings.dynamic_date_formats;
       delete updatedMappings.numeric_detection;
+
+      expect(data).toEqual(updatedMappings);
+    });
+
+    test('updates mapping without inference id for semantic_text field', async () => {
+      let updatedMappings = { ...defaultMappings };
+
+      const {
+        find,
+        actions: { addField },
+        component,
+      } = testBed;
+
+      /**
+       * Mapped fields
+       */
+      await act(async () => {
+        find('addFieldButton').simulate('click');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
+      });
+      component.update();
+
+      const newField = { name: 'someNewField', type: 'semantic_text' };
+      await addField(newField.name, newField.type);
+
+      updatedMappings = {
+        ...updatedMappings,
+        properties: {
+          ...updatedMappings.properties,
+          [newField.name]: { reference_field: '', type: 'semantic_text' },
+        },
+      };
+
+      ({ data } = await getMappingsEditorData(component));
+
+      expect(data).toEqual(updatedMappings);
+    });
+
+    test('updates mapping with reference field value for semantic_text field', async () => {
+      let updatedMappings = { ...defaultMappings };
+
+      const {
+        find,
+        actions: { addField },
+        component,
+      } = testBed;
+
+      /**
+       * Mapped fields
+       */
+      await act(async () => {
+        find('addFieldButton').simulate('click');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
+      });
+      component.update();
+
+      const newField = {
+        name: 'someNewField',
+        type: 'semantic_text',
+        referenceField: 'address.city',
+      };
+      await addField(newField.name, newField.type, undefined, newField.referenceField);
+
+      updatedMappings = {
+        ...updatedMappings,
+        properties: {
+          ...updatedMappings.properties,
+          [newField.name]: { reference_field: 'address.city', type: 'semantic_text' },
+        },
+      };
+
+      ({ data } = await getMappingsEditorData(component));
 
       expect(data).toEqual(updatedMappings);
     });

@@ -69,7 +69,7 @@ export type ToolMessage<
   TToolResponse extends Record<string, any> | unknown = Record<string, any> | unknown,
   TToolData extends Record<string, any> | undefined = Record<string, any> | undefined
 > = MessageBase<MessageRole.Tool> & {
-  /*
+  /**
    * The name of the tool called. Used for refining the type of the response.
    */
   name: TName;

@@ -8,6 +8,7 @@
  */
 
 import { OverlayRef } from '@kbn/core/public';
+import { EuiFlyoutProps } from '@elastic/eui';
 import { Adapters } from '../common';
 
 /**
@@ -60,6 +61,7 @@ export interface InspectorViewDescription {
 export interface InspectorOptions {
   title?: string;
   options?: unknown;
+  flyoutType?: EuiFlyoutProps['type'];
 }
 
 export type InspectorSession = OverlayRef;

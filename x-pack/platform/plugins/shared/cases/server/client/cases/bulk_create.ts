@@ -54,10 +54,20 @@ export const bulkCreate = async (
 
     const casesWithIds = getCaseWithIds(decodedData);
 
-    await auth.ensureAuthorized({
-      operation: Operations.createCase,
-      entities: casesWithIds.map((theCase) => ({ owner: theCase.owner, id: theCase.id })),
-    });
+    if (
+      casesWithIds.filter((theCase) => theCase.assignees && theCase.assignees.length !== 0).length >
+      0
+    ) {
+      await auth.ensureAuthorized({
+        operation: [Operations.assignCase, Operations.createCase],
+        entities: casesWithIds.map((theCase) => ({ owner: theCase.owner, id: theCase.id })),
+      });
+    } else {
+      await auth.ensureAuthorized({
+        operation: Operations.createCase,
+        entities: casesWithIds.map((theCase) => ({ owner: theCase.owner, id: theCase.id })),
+      });
+    }
 
     const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
 

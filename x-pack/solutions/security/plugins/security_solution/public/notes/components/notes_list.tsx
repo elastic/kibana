@@ -59,8 +59,8 @@ export interface NotesListProps {
  * When a note is being created, the component renders a loading spinner when the new note is about to be added.
  */
 export const NotesList = memo(({ notes, options }: NotesListProps) => {
-  const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
-  const canDeleteNotes = kibanaSecuritySolutionsPrivileges.crud;
+  const { notesPrivileges } = useUserPrivileges();
+  const canDeleteNotes = notesPrivileges.crud;
 
   const createStatus = useSelector((state: State) => selectCreateNoteStatus(state));
 
@@ -107,7 +107,7 @@ export const NotesList = memo(({ notes, options }: NotesListProps) => {
           <EuiLoadingElastic size="xxl" data-test-subj={ADD_NOTE_LOADING_TEST_ID} />
         )}
       </EuiCommentList>
-      {isDeleteModalVisible && <DeleteConfirmModal />}
+      {isDeleteModalVisible && <DeleteConfirmModal refetch={false} />}
     </>
   );
 });

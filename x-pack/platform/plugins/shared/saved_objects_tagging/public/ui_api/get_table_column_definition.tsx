@@ -14,7 +14,8 @@ import {
   GetTableColumnDefinitionOptions,
 } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { ITagsCache } from '../services';
-import { getTagsFromReferences, byNameTagSorter } from '../utils';
+import { byNameTagSorter } from '../utils';
+import { getTagsFromReferences } from '../../common';
 
 export interface BuildGetTableColumnDefinitionOptions {
   components: SavedObjectsTaggingApiUiComponent;

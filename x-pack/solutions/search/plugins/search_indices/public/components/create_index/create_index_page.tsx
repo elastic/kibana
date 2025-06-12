@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiLoadingLogo, EuiPageTemplate } from '@elastic/eui';
+import { EuiLoadingLogo } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { useKibana } from '../../hooks/use_kibana';
@@ -17,14 +17,14 @@ import { LoadIndicesStatusError } from '../shared/load_indices_status_error';
 
 import { CreateIndex } from './create_index';
 import { usePageChrome } from '../../hooks/use_page_chrome';
-import { IndexManagementBreadcrumbs } from '../shared/breadcrumbs';
+import { useIndexManagementBreadcrumbs } from '../../hooks/use_index_management_breadcrumbs';
 
 const CreateIndexLabel = i18n.translate('xpack.searchIndices.createIndex.docTitle', {
   defaultMessage: 'Create Index',
 });
 
 export const CreateIndexPage = () => {
-  const { console: consolePlugin } = useKibana().services;
+  const { console: consolePlugin, history, searchNavigation } = useKibana().services;
   const {
     data: indicesData,
     isInitialLoading,
@@ -36,16 +36,23 @@ export const CreateIndexPage = () => {
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
   );
-  usePageChrome(CreateIndexLabel, [...IndexManagementBreadcrumbs, { text: CreateIndexLabel }]);
+  const indexManagementBreadcrumbs = useIndexManagementBreadcrumbs();
+  usePageChrome(CreateIndexLabel, [
+    ...indexManagementBreadcrumbs,
+    {
+      text: CreateIndexLabel,
+    },
+  ]);
 
   return (
-    <EuiPageTemplate
+    <KibanaPageTemplate
       offset={0}
       restrictWidth={false}
       data-test-subj="elasticsearchCreateIndexPage"
       grow={false}
+      solutionNav={searchNavigation?.useClassicNavigation(history)}
     >
-      <KibanaPageTemplate.Section alignment="center" restrictWidth={false} grow>
+      <KibanaPageTemplate.Section alignment="top" restrictWidth={false}>
         {isInitialLoading && <EuiLoadingLogo />}
         {hasIndicesStatusFetchError && <LoadIndicesStatusError error={indicesFetchError} />}
         {!isInitialLoading && !hasIndicesStatusFetchError && (
@@ -53,6 +60,6 @@ export const CreateIndexPage = () => {
         )}
       </KibanaPageTemplate.Section>
       {embeddableConsole}
-    </EuiPageTemplate>
+    </KibanaPageTemplate>
   );
 };

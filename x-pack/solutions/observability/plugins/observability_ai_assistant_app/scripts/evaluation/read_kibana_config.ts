@@ -9,6 +9,7 @@ import path from 'path';
 import fs from 'fs';
 import yaml from 'js-yaml';
 import { identity, pickBy } from 'lodash';
+import { unflattenObject } from '@kbn/observability-utils-common/object/unflatten_object';
 
 export type KibanaConfig = ReturnType<typeof readKibanaConfig>;
 
@@ -35,10 +36,14 @@ export const readKibanaConfig = () => {
   };
 
   return {
-    'elasticsearch.hosts': 'http://localhost:9200',
-    'elasticsearch.username': 'elastic',
-    'elasticsearch.password': 'changeme',
-    ...loadedKibanaConfig,
-    ...cliEsCredentials,
+    elasticsearch: {
+      hosts: 'http://localhost:9200',
+      username: 'elastic',
+      password: 'changeme',
+    },
+    ...unflattenObject({
+      ...loadedKibanaConfig,
+      ...cliEsCredentials,
+    }),
   };
 };

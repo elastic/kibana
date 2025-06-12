@@ -13,7 +13,7 @@ import { ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT } from '../../../common/c
 
 import { ErrorCode } from '../../../common/types/error_codes';
 
-import { RouteDependencies } from '../../plugin';
+import type { RouteDependencies } from '../../types';
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
@@ -22,6 +22,12 @@ export function registerSearchRoute({ router, log }: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/indices/{index_name}/search',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: schema.object({
           searchQuery: schema.string({

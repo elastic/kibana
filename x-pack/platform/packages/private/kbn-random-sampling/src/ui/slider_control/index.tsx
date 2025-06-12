@@ -9,10 +9,11 @@ import { EuiFlexGroup, EuiFlexItem, EuiRange, EuiText, useEuiTheme } from '@elas
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TooltipWrapper } from '@kbn/visualization-utils';
+import { i18n } from '@kbn/i18n';
 
 export interface ControlSliderProps {
   /** Allowed values to show on the Control Slider */
-  values: number[];
+  values: Array<{ label: string; value: number; accessibleLabel?: string }>;
   /** Current value set */
   currentValue: number | undefined;
   /** When set will show the control in a disabled state */
@@ -34,8 +35,10 @@ export function ControlSlider({
   'data-test-subj': dataTestSubj,
 }: ControlSliderProps) {
   const { euiTheme } = useEuiTheme();
-  const samplingIndex = values.findIndex((v) => v === currentValue);
+
+  const samplingIndex = values.findIndex((v) => v.value === currentValue);
   const currentSamplingIndex = samplingIndex > -1 ? samplingIndex : values.length - 1;
+
   return (
     <TooltipWrapper
       tooltipContent={disabledReason}
@@ -58,11 +61,18 @@ export function ControlSlider({
         <EuiFlexItem>
           <EuiRange
             data-test-subj={dataTestSubj}
+            aria-label={i18n.translate('randomSampling.ui.sliderControl.ariaLabel', {
+              defaultMessage: 'Sampling percentages',
+            })}
+            aria-describedby={i18n.translate('randomSampling.ui.sliderControl.ariaDescribedby', {
+              defaultMessage:
+                'Lower sampling percentages increases the performance, but lowers the accuracy. Lower sampling percentages are best for large datasets.',
+            })}
             value={currentSamplingIndex}
             disabled={disabled}
             fullWidth
             onChange={(e) => {
-              onChange(values[Number(e.currentTarget.value)]);
+              onChange(values[Number(e.currentTarget.value)].value);
             }}
             showInput={false}
             showRange={false}
@@ -70,10 +80,9 @@ export function ControlSlider({
             step={1}
             min={0}
             max={values.length - 1}
-            ticks={values.map((v, i) => ({
-              // Remove the initial 0 from values with decimal digits: 0.001 => .001
-              label: `${v * 100}%`.slice(Number.isInteger(v * 100) ? 0 : 1),
-              value: i,
+            ticks={values.map((tick, index) => ({
+              ...tick,
+              value: index,
             }))}
           />
         </EuiFlexItem>

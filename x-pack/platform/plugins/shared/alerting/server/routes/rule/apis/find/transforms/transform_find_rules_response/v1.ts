@@ -11,7 +11,7 @@ import type {
   RuleParamsV1,
 } from '../../../../../../../common/routes/rule/response';
 import type { FindResult } from '../../../../../../application/rule/methods/find';
-import { Rule, RuleParams } from '../../../../../../application/rule/types';
+import type { Rule, RuleParams } from '../../../../../../application/rule/types';
 import {
   transformRuleActionsV1,
   transformMonitoringV1,
@@ -21,7 +21,8 @@ import {
 
 export const transformPartialRule = <Params extends RuleParams = never>(
   rule: Partial<Rule<Params>>,
-  fields?: string[]
+  fields?: string[],
+  includeArtifacts: boolean = false
 ): Partial<RuleResponseV1<RuleParamsV1>> => {
   const ruleResponse = {
     ...(rule.id !== undefined ? { id: rule.id } : {}),
@@ -80,6 +81,7 @@ export const transformPartialRule = <Params extends RuleParams = never>(
       : {}),
     ...(rule.alertDelay !== undefined ? { alert_delay: rule.alertDelay } : {}),
     ...(rule.flapping !== undefined ? { flapping: transformFlappingV1(rule.flapping) } : {}),
+    ...(includeArtifacts && rule.artifacts !== undefined ? { artifacts: rule.artifacts } : {}),
   };
 
   type RuleKeys = keyof RuleResponseV1<RuleParamsV1>;
@@ -100,14 +102,15 @@ export const transformPartialRule = <Params extends RuleParams = never>(
 
 export const transformFindRulesResponse = <Params extends RuleParams = never>(
   result: FindResult<Params>,
-  fields?: string[]
+  fields?: string[],
+  includeArtifacts: boolean = false
 ): FindRulesResponseV1<RuleParamsV1>['body'] => {
   return {
     page: result.page,
     per_page: result.perPage,
     total: result.total,
     data: result.data.map((rule) =>
-      transformPartialRule<RuleParamsV1>(rule as Partial<Rule<Params>>, fields)
+      transformPartialRule<RuleParamsV1>(rule as Partial<Rule<Params>>, fields, includeArtifacts)
     ),
   };
 };

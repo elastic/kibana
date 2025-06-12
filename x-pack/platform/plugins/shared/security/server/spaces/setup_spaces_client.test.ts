@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 
 import { setupSpacesClient } from './setup_spaces_client';
@@ -15,11 +15,13 @@ import { authorizationMock } from '../authorization/index.mock';
 const getCurrentUser = jest.fn();
 
 describe('setupSpacesClient', () => {
+  const getTypeRegistry = () => Promise.resolve(savedObjectsServiceMock.createTypeRegistryMock());
+
   it('does not setup the spaces client when spaces is disabled', () => {
     const authz = authorizationMock.create();
     const audit = auditServiceMock.create();
 
-    setupSpacesClient({ authz, audit, getCurrentUser });
+    setupSpacesClient({ authz, audit, getCurrentUser, getTypeRegistry });
   });
 
   it('configures the repository factory, wrapper, and audit logger', () => {
@@ -27,7 +29,7 @@ describe('setupSpacesClient', () => {
     const audit = auditServiceMock.create();
     const spaces = spacesMock.createSetup();
 
-    setupSpacesClient({ authz, audit, spaces, getCurrentUser });
+    setupSpacesClient({ authz, audit, spaces, getCurrentUser, getTypeRegistry });
 
     expect(spaces.spacesClient.registerClientWrapper).toHaveBeenCalledTimes(1);
     expect(spaces.spacesClient.setClientRepositoryFactory).toHaveBeenCalledTimes(1);
@@ -40,7 +42,7 @@ describe('setupSpacesClient', () => {
 
     const { savedObjects } = coreMock.createStart();
 
-    setupSpacesClient({ authz, audit, spaces, getCurrentUser });
+    setupSpacesClient({ authz, audit, spaces, getCurrentUser, getTypeRegistry });
 
     expect(spaces.spacesClient.setClientRepositoryFactory).toHaveBeenCalledTimes(1);
     const [repositoryFactory] = spaces.spacesClient.setClientRepositoryFactory.mock.calls[0];
@@ -62,7 +64,7 @@ describe('setupSpacesClient', () => {
 
     const { savedObjects } = coreMock.createStart();
 
-    setupSpacesClient({ authz, audit, spaces, getCurrentUser });
+    setupSpacesClient({ authz, audit, spaces, getCurrentUser, getTypeRegistry });
 
     expect(spaces.spacesClient.setClientRepositoryFactory).toHaveBeenCalledTimes(1);
     const [repositoryFactory] = spaces.spacesClient.setClientRepositoryFactory.mock.calls[0];
@@ -82,7 +84,7 @@ describe('setupSpacesClient', () => {
     const audit = auditServiceMock.create();
     const spaces = spacesMock.createSetup();
 
-    setupSpacesClient({ authz, audit, spaces, getCurrentUser });
+    setupSpacesClient({ authz, audit, spaces, getCurrentUser, getTypeRegistry });
 
     expect(spaces.spacesClient.registerClientWrapper).toHaveBeenCalledTimes(1);
     const [wrapper] = spaces.spacesClient.registerClientWrapper.mock.calls[0];

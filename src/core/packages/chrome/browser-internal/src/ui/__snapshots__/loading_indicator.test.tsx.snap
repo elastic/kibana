@@ -5,9 +5,9 @@ exports[`kbnLoadingIndicator is hidden by default 1`] = `
   <EmotionGlobal
     styles={
       Object {
-        ".euiHeaderSectionItem .euiButtonEmpty__text": Object {
-          "display": "flex",
-        },
+        "name": "11nwfnw-LoadingIndicator",
+        "styles": ".euiHeaderSectionItem .euiButtonEmpty__text{display:flex;};label:LoadingIndicator;",
+        "toString": [Function],
       }
     }
   />
@@ -25,9 +25,9 @@ exports[`kbnLoadingIndicator is visible when loadingCount is > 0 1`] = `
   <EmotionGlobal
     styles={
       Object {
-        ".euiHeaderSectionItem .euiButtonEmpty__text": Object {
-          "display": "flex",
-        },
+        "name": "11nwfnw-LoadingIndicator",
+        "styles": ".euiHeaderSectionItem .euiButtonEmpty__text{display:flex;};label:LoadingIndicator;",
+        "toString": [Function],
       }
     }
   />
@@ -45,9 +45,9 @@ exports[`kbnLoadingIndicator shows logo image when customLogo is set 1`] = `
   <EmotionGlobal
     styles={
       Object {
-        ".euiHeaderSectionItem .euiButtonEmpty__text": Object {
-          "display": "flex",
-        },
+        "name": "11nwfnw-LoadingIndicator",
+        "styles": ".euiHeaderSectionItem .euiButtonEmpty__text{display:flex;};label:LoadingIndicator;",
+        "toString": [Function],
       }
     }
   />

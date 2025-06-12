@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { isCCSRemoteIndexName } from '@kbn/es-query';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { partition } from 'lodash';
-import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
+import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
 import { StoredSLOSettings } from '../../domain/models';
 import { toHighPrecision } from '../../utils/number';
 import { createEsParams, typedSearch } from '../../utils/queries';
-import { getListOfSummaryIndices, getSloSettings } from '../slo_settings';
+import { getSummaryIndices, getSloSettings } from '../slo_settings';
 import { EsSummaryDocument } from '../summary_transform_generator/helpers/create_temp_summary';
 import { getElasticsearchQueryOrThrow, parseStringFilters } from '../transform_generators';
 import { fromRemoteSummaryDocumentToSloDefinition } from '../unsafe_federated/remote_summary_doc_to_slo';
@@ -47,7 +47,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
   ): Promise<Paginated<SummaryResult>> {
     const parsedFilters = parseStringFilters(filters, this.logger);
     const settings = await getSloSettings(this.soClient);
-    const { indices } = await getListOfSummaryIndices(this.esClient, settings);
+    const { indices } = await getSummaryIndices(this.esClient, settings);
 
     const esParams = createEsParams({
       index: indices,
@@ -112,7 +112,11 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
       const finalTotal = total - (tempSummaryDocuments.length - tempSummaryDocumentsDeduped.length);
 
       const paginationResults = isCursorPagination(pagination)
-        ? { searchAfter: finalResults[finalResults.length - 1].sort, size: pagination.size }
+        ? {
+            // `sort` has unknown as types
+            searchAfter: finalResults[finalResults.length - 1].sort as Array<string | number>,
+            size: pagination.size,
+          }
         : pagination;
 
       return {
@@ -160,7 +164,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
         }),
       };
     } catch (err) {
-      this.logger.error(`Error while searching SLO summary documents. ${err}`);
+      this.logger.debug(`Error while searching SLO summary documents. ${err}`);
       return { total: 0, ...pagination, results: [] };
     }
   }
@@ -170,8 +174,10 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
     // The temp summary documents are _eventually_ removed as we get through the real summary documents
 
     await this.esClient.deleteByQuery({
-      index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+      index: SUMMARY_DESTINATION_INDEX_PATTERN,
       wait_for_completion: false,
+      conflicts: 'proceed',
+      slices: 'auto',
       query: {
         bool: {
           filter: [{ terms: { 'slo.id': summarySloIds } }, { term: { isTempDoc: true } }],

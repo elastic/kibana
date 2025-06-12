@@ -35,7 +35,7 @@ interface ReasonFields {
 }
 const getFieldsFromDoc = (mergedDoc: SignalSourceHit) => {
   const reasonFields: ReasonFields = {};
-  const docToUse = mergedDoc?.fields || mergedDoc?._source || mergedDoc;
+  const docToUse = mergedDoc?.fields || mergedDoc?._source;
 
   reasonFields.destinationAddress = getOr(null, 'destination.ip', docToUse);
   reasonFields.destinationPort = getOr(null, 'destination.port', docToUse);

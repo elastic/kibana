@@ -17,12 +17,14 @@ export interface LanguageSelectorProps {
   selectedLanguage: AvailableLanguages;
   options: CodeLanguage[];
   onSelectLanguage: (value: AvailableLanguages) => void;
+  showLabel?: boolean;
 }
 
 export const LanguageSelector = ({
   selectedLanguage,
   options,
   onSelectLanguage,
+  showLabel = false,
 }: LanguageSelectorProps) => {
   const assetBasePath = useAssetBasePath();
   const languageOptions = useMemo(
@@ -48,6 +50,16 @@ export const LanguageSelector = ({
   );
   return (
     <EuiSuperSelect<AvailableLanguages>
+      prepend={
+        showLabel
+          ? i18n.translate('xpack.searchIndices.codeLanguage.selectLabel', {
+              defaultMessage: 'Language',
+            })
+          : undefined
+      }
+      aria-label={i18n.translate('xpack.searchIndices.codeLanguage.selectLabel', {
+        defaultMessage: 'Select a programming language for the code examples',
+      })}
       options={languageOptions}
       valueOfSelected={selectedLanguage}
       onChange={(value) => onSelectLanguage(value)}

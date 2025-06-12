@@ -92,5 +92,14 @@ export function getSavedQuerySecurityUtils({ getPageObjects, getService }: FtrPr
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
       });
     },
+    shouldDisallowAccessToSavedQueries: () => {
+      it('does not allow loading a saved query via the saved query management component', async () => {
+        await savedQueryManagementComponent.savedQueryLoadButtonMissingOrFail();
+      });
+
+      it('does not allow saving via the saved query management component', async () => {
+        await savedQueryManagementComponent.saveNewQueryMissingOrFail('hidden');
+      });
+    },
   };
 }

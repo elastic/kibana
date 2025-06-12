@@ -24,6 +24,7 @@ export {
   type ToolSchema,
   type UnvalidatedToolCall,
   type ToolCallsOf,
+  type ToolCallbacksOf,
   type ToolCall,
   type ToolDefinition,
   type ToolOptions,
@@ -39,6 +40,7 @@ export {
   type ChatCompletionMessageEvent,
   type ChatCompleteStreamResponse,
   type ChatCompleteResponse,
+  type ChatCompleteRetryConfiguration,
   type ChatCompletionTokenCount,
   type BoundChatCompleteAPI,
   type BoundChatCompleteOptions,
@@ -56,7 +58,11 @@ export {
   isToolValidationError,
   isTokenLimitReachedError,
   isToolNotFoundError,
+  type ChatCompleteMetadata,
+  type ConnectorTelemetryMetadata,
 } from './src/chat_complete';
+
+export type { BoundInferenceClient, InferenceClient } from './src/inference_client';
 export {
   OutputEventType,
   type OutputAPI,
@@ -88,20 +94,61 @@ export {
   type InferenceTaskInternalError,
   type InferenceTaskRequestError,
   type InferenceTaskAbortedError,
+  type InferenceTaskProviderError,
   createInferenceInternalError,
   createInferenceRequestError,
   createInferenceRequestAbortedError,
+  createInferenceProviderError,
   isInferenceError,
   isInferenceInternalError,
   isInferenceRequestError,
   isInferenceRequestAbortedError,
+  isInferenceProviderError,
 } from './src/errors';
+
+export { Tokenizer, generateFakeToolCallId, ShortIdTable } from './src/utils';
+
+export { elasticModelDictionary } from './src/const';
 
 export { truncateList } from './src/truncate_list';
 export {
   InferenceConnectorType,
   isSupportedConnectorType,
   isSupportedConnector,
+  getConnectorDefaultModel,
+  getConnectorModel,
+  getConnectorFamily,
+  getConnectorPlatform,
+  getConnectorProvider,
+  connectorToInference,
   type InferenceConnector,
 } from './src/connectors';
-export { defaultInferenceEndpoints } from './src/inference_endpoints';
+export {
+  defaultInferenceEndpoints,
+  InferenceEndpointProvider,
+  elasticModelIds,
+} from './src/inference_endpoints';
+
+export type {
+  InferenceTracingExportConfig,
+  InferenceTracingLangfuseExportConfig,
+  InferenceTracingPhoenixExportConfig,
+} from './src/tracing';
+
+export { type Model, ModelFamily, ModelPlatform, ModelProvider } from './src/model_provider';
+
+export {
+  type BoundPromptAPI,
+  type BoundPromptOptions,
+  type Prompt,
+  type PromptAPI,
+  type PromptCompositeResponse,
+  type PromptFactory,
+  type PromptOptions,
+  type PromptResponse,
+  type PromptStreamResponse,
+  type PromptVersion,
+  type ToolOptionsOfPrompt,
+  type UnboundPromptOptions,
+  createPrompt,
+} from './src/prompt';

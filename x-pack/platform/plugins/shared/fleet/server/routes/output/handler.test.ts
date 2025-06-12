@@ -14,7 +14,7 @@ import { postOutputHandler, putOutputHandler } from './handler';
 const putOutputHandlerWithErrorHandler = withDefaultErrorHandler(putOutputHandler);
 const postOutputHandlerWithErrorHandler = withDefaultErrorHandler(postOutputHandler);
 
-describe('output handler', () => {
+describe('Outputs handler', () => {
   const mockContext = {
     core: Promise.resolve({
       savedObjects: {},
@@ -257,5 +257,94 @@ describe('output handler', () => {
     );
 
     expect(res).toEqual({ body: { item: { id: 'output1' } } });
+  });
+
+  it('should return ok if one of kibana_api_key is provided for remote_elasticsearch output', async () => {
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ isServerlessEnabled: false } as any);
+
+    const res = await postOutputHandlerWithErrorHandler(
+      mockContext,
+      { body: { type: 'remote_elasticsearch', kibana_api_key: 'value2' } } as any,
+      mockResponse as any
+    );
+
+    expect(res).toEqual({ body: { item: { id: 'output1' } } });
+  });
+
+  it('should return ok if one of ssl.key and secrets.ssl.key is provided for remote_elasticsearch output', async () => {
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ isServerlessEnabled: false } as any);
+
+    const res = await postOutputHandlerWithErrorHandler(
+      mockContext,
+      { body: { type: 'remote_elasticsearch', secrets: { ssl: { key: 'token2' } } } } as any,
+      mockResponse as any
+    );
+
+    expect(res).toEqual({ body: { item: { id: 'output1' } } });
+  });
+
+  it('should return error if both ssl.key and secrets.ssl.key are provided for remote_elasticsearch output', async () => {
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ isServerlessEnabled: false } as any);
+
+    const res = await postOutputHandlerWithErrorHandler(
+      mockContext,
+      {
+        body: {
+          type: 'remote_elasticsearch',
+          kibana_api_key: 'value1',
+          secrets: { ssl: { key: 'token2' } },
+          ssl: { key: 'token2' },
+        },
+      } as any,
+      mockResponse as any
+    );
+
+    expect(res).toEqual({
+      body: { message: 'Cannot specify both ssl.key and secrets.ssl.key' },
+      statusCode: 400,
+    });
+  });
+  it('should return ok if one of ssl.key and secrets.ssl.key is provided for elasticsearch output', async () => {
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ isServerlessEnabled: false } as any);
+
+    const res = await postOutputHandlerWithErrorHandler(
+      mockContext,
+      { body: { type: 'elasticsearch', secrets: { ssl: { key: 'token2' } } } } as any,
+      mockResponse as any
+    );
+
+    expect(res).toEqual({ body: { item: { id: 'output1' } } });
+  });
+
+  it('should return error if both ssl.key and secrets.ssl.key are provided for elasticsearch output', async () => {
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ isServerlessEnabled: false } as any);
+
+    const res = await postOutputHandlerWithErrorHandler(
+      mockContext,
+      {
+        body: {
+          type: 'elasticsearch',
+          kibana_api_key: 'value1',
+          secrets: { ssl: { key: 'token2' } },
+          ssl: { key: 'token2' },
+        },
+      } as any,
+      mockResponse as any
+    );
+
+    expect(res).toEqual({
+      body: { message: 'Cannot specify both ssl.key and secrets.ssl.key' },
+      statusCode: 400,
+    });
   });
 });

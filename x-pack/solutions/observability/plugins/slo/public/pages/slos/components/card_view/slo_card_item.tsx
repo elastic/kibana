@@ -18,14 +18,7 @@ import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@k
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import moment from 'moment';
 import React, { useState } from 'react';
-import { SloDeleteModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
-import { SloDisableConfirmationModal } from '../../../../components/slo/disable_confirmation_modal/slo_disable_confirmation_modal';
-import { SloEnableConfirmationModal } from '../../../../components/slo/enable_confirmation_modal/slo_enable_confirmation_modal';
-import { SloResetConfirmationModal } from '../../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
-import { useDisableSlo } from '../../../../hooks/use_disable_slo';
-import { useEnableSlo } from '../../../../hooks/use_enable_slo';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { useResetSlo } from '../../../../hooks/use_reset_slo';
 import { BurnRateRuleParams } from '../../../../typings';
 import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
 import { useSloListActions } from '../../hooks/use_slo_list_actions';
@@ -75,10 +68,6 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isAddRuleFlyoutOpen, setIsAddRuleFlyoutOpen] = useState(false);
   const [isEditRuleFlyoutOpen, setIsEditRuleFlyoutOpen] = useState(false);
-  const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
-  const [isResetConfirmationModalOpen, setResetConfirmationModalOpen] = useState(false);
-  const [isEnableConfirmationModalOpen, setEnableConfirmationModalOpen] = useState(false);
-  const [isDisableConfirmationModalOpen, setDisableConfirmationModalOpen] = useState(false);
   const [isDashboardAttachmentReady, setDashboardAttachmentReady] = useState(false);
 
   const historicalSliData = formatHistoricalData(historicalSummary, 'sli_value');
@@ -88,39 +77,6 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
     setIsActionsPopoverOpen,
     setIsAddRuleFlyoutOpen,
   });
-
-  const closeDeleteModal = () => {
-    setDeleteConfirmationModalOpen(false);
-  };
-
-  const { mutate: resetSlo, isLoading: isResetLoading } = useResetSlo();
-  const { mutate: enableSlo, isLoading: isEnableLoading } = useEnableSlo();
-  const { mutate: disableSlo, isLoading: isDisableLoading } = useDisableSlo();
-
-  const handleResetConfirm = () => {
-    resetSlo({ id: slo.id, name: slo.name });
-    setResetConfirmationModalOpen(false);
-  };
-
-  const handleResetCancel = () => {
-    setResetConfirmationModalOpen(false);
-  };
-
-  const handleEnableCancel = () => {
-    setEnableConfirmationModalOpen(false);
-  };
-  const handleEnableConfirm = () => {
-    enableSlo({ id: slo.id, name: slo.name });
-    setEnableConfirmationModalOpen(false);
-  };
-
-  const handleDisableCancel = () => {
-    setDisableConfirmationModalOpen(false);
-  };
-  const handleDisableConfirm = () => {
-    disableSlo({ id: slo.id, name: slo.name });
-    setDisableConfirmationModalOpen(false);
-  };
 
   return (
     <>
@@ -149,8 +105,8 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
         `}
         title={
           slo.summary.summaryUpdatedAt
-            ? i18n.translate('xpack.slo.sloCardItem.euiPanel.lastUpdatedLabel', {
-                defaultMessage: '{status}, Last updated: {value}',
+            ? i18n.translate('xpack.slo.sloCardItem.euiPanel.lastSummaryUpdatedLabel', {
+                defaultMessage: '{status}, Last summary updated: {value}',
                 values: {
                   status: slo.summary.status,
                   value: moment(slo.summary.summaryUpdatedAt).fromNow(),
@@ -178,12 +134,8 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
             isActionsPopoverOpen={isActionsPopoverOpen}
             setIsActionsPopoverOpen={setIsActionsPopoverOpen}
             setIsAddRuleFlyoutOpen={setIsAddRuleFlyoutOpen}
-            setDeleteConfirmationModalOpen={setDeleteConfirmationModalOpen}
             setIsEditRuleFlyoutOpen={setIsEditRuleFlyoutOpen}
             setDashboardAttachmentReady={setDashboardAttachmentReady}
-            setResetConfirmationModalOpen={setResetConfirmationModalOpen}
-            setEnableConfirmationModalOpen={setEnableConfirmationModalOpen}
-            setDisableConfirmationModalOpen={setDisableConfirmationModalOpen}
           />
         </div>
       </EuiPanel>
@@ -200,37 +152,6 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
         setIsEditRuleFlyoutOpen={setIsEditRuleFlyoutOpen}
         refetchRules={refetchRules}
       />
-
-      {isDeleteConfirmationModalOpen ? (
-        <SloDeleteModal slo={slo} onCancel={closeDeleteModal} onSuccess={closeDeleteModal} />
-      ) : null}
-
-      {isResetConfirmationModalOpen ? (
-        <SloResetConfirmationModal
-          slo={slo}
-          onCancel={handleResetCancel}
-          onConfirm={handleResetConfirm}
-          isLoading={isResetLoading}
-        />
-      ) : null}
-
-      {isEnableConfirmationModalOpen ? (
-        <SloEnableConfirmationModal
-          slo={slo}
-          onCancel={handleEnableCancel}
-          onConfirm={handleEnableConfirm}
-          isLoading={isEnableLoading}
-        />
-      ) : null}
-
-      {isDisableConfirmationModalOpen ? (
-        <SloDisableConfirmationModal
-          slo={slo}
-          onCancel={handleDisableCancel}
-          onConfirm={handleDisableConfirm}
-          isLoading={isDisableLoading}
-        />
-      ) : null}
 
       {isDashboardAttachmentReady ? (
         <SavedObjectSaveModalDashboard
@@ -272,11 +193,12 @@ export function SloCardChart({
   const { cardColor } = useSloCardColor(slo.summary.status);
   const subTitle = getSubTitle(slo);
   const { sliValue, sloTarget, sloDetailsUrl } = useSloFormattedSummary(slo);
+  const chartBaseTheme = charts.theme.useChartsBaseTheme();
 
   return (
     <Chart>
       <Settings
-        baseTheme={charts.theme.useChartsBaseTheme()}
+        baseTheme={chartBaseTheme}
         theme={{
           metric: {
             iconAlign: 'right',

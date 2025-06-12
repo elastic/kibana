@@ -22,7 +22,7 @@ import {
   AutocompleteFieldMatchComponent,
 } from '@kbn/securitysolution-autocomplete';
 import type { Severity, SeverityMappingItem } from '@kbn/securitysolution-io-ts-alerting-types';
-import { severityOptions } from '../step_about_rule/data';
+import { useSeverityOptions } from '../step_about_rule/data';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as styles from './styles';
 import * as i18n from './translations';
@@ -157,6 +157,8 @@ function SeverityMappingRow({
     },
     [index, severityMappingItem.severity, onFieldMatchValueChange]
   );
+
+  const severityOptions = useSeverityOptions();
 
   return (
     <EuiFlexItem key={`${severityMappingItem.severity}-${index}`}>

@@ -6,44 +6,51 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiPageBody, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { CreateDataViewButton } from '../../../../components/create_data_view_button';
-import { useMlKibana, useNavigateToPath } from '../../../../contexts/kibana';
+import {
+  useMlKibana,
+  useNavigateToPath,
+  useMlManagementLocator,
+} from '../../../../contexts/kibana';
 import { MlPageHeader } from '../../../../components/page_header';
 
 export interface PageProps {
   nextStepPath: string;
+  extraButtons?: React.ReactNode;
 }
 
 const RESULTS_PER_PAGE = 20;
 
 type SavedObject = SavedObjectCommon<FinderAttributes & { isTextBasedQuery?: boolean }>;
 
-export const Page: FC<PageProps> = ({
-  nextStepPath,
-  extraButtons,
-}: {
-  nextStepPath: string;
-  extraButtons?: React.ReactNode;
-}) => {
+export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
   const { contentManagement, uiSettings } = useMlKibana().services;
+  const mlLocator = useMlManagementLocator();
   const navigateToPath = useNavigateToPath();
 
-  const onObjectSelection = useCallback(
-    (id: string, type: string, name?: string) => {
+  const onObjectSelection = async (id: string, type: string, name?: string) => {
+    const urlPath = window.location.pathname;
+    if (urlPath.includes('management')) {
+      await mlLocator?.navigate({
+        sectionId: 'ml',
+        appId: `anomaly_detection/${nextStepPath}?${
+          type === 'index-pattern' ? 'index' : 'savedSearchId'
+        }=${encodeURIComponent(id)}`,
+      });
+    } else {
       navigateToPath(
         `${nextStepPath}?${
           type === 'index-pattern' ? 'index' : 'savedSearchId'
         }=${encodeURIComponent(id)}`
       );
-    },
-    [navigateToPath, nextStepPath]
-  );
+    }
+  };
 
   return (
     <div data-test-subj="mlPageSourceSelection">

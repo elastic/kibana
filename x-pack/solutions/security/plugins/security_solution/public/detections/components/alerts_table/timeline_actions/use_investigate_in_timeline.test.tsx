@@ -19,11 +19,13 @@ import { EuiPopover, EuiContextMenu } from '@elastic/eui';
 import * as timelineActions from '../../../../timelines/store/actions';
 import { getTimelineTemplate } from '../../../../timelines/containers/api';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../timelines/containers/api');
 jest.mock('../../../../common/lib/apm/use_start_transaction');
 jest.mock('../../../../common/hooks/use_app_toasts');
+jest.mock('../../../../common/components/user_privileges');
 
 const ecsRowData: Ecs = {
   _id: '1',
@@ -269,6 +271,9 @@ describe('useInvestigateInTimeline', () => {
         },
       },
     });
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      timelinePrivileges: { read: true },
+    });
   });
   afterEach(() => {
     jest.clearAllMocks();
@@ -390,6 +395,19 @@ describe('useInvestigateInTimeline', () => {
           );
         });
       });
+    });
+  });
+
+  describe('privileges', () => {
+    test('should not return a timeline action when the user does not have sufficient privileges', () => {
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        timelinePrivileges: { read: false },
+      });
+
+      const { result } = renderHook(() => useInvestigateInTimeline(props), {
+        wrapper: TestProviders,
+      });
+      expect(result.current.investigateInTimelineActionItems).toHaveLength(0);
     });
   });
 });

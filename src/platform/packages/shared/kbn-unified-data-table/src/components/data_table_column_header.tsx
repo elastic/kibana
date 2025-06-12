@@ -136,3 +136,42 @@ export const DataTableTimeColumnHeader = ({
     </div>
   );
 };
+
+export const DataTableScoreColumnHeader = ({
+  isSorted,
+  showColumnTokens,
+  columnName,
+  columnsMeta,
+  dataView,
+  headerRowHeight,
+  columnDisplayName,
+}: DataTableColumnHeaderProps & { isSorted?: boolean }) => {
+  const tooltipContent = i18n.translate('unifiedDataTable.tableHeader.scoreFieldIconTooltip', {
+    defaultMessage: 'In order to retrieve values for _score, you must sort by it.',
+  });
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
+      {showColumnTokens && isSorted && (
+        <DataTableColumnToken
+          columnName={columnName}
+          columnsMeta={columnsMeta}
+          dataView={dataView}
+        />
+      )}
+      {!isSorted && (
+        <span css={{ paddingRight: euiTheme.size.xs }}>
+          <EuiIconTip
+            content={tooltipContent}
+            color="warning"
+            size="s"
+            type="alert"
+            position="left"
+          />
+        </span>
+      )}
+      <DataTableColumnTitle columnDisplayName={columnDisplayName} />
+    </ColumnHeaderTruncateContainer>
+  );
+};

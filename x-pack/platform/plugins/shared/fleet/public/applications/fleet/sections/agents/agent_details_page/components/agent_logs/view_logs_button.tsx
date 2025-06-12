@@ -54,7 +54,7 @@ export const ViewLogsButton: React.FunctionComponent<ViewLogsProps> = ({
         from: getTimeRangeStartFromTime(startTime ? startTime : defaultStartTime),
         to: getTimeRangeEndFromTime(endTime ? endTime : defaultEndTime),
       },
-      filter: logStreamQuery,
+      query: { language: 'kuery', query: logStreamQuery },
     });
   }, [endTime, logStreamQuery, logsLocator, startTime]);
 

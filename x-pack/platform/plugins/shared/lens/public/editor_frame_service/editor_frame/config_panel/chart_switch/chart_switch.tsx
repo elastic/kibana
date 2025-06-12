@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import './chart_switch.scss';
 import React, { useState, useMemo, memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ExperimentalBadge } from '../../../../shared_components';

@@ -37,9 +37,6 @@ describe('registerRoutes', () => {
         params: schema.object({
           case_id: schema.string(),
         }),
-        query: schema.object({
-          includeComments: schema.boolean(),
-        }),
       },
       handler,
     }),
@@ -183,7 +180,6 @@ describe('registerRoutes', () => {
       ['params' | 'query' | 'body', keyof CasesRouter, Record<string, unknown>]
     > = [
       ['params', 'get', { case_id: '123' }],
-      ['query', 'get', { includeComments: false }],
       ['body', 'post', { title: 'test' }],
     ];
 
