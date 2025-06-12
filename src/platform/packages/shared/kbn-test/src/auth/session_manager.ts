@@ -156,7 +156,7 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
       if (isSessionValid) {
         return cachedSession; // Return valid cached session
       }
-      this.log.debug(`Session for role '${role}' expired.`);
+      this.log.warning(`Session for role '${role}' expired.`);
       this.sessionCache.delete(cacheKey); // Remove expired session
     }
 
