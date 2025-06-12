@@ -21,6 +21,7 @@ import { generateAssistantComment } from './util/comments';
 import type { SiemRuleMigrationsClientDependencies, StoredRuleMigration } from '../types';
 import { ActionsClientChat } from './util/actions_client_chat';
 import { EsqlKnowledgeBase } from './util/esql_knowledge_base';
+import { nullifyElasticRule } from './util/nullify_missing_properties';
 
 /** Number of concurrent rule translations in the pool */
 const TASK_CONCURRENCY = 10 as const;
@@ -338,9 +339,13 @@ export class RuleMigrationTaskRunner {
     migrationResult: MigrateRuleState
   ) {
     this.logger.debug(`Translation of rule "${ruleMigration.id}" succeeded`);
+    const nullifiedElasticRule = nullifyElasticRule(
+      migrationResult.elastic_rule as ElasticRule,
+      this.logger.error
+    );
     const ruleMigrationTranslated = {
       ...ruleMigration,
-      elastic_rule: migrationResult.elastic_rule as ElasticRule,
+      elastic_rule: nullifiedElasticRule as ElasticRule,
       translation_result: migrationResult.translation_result,
       comments: migrationResult.comments,
     };
