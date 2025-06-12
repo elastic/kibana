@@ -42,13 +42,6 @@ export const GO_BACK_TO_RULES_TABLE_BUTTON = i18n.translate(
   }
 );
 
-export const REPROCESS_FAILED_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.reprocessFailedRulesButtonAriaLabel',
-  {
-    defaultMessage: 'Reprocess failed rules',
-  }
-);
-
 export const ALREADY_TRANSLATED_RULE_TOOLTIP = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.table.alreadyTranslatedTooltip',
   {
