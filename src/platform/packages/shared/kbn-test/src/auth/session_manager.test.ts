@@ -480,7 +480,9 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
     beforeEach(() => {
       jest.resetAllMocks();
       process.env.TEST_CLOUD_HOST_NAME = 'cloud.env.co'; // Mock the environment variable
-      jest.requireMock('../kbn_client/kbn_client').KbnClient.mockImplementation(() => ({ version: { get } }));
+      jest
+        .requireMock('../kbn_client/kbn_client')
+        .KbnClient.mockImplementation(() => ({ version: { get } }));
       get.mockImplementationOnce(() => Promise.resolve('8.12.0'));
 
       samlSessionManager = new SamlSessionManager(samlSMOptionsWithCloudHostName);
