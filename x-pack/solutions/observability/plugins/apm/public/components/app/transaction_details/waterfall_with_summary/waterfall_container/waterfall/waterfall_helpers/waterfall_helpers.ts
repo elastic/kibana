@@ -91,7 +91,7 @@ export type IWaterfallSpan = IWaterfallItemBase<WaterfallSpan, 'span'>;
 
 export type IWaterfallSpanOrTransaction = IWaterfallTransaction | IWaterfallSpan;
 
-export type IWaterfallGetRelatedErrorsHref = (traceId: string, docId: string) => string;
+export type IWaterfallGetRelatedErrorsHref = (docId: string) => string;
 
 export type IWaterfallItem = IWaterfallSpanOrTransaction;
 

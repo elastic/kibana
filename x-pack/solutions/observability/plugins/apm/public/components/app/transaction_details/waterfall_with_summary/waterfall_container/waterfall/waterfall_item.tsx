@@ -336,7 +336,7 @@ function EmbeddableRelatedErrors({
 }: {
   item: IWaterfallSpanOrTransaction;
   errorCount: number;
-  getRelatedErrorsHref?: (traceId: string, docId: string) => string;
+  getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
 }) {
   const { euiTheme } = useEuiTheme();
 
@@ -356,7 +356,7 @@ function EmbeddableRelatedErrors({
       <EuiBadge
         color={euiTheme.colors.danger}
         iconType="arrowRight"
-        href={getRelatedErrorsHref(item.doc.trace.id, item.id)}
+        href={getRelatedErrorsHref(item.id)}
         onClick={(e: React.MouseEvent | React.KeyboardEvent) => {
           e.stopPropagation();
         }}
