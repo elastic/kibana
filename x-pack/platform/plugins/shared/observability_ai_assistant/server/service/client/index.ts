@@ -188,11 +188,7 @@ export class ObservabilityAIAssistantClient {
     kibanaPublicUrl?: string;
     instructions?: AdHocInstruction[];
     simulateFunctionCalling?: boolean;
-    disableFunctions?:
-      | boolean
-      | {
-          except: string[];
-        };
+    disableFunctions?: boolean;
   }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
     return new LangTracer(context.active()).startActiveSpan(
       'complete',
@@ -225,9 +221,9 @@ export class ObservabilityAIAssistantClient {
                 applicationInstructions: functionClient.getInstructions(),
                 userInstructions,
                 adHocInstructions: allAdHocInstructions,
-                availableFunctionNames: functionClient
-                  .getFunctions()
-                  .map((fn) => fn.definition.name),
+                availableFunctionNames: disableFunctions
+                  ? []
+                  : functionClient.getFunctions().map((fn) => fn.definition.name),
               }),
               initialMessages
             );
