@@ -41,9 +41,7 @@
                 "tags": [],
                 "label": "allowEmptyRange",
                 "description": [],
-                "signature": [
-                  "true"
-                ],
+                "signature": ["true"],
                 "path": "src/platform/plugins/shared/kibana_react/public/validated_range/validated_dual_range.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -55,9 +53,7 @@
                 "tags": [],
                 "label": "fullWidth",
                 "description": [],
-                "signature": [
-                  "false"
-                ],
+                "signature": ["false"],
                 "path": "src/platform/plugins/shared/kibana_react/public/validated_range/validated_dual_range.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -69,9 +65,7 @@
                 "tags": [],
                 "label": "compressed",
                 "description": [],
-                "signature": [
-                  "false"
-                ],
+                "signature": ["false"],
                 "path": "src/platform/plugins/shared/kibana_react/public/validated_range/validated_dual_range.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -99,9 +93,7 @@
                 "tags": [],
                 "label": "nextProps",
                 "description": [],
-                "signature": [
-                  "Props"
-                ],
+                "signature": ["Props"],
                 "path": "src/platform/plugins/shared/kibana_react/public/validated_range/validated_dual_range.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -114,9 +106,7 @@
                 "tags": [],
                 "label": "prevState",
                 "description": [],
-                "signature": [
-                  "State"
-                ],
+                "signature": ["State"],
                 "path": "src/platform/plugins/shared/kibana_react/public/validated_range/validated_dual_range.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -144,9 +134,7 @@
             "tags": [],
             "label": "_onChange",
             "description": [],
-            "signature": [
-              "(value: [string | number, string | number]) => void"
-            ],
+            "signature": ["(value: [string | number, string | number]) => void"],
             "path": "src/platform/plugins/shared/kibana_react/public/validated_range/validated_dual_range.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -158,9 +146,7 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": [
-                  "[string | number, string | number]"
-                ],
+                "signature": ["[string | number, string | number]"],
                 "path": "src/platform/plugins/shared/kibana_react/public/validated_range/validated_dual_range.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -176,9 +162,7 @@
             "tags": [],
             "label": "render",
             "description": [],
-            "signature": [
-              "() => React.JSX.Element"
-            ],
+            "signature": ["() => React.JSX.Element"],
             "path": "src/platform/plugins/shared/kibana_react/public/validated_range/validated_dual_range.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -221,9 +205,7 @@
             "tags": [],
             "label": "services",
             "description": [],
-            "signature": [
-              "Services"
-            ],
+            "signature": ["Services"],
             "path": "src/platform/plugins/shared/kibana_react/public/context/context.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -263,11 +245,7 @@
             "tags": [],
             "label": "services",
             "description": [],
-            "signature": [
-              "Partial<",
-              "CoreStart",
-              ">"
-            ],
+            "signature": ["Partial<", "CoreStart", ">"],
             "path": "src/platform/plugins/shared/kibana_react/public/notifications/create_notifications.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -307,11 +285,7 @@
             "tags": [],
             "label": "services",
             "description": [],
-            "signature": [
-              "Partial<",
-              "CoreStart",
-              ">"
-            ],
+            "signature": ["Partial<", "CoreStart", ">"],
             "path": "src/platform/plugins/shared/kibana_react/public/overlays/create_react_overlays.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -327,9 +301,7 @@
         "type": "Function",
         "tags": [],
         "label": "ElasticAgentCard",
-        "description": [
-          "\nApplies extra styling to a typical EuiAvatar"
-        ],
+        "description": ["\nApplies extra styling to a typical EuiAvatar"],
         "signature": [
           "({ solution, recommended, title, href, button, layout, category, ...cardRest }: ",
           {
@@ -392,9 +364,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "P"
-            ],
+            "signature": ["P"],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -406,9 +376,7 @@
             "tags": [],
             "label": "context",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -422,9 +390,7 @@
         "type": "Function",
         "tags": [],
         "label": "KibanaPageTemplateSolutionNavAvatar",
-        "description": [
-          "\nApplies extra styling to a typical EuiAvatar"
-        ],
+        "description": ["\nApplies extra styling to a typical EuiAvatar"],
         "signature": [
           "({ className, size, ...rest }: ",
           "KibanaPageTemplateSolutionNavAvatarProps",
@@ -441,9 +407,7 @@
             "tags": [],
             "label": "{ className, size, ...rest }",
             "description": [],
-            "signature": [
-              "KibanaPageTemplateSolutionNavAvatarProps"
-            ],
+            "signature": ["KibanaPageTemplateSolutionNavAvatarProps"],
             "path": "src/platform/plugins/shared/kibana_react/public/page_template/solution_nav/solution_nav_avatar.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -457,9 +421,7 @@
         "parentPluginId": "kibanaReact",
         "id": "def-public.KibanaThemeProvider",
         "type": "Function",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": ["deprecated"],
         "label": "KibanaThemeProvider",
         "description": [],
         "signature": [
@@ -510,11 +472,7 @@
         "tags": [],
         "label": "Markdown",
         "description": [],
-        "signature": [
-          "(props: ",
-          "MarkdownProps",
-          ") => React.JSX.Element"
-        ],
+        "signature": ["(props: ", "MarkdownProps", ") => React.JSX.Element"],
         "path": "src/platform/plugins/shared/kibana_react/public/markdown/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -526,9 +484,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "MarkdownProps"
-            ],
+            "signature": ["MarkdownProps"],
             "path": "src/platform/plugins/shared/kibana_react/public/markdown/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -545,11 +501,7 @@
         "tags": [],
         "label": "MarkdownSimple",
         "description": [],
-        "signature": [
-          "(props: ",
-          "MarkdownSimpleProps",
-          ") => React.JSX.Element"
-        ],
+        "signature": ["(props: ", "MarkdownSimpleProps", ") => React.JSX.Element"],
         "path": "src/platform/plugins/shared/kibana_react/public/markdown/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -561,9 +513,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "MarkdownSimpleProps"
-            ],
+            "signature": ["MarkdownSimpleProps"],
             "path": "src/platform/plugins/shared/kibana_react/public/markdown/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -688,9 +638,7 @@
             "tags": [],
             "label": "{\n  addDataHref,\n  application,\n  devToolsHref,\n  hidden,\n  managementHref,\n  showDevToolsLink,\n  showManagementLink,\n}",
             "description": [],
-            "signature": [
-              "Props"
-            ],
+            "signature": ["Props"],
             "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_actions/overview_page_actions.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -721,9 +669,7 @@
             "tags": [],
             "label": "{\n  addBasePath,\n  path,\n  onSetDefaultRoute,\n  onChangeDefaultRoute,\n}",
             "description": [],
-            "signature": [
-              "Props"
-            ],
+            "signature": ["Props"],
             "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_footer/overview_page_footer.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -758,12 +704,7 @@
             "tags": [],
             "label": "history",
             "description": [],
-            "signature": [
-              "ScopedHistory",
-              "<unknown> | ",
-              "History",
-              "<unknown>"
-            ],
+            "signature": ["ScopedHistory", "<unknown> | ", "History", "<unknown>"],
             "path": "src/platform/plugins/shared/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -776,9 +717,7 @@
             "tags": [],
             "label": "to",
             "description": [],
-            "signature": [
-              "string | LocationObject"
-            ],
+            "signature": ["string | LocationObject"],
             "path": "src/platform/plugins/shared/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -791,9 +730,7 @@
             "tags": [],
             "label": "onClickCallback",
             "description": [],
-            "signature": [
-              "Function | undefined"
-            ],
+            "signature": ["Function | undefined"],
             "path": "src/platform/plugins/shared/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -828,12 +765,7 @@
             "tags": [],
             "label": "history",
             "description": [],
-            "signature": [
-              "ScopedHistory",
-              "<unknown> | ",
-              "History",
-              "<unknown>"
-            ],
+            "signature": ["ScopedHistory", "<unknown> | ", "History", "<unknown>"],
             "path": "src/platform/plugins/shared/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -846,9 +778,7 @@
             "tags": [],
             "label": "to",
             "description": [],
-            "signature": [
-              "string | LocationObject"
-            ],
+            "signature": ["string | LocationObject"],
             "path": "src/platform/plugins/shared/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -861,9 +791,7 @@
             "tags": [],
             "label": "onClickCallback",
             "description": [],
-            "signature": [
-              "Function | undefined"
-            ],
+            "signature": ["Function | undefined"],
             "path": "src/platform/plugins/shared/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -877,9 +805,7 @@
         "parentPluginId": "kibanaReact",
         "id": "def-public.toMountPoint",
         "type": "Function",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": ["deprecated"],
         "label": "toMountPoint",
         "description": [],
         "signature": [
@@ -924,9 +850,7 @@
             "tags": [],
             "label": "node",
             "description": [],
-            "signature": [
-              "React.ReactNode"
-            ],
+            "signature": ["React.ReactNode"],
             "path": "src/platform/plugins/shared/kibana_react/public/util/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1008,15 +932,25 @@
         "parentPluginId": "kibanaReact",
         "id": "def-public.useDarkMode",
         "type": "Function",
-        "tags": [],
+        "tags": ["deprecated"],
         "label": "useDarkMode",
-        "description": [],
-        "signature": [
-          "(defaultValue?: boolean | undefined) => boolean"
+        "description": [
+          "\nThis should only be used to pass the darkMode to a theme provider which is outside\nof the global theme provider scope. For example when used with `EuiThemeProvider`.\n"
         ],
+        "signature": ["(defaultValue?: boolean | undefined) => boolean"],
         "path": "src/platform/plugins/shared/kibana_react/public/dark_mode/use_dark_mode.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/app/app.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/app/app.tsx"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -1025,9 +959,7 @@
             "tags": [],
             "label": "defaultValue",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/platform/plugins/shared/kibana_react/public/dark_mode/use_dark_mode.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1043,9 +975,7 @@
         "type": "Function",
         "tags": [],
         "label": "useExecutionContext",
-        "description": [
-          "\nSet and clean up application level execution context"
-        ],
+        "description": ["\nSet and clean up application level execution context"],
         "signature": [
           "(executionContext: ",
           "ExecutionContextSetup",
@@ -1064,10 +994,7 @@
             "tags": [],
             "label": "executionContext",
             "description": [],
-            "signature": [
-              "ExecutionContextSetup",
-              " | undefined"
-            ],
+            "signature": ["ExecutionContextSetup", " | undefined"],
             "path": "src/platform/plugins/shared/kibana_react/public/use_execution_context/use_execution_context.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1080,9 +1007,7 @@
             "tags": [],
             "label": "context",
             "description": [],
-            "signature": [
-              "KibanaExecutionContext"
-            ],
+            "signature": ["KibanaExecutionContext"],
             "path": "src/platform/plugins/shared/kibana_react/public/use_execution_context/use_execution_context.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1101,9 +1026,7 @@
         "description": [
           "\nReturns the current global UI-settings value.\n\nUsage:\n\n```js\nconst customBranding = useGlobalUiSetting('customBranding:pageTitle');\n```"
         ],
-        "signature": [
-          "<T>(key: string, defaultValue?: T | undefined) => T"
-        ],
+        "signature": ["<T>(key: string, defaultValue?: T | undefined) => T"],
         "path": "src/platform/plugins/shared/kibana_react/public/ui_settings/use_ui_setting.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1115,9 +1038,7 @@
             "tags": [],
             "label": "key",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "src/platform/plugins/shared/kibana_react/public/ui_settings/use_ui_setting.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1130,9 +1051,7 @@
             "tags": [],
             "label": "defaultValue",
             "description": [],
-            "signature": [
-              "T | undefined"
-            ],
+            "signature": ["T | undefined"],
             "path": "src/platform/plugins/shared/kibana_react/public/ui_settings/use_ui_setting.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1151,9 +1070,7 @@
         "description": [
           "\nReturns a 2-tuple, where first entry is the setting value and second is a\nfunction to update the setting value.\n\nSynchronously returns the most current value of the setting and subscribes\nto all subsequent updates, which will re-render your component on new values.\n\nUsage:\n\n```js\nconst [customBranding, setCustomBranding] = useGlobalUiSetting$('customBranding:pageTitle');\n```"
         ],
-        "signature": [
-          "<T>(key: string, defaultValue?: T | undefined) => [T, Setter<T>]"
-        ],
+        "signature": ["<T>(key: string, defaultValue?: T | undefined) => [T, Setter<T>]"],
         "path": "src/platform/plugins/shared/kibana_react/public/ui_settings/use_ui_setting.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1165,9 +1082,7 @@
             "tags": [],
             "label": "key",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "src/platform/plugins/shared/kibana_react/public/ui_settings/use_ui_setting.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1180,9 +1095,7 @@
             "tags": [],
             "label": "defaultValue",
             "description": [],
-            "signature": [
-              "T | undefined"
-            ],
+            "signature": ["T | undefined"],
             "path": "src/platform/plugins/shared/kibana_react/public/ui_settings/use_ui_setting.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1228,9 +1141,7 @@
         "description": [
           "\nReturns the current UI-settings value.\n\nUsage:\n\n```js\nconst darkMode = useUiSetting('theme:darkMode');\n```"
         ],
-        "signature": [
-          "<T>(key: string, defaultValue?: T | undefined) => T"
-        ],
+        "signature": ["<T>(key: string, defaultValue?: T | undefined) => T"],
         "path": "src/platform/plugins/shared/kibana_react/public/ui_settings/use_ui_setting.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1242,9 +1153,7 @@
             "tags": [],
             "label": "key",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "src/platform/plugins/shared/kibana_react/public/ui_settings/use_ui_setting.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1257,9 +1166,7 @@
             "tags": [],
             "label": "defaultValue",
             "description": [],
-            "signature": [
-              "T | undefined"
-            ],
+            "signature": ["T | undefined"],
             "path": "src/platform/plugins/shared/kibana_react/public/ui_settings/use_ui_setting.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1278,9 +1185,7 @@
         "description": [
           "\nReturns a 2-tuple, where first entry is the setting value and second is a\nfunction to update the setting value.\n\nSynchronously returns the most current value of the setting and subscribes\nto all subsequent updates, which will re-render your component on new values.\n\nUsage:\n\n```js\nconst [darkMode, setDarkMode] = useUiSetting$('theme:darkMode');\n```"
         ],
-        "signature": [
-          "<T>(key: string, defaultValue?: T | undefined) => [T, Setter<T>]"
-        ],
+        "signature": ["<T>(key: string, defaultValue?: T | undefined) => [T, Setter<T>]"],
         "path": "src/platform/plugins/shared/kibana_react/public/ui_settings/use_ui_setting.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1292,9 +1197,7 @@
             "tags": [],
             "label": "key",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "src/platform/plugins/shared/kibana_react/public/ui_settings/use_ui_setting.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1307,9 +1210,7 @@
             "tags": [],
             "label": "defaultValue",
             "description": [],
-            "signature": [
-              "T | undefined"
-            ],
+            "signature": ["T | undefined"],
             "path": "src/platform/plugins/shared/kibana_react/public/ui_settings/use_ui_setting.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1348,9 +1249,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "React.ComponentType<Props>"
-            ],
+            "signature": ["React.ComponentType<Props>"],
             "path": "src/platform/plugins/shared/kibana_react/public/context/context.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1364,9 +1263,7 @@
         "parentPluginId": "kibanaReact",
         "id": "def-public.wrapWithTheme",
         "type": "Function",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": ["deprecated"],
         "label": "wrapWithTheme",
         "description": [],
         "signature": [
@@ -1413,9 +1310,7 @@
             "tags": [],
             "label": "node",
             "description": [],
-            "signature": [
-              "React.ReactNode"
-            ],
+            "signature": ["React.ReactNode"],
             "path": "src/platform/plugins/shared/kibana_react/public/theme.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1452,10 +1347,7 @@
             "tags": [],
             "label": "userProfile",
             "description": [],
-            "signature": [
-              "UserProfileService",
-              " | undefined"
-            ],
+            "signature": ["UserProfileService", " | undefined"],
             "path": "src/platform/plugins/shared/kibana_react/public/theme.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1531,9 +1423,7 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": [
-                  "P"
-                ],
+                "signature": ["P"],
                 "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1545,9 +1435,7 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
+                "signature": ["any"],
                 "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1584,9 +1472,7 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": [
-                  "P"
-                ],
+                "signature": ["P"],
                 "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1624,9 +1510,7 @@
             "tags": [],
             "label": "services",
             "description": [],
-            "signature": [
-              "Services"
-            ],
+            "signature": ["Services"],
             "path": "src/platform/plugins/shared/kibana_react/public/context/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1769,9 +1653,7 @@
                 "tags": [],
                 "label": "node",
                 "description": [],
-                "signature": [
-                  "React.ReactNode"
-                ],
+                "signature": ["React.ReactNode"],
                 "path": "src/platform/plugins/shared/kibana_react/public/overlays/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1784,10 +1666,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": [
-                  "OverlayFlyoutOpenOptions",
-                  " | undefined"
-                ],
+                "signature": ["OverlayFlyoutOpenOptions", " | undefined"],
                 "path": "src/platform/plugins/shared/kibana_react/public/overlays/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1820,9 +1699,7 @@
                 "tags": [],
                 "label": "node",
                 "description": [],
-                "signature": [
-                  "React.ReactNode"
-                ],
+                "signature": ["React.ReactNode"],
                 "path": "src/platform/plugins/shared/kibana_react/public/overlays/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1835,10 +1712,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": [
-                  "OverlayModalOpenOptions",
-                  " | undefined"
-                ],
+                "signature": ["OverlayModalOpenOptions", " | undefined"],
                 "path": "src/platform/plugins/shared/kibana_react/public/overlays/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1891,12 +1765,8 @@
             "type": "string",
             "tags": [],
             "label": "logo",
-            "description": [
-              "\nOptionally replace the auto-generated logo"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nOptionally replace the auto-generated logo"],
+            "signature": ["string | undefined"],
             "path": "src/platform/plugins/shared/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1907,9 +1777,7 @@
             "type": "string",
             "tags": [],
             "label": "docsLink",
-            "description": [
-              "\nRequired to set the docs link for the whole solution"
-            ],
+            "description": ["\nRequired to set the docs link for the whole solution"],
             "path": "src/platform/plugins/shared/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1920,12 +1788,8 @@
             "type": "string",
             "tags": [],
             "label": "pageTitle",
-            "description": [
-              "\nOptionally replace the auto-generated page title (h1)"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nOptionally replace the auto-generated page title (h1)"],
+            "signature": ["string | undefined"],
             "path": "src/platform/plugins/shared/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2003,9 +1867,7 @@
             "tags": [],
             "label": "color",
             "description": [],
-            "signature": [
-              "\"success\" | \"warning\" | \"primary\" | \"danger\" | undefined"
-            ],
+            "signature": ["\"success\" | \"warning\" | \"primary\" | \"danger\" | undefined"],
             "path": "src/platform/plugins/shared/kibana_react/public/notifications/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2017,10 +1879,7 @@
             "tags": [],
             "label": "iconType",
             "description": [],
-            "signature": [
-              "IconType",
-              " | undefined"
-            ],
+            "signature": ["IconType", " | undefined"],
             "path": "src/platform/plugins/shared/kibana_react/public/notifications/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2032,9 +1891,7 @@
             "tags": [],
             "label": "toastLifeTimeMs",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "src/platform/plugins/shared/kibana_react/public/notifications/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2046,9 +1903,7 @@
             "tags": [],
             "label": "onClose",
             "description": [],
-            "signature": [
-              "(() => void) | undefined"
-            ],
+            "signature": ["(() => void) | undefined"],
             "path": "src/platform/plugins/shared/kibana_react/public/notifications/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2060,9 +1915,7 @@
         "parentPluginId": "kibanaReact",
         "id": "def-public.ToMountPointOptions",
         "type": "Interface",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": ["deprecated"],
         "label": "ToMountPointOptions",
         "description": [],
         "path": "src/platform/plugins/shared/kibana_react/public/util/index.tsx",
@@ -2077,10 +1930,7 @@
             "tags": [],
             "label": "analytics",
             "description": [],
-            "signature": [
-              "AnalyticsServiceStart",
-              " | undefined"
-            ],
+            "signature": ["AnalyticsServiceStart", " | undefined"],
             "path": "src/platform/plugins/shared/kibana_react/public/util/index.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2092,12 +1942,7 @@
             "tags": [],
             "label": "theme$",
             "description": [],
-            "signature": [
-              "Observable",
-              "<",
-              "CoreTheme",
-              "> | undefined"
-            ],
+            "signature": ["Observable", "<", "CoreTheme", "> | undefined"],
             "path": "src/platform/plugins/shared/kibana_react/public/util/index.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2109,10 +1954,7 @@
             "tags": [],
             "label": "userProfile",
             "description": [],
-            "signature": [
-              "UserProfileService",
-              " | undefined"
-            ],
+            "signature": ["UserProfileService", " | undefined"],
             "path": "src/platform/plugins/shared/kibana_react/public/util/index.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2149,9 +1991,7 @@
             "tags": [],
             "label": "height",
             "description": [],
-            "signature": [
-              "string | number | undefined"
-            ],
+            "signature": ["string | number | undefined"],
             "path": "src/platform/plugins/shared/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2214,11 +2054,7 @@
             "tags": [],
             "label": "onEditor",
             "description": [],
-            "signature": [
-              "((editor: ",
-              "editor",
-              ".IStandaloneCodeEditor) => void) | undefined"
-            ],
+            "signature": ["((editor: ", "editor", ".IStandaloneCodeEditor) => void) | undefined"],
             "path": "src/platform/plugins/shared/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -2230,10 +2066,7 @@
                 "tags": [],
                 "label": "editor",
                 "description": [],
-                "signature": [
-                  "editor",
-                  ".IStandaloneCodeEditor"
-                ],
+                "signature": ["editor", ".IStandaloneCodeEditor"],
                 "path": "src/platform/plugins/shared/kibana_react/public/url_template_editor/url_template_editor.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2249,9 +2082,7 @@
             "tags": [],
             "label": "placeholder",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/platform/plugins/shared/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2310,9 +2141,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/platform/plugins/shared/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2324,9 +2153,7 @@
             "tags": [],
             "label": "documentation",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/platform/plugins/shared/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2338,10 +2165,7 @@
             "tags": [],
             "label": "kind",
             "description": [],
-            "signature": [
-              "languages",
-              ".CompletionItemKind | undefined"
-            ],
+            "signature": ["languages", ".CompletionItemKind | undefined"],
             "path": "src/platform/plugins/shared/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2353,9 +2177,7 @@
             "tags": [],
             "label": "sortText",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "src/platform/plugins/shared/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2432,6 +2254,8 @@
           "ThemeServiceSetup",
           " | undefined; plugins?: ",
           "PluginsServiceStart",
+          " | undefined; pricing?: ",
+          "PricingServiceStart",
           " | undefined; security?: ",
           "SecurityServiceStart",
           " | undefined; userProfile?: ",
@@ -2449,9 +2273,7 @@
         "parentPluginId": "kibanaReact",
         "id": "def-public.KibanaThemeProviderProps",
         "type": "Type",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": ["deprecated"],
         "label": "KibanaThemeProviderProps",
         "description": [],
         "signature": [
@@ -2537,9 +2359,7 @@
         "tags": [],
         "label": "Value",
         "description": [],
-        "signature": [
-          "[string | number, string | number]"
-        ],
+        "signature": ["[string | number, string | number]"],
         "path": "src/platform/plugins/shared/kibana_react/public/validated_range/validated_dual_range.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -2591,9 +2411,7 @@
         "type": "Function",
         "tags": [],
         "label": "createGlobalStyle",
-        "description": [
-          "/** see https://styled-components.com/docs/api#createglobalstyle */"
-        ],
+        "description": ["/** see https://styled-components.com/docs/api#createglobalstyle */"],
         "signature": [
           "<P extends object = {}>(first: TemplateStringsArray | ",
           "CSSObject",
@@ -2665,12 +2483,7 @@
             "tags": [],
             "label": "interpolations",
             "description": [],
-            "signature": [
-              "Interpolation",
-              "<",
-              "ThemedStyledProps",
-              "<P, T>>[]"
-            ],
+            "signature": ["Interpolation", "<", "ThemedStyledProps", "<P, T>>[]"],
             "path": "node_modules/@types/styled-components/ts3.7/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2684,9 +2497,7 @@
         "type": "Function",
         "tags": [],
         "label": "css",
-        "description": [
-          "/** see https://styled-components.com/docs/api#css-prop */"
-        ],
+        "description": ["/** see https://styled-components.com/docs/api#css-prop */"],
         "signature": [
           "BaseThemedCssFunction",
           "<",
@@ -2710,9 +2521,7 @@
         "type": "Function",
         "tags": [],
         "label": "euiStyled",
-        "description": [
-          "/** see https://styled-components.com/docs/api#styled */"
-        ],
+        "description": ["/** see https://styled-components.com/docs/api#styled */"],
         "signature": [
           "ThemedBaseStyledInterface",
           "<",
@@ -2736,9 +2545,7 @@
         "type": "Function",
         "tags": [],
         "label": "keyframes",
-        "description": [
-          "/** see https://styled-components.com/docs/api#keyframes */"
-        ],
+        "description": ["/** see https://styled-components.com/docs/api#keyframes */"],
         "signature": [
           "(strings: TemplateStringsArray | ",
           "CSSKeyframes",
@@ -2759,10 +2566,7 @@
             "tags": [],
             "label": "strings",
             "description": [],
-            "signature": [
-              "TemplateStringsArray | ",
-              "CSSKeyframes"
-            ],
+            "signature": ["TemplateStringsArray | ", "CSSKeyframes"],
             "path": "node_modules/@types/styled-components/ts3.7/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2774,10 +2578,7 @@
             "tags": [],
             "label": "interpolations",
             "description": [],
-            "signature": [
-              "SimpleInterpolation",
-              "[]"
-            ],
+            "signature": ["SimpleInterpolation", "[]"],
             "path": "node_modules/@types/styled-components/ts3.7/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2791,9 +2592,7 @@
         "type": "Function",
         "tags": [],
         "label": "KibanaStyledComponentsThemeProvider",
-        "description": [
-          "\nA `styled-components` `ThemeProvider` that incorporates EUI dark mode."
-        ],
+        "description": ["\nA `styled-components` `ThemeProvider` that incorporates EUI dark mode."],
         "signature": [
           "<OuterTheme extends ",
           "DefaultTheme",
@@ -2848,9 +2647,7 @@
         "parentPluginId": "kibanaReact",
         "id": "def-common.KibanaStyledComponentsThemeProviderDecorator",
         "type": "Function",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": ["deprecated"],
         "label": "KibanaStyledComponentsThemeProviderDecorator",
         "description": [
           "\nStorybook decorator using the EUI theme provider. Uses the value from\n`globals` provided by the Storybook theme switcher.\n"
@@ -2887,14 +2684,7 @@
             "tags": [],
             "label": "storyFn",
             "description": [],
-            "signature": [
-              "PartialStoryFn",
-              "<",
-              "R",
-              ", ",
-              "StrictArgs",
-              ">"
-            ],
+            "signature": ["PartialStoryFn", "<", "R", ", ", "StrictArgs", ">"],
             "path": "src/platform/packages/shared/react/kibana_context/styled/styled_provider.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -2907,14 +2697,7 @@
             "tags": [],
             "label": "{ globals }",
             "description": [],
-            "signature": [
-              "StoryContext",
-              "<",
-              "R",
-              ", ",
-              "StrictArgs",
-              ">"
-            ],
+            "signature": ["StoryContext", "<", "R", ", ", "StrictArgs", ">"],
             "path": "src/platform/packages/shared/react/kibana_context/styled/styled_provider.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -2930,9 +2713,7 @@
         "type": "Function",
         "tags": [],
         "label": "withTheme",
-        "description": [
-          "/** see https://styled-components.com/docs/api#withtheme */"
-        ],
+        "description": ["/** see https://styled-components.com/docs/api#withtheme */"],
         "signature": [
           "<C extends React.ComponentType<any>>(component: React.ComponentProps<C> extends { theme?: ",
           {
@@ -2964,9 +2745,7 @@
             "tags": [],
             "label": "component",
             "description": [],
-            "signature": [
-              "React.ComponentProps<C> extends { theme?: T | undefined; } ? C : never"
-            ],
+            "signature": ["React.ComponentProps<C> extends { theme?: T | undefined; } ? C : never"],
             "path": "node_modules/@types/styled-components/ts3.7/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2995,9 +2774,7 @@
             "type": "Object",
             "tags": [],
             "label": "eui",
-            "description": [
-              "EUI theme vars that automaticall adjust to light and dark mode."
-            ],
+            "description": ["EUI theme vars that automaticall adjust to light and dark mode."],
             "signature": [
               "{ euiZDataGrid: number; euiZHeaderBelowDataGrid: number; euiZDataGridCellPopover: number; euiDataGridCellPaddingS: string; euiDataGridCellPaddingM: string; euiDataGridCellPaddingL: string; euiTableHoverColor: string; euiTableSelectedColor: string; euiTableHoverSelectedColor: string; euiTableActionsBorderColor: string; euiTableHoverClickableColor: string; euiTableFocusClickableColor: string; euiContrastRatioText: number; euiContrastRatioGraphic: number; euiContrastRatioDisabled: number; euiAnimSlightBounce: string; euiAnimSlightResistance: string; euiAnimSpeedExtraFast: string; euiAnimSpeedFast: string; euiAnimSpeedNormal: string; euiAnimSpeedSlow: string; euiAnimSpeedExtraSlow: string; euiBorderWidthThin: string; euiBorderWidthThick: string; euiBorderColor: string; euiBorderRadius: string; euiBorderRadiusSmall: string; euiBorderThick: string; euiBorderThin: string; euiBorderEditable: string; euiButtonHeight: string; euiButtonHeightSmall: string; euiButtonHeightXSmall: string; euiButtonColorDisabled: string; euiButtonColorDisabledText: string; euiButtonColorGhostDisabled: string; euiButtonTypes: { primary: string; accent: string; accentSecondary: string; neutral: string; success: string; warning: string; risk: string; danger: string; ghost: string; text: string; }; euiFontWeightLight: number; euiFontWeightRegular: number; euiFontWeightMedium: number; euiFontWeightSemiBold: number; euiFontWeightBold: number; euiCodeFontWeightRegular: number; euiCodeFontWeightBold: number; euiFormMaxWidth: string; euiFormControlHeight: string; euiFormControlCompressedHeight: string; euiFormControlPadding: string; euiFormControlCompressedPadding: string; euiFormControlBorderRadius: string; euiFormControlCompressedBorderRadius: string; euiRadioSize: string; euiCheckBoxSize: string; euiCheckboxBorderRadius: string; euiSwitchHeight: string; euiSwitchWidth: string; euiSwitchThumbSize: string; euiSwitchIconHeight: string; euiSwitchHeightCompressed: string; euiSwitchWidthCompressed: string; euiSwitchThumbSizeCompressed: string; euiSwitchHeightMini: string; euiSwitchWidthMini: string; euiSwitchThumbSizeMini: string; euiFormBackgroundColor: string; euiFormBackgroundDisabledColor: string; euiFormBackgroundReadOnlyColor: string; euiFormBorderOpaqueColor: string; euiFormBorderColor: string; euiFormBorderDisabledColor: string; euiFormCustomControlDisabledIconColor: string; euiFormCustomControlBorderColor: string; euiFormControlDisabledColor: string; euiFormControlBoxShadow: string; euiFormControlPlaceholderText: string; euiFormInputGroupLabelBackground: string; euiFormInputGroupBorder: string; euiSwitchOffColor: string; euiFormControlIconSizes: { small: string; medium: string; large: string; xLarge: string; xxLarge: string; }; euiFormControlLayoutGroupInputHeight: string; euiFormControlLayoutGroupInputCompressedHeight: string; euiFormControlLayoutGroupInputCompressedBorderRadius: string; euiHeaderBackgroundColor: string; euiHeaderDarkBackgroundColor: string; euiHeaderBorderColor: string; euiHeaderBreadcrumbColor: string; euiHeaderHeight: string; euiHeaderChildSize: string; euiHeaderHeightCompensation: string; euiPageDefaultMaxWidth: string; euiPageSidebarMinWidth: string; euiPanelPaddingModifiers: { paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiPanelBorderRadiusModifiers: { borderRadiusNone: number; borderRadiusMedium: string; }; euiPanelBackgroundColorModifiers: { transparent: string; plain: string; subdued: string; accent: string; accentSecondary: string; primary: string; success: string; warning: string; danger: string; }; euiBreakpoints: { xs: number; s: string; m: string; l: string; xl: string; }; euiBreakpointKeys: string; euiShadowColor: string; euiSize: string; euiSizeXS: string; euiSizeS: string; euiSizeM: string; euiSizeL: string; euiSizeXL: string; euiSizeXXL: string; euiScrollBar: string; euiScrollBarCorner: string; euiScrollBarCornerThin: string; euiFocusRingColor: string; euiFocusRingAnimStartColor: string; euiFocusRingAnimStartSize: string; euiFocusRingAnimStartSizeLarge: string; euiFocusRingSizeLarge: string; euiFocusRingSize: string; euiFocusTransparency: number; euiFocusTransparencyPercent: string; euiFocusBackgroundColor: string; euiFontFamily: string; euiCodeFontFamily: string; euiFontFeatureSettings: string; euiTextScale: string; euiFontSize: string; euiFontSizeXS: string; euiFontSizeS: string; euiFontSizeM: string; euiFontSizeL: string; euiFontSizeXL: string; euiFontSizeXXL: string; euiLineHeight: number; euiBodyLineHeight: number; euiTitles: { xxxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; s: { 'font-size': string; 'line-height': string; 'font-weight': number; }; m: { 'font-size': string; 'line-height': string; 'font-weight': number; }; l: { 'font-size': string; 'line-height': string; 'font-weight': number; }; }; euiZLevel0: number; euiZLevel1: number; euiZLevel2: number; euiZLevel3: number; euiZLevel4: number; euiZLevel5: number; euiZLevel6: number; euiZLevel7: number; euiZLevel8: number; euiZLevel9: number; euiZToastList: number; euiZModal: number; euiZMask: number; euiZNavigation: number; euiZContentMenu: number; euiZHeader: number; euiZFlyout: number; euiZMaskBelowHeader: number; euiZContent: number; euiPaletteColorBlind: { euiColorVis0: { graphic: string; behindText: string; }; euiColorVis1: { graphic: string; behindText: string; }; euiColorVis2: { graphic: string; behindText: string; }; euiColorVis3: { graphic: string; behindText: string; }; euiColorVis4: { graphic: string; behindText: string; }; euiColorVis5: { graphic: string; behindText: string; }; euiColorVis6: { graphic: string; behindText: string; }; euiColorVis7: { graphic: string; behindText: string; }; euiColorVis8: { graphic: string; behindText: string; }; euiColorVis9: { graphic: string; behindText: string; }; }; euiPaletteColorBlindKeys: string; euiColorVis0: string; euiColorVis1: string; euiColorVis2: string; euiColorVis3: string; euiColorVis4: string; euiColorVis5: string; euiColorVis6: string; euiColorVis7: string; euiColorVis8: string; euiColorVis9: string; euiColorVis0_behindText: string; euiColorVis1_behindText: string; euiColorVis2_behindText: string; euiColorVis3_behindText: string; euiColorVis4_behindText: string; euiColorVis5_behindText: string; euiColorVis6_behindText: string; euiColorVis7_behindText: string; euiColorVis8_behindText: string; euiColorVis9_behindText: string; euiColorVisAsTextLight0: string; euiColorVisAsTextLight1: string; euiColorVisAsTextLight2: string; euiColorVisAsTextLight3: string; euiColorVisAsTextLight4: string; euiColorVisAsTextLight5: string; euiColorVisAsTextLight6: string; euiColorVisAsTextDark0: string; euiColorVisAsTextDark1: string; euiColorVisAsTextDark2: string; euiColorVisAsTextDark3: string; euiColorVisAsTextDark4: string; euiColorVisAsTextDark5: string; euiColorVisAsTextDark6: string; euiColorVisSuccess0: string; euiColorVisSuccess1: string; euiColorVisWarning0: string; euiColorVisDanger0: string; euiColorVisDanger1: string; euiColorVisNeutral0: string; euiColorVisGrey0: string; euiColorVisGrey1: string; euiColorVisGrey2: string; euiColorVisGrey3: string; euiColorVisWarm0: string; euiColorVisWarm1: string; euiColorVisWarm2: string; euiColorVisCool0: string; euiColorVisCool1: string; euiColorVisCool2: string; euiColorVisComplementary0: string; euiColorVisComplementary1: string; euiColorSeverityUnknown: string; euiColorSeverityNeutral: string; euiColorSeveritySuccess: string; euiColorSeverityWarning: string; euiColorSeverityRisk: string; euiColorSeverityDanger: string; euiColorChartLines: string; euiColorChartBand: string; euiColorGhost: string; euiColorInk: string; euiColorPrimary: string; euiColorAccent: string; euiColorAccentSecondary: string; euiColorSuccess: string; euiColorWarning: string; euiColorDanger: string; euiColorEmptyShade: string; euiColorLightestShade: string; euiColorLightShade: string; euiColorMediumShade: string; euiColorDarkShade: string; euiColorDarkestShade: string; euiColorFullShade: string; euiPageBackgroundColor: string; euiColorHighlight: string; euiTextColor: string; euiTitleColor: string; euiTextSubduedColor: string; euiColorDisabled: string; euiColorPrimaryText: string; euiColorSuccessText: string; euiColorAccentText: string; euiColorWarningText: string; euiColorDangerText: string; euiColorDisabledText: string; euiLinkColor: string; euiColorPlainLight: string; euiColorPlainDark: string; euiColorTextPrimary: string; euiColorTextAccent: string; euiColorTextAccentSecondary: string; euiColorTextNeutral: string; euiColorTextSuccess: string; euiColorTextWarning: string; euiColorTextRisk: string; euiColorTextDanger: string; euiColorTextParagraph: string; euiColorTextHeading: string; euiColorTextSubdued: string; euiColorTextDisabled: string; euiColorTextInverse: string; euiColorBackgroundBasePrimary: string; euiColorBackgroundBaseAccent: string; euiColorBackgroundBaseAccentSecondary: string; euiColorBackgroundBaseNeutral: string; euiColorBackgroundBaseSuccess: string; euiColorBackgroundBaseWarning: string; euiColorBackgroundBaseRisk: string; euiColorBackgroundBaseDanger: string; euiColorBackgroundBaseSubdued: string; euiColorBackgroundBasePlain: string; euiColorBackgroundBaseDisabled: string; euiColorBackgroundBaseHighlighted: string; euiColorBackgroundBaseFormsPrepend: string; euiColorBackgroundBaseFormsControlDisabled: string; euiColorBackgroundBaseInteractiveHover: string; euiColorBackgroundBaseInteractiveSelect: string; euiColorBackgroundBaseInteractiveOverlay: string; euiColorBackgroundBaseSkeletonEdge: string; euiColorBackgroundBaseSkeletonMiddle: string; euiColorBackgroundLightPrimary: string; euiColorBackgroundLightAccent: string; euiColorBackgroundLightAccentSecondary: string; euiColorBackgroundLightNeutral: string; euiColorBackgroundLightSuccess: string; euiColorBackgroundLightWarning: string; euiColorBackgroundLightRisk: string; euiColorBackgroundLightDanger: string; euiColorBackgroundLightText: string; euiColorBackgroundFilledPrimary: string; euiColorBackgroundFilledAccent: string; euiColorBackgroundFilledAccentSecondary: string; euiColorBackgroundFilledNeutral: string; euiColorBackgroundFilledSuccess: string; euiColorBackgroundFilledWarning: string; euiColorBackgroundFilledRisk: string; euiColorBackgroundFilledDanger: string; euiColorBackgroundFilledText: string; euiColorBorderBasePrimary: string; euiColorBorderBaseAccent: string; euiColorBorderBaseAccentSecondary: string; euiColorBorderBaseNeutral: string; euiColorBorderBaseSuccess: string; euiColorBorderBaseWarning: string; euiColorBorderBaseRisk: string; euiColorBorderBaseDanger: string; euiColorBorderBasePlain: string; euiColorBorderBaseSubdued: string; euiColorBorderBaseDisabled: string; euiColorBorderBaseFloating: string; euiColorBorderBaseFormsColorSwatch: string; euiColorBorderBaseFormsControl: string; euiColorBorderStrongPrimary: string; euiColorBorderStrongAccent: string; euiColorBorderStrongAccentSecondary: string; euiColorBorderStrongNeutral: string; euiColorBorderStrongSuccess: string; euiColorBorderStrongWarning: string; euiColorBorderStrongRisk: string; euiColorBorderStrongDanger: string; }"
             ],
@@ -3011,9 +2788,7 @@
             "type": "boolean",
             "tags": [],
             "label": "darkMode",
-            "description": [
-              "True if the theme is in \"dark\" mode, false otherwise."
-            ],
+            "description": ["True if the theme is in \"dark\" mode, false otherwise."],
             "path": "src/platform/packages/shared/react/kibana_context/styled/styled_provider.tsx",
             "deprecated": false,
             "trackAdoption": false
