@@ -7,18 +7,25 @@
 
 import { omit } from 'lodash';
 import { CustomThresholdParams } from '@kbn/response-ops-rule-params/custom_threshold';
+import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
+import { DataViewSpec } from '@kbn/response-ops-rule-params/common';
 import {
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_TYPE_ID,
+  ALERT_RULE_UUID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   fields as TECHNICAL_ALERT_FIELDS,
 } from '@kbn/rule-data-utils';
 
 export class AlertData {
-  constructor(private alert: any) {}
+  constructor(private alert: Awaited<ReturnType<AlertsClient['get']>>) {}
 
   getRuleParameters() {
     return this.alert[ALERT_RULE_PARAMETERS];
+  }
+
+  getRuleId() {
+    return this.alert[ALERT_RULE_UUID];
   }
 
   getRelevantRuleFields(): Set<string> {
@@ -51,11 +58,17 @@ export class AlertData {
     return Object.keys(nonTechnicalFields);
   }
 
+  getAllRelevantFields(): string[] {
+    const ruleFields = this.getRelevantRuleFields();
+    const aadFields = this.getRelevantAADFields();
+    return Array.from(new Set([...ruleFields, ...aadFields]));
+  }
+
   getAlertTags(): string[] {
     return this.alert.tags || [];
   }
 
-  getRuleQueryIndex() {
+  getRuleQueryIndex(): string | null {
     const ruleParameters = this.getRuleParameters();
     const ruleTypeId = this.getRuleTypeId();
     if (!ruleParameters) {
@@ -64,13 +77,17 @@ export class AlertData {
     switch (ruleTypeId) {
       case OBSERVABILITY_THRESHOLD_RULE_TYPE_ID:
         const customThresholdParams = ruleParameters as CustomThresholdParams;
-        return customThresholdParams.searchConfiguration.index;
+        if (typeof customThresholdParams.searchConfiguration.index === 'object')
+          return (customThresholdParams.searchConfiguration.index as DataViewSpec)?.id || null;
+        if (typeof customThresholdParams.searchConfiguration.index === 'string')
+          return customThresholdParams.searchConfiguration.index;
+        return null;
       default:
-        return '';
+        return null;
     }
   }
 
-  getRuleTypeId() {
+  getRuleTypeId(): string | undefined {
     return this.alert[ALERT_RULE_TYPE_ID];
   }
 }

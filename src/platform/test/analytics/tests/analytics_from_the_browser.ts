@@ -153,13 +153,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             timestamp: reportTestPluginLifecycleEventsAction!.meta[setupEvent].timestamp,
             event_type: 'test-plugin-lifecycle',
             context: initialContext,
-            properties: { plugin: 'analyticsPluginA', step: 'setup' },
+            properties: { plugin: 'analyticsPluginA', step: 'setup', traceId: events[0].trace?.id },
+            trace: { id: events[0].properties.traceId }, // Cross-checking with the properties.traceId to validate that the event reporter (plugin) and the client see the same transaction.
           },
           {
             timestamp: reportTestPluginLifecycleEventsAction!.meta[startEvent].timestamp,
             event_type: 'test-plugin-lifecycle',
             context: reportEventContext,
-            properties: { plugin: 'analyticsPluginA', step: 'start' },
+            properties: { plugin: 'analyticsPluginA', step: 'start', traceId: events[1].trace?.id },
+            trace: { id: events[1].properties.traceId }, // Cross-checking with the properties.traceId to validate that the event reporter (plugin) and the client see the same transaction.
           },
         ]);
       });
