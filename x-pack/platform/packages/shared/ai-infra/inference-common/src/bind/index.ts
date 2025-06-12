@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export interface StackConnectorsConfigType {
-  enableExperimental: string[];
-}
+export { type BoundOptions, type UnboundOptions, bindApi } from './bind_api';
