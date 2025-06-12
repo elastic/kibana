@@ -710,6 +710,7 @@ export default function (providerContext: FtrProviderContext) {
           package_policies: [],
           is_protected: false,
           space_ids: ['default'],
+          supports_agentless: false,
         });
       });
 
