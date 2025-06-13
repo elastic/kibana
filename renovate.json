@@ -2211,7 +2211,7 @@
         "release_note:skip",
         "backport:prev-minor"
       ],
-      "recreateWhen": "never",
+      "dependencyDashboardApproval": true,
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -4321,7 +4321,10 @@
         "@opentelemetry/exporter-trace-otlp-proto",
         "@opentelemetry/otlp-exporter-base",
         "@opentelemetry/sdk-node",
-        "@opentelemetry/sdk-trace-node"
+        "@opentelemetry/sdk-trace-node",
+        "@opentelemetry/instrumentation",
+        "@opentelemetry/instrumentation-http",
+        "@opentelemetry/instrumentation-undici"
       ],
       "reviewers": [
         "team:stack-monitoring",

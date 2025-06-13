@@ -31,7 +31,7 @@
       "_mtermvectors",
       "{index}/_mtermvectors"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-multi-termvectors.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-mtermvectors",
     "availability": {
       "stack": true,
       "serverless": true

@@ -245,12 +245,10 @@ describe('autocomplete.suggest', () => {
 
         it('suggests after operator', async () => {
           await assertSuggestions('FROM a | STATS MIN(b) WHERE keywordField != /', [
-            ...getFieldNamesByType(['boolean', 'text', 'keyword']),
-            ...getFunctionSignaturesByReturnType(
-              Location.STATS_WHERE,
-              ['boolean', 'text', 'keyword'],
-              { scalar: true }
-            ),
+            ...getFieldNamesByType(['text', 'keyword']),
+            ...getFunctionSignaturesByReturnType(Location.STATS_WHERE, ['text', 'keyword'], {
+              scalar: true,
+            }),
           ]);
         });
 
@@ -479,10 +477,14 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions(
           'from a | stats avg(b) by BUCKET(dateField, /50, ?_tstart, ?_tend)',
           [
-            ...getLiteralsByType('time_literal'),
-            ...getFunctionSignaturesByReturnType(Location.EVAL, ['integer', 'date_period'], {
-              scalar: true,
-            }),
+            ...getLiteralsByType('time_duration'),
+            ...getFunctionSignaturesByReturnType(
+              Location.EVAL,
+              ['integer', 'date_period', 'time_duration'],
+              {
+                scalar: true,
+              }
+            ),
           ]
         );
       });

@@ -6778,25 +6778,7 @@ paths:
                                     panelConfig:
                                       additionalProperties: true
                                       type: object
-                                      properties:
-                                        description:
-                                          description: The description of the panel
-                                          type: string
-                                        enhancements:
-                                          additionalProperties: {}
-                                          type: object
-                                        hidePanelTitles:
-                                          description: Set to true to hide the panel title in its container.
-                                          type: boolean
-                                        savedObjectId:
-                                          description: The unique id of the library item to construct the embeddable.
-                                          type: string
-                                        title:
-                                          description: The title of the panel
-                                          type: string
-                                        version:
-                                          description: The version of the embeddable in the panel.
-                                          type: string
+                                      properties: {}
                                     panelIndex:
                                       type: string
                                     panelRefName:
@@ -6872,25 +6854,7 @@ paths:
                                           panelConfig:
                                             additionalProperties: true
                                             type: object
-                                            properties:
-                                              description:
-                                                description: The description of the panel
-                                                type: string
-                                              enhancements:
-                                                additionalProperties: {}
-                                                type: object
-                                              hidePanelTitles:
-                                                description: Set to true to hide the panel title in its container.
-                                                type: boolean
-                                              savedObjectId:
-                                                description: The unique id of the library item to construct the embeddable.
-                                                type: string
-                                              title:
-                                                description: The title of the panel
-                                                type: string
-                                              version:
-                                                description: The version of the embeddable in the panel.
-                                                type: string
+                                            properties: {}
                                           panelIndex:
                                             type: string
                                           panelRefName:
@@ -7351,25 +7315,7 @@ paths:
                               panelConfig:
                                 additionalProperties: true
                                 type: object
-                                properties:
-                                  description:
-                                    description: The description of the panel
-                                    type: string
-                                  enhancements:
-                                    additionalProperties: {}
-                                    type: object
-                                  hidePanelTitles:
-                                    description: Set to true to hide the panel title in its container.
-                                    type: boolean
-                                  savedObjectId:
-                                    description: The unique id of the library item to construct the embeddable.
-                                    type: string
-                                  title:
-                                    description: The title of the panel
-                                    type: string
-                                  version:
-                                    description: The version of the embeddable in the panel.
-                                    type: string
+                                properties: {}
                               panelIndex:
                                 description: The unique ID of the panel.
                                 type: string
@@ -7447,25 +7393,7 @@ paths:
                                     panelConfig:
                                       additionalProperties: true
                                       type: object
-                                      properties:
-                                        description:
-                                          description: The description of the panel
-                                          type: string
-                                        enhancements:
-                                          additionalProperties: {}
-                                          type: object
-                                        hidePanelTitles:
-                                          description: Set to true to hide the panel title in its container.
-                                          type: boolean
-                                        savedObjectId:
-                                          description: The unique id of the library item to construct the embeddable.
-                                          type: string
-                                        title:
-                                          description: The title of the panel
-                                          type: string
-                                        version:
-                                          description: The version of the embeddable in the panel.
-                                          type: string
+                                      properties: {}
                                     panelIndex:
                                       description: The unique ID of the panel.
                                       type: string
@@ -7848,25 +7776,7 @@ paths:
                                     panelConfig:
                                       additionalProperties: true
                                       type: object
-                                      properties:
-                                        description:
-                                          description: The description of the panel
-                                          type: string
-                                        enhancements:
-                                          additionalProperties: {}
-                                          type: object
-                                        hidePanelTitles:
-                                          description: Set to true to hide the panel title in its container.
-                                          type: boolean
-                                        savedObjectId:
-                                          description: The unique id of the library item to construct the embeddable.
-                                          type: string
-                                        title:
-                                          description: The title of the panel
-                                          type: string
-                                        version:
-                                          description: The version of the embeddable in the panel.
-                                          type: string
+                                      properties: {}
                                     panelIndex:
                                       type: string
                                     panelRefName:
@@ -7942,25 +7852,7 @@ paths:
                                           panelConfig:
                                             additionalProperties: true
                                             type: object
-                                            properties:
-                                              description:
-                                                description: The description of the panel
-                                                type: string
-                                              enhancements:
-                                                additionalProperties: {}
-                                                type: object
-                                              hidePanelTitles:
-                                                description: Set to true to hide the panel title in its container.
-                                                type: boolean
-                                              savedObjectId:
-                                                description: The unique id of the library item to construct the embeddable.
-                                                type: string
-                                              title:
-                                                description: The title of the panel
-                                                type: string
-                                              version:
-                                                description: The version of the embeddable in the panel.
-                                                type: string
+                                            properties: {}
                                           panelIndex:
                                             type: string
                                           panelRefName:
@@ -8401,25 +8293,7 @@ paths:
                               panelConfig:
                                 additionalProperties: true
                                 type: object
-                                properties:
-                                  description:
-                                    description: The description of the panel
-                                    type: string
-                                  enhancements:
-                                    additionalProperties: {}
-                                    type: object
-                                  hidePanelTitles:
-                                    description: Set to true to hide the panel title in its container.
-                                    type: boolean
-                                  savedObjectId:
-                                    description: The unique id of the library item to construct the embeddable.
-                                    type: string
-                                  title:
-                                    description: The title of the panel
-                                    type: string
-                                  version:
-                                    description: The version of the embeddable in the panel.
-                                    type: string
+                                properties: {}
                               panelIndex:
                                 description: The unique ID of the panel.
                                 type: string
@@ -8497,25 +8371,7 @@ paths:
                                     panelConfig:
                                       additionalProperties: true
                                       type: object
-                                      properties:
-                                        description:
-                                          description: The description of the panel
-                                          type: string
-                                        enhancements:
-                                          additionalProperties: {}
-                                          type: object
-                                        hidePanelTitles:
-                                          description: Set to true to hide the panel title in its container.
-                                          type: boolean
-                                        savedObjectId:
-                                          description: The unique id of the library item to construct the embeddable.
-                                          type: string
-                                        title:
-                                          description: The title of the panel
-                                          type: string
-                                        version:
-                                          description: The version of the embeddable in the panel.
-                                          type: string
+                                      properties: {}
                                     panelIndex:
                                       description: The unique ID of the panel.
                                       type: string
@@ -8894,25 +8750,7 @@ paths:
                                     panelConfig:
                                       additionalProperties: true
                                       type: object
-                                      properties:
-                                        description:
-                                          description: The description of the panel
-                                          type: string
-                                        enhancements:
-                                          additionalProperties: {}
-                                          type: object
-                                        hidePanelTitles:
-                                          description: Set to true to hide the panel title in its container.
-                                          type: boolean
-                                        savedObjectId:
-                                          description: The unique id of the library item to construct the embeddable.
-                                          type: string
-                                        title:
-                                          description: The title of the panel
-                                          type: string
-                                        version:
-                                          description: The version of the embeddable in the panel.
-                                          type: string
+                                      properties: {}
                                     panelIndex:
                                       type: string
                                     panelRefName:
@@ -8988,25 +8826,7 @@ paths:
                                           panelConfig:
                                             additionalProperties: true
                                             type: object
-                                            properties:
-                                              description:
-                                                description: The description of the panel
-                                                type: string
-                                              enhancements:
-                                                additionalProperties: {}
-                                                type: object
-                                              hidePanelTitles:
-                                                description: Set to true to hide the panel title in its container.
-                                                type: boolean
-                                              savedObjectId:
-                                                description: The unique id of the library item to construct the embeddable.
-                                                type: string
-                                              title:
-                                                description: The title of the panel
-                                                type: string
-                                              version:
-                                                description: The version of the embeddable in the panel.
-                                                type: string
+                                            properties: {}
                                           panelIndex:
                                             type: string
                                           panelRefName:
@@ -27357,6 +27177,304 @@ paths:
       summary: Bulk install packages
       tags:
         - Elastic Package Manager (EPM)
+  /api/fleet/epm/packages/_bulk_uninstall:
+    post:
+      description: '[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.'
+      operationId: post-fleet-epm-packages-bulk-uninstall
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                force:
+                  default: false
+                  type: boolean
+                packages:
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      version:
+                        type: string
+                    required:
+                      - name
+                      - version
+                  minItems: 1
+                  type: array
+              required:
+                - packages
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  taskId:
+                    type: string
+                required:
+                  - taskId
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+      summary: Bulk uninstall packages
+      tags:
+        - Elastic Package Manager (EPM)
+  /api/fleet/epm/packages/_bulk_uninstall/{taskId}:
+    get:
+      description: '[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.'
+      operationId: get-fleet-epm-packages-bulk-uninstall-taskid
+      parameters:
+        - in: path
+          name: taskId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  error:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - message
+                  results:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        error:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            message:
+                              type: string
+                          required:
+                            - message
+                        name:
+                          type: string
+                        success:
+                          type: boolean
+                      required:
+                        - name
+                        - success
+                    type: array
+                  status:
+                    type: string
+                required:
+                  - status
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+      summary: Get Bulk uninstall packages details
+      tags:
+        - Elastic Package Manager (EPM)
+  /api/fleet/epm/packages/_bulk_upgrade:
+    post:
+      description: '[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.'
+      operationId: post-fleet-epm-packages-bulk-upgrade
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                force:
+                  default: false
+                  type: boolean
+                packages:
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      version:
+                        type: string
+                    required:
+                      - name
+                  minItems: 1
+                  type: array
+                prerelease:
+                  type: boolean
+                upgrade_package_policies:
+                  default: false
+                  type: boolean
+              required:
+                - packages
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  taskId:
+                    type: string
+                required:
+                  - taskId
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+      summary: Bulk upgrade packages
+      tags:
+        - Elastic Package Manager (EPM)
+  /api/fleet/epm/packages/_bulk_upgrade/{taskId}:
+    get:
+      description: '[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.'
+      operationId: get-fleet-epm-packages-bulk-upgrade-taskid
+      parameters:
+        - in: path
+          name: taskId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  error:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - message
+                  results:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        error:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            message:
+                              type: string
+                          required:
+                            - message
+                        name:
+                          type: string
+                        success:
+                          type: boolean
+                      required:
+                        - name
+                        - success
+                    type: array
+                  status:
+                    type: string
+                required:
+                  - status
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+      summary: Get Bulk upgrade packages details
+      tags:
+        - Elastic Package Manager (EPM)
   /api/fleet/epm/packages/{pkgName}/{pkgVersion}:
     delete:
       description: '[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.'
@@ -39737,13 +39855,29 @@ paths:
                         updated_at:
                           type: string
                         warning:
-                          type: string
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            message:
+                              type: string
+                            title:
+                              type: string
+                          required:
+                            - title
                       required:
                         - sync_status
                         - install_status
                     type: array
                   warning:
-                    type: string
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                      title:
+                        type: string
+                    required:
+                      - title
                 required:
                   - integrations
         '400':
@@ -39848,13 +39982,29 @@ paths:
                         updated_at:
                           type: string
                         warning:
-                          type: string
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            message:
+                              type: string
+                            title:
+                              type: string
+                          required:
+                            - title
                       required:
                         - sync_status
                         - install_status
                     type: array
                   warning:
-                    type: string
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                      title:
+                        type: string
+                    required:
+                      - title
                 required:
                   - integrations
         '400':
@@ -61663,6 +61813,12 @@ components:
           enum:
             - delete
           type: string
+        gaps_range_end:
+          description: Gaps range end, valid only when query is provided
+          type: string
+        gaps_range_start:
+          description: Gaps range start, valid only when query is provided
+          type: string
         ids:
           description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
           items:
@@ -61680,6 +61836,12 @@ components:
         action:
           enum:
             - disable
+          type: string
+        gaps_range_end:
+          description: Gaps range end, valid only when query is provided
+          type: string
+        gaps_range_start:
+          description: Gaps range start, valid only when query is provided
           type: string
         ids:
           description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
@@ -61712,6 +61874,12 @@ components:
           required:
             - include_exceptions
             - include_expired_exceptions
+        gaps_range_end:
+          description: Gaps range end, valid only when query is provided
+          type: string
+        gaps_range_start:
+          description: Gaps range start, valid only when query is provided
+          type: string
         ids:
           description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
           items:
@@ -61804,6 +61972,12 @@ components:
             $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayload'
           minItems: 1
           type: array
+        gaps_range_end:
+          description: Gaps range end, valid only when query is provided
+          type: string
+        gaps_range_start:
+          description: Gaps range start, valid only when query is provided
+          type: string
         ids:
           description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
           items:
@@ -61827,6 +62001,12 @@ components:
           enum:
             - enable
           type: string
+        gaps_range_end:
+          description: Gaps range end, valid only when query is provided
+          type: string
+        gaps_range_start:
+          description: Gaps range start, valid only when query is provided
+          type: string
         ids:
           description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
           items:
@@ -61847,6 +62027,12 @@ components:
           enum:
             - export
           type: string
+        gaps_range_end:
+          description: Gaps range end, valid only when query is provided
+          type: string
+        gaps_range_start:
+          description: Gaps range start, valid only when query is provided
+          type: string
         ids:
           description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
           items:
@@ -61864,6 +62050,12 @@ components:
         action:
           enum:
             - run
+          type: string
+        gaps_range_end:
+          description: Gaps range end, valid only when query is provided
+          type: string
+        gaps_range_start:
+          description: Gaps range start, valid only when query is provided
           type: string
         ids:
           description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.

@@ -105,7 +105,7 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerialize
   PublishesBlockingError &
   Required<PublishesWritableTitle> &
   Required<PublishesDescription> &
-  PublishesSavedSearch &
+  PublishesWritableSavedSearch &
   PublishesWritableDataViews &
   PublishesWritableUnifiedSearch &
   HasLibraryTransforms &
@@ -117,6 +117,10 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerialize
 
 export interface PublishesSavedSearch {
   savedSearch$: PublishingSubject<SavedSearch>;
+}
+
+export interface PublishesWritableSavedSearch extends PublishesSavedSearch {
+  setColumns: (columns: string[] | undefined) => void;
 }
 
 export const apiPublishesSavedSearch = (
