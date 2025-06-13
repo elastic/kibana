@@ -29,7 +29,6 @@ import {
   type DiscoverCellActionExecutionContext,
 } from '../types';
 import { createContextAwarenessMocks } from '../__mocks__';
-import { DataViewField } from '@kbn/data-views-plugin/common';
 import { type ScopedProfilesManager } from '../profiles_manager';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 
@@ -245,12 +244,12 @@ describe('createCellAction', () => {
         ...context,
         data: [
           {
-            field: new DataViewField({
-              name: 'test',
-              type: 'string',
-              aggregatable: true,
-              searchable: true,
-            }),
+            field: {
+              name: '',
+              type: '',
+              aggregatable: false,
+              searchable: false,
+            },
           },
         ],
         metadata: { instanceId: 'test', dataView: dataViewWithTimefieldMock },
