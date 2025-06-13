@@ -48,6 +48,8 @@ const devOrCIPaths = [
   tmpdir(),
   getRealTmpPath(),
   join(homedir(), '.kibanaSecuritySolutionCliTools'),
+  'target',
+  '/target',
 ];
 
 const safePaths = [...baseSafePaths, ...(isDevOrCI ? devOrCIPaths : [])];
@@ -56,15 +58,18 @@ const safePaths = [...baseSafePaths, ...(isDevOrCI ? devOrCIPaths : [])];
 // Idea 1: Use EventEmitter to propagate file logger path.
 // Checked it, it works, though we need to find a proper folder/package for that event emitter.
 fsEventBus.on('kbn_config_changed', ({ loggerFilePath }) => {
-  console.log('Logger path changed:', loggerFilePath);
   safePaths.push(loggerFilePath);
 });
 
 const getSafePath = (userPath) => {
   const normalizedPath = normalize(userPath);
 
+  if (isDevOrCI && (normalizedPath.endsWith('.txt') || normalizedPath.endsWith('.md'))) {
+    return normalizedPath;
+  }
+
   if (!safePaths.some((path) => normalizedPath.startsWith(path))) {
-    throw new Error(`Unsafe path detected: "${userPath}".`);
+    throw new Error(`Unsafe path detected: "${normalizedPath}".`);
   }
 
   return normalizedPath;
