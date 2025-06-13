@@ -6,8 +6,14 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiI18nNumber, EuiLoadingChart, EuiIcon } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiI18nNumber,
+  EuiLoadingChart,
+  EuiIcon,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/css';
 import {
   BarSeries,
@@ -40,6 +46,7 @@ export function DocumentsColumn({
     },
   } = useKibana();
   const chartBaseTheme = useElasticChartsTheme();
+  const { euiTheme } = useEuiTheme();
 
   const { timeState } = useTimefilter();
 
@@ -88,7 +95,7 @@ export function DocumentsColumn({
       alignItems="center"
       gutterSize="m"
       className={css`
-        height: ${euiThemeVars.euiSizeXL};
+        height: ${euiTheme.size.xl};
         white-space: nowrap;
       `}
     >
@@ -98,7 +105,7 @@ export function DocumentsColumn({
           justifyContent="flexEnd"
           gutterSize="m"
           className={css`
-            height: ${euiThemeVars.euiSizeXL};
+            height: ${euiTheme.size.xl};
             white-space: nowrap;
           `}
         >
@@ -107,9 +114,9 @@ export function DocumentsColumn({
             justifyContent="flexEnd"
             gutterSize="m"
             className={css`
-              height: ${euiThemeVars.euiSizeXL};
+              height: ${euiTheme.size.xl};
               white-space: nowrap;
-              padding-right: ${euiThemeVars.euiSizeXL};
+              padding-right: ${euiTheme.size.xl};
             `}
           >
             <EuiFlexGroup>
@@ -124,7 +131,7 @@ export function DocumentsColumn({
                 grow={false}
                 className={css`
                   display: flex;
-                  padding-right: ${euiThemeVars.euiSizeXL};
+                  padding-right: ${euiTheme.size.xl};
                   justify-content: center;
                 `}
               >
@@ -146,14 +153,14 @@ export function DocumentsColumn({
           <EuiFlexItem
             grow={3}
             className={css`
-              border-bottom: ${hasData ? '1px solid' : 'none'} ${euiThemeVars.euiColorLightestShade};
+              border-bottom: ${hasData ? '1px solid' : 'none'} ${euiTheme.colors.lightShade};
               display: flex;
               justify-content: center;
               align-items: center;
             `}
           >
             {hasData ? (
-              <Chart size={{ width: '100%', height: euiThemeVars.euiSizeL }}>
+              <Chart size={{ width: '100%', height: euiTheme.size.l }}>
                 <Settings
                   locale={i18n.getLocale()}
                   baseTheme={chartBaseTheme}

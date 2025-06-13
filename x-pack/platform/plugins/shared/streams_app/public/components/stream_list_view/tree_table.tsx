@@ -14,10 +14,12 @@ import {
   EuiInMemoryTable,
   Direction,
   Criteria,
+  useEuiTheme,
 } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
+import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
 import { css } from '@emotion/css';
-import { isRootStreamDefinition, getSegments, isDescendantOf, Streams } from '@kbn/streams-schema';
+import { isRootStreamDefinition, getSegments, Streams } from '@kbn/streams-schema';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import { isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
@@ -37,17 +39,18 @@ export function StreamsTreeTable({
   loading?: boolean;
 }) {
   const router = useStreamsAppRouter();
+  const { euiTheme } = useEuiTheme();
 
   const {
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
+        share,
       },
     },
   } = useKibana();
 
   const { timeState } = useTimefilter();
-
   const [docCounts, setDocCounts] = useState<Record<string, number>>({});
 
   const streamNames = React.useMemo(() => (streams ?? []).map((s) => s.stream.name), [streams]);
@@ -91,29 +94,68 @@ export function StreamsTreeTable({
     };
   }, [streamNames, timeState, streamsRepositoryClient]);
 
-  type SortableField = 'name' | 'documentsCount' | 'retentionMs';
-  const [sortField, setSortField] = useState<SortableField>('name');
+  type SortableField = 'nameSortKey' | 'documentsCount' | 'retentionMs';
+  const [sortField, setSortField] = useState<SortableField>('nameSortKey');
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
 
-  const items = React.useMemo(
-    () =>
-      flattenTrees(asTrees(streams ?? [])).map((item) => {
-        const documentsCount = docCounts[item.name] ?? 0;
-        let retentionMs = 0;
-        const lc = item.effective_lifecycle;
-        if (isDslLifecycle(lc)) {
-          retentionMs = parseDurationInSeconds(lc.dsl.data_retention ?? '') * 1000;
-        } else if (isIlmLifecycle(lc)) {
-          retentionMs = Number.POSITIVE_INFINITY;
+  interface EnrichedStreamTree extends StreamTree {
+    nameSortKey: string;
+    documentsCount: number;
+    retentionMs: number;
+  }
+  type TableRow = EnrichedStreamTree & {
+    level: number;
+    parentNameSortKey: string;
+    parentDocumentsCount: number;
+    parentRetentionMs: number;
+  };
+
+  const sortRootsAndFlatten = useCallback(
+    (tree: EnrichedStreamTree[], fieldName: SortableField, sortDir: Direction): TableRow[] => {
+      const sortedRoots = [...tree].sort((a, b) => {
+        const av = a[fieldName];
+        const bv = b[fieldName];
+        if (typeof av === 'string' && typeof bv === 'string') {
+          return sortDir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av);
         }
-        return {
-          ...item,
-          documentsCount,
-          retentionMs,
+        if (typeof av === 'number' && typeof bv === 'number') {
+          return sortDir === 'asc' ? av - bv : bv - av;
+        }
+        return 0;
+      });
+      const result: TableRow[] = [];
+      function walk(node: EnrichedStreamTree, level = 0, parent?: EnrichedStreamTree) {
+        const row: TableRow = {
+          ...node,
+          level,
+          parentNameSortKey: parent ? parent.nameSortKey : node.nameSortKey,
+          parentDocumentsCount: parent ? parent.documentsCount : node.documentsCount,
+          parentRetentionMs: parent ? parent.retentionMs : node.retentionMs,
         };
-      }),
-    [streams, docCounts]
+        result.push(row);
+        node.children.forEach((child: any) => walk(child, level + 1, node));
+      }
+      sortedRoots.forEach((n) => walk(n));
+      return result;
+    },
+    []
   );
+
+  const items = React.useMemo(() => {
+    const tree = asTrees(streams ?? []).map((item) => {
+      const documentsCount = docCounts[item.name] ?? 0;
+      let retentionMs = 0;
+      const lc = item.effective_lifecycle;
+      if (isDslLifecycle(lc)) {
+        retentionMs = parseDurationInSeconds(lc.dsl.data_retention ?? '') * 1000;
+      } else if (isIlmLifecycle(lc)) {
+        retentionMs = Number.POSITIVE_INFINITY;
+      }
+      const nameSortKey = `${getSegments(item.name).length}_${item.name.toLowerCase()}`;
+      return { ...item, nameSortKey, documentsCount, retentionMs };
+    });
+    return sortRootsAndFlatten(tree, sortField, sortDirection);
+  }, [streams, docCounts, sortField, sortDirection, sortRootsAndFlatten]);
 
   const onTableChange = useCallback(({ sort }: Criteria<any>) => {
     if (sort) {
@@ -129,8 +171,15 @@ export function StreamsTreeTable({
     },
   };
 
+  const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
+    OBSERVABILITY_ONBOARDING_LOCATOR
+  );
+  const handleAddData = () => {
+    onboardingLocator?.navigate({});
+  };
+
   if (!loading && items.length === 0) {
-    return <StreamsListEmptyState onAddData={() => {}} />;
+    return <StreamsListEmptyState onAddData={handleAddData} />;
   }
 
   return (
@@ -138,46 +187,47 @@ export function StreamsTreeTable({
       loading={loading}
       columns={[
         {
-          field: 'name',
+          field: 'nameSortKey',
           name: i18n.translate('xpack.streams.streamsTreeTable.nameColumnName', {
             defaultMessage: 'Name',
           }),
-          sortable: true,
+          sortable: (row: TableRow) => (row.level === 0 ? row.nameSortKey : row.parentNameSortKey),
           dataType: 'string',
-          render: (name: StreamTreeWithLevel['name'], item) => (
+          render: (_: any, item) => (
             <EuiFlexGroup
               alignItems="center"
               gutterSize="s"
               responsive={false}
               className={css`
-                margin-left: ${item.level * parseInt(euiThemeVars.euiSizeXL, 10)}px;
+                margin-left: ${item.level * parseInt(euiTheme.size.xl, 10)}px;
               `}
             >
               <EuiFlexItem grow={false}>
                 {item.children.length > 0 ? (
-                  <EuiIcon type="arrowDown" color="primary" size="s" />
+                  <EuiIcon type="arrowDown" color="black" size="s" />
                 ) : (
-                  <EuiIcon type="empty" color="primary" size="s" />
+                  <EuiIcon type="empty" color="black" size="s" />
                 )}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiLink
                   data-test-subj="streamsAppStreamNodeLink"
-                  href={router.link('/{key}', { path: { key: name } })}
+                  href={router.link('/{key}', { path: { key: item.name } })}
                 >
-                  {name}
+                  {item.name}
                 </EuiLink>
               </EuiFlexItem>
             </EuiFlexGroup>
           ),
         },
         {
-          field: 'documents',
+          field: 'documentsCount',
           name: i18n.translate('xpack.streams.streamsTreeTable.documentsColumnName', {
             defaultMessage: 'Documents',
           }),
           width: '280px',
-          sortable: true,
+          sortable: (row: TableRow) =>
+            row.level === 0 ? row.documentsCount : row.parentDocumentsCount,
           dataType: 'number',
           render: (_: any, item: any) =>
             item.data_stream ? (
@@ -185,13 +235,13 @@ export function StreamsTreeTable({
             ) : null,
         },
         {
-          field: 'effective_lifecycle',
+          field: 'retentionMs',
           name: i18n.translate('xpack.streams.streamsTreeTable.retentionColumnName', {
             defaultMessage: 'Retention',
           }),
           width: '160px',
           align: 'left',
-          sortable: true,
+          sortable: (row: TableRow) => (row.level === 0 ? row.retentionMs : row.parentRetentionMs),
           dataType: 'number',
           render: (_: any, item: any) => <RetentionColumn lifecycle={item.effective_lifecycle} />,
         },
@@ -235,9 +285,7 @@ export function asTrees(streams: ListStreamDetail[]) {
     // traverse the tree following the prefix of the current name.
     // once we reach the leaf, the current name is added as child - this works because the ids are sorted by depth
     while (
-      (existingNode = currentTree.find((node) =>
-        isDescendantOf(node.name, streamDetail.stream.name)
-      ))
+      (existingNode = currentTree.find((node) => isParentName(node.name, streamDetail.stream.name)))
     ) {
       currentTree = existingNode.children;
     }
@@ -260,16 +308,6 @@ export function asTrees(streams: ListStreamDetail[]) {
   return trees;
 }
 
-interface StreamTreeWithLevel extends StreamTree {
-  level: number;
-}
-
-function flattenTrees(trees: StreamTree[], level = 0) {
-  return trees.reduce<StreamTreeWithLevel[]>((acc: StreamTreeWithLevel[], tree: StreamTree) => {
-    acc.push({ ...tree, level });
-    if (tree.children.length) {
-      acc.push(...flattenTrees(tree.children, level + 1));
-    }
-    return acc;
-  }, []);
+function isParentName(parent: string, descendant: string) {
+  return parent !== descendant && descendant.startsWith(parent + '.');
 }

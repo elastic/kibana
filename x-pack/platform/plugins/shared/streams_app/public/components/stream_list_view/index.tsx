@@ -41,13 +41,13 @@ export function StreamListView() {
     [streamsRepositoryClient]
   );
 
-  const theme = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
   return (
     <>
       <EuiPageHeader
         paddingSize="l"
         css={css`
-          background: ${theme.euiTheme.colors.backgroundBasePlain};
+          background: ${euiTheme.colors.backgroundBasePlain};
           .euiSpacer--l {
             display: none !important;
           }
@@ -57,7 +57,7 @@ export function StreamListView() {
             alignItems="center"
             gutterSize="m"
             css={css`
-              margin-bottom: ${theme.euiTheme.size.s};
+              margin-bottom: ${euiTheme.size.s};
             `}
           >
             {i18n.translate('xpack.streams.streamsListView.pageHeaderTitle', {

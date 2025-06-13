@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { EuiBadgeGroup, EuiFlexGroup } from '@elastic/eui';
+import { EuiBadgeGroup, EuiFlexGroup, EuiPageHeader, useEuiTheme, EuiToolTip } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
+import type { ReactNode } from 'react';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
@@ -18,7 +20,7 @@ export type ManagementTabs = Record<
   string,
   {
     content: JSX.Element;
-    label: string;
+    label: ReactNode | string;
   }
 >;
 
@@ -49,10 +51,15 @@ export function Wrapper({
     })
   );
 
+  const { euiTheme } = useEuiTheme();
   return (
     <>
-      <StreamsAppPageTemplate.Header
+      <EuiPageHeader
+        paddingSize="l"
         bottomBorder="extended"
+        css={css`
+          background: ${euiTheme.colors.backgroundBasePlain};
+        `}
         pageTitle={
           <EuiFlexGroup gutterSize="s" alignItems="center">
             {i18n.translate('xpack.streams.entityDetailViewWithoutParams.manageStreamTitle', {
@@ -60,18 +67,40 @@ export function Wrapper({
               values: { streamId },
             })}
             <EuiBadgeGroup gutterSize="s">
-              {Streams.UnwiredStream.GetResponse.is(definition) && <ClassicStreamBadge />}
-              <LifecycleBadge lifecycle={definition.effective_lifecycle} />
+              {Streams.UnwiredStream.GetResponse.is(definition) && (
+                <EuiToolTip
+                  position="top"
+                  title={i18n.translate('xpack.streams.badges.classic.title', {
+                    defaultMessage: 'Classic Stream',
+                  })}
+                  content={i18n.translate('xpack.streams.badges.classic.description', {
+                    defaultMessage:
+                      'Classic streams are based on existing data streams and may not support all Streams features like custom re-routing',
+                  })}
+                >
+                  <ClassicStreamBadge />
+                </EuiToolTip>
+              )}
+              <EuiToolTip
+                position="top"
+                title={i18n.translate('xpack.streams.badges.lifecycle.title', {
+                  defaultMessage: 'Data Retention',
+                })}
+                content={i18n.translate('xpack.streams.badges.lifecycle.description', {
+                  defaultMessage:
+                    'You can edit retention settings from the stream’s management view',
+                })}
+              >
+                <LifecycleBadge lifecycle={definition.effective_lifecycle} />
+              </EuiToolTip>
             </EuiBadgeGroup>
           </EuiFlexGroup>
         }
-        tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => {
-          return {
-            label,
-            href,
-            isSelected: tab === tabKey,
-          };
-        })}
+        tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => ({
+          label,
+          href,
+          isSelected: tab === tabKey,
+        }))}
       />
       <StreamsAppPageTemplate.Body>{tabs[tab].content}</StreamsAppPageTemplate.Body>
     </>
