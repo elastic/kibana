@@ -33,6 +33,7 @@ import {
   type Feedback,
   aiAssistantSimulatedFunctionCalling,
   getElasticManagedLlmConnector,
+  KnowledgeBaseState,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -377,10 +378,15 @@ export function ChatBody({
   const { conversationCalloutDismissed, tourCalloutDismissed } = useElasticLlmCalloutsStatus(false);
 
   const showElasticLlmCalloutInChat =
-    elasticManagedLlm &&
+    !!elasticManagedLlm &&
     connectors.selectedConnector === elasticManagedLlm.id &&
     !conversationCalloutDismissed &&
     tourCalloutDismissed;
+
+  const showKnowledgeBaseReIndexingCallout =
+    knowledgeBase.status.value?.enabled === true &&
+    knowledgeBase.status.value?.kbState === KnowledgeBaseState.READY &&
+    knowledgeBase.status.value?.isReIndexing === true;
 
   const isPublic = conversation.value?.public;
   const isArchived = !!conversation.value?.archived;
@@ -523,12 +529,12 @@ export function ChatBody({
                     )
                   }
                   showElasticLlmCalloutInChat={showElasticLlmCalloutInChat}
+                  showKnowledgeBaseReIndexingCallout={showKnowledgeBaseReIndexingCallout}
                 />
               ) : (
                 <ChatTimeline
                   conversationId={conversationId}
                   messages={messages}
-                  knowledgeBase={knowledgeBase}
                   chatService={chatService}
                   currentUser={conversationUser}
                   isConversationOwnedByCurrentUser={isConversationOwnedByCurrentUser}
@@ -550,6 +556,7 @@ export function ChatBody({
                   onActionClick={handleActionClick}
                   isArchived={isArchived}
                   showElasticLlmCalloutInChat={showElasticLlmCalloutInChat}
+                  showKnowledgeBaseReIndexingCallout={showKnowledgeBaseReIndexingCallout}
                 />
               )}
             </EuiPanel>
