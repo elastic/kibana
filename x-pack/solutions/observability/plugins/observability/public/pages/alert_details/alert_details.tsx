@@ -103,7 +103,6 @@ export function AlertDetails() {
     observabilityAIAssistant,
     uiSettings,
     serverless,
-    contentManagement,
     application: { navigateToUrl },
   } = services;
   const { basePath } = http;
@@ -178,7 +177,7 @@ export function AlertDetails() {
     if (alertDetail) {
       setRuleTypeModel(ruleTypeRegistry.get(alertDetail?.formatted.fields[ALERT_RULE_TYPE_ID]!));
       setAlertStatus(alertDetail?.formatted?.fields[ALERT_STATUS] as AlertStatus);
-      if (passedTab === OVERVIEW_TAB_ID || passedTab === null) setActiveTabId(OVERVIEW_TAB_ID);
+      if (passedTab === 'overview' || passedTab === null) setActiveTabId('overview');
     }
   }, [passedTab, alertDetail, ruleTypeRegistry]);
 
@@ -205,7 +204,7 @@ export function AlertDetails() {
   }, []);
 
   const showRelatedAlertsFromCallout = () => {
-    // handleSetTabId(RELATED_ALERTS_TAB_ID);
+    handleSetTabId('related_alerts');
     navigateToUrl(
       `${basePath.prepend(
         paths.observability.alerts
