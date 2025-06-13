@@ -36,7 +36,7 @@ export const API_KEY_ID_HELP_TEXT = i18n.translate(
   'xpack.stackConnectors.components.xsoar.apiKeyIDFieldHelpText',
   {
     defaultMessage:
-      'For the cloud instance, the API Key ID is required, that is your unique token used to authenticate the API Key.',
+      'For the cloud instance, the API Key ID is required, that is your serial number of the API Key.',
   }
 );
 
@@ -120,7 +120,7 @@ export const PLAYBOOK_LABEL = i18n.translate(
 export const PLAYBOOK_HELP = i18n.translate(
   'xpack.stackConnectors.components.xsoar.params.playbookHelp',
   {
-    defaultMessage: 'The XSOAR playbook to associate with incident.',
+    defaultMessage: 'The XSOAR playbook to associate with incident',
   }
 );
 

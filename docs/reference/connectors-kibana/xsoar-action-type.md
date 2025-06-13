@@ -78,13 +78,3 @@ Body
 ## Connector networking configuration [xsoar-connector-networking-configuration]
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
-
-
-## Configure XSOAR [configure-xsoar]
-
-To generate an API key in XSOAR:
-
-1. Log in to your XSOAR instance.
-2. Navigate to **Settings & Info > Settings > Integrations > API Keys**.
-3. Generate the **API Key** and copy its value to configure the connector in {{kib}}.
-

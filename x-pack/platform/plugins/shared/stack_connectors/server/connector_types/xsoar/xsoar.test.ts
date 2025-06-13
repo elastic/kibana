@@ -223,6 +223,7 @@ describe('XSOARConnector', () => {
           headers: {
             Authorization: 'test123',
           },
+          timeout: 15000,
         },
         connectorUsageCollector
       );
@@ -242,6 +243,7 @@ describe('XSOARConnector', () => {
             Authorization: 'test123',
             'x-xdr-auth-id': '123',
           },
+          timeout: 15000,
         },
         connectorUsageCollector
       );
@@ -517,9 +519,9 @@ describe('XSOARConnector', () => {
     });
 
     it('error when malformed incident is passed', async () => {
-      const res = await connector.run(malformedIncident, connectorUsageCollector);
-      expect(res.status).toBe('error');
-      expect(res.message).toBe('error triggering XSOAR workflow, parsing body');
+      await expect(connector.run(malformedIncident, connectorUsageCollector)).rejects.toThrowError(
+        `Error parsing Body: SyntaxError: Expected property name or '}' in JSON at position 1`
+      );
     });
   });
 });
