@@ -31,13 +31,13 @@ import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { useMlKibana } from '@kbn/ml-kibana-context';
 import type { DatafeedValidationResponse } from '@kbn/ml-common-types/job_validation';
 import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 
 import { useNavigateToManagementMlLink } from '../../../../../../../contexts/kibana/use_create_url';
-import { JobCreatorContext } from '../../../job_creator_context';
 import type { AdvancedJobCreator } from '../../../../../common/job_creator';
 import { resetAdvancedJob } from '../../../../../common/job_creator/util/general';
 
-import { useMlApi } from '../../../../../../../contexts/kibana';
+import { JobCreatorContext } from '../../../job_creator_context';
 
 const fixedPageSize: number = 8;
 

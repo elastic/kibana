@@ -47,6 +47,7 @@
     "@kbn/test-suites-xpack-platform",
     "@kbn/ml-string-hash",
     "@kbn/ml-common-types",
-    "@kbn/ml-common-constants"
+    "@kbn/ml-common-constants",
+    "@kbn/ml-server-api-schemas"
   ]
 }
