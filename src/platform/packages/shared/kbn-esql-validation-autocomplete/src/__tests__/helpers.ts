@@ -98,12 +98,14 @@ export const timeseriesIndices: IndexAutocompleteItem[] = [
   },
 ];
 
-export const editorExtensions = [
-  {
-    name: 'Logs Count by Host',
-    query: 'from logs* | STATS count(*) by host',
-  },
-];
+export const editorExtensions = {
+  recommendedQueries: [
+    {
+      name: 'Logs Count by Host',
+      query: 'from logs* | STATS count(*) by host',
+    },
+  ],
+};
 
 export const inferenceEndpoints: InferenceEndpointAutocompleteItem[] = [
   {
@@ -146,9 +148,11 @@ export function getCallbackMocks(): ESQLCallbacks {
     getTimeseriesIndices: jest.fn(async () => ({ indices: timeseriesIndices })),
     getEditorExtensions: jest.fn(async (queryString: string) => {
       if (queryString.includes('logs*')) {
-        return editorExtensions;
+        return {
+          recommendedQueries: editorExtensions.recommendedQueries,
+        };
       }
-      return [];
+      return { recommendedQueries: [] };
     }),
     getInferenceEndpoints: jest.fn(async (taskType: InferenceTaskType) => ({ inferenceEndpoints })),
   };

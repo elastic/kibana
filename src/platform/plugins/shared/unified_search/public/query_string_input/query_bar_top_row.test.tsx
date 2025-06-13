@@ -11,6 +11,7 @@ import { mockPersistedLogFactory } from './query_string_input.test.mocks';
 
 import React from 'react';
 import { mount, shallow } from 'enzyme';
+import { BehaviorSubject } from 'rxjs';
 import { render } from '@testing-library/react';
 import { EMPTY } from 'rxjs';
 
@@ -24,6 +25,7 @@ import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { unifiedSearchPluginMock } from '../mocks';
 
 const startMock = coreMock.createStart();
+startMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject('oblt'));
 
 const mockTimeHistory = {
   get: () => {
