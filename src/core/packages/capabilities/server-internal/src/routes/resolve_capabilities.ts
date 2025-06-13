@@ -35,7 +35,7 @@ export function registerCapabilitiesRoutes(router: IRouter, resolver: Capabiliti
             schema.string({
               validate: (appName) => {
                 if (!applicationIdRegexp.test(appName)) {
-                  return 'Invalid application id';
+                  return `Invalid application id: ${appName}`;
                 }
               },
             })
