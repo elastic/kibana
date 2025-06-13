@@ -25,7 +25,7 @@ import {
 import { css } from '@emotion/react';
 import { css as classNameCss } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { MonacoMessage } from '../helpers';
+import { filterDataErrors, type MonacoMessage } from '../helpers';
 import { DataErrorsControl } from '../types';
 
 interface TypeConsts {
@@ -151,6 +151,7 @@ function ErrorsWarningsFooter({
               />
             </EuiText>
           }
+          data-test-subj="ESQLEditor-footerPopover-dataErrorsSwitch"
         />
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -174,14 +175,14 @@ export function ErrorsWarningsFooterPopover({
   isSpaceReduced?: boolean;
   dataErrorsControl?: DataErrorsControl;
 }) {
-  const messages = useMemo(() => {
+  const visibleItems = useMemo(() => {
     if (dataErrorsControl?.enabled === false) {
-      return items.filter((item) => item.code !== 'unknownIndex' && item.code !== 'unknownColumn');
+      return filterDataErrors(items);
     }
     return items;
   }, [items, dataErrorsControl]);
 
-  const { color, message } = getConstsByType(type, messages.length);
+  const { color, message } = getConstsByType(type, visibleItems.length);
   const closePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
 
   return (
@@ -202,15 +203,16 @@ export function ErrorsWarningsFooterPopover({
                 setIsPopoverOpen(!isPopoverOpen);
               }}
             >
-              {isSpaceReduced ? messages.length : message}
+              {isSpaceReduced ? visibleItems.length : message}
             </EuiButtonEmpty>
           }
           ownFocus={false}
           isOpen={isPopoverOpen}
           closePopover={closePopover}
+          data-test-subj={`ESQLEditor-footerPopover-${type}`}
         >
-          {messages.length > 0 && (
-            <ErrorsWarningsContent items={messages} type={type} onErrorClick={onErrorClick} />
+          {visibleItems.length > 0 && (
+            <ErrorsWarningsContent items={visibleItems} type={type} onErrorClick={onErrorClick} />
           )}
           {dataErrorsControl && (
             <ErrorsWarningsFooter

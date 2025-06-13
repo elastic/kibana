@@ -49,6 +49,7 @@ import {
   onMouseDownResizeHandler,
   getEditorOverwrites,
   type MonacoMessage,
+  filterDataErrors,
 } from './helpers';
 import { addQueriesToCache } from './history_local_storage';
 import { ResizableButton } from './resizable_button';
@@ -633,10 +634,7 @@ export const ESQLEditor = memo(function ESQLEditor({
 
       if (parserErrors.length) {
         if (dataErrorsControl?.enabled === false) {
-          const filteredErrors = parserErrors.filter(
-            (error) => error.code !== 'unknownIndex' && error.code !== 'unknownColumn'
-          );
-          markers.push(...filteredErrors);
+          markers.push(...filterDataErrors(parserErrors));
         } else {
           markers.push(...parserErrors);
         }

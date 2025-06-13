@@ -372,3 +372,10 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
     }
   `;
 };
+
+export const filterDataErrors = (errors: MonacoMessage[]): MonacoMessage[] => {
+  return errors.filter((error) => {
+    const code = typeof error.code === 'object' ? error.code.value : error.code;
+    return code !== 'unknownIndex' && code !== 'unknownColumn';
+  });
+};
