@@ -31,6 +31,7 @@ import { CreateCaseFormFields } from './form_fields';
 import { getConfigurationByOwner } from '../../containers/configure/utils';
 import { CreateCaseOwnerSelector } from './owner_selector';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
+import { useActiveSolution } from '../app/use_active_solution';
 import { getInitialCaseValue, getOwnerDefaultValue } from './utils';
 
 export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsProps>, 'withSteps'> {
@@ -64,9 +65,33 @@ export const FormFieldsWithFormContext: React.FC<FormFieldsWithFormContextProps>
     selectedOwner,
     onSelectedOwner,
   }) => {
-    const { owner } = useCasesContext();
+    const activeSolution = useActiveSolution();
+    // Ideally I would like to use the owner from the cases context, but it doesn't work in the 3rd scenario
+    // 1st scenario is when the user is in the classic view, the owner is not set in the cases context, which works fine
+    // 2nd scenario is when the user is in the security solution, the owner is set to securitySolution, which works fine
+    // 3rd scenario is when the user is in the observability solution, the owner is empty, which causes the owner selector to show up
+    // const { owner } = useCasesContext();
     const availableOwners = useAvailableCasesOwners();
-    const shouldShowOwnerSelector = Boolean(!owner.length && availableOwners.length > 1);
+
+    const mapActiveSolutionToOwner = (solution: string): string => {
+      switch (solution) {
+        case 'oblt':
+          return 'observability';
+        case 'security':
+          return 'securitySolution';
+        default:
+          return 'cases'; // default to cases if no match, in this case classis view is used
+      }
+    };
+    // Need to check if this works on serverless as well
+    const shouldShowOwnerSelector = mapActiveSolutionToOwner(activeSolution) === 'cases';
+
+    if (!shouldShowOwnerSelector) {
+      onSelectedOwner(mapActiveSolutionToOwner(activeSolution));
+      // do I need to reset the form here?
+      // similar to the onOwnerChange function
+    }
+
     const { reset } = useFormContext();
 
     const { data: connectors = [], isLoading: isLoadingConnectors } =
@@ -124,7 +149,6 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
     const availableOwners = useAvailableCasesOwners();
     const defaultOwnerValue = owner[0] ?? getOwnerDefaultValue(availableOwners);
     const [selectedOwner, onSelectedOwner] = useState<string>(defaultOwnerValue);
-
     const { data: configurations, isLoading: isLoadingCaseConfiguration } =
       useGetAllCaseConfigurations();
 
