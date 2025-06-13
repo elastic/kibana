@@ -23,7 +23,7 @@ describe('updateGapFromSchedule', () => {
       const gap = createTestGap();
       const updatedGap = updateGapFromSchedule({
         gap,
-        backfillSchedule: [],
+        scheduledItems: [],
       });
 
       expect(updatedGap.filledIntervals).toHaveLength(0);
@@ -34,10 +34,10 @@ describe('updateGapFromSchedule', () => {
       const gap = createTestGap();
       const updatedGap = updateGapFromSchedule({
         gap,
-        backfillSchedule: [
+        scheduledItems: [
           {
-            runAt: '2024-01-01T00:15:00.000Z',
-            interval: '15m',
+            from: new Date('2024-01-01T00:00:00.000Z'),
+            to: new Date('2024-01-01T00:15:00.000Z'),
             status: adHocRunStatus.COMPLETE,
           },
         ],
@@ -54,10 +54,10 @@ describe('updateGapFromSchedule', () => {
       const gap = createTestGap();
       const updatedGap = updateGapFromSchedule({
         gap,
-        backfillSchedule: [
+        scheduledItems: [
           {
-            runAt: '2024-01-01T00:15:00.000Z',
-            interval: '15m',
+            from: new Date('2024-01-01T00:00:00.000Z'),
+            to: new Date('2024-01-01T00:15:00.000Z'),
             status: adHocRunStatus.RUNNING,
           },
         ],
@@ -76,15 +76,15 @@ describe('updateGapFromSchedule', () => {
       const gap = createTestGap();
       const updatedGap = updateGapFromSchedule({
         gap,
-        backfillSchedule: [
+        scheduledItems: [
           {
-            runAt: '2024-01-01T00:15:00.000Z',
-            interval: '15m',
+            from: new Date('2024-01-01T00:00:00.000Z'),
+            to: new Date('2024-01-01T00:15:00.000Z'),
             status: adHocRunStatus.COMPLETE,
           },
           {
-            runAt: '2024-01-01T00:20:00.000Z',
-            interval: '15m',
+            from: new Date('2024-01-01T00:05:00.000Z'),
+            to: new Date('2024-01-01T00:20:00.000Z'),
             status: adHocRunStatus.COMPLETE,
           },
         ],
@@ -101,20 +101,20 @@ describe('updateGapFromSchedule', () => {
       const gap = createTestGap();
       const updatedGap = updateGapFromSchedule({
         gap,
-        backfillSchedule: [
+        scheduledItems: [
           {
-            runAt: '2024-01-01T00:15:00.000Z',
-            interval: '15m',
+            from: new Date('2024-01-01T00:00:00.000Z'),
+            to: new Date('2024-01-01T00:15:00.000Z'),
             status: adHocRunStatus.COMPLETE,
           },
           {
-            runAt: '2024-01-01T00:30:00.000Z',
-            interval: '15m',
+            from: new Date('2024-01-01T00:15:00.000Z'),
+            to: new Date('2024-01-01T00:30:00.000Z'),
             status: adHocRunStatus.RUNNING,
           },
           {
-            runAt: '2024-01-01T00:45:00.000Z',
-            interval: '15m',
+            from: new Date('2024-01-01T00:30:00.000Z'),
+            to: new Date('2024-01-01T00:45:00.000Z'),
             status: adHocRunStatus.PENDING,
           },
         ],
@@ -138,10 +138,10 @@ describe('updateGapFromSchedule', () => {
       const gap = createTestGap();
       const updatedGap = updateGapFromSchedule({
         gap,
-        backfillSchedule: [
+        scheduledItems: [
           {
-            runAt: '2024-01-01T02:00:00.000Z', // Outside gap range
-            interval: '15m',
+            from: new Date('2024-01-01T01:45:00.000Z'),
+            to: new Date('2024-01-01T02:00:00.000Z'), // Outside gap range
             status: adHocRunStatus.COMPLETE,
           },
         ],
