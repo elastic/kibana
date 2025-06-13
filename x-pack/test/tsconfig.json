@@ -37,8 +37,6 @@
     "@kbn/fleet-plugin",
     "@kbn/global-search-plugin",
     "@kbn/features-plugin",
-    "@kbn/encrypted-saved-objects-plugin",
-    "@kbn/event-log-plugin",
     "@kbn/features-plugin",
     "@kbn/global-search-plugin",
     "@kbn/infra-plugin",
@@ -50,7 +48,6 @@
     "@kbn/spaces-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/transform-plugin",
-    "@kbn/triggers-actions-ui-plugin",
     "@kbn/upgrade-assistant-plugin",
     "@kbn/remote-clusters-plugin",
     "@kbn/synthetics-plugin",
@@ -95,8 +92,11 @@
     "@kbn/user-profile-components",
     "@kbn/apm-synthtrace-client",
     "@kbn/journeys",
+<<<<<<< HEAD
     "@kbn/stdio-dev-helpers",
     "@kbn/alerting-api-integration-helpers",
+=======
+>>>>>>> 6aafb4f7f4c ([SKA] relocate alerting_api_integration tests (#222603))
     "@kbn/cloud-integration-saml-provider-plugin",
     "@kbn/security-api-integration-helpers",
     "@kbn/alerts-as-data-utils",
@@ -118,8 +118,6 @@
     "@kbn/uptime-plugin",
     "@kbn/ml-category-validator",
     "@kbn/observability-ai-assistant-plugin",
-    "@kbn/stack-connectors-plugin",
-    "@kbn/stack-alerts-plugin",
     "@kbn/es",
     "@kbn/metrics-data-access-plugin",
     "@kbn/dataset-quality-plugin",
@@ -140,7 +138,6 @@
     "@kbn/observability-ai-assistant-app-plugin",
     "@kbn/aiops-log-rate-analysis",
     "@kbn/apm-data-view",
-    "@kbn/core-saved-objects-api-server",
     "@kbn/search-types",
     "@kbn/alerting-comparators",
     "@kbn/alerting-state-types",
@@ -152,7 +149,6 @@
     "@kbn/securitysolution-exceptions-common",
     "@kbn/securitysolution-endpoint-exceptions-common",
     "@kbn/osquery-plugin",
-    "@kbn/actions-simulators-plugin",
     "@kbn/cases-api-integration-test-plugin",
     "@kbn/security-solution-plugin/public/management/cypress",
     "@kbn/mock-idp-utils",
@@ -178,8 +174,13 @@
     "@kbn/lock-manager",
     "@kbn/alerts-ui-shared",
     "@kbn/test-suites-xpack-platform",
+<<<<<<< HEAD
     "@kbn/test-suites-xpack-observability",
     "@kbn/management-settings-ids",
     "@kbn/apm-sources-access-plugin",
+=======
+    "@kbn/core-chrome-browser",
+    "@kbn/event-log-plugin",
+>>>>>>> 6aafb4f7f4c ([SKA] relocate alerting_api_integration tests (#222603))
   ]
 }
