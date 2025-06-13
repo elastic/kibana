@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsImportResponse, SavedObjectsImportRetry } from '@kbn/core/public';
+import type { SavedObjectsImportResponse, SavedObjectsImportRetry } from '@kbn/core/server';
 
 export interface CopyOptions {
   includeRelated: boolean;

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ResolvedSimpleSavedObject, SavedObject } from '@kbn/core/public';
+import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
+import type { SavedObject } from '@kbn/core/server';
 import {
   API_ROUTE_SHAREABLE_ZIP,
   API_ROUTE_TEMPLATES,

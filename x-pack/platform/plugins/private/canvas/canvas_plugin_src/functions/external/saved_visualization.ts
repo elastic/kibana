@@ -8,7 +8,7 @@
 import { omit } from 'lodash';
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { VisualizeInput } from '@kbn/visualizations-plugin/public';
-import { SavedObjectReference } from '@kbn/core/types';
+import type { SavedObjectReference } from '@kbn/core/server';
 import {
   EmbeddableTypes,
   EmbeddableExpressionType,

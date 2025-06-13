@@ -14,7 +14,6 @@
     "@kbn/utils",
     "@kbn/logging",
     "@kbn/core-http-server",
-    "@kbn/core-saved-objects-common",
     "@kbn/core-saved-objects-base-server-internal",
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-saved-objects-server",

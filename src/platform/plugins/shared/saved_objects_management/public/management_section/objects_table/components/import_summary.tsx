@@ -24,11 +24,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  SavedObjectsImportSuccess,
-  SavedObjectsImportWarning,
-  IBasePath,
-} from '@kbn/core/public';
+import type { SavedObjectsImportSuccess, SavedObjectsImportWarning } from '@kbn/core/server';
+import type { IBasePath } from '@kbn/core/public';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { getDefaultTitle, getSavedObjectLabel, FailedImport } from '../../../lib';
 import './import_summary.scss';

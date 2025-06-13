@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
+import type { SavedObject } from '@kbn/core/server';
 
 import type { AgentPolicy } from '../../../common';
 import type { AgentPolicySOAttributes } from '../../types';

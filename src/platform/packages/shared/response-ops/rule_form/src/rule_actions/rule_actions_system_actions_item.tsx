@@ -30,7 +30,7 @@ import {
   checkActionFormActionTypeEnabled,
   ActionConnector,
 } from '@kbn/alerts-ui-shared';
-import { SavedObjectAttribute } from '@kbn/core/types';
+import type { SavedObjectAttribute } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, some } from 'lodash';
 import React, { Suspense, useCallback, useMemo, useState } from 'react';

@@ -12,7 +12,7 @@ import {
   SavedObjectsImportRetry,
   SavedObjectsImportWarning,
   SavedObjectsImportResponse,
-} from '@kbn/core-saved-objects-common';
+} from '@kbn/core-saved-objects-api-server';
 import type { SavedObject } from '..';
 
 /**

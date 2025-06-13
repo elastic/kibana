@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as serverTypes from './server_types';
-
 /**
  * Information about the migrations that have been applied to this SavedObject.
  * When Kibana starts up, KibanaMigrator detects outdated documents and
@@ -49,33 +47,3 @@ export interface SavedObjectError {
   statusCode: number;
   metadata?: Record<string, unknown>;
 }
-
-/**
- * @public
- * @deprecated See https://github.com/elastic/kibana/issues/149098. Import this type from @kbn/core/server instead.
- */
-export type SavedObjectAttributeSingle = serverTypes.SavedObjectAttributeSingle;
-
-/**
- * @public
- * @deprecated See https://github.com/elastic/kibana/issues/149098. Import this type from @kbn/core/server instead.
- */
-export type SavedObjectAttribute = serverTypes.SavedObjectAttribute;
-
-/**
- * @public
- * @deprecated See https://github.com/elastic/kibana/issues/149098. Import this type from @kbn/core/server instead.
- */
-export type SavedObjectAttributes = serverTypes.SavedObjectAttributes;
-
-/**
- * @public
- * @deprecated See https://github.com/elastic/kibana/issues/149098. Import this type from @kbn/core/server instead.
- */
-export type SavedObjectReference = serverTypes.SavedObjectReference;
-
-/**
- * @public
- * @deprecated See https://github.com/elastic/kibana/issues/149098. Import this type from @kbn/core/server instead.
- */
-export type SavedObject<T = unknown> = serverTypes.SavedObject<T>;

@@ -134,7 +134,6 @@
     "@kbn/repo-info",
     "@kbn/storybook",
     "@kbn/controls-plugin",
-    "@kbn/core-saved-objects-common",
     "@kbn/core-saved-objects-import-export-server-mocks",
     "@kbn/user-profile-components",
     "@kbn/guided-onboarding",

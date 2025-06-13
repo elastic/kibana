@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
+import type { LegacyUrlAliasTarget } from '@kbn/core/server';
 
 export interface InternalLegacyUrlAliasTarget extends LegacyUrlAliasTarget {
   /**

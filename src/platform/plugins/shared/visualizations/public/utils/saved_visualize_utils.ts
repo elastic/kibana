@@ -8,7 +8,7 @@
  */
 
 import _ from 'lodash';
-import type { SavedObjectAttributes, SavedObjectReference } from '@kbn/core/public';
+import type { SavedObjectAttributes, SavedObjectReference } from '@kbn/core/server';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import {
   extractSearchSourceReferences,

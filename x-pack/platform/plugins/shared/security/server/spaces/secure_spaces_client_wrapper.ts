@@ -7,8 +7,7 @@
 
 import Boom from '@hapi/boom';
 
-import type { KibanaRequest, SavedObjectsClient } from '@kbn/core/server';
-import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
+import type { KibanaRequest, LegacyUrlAliasTarget, SavedObjectsClient } from '@kbn/core/server';
 import type {
   ISavedObjectsSecurityExtension,
   ISavedObjectTypeRegistry,

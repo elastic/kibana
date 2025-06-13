@@ -7,7 +7,7 @@
 
 import type { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import type { DecoratedError, SavedObject } from '@kbn/core-saved-objects-server';
-import type { SavedObjectError } from '@kbn/core/types';
+import type { SavedObjectError } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
 import type {
   AttachmentAttributes,

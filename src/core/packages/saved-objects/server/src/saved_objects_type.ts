@@ -10,7 +10,7 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { SavedObjectsNamespaceType } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsNamespaceType } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectsTypeManagementDefinition } from './saved_objects_management';
 import type { SavedObjectsValidationMap } from './validation';
 import type { SavedObjectMigrationMap } from './migration';

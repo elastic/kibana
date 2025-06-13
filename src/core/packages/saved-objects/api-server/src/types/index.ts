@@ -8,15 +8,18 @@
  */
 
 export type {
-  SavedObject,
   SavedObjectsNamespaceType,
+  SavedObjectError,
+  SavedObjectsMigrationVersion,
+} from './saved_objects';
+
+export type {
+  SavedObject,
   SavedObjectAttributeSingle,
   SavedObjectAttribute,
   SavedObjectAttributes,
-  SavedObjectError,
   SavedObjectReference,
-  SavedObjectsMigrationVersion,
-} from './src/saved_objects';
+} from './server_types';
 
 export type {
   SavedObjectsImportResponse,
@@ -31,6 +34,6 @@ export type {
   SavedObjectsImportUnknownError,
   SavedObjectsImportActionRequiredWarning,
   SavedObjectsImportConflictError,
-} from './src/saved_objects_imports';
+} from './saved_objects_imports';
 
-export type { SavedObjectTypeIdTuple, LegacyUrlAliasTarget } from './src/types';
+export type { SavedObjectTypeIdTuple, LegacyUrlAliasTarget } from './types';

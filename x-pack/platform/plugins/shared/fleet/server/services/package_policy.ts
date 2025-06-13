@@ -20,6 +20,7 @@ import type {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkUpdateObject,
   SavedObject,
+  SavedObjectError,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
@@ -29,8 +30,6 @@ import { load } from 'js-yaml';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import pMap from 'p-map';
-
-import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import { catchAndSetErrorStackTrace } from '../errors/utils';
 

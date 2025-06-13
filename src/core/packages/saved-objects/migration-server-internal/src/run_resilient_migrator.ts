@@ -13,7 +13,7 @@ import type {
   ElasticsearchClient,
   ElasticsearchCapabilities,
 } from '@kbn/core-elasticsearch-server';
-import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-api-server';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import type {
   IndexMapping,

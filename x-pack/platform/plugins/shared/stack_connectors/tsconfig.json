@@ -30,7 +30,6 @@
     "@kbn/safer-lodash-set",
     "@kbn/core-http-browser",
     "@kbn/core-saved-objects-api-server",
-    "@kbn/core-saved-objects-common",
     "@kbn/core-http-browser-mocks",
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/alerting-plugin",

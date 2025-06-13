@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectAttributes } from '@kbn/core/types';
+import type { SavedObjectAttributes } from '@kbn/core/server';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import type { Datafeed, Job } from './anomaly_detection_jobs';
 

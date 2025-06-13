@@ -10,7 +10,7 @@
 import type { SearchQuery } from '@kbn/content-management-plugin/common';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { Reference, ContentManagementCrudTypes } from '@kbn/content-management-utils';
-import type { SavedObjectError } from '@kbn/core/public';
+import type { SavedObjectError } from '@kbn/core/server';
 import type { GetIn } from '@kbn/content-management-plugin/common';
 
 const DASHBOARD_CONTENT_TYPE_ID = 'dashboard';

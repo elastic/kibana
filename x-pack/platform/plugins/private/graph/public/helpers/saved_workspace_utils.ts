@@ -7,8 +7,8 @@
 
 import { cloneDeep, assign, defaults, forOwn } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { CoreStart, IBasePath, SavedObjectAttributes } from '@kbn/core/public';
-
+import type { CoreStart, IBasePath } from '@kbn/core/public';
+import type { SavedObjectAttributes } from '@kbn/core/server';
 import { SavedObjectSaveOpts, isErrorNonFatal } from '@kbn/saved-objects-plugin/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { ContentClient } from '@kbn/content-management-plugin/public';

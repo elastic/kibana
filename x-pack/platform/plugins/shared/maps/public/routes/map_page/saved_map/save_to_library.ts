@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core/public';
+import type { SavedObjectReference } from '@kbn/core/server';
 import type { MapAttributes } from '../../../../common/content_management';
 import { getMapClient } from '../../../content_management';
 

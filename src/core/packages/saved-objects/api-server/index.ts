@@ -66,8 +66,28 @@ export type {
 
 export type {
   SavedObject,
+  SavedObjectsNamespaceType,
+  SavedObjectAttributeSingle,
   SavedObjectAttribute,
   SavedObjectAttributes,
-  SavedObjectAttributeSingle,
+  SavedObjectError,
   SavedObjectReference,
-} from '@kbn/core-saved-objects-common/src/server_types';
+  SavedObjectsMigrationVersion,
+} from './src/types';
+
+export type {
+  SavedObjectsImportResponse,
+  SavedObjectsImportSuccess,
+  SavedObjectsImportFailure,
+  SavedObjectsImportRetry,
+  SavedObjectsImportWarning,
+  SavedObjectsImportSimpleWarning,
+  SavedObjectsImportAmbiguousConflictError,
+  SavedObjectsImportUnsupportedTypeError,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportActionRequiredWarning,
+  SavedObjectsImportConflictError,
+} from './src/types';
+
+export type { SavedObjectTypeIdTuple, LegacyUrlAliasTarget } from './src/types';

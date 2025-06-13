@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HttpStart, SavedObjectsImportResponse } from '@kbn/core/public';
+import { HttpStart } from '@kbn/core/public';
+import type { SavedObjectsImportResponse } from '@kbn/core/server';
 import { ImportMode } from '../management_section/objects_table/components/import_mode_control';
 
 export async function importFile(

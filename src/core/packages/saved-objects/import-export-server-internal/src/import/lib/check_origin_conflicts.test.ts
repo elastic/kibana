@@ -10,10 +10,10 @@
 import { mockCreateOriginQuery } from './check_reference_origins.test.mock';
 
 import type {
+  SavedObjectsClientContract,
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
-} from '@kbn/core-saved-objects-common';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+} from '@kbn/core-saved-objects-api-server';
 import type {
   ISavedObjectTypeRegistry,
   SavedObject,

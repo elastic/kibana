@@ -8,7 +8,7 @@
 import type {
   SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportConflictError,
-} from '@kbn/core/public';
+} from '@kbn/core/server';
 
 import type { FailedImport, ProcessedImportResponse } from '.';
 import type { CopyToSpaceSavedObjectTarget } from '../types';

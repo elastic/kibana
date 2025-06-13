@@ -47,9 +47,9 @@ import type {
   IUiSettingsClient,
   KibanaExecutionContext,
   OverlayRef,
-  SavedObjectReference,
   ThemeServiceStart,
 } from '@kbn/core/public';
+import type { SavedObjectReference } from '@kbn/core/server';
 import type { TimefilterContract, FilterManager } from '@kbn/data-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type {

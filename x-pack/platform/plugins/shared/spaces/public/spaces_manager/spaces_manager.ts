@@ -9,8 +9,10 @@ import type { Observable } from 'rxjs';
 import { BehaviorSubject, skipWhile } from 'rxjs';
 
 import type { HttpSetup } from '@kbn/core/public';
-import type { SavedObjectsCollectMultiNamespaceReferencesResponse } from '@kbn/core-saved-objects-api-server';
-import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
+import type {
+  LegacyUrlAliasTarget,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
+} from '@kbn/core-saved-objects-api-server';
 import type { Role } from '@kbn/security-plugin-types-common';
 
 import {

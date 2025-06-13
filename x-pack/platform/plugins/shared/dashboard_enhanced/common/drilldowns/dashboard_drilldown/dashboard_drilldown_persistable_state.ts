@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from '@kbn/core/types';
+import type { SavedObjectReference } from '@kbn/core/server';
 import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
 import { SerializedAction, SerializedEvent } from '@kbn/ui-actions-enhanced-plugin/common';
 import { DashboardDrilldownConfig } from './types';

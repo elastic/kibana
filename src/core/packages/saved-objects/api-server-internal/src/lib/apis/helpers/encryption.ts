@@ -8,7 +8,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
+import { SavedObject } from '@kbn/core-saved-objects-api-server';
 import type {
   AuthorizationTypeMap,
   ISavedObjectsSecurityExtension,

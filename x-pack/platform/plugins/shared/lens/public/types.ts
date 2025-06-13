@@ -6,7 +6,8 @@
  */
 import type { Ast } from '@kbn/interpreter';
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
-import type { CoreStart, SavedObjectReference, ResolvedSimpleSavedObject } from '@kbn/core/public';
+import type { CoreStart, ResolvedSimpleSavedObject } from '@kbn/core/public';
+import type { SavedObjectReference } from '@kbn/core/server';
 import type { ColorMapping, PaletteOutput } from '@kbn/coloring';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';

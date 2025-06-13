@@ -6,12 +6,12 @@
  */
 
 import type {
+  LegacyUrlAliasTarget,
   SavedObjectReferenceWithContext,
   SavedObjectsClient,
   SavedObjectsFindResult,
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
-import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import type {
   AuthorizeBulkGetObject,
   AuthorizeCreateObject,

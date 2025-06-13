@@ -12,7 +12,7 @@ import murmurhash from 'murmurhash';
 import { v4 } from 'uuid';
 import { Subject } from 'rxjs';
 import { omit, defaults, get } from 'lodash';
-import type { SavedObjectError } from '@kbn/core-saved-objects-common';
+import type { SavedObjectError } from '@kbn/core/server';
 
 import type { estypes } from '@elastic/elasticsearch';
 import type {

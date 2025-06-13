@@ -10,7 +10,7 @@ import { map } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 import { Subject, race, from } from 'rxjs';
 import { bufferWhen, filter, bufferCount, flatMap, mapTo, first } from 'rxjs';
-import type { SavedObjectError } from '@kbn/core-saved-objects-common';
+import type { SavedObjectError } from '@kbn/core/server';
 import type { Result, Ok, Err } from './result_type';
 import { either, asOk, asErr } from './result_type';
 

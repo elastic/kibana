@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectAttributes, SavedObjectReference } from '@kbn/core/public';
+import type { SavedObjectAttributes, SavedObjectReference } from '@kbn/core/server';
 
 export function extractReferences({
   attributes,

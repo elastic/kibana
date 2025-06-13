@@ -8,13 +8,15 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import type { SavedObjectsImportRetry } from '@kbn/core-saved-objects-common';
 import {
   type SavedObject,
   type SavedObjectReference,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectsClientContract,
+  SavedObjectsImportRetry,
+} from '@kbn/core-saved-objects-api-server';
 import { checkConflicts } from './check_conflicts';
 
 jest.mock('uuid', () => ({

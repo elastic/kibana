@@ -23,7 +23,7 @@ import React, { Fragment } from 'react';
 import type {
   SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportConflictError,
-} from '@kbn/core/public';
+} from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 
 import { CopyStatusIndicator } from './copy_status_indicator';

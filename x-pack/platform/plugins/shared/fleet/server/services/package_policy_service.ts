@@ -12,9 +12,8 @@ import type {
   RequestHandlerContext,
   ElasticsearchClient,
   SavedObjectsClientContract,
+  SavedObjectError,
 } from '@kbn/core/server';
-
-import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
