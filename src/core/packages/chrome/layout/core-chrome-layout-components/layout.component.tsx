@@ -23,15 +23,17 @@ interface SlotProps extends LayoutStyleArgs {
   hasFooter: boolean;
   hasSidebar: boolean;
   hasSidebarPanel: boolean;
+  hasHeader: boolean;
+  hasNavigation: boolean;
 }
 
 type Slot = (props: SlotProps) => React.ReactNode;
 
 export interface ChromeLayoutComponentProps extends LayoutGlobalCSSProps {
   children: {
-    Header: Slot;
+    Header?: Slot | null;
     Application: Slot;
-    Navigation: Slot;
+    Navigation?: Slot | null;
     NavigationPanel?: Slot | null;
     Banner?: Slot | null;
     Footer?: Slot | null;
@@ -58,64 +60,76 @@ export const ChromeLayoutComponent = ({
   const hasSidebar = !!Sidebar;
   const hasSidebarPanel = !!SidebarPanel;
   const hasNavigationPanel = !!NavigationPanel;
+  const hasHeader = !!Header;
+  const hasNavigation = !!Navigation;
 
-  const styleArgs: LayoutStyleArgs = {
+  const styleProps: LayoutStyleArgs = {
     ...props,
     bannerHeight: hasBanner ? props.bannerHeight : 0,
     footerHeight: hasFooter ? props.footerHeight : 0,
+    headerHeight: hasHeader ? props.headerHeight : 0,
+    navigationWidth: hasNavigation ? props.navigationWidth : 0,
     navigationPanelWidth: hasNavigationPanel ? props.navigationPanelWidth : 0,
     sidebarWidth: hasSidebar ? props.sidebarWidth : 0,
     sidebarPanelWidth: hasSidebar && hasSidebarPanel ? props.sidebarPanelWidth : 0,
   };
 
-  const styleProps = useLayoutStyles(styleArgs);
+  const styles = useLayoutStyles(styleProps);
 
-  const slotProps = { hasBanner, hasFooter, hasSidebar, hasSidebarPanel, ...styleArgs };
+  const slotProps: SlotProps = {
+    hasHeader,
+    hasNavigation,
+    hasBanner,
+    hasFooter,
+    hasSidebar,
+    hasSidebarPanel,
+    ...styleProps,
+  };
 
   const banner = hasBanner ? (
-    <LayoutBanner height={styleArgs.bannerHeight}>
-      <Banner {...slotProps} />
-    </LayoutBanner>
+    <LayoutBanner height={styleProps.bannerHeight}>{Banner(slotProps)}</LayoutBanner>
   ) : null;
 
   const footer = hasFooter ? (
-    <LayoutFooter height={styleArgs.footerHeight}>
-      <Footer {...slotProps} />
-    </LayoutFooter>
+    <LayoutFooter height={styleProps.footerHeight}>{Footer(slotProps)}</LayoutFooter>
   ) : null;
 
   const navigationPanel = hasNavigationPanel ? (
-    <LayoutNavigationPanel width={styleArgs.navigationPanelWidth}>
-      <NavigationPanel {...slotProps} />
+    <LayoutNavigationPanel width={styleProps.navigationPanelWidth}>
+      {NavigationPanel(slotProps)}
     </LayoutNavigationPanel>
   ) : null;
 
   const sidebar = hasSidebar ? (
-    <LayoutSidebar width={styleArgs.sidebarWidth}>
-      <Sidebar {...slotProps} />
-    </LayoutSidebar>
+    <LayoutSidebar width={styleProps.sidebarWidth}>{Sidebar(slotProps)}</LayoutSidebar>
   ) : null;
 
   const sidebarPanel =
     hasSidebar && hasSidebarPanel ? (
-      <LayoutSidebarPanel width={styleArgs.sidebarPanelWidth}>
-        <SidebarPanel {...slotProps} />
+      <LayoutSidebarPanel width={styleProps.sidebarPanelWidth}>
+        {SidebarPanel(slotProps)}
       </LayoutSidebarPanel>
     ) : null;
 
+  const header = Header ? (
+    <LayoutHeader top={styleProps.bannerHeight} height={styleProps.headerHeight}>
+      {Header(slotProps)}
+    </LayoutHeader>
+  ) : null;
+
+  const navigation = Navigation ? (
+    <LayoutNavigation width={styleProps.navigationWidth}>{Navigation(slotProps)}</LayoutNavigation>
+  ) : null;
+
+  const application = <LayoutApplication>{Application(slotProps)}</LayoutApplication>;
+
   return (
-    <div {...styleProps}>
+    <div css={styles.css} style={styles.style}>
       {banner}
-      <LayoutHeader top={styleArgs.bannerHeight} height={styleArgs.headerHeight}>
-        <Header {...slotProps} />
-      </LayoutHeader>
-      <LayoutNavigation width={styleArgs.navigationWidth}>
-        <Navigation {...slotProps} />
-      </LayoutNavigation>
+      {header}
+      {navigation}
       {navigationPanel}
-      <LayoutApplication>
-        <Application {...slotProps} />
-      </LayoutApplication>
+      {application}
       {footer}
       {sidebar}
       {sidebarPanel}

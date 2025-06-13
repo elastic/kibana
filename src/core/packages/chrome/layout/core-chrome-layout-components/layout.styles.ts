@@ -19,6 +19,22 @@ export interface LayoutStyleArgs {
   sidebarPanelWidth: number;
 }
 
+const cssProp = css`
+  align-items: baseline;
+  height: 100vh;
+  width: 100vw;
+  min-height: 100%;
+  min-width: 100%;
+
+  display: grid;
+
+  grid-template-areas:
+    'banner banner banner banner banner'
+    'navigation navigationPanel header sidebarPanel sidebar'
+    'navigation navigationPanel app sidebarPanel sidebar'
+    'navigation navigationPanel footer sidebarPanel sidebar';
+`;
+
 // TODO: clintandrewhall - Handle smaller screens using `useEuiBreakpoints`.
 export const useLayoutStyles = ({
   bannerHeight,
@@ -29,22 +45,6 @@ export const useLayoutStyles = ({
   sidebarWidth,
   sidebarPanelWidth,
 }: LayoutStyleArgs) => {
-  const cssProp = css`
-    align-items: baseline;
-    height: 100vh;
-    width: 100vw;
-    min-height: 100%;
-    min-width: 100%;
-
-    display: grid;
-
-    grid-template-areas:
-      'banner banner banner banner banner'
-      'navigation navigationPanel header sidebarPanel sidebar'
-      'navigation navigationPanel app sidebarPanel sidebar'
-      'navigation navigationPanel footer sidebarPanel sidebar';
-  `;
-
   const style = {
     gridTemplateColumns: `
       ${navigationWidth}px

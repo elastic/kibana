@@ -36,6 +36,8 @@ interface StoryArgs {
   includeBanner: boolean;
   includeFooter: boolean;
   includeNavigationPanel: boolean;
+  includeNavigation: boolean;
+  includeHeader: boolean;
 }
 
 type PropsAndArgs = React.ComponentProps<typeof ChromeLayout> & StoryArgs;
@@ -62,6 +64,8 @@ const LayoutExample = ({
   includeSidebar,
   includeSidebarPanel,
   includeNavigationPanel,
+  includeNavigation,
+  includeHeader,
   ...props
 }: StoryArgs) => {
   const {
@@ -90,23 +94,27 @@ const LayoutExample = ({
                 label="Global Banner"
               />
             ),
-        Header: () => (
-          <Box
-            label="Global Header"
-            color={colors.textParagraph}
-            backgroundColor={colors.backgroundFilledText}
-          />
-        ),
-        Navigation: () => (
-          <Box
-            label="Navigation"
-            color={colors.textPrimary}
-            backgroundColor={colors.primary}
-            labelCSS={css`
-              transform: translate(-50%, -50%) rotate(-90deg);
-            `}
-          />
-        ),
+        Header: !includeHeader
+          ? null
+          : () => (
+              <Box
+                label="Global Header"
+                color={colors.textParagraph}
+                backgroundColor={colors.backgroundFilledText}
+              />
+            ),
+        Navigation: !includeNavigation
+          ? null
+          : () => (
+              <Box
+                label="Navigation"
+                color={colors.textPrimary}
+                backgroundColor={colors.primary}
+                labelCSS={css`
+                  transform: translate(-50%, -50%) rotate(-90deg);
+                `}
+              />
+            ),
         NavigationPanel: !includeNavigationPanel
           ? null
           : () => (
@@ -187,6 +195,8 @@ export const Layout: StoryObj<PropsAndArgs> = {
     includeBanner: true,
     includeFooter: true,
     includeNavigationPanel: true,
+    includeNavigation: true,
+    includeHeader: true,
     includeSidebar: true,
     includeSidebarPanel: true,
     bannerHeight: 48,
@@ -217,6 +227,14 @@ export const Layout: StoryObj<PropsAndArgs> = {
     includeSidebarPanel: {
       control: 'boolean',
       description: 'Whether to include the sidebar panel in the layout',
+    },
+    includeNavigation: {
+      control: 'boolean',
+      description: 'Whether to include the navigation in the layout',
+    },
+    includeHeader: {
+      control: 'boolean',
+      description: 'Whether to include the header in the layout',
     },
     bannerHeight: { control: 'number', description: 'Height of the banner' },
     footerHeight: { control: 'number', description: 'Height of the footer' },
