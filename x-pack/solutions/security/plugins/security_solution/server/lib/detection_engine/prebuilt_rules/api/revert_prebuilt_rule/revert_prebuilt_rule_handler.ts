@@ -27,7 +27,7 @@ import { fetchRulesByQueryOrIds } from '../../../rule_management/api/rules/bulk_
 import { convertAlertingRuleToRuleResponse } from '../../../rule_management/logic/detection_rules_client/converters/convert_alerting_rule_to_rule_response';
 import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
 import { zipRuleVersions } from '../../logic/rule_versions/zip_rule_versions';
-import { revertPrebuiltRules } from '../../logic/rule_objects/revert_prebuilt_rules';
+import { mergeAndUpdatePrebuiltRules } from '../../logic/rule_objects/merge_and_update_prebuilt_rules';
 import { getConcurrencyErrors } from './get_concurrrency_errors';
 
 const MAX_RULES_TO_REVERT = 1;
@@ -123,10 +123,8 @@ export const revertPrebuiltRuleHandler = async (
       });
     });
 
-    const { results: upgradeResults, errors: installationErrors } = await revertPrebuiltRules(
-      detectionRulesClient,
-      revertableRules
-    );
+    const { results: upgradeResults, errors: installationErrors } =
+      await mergeAndUpdatePrebuiltRules(detectionRulesClient, revertableRules);
 
     const formattedInstallationErrors = installationErrors.map(({ error, item }) => {
       return {

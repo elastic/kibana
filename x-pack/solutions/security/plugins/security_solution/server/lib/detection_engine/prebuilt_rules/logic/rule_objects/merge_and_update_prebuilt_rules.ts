@@ -12,22 +12,22 @@ import type { IDetectionRulesClient } from '../../../rule_management/logic/detec
 import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
 
 /**
- * Reverts existing prebuilt rules to their base version given a set of rules and output index.
+ * Merges customization adjacent fields (actions, exception_list, etc.) and updates rule to provided rule asset.
  * This implements a chunked approach to not saturate network connections and
  * avoid being a "noisy neighbor".
  * @param detectionRulesClient IDetectionRulesClient
- * @param ruleVersions The rules versions to revert
+ * @param ruleVersions The rules versions to update
  */
-export const revertPrebuiltRules = async (
+export const mergeAndUpdatePrebuiltRules = async (
   detectionRulesClient: IDetectionRulesClient,
   ruleVersions: RuleTriad[]
 ) =>
-  withSecuritySpan('revertPrebuiltRules', async () => {
+  withSecuritySpan('mergeAndUpdatePrebuiltRule', async () => {
     const result = await initPromisePool({
       concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
       items: ruleVersions,
       executor: async ({ current, target }) => {
-        return detectionRulesClient.revertPrebuiltRule({
+        return detectionRulesClient.mergeAndUpdatePrebuiltRule({
           ruleAsset: target,
           existingRule: current,
         });

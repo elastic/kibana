@@ -17,7 +17,7 @@ import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_re
 import { applyRuleUpdate } from '../mergers/apply_rule_update';
 import { validateMlAuth, mergeExceptionLists } from '../utils';
 
-export const revertPrebuiltRule = async ({
+export const mergeAndUpdatePrebuiltRule = async ({
   actionsClient,
   rulesClient,
   ruleAsset,
