@@ -263,7 +263,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expectSnapshot(csvFile).toMatch();
       });
 
-      it('generate a report using ES|QL for relative time range as absolute dates and time params', async () => {
+      // TODO: Adjust and unskip when we have full support for toggling relative/absolute time ranges through the export UI
+      // https://github.com/elastic/kibana/issues/223171
+      it.skip('generate a report using ES|QL for relative time range as absolute dates and time params', async () => {
         const RECENT_DATA_INDEX_NAME = 'test_recent_data';
         const RECENT_DOC_COUNT = 500;
         const RECENT_DOC_END_DATE = moment().toISOString();

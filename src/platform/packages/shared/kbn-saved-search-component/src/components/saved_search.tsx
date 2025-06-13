@@ -37,6 +37,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
     filters,
     index,
     timestampField,
+    columns,
     height,
     columns,
   } = props;
@@ -97,6 +98,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
       abortController.abort();
     };
   }, [
+    columns,
     dataViews,
     documentViewerEnabled,
     filters,
