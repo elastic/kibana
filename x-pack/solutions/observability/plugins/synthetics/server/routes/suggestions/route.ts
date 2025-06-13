@@ -61,10 +61,7 @@ export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
     query: QuerySchema,
   },
   handler: async (route): Promise<any> => {
-    const {
-      savedObjectsClient,
-      server: { logger },
-    } = route;
+    const { savedObjectsClient } = route;
     const { query } = route.request.query;
 
     const { filtersStr } = await getMonitorFilters(route);
