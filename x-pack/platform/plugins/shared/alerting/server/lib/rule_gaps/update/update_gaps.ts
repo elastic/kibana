@@ -70,15 +70,10 @@ export const prepareGapForUpdate = async (
   );
 
   if (scheduledItems.length > 0 && !hasFailedBackfillTask) {
-    await withSpan(
-      { name: 'updateGaps.prepareGapForUpdate.updateGapFromSchedule', type: 'rules' },
-      async () => {
-        updateGapFromSchedule({
-          gap,
-          scheduledItems,
-        });
-      }
-    );
+    updateGapFromSchedule({
+      gap,
+      scheduledItems,
+    });
   }
 
   if (hasFailedBackfillTask || scheduledItems.length === 0 || shouldRefetchAllBackfills) {
