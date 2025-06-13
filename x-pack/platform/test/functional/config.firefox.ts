@@ -13,6 +13,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...chromeConfig.getAll(),
 
+    testFiles: [],
+
     browser: {
       type: 'firefox',
     },
