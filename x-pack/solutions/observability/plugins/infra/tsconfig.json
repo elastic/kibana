@@ -121,6 +121,7 @@
     "@kbn/object-utils",
     "@kbn/coloring",
     "@kbn/saved-search-component"
+    "@kbn/core-saved-objects-server"
   ],
   "exclude": ["target/**/*"]
 }
