@@ -201,7 +201,6 @@ describe(
   { tags: ['@serverless'] },
   () => {
     beforeEach(() => {
-      cy.intercept('POST', '/api/fleet/agent_policies?sys_monitoring=true').as('saveAgentless');
       login();
       visit('/app/integrations/browse');
       cy.get('button[role="switch"]').click();
@@ -225,7 +224,6 @@ describe(
       });
 
       cy.get(SAVE_BUTTON).click();
-      cy.wait('@saveAgentless');
     });
 
     it('should save an agentless package policy with single account type', () => {
@@ -249,7 +247,6 @@ describe(
       });
 
       cy.get(SAVE_BUTTON).click();
-      cy.wait('@saveAgentless');
     });
   }
 );

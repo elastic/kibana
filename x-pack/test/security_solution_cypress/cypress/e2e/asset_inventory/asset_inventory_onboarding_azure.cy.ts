@@ -334,8 +334,6 @@ describe(
   { tags: ['@serverless'] },
   () => {
     beforeEach(() => {
-      cy.intercept('POST', '/api/fleet/agent_policies?sys_monitoring=true').as('saveAgentless');
-
       login();
       visit('/app/integrations/browse');
       cy.get('button[role="switch"]').click();
@@ -343,7 +341,7 @@ describe(
     });
 
     it('should save an organization package policy', () => {
-      const policyName = changePolicyName('asset_inventory-azure-agentless');
+      changePolicyName('asset_inventory-azure-agentless');
       selectCloudProvider('azure');
 
       shouldBeChecked(AZURE_ORGANIZATION_ACCOUNT_TEST_ID);
@@ -356,21 +354,10 @@ describe(
       cy.get(AZURE_CLIENT_SECRET_TEST_ID).type(AZURE_CLIENT_SECRET);
       shouldBeEnabled(SAVE_BUTTON);
       cy.get(SAVE_BUTTON).click();
-
-      //   selectPolicyForEditing(policyName);
-      //   checkPolicyName(policyName);
-      //   shouldBeChecked(AZURE_ORGANIZATION_ACCOUNT_TEST_ID);
-      //   checkInputValue(AZURE_CLIENT_ID_TEST_ID, AZURE_CLIENT_ID);
-      //   checkInputValue(AZURE_TENANT_ID_TEST_ID, AZURE_TENANT_ID);
-
-      //   shouldBeDisabled(SAVE_EDIT_BUTTON);
-      //   const newPolicyName = changePolicyName(policyName + '-edited');
-      //   clickSaveEditButton();
-      //   findPolicyLink(newPolicyName);
     });
 
     it('should save a single account package policy', () => {
-      const policyName = changePolicyName('asset_inventory-azure-agentless-single-account');
+      changePolicyName('asset_inventory-azure-agentless-single-account');
       selectCloudProvider('azure');
       cy.get(AZURE_SINGLE_ACCOUNT_TEST_ID).click();
 
@@ -384,17 +371,6 @@ describe(
       cy.get(AZURE_CLIENT_SECRET_TEST_ID).type(AZURE_CLIENT_SECRET);
       shouldBeEnabled(SAVE_BUTTON);
       cy.get(SAVE_BUTTON).click();
-
-      //   selectPolicyForEditing(policyName);
-      //   checkPolicyName(policyName);
-      //   shouldBeChecked(AZURE_SINGLE_ACCOUNT_TEST_ID);
-      //   checkInputValue(AZURE_CLIENT_ID_TEST_ID, AZURE_CLIENT_ID);
-      //   checkInputValue(AZURE_TENANT_ID_TEST_ID, AZURE_TENANT_ID);
-
-      //   shouldBeDisabled(SAVE_EDIT_BUTTON);
-      //   const newPolicyName = changePolicyName(policyName + '-edited');
-      //   clickSaveEditButton();
-      //   findPolicyLink(newPolicyName);
     });
   }
 );
