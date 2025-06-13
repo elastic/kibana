@@ -707,8 +707,8 @@ export const installLegacyRiskScore = async ({ supertest }: { supertest: SuperTe
     .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
     .send()
     .expect(200);
-  };
-  
+};
+
 export const downgradeRiskEngineIndexVersion = async ({
   es,
   space = 'default',
