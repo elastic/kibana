@@ -14,7 +14,7 @@ export const CostAwareness = () => {
   const {
     docLinks: {
       links: {
-        alerting: {
+        observability: {
           elasticManagedLlm: ELASTIC_LLM_LINK,
           elasticManagedLlmUsageCost: ELASTIC_LLM_USAGE_COST_LINK,
         },

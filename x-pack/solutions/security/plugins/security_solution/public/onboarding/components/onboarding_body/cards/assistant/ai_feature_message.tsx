@@ -22,7 +22,7 @@ export const ElasticAIFeatureMessage = React.memo(() => {
           elasticAiFeatures: ELASTIC_AI_FEATURES_LINK,
           thirdPartyLlmProviders: THIRD_PARTY_LLM_LINK,
         },
-        alerting: { elasticManagedLlmUsageCost: ELASTIC_LLM_USAGE_COST_LINK },
+        observability: { elasticManagedLlmUsageCost: ELASTIC_LLM_USAGE_COST_LINK },
       },
     },
   } = useKibana().services;

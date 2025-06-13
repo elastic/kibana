@@ -20,8 +20,8 @@ export const UsageCostMessage: React.FC = () => {
         values={{
           elasticLLM: (
             <EuiLink
-              data-test-subj="read-only-link"
-              href={docLinks.links.alerting.elasticManagedLlm}
+              data-test-subj="elasticManagedLlmLink"
+              href={docLinks.links.observability.elasticManagedLlm}
               target="_blank"
               rel="noopener noreferrer"
               external
@@ -34,7 +34,7 @@ export const UsageCostMessage: React.FC = () => {
           ),
           usageCost: (
             <EuiLink
-              href={docLinks.links.alerting.elasticManagedLlmUsageCost}
+              href={docLinks.links.observability.elasticManagedLlmUsageCost}
               target="_blank"
               rel="noopener noreferrer"
               external

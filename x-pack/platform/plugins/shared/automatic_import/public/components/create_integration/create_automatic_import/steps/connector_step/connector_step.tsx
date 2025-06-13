@@ -52,7 +52,7 @@ const ElasticLLMNewIntegrationMessage = React.memo(() => {
           thirdPartyLlmProviders: THIRD_PARTY_LLM_LINK,
           llmPerformanceMatrix: LLM_PERFORMANCE_LINK,
         },
-        alerting: { elasticManagedLlmUsageCost: ELASTIC_LLM_USAGE_COST_LINK },
+        observability: { elasticManagedLlmUsageCost: ELASTIC_LLM_USAGE_COST_LINK },
       },
     },
   } = useKibana().services;

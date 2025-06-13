@@ -20,7 +20,7 @@ export const ElasticLlmCallout = ({ showEISCallout }: { showEISCallout: boolean 
     getUrlForApp,
     docLinks: {
       links: {
-        alerting: { elasticManagedLlmUsageCost: ELASTIC_LLM_USAGE_COST_LINK },
+        observability: { elasticManagedLlmUsageCost: ELASTIC_LLM_USAGE_COST_LINK },
       },
     },
   } = useAssistantContext();
