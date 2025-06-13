@@ -11,7 +11,6 @@ import {
   shouldBeChecked,
   shouldBeDisabled,
   shouldBeEnabled,
-  shouldBeSelected,
 } from '../../helpers/common';
 import { login } from '../../tasks/login';
 import { visit } from '../../tasks/navigation';
