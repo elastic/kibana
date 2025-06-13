@@ -4,6 +4,21 @@
       "format": [
         "text"
       ],
+      "help": "__flag__",
+      "v": "__flag__",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "allow_no_match": "__flag__",
+      "bytes": [
+        "b",
+        "kb",
+        "mb",
+        "gb",
+        "tb",
+        "pb"
+      ],
       "h": [
         "create_time",
         "created_by",
@@ -20,7 +35,6 @@
         "operations",
         "version"
       ],
-      "help": "__flag__",
       "s": [
         "create_time",
         "created_by",
@@ -36,20 +50,6 @@
         "license",
         "operations",
         "version"
-      ],
-      "v": "__flag__",
-      "error_trace": "__flag__",
-      "filter_path": [],
-      "human": "__flag__",
-      "pretty": "__flag__",
-      "allow_no_match": "__flag__",
-      "bytes": [
-        "b",
-        "kb",
-        "mb",
-        "gb",
-        "tb",
-        "pb"
       ],
       "from": "",
       "size": "",
@@ -70,7 +70,7 @@
       "_cat/ml/trained_models",
       "_cat/ml/trained_models/{model_id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cat-trained-model.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-ml-trained-models",
     "availability": {
       "stack": true,
       "serverless": true

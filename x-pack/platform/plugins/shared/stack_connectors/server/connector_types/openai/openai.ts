@@ -19,6 +19,7 @@ import type {
 } from 'openai/resources/chat/completions';
 import type { Stream } from 'openai/streaming';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { TaskErrorSource, createTaskRunError } from '@kbn/task-manager-plugin/server';
 import { getCustomAgents } from '@kbn/actions-plugin/server/lib/get_custom_agents';
 import { removeEndpointFromUrl } from './lib/openai_utils';
 import {
@@ -424,6 +425,12 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       // since we do not use the sub action connector request method, we need to do our own error handling
     } catch (e) {
       const errorMessage = this.getResponseErrorMessage(e);
+
+      // Based on the OpenAI API documentation, the error contains the status code in the `status` property
+      if (e.status === 429) {
+        throw createTaskRunError(new Error(errorMessage), TaskErrorSource.USER);
+      }
+
       throw new Error(errorMessage);
     }
   }

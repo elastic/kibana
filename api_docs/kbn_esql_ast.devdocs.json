@@ -5859,12 +5859,12 @@
           },
           {
             "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.ESQLSource.cluster",
+            "id": "def-common.ESQLSource.prefix",
             "type": "Object",
             "tags": [],
-            "label": "cluster",
+            "label": "prefix",
             "description": [
-              "\nRepresents the cluster part of the source identifier. Empty string if not\npresent.\n\n```\nFROM [<cluster>:]<index>\n```"
+              "\nRepresents the prefix part of the source identifier. Empty string if not\npresent. Used in index pattern as the cluster identifier or as \"mode\" in\nenrich policy.\n\n```\nFROM [<prefix>:]<index>\n```"
             ],
             "signature": [
               "ESQLStringLiteral",

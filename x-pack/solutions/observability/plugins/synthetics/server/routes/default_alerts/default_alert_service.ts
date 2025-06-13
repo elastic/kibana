@@ -259,8 +259,8 @@ export class DefaultAlertService {
     let actionConnectors: FindActionResult[] = [];
     try {
       actionConnectors = await actionsClient.getAll();
-    } catch (e) {
-      this.server.logger.error(e);
+    } catch (error) {
+      this.server.logger.error(`Error getting connectors, Error: ${error.message}`, { error });
     }
     return { actionConnectors, settings: this.settings };
   }
