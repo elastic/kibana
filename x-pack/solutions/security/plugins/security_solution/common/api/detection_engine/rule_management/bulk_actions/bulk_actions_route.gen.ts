@@ -201,7 +201,7 @@ export const BulkManualRuleFillGaps = BulkActionBase.merge(
   z.object({
     action: z.literal('fill_gaps'),
     /**
-     * Object that describes applying a manual gap fill action for the specified range.
+     * Object that describes applying a manual gap fill action for the specified time range.
      */
     fill_gaps: z.object({
       /**

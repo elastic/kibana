@@ -1276,7 +1276,7 @@ components:
               enum: [fill_gaps]
             fill_gaps:
               type: object
-              description: Object that describes applying a manual gap fill action for the specified range.
+              description: Object that describes applying a manual gap fill action for the specified time range.
               properties:
                 start_date:
                   type: string
