@@ -16,7 +16,6 @@ import { convertAlertingRuleToRuleResponse } from '../converters/convert_alertin
 import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
 import { applyRuleUpdate } from '../mergers/apply_rule_update';
 import { validateMlAuth, mergeExceptionLists } from '../utils';
-import { createRule } from './create_rule';
 
 export const revertPrebuiltRule = async ({
   actionsClient,
@@ -34,34 +33,6 @@ export const revertPrebuiltRule = async ({
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
 }): Promise<RuleResponse> => {
   await validateMlAuth(mlAuthz, ruleAsset.type);
-
-  // TODO: do we need this for revert method?
-  if (ruleAsset.type !== existingRule.type) {
-    // If we're trying to change the type of a prepackaged rule, we need to delete the old one
-    // and replace it with the new rule, keeping the enabled setting, actions, throttle, id,
-    // and exception lists from the old rule
-    await rulesClient.delete({ id: existingRule.id });
-
-    const createdRule = await createRule({
-      actionsClient,
-      rulesClient,
-      mlAuthz,
-      rule: {
-        ...ruleAsset,
-        immutable: true,
-        enabled: existingRule.enabled,
-        exceptions_list: existingRule.exceptions_list,
-        actions: existingRule.actions,
-        timeline_id: existingRule.timeline_id,
-        timeline_title: existingRule.timeline_title,
-      },
-      id: existingRule.id,
-    });
-
-    return createdRule;
-  }
-
-  // Else, recreate the rule from scratch with the passed payload.
   const updatedRule = await applyRuleUpdate({
     prebuiltRuleAssetClient,
     existingRule,

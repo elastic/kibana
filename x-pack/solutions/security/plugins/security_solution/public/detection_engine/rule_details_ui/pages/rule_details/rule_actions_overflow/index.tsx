@@ -194,6 +194,7 @@ const RuleActionsOverflowComponent = ({
                       title: isRevertBaseVersionDisabled
                         ? i18nActions.REVERT_RULE_TOOLTIP_TITLE
                         : undefined,
+                      'data-test-subj': 'rules-details-revert-rule-tooltip',
                     }}
                     icon="timeRefresh"
                     disabled={!userHasPermissions || isRevertBaseVersionDisabled}

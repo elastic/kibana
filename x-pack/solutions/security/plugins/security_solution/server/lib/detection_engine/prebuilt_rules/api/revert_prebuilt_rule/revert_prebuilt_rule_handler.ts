@@ -28,6 +28,7 @@ import { convertAlertingRuleToRuleResponse } from '../../../rule_management/logi
 import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
 import { zipRuleVersions } from '../../logic/rule_versions/zip_rule_versions';
 import { revertPrebuiltRules } from '../../logic/rule_objects/revert_prebuilt_rules';
+import { getConcurrencyErrors } from './get_concurrrency_errors';
 
 const MAX_RULES_TO_REVERT = 1;
 
@@ -65,7 +66,7 @@ export const revertPrebuiltRuleHandler = async (
     const skipped: BulkActionReversionSkipResult[] = [];
 
     const baseRules = await ruleAssetsClient.fetchAssetsByVersion(rulesToRevert);
-    const ruleVersionsMap = zipRuleVersions(rulesToRevert, [], baseRules); // We use base versions as target argument as we are reverting rules
+    const ruleVersionsMap = zipRuleVersions(rulesToRevert, [], baseRules); // We use base versions as target param as we are reverting rules
     const revertableRules: RuleTriad[] = [];
 
     rulesToRevert.forEach((rule) => {
@@ -92,7 +93,7 @@ export const revertPrebuiltRuleHandler = async (
         return;
       }
 
-      const concurrencyErrors = validateConcurrencyErrors(
+      const concurrencyErrors = getConcurrencyErrors(
         concurrencySet[rule.id].revision,
         concurrencySet[rule.id].version,
         rule
@@ -156,6 +157,8 @@ export const revertPrebuiltRuleHandler = async (
   }
 };
 
+// Similar to `buildBulkResponse` in /bulk_actions_response.ts but the RevertPrebuiltRulesResponseBody has a slightly different return body
+// If we extend the revert route this can be folded into the existing buildBuleResponse function
 const buildRuleReversionResponse = (
   response: KibanaResponseFactory,
   {
@@ -211,28 +214,4 @@ const buildRuleReversionResponse = (
   };
 
   return response.ok({ body: responseBody });
-};
-
-const validateConcurrencyErrors = (
-  revision: number,
-  version: number,
-  rule: RuleResponse
-): BulkActionError[] => {
-  const errors: BulkActionError[] = [];
-  if (rule.version !== version) {
-    errors.push({
-      message: `Version mismatch for id ${rule.id}: expected ${version}, got ${rule.version}`,
-      status: 409,
-      rule,
-    });
-  }
-
-  if (rule.revision !== revision) {
-    errors.push({
-      message: `Revision mismatch for id ${rule.id}: expected ${revision}, got ${rule.revision}`,
-      status: 409,
-      rule,
-    });
-  }
-  return errors;
 };
