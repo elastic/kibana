@@ -75,7 +75,7 @@ export class BackfillTaskRunner implements CancellableTask {
     const painlessScript = await this.getPainlessScript(esClient);
 
     if (painlessScript.found) {
-      this.handleDebug(`Reindexing from ${this.sourceIndex} to ${this.destIndex}.`);
+      this.logDebug(`Reindexing from ${this.sourceIndex} to ${this.destIndex}.`);
       const painlessScriptId = await this.getPainlessScriptId(esClient);
 
       await esClient.reindex({
@@ -101,7 +101,7 @@ export class BackfillTaskRunner implements CancellableTask {
   private async getPainlessScript(esClient: ElasticsearchClient) {
     const painlessScriptId = await this.getPainlessScriptId(esClient);
 
-    this.handleDebug(`Getting painless script with id ${painlessScriptId}.`);
+    this.logDebug(`Getting painless script with id ${painlessScriptId}.`);
     return esClient.getScript({
       id: painlessScriptId,
     });
@@ -124,14 +124,14 @@ export class BackfillTaskRunner implements CancellableTask {
   private async getCurrentMapping(
     esClient: ElasticsearchClient
   ): Promise<IndicesGetMappingResponse> {
-    this.handleDebug('Getting index mapping.');
+    this.logDebug('Getting index mapping.');
     return esClient.indices.getMapping({
       index: this.destIndex,
     });
   }
 
   private async waitForDestIndex(esClient: ElasticsearchClient) {
-    this.handleDebug('Checking index availability.');
+    this.logDebug('Checking index availability.');
     return esClient.cluster.health({
       index: this.destIndex,
       wait_for_status: 'green',
@@ -140,7 +140,7 @@ export class BackfillTaskRunner implements CancellableTask {
     });
   }
 
-  public handleDebug(message: string) {
+  public logDebug(message: string) {
     this.logger.debug(`[${this.destIndex}] ${message}`, {
       tags: ['cai-backfill', this.destIndex],
     });

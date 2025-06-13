@@ -31,7 +31,7 @@ describe('SynchronizationTaskRunner', () => {
   const lastSyncAttempt = new Date('2025-06-10T09:30:00.000Z');
   const newAttemptTime = new Date('2025-06-10T09:40:00.000Z');
 
-  const syncTaskId = 'foobar';
+  const esReindexTaskId = 'foobar';
 
   const taskInstance = {
     params: {
@@ -41,7 +41,7 @@ describe('SynchronizationTaskRunner', () => {
     state: {
       lastSyncSuccess,
       lastSyncAttempt,
-      syncTaskId,
+      esReindexTaskId,
     },
   } as unknown as ConcreteTaskInstance;
 
@@ -67,7 +67,7 @@ describe('SynchronizationTaskRunner', () => {
     });
 
     esClient.reindex.mockResolvedValue({
-      task: syncTaskId,
+      task: esReindexTaskId,
     });
   });
 
@@ -91,7 +91,7 @@ describe('SynchronizationTaskRunner', () => {
 
     const result = await taskRunner.run();
 
-    expect(esClient.tasks.get).toBeCalledWith({ task_id: syncTaskId });
+    expect(esClient.tasks.get).toBeCalledWith({ task_id: esReindexTaskId });
     expect(esClient.cluster.health).toBeCalledWith({
       index: destIndex,
       wait_for_status: 'green',
@@ -155,7 +155,7 @@ describe('SynchronizationTaskRunner', () => {
         lastSyncSuccess: lastSyncAttempt,
         // we set a new value for lastSyncAttempt
         lastSyncAttempt: newAttemptTime,
-        syncTaskId,
+        esReindexTaskId,
       },
     });
   });
@@ -233,7 +233,7 @@ describe('SynchronizationTaskRunner', () => {
       state: {
         lastSyncSuccess: undefined,
         lastSyncAttempt: newAttemptTime,
-        syncTaskId,
+        esReindexTaskId,
       },
     });
   });
@@ -332,7 +332,7 @@ describe('SynchronizationTaskRunner', () => {
         lastSyncSuccess,
         // we set a new value for lastSyncAttempt
         lastSyncAttempt: newAttemptTime,
-        syncTaskId,
+        esReindexTaskId,
       },
     });
   });
@@ -347,7 +347,7 @@ describe('SynchronizationTaskRunner', () => {
         taskInstance: {
           ...taskInstance,
           state: {
-            // A missing syncTaskId should have missing sync times
+            // A missing esReindexTaskId should have missing sync times
             lastSyncAttempt: 'some-time',
           },
         },

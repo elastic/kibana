@@ -206,12 +206,12 @@ export class CasePlugin
       scheduleCasesAnalyticsSyncTasks({ taskManager: plugins.taskManager, logger: this.logger });
     }
 
-    void createCasesAnalyticsIndexes({
+    createCasesAnalyticsIndexes({
       esClient: core.elasticsearch.client.asInternalUser,
       logger: this.logger,
       isServerless: this.isServerless,
       taskManager: plugins.taskManager,
-    });
+    }).catch(() => {}); // it shouldn't reject, but just in case
 
     this.userProfileService.initialize({
       spaces: plugins.spaces,

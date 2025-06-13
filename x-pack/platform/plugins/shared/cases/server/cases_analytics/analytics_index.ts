@@ -122,10 +122,10 @@ export class AnalyticsIndex {
       const indexExists = await this.indexExists();
 
       if (!indexExists) {
-        this.handleDebug(`Index does not exist. Creating.`);
+        this.logDebug(`Index does not exist. Creating.`);
         await this.createIndexMapping();
       } else {
-        this.handleDebug(`Index exists. Updating mapping.`);
+        this.logDebug(`Index exists. Updating mapping.`);
         await this.updateIndexMapping();
       }
     } catch (error) {
@@ -140,7 +140,7 @@ export class AnalyticsIndex {
       if (shouldUpdateMapping) {
         await this.updateMapping();
       } else {
-        this.handleDebug(`Mapping version is up to date. Skipping update.`);
+        this.logDebug(`Mapping version is up to date. Skipping update.`);
       }
     } catch (error) {
       this.handleError('Failed to update the index mapping.', error);
@@ -154,24 +154,24 @@ export class AnalyticsIndex {
   }
 
   private async updateMapping() {
-    this.handleDebug(`Updating the painless script.`);
+    this.logDebug(`Updating the painless script.`);
     await this.putScript();
 
-    this.handleDebug(`Updating index mapping.`);
+    this.logDebug(`Updating index mapping.`);
     await this.esClient.indices.putMapping({
       index: this.indexName,
       ...this.mappings,
     });
 
-    this.handleDebug(`Scheduling the backfill task.`);
+    this.logDebug(`Scheduling the backfill task.`);
     await this.scheduleBackfillTask();
   }
 
   private async createIndexMapping() {
-    this.handleDebug(`Creating painless script.`);
+    this.logDebug(`Creating painless script.`);
     await this.putScript();
 
-    this.handleDebug(`Creating index.`);
+    this.logDebug(`Creating index.`);
     await this.esClient.indices.create({
       index: this.indexName,
       timeout: CAI_DEFAULT_TIMEOUT,
@@ -181,12 +181,12 @@ export class AnalyticsIndex {
       },
     });
 
-    this.handleDebug(`Scheduling the backfill task.`);
+    this.logDebug(`Scheduling the backfill task.`);
     await this.scheduleBackfillTask();
   }
 
   private async indexExists(): Promise<boolean> {
-    this.handleDebug(`Checking if index exists.`);
+    this.logDebug(`Checking if index exists.`);
     return this.esClient.indices.exists({
       index: this.indexName,
     });
@@ -211,7 +211,7 @@ export class AnalyticsIndex {
     indexVersion: number;
     painlessScriptId: string;
   }): MappingMeta {
-    this.handleDebug(
+    this.logDebug(
       `Construction mapping._meta. Index version: ${indexVersion}. Painless script: ${painlessScriptId}.`
     );
 
@@ -221,7 +221,7 @@ export class AnalyticsIndex {
     };
   }
 
-  public handleDebug(message: string) {
+  public logDebug(message: string) {
     this.logger.debug(`[${this.indexName}] ${message}`, {
       tags: ['cai-index-creation', this.indexName],
     });

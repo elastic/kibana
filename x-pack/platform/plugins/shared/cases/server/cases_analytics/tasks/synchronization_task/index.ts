@@ -17,7 +17,7 @@ import type { CasesServerStartDependencies } from '../../../types';
 import { AnalyticsIndexSynchronizationTaskFactory } from './synchronization_task_factory';
 
 const TASK_TYPE = 'cai:cases_analytics_index_synchronization';
-const SCHEDULE: IntervalSchedule = { interval: '1m' };
+const SCHEDULE: IntervalSchedule = { interval: '5m' };
 
 export function registerCAISynchronizationTask({
   taskManager,
