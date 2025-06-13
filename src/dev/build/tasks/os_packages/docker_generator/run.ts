@@ -78,7 +78,6 @@ export async function runDockerGenerator(
   if (flags.serverless) artifactVariant = '-serverless';
   const artifactPrefix = `kibana${artifactVariant}-${version}-linux`;
   const artifactTarball = `${artifactPrefix}-${artifactArchitecture}.tar.gz`;
-  log.warning(`ARCH: ${artifactArchitecture}, TARBALL: ${artifactTarball}`);
   const beatsArchitecture = flags.architecture === 'aarch64' ? 'arm64' : 'x86_64';
   const metricbeatTarball = `metricbeat${
     flags.fips ? '-fips' : ''
