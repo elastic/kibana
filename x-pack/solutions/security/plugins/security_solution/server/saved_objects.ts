@@ -19,7 +19,6 @@ import { riskEngineConfigurationType } from './lib/entity_analytics/risk_engine/
 import { entityEngineDescriptorType } from './lib/entity_analytics/entity_store/saved_object';
 import {
   privilegeMonitoringType,
-  privilegeMonitoringIndexSourceType,
   monitoringEntitySourceType,
 } from './lib/entity_analytics/privilege_monitoring/saved_objects';
 
