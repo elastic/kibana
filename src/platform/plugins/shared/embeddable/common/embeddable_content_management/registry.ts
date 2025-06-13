@@ -40,16 +40,19 @@ class EmbeddableContentManagementRegistry<IsAsync extends true | false = false> 
     this.registry.set(id, getDefinition);
   };
 
-  public getContentManagementDefinition(id: string): MaybeDefinitionSyncOrAsync<IsAsync> {
+  public getContentManagementDefinition: (id: string) => MaybeDefinitionSyncOrAsync<IsAsync> = (
+    id
+  ) => {
     const getDefinition = this.registry.get(id);
     if (!getDefinition) {
       return undefined as IsAsync extends true ? Promise<undefined> : undefined;
     }
     return getDefinition();
-  }
+  };
 }
 
 export class EmbeddableContentManagementRegistryPublic extends EmbeddableContentManagementRegistry<true> {
+  // @ts-expect-error Overload arrow function with member function to correctly bind `this` to superclass
   public async getContentManagementDefinition(
     id: string
   ): Promise<MaybeEmbeddableContentManagementDefinition> {
@@ -58,6 +61,7 @@ export class EmbeddableContentManagementRegistryPublic extends EmbeddableContent
 }
 
 export class EmbeddableContentManagementRegistryServer extends EmbeddableContentManagementRegistry<false> {
+  // @ts-expect-error Overload arrow function with member function to correctly bind `this` to superclass
   public getContentManagementDefinition(id: string): MaybeEmbeddableContentManagementDefinition {
     return super.getContentManagementDefinition(id);
   }
