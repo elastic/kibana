@@ -9,6 +9,7 @@ import type { ChangeEventHandler } from 'react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import type { EuiFieldTextProps, EuiSuperSelectOption } from '@elastic/eui';
 import {
+  EuiButtonGroup,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -38,10 +39,6 @@ import type {
   NewTrustedApp,
 } from '../../../../../../common/endpoint/types';
 import {
-  StyledEuiFlexItemButtonGroup,
-  StyledButtonGroup,
-} from '../../../../components/effected_policy_select';
-import {
   isValidHash,
   getDuplicateFields,
 } from '../../../../../../common/endpoint/service/artifacts/validations';
@@ -68,9 +65,8 @@ import { EffectedPolicySelect } from '../../../../components/effected_policy_sel
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
 import { TrustedAppsArtifactsDocsLink } from './artifacts_docs_link';
 import { isAdvancedModeEnabled } from '../../../../../../common/endpoint/service/artifacts/utils';
-import { ADVANCED_MODE_TAG } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/constants';
-import { StyledEuiFlexItem } from '../../../policy/view/ingest_manager_integration/endpoint_package_custom_extension/components/styled_components';
-import { useIsExperimentalFeatureEnabled } from '@kbn/security-solution-plugin/public/common/hooks/use_experimental_features';
+import { ADVANCED_MODE_TAG } from '../../../../../../common/endpoint/service/artifacts/constants';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 
 interface FieldValidationState {
   /** If this fields state is invalid. Drives display of errors on the UI */
@@ -263,7 +259,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
     const { getTagsUpdatedBy } = useGetUpdatedTags(item);
 
     const selectedFormType = useMemo(() => {
-      return isFormAdvancedMode ? 'advancedMode' : 'basicMode'
+      return isFormAdvancedMode ? 'advancedMode' : 'basicMode';
     }, [isFormAdvancedMode]);
 
     const advancedModeToggle = [
@@ -568,16 +564,17 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           <EuiFlexItem grow={2}>
             <EuiText size="s">{CONDITIONS_HEADER_DESCRIPTION}</EuiText>
           </EuiFlexItem>
-          {isTAAdvancedModeFeatureFlagEnabled && <StyledEuiFlexItemButtonGroup grow={1}>
+          {isTAAdvancedModeFeatureFlagEnabled && (<EuiFlexItem grow={1}>
             <EuiFormRow fullWidth>
-              <StyledButtonGroup
+              <EuiButtonGroup
                 legend="Advanced Mode Toggle"
+                color="primary"
                 options={advancedModeToggle}
                 idSelected={selectedFormType}
                 onChange={handleAdvancedModeChange}
               />
             </EuiFormRow>
-          </StyledEuiFlexItemButtonGroup>}
+          </EuiFlexItem>)}
         </EuiFlexGroup>
         <EuiSpacer size="m" />
         <EuiFormRow
@@ -596,6 +593,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
             data-test-subj={getTestId('osSelectField')}
           />
         </EuiFormRow>
+        {isFormAdvancedMode && (<EuiText>hi bubaz</EuiText>)}
         <EuiFormRow
           fullWidth
           data-test-subj={getTestId('conditionsRow')}
@@ -632,4 +630,3 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
 );
 
 TrustedAppsForm.displayName = 'TrustedAppsForm';
-
