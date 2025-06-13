@@ -51,9 +51,20 @@ export const KUBERNETES_POD_UID_FIELD = 'kubernetes.pod.uid';
 export const EVENT_MODULE = 'event.module';
 export const METRICSET_MODULE = 'metricset.module';
 export const METRICSET_NAME = 'metricset.name';
+export const DATASTREAM_DATASET = 'data_stream.dataset';
+
+// metricbeat
+export const AGENT_TYPE = 'agent.type';
+export const METRICBEAT = 'metricbeat';
+
+// OTel hostmetricsreceiver
+export const OTEL_RECEIVER_DATASET_VALUE = 'hostmetricsreceiver.otel';
+// OTel dataset
+export const OTEL_DATASET_VALUE = '*.otel';
 
 // integrations
 export const SYSTEM_INTEGRATION = 'system';
+export const KUBERNETES_INTEGRATION = 'kubernetes';
 
 // logs
 export const MESSAGE_FIELD = 'message';
