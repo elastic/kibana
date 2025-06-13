@@ -69,7 +69,7 @@ export function RelativeTimestampTooltip({
   const absoluteTimeLabel = asAbsoluteDateTime(time, timeUnit);
 
   const timeDisplay =
-    duration.hours() >= relativeDisplayThreshold
+    duration.asHours() > relativeDisplayThreshold
       ? absoluteTimeLabel
       : getRelativeTimeText(duration);
 

@@ -94,7 +94,11 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
       <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />
     ),
     [ALERT_START]: (value) => (
-      <RelativeTimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />
+      <RelativeTimestampTooltip
+        time={new Date(value ?? '').getTime()}
+        timeUnit="milliseconds"
+        relativeDisplayThreshold={2}
+      />
     ),
     [ALERT_RULE_EXECUTION_TIMESTAMP]: (value) => (
       <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />
