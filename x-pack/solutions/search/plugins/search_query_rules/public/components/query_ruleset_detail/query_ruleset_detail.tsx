@@ -209,6 +209,7 @@ export const QueryRulesetDetail: React.FC = () => {
                   })}
                 </>
               ),
+              'data-test-subj': 'queryRulesetDetailBackButton',
               color: 'primary',
               'aria-current': false,
               href: '#',
