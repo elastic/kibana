@@ -22,15 +22,14 @@ import {
   getPerformBulkActionEditSchemaMock,
   getBulkDisableRuleActionSchemaMock,
 } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
-import { readRules } from '../../../logic/detection_rules_client/read_rules';
 import { BulkActionsDryRunErrCodeEnum } from '../../../../../../../common/api/detection_engine';
 import type { ConfigType } from '../../../../../../config';
 
 jest.mock('../../../../../machine_learning/authz');
-jest.mock('../../../logic/detection_rules_client/read_rules', () => ({ readRules: jest.fn() }));
+
+let bulkGetRulesMock: jest.Mock;
 
 describe('Perform bulk action route', () => {
-  const readRulesMock = readRules as jest.Mock;
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
@@ -39,10 +38,11 @@ describe('Perform bulk action route', () => {
     bulkEditAlertSuppressionEnabled: true,
   } as ConfigType['experimentalFeatures'];
 
-  beforeEach(() => {
+  beforeEach(async () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
+    bulkGetRulesMock = (await context.alerting.getRulesClient()).bulkGetRules as jest.Mock;
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
     clients.rulesClient.bulkDisableRules.mockResolvedValue({
@@ -359,9 +359,10 @@ describe('Perform bulk action route', () => {
     });
 
     it('returns partial failure error if one if rules from ids params can`t be fetched', async () => {
-      readRulesMock
-        .mockImplementationOnce(() => Promise.resolve(mockRule))
-        .mockImplementationOnce(() => Promise.resolve(null));
+      bulkGetRulesMock.mockImplementation(() => ({
+        rules: [mockRule],
+        errors: [{ id: 'failed-mock-id', error: { statusCode: 404 } }],
+      }));
 
       const request = requestMock.create({
         method: 'patch',
