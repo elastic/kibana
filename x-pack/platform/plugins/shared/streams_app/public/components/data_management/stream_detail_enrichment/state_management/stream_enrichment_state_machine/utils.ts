@@ -33,7 +33,7 @@ export const defaultKqlSamplesDataSource: KqlSamplesDataSource = {
   type: 'kql-samples',
   name: '',
   enabled: true,
-  time: {
+  timeRange: {
     from: 'now-15m',
     to: 'now',
   },

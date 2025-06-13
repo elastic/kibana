@@ -13,26 +13,14 @@ import { Filter, Query, TimeRange, buildEsQuery } from '@kbn/es-query';
 import { Observable, filter, map, of } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import { IEsSearchResponse } from '@kbn/search-types';
+import { pick } from 'lodash';
 import { getFormattedError } from '../../../../../util/errors';
 import { DataSourceMachineDeps } from './types';
-import {
-  CustomSamplesDataSourceWithUIAttributes,
-  EnrichmentDataSourceWithUIAttributes,
-  KqlSamplesDataSourceWithUIAttributes,
-} from '../../types';
+import { EnrichmentDataSourceWithUIAttributes } from '../../types';
 
 export interface SamplesFetchInput {
   dataSource: EnrichmentDataSourceWithUIAttributes;
   streamName: string;
-}
-
-interface CollectKqlDataParams {
-  data: DataSourceMachineDeps['data'];
-  filters?: Filter[];
-  query?: Query;
-  time?: TimeRange;
-  streamName: string;
-  size?: number;
 }
 
 interface SearchParamsOptions {
@@ -43,7 +31,11 @@ interface SearchParamsOptions {
   timeRange?: TimeRange;
 }
 
-type CollectorParams = Pick<CollectKqlDataParams, 'data' | 'streamName'>;
+interface CollectKqlDataParams extends SearchParamsOptions {
+  data: DataSourceMachineDeps['data'];
+}
+
+type CollectorParams = Pick<CollectKqlDataParams, 'data' | 'index'>;
 
 /**
  * Creates a data collector actor that fetches sample documents based on the data source type
@@ -51,10 +43,7 @@ type CollectorParams = Pick<CollectKqlDataParams, 'data' | 'streamName'>;
 export function createDataCollectorActor({ data }: Pick<DataSourceMachineDeps, 'data'>) {
   return fromObservable<SampleDocument[], SamplesFetchInput>(({ input }) => {
     const { dataSource, streamName } = input;
-    return getDataCollectorForDataSource(dataSource)({
-      data,
-      streamName,
-    });
+    return getDataCollectorForDataSource(dataSource)({ data, index: streamName });
   });
 }
 
@@ -63,51 +52,16 @@ export function createDataCollectorActor({ data }: Pick<DataSourceMachineDeps, '
  */
 function getDataCollectorForDataSource(dataSource: EnrichmentDataSourceWithUIAttributes) {
   if (dataSource.type === 'random-samples') {
-    return collectRandomSamples;
+    return (args: CollectorParams) => collectKqlData(args);
   }
   if (dataSource.type === 'kql-samples') {
-    return (args: CollectorParams) => collectKqlSamples({ ...args, dataSource });
+    return (args: CollectorParams) =>
+      collectKqlData({ ...args, ...pick(dataSource, ['filters', 'query', 'timeRange']) });
   }
   if (dataSource.type === 'custom-samples') {
-    return () => collectCustomSamples({ dataSource });
+    return () => of(dataSource.documents);
   }
   return () => of<SampleDocument[]>([]);
-}
-
-/**
- * Collects random samples from the specified stream
- */
-function collectRandomSamples({ data, streamName }: CollectorParams): Observable<SampleDocument[]> {
-  return collectKqlData({ data, streamName });
-}
-
-/**
- * Collects samples based on KQL query
- */
-function collectKqlSamples({
-  data,
-  dataSource,
-  streamName,
-}: CollectorParams & {
-  dataSource: KqlSamplesDataSourceWithUIAttributes;
-}): Observable<SampleDocument[]> {
-  return collectKqlData({
-    data,
-    time: dataSource.time,
-    query: dataSource.query,
-    streamName,
-  });
-}
-
-/**
- * Returns custom sample documents directly
- */
-function collectCustomSamples({
-  dataSource,
-}: {
-  dataSource: CustomSamplesDataSourceWithUIAttributes;
-}): Observable<SampleDocument[]> {
-  return of(dataSource.documents);
 }
 
 /**
@@ -115,28 +69,14 @@ function collectCustomSamples({
  */
 function collectKqlData({
   data,
-  filters,
-  query,
-  time,
-  streamName,
-  size,
+  ...searchParams
 }: CollectKqlDataParams): Observable<SampleDocument[]> {
   const abortController = new AbortController();
+  const params = buildSamplesSearchParams(searchParams);
 
   return new Observable((observer) => {
     const subscription = data.search
-      .search(
-        {
-          params: buildSamplesSearchParams({
-            filters,
-            index: streamName,
-            query,
-            timeRange: time,
-            size,
-          }),
-        },
-        { abortSignal: abortController.signal }
-      )
+      .search({ params }, { abortSignal: abortController.signal })
       .pipe(filter(isValidSearchResult), map(extractDocumentsFromResult))
       .subscribe(observer);
 

@@ -28,8 +28,6 @@ import { DataSourcesList } from './data_sources_list';
 export const SimulationPlayground = () => {
   const { viewSimulationPreviewData, viewSimulationDetectedFields } = useStreamEnrichmentEvents();
 
-  const definition = useStreamEnrichmentSelector((state) => state.context.definition);
-
   const isViewingDataPreview = useStreamEnrichmentSelector((state) =>
     state.matches({
       ready: { enrichment: { displayingSimulation: 'viewDataPreview' } },
@@ -82,9 +80,7 @@ export const SimulationPlayground = () => {
       </EuiFlexItem>
       <EuiSpacer size="m" />
       {isViewingDataPreview && <ProcessorOutcomePreview />}
-      {isViewingDetectedFields && (
-        <DetectedFieldsEditor definition={definition} detectedFields={detectedFields} />
-      )}
+      {isViewingDetectedFields && <DetectedFieldsEditor detectedFields={detectedFields} />}
     </>
   );
 };
