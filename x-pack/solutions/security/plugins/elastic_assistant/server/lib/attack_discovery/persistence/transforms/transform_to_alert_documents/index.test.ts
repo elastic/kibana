@@ -95,7 +95,7 @@ describe('Transform attack discoveries to alert documents', () => {
       const result = transformToAlertDocuments(defaultProps);
 
       expect(result[0][ALERT_UUID]).toBe(
-        'c12dc54a0eb70f7c1d5db7f343f8dfc45abd207b3e5a4d9effd6ab39bc9437ae'
+        'bbcce335305e816a8603787f5e74f938d7fbbb810b28e707ba82a8d864ed90f5'
       );
     });
 
@@ -139,8 +139,8 @@ describe('Transform attack discoveries to alert documents', () => {
 
       const uuids = result.map((alert) => alert[ALERT_UUID]);
       expect(uuids).toEqual([
-        'c12dc54a0eb70f7c1d5db7f343f8dfc45abd207b3e5a4d9effd6ab39bc9437ae',
-        'da901c94a3fdb8f0e336ec0064b88bd9a072dfc568325da5748f23f5670f1e51',
+        'bbcce335305e816a8603787f5e74f938d7fbbb810b28e707ba82a8d864ed90f5',
+        '0a5cbb77551efa52f4ed4862d8ad1beab2b9e8628993e3d1597a7924601d1c6b',
       ]);
     });
 

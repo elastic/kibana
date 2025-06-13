@@ -194,7 +194,7 @@ export const transformToAlertDocuments = ({
     const alertHash = generateAttackDiscoveryAlertHash({
       attackDiscovery,
       connectorId: restParams.apiConfig.connectorId,
-      ownerId: authenticatedUser.profile_uid ?? authenticatedUser.username,
+      ownerId: authenticatedUser.username ?? authenticatedUser.profile_uid,
       spaceId,
     });
 
