@@ -77,20 +77,22 @@ export const registerESQLExtensionsRoute = (
         })) as ResolveIndexResponse;
 
         const sources = {
-          ...localSources,
-          ...ccsSources,
+          indices: [...(localSources.indices ?? []), ...(ccsSources.indices ?? [])],
+          aliases: [...(localSources.aliases ?? []), ...(ccsSources.aliases ?? [])],
+          data_streams: [...(localSources.data_streams ?? []), ...(ccsSources.data_streams ?? [])],
         };
 
         // Validate solutionId
         const validSolutionId = isSolutionId(solutionId) ? solutionId : 'oblt'; // No solutionId provided, or invalid
-        // return the recommended queries for now, we will add more extensions later
         const recommendedQueries = extensionsRegistry.getRecommendedQueries(
           query,
           sources,
           validSolutionId
         );
         return response.ok({
-          body: recommendedQueries,
+          body: {
+            recommendedQueries,
+          },
         });
       } catch (error) {
         logger.get().debug(error);

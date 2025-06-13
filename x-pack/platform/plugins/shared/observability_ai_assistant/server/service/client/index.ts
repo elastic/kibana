@@ -201,11 +201,7 @@ export class ObservabilityAIAssistantClient {
     kibanaPublicUrl?: string;
     userInstructions?: Instruction[];
     simulateFunctionCalling?: boolean;
-    disableFunctions?:
-      | boolean
-      | {
-          except: string[];
-        };
+    disableFunctions?: boolean;
   }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
     return withInferenceSpan('run_tools', () => {
       const isConversationUpdate = persist && !!predefinedConversationId;
@@ -252,7 +248,9 @@ export class ObservabilityAIAssistantClient {
             applicationInstructions: functionClient.getInstructions(),
             kbUserInstructions,
             apiUserInstructions,
-            availableFunctionNames: functionClient.getFunctions().map((fn) => fn.definition.name),
+            availableFunctionNames: disableFunctions
+              ? []
+              : functionClient.getFunctions().map((fn) => fn.definition.name),
           });
         }),
         shareReplay()
