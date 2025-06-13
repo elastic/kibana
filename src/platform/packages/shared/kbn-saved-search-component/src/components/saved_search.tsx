@@ -108,7 +108,6 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
     solutionNavIdOverride,
     timeRange,
     timestampField,
-    columns,
   ]);
 
   if (error) {
