@@ -6,57 +6,24 @@
  */
 
 import type { Subscription } from 'rxjs';
-import type {
-  KibanaRequest,
-  Logger,
-  SavedObjectsClientContract,
-  SavedObjectsServiceStart,
-  SavedObjectsUpdateResponse,
-} from '@kbn/core/server';
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import type { Logger, SavedObjectsUpdateResponse } from '@kbn/core/server';
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
-
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import type { AgentPolicySOAttributes } from '../types';
-
 import type { LicenseService } from '../../common/services/license';
-
 import type { AgentPolicy } from '../../common';
 import {
   isAgentPolicyValidForLicense,
   unsetAgentPolicyAccordingToLicenseLevel,
 } from '../../common/services/agent_policy_config';
-
 import { agentPolicyService, getAgentPolicySavedObjectType } from './agent_policy';
+import { appContextService } from './app_context';
 
 export class PolicyWatcher {
-  private logger: Logger;
   private subscription: Subscription | undefined;
-  private soStart: SavedObjectsServiceStart;
-  constructor(soStart: SavedObjectsServiceStart, logger: Logger) {
-    this.logger = logger;
-    this.soStart = soStart;
-  }
 
-  /**
-   * The policy watcher is not called as part of a HTTP request chain, where the
-   * request-scoped SOClient could be passed down. It is called via license observable
-   * changes. We are acting as the 'system' in response to license changes, so we are
-   * intentionally using the system user here. Be very aware of what you are using this
-   * client to do
-   */
-  private makeInternalSOClient(soStart: SavedObjectsServiceStart): SavedObjectsClientContract {
-    const fakeRequest = {
-      headers: {},
-      getBasePath: () => '',
-      path: '/',
-      route: { settings: {} },
-      url: { href: {} },
-      raw: { req: { url: '/' } },
-    } as unknown as KibanaRequest;
-    return soStart.getScopedClient(fakeRequest, { excludedExtensions: [SECURITY_EXTENSION_ID] });
-  }
+  constructor(private logger: Logger) {}
 
   public start(licenseService: LicenseService) {
     this.subscription = licenseService.getLicenseInformation$()?.subscribe(this.watch.bind(this));
@@ -71,9 +38,10 @@ export class PolicyWatcher {
   public async watch(license: ILicense) {
     const log = this.logger.get('endpoint', 'agentPolicyLicenseWatch');
 
+    const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
     const agentPolicyFetcher = await agentPolicyService.fetchAllAgentPolicies(
-      this.makeInternalSOClient(this.soStart),
-      { fields: ['is_protected', 'id', 'revision'] } // Don't forget to extend this to include all fields that are used in the `isAgentPolicyValidForLicense` function
+      soClient,
+      { fields: ['is_protected', 'id', 'revision'], spaceId: '*' } // Don't forget to extend this to include all fields that are used in the `isAgentPolicyValidForLicense` function
     );
 
     log.info('Checking agent policies for compliance with the current license.');
@@ -93,23 +61,24 @@ export class PolicyWatcher {
       }
       const savedObjectType = await getAgentPolicySavedObjectType();
 
-      const { saved_objects: bulkUpdateSavedObjects } = await this.makeInternalSOClient(
-        this.soStart
-      ).bulkUpdate<AgentPolicySOAttributes>(
-        policiesToUpdate.map((policy) => {
-          const { id, revision, ...policyContent } = policy;
-          return {
-            type: savedObjectType,
-            id,
-            attributes: {
-              ...policyContent,
-              revision: revision + 1,
-              updated_at: new Date().toISOString(),
-              updated_by: 'system',
-            },
-          };
-        })
-      );
+      const { saved_objects: bulkUpdateSavedObjects } =
+        await soClient.bulkUpdate<AgentPolicySOAttributes>(
+          policiesToUpdate.map((policy) => {
+            const { id, revision, ...policyContent } = policy;
+            const updatedPolicy = {
+              type: savedObjectType,
+              id,
+              attributes: {
+                ...policyContent,
+                revision: revision + 1,
+                updated_at: new Date().toISOString(),
+                updated_by: 'system',
+              },
+              ...(policyContent.space_ids?.length ? { namespace: policyContent.space_ids[0] } : {}),
+            };
+            return updatedPolicy;
+          })
+        );
       updatedAgentPolicies.push(...bulkUpdateSavedObjects);
     }
 
@@ -147,7 +116,7 @@ export class PolicyWatcher {
     } else {
       log.error(
         `Done - all ${failedPolicies.length} failed to update. Errors encountered:\n${failedPolicies
-          .map((e) => `Policy [${e.id}] failed to update due to error: ${e.error}`)
+          .map((e) => `Policy [${e.id}] failed to update due to error: ${e.error.message}`)
           .join('\n')}`
       );
     }

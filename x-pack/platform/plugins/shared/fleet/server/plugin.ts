@@ -752,7 +752,7 @@ export class FleetPlugin
 
     const logger = appContextService.getLogger();
 
-    this.policyWatcher = new PolicyWatcher(core.savedObjects, logger);
+    this.policyWatcher = new PolicyWatcher(logger);
 
     this.policyWatcher.start(licenseService);
 
