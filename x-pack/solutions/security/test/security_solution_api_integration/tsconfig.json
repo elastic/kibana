@@ -57,5 +57,8 @@
     "@kbn/security-plugin-types-common",
     "@kbn/babel-register",
     "@kbn/config-schema",
+    "@kbn/test-suites-xpack/security_solution_endpoint",
+    "@kbn/test-suites-xpack-platform",
+    "@kbn/test-suites-xpack",
   ]
 }
