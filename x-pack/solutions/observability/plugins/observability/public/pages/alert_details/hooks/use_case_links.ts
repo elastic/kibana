@@ -33,9 +33,13 @@ export function useCaseLinks(cases?: Cases): CaseLinks {
 
   const basePath = httpBasePath.serverBasePath;
   useEffect(() => {
-    return spaces?.getActiveSpace$().subscribe((space) => {
+    if (!spaces) return;
+    const sub = spaces.getActiveSpace$().subscribe((space) => {
       setActiveSpace(space.id);
-    })?.unsubscribe;
+    });
+    return () => {
+      sub.unsubscribe();
+    };
   }, [spaces]);
   const { casesOverviewLocator, caseDetailLocator } = useMemo(
     () => ({
