@@ -13,6 +13,7 @@ import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import useMountedState from 'react-use/lib/useMountedState';
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import html2canvas from 'html2canvas';
 import { UI_SETTINGS } from '../../../common/constants';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { openSettingsFlyout } from '../../dashboard_renderer/settings/open_settings_flyout';
@@ -27,13 +28,17 @@ import { ShowShareModal } from './share/show_share_modal';
 export const useDashboardMenuItems = ({
   isLabsShown,
   setIsLabsShown,
+  isAddToCaseModalOpen,
   setIsAddToCaseModalOpen,
+  setScreenshot,
   maybeRedirect,
   showResetChange,
 }: {
   isLabsShown: boolean;
   setIsLabsShown: Dispatch<SetStateAction<boolean>>;
+  isAddToCaseModalOpen: boolean;
   setIsAddToCaseModalOpen: Dispatch<SetStateAction<boolean>>;
+  setScreenshot: Dispatch<SetStateAction<any>>;
   maybeRedirect: (result?: SaveDashboardReturn) => void;
   showResetChange?: boolean;
 }) => {
@@ -118,8 +123,22 @@ export const useDashboardMenuItems = ({
   /**
    * Register all of the top nav configs that can be used by dashboard.
    */
-
   const menuItems = useMemo(() => {
+    const generateScreenshot = async () => {
+      const element = document.getElementById('kibana-body');
+      if (!element) {
+        return null;
+      }
+
+      try {
+        const canvas = await html2canvas(element);
+        const dataUrl = canvas.toDataURL('image/png');
+        setScreenshot(dataUrl);
+      } catch (error) {
+        setScreenshot(null);
+      }
+    };
+
     return {
       fullScreen: {
         ...topNavStrings.fullScreen,
@@ -222,7 +241,10 @@ export const useDashboardMenuItems = ({
         id: 'add-to-case',
         testId: 'dashboardAddToCaseButton',
         disableButton: disableTopNav,
-        run: () => setIsAddToCaseModalOpen(true),
+        run: async () => {
+          await generateScreenshot();
+          setIsAddToCaseModalOpen(!isAddToCaseModalOpen);
+        },
       },
     };
   }, [
@@ -240,6 +262,8 @@ export const useDashboardMenuItems = ({
     resetChanges,
     isResetting,
     setIsAddToCaseModalOpen,
+    isAddToCaseModalOpen,
+    setScreenshot,
   ]);
 
   const resetChangesMenuItem = useMemo(() => {

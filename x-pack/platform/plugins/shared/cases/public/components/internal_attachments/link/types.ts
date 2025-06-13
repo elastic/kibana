@@ -10,4 +10,7 @@ export interface LinkAttachmentPersistedState {
   type: string;
   icon: string;
   label: string;
+  snapshot: {
+    imgData: string;
+  };
 }
