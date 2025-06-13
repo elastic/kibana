@@ -11,6 +11,7 @@ import { once } from 'lodash';
 import {
   InferenceCallToolRequest,
   InferenceCallToolResponse,
+  InferenceClient,
   InferenceListToolsResponse,
   InferenceTaskError,
   InferenceTaskErrorCode,
@@ -23,7 +24,6 @@ import {
   MCP_CONNECTOR_SUB_ACTION_TYPE_CALL_TOOL,
   MCP_CONNECTOR_SUB_ACTION_TYPE_LIST_TOOLS,
 } from '@kbn/mcp-connector-common';
-import { InferenceClient } from '../inference_client';
 import { getMCPConnectors } from './get_mcp_connectors';
 
 interface CreateMCPApiOptions {
@@ -35,7 +35,6 @@ interface CreateMCPApiOptions {
 export function createMCPApis({
   actions,
   request,
-  logger,
 }: CreateMCPApiOptions): Pick<InferenceClient, 'callMCPTool' | 'listMCPTools'> {
   const getActionsClient = once(() => {
     return actions.getActionsClientWithRequest(request);
@@ -64,8 +63,6 @@ export function createMCPApis({
           },
         } satisfies MCPCallToolParams,
       });
-
-      console.log(result);
 
       if (result.status === 'ok') {
         const response = result.data as CallToolResponse;

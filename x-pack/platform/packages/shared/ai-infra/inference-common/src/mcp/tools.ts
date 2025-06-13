@@ -4,11 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  ListToolsResponse,
-  CallToolRequest,
-  CallToolResponseResolved,
-} from '@kbn/mcp-connector-common';
+import { ListToolsResponse, CallToolRequest, CallToolResponse } from '@kbn/mcp-connector-common';
 
 export interface InferenceMCPConnector {
   connectorId: string;
@@ -22,8 +18,6 @@ export interface InferenceCallToolRequest extends CallToolRequest {
   connectorId: string;
 }
 
-export interface InferenceCallToolResponseResolved extends CallToolResponseResolved {
+export interface InferenceCallToolResponse extends CallToolResponse {
   connectorId: string;
 }
-
-export type InferenceCallToolResponse = InferenceCallToolResponseResolved;

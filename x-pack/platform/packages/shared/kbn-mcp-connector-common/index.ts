@@ -33,7 +33,6 @@ export {
 export type {
   CallToolRequest,
   CallToolResponse,
-  CallToolResponseResolved,
   Tool,
   ListToolsResponse,
   ContentPart,

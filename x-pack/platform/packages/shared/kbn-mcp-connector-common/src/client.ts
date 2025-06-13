@@ -18,11 +18,9 @@ export interface TextPart {
 
 export type ContentPart = TextPart;
 
-export interface CallToolResponseResolved {
+export interface CallToolResponse {
   content: ContentPart[];
 }
-
-export type CallToolResponse = CallToolResponseResolved;
 
 export interface Tool {
   name: string;
