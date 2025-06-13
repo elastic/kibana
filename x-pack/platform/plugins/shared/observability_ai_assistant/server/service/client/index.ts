@@ -48,7 +48,7 @@ import {
   type StreamingChatResponseEvent,
 } from '../../../common/conversation_complete';
 import { convertMessagesForInference } from '../../../common/convert_messages_for_inference';
-import { CompatibleJSONSchema, FunctionVisibility } from '../../../common/functions/types';
+import { CompatibleJSONSchema } from '../../../common/functions/types';
 import {
   type Instruction,
   type Conversation,
