@@ -13,12 +13,7 @@ import type { RegistrationCallback } from '../../service/types';
 import { registerElasticsearchFunction } from './elasticsearch';
 import { GET_DATASET_INFO_FUNCTION_NAME, registerGetDatasetInfoFunction } from './get_dataset_info';
 import { registerKibanaFunction } from './kibana';
-// import {
-//   registerExecuteConnectorFunction,
-//   EXECUTE_CONNECTOR_FUNCTION_NAME,
-//   registerGetConnectorInfoFunction,
-//   GET_CONNECTOR_INFO_FUNCTION_NAME,
-// } from './execute_connector';
+import { registerGetConnectorInfoFunction } from './execute_connector';
 import { GET_DATA_ON_SCREEN_FUNCTION_NAME } from './get_data_on_screen';
 import { registerExecuteConnectorAgent } from '../agents/execute_connector';
 
@@ -135,19 +130,6 @@ ${
       );
     }
 
-    // instructions.push(
-    //   `Before calling the "${EXECUTE_CONNECTOR_FUNCTION_NAME}" function, you MUST first call the "${GET_CONNECTOR_INFO_FUNCTION_NAME}" function.
-    //   This is required to:
-    //   1. Retrieve the list of available connectors.
-    //   2. Obtain the correct schema and required parameters for the connector you want to execute.
-    //   Once you receive the connector information:
-    //   - Select the correct connector by its "id".
-    //   - Construct the "params" object using the schema provided for that connector.
-    //   - Then, and only then, call the "${EXECUTE_CONNECTOR_FUNCTION_NAME}" function with the appropriate "id" and "params".
-
-    //   Skipping this process may result in errors, invalid schema usage, or failed executions.`
-    // );
-
     return instructions.map((instruction) => dedent(instruction));
   });
 
@@ -171,8 +153,7 @@ ${
   }
   registerGetDatasetInfoFunction(registrationParameters);
 
-  // registerGetConnectorInfoFunction(registrationParameters);
-  // registerExecuteConnectorFunction(registrationParameters);
+  registerGetConnectorInfoFunction(registrationParameters);
 
   registerExecuteConnectorAgent(registrationParameters);
 };

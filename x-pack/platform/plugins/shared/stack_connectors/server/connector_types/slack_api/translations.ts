@@ -10,3 +10,10 @@ import { i18n } from '@kbn/i18n';
 export const SLACK_CONNECTOR_NAME = i18n.translate('xpack.stackConnectors.slackApi.title', {
   defaultMessage: 'Slack API',
 });
+
+export const SLACK_CONNECTOR_DESCRIPTION = i18n.translate(
+  'xpack.stackConnectors.slackApi.description',
+  {
+    defaultMessage: 'Send messages to Slack channels using the Slack API.',
+  }
+);

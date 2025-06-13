@@ -188,6 +188,7 @@ export interface ActionType<
 > {
   id: string;
   name: string;
+  description?: string;
   maxAttempts?: number;
   minimumLicenseRequired: LicenseType;
   supportedFeatureIds: string[];

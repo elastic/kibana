@@ -270,6 +270,9 @@ export function getConnectorType(params: GetConnectorTypeParams): EmailConnector
     name: i18n.translate('xpack.stackConnectors.email.title', {
       defaultMessage: 'Email',
     }),
+    description: i18n.translate('xpack.stackConnectors.email.description', {
+      defaultMessage: 'Send emails.',
+    }),
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,
