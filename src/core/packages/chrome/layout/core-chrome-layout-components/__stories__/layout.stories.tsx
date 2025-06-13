@@ -12,6 +12,7 @@ import { Meta, StoryObj } from '@storybook/react';
 import { Global, css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { ChromeLayout, ChromeLayoutConfigProvider } from '..';
+import { LayoutDebugOverlay } from '../debug/LayoutDebugOverlay';
 import { Box } from './box';
 
 const styles = css`
@@ -24,6 +25,7 @@ const styles = css`
 `;
 
 interface StoryArgs {
+  debug: boolean;
   bannerHeight: number;
   footerHeight: number;
   headerHeight: number;
@@ -59,6 +61,7 @@ export default {
 } as Meta<PropsAndArgs>;
 
 const LayoutExample = ({
+  debug,
   includeBanner,
   includeFooter,
   includeSidebar,
@@ -73,122 +76,134 @@ const LayoutExample = ({
   } = useEuiTheme();
 
   return (
-    <ChromeLayoutConfigProvider value={{ ...props }}>
-      <ChromeLayout
-        banner={
-          includeBanner ? (
-            <Box color={colors.danger} backgroundColor={colors.textDanger} label="Global Banner" />
-          ) : null
-        }
-        footer={
-          includeFooter ? (
-            <Box color={colors.danger} backgroundColor={colors.textDanger} label="Global Footer" />
-          ) : null
-        }
-        header={
-          includeHeader ? (
-            <Box
-              label="Global Header"
-              color={colors.textParagraph}
-              backgroundColor={colors.backgroundFilledText}
-            />
-          ) : null
-        }
-        navigation={
-          includeNavigation ? (
-            <Box
-              label="Global Navigation"
-              color={colors.textPrimary}
-              backgroundColor={colors.primary}
-              labelCSS={css`
-                transform: translate(-50%, -50%) rotate(-90deg);
-              `}
-            />
-          ) : null
-        }
-        navigationPanel={
-          includeNavigationPanel ? (
-            <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
-              <EuiFlexItem
-                grow={false}
-                style={{ height: props.headerHeight }}
-                css={css`
-                  white-space: nowrap;
+    <>
+      {debug && <LayoutDebugOverlay />}
+      <ChromeLayoutConfigProvider value={{ ...props }}>
+        <ChromeLayout
+          banner={
+            includeBanner ? (
+              <Box
+                color={colors.danger}
+                backgroundColor={colors.textDanger}
+                label="Global Banner"
+              />
+            ) : null
+          }
+          footer={
+            includeFooter ? (
+              <Box
+                color={colors.danger}
+                backgroundColor={colors.textDanger}
+                label="Global Footer"
+              />
+            ) : null
+          }
+          header={
+            includeHeader ? (
+              <Box
+                label="Global Header"
+                color={colors.textParagraph}
+                backgroundColor={colors.backgroundFilledText}
+              />
+            ) : null
+          }
+          navigation={
+            includeNavigation ? (
+              <Box
+                label="Global Navigation"
+                color={colors.textPrimary}
+                backgroundColor={colors.primary}
+                labelCSS={css`
+                  transform: translate(-50%, -50%) rotate(-90deg);
                 `}
-              >
-                <Box
-                  label="Nav Header"
-                  color={colors.textPrimary}
-                  backgroundColor={colors.primary}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={true}>
-                <Box
-                  label="Navigation Panel"
-                  color={colors.textPrimary}
-                  backgroundColor={colors.primary}
-                  labelCSS={css`
-                    text-align: center;
+              />
+            ) : null
+          }
+          navigationPanel={
+            includeNavigationPanel ? (
+              <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
+                <EuiFlexItem
+                  grow={false}
+                  style={{ height: props.headerHeight }}
+                  css={css`
+                    white-space: nowrap;
                   `}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ) : null
-        }
-        sidebar={
-          includeSidebar ? (
-            <Box
-              label="Global Sidebar"
-              color={colors.accentSecondary}
-              backgroundColor={colors.textAccentSecondary}
-              labelCSS={css`
-                transform: translate(-50%, -50%) rotate(90deg);
-              `}
-            />
-          ) : null
-        }
-        sidebarPanel={
-          includeSidebarPanel ? (
-            <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
-              <EuiFlexItem
-                grow={false}
-                style={{ height: props.headerHeight }}
-                css={css`
-                  white-space: nowrap;
+                >
+                  <Box
+                    label="Nav Header"
+                    color={colors.textPrimary}
+                    backgroundColor={colors.primary}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={true}>
+                  <Box
+                    label="Navigation Panel"
+                    color={colors.textPrimary}
+                    backgroundColor={colors.primary}
+                    labelCSS={css`
+                      text-align: center;
+                    `}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ) : null
+          }
+          sidebar={
+            includeSidebar ? (
+              <Box
+                label="Global Sidebar"
+                color={colors.accentSecondary}
+                backgroundColor={colors.textAccentSecondary}
+                labelCSS={css`
+                  transform: translate(-50%, -50%) rotate(90deg);
                 `}
-              >
-                <Box
-                  label="Sidebar Header"
-                  color={colors.accentSecondary}
-                  backgroundColor={colors.textAccentSecondary}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <Box
-                  label="Sidebar Panel"
-                  color={colors.accentSecondary}
-                  backgroundColor={colors.textAccentSecondary}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ) : null
-        }
-      >
-        <Box
-          label="Application"
-          color={colors.textWarning}
-          backgroundColor={colors.warning}
-          rootCSS={css`
-            height: 1000px;
-          `}
-        />
-      </ChromeLayout>
-    </ChromeLayoutConfigProvider>
+              />
+            ) : null
+          }
+          sidebarPanel={
+            includeSidebarPanel ? (
+              <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
+                <EuiFlexItem
+                  grow={false}
+                  style={{ height: props.headerHeight }}
+                  css={css`
+                    white-space: nowrap;
+                  `}
+                >
+                  <Box
+                    label="Sidebar Header"
+                    color={colors.accentSecondary}
+                    backgroundColor={colors.textAccentSecondary}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <Box
+                    label="Sidebar Panel"
+                    color={colors.accentSecondary}
+                    backgroundColor={colors.textAccentSecondary}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ) : null
+          }
+        >
+          <Box
+            label="Application"
+            color={colors.textWarning}
+            backgroundColor={colors.warning}
+            rootCSS={css`
+              height: 1000px;
+            `}
+          />
+        </ChromeLayout>
+      </ChromeLayoutConfigProvider>
+    </>
   );
 };
 
 export const Layout: StoryObj<PropsAndArgs> = {
   args: {
+    debug: false,
     includeBanner: true,
     includeFooter: true,
     includeNavigationPanel: true,
@@ -205,6 +220,10 @@ export const Layout: StoryObj<PropsAndArgs> = {
     sidebarWidth: 48,
   },
   argTypes: {
+    debug: {
+      control: 'boolean',
+      description: 'Whether to include the debug overlay in the layout',
+    },
     includeBanner: {
       control: 'boolean',
       description: 'Whether to include the banner in the layout',
