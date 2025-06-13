@@ -34,7 +34,7 @@ const metricRuleTypes = [
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
 ];
 
-export const getMetricsAlertingFeatures = (): KibanaFeatureConfig => {
+export const getMetricsFeature = (): KibanaFeatureConfig => {
   const metricAlertingFeatures = metricRuleTypes.map((ruleTypeId) => {
     const consumers = [METRICS_FEATURE_ID, ALERTING_FEATURE_ID, ...DEPRECATED_ALERTING_CONSUMERS];
 
@@ -112,7 +112,7 @@ const logsRuleTypes = [
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
 ];
-export const getLogsAlertingFeatures = (): KibanaFeatureConfig => {
+export const getLogsFeature = (): KibanaFeatureConfig => {
   const logsAlertingFeatures = logsRuleTypes.map((ruleTypeId) => {
     const consumers = [LOGS_FEATURE_ID, ALERTING_FEATURE_ID, ...DEPRECATED_ALERTING_CONSUMERS];
 

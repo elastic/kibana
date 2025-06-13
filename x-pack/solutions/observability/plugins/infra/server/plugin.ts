@@ -20,7 +20,7 @@ import {
 import { type AlertsLocatorParams, alertsLocatorID } from '@kbn/observability-plugin/common';
 import { mapValues } from 'lodash';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
-import { getLogsAlertingFeatures, getMetricsAlertingFeatures } from './features';
+import { getLogsFeature, getMetricsFeature } from './features';
 import { registerRoutes } from './infra_server';
 import type {
   InfraServerPluginSetupDeps,
@@ -179,8 +179,8 @@ export class InfraServerPlugin
       plugins: libsPlugins,
     };
 
-    plugins.features.registerKibanaFeature(getMetricsAlertingFeatures());
-    plugins.features.registerKibanaFeature(getLogsAlertingFeatures());
+    plugins.features.registerKibanaFeature(getMetricsFeature());
+    plugins.features.registerKibanaFeature(getLogsFeature());
 
     // Register an handler to retrieve the fallback logView starting from a source configuration
     plugins.logsShared.logViews.registerLogViewFallbackHandler(async (sourceId, { soClient }) => {
