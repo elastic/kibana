@@ -6,12 +6,7 @@
  */
 
 import { isHumanMessage, isAIMessage, AIMessage, ToolMessage } from '@langchain/core/messages';
-import {
-  ToolSourceType,
-  ToolCallWithResult,
-  ToolCallStep,
-  ConversationRoundStepType,
-} from '@kbn/onechat-common';
+import { ToolCallWithResult, ToolCallStep, ConversationRoundStepType } from '@kbn/onechat-common';
 import { conversationLangchainMessages } from './to_langchain_messages';
 
 describe('conversationLangchainMessages', () => {
@@ -24,7 +19,7 @@ describe('conversationLangchainMessages', () => {
     result: string
   ): ToolCallWithResult => ({
     toolCallId: id,
-    toolId: { toolId, sourceType: ToolSourceType.builtIn, sourceId: 'builtIn' },
+    toolId: { toolId, providerId: 'provider-1' },
     args,
     result,
   });
