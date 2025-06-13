@@ -6,9 +6,17 @@
  */
 import { EuiText } from '@elastic/eui';
 import React from 'react';
+import { css } from '@emotion/react';
 
 export const IncrementalIdText = React.memo<{ incrementalId: number }>(({ incrementalId }) => (
-  <EuiText color="subdued" size="s" data-test-subj="cases-incremental-id-text">
+  <EuiText
+    color="subdued"
+    size="s"
+    data-test-subj="cases-incremental-id-text"
+    css={css`
+      user-select: all;
+    `}
+  >
     {'#'}
     {incrementalId}
   </EuiText>
