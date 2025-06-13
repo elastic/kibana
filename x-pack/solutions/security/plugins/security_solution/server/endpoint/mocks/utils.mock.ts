@@ -115,7 +115,7 @@ export const applyEsClientSearchMock = <TDocument = unknown>({
     ) {
       const searchResponse = typeof response === 'function' ? response(params) : response;
 
-      if (pitUsage && !searchResponse.pit_id) {
+      if (pitUsage) {
         const mockPitId = pit?.id ?? '';
         searchResponse.pit_id = searchResponse.pit_id ?? mockPitId;
 
