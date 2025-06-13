@@ -292,7 +292,7 @@ export const performBulkUpdate = async <T>(
       const encryptedUpdatedAttributes = await encryptionHelper.optionallyEncryptAttributes(
         type,
         id,
-        savedObjectNamespaces ?? savedObjectNamespace,
+        objectNamespace || namespace,
         documentToSave[type]
       );
 
