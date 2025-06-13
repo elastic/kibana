@@ -20,7 +20,10 @@ import {
   EuiTab,
   EuiTabs,
   EuiButtonEmpty,
+  useEuiTheme,
 } from '@elastic/eui';
+import { dynamic } from '@kbn/shared-ux-utility';
+import { css } from '@emotion/react';
 import { ProcessorOutcomePreview } from './processor_outcome_preview';
 import {
   useSimulatorSelector,
@@ -28,11 +31,14 @@ import {
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
 import { DetectedFieldsEditor } from './detected_fields_editor';
-import { DataSourcesFlyout } from './data_sources_flyout';
 import {
   DataSourceActorRef,
   useDataSourceSelector,
 } from './state_management/data_source_state_machine';
+
+const DataSourcesFlyout = dynamic(() =>
+  import('./data_sources_flyout').then((mod) => ({ default: mod.DataSourcesFlyout }))
+);
 
 export const SimulationPlayground = () => {
   const { viewSimulationPreviewData, viewSimulationDetectedFields } = useStreamEnrichmentEvents();
@@ -147,6 +153,7 @@ const manageDataSourcesLabel = i18n.translate(
 );
 
 const DataSourceListItem = ({ dataSourceRef }: { dataSourceRef: DataSourceActorRef }) => {
+  const { euiTheme } = useEuiTheme();
   const dataSourceState = useDataSourceSelector(dataSourceRef, (snapshot) => snapshot);
 
   const isEnabled = dataSourceState.matches('enabled');
@@ -155,16 +162,25 @@ const DataSourceListItem = ({ dataSourceRef }: { dataSourceRef: DataSourceActorR
   };
 
   const content = (
-    <>
-      <EuiText component="span" size="s" className="eui-textTruncate">
-        <strong>
-          {dataSourceState.context.dataSource.name || dataSourceState.context.dataSource.type}
-        </strong>
-      </EuiText>{' '}
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="xs"
+      css={css`
+        max-width: 160px;
+      `}
+    >
+      <strong
+        className="eui-textTruncate"
+        css={css`
+          font-weight: ${euiTheme.font.weight.semiBold};
+        `}
+      >
+        {dataSourceState.context.dataSource.name || dataSourceState.context.dataSource.type}
+      </strong>
       <EuiText component="span" size="s" color="subdued">
         ({dataSourceState.context.data.length})
       </EuiText>
-    </>
+    </EuiFlexGroup>
   );
 
   return (

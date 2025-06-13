@@ -13,7 +13,12 @@ import {
   getMappedSchemaFields,
   getUnmappedSchemaFields,
 } from '../simulation_state_machine';
-import { EnrichmentUrlState, RandomSamplesDataSource } from '../../../../../../common/url_schema';
+import {
+  EnrichmentUrlState,
+  KqlSamplesDataSource,
+  RandomSamplesDataSource,
+  CustomSamplesDataSource,
+} from '../../../../../../common/url_schema';
 import { dataSourceConverter } from '../../utils';
 
 export const defaultRandomSamplesDataSource: RandomSamplesDataSource = {
@@ -22,6 +27,28 @@ export const defaultRandomSamplesDataSource: RandomSamplesDataSource = {
     defaultMessage: 'Random samples',
   }),
   enabled: true,
+};
+
+export const defaultKqlSamplesDataSource: KqlSamplesDataSource = {
+  type: 'kql-samples',
+  name: '',
+  enabled: true,
+  time: {
+    from: 'now-15m',
+    to: 'now',
+  },
+  filters: [],
+  query: {
+    language: 'kuery',
+    query: '',
+  },
+};
+
+export const defaultCustomSamplesDataSource: CustomSamplesDataSource = {
+  type: 'custom-samples',
+  name: '',
+  enabled: true,
+  documents: [],
 };
 
 export const defaultEnrichmentUrlState: EnrichmentUrlState = {
