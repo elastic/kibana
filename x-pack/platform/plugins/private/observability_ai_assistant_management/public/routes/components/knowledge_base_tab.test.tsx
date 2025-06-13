@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent } from '@testing-library/react';
+import { act, fireEvent } from '@testing-library/react';
 import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
 import { useGenAIConnectors, useKnowledgeBase } from '@kbn/ai-assistant/src/hooks';
 import { render } from '../../helpers/test_helper';
@@ -101,6 +101,47 @@ describe('KnowledgeBaseTab', () => {
       expect(
         getByTestId('observabilityAiAssistantWelcomeMessageSetUpKnowledgeBaseButton')
       ).toBeInTheDocument();
+    });
+  });
+
+  describe('when the knowledge base is re-indexing', () => {
+    beforeEach(() => {
+      useKnowledgeBaseMock.mockReturnValue({
+        status: {
+          value: {
+            kbState: KnowledgeBaseState.READY,
+            enabled: true,
+            isReIndexing: true,
+          },
+        },
+        isInstalling: false,
+        install: jest.fn(),
+      });
+    });
+
+    it('should show a warning callout while re-indexing is in progress', async () => {
+      const { getByTestId, queryByTestId, rerender } = render(<KnowledgeBaseTab />);
+      expect(getByTestId('knowledgeBaseReindexingCallOut')).toBeInTheDocument();
+
+      // Re-indexing completed
+      useKnowledgeBaseMock.mockReturnValue({
+        status: {
+          value: {
+            kbState: KnowledgeBaseState.READY,
+            enabled: true,
+            isReIndexing: false,
+          },
+        },
+        isInstalling: false,
+        install: jest.fn(),
+      });
+
+      await act(async () => {
+        rerender(<KnowledgeBaseTab />);
+      });
+
+      // Callout is no longer shown
+      expect(queryByTestId('knowledgeBaseReindexingCallOut')).not.toBeInTheDocument();
     });
   });
 
