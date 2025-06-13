@@ -12,6 +12,12 @@ import type {
 } from '@kbn/ml-common-types/ml_server_info';
 import type { MlApi } from '@kbn/ml-services/ml_api_service';
 
+let defaults: MlServerDefaults = {
+  anomaly_detectors: {},
+  datafeeds: {},
+};
+let limits: MlServerLimits = {};
+
 const cloudInfo: CloudInfo = {
   cloudId: null,
   isCloud: false,
