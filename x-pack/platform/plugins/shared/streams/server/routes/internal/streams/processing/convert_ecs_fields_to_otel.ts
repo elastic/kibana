@@ -6,6 +6,12 @@
  */
 
 /**
+ * THESE MAPPINGS HAVE BEEN GENERATED FROM THE ECS DOCUMENTATION - DO NOT MODIFY MANUALLY!
+ *
+ * See `x-pack/platform/plugins/shared/streams/scripts/create_otel_mappings.ts` for the script that generates these mappings.
+ */
+
+/**
  * The name of the ECS field is identical to the SemConv attribute name and has (practically) the same semantics.
  *
  * See https://www.elastic.co/docs/reference/ecs/ecs-otel-alignment-details for full reference.
