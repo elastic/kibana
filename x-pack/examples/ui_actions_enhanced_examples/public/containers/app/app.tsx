@@ -8,18 +8,15 @@
 import React from 'react';
 import { EuiPage } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Page } from '../../components/page';
 import { DrilldownsManager } from '../drilldowns_manager';
 
 export const App = ({ core }: { core: CoreStart }) => {
-  return (
-    <KibanaRenderContextProvider i18n={core.i18n} theme={core.theme}>
-      <EuiPage>
-        <Page title={'UI Actions Enhanced'}>
-          <DrilldownsManager />
-        </Page>
-      </EuiPage>
-    </KibanaRenderContextProvider>
+  return core.rendering.addContext(
+    <EuiPage>
+      <Page title={'UI Actions Enhanced'}>
+        <DrilldownsManager />
+      </Page>
+    </EuiPage>
   );
 };
