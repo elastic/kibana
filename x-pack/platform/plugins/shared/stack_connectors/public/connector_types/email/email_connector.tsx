@@ -131,6 +131,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
       const emailConfig = await getEmailServiceConfig(availableEmailServices[0].value as string);
       updateFieldValues({
         config: {
+          service: availableEmailServices[0].value,
           host: emailConfig?.host,
           port: emailConfig?.port,
           secure: emailConfig?.secure,
