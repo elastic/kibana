@@ -6,11 +6,14 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { LazySavedSearchComponent } from '@kbn/saved-search-component';
 import useAsync from 'react-use/lib/useAsync';
+import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
+import { getLogsLocatorFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 import { buildCombinedAssetFilter } from '../../../../../../utils/filters/build';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
@@ -37,10 +40,13 @@ export const LogsSavedSearchComponent = () => {
       data: {
         search: { searchSource },
       },
+      share: { url },
     },
   } = useKibanaContextForPlugin();
 
   const logSources = useAsync(logSourcesService.getFlattenedLogSources);
+
+  const logsLocator = getLogsLocatorFromUrlService(url);
 
   const {
     parsedDateRange: { from, to },
@@ -58,23 +64,61 @@ export const LogsSavedSearchComponent = () => {
 
   const memoizedTimeRange = useMemo(() => ({ from, to }), [from, to]);
 
+  const discoverLink = logsLocator?.getRedirectUrl({
+    timeRange: memoizedTimeRange,
+    query: hostsFilterQuery,
+  });
+
   if (!hostNodes.length && !loading) {
     return <LogsTabNoResults />;
   }
 
   return logSources.value ? (
-    <LazySavedSearchComponent
-      dependencies={{ embeddable, searchSource, dataViews }}
-      index={logSources.value}
-      timeRange={memoizedTimeRange}
-      query={hostsFilterQuery}
-      height="60vh"
-      displayOptions={{
-        solutionNavIdOverride: 'oblt',
-        enableDocumentViewer: true,
-        enableFilters: false,
-      }}
-    />
+    <>
+      {!loading && (
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" style={{ marginBottom: 8 }}>
+          <EuiFlexItem grow={false}>
+            <EuiLink
+              data-test-subj="infraHostLogsTabOpenInDiscoverLink"
+              href={discoverLink}
+              target="_blank"
+              color="primary"
+              css={css`
+                display: flex;
+                align-items: center;
+              `}
+              external={false}
+            >
+              <EuiIcon
+                type="discoverApp"
+                size="s"
+                color="primary"
+                css={css`
+                  margin-right: 4px;
+                `}
+              />
+              <EuiText size="xs">
+                {i18n.translate('xpack.infra.hosts.logs.openInDiscoverLabel', {
+                  defaultMessage: 'Open in Discover',
+                })}
+              </EuiText>
+            </EuiLink>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+      <LazySavedSearchComponent
+        dependencies={{ embeddable, searchSource, dataViews }}
+        index={logSources.value}
+        timeRange={memoizedTimeRange}
+        query={hostsFilterQuery}
+        height="60vh"
+        displayOptions={{
+          solutionNavIdOverride: 'oblt',
+          enableDocumentViewer: true,
+          enableFilters: false,
+        }}
+      />
+    </>
   ) : null;
 };
 
