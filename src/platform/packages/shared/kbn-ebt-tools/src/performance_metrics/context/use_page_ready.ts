@@ -20,6 +20,16 @@ interface UsePageReadyProps {
   isRefreshing: boolean;
 }
 
+// Generic hook to store the previous value of a variable
+const usePrevious = <T>(value: T): T | undefined => {
+  const ref = useRef<T>();
+  useEffect(() => {
+    ref.current = value;
+  }, [value]);
+
+  return ref.current;
+};
+
 export const usePageReady = ({
   isInitialLoadReported,
   isReady,
@@ -29,28 +39,34 @@ export const usePageReady = ({
   meta,
 }: UsePageReadyProps) => {
   const { onPageReady, onPageRefreshStart } = usePerformanceContext();
-  const prevIsRefreshing = useRef<boolean>(false);
+  const prevIsRefreshing = usePrevious(isRefreshing);
 
   useEffect(() => {
-    // We don't want to do anything here if the initial load has not been reported yet
-    // This hook is to report the refresh load
-    if (!isInitialLoadReported) return;
+    // Skip until either the page is ready for the first time or a refresh cycle begins
+    if (!isInitialLoadReported && !isReady) return;
 
-    if (!prevIsRefreshing.current && isRefreshing) {
-      onPageRefreshStart();
-    } else if (prevIsRefreshing.current && !isRefreshing) {
-      // Only call onPageReady when isRefreshing changes from true to false
-      onPageReady({ customMetrics, meta });
-    }
-
-    // Update the previous value
-    prevIsRefreshing.current = isRefreshing;
-  }, [customMetrics, isInitialLoadReported, isRefreshing, meta, onPageReady, onPageRefreshStart]);
-
-  useEffect(() => {
+    // Initial load flow
     if (isReady && !isInitialLoadReported) {
       onPageReady({ customMetrics, meta });
       onInitialLoadReported();
+      return;
     }
-  }, [customMetrics, isInitialLoadReported, isReady, meta, onInitialLoadReported, onPageReady]);
+
+    // Refresh flow (only after the initial load has been reported)
+    if (!prevIsRefreshing && isRefreshing) {
+      onPageRefreshStart();
+    } else if (prevIsRefreshing && !isRefreshing) {
+      onPageReady({ customMetrics, meta });
+    }
+  }, [
+    customMetrics,
+    isInitialLoadReported,
+    isReady,
+    isRefreshing,
+    meta,
+    onInitialLoadReported,
+    onPageReady,
+    onPageRefreshStart,
+    prevIsRefreshing,
+  ]);
 };
