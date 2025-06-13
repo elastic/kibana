@@ -34,8 +34,31 @@ interface RegisterAPIRoutesArgs {
   logger: Logger;
 }
 
-const TECHNICAL_PREVIEW_WARNING =
-  'This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.';
+const commonRouteConfig = {
+  // This route is in development and not yet intended for public use.
+  access: 'internal',
+  /**
+   * `enableQueryVersion` is a temporary solution for testing internal endpoints.
+   * Requests to these internal endpoints from Kibana Dev Tools or external clients
+   * should include the ?apiVersion=1 query parameter.
+   * This will be removed when the API is finalized and moved to a stable version.
+   */
+  enableQueryVersion: true,
+  description:
+    'This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+  options: {
+    tags: ['oas-tag:Dashboards'],
+    availability: {
+      stability: 'experimental',
+    },
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'Relies on Content Client for authorization',
+    },
+  },
+} as const;
 
 export function registerAPIRoutes({
   http,
@@ -48,22 +71,8 @@ export function registerAPIRoutes({
   // Create API route
   const createRoute = versionedRouter.post({
     path: `${PUBLIC_API_PATH}/{id?}`,
-    access: 'internal',
-    enableQueryVersion: true,
     summary: 'Create a dashboard',
-    description: TECHNICAL_PREVIEW_WARNING,
-    options: {
-      tags: ['oas-tag:Dashboards'],
-      availability: {
-        stability: 'experimental',
-      },
-    },
-    security: {
-      authz: {
-        enabled: false,
-        reason: 'Relies on Content Client for authorization',
-      },
-    },
+    ...commonRouteConfig,
   });
 
   createRoute.addVersion(
@@ -128,22 +137,8 @@ export function registerAPIRoutes({
 
   const updateRoute = versionedRouter.put({
     path: `${PUBLIC_API_PATH}/{id}`,
-    access: 'internal',
-    enableQueryVersion: true,
     summary: `Update an existing dashboard`,
-    description: TECHNICAL_PREVIEW_WARNING,
-    options: {
-      tags: ['oas-tag:Dashboards'],
-      availability: {
-        stability: 'experimental',
-      },
-    },
-    security: {
-      authz: {
-        enabled: false,
-        reason: 'Relies on Content Client for authorization',
-      },
-    },
+    ...commonRouteConfig,
   });
 
   updateRoute.addVersion(
@@ -196,22 +191,8 @@ export function registerAPIRoutes({
   // List API route
   const listRoute = versionedRouter.get({
     path: `${PUBLIC_API_PATH}`,
-    access: 'internal',
-    enableQueryVersion: true,
     summary: `Get a list of dashboards`,
-    description: TECHNICAL_PREVIEW_WARNING,
-    options: {
-      tags: ['oas-tag:Dashboards'],
-      availability: {
-        stability: 'experimental',
-      },
-    },
-    security: {
-      authz: {
-        enabled: false,
-        reason: 'Relies on Content Client for authorization',
-      },
-    },
+    ...commonRouteConfig,
   });
 
   listRoute.addVersion(
@@ -285,22 +266,8 @@ export function registerAPIRoutes({
   // Get API route
   const getRoute = versionedRouter.get({
     path: `${PUBLIC_API_PATH}/{id}`,
-    access: 'internal',
-    enableQueryVersion: true,
     summary: `Get a dashboard`,
-    description: TECHNICAL_PREVIEW_WARNING,
-    options: {
-      tags: ['oas-tag:Dashboards'],
-      availability: {
-        stability: 'experimental',
-      },
-    },
-    security: {
-      authz: {
-        enabled: false,
-        reason: 'Relies on Content Client for authorization',
-      },
-    },
+    ...commonRouteConfig,
   });
 
   getRoute.addVersion(
@@ -353,22 +320,8 @@ export function registerAPIRoutes({
   // Delete API route
   const deleteRoute = versionedRouter.delete({
     path: `${PUBLIC_API_PATH}/{id}`,
-    access: 'internal',
-    enableQueryVersion: true,
     summary: `Delete a dashboard`,
-    description: TECHNICAL_PREVIEW_WARNING,
-    options: {
-      tags: ['oas-tag:Dashboards'],
-      availability: {
-        stability: 'experimental',
-      },
-    },
-    security: {
-      authz: {
-        enabled: false,
-        reason: 'Relies on Content Client for authorization',
-      },
-    },
+    ...commonRouteConfig,
   });
 
   deleteRoute.addVersion(
