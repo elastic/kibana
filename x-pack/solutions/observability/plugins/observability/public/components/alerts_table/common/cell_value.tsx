@@ -42,6 +42,7 @@ import { CellTooltip } from './cell_tooltip';
 import { TimestampTooltip } from './timestamp_tooltip';
 import { GetObservabilityAlertsTableProp } from '../types';
 import AlertActions from '../../alert_actions/alert_actions';
+import { RelativeTimestampTooltip } from './relative_timestamp_tooltip';
 
 export const getAlertFieldValue = (alert: Alert, fieldName: string) => {
   // can be updated when working on https://github.com/elastic/kibana/issues/140819
@@ -93,7 +94,7 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
       <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />
     ),
     [ALERT_START]: (value) => (
-      <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />
+      <RelativeTimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />
     ),
     [ALERT_RULE_EXECUTION_TIMESTAMP]: (value) => (
       <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />
