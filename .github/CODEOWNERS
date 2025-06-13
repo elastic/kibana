@@ -1328,6 +1328,9 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 # Observability UI
 /x-pack/test_serverless/api_integration/test_suites/observability/config.ts @elastic/observability-ui @elastic/appex-qa
 /x-pack/test_serverless/api_integration/test_suites/observability/index.ts @elastic/observability-ui
+/x-pack/test_serverless/api_integration/test_suites/observability/config.logs_essentials.ts @elastic/observability-ui @elastic/appex-qa
+/x-pack/test_serverless/api_integration/test_suites/observability/index.logs_essentials.ts @elastic/observability-ui
+/x-pack/test_serverless/api_integration/test_suites/observability/logs_essentials_only @elastic/observability-ui
 
 ### Observability Plugins
 
