@@ -27,14 +27,18 @@ const { join, normalize } = require('path');
 const { homedir, tmpdir } = require('os');
 
 const isDevOrCI = process.env.NODE_ENV !== 'production' || process.env.CI === 'true';
-
-// TODO: propagate here file specified for file logger (it can change in the runtime)
-// Idea 1: Use EventEmitter to propagate file logger path.
-// Checked it, it works, though we need to find a proper folder/package for that event emitter.
 const baseSafePaths = [join(REPO_ROOT, 'data'), join(REPO_ROOT, '.es')];
 const devOrCIPaths = [REPO_ROOT, tmpdir(), join(homedir(), '.kibanaSecuritySolutionCliTools')];
 
 const safePaths = [...baseSafePaths, ...(isDevOrCI ? devOrCIPaths : [])];
+
+// TODO: propagate here file specified for file logger (it can change in the runtime)
+// Idea 1: Use EventEmitter to propagate file logger path.
+// Checked it, it works, though we need to find a proper folder/package for that event emitter.
+fsEventBus.on('kbn_config_changed', ({ loggerFilePath }) => {
+  console.log('Logger path changed:', loggerFilePath);
+  safePaths.push(loggerFilePath);
+});
 
 const getSafePath = (userPath) => {
   const normalizedPath = normalize(userPath);
@@ -45,11 +49,6 @@ const getSafePath = (userPath) => {
 
   return normalizedPath;
 };
-
-fsEventBus.on('kbn_config_changed', ({ loggerFilePath }) => {
-  console.log('Logger path changed:', loggerFilePath);
-  safePaths.push(loggerFilePath);
-});
 
 const patchFs = (fs) => {
   return new Proxy(fs, {
