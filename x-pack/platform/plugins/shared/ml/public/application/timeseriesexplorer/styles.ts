@@ -80,7 +80,7 @@ export const useTimeseriesExplorerStyles = () => {
             },
 
             '&.forecast': {
-              fill: transparentize(euiTheme.colors.vis.euiColorVis1, 0.2),
+              fill: transparentize(euiTheme.colors.vis.euiColorVis1, 0.4),
               pointerEvents: 'none',
             },
           },
