@@ -48,7 +48,7 @@ import {
   type StreamingChatResponseEvent,
 } from '../../../common/conversation_complete';
 import { convertMessagesForInference } from '../../../common/convert_messages_for_inference';
-import { CompatibleJSONSchema, FunctionVisibility } from '../../../common/functions/types';
+import { CompatibleJSONSchema } from '../../../common/functions/types';
 import {
   type Instruction,
   type Conversation,
@@ -202,11 +202,7 @@ export class ObservabilityAIAssistantClient {
     kibanaPublicUrl?: string;
     userInstructions?: Instruction[];
     simulateFunctionCalling?: boolean;
-    disableFunctions?:
-      | boolean
-      | {
-          except: string[];
-        };
+    disableFunctions?: boolean;
   }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
     return withInferenceSpan('run_tools', () => {
       const isConversationUpdate = persist && !!predefinedConversationId;
@@ -245,16 +241,16 @@ export class ObservabilityAIAssistantClient {
             }).pipe(shareReplay());
 
       const systemMessage$ = kbUserInstructions$.pipe(
-        map((kbUserInstructions) => {
-          return getSystemMessageFromInstructions({
+        map((kbUserInstructions) =>
+          getSystemMessageFromInstructions({
             applicationInstructions: functionClient.getInstructions(),
             kbUserInstructions,
             apiUserInstructions,
             availableFunctionNames: disableFunctions
               ? []
               : functionClient.getFunctions().map((fn) => fn.definition.name),
-          });
-        }),
+          })
+        ),
         shareReplay()
       );
 
@@ -494,16 +490,19 @@ export class ObservabilityAIAssistantClient {
         },
       },
     };
+
+    this.dependencies.logger.debug(
+      () =>
+        `Options for inference client for name: "${name}" before anonymization: ${JSON.stringify({
+          ...options,
+          messages,
+        })}`
+    );
+
     if (stream) {
       return defer(() =>
         from(this.dependencies.anonymizationService.redactMessages(messages)).pipe(
           switchMap(({ redactedMessages }) => {
-            this.dependencies.logger.debug(
-              () =>
-                `Calling inference client for name: "${name}" with options: ${JSON.stringify(
-                  options
-                )}`
-            );
             return (
               this.dependencies.inferenceClient
                 .chatComplete({
