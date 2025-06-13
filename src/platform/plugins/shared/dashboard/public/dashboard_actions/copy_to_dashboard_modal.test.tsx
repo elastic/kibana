@@ -13,6 +13,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CopyToDashboardAPI } from './copy_to_dashboard_action';
 import { CopyToDashboardModal } from './copy_to_dashboard_modal';
+import { DashboardPickerProps } from '@kbn/presentation-util-plugin/public/components/dashboard_picker/dashboard_picker';
 
 jest.mock('../utils/get_dashboard_capabilities', () => ({
   getDashboardCapabilities: () => ({
@@ -23,11 +24,17 @@ jest.mock('../utils/get_dashboard_capabilities', () => ({
 
 jest.mock('@kbn/presentation-util-plugin/public', () => ({
   withSuspense: (Component: ComponentType) => Component,
-  LazyDashboardPicker: ({ idsToOmit }: { idsToOmit?: string[] }) => {
-    return idsToOmit?.length ? (
-      <div>mockDashboardPicker idsToOmit:{idsToOmit.join(',')}</div>
-    ) : (
-      <div>mockDashboardPicker</div>
+  LazyDashboardPicker: ({ idsToOmit, onChange }: DashboardPickerProps) => {
+    const label = idsToOmit?.length
+      ? `mockDashboardPicker idsToOmit:${idsToOmit.join(',')}`
+      : `mockDashboardPicker`;
+    return (
+      <button
+        id="mockDashboardPicker"
+        onClick={() => onChange({ name: 'Dashboard Two', id: 'dashboardTwo' })}
+      >
+        {label}
+      </button>
     );
   },
 }));
@@ -64,71 +71,110 @@ describe('CopyToDashboardModal', () => {
     };
   });
 
-  test('should enable add to "new dashboard" when in saved dashboard', async () => {
-    const result = render(<CopyToDashboardModal api={api} closeModal={closeModalMock} />);
+  describe('"New dashboard" option', () => {
+    test('should be enabled when parent is saved dashboard', async () => {
+      const result = render(<CopyToDashboardModal api={api} closeModal={closeModalMock} />);
 
-    await waitFor(() =>
-      expect(result.container.querySelector('#new-dashboard-option')).toBeEnabled()
-    );
-  });
-
-  test('should disable add to "new dashboard" when in new dashboard', async () => {
-    const newDashboardApi = {
-      ...api,
-      parentApi: {
-        ...api.parentApi,
-        savedObjectId$: new BehaviorSubject<string | undefined>(undefined),
-      },
-    };
-    const result = render(
-      <CopyToDashboardModal api={newDashboardApi} closeModal={closeModalMock} />
-    );
-
-    await waitFor(() =>
-      expect(result.container.querySelector('#new-dashboard-option')).toBeDisabled()
-    );
-  });
-
-  test('does not show the current dashboard in the dashboard picker', async () => {
-    render(<CopyToDashboardModal api={api} closeModal={closeModalMock} />);
-
-    await waitFor(() =>
-      expect(screen.queryByText('mockDashboardPicker idsToOmit:dashboardOne')).toBeInTheDocument()
-    );
-  });
-
-  test('should navigate to dashboard on submit', async () => {
-    const result = render(<CopyToDashboardModal api={api} closeModal={closeModalMock} />);
-
-    await waitFor(() => {
-      // select new dashboard radio to enable submit button
-      const newDashboardRadio = result.container.querySelector('#new-dashboard-option');
-      expect(newDashboardRadio).not.toBeNull();
-      userEvent.click(newDashboardRadio!);
-
-      // Click submit button
-      const submitButton = result.container.querySelector('[data-test-subj=confirmCopyToButton]');
-      expect(submitButton).not.toBeNull();
-      expect(submitButton).toBeEnabled();
-      userEvent.click(submitButton!);
+      await waitFor(() =>
+        expect(result.container.querySelector('#new-dashboard-option')).toBeEnabled()
+      );
     });
 
-    await waitFor(() =>
-      expect(navigateToWithEmbeddablePackageMock).toHaveBeenCalledWith('dashboards', {
-        path: '#/create',
-        state: {
-          serializedState: {
-            rawState: {
-              title: 'Panel One',
-            },
-          },
-          size: {
-            height: 1,
-            width: 1,
-          },
-          type: 'testPanelType',
+    test('should disable when parent is new dashboard', async () => {
+      const newDashboardApi = {
+        ...api,
+        parentApi: {
+          ...api.parentApi,
+          savedObjectId$: new BehaviorSubject<string | undefined>(undefined),
         },
-      })
-    );
+      };
+      const result = render(
+        <CopyToDashboardModal api={newDashboardApi} closeModal={closeModalMock} />
+      );
+
+      await waitFor(() =>
+        expect(result.container.querySelector('#new-dashboard-option')).toBeDisabled()
+      );
+    });
+
+    test('should navigate to new dashboard on submit', async () => {
+      const result = render(<CopyToDashboardModal api={api} closeModal={closeModalMock} />);
+
+      await waitFor(() => {
+        // select new dashboard radio
+        const newDashboardRadio = result.container.querySelector('#new-dashboard-option');
+        expect(newDashboardRadio).not.toBeNull();
+        userEvent.click(newDashboardRadio!);
+
+        // Click submit button
+        const submitButton = result.container.querySelector('[data-test-subj=confirmCopyToButton]');
+        expect(submitButton).not.toBeNull();
+        expect(submitButton).toBeEnabled();
+        userEvent.click(submitButton!);
+      });
+
+      await waitFor(() =>
+        expect(navigateToWithEmbeddablePackageMock).toHaveBeenCalledWith('dashboards', {
+          path: '#/create',
+          state: {
+            serializedState: {
+              rawState: {
+                title: 'Panel One',
+              },
+            },
+            size: {
+              height: 1,
+              width: 1,
+            },
+            type: 'testPanelType',
+          },
+        })
+      );
+    });
+  });
+
+  describe('"Existing dashboard" option', () => {
+    test('does not show the current dashboard in the dashboard picker', async () => {
+      render(<CopyToDashboardModal api={api} closeModal={closeModalMock} />);
+
+      await waitFor(() =>
+        expect(screen.queryByText('mockDashboardPicker idsToOmit:dashboardOne')).toBeInTheDocument()
+      );
+    });
+
+    test('should navigate to selected dashboard on submit', async () => {
+      const result = render(<CopyToDashboardModal api={api} closeModal={closeModalMock} />);
+
+      await waitFor(() => {
+        // select a dashboard
+        const mockDashboardPickerButton = result.container.querySelector('#mockDashboardPicker');
+        expect(mockDashboardPickerButton).not.toBeNull();
+        userEvent.click(mockDashboardPickerButton!);
+
+        // Click submit button
+        const submitButton = result.container.querySelector('[data-test-subj=confirmCopyToButton]');
+        expect(submitButton).not.toBeNull();
+        expect(submitButton).toBeEnabled();
+        userEvent.click(submitButton!);
+      });
+
+      await waitFor(() =>
+        expect(navigateToWithEmbeddablePackageMock).toHaveBeenCalledWith('dashboards', {
+          path: '#/view/dashboardTwo?_a=(viewMode:edit)',
+          state: {
+            serializedState: {
+              rawState: {
+                title: 'Panel One',
+              },
+            },
+            size: {
+              height: 1,
+              width: 1,
+            },
+            type: 'testPanelType',
+          },
+        })
+      );
+    });
   });
 });
