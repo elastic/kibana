@@ -45,11 +45,11 @@ export const createToolProviderMock = (): ToolProviderMock => {
 
 export const esqlToolProviderMock = (): EsqlToolProviderMock => {
   return {
-    id:esqlToolProviderId,
+    id: esqlToolProviderId,
     has: jest.fn(),
     get: jest.fn(),
     list: jest.fn(),
-    getScopedClient: jest.fn()
+    getScopedClient: jest.fn(),
   };
 };
 
@@ -76,7 +76,7 @@ export const createScopedPublicToolRegistryMock = (): ScopedPublicToolRegistryMo
 export const createToolsServiceStartMock = (): ToolsServiceStartMock => {
   return {
     registry: createInternalToolRegistryMock(),
-    esql: esqlToolProviderMock()
+    esql: esqlToolProviderMock(),
   };
 };
 
