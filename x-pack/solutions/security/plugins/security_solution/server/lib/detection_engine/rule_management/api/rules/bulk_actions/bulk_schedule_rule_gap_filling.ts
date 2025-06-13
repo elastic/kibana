@@ -35,19 +35,25 @@ export const bulkScheduleRuleGapFilling = async ({
 }: BuildScheduleRuleGapFillingParams): Promise<BulkScheduleBackfillOutcome> => {
   const errors: Array<PromisePoolError<RuleAlertType, Error> | BulkOperationError> = [];
   // In the first step, we validate if it is possible to schedule backfill for the rules
-  const validatedRules: RuleAlertType[] = [];
-  await Promise.all(
+  const validationResults = await Promise.all(
     rules.map(async (rule) => {
       try {
         await validateBulkRuleGapFilling({
           mlAuthz,
           rule,
         });
-        validatedRules.push(rule);
+        return { valid: true, rule };
       } catch (error) {
-        errors.push({ item: rule, error });
+        return { valid: false, rule, error };
       }
     })
+  );
+
+  const validatedRules = validationResults.filter(({ valid }) => valid).map(({ rule }) => rule);
+  errors.push(
+    ...validationResults
+      .filter(({ valid }) => !valid)
+      .map(({ rule, error }) => ({ item: rule, error }))
   );
 
   if (isDryRun || validatedRules.length === 0) {
