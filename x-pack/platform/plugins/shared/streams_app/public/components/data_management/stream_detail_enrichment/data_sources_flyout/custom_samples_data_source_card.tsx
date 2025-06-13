@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiCallOut, EuiSpacer, EuiFormRow, EuiCode } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor } from '@kbn/code-editor';
@@ -41,6 +41,17 @@ export const CustomSamplesDataSourceCard = ({
     dataSourceRef.send({ type: 'dataSource.change', dataSource: { ...dataSource, ...params } });
   };
 
+  const editorValue = useMemo(
+    () => serializeXJson(dataSource.documents, '[]'),
+    [dataSource.documents]
+  );
+  const handleEditorChange = (value: string) => {
+    const documents = deserializeJson(value);
+    if (isSchema(customSamplesDataSourceDocumentsSchema, documents)) {
+      handleChange({ documents });
+    }
+  };
+
   return (
     <DataSourceCard
       dataSourceRef={dataSourceRef}
@@ -56,36 +67,14 @@ export const CustomSamplesDataSourceCard = ({
       />
       <EuiFormRow
         label={DATA_SOURCES_I18N.customSamples.label}
-        helpText={
-          <FormattedMessage
-            id="xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.customSamples.helpText"
-            defaultMessage="Use JSON format: {code}"
-            values={{
-              code: (
-                <EuiCode>
-                  {JSON.stringify([
-                    {
-                      foo: 'bar',
-                      foo2: 'baz',
-                    },
-                  ])}
-                </EuiCode>
-              ),
-            }}
-          />
-        }
+        helpText={DATA_SOURCES_I18N.customSamples.helpText}
         isDisabled={isDisabled}
         fullWidth
       >
         <CodeEditor
           height={200}
-          value={serializeXJson(dataSource.documents, '[]')}
-          onChange={(value) => {
-            const documents = deserializeJson(value);
-            if (isSchema(customSamplesDataSourceDocumentsSchema, documents)) {
-              handleChange({ documents });
-            }
-          }}
+          value={editorValue}
+          onChange={handleEditorChange}
           languageId="xjson"
           options={{
             tabSize: 2,

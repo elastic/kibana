@@ -17,10 +17,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import {
-  useStreamEnrichmentEvents,
-  useStreamEnrichmentSelector,
-} from '../state_management/stream_enrichment_state_machine';
+import { useStreamEnrichmentSelector } from '../state_management/stream_enrichment_state_machine';
 import { DATA_SOURCES_I18N } from './translations';
 import { AddDataSourcesContextMenu } from './add_data_sources_context_menu';
 import { DataSource } from './data_source';
@@ -30,8 +27,6 @@ interface DataSourcesFlyoutProps {
 }
 
 export const DataSourcesFlyout = ({ onClose }: DataSourcesFlyoutProps) => {
-  const { addDataSource } = useStreamEnrichmentEvents();
-
   const dataSourcesActorRefs = useStreamEnrichmentSelector(
     (snapshot) => snapshot.context.dataSourcesRefs
   );
@@ -56,7 +51,7 @@ export const DataSourcesFlyout = ({ onClose }: DataSourcesFlyoutProps) => {
           <EuiTitle size="s">
             <h3>{DATA_SOURCES_I18N.flyout.infoTitle}</h3>
           </EuiTitle>
-          <AddDataSourcesContextMenu onAddDataSource={addDataSource} />
+          <AddDataSourcesContextMenu />
         </EuiFlexGroup>
         <EuiSpacer size="m" />
         <EuiFlexGroup component="ul" direction="column" gutterSize="m">

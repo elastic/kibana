@@ -8,18 +8,16 @@
 import React from 'react';
 import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { useBoolean } from '@kbn/react-hooks';
-import { EnrichmentDataSource } from '../../../../../common/url_schema';
 import { DATA_SOURCES_I18N } from './translations';
 import {
   defaultCustomSamplesDataSource,
   defaultKqlSamplesDataSource,
 } from '../state_management/stream_enrichment_state_machine/utils';
+import { useStreamEnrichmentEvents } from '../state_management/stream_enrichment_state_machine';
 
-interface DataSourcesContextMenuProps {
-  onAddDataSource: (dataSource: EnrichmentDataSource) => void;
-}
+export const AddDataSourcesContextMenu = () => {
+  const { addDataSource } = useStreamEnrichmentEvents();
 
-export const AddDataSourcesContextMenu = ({ onAddDataSource }: DataSourcesContextMenuProps) => {
   const [isOpen, { toggle: toggleMenu, off: closeMenu }] = useBoolean();
 
   return (
@@ -45,7 +43,7 @@ export const AddDataSourcesContextMenu = ({ onAddDataSource }: DataSourcesContex
                 name: DATA_SOURCES_I18N.contextMenu.addKqlDataSource,
                 icon: 'search',
                 onClick: () => {
-                  onAddDataSource(defaultKqlSamplesDataSource);
+                  addDataSource(defaultKqlSamplesDataSource);
                   closeMenu();
                 },
               },
@@ -53,7 +51,7 @@ export const AddDataSourcesContextMenu = ({ onAddDataSource }: DataSourcesContex
                 name: DATA_SOURCES_I18N.contextMenu.addCustomSamples,
                 icon: 'visText',
                 onClick: () => {
-                  onAddDataSource(defaultCustomSamplesDataSource);
+                  addDataSource(defaultCustomSamplesDataSource);
                   closeMenu();
                 },
               },

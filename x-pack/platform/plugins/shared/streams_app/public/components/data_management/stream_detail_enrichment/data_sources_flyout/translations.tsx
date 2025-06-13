@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 export const DATA_SOURCES_I18N = {
   flyout: {
@@ -129,6 +132,15 @@ export const DATA_SOURCES_I18N = {
     label: i18n.translate(
       'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.customSamples.label',
       { defaultMessage: 'Documents' }
+    ),
+    helpText: (
+      <FormattedMessage
+        id="xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.customSamples.helpText"
+        defaultMessage="Use JSON format: {code}"
+        values={{
+          code: <EuiCode>{JSON.stringify([{ foo: 'bar', foo2: 'baz' }])}</EuiCode>,
+        }}
+      />
     ),
   },
   nameField: {
