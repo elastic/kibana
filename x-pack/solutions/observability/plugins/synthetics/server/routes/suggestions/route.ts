@@ -64,26 +64,22 @@ export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
     query: QuerySchema,
   },
   handler: async (route): Promise<any> => {
-    const {
-      server: { logger },
-      monitorConfigRepository,
-    } = route;
+    const { monitorConfigRepository } = route;
     const { query } = route.request.query;
 
     const { filtersStr } = await getMonitorFilters(route);
     const { allLocations = [] } = await getAllLocations(route);
-    try {
-      const data = await monitorConfigRepository.find<EncryptedSyntheticsMonitorAttributes>({
-        perPage: 0,
-        filter: filtersStr ? `${filtersStr}` : undefined,
-        aggs,
-        search: query ? `${query}*` : undefined,
-        searchFields: SEARCH_FIELDS,
-      });
+    const data = await monitorConfigRepository.find<EncryptedSyntheticsMonitorAttributes>({
+      perPage: 0,
+      filter: filtersStr ? `${filtersStr}` : undefined,
+      aggs,
+      search: query ? `${query}*` : undefined,
+      searchFields: SEARCH_FIELDS,
+    });
 
-      const { monitorTypesAggs, tagsAggs, locationsAggs, projectsAggs, monitorIdsAggs } =
-        (data?.aggregations as AggsResponse) ?? {};
-      const allLocationsMap = new Map(allLocations.map((obj) => [obj.id, obj.label]));
+    const { monitorTypesAggs, tagsAggs, locationsAggs, projectsAggs, monitorIdsAggs } =
+      (data?.aggregations as AggsResponse) ?? {};
+    const allLocationsMap = new Map(allLocations.map((obj) => [obj.id, obj.label]));
 
       return {
         monitorIds: monitorIdsAggs?.buckets?.map(({ key, doc_count: count, name }) => ({
@@ -118,9 +114,6 @@ export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
             count,
           })) ?? [],
       };
-    } catch (error) {
-      logger.error(`Failed to fetch synthetics suggestions: ${error}`);
-    }
   },
 });
 
