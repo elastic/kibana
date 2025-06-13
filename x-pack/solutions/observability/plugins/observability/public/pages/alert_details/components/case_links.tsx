@@ -47,7 +47,6 @@ export function CaseLinks({ alert }: Props) {
               data-test-subj="xpack.observability.pages.alertDetails.cases.caseLink"
               href={firstCaseLink}
               css={caseLinkStyle}
-              target="_blank"
               external={false}
             >
               {cases[0].title}
