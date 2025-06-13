@@ -37,6 +37,7 @@ export const useConversationsTable = () => {
     ({
       conversationOptionsIds,
       deletedConversationsIds,
+      excludedIds,
       handlePageChecked,
       handlePageUnchecked,
       handleRowChecked,
@@ -44,11 +45,13 @@ export const useConversationsTable = () => {
       isDeleteAll,
       isDeleteEnabled,
       isEditEnabled,
+      isExcludedMode,
       onDeleteActionClicked,
       onEditActionClicked,
     }: {
       conversationOptionsIds: string[];
       deletedConversationsIds: string[];
+      excludedIds: string[];
       handlePageChecked: () => void;
       handlePageUnchecked: () => void;
       handleRowChecked: (conversation: ConversationTableItem) => void;
@@ -56,6 +59,7 @@ export const useConversationsTable = () => {
       isDeleteAll: boolean;
       isDeleteEnabled: (conversation: ConversationTableItem) => boolean;
       isEditEnabled: (conversation: ConversationTableItem) => boolean;
+      isExcludedMode: boolean;
       onDeleteActionClicked: (conversation: ConversationTableItem) => void;
       onEditActionClicked: (conversation: ConversationTableItem) => void;
     }): Array<EuiBasicTableColumn<ConversationTableItem>> => {
@@ -67,6 +71,8 @@ export const useConversationsTable = () => {
               isDeleteAll={isDeleteAll}
               conversationOptionsIds={conversationOptionsIds}
               deletedConversationsIds={deletedConversationsIds}
+              excludedIds={excludedIds}
+              isExcludedMode={isExcludedMode}
               handlePageChecked={handlePageChecked}
               handlePageUnchecked={handlePageUnchecked}
             />
@@ -75,6 +81,8 @@ export const useConversationsTable = () => {
             <InputCheckbox
               conversation={conversation}
               deletedConversationsIds={deletedConversationsIds}
+              excludedIds={excludedIds}
+              isExcludedMode={isExcludedMode}
               handleRowChecked={handleRowChecked}
               handleRowUnChecked={handleRowUnChecked}
               isDeleteAll={isDeleteAll}

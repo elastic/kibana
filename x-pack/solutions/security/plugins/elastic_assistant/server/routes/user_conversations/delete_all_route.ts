@@ -9,7 +9,9 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
   API_VERSIONS,
+  DeleteAllConversationsRequestBody,
 } from '@kbn/elastic-assistant-common';
+import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { performChecks } from '../helpers';
@@ -28,7 +30,11 @@ export const deleteAllConversationsRoute = (router: ElasticAssistantPluginRouter
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: false,
+        validate: {
+          request: {
+            body: buildRouteValidationWithZod(DeleteAllConversationsRequestBody),
+          },
+        },
       },
       async (context, request, response) => {
         const assistantResponse = buildResponse(response);
@@ -44,7 +50,9 @@ export const deleteAllConversationsRoute = (router: ElasticAssistantPluginRouter
           }
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
 
-          const result = await dataClient?.deleteAllConversations();
+          const result = await dataClient?.deleteAllConversations({
+            excludedIds: request.body?.excludedIds,
+          });
 
           return response.ok({
             body: {

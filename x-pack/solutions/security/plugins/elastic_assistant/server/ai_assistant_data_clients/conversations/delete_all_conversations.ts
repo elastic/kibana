@@ -12,16 +12,27 @@ export interface DeleteAllConversationsParams {
   esClient: ElasticsearchClient;
   conversationIndex: string;
   logger: Logger;
+  excludedIds?: string[];
 }
 export const deleteAllConversations = async ({
   esClient,
   conversationIndex,
   logger,
+  excludedIds = [],
 }: DeleteAllConversationsParams): Promise<DeleteByQueryResponse | undefined> => {
   try {
     const response = await esClient.deleteByQuery({
       query: {
-        match_all: {},
+        bool: {
+          must: {
+            match_all: {},
+          },
+          must_not: {
+            ids: {
+              values: excludedIds,
+            },
+          },
+        },
       },
       conflicts: 'proceed',
       index: conversationIndex,

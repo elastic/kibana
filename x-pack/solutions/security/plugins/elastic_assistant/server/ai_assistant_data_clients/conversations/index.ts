@@ -162,14 +162,18 @@ export class AIAssistantConversationsDataClient extends AIAssistantDataClient {
 
   /**
    * Deletes all conversations in the index.
+   * @param options.excludedIds An array of ids to exclude from deletion.
    * @returns The number of conversations deleted
    */
-  public deleteAllConversations = async (): Promise<DeleteByQueryResponse | undefined> => {
+  public deleteAllConversations = async (options?: {
+    excludedIds?: string[];
+  }): Promise<DeleteByQueryResponse | undefined> => {
     const esClient = await this.options.elasticsearchClientPromise;
     return deleteAllConversations({
       esClient,
       conversationIndex: this.indexTemplateAndPattern.alias,
       logger: this.options.logger,
+      excludedIds: options?.excludedIds,
     });
   };
 }

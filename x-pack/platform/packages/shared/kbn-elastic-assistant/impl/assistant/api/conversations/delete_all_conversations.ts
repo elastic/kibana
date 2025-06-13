@@ -13,10 +13,12 @@ export const deleteAllConversations = async ({
   http,
   signal,
   toasts,
+  excludedIds = [],
 }: {
   http: HttpSetup;
   toasts?: IToasts;
   signal?: AbortSignal | undefined;
+  excludedIds?: string[];
 }) => {
   try {
     const result = await http.fetch<DeleteAllConversationsResponse>(
@@ -25,6 +27,7 @@ export const deleteAllConversations = async ({
         method: 'DELETE',
         signal,
         version: API_VERSIONS.public.v1,
+        body: JSON.stringify({ excludedIds }),
       }
     );
     if (result?.failures) {

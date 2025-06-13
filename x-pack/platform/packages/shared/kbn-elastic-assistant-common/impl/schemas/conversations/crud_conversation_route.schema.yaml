@@ -79,6 +79,19 @@ paths:
       summary: Delete conversations
       tags:
         - Conversation API
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                excludedIds:
+                  type: array
+                  items:
+                    type: string
+                  description: Optional list of conversation IDs to delete.
+                  example: ["abc123", "def456"]
       responses:
         200:
           description: Indicates a successful call. The conversations were deleted successfully.

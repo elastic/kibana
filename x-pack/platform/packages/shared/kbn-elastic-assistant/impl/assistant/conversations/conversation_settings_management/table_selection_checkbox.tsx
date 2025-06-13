@@ -11,25 +11,35 @@ import { ConversationTableItem } from './types';
 export const PageSelectionCheckbox = ({
   conversationOptionsIds,
   deletedConversationsIds,
+  excludedIds,
   handlePageChecked,
   handlePageUnchecked,
   isDeleteAll,
+  isExcludedMode,
 }: {
   conversationOptionsIds: string[];
   deletedConversationsIds: string[];
+  excludedIds: string[];
   handlePageChecked: () => void;
   handlePageUnchecked: () => void;
   isDeleteAll: boolean;
+  isExcludedMode: boolean;
 }) => {
   const [pageSelectionChecked, setPageSelectionChecked] = useState(
-    isDeleteAll || conversationOptionsIds.every((id) => deletedConversationsIds.includes(id))
+    (!isExcludedMode &&
+      (isDeleteAll ||
+        conversationOptionsIds.every((id) => deletedConversationsIds.includes(id)))) ||
+      (isExcludedMode && !excludedIds.some((id) => conversationOptionsIds.includes(id)))
   );
 
   useEffect(() => {
     setPageSelectionChecked(
-      isDeleteAll || conversationOptionsIds.every((id) => deletedConversationsIds.includes(id))
+      (!isExcludedMode &&
+        (isDeleteAll ||
+          conversationOptionsIds.every((id) => deletedConversationsIds.includes(id)))) ||
+        (isExcludedMode && !excludedIds.some((id) => conversationOptionsIds.includes(id)))
     );
-  }, [isDeleteAll, deletedConversationsIds, conversationOptionsIds]);
+  }, [isDeleteAll, deletedConversationsIds, conversationOptionsIds, excludedIds, isExcludedMode]);
 
   if (conversationOptionsIds.length === 0) {
     return null;
@@ -40,7 +50,6 @@ export const PageSelectionCheckbox = ({
       data-test-subj={`conversationPageSelect`}
       id={`conversationPageSelect`}
       checked={pageSelectionChecked}
-      disabled={isDeleteAll}
       onChange={(e) => {
         if (e.target.checked) {
           setPageSelectionChecked(true);
@@ -57,30 +66,37 @@ export const PageSelectionCheckbox = ({
 export const InputCheckbox = ({
   conversation,
   deletedConversationsIds,
+  excludedIds,
+  isExcludedMode,
   handleRowChecked,
   handleRowUnChecked,
   isDeleteAll,
 }: {
   conversation: ConversationTableItem;
   deletedConversationsIds: string[];
+  excludedIds: string[];
+  isExcludedMode: boolean;
   handleRowChecked: (conversation: ConversationTableItem) => void;
   handleRowUnChecked: (conversation: ConversationTableItem) => void;
   isDeleteAll: boolean;
 }) => {
   const [checked, setChecked] = useState(
-    isDeleteAll || deletedConversationsIds.includes(conversation.id)
+    (!isExcludedMode && (isDeleteAll || deletedConversationsIds.includes(conversation.id))) ||
+      (isExcludedMode && !excludedIds.includes(conversation.id))
   );
 
   useEffect(() => {
-    setChecked(isDeleteAll || deletedConversationsIds.includes(conversation.id));
-  }, [isDeleteAll, deletedConversationsIds, conversation.id]);
+    setChecked(
+      (!isExcludedMode && (isDeleteAll || deletedConversationsIds.includes(conversation.id))) ||
+        (isExcludedMode && !excludedIds.includes(conversation.id))
+    );
+  }, [isDeleteAll, deletedConversationsIds, conversation.id, excludedIds, isExcludedMode]);
 
   return (
     <EuiCheckbox
       data-test-subj={`conversationSelect-${conversation.id}`}
       id={`conversationSelect-${conversation.id}`}
       checked={checked}
-      disabled={isDeleteAll}
       onChange={(e) => {
         if (e.target.checked) {
           setChecked(true);

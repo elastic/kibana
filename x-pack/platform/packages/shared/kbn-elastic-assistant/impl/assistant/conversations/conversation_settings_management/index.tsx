@@ -80,6 +80,11 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     totalItemCount,
   });
 
+  const deletedConversationsIds = useMemo(
+    () => deletedConversations.map((item) => item.id),
+    [deletedConversations]
+  );
+
   const allSystemPrompts = useMemo(
     () => allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.system),
     [allPrompts.data]
@@ -122,12 +127,16 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
 
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
   const [isDeleteAll, setIsDeleteAll] = useState(false);
+  const [isExcludedMode, setIsExcludedMode] = useState(false);
+  const [excludedIds, setExcludedIds] = useState<string[]>([]);
+  const [totalSelectedConversations, setTotalSelectedConversations] = useState(0);
   const handleSave = useCallback(
     async (param?: { callback?: () => void; bulkActions?: ConversationsBulkActions }) => {
       const { bulkActions, callback } = param ?? {};
-      const saveConversationsSettingsParams = isDeleteAll
-        ? { isDeleteAll: true as const }
-        : { isDeleteAll: false as const, bulkActions };
+      const saveConversationsSettingsParams =
+        isDeleteAll || excludedIds.length > 0
+          ? { isDeleteAll: true, excludedIds }
+          : { isDeleteAll: false, bulkActions };
       const isSuccess = await saveConversationsSettings(saveConversationsSettingsParams);
       if (isSuccess) {
         toasts?.addSuccess({
@@ -137,12 +146,13 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
         setHasPendingChanges(false);
         setIsDeleteAll(false);
         setDeletedConversations(DEFAULT_EMPTY_DELETED_CONVERSATIONS_ARRAY);
+        setTotalSelectedConversations(0);
         callback?.();
       } else {
         resetConversationsSettings();
       }
     },
-    [isDeleteAll, resetConversationsSettings, saveConversationsSettings, toasts]
+    [excludedIds, isDeleteAll, resetConversationsSettings, saveConversationsSettings, toasts]
   );
 
   const setAssistantStreamingEnabled = useCallback(
@@ -198,11 +208,11 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   );
 
   const onBulkDeleteActionClicked = useCallback(() => {
-    onConversationsBulkDeleted(deletedConversations.map((item) => item.id));
+    onConversationsBulkDeleted(deletedConversationsIds);
 
     closeEditFlyout();
     openConfirmModal();
-  }, [closeEditFlyout, deletedConversations, onConversationsBulkDeleted, openConfirmModal]);
+  }, [closeEditFlyout, deletedConversationsIds, onConversationsBulkDeleted, openConfirmModal]);
 
   const onDeleteConfirmed = useCallback(() => {
     if (Object.keys(conversationsSettingsBulkActions).length === 0) {
@@ -235,31 +245,91 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     defaultConnector,
   });
 
-  const handleRowChecked = useCallback((selectedItem: ConversationTableItem) => {
-    setDeletedConversations((prev) => [...prev, selectedItem]);
-  }, []);
+  const conversationOptionsIds = useMemo(
+    () => conversationOptions.map((item) => item.id),
+    [conversationOptions]
+  );
 
-  const handleRowUnChecked = useCallback((selectedItem: ConversationTableItem) => {
-    setDeletedConversations((prev) => prev.filter((item) => item.id !== selectedItem.id));
-  }, []);
+  const handleRowChecked = useCallback(
+    (selectedItem: ConversationTableItem) => {
+      if (isExcludedMode) {
+        const newExcludedIds = excludedIds.filter((item) => item !== selectedItem.id);
+        setExcludedIds(newExcludedIds);
+      } else {
+        const newDeletedConversations = [...deletedConversations, selectedItem];
+        setDeletedConversations(newDeletedConversations);
+        if (newDeletedConversations.length === totalItemCount) {
+          setIsDeleteAll(true);
+        }
+      }
+      setTotalSelectedConversations((prev) => prev + 1);
+    },
+    [deletedConversations, excludedIds, isExcludedMode, totalItemCount]
+  );
+
+  const handleRowUnChecked = useCallback(
+    (selectedItem: ConversationTableItem) => {
+      if (isExcludedMode) {
+        setExcludedIds((prev) => [...prev, selectedItem.id]);
+      } else {
+        setDeletedConversations((prev) => prev.filter((item) => item.id !== selectedItem.id));
+      }
+      setIsDeleteAll(false);
+      setTotalSelectedConversations((prev) => (prev || totalItemCount) - 1);
+    },
+    [isExcludedMode, totalItemCount]
+  );
 
   const handlePageChecked = useCallback(() => {
-    setDeletedConversations(conversationOptions);
-  }, [conversationOptions]);
+    if (isExcludedMode) {
+      const newExcludedIds = excludedIds.filter((item) => !conversationOptionsIds.includes(item));
+      setExcludedIds(newExcludedIds);
+    } else {
+      const newDeletedConversations = [...deletedConversations, ...conversationOptions];
+      setDeletedConversations(newDeletedConversations);
+      if (newDeletedConversations.length === totalItemCount) {
+        setIsDeleteAll(true);
+      }
+    }
+    setTotalSelectedConversations((prev) => prev + conversationOptionsIds.length);
+  }, [
+    conversationOptions,
+    conversationOptionsIds,
+    deletedConversations,
+    excludedIds,
+    isExcludedMode,
+    totalItemCount,
+  ]);
 
   const handlePageUnchecked = useCallback(() => {
+    if (isExcludedMode) {
+      setExcludedIds((prev) => [...prev, ...conversationOptionsIds]);
+    } else {
+      setDeletedConversations(
+        deletedConversations.filter((item) => !conversationOptionsIds.includes(item.id))
+      );
+    }
+    setTotalSelectedConversations(
+      (prev) => (prev || totalItemCount) - conversationOptionsIds.length
+    );
+
     setIsDeleteAll(false);
-    setDeletedConversations(DEFAULT_EMPTY_DELETED_CONVERSATIONS_ARRAY);
-  }, []);
+  }, [conversationOptionsIds, deletedConversations, isExcludedMode, totalItemCount]);
 
   const handleSelectAll = useCallback(() => {
     setIsDeleteAll(true);
+    setIsExcludedMode(true);
     setDeletedConversations(conversationOptions);
-  }, [conversationOptions]);
+    setTotalSelectedConversations(totalItemCount);
+    setExcludedIds([]);
+  }, [conversationOptions, totalItemCount]);
 
   const handleUnselectAll = useCallback(() => {
     setIsDeleteAll(false);
-    setDeletedConversations(DEFAULT_EMPTY_DELETED_CONVERSATIONS_ARRAY);
+    setIsExcludedMode(false);
+    setDeletedConversations([]);
+    setTotalSelectedConversations(0);
+    setExcludedIds([]);
   }, []);
 
   const onSaveCancelled = useCallback(() => {
@@ -276,8 +346,9 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   const columns = useMemo(
     () =>
       getColumns({
-        conversationOptionsIds: conversationOptions.map((item) => item.id),
-        deletedConversationsIds: deletedConversations.map((item) => item.id),
+        conversationOptionsIds,
+        deletedConversationsIds,
+        excludedIds,
         handlePageChecked,
         handlePageUnchecked,
         handleRowChecked,
@@ -285,18 +356,22 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
         isDeleteAll,
         isDeleteEnabled: () => !isDeleteAll && deletedConversations.length === 0,
         isEditEnabled: () => !isDeleteAll && deletedConversations.length === 0,
+        isExcludedMode,
         onDeleteActionClicked,
         onEditActionClicked,
       }),
     [
-      conversationOptions,
-      deletedConversations,
+      conversationOptionsIds,
+      deletedConversations.length,
+      deletedConversationsIds,
+      excludedIds,
       getColumns,
       handlePageChecked,
       handlePageUnchecked,
       handleRowChecked,
       handleRowUnChecked,
       isDeleteAll,
+      isExcludedMode,
       onDeleteActionClicked,
       onEditActionClicked,
     ]
@@ -310,10 +385,8 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
       ? deletedConversations[0]?.title
         ? i18n.DELETE_CONVERSATION_CONFIRMATION_TITLE(deletedConversations[0]?.title)
         : i18n.DELETE_CONVERSATION_CONFIRMATION_DEFAULT_TITLE
-      : i18n.DELETE_MULTIPLE_CONVERSATIONS_CONFIRMATION_TITLE(
-          isDeleteAll ? totalItemCount : deletedConversations.length
-        );
-  }, [deletedConversations, isDeleteAll, totalItemCount]);
+      : i18n.DELETE_MULTIPLE_CONVERSATIONS_CONFIRMATION_TITLE(totalSelectedConversations);
+  }, [deletedConversations, totalSelectedConversations]);
 
   if (!conversationsLoaded) {
     return null;
@@ -341,8 +414,8 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
           onConversationsBulkDeleted={onBulkDeleteActionClicked}
           handleSelectAll={handleSelectAll}
           handleUnselectAll={handleUnselectAll}
-          selected={deletedConversations}
           totalConversations={totalItemCount}
+          totalSelected={totalSelectedConversations}
           isDeleteAll={isDeleteAll}
         />
         <EuiBasicTable
@@ -387,20 +460,21 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
           )}
         </Flyout>
       )}
-      {deleteConfirmModalVisibility && deletedConversations?.length > 0 && (
-        <EuiConfirmModal
-          aria-labelledby={confirmationTitle}
-          title={confirmationTitle}
-          onCancel={onDeleteCancelled}
-          onConfirm={onDeleteConfirmed}
-          cancelButtonText={CANCEL}
-          confirmButtonText={DELETE}
-          buttonColor="danger"
-          defaultFocusedButton="confirm"
-        >
-          <p />
-        </EuiConfirmModal>
-      )}
+      {deleteConfirmModalVisibility &&
+        (deletedConversations?.length > 0 || excludedIds?.length > 0) && (
+          <EuiConfirmModal
+            aria-labelledby={confirmationTitle}
+            title={confirmationTitle}
+            onCancel={onDeleteCancelled}
+            onConfirm={onDeleteConfirmed}
+            cancelButtonText={CANCEL}
+            confirmButtonText={DELETE}
+            buttonColor="danger"
+            defaultFocusedButton="confirm"
+          >
+            <p />
+          </EuiConfirmModal>
+        )}
       <AssistantSettingsBottomBar
         hasPendingChanges={hasPendingChanges}
         onCancelClick={onCancelClick}
