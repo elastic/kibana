@@ -411,7 +411,7 @@ const assertIndex = (namespace: string) => {
         },
       },
       settings: {
-        'index.default_pipeline': `entity_analytics_create_eventIngest_from_timestamp-pipeline-${namespace}`,
+        'index.default_pipeline': null,
       },
     },
   });
