@@ -97,13 +97,9 @@ export function transformAttributesToESModel(caseAttributes: Partial<CaseTransfo
   attributes: Partial<CasePersistedAttributes>;
   referenceHandler: ConnectorReferenceHandler;
 } {
-  const { connector, external_service, severity, status, ...restAttributes } = caseAttributes;
+  const { connector, external_service, severity, status, incremental_id, ...restAttributes } =
+    caseAttributes;
   const { connector_id: pushConnectorId, ...restExternalService } = external_service ?? {};
-
-  // remove incremental_id, this one's reserved to be set by the system
-  if ('incremental_id' in restAttributes) {
-    delete restAttributes.incremental_id;
-  }
 
   const transformedConnector = {
     ...(connector && {

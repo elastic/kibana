@@ -69,10 +69,6 @@ const EqlTab = tabWithSuspense(
   lazy(() => import('./eql')),
   <TimelineTabFallback />
 );
-const GraphTab = tabWithSuspense(
-  lazy(() => import('./graph')),
-  <TimelineTabFallback />
-);
 const NotesTab = tabWithSuspense(
   lazy(() => import('./notes')),
   <TimelineTabFallback />
@@ -92,7 +88,6 @@ interface BasicTimelineTab {
   timelineFullScreen?: boolean;
   timelineId: TimelineId;
   timelineType: TimelineType;
-  graphEventId?: string;
   timelineDescription: string;
 }
 
@@ -117,24 +112,6 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
     const shouldShowESQLTab = useMemo(
       () => isEsqlAdvancedSettingEnabled || timelineESQLSavedSearch != null,
       [isEsqlAdvancedSettingEnabled, timelineESQLSavedSearch]
-    );
-    const getTab = useCallback(
-      (tab: TimelineTabs) => {
-        switch (tab) {
-          case TimelineTabs.graph:
-            return <GraphTab timelineId={timelineId} />;
-          case TimelineTabs.notes:
-            return <NotesTab timelineId={timelineId} />;
-          default:
-            return null;
-        }
-      },
-      [timelineId]
-    );
-
-    const isGraphOrNotesTabs = useMemo(
-      () => [TimelineTabs.graph, TimelineTabs.notes].includes(activeTimelineTab),
-      [activeTimelineTab]
     );
 
     return (
@@ -185,10 +162,10 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
         )}
         <LazyTimelineTabRenderer
           timelineId={timelineId}
-          shouldShowTab={isGraphOrNotesTabs}
-          dataTestSubj={`timeline-tab-content-${TimelineTabs.graph}-${TimelineTabs.notes}`}
+          shouldShowTab={activeTimelineTab === TimelineTabs.notes}
+          dataTestSubj={`timeline-tab-content-${TimelineTabs.notes}`}
         >
-          {isGraphOrNotesTabs ? getTab(activeTimelineTab) : null}
+          <NotesTab timelineId={timelineId} />
         </LazyTimelineTabRenderer>
       </>
     );
@@ -228,7 +205,6 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   timelineId,
   timelineFullScreen,
   timelineType,
-  graphEventId,
   timelineDescription,
 }) => {
   const dispatch = useDispatch();
@@ -353,14 +329,13 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   }, [setActiveTab, dispatch, timelineId]);
 
   useEffect(() => {
-    // we redirect to the Query tab in the following situations:
-    // - for the Analyzer tab but the graphEventId is missing from the url
-    // - for urls with Timeline saved with the Session tab, we automatically (as Session View is now rendered in the flyout)
+    // we redirect to the Query tab when we try to load Timeline urls with the Session or Analyzer tabs active
+    // Session View and Analyzer graph are now only rendered in the flyout
     // @ts-ignore
-    if ((!graphEventId && activeTab === TimelineTabs.graph) || activeTab === 'session') {
+    if (activeTab === 'graph' || activeTab === 'session') {
       setQueryAsActiveTab();
     }
-  }, [activeTab, graphEventId, setQueryAsActiveTab]);
+  }, [activeTab, setQueryAsActiveTab]);
 
   return (
     <>
