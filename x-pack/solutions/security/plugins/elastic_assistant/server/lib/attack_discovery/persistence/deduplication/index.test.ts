@@ -102,7 +102,7 @@ describe('deduplicateAttackDiscoveries', () => {
       },
     } as unknown as estypes.SearchResponse);
     await deduplicateAttackDiscoveries(defaultProps);
-    expect(mockLogger.debug).toHaveBeenCalledWith(
+    expect(mockLogger.info).toHaveBeenCalledWith(
       'Found 1 duplicate alert(s), skipping report for those.'
     );
   });

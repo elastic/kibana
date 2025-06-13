@@ -281,7 +281,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
 
     const { id, ...restDiscovery } = mockAttackDiscoveries[0];
     expect(services.alertsClient.report).toHaveBeenCalledWith({
-      id: '1517c5b7a4e203cfd56cb99bb831b3b82ffa60597ae7036dfb322732d9fcd22f',
+      id: 'c6f1252a8be68c4dc8d6181ef2c0b8da4288d7856ad7bbfccb888730023d9629',
       actionGroup: 'default',
     });
 
@@ -290,7 +290,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
       payload: {
         'ecs.version': EcsVersion,
         'kibana.alert.instance.id':
-          '1517c5b7a4e203cfd56cb99bb831b3b82ffa60597ae7036dfb322732d9fcd22f',
+          'c6f1252a8be68c4dc8d6181ef2c0b8da4288d7856ad7bbfccb888730023d9629',
         'kibana.alert.uuid': 'fake-alert',
         'kibana.alert.attack_discovery.alert_ids': [
           '021b27d6bee0650a843be1d511119a3b5c7c8fdaeff922471ce0248ad27bd26c',
