@@ -123,6 +123,7 @@ describe('RelatedDashboardsClient', () => {
                             },
                           },
                         },
+                        type: 'lens',
                       },
                     },
                   },
@@ -149,6 +150,7 @@ describe('RelatedDashboardsClient', () => {
                             },
                           },
                         },
+                        type: 'lens',
                       },
                     },
                   },
@@ -182,6 +184,7 @@ describe('RelatedDashboardsClient', () => {
                         formBased: { layers: [{ columns: [{ sourceField: 'field2' }] }] },
                       },
                     },
+                    type: 'lens',
                   },
                 },
                 panelIndex: expect.any(String),
@@ -212,6 +215,7 @@ describe('RelatedDashboardsClient', () => {
                         formBased: { layers: [{ columns: [{ sourceField: 'field1' }] }] },
                       },
                     },
+                    type: 'lens',
                   },
                 },
                 panelIndex: expect.any(String),
@@ -233,6 +237,7 @@ describe('RelatedDashboardsClient', () => {
                         formBased: { layers: [{ columns: [{ sourceField: 'field1' }] }] },
                       },
                     },
+                    type: 'lens',
                   },
                 },
                 panelIndex: expect.any(String),
@@ -277,6 +282,7 @@ describe('RelatedDashboardsClient', () => {
                           formBased: { layers: [{ columns: [{ sourceField: 'field1' }] }] },
                         },
                       },
+                      type: 'lens',
                     },
                   },
                 },
@@ -324,6 +330,7 @@ describe('RelatedDashboardsClient', () => {
                             formBased: { layers: [{ columns: [{ sourceField: 'field1' }] }] }, // matches by field which is handled by getDashboardsByField
                           },
                         },
+                        type: 'lens',
                       },
                     },
                   },
@@ -357,6 +364,7 @@ describe('RelatedDashboardsClient', () => {
                         formBased: { layers: [{ columns: [{ sourceField: 'field1' }] }] },
                       },
                     },
+                    type: 'lens',
                   },
                 },
                 panelIndex: '123',
@@ -407,6 +415,7 @@ describe('RelatedDashboardsClient', () => {
               type: 'lens',
               panelConfig: {
                 attributes: {
+                  type: 'lens',
                   references: [
                     { name: 'indexpattern', id: 'index2' },
                     { name: 'irrelevant', id: 'index1' },
@@ -429,6 +438,50 @@ describe('RelatedDashboardsClient', () => {
       expect(resultWithMatch.dashboards[0].matchedBy).toEqual({
         index: ['index2'],
       });
+    });
+
+    it('should return an empty set when lens attributes are not available', () => {
+      client.dashboardsById.set('dashboard1', {
+        id: 'dashboard1',
+        attributes: {
+          title: 'Dashboard 1',
+          panels: [
+            {
+              type: 'lens',
+              panelConfig: {
+                attributes: null, // Lens attributes are not available
+              },
+            },
+          ],
+        },
+      } as any);
+
+      // @ts-ignore next-line
+      const result = client.getDashboardsByIndex('index1');
+      expect(result.dashboards).toEqual([]);
+    });
+  });
+
+  describe('getPanelsByField', () => {
+    it('should return an empty set when lens attributes are not available', () => {
+      client.dashboardsById.set('dashboard1', {
+        id: 'dashboard1',
+        attributes: {
+          title: 'Dashboard 1',
+          panels: [
+            {
+              type: 'lens',
+              panelConfig: {
+                attributes: null, // Lens attributes are not available
+              },
+            },
+          ],
+        },
+      } as any);
+
+      // @ts-ignore next-line
+      const result = client.getDashboardsByField(['field1']);
+      expect(result.dashboards).toEqual([]);
     });
   });
 
@@ -635,6 +688,7 @@ describe('RelatedDashboardsClient', () => {
                             formBased: { layers: [{ columns: [{ sourceField: 'field1' }] }] }, // matches by field which is handled by getDashboardsByField
                           },
                         },
+                        type: 'lens',
                       },
                     },
                   },
@@ -657,6 +711,7 @@ describe('RelatedDashboardsClient', () => {
                             formBased: { layers: [{ columns: [{ sourceField: 'field2' }] }] },
                           },
                         },
+                        type: 'lens',
                       },
                     },
                   },
@@ -698,6 +753,7 @@ describe('RelatedDashboardsClient', () => {
                         formBased: { layers: [{ columns: [{ sourceField: 'field1' }] }] },
                       },
                     },
+                    type: 'lens',
                   },
                 },
                 panelIndex: '123',

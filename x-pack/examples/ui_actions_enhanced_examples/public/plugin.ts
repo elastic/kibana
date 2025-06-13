@@ -96,7 +96,7 @@ export class UiActionsEnhancedExamplesPlugin
               triggers: [SAMPLE_APP2_CLICK_TRIGGER],
               placeContext: {},
             }),
-            coreStart
+            coreStart.rendering
           ),
           {
             ownFocus: true,
@@ -122,7 +122,7 @@ export class UiActionsEnhancedExamplesPlugin
               triggers: [SAMPLE_APP2_CLICK_TRIGGER],
               placeContext: { sampleApp2ClickContext },
             }),
-            coreStart
+            coreStart.rendering
           ),
           {
             ownFocus: true,
