@@ -17,9 +17,13 @@ import { cases, shareService } from '../../../services/kibana_services';
 export const AddToCaseOpenModal = ({
   savedObjectId,
   dashboardTitle,
+  screenshot,
+  onClose,
 }: {
   savedObjectId: string;
   dashboardTitle: string;
+  screenshot: any;
+  onClose: () => void;
 }) => {
   const {
     hooks: { useCasesAddToExistingCaseModal },
@@ -27,7 +31,7 @@ export const AddToCaseOpenModal = ({
   const { url: urlService } = shareService;
   const dashboardLocator = urlService.locators.get<DashboardLocatorParams>(DASHBOARD_APP_LOCATOR);
   const casesModal = useCasesAddToExistingCaseModal({
-    onClose: () => {},
+    onClose,
     onSuccess: () => {},
   });
 
@@ -41,12 +45,15 @@ export const AddToCaseOpenModal = ({
         label: dashboardTitle,
         type: 'dashboard',
         icon: 'dashboardApp',
+        snapshot: {
+          imgData: screenshot,
+        },
       },
       persistableStateAttachmentTypeId: LINK_ATTACHMENT_TYPE,
       type: AttachmentType.persistableState,
     };
     casesModal.open({ getAttachments: () => [attachments] });
-  }, [casesModal, dashboardLocator, savedObjectId, dashboardTitle]);
+  }, [casesModal, dashboardLocator, savedObjectId, dashboardTitle, screenshot]);
 
   return <></>;
 };

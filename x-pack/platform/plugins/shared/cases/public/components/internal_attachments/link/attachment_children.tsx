@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiLink } from '@elastic/eui';
+import { EuiImage, EuiLink } from '@elastic/eui';
 import type { LinkAttachmentPersistedState } from './types';
 
 interface AttachmentChildrenProps {
@@ -16,8 +16,16 @@ interface AttachmentChildrenProps {
 export const LinkAttachmentChildren: React.FC<AttachmentChildrenProps> = ({
   persistableStateAttachmentState,
 }) => {
-  const { pathname, label } = persistableStateAttachmentState;
-  return <EuiLink href={pathname}>{label}</EuiLink>;
+  const { pathname, label, snapshot } = persistableStateAttachmentState;
+
+  return (
+    <>
+      <EuiLink href={pathname}>{label}</EuiLink>
+      {snapshot?.imgData && (
+        <EuiImage key="screenshot" src={snapshot.imgData} alt="screenshot" allowFullScreen />
+      )}
+    </>
+  );
 };
 
 LinkAttachmentChildren.displayName = 'LinkAttachmentChildren';

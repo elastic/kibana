@@ -82,6 +82,7 @@ export function InternalDashboardTopNav({
   const [isChromeVisible, setIsChromeVisible] = useState(false);
   const [isLabsShown, setIsLabsShown] = useState(false);
   const [isAddToCaseModalOpen, setIsAddToCaseModalOpen] = useState(false);
+  const [screenshot, setScreenshot] = useState();
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
 
   const {
@@ -266,7 +267,9 @@ export function InternalDashboardTopNav({
   const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
     isLabsShown,
     setIsLabsShown,
+    isAddToCaseModalOpen,
     setIsAddToCaseModalOpen,
+    setScreenshot,
     maybeRedirect,
     showResetChange,
   });
@@ -392,9 +395,14 @@ export function InternalDashboardTopNav({
       {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
       ) : null}
-      {isAddToCaseModalOpen && canCases ? (
+      {isAddToCaseModalOpen && canCases && lastSavedId ? (
         <CasesContext permissions={canCases} owner={[]}>
-          <AddToCaseOpenModal savedObjectId={lastSavedId} dashboardTitle={dashboardTitle} />
+          <AddToCaseOpenModal
+            savedObjectId={lastSavedId}
+            dashboardTitle={dashboardTitle}
+            screenshot={screenshot}
+            onClose={() => setIsAddToCaseModalOpen(false)}
+          />
         </CasesContext>
       ) : null}
       {viewMode === 'edit' ? <DashboardEditingToolbar isDisabled={!!focusedPanelId} /> : null}
