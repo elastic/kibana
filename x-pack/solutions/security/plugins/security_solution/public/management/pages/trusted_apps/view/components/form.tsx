@@ -10,6 +10,8 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import type { EuiFieldTextProps, EuiSuperSelectOption } from '@elastic/eui';
 import {
   EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiHorizontalRule,
@@ -29,12 +31,16 @@ import {
   OperatingSystem,
 } from '@kbn/securitysolution-utils';
 import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
-import { useCanAssignArtifactPerPolicy } from '../../../../hooks/artifacts/use_can_assign_artifact_per_policy';
+import { useCanAssignArtifactPerPolicy, useGetUpdatedTags } from '../../../../hooks/artifacts';
 import { FormattedError } from '../../../../components/formatted_error';
 import type {
   TrustedAppConditionEntry,
   NewTrustedApp,
 } from '../../../../../../common/endpoint/types';
+import {
+  StyledEuiFlexItemButtonGroup,
+  StyledButtonGroup,
+} from '../../../../components/effected_policy_select';
 import {
   isValidHash,
   getDuplicateFields,
@@ -61,6 +67,10 @@ import type { EffectedPolicySelectProps } from '../../../../components/effected_
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
 import { TrustedAppsArtifactsDocsLink } from './artifacts_docs_link';
+import { isAdvancedModeEnabled } from '../../../../../../common/endpoint/service/artifacts/utils';
+import { ADVANCED_MODE_TAG } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/constants';
+import { StyledEuiFlexItem } from '../../../policy/view/ingest_manager_integration/endpoint_package_custom_extension/components/styled_components';
+import { useIsExperimentalFeatureEnabled } from '@kbn/security-solution-plugin/public/common/hooks/use_experimental_features';
 
 interface FieldValidationState {
   /** If this fields state is invalid. Drives display of errors on the UI */
@@ -233,6 +243,7 @@ const defaultConditionEntry = (): TrustedAppConditionEntry<ConditionEntryField.H
   value: '',
 });
 
+
 export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
   ({ item, onChange, mode, error: submitError }) => {
     const getTestId = useTestIdGenerator('trustedApps-form');
@@ -247,6 +258,35 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       validateValues(item)
     );
 
+    const isTAAdvancedModeFeatureFlagEnabled = useIsExperimentalFeatureEnabled('trustedAppsAdvancedMode');
+    const isFormAdvancedMode: boolean = useMemo(() => isAdvancedModeEnabled(item), [item]);
+    const { getTagsUpdatedBy } = useGetUpdatedTags(item);
+
+    const selectedFormType = useMemo(() => {
+      return isFormAdvancedMode ? 'advancedMode' : 'basicMode'
+    }, [isFormAdvancedMode]);
+
+    const advancedModeToggle = [
+      {
+        id: 'basicMode',
+        label: i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.basicMode', {
+          defaultMessage: 'Basic',
+        }),
+        iconType: selectedFormType === 'basicMode' ? 'checkInCircleFilled' : 'empty',
+        'data-test-subj': 'basicModeButton',
+      },
+      {
+        id: 'advancedMode',
+        label: i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.advancedMode', {
+          defaultMessage: 'Advanced',
+        }),
+        iconType: selectedFormType === 'advancedMode' ? 'checkInCircleFilled' : 'empty',
+        'data-test-subj': 'advancedModeButton',
+      },
+    ];
+
+
+
     const processChanged = useCallback(
       (updatedFormValues: ArtifactFormComponentProps['item']) => {
         const updatedValidationResult = validateValues(updatedFormValues);
@@ -256,10 +296,10 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           isValid: updatedValidationResult.isValid,
           confirmModalLabels: updatedValidationResult.extraWarning
             ? CONFIRM_WARNING_MODAL_LABELS(
-                i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.confirmModal.name', {
-                  defaultMessage: 'trusted application',
-                })
-              )
+              i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.confirmModal.name', {
+                defaultMessage: 'trusted application',
+              })
+            )
             : undefined,
         });
       },
@@ -304,6 +344,24 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           inputDisplay: OS_TITLES[os],
         })),
       []
+    );
+
+    const handleAdvancedModeChange = useCallback(
+      (selectedId: string) => {
+        onChange({
+          item: {
+            ...item,
+            tags: getTagsUpdatedBy(
+              'advancedMode',
+              selectedId === 'advancedMode'
+                ? [ADVANCED_MODE_TAG]
+                : []
+            ),
+          },
+          isValid: true,
+        });
+      },
+      [getTagsUpdatedBy, item, onChange]
     );
 
     const handleOnOsChange = useCallback(
@@ -506,7 +564,21 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           <h3>{CONDITIONS_HEADER}</h3>
         </EuiText>
         <EuiSpacer size="xs" />
-        <EuiText size="s">{CONDITIONS_HEADER_DESCRIPTION}</EuiText>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={2}>
+            <EuiText size="s">{CONDITIONS_HEADER_DESCRIPTION}</EuiText>
+          </EuiFlexItem>
+          {isTAAdvancedModeFeatureFlagEnabled && <StyledEuiFlexItemButtonGroup grow={1}>
+            <EuiFormRow fullWidth>
+              <StyledButtonGroup
+                legend="Advanced Mode Toggle"
+                options={advancedModeToggle}
+                idSelected={selectedFormType}
+                onChange={handleAdvancedModeChange}
+              />
+            </EuiFormRow>
+          </StyledEuiFlexItemButtonGroup>}
+        </EuiFlexGroup>
         <EuiSpacer size="m" />
         <EuiFormRow
           label={SELECT_OS_LABEL}
@@ -560,3 +632,4 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
 );
 
 TrustedAppsForm.displayName = 'TrustedAppsForm';
+
