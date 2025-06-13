@@ -31,11 +31,13 @@ import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import { isDataFrameAnalyticsConfigs } from '@kbn/ml-data-frame-analytics-utils';
 import { indexServiceFactory, type MlIndexUtils } from '@kbn/ml-services/index_service';
+import type { MlKibanaReactContextValue } from '@kbn/ml-kibana-context/kibana_context';
 
 import type { DashboardService, DashboardItems } from '../../services/dashboard_service';
 import type { ToastNotificationService } from '../../services/toast_notification_service';
 import { toastNotificationServiceProvider } from '../../services/toast_notification_service';
-import type { MlKibanaReactContextValue } from '../../contexts/kibana';
+import { openCustomUrlWindow } from '../../util/custom_url_utils';
+
 import { CustomUrlEditor, CustomUrlList } from './custom_url_editor';
 import {
   getNewCustomUrlDefaults,
@@ -44,7 +46,6 @@ import {
   getTestUrl,
   type CustomUrlSettings,
 } from './custom_url_editor/utils';
-import { openCustomUrlWindow } from '../../util/custom_url_utils';
 import type { CustomUrlsWrapperProps } from './custom_urls_wrapper';
 
 interface CustomUrlsState {

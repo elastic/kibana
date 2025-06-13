@@ -15,6 +15,5 @@ export {
   useMlManagementLocator,
   useMlManagementLocatorInternal,
 } from './use_create_url';
-export { useMlApi } from './use_ml_api_context';
 export { useFieldFormatter } from './use_field_formatter';
 export { useMlLicenseInfo } from './use_ml_license';

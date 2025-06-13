@@ -16,6 +16,7 @@ import { getBoundsRoundedToInterval, TimeBuckets } from '@kbn/ml-time-buckets';
 import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
 import { OVERALL_LABEL, VIEW_BY_JOB_LABEL } from '@kbn/ml-common-constants/explorer_constants';
 import type { MlResultsService } from '@kbn/ml-services/results_service_2';
+
 import type {
   ExplorerJob,
   OverallSwimlaneData,
