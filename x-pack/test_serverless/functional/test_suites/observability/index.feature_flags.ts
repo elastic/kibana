@@ -11,6 +11,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('serverless observability UI - feature flags', function () {
     // add tests that require feature flags, defined in config.feature_flags.ts
     loadTestFile(require.resolve('./role_management'));
+    loadTestFile(require.resolve('./rules/rules_with_custom_role'));
     loadTestFile(require.resolve('./infra'));
     loadTestFile(require.resolve('./streams'));
   });
