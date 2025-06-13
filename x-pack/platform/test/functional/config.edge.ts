@@ -8,7 +8,7 @@
 import { FtrConfigProviderContext } from "@kbn/test";
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const firefoxConfig = await readConfigFile(require.resolve('./config.firefox.js'));
+  const firefoxConfig = await readConfigFile(require.resolve('./config.firefox.ts'));
 
   return {
     ...firefoxConfig.getAll(),

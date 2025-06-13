@@ -8,7 +8,7 @@
 import { FtrConfigProviderContext } from "@kbn/test";
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const chromeConfig = await readConfigFile(require.resolve('./config.base.js'));
+  const chromeConfig = await readConfigFile(require.resolve('./config.base.ts'));
 
   return {
     ...chromeConfig.getAll(),
