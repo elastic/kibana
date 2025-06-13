@@ -113,7 +113,8 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
     });
   };
 
-  describe('schedule alert deletion', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/223437
+  describe.skip('schedule alert deletion', () => {
     before(async () => {
       // We're in a non-default space, so we need a detection rule to run and generate alerts
       // in order to create the space-specific alerts index
