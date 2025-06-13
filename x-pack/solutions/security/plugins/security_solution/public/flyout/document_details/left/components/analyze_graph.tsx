@@ -37,7 +37,7 @@ export const ANALYZER_PREVIEW_BANNER = {
  * Analyzer graph view displayed in the document details expandable flyout left section under the Visualize tab
  */
 export const AnalyzeGraph: FC = () => {
-  const { eventId, scopeId, dataAsNestedObject } = useDocumentDetailsContext();
+  const { eventId, scopeId, dataAsNestedObject, indexName } = useDocumentDetailsContext();
   const isEnabled = useIsInvestigateInResolverActionEnabled(dataAsNestedObject);
 
   const key = useWhichFlyout() ?? 'memory';
@@ -63,6 +63,7 @@ export const AnalyzeGraph: FC = () => {
         databaseDocumentID={eventId}
         resolverComponentInstanceID={`${key}-${scopeId}`}
         indices={selectedPatterns}
+        entityIndex={indexName}
         shouldUpdate={shouldUpdate}
         filters={filters}
         isSplitPanel
