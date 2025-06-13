@@ -95,7 +95,7 @@ describe('tracesDataSourceProfileProvider', () => {
     ).toEqual(RESOLUTION_MISMATCH);
   });
 
-  it("should NOT match when the root context isn't Observability", () => {
+  it('should NOT match when the solutionType is NOT Observability', () => {
     expect(
       tracesDataSourceProfileProvider.resolve({
         rootContext: {
