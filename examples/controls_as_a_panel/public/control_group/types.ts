@@ -8,15 +8,22 @@
  */
 
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { PublishesUnsavedChanges, SerializedTitles } from '@kbn/presentation-publishing';
+import {
+  HasEditCapabilities,
+  PublishesUnsavedChanges,
+  SerializedTitles,
+} from '@kbn/presentation-publishing';
 
-export interface ControlsGroupInternalState {
+export interface ControlGroupAttributes {
   controls: {
     [key: string]: { type: 'optionsList' | 'rangeSlider' };
   };
 }
 
-export type ControlGroupSerializedState = SerializedTitles & ControlsGroupInternalState;
+export type ControlGroupSerializedState = SerializedTitles & { attributes: ControlGroupAttributes };
+
+export type ControlGroupRuntimeState = SerializedTitles & ControlGroupAttributes;
 
 export type ControlGroupApi = DefaultEmbeddableApi<ControlGroupSerializedState> &
+  HasEditCapabilities &
   PublishesUnsavedChanges;

@@ -27,16 +27,19 @@ export class ControlsAsAPanelExamplePlugin
 {
   public setup(core: CoreSetup<ControlsExampleStartDeps>, { embeddable }: SetupDeps) {
     embeddable.registerReactEmbeddableFactory(CONTROL_PANEL_ID, async () => {
-      const { controlPanelEmbeddableFactory } = await import(
+      const { getControlPanelEmbeddableFactory } = await import(
         './control_group/control_group_embeddable'
       );
-      return controlPanelEmbeddableFactory;
+      const [coreStart] = await core.getStartServices();
+      return getControlPanelEmbeddableFactory(coreStart);
     });
   }
 
   public start(core: CoreStart, deps: ControlsExampleStartDeps) {
     deps.uiActions.registerActionAsync(ADD_CONTROL_PANEL_ACTION_ID, async () => {
-      const { AddControlPanelAction } = await import('./control_group/add_control_panel_action');
+      const { AddControlPanelAction } = await import(
+        './control_group/actions/add_control_panel_action'
+      );
       return new AddControlPanelAction();
     });
     deps.uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_CONTROL_PANEL_ACTION_ID);
