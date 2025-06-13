@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../../../alerting_api_integration/common/ftr_provider_context';
+import type { FtrProviderContext } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/ftr_provider_context';
 import {
   buildUp,
   tearDown,
-} from '../../../../../alerting_api_integration/spaces_only/tests/helpers';
+} from '@kbn/test-suites-xpack-platform/alerting_api_integration/spaces_only/tests/helpers';
 
 export default function actionsTests({ loadTestFile, getService }: FtrProviderContext) {
   describe('Connectors with AWS SES Kibana config', () => {
