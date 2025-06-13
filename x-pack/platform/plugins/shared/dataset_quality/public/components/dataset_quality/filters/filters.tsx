@@ -54,6 +54,7 @@ export default function Filters() {
     onTypesChange,
     selectedQuery,
     onQueryChange,
+    isCompleteDatasetQualityAvailable,
   } = useDatasetQualityFilters();
 
   const commonlyUsedRanges = useQuickTimeRanges();
@@ -69,15 +70,17 @@ export default function Filters() {
           integrations={integrations}
           onIntegrationsChange={onIntegrationsChange}
         />
-        <Selector
-          dataTestSubj="datasetQualityFilterType"
-          label={typesLabel}
-          searchPlaceholder={typesSearchPlaceholder}
-          noneMatchingMessage={typesNoneMatching}
-          noneAvailableMessage={typesNoneAvailable}
-          options={types}
-          onOptionsChange={onTypesChange}
-        />
+        {isCompleteDatasetQualityAvailable && (
+          <Selector
+            dataTestSubj="datasetQualityFilterType"
+            label={typesLabel}
+            searchPlaceholder={typesSearchPlaceholder}
+            noneMatchingMessage={typesNoneMatching}
+            noneAvailableMessage={typesNoneAvailable}
+            options={types}
+            onOptionsChange={onTypesChange}
+          />
+        )}
         <NamespacesSelector
           isLoading={isLoading}
           namespaces={namespaces}

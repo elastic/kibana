@@ -5,17 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiBetaBadge, EuiLink, EuiPageHeader, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { KNOWN_TYPES } from '../../../common/constants';
+import { DEFAULT_DATASET_TYPE, KNOWN_TYPES } from '../../../common/constants';
 import { datasetQualityAppTitle } from '../../../common/translations';
+import { useDatasetQualityFilters } from '../../hooks/use_dataset_quality_filters';
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function Header() {
+  const { isCompleteDatasetQualityAvailable } = useDatasetQualityFilters();
+  const validTypes = useMemo(
+    () => (isCompleteDatasetQualityAvailable ? KNOWN_TYPES : [DEFAULT_DATASET_TYPE]),
+    [isCompleteDatasetQualityAvailable]
+  );
+
   return (
     <EuiPageHeader
       bottomBorder
@@ -35,7 +42,7 @@ export default function Header() {
           id="xpack.datasetQuality.appDescription"
           defaultMessage="Monitor the data set quality for {types} data streams that follow the {dsNamingSchemeLink}."
           values={{
-            types: KNOWN_TYPES.map((type, index) => {
+            types: validTypes.map((type, index) => {
               return (
                 <>
                   {index > 0 && ', '}

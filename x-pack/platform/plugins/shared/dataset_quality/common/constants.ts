@@ -9,6 +9,7 @@ import { _IGNORED } from './es_fields';
 import { DataStreamType, QualityIndicators } from './types';
 
 export const DATASET_QUALITY_APP_ID = 'dataset_quality';
+export const DATASET_QUALITY_COMPLETE_ID = 'dataset-quality-complete';
 export const DEFAULT_DATASET_TYPE: DataStreamType = 'logs';
 export const DEFAULT_LOGS_DATA_VIEW = 'logs-*-*';
 
