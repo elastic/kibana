@@ -17,8 +17,8 @@ import merge from 'lodash/merge';
 import type { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
-import type { CloudStart } from '@kbn/cloud-plugin/public';
 
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import {
   SUPPORTED_CLOUDBEAT_INPUTS,
   ASSET_POLICY_TEMPLATE,
@@ -86,8 +86,8 @@ const getAssetType = (policyTemplateInput: AssetInput) => {
 export interface GetCloudConnectorRemoteRoleTemplateParams {
   input: NewPackagePolicyAssetInput;
   cloud: Pick<
-    CloudStart,
-    'isCloudEnabled' | 'kibanaUrl' | 'deploymentUrl' | 'serverless' | 'isServerlessEnabled'
+    CloudSetup,
+    'isCloudEnabled' | 'cloudHost' | 'deploymentUrl' | 'serverless' | 'isServerlessEnabled'
   >;
   packageInfo: PackageInfo;
 }
@@ -547,11 +547,11 @@ export const getCloudCredentialVarsConfig = ({
     [credentialType]: { value: optionId },
   };
 };
-export const getCloudProviderFromKibanaUrl = (
-  kibanaUrl: string | undefined
+export const getCloudProviderFromCloudHost = (
+  cloudHost: string | undefined
 ): string | undefined => {
-  if (!kibanaUrl) return undefined;
-  const match = kibanaUrl.match(/\.(aws|gcp|azure)\.elastic\.cloud/);
+  if (!cloudHost) return undefined;
+  const match = cloudHost.match(/\b(aws|gcp|azure)\b/);
   return match?.[1];
 };
 
@@ -568,7 +568,8 @@ export const getCloudConnectorRemoteRoleTemplate = ({
 }: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
   const accountType = input?.streams?.[0]?.vars?.['aws.account_type']?.value ?? AWS_SINGLE_ACCOUNT;
 
-  const provider = getCloudProviderFromKibanaUrl(cloud?.kibanaUrl);
+  const provider = getCloudProviderFromCloudHost(cloud?.cloudHost);
+  console.log("provider", provider);
   if (!provider || provider !== 'aws') return undefined;
 
   const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);

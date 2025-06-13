@@ -953,17 +953,16 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       (useKibana as jest.Mock).mockReturnValue({
         services: {
           cloud: {
-            kibanaUrl: 'https://my-deployment.kb.us-east-1.aws.elastic.cloud',
-            deploymentUrl: 'https://cloud.elastic.co/deployments/abc123456789',
+            deploymentUrl: 'https://cloud.elastic.co/deployments/bfdad4ef99a24212a06d387593686d63',
             isCloudEnabled: true,
             isServerlessEnabled: false,
-            serverless: undefined,
+            cloudHost: 'eu-west-1.aws.qa.elastic.cloud',
+            serverless: {},
           },
           uiSettings: {
             get: (key: string) => key === SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING,
           },
         },
-
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
@@ -1008,7 +1007,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       (useKibana as jest.Mock).mockReturnValue({
         services: {
           cloud: {
-            kibanaUrl: 'https://my-deployment.kb.us-east-1.aws.elastic.cloud',
+            cloudHost: 'eu-west-1.aws.qa.elastic.cloud',
             deploymentUrl: undefined,
             isCloudEnabled: true,
             isServerlessEnabled: true,

@@ -346,20 +346,37 @@ export const AwsCredentialsFormAgentless = ({
     <>
       <AWSSetupInfoContent
         info={
-          <FormattedMessage
-            id="xpack.securitySolution.assetInventory.awsIntegration.gettingStarted.setupInfoContentAgentless"
-            defaultMessage="Utilize AWS Access Keys or Cloud Connector to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
-            values={{
-              gettingStartedLink: (
-                <EuiLink href={documentationLink} target="_blank">
-                  <FormattedMessage
-                    id="xpack.securitySolution.assetInventory.awsIntegration.gettingStarted.setupInfoContentLink"
-                    defaultMessage="Getting Started"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
+          showCloudConnectors ? (
+            <FormattedMessage
+              id="xpack.securitySolution.assetInventory.awsIntegration.gettingStarted.setupInfoContentAgentlessCloudConnectors"
+              defaultMessage="Utilize AWS Access Keys or Cloud Connectors to set up and deploy Asset Discovery for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
+              values={{
+                gettingStartedLink: (
+                  <EuiLink href={documentationLink} target="_blank">
+                    <FormattedMessage
+                      id="xpack.securitySolution.assetInventory.awsIntegration.gettingStarted.setupInfoContentLink"
+                      defaultMessage="Getting Started"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.securitySolution.assetInventory.awsIntegration.gettingStarted.setupInfoContentAgentless"
+              defaultMessage="Utilize AWS Access Keys to set up and deploy Asset Discovery for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
+              values={{
+                gettingStartedLink: (
+                  <EuiLink href={documentationLink} target="_blank">
+                    <FormattedMessage
+                      id="xpack.securitySolution.assetInventory.awsIntegration.gettingStarted.setupInfoContentLink"
+                      defaultMessage="Getting Started"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          )
         }
       />
       <EuiSpacer size="l" />

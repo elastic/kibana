@@ -336,7 +336,7 @@ export const AwsCredentialsFormAgentless = ({
         info={
           showCloudConnectors ? (
             <FormattedMessage
-              id="xpack.csp.awsIntegration.gettingStarted.setupInfoContentAgentless"
+              id="xpack.csp.awsIntegration.gettingStarted.setupInfoContentAgentlessCloudConnector"
               defaultMessage="Utilize AWS Access Keys or Cloud Connector to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
               values={{
                 gettingStartedLink: (
@@ -351,8 +351,8 @@ export const AwsCredentialsFormAgentless = ({
             />
           ) : (
             <FormattedMessage
-              id="xpack.csp.awsIntegration.gettingStarted.setupInfoContentAgentlessCloudConnector"
-              defaultMessage="Utilize AWS Access Keys or Cloud Connector to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
+              id="xpack.csp.awsIntegration.gettingStarted.setupInfoContentAgentless"
+              defaultMessage="Utilize AWS Access Keys to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
               values={{
                 gettingStartedLink: (
                   <EuiLink href={documentationLink} target="_blank">

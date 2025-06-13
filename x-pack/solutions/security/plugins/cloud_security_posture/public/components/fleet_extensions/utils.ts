@@ -495,7 +495,7 @@ export const getCloudProviderFromCloudHost = (
   cloudHost: string | undefined
 ): string | undefined => {
   if (!cloudHost) return undefined;
-  const match = cloudHost.match(/\.(aws|gcp|azure)\./)?.[1];
+  const match = cloudHost.match(/\b(aws|gcp|azure)\b/)?.[1];
   return match;
 };
 
