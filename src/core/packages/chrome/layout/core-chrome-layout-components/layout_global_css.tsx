@@ -9,19 +9,19 @@
 
 import React from 'react';
 import { Global, css } from '@emotion/react';
-import { LayoutStyleArgs } from './layout.styles';
+import { useLayoutState } from './layout_state_context';
 
-export type LayoutGlobalCSSProps = LayoutStyleArgs;
+export const LayoutGlobalCSS = () => {
+  const {
+    bannerHeight,
+    footerHeight,
+    headerHeight,
+    navigationWidth,
+    navigationPanelWidth,
+    sidebarWidth,
+    sidebarPanelWidth,
+  } = useLayoutState();
 
-export const LayoutGlobalCSS = ({
-  bannerHeight,
-  footerHeight,
-  headerHeight,
-  navigationWidth,
-  navigationPanelWidth,
-  sidebarWidth,
-  sidebarPanelWidth,
-}: LayoutGlobalCSSProps) => {
   const banner = css`
     --kbn-layout--banner-top: 0;
     --kbn-layout--banner-height: ${bannerHeight}px;

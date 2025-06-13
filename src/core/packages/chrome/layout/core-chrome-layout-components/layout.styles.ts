@@ -8,16 +8,7 @@
  */
 
 import { css } from '@emotion/react';
-
-export interface LayoutStyleArgs {
-  bannerHeight: number;
-  footerHeight: number;
-  headerHeight: number;
-  navigationWidth: number;
-  navigationPanelWidth: number;
-  sidebarWidth: number;
-  sidebarPanelWidth: number;
-}
+import { LayoutState } from './layout.types';
 
 const cssProp = css`
   align-items: baseline;
@@ -36,15 +27,17 @@ const cssProp = css`
 `;
 
 // TODO: clintandrewhall - Handle smaller screens using `useEuiBreakpoints`.
-export const useLayoutStyles = ({
-  bannerHeight,
-  footerHeight,
-  headerHeight,
-  navigationWidth,
-  navigationPanelWidth,
-  sidebarWidth,
-  sidebarPanelWidth,
-}: LayoutStyleArgs) => {
+export const useLayoutStyles = (layoutState: LayoutState) => {
+  const {
+    navigationPanelWidth,
+    navigationWidth,
+    sidebarPanelWidth,
+    sidebarWidth,
+    bannerHeight,
+    headerHeight,
+    footerHeight,
+  } = layoutState;
+
   const style = {
     gridTemplateColumns: `
       ${navigationWidth}px

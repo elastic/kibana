@@ -16,6 +16,7 @@ const root = css`
   height: 100%;
   overflow: hidden;
   position: sticky;
+  width: var(--kbn-layout--sidebar-panel-width);
 `;
 
 export const styles = {

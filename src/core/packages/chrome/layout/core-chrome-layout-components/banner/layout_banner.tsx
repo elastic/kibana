@@ -13,13 +13,8 @@ import { styles } from './layout_banner.styles';
 
 export interface LayoutBannerProps {
   children: ReactNode;
-  height: number;
 }
 
-export const LayoutBanner = ({ children, height }: LayoutBannerProps) => {
-  return (
-    <section css={styles.root} style={{ height }}>
-      {children}
-    </section>
-  );
+export const LayoutBanner = ({ children }: LayoutBannerProps) => {
+  return <section css={styles.root}>{children}</section>;
 };

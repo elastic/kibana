@@ -13,7 +13,8 @@ const root = css`
   position: sticky;
   overflow: hidden;
   grid-area: footer;
-  width: 100%;
+  width: var(--kbn-layout--footer-width);
+  height: var(--kbn-layout--footer-height);
 `;
 
 export const styles = {

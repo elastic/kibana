@@ -15,113 +15,58 @@ import { LayoutFooter } from './footer';
 import { LayoutHeader } from './header';
 import { LayoutSidebar, LayoutSidebarPanel } from './sidebar';
 
-import { LayoutStyleArgs, useLayoutStyles } from './layout.styles';
-import { LayoutGlobalCSSProps } from './layout_global_css';
+import { useLayoutStyles } from './layout.styles';
+import { ChromeLayoutSlots, Slot } from './layout.types';
+import { useLayoutState } from './layout_state_context';
 
-interface SlotProps extends LayoutStyleArgs {
-  hasBanner: boolean;
-  hasFooter: boolean;
-  hasSidebar: boolean;
-  hasSidebarPanel: boolean;
-  hasHeader: boolean;
-  hasNavigation: boolean;
+export interface ChromeLayoutComponentProps extends ChromeLayoutSlots {
+  // application
+  children: Slot;
 }
 
-type Slot = (props: SlotProps) => React.ReactNode;
+export const ChromeLayoutComponent = ({ children, ...props }: ChromeLayoutComponentProps) => {
+  const layoutState = useLayoutState();
+  const styles = useLayoutStyles(layoutState);
 
-export interface ChromeLayoutComponentProps extends LayoutGlobalCSSProps {
-  children: {
-    Header?: Slot | null;
-    Application: Slot;
-    Navigation?: Slot | null;
-    NavigationPanel?: Slot | null;
-    Banner?: Slot | null;
-    Footer?: Slot | null;
-    SidebarPanel?: Slot | null;
-    Sidebar?: Slot | null;
-  };
-}
-
-export const ChromeLayoutComponent = ({
-  children: {
-    Application,
-    Banner,
-    Header,
-    Navigation,
-    NavigationPanel,
-    Footer,
-    SidebarPanel,
-    Sidebar,
-  },
-  ...props
-}: ChromeLayoutComponentProps) => {
-  const hasBanner = !!Banner;
-  const hasFooter = !!Footer;
-  const hasSidebar = !!Sidebar;
-  const hasSidebarPanel = !!SidebarPanel;
-  const hasNavigationPanel = !!NavigationPanel;
-  const hasHeader = !!Header;
-  const hasNavigation = !!Navigation;
-
-  const styleProps: LayoutStyleArgs = {
-    ...props,
-    bannerHeight: hasBanner ? props.bannerHeight : 0,
-    footerHeight: hasFooter ? props.footerHeight : 0,
-    headerHeight: hasHeader ? props.headerHeight : 0,
-    navigationWidth: hasNavigation ? props.navigationWidth : 0,
-    navigationPanelWidth: hasNavigationPanel ? props.navigationPanelWidth : 0,
-    sidebarWidth: hasSidebar ? props.sidebarWidth : 0,
-    sidebarPanelWidth: hasSidebar && hasSidebarPanel ? props.sidebarPanelWidth : 0,
+  const renderSlot = (slot: Slot) => {
+    if (typeof slot === 'function') {
+      return slot(layoutState);
+    }
+    return slot;
   };
 
-  const styles = useLayoutStyles(styleProps);
-
-  const slotProps: SlotProps = {
-    hasHeader,
-    hasNavigation,
-    hasBanner,
-    hasFooter,
-    hasSidebar,
-    hasSidebarPanel,
-    ...styleProps,
-  };
-
-  const banner = hasBanner ? (
-    <LayoutBanner height={styleProps.bannerHeight}>{Banner(slotProps)}</LayoutBanner>
+  const banner = layoutState.hasBanner ? (
+    <LayoutBanner>{renderSlot(props.banner)}</LayoutBanner>
   ) : null;
 
-  const footer = hasFooter ? (
-    <LayoutFooter height={styleProps.footerHeight}>{Footer(slotProps)}</LayoutFooter>
+  const footer = layoutState.hasFooter ? (
+    <LayoutFooter>{renderSlot(props.footer)}</LayoutFooter>
   ) : null;
 
-  const navigationPanel = hasNavigationPanel ? (
-    <LayoutNavigationPanel width={styleProps.navigationPanelWidth}>
-      {NavigationPanel(slotProps)}
+  const navigationPanel = layoutState.hasNavigationPanel ? (
+    <LayoutNavigationPanel width={layoutState.navigationPanelWidth}>
+      {renderSlot(props.navigationPanel)}
     </LayoutNavigationPanel>
   ) : null;
 
-  const sidebar = hasSidebar ? (
-    <LayoutSidebar width={styleProps.sidebarWidth}>{Sidebar(slotProps)}</LayoutSidebar>
+  const sidebar = layoutState.hasSidebar ? (
+    <LayoutSidebar>{renderSlot(props.sidebar)}</LayoutSidebar>
   ) : null;
 
   const sidebarPanel =
-    hasSidebar && hasSidebarPanel ? (
-      <LayoutSidebarPanel width={styleProps.sidebarPanelWidth}>
-        {SidebarPanel(slotProps)}
-      </LayoutSidebarPanel>
+    layoutState.hasSidebar && layoutState.hasSidebarPanel ? (
+      <LayoutSidebarPanel>{renderSlot(props.sidebarPanel)}</LayoutSidebarPanel>
     ) : null;
 
-  const header = Header ? (
-    <LayoutHeader top={styleProps.bannerHeight} height={styleProps.headerHeight}>
-      {Header(slotProps)}
-    </LayoutHeader>
+  const header = layoutState.hasHeader ? (
+    <LayoutHeader>{renderSlot(props.header)}</LayoutHeader>
   ) : null;
 
-  const navigation = Navigation ? (
-    <LayoutNavigation width={styleProps.navigationWidth}>{Navigation(slotProps)}</LayoutNavigation>
+  const navigation = layoutState.hasNavigation ? (
+    <LayoutNavigation>{renderSlot(props.navigation)}</LayoutNavigation>
   ) : null;
 
-  const application = <LayoutApplication>{Application(slotProps)}</LayoutApplication>;
+  const application = <LayoutApplication>{renderSlot(children)}</LayoutApplication>;
 
   return (
     <div css={styles.css} style={styles.style}>

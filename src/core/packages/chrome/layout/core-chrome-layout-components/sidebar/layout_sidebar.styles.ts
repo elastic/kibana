@@ -19,6 +19,7 @@ const root = css`
   flex-direction: column;
   align-items: center;
   height: 100%;
+  width: var(--kbn-layout--sidebar-width);
 `;
 
 export const styles = {

@@ -12,13 +12,8 @@ import { styles } from './layout_navigation.styles';
 
 export interface LayoutNavigationProps {
   children: ReactNode;
-  width: number;
 }
 
-export const LayoutNavigation = ({ children, width }: LayoutNavigationProps) => {
-  return (
-    <nav css={styles.root} style={{ width }}>
-      {children}
-    </nav>
-  );
+export const LayoutNavigation = ({ children }: LayoutNavigationProps) => {
+  return <nav css={styles.root}>{children}</nav>;
 };

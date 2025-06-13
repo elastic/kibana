@@ -12,14 +12,8 @@ import { styles } from './layout_header.styles';
 
 export interface LayoutHeaderProps {
   children: ReactNode;
-  top: number;
-  height: number;
 }
 
-export const LayoutHeader = ({ children, top, height }: LayoutHeaderProps) => {
-  return (
-    <header css={styles.root} style={{ top, height }}>
-      {children}
-    </header>
-  );
+export const LayoutHeader = ({ children }: LayoutHeaderProps) => {
+  return <header css={styles.root}>{children}</header>;
 };

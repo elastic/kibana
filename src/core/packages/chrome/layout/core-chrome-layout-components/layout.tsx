@@ -11,12 +11,15 @@ import React from 'react';
 
 import { ChromeLayoutComponent, type ChromeLayoutComponentProps } from './layout.component';
 import { LayoutGlobalCSS } from './layout_global_css';
+import { LayoutStateProvider } from './layout_state_context';
 
 export type ChromeLayoutProps = ChromeLayoutComponentProps;
 
-export const ChromeLayout = ({ children, ...props }: ChromeLayoutProps) => (
-  <>
-    <LayoutGlobalCSS {...props} />
-    <ChromeLayoutComponent {...props}>{children}</ChromeLayoutComponent>
-  </>
-);
+export const ChromeLayout = ({ children, ...props }: ChromeLayoutProps) => {
+  return (
+    <LayoutStateProvider {...props}>
+      <LayoutGlobalCSS />
+      <ChromeLayoutComponent {...props}>{children}</ChromeLayoutComponent>
+    </LayoutStateProvider>
+  );
+};

@@ -13,13 +13,8 @@ import { styles } from './layout_sidebar.styles';
 
 export interface LayoutSidebarProps {
   children: ReactNode;
-  width: number;
 }
 
-export const LayoutSidebar = ({ children, width }: LayoutSidebarProps) => {
-  return (
-    <nav css={styles.root} style={{ width }}>
-      {children}
-    </nav>
-  );
+export const LayoutSidebar = ({ children }: LayoutSidebarProps) => {
+  return <nav css={styles.root}>{children}</nav>;
 };

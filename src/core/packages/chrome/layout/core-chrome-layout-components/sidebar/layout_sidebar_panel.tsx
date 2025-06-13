@@ -12,13 +12,8 @@ import { styles } from './layout_sidebar_panel.styles';
 
 export interface LayoutSidebarPanelProps {
   children: ReactNode;
-  width: number;
 }
 
-export const LayoutSidebarPanel = ({ children, width }: LayoutSidebarPanelProps) => {
-  return (
-    <aside css={styles.root} style={{ width }}>
-      {children}
-    </aside>
-  );
+export const LayoutSidebarPanel = ({ children }: LayoutSidebarPanelProps) => {
+  return <aside css={styles.root}>{children}</aside>;
 };

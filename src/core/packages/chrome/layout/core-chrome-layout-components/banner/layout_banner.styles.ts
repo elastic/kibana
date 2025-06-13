@@ -13,8 +13,8 @@ const root = css`
   grid-area: banner;
   overflow: hidden;
   position: sticky;
-  top: 0;
-  width: 100%;
+  width: var(--kbn-layout--banner-width);
+  height: var(--kbn-layout--banner-height);
 `;
 
 export const styles = {

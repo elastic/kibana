@@ -13,13 +13,8 @@ import { styles } from './layout_footer.styles';
 
 export interface LayoutFooterProps {
   children: ReactNode;
-  height: number;
 }
 
-export const LayoutFooter = ({ children, height }: LayoutFooterProps) => {
-  return (
-    <footer css={styles.root} style={{ height }}>
-      {children}
-    </footer>
-  );
+export const LayoutFooter = ({ children }: LayoutFooterProps) => {
+  return <footer css={styles.root}>{children}</footer>;
 };

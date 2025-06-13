@@ -11,7 +11,7 @@ import React from 'react';
 import { Meta, StoryObj } from '@storybook/react';
 import { Global, css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { ChromeLayout } from '../layout';
+import { ChromeLayout, ChromeLayoutConfigProvider } from '..';
 import { Box } from './box';
 
 const styles = css`
@@ -73,120 +73,117 @@ const LayoutExample = ({
   } = useEuiTheme();
 
   return (
-    <ChromeLayout {...props}>
-      {{
-        Application: () => (
-          <Box
-            label="Application"
-            color={colors.textWarning}
-            backgroundColor={colors.warning}
-            rootCSS={css`
-              height: 1000px;
-            `}
-          />
-        ),
-        Banner: !includeBanner
-          ? null
-          : () => (
-              <Box
-                color={colors.danger}
-                backgroundColor={colors.textDanger}
-                label="Global Banner"
-              />
-            ),
-        Header: !includeHeader
-          ? null
-          : () => (
-              <Box
-                label="Global Header"
-                color={colors.textParagraph}
-                backgroundColor={colors.backgroundFilledText}
-              />
-            ),
-        Navigation: !includeNavigation
-          ? null
-          : () => (
-              <Box
-                label="Navigation"
-                color={colors.textPrimary}
-                backgroundColor={colors.primary}
-                labelCSS={css`
-                  transform: translate(-50%, -50%) rotate(-90deg);
+    <ChromeLayoutConfigProvider value={{ ...props }}>
+      <ChromeLayout
+        banner={
+          includeBanner ? (
+            <Box color={colors.danger} backgroundColor={colors.textDanger} label="Global Banner" />
+          ) : null
+        }
+        footer={
+          includeFooter ? (
+            <Box color={colors.danger} backgroundColor={colors.textDanger} label="Global Footer" />
+          ) : null
+        }
+        header={
+          includeHeader ? (
+            <Box
+              label="Global Header"
+              color={colors.textParagraph}
+              backgroundColor={colors.backgroundFilledText}
+            />
+          ) : null
+        }
+        navigation={
+          includeNavigation ? (
+            <Box
+              label="Global Navigation"
+              color={colors.textPrimary}
+              backgroundColor={colors.primary}
+              labelCSS={css`
+                transform: translate(-50%, -50%) rotate(-90deg);
+              `}
+            />
+          ) : null
+        }
+        navigationPanel={
+          includeNavigationPanel ? (
+            <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
+              <EuiFlexItem
+                grow={false}
+                style={{ height: props.headerHeight }}
+                css={css`
+                  white-space: nowrap;
                 `}
-              />
-            ),
-        NavigationPanel: !includeNavigationPanel
-          ? null
-          : () => (
-              <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
-                <EuiFlexItem
-                  grow={false}
-                  style={{ height: props.headerHeight }}
-                  css={css`
-                    white-space: nowrap;
+              >
+                <Box
+                  label="Nav Header"
+                  color={colors.textPrimary}
+                  backgroundColor={colors.primary}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={true}>
+                <Box
+                  label="Navigation Panel"
+                  color={colors.textPrimary}
+                  backgroundColor={colors.primary}
+                  labelCSS={css`
+                    text-align: center;
                   `}
-                >
-                  <Box
-                    label="Nav Header"
-                    color={colors.textPrimary}
-                    backgroundColor={colors.primary}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={true}>
-                  <Box
-                    label="Navigation Panel"
-                    color={colors.textPrimary}
-                    backgroundColor={colors.primary}
-                    labelCSS={css`
-                      text-align: center;
-                    `}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ),
-        Sidebar: !includeSidebar
-          ? null
-          : () => (
-              <Box
-                label="Sidebar"
-                color={colors.accentSecondary}
-                backgroundColor={colors.textAccentSecondary}
-                labelCSS={css`
-                  transform: translate(-50%, -50%) rotate(90deg);
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ) : null
+        }
+        sidebar={
+          includeSidebar ? (
+            <Box
+              label="Global Sidebar"
+              color={colors.accentSecondary}
+              backgroundColor={colors.textAccentSecondary}
+              labelCSS={css`
+                transform: translate(-50%, -50%) rotate(90deg);
+              `}
+            />
+          ) : null
+        }
+        sidebarPanel={
+          includeSidebarPanel ? (
+            <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
+              <EuiFlexItem
+                grow={false}
+                style={{ height: props.headerHeight }}
+                css={css`
+                  white-space: nowrap;
                 `}
-              />
-            ),
-        SidebarPanel: !includeSidebarPanel
-          ? null
-          : () => (
-              <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
-                <EuiFlexItem
-                  grow={false}
-                  style={{ height: props.headerHeight }}
-                  css={css`
-                    white-space: nowrap;
-                  `}
-                >
-                  <Box
-                    label="Sidebar Header"
-                    color={colors.accentSecondary}
-                    backgroundColor={colors.textAccentSecondary}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <Box
-                    label="Sidebar Panel"
-                    color={colors.accentSecondary}
-                    backgroundColor={colors.textAccentSecondary}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ),
-        Footer: !includeFooter
-          ? null
-          : () => <Box label="Footer" color={colors.danger} backgroundColor={colors.textDanger} />,
-      }}
-    </ChromeLayout>
+              >
+                <Box
+                  label="Sidebar Header"
+                  color={colors.accentSecondary}
+                  backgroundColor={colors.textAccentSecondary}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <Box
+                  label="Sidebar Panel"
+                  color={colors.accentSecondary}
+                  backgroundColor={colors.textAccentSecondary}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ) : null
+        }
+      >
+        <Box
+          label="Application"
+          color={colors.textWarning}
+          backgroundColor={colors.warning}
+          rootCSS={css`
+            height: 1000px;
+          `}
+        />
+      </ChromeLayout>
+    </ChromeLayoutConfigProvider>
   );
 };
 
