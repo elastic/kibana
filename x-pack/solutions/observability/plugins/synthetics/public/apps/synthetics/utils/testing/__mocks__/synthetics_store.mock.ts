@@ -142,6 +142,7 @@ export const mockState: SyntheticsAppState = {
     loading: false,
     status: null,
     error: null,
+    isInitialTTFMPReported: false,
   },
   globalParams: {
     addError: null,

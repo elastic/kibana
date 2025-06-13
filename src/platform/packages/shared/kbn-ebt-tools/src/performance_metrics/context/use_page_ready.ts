@@ -7,23 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import type { CustomMetrics, Meta } from './performance_context';
 import { usePerformanceContext } from '../../..';
 
-export const usePageReady = (state: {
+interface UsePageReadyProps {
   customMetrics?: CustomMetrics;
   isReady: boolean;
   meta?: Meta;
-}) => {
+  onInitialLoadReported: () => void;
+  isInitialLoadReported: boolean;
+}
+
+export const usePageReady = ({
+  isInitialLoadReported,
+  isReady,
+  onInitialLoadReported,
+  customMetrics,
+  meta,
+}: UsePageReadyProps) => {
   const { onPageReady } = usePerformanceContext();
 
-  const [isReported, setIsReported] = useState(false);
-
   useEffect(() => {
-    if (state.isReady && !isReported) {
-      onPageReady({ customMetrics: state.customMetrics, meta: state.meta });
-      setIsReported(true);
+    if (isReady && !isInitialLoadReported) {
+      onPageReady({ customMetrics, meta });
+      onInitialLoadReported();
     }
-  }, [isReported, onPageReady, state.customMetrics, state.isReady, state.meta]);
+  }, [customMetrics, isInitialLoadReported, isReady, meta, onInitialLoadReported, onPageReady]);
 };

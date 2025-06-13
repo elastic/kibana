@@ -14,6 +14,7 @@ import {
   clearOverviewStatusState,
   fetchOverviewStatusAction,
   quietFetchOverviewStatusAction,
+  initialTTFMPReported,
 } from './actions';
 
 export interface OverviewStatusStateReducer {
@@ -23,6 +24,7 @@ export interface OverviewStatusStateReducer {
   allConfigs?: OverviewStatusMetaData[];
   disabledConfigs?: OverviewStatusMetaData[];
   error: IHttpSerializedFetchError | null;
+  isInitialTTFMPReported: boolean;
 }
 
 const initialState: OverviewStatusStateReducer = {
@@ -30,6 +32,7 @@ const initialState: OverviewStatusStateReducer = {
   loaded: false,
   status: null,
   error: null,
+  isInitialTTFMPReported: false,
 };
 
 export const overviewStatusReducer = createReducer(initialState, (builder) => {
@@ -65,6 +68,9 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
     })
     .addCase(clearOverviewStatusErrorAction, (state) => {
       state.error = null;
+    })
+    .addCase(initialTTFMPReported, (state) => {
+      state.isInitialTTFMPReported = true;
     });
 });
 
