@@ -7,6 +7,11 @@
 
 import type { ChangeEvent } from 'react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import type { Observable } from 'rxjs';
+import { combineLatest, map } from 'rxjs';
+import { debounce, intersectionBy } from 'lodash';
+
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
@@ -18,16 +23,16 @@ import {
   EuiComboBox,
   EuiSteps,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import useObservable from 'react-use/lib/useObservable';
-import type { Observable } from 'rxjs';
-import { combineLatest, map } from 'rxjs';
-import { debounce, intersectionBy } from 'lodash';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { type DataViewEditorService } from '@kbn/data-view-editor-plugin/public';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+
 import { useToastNotificationService } from '../../services/toast_notification_service';
-import { useMlKibana, useMlLocator, useNavigateToPath } from '../../contexts/kibana';
+import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
+
 import { DataViewEditor } from './data_view_editor';
 
 export const matchedIndicesDefault = {
