@@ -13,7 +13,7 @@ import type {
   DashboardRendererProps,
 } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer as DashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
-import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
+import type { DashboardLocatorParams, DashboardState } from '@kbn/dashboard-plugin/common';
 import type { Filter, Query } from '@kbn/es-query';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
@@ -27,9 +27,7 @@ import { inputsActions } from '../../common/store/inputs';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { useSecurityTags } from '../context/dashboard_context';
 
-const initialInput = new BehaviorSubject<
-  ReturnType<NonNullable<DashboardCreationOptions['getInitialInput']>>
->({});
+const initialInput = new BehaviorSubject<Partial<DashboardState>>({});
 
 const DashboardRendererComponent = ({
   canReadDashboard,
@@ -109,7 +107,7 @@ const DashboardRendererComponent = ({
   const getCreationOptions: () => Promise<DashboardCreationOptions> = useCallback(() => {
     return Promise.resolve({
       useSessionStorageIntegration: true,
-      getInitialInput: () => {
+      getInitialInput: async () => {
         return initialInput.value;
       },
       getIncomingEmbeddable: () =>

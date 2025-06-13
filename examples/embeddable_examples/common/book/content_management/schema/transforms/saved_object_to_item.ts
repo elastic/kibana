@@ -11,10 +11,10 @@ import type { SavedObjectAttributesWithReferences } from '@kbn/embeddable-plugin
 import type { SavedObjectReference } from '@kbn/core/server';
 import { Mutable } from 'utility-types';
 import type { SavedBookAttributes } from '../../../../../server/book/saved_object';
-import type { BookAttributes } from '../../../../../server/book/content_management/latest';
+import { BookItem } from '../schema';
 
 const injectReferences = (attributes: SavedBookAttributes, references: SavedObjectReference[]) => {
-  const injectedParams: Mutable<Partial<BookAttributes>> = {};
+  const injectedParams: Mutable<Partial<BookItem>> = {};
   if (attributes.metadata.sequelToBookRefName) {
     const sequelId = references.find((r) => r.name === attributes.metadata.sequelToBookRefName)?.id;
     if (sequelId) injectedParams.sequelTo = sequelId;
@@ -39,7 +39,7 @@ const savedURLObjectToItem = ({
   bookSynopsis,
   numberOfPages,
   authorName,
-}: BookSavedURLObjectAttributes): BookAttributes => ({
+}: BookSavedURLObjectAttributes): BookItem => ({
   bookTitle,
   synopsis: bookSynopsis,
   author: authorName,
@@ -48,7 +48,7 @@ const savedURLObjectToItem = ({
 
 export const savedObjectToItem = (
   so: SavedObjectAttributesWithReferences<SavedBookAttributes> | BookSavedURLObjectAttributes
-): BookAttributes =>
+): BookItem =>
   isUrlObject(so)
     ? savedURLObjectToItem(so)
     : {
@@ -56,6 +56,6 @@ export const savedObjectToItem = (
         author: so.attributes.metadata.text.authorName,
         pages: so.attributes.metadata.numbers.numberOfPages,
         synopsis: so.attributes.metadata.text.bookSynopsis,
-        published: so.attributes.metadata.numbers.publicationYear ?? null,
+        published: so.attributes.metadata.numbers.publicationYear ?? undefined,
         ...injectReferences(so.attributes, so.references),
       };

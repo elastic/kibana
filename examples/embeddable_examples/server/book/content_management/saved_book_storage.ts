@@ -16,10 +16,11 @@ import type { SavedObjectReference } from '@kbn/core/server';
 import { tagsToFindOptions } from '@kbn/content-management-utils';
 import { SavedObjectAttributesWithReferences } from '@kbn/embeddable-plugin/common/types';
 import { omit } from 'lodash';
-import type { BookAttributes, BookSearchOptions } from './latest';
+import type { BookSearchOptions } from './latest';
 import { BOOK_SAVED_OBJECT_TYPE, SavedBookAttributes } from '../saved_object';
 import {
   BOOK_CONTENT_ID,
+  BookItem,
   itemToSavedObject,
   savedObjectToItem,
 } from '../../../common/book/content_management/schema';
@@ -136,14 +137,14 @@ export class SavedBookStorage implements ContentStorage {
     throw new Error(`[bulkGet] has not been implemented. See DashboardStorage class.`);
   }
 
-  async create(ctx: StorageContext, data: BookAttributes, options?: object | undefined) {
+  async create(ctx: StorageContext, data: BookItem, options?: object | undefined) {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
     const soClient = await savedObjectClientFromRequest(ctx);
 
     // Validate input (data & options) & UP transform them to the latest version
     const { value: dataToLatest, error: dataError } = transforms.create.in.data.up<
-      BookAttributes,
-      BookAttributes
+      BookItem,
+      BookItem
     >(data);
     if (dataError) {
       throw Boom.badRequest(`Invalid data. ${dataError.message}`);
@@ -166,7 +167,7 @@ export class SavedBookStorage implements ContentStorage {
       }
     );
 
-    let item: BookAttributes;
+    let item: BookItem;
 
     try {
       item = savedObjectToItem(savedObject);
@@ -188,19 +189,14 @@ export class SavedBookStorage implements ContentStorage {
     return value;
   }
 
-  async update(
-    ctx: StorageContext,
-    id: string,
-    data: BookAttributes,
-    options?: object | undefined
-  ) {
+  async update(ctx: StorageContext, id: string, data: BookItem, options?: object | undefined) {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
     const soClient = await savedObjectClientFromRequest(ctx);
 
     // Validate input (data & options) & UP transform them to the latest version
     const { value: dataToLatest, error: dataError } = transforms.update.in.data.up<
-      BookAttributes,
-      BookAttributes
+      BookItem,
+      BookItem
     >(data);
     if (dataError) {
       throw Boom.badRequest(`Invalid data. ${dataError.message}`);
@@ -225,7 +221,7 @@ export class SavedBookStorage implements ContentStorage {
       }
     );
 
-    let item: BookAttributes;
+    let item: BookItem;
 
     try {
       // TODO fix partial types
