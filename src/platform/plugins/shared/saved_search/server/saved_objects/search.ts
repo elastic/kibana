@@ -87,7 +87,7 @@ export function getSavedSearchObjectType(
         changes: [
           {
             type: 'unsafe_transform',
-            transformFn: extractTabsTransformFn,
+            transformFn: (typeSafeGuard) => typeSafeGuard(extractTabsTransformFn),
           },
         ],
         schemas: {
