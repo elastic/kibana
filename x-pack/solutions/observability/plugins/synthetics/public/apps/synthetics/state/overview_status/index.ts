@@ -24,7 +24,7 @@ export interface OverviewStatusStateReducer {
   allConfigs?: OverviewStatusMetaData[];
   disabledConfigs?: OverviewStatusMetaData[];
   error: IHttpSerializedFetchError | null;
-  isInitialTTFMPReported: boolean;
+  isInitialLoadReported: boolean;
 }
 
 const initialState: OverviewStatusStateReducer = {
@@ -32,7 +32,7 @@ const initialState: OverviewStatusStateReducer = {
   loaded: false,
   status: null,
   error: null,
-  isInitialTTFMPReported: false,
+  isInitialLoadReported: false,
 };
 
 export const overviewStatusReducer = createReducer(initialState, (builder) => {
@@ -70,7 +70,7 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
       state.error = null;
     })
     .addCase(initialTTFMPReported, (state) => {
-      state.isInitialTTFMPReported = true;
+      state.isInitialLoadReported = true;
     });
 });
 

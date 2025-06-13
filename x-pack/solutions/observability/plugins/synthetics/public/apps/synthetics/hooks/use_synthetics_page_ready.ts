@@ -12,7 +12,7 @@ import { initialTTFMPReported, selectOverviewStatus } from '../state/overview_st
 export const useSyntheticsPageReady = () => {
   const {
     loaded,
-    isInitialTTFMPReported,
+    isInitialLoadReported,
     loading: isLoadingOverviewStatus,
   } = useSelector(selectOverviewStatus);
 
@@ -20,7 +20,7 @@ export const useSyntheticsPageReady = () => {
 
   usePageReady({
     isReady: loaded,
-    isInitialLoadReported: isInitialTTFMPReported,
+    isInitialLoadReported,
     // This will collect the metric even when we are periodically refreshing the data in the background
     // and not only when the user decides to refresh the data, the action is the same
     isRefreshing: loaded && isLoadingOverviewStatus,
