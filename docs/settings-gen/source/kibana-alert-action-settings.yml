@@ -281,6 +281,50 @@ groups:
             self: all
             ess: all
          # example: |
+      
+      - setting: xpack.actions.email.services.ses.host 
+        id: action-config-email-services-ses-host
+        description: |
+          The SMTP endpoint for an Amazon Simple Email Service (SES) service provider that can be used by email connectors.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        warning: "This setting alone is insufficient for overriding system defaults for the SES SMTP endpoint. You must also configure the `xpack.actions.email.services.ses.port` setting"
+        # important: ""
+        datatype: string
+        default: "email-smtp.us-east-1.amazonaws.com"
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: xpack.actions.email.services.ses.port
+        id: action-config-email-services-ses-port
+        description: |
+          The port number for an Amazon Simple Email Service (SES) service provider that can be used by email connectors.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: 465
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
 
       - setting: xpack.actions.enableFooterInEmail
         # id:
