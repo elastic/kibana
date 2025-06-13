@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import chalk from 'chalk';
 import { ToolingLog } from '@kbn/tooling-log';
 
 import { Config, createRunner } from './lib';
@@ -48,7 +49,7 @@ export interface BuildOptions {
 export async function buildDistributables(log: ToolingLog, options: BuildOptions): Promise<void> {
   log.verbose('building distributables with options:', options);
 
-  log.write('--- Running global Kibana build tasks');
+  log.write(`--- ${chalk`{dim [  global  ]}`} Kibana build tasks`);
 
   const config = await Config.create(options);
   const globalRun = createRunner({ config, log });
