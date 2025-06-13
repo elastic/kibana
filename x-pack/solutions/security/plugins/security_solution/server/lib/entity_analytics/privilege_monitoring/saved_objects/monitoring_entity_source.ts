@@ -90,4 +90,11 @@ export class MonitoringEntitySourceDescriptorClient {
     const id = this.getSavedObjectId();
     await this.dependencies.soClient.delete(monitoringEntitySourceTypeName, id);
   }
+
+  public async findByIndex() {
+    const result = await this.find();
+    return result.saved_objects
+      .filter((so) => so.attributes.type === 'index')
+      .map((so) => so.attributes);
+  }
 }

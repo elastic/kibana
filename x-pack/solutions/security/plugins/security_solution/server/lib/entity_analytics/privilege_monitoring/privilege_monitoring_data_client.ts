@@ -71,7 +71,7 @@ export class PrivilegeMonitoringDataClient {
   private esClient: ElasticsearchClient;
   private internalUserClient: ElasticsearchClient;
   private engineClient: PrivilegeMonitoringEngineDescriptorClient;
-  private indexSourceClient: MonitoringEntitySourceDescriptorClient;
+  private monitoringIndexSourceClient: MonitoringEntitySourceDescriptorClient;
 
   constructor(private readonly opts: PrivilegeMonitoringClientOpts) {
     this.esClient = opts.clusterClient.asCurrentUser;
@@ -81,7 +81,7 @@ export class PrivilegeMonitoringDataClient {
       soClient: opts.soClient,
       namespace: opts.namespace,
     });
-    this.indexSourceClient = new MonitoringEntitySourceDescriptorClient({
+    this.monitoringIndexSourceClient = new MonitoringEntitySourceDescriptorClient({
       soClient: opts.soClient,
       namespace: opts.namespace,
     });
@@ -103,11 +103,11 @@ export class PrivilegeMonitoringDataClient {
     this.log('debug', `Initialized privileged monitoring engine saved object`);
 
     // TODO: testing this out, remove log in future.
-    const indexSourceDescriptor = await this.indexSourceClient.create({
+    const indexSourceDescriptor = await this.monitoringIndexSourceClient.create({
       type: 'index',
       managed: true,
-      indexPattern: this.getIndex(),
-      name: 'defaultName', // TODO: should this be here? Double check with design/jira
+      indexPattern: this.getIndex(), // double check with gives 'entity-analytics.privileged-user'
+      name: 'defaultName', // TODO: double check what default name should be
     });
     this.log(
       'info',
@@ -136,6 +136,12 @@ export class PrivilegeMonitoringDataClient {
       this.opts.telemetry?.reportEvent(PRIVMON_ENGINE_INITIALIZATION_EVENT.eventType, {
         duration,
       });
+      // get all monitoring index sources of type 'index
+      const indexSources = await this.monitoringIndexSourceClient.findByIndex();
+      this.log(
+        'info',
+        `Found index sources for privilege monitoring:\n${JSON.stringify(indexSources, null, 2)}`
+      );
     } catch (e) {
       this.log('error', `Error initializing privilege monitoring engine: ${e}`);
       this.audit(
