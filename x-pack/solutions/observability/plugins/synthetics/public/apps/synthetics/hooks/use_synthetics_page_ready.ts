@@ -7,7 +7,7 @@
 
 import { useDispatch, useSelector } from 'react-redux';
 import { usePageReady } from '@kbn/ebt-tools';
-import { initialTTFMPReported, selectOverviewStatus } from '../state/overview_status';
+import { initialLoadReported, selectOverviewStatus } from '../state/overview_status';
 
 export const useSyntheticsPageReady = () => {
   const {
@@ -25,7 +25,7 @@ export const useSyntheticsPageReady = () => {
     // and not only when the user decides to refresh the data, the action is the same
     isRefreshing: loaded && isLoadingOverviewStatus,
     onInitialLoadReported: () => {
-      dispatch(initialTTFMPReported());
+      dispatch(initialLoadReported());
     },
   });
 };

@@ -14,7 +14,7 @@ import {
   clearOverviewStatusState,
   fetchOverviewStatusAction,
   quietFetchOverviewStatusAction,
-  initialTTFMPReported,
+  initialLoadReported,
 } from './actions';
 
 export interface OverviewStatusStateReducer {
@@ -69,7 +69,7 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
     .addCase(clearOverviewStatusErrorAction, (state) => {
       state.error = null;
     })
-    .addCase(initialTTFMPReported, (state) => {
+    .addCase(initialLoadReported, (state) => {
       state.isInitialLoadReported = true;
     });
 });
