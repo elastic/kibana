@@ -1544,6 +1544,9 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test_serverless/**/test_suites/common/management/transforms/ @elastic/ml-ui
 /x-pack/test/api_integration/services/ml.ts @elastic/ml-ui
 
+# Security Machine Learning
+x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security_* @elastic/security-ml
+
 # Additional plugins and packages maintained by the ML team.
 ^/src/platform/test/examples/response_stream/*.ts @elastic/ml-ui
 /x-pack/test/accessibility/apps/group2/transform.ts  @elastic/ml-ui
@@ -1840,7 +1843,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /config/serverless.es.yml @elastic/kibana-core @elastic/kibana-security @elastic/search-kibana
 /config/serverless.oblt.yml @elastic/kibana-core @elastic/kibana-security @elastic/observability-ui
 /config/serverless.oblt.complete.yml @elastic/kibana-core @elastic/observability-ui
-/config/serverless.oblt.essentials.yml @elastic/kibana-core @elastic/observability-ui
+/config/serverless.oblt.logs_essentials.yml @elastic/kibana-core @elastic/observability-ui
 /config/serverless.security.yml @elastic/kibana-core @elastic/security-solution @elastic/kibana-security
 /config/serverless.security.search_ai_lake.yml @elastic/security-solution @elastic/kibana-security
 /config/serverless.security.essentials.yml @elastic/security-solution @elastic/kibana-security
@@ -2222,6 +2225,8 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/solutions/security/plugins/security_solution/public/common/components/hover_actions @elastic/security-threat-hunting-explore @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/formatted_date/index.tsx  @elastic/security-threat-hunting-explore @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/formatted_number/index.tsx  @elastic/security-threat-hunting-explore @elastic/security-threat-hunting-investigations
+
+/x-pack/solutions/security/plugins/security_solution/public/flyout/ai_for_soc/components @elastic/security-threat-hunting-investigations @elastic/security-generative-ai
 
 /x-pack/solutions/security/plugins/security_solution/server/routes @elastic/security-detections-response @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/server/utils @elastic/security-detections-response @elastic/security-threat-hunting

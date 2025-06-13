@@ -49,6 +49,7 @@ export function SchemaEditor({
           <Controls controls={controls} onChange={updateControls} onRefreshData={onRefreshData} />
         )}
         <FieldsTable
+          isLoading={isLoading ?? false}
           controls={controls}
           defaultColumns={defaultColumns}
           fields={fields}
