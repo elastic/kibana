@@ -62,7 +62,7 @@ export const InstallSection: React.FunctionComponent<Props> = ({
           compressed
         />
         <EuiToolTip position="top" content={addElasticAgentCompleteTooltipContent}>
-          <EuiIcon tabIndex={0} type="iInCircle" />
+          <EuiIcon tabIndex={0} type="info" />
         </EuiToolTip>
       </EuiFlexGroup>
       <EuiSpacer size="m" />

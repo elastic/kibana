@@ -410,7 +410,7 @@ describe('AgentUpgradeStatus', () => {
       });
       expectNoUpgradeStatusBadges(results);
       expect(
-        results.container.querySelector('[data-euiicon-type="iInCircle"]')
+        results.container.querySelector('[data-euiicon-type="info"]')
       ).not.toBeInTheDocument();
     });
   });

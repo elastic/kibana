@@ -250,7 +250,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
                 <EuiIcon
                   size="s"
                   color="subdued"
-                  type="iInCircle"
+                  type="info"
                   data-test-subj="usingMaxRetention"
                 />
               </EuiToolTip>

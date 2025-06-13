@@ -87,7 +87,7 @@ export const PipelinesCsvUploader: FC<Props> = ({
           <p>
             Default action
             <EuiIconTip
-              type="iInCircle"
+              type="info"
               content={
                 <FormattedMessage
                   id="xpack.ingestPipelines.createFromCsv.fileUpload.settingDescription"
