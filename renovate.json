@@ -500,7 +500,8 @@
         "@types/prop-types",
         "@types/react",
         "@types/react-dom",
-        "@types/react-is"
+        "@types/react-is",
+        "csstype"
       ],
       "reviewers": [
         "team:appex-sharedux"
@@ -1028,7 +1029,6 @@
     {
       "groupName": "@elastic/kibana-management dependencies",
       "matchDepNames": [
-        "csstype",
         "cronstrue"
       ],
       "reviewers": [
