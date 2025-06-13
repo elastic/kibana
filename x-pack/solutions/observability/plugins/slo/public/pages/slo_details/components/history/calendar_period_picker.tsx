@@ -64,6 +64,7 @@ export function CalendarPeriodPicker({ slo, onChange }: Props) {
           handleChangePeriod(-1);
         }}
         iconType="arrowRight"
+        iconSide="right"
       >
         {i18n.translate('xpack.slo.sloDetailsHistory.nextPeriodButtonLabel', {
           defaultMessage: 'Next',
