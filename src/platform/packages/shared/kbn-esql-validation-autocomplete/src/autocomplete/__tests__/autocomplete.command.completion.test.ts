@@ -31,7 +31,7 @@ describe('autocomplete.suggest', () => {
       ];
 
       await assertSuggestions(`FROM a | COMPLETION /`, [
-        '"${0:Your prompt to the LLM.}"',
+        { text: '"${0:Your prompt to the LLM.}"', asSnippet: true },
         ...expectedSuggestions,
       ]);
 
