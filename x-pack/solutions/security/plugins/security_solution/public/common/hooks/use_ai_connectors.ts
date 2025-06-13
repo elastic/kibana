@@ -18,12 +18,14 @@ export const useAIConnectors = () => {
   const {
     services: { http },
   } = useKibana();
+
   const { addError } = useAppToasts();
-  const { data, ...rest } = useQuery({
+
+  const { data, isLoading, error } = useQuery({
     queryKey: QUERY_KEY,
     queryFn: () => loadAiConnectors(http),
-    onError: (error) => {
-      addError(error, {
+    onError: (err) => {
+      addError(err, {
         title: i18n.ERROR_FETCH_AI_CONNECTORS,
       });
     },
@@ -33,9 +35,10 @@ export const useAIConnectors = () => {
   return useMemo(
     () => ({
       aiConnectors: data ?? [],
-      ...rest,
+      isLoading,
+      error,
     }),
-    [data, rest]
+    [data, isLoading, error]
   );
 };
 
