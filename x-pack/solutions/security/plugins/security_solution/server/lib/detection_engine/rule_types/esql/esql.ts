@@ -87,7 +87,7 @@ export const esqlExecutor = async ({
     const dataTiersFilters = await getDataTierFilter({
       uiSettingsClient: services.uiSettingsClient,
     });
-    const isRuleAggregating = computeIsESQLQueryAggregating(completeRule.ruleParams.query);
+    const isRuleAggregating = computeIsESQLQueryAggregating(ruleParams.query);
     const hasMvExpand = getMvExpandFields(ruleParams.query).length > 0;
     // since pagination is not supported in ES|QL, we will use tuple.maxSignals + 1 to determine if search results are exhausted
     const size = tuple.maxSignals + 1;
