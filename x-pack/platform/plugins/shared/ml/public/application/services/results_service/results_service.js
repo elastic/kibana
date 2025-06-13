@@ -534,7 +534,7 @@ export function resultsServiceProvider(mlApi) {
       perPage = SWIM_LANE_DEFAULT_PAGE_SIZE,
       fromPage = 1,
       influencersFilterQuery,
-      swimLaneSeverity
+      swimLaneSeverity = [{ min: 0 }]
     ) {
       return new Promise((resolve, reject) => {
         const obj = { success: true, results: {} };
