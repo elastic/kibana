@@ -85,7 +85,7 @@ export const generateAttackDiscoveryAlertHash = ({
    * - `spaceId` - to separate attacks on a space basis
    */
   return createHash('sha256')
-    .update(attackDiscovery.alertIds.sort().join())
+    .update([...attackDiscovery.alertIds].sort().join())
     .update(connectorId)
     .update(ownerId)
     .update(spaceId)
