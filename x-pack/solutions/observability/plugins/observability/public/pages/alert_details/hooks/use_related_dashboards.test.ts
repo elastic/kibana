@@ -28,6 +28,12 @@ const TEST_DASHBOARD_2 = {
   description: 'This is dashboard 2',
 };
 
+const TEST_DASHBOARD_3 = {
+  id: 'dashboard-3',
+  title: 'Dashboard 3',
+  description: 'This is dashboard 3',
+};
+
 jest.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
   __esModule: true,
   useKibana: jest.fn(() => mockUseKibanaReturnValue),
@@ -38,7 +44,7 @@ jest.mock('@tanstack/react-query', () => ({
   useQuery: (params: { queryKey: string[]; queryFn: () => Promise<any> }) => mockUseQuery(params),
 }));
 
-describe('useSuggestedDashboards', () => {
+describe('useRelatedDashboards', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseKibanaReturnValue.services.http.get.mockClear();
@@ -91,6 +97,15 @@ describe('useSuggestedDashboards', () => {
           updatedAt: '2023-01-02',
         },
       ],
+      linkedDashboards: [
+        {
+          id: TEST_DASHBOARD_3.id,
+          title: TEST_DASHBOARD_3.title,
+          description: TEST_DASHBOARD_3.description,
+          extraProperty: 'extra value',
+          createdAt: '2023-01-01',
+        },
+      ],
     };
 
     mockUseQuery.mockReturnValue({
@@ -111,6 +126,13 @@ describe('useSuggestedDashboards', () => {
         id: TEST_DASHBOARD_2.id,
         title: TEST_DASHBOARD_2.title,
         description: TEST_DASHBOARD_2.description,
+      },
+    ]);
+    expect(result.current.linkedDashboards).toEqual([
+      {
+        id: TEST_DASHBOARD_3.id,
+        title: TEST_DASHBOARD_3.title,
+        description: TEST_DASHBOARD_3.description,
       },
     ]);
   });

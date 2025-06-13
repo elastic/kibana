@@ -45,6 +45,6 @@ export const useRelatedDashboards = (alertId: string) => {
     isLoadingRelatedDashboards: isLoading,
     suggestedDashboards: data?.suggestedDashboards?.map(getDashboardMetadata),
     linkedDashboards: data?.linkedDashboards?.map(getDashboardMetadata),
-    refetchRelatedDashboard: refetch,
+    refetchRelatedDashboards: refetch,
   };
 };

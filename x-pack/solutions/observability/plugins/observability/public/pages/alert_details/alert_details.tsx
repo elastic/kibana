@@ -111,7 +111,7 @@ export function AlertDetails() {
     isLoadingRelatedDashboards,
     suggestedDashboards,
     linkedDashboards,
-    refetchRelatedDashboard,
+    refetchRelatedDashboards,
   } = useRelatedDashboards(alertId);
 
   const [isLoading, alertDetail] = useFetchAlertDetail(alertId);
@@ -124,8 +124,8 @@ export function AlertDetails() {
   });
 
   const onSuccessAddSuggestedDashboard = useCallback(async () => {
-    await Promise.all([refetchRelatedDashboard(), refetch()]);
-  }, [refetch, refetchRelatedDashboard]);
+    await Promise.all([refetchRelatedDashboards(), refetch()]);
+  }, [refetch, refetchRelatedDashboards]);
 
   const [alertStatus, setAlertStatus] = useState<AlertStatus>();
   const { euiTheme } = useEuiTheme();

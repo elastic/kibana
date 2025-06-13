@@ -58,7 +58,7 @@ export function RelatedDashboards({
   return (
     <div>
       <DashboardTiles
-        title={i18n.translate('xpack.observability.alertDetails.relatedDashboards', {
+        title={i18n.translate('xpack.observability.alertDetails.linkedDashboards', {
           defaultMessage: 'Linked dashboards',
         })}
         isLoadingDashboards={isLoadingRelatedDashboards}
