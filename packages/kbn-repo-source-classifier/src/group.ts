@@ -18,38 +18,41 @@ const DEFAULT_MODULE_ATTRS: ModuleAttrs = {
   group: 'common',
   visibility: 'shared',
 };
-const KIBANA_SOLUTIONS = ['observability', 'security', 'search'];
+
+const SOLUTIONS = ['observability', 'security', 'search'];
 
 const MODULE_GROUPING_BY_PATH: Record<string, ModuleAttrs> = ['packages', 'plugins']
-  .map<Record<string, ModuleAttrs>>((type) => ({
-    [`src/platform/${type}/shared`]: {
-      group: 'platform',
-      visibility: 'shared',
-    },
-    [`src/platform/${type}/private`]: {
-      group: 'platform',
-      visibility: 'private',
-    },
-    [`x-pack/platform/${type}/shared`]: {
-      group: 'platform',
-      visibility: 'shared',
-    },
-    [`x-pack/platform/${type}/private`]: {
-      group: 'platform',
-      visibility: 'private',
-    },
-    ...KIBANA_SOLUTIONS.reduce<Record<string, ModuleAttrs>>((acc, solution) => {
-      acc[`x-pack/solutions/${solution}/${type}`] = {
-        group: solution,
+  .map<Record<string, ModuleAttrs>>((type) => {
+    const entries: Record<string, ModuleAttrs> = {
+      [`src/platform/${type}/shared`]: {
+        group: 'platform',
+        visibility: 'shared',
+      },
+      [`src/platform/${type}/private`]: {
+        group: 'platform',
+        visibility: 'private',
+      },
+      [`x-pack/platform/${type}/shared`]: {
+        group: 'platform',
+        visibility: 'shared',
+      },
+      [`x-pack/platform/${type}/private`]: {
+        group: 'platform',
+        visibility: 'private',
+      },
+    };
+    for (const solution of SOLUTIONS) {
+      entries[`x-pack/solutions/${solution}/${type}`] = {
+        group: solution as ModuleGroup,
         visibility: 'private',
       };
-      acc[`x-pack/solutions/${solution}/test`] = {
-        group: solution,
+      entries[`x-pack/solutions/${solution}/${type}/test`] = {
+        group: solution as ModuleGroup,
         visibility: 'private',
       };
-      return acc;
-    }, {}),
-  }))
+    }
+    return entries;
+  })
   .reduce((acc, current) => ({ ...acc, ...current }), {
     'src/platform/test': {
       group: 'platform',
