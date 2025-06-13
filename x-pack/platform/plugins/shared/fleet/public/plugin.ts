@@ -51,8 +51,7 @@ import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/
 
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 
-import type { Observable } from 'rxjs';
-import { from, shareReplay, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 
 import type { AutomaticImportPluginStart } from '@kbn/automatic-import-plugin/public';
 
@@ -93,7 +92,6 @@ import type {
 import { LazyCustomLogsAssetsExtension } from './lazy_custom_logs_assets_extension';
 import { setCustomIntegrations, setCustomIntegrationsStart } from './services/custom_integrations';
 import { getFleetDeepLinks } from './deep_links';
-import { PackageDetailClient } from './services/package_detail/package_detail_client';
 
 export type { FleetConfigType } from '../common/types';
 
@@ -112,16 +110,6 @@ export interface FleetStart {
   registerExtension: UIExtensionRegistrationCallback;
   isInitialized: () => Promise<true>;
 
-  sideNav$: Observable<
-    Record<
-      string,
-      Array<{
-        title: string;
-        entity?: string;
-        dashboardId: string;
-      }>
-    >
-  >;
   hooks: {
     epm: {
       getBulkAssets: (
@@ -397,7 +385,6 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
           throw new Error(permissionsResponse?.error || 'Unknown permissions error');
         }
       }),
-      sideNav$: createSideNavObservable(core),
 
       registerExtension,
 
@@ -412,22 +399,3 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
 
   public stop() {}
 }
-
-const createSideNavObservable = once(
-  (
-    core: CoreStart
-  ): Observable<
-    Record<
-      string,
-      Array<{
-        title: string;
-        entity?: string;
-        dashboardId: string;
-      }>
-    >
-  > => {
-    const packageDetailClient = new PackageDetailClient(core.http);
-
-    return from(packageDetailClient.getPackage('kubernetes')).pipe(shareReplay(1));
-  }
-);

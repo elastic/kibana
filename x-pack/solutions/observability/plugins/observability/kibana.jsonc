@@ -53,7 +53,7 @@
       "observabilityAIAssistant",
       "investigate",
       "streams",
-      "fleet"
+      "observabilityNavigation"
     ],
     "requiredBundles": [
       "data",

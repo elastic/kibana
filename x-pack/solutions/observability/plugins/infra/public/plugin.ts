@@ -35,6 +35,7 @@ import {
 } from '@kbn/observability-shared-plugin/common';
 import type { NavigationEntry } from '@kbn/observability-shared-plugin/public';
 import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability/constants';
+import type { ObservabilityNavigationItems } from '@kbn/observability-navigation-plugin/public';
 import type { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
@@ -124,11 +125,11 @@ export class Plugin implements InfraClientPluginClass {
     });
 
     const startDep$AndAccessibleFlag$ = from(core.getStartServices()).pipe(
-      switchMap(([{ application }, { fleet }]) =>
+      switchMap(([{ application }, { observabilityNavigation }]) =>
         combineLatest([
           of(application),
           getLogsExplorerAccessible$(application),
-          fleet?.sideNav$ ?? of(undefined),
+          observabilityNavigation?.sideNav$ || of(undefined),
         ])
       )
     );
@@ -138,7 +139,7 @@ export class Plugin implements InfraClientPluginClass {
     /** !! Need to be kept in sync with the deepLinks in x-pack/solutions/observability/plugins/infra/public/plugin.ts */
     pluginsSetup.observabilityShared.navigation.registerSections(
       startDep$AndAccessibleFlag$.pipe(
-        map(([application, isLogsExplorerAccessible, integrations]) => {
+        map(([application, isLogsExplorerAccessible, navigation]) => {
           const { infrastructure, logs } = application.capabilities;
           return [
             ...(logs.show
@@ -179,13 +180,13 @@ export class Plugin implements InfraClientPluginClass {
                         app: 'metrics',
                         path: '/hosts',
                       },
-                      ...(integrations?.kubernetes
+                      ...(navigation?.kubernetes
                         ? [
                             {
                               label: 'Kubernetes',
                               app: 'metrics',
                               path: '/kubernetes',
-                              deepLinks: integrations.kubernetes.map(
+                              deepLinks: navigation.kubernetes.map(
                                 ({ dashboardId, title, entity }) => {
                                   const url = new URL(
                                     entity
@@ -260,10 +261,10 @@ export class Plugin implements InfraClientPluginClass {
     // !! Need to be kept in sync with the routes in x-pack/solutions/observability/plugins/infra/public/pages/metrics/index.tsx
     const getInfraDeepLinks = ({
       metricsExplorerEnabled,
-      integrations,
+      navigation,
     }: {
       metricsExplorerEnabled: boolean;
-      integrations?: Record<string, Array<{ dashboardId: string; entity?: string; title: string }>>;
+      navigation?: ObservabilityNavigationItems;
     }): AppDeepLink[] => {
       const visibleIn: AppDeepLinkLocations[] = ['globalSearch'];
 
@@ -293,14 +294,14 @@ export class Plugin implements InfraClientPluginClass {
               },
             ]
           : []),
-        ...(integrations?.kubernetes
+        ...(navigation?.kubernetes
           ? [
               {
                 id: 'kubernetes',
                 title: 'Kubernetes',
                 path: '/kubernetes',
                 // visibleIn,
-                deepLinks: integrations.kubernetes.map(({ dashboardId, title, entity }) => {
+                deepLinks: navigation?.kubernetes.map(({ dashboardId, title, entity }) => {
                   const url = new URL(
                     entity ? `/kubernetes/${entity.replace(/\./g, '-')}` : `/kubernetes/overview`,
                     window.location.origin
@@ -369,11 +370,11 @@ export class Plugin implements InfraClientPluginClass {
       },
     });
     startDep$AndAccessibleFlag$.subscribe(
-      ([_applicationStart, _isLogsExplorerAccessible, integrations]) => {
+      ([_applicationStart, _isLogsExplorerAccessible, navigation]) => {
         this.appUpdater$.next(() => ({
           deepLinks: getInfraDeepLinks({
             metricsExplorerEnabled: this.config.featureFlags.metricsExplorerEnabled,
-            integrations,
+            navigation,
           }),
         }));
       }

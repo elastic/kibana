@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-export interface IPackageDetailClient {
-  getPackage(name: string): Promise<
-    Record<
-      string,
-      Array<{
-        title: string;
-        dashboardId: string;
-      }>
-    >
-  >;
-}
+import { internalSetupRoutes } from './internal/setup/route';
+
+export const observabilityNavigationRouteRepository = {
+  ...internalSetupRoutes,
+};
+
+export type ObservabilityNavigationRouteRepository = typeof observabilityNavigationRouteRepository;

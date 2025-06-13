@@ -5,9 +5,10 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type { AppDeepLinkId, NavigationTreeDefinition, RenderAs } from '@kbn/core-chrome-browser';
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
 import { combineLatest, map, of } from 'rxjs';
+import { ObservabilityNavigationItems } from '@kbn/observability-navigation-plugin/public';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 
 const title = i18n.translate(
@@ -20,17 +21,13 @@ const icon = 'logoObservability';
 
 function createNavTree({
   streamsAvailable,
-  kubernetesDashboards,
+  observabilityNav,
 }: {
   streamsAvailable?: boolean;
-  kubernetesDashboards?: Array<{
-    title: string;
-    entity?: string;
-    dashboardId: string;
-  }>;
+  observabilityNav?: ObservabilityNavigationItems;
 }) {
   const k8sSubItems =
-    kubernetesDashboards?.map(({ title: dashboardTitle, dashboardId }) => {
+    observabilityNav?.kubernetes.map(({ title: dashboardTitle, dashboardId }) => {
       return {
         link: (dashboardId.startsWith('kubernetes')
           ? `metrics:${dashboardId}`
@@ -203,15 +200,22 @@ function createNavTree({
                       }
                     ),
                   },
-                  {
-                    id: 'kubernetes',
-                    renderAs: 'accordion',
-                    defaultIsCollapsed: false,
-                    title: i18n.translate('xpack.observability.obltNav.infrastructure.kubernetes', {
-                      defaultMessage: 'Kubernetes',
-                    }),
-                    children: k8sSubItems,
-                  },
+                  ...(k8sSubItems.length > 0
+                    ? [
+                        {
+                          id: 'kubernetes',
+                          renderAs: 'accordion' as RenderAs,
+                          defaultIsCollapsed: false,
+                          title: i18n.translate(
+                            'xpack.observability.obltNav.infrastructure.kubernetes',
+                            {
+                              defaultMessage: 'Kubernetes',
+                            }
+                          ),
+                          children: k8sSubItems,
+                        },
+                      ]
+                    : []),
                 ],
               },
               {
@@ -504,13 +508,13 @@ export const createDefinition = (
   icon: 'logoObservability',
   homePage: 'observabilityOnboarding',
   navigationTree$: combineLatest({
-    fleet: pluginsStart.fleet?.sideNav$ ?? of(undefined),
+    observabilityNav: pluginsStart.observabilityNavigation?.sideNav$ || of(undefined),
     streams: pluginsStart.streams?.status$ || of({ status: 'disabled' as const }),
   }).pipe(
-    map(({ fleet, streams }) => {
+    map(({ observabilityNav, streams }) => {
       return createNavTree({
         streamsAvailable: streams.status === 'enabled',
-        kubernetesDashboards: fleet?.kubernetes,
+        observabilityNav,
       });
     })
   ),
