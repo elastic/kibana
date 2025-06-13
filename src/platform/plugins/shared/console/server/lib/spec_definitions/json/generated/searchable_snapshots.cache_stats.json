@@ -17,7 +17,7 @@
       "_searchable_snapshots/cache/stats",
       "_searchable_snapshots/{node_id}/cache/stats"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/searchable-snapshots-api-cache-stats.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-searchable-snapshots-cache-stats",
     "availability": {
       "stack": true,
       "serverless": false
