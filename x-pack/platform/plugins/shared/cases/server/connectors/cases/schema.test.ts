@@ -16,12 +16,7 @@ describe('CasesConnectorRunParamsSchema', () => {
     alerts: [{ _id: 'alert-id', _index: 'alert-index' }],
     groupedAlerts: null,
     groupingBy: ['host.name'],
-    rule: {
-      id: 'rule-id',
-      name: 'Test rule',
-      tags: [],
-      ruleUrl: 'https://example.com',
-    },
+    rule: { id: 'rule-id', name: 'Test rule', tags: [], ruleUrl: 'https://example.com' },
     owner: 'cases',
     referencedAlerts: false,
     ...overrides,
