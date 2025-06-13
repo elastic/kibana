@@ -10,9 +10,7 @@
 import type { Serializable } from '@kbn/utility-types';
 import { SavedObjectReference } from '@kbn/core/server';
 
-import type {
-  DashboardAttributes as DashboardAttributesV1,
-} from '../../schema/v1';
+import type { DashboardAttributes as DashboardAttributesV1 } from '../../schema/v1';
 
 import type { GridData } from '../../schema/v2';
 

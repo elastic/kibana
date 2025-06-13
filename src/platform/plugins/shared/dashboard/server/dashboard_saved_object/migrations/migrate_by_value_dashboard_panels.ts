@@ -42,7 +42,7 @@ export const migrateByValueDashboardPanels =
         type: CONTROL_GROUP_TYPE,
       } as SerializableRecord);
       attributes.controlGroupInput =
-      serializableRuntimeStateToControlGroupSavedObjectState(migratedControlGroupInput);
+        serializableRuntimeStateToControlGroupSavedObjectState(migratedControlGroupInput);
     }
 
     // Skip if panelsJSON is missing otherwise this will cause saved object import to fail when

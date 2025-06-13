@@ -18,7 +18,9 @@ import {
 } from './dashboard_container_references';
 import { MigrationsDashboardPanelMap, MigrationsDashboardPanelState } from './types';
 
-export function convertSavedDashboardPanelToPanelState<PanelState extends object>(savedDashboardPanel: SavedDashboardPanel): MigrationsDashboardPanelState<PanelState> {
+export function convertSavedDashboardPanelToPanelState<PanelState extends object>(
+  savedDashboardPanel: SavedDashboardPanel
+): MigrationsDashboardPanelState<PanelState> {
   return {
     type: savedDashboardPanel.type,
     gridData: savedDashboardPanel.gridData,
@@ -56,14 +58,19 @@ export function convertPanelStateToSavedDashboardPanel(
     type: panelState.type,
     gridData: panelState.gridData,
     panelIndex: (panelState.explicitInput as { id: string }).id,
-    embeddableConfig: omit(panelState.explicitInput  as { id: string; savedObjectId?: string; title?: string }, ['id', 'savedObjectId', 'title']),
+    embeddableConfig: omit(
+      panelState.explicitInput as { id: string; savedObjectId?: string; title?: string },
+      ['id', 'savedObjectId', 'title']
+    ),
     ...(title !== undefined && { title }),
     ...(savedObjectId !== undefined && { id: savedObjectId }),
     ...(panelState.panelRefName !== undefined && { panelRefName: panelState.panelRefName }),
   };
 }
 
-export const convertSavedPanelsToPanelMap = (panels?: SavedDashboardPanel[]): MigrationsDashboardPanelMap => {
+export const convertSavedPanelsToPanelMap = (
+  panels?: SavedDashboardPanel[]
+): MigrationsDashboardPanelMap => {
   const panelsMap: MigrationsDashboardPanelMap = {};
   panels?.forEach((panel, idx) => {
     panelsMap![panel.panelIndex ?? String(idx)] = convertSavedDashboardPanelToPanelState(panel);
@@ -72,7 +79,7 @@ export const convertSavedPanelsToPanelMap = (panels?: SavedDashboardPanel[]): Mi
 };
 
 export const convertPanelMapToSavedPanels = (
-  panels: MigrationsDashboardPanelState,
+  panels: MigrationsDashboardPanelMap,
   removeLegacyVersion?: boolean
 ) => {
   return Object.values(panels).map((panel) =>
@@ -84,7 +91,10 @@ export const convertPanelMapToSavedPanels = (
  * When saving a dashboard as a copy, we should generate new IDs for all panels so that they are
  * properly refreshed when navigating between Dashboards
  */
-export const generateNewPanelIds = (panels: MigrationsDashboardPanelState, references?: Reference[]) => {
+export const generateNewPanelIds = (
+  panels: MigrationsDashboardPanelState,
+  references?: Reference[]
+) => {
   const newPanelsMap: MigrationsDashboardPanelMap = {};
   const newReferences: Reference[] = [];
   for (const [oldId, panel] of Object.entries(panels)) {

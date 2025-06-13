@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GridData } from '../schema/v2';
 import type { Reference } from '@kbn/content-management-utils';
 
-import { EmbeddableStateWithType } from "@kbn/embeddable-plugin/common";
+import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
+import { GridData } from '../schema/v2';
 
 export interface MigrationsDashboardPanelMap {
   [key: string]: MigrationsDashboardPanelState;

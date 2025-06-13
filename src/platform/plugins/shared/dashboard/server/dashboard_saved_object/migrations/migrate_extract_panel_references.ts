@@ -9,9 +9,9 @@
 
 import { SavedObjectMigrationFn } from '@kbn/core/server';
 
-import { extractReferences, injectReferences } from '../../../common';
-import { DashboardAttributes } from '../../../common/content_management';
+import { extractReferences, injectReferences } from './dashboard_saved_object_references';
 import { DashboardSavedObjectTypeMigrationsDeps } from './dashboard_saved_object_migrations';
+import { DashboardAttributes } from '../schema/v1';
 
 /**
  * In 7.8.0 we introduced dashboard drilldowns which are stored inside dashboard saved object as part of embeddable state
