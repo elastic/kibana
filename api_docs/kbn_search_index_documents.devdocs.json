@@ -87,6 +87,41 @@
       },
       {
         "parentPluginId": "@kbn/search-index-documents",
+        "id": "def-common.EditableResult",
+        "type": "Function",
+        "tags": [],
+        "label": "EditableResult",
+        "description": [],
+        "signature": [
+          "({ leftSideItem, hasIndexSelector, onIndexSelectorChange, onIdSelectorChange, onDeleteDocument, onExpand, indices, fields, initialDocId, initialIndex, error, isLoading, }: ",
+          "EditableResultProps",
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-search-index-documents/components/result/editable_result.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-index-documents",
+            "id": "def-common.EditableResult.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  leftSideItem,\n  hasIndexSelector,\n  onIndexSelectorChange,\n  onIdSelectorChange,\n  onDeleteDocument,\n  onExpand,\n  indices = [],\n  fields = [],\n  initialDocId = '',\n  initialIndex = '',\n  error,\n  isLoading = false,\n}",
+            "description": [],
+            "signature": [
+              "EditableResultProps"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-search-index-documents/components/result/editable_result.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-index-documents",
         "id": "def-common.fetchSearchResults",
         "type": "Function",
         "tags": [],
