@@ -51,7 +51,6 @@ interface Props {
   isDisabled?: boolean;
 }
 
-const DEFAULT_EMPTY_DELETED_CONVERSATIONS_ARRAY: ConversationTableItem[] = [];
 const EMPTY_CONVERSATIONS_ARRAY: ConversationTableItem[] = [];
 
 const ConversationSettingsManagementComponent: React.FC<Props> = ({
@@ -145,7 +144,9 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
         });
         setHasPendingChanges(false);
         setIsDeleteAll(false);
-        setDeletedConversations(DEFAULT_EMPTY_DELETED_CONVERSATIONS_ARRAY);
+        setIsExcludedMode(false);
+        setDeletedConversations([]);
+        setExcludedIds([]);
         setTotalSelectedConversations(0);
         callback?.();
       } else {
@@ -230,7 +231,11 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   ]);
 
   const onDeleteCancelled = useCallback(() => {
-    setDeletedConversations(DEFAULT_EMPTY_DELETED_CONVERSATIONS_ARRAY);
+    setIsDeleteAll(false);
+    setIsExcludedMode(false);
+    setDeletedConversations([]);
+    setTotalSelectedConversations(0);
+    setExcludedIds([]);
     closeConfirmModal();
     onCancelClick();
   }, [closeConfirmModal, onCancelClick]);
@@ -319,10 +324,9 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   const handleSelectAll = useCallback(() => {
     setIsDeleteAll(true);
     setIsExcludedMode(true);
-    setDeletedConversations(conversationOptions);
     setTotalSelectedConversations(totalItemCount);
     setExcludedIds([]);
-  }, [conversationOptions, totalItemCount]);
+  }, [totalItemCount]);
 
   const handleUnselectAll = useCallback(() => {
     setIsDeleteAll(false);
@@ -461,7 +465,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
         </Flyout>
       )}
       {deleteConfirmModalVisibility &&
-        (deletedConversations?.length > 0 || excludedIds?.length > 0) && (
+        (isDeleteAll || deletedConversations?.length > 0 || excludedIds?.length > 0) && (
           <EuiConfirmModal
             aria-labelledby={confirmationTitle}
             title={confirmationTitle}
