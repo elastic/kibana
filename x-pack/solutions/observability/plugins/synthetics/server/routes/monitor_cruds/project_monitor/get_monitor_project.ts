@@ -67,7 +67,7 @@ export const getSyntheticsProjectMonitorsRoute: SyntheticsRestApiRouteFactory = 
         monitors: projectMonitors,
       };
     } catch (error) {
-      logger.error(error);
+      logger.error(`Error getting Synthetics monitors, Error: ${error.message}`, { error });
     }
   },
 });

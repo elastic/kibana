@@ -191,6 +191,39 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-public.NamespaceComboBox",
+        "type": "Function",
+        "tags": [],
+        "label": "NamespaceComboBox",
+        "description": [],
+        "signature": [
+          "({ namespace, placeholder, isEditPage, packageType, validationError, docLinks, onNamespaceChange, \"data-test-subj\": dataTestSubj, fullWidth, }: NamespaceFormRowProps) => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/public/components/namespace_combo_box.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.NamespaceComboBox.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  namespace,\n  placeholder,\n  isEditPage,\n  packageType,\n  validationError,\n  docLinks,\n  onNamespaceChange,\n  'data-test-subj': dataTestSubj = 'packagePolicyNamespaceInput',\n  fullWidth = false,\n}",
+            "description": [],
+            "signature": [
+              "NamespaceFormRowProps"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/public/components/namespace_combo_box.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-public.PackageIcon",
         "type": "Function",
         "tags": [],

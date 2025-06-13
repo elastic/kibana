@@ -12,8 +12,10 @@ import { useKibana } from '../../../common/lib/kibana';
 import { of, throwError } from 'rxjs';
 import { showErrorToast } from '@kbn/cloud-security-posture';
 import { createTestProviderWrapper } from '../../test/test_provider';
+import { useDataViewContext } from '../data_view_context';
 
 jest.mock('../../../common/lib/kibana');
+jest.mock('../data_view_context');
 jest.mock('@kbn/cloud-security-posture', () => ({
   showErrorToast: jest.fn(),
 }));
@@ -54,6 +56,11 @@ describe('useFetchChartData', () => {
     jest.clearAllMocks();
     (useKibana as jest.Mock).mockReturnValue({
       services: getMockKibanaServices(),
+    });
+    (useDataViewContext as jest.Mock).mockReturnValue({
+      dataView: {
+        getIndexPattern: () => 'assets-test-*',
+      },
     });
   });
 

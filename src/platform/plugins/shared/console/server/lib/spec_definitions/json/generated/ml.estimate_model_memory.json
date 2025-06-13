@@ -12,7 +12,7 @@
     "patterns": [
       "_ml/anomaly_detectors/_estimate_model_memory"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-apis.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-estimate-model-memory",
     "availability": {
       "stack": true,
       "serverless": true

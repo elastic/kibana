@@ -41,6 +41,7 @@ const createActionsConfigMock = () => {
         pfx: true,
       },
     }),
+    getAwsSesConfig: jest.fn().mockReturnValue(null),
   };
   return mocked;
 };
