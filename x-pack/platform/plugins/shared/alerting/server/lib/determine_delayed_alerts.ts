@@ -69,7 +69,8 @@ export function determineDelayedAlerts<
   for (const id of keys(recoveredAlerts)) {
     const alert = recoveredAlerts[id];
     // if alert has not reached the alertDelay threshold don't recover the alert
-    if (alert.getActiveCount() < alertDelay) {
+    const activeCount = alert.getActiveCount();
+    if (activeCount > 0 && activeCount < alertDelay) {
       // remove from recovered alerts
       delete recoveredAlerts[id];
       delete trackedRecoveredAlerts[id];
