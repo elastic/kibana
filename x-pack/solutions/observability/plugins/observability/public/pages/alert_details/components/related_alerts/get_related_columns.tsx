@@ -27,7 +27,7 @@ export const getRelatedColumns = (): EuiDataGridColumn[] => {
     {
       id: ALERT_START,
       displayAsText: i18n.translate('xpack.observability.alertsTGrid.startColumnDescription', {
-        defaultMessage: 'Triggered',
+        defaultMessage: 'Created',
       }),
       initialWidth: 120,
       isSortable: false,
