@@ -288,6 +288,7 @@ import type {
   GetEntityStoreStatusRequestQueryInput,
   GetEntityStoreStatusResponse,
 } from './entity_analytics/entity_store/status.gen';
+import type { RunEntityAnalyticsMigrationsResponse } from './entity_analytics/migrations/run_migrations_route.gen';
 import type { CleanUpRiskEngineResponse } from './entity_analytics/risk_engine/engine_cleanup_route.gen';
 import type {
   ConfigureRiskEngineSavedObjectRequestBodyInput,
@@ -2260,6 +2261,18 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         method: 'POST',
         body: props.body,
         query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async runEntityAnalyticsMigrations() {
+    this.log.info(`${new Date().toISOString()} Calling API RunEntityAnalyticsMigrations`);
+    return this.kbnClient
+      .request<RunEntityAnalyticsMigrationsResponse>({
+        path: '/internal/entity_analytics/migrations/run',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
