@@ -106,13 +106,17 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
     });
   };
 
+  public getAdHocAlertsIndexPattern = () => {
+    if (this.adhocAttackDiscoveryDataClient === undefined) {
+      throw new Error('`adhocAttackDiscoveryDataClient` is required');
+    }
+    return this.adhocAttackDiscoveryDataClient.indexNameWithNamespace(this.spaceId);
+  };
+
   public getScheduledAndAdHocIndexPattern = () => {
-    const adhocAlertsIndex = this.adhocAttackDiscoveryDataClient?.indexNameWithNamespace(
-      this.spaceId
-    );
     return [
       getScheduledIndexPattern(this.spaceId), // scheduled
-      ...(adhocAlertsIndex ? [adhocAlertsIndex] : []), // ad-hoc
+      this.getAdHocAlertsIndexPattern(), // ad-hoc
     ].join(',');
   };
 

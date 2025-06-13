@@ -95,8 +95,16 @@ export const generateAndUpdateAttackDiscoveries = async ({
     if (attackDiscoveryAlertsEnabled) {
       const alertsContextCount = anonymizedAlerts.length;
 
-      // Deduplicate attackDiscoveries before creating alerts
-      const indexPattern = dataClient.getScheduledAndAdHocIndexPattern();
+      /**
+       * Deduplicate attackDiscoveries before creating alerts
+       *
+       * We search for duplicates within the ad hoc index only,
+       * because there will be no duplicates in the scheduled index due to the
+       * fact that we use schedule ID (for the schedules) and
+       * user ID (for the ad hoc generations) as part of the alert ID hash
+       * generated for the deduplication purposes
+       */
+      const indexPattern = dataClient.getAdHocAlertsIndexPattern();
       const dedupedDiscoveries = await deduplicateAttackDiscoveries({
         esClient,
         attackDiscoveries: attackDiscoveries ?? [],
