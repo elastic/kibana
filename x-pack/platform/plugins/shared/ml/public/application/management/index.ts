@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
 import type { CoreSetup } from '@kbn/core/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
@@ -14,6 +13,7 @@ import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { MlFeatures, NLPSettings, ExperimentalFeatures } from '@kbn/ml-common-constants/app';
 import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
 import type { ITelemetryClient } from '@kbn/ml-trained-models-utils/src/types/telemetry';
+
 import type { MlStartDependencies } from '../../plugin';
 
 export enum MANAGEMENT_SECTION_IDS {
