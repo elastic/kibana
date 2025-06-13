@@ -8,7 +8,6 @@
 import { useMemo } from 'react';
 
 import { useMlKibana } from '@kbn/ml-kibana-context';
-
 import type { JobsApiService } from '@kbn/ml-services/ml_api_service/jobs';
 import { jobsApiProvider } from '@kbn/ml-services/ml_api_service/jobs';
 

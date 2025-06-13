@@ -37,8 +37,8 @@ import {
 import type { MemoryInputValidatorResult } from '@kbn/ml-validators';
 import { memoryInputValidator } from '@kbn/ml-validators';
 import { useMlKibana } from '@kbn/ml-kibana-context';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 
-import { useMlApi } from '../../../../../contexts/kibana';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
 import { useRefreshAnalyticsList } from '../../../../common/analytics';
 
