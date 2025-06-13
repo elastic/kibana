@@ -246,16 +246,13 @@ export class ObservabilityAIAssistantClient {
 
       const systemMessage$ = kbUserInstructions$.pipe(
         map((kbUserInstructions) => {
-          const availableFunctionNames = functionClient
-            .getFunctions()
-            .filter((fn) => fn.definition.visibility !== FunctionVisibility.Internal)
-            .map((fn) => fn.definition.name);
-
           return getSystemMessageFromInstructions({
             applicationInstructions: functionClient.getInstructions(),
             kbUserInstructions,
             apiUserInstructions,
-            availableFunctionNames,
+            availableFunctionNames: disableFunctions
+              ? []
+              : functionClient.getFunctions().map((fn) => fn.definition.name),
           });
         }),
         shareReplay()
