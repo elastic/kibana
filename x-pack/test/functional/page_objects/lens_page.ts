@@ -2026,8 +2026,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return url;
     },
 
-    async openCSVDownloadExport() {
+    async triggerCSVDownloadExport() {
       await this.clickExportButton();
+      // simply clicking the export button is enough, to trigger the CSV download in lens
       await exports.clickPopoverItem('CSV', this.clickExportButton);
     },
 
@@ -2043,7 +2044,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async getCSVContent() {
-      await testSubjects.click('generateReportButton');
       return await browser.execute<
         [void],
         Record<string, { content: string; type: string }> | undefined
