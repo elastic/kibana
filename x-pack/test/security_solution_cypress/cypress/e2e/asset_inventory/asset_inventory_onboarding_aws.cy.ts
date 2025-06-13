@@ -61,7 +61,6 @@ describe('Asset Inventory integration onboarding - AWS', { tags: ['@ess'] }, () 
   beforeEach(() => {
     login();
     visit('/app/integrations/browse');
-    // cy.contains('button', 'Display beta integrations').click();
     cy.get('button[role="switch"]').click();
     visit(ASSET_INVENTORY_INTEGRATION_URL);
   });
@@ -258,6 +257,7 @@ describe(
       shouldBeEnabled(SAVE_BUTTON);
 
       cy.get(SAVE_BUTTON).click();
+      cy.wait('@saveAgentless');
     });
 
     it('should save an organization agentless package policy with temporary keys', () => {
