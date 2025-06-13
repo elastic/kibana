@@ -44,7 +44,7 @@ import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
 import {
   ALERTS_URL_STORAGE_KEY,
   OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
-  getObservabilityAlertFeatureIds,
+  observabilityAlertFeatureIds,
 } from '../../../common/constants';
 import { ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID } from '../../constants';
 import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_available_rules_with_descriptions';
@@ -85,7 +85,6 @@ function InternalAlertsPage() {
       getAlertSummaryWidget: AlertSummaryWidget,
     },
     uiSettings,
-    serverless,
   } = kibanaServices;
   const { onPageReady } = usePerformanceContext();
   const { toasts } = notifications;
@@ -226,7 +225,7 @@ function InternalAlertsPage() {
       const response = await loadRuleAggregations({
         http,
         ruleTypeIds: filteredRuleTypes,
-        consumers: getObservabilityAlertFeatureIds({ isServerless: Boolean(serverless) }),
+        consumers: observabilityAlertFeatureIds,
       });
       const { ruleExecutionStatus, ruleMutedStatus, ruleEnabledStatus, ruleSnoozedStatus } =
         response;
@@ -314,7 +313,7 @@ function InternalAlertsPage() {
             {hasInitialControlLoadingFinished ? (
               <AlertSummaryWidget
                 ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
-                consumers={getObservabilityAlertFeatureIds({ isServerless: Boolean(serverless) })}
+                consumers={observabilityAlertFeatureIds}
                 filter={esQuery}
                 fullSize
                 timeRange={alertSummaryTimeRange}
@@ -331,7 +330,7 @@ function InternalAlertsPage() {
             {esQuery && hasInitialControlLoadingFinished && (
               <AlertsGrouping<AlertsByGroupingAgg>
                 ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
-                consumers={getObservabilityAlertFeatureIds({ isServerless: Boolean(serverless) })}
+                consumers={observabilityAlertFeatureIds}
                 from={alertSearchBarStateProps.rangeFrom}
                 to={alertSearchBarStateProps.rangeTo}
                 globalFilters={globalFilters}
@@ -361,9 +360,7 @@ function InternalAlertsPage() {
                     <ObservabilityAlertsTable
                       id={ALERTS_TABLE_ID}
                       ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
-                      consumers={getObservabilityAlertFeatureIds({
-                        isServerless: Boolean(serverless),
-                      })}
+                      consumers={observabilityAlertFeatureIds}
                       query={mergeBoolQueries(esQuery, groupQuery)}
                       initialPageSize={ALERTS_PER_PAGE}
                       onUpdate={onUpdate}

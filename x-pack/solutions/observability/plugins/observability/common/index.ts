@@ -83,4 +83,4 @@ import { paths } from './locators/paths';
 export const observabilityPaths = paths.observability;
 export type { AlertsLocator, AlertsLocatorParams } from './locators/alerts';
 export { AlertsLocatorDefinition } from './locators/alerts';
-export { getObservabilityAlertFeatureIds } from './constants';
+export { observabilityAlertFeatureIds } from './constants';

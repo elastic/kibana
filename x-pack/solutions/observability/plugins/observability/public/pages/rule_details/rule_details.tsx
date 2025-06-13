@@ -20,7 +20,7 @@ import { ruleDetailsLocatorID } from '../../../common';
 import {
   ALERT_STATUS_ALL,
   OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
-  getObservabilityAlertFeatureIds,
+  observabilityAlertFeatureIds,
 } from '../../../common/constants';
 import { paths, relativePaths } from '../../../common/locators/paths';
 import type { AlertStatus } from '../../../common/typings';
@@ -256,7 +256,7 @@ export function RuleDetailsPage() {
         <EuiFlexItem css={{ minWidth: 350 }}>
           <AlertSummaryWidget
             ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
-            consumers={getObservabilityAlertFeatureIds({ isServerless: Boolean(serverless) })}
+            consumers={observabilityAlertFeatureIds}
             onClick={handleAlertSummaryWidgetClick}
             timeRange={alertSummaryWidgetTimeRange}
             filter={{
