@@ -13,7 +13,7 @@ import { handleEcsMapping } from './mapping';
 import { handleMissingKeys } from './missing';
 import { modelInput, modelMergedInputFromSubGraph, modelOutput, modelSubOutput } from './model';
 import { graphState } from './state';
-import type { EcsBaseNodeParams, EcsGraphParams } from './types';
+import type { EcsBaseNodeParams, EcsGraphParams, EcsSubGraphParams } from './types';
 import { handleValidateMappings } from './validate';
 
 const handleCreateMappingChunks = async ({ state }: EcsBaseNodeParams) => {
@@ -55,7 +55,7 @@ function chainRouter({ state }: EcsBaseNodeParams): string {
 }
 
 // This is added as a separate graph to be able to run these steps concurrently from handleCreateMappingChunks
-export async function getEcsSubGraph({ model }: EcsGraphParams) {
+export async function getEcsSubGraph({ model }: EcsSubGraphParams) {
   const workflow = new StateGraph({
     channels: graphState,
   })
@@ -82,13 +82,13 @@ export async function getEcsSubGraph({ model }: EcsGraphParams) {
   return compiledEcsSubGraph;
 }
 
-export async function getEcsGraph({ model }: EcsGraphParams) {
+export async function getEcsGraph({ model, client }: EcsGraphParams) {
   const subGraph = await getEcsSubGraph({ model });
   const workflow = new StateGraph({
     channels: graphState,
   })
     .addNode('modelInput', (state: EcsMappingState) => modelInput({ state }))
-    .addNode('modelOutput', (state: EcsMappingState) => modelOutput({ state }))
+    .addNode('modelOutput', (state: EcsMappingState) => modelOutput({ state, client }))
     .addNode('handleValidation', (state: EcsMappingState) => handleValidateMappings({ state }))
     .addNode('handleDuplicates', (state: EcsMappingState) => handleDuplicates({ state, model }))
     .addNode('handleMissingKeys', (state: EcsMappingState) => handleMissingKeys({ state, model }))
