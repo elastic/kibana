@@ -1604,6 +1604,13 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         .send(props.body as object)
         .query(props.query);
     },
+    runEntityAnalyticsMigrations(kibanaSpace: string = 'default') {
+      return supertest
+        .post(routeWithNamespace('/internal/entity_analytics/migrations/run', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
     /**
      * Run a shell command on an endpoint.
      */
