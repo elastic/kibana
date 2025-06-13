@@ -23,4 +23,7 @@ export const referenceDataSavedObjectType: SavedObjectsType = {
       metadata: { type: 'object' },
     },
   },
+  modelVersions: {
+    1: { changes: [] },
+  },
 };
