@@ -222,5 +222,52 @@ export default function (providerContext: FtrProviderContext) {
           .expect(404);
       });
     });
+
+    // Bulk migrate agents
+    describe('POST /agents/bulk_migrate', () => {
+      it('should return a 200 if the migration action is successful', async () => {
+        const {} = await supertest
+          .post(`/api/fleet/agents/bulk_migrate`)
+          .set('kbn-xsrf', 'xx')
+          .send({
+            agents: ['agent1'],
+            uri: 'https://example.com',
+          })
+          .expect(200);
+      });
+
+      it('should return a 403 if any agent is tamper protected', async () => {
+        const {} = await supertest
+          .post(`/api/fleet/agents/bulk_migrate`)
+          .set('kbn-xsrf', 'xx')
+          .send({
+            agents: ['agent1', 'agent2'],
+            uri: 'https://example.com',
+          })
+          .expect(403);
+      });
+
+      it('should return a 403 if any agent is a fleet-agent', async () => {
+        const {} = await supertest
+          .post(`/api/fleet/agents/bulk_migrate`)
+          .set('kbn-xsrf', 'xx')
+          .send({
+            agents: ['agent1', 'agent3'],
+            uri: 'https://example.com',
+          })
+          .expect(403);
+      });
+
+      it('should return a 404 when any agent does not exist', async () => {
+        await supertest
+          .post(`/api/fleet/agents/bulk_migrate`)
+          .set('kbn-xsrf', 'xx')
+          .send({
+            agents: ['agent100', 'agent400', 'agent1'],
+            uri: 'https://example.com',
+          })
+          .expect(404);
+      });
+    });
   });
 }

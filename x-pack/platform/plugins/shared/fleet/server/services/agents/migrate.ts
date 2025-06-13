@@ -36,3 +36,30 @@ export async function migrateSingleAgent(
   });
   return { actionId: response.id };
 }
+
+export async function bulkMigrateAgents(
+  esClient: ElasticsearchClient,
+  agents: Agent[],
+  agentPolicies: Array<AgentPolicy | undefined>,
+  options: any
+) {
+  // If any agent is protected or has fleet-server as a component, throw an error
+  if (
+    agentPolicies.some((policy) => policy?.is_protected) ||
+    agents.some((agent) => agent.components?.some((c) => c.type === 'fleet-server'))
+  ) {
+    throw new FleetUnauthorizedError(`One or more agents are protected and cannot be migrated`);
+  }
+
+  const response = await createAgentAction(esClient, {
+    agents: agents.map((agent) => agent.id),
+    created_at: new Date().toISOString(),
+    type: 'MIGRATE',
+    data: {
+      enrollment_token: options.enrollment_token,
+      target_uri: options.uri,
+      settings: options.settings,
+    },
+  });
+  return { actionId: response.id };
+}

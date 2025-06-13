@@ -552,6 +552,18 @@ export const MigrateSingleAgentResponseSchema = schema.object({
   actionId: schema.string(),
 });
 
+export const BulkMigrateAgentsRequestSchema = {
+  body: schema.object({
+    agentIds: schema.arrayOf(schema.string()),
+    uri: schema.uri(),
+    enrollment_token: schema.string(),
+    settings: schema.maybe(schema.object(MigrateOptionsSchema)),
+  }),
+};
+export const BulkMigrateAgentsResponseSchema = schema.object({
+  actionId: schema.string(),
+});
+
 export const PostBulkUpdateAgentTagsRequestSchema = {
   body: schema.object({
     agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
