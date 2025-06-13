@@ -1633,6 +1633,9 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/test_serverless/**/test_suites/common/management/transforms/ @elastic/ml-ui @elastic/kibana-management
 /x-pack/test/api_integration/services/ml.ts @elastic/ml-ui
 
+# Security Machine Learning
+x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security_* @elastic/security-ml
+
 # Additional plugins and packages maintained by the ML team.
 /src/platform/test/examples/response_stream/*.ts @elastic/ml-ui
 /x-pack/test/accessibility/apps/group2/transform.ts  @elastic/ml-ui @elastic/kibana-management
@@ -1950,7 +1953,7 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /config/serverless.es.yml @elastic/kibana-core @elastic/kibana-security @elastic/search-kibana
 /config/serverless.oblt.yml @elastic/kibana-core @elastic/kibana-security @elastic/observability-ui
 /config/serverless.oblt.complete.yml @elastic/kibana-core @elastic/observability-ui
-/config/serverless.oblt.essentials.yml @elastic/kibana-core @elastic/observability-ui
+/config/serverless.oblt.logs_essentials.yml @elastic/kibana-core @elastic/observability-ui
 /config/serverless.security.yml @elastic/kibana-core @elastic/security-solution @elastic/kibana-security
 /config/serverless.security.search_ai_lake.yml @elastic/security-solution @elastic/kibana-security
 /config/serverless.security.essentials.yml @elastic/security-solution @elastic/kibana-security
@@ -2823,7 +2826,7 @@ oas_docs/kibana.info.serverless.yaml          @elastic/platform-docs
 oas_docs/kibana.info.yaml                     @elastic/platform-docs
 
 # Documentation settings files
-docs/settings-gen                             @elastic/platform-docs
+docs/settings-gen                             @elastic/platform-docs @elastic/experience-docs
 
 # Plugin manifests
 /src/plugins/**/kibana.jsonc @elastic/kibana-core
