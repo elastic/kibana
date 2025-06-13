@@ -2180,7 +2180,7 @@
             "label": "getEditorExtensions",
             "description": [],
             "signature": [
-              "((queryString: string) => Promise<",
+              "((queryString: string) => Promise<{ recommendedQueries: ",
               {
                 "pluginId": "@kbn/esql-types",
                 "scope": "common",
@@ -2188,7 +2188,7 @@
                 "section": "def-common.RecommendedQuery",
                 "text": "RecommendedQuery"
               },
-              "[]>) | undefined"
+              "[]; }>) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
             "deprecated": false,
