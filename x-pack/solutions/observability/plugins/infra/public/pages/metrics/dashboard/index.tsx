@@ -16,6 +16,7 @@ import { useFetchDashboardById } from './hooks/use_fetch_dashboard_by_id';
 import { DatePicker } from './components/date_picker/date_picker';
 import { DatePickerProvider } from './hooks/use_date_picker';
 import { RenderDashboard } from './components/dashboard/render_dashboard';
+import { KubernetesTimeRangeMetadataProvider } from './hooks/use_kubernetes_timerange_metadata';
 
 export const Dashboard = () => {
   const {
@@ -75,7 +76,9 @@ export const Dashboard = () => {
           }}
           data-test-subj="infraKubernetesPage"
         >
-          <RenderDashboard dashboardId={dashboardId} />
+          <KubernetesTimeRangeMetadataProvider>
+            <RenderDashboard dashboardId={dashboardId} />
+          </KubernetesTimeRangeMetadataProvider>
         </PageTemplate>
       </EuiErrorBoundary>
     </DatePickerProvider>
