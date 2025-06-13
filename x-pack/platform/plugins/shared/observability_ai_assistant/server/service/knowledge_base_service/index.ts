@@ -282,7 +282,7 @@ export class KnowledgeBaseService {
             : [{ [String(sortBy)]: { order: sortDirection } }],
         size: 500,
         _source: {
-          excludes: ['confidence', 'is_correction'],
+          excludes: ['confidence', 'is_correction'], // fields deprecated in https://github.com/elastic/kibana/pull/222814
         },
       });
 
