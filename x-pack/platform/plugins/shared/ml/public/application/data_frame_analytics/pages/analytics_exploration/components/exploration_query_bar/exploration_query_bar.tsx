@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Query } from '@kbn/es-query';
-import type { QueryErrorMessage } from '@kbn/ml-error-utils';
+import type { QueryErrorMessage } from '@kbn/ml-common-types/errors';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { PLUGIN_ID } from '@kbn/ml-common-constants/app';

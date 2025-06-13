@@ -24,8 +24,9 @@ export const useMlManagementHref = (
   useEffect(
     function setUpMlUrl() {
       const getUrl = async () => {
-        if (ml && ml.managementLocator) {
-          const result = await ml.managementLocator?.getUrl(params, appId);
+        if (ml && ml.getManagementLocator) {
+          const managementLocator = await ml.getManagementLocator();
+          const result = await managementLocator.getUrl(params, appId);
           if (result.url) {
             setMlManagementUrl(result.url);
           }

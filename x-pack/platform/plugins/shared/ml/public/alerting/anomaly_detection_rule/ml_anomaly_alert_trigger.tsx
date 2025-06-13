@@ -74,7 +74,7 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
       if (!getManagementLocator) return;
 
       const managementLocator = await getManagementLocator();
-      const url = await managementLocator.getUrl(
+      const { url } = await managementLocator.getUrl(
         { page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB },
         'anomaly_detection'
       );
