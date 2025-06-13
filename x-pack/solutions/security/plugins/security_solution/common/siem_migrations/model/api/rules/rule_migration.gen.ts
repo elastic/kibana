@@ -54,6 +54,16 @@ export type CreateRuleMigrationRulesRequestParamsInput = z.input<
   typeof CreateRuleMigrationRulesRequestParams
 >;
 
+export type CreateRuleMigrationRequestBody = z.infer<typeof CreateRuleMigrationRequestBody>;
+export const CreateRuleMigrationRequestBody = z.object({
+  name: NonEmptyString,
+});
+
+export type UpdateRuleMigrationRequestBody = z.infer<typeof UpdateRuleMigrationRequestBody>;
+export const UpdateRuleMigrationRequestBody = z.object({
+  name: NonEmptyString,
+});
+
 export type CreateRuleMigrationRulesRequestBody = z.infer<
   typeof CreateRuleMigrationRulesRequestBody
 >;

@@ -7,23 +7,24 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { SIEM_RULE_MIGRATIONS_PATH } from '../../../../../common/siem_migrations/constants';
+import { SIEM_RULE_MIGRATION_PATH } from '../../../../../common/siem_migrations/constants';
 import {
-  type CreateRuleMigrationResponse,
-  CreateRuleMigrationRequestBody,
+  type UpdateRuleMigrationResponse,
+  UpdateRuleMigrationRequestBody,
+  UpdateRuleMigrationRequestParams,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { SiemMigrationAuditLogger } from './util/audit';
 import { authz } from './util/authz';
 import { withLicense } from './util/with_license';
 
-export const registerSiemRuleMigrationsCreateRoute = (
+export const registerSiemRuleMigrationsUpdateRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger
 ) => {
   router.versioned
-    .put({
-      path: SIEM_RULE_MIGRATIONS_PATH,
+    .patch({
+      path: SIEM_RULE_MIGRATION_PATH,
       access: 'internal',
       security: { authz },
     })
@@ -32,20 +33,27 @@ export const registerSiemRuleMigrationsCreateRoute = (
         version: '1',
         validate: {
           request: {
-            body: buildRouteValidationWithZod(CreateRuleMigrationRequestBody),
+            params: buildRouteValidationWithZod(UpdateRuleMigrationRequestParams),
+            body: buildRouteValidationWithZod(UpdateRuleMigrationRequestBody),
           },
         },
       },
       withLicense(
-        async (context, req, res): Promise<IKibanaResponse<CreateRuleMigrationResponse>> => {
+        async (context, req, res): Promise<IKibanaResponse<UpdateRuleMigrationResponse>> => {
           const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
+          const { migration_id: migrationId } = req.params;
           try {
             const ctx = await context.resolve(['securitySolution']);
             const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
             await siemMigrationAuditLogger.logCreateMigration();
-            const migrationId = await ruleMigrationsClient.data.migrations.create(req.body.name);
+            await ruleMigrationsClient.data.migrations.update({
+              id: migrationId,
+              params: {
+                name: req.body.name,
+              },
+            });
 
-            return res.ok({ body: { migration_id: migrationId } });
+            return res.ok();
           } catch (error) {
             logger.error(error);
             await siemMigrationAuditLogger.logCreateMigration({

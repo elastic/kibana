@@ -73,7 +73,7 @@ export const MacrosDataInput = React.memo<MacrosDataInputProps>(
 MacrosDataInput.displayName = 'MacrosDataInput';
 
 const END = 10 as const;
-type SubStep = 1 | 2 | 3 | typeof END;
+type SubStep = 1 | 2 | 3 | 4 | typeof END;
 export const MacrosDataInputSubSteps = React.memo<MacrosDataInputSubStepsProps>(
   ({ migrationStats, missingMacros, onMissingResourcesFetched }) => {
     const { telemetry } = useKibana().services.siemMigrations.rules;
@@ -81,17 +81,17 @@ export const MacrosDataInputSubSteps = React.memo<MacrosDataInputSubStepsProps>(
 
     // Copy query step
     const onCopied = useCallback(() => {
-      setSubStep(2);
+      setSubStep(3);
       telemetry.reportSetupMacrosQueryCopied({ migrationId: migrationStats.id });
     }, [telemetry, migrationStats.id]);
     const copyStep = useCopyExportQueryStep({ status: getStatus(1, subStep), onCopied });
 
     // Upload macros step
     const onMacrosCreatedStep = useCallback<OnResourcesCreated>(() => {
-      setSubStep(3);
+      setSubStep(4);
     }, []);
     const uploadStep = useMacrosFileUploadStep({
-      status: getStatus(2, subStep),
+      status: getStatus(3, subStep),
       migrationStats,
       missingMacros,
       onMacrosCreated: onMacrosCreatedStep,
@@ -106,7 +106,7 @@ export const MacrosDataInputSubSteps = React.memo<MacrosDataInputSubStepsProps>(
       [onMissingResourcesFetched]
     );
     const resourcesStep = useCheckResourcesStep({
-      status: getStatus(3, subStep),
+      status: getStatus(4, subStep),
       migrationStats,
       onMissingResourcesFetched: onMissingResourcesFetchedStep,
     });

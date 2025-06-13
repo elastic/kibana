@@ -23,10 +23,15 @@ import { PanelText } from '../../../../common/components/panel_text';
 import type { RuleMigrationStats } from '../../types';
 import * as i18n from './translations';
 import { RuleMigrationsReadMore } from './read_more';
+import { MigrationName } from './migration_name';
+import type { RuleMigrationResourceBase } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 
 export interface MigrationProgressPanelProps {
   migrationStats: RuleMigrationStats;
 }
+
+const EMPTY_MISSING_RESOURCES: RuleMigrationResourceBase[] = [];
+
 export const MigrationProgressPanel = React.memo<MigrationProgressPanelProps>(
   ({ migrationStats }) => {
     const { euiTheme } = useEuiTheme();
@@ -38,11 +43,11 @@ export const MigrationProgressPanel = React.memo<MigrationProgressPanelProps>(
     return (
       <EuiPanel data-test-subj="migrationProgressPanel" hasShadow={false} hasBorder paddingSize="m">
         <EuiFlexGroup direction="column" gutterSize="xs">
-          <EuiFlexItem grow={false}>
-            <PanelText size="s" semiBold>
-              <p>{i18n.RULE_MIGRATION_TITLE(migrationStats.number)}</p>
-            </PanelText>
-          </EuiFlexItem>
+          <MigrationName
+            migrationStats={migrationStats}
+            isLoading={false}
+            missingResources={EMPTY_MISSING_RESOURCES}
+          />
           <EuiFlexItem grow={false}>
             <EuiText size="s">
               {i18n.RULE_MIGRATION_PROGRESS_DESCRIPTION(migrationStats.rules.total)}

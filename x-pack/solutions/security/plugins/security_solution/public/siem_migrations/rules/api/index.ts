@@ -27,6 +27,7 @@ import {
   SIEM_RULE_MIGRATION_MISSING_PRIVILEGES_PATH,
   SIEM_RULE_MIGRATION_RULES_PATH,
   SIEM_RULE_MIGRATIONS_INTEGRATIONS_STATS_PATH,
+  SIEM_RULE_MIGRATION_PATH,
 } from '../../../../common/siem_migrations/constants';
 import type {
   CreateRuleMigrationResponse,
@@ -82,14 +83,18 @@ export const getRuleMigrationsStatsAll = async ({
 export interface CreateRuleMigrationParams {
   /** Optional AbortSignal for cancelling request */
   signal?: AbortSignal;
+  /** The name of the migration */
+  name: string;
 }
 /** Starts a new migration with the provided rules. */
 export const createRuleMigration = async ({
   signal,
+  name,
 }: CreateRuleMigrationParams): Promise<CreateRuleMigrationResponse> => {
   return KibanaServices.get().http.put<CreateRuleMigrationResponse>(SIEM_RULE_MIGRATIONS_PATH, {
     version: '1',
     signal,
+    body: JSON.stringify({ name }),
   });
 };
 
@@ -349,5 +354,28 @@ export const updateMigrationRules = async ({
   return KibanaServices.get().http.patch<UpdateRuleMigrationResponse>(
     replaceParams(SIEM_RULE_MIGRATION_RULES_PATH, { migration_id: migrationId }),
     { version: '1', body: JSON.stringify(rulesToUpdate), signal }
+  );
+};
+
+export interface UpdateMigrationNameParams {
+  /** `id` of the migration to update the name for */
+  migrationId: string;
+  /** The name of the migration */
+  name: string;
+  /** Optional AbortSignal for cancelling request */
+  signal?: AbortSignal;
+}
+export const updateMigrationName = async ({
+  migrationId,
+  signal,
+  name,
+}: UpdateMigrationNameParams): Promise<UpdateRuleMigrationResponse> => {
+  return KibanaServices.get().http.patch<UpdateRuleMigrationResponse>(
+    replaceParams(SIEM_RULE_MIGRATION_PATH, { migration_id: migrationId }),
+    {
+      version: '1',
+      body: JSON.stringify({ name }),
+      signal,
+    }
   );
 };

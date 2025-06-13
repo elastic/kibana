@@ -185,6 +185,10 @@ export const RuleMigrationData = z.object({
    * The last execution of the rule migration task.
    */
   last_execution: RuleMigrationLastExecution.optional(),
+  /**
+   * The name of the migration
+   */
+  name: NonEmptyString,
 });
 
 /**
@@ -365,6 +369,10 @@ export const RuleMigrationTaskStats = z.object({
    * The last error message if the migration task execution failed.
    */
   last_error: z.string().optional(),
+  /**
+   * The name of the migration
+   */
+  name: NonEmptyString.optional(),
 });
 
 /**

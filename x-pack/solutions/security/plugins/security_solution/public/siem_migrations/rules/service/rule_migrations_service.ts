@@ -124,7 +124,10 @@ export class SiemRulesMigrationsService {
     }
   }
 
-  public async createRuleMigration(data: CreateRuleMigrationRulesRequestBody): Promise<string> {
+  public async createRuleMigration(
+    data: CreateRuleMigrationRulesRequestBody,
+    migrationName: string
+  ): Promise<string> {
     const rulesCount = data.length;
     if (rulesCount === 0) {
       throw new Error(i18n.EMPTY_RULES_ERROR);
@@ -132,7 +135,9 @@ export class SiemRulesMigrationsService {
 
     try {
       // create the migration
-      const { migration_id: migrationId } = await api.createRuleMigration({});
+      const { migration_id: migrationId } = await api.createRuleMigration({
+        name: migrationName,
+      });
 
       await this.addRulesToMigration(migrationId, data);
 

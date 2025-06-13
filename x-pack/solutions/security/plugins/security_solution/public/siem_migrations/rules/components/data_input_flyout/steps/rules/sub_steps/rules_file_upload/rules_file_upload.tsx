@@ -28,16 +28,17 @@ export interface RulesFileUploadProps {
   apiError?: string;
   isLoading?: boolean;
   isCreated?: boolean;
+  migrationName: string;
 }
 export const RulesFileUpload = React.memo<RulesFileUploadProps>(
-  ({ createMigration, apiError, isLoading, isCreated }) => {
+  ({ createMigration, apiError, isLoading, isCreated, migrationName }) => {
     const [rulesToUpload, setRulesToUpload] = useState<CreateRuleMigrationRulesRequestBody>([]);
     const filePickerRef = useRef<EuiFilePickerClass>(null);
 
     const createRules = useCallback(() => {
       filePickerRef.current?.removeFiles();
-      createMigration(rulesToUpload);
-    }, [createMigration, rulesToUpload]);
+      createMigration(rulesToUpload, migrationName);
+    }, [createMigration, rulesToUpload, migrationName]);
 
     const onFileParsed = useCallback((content: Array<SplunkRow<SplunkRulesResult>>) => {
       const rules = content.map(formatRuleRow);
@@ -62,7 +63,7 @@ export const RulesFileUpload = React.memo<RulesFileUploadProps>(
     }, [apiError, fileError]);
 
     const showLoader = isParsing || isLoading;
-    const isDisabled = showLoader || isCreated;
+    const isDisabled = showLoader || isCreated || migrationName.length === 0;
     const isButtonDisabled = isDisabled || rulesToUpload.length === 0;
 
     return (

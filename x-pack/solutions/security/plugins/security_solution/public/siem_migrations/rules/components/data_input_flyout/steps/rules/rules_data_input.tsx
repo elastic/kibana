@@ -18,6 +18,7 @@ import { SubSteps } from '../common/sub_step';
 import { useCopyExportQueryStep } from './sub_steps/copy_export_query';
 import { useRulesFileUploadStep } from './sub_steps/rules_file_upload';
 import { useCheckResourcesStep } from './sub_steps/check_resources';
+import { useMigrationNameStep } from './sub_steps/migration_name';
 
 interface RulesDataInputSubStepsProps {
   migrationStats?: RuleMigrationTaskStats;
@@ -70,32 +71,46 @@ export const RulesDataInput = React.memo<RulesDataInputProps>(
 RulesDataInput.displayName = 'RulesDataInput';
 
 const END = 10 as const;
-type SubStep = 1 | 2 | 3 | typeof END;
+type SubStep = 1 | 2 | 3 | 4 | typeof END;
 export const RulesDataInputSubSteps = React.memo<RulesDataInputSubStepsProps>(
   ({ migrationStats, onMigrationCreated, onMissingResourcesFetched }) => {
     const { telemetry } = useKibana().services.siemMigrations.rules;
-    const [subStep, setSubStep] = useState<SubStep>(migrationStats ? 3 : 1);
+    const [subStep, setSubStep] = useState<SubStep>(migrationStats ? 4 : 1);
+    const [migrationName, setMigrationName] = useState<string>(migrationStats?.name ?? '');
+
+    const onMigrationNameSet = useCallback((name: string) => {
+      setSubStep(2);
+      setMigrationName(name);
+    }, []);
+
+    const migrationNameStep = useMigrationNameStep({
+      status: getStatus(1, subStep),
+      migrationName,
+      setMigrationName: onMigrationNameSet,
+      subStep,
+    });
 
     // Copy query step
     const onCopied = useCallback(() => {
-      setSubStep(2);
+      setSubStep(3);
       telemetry.reportSetupRulesQueryCopied({ migrationId: migrationStats?.id });
     }, [telemetry, migrationStats?.id]);
 
-    const copyStep = useCopyExportQueryStep({ status: getStatus(1, subStep), onCopied });
+    const copyStep = useCopyExportQueryStep({ status: getStatus(2, subStep), onCopied });
 
     // Upload rules step
     const onMigrationCreatedStep = useCallback<OnMigrationCreated>(
       (stats) => {
         onMigrationCreated(stats);
-        setSubStep(3);
+        setSubStep(4);
       },
       [onMigrationCreated]
     );
     const uploadStep = useRulesFileUploadStep({
-      status: getStatus(2, subStep),
+      status: getStatus(3, subStep),
       migrationStats,
       onMigrationCreated: onMigrationCreatedStep,
+      migrationName,
     });
 
     // Check missing resources step
@@ -107,14 +122,14 @@ export const RulesDataInputSubSteps = React.memo<RulesDataInputSubStepsProps>(
       [onMissingResourcesFetched]
     );
     const resourcesStep = useCheckResourcesStep({
-      status: getStatus(3, subStep),
+      status: getStatus(4, subStep),
       migrationStats,
       onMissingResourcesFetched: onMissingResourcesFetchedStep,
     });
 
     const steps = useMemo<EuiStepProps[]>(
-      () => [copyStep, uploadStep, resourcesStep],
-      [copyStep, uploadStep, resourcesStep]
+      () => [migrationNameStep, copyStep, uploadStep, resourcesStep],
+      [migrationNameStep, copyStep, uploadStep, resourcesStep]
     );
 
     return <SubSteps steps={steps} />;

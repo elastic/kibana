@@ -20,11 +20,13 @@ export interface RulesFileUploadStepProps {
   status: EuiStepStatus;
   migrationStats?: RuleMigrationTaskStats;
   onMigrationCreated: OnMigrationCreated;
+  migrationName: string;
 }
 export const useRulesFileUploadStep = ({
   status,
   migrationStats,
   onMigrationCreated,
+  migrationName,
 }: RulesFileUploadStepProps): EuiStepProps => {
   const [isCreated, setIsCreated] = useState<boolean>(!!migrationStats);
   const onSuccess = useCallback<OnSuccess>(
@@ -55,6 +57,7 @@ export const useRulesFileUploadStep = ({
         isLoading={isLoading}
         isCreated={isCreated}
         apiError={error?.message}
+        migrationName={migrationName}
       />
     ),
   };

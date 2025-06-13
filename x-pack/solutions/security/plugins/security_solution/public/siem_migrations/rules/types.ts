@@ -12,6 +12,8 @@ export interface RuleMigrationStats extends RuleMigrationTaskStats {
   status: SiemMigrationTaskStatus;
   /** The sequential number of the migration */
   number: number;
+  /** The name of the migration */
+  name?: string;
 }
 
 export enum AuthorFilter {

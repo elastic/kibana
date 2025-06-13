@@ -11,17 +11,21 @@ import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/c
 import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import type { RuleMigrationResourceBase } from '../../../../../common/siem_migrations/model/rule_migration.gen';
-import { PanelText } from '../../../../common/components/panel_text';
 import { useStartMigration } from '../../service/hooks/use_start_migration';
 import type { RuleMigrationStats } from '../../types';
 import { useRuleMigrationDataInputContext } from '../data_input_flyout/context';
 import * as i18n from './translations';
 import { useGetMissingResources } from '../../service/hooks/use_get_missing_resources';
 import { RuleMigrationsLastError } from './last_error';
+import { MigrationName } from './migration_name';
+import { PanelText } from '../../../../common/components/panel_text';
 
 export interface MigrationReadyPanelProps {
   migrationStats: RuleMigrationStats;
 }
+
+const EMPTY_MISSING_RESOURCES: RuleMigrationResourceBase[] = [];
+
 export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migrationStats }) => {
   const { openFlyout } = useRuleMigrationDataInputContext();
   const { telemetry } = useKibana().services.siemMigrations.rules;
@@ -45,31 +49,19 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
     [migrationStats.status]
   );
 
-  const migrationPanelDescription = useMemo(() => {
-    if (migrationStats.last_error) {
-      return i18n.RULE_MIGRATION_ERROR_DESCRIPTION(migrationStats.rules.total);
-    }
-
-    if (isAborted) {
-      return i18n.RULE_MIGRATION_ABORTED_DESCRIPTION(migrationStats.rules.total);
-    }
-
-    return i18n.RULE_MIGRATION_READY_DESCRIPTION(migrationStats.rules.total);
-  }, [migrationStats.last_error, migrationStats.rules.total, isAborted]);
-
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize="m">
       <EuiFlexGroup direction="row" gutterSize="m" alignItems="flexEnd">
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="s">
-            <EuiFlexItem>
-              <PanelText size="s" semiBold>
-                <p>{i18n.RULE_MIGRATION_TITLE(migrationStats.number)}</p>
-              </PanelText>
-            </EuiFlexItem>
+            <MigrationName
+              migrationStats={migrationStats}
+              isLoading={isLoading}
+              missingResources={EMPTY_MISSING_RESOURCES}
+            />
             <EuiFlexItem>
               <PanelText data-test-subj="ruleMigrationDescription" size="s" subdued>
-                <span>{migrationPanelDescription}</span>
+                <span>{i18n.RULE_MIGRATION_READY_DESCRIPTION(migrationStats.rules.total)}</span>
                 <span>
                   {!isLoading && missingResources.length > 0
                     ? ` ${i18n.RULE_MIGRATION_READY_MISSING_RESOURCES}`

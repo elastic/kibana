@@ -14,7 +14,7 @@ import { isNotFoundError } from './utils';
 import { MAX_ES_SEARCH_SIZE } from '../constants';
 
 export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseClient {
-  async create(): Promise<string> {
+  async create(name: string): Promise<string> {
     const migrationId = uuidV4();
     const index = await this.getIndexName();
     const profileUid = await this.getProfileUid();
@@ -28,6 +28,7 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
         document: {
           created_by: profileUid,
           created_at: createdAt,
+          name,
         },
       })
       .catch((error) => {
@@ -190,6 +191,35 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
       })
       .catch((error) => {
         this.logger.error(`Error updating last execution for migration ${id}: ${error}`);
+        throw error;
+      });
+  }
+
+  /**
+   * Updates the migration document with the provided parameters.
+   */
+  async update({
+    id,
+    params,
+  }: {
+    id: string;
+    params: Partial<StoredSiemMigration>;
+  }): Promise<void> {
+    this.logger.info(`Updating migration ${id} with params: ${JSON.stringify(params)}`);
+    const index = await this.getIndexName();
+
+    await this.esClient
+      .update({
+        index,
+        id,
+        refresh: 'wait_for',
+        doc: {
+          ...params,
+        },
+        retry_on_conflict: 1,
+      })
+      .catch((error) => {
+        this.logger.error(`Error updating migration ${id}: ${error}`);
         throw error;
       });
   }

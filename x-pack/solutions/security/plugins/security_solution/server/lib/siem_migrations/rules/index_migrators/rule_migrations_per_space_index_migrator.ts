@@ -65,9 +65,12 @@ export class RuleMigrationSpaceIndexMigrator {
       _source: true,
     });
 
-    return result.hits.hits.map(({ _id }) => {
+    return result.hits.hits.map(({ _id, _source }) => {
       assert(_id, 'document should have _id');
-      return _id;
+      return {
+        id: _id,
+        ..._source,
+      };
     });
   }
 
@@ -88,6 +91,28 @@ export class RuleMigrationSpaceIndexMigrator {
     return this.esClient.bulk({
       refresh: 'wait_for',
       operations: createOperations,
+    });
+  }
+
+  private async updateMigrationDocs(docs: StoredSiemMigration[]) {
+    const indexName = this.ruleMigrationIndexAdapters.migrations.getIndexName(this.spaceId);
+    const updateOperations = docs.flatMap((doc) => [
+      {
+        update: {
+          _id: doc.id,
+          _index: indexName,
+        },
+      },
+      {
+        doc: {
+          name: doc.name,
+        },
+      },
+    ]);
+
+    return this.esClient.bulk({
+      refresh: 'wait_for',
+      operations: updateOperations,
     });
   }
 
@@ -112,16 +137,46 @@ export class RuleMigrationSpaceIndexMigrator {
       await this.getExistingMigrationFromMigrationsIndex();
 
     const migrationsToIndex = existingMigrationsFromRulesIndex.filter(
-      (migration) => !existingMigrationsFromMigrationsIndex.some((id) => id === migration.id)
+      (migration) => !existingMigrationsFromMigrationsIndex.some((m) => m.id === migration.id)
     );
 
     if (migrationsToIndex.length > 0) {
       this.logger.info(
         `Found ${migrationsToIndex.length} rule migration documents from rules index with an absent migration doc. Creating corresponding migration documents.`
       );
-      await this.indexMigrationDocs(migrationsToIndex);
+      await this.indexMigrationDocs(
+        migrationsToIndex.map((migration) => ({
+          ...migration,
+          created_by: migration.created_by ?? '',
+          created_at: migration.created_at ?? new Date().toISOString(),
+          name: `SIEM Migration ${
+            existingMigrationsFromRulesIndex.findIndex((m) => m.id === migration.id) + 1
+          }`,
+        }))
+      );
       this.logger.info(
         `Created ${migrationsToIndex.length} rule migration documents from rules index with an absent migration doc.`
+      );
+    }
+
+    const migrationsMaybeMissingName = existingMigrationsFromMigrationsIndex
+      .filter((migration) => !migration.name)
+      .map((migration) => ({
+        ...migration,
+        created_by: migration.created_by ?? '',
+        created_at: migration.created_at ?? new Date().toISOString(),
+        name: `SIEM Migration ${
+          existingMigrationsFromRulesIndex.findIndex((m) => m.id === migration.id) + 1
+        }`,
+      }));
+
+    if (migrationsMaybeMissingName.length > 0) {
+      this.logger.info(
+        `Found ${migrationsMaybeMissingName.length} migration documents with an absent name. Updating them.`
+      );
+      await this.updateMigrationDocs(migrationsMaybeMissingName);
+      this.logger.info(
+        `Updated ${migrationsMaybeMissingName.length} migration documents with an absent name.`
       );
     }
   }
