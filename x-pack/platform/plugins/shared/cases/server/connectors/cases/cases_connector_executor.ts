@@ -13,10 +13,6 @@ import { CaseStatuses } from '@kbn/cases-components';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { Logger } from '@kbn/core/server';
 import { getFlattenedObject } from '@kbn/std';
-import {
-  ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
-  getAttackDiscoveryMarkdown,
-} from '@kbn/elastic-assistant-common';
 import type {
   CustomFieldsConfiguration,
   TemplatesConfiguration,
@@ -34,12 +30,16 @@ import type { BulkCreateCasesRequest } from '../../../common/types/api';
 import type { Case } from '../../../common';
 import { ConnectorTypes, AttachmentType } from '../../../common';
 import {
-  ATTACK_DISCOVERY_GROUPING_KEY,
   INITIAL_ORACLE_RECORD_COUNTER,
   MAX_CONCURRENT_ES_REQUEST,
   MAX_OPEN_CASES,
 } from './constants';
-import type { BulkCreateOracleRecordRequest, CasesConnectorRunParams, OracleRecord } from './types';
+import type {
+  BulkCreateOracleRecordRequest,
+  CasesConnectorRunParams,
+  CasesGroupedAlerts,
+  OracleRecord,
+} from './types';
 import type { CasesOracleService } from './cases_oracle_service';
 import {
   convertValueToString,
@@ -57,7 +57,6 @@ import {
   GROUPED_BY_DESC,
   GROUPED_BY_TITLE,
 } from './translations';
-import { AttackDiscoveryExpandedAlertsSchema } from './schema';
 
 interface CasesConnectorExecutorParams {
   logger: Logger;
@@ -67,13 +66,7 @@ interface CasesConnectorExecutorParams {
   spaceId: string;
 }
 
-interface GroupedAlerts {
-  alerts: CasesConnectorRunParams['alerts'];
-  comment?: string;
-  grouping: Record<string, unknown>;
-}
-
-type GroupedAlertsWithOracleKey = GroupedAlerts & { oracleKey: string };
+type GroupedAlertsWithOracleKey = CasesGroupedAlerts & { oracleKey: string };
 type GroupedAlertsWithOracleRecords = GroupedAlertsWithOracleKey & { oracleRecord: OracleRecord };
 type GroupedAlertsWithCaseId = GroupedAlertsWithOracleRecords & { caseId: string };
 type GroupedAlertsWithCases = GroupedAlertsWithCaseId & { theCase: Case };
@@ -100,16 +93,9 @@ export class CasesConnectorExecutor {
   }
 
   public async execute(params: CasesConnectorRunParams) {
-    const { alerts, groupingBy, rule } = params;
+    const { alerts, groupedAlerts: casesGroupedAlerts, groupingBy } = params;
 
-    /**
-     * We handle attack discovery alerts differently than other alerts and group
-     * their building block SIEM alerts that led to each attack separately.
-     */
-    const groupedAlerts =
-      rule.type === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID
-        ? this.groupAttackDiscoveryAlerts({ alerts })
-        : this.groupAlerts({ params, alerts, groupingBy });
+    const groupedAlerts = casesGroupedAlerts ?? this.groupAlerts({ params, alerts, groupingBy });
     const groupedAlertsWithCircuitBreakers = this.applyCircuitBreakers(params, groupedAlerts);
 
     if (groupedAlertsWithCircuitBreakers.length === 0) {
@@ -192,7 +178,7 @@ export class CasesConnectorExecutor {
     groupingBy,
   }: Pick<CasesConnectorRunParams, 'alerts' | 'groupingBy'> & {
     params: CasesConnectorRunParams;
-  }): GroupedAlerts[] {
+  }): CasesGroupedAlerts[] {
     if (this.logger.isLevelEnabled('debug')) {
       this.logger.debug(
         `[CasesConnector][CasesConnectorExecutor][groupAlerts] Grouping ${alerts.length} alerts`,
@@ -204,7 +190,7 @@ export class CasesConnectorExecutor {
     }
 
     const uniqueGroupingByFields = Array.from(new Set<string>(groupingBy));
-    const groupingMap = new Map<string, GroupedAlerts>();
+    const groupingMap = new Map<string, CasesGroupedAlerts>();
 
     /**
      * We are interested in alerts that have a value for any
@@ -252,64 +238,6 @@ export class CasesConnectorExecutor {
     return Array.from(groupingMap.values());
   }
 
-  private groupAttackDiscoveryAlerts({
-    alerts,
-  }: Pick<CasesConnectorRunParams, 'alerts'>): GroupedAlerts[] {
-    const groupingMap = new Map<string, GroupedAlerts>();
-
-    /**
-     * First we should validate that the alerts array schema complies with the attack discovery object.
-     */
-    const attackDiscoveryAlerts = AttackDiscoveryExpandedAlertsSchema.validate(
-      alerts,
-      {},
-      undefined,
-      { stripUnknownKeys: true }
-    );
-
-    /**
-     * For each attack discovery alert we would like to create one separate case.
-     */
-    attackDiscoveryAlerts.forEach((attackAlert) => {
-      const alertsIndexPattern = attackAlert.kibana.alert.rule.parameters.alertsIndexPattern;
-      const attackDiscoveryId = attackAlert._id;
-      const attackDiscovery = attackAlert.kibana.alert.attack_discovery;
-      const alertIds = attackDiscovery.alert_ids;
-
-      /**
-       * Each attack discovery alert references a list of SIEM alerts that led to the attack.
-       * These SIEM alerts will be added to the case.
-       */
-      const detectionAlerts = alertIds.map((siemAlertId) => {
-        return { _id: siemAlertId, _index: alertsIndexPattern };
-      });
-
-      groupingMap.set(attackDiscoveryId, {
-        alerts: detectionAlerts,
-        /**
-         * For attack discovery cases we would like to add a comment generated by the LLM.
-         */
-        comment: getAttackDiscoveryMarkdown({
-          attackDiscovery: {
-            id: attackDiscoveryId,
-            alertIds,
-            detailsMarkdown: attackDiscovery.details_markdown,
-            entitySummaryMarkdown: attackDiscovery.entity_summary_markdown,
-            mitreAttackTactics: attackDiscovery.mitre_attack_tactics,
-            summaryMarkdown: attackDiscovery.summary_markdown,
-            title: attackDiscovery.title,
-          },
-          replacements: attackDiscovery.replacements?.reduce((acc: Record<string, string>, r) => {
-            acc[r.uuid] = r.value;
-            return acc;
-          }, {}),
-        }),
-        grouping: { [ATTACK_DISCOVERY_GROUPING_KEY]: attackAlert._id },
-      });
-    });
-    return Array.from(groupingMap.values());
-  }
-
   private generateNoGroupAlertGrouping = (groupingBy: string[]) => {
     const noGroupedGrouping = groupingBy.reduce((acc, field) => {
       acc[field] = 'unknown';
@@ -322,8 +250,8 @@ export class CasesConnectorExecutor {
 
   private applyCircuitBreakers(
     params: CasesConnectorRunParams,
-    groupedAlerts: GroupedAlerts[]
-  ): GroupedAlerts[] {
+    groupedAlerts: CasesGroupedAlerts[]
+  ): CasesGroupedAlerts[] {
     if (groupedAlerts.length > params.maximumCasesToOpen || groupedAlerts.length > MAX_OPEN_CASES) {
       const maxCasesCircuitBreaker = Math.min(params.maximumCasesToOpen, MAX_OPEN_CASES);
 
@@ -338,7 +266,7 @@ export class CasesConnectorExecutor {
     return groupedAlerts;
   }
 
-  private removeGrouping(groupedAlerts: GroupedAlerts[]): GroupedAlerts[] {
+  private removeGrouping(groupedAlerts: CasesGroupedAlerts[]): CasesGroupedAlerts[] {
     const allAlerts = groupedAlerts.map(({ alerts }) => alerts).flat();
 
     return [{ alerts: allAlerts, grouping: {} }];
@@ -346,7 +274,7 @@ export class CasesConnectorExecutor {
 
   private generateOracleKeys(
     params: CasesConnectorRunParams,
-    groupedAlerts: GroupedAlerts[]
+    groupedAlerts: CasesGroupedAlerts[]
   ): Map<string, GroupedAlertsWithOracleKey> {
     if (this.logger.isLevelEnabled('debug')) {
       this.logger.debug(
@@ -359,7 +287,7 @@ export class CasesConnectorExecutor {
 
     const oracleMap = new Map<string, GroupedAlertsWithOracleKey>();
 
-    for (const { grouping, alerts, comment } of groupedAlerts) {
+    for (const { grouping, alerts, comments, title } of groupedAlerts) {
       const getRecordIdParams = {
         ruleId: rule.id,
         grouping,
@@ -379,7 +307,7 @@ export class CasesConnectorExecutor {
         );
       }
 
-      oracleMap.set(oracleKey, { oracleKey, grouping, alerts, comment });
+      oracleMap.set(oracleKey, { oracleKey, grouping, alerts, comments, title });
     }
 
     if (this.logger.isLevelEnabled('debug')) {
@@ -688,8 +616,9 @@ export class CasesConnectorExecutor {
       casesMap.set(caseId, {
         caseId,
         alerts: entry.alerts,
-        comment: entry.comment,
         grouping: entry.grouping,
+        comments: entry.comments,
+        title: entry.title,
         oracleKey: recordId,
         oracleRecord: entry.oracleRecord,
       });
@@ -830,7 +759,7 @@ export class CasesConnectorExecutor {
     customFieldsConfigurations?: CustomFieldsConfiguration,
     templatesConfigurations?: TemplatesConfiguration
   ): Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } {
-    const { grouping, caseId, oracleRecord } = groupingData;
+    const { grouping, caseId, oracleRecord, title } = groupingData;
     const flattenGrouping = getFlattenedObject(grouping);
 
     const selectedTemplate = templatesConfigurations?.find(
@@ -860,6 +789,7 @@ export class CasesConnectorExecutor {
         caseFieldsFromTemplate?.description ?? this.getCaseDescription(params, flattenGrouping),
       tags: this.getCaseTags(params, flattenGrouping, caseFieldsFromTemplate?.tags),
       title:
+        title ??
         caseFieldsFromTemplate?.title ??
         this.getCasesTitle(params, flattenGrouping, oracleRecord.counter),
       connector: caseFieldsFromTemplate?.connector ?? {
@@ -884,7 +814,7 @@ export class CasesConnectorExecutor {
 
   private getCasesTitle(
     params: CasesConnectorRunParams,
-    grouping: GroupedAlerts['grouping'],
+    grouping: CasesGroupedAlerts['grouping'],
     oracleCounter: number
   ) {
     const totalDots = 3;
@@ -934,7 +864,10 @@ export class CasesConnectorExecutor {
     return `${ruleNameTrimmedWithDots}${suffix}`;
   }
 
-  private getCaseDescription(params: CasesConnectorRunParams, grouping: GroupedAlerts['grouping']) {
+  private getCaseDescription(
+    params: CasesConnectorRunParams,
+    grouping: CasesGroupedAlerts['grouping']
+  ) {
     const ruleName = params.rule.ruleUrl
       ? `['${params.rule.name}'](${params.rule.ruleUrl})`
       : params.rule.name;
@@ -956,7 +889,7 @@ export class CasesConnectorExecutor {
 
   private getCaseTags(
     params: CasesConnectorRunParams,
-    grouping: GroupedAlerts['grouping'],
+    grouping: CasesGroupedAlerts['grouping'],
     templateCaseTags?: string[]
   ) {
     const ruleTags = Array.isArray(params.rule.tags) ? params.rule.tags : [];
@@ -972,7 +905,7 @@ export class CasesConnectorExecutor {
       .map((tag) => tag.slice(0, MAX_LENGTH_PER_TAG));
   }
 
-  private getGroupingAsTags(grouping: GroupedAlerts['grouping']): string[] {
+  private getGroupingAsTags(grouping: CasesGroupedAlerts['grouping']): string[] {
     return Object.entries(grouping)
       .map(([key, value]) => [key, `${key}:${convertValueToString(value)}`])
       .flat();
@@ -1179,7 +1112,7 @@ export class CasesConnectorExecutor {
       this.getLogMetadata(params, { tags: ['case-connector:attachAlertsToCases'] })
     );
 
-    const { rule } = params;
+    const { referencedAlerts, rule } = params;
 
     const [casesUnderAlertLimit, casesOverAlertLimit] = partition(
       Array.from(groupedAlertsWithCases.values()),
@@ -1209,25 +1142,20 @@ export class CasesConnectorExecutor {
     );
 
     const bulkCreateAlertsRequest: BulkCreateAlertsReq[] = casesUnderAlertLimit.map(
-      ({ theCase, alerts, comment }) => {
-        const commentAttachment: UserCommentAttachmentPayload[] = comment
-          ? [{ type: AttachmentType.user, comment, owner: theCase.owner }]
-          : [];
+      ({ theCase, alerts, comments }) => {
+        const commentAttachment: UserCommentAttachmentPayload[] =
+          comments?.map((comment) => ({
+            type: AttachmentType.user,
+            comment,
+            owner: theCase.owner,
+          })) ?? [];
         return {
           caseId: theCase.id,
           attachments: [
             ...commentAttachment,
             {
               type: AttachmentType.alert,
-              rule:
-                /**
-                 * Attack discovery rule type generates alerts that reference SIEM detections alerts and those we attach to resulting case.
-                 * Those SIEM alerts are generated by one of the SIEM rules not the attack discovery rule.
-                 * That is why we do not attach the information of the attack discovery rule and instead let the Case to deduce it from the SIEM alert.
-                 */
-                rule.type === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID
-                  ? { id: null, name: null }
-                  : { id: rule.id, name: rule.name },
+              rule: referencedAlerts ? { id: null, name: null } : { id: rule.id, name: rule.name },
               /**
                * Map traverses the array in ascending order.
                * The order is guaranteed to be the same for
