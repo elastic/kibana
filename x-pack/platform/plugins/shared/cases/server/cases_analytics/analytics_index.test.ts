@@ -187,7 +187,8 @@ describe('AnalyticsIndex', () => {
     expect(scheduleCAIBackfillTaskMock).toBeCalledTimes(0);
 
     expect(logger.debug).toBeCalledWith(
-      `[${indexName}] Mapping version is up to date. Skipping update.`
+      `[${indexName}] Mapping version is up to date. Skipping update.`,
+      { tags: ['cai-index-creation', `${indexName}`] }
     );
   });
 
@@ -204,7 +205,8 @@ describe('AnalyticsIndex', () => {
     expect(scheduleCAIBackfillTaskMock).toBeCalledTimes(0);
 
     expect(logger.debug).toBeCalledWith(
-      `[${indexName}] Mapping version is up to date. Skipping update.`
+      `[${indexName}] Mapping version is up to date. Skipping update.`,
+      { tags: ['cai-index-creation', `${indexName}`] }
     );
   });
 

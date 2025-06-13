@@ -39,7 +39,7 @@ describe('BackfillTaskRunner', () => {
       source: 'ctx._source.remove("foobar");',
     };
 
-    esClient.indices.getMapping.mockResolvedValueOnce({
+    esClient.indices.getMapping.mockResolvedValue({
       [destIndex]: {
         mappings: {
           _meta: {
@@ -79,7 +79,9 @@ describe('BackfillTaskRunner', () => {
         query: sourceQuery,
       },
       dest: { index: destIndex },
-      script: painlessScript,
+      script: {
+        id: painlessScriptId,
+      },
       refresh: true,
     });
     expect(result).toEqual({ state: {} });
@@ -114,8 +116,8 @@ describe('BackfillTaskRunner', () => {
       });
 
       expect(logger.error).toBeCalledWith(
-        'Backfill reindex of .dest-index failed. Error: My retryable error',
-        { tags: ['backfill-run-failed', 'framework-error'] }
+        '[.dest-index] Backfill reindex failed. Error: My retryable error',
+        { tags: ['cai-backfill', 'cai-backfill-error', '.dest-index'] }
       );
     });
 
@@ -138,8 +140,8 @@ describe('BackfillTaskRunner', () => {
       }
 
       expect(logger.error).toBeCalledWith(
-        'Backfill reindex of .dest-index failed. Error: My unrecoverable error',
-        { tags: ['backfill-run-failed', 'framework-error'] }
+        '[.dest-index] Backfill reindex failed. Error: My unrecoverable error',
+        { tags: ['cai-backfill', 'cai-backfill-error', '.dest-index'] }
       );
     });
   });

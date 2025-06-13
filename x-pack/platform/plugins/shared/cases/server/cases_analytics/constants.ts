@@ -5,6 +5,18 @@
  * 2.0.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+
+import {
+  CAI_ATTACHMENTS_INDEX_NAME,
+  getAttachmentsSynchronizationSourceQuery,
+} from './attachments_index/constants';
+import { CAI_CASES_INDEX_NAME, getCasesSynchronizationSourceQuery } from './cases_index/constants';
+import {
+  CAI_COMMENTS_INDEX_NAME,
+  getCommentsSynchronizationSourceQuery,
+} from './comments_index/constants';
+
 export const CAI_NUMBER_OF_SHARDS = 1;
 /** Allocate 1 replica if there are enough data nodes, otherwise continue with 0 */
 export const CAI_AUTO_EXPAND_REPLICAS = '0-1';
@@ -21,3 +33,12 @@ export const CAI_INDEX_MODE = 'lookup';
  * request or response sent over the socket it will be dropped after 60s.
  */
 export const CAI_DEFAULT_TIMEOUT = '300s';
+
+export const SYNCHRONIZATION_QUERIES_DICTIONARY: Record<
+  string,
+  (lastSyncAt: Date) => QueryDslQueryContainer
+> = {
+  [CAI_CASES_INDEX_NAME]: getCasesSynchronizationSourceQuery,
+  [CAI_COMMENTS_INDEX_NAME]: getCommentsSynchronizationSourceQuery,
+  [CAI_ATTACHMENTS_INDEX_NAME]: getAttachmentsSynchronizationSourceQuery,
+};
