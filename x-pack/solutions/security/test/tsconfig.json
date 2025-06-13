@@ -40,5 +40,8 @@
     "@kbn/alerting-api-integration-helpers",
     "@kbn/event-log-plugin",
     "@kbn/alerting-plugin",
+    "@kbn/stack-connectors-plugin",
+    "@kbn/security-plugin",
+    "@kbn/security-plugin-types-common",
   ]
 }
