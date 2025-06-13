@@ -4226,7 +4226,7 @@
                 "section": "def-common.Serializable",
                 "text": "Serializable"
               },
-              "; fractional: boolean; }"
+              "; fractional: boolean; alwaysShowSign: boolean; }"
             ],
             "path": "src/platform/plugins/shared/field_formats/common/converters/percent.ts",
             "deprecated": false,
