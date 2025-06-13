@@ -30,14 +30,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
-import { ShareMenuProvider, type IShareContext, useShareTabsContext } from '../context';
+import { ShareProvider, type IShareContext, useShareTypeContext } from '../context';
 import { ExportShareConfig } from '../../types';
 
 export const ExportMenu: FC<{ shareContext: IShareContext }> = ({ shareContext }) => {
   return (
-    <ShareMenuProvider {...{ shareContext }}>
+    <ShareProvider {...{ shareContext }}>
       <Fragment>{React.createElement(injectI18n(ExportMenuPopover))}</Fragment>
-    </ShareMenuProvider>
+    </ShareProvider>
   );
 };
 
@@ -111,7 +111,7 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
     objectType,
     objectTypeAlias,
     objectTypeMeta,
-  } = useShareTabsContext('integration', 'export');
+  } = useShareTypeContext('integration', 'export');
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [isCreatingExport, setIsCreatingExport] = useState<boolean>(false);
   const [selectedMenuItemId, setSelectedMenuItemId] = useState<string>();
