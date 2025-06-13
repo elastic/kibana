@@ -48,7 +48,8 @@
     "@kbn/esql-validation-autocomplete",
     "@kbn/react-kibana-mount",
     "@kbn/field-utils",
-    "@kbn/language-documentation"
+    "@kbn/language-documentation",
+    "@kbn/esql-types"
   ],
   "exclude": [
     "target/**/*",
