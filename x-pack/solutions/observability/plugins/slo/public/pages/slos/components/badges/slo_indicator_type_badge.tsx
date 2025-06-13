@@ -8,6 +8,7 @@
 import { EuiBadge, EuiBadgeProps, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
+  ALL_VALUE,
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
   SLODefinitionResponse,
@@ -69,8 +70,9 @@ export function SloIndicatorTypeBadge({ slo, color }: Props) {
       </EuiFlexItem>
       {(apmTransactionDurationIndicatorSchema.is(slo.indicator) ||
         apmTransactionErrorRateIndicatorSchema.is(slo.indicator)) &&
-        slo.indicator.params.service !== '' && (
-          <EuiFlexItem grow={false} style={{ maxWidth: 100 }}>
+        slo.indicator.params.service !== '' &&
+        slo.indicator.params.service !== ALL_VALUE && (
+          <EuiFlexItem grow={false} css={{ maxWidth: 100 }}>
             <EuiToolTip
               position="top"
               content={i18n.translate('xpack.slo.sloIndicatorTypeBadge.exploreInApm', {
