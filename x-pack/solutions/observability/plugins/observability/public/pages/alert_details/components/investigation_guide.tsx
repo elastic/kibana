@@ -7,15 +7,24 @@
 
 import { EuiEmptyPrompt, EuiButton, EuiSpacer, EuiMarkdownFormat } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { RuleFormStepId } from '@kbn/response-ops-rule-form/src/constants';
 import React from 'react';
+import {
+  useEditRuleFormFlyout,
+  type UseEditRuleFormFlyoutProps,
+} from '../hooks/use_edit_rule_form_flyout';
 
-export function InvestigationGuide({
-  blob,
-  createGuide,
-}: {
+interface InvestigationGuideProps extends UseEditRuleFormFlyoutProps {
   blob?: string;
-  createGuide: () => void;
-}): React.FC {
+}
+
+export function InvestigationGuide({ blob, onUpdate, refetch, rule }: InvestigationGuideProps) {
+  const { AlertDetailsRuleFormFlyout, handleEditRuleDetails } = useEditRuleFormFlyout({
+    onUpdate,
+    refetch,
+    rule,
+  });
   return blob ? (
     <>
       <EuiSpacer size="m" />
@@ -28,20 +37,42 @@ export function InvestigationGuide({
       </EuiMarkdownFormat>
     </>
   ) : (
-    <EuiEmptyPrompt
-      iconType="logoObservability"
-      iconColor="default"
-      title={<h3>Add an Investigation Guide</h3>}
-      titleSize="m"
-      body={<p>Add a guide to your alert's rule.</p>}
-      actions={
-        <EuiButton
-          data-test-subj="xpack.observability.alertDetails.investigationGuide.emptyPrompt.addGuide"
-          color="primary"
-        >
-          Add guide
-        </EuiButton>
-      }
-    />
+    <>
+      <EuiEmptyPrompt
+        iconType="logoObservability"
+        iconColor="default"
+        title={
+          <h3>
+            <FormattedMessage
+              id="xpack.observability.alertDetails.investigationGide.emptyPrompt.title"
+              defaultMessage="Add an Investigation Guide"
+            />
+          </h3>
+        }
+        titleSize="m"
+        body={
+          <p>
+            <FormattedMessage
+              id="xpack.observability.alertDetails.investigationGide.emptyPrompt.body"
+              defaultMessage="Add a guide to your alert's rule."
+            />
+          </p>
+        }
+        actions={
+          <EuiButton
+            data-test-subj="xpack.observability.alertDetails.investigationGuide.emptyPrompt.addGuide"
+            color="primary"
+            onClick={handleEditRuleDetails}
+            fill
+          >
+            <FormattedMessage
+              id="xpack.observability.alertDetails.investigationGide.emptyPrompt.addGuideButton.copy"
+              defaultMessage="Add guide"
+            />
+          </EuiButton>
+        }
+      />
+      <AlertDetailsRuleFormFlyout initialEditStep={RuleFormStepId.DETAILS} />
+    </>
   );
 }

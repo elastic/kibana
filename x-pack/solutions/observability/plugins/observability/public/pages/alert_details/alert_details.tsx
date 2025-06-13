@@ -120,7 +120,7 @@ export function AlertDetails() {
   const userCasesPermissions = canUseCases([observabilityFeatureId]);
   const ruleId = alertDetail?.formatted.fields[ALERT_RULE_UUID];
   const { rule, refetch } = useFetchRule({
-    ruleId,
+    ruleId: ruleId || '',
   });
 
   const onSuccessAddSuggestedDashboard = useCallback(async () => {
@@ -331,7 +331,14 @@ export function AlertDetails() {
         />
       ),
       'data-test-subj': 'investigationGuideTab',
-      content: <InvestigationGuide blob={rule?.artifacts?.investigation_guide?.blob} />,
+      content: (
+        <InvestigationGuide
+          blob={rule?.artifacts?.investigation_guide?.blob}
+          onUpdate={onUpdate}
+          refetch={refetch}
+          rule={rule}
+        />
+      ),
     },
     {
       id: 'related_alerts',
@@ -392,6 +399,8 @@ export function AlertDetails() {
               alertStatus={alertStatus}
               onUntrackAlert={onUntrackAlert}
               onUpdate={onUpdate}
+              rule={rule}
+              refetch={refetch}
             />
           </CasesContext>,
         ],
