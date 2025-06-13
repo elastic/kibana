@@ -29,6 +29,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';
+import useDebounce from 'react-use/lib/useDebounce';
 import type { Query } from '@kbn/es-query';
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import { isDefined } from '@kbn/ml-is-defined';
@@ -157,27 +158,36 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
     const severityOptions = useSeverityOptions();
     const thresholdToSeverity = useThresholdToSeverity();
 
-    // Derive selected severity options directly from observable
+    const [severityUpdate, setSeverityUpdate] = useState<SeverityOption[] | null>(null);
+
+    useDebounce(
+      () => {
+        if (severityUpdate) {
+          const thresholds = severityUpdate.map((severity) => severity.threshold);
+          anomalyTimelineStateService.setSeverity(thresholds);
+          setSeverityUpdate(null);
+        }
+      },
+      500,
+      [severityUpdate]
+    );
+
+    // Use local state for immediate feedback, fall back to URL state
     const selectedSeverityOptions = useMemo(() => {
-      if (
-        swimLaneSeverity === undefined ||
-        swimLaneSeverity === null ||
-        swimLaneSeverity.length === 0
-      ) {
-        // Default to all severities selected if no severity is set
+      if (severityUpdate) {
+        return severityUpdate;
+      }
+
+      if (!swimLaneSeverity?.length) {
         return severityOptions;
       }
 
       return thresholdToSeverity(swimLaneSeverity);
-    }, [swimLaneSeverity, severityOptions, thresholdToSeverity]);
+    }, [severityUpdate, swimLaneSeverity, severityOptions, thresholdToSeverity]);
 
-    const handleSeverityChange = useCallback(
-      (newSelectedSeverities: SeverityOption[]) => {
-        const thresholds = newSelectedSeverities.map((severity) => severity.threshold);
-        anomalyTimelineStateService.setSeverity(thresholds);
-      },
-      [anomalyTimelineStateService]
-    );
+    const handleSeverityChange = useCallback((newSelectedSeverities: SeverityOption[]) => {
+      setSeverityUpdate(newSelectedSeverities);
+    }, []);
 
     const viewBySwimlaneFieldName = useObservable(
       anomalyTimelineStateService.getViewBySwimlaneFieldName$()
