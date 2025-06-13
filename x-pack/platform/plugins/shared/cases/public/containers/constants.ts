@@ -71,7 +71,7 @@ export const casesMutationsKeys = {
   deleteObservable: ['delete-observable'] as const,
 };
 
-const DEFAULT_SEARCH_FIELDS = ['title', 'description', 'incremental_id'];
+const DEFAULT_SEARCH_FIELDS = ['title', 'description'];
 
 // TODO: Remove reporters. Move searchFields to API.
 export const DEFAULT_FILTER_OPTIONS: FilterOptions = {

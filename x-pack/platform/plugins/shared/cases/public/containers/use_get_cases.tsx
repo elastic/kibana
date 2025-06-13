@@ -17,6 +17,8 @@ import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { useAvailableCasesOwners } from '../components/app/use_available_owners';
 import { getAllPermissionsExceptFrom } from '../utils/permissions';
 
+const incrementalIdRegEx = /^#(\d{1,50})\s*$/;
+
 export const initialData: CasesFindResponseUI = {
   cases: [],
   countClosedCases: 0,
@@ -45,6 +47,21 @@ export const useGetCases = (
       ? { owner: params.filterOptions.owner }
       : { owner: initialOwner };
 
+  // overrides for incremental_id search
+  let search = params.filterOptions?.search?.trim();
+  let overrides: Partial<FilterOptions> = {};
+  const isIncrementalIdSearch = incrementalIdRegEx.test(search ?? '');
+  if (search && isIncrementalIdSearch) {
+    // extract the number portion of the inc id search: #123 -> 123
+    search = incrementalIdRegEx.exec(search)?.[1] ?? search;
+    // search only in `incremental_id` since types with `title`
+    // and `description` don't overlap
+    overrides = {
+      searchFields: ['incremental_id'],
+      search,
+    };
+  }
+
   return useQuery(
     casesQueriesKeys.cases(params),
     ({ signal }) => {
@@ -53,6 +70,7 @@ export const useGetCases = (
           ...DEFAULT_FILTER_OPTIONS,
           ...(params.filterOptions ?? {}),
           ...ownerFilter,
+          ...overrides,
         },
         queryParams: {
           ...DEFAULT_QUERY_PARAMS,

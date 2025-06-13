@@ -17,7 +17,7 @@ export const CASES_INCREMENTAL_ID_SYNC_TASK_TYPE = 'cases_incremental_id_assignm
 export const CASES_INCREMENTAL_ID_SYNC_TASK_ID = `Cases:${CASES_INCREMENTAL_ID_SYNC_TASK_TYPE}`;
 
 export const CasesIncrementIdTaskVersion = '1.0.0';
-const CASES_INCREMENTAL_ID_SYNC_INTERVAL_DEFAULT = '5m';
+const CASES_INCREMENTAL_ID_SYNC_INTERVAL_DEFAULT = '30s';
 
 export class IncrementalIdTaskManager {
   private logger: Logger;
