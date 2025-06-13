@@ -80,6 +80,7 @@ jest.mock('./handlers', () => ({
 
 jest.mock('./migrate_handlers', () => ({
   migrateSingleAgentHandler: jest.fn(),
+  bulkMigrateAgentsHandler: jest.fn(),
 }));
 
 jest.mock('./actions_handlers', () => ({

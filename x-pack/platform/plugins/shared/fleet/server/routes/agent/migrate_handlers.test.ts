@@ -28,6 +28,9 @@ jest.mock('../../services/agents', () => {
     getAgentById: jest.fn(),
     getAgentPolicyForAgent: jest.fn(),
     migrateSingleAgent: jest.fn(),
+    getByIds: jest.fn(),
+    getAgentPolicyForAgents: jest.fn(),
+    bulkMigrateAgents: jest.fn(),
   };
 });
 
@@ -179,7 +182,11 @@ describe('Migrate handlers', () => {
       { id: 'policy-id-1', is_protected: false },
       { id: 'policy-id-2', is_protected: false },
     ];
-    const mockSettings = { enrollment_token: 'token123', uri: 'https://example.com' };
+    const mockSettings = {
+      enrollment_token: 'token123',
+      uri: 'https://example.com',
+      agentIds,
+    };
     const mockActionResponse = { id: 'action-id' };
 
     beforeEach(() => {
@@ -189,7 +196,6 @@ describe('Migrate handlers', () => {
       mockSavedObjectsClient = savedObjectsClientMock.create();
       mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       mockRequest = {
-        params: { agentIds },
         body: mockSettings,
       };
 
@@ -228,7 +234,8 @@ describe('Migrate handlers', () => {
       expect(AgentService.getByIds).toHaveBeenCalledWith(
         mockElasticsearchClient,
         mockSavedObjectsClient,
-        agentIds
+        agentIds,
+        { ignoreMissing: false }
       );
 
       expect(AgentService.getAgentPolicyForAgents).toHaveBeenCalledWith(
@@ -243,7 +250,6 @@ describe('Migrate handlers', () => {
         mockAgentPolicies,
         {
           ...mockSettings,
-          policyId: mockAgentPolicies[0].id,
         }
       );
 

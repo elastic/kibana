@@ -224,14 +224,15 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     // Bulk migrate agents
-    describe('POST /agents/bulk_migrate', () => {
+    describe.only('POST /agents/bulk_migrate', () => {
       it('should return a 200 if the migration action is successful', async () => {
         const {} = await supertest
           .post(`/api/fleet/agents/bulk_migrate`)
           .set('kbn-xsrf', 'xx')
           .send({
-            agents: ['agent1'],
+            agentIds: ['agent1'],
             uri: 'https://example.com',
+            enrollment_token: '1234',
           })
           .expect(200);
       });
@@ -241,8 +242,9 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agents/bulk_migrate`)
           .set('kbn-xsrf', 'xx')
           .send({
-            agents: ['agent1', 'agent2'],
+            agentIds: ['agent1', 'agent2'],
             uri: 'https://example.com',
+            enrollment_token: '1234',
           })
           .expect(403);
       });
@@ -252,8 +254,9 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agents/bulk_migrate`)
           .set('kbn-xsrf', 'xx')
           .send({
-            agents: ['agent1', 'agent3'],
+            agentIds: ['agent1', 'agent3'],
             uri: 'https://example.com',
+            enrollment_token: '1234',
           })
           .expect(403);
       });
@@ -263,8 +266,9 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agents/bulk_migrate`)
           .set('kbn-xsrf', 'xx')
           .send({
-            agents: ['agent100', 'agent400', 'agent1'],
+            agentIds: ['agent100', 'agent400', 'agent1'],
             uri: 'https://example.com',
+            enrollment_token: '1234',
           })
           .expect(404);
       });

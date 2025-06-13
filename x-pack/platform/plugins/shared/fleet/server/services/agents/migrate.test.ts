@@ -61,6 +61,7 @@ describe('Agent migration', () => {
       agents: ['agent-123'],
       created_at: new Date().toISOString(),
     });
+    mockedPolicy.is_protected = false;
   });
 
   describe('migrateSingleAgent', () => {
