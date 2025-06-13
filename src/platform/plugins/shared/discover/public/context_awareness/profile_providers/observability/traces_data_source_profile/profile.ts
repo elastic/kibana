@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { TRACES_PRODUCT_FEATURE_ID } from '../../../../../common/constants';
 import { DataSourceCategory, type DataSourceProfileProvider } from '../../../profiles';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 import type { ProfileProviderServices } from '../../profile_provider_services';
@@ -20,6 +21,7 @@ export const createTracesDataSourceProfileProvider = ({
 }: ProfileProviderServices): DataSourceProfileProvider => ({
   profileId: OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID,
   isExperimental: true,
+  restrictedToProductFeature: TRACES_PRODUCT_FEATURE_ID,
   profile: {
     getDefaultAppState: (prev) => (params) => ({
       ...prev(params),
