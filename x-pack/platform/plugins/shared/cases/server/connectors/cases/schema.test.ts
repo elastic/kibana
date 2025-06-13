@@ -14,15 +14,16 @@ import {
 describe('CasesConnectorRunParamsSchema', () => {
   const getParams = (overrides = {}) => ({
     alerts: [{ _id: 'alert-id', _index: 'alert-index' }],
+    groupedAlerts: null,
     groupingBy: ['host.name'],
     rule: {
       id: 'rule-id',
       name: 'Test rule',
       tags: [],
-      type: 'test-rule-1',
       ruleUrl: 'https://example.com',
     },
     owner: 'cases',
+    referencedAlerts: false,
     ...overrides,
   });
 
@@ -35,18 +36,19 @@ describe('CasesConnectorRunParamsSchema', () => {
             "_index": "alert-index",
           },
         ],
+        "groupedAlerts": null,
         "groupingBy": Array [
           "host.name",
         ],
         "maximumCasesToOpen": 5,
         "owner": "cases",
+        "referencedAlerts": false,
         "reopenClosedCases": false,
         "rule": Object {
           "id": "rule-id",
           "name": "Test rule",
           "ruleUrl": "https://example.com",
           "tags": Array [],
-          "type": "test-rule-1",
         },
         "templateId": null,
         "timeWindow": "7d",

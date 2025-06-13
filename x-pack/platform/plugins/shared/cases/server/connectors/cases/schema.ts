@@ -27,7 +27,6 @@ const RuleSchema = schema.object({
   id: schema.string(),
   name: schema.string(),
   tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
-  type: schema.string(),
   ruleUrl: schema.nullable(schema.string()),
 });
 
