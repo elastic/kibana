@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
-import { WithMissingPrivilegesTooltip } from '.';
+import { WithMissingPrivilegesTooltip } from './with_missing_privileges_tooltip';
 import { useKibana } from '../../../../common/lib/kibana';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import type { SiemMigrationsService } from '../../../service';
@@ -28,11 +28,11 @@ const mockSiemMigrationsService = {
   },
 } as unknown as jest.MockedObjectDeep<SiemMigrationsService>;
 
-const TestComponent = () => {
-  return <EuiButton data-test-subj="test-component" />;
+const TestComponent = ({ isAuthorized }: { isAuthorized: boolean }) => {
+  return <EuiButton isDisabled={!isAuthorized} data-test-subj="test-component" />;
 };
 
-const TestcomponentWithTooltip = WithMissingPrivilegesTooltip(TestComponent);
+const TestcomponentWithTooltip = WithMissingPrivilegesTooltip(TestComponent, 'all');
 
 const renderTestComponent = () => {
   return render(<TestcomponentWithTooltip />);
@@ -53,12 +53,14 @@ describe('WithMissingPrivileges Tooltip', () => {
     mockSiemMigrationsService.rules.getMissingCapabilities.mockReturnValue([]);
     const { getByTestId, queryByTestId } = renderTestComponent();
     expect(getByTestId('test-component')).toBeInTheDocument();
+    expect(getByTestId('test-component')).not.toBeDisabled();
     expect(queryByTestId('missingPrivilegesTooltipAnchor')).not.toBeInTheDocument();
   });
 
   it('renders the component with tooltip when there are missing capabilities', async () => {
     const { getByTestId, queryByTestId } = renderTestComponent();
     expect(getByTestId('test-component')).toBeInTheDocument();
+    expect(getByTestId('test-component')).toBeDisabled();
     expect(queryByTestId('missingPrivilegesTooltipAnchor')).toBeInTheDocument();
     fireEvent.mouseOver(getByTestId('test-component'));
     await waitFor(() => {

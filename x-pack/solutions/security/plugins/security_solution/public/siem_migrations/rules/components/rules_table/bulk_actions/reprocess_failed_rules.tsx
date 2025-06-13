@@ -8,7 +8,6 @@
 import { EuiButton } from '@elastic/eui';
 import React from 'react';
 import * as i18n from './translations';
-import type { MissingCapability } from '../../../service/capabilities';
 import { WithMissingPrivilegesTooltip } from '../../missing_privileges';
 
 interface ReprocessFailedRulesButtonProps {
@@ -16,7 +15,7 @@ interface ReprocessFailedRulesButtonProps {
   isLoading?: boolean;
   numberOfFailedRules: number;
   isDisabled?: boolean;
-  missingCapabilities: MissingCapability[];
+  isAuthorized: boolean;
 }
 
 const ReprocessFailedRulesButtonComp = React.memo(function ReprocessFailedRulesButton({
@@ -24,14 +23,14 @@ const ReprocessFailedRulesButtonComp = React.memo(function ReprocessFailedRulesB
   isLoading = false,
   numberOfFailedRules = 0,
   isDisabled = false,
-  missingCapabilities = [],
+  isAuthorized,
 }: ReprocessFailedRulesButtonProps) {
   return (
     <EuiButton
       iconType="refresh"
       color={'warning'}
       onClick={onClick}
-      disabled={isDisabled || missingCapabilities.length > 0}
+      disabled={isDisabled || !isAuthorized}
       isLoading={isLoading}
       data-test-subj="reprocessFailedRulesButton"
       aria-label={i18n.REPROCESS_FAILED_ARIA_LABEL}
@@ -42,5 +41,6 @@ const ReprocessFailedRulesButtonComp = React.memo(function ReprocessFailedRulesB
 });
 
 export const ReprocessFailedRulesButton = WithMissingPrivilegesTooltip(
-  ReprocessFailedRulesButtonComp
+  ReprocessFailedRulesButtonComp,
+  'all'
 );

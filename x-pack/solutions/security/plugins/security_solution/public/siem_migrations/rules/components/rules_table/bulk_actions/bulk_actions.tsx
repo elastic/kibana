@@ -18,8 +18,6 @@ export interface BulkActionsProps {
   installTranslatedRule?: () => void;
   installSelectedRule?: () => void;
   reprocessFailedRules?: () => void;
-  hasMissingCapabilities?: boolean;
-  missingCapabilitiesText?: React.ReactNode | string;
 }
 
 /**
