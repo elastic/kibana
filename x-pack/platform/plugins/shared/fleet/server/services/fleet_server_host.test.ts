@@ -93,7 +93,9 @@ function getMockedSoClient(options?: { id?: string; findHosts?: boolean; findSet
       } as any;
     }
 
-    if (type === LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE) {
+    if (
+      [LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE].includes(type)
+    ) {
       return {
         saved_objects: [
           {
@@ -106,34 +108,6 @@ function getMockedSoClient(options?: { id?: string; findHosts?: boolean; findSet
               name: 'fleet-server',
               description: '',
               namespace: 'default',
-              enabled: true,
-              policy_id: 'fleet-server-id-1',
-              policy_ids: ['fleet-server-id-1'],
-              package: {
-                name: 'fleet-server',
-                title: 'Fleet Server',
-                version: '0.9.0',
-              },
-              inputs: [],
-            },
-          },
-        ],
-      } as any;
-    }
-
-    if (type === PACKAGE_POLICY_SAVED_OBJECT_TYPE) {
-      return {
-        saved_objects: [
-          {
-            id: 'existing-package-policy',
-            type: 'ingest-package-policies',
-            score: 1,
-            references: [],
-            version: '1.0.0',
-            attributes: {
-              name: 'fleet-server',
-              description: '',
-              namespaces: ['default'],
               enabled: true,
               policy_id: 'fleet-server-id-1',
               policy_ids: ['fleet-server-id-1'],
