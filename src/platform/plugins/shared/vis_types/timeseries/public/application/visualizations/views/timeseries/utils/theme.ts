@@ -97,6 +97,7 @@ export function getBaseTheme(baseTheme: Theme, bgColor?: string | null): Theme {
   }
 
   const bgLuminosity = computeRelativeLuminosity(bgColor);
+  // TODO check if this still apply
   const mainTheme = bgLuminosity <= 0.179 ? LEGACY_DARK_THEME : LEGACY_LIGHT_THEME;
   const color = findBestContrastColor(
     bgColor,

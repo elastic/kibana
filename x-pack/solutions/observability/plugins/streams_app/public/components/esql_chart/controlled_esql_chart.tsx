@@ -18,6 +18,7 @@ import {
   Tooltip,
   niceTimeFormatter,
 } from '@elastic/charts';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getTimeZone } from '@kbn/observability-utils-browser/utils/ui_settings/get_timezone';
@@ -60,6 +61,7 @@ export function ControlledEsqlChart<T extends string>({
   const {
     core: { uiSettings },
   } = useKibana();
+  const chartBaseTheme = useElasticChartsTheme();
 
   const allTimeseries = useMemo(
     () =>
@@ -137,6 +139,7 @@ export function ControlledEsqlChart<T extends string>({
         legendPosition={Position.Bottom}
         xDomain={xDomain}
         locale={i18n.getLocale()}
+        baseTheme={chartBaseTheme}
       />
       <Axis
         id="x-axis"
