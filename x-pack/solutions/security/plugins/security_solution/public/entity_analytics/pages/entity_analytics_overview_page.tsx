@@ -8,6 +8,6 @@
 import React from 'react';
 import { EntityAnalyticsPage } from './entity_analytics_dashboard';
 
-export const RiskAnalyticsDashboard: React.FC = () => {
-  return <EntityAnalyticsPage isRiskAnalytics={true} />;
+export const OverviewDashboard: React.FC = () => {
+  return <EntityAnalyticsPage isOverview={true} />;
 };

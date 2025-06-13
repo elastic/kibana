@@ -11,7 +11,7 @@ import {
   SECURITY_FEATURE_ID,
   ENTITY_ANALYTICS_LANDING_PATH,
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
-  ENTITY_ANALYTICS_RISK_ANALYTICS_PATH,
+  ENTITY_ANALYTICS_OVERVIEW_PATH,
 } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
 import { ENTITY_ANALYTICS, ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING } from '../app/translations';
@@ -36,15 +36,15 @@ const privMonLinks: LinkItem = {
 };
 
 const riskAnalyticsLinks: LinkItem = {
-  id: SecurityPageName.entityAnalyticsRiskAnalytics,
-  title: i18n.translate('xpack.securitySolution.appLinks.riskAnalytics', {
-    defaultMessage: 'Risk Analytics',
+  id: SecurityPageName.entityAnalyticsOverview,
+  title: i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.overview', {
+    defaultMessage: 'Overview',
   }),
   landingImage: riskAnalyticsPageImg,
-  path: ENTITY_ANALYTICS_RISK_ANALYTICS_PATH,
+  path: ENTITY_ANALYTICS_OVERVIEW_PATH,
   globalSearchKeywords: [
-    i18n.translate('xpack.securitySolution.appLinks.riskAnalytics', {
-      defaultMessage: 'Risk Analytics',
+    i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.overview', {
+      defaultMessage: 'Overview',
     }),
   ],
   hideTimeline: false,

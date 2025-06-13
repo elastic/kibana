@@ -7,7 +7,7 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
-import { ENTITY_ANALYTICS, RISK_ANALYTICS } from '../../app/translations';
+import { ENTITY_ANALYTICS, ENTITY_ANALYTICS_OVERVIEW } from '../../app/translations';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../app/types';
 import { useSourcererDataView } from '../../sourcerer/containers';
@@ -29,7 +29,7 @@ import { useEntityAnalyticsTypes } from '../hooks/use_enabled_entity_types';
 import type { EntityAnalyticsComponentProps } from '../../../common/entity_analytics/types';
 
 const EntityAnalyticsComponent: React.FC<EntityAnalyticsComponentProps> = ({
-  isRiskAnalytics = false,
+  isOverview = false,
 }) => {
   const [skipEmptyPrompt, setSkipEmptyPrompt] = React.useState(false);
   const onSkip = React.useCallback(() => setSkipEmptyPrompt(true), [setSkipEmptyPrompt]);
@@ -72,14 +72,14 @@ const EntityAnalyticsComponent: React.FC<EntityAnalyticsComponentProps> = ({
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsPage">
-            <HeaderPage title={isRiskAnalytics ? RISK_ANALYTICS : ENTITY_ANALYTICS} />
+            <HeaderPage title={isOverview ? ENTITY_ANALYTICS_OVERVIEW : ENTITY_ANALYTICS} />
 
             {isSourcererLoading ? (
               <EuiLoadingSpinner size="l" data-test-subj="entityAnalyticsLoader" />
             ) : (
               <EuiFlexGroup direction="column" data-test-subj="entityAnalyticsSections">
                 <EuiFlexItem>
-                  <EntityAnalyticsHeader isRiskAnalytics={isRiskAnalytics} />
+                  <EntityAnalyticsHeader isOverview={isOverview} />
                 </EuiFlexItem>
 
                 {!isEntityStoreFeatureFlagDisabled ? (
@@ -96,7 +96,7 @@ const EntityAnalyticsComponent: React.FC<EntityAnalyticsComponentProps> = ({
                   </>
                 )}
 
-                <EuiFlexItem>{!isRiskAnalytics && <EntityAnalyticsAnomalies />}</EuiFlexItem>
+                <EuiFlexItem>{!isOverview && <EntityAnalyticsAnomalies />}</EuiFlexItem>
               </EuiFlexGroup>
             )}
           </SecuritySolutionPageWrapper>

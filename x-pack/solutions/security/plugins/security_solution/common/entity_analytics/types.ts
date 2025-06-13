@@ -33,5 +33,5 @@ export const EntityTypeToIdentifierField: Record<EntityType, EntityIdentifierFie
 };
 
 export interface EntityAnalyticsComponentProps {
-  isRiskAnalytics?: boolean;
+  isOverview?: boolean;
 }

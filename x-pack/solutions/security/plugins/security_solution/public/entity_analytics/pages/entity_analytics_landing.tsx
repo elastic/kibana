@@ -28,9 +28,9 @@ export const EntityAnalyticsLandingPage = () => {
       ? entityAnalyticsLandingNavLink.links
       : [];
   const entityAnalyticsRiskAnalyticsNavLink = useRootNavLink(
-    SecurityPageName.entityAnalyticsRiskAnalytics
+    SecurityPageName.entityAnalyticsOverview
   );
-  const entityAnalyticsRiskAnalyticslinks =
+  const entityAnalyticsOverviewlinks =
     entityAnalyticsRiskAnalyticsNavLink &&
     'links' in entityAnalyticsRiskAnalyticsNavLink &&
     Array.isArray(entityAnalyticsRiskAnalyticsNavLink.links)
@@ -50,11 +50,11 @@ export const EntityAnalyticsLandingPage = () => {
       <br />
       <br />
       <LandingLinksImages
-        items={entityAnalyticsRiskAnalyticslinks}
+        items={entityAnalyticsOverviewlinks}
         urlState={urlState}
         onLinkClick={trackLandingLinkClick}
       />
-      <SpyRoute pageName={SecurityPageName.entityAnalyticsRiskAnalytics} />
+      <SpyRoute pageName={SecurityPageName.entityAnalyticsOverview} />
     </SecuritySolutionPageWrapper>
   );
 };
