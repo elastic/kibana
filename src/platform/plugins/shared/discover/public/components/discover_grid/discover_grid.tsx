@@ -48,7 +48,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
       query,
       updateESQLQuery: onUpdateESQLQuery,
       setExpandedDoc,
-      enableDocumentViewer: !!renderDocumentView,
+      isDocViewerEnabled: !!renderDocumentView,
     });
   }, [
     customRowAdditionalLeadingControls,

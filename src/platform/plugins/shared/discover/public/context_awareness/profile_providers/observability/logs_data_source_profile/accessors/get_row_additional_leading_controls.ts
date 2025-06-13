@@ -21,7 +21,7 @@ export const getRowAdditionalLeadingControls: LogsDataSourceProfileProvider['pro
     (prev, { context }) =>
     (params) => {
       const additionalControls = prev(params) || [];
-      const { updateESQLQuery, query, setExpandedDoc, enableDocumentViewer } = params;
+      const { updateESQLQuery, query, setExpandedDoc, isDocViewerEnabled } = params;
 
       const isDegradedDocsControlEnabled = isOfAggregateQueryType(query)
         ? queryContainsMetadataIgnored(query)
@@ -52,7 +52,7 @@ export const getRowAdditionalLeadingControls: LogsDataSourceProfileProvider['pro
           setExpandedDoc(props.record, { initialTabId: 'doc_view_logs_overview' });
         };
 
-      return enableDocumentViewer
+      return isDocViewerEnabled
         ? [
             ...additionalControls,
             createDegradedDocsControl({

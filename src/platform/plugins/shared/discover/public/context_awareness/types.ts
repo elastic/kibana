@@ -191,7 +191,7 @@ export interface RowControlsExtensionParams {
   /**
    * Flag to indicate if Flyout opening controls must be rendered or not
    */
-  enableDocumentViewer?: boolean;
+  isDocViewerEnabled: boolean;
 }
 
 /**
