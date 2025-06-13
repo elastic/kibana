@@ -489,5 +489,4 @@ components:
           description: The error message if the last execution failed.
         is_stopped:
           type: boolean
-          nullable: true
           description: Indicates if the last execution was stopped by the user.

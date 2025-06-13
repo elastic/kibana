@@ -165,7 +165,7 @@ export const RuleMigrationLastExecution = z.object({
   /**
    * Indicates if the last execution was stopped by the user.
    */
-  is_stopped: z.boolean().nullable().optional(),
+  is_stopped: z.boolean().optional(),
 });
 
 /**

@@ -94,34 +94,9 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
   }
 
   /**
-   * Sets `is_stopped` flag for migration document
-   */
-  async setIsStopped({ id }: { id: string }): Promise<void> {
-    await this.updateLastExecution(id, {
-      is_stopped: true,
-    });
-  }
-
-  /**
-   * Saves a migration as failed, updating the last execution parameters with the provided error message.
-   */
-  async saveAsFailed({ id, error }: { id: string; error: string }): Promise<void> {
-    await this.updateLastExecution(id, {
-      error,
-      finished_at: new Date().toISOString(),
-    });
-  }
-
-  /**
    * Saves a migration as started, updating the last execution parameters with the current timestamp.
    */
-  async saveAsStarted({
-    id,
-    connectorId,
-  }: {
-    id: string;
-    connectorId: RuleMigrationLastExecution['connector_id'];
-  }): Promise<void> {
+  async saveAsStarted({ id, connectorId }: { id: string; connectorId: string }): Promise<void> {
     await this.updateLastExecution(id, {
       started_at: new Date().toISOString(),
       connector_id: connectorId,
@@ -136,6 +111,21 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
    */
   async saveAsFinished({ id }: { id: string }): Promise<void> {
     await this.updateLastExecution(id, { finished_at: new Date().toISOString() });
+  }
+
+  /**
+   * Saves a migration as failed, updating the last execution parameters with the provided error message.
+   */
+  async saveAsFailed({ id, error }: { id: string; error: string }): Promise<void> {
+    await this.updateLastExecution(id, { error, finished_at: new Date().toISOString() });
+  }
+
+  /**
+   * Sets `is_stopped` flag for migration document.
+   * It does not update `finished_at` timestamp, `saveAsFinished` or `saveAsFailed` should be called separately.
+   */
+  async setIsStopped({ id }: { id: string }): Promise<void> {
+    await this.updateLastExecution(id, { is_stopped: true });
   }
 
   /**
