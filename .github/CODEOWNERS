@@ -1328,6 +1328,9 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 # Observability UI
 /x-pack/test_serverless/api_integration/test_suites/observability/config.ts @elastic/observability-ui @elastic/appex-qa
 /x-pack/test_serverless/api_integration/test_suites/observability/index.ts @elastic/observability-ui
+/x-pack/test_serverless/api_integration/test_suites/observability/config.logs_essentials.ts @elastic/observability-ui @elastic/appex-qa
+/x-pack/test_serverless/api_integration/test_suites/observability/index.logs_essentials.ts @elastic/observability-ui
+/x-pack/test_serverless/api_integration/test_suites/observability/logs_essentials_only @elastic/observability-ui
 
 ### Observability Plugins
 
@@ -1410,9 +1413,6 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/test/common/utils/synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team # Assigned per https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-apm-synthtrace/kibana.jsonc#L5
 /x-pack/test/common/utils/server_route_repository @elastic/obs-knowledge-team
 /src/platform/test/functional/services/synthtrace/logs_synthtrace_es_client.ts @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
-/x-pack/test_serverless/api_integration/test_suites/observability/config.logs_essentials.ts @elastic/obs-ux-logs-team
-/x-pack/test_serverless/api_integration/test_suites/observability/index.logs_essentials.ts @elastic/obs-ux-logs-team
-/x-pack/test_serverless/api_integration/test_suites/observability/logs_essentials_only @elastic/obs-ux-logs-team
 
 
 ## Streams parts owned by Logs UX
