@@ -27,6 +27,7 @@ import {
   EuiToolTip,
   type EuiSwitchEvent,
   EuiSwitch,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
@@ -112,6 +113,10 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
     objectTypeAlias,
     objectTypeMeta,
   } = useShareTypeContext('integration', 'export');
+  const { shareMenuItems: exportDerivatives } = useShareTypeContext(
+    'integration',
+    'exportDerivatives'
+  );
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [isCreatingExport, setIsCreatingExport] = useState<boolean>(false);
   const [selectedMenuItemId, setSelectedMenuItemId] = useState<string>();
@@ -155,9 +160,9 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
         data-test-subj="exportPopover"
         button={anchorElement!}
         closePopover={onClose}
-        panelPaddingSize="none"
+        panelPaddingSize="s"
       >
-        <EuiListGroup>
+        <EuiListGroup flush>
           {shareMenuItems.map((menuItem) => (
             <EuiToolTip
               position="left"
@@ -178,6 +183,16 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
             </EuiToolTip>
           ))}
         </EuiListGroup>
+        {Boolean(exportDerivatives.length) && (
+          <React.Fragment>
+            <EuiHorizontalRule margin="xs" />
+            {exportDerivatives.map((exportDerivative) => {
+              return (
+                <EuiButton key={exportDerivative.id} iconType={exportDerivative.config.icon} />
+              );
+            })}
+          </React.Fragment>
+        )}
       </EuiWrappingPopover>
       {isFlyoutVisible && (
         <EuiFlyout

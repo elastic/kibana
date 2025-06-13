@@ -167,11 +167,23 @@ export interface ExportShare
   groupId: 'export';
 }
 
+/**
+ * @description Special Share integration implementation definition that build off exports within kibana
+ */
+export interface ExportShareDerivatives
+  extends ShareIntegration<{
+    label: ReactNode;
+    icon?: EuiIconProps['type'];
+  }> {
+  groupId: 'exportDerivatives';
+}
+
 export type ShareActionIntents = LinkShare | EmbedShare | ShareLegacy | ShareIntegration;
 
 export type LinkShareConfig = ShareImplementation<LinkShare>;
 export type EmbedShareConfig = ShareImplementation<EmbedShare>;
 export type ExportShareConfig = ShareImplementation<ExportShare>;
+export type ExportShareDerivativesConfig = ShareImplementation<ExportShareDerivatives>;
 export type ShareIntegrationConfig = ShareImplementation<ShareIntegration>;
 
 export type LegacyIntegrationConfig = Omit<ShareLegacy, 'config'> & {
@@ -181,9 +193,10 @@ export type LegacyIntegrationConfig = Omit<ShareLegacy, 'config'> & {
 export type ShareConfigs =
   | LinkShareConfig
   | EmbedShareConfig
+  | ShareIntegrationConfig
   | ExportShareConfig
-  | LegacyIntegrationConfig
-  | ShareIntegrationConfig;
+  | ExportShareDerivativesConfig
+  | LegacyIntegrationConfig;
 
 export type LinkShareUIConfig = ShareActionUserInputBase<{
   /**
