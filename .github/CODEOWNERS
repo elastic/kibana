@@ -261,7 +261,6 @@ src/core/packages/saved-objects/base-server-mocks @elastic/kibana-core
 src/core/packages/saved-objects/browser @elastic/kibana-core
 src/core/packages/saved-objects/browser-internal @elastic/kibana-core
 src/core/packages/saved-objects/browser-mocks @elastic/kibana-core
-src/core/packages/saved-objects/common @elastic/kibana-core
 src/core/packages/saved-objects/import-export-server-internal @elastic/kibana-core
 src/core/packages/saved-objects/import-export-server-mocks @elastic/kibana-core
 src/core/packages/saved-objects/migration-server-internal @elastic/kibana-core
