@@ -446,7 +446,7 @@ describe('RuleMigrationsTaskClient', () => {
       );
     });
 
-    it('should mark migration task as aborted when manually stopping a running migration', async () => {
+    it('should mark migration task as stopped when manually stopping a running migration', async () => {
       const abortMock = jest.fn();
       const migrationRunner = {
         abortController: { abort: abortMock },
