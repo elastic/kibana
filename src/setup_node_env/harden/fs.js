@@ -28,7 +28,12 @@ const { homedir, tmpdir } = require('os');
 
 const isDevOrCI = process.env.NODE_ENV !== 'production' || process.env.CI === 'true';
 const baseSafePaths = [join(REPO_ROOT, 'data'), join(REPO_ROOT, '.es')];
-const devOrCIPaths = [REPO_ROOT, tmpdir(), join(homedir(), '.kibanaSecuritySolutionCliTools')];
+const devOrCIPaths = [
+  REPO_ROOT,
+  tmpdir(),
+  join('/private', tmpdir()),
+  join(homedir(), '.kibanaSecuritySolutionCliTools'),
+];
 
 const safePaths = [...baseSafePaths, ...(isDevOrCI ? devOrCIPaths : [])];
 
