@@ -29,3 +29,10 @@ export {
   type RecommendedQuery,
   type ResolveIndexResponse,
 } from './src/extensions_autocomplete_types';
+
+export {
+  type InferenceEndpointsAutocompleteResult,
+  type InferenceEndpointAutocompleteItem,
+} from './src/inference_endpoint_autocomplete_types';
+
+export { REGISTRY_EXTENSIONS_ROUTE } from './src/constants';
