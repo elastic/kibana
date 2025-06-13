@@ -7,24 +7,30 @@
 
 import type { FC } from 'react';
 import React, { useState, useEffect, useCallback } from 'react';
+
 import { EuiEmptyPrompt } from '@elastic/eui';
 
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useUrlState } from '@kbn/ml-url-state';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+
 import { NodeAvailableWarning } from '../../../components/node_available_warning';
 import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
 import { UpgradeWarning } from '../../../components/upgrade';
-import { JobMap } from '.';
 import { HelpMenu } from '../../../components/help_menu';
-import { useMlKibana, useMlApi } from '../../../contexts/kibana';
-import { useRefreshAnalyticsList } from '../../common';
 import { MlPageHeader } from '../../../components/page_header';
+
+import { useRefreshAnalyticsList } from '../../common';
+
 import type { AnalyticsSelectorIds } from '../components/analytics_selector';
 import { AnalyticsIdSelector, AnalyticsIdSelectorControls } from '../components/analytics_selector';
 import { AnalyticsEmptyPrompt } from '../analytics_management/components/empty_prompt';
 import { PageTitle } from '../../../components/page_title';
 import { JobInfoFlyoutsProvider } from '../../../jobs/components/job_details_flyout/job_details_flyout_context';
 import { AnalyticsDetailFlyout } from '../analytics_exploration/components/analytics_detail_flyout';
+
+import { JobMap } from '.';
 
 export const Page: FC = () => {
   const [globalState, setGlobalState] = useUrlState('_g');

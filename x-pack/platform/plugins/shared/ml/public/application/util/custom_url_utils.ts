@@ -9,6 +9,7 @@
 
 import { get, flow } from 'lodash';
 import moment from 'moment';
+
 import rison, { type RisonValue } from '@kbn/rison';
 import type { TimeRange } from '@kbn/es-query';
 import type {
@@ -19,8 +20,10 @@ import type {
 } from '@kbn/ml-anomaly-utils';
 import type { DataGridItem } from '@kbn/ml-data-grid';
 import { parseInterval } from '@kbn/ml-parse-interval';
-
-import { escapeForElasticsearchQuery, replaceStringTokens } from './string_utils';
+import {
+  escapeForElasticsearchQuery,
+  replaceStringTokens,
+} from '@kbn/ml-common-utils/string_utils';
 
 // Value of custom_url time_range property indicating drilldown time range is calculated automatically
 // depending on the context in which the URL is being opened.
