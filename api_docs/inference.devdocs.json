@@ -40,23 +40,7 @@
           "label": "chatComplete",
           "description": [],
           "signature": [
-            "<TToolOptions extends ",
-            {
-              "pluginId": "@kbn/inference-common",
-              "scope": "common",
-              "docId": "kibKbnInferenceCommonPluginApi",
-              "section": "def-common.ToolOptions",
-              "text": "ToolOptions"
-            },
-            "<string> = ",
-            {
-              "pluginId": "@kbn/inference-common",
-              "scope": "common",
-              "docId": "kibKbnInferenceCommonPluginApi",
-              "section": "def-common.ToolOptions",
-              "text": "ToolOptions"
-            },
-            "<string>, TStream extends boolean = false>(options: ",
+            "<TOptions extends ",
             {
               "pluginId": "@kbn/inference-common",
               "scope": "common",
@@ -64,15 +48,15 @@
               "section": "def-common.ChatCompleteOptions",
               "text": "ChatCompleteOptions"
             },
-            "<TToolOptions, TStream>) => ",
+            ">(options: TOptions) => ",
             {
               "pluginId": "@kbn/inference-common",
               "scope": "common",
               "docId": "kibKbnInferenceCommonPluginApi",
-              "section": "def-common.ChatCompleteCompositeResponse",
-              "text": "ChatCompleteCompositeResponse"
+              "section": "def-common.ChatCompleteAPIResponse",
+              "text": "ChatCompleteAPIResponse"
             },
-            "<TToolOptions, TStream>"
+            "<TOptions>"
           ],
           "path": "x-pack/platform/plugins/shared/inference/public/types.ts",
           "deprecated": false,
@@ -82,44 +66,12 @@
             {
               "parentPluginId": "inference",
               "id": "def-public.InferencePublicStart.chatComplete.$1",
-              "type": "CompoundType",
+              "type": "Uncategorized",
               "tags": [],
               "label": "options",
               "description": [],
               "signature": [
-                "{ connectorId: string; stream?: TStream | undefined; system?: string | undefined; messages: ",
-                {
-                  "pluginId": "@kbn/inference-common",
-                  "scope": "common",
-                  "docId": "kibKbnInferenceCommonPluginApi",
-                  "section": "def-common.Message",
-                  "text": "Message"
-                },
-                "[]; temperature?: number | undefined; modelName?: string | undefined; functionCalling?: ",
-                {
-                  "pluginId": "@kbn/inference-common",
-                  "scope": "common",
-                  "docId": "kibKbnInferenceCommonPluginApi",
-                  "section": "def-common.FunctionCallingMode",
-                  "text": "FunctionCallingMode"
-                },
-                " | undefined; abortSignal?: AbortSignal | undefined; metadata?: ",
-                {
-                  "pluginId": "@kbn/inference-common",
-                  "scope": "common",
-                  "docId": "kibKbnInferenceCommonPluginApi",
-                  "section": "def-common.ChatCompleteMetadata",
-                  "text": "ChatCompleteMetadata"
-                },
-                " | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
-                {
-                  "pluginId": "@kbn/inference-common",
-                  "scope": "common",
-                  "docId": "kibKbnInferenceCommonPluginApi",
-                  "section": "def-common.ChatCompleteRetryConfiguration",
-                  "text": "ChatCompleteRetryConfiguration"
-                },
-                " | undefined; } & TToolOptions"
+                "TOptions"
               ],
               "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
               "deprecated": false,
@@ -1756,7 +1708,7 @@
         "label": "createRestClient",
         "description": [],
         "signature": [
-          "(options: UnboundOptions) => ",
+          "(options: RestOptions) => ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -1777,7 +1729,7 @@
             "label": "options",
             "description": [],
             "signature": [
-              "UnboundOptions"
+              "RestOptions"
             ],
             "path": "x-pack/platform/plugins/shared/inference/common/rest/create_client.ts",
             "deprecated": false,
@@ -1796,7 +1748,7 @@
         "label": "createRestClient",
         "description": [],
         "signature": [
-          "(options: BoundOptions) => ",
+          "(options: BoundRestOptions) => ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -1817,7 +1769,7 @@
             "label": "options",
             "description": [],
             "signature": [
-              "BoundOptions"
+              "BoundRestOptions"
             ],
             "path": "x-pack/platform/plugins/shared/inference/common/rest/create_client.ts",
             "deprecated": false,
@@ -1836,7 +1788,7 @@
         "label": "createRestClient",
         "description": [],
         "signature": [
-          "(options: UnboundOptions | BoundOptions) => ",
+          "(options: RestOptions | BoundRestOptions) => ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -1865,7 +1817,7 @@
             "label": "options",
             "description": [],
             "signature": [
-              "UnboundOptions | BoundOptions"
+              "RestOptions | BoundRestOptions"
             ],
             "path": "x-pack/platform/plugins/shared/inference/common/rest/create_client.ts",
             "deprecated": false,
