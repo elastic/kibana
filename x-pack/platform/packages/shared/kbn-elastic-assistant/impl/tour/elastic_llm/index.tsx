@@ -17,7 +17,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { css } from '@emotion/react';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../const';
-import { elasticLLMTourStep1 } from './step_config';
+import { EISUsageCostTourState, elasticLLMTourStep1, tourDefaultConfig } from './step_config';
 import { ELASTIC_LLM_TOUR_FINISH_TOUR } from './translations';
 import { useAssistantContext } from '../../assistant_context';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
@@ -44,9 +44,12 @@ const ElasticLLMCostAwarenessTourComponent: React.FC<Props> = ({
   const { http, inferenceEnabled } = useAssistantContext();
   const { euiTheme } = useEuiTheme();
   const tourStorageKey = useTourStorageKey(storageKey);
-  const [tourCompleted, setTourCompleted] = useLocalStorage<boolean>(tourStorageKey, false);
+  const [tourState, setTourState] = useLocalStorage<EISUsageCostTourState>(
+    tourStorageKey,
+    tourDefaultConfig
+  );
 
-  const [showTour, setShowTour] = useState(!tourCompleted && !isDisabled);
+  const [showTour, setShowTour] = useState(!tourState?.isTourActive && !isDisabled);
 
   const [isTimerExhausted, setIsTimerExhausted] = useState(false);
 
@@ -59,9 +62,12 @@ const ElasticLLMCostAwarenessTourComponent: React.FC<Props> = ({
   }, []);
 
   const finishTour = useCallback(() => {
-    setTourCompleted(true);
+    setTourState((prev = tourDefaultConfig) => ({
+      ...prev,
+      isTourActive: false,
+    }));
     setShowTour(false);
-  }, [setTourCompleted, setShowTour]);
+  }, [setTourState, setShowTour]);
 
   const { data: aiConnectors } = useLoadConnectors({
     http,
@@ -77,7 +83,7 @@ const ElasticLLMCostAwarenessTourComponent: React.FC<Props> = ({
     if (
       !inferenceEnabled ||
       isDisabled ||
-      tourCompleted ||
+      !tourState?.isTourActive ||
       aiConnectors?.length === 0 ||
       !isElasticLLMConnectorSelected
     ) {
@@ -86,13 +92,14 @@ const ElasticLLMCostAwarenessTourComponent: React.FC<Props> = ({
       setShowTour(true);
     }
   }, [
-    tourCompleted,
+    tourState,
     isDisabled,
     children,
     showTour,
     inferenceEnabled,
     aiConnectors?.length,
     isElasticLLMConnectorSelected,
+    setTourState,
   ]);
 
   if (!children) {

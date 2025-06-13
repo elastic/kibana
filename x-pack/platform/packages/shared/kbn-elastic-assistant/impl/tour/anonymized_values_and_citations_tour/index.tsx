@@ -18,6 +18,7 @@ import {
   conversationContainsContentReferences,
 } from '../../assistant/conversations/utils';
 import { useTourStorageKey } from '../common/hooks/use_tour_storage_key';
+import { EISUsageCostTourState, tourDefaultConfig } from '../elastic_llm/step_config';
 
 interface Props {
   conversation: Conversation | undefined;
@@ -42,6 +43,14 @@ export const AnonymizedValuesAndCitationsTour: React.FC<Props> = ({ conversation
   );
   const [tourCompleted, setTourCompleted] = useLocalStorage<boolean>(tourStorageKey, false);
 
+  const eisLLMUsageCostTourStorageKey = useTourStorageKey(
+    NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM_USAGE_ASSISTANT_HEADER
+  );
+  const [eisLLMUsageCostTourState] = useLocalStorage<EISUsageCostTourState>(
+    eisLLMUsageCostTourStorageKey,
+    tourDefaultConfig
+  );
+
   const [showTour, setShowTour] = useState(false);
 
   useEffect(() => {
@@ -51,8 +60,11 @@ export const AnonymizedValuesAndCitationsTour: React.FC<Props> = ({ conversation
 
     const knowledgeBaseTourState = getKnowledgeBaseTourStateThrottled(kbTourStorageKey);
 
-    // If the knowledge base tour is active on this page (i.e. step 1), don't show this tour to prevent overlap.
-    if (knowledgeBaseTourState?.isTourActive && knowledgeBaseTourState?.currentTourStep === 1) {
+    // If the knowledge base tour or EIS tour is active on this page (i.e. step 1), don't show this tour to prevent overlap.
+    if (
+      (knowledgeBaseTourState?.isTourActive && knowledgeBaseTourState?.currentTourStep === 1) ||
+      (eisLLMUsageCostTourState?.isTourActive && eisLLMUsageCostTourState?.currentTourStep === 1)
+    ) {
       return;
     }
 
@@ -68,7 +80,15 @@ export const AnonymizedValuesAndCitationsTour: React.FC<Props> = ({ conversation
         clearTimeout(timer);
       };
     }
-  }, [conversation, tourCompleted, showTour, kbTourStorageKey]);
+  }, [
+    conversation,
+    tourCompleted,
+    showTour,
+    kbTourStorageKey,
+    eisLLMUsageCostTourStorageKey,
+    eisLLMUsageCostTourState?.isTourActive,
+    eisLLMUsageCostTourState?.currentTourStep,
+  ]);
 
   const finishTour = useCallback(() => {
     setTourCompleted(true);

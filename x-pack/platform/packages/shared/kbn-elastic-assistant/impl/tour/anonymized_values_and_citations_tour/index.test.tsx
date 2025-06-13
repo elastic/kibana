@@ -117,8 +117,8 @@ describe('AnonymizedValuesAndCitationsTour', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('does not render tour if the knowledge base tour is on step 1', async () => {
-    (useLocalStorage as jest.Mock).mockReturnValue([false, jest.fn()]);
+  it('does not render tour if the knowledge base tour or EIS tour is on step 1', async () => {
+    (useLocalStorage as jest.Mock).mockReturnValueOnce([false, jest.fn()]);
 
     mockGetItem.mockReturnValue(
       JSON.stringify({
