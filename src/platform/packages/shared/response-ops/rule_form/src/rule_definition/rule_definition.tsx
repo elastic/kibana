@@ -299,7 +299,7 @@ export const RuleDefinition = () => {
                 {SCHEDULE_DESCRIPTION_TEXT}&nbsp;
                 <EuiIconTip
                   position="right"
-                  type="questionInCircle"
+                  type="question"
                   content={SCHEDULE_TOOLTIP_TEXT}
                 />
               </p>
@@ -346,7 +346,7 @@ export const RuleDefinition = () => {
                       {ALERT_DELAY_DESCRIPTION_TEXT}&nbsp;
                       <EuiIconTip
                         position="right"
-                        type="questionInCircle"
+                        type="question"
                         content={ALERT_DELAY_HELP_TEXT}
                       />
                     </p>

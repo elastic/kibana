@@ -60,7 +60,7 @@ export const iconChoices: GenericIcon[] = [
     label: i18n.translate('xpack.graph.icon.home', { defaultMessage: 'Home' }),
   },
   {
-    id: 'questionInCircle',
+    id: 'question',
     prevName: 'fa-question',
     package: 'eui',
     patterns: [/query/i, /search/i],

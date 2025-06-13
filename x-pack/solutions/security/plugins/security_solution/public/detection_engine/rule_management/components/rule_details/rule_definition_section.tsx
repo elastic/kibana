@@ -298,7 +298,7 @@ const UnavailableMlJobLink: React.FC<UnavailableMlJobLinkProps> = ({ jobId }) =>
 
   const button = (
     <EuiButtonIcon
-      iconType="questionInCircle"
+      iconType="question"
       onClick={togglePopover}
       aria-label={i18n.MACHINE_LEARNING_JOB_NOT_AVAILABLE}
     />

@@ -61,7 +61,7 @@ export function TopAggregateParamEditor({
       />{' '}
       <EuiIconTip
         position="right"
-        type="questionInCircle"
+        type="question"
         content={i18n.translate('visDefaultEditor.controls.aggregateWithTooltip', {
           defaultMessage:
             'Choose a strategy for combining multiple hits or a multi-valued field into a single metric.',

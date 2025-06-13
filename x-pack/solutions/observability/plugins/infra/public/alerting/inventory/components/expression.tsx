@@ -346,7 +346,7 @@ export const Expressions: React.FC<Props> = (props) => {
               defaultMessage: "Alert me if there's no data",
             })}{' '}
             <EuiIconTip
-              type="questionInCircle"
+              type="question"
               color="subdued"
               content={i18n.translate('xpack.infra.metrics.alertFlyout.noDataHelpText', {
                 defaultMessage:

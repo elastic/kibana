@@ -269,7 +269,7 @@ const ActionsConnectorsList = ({
           <>
             {link}
             <EuiIconTip
-              type="questionInCircle"
+              type="question"
               content={checkEnabledResult.message}
               position="right"
             />

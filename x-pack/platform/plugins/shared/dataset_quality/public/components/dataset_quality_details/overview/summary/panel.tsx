@@ -102,7 +102,7 @@ export function PanelIndicator({
                 <EuiIcon
                   size="s"
                   color="subdued"
-                  type="questionInCircle"
+                  type="question"
                   className="eui-alignTop"
                 />
               </EuiText>

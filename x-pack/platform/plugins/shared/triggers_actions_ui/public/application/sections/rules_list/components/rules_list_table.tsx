@@ -282,7 +282,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
           )}
           size="s"
           color="subdued"
-          type="questionInCircle"
+          type="question"
           className="eui-alignTop"
         />
         <PercentileSelectablePopover
@@ -411,7 +411,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
                             }
                           `}
                           data-test-subj="ruleDisabledByLicenseTooltip"
-                          type="questionInCircle"
+                          type="question"
                           content={checkEnabledResult.message}
                           position="right"
                         />
@@ -476,7 +476,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
               )}
               size="s"
               color="subdued"
-              type="questionInCircle"
+              type="question"
               className="eui-alignTop"
             />
           </span>
@@ -528,7 +528,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
               )}
               size="s"
               color="subdued"
-              type="questionInCircle"
+              type="question"
               className="eui-alignTop"
             />
           </span>
@@ -642,7 +642,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
               )}
               size="s"
               color="subdued"
-              type="questionInCircle"
+              type="question"
               className="eui-alignTop"
             />
           </span>
@@ -724,7 +724,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
               )}
               size="s"
               color="subdued"
-              type="questionInCircle"
+              type="question"
               className="eui-alignTop"
             />
           </span>

@@ -132,7 +132,7 @@ export function APMSection({ bucketSize }: Props) {
                   <EuiIcon
                     size="s"
                     color="subdued"
-                    type="questionInCircle"
+                    type="question"
                     className="eui-alignCenter"
                   />
                 </>

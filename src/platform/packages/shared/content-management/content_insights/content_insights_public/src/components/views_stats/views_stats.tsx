@@ -84,7 +84,7 @@ const NoViewsTip = () => {
       color="inherit"
       iconProps={{ style: { verticalAlign: 'text-bottom', marginLeft: 2 } }}
       css={{ textWrap: 'balance' }}
-      type="questionInCircle"
+      type="question"
       content={
         <>
           <FormattedMessage

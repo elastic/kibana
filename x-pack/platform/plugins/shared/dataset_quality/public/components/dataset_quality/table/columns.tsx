@@ -287,7 +287,7 @@ export const getDatasetQualityTableColumns = ({
           <EuiToolTip content={datasetQualityColumnTooltip}>
             <span>
               {`${datasetQualityColumnName} `}
-              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+              <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
             </span>
           </EuiToolTip>
         </EuiTableHeader>
@@ -308,7 +308,7 @@ export const getDatasetQualityTableColumns = ({
           <EuiToolTip content={degradedDocsColumnTooltip}>
             <span>
               {`${degradedDocsColumnName} `}
-              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+              <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
             </span>
           </EuiToolTip>
         </EuiTableHeader>
@@ -346,7 +346,7 @@ export const getDatasetQualityTableColumns = ({
                     <EuiIcon
                       size="s"
                       color="subdued"
-                      type="questionInCircle"
+                      type="question"
                       className="eui-alignTop"
                     />
                   </span>

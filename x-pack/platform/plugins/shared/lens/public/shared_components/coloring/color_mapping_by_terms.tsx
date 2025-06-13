@@ -138,7 +138,7 @@ export function ColorMappingByTerms({
                         }}
                         position="top"
                         size="s"
-                        type="questionInCircle"
+                        type="question"
                       />
                     </span>
                   </EuiText>

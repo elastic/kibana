@@ -169,7 +169,7 @@ export function GaugeDimensionEditor(
                   })}
 
                   <EuiIcon
-                    type="questionInCircle"
+                    type="question"
                     color="subdued"
                     size="s"
                     className="eui-alignTop"

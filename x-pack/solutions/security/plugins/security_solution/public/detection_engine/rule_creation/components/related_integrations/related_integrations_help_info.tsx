@@ -26,7 +26,7 @@ export function RelatedIntegrationsHelpInfo(): JSX.Element {
 
   const button = (
     <EuiButtonIcon
-      iconType="questionInCircle"
+      iconType="question"
       onClick={togglePopover}
       aria-label="Open help popover"
     />

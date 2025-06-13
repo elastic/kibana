@@ -79,7 +79,7 @@ const CountdownComponent: React.FC<Props> = ({
 
   const iconInQuestionButton = useMemo(
     () => (
-      <EuiButtonIcon aria-label={i18n.INFORMATION} iconType="questionInCircle" onClick={onClick} />
+      <EuiButtonIcon aria-label={i18n.INFORMATION} iconType="question" onClick={onClick} />
     ),
     [onClick]
   );

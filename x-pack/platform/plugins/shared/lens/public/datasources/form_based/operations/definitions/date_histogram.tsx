@@ -424,7 +424,7 @@ export const dateHistogramOperation: OperationDefinition<
                       }}
                       position="top"
                       size="s"
-                      type="questionInCircle"
+                      type="question"
                     />
                   </EuiText>
                 }

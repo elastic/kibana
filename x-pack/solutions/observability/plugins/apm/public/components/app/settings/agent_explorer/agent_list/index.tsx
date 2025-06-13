@@ -165,7 +165,7 @@ export function getAgentsColumns({
                   <EuiIcon
                     size="s"
                     color="subdued"
-                    type="questionInCircle"
+                    type="question"
                     className="eui-alignCenter"
                   />
                 </>

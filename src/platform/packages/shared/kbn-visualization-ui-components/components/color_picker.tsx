@@ -129,7 +129,7 @@ export const ColorPicker = ({
             {!disableHelpTooltip && (
               <>
                 <EuiIcon
-                  type="questionInCircle"
+                  type="question"
                   color="subdued"
                   size="s"
                   className="eui-alignTop"

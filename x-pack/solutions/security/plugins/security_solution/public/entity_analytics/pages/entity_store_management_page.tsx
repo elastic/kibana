@@ -271,7 +271,7 @@ const WhatIsAssetCriticalityPanel: React.FC = () => {
       />
       <EuiSpacer size="l" />
       <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiIcon type="questionInCircle" size="xl" />
+        <EuiIcon type="question" size="xl" />
         <EuiTitle size="xxs">
           <h3>
             <FormattedMessage

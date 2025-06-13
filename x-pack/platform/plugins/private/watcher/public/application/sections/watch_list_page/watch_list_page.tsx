@@ -65,7 +65,7 @@ const stateColumnHeader = (
       {i18n.translate('xpack.watcher.sections.watchList.watchTable.stateHeader', {
         defaultMessage: 'State',
       })}{' '}
-      <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+      <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
     </span>
   </EuiToolTip>
 );
@@ -83,7 +83,7 @@ const conditionLastMetHeader = (
       {i18n.translate('xpack.watcher.sections.watchList.watchTable.lastFiredHeader', {
         defaultMessage: 'Condition last met',
       })}{' '}
-      <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+      <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
     </span>
   </EuiToolTip>
 );
@@ -101,7 +101,7 @@ const lastCheckedHeader = (
       {i18n.translate('xpack.watcher.sections.watchList.watchTable.lastTriggeredHeader', {
         defaultMessage: 'Last checked',
       })}{' '}
-      <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+      <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
     </span>
   </EuiToolTip>
 );
@@ -120,7 +120,7 @@ const commentHeader = (
       {i18n.translate('xpack.watcher.sections.watchList.watchTable.commentHeader', {
         defaultMessage: 'Comment',
       })}{' '}
-      <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+      <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
     </span>
   </EuiToolTip>
 );

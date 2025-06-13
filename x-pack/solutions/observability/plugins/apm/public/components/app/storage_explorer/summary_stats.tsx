@@ -185,7 +185,7 @@ function SummaryMetric({
         <EuiToolTip content={tooltipContent}>
           <EuiText size="s" color="subdued">
             {label}{' '}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
           </EuiText>
         </EuiToolTip>
       ) : (

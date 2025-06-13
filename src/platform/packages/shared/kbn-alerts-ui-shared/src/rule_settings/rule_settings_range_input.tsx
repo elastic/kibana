@@ -31,7 +31,7 @@ export const RuleSettingsRangeInput = memo((props: RuleSettingsRangeInputProps) 
         {label}
         &nbsp;
         {labelPopoverText && (
-          <EuiIconTip color="subdued" size="s" type="questionInCircle" content={labelPopoverText} />
+          <EuiIconTip color="subdued" size="s" type="question" content={labelPopoverText} />
         )}
       </div>
     );

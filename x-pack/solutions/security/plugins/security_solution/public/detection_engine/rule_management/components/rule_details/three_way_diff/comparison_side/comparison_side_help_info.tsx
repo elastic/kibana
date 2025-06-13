@@ -33,7 +33,7 @@ export function ComparisonSideHelpInfo({ options }: ComparisonSideHelpInfoProps)
 
   const button = (
     <EuiButtonIcon
-      iconType="questionInCircle"
+      iconType="question"
       onClick={togglePopover}
       aria-label="Open help popover"
     />
