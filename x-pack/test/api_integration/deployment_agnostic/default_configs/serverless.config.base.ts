@@ -14,6 +14,8 @@ import {
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { ServerlessProjectType } from '@kbn/es';
 import path from 'path';
+import { getPreConfiguredActions } from '../../../alerting_api_integration/common/config';
+import { getTlsWebhookServerUrls } from '../../../alerting_api_integration/common/lib/get_tls_webhook_servers';
 import { DeploymentAgnosticCommonServices, services } from '../services';
 
 interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
@@ -70,6 +72,7 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
 
     const packageRegistryConfig = path.join(__dirname, './fixtures/package_registry_config.yml');
     const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
+    const tlsWebhookServers = await getTlsWebhookServerUrls(6300, 6399);
 
     /**
      * This is used by CI to set the docker registry port
@@ -99,7 +102,7 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
           port: dockerRegistryPort,
           args: dockerArgs,
           waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 2 * 1000, // 2 minutes
+          waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
         },
       }),
       esTestCluster: {
@@ -128,6 +131,11 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
           '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
           '--xpack.uptime.service.devUrl=mockDevUrl',
           '--xpack.uptime.service.manifestUrl=mockDevUrl',
+          `--xpack.actions.preconfigured=${getPreConfiguredActions(tlsWebhookServers)}`,
+          '--xpack.alerting.rules.minimumScheduleInterval.value="1s"',
+          ...(dockerRegistryPort
+            ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
+            : []),
         ],
       },
       testFiles: options.testFiles,

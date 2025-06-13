@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import {
   replaceAnonymizedValuesWithOriginalValues,
   ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID,
@@ -17,6 +18,7 @@ import {
   ALERT_RULE_NAME,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
+  ALERT_URL,
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
 import {
@@ -30,9 +32,8 @@ import {
   ALERT_ATTACK_DISCOVERY_ALERT_IDS,
   ALERT_ATTACK_DISCOVERY_ALERTS_CONTEXT_COUNT,
 } from '../../../schedules/fields/field_names';
-import { v4 as uuidv4 } from 'uuid';
 
-import { transformToAlertDocuments } from '.';
+import { transformToAlertDocuments, transformToBaseAlertDocument } from '.';
 import { mockAuthenticatedUser } from '../../../../../__mocks__/mock_authenticated_user';
 import { mockCreateAttackDiscoveryAlertsParams } from '../../../../../__mocks__/mock_create_attack_discovery_alerts_params';
 
@@ -40,241 +41,387 @@ jest.mock('uuid', () => ({
   v4: jest.fn(),
 }));
 
-describe('transformToAlertDocuments', () => {
-  const mockNow = new Date('2025-04-24T17:36:25.812Z');
-  const spaceId = 'default';
+describe('Transform attack discoveries to alert documents', () => {
+  describe('transformToAlertDocuments', () => {
+    const mockNow = new Date('2025-04-24T17:36:25.812Z');
+    const spaceId = 'default';
 
-  beforeEach(() => {
-    jest.resetAllMocks();
+    beforeEach(() => {
+      jest.resetAllMocks();
 
-    (uuidv4 as unknown as jest.Mock)
-      .mockImplementationOnce(() => '879B171F-428B-4B23-99C3-EDE33334AB71')
-      .mockImplementationOnce(() => '123B171F-428B-4B23-99C3-EDE33334AB72');
-  });
-
-  it(`returns the expected ${ALERT_ATTACK_DISCOVERY_ALERT_IDS} field`, () => {
-    const result = transformToAlertDocuments({
-      authenticatedUser: mockAuthenticatedUser,
-      createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
-      now: mockNow,
-      spaceId,
+      (uuidv4 as unknown as jest.Mock)
+        .mockImplementationOnce(() => '879B171F-428B-4B23-99C3-EDE33334AB71')
+        .mockImplementationOnce(() => '123B171F-428B-4B23-99C3-EDE33334AB72');
     });
 
-    expect(result[0][ALERT_ATTACK_DISCOVERY_ALERT_IDS]).toEqual(
-      mockCreateAttackDiscoveryAlertsParams.attackDiscoveries[0].alertIds
-    );
+    it(`returns the expected ${ALERT_ATTACK_DISCOVERY_ALERT_IDS} field`, () => {
+      const result = transformToAlertDocuments({
+        authenticatedUser: mockAuthenticatedUser,
+        createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
+        now: mockNow,
+        spaceId,
+      });
+
+      expect(result[0][ALERT_ATTACK_DISCOVERY_ALERT_IDS]).toEqual(
+        mockCreateAttackDiscoveryAlertsParams.attackDiscoveries[0].alertIds
+      );
+    });
+
+    it(`returns an empty array for ${ALERT_ATTACK_DISCOVERY_ALERT_IDS} if no alertIds are provided`, () => {
+      const params = {
+        ...mockCreateAttackDiscoveryAlertsParams,
+        attackDiscoveries: [
+          {
+            ...mockCreateAttackDiscoveryAlertsParams.attackDiscoveries[0],
+            alertIds: [],
+          },
+        ],
+      };
+
+      const result = transformToAlertDocuments({
+        authenticatedUser: mockAuthenticatedUser,
+        createAttackDiscoveryAlertsParams: params,
+        now: mockNow,
+        spaceId,
+      });
+
+      expect(result[0][ALERT_ATTACK_DISCOVERY_ALERT_IDS]).toEqual([]);
+    });
+
+    it(`returns the expected ${ALERT_ATTACK_DISCOVERY_ALERTS_CONTEXT_COUNT} field`, () => {
+      const result = transformToAlertDocuments({
+        authenticatedUser: mockAuthenticatedUser,
+        createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
+        now: mockNow,
+        spaceId,
+      });
+
+      expect(result[0][ALERT_ATTACK_DISCOVERY_ALERTS_CONTEXT_COUNT]).toEqual(
+        mockCreateAttackDiscoveryAlertsParams.alertsContextCount
+      );
+    });
+
+    it(`returns the expected ${ALERT_UUID}`, () => {
+      uuidv4 as unknown as jest.Mock;
+
+      const result = transformToAlertDocuments({
+        authenticatedUser: mockAuthenticatedUser,
+        createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
+        now: mockNow,
+        spaceId,
+      });
+
+      expect(result[0][ALERT_UUID]).toBe('879B171F-428B-4B23-99C3-EDE33334AB71');
+    });
+
+    it(`returns the same ${ALERT_INSTANCE_ID} as the ${ALERT_UUID}`, () => {
+      const result = transformToAlertDocuments({
+        authenticatedUser: mockAuthenticatedUser,
+        createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
+        now: mockNow,
+        spaceId,
+      });
+
+      expect(result[0][ALERT_INSTANCE_ID]).toEqual(result[0][ALERT_UUID]);
+    });
+
+    it(`returns the expected ${ALERT_RISK_SCORE}`, () => {
+      const result = transformToAlertDocuments({
+        authenticatedUser: mockAuthenticatedUser,
+        createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
+        now: mockNow,
+        spaceId,
+      });
+
+      expect(result[0][ALERT_RISK_SCORE]).toEqual(1316);
+    });
+
+    it(`returns the expected ${ALERT_ATTACK_DISCOVERY_USER_ID}`, () => {
+      const result = transformToAlertDocuments({
+        authenticatedUser: mockAuthenticatedUser,
+        createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
+        now: mockNow,
+        spaceId,
+      });
+
+      expect(result[0][ALERT_ATTACK_DISCOVERY_USER_ID]).toEqual(mockAuthenticatedUser.profile_uid);
+    });
+
+    it(`returns the expected ${ALERT_ATTACK_DISCOVERY_USER_NAME}`, () => {
+      const result = transformToAlertDocuments({
+        authenticatedUser: mockAuthenticatedUser,
+        createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
+        now: mockNow,
+        spaceId,
+      });
+
+      expect(result[0][ALERT_ATTACK_DISCOVERY_USER_NAME]).toEqual(mockAuthenticatedUser.username);
+    });
+
+    it(`returns the expected ${ALERT_ATTACK_DISCOVERY_USERS}`, () => {
+      const result = transformToAlertDocuments({
+        authenticatedUser: mockAuthenticatedUser,
+        createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
+        now: mockNow,
+        spaceId,
+      });
+
+      expect(result[0][ALERT_ATTACK_DISCOVERY_USERS]).toEqual([
+        {
+          id: mockAuthenticatedUser.profile_uid,
+          name: mockAuthenticatedUser.username,
+        },
+      ]);
+    });
+
+    it('generates unique UUIDs for multiple alerts', () => {
+      const params = {
+        authenticatedUser: mockAuthenticatedUser,
+        createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
+        now: mockNow,
+        spaceId,
+      };
+
+      const result = transformToAlertDocuments(params);
+
+      const uuids = result.map((alert) => alert[ALERT_UUID]);
+      expect(uuids).toEqual([
+        '879B171F-428B-4B23-99C3-EDE33334AB71',
+        '123B171F-428B-4B23-99C3-EDE33334AB72',
+      ]);
+    });
+
+    it(`returns the expected ${ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN_WITH_REPLACEMENTS}`, () => {
+      const result = transformToAlertDocuments({
+        authenticatedUser: mockAuthenticatedUser,
+        createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
+        now: mockNow,
+        spaceId,
+      });
+
+      expect(result[0][ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN_WITH_REPLACEMENTS]).toEqual(
+        replaceAnonymizedValuesWithOriginalValues({
+          messageContent:
+            mockCreateAttackDiscoveryAlertsParams.attackDiscoveries[0].detailsMarkdown,
+          replacements: mockCreateAttackDiscoveryAlertsParams.replacements ?? {},
+        })
+      );
+    });
+
+    it('handles undefined entitySummaryMarkdown correctly', () => {
+      const params: CreateAttackDiscoveryAlertsParams = {
+        ...mockCreateAttackDiscoveryAlertsParams,
+        attackDiscoveries: [
+          {
+            ...mockCreateAttackDiscoveryAlertsParams.attackDiscoveries[0],
+            entitySummaryMarkdown: undefined, // <-- undefined
+          },
+        ],
+      };
+
+      const result = transformToAlertDocuments({
+        authenticatedUser: mockAuthenticatedUser,
+        createAttackDiscoveryAlertsParams: params,
+        now: mockNow,
+        spaceId,
+      });
+
+      expect(
+        result[0][ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS]
+      ).toBeUndefined();
+    });
+
+    it(`returns the expected ${ALERT_ATTACK_DISCOVERY_REPLACEMENTS}`, () => {
+      const result = transformToAlertDocuments({
+        authenticatedUser: mockAuthenticatedUser,
+        createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
+        now: mockNow,
+        spaceId,
+      });
+
+      expect(result[0][ALERT_ATTACK_DISCOVERY_REPLACEMENTS]).toEqual(
+        Object.entries(mockCreateAttackDiscoveryAlertsParams.replacements ?? {}).map(
+          ([uuid, value]) => ({
+            uuid,
+            value,
+          })
+        )
+      );
+    });
+
+    it('returns the expected static ALERT_RULE* fields', () => {
+      const result = transformToAlertDocuments({
+        authenticatedUser: mockAuthenticatedUser,
+        createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
+        now: mockNow,
+        spaceId,
+      });
+
+      expect(result[0][ALERT_RULE_CATEGORY]).toBe(
+        'Attack discovery ad hoc (placeholder rule category)'
+      );
+      expect(result[0][ALERT_RULE_NAME]).toBe('Attack discovery ad hoc (placeholder rule name)');
+      expect(result[0][ALERT_RULE_TYPE_ID]).toBe(ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID);
+      expect(result[0][ALERT_RULE_UUID]).toBe(ATTACK_DISCOVERY_AD_HOC_RULE_ID);
+    });
+
+    it('handles empty replacements correctly', () => {
+      const params = {
+        ...mockCreateAttackDiscoveryAlertsParams,
+        replacements: {},
+      };
+
+      const result = transformToAlertDocuments({
+        authenticatedUser: mockAuthenticatedUser,
+        createAttackDiscoveryAlertsParams: params,
+        now: mockNow,
+        spaceId,
+      });
+
+      expect(result[0][ALERT_ATTACK_DISCOVERY_REPLACEMENTS]).toBeUndefined();
+    });
   });
 
-  it(`returns an empty array for ${ALERT_ATTACK_DISCOVERY_ALERT_IDS} if no alertIds are provided`, () => {
-    const params = {
-      ...mockCreateAttackDiscoveryAlertsParams,
-      attackDiscoveries: [
-        {
+  describe('transformToBaseAlertDocument', () => {
+    const { attackDiscoveries, generationUuid, ...alertsParams } =
+      mockCreateAttackDiscoveryAlertsParams;
+
+    beforeEach(() => {
+      jest.resetAllMocks();
+
+      (uuidv4 as unknown as jest.Mock)
+        .mockImplementationOnce(() => '879B171F-428B-4B23-99C3-EDE33334AB71')
+        .mockImplementationOnce(() => '123B171F-428B-4B23-99C3-EDE33334AB72');
+    });
+
+    it(`returns the expected ${ALERT_ATTACK_DISCOVERY_ALERT_IDS} field`, () => {
+      const result = transformToBaseAlertDocument({
+        alertId: uuidv4(),
+        attackDiscovery: attackDiscoveries[0],
+        alertsParams,
+        spaceId: 'default',
+      });
+
+      expect(result[ALERT_ATTACK_DISCOVERY_ALERT_IDS]).toEqual(
+        mockCreateAttackDiscoveryAlertsParams.attackDiscoveries[0].alertIds
+      );
+    });
+
+    it(`returns an empty array for ${ALERT_ATTACK_DISCOVERY_ALERT_IDS} if no alertIds are provided`, () => {
+      const result = transformToBaseAlertDocument({
+        alertId: uuidv4(),
+        attackDiscovery: {
           ...mockCreateAttackDiscoveryAlertsParams.attackDiscoveries[0],
           alertIds: [],
         },
-      ],
-    };
+        alertsParams,
+        spaceId: 'default',
+      });
 
-    const result = transformToAlertDocuments({
-      authenticatedUser: mockAuthenticatedUser,
-      createAttackDiscoveryAlertsParams: params,
-      now: mockNow,
-      spaceId,
+      expect(result[ALERT_ATTACK_DISCOVERY_ALERT_IDS]).toEqual([]);
     });
 
-    expect(result[0][ALERT_ATTACK_DISCOVERY_ALERT_IDS]).toEqual([]);
-  });
+    it(`returns the expected ${ALERT_ATTACK_DISCOVERY_ALERTS_CONTEXT_COUNT} field`, () => {
+      const result = transformToBaseAlertDocument({
+        alertId: uuidv4(),
+        attackDiscovery: attackDiscoveries[0],
+        alertsParams,
+        spaceId: 'default',
+      });
 
-  it(`returns the expected ${ALERT_ATTACK_DISCOVERY_ALERTS_CONTEXT_COUNT} field`, () => {
-    const result = transformToAlertDocuments({
-      authenticatedUser: mockAuthenticatedUser,
-      createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
-      now: mockNow,
-      spaceId,
+      expect(result[ALERT_ATTACK_DISCOVERY_ALERTS_CONTEXT_COUNT]).toEqual(
+        mockCreateAttackDiscoveryAlertsParams.alertsContextCount
+      );
     });
 
-    expect(result[0][ALERT_ATTACK_DISCOVERY_ALERTS_CONTEXT_COUNT]).toEqual(
-      mockCreateAttackDiscoveryAlertsParams.alertsContextCount
-    );
-  });
+    it(`returns the expected ${ALERT_RISK_SCORE}`, () => {
+      const result = transformToBaseAlertDocument({
+        alertId: uuidv4(),
+        attackDiscovery: attackDiscoveries[0],
+        alertsParams,
+        spaceId: 'default',
+      });
 
-  it(`returns the expected ${ALERT_UUID}`, () => {
-    uuidv4 as unknown as jest.Mock;
-
-    const result = transformToAlertDocuments({
-      authenticatedUser: mockAuthenticatedUser,
-      createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
-      now: mockNow,
-      spaceId,
+      expect(result[ALERT_RISK_SCORE]).toEqual(1316);
     });
 
-    expect(result[0][ALERT_UUID]).toBe('879B171F-428B-4B23-99C3-EDE33334AB71');
-  });
+    it(`returns the expected ${ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN_WITH_REPLACEMENTS}`, () => {
+      const result = transformToBaseAlertDocument({
+        alertId: uuidv4(),
+        attackDiscovery: attackDiscoveries[0],
+        alertsParams,
+        spaceId: 'default',
+      });
 
-  it(`returns the same ${ALERT_INSTANCE_ID} as the ${ALERT_UUID}`, () => {
-    const result = transformToAlertDocuments({
-      authenticatedUser: mockAuthenticatedUser,
-      createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
-      now: mockNow,
-      spaceId,
+      expect(result[ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN_WITH_REPLACEMENTS]).toEqual(
+        replaceAnonymizedValuesWithOriginalValues({
+          messageContent:
+            mockCreateAttackDiscoveryAlertsParams.attackDiscoveries[0].detailsMarkdown,
+          replacements: mockCreateAttackDiscoveryAlertsParams.replacements ?? {},
+        })
+      );
     });
 
-    expect(result[0][ALERT_INSTANCE_ID]).toEqual(result[0][ALERT_UUID]);
-  });
-
-  it(`returns the expected ${ALERT_RISK_SCORE}`, () => {
-    const result = transformToAlertDocuments({
-      authenticatedUser: mockAuthenticatedUser,
-      createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
-      now: mockNow,
-      spaceId,
-    });
-
-    expect(result[0][ALERT_RISK_SCORE]).toEqual(1316);
-  });
-
-  it(`returns the expected ${ALERT_ATTACK_DISCOVERY_USER_ID}`, () => {
-    const result = transformToAlertDocuments({
-      authenticatedUser: mockAuthenticatedUser,
-      createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
-      now: mockNow,
-      spaceId,
-    });
-
-    expect(result[0][ALERT_ATTACK_DISCOVERY_USER_ID]).toEqual(mockAuthenticatedUser.profile_uid);
-  });
-
-  it(`returns the expected ${ALERT_ATTACK_DISCOVERY_USER_NAME}`, () => {
-    const result = transformToAlertDocuments({
-      authenticatedUser: mockAuthenticatedUser,
-      createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
-      now: mockNow,
-      spaceId,
-    });
-
-    expect(result[0][ALERT_ATTACK_DISCOVERY_USER_NAME]).toEqual(mockAuthenticatedUser.username);
-  });
-
-  it(`returns the expected ${ALERT_ATTACK_DISCOVERY_USERS}`, () => {
-    const result = transformToAlertDocuments({
-      authenticatedUser: mockAuthenticatedUser,
-      createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
-      now: mockNow,
-      spaceId,
-    });
-
-    expect(result[0][ALERT_ATTACK_DISCOVERY_USERS]).toEqual([
-      {
-        id: mockAuthenticatedUser.profile_uid,
-        name: mockAuthenticatedUser.username,
-      },
-    ]);
-  });
-
-  it('generates unique UUIDs for multiple alerts', () => {
-    const params = {
-      authenticatedUser: mockAuthenticatedUser,
-      createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
-      now: mockNow,
-      spaceId,
-    };
-
-    const result = transformToAlertDocuments(params);
-
-    const uuids = result.map((alert) => alert[ALERT_UUID]);
-    expect(uuids).toEqual([
-      '879B171F-428B-4B23-99C3-EDE33334AB71',
-      '123B171F-428B-4B23-99C3-EDE33334AB72',
-    ]);
-  });
-
-  it(`returns the expected ${ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN_WITH_REPLACEMENTS}`, () => {
-    const result = transformToAlertDocuments({
-      authenticatedUser: mockAuthenticatedUser,
-      createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
-      now: mockNow,
-      spaceId,
-    });
-
-    expect(result[0][ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN_WITH_REPLACEMENTS]).toEqual(
-      replaceAnonymizedValuesWithOriginalValues({
-        messageContent: mockCreateAttackDiscoveryAlertsParams.attackDiscoveries[0].detailsMarkdown,
-        replacements: mockCreateAttackDiscoveryAlertsParams.replacements ?? {},
-      })
-    );
-  });
-
-  it('handles undefined entitySummaryMarkdown correctly', () => {
-    const params: CreateAttackDiscoveryAlertsParams = {
-      ...mockCreateAttackDiscoveryAlertsParams,
-      attackDiscoveries: [
-        {
+    it('handles undefined entitySummaryMarkdown correctly', () => {
+      const result = transformToBaseAlertDocument({
+        alertId: uuidv4(),
+        attackDiscovery: {
           ...mockCreateAttackDiscoveryAlertsParams.attackDiscoveries[0],
           entitySummaryMarkdown: undefined, // <-- undefined
         },
-      ],
-    };
+        alertsParams,
+        spaceId: 'default',
+      });
 
-    const result = transformToAlertDocuments({
-      authenticatedUser: mockAuthenticatedUser,
-      createAttackDiscoveryAlertsParams: params,
-      now: mockNow,
-      spaceId,
+      expect(
+        result[ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS]
+      ).toBeUndefined();
     });
 
-    expect(
-      result[0][ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS]
-    ).toBeUndefined();
-  });
+    it(`returns the expected ${ALERT_ATTACK_DISCOVERY_REPLACEMENTS}`, () => {
+      const result = transformToBaseAlertDocument({
+        alertId: uuidv4(),
+        attackDiscovery: attackDiscoveries[0],
+        alertsParams,
+        spaceId: 'default',
+      });
 
-  it(`returns the expected ${ALERT_ATTACK_DISCOVERY_REPLACEMENTS}`, () => {
-    const result = transformToAlertDocuments({
-      authenticatedUser: mockAuthenticatedUser,
-      createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
-      now: mockNow,
-      spaceId,
+      expect(result[ALERT_ATTACK_DISCOVERY_REPLACEMENTS]).toEqual(
+        Object.entries(mockCreateAttackDiscoveryAlertsParams.replacements ?? {}).map(
+          ([uuid, value]) => ({
+            uuid,
+            value,
+          })
+        )
+      );
     });
 
-    expect(result[0][ALERT_ATTACK_DISCOVERY_REPLACEMENTS]).toEqual(
-      Object.entries(mockCreateAttackDiscoveryAlertsParams.replacements ?? {}).map(
-        ([uuid, value]) => ({
-          uuid,
-          value,
-        })
-      )
-    );
-  });
+    it('handles empty replacements correctly', () => {
+      const result = transformToBaseAlertDocument({
+        alertId: uuidv4(),
+        attackDiscovery: attackDiscoveries[0],
+        alertsParams: {
+          ...alertsParams,
+          replacements: {},
+        },
+        spaceId: 'default',
+      });
 
-  it('returns the expected static ALERT_RULE* fields', () => {
-    const result = transformToAlertDocuments({
-      authenticatedUser: mockAuthenticatedUser,
-      createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
-      now: mockNow,
-      spaceId,
+      expect(result[ALERT_ATTACK_DISCOVERY_REPLACEMENTS]).toBeUndefined();
     });
 
-    expect(result[0][ALERT_RULE_CATEGORY]).toBe(
-      'Attack discovery ad hoc (placeholder rule category)'
-    );
-    expect(result[0][ALERT_RULE_NAME]).toBe('Attack discovery ad hoc (placeholder rule name)');
-    expect(result[0][ALERT_RULE_TYPE_ID]).toBe(ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID);
-    expect(result[0][ALERT_RULE_UUID]).toBe(ATTACK_DISCOVERY_AD_HOC_RULE_ID);
-  });
+    it(`returns the expected ${ALERT_URL}`, () => {
+      const result = transformToBaseAlertDocument({
+        alertId: uuidv4(),
+        attackDiscovery: attackDiscoveries[0],
+        alertsParams,
+        publicBaseUrl: 'http://jest.com/test',
+        spaceId: 'very-nice-space',
+      });
 
-  it('handles empty replacements correctly', () => {
-    const params = {
-      ...mockCreateAttackDiscoveryAlertsParams,
-      replacements: {},
-    };
-
-    const result = transformToAlertDocuments({
-      authenticatedUser: mockAuthenticatedUser,
-      createAttackDiscoveryAlertsParams: params,
-      now: mockNow,
-      spaceId,
+      expect(result[ALERT_URL]).toEqual(
+        'http://jest.com/test/s/very-nice-space/app/security/attack_discovery?id=879B171F-428B-4B23-99C3-EDE33334AB71'
+      );
     });
-
-    expect(result[0][ALERT_ATTACK_DISCOVERY_REPLACEMENTS]).toBeUndefined();
   });
 });

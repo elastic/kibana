@@ -52,3 +52,16 @@ export const MISCONFIGURATION_STATUS: Record<string, string> = {
   PASSED: 'passed',
   FAILED: 'failed',
 };
+
+export const CSP_MOMENT_FORMAT = 'MMMM D, YYYY @ HH:mm:ss.SSS';
+
+// A mapping of in-development features to their status. These features should be hidden from users but can be easily
+// activated via a simple code change in a single location.
+export const INTERNAL_FEATURE_FLAGS = {
+  showManageRulesMock: false,
+  showFindingFlyoutEvidence: true,
+} as const;
+
+export const DETECTION_RULE_RULES_API_CURRENT_VERSION = '2023-10-31';
+
+export const FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings-default*';

@@ -8,7 +8,7 @@
  */
 
 import type { FC } from 'react';
-import React, { Fragment, useCallback, useMemo, useState } from 'react';
+import React, { Fragment, useCallback, useMemo, useRef, useState } from 'react';
 import { EuiSpacer, EuiText, useEuiPaddingSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -34,6 +34,7 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
 import useObservable from 'react-use/lib/useObservable';
 import { map } from 'rxjs';
+import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DiscoverGrid } from '../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../common/constants';
@@ -110,6 +111,20 @@ export function ContextAppContent({
   const services = useDiscoverServices();
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
+  const [initialTabId, setInitialTabId] = useState<string | undefined>(undefined);
+  const docViewerRef = useRef<DocViewerApi>(null);
+
+  const setExpandedDocWithInitialTab = useCallback(
+    (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => {
+      setExpandedDoc(doc);
+      setInitialTabId(options?.initialTabId);
+      if (options?.initialTabId) {
+        docViewerRef.current?.setSelectedTabId(options.initialTabId);
+      }
+    },
+    []
+  );
+
   const isAnchorLoading =
     anchorStatus === LoadingStatus.LOADING || anchorStatus === LoadingStatus.UNINITIALIZED;
   const arePredecessorsLoading =
@@ -159,10 +174,12 @@ export function ContextAppContent({
         onRemoveColumn={onRemoveColumn}
         onAddColumn={onAddColumn}
         onClose={() => setExpandedDoc(undefined)}
-        setExpandedDoc={setExpandedDoc}
+        initialTabId={initialTabId}
+        setExpandedDoc={setExpandedDocWithInitialTab}
+        docViewerRef={docViewerRef}
       />
     ),
-    [addFilter, dataView, onAddColumn, onRemoveColumn]
+    [addFilter, dataView, onAddColumn, onRemoveColumn, setExpandedDocWithInitialTab, initialTabId]
   );
 
   const onResize = useCallback<NonNullable<UnifiedDataTableProps['onResize']>>(
@@ -258,7 +275,7 @@ export function ContextAppContent({
               isPaginationEnabled={false}
               rowsPerPageState={getDefaultRowsPerPage(services.uiSettings)}
               controlColumnIds={controlColumnIds}
-              setExpandedDoc={setExpandedDoc}
+              setExpandedDoc={setExpandedDocWithInitialTab}
               onFilter={addFilter}
               onSetColumns={onSetColumns}
               configRowHeight={configRowHeight}

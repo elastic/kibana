@@ -723,13 +723,19 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
   })),
 }));
 
-jest.mock('@faker-js/faker', () => ({
-  faker: {
-    string: {
-      alpha: jest.fn().mockReturnValue('123'),
+jest.mock('@faker-js/faker', () => {
+  const originalModule = jest.requireActual('@faker-js/faker');
+  return {
+    ...originalModule,
+    faker: {
+      ...originalModule.faker,
+      string: {
+        ...originalModule.faker.string,
+        alpha: jest.fn().mockReturnValue('123'),
+      },
     },
-  },
-}));
+  };
+});
 
 jest.mock('@kbn/inference-endpoint-ui-common/src/hooks/use_providers', () => ({
   useProviders: jest.fn(() => ({

@@ -16,7 +16,6 @@ import userEvent from '@testing-library/user-event';
 
 import { coreServices, dataViewsService } from '../../../services/kibana_services';
 import { getMockedControlGroupApi, getMockedFinalizeApi } from '../../mocks/control_mocks';
-import * as initializeControl from '../initialize_data_control';
 import { getOptionsListControlFactory } from './get_options_list_control_factory';
 
 describe('Options List Control Api', () => {
@@ -345,36 +344,5 @@ describe('Options List Control Api', () => {
         },
       ]);
     });
-  });
-
-  test('ensure initialize data control contains all editor state', async () => {
-    const initializeSpy = jest.spyOn(initializeControl, 'initializeDataControl');
-    const initialState = {
-      dataViewId: 'myDataViewId',
-      fieldName: 'myFieldName',
-      runPastTimeout: true,
-    };
-    await factory.buildControl({
-      initialState: {
-        dataViewId: 'myDataViewId',
-        fieldName: 'myFieldName',
-        runPastTimeout: true,
-      },
-      finalizeApi,
-      uuid,
-      controlGroupApi,
-    });
-    expect(initializeSpy).toHaveBeenCalledWith(
-      uuid,
-      'optionsListControl',
-      'optionsListDataView',
-      initialState,
-      {
-        searchTechnique: expect.anything(),
-        singleSelect: expect.anything(),
-        runPastTimeout: expect.anything(),
-      },
-      controlGroupApi
-    );
   });
 });

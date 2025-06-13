@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 
-import { mockIndexPattern, TestProviders } from '../../../common/mock';
+import { mockDataViewSpec, TestProviders } from '../../../common/mock';
 import { OverviewHost } from '../overview_host';
 import { OverviewNetwork } from '../overview_network';
 
@@ -35,7 +35,7 @@ describe('EventCounts', () => {
     filters: [],
     from,
     indexNames: [],
-    indexPattern: mockIndexPattern,
+    dataViewSpec: mockDataViewSpec,
     setQuery: jest.fn(),
     to,
     query: {

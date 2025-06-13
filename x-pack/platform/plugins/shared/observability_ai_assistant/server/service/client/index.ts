@@ -28,8 +28,13 @@ import {
 } from 'rxjs';
 import { v4 } from 'uuid';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
-import { withInferenceSpan, type InferenceClient } from '@kbn/inference-plugin/server';
-import { ChatCompleteResponse, FunctionCallingMode, ToolChoiceType } from '@kbn/inference-common';
+import { withInferenceSpan } from '@kbn/inference-tracing';
+import {
+  ChatCompleteResponse,
+  FunctionCallingMode,
+  InferenceClient,
+  ToolChoiceType,
+} from '@kbn/inference-common';
 import { isLockAcquisitionError } from '@kbn/lock-manager';
 import { resourceNames } from '..';
 import {
@@ -68,11 +73,12 @@ import { getGeneratedTitle } from './operators/get_generated_title';
 import { runStartupMigrations } from '../startup_migrations/run_startup_migrations';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
-import { waitForKbModel, warmupModel } from '../inference_endpoint';
+import { deleteInferenceEndpoint, waitForKbModel, warmupModel } from '../inference_endpoint';
 import { reIndexKnowledgeBaseWithLock } from '../knowledge_base_service/reindex_knowledge_base';
 import { populateMissingSemanticTextFieldWithLock } from '../startup_migrations/populate_missing_semantic_text_fields';
 import { createOrUpdateKnowledgeBaseIndexAssets } from '../index_assets/create_or_update_knowledge_base_index_assets';
 import { getInferenceIdFromWriteIndex } from '../knowledge_base_service/get_inference_id_from_write_index';
+import { LEGACY_CUSTOM_INFERENCE_ID } from '../../../common/preconfigured_inference_ids';
 
 const MAX_FUNCTION_CALLS = 8;
 
@@ -195,11 +201,7 @@ export class ObservabilityAIAssistantClient {
     kibanaPublicUrl?: string;
     userInstructions?: Instruction[];
     simulateFunctionCalling?: boolean;
-    disableFunctions?:
-      | boolean
-      | {
-          except: string[];
-        };
+    disableFunctions?: boolean;
   }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
     return withInferenceSpan('run_tools', () => {
       const isConversationUpdate = persist && !!predefinedConversationId;
@@ -246,7 +248,9 @@ export class ObservabilityAIAssistantClient {
             applicationInstructions: functionClient.getInstructions(),
             kbUserInstructions,
             apiUserInstructions,
-            availableFunctionNames: functionClient.getFunctions().map((fn) => fn.definition.name),
+            availableFunctionNames: disableFunctions
+              ? []
+              : functionClient.getFunctions().map((fn) => fn.definition.name),
           });
         }),
         shareReplay()
@@ -505,11 +509,10 @@ export class ObservabilityAIAssistantClient {
         convertInferenceEventsToStreamingEvents(),
         failOnNonExistingFunctionCall({ functions }),
         tap((event) => {
-          if (
-            event.type === StreamingChatResponseEventType.ChatCompletionChunk &&
-            this.dependencies.logger.isLevelEnabled('trace')
-          ) {
-            this.dependencies.logger.trace(`Received chunk: ${JSON.stringify(event.message)}`);
+          if (event.type === StreamingChatResponseEventType.ChatCompletionChunk) {
+            this.dependencies.logger.trace(
+              () => `Received chunk: ${JSON.stringify(event.message)}`
+            );
           }
         }),
         shareReplay()
@@ -721,6 +724,15 @@ export class ObservabilityAIAssistantClient {
           config: this.dependencies.config,
           esClient: this.dependencies.esClient,
         });
+
+        // If the inference ID switched to a preconfigured inference endpoint, delete the legacy custom inference endpoint if it exists.
+        if (currentInferenceId === LEGACY_CUSTOM_INFERENCE_ID) {
+          void deleteInferenceEndpoint({
+            esClient,
+            logger,
+            inferenceId: LEGACY_CUSTOM_INFERENCE_ID,
+          });
+        }
       })
       .catch((e) => {
         if (isLockAcquisitionError(e)) {
@@ -818,6 +830,21 @@ export class ObservabilityAIAssistantClient {
         ...entry,
         type: KnowledgeBaseType.Contextual,
       },
+    });
+  };
+
+  addKnowledgeBaseBulkEntries = async ({
+    entries,
+  }: {
+    entries: Array<Omit<KnowledgeBaseEntry, '@timestamp' | 'type'>>;
+  }): Promise<void> => {
+    return this.dependencies.knowledgeBaseService.addBulkEntries({
+      entries: entries.map((entry) => ({
+        ...entry,
+        type: KnowledgeBaseType.Contextual,
+      })),
+      user: this.dependencies.user,
+      namespace: this.dependencies.namespace,
     });
   };
 

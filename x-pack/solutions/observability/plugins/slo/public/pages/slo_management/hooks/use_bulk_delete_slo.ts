@@ -15,7 +15,7 @@ import { useBulkOperation } from '../context/bulk_operation';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
-export function useBulkDeleteSlo() {
+export function useBulkDeleteSlo({ onConfirm }: { onConfirm?: () => void } = {}) {
   const {
     notifications: { toasts },
   } = useKibana().services;
@@ -29,22 +29,13 @@ export function useBulkDeleteSlo() {
   >(
     ['bulkDeleteSlo'],
     ({ items }) => {
-      try {
-        return sloClient.fetch('POST /api/observability/slos/_bulk_delete 2023-10-31', {
-          params: {
-            body: {
-              list: items.map(({ id }) => id),
-            },
+      return sloClient.fetch('POST /api/observability/slos/_bulk_delete 2023-10-31', {
+        params: {
+          body: {
+            list: items.map(({ id }) => id),
           },
-        });
-      } catch (error) {
-        return Promise.reject(
-          i18n.translate('xpack.slo.bulkDelete.errorMessage', {
-            defaultMessage: 'Failed to bulk delete {count} SLOs, something went wrong: {error}',
-            values: { error: String(error), count: items.length },
-          })
-        );
-      }
+        },
+      });
     },
     {
       onError: (error, { items }) => {
@@ -64,6 +55,8 @@ export function useBulkDeleteSlo() {
             values: { count: items.length },
           })
         );
+
+        onConfirm?.();
       },
     }
   );

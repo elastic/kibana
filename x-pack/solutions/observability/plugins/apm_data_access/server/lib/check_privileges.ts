@@ -7,7 +7,8 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
-import type { APMIndices } from '..';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
+
 export interface ApmDataAccessPrivilegesCheck {
   request: KibanaRequest;
   security?: SecurityPluginStart;
@@ -16,8 +17,7 @@ export interface ApmDataAccessPrivilegesCheck {
 
 export function convertIndiciesToPrivilege(apmIndices: APMIndices) {
   return Object.values(apmIndices)
-    .map((value) => value.split(','))
-    .flat()
+    .flatMap((value) => value.split(','))
     .reduce<Record<string, string[]>>((obj, item, index) => {
       obj[item] = ['read'];
       return obj;

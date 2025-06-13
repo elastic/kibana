@@ -436,7 +436,6 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                   )}
                   value={indexPrivilege.query ?? ''}
                   onChange={this.onQueryChange}
-                  useDarkTheme={this.props.isDarkMode}
                   options={{
                     readOnly: this.props.isRoleReadOnly,
                     minimap: {

@@ -21,7 +21,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getServices } from '../../kibana_services';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
 interface Props {
   urlBasePath: string;
@@ -30,8 +30,9 @@ interface Props {
 }
 
 export function SampleDataCard({ urlBasePath, onDecline, onConfirm }: Props) {
-  const IS_DARK_THEME = getServices().theme.getTheme().darkMode;
-  const cardGraphicFile = !IS_DARK_THEME
+  const isDarkMode = useKibanaIsDarkMode();
+
+  const cardGraphicFile = !isDarkMode
     ? 'illustration_integrations_lightmode.png'
     : 'illustration_integrations_darkmode.png';
   const cardGraphicURL = `${urlBasePath}/plugins/home/assets/common/${cardGraphicFile}`;

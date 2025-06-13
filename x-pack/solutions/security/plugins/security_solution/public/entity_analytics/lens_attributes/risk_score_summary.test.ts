@@ -19,11 +19,12 @@ jest.mock('../../sourcerer/containers', () => ({
     selectedPatterns: ['auditbeat-mytest-*'],
     dataViewId: 'security-solution-my-test',
     indicesExist: true,
+    sourcererDataView: {},
   }),
 }));
 
 jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('2cc5663b-f062-43f8-8688-fc8166c2ca8e'),
+  v4: jest.fn().mockReturnValue('generated-uuid'),
 }));
 
 describe('getRiskScoreSummaryAttributes', () => {

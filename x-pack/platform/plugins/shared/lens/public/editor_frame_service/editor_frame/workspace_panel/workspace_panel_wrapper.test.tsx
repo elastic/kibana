@@ -99,7 +99,7 @@ describe('workspace_panel_wrapper', () => {
   });
 
   it('should render its children', async () => {
-    const customElementText = faker.random.word();
+    const customElementText = faker.word.words();
     renderWorkspacePanelWrapper({ children: <span>{customElementText}</span> });
     expect(screen.getByText(customElementText)).toBeInTheDocument();
   });

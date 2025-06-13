@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import originalExpect from 'expect';
 import { defaultNamespace } from '@kbn/test-suites-xpack/functional/apps/dataset_quality/data';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
@@ -29,6 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'observabilityLogsExplorer',
     'datasetQuality',
     'svlCommonPage',
+    'discover',
   ]);
   const testSubjects = getService('testSubjects');
   const synthtrace = getService('svlLogsSynthtraceClient');
@@ -338,7 +340,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(datasetSelectorText).to.eql(regularDatasetName);
       });
 
-      it('should go log explorer for degraded docs when the button next to breakdown selector is clicked', async () => {
+      it('should go to discover for degraded docs when the button next to breakdown selector is clicked', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: apacheAccessDataStreamName,
         });
@@ -347,10 +349,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsLinkToDiscover
         );
 
-        // Confirm dataset selector text in observability logs explorer
-        const datasetSelectorText =
-          await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
-        expect(datasetSelectorText).to.contain(apacheAccessDatasetName);
+        // Confirm dataset selector text in discover
+        await retry.try(async () => {
+          const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
+          originalExpect(datasetSelectorText).toMatch(apacheAccessDatasetName);
+        });
       });
     });
 

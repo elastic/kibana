@@ -33,6 +33,7 @@ jest.mock('../../../../common/components/link_to', () => {
     }),
   };
 });
+jest.mock('../../../../data_view_manager/hooks/use_data_view');
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -112,6 +113,7 @@ describe('useRuleFromTimeline', () => {
         ...mockSourcererScope,
         dataViewId: 'custom-data-view-id',
         selectedPatterns: ['awesome-*'],
+        sourcererDataView: {},
       });
     });
 

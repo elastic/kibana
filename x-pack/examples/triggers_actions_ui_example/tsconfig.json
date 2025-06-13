@@ -36,10 +36,5 @@
     "@kbn/response-ops-rule-form",
     "@kbn/task-manager-plugin",
     "@kbn/fields-metadata-plugin",
-    "@kbn/response-ops-alerts-filters-form",
-    "@kbn/core-http-browser",
-    "@kbn/core-notifications-browser",
-    "@kbn/response-ops-rules-apis",
-    "@kbn/alerting-types",
   ]
 }

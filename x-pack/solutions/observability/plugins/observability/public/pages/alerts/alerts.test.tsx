@@ -40,6 +40,11 @@ mockUseKibanaReturnValue.services.application.capabilities = {
     show: true,
   },
 };
+mockUseKibanaReturnValue.services.spaces.getActiveSpace = jest
+  .fn()
+  .mockImplementation(() =>
+    Promise.resolve({ id: 'space-id', name: 'space-name', disabledFeatures: [] })
+  );
 
 const mockObservabilityAIAssistant = observabilityAIAssistantPluginMock.createStartContract();
 

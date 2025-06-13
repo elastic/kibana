@@ -7,11 +7,17 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ThemeServiceStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Ast } from '@kbn/interpreter';
 import { buildExpressionFunction, DatatableRow } from '@kbn/expressions-plugin/common';
-import { PaletteRegistry, CustomPaletteParams, CUSTOM_PALETTE } from '@kbn/coloring';
+import {
+  PaletteRegistry,
+  CustomPaletteParams,
+  CUSTOM_PALETTE,
+  applyPaletteParams,
+  getOverridePaletteStops,
+  PaletteOutput,
+} from '@kbn/coloring';
 import type {
   GaugeExpressionFunctionDefinition,
   GaugeShape,
@@ -37,7 +43,6 @@ import type {
 import { getSuggestions } from './suggestions';
 import { GROUP_ID, LENS_GAUGE_ID, GaugeVisualizationState } from './constants';
 import { GaugeToolbar } from './toolbar_component';
-import { applyPaletteParams } from '../../shared_components';
 import { GaugeDimensionEditor } from './dimension_editor';
 import { generateId } from '../../id_generator';
 import { getAccessorsFromState } from './utils';
@@ -52,7 +57,6 @@ import {
 
 interface GaugeVisualizationDeps {
   paletteService: PaletteRegistry;
-  theme: ThemeServiceStart;
 }
 
 export const isNumericMetric = (op: OperationMetadata) =>
@@ -61,12 +65,17 @@ export const isNumericMetric = (op: OperationMetadata) =>
 export const isNumericDynamicMetric = (op: OperationMetadata) =>
   isNumericMetric(op) && !op.isStaticValue;
 
-function computePaletteParams(params: CustomPaletteParams) {
+function computePaletteParams(
+  paletteService: PaletteRegistry,
+  palette: PaletteOutput<CustomPaletteParams>
+) {
+  const stops = getOverridePaletteStops(paletteService, palette);
+
   return {
-    ...params,
+    ...palette.params,
     // rewrite colors and stops as two distinct arguments
-    colors: (params?.stops || []).map(({ color }) => color),
-    stops: params?.name === 'custom' ? (params?.stops || []).map(({ stop }) => stop) : [],
+    colors: stops?.map(({ color }) => color),
+    stops: palette.params?.name === 'custom' ? stops?.map(({ stop }) => stop) : [],
     reverse: false, // managed at UI level
   };
 }
@@ -144,7 +153,9 @@ const toExpression = (
     shape: state.shape ?? GaugeShapes.HORIZONTAL_BULLET,
     colorMode: state?.colorMode ?? 'none',
     palette: state.palette?.params
-      ? paletteService.get(CUSTOM_PALETTE).toExpression(computePaletteParams(state.palette.params))
+      ? paletteService
+          .get(CUSTOM_PALETTE)
+          .toExpression(computePaletteParams(paletteService, state.palette))
       : undefined,
     ticksPosition: state.ticksPosition ?? 'auto',
     labelMinor: state.labelMinor,

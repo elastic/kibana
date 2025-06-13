@@ -12,6 +12,7 @@ import {
   ESQLAstQueryExpression,
   ESQLFunction,
   ESQLSingleAstItem,
+  ESQLSource,
   isESQLNamedParamLiteral,
 } from '@kbn/esql-ast/src/types';
 import {
@@ -20,7 +21,6 @@ import {
   getFunctionDefinition,
   getFunctionSignatures,
   type ESQLCallbacks,
-  getPolicyHelper,
 } from '@kbn/esql-validation-autocomplete';
 import { getFieldsByTypeRetriever } from '@kbn/esql-validation-autocomplete/src/autocomplete/autocomplete';
 import {
@@ -32,10 +32,10 @@ import {
   getValidSignaturesAndTypesToSuggestNext,
 } from '@kbn/esql-validation-autocomplete/src/autocomplete/helper';
 import { ENRICH_MODES } from '@kbn/esql-validation-autocomplete/src/definitions/commands_helpers';
-import { modeDescription } from '@kbn/esql-validation-autocomplete/src/autocomplete/commands/enrich/util';
-import { i18n } from '@kbn/i18n';
-import { buildQueryUntilPreviousCommand } from '@kbn/esql-validation-autocomplete/src/shared/resources_helpers';
 import { within } from '@kbn/esql-validation-autocomplete/src/shared/helpers';
+import { getPolicyHelper } from '@kbn/esql-validation-autocomplete/src/shared/resources_helpers';
+import { i18n } from '@kbn/i18n';
+import { modeDescription } from '@kbn/esql-validation-autocomplete/src/autocomplete/commands/enrich/util';
 import { monacoPositionToOffset } from '../shared/utils';
 import { monaco } from '../../../monaco_imports';
 import { getVariablesHoverContent } from './helpers';
@@ -119,6 +119,7 @@ export async function getHoverItem(
   }
 
   if (node.type === 'source' && node.sourceType === 'policy') {
+    const source = node as ESQLSource;
     const { getPolicyMetadata } = getPolicyHelper(resourceRetriever);
     const policyMetadata = await getPolicyMetadata(node.name);
     if (policyMetadata) {
@@ -142,18 +143,22 @@ export async function getHoverItem(
         ]
       );
     }
-  }
 
-  if (node.type === 'mode') {
-    const mode = ENRICH_MODES.find(({ name }) => name === node!.name)!;
-    hoverContent.contents.push(
-      ...[
-        { value: modeDescription },
-        {
-          value: `**${mode.name}**: ${mode.description}`,
-        },
-      ]
-    );
+    if (!!source.prefix) {
+      const mode = ENRICH_MODES.find(
+        ({ name }) => '_' + name === source.prefix!.valueUnquoted.toLowerCase()
+      )!;
+      if (mode) {
+        hoverContent.contents.push(
+          ...[
+            { value: modeDescription },
+            {
+              value: `**${mode.name}**: ${mode.description}`,
+            },
+          ]
+        );
+      }
+    }
   }
 
   return hoverContent;
@@ -166,10 +171,7 @@ async function getHintForFunctionArg(
   offset: number,
   resourceRetriever?: ESQLCallbacks
 ) {
-  const queryForFields = getQueryForFields(
-    buildQueryUntilPreviousCommand(root.commands, query),
-    root.commands
-  );
+  const queryForFields = getQueryForFields(query, root);
   const { getFieldsMap } = getFieldsByTypeRetriever(queryForFields, resourceRetriever);
 
   const fnDefinition = getFunctionDefinition(fnNode.name);

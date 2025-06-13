@@ -6,13 +6,9 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 
-import {
-  ASSIGNEES_ADD_BUTTON_TEST_ID,
-  ASSIGNEES_EMPTY_TEST_ID,
-  ASSIGNEES_TITLE_TEST_ID,
-} from './test_ids';
+import { ASSIGNEES_ADD_BUTTON_TEST_ID, ASSIGNEES_EMPTY_TEST_ID } from './test_ids';
 import { Assignees } from './assignees';
 
 import { useGetCurrentUserProfile } from '../../../../common/components/user_profiles/use_get_current_user_profile';
@@ -25,9 +21,9 @@ import { ASSIGNEES_APPLY_BUTTON_TEST_ID } from '../../../../common/components/as
 import { useLicense } from '../../../../common/hooks/use_license';
 import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
 import {
+  USER_AVATAR_ITEM_TEST_ID,
   USERS_AVATARS_COUNT_BADGE_TEST_ID,
   USERS_AVATARS_PANEL_TEST_ID,
-  USER_AVATAR_ITEM_TEST_ID,
 } from '../../../../common/components/user_profiles/test_ids';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
@@ -92,7 +88,6 @@ describe('<Assignees />', () => {
   it('should render component', () => {
     const { getByTestId } = renderAssignees();
 
-    expect(getByTestId(ASSIGNEES_TITLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(USERS_AVATARS_PANEL_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID)).not.toBeDisabled();

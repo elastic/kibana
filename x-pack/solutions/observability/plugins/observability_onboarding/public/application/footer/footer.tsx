@@ -63,7 +63,7 @@ export const Footer: FunctionComponent = () => {
       ),
       linkARIALabel: i18n.translate(
         'xpack.observability_onboarding.experimentalOnboardingFlow.exploreForumFlexItemLinkARIALabel',
-        { defaultMessage: 'Open Elastic Discuss forum' }
+        { defaultMessage: 'Discuss forum. Open Elastic forum' }
       ),
       link: URL_FORUM,
       testSubject: 'observabilityOnboardingFooterDiscussForumLink',

@@ -9,7 +9,6 @@
 
 import {
   ESQLAst,
-  ESQLAstTimeseriesCommand,
   ESQLColumn,
   ESQLCommand,
   ESQLCommandOption,
@@ -55,7 +54,6 @@ import type {
 } from './types';
 
 import { validate as validateJoinCommand } from './commands/join';
-import { validate as validateTimeseriesCommand } from './commands/metrics';
 
 /**
  * ES|QL validation public API
@@ -118,6 +116,9 @@ export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   getVariables: [],
   canSuggestVariables: [],
   getJoinIndices: [],
+  getTimeseriesIndices: [],
+  getEditorExtensions: [],
+  getInferenceEndpoints: [],
 };
 
 /**
@@ -217,16 +218,10 @@ function validateCommand(
   }
 
   if (commandDef.validate) {
-    messages.push(...commandDef.validate(command, references));
+    messages.push(...commandDef.validate(command, references, ast));
   }
 
   switch (commandDef.name) {
-    case 'ts': {
-      const metrics = command as ESQLAstTimeseriesCommand;
-      const metricsCommandErrors = validateTimeseriesCommand(metrics, references);
-      messages.push(...metricsCommandErrors);
-      break;
-    }
     case 'join': {
       const join = command as ESQLAstJoinCommand;
       const joinCommandErrors = validateJoinCommand(join, references);
@@ -411,7 +406,7 @@ export function validateSources(
 
     if (source.sourceType === 'index') {
       const index = source.index;
-      const sourceName = source.cluster ? source.name : index?.valueUnquoted;
+      const sourceName = source.prefix ? source.name : index?.valueUnquoted;
       if (!sourceName) continue;
 
       if (sourceExists(sourceName, availableSources) && !hasWildcard(sourceName)) {

@@ -11,7 +11,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLink,
   EuiPagination,
   EuiPanel,
   EuiSkeletonText,
@@ -31,8 +30,6 @@ import { useHistory } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
 import { ExceptionStacktrace, PlaintextStacktrace, Stacktrace } from '@kbn/event-stacktrace';
 import type { AT_TIMESTAMP } from '../../../../../common/es_fields/apm';
-import { ERROR_GROUP_ID } from '../../../../../common/es_fields/apm';
-import { TraceSearchType } from '../../../../../common/trace_explorer';
 import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
@@ -40,7 +37,6 @@ import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { isPending, isSuccess } from '../../../../hooks/use_fetcher';
-import { useTraceExplorerEnabledSetting } from '../../../../hooks/use_trace_explorer_enabled_setting';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { TransactionDetailLink } from '../../../shared/links/apm/transaction_detail_link';
 import { DiscoverErrorLink } from '../../../shared/links/discover_links/discover_error_link';
@@ -50,7 +46,6 @@ import { Summary } from '../../../shared/summary';
 import { HttpInfoSummaryItem } from '../../../shared/summary/http_info_summary_item';
 import { UserAgentSummaryItem } from '../../../shared/summary/user_agent_summary_item';
 import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
-import { TransactionTab } from '../../transaction_details/waterfall_with_summary/transaction_tabs';
 import type { ErrorTab } from './error_tabs';
 import { ErrorTabKey, getTabs } from './error_tabs';
 import { ErrorUiActionsContextMenu } from './error_ui_actions_context_menu';
@@ -97,12 +92,7 @@ export function ErrorSampleDetails({
 
   const router = useApmRouter();
 
-  const isTraceExplorerEnabled = useTraceExplorerEnabledSetting();
-
-  const {
-    path: { groupId },
-    query,
-  } = useAnyOfApmParams(
+  const { query } = useAnyOfApmParams(
     '/services/{serviceName}/errors/{groupId}',
     '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}',
     '/mobile-services/{serviceName}/errors-and-crashes/crashes/{groupId}'
@@ -181,19 +171,6 @@ export function ErrorSampleDetails({
   const serviceVersion = error.service.version;
   const isUnhandled = error.error.exception?.[0]?.handled === false;
 
-  const traceExplorerLink = router.link('/traces/explorer/waterfall', {
-    query: {
-      ...query,
-      showCriticalPath: false,
-      query: `${ERROR_GROUP_ID}:${groupId}`,
-      type: TraceSearchType.kql,
-      traceId: '',
-      transactionId: '',
-      waterfallItemId: '',
-      detailTab: TransactionTab.timeline,
-    },
-  });
-
   return (
     <EuiPanel hasBorder={true}>
       <EuiFlexGroup alignItems="center">
@@ -216,22 +193,6 @@ export function ErrorSampleDetails({
             />
           )}
         </EuiFlexItem>
-        {isTraceExplorerEnabled && (
-          <EuiFlexItem grow={false}>
-            <EuiLink data-test-subj="apmErrorSampleDetailsLink" href={traceExplorerLink}>
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem>
-                  <EuiIcon type="apmTrace" />
-                </EuiFlexItem>
-                <EuiFlexItem css={{ whiteSpace: 'nowrap' }}>
-                  {i18n.translate('xpack.apm.errorSampleDetails.viewOccurrencesInTraceExplorer', {
-                    defaultMessage: 'Explore traces with this error',
-                  })}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiLink>
-          </EuiFlexItem>
-        )}
         {externalContextMenuItems.value?.length ? (
           <ErrorUiActionsContextMenu items={externalContextMenuItems.value} />
         ) : undefined}

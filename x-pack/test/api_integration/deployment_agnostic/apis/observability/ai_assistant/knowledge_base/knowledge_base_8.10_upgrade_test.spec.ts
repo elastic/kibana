@@ -36,7 +36,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   describe('Knowledge base: when upgrading from 8.10 to 8.18', function () {
     // Intentionally skipped in all serverless environnments (local and MKI)
     // because the migration scenario being tested is not relevant to MKI and Serverless.
-    this.tags(['skipServerless']);
+    this.tags(['skipServerless', 'skipCloud']);
 
     before(async () => {
       // in a real environment we will use the ELSER inference endpoint (`.elser-2-elasticsearch`) which is pre-installed

@@ -20,7 +20,7 @@ export interface DataBounds {
   fallback?: boolean;
 }
 
-export interface PaletteOutput<T = { [key: string]: unknown }> {
+export interface PaletteOutput<T = Record<string, unknown>> {
   type: 'palette' | 'system_palette';
   name: string;
   params?: T;
@@ -140,7 +140,9 @@ export interface CustomPaletteParams {
   progression?: 'fixed';
   rangeMin?: number;
   rangeMax?: number;
+  /** lower color stops */
   stops?: ColorStop[];
+  /** upper color stops */
   colorStops?: ColorStop[];
   steps?: number;
   maxSteps?: number | undefined;

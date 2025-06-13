@@ -10,7 +10,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CenteredLoadingSpinner } from '../../../../../../common/components/centered_loading_spinner';
 import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
-import { useDefinedLocalStorage } from '../../../../hooks/use_stored_state';
 import type { OnboardingCardComponent } from '../../../../../types';
 import * as i18n from './translations';
 import { OnboardingCardContentPanel } from '../../common/card_content_panel';
@@ -19,6 +18,7 @@ import { CardSubduedText } from '../../common/card_subdued_text';
 import { ConnectorsMissingPrivilegesCallOut } from '../../common/connectors/missing_privileges';
 import type { AIConnector } from '../../common/connectors/types';
 import type { AIConnectorCardMetadata } from './types';
+import { useDefinedLocalStorage } from '../../../../../../common/lib/integrations/hooks/use_stored_state';
 
 const LlmPerformanceMatrixDocsLink = React.memo<{ text: string }>(({ text }) => {
   const { llmPerformanceMatrix } = useKibana().services.docLinks.links.securitySolution;

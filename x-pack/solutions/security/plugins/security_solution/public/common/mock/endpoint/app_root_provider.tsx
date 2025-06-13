@@ -10,7 +10,7 @@ import React, { memo } from 'react';
 import { Provider } from 'react-redux';
 import { Router } from '@kbn/shared-ux-router';
 import type { History } from 'history';
-import useObservable from 'react-use/lib/useObservable';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type { Store } from 'redux';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -37,9 +37,7 @@ export const AppRootProvider = memo<{
   queryClient: QueryClient;
   children: ReactNode | ReactNode[];
 }>(({ store, history, coreStart, queryClient, startServices, children }) => {
-  const { theme: themeStart } = coreStart;
-  const theme = useObservable(themeStart.theme$, themeStart.getTheme());
-  const isDarkMode = theme.darkMode;
+  const isDarkMode = useKibanaIsDarkMode();
 
   return (
     <KibanaRenderContextProvider {...coreStart}>

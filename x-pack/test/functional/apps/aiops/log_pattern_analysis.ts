@@ -25,7 +25,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
   }
 
-  describe('log pattern analysis', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/200836
+  describe.skip('log pattern analysis', function () {
     let tabsCount = 1;
 
     afterEach(async () => {

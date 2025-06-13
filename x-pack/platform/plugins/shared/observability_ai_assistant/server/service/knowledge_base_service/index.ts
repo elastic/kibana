@@ -462,6 +462,55 @@ export class KnowledgeBaseService {
     }
   };
 
+  addBulkEntries = async ({
+    entries,
+    user,
+    namespace,
+  }: {
+    entries: Array<Omit<KnowledgeBaseEntry, '@timestamp'>>;
+    user?: { name: string; id?: string };
+    namespace: string;
+  }): Promise<void> => {
+    if (!this.dependencies.config.enableKnowledgeBase) {
+      return;
+    }
+
+    try {
+      const bulkBody = entries.flatMap((entry) => [
+        { index: { _index: resourceNames.writeIndexAlias.kb, _id: entry.id } },
+        {
+          '@timestamp': new Date().toISOString(),
+          ...entry,
+          ...(entry.text ? { semantic_text: entry.text } : {}),
+          user,
+          namespace,
+        },
+      ]);
+
+      const bulkResult = await this.dependencies.esClient.asInternalUser.bulk({
+        refresh: 'wait_for',
+        body: bulkBody,
+      });
+
+      if (bulkResult.errors) {
+        const errorMessages = bulkResult.items
+          .filter((item: any) => item.index?.error)
+          .map((item: any) => item.index?.error?.reason);
+        throw new Error(`Indexing failed: ${errorMessages.join(', ')}`);
+      }
+
+      this.dependencies.logger.debug(
+        `Successfully added ${entries.length} entries to the knowledge base`
+      );
+    } catch (error) {
+      this.dependencies.logger.error(`Failed to add entries to the knowledge base: ${error}`);
+      if (isInferenceEndpointMissingOrUnavailable(error)) {
+        throwKnowledgeBaseNotReady(error);
+      }
+      throw error;
+    }
+  };
+
   deleteEntry = async ({ id }: { id: string }): Promise<void> => {
     try {
       await this.dependencies.esClient.asInternalUser.delete({

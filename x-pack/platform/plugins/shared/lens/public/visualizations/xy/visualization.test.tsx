@@ -109,7 +109,6 @@ set(core, 'application.capabilities.visualize.save', true);
 const xyVisualization = getXyVisualization({
   paletteService: paletteServiceMock,
   fieldFormats: fieldFormatsMock,
-  useLegacyTimeAxis: false,
   kibanaTheme: themeServiceMock.createStartContract(),
   eventAnnotationService: eventAnnotationServiceMock,
   core,
@@ -224,15 +223,17 @@ describe('xy_visualization', () => {
                 "colorMode": Object {
                   "type": "categorical",
                 },
-                "paletteId": "eui_amsterdam_color_blind",
+                "paletteId": "default",
                 "specialAssignments": Array [
                   Object {
                     "color": Object {
                       "type": "loop",
                     },
-                    "rule": Object {
-                      "type": "other",
-                    },
+                    "rules": Array [
+                      Object {
+                        "type": "other",
+                      },
+                    ],
                     "touched": false,
                   },
                 ],
@@ -278,6 +279,7 @@ describe('xy_visualization', () => {
             ],
           } as XYPersistedState,
           undefined,
+          undefined,
           {},
           [
             {
@@ -319,6 +321,7 @@ describe('xy_visualization', () => {
               },
             ],
           },
+          undefined,
           undefined,
           {},
           [
@@ -392,6 +395,7 @@ describe('xy_visualization', () => {
                 } as XYPersistedByReferenceAnnotationLayerConfig,
               ],
             } as XYPersistedState,
+            undefined,
             undefined,
             {
               [annotationGroupId1]: {
@@ -519,6 +523,7 @@ describe('xy_visualization', () => {
               layers: [...baseState.layers, ...persistedAnnotationLayers],
             } as XYPersistedState,
             undefined,
+            undefined,
             libraryAnnotationGroups,
             references
           ).layers
@@ -592,6 +597,7 @@ describe('xy_visualization', () => {
               ...baseState,
               layers: [...baseState.layers, ...persistedAnnotationLayers],
             } as XYPersistedState,
+            undefined,
             undefined,
             libraryAnnotationGroups,
             references

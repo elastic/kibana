@@ -7,11 +7,11 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type { CloudProvider } from '@kbn/custom-icons';
 import { getAgentIcon, getCloudProviderIcon, getServerlessIcon } from '@kbn/custom-icons';
 import type { ReactChild } from 'react';
 import React, { useState } from 'react';
-import { useTheme } from '../../../hooks/use_theme';
 import type { ContainerType } from '../../../../common/service_metadata';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { CloudDetails } from './cloud_details';
@@ -76,9 +76,8 @@ export interface PopoverItem {
 }
 
 export function ServiceIcons({ start, end, serviceName, environment }: Props) {
+  const isDarkMode = useKibanaIsDarkMode();
   const [selectedIconPopover, setSelectedIconPopover] = useState<Icons | null>();
-
-  const theme = useTheme();
 
   const { data: icons, status: iconsFetchStatus } = useFetcher(
     (callApmApi) => {
@@ -119,7 +118,7 @@ export function ServiceIcons({ start, end, serviceName, environment }: Props) {
     {
       key: 'service',
       icon: {
-        type: getAgentIcon(icons?.agentName, theme.darkMode) || 'node',
+        type: getAgentIcon(icons?.agentName, isDarkMode) || 'node',
       },
       isVisible: !!icons?.agentName,
       title: i18n.translate('xpack.apm.serviceIcons.service', {
@@ -130,7 +129,7 @@ export function ServiceIcons({ start, end, serviceName, environment }: Props) {
     {
       key: 'opentelemetry',
       icon: {
-        type: getAgentIcon('opentelemetry', theme.darkMode),
+        type: getAgentIcon('opentelemetry', isDarkMode),
       },
       isVisible: !!icons?.agentName && isOpenTelemetryAgentName(icons.agentName),
       title: i18n.translate('xpack.apm.serviceIcons.opentelemetry', {

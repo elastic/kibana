@@ -8,7 +8,6 @@
  */
 
 import moment from 'moment';
-import { LEGACY_TIME_AXIS } from '@kbn/charts-plugin/common';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -31,7 +30,7 @@ import {
   extendedAnnotationLayerFunction,
   referenceLineDecorationConfigFunction,
 } from '../common/expression_functions';
-import { GetStartDepsFn, getXyChartRenderer } from './expression_renderers';
+import { GetStartDeps, getXyChartRenderer } from './expression_renderers';
 import { eventAnnotationsResult } from '../common/expression_functions/event_annotations_result';
 
 export interface XYPluginStartDependencies {
@@ -71,7 +70,7 @@ export class ExpressionXyPlugin {
     expressions.registerFunction(xyVisFunction);
     expressions.registerFunction(layeredXyVisFunction);
 
-    const getStartDeps: GetStartDepsFn = async () => {
+    const getStartDeps = async () => {
       const [coreStart, deps] = await core.getStartServices();
       const {
         data,
@@ -85,7 +84,6 @@ export class ExpressionXyPlugin {
 
       const { theme: kibanaTheme } = coreStart;
       const eventAnnotationService = await eventAnnotation.getService();
-      const useLegacyTimeAxis = core.uiSettings.get(LEGACY_TIME_AXIS);
 
       return {
         data,
@@ -95,12 +93,11 @@ export class ExpressionXyPlugin {
         usageCollection,
         activeCursor,
         paletteService,
-        useLegacyTimeAxis,
         eventAnnotationService,
         timeZone: getTimeZone(core.uiSettings),
         timeFormat: core.uiSettings.get('dateFormat'),
         startServices: coreStart,
-      };
+      } satisfies GetStartDeps;
     };
 
     expressions.registerRenderer(getXyChartRenderer({ getStartDeps }));

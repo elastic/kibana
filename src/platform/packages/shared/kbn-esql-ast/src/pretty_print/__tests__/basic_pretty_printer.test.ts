@@ -141,6 +141,16 @@ describe('single line query', () => {
       });
     });
 
+    describe('ENRICH', () => {
+      test('policy name with colon', () => {
+        const { text } = reprint(
+          'FROM a | ENRICH _coordinator:woof ON category WITH col0 = category'
+        );
+
+        expect(text).toBe('FROM a | ENRICH _coordinator:woof ON category WITH col0 = category');
+      });
+    });
+
     describe('CHANGE_POINT', () => {
       test('value only', () => {
         const { text } = reprint(`FROM a | CHANGE_POINT value`);
@@ -180,6 +190,38 @@ describe('single line query', () => {
       });
     });
 
+    describe('RERANK', () => {
+      test('single field', () => {
+        const { text } = reprint(`FROM a | RERANK "query" ON field1 WITH some_id`);
+
+        expect(text).toBe('FROM a | RERANK "query" ON field1 WITH some_id');
+      });
+
+      test('two fields', () => {
+        const { text } = reprint(`FROM a | RERANK "query" ON field1,field2 WITH some_id`);
+
+        expect(text).toBe('FROM a | RERANK "query" ON field1, field2 WITH some_id');
+      });
+
+      test('param as query', () => {
+        const { text } = reprint(`FROM a | RERANK ?param ON field1,field2 WITH some_id`);
+
+        expect(text).toBe('FROM a | RERANK ?param ON field1, field2 WITH some_id');
+      });
+
+      test('param as field part', () => {
+        const { text } = reprint(`FROM a | RERANK ?param ON nested.?par, field2 WITH some_id`);
+
+        expect(text).toBe('FROM a | RERANK ?param ON nested.?par, field2 WITH some_id');
+      });
+
+      test('param as inference ID', () => {
+        const { text } = reprint(`FROM a | RERANK ?param ON nested.?par, field2 WITH ?`);
+
+        expect(text).toBe('FROM a | RERANK ?param ON nested.?par, field2 WITH ?');
+      });
+    });
+
     describe('FORK', () => {
       test('from single line', () => {
         const { text } =
@@ -200,6 +242,73 @@ describe('single line query', () => {
 
         expect(text).toBe(
           'FROM index | FORK (WHERE keywordField != "" | LIMIT 100) (SORT doubleField ASC NULLS LAST)'
+        );
+      });
+    });
+
+    describe('SAMPLE', () => {
+      test('from single line', () => {
+        const { text } = reprint(`FROM index | SAMPLE 0.1 123`);
+
+        expect(text).toBe('FROM index | SAMPLE 0.1 123');
+      });
+
+      test('from multiline', () => {
+        const { text } = reprint(`FROM index
+| SAMPLE 0.1 123
+          `);
+
+        expect(text).toBe('FROM index | SAMPLE 0.1 123');
+      });
+    });
+
+    describe('RRF', () => {
+      test('from single line', () => {
+        const { text } =
+          reprint(`FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | RRF | KEEP title, _score
+        `);
+
+        expect(text).toBe(
+          'FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | RRF | KEEP title, _score'
+        );
+      });
+
+      test('from multiline', () => {
+        const { text } = reprint(`FROM search-movies METADATA _score, _id, _index
+  | FORK
+    (WHERE semantic_title : "Shakespeare" | SORT _score)
+    (WHERE title : "Shakespeare" | SORT _score)
+  | RRF
+  | KEEP title, _score
+          `);
+
+        expect(text).toBe(
+          'FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | RRF | KEEP title, _score'
+        );
+      });
+    });
+
+    describe('COMPLETION', () => {
+      test('from single line', () => {
+        const { text } =
+          reprint(`FROM search-movies | COMPLETION "Shakespeare" WITH inferenceId AS result
+        `);
+
+        expect(text).toBe(
+          'FROM search-movies | COMPLETION "Shakespeare" WITH inferenceId AS result'
+        );
+      });
+
+      test('from multiline', () => {
+        const { text } = reprint(
+          `FROM kibana_sample_data_ecommerce
+                 | COMPLETION "prompt" WITH \`openai-completion\` AS result
+                 | LIMIT 2
+          `
+        );
+
+        expect(text).toBe(
+          'FROM kibana_sample_data_ecommerce | COMPLETION "prompt" WITH `openai-completion` AS result | LIMIT 2'
         );
       });
     });

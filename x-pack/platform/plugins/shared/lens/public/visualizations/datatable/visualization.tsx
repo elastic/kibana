@@ -6,17 +6,27 @@
  */
 
 import React from 'react';
+
 import { Ast } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
-import { PaletteRegistry, CUSTOM_PALETTE, PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
+import {
+  PaletteRegistry,
+  CUSTOM_PALETTE,
+  PaletteOutput,
+  CustomPaletteParams,
+  applyPaletteParams,
+  getOverridePaletteStops,
+} from '@kbn/coloring';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import { getOriginalId } from '@kbn/transpose-utils';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import useObservable from 'react-use/lib/useObservable';
 import { getSortingCriteria } from '@kbn/sort-predicates';
+import { getKbnPalettes, useKbnPalettes } from '@kbn/palettes';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import { DataGridDensity } from '@kbn/unified-data-table';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
   SuggestionRequest,
@@ -45,15 +55,16 @@ import {
   DEFAULT_ROW_HEIGHT_LINES,
 } from './components/constants';
 import {
-  applyPaletteParams,
   defaultPaletteParams,
   findMinMaxByColumnId,
-  getColorStops,
   getAccessorType,
+  getPaletteDisplayColors,
 } from '../../shared_components';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 import { DatatableInspectorTables } from '../../../common/expressions/datatable/datatable_fn';
 import { getSimpleColumnType } from './components/table_actions';
+import { convertToRuntimeState } from './runtime_state';
+
 export interface DatatableVisualizationState {
   columns: ColumnState[];
   layerId: string;
@@ -64,6 +75,7 @@ export interface DatatableVisualizationState {
   rowHeightLines?: number;
   headerRowHeightLines?: number;
   paging?: PagingState;
+  density?: DataGridDensity;
 }
 
 const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
@@ -119,14 +131,18 @@ export const getDatatableVisualization = ({
 
   triggers: [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.tableRowContextMenuClick],
 
-  initialize(addNewLayer, state) {
-    return (
-      state || {
-        columns: [],
-        layerId: addNewLayer(),
-        layerType: LayerTypes.DATA,
-      }
-    );
+  initialize(addNewLayer, state, mainPalette, datasourceStates) {
+    if (state) return convertToRuntimeState(state, datasourceStates);
+
+    return {
+      columns: [],
+      layerId: addNewLayer(),
+      layerType: LayerTypes.DATA,
+    };
+  },
+
+  convertToRuntimeState(state, datasourceStates) {
+    return convertToRuntimeState(state, datasourceStates);
   },
 
   onDatasourceUpdate(state, frame) {
@@ -268,7 +284,9 @@ export const getDatatableVisualization = ({
   on the Metric dimension in cases where there are no numeric columns
   **/
   getConfiguration({ state, frame }) {
-    const isDarkMode = kibanaTheme.getTheme().darkMode;
+    const theme = kibanaTheme.getTheme();
+    const palettes = getKbnPalettes(theme);
+
     const { sortedColumns, datasource } = getDatasourceAndSortedColumns(
       state,
       frame.datasourceLayers
@@ -320,7 +338,13 @@ export const getDatatableVisualization = ({
                 hidden,
                 collapseFn,
               } = columnMap[accessor] ?? {};
-              const stops = getColorStops(paletteService, isDarkMode, palette, colorMapping);
+              const stops = getPaletteDisplayColors(
+                paletteService,
+                palettes,
+                theme.darkMode,
+                palette,
+                colorMapping
+              );
               const hasColoring = colorMode !== 'none' && stops.length > 0;
 
               return {
@@ -407,7 +431,13 @@ export const getDatatableVisualization = ({
                 colorMapping,
                 hidden,
               } = columnMap[accessor] ?? {};
-              const stops = getColorStops(paletteService, isDarkMode, palette, colorMapping);
+              const stops = getPaletteDisplayColors(
+                paletteService,
+                palettes,
+                theme.darkMode,
+                palette,
+                colorMapping
+              );
               const hasColoring = colorMode !== 'none' && stops.length > 0;
 
               return {
@@ -465,10 +495,17 @@ export const getDatatableVisualization = ({
     };
   },
   DimensionEditorComponent(props) {
-    const isDarkMode = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
+    const isDarkMode = useKibanaIsDarkMode();
+    const palettes = useKbnPalettes();
 
     return (
-      <TableDimensionEditor {...props} isDarkMode={isDarkMode} paletteService={paletteService} />
+      <TableDimensionEditor
+        {...props}
+        isDarkMode={isDarkMode}
+        palettes={palettes}
+        paletteService={paletteService}
+        formatFactory={formatFactory}
+      />
     );
   },
 
@@ -557,13 +594,14 @@ export const getDatatableVisualization = ({
             datasource,
             column.columnId
           );
+          const stops = getOverridePaletteStops(paletteService, column.palette);
           const paletteParams = {
             ...column.palette?.params,
             // rewrite colors and stops as two distinct arguments
-            colors: (column.palette?.params?.stops || []).map(({ color }) => color),
+            colors: stops?.map(({ color }) => color),
             stops:
               column.palette?.params?.name === RowHeightMode.custom
-                ? (column.palette?.params?.stops || []).map(({ stop }) => stop)
+                ? stops?.map(({ stop }) => stop)
                 : [],
             reverse: false, // managed at UI level
           };
@@ -615,6 +653,7 @@ export const getDatatableVisualization = ({
       rowHeightLines: state.rowHeightLines ?? DEFAULT_ROW_HEIGHT_LINES,
       headerRowHeightLines: state.headerRowHeightLines ?? DEFAULT_HEADER_ROW_HEIGHT_LINES,
       pageSize: state.paging?.enabled ? state.paging.size : undefined,
+      density: state.density ?? DataGridDensity.NORMAL,
     }).toAst();
 
     return {

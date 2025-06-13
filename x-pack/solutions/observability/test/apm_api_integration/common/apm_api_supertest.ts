@@ -13,15 +13,44 @@ import type {
   APIClientRequestParamsOf,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import type { APIEndpoint } from '@kbn/apm-plugin/server';
+import type {
+  APIEndpoint as SourcesAPIEndpoint,
+  APIReturnType as SourcesAPIReturnType,
+  APIClientRequestParamsOf as SourcesAPIClientRequestParamsOf,
+} from '@kbn/apm-sources-access-plugin/server';
 import { formatRequest } from '@kbn/server-route-repository';
 
+type CombinedAPIRequest<TEndpoint extends APIEndpoint | SourcesAPIEndpoint> =
+  TEndpoint extends APIEndpoint
+    ? APIReturnType<TEndpoint>
+    : TEndpoint extends SourcesAPIEndpoint
+    ? SourcesAPIReturnType<TEndpoint>
+    : never;
+
+type CombinedOptions<TEndpoint extends APIEndpoint | SourcesAPIEndpoint> =
+  TEndpoint extends APIEndpoint
+    ? Options<TEndpoint>
+    : TEndpoint extends SourcesAPIEndpoint
+    ? SourceOptions<TEndpoint>
+    : never;
+
+type Options<TEndpoint extends APIEndpoint> = {
+  type?: 'form-data';
+  endpoint: TEndpoint;
+  spaceId?: string;
+} & APIClientRequestParamsOf<TEndpoint> & {
+    params?: { query?: { _inspect?: boolean } };
+  };
+
+type SourceOptions<TEndpoint extends SourcesAPIEndpoint> = {
+  type?: 'form-data';
+  endpoint: TEndpoint;
+  spaceId?: string;
+} & SourcesAPIClientRequestParamsOf<TEndpoint>;
+
 export function createApmApiClient(st: supertest.Agent) {
-  return async <TEndpoint extends APIEndpoint>(
-    options: {
-      type?: 'form-data';
-      endpoint: TEndpoint;
-      spaceId?: string;
-    } & APIClientRequestParamsOf<TEndpoint> & { params?: { query?: { _inspect?: boolean } } }
+  return async <TEndpoint extends APIEndpoint | SourcesAPIEndpoint>(
+    options: CombinedOptions<TEndpoint>
   ): Promise<SupertestReturnType<TEndpoint>> => {
     const { endpoint, type } = options;
 
@@ -96,7 +125,7 @@ Body: ${JSON.stringify(res.body)}`
   }
 }
 
-export interface SupertestReturnType<TEndpoint extends APIEndpoint> {
+export interface SupertestReturnType<TEndpoint extends APIEndpoint | SourcesAPIEndpoint> {
   status: number;
-  body: APIReturnType<TEndpoint>;
+  body: CombinedAPIRequest<TEndpoint>;
 }

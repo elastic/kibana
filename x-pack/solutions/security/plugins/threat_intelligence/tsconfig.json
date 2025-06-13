@@ -35,7 +35,8 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/search-types",
     "@kbn/response-ops-alerts-fields-browser",
-    "@kbn/charts-theme"
+    "@kbn/charts-theme",
+    "@kbn/react-kibana-context-theme"
   ],
   "exclude": ["target/**/*"]
 }

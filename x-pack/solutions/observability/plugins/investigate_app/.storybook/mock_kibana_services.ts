@@ -36,6 +36,7 @@ const storage = new LocalStorageMock({}) as unknown as Storage;
 setKibanaServices(
   {
     getJoinIndicesAutocomplete: async () => ({ indices: [] }),
+    getTimeseriesIndicesAutocomplete: async () => ({ indices: [] }),
     variablesService: {
       esqlVariables: [],
       areSuggestionsEnabled: false,

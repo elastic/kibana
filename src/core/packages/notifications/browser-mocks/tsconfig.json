@@ -12,10 +12,9 @@
   ],
   "kbn_references": [
     "@kbn/utility-types-jest",
-    "@kbn/core-notifications-browser",
-    "@kbn/core-notifications-browser-internal"
+    "@kbn/core-notifications-browser"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }

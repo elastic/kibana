@@ -11,21 +11,22 @@ import {
   QueryDslQueryContainer,
   Result,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { IScopedClusterClient, Logger, KibanaRequest } from '@kbn/core/server';
+import type { IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
-import { Condition, getAncestors, getParentId, Streams } from '@kbn/streams-schema';
+import { Condition, Streams, getAncestors, getParentId } from '@kbn/streams-schema';
 import { AssetClient } from './assets/asset_client';
-import { LOGS_ROOT_STREAM_NAME, rootStreamDefinition } from './root_stream_definition';
-import { StreamsStorageClient } from './service';
-import { checkAccess, checkAccessBulk } from './stream_crud';
+import { ASSET_ID, ASSET_TYPE } from './assets/fields';
+import { QueryClient } from './assets/query/query_client';
 import {
   DefinitionNotFoundError,
   isDefinitionNotFoundError,
 } from './errors/definition_not_found_error';
 import { SecurityError } from './errors/security_error';
-import { State } from './state_management/state';
 import { StatusError } from './errors/status_error';
-import { ASSET_ID, ASSET_TYPE } from './assets/fields';
+import { LOGS_ROOT_STREAM_NAME, rootStreamDefinition } from './root_stream_definition';
+import { StreamsStorageClient } from './service';
+import { State } from './state_management/state';
+import { checkAccess, checkAccessBulk } from './stream_crud';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -59,6 +60,7 @@ export class StreamsClient {
     private readonly dependencies: {
       scopedClusterClient: IScopedClusterClient;
       assetClient: AssetClient;
+      queryClient: QueryClient;
       storageClient: StreamsStorageClient;
       logger: Logger;
       request: KibanaRequest;
@@ -206,19 +208,18 @@ export class StreamsClient {
 
     const { dashboards, queries } = request;
 
-    const queryLinks = queries.map((query) => ({
-      [ASSET_ID]: query.id,
-      [ASSET_TYPE]: 'query' as const,
-      query,
-    }));
-
-    await this.dependencies.assetClient.syncAssetList(stream.name, [
-      ...dashboards.map((dashboard) => ({
+    // sync dashboards as before
+    await this.dependencies.assetClient.syncAssetList(
+      stream.name,
+      dashboards.map((dashboard) => ({
         [ASSET_ID]: dashboard,
         [ASSET_TYPE]: 'dashboard' as const,
       })),
-      ...queryLinks,
-    ]);
+      'dashboard'
+    );
+
+    // sync rules with asset links
+    await this.dependencies.queryClient.syncQueries(stream.name, queries);
 
     return {
       acknowledged: true,
@@ -324,6 +325,13 @@ export class StreamsClient {
     throw streamDefinition;
   }
 
+  private getStreamDefinitionFromSource(source: Streams.all.Definition | undefined) {
+    if (!source) {
+      throw new DefinitionNotFoundError(`Cannot find stream definition`);
+    }
+    return source;
+  }
+
   /**
    * Returns a stream definition for the given name:
    * - if a wired stream definition exists
@@ -339,9 +347,7 @@ export class StreamsClient {
     try {
       const response = await this.dependencies.storageClient.get({ id: name });
 
-      const streamDefinition = response._source!;
-
-      Streams.all.Definition.asserts(streamDefinition);
+      const streamDefinition = this.getStreamDefinitionFromSource(response._source);
 
       if (Streams.ingest.all.Definition.is(streamDefinition)) {
         const privileges = await checkAccess({
@@ -372,9 +378,7 @@ export class StreamsClient {
   private async getStoredStreamDefinition(name: string): Promise<Streams.all.Definition> {
     return await Promise.all([
       this.dependencies.storageClient.get({ id: name }).then((response) => {
-        const source = response._source!;
-        Streams.all.Definition.asserts(source);
-        return source;
+        return this.getStreamDefinitionFromSource(response._source);
       }),
       checkAccess({ name, scopedClusterClient: this.dependencies.scopedClusterClient }).then(
         (privileges) => {
@@ -419,14 +423,16 @@ export class StreamsClient {
    * include the dashboard links.
    */
   async getPrivileges(name: string) {
+    const REQUIRED_MANAGE_PRIVILEGES = [
+      'manage_index_templates',
+      'manage_ingest_pipelines',
+      'manage_pipeline',
+      'read_pipeline',
+    ];
+
     const privileges =
       await this.dependencies.scopedClusterClient.asCurrentUser.security.hasPrivileges({
-        cluster: [
-          'manage_index_templates',
-          'manage_ingest_pipelines',
-          'manage_pipeline',
-          'read_pipeline',
-        ],
+        cluster: [...REQUIRED_MANAGE_PRIVILEGES, 'monitor_text_structure'],
         index: [
           {
             names: [name],
@@ -445,12 +451,13 @@ export class StreamsClient {
 
     return {
       manage:
-        Object.values(privileges.cluster).every((privilege) => privilege === true) &&
+        REQUIRED_MANAGE_PRIVILEGES.every((privilege) => privileges.cluster[privilege] === true) &&
         Object.values(privileges.index[name]).every((privilege) => privilege === true),
       monitor: privileges.index[name].monitor,
       lifecycle:
         privileges.index[name].manage_data_stream_lifecycle && privileges.index[name].manage_ilm,
       simulate: privileges.cluster.read_pipeline && privileges.index[name].create,
+      text_structure: privileges.cluster.monitor_text_structure,
     };
   }
 
@@ -562,11 +569,9 @@ export class StreamsClient {
       query,
     });
 
-    const streams = streamsSearchResponse.hits.hits.flatMap((hit) => {
-      const source = hit._source!;
-      Streams.all.Definition.asserts(source);
-      return source;
-    });
+    const streams = streamsSearchResponse.hits.hits.flatMap((hit) =>
+      this.getStreamDefinitionFromSource(hit._source)
+    );
 
     const privileges = await checkAccessBulk({
       names: streams
@@ -622,7 +627,7 @@ export class StreamsClient {
       throw result.error;
     }
 
-    await this.dependencies.assetClient.syncAssetList(definition.name, []);
+    await this.dependencies.queryClient.syncQueries(name, []);
 
     return { acknowledged: true, result: 'deleted' };
   }

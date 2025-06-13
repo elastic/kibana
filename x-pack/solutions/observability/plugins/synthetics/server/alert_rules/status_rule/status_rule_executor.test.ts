@@ -12,7 +12,6 @@ import { mockEncryptedSO } from '../../synthetics_service/utils/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { SyntheticsService } from '../../synthetics_service/synthetics_service';
-import * as monitorUtils from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import * as locationsUtils from '../../synthetics_service/get_all_locations';
 import type { PublicLocation } from '../../../common/runtime_types';
 import { SyntheticsServerSetup } from '../../types';
@@ -82,10 +81,11 @@ describe('StatusRuleExecutor', () => {
       name: 'test',
     },
   } as any);
+  const configRepo = statusRule.monitorConfigRepository;
 
   describe('DefaultRule', () => {
     it('should only query enabled monitors', async () => {
-      const spy = jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue([]);
+      const spy = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
 
       const { downConfigs, staleDownConfigs } = await statusRule.getDownChecks({});
 
@@ -94,12 +94,58 @@ describe('StatusRuleExecutor', () => {
 
       expect(spy).toHaveBeenCalledWith({
         filter: 'synthetics-monitor.attributes.alert.status.enabled: true',
-        soClient,
       });
     });
 
+    it('should use all monitorLocationIds when params locations is an empty array', async () => {
+      // Create a spy on the queryMonitorStatusAlert function
+      const queryMonitorStatusAlertModule = await import('./queries/query_monitor_status_alert');
+      const spy = jest
+        .spyOn(queryMonitorStatusAlertModule, 'queryMonitorStatusAlert')
+        .mockResolvedValue({
+          upConfigs: {},
+          downConfigs: {},
+          enabledMonitorQueryIds: [],
+        });
+
+      // Create a new instance with empty locations array
+      const statusRuleWithEmptyLocations = new StatusRuleExecutor(
+        esClient,
+        serverMock,
+        monitorClient,
+        {
+          params: {
+            locations: [], // Empty locations array
+          },
+          services: {
+            uiSettingsClient,
+            savedObjectsClient: soClient,
+            scopedClusterClient: { asCurrentUser: mockEsClient },
+          },
+          rule: {
+            name: 'test',
+          },
+        } as any
+      );
+
+      // Mock the getAll method to return test monitors with a location
+      jest
+        .spyOn(statusRuleWithEmptyLocations.monitorConfigRepository, 'getAll')
+        .mockResolvedValue(testMonitors);
+
+      // Execute
+      await statusRuleWithEmptyLocations.getDownChecks({});
+
+      // Verify that queryMonitorStatusAlert was called passing the monitor location
+      expect(spy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          monitorLocationIds: ['us_central_qa'],
+        })
+      );
+    });
+
     it('marks deleted configs as expected', async () => {
-      jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue(testMonitors);
+      jest.spyOn(configRepo, 'getAll').mockResolvedValue(testMonitors);
 
       const { downConfigs } = await statusRule.getDownChecks({});
 
@@ -175,7 +221,7 @@ describe('StatusRuleExecutor', () => {
     });
 
     it('does not mark deleted config when monitor does not contain location label', async () => {
-      jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue([
+      jest.spyOn(configRepo, 'getAll').mockResolvedValue([
         {
           ...testMonitors[0],
           attributes: {

@@ -29,6 +29,7 @@ import { TimeCache } from './data_model/time_cache';
 jest.mock('./default_spec', () => ({
   getDefaultSpec: () => jest.requireActual('./test_utils/default.spec.json'),
 }));
+const theme = { darkMode: false };
 
 describe('VegaVisualizations', () => {
   let domNode: HTMLDivElement;
@@ -98,7 +99,8 @@ describe('VegaVisualizations', () => {
           }),
           new TimeCache(dataPluginStart.query.timefilter.timefilter, 0),
           {},
-          mockGetServiceSettings
+          mockGetServiceSettings,
+          theme
         );
         await vegaParser.parseAsync();
         await vegaVis.render(vegaParser);
@@ -123,6 +125,7 @@ describe('VegaVisualizations', () => {
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, jest.fn());
+
         const vegaParser = new VegaParser(
           JSON.stringify(vegaGraph),
           new SearchAPI({
@@ -132,7 +135,8 @@ describe('VegaVisualizations', () => {
           }),
           new TimeCache(dataPluginStart.query.timefilter.timefilter, 0),
           {},
-          mockGetServiceSettings
+          mockGetServiceSettings,
+          theme
         );
         await vegaParser.parseAsync();
         await vegaVis.render(vegaParser);

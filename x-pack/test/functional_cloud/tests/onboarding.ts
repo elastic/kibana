@@ -55,6 +55,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await deleteSavedObject();
     });
 
+    it('Only redirect', async () => {
+      await browser.get(deployment.getHostPort() + `/app/cloud/onboarding`);
+      await find.byCssSelector('[data-test-subj="userMenuButton"]', 20000);
+
+      // We need to make sure that both path and hash are respected.
+      const currentURL = parse(await browser.getCurrentUrl());
+      expect(currentURL.pathname).to.eql('/app/observability/landing');
+    });
+
     it('Redirect and save token', async () => {
       await browser.get(
         deployment.getHostPort() +

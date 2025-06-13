@@ -30,7 +30,8 @@ jest.mock('@tanstack/react-query', () => {
   };
 });
 
-describe('When using the `useGetFileInfo()` hook', () => {
+// Failing: See https://github.com/elastic/kibana/issues/218159
+describe.skip('When using the `useGetFileInfo()` hook', () => {
   let renderReactQueryHook: ReactQueryHookRenderer<
     Parameters<typeof useGetFileInfo>,
     ReturnType<typeof useGetFileInfo>

@@ -8,19 +8,14 @@
  */
 
 import { Datum, PartitionLayer } from '@elastic/charts';
-import {
-  PaletteRegistry,
-  getColorFactory,
-  getPalette,
-  AVAILABLE_PALETTES,
-  NeutralPalette,
-} from '@kbn/coloring';
+import { ColorHandlingFn, PaletteRegistry, getColorFactory } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { Datatable, DatatableRow } from '@kbn/expressions-plugin/public';
 
 import { getColorCategories } from '@kbn/chart-expressions-common';
+import { KbnPalettes } from '@kbn/palettes';
 import { getDistinctSeries } from '..';
 import { BucketColumns, ChartTypes, PartitionVisParams } from '../../../common/types';
 import { sortPredicateByType, sortPredicateSaveSourceOrder } from './sort_predicate';
@@ -41,7 +36,8 @@ export const getLayers = (
   visData: Datatable,
   overwriteColors: { [key: string]: string } = {},
   rows: DatatableRow[],
-  palettes: PaletteRegistry | null,
+  paletteService: PaletteRegistry | null,
+  palettes: KbnPalettes,
   formatters: Record<string, FieldFormat | undefined>,
   formatter: FieldFormatsStart,
   syncColors: boolean,
@@ -57,16 +53,20 @@ export const getLayers = (
     fillLabel.valueFormatter = () => '';
   }
 
+  const categories =
+    chartType === ChartTypes.MOSAIC && columns.length === 2
+      ? getColorCategories(rows, columns[1]?.id)
+      : getColorCategories(rows, columns[0]?.id);
+
+  const colorIndexMap = new Map(categories.map((c, i) => [String(c), i]));
+
   const isSplitChart = Boolean(visParams.dimensions.splitColumn || visParams.dimensions.splitRow);
   let byDataPalette: ReturnType<typeof byDataColorPaletteMap>;
-  if (!syncColors && columns[1]?.id && palettes && visParams.palette) {
+  if (!syncColors && columns[1]?.id && paletteService && visParams.palette) {
     byDataPalette = byDataColorPaletteMap(
-      rows,
-      columns[1],
-      palettes?.get(visParams.palette.name),
+      paletteService?.get(visParams.palette.name),
       visParams.palette,
-      formatters,
-      formatter
+      colorIndexMap
     );
   }
 
@@ -79,8 +79,9 @@ export const getLayers = (
     chartType,
     columns,
     rows,
-    isDarkMode,
-    visParams
+    palettes,
+    visParams,
+    isDarkMode
   );
 
   return columns.map((col, layerIndex) => {
@@ -110,13 +111,13 @@ export const getLayers = (
                 distinctSeries,
                 { columnsLength: columns.length, rowsLength: rows.length },
                 visParams,
-                palettes,
+                paletteService,
                 byDataPalette,
                 syncColors,
                 isDarkMode,
                 formatter,
                 col,
-                formatters
+                colorIndexMap
               ),
       },
     };
@@ -131,9 +132,10 @@ function getColorFromMappingFactory(
   chartType: ChartTypes,
   columns: Array<Partial<BucketColumns>>,
   rows: DatatableRow[],
-  isDarkMode: boolean,
-  visParams: PartitionVisParams
-): undefined | ((category: string | string[]) => string) {
+  palettes: KbnPalettes,
+  visParams: PartitionVisParams,
+  isDarkMode: boolean
+): undefined | ColorHandlingFn {
   const { colorMapping, dimensions } = visParams;
 
   if (!colorMapping) {
@@ -151,19 +153,14 @@ function getColorFromMappingFactory(
   }
   // the mosaic configures the main categories in the second column, instead of the first
   // as it happens in all the other partition types.
-  // Independentely from the bucket aggregation used, the categories will always be casted
+  // Independently from the bucket aggregation used, the categories will always be casted
   // as string to make it nicely working with a text input field, avoiding a field
   const categories =
     chartType === ChartTypes.MOSAIC && columns.length === 2
       ? getColorCategories(rows, columns[1]?.id)
       : getColorCategories(rows, columns[0]?.id);
-  return getColorFactory(
-    JSON.parse(colorMapping),
-    getPalette(AVAILABLE_PALETTES, NeutralPalette),
-    isDarkMode,
-    {
-      type: 'categories',
-      categories,
-    }
-  );
+  return getColorFactory(JSON.parse(colorMapping), palettes, isDarkMode, {
+    type: 'categories',
+    categories,
+  });
 }

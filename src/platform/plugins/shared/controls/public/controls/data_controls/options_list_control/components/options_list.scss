@@ -1,3 +1,21 @@
+/* additional custom overrides due to unexpected component usage;
+open issue: https://github.com/elastic/eui-private/issues/270 */
+.optionsList__filterGroup {
+  /* prevents duplicate border due to nested filterGroup */
+  &::after {
+    display: none;
+  }
+
+  .euiFilterButton__wrapper {
+    padding: 0;
+
+    &::before,
+    &::after {
+      display: none;
+    }
+  }
+}
+
 .optionsList__inputButtonOverride {
   max-inline-size: 100% !important;
 

@@ -12,8 +12,6 @@ import * as Rx from 'rxjs';
 import { omitBy, isUndefined } from 'lodash';
 
 import { apm } from '@elastic/apm-rum';
-import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
-import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
@@ -25,8 +23,7 @@ import type {
   ToastInputFields,
   ToastOptions,
 } from '@kbn/core-notifications-browser';
-import type { ThemeServiceStart } from '@kbn/core-theme-browser';
-import type { UserProfileService } from '@kbn/core-user-profile-browser';
+import type { RenderingService } from '@kbn/core-rendering-browser';
 import { ErrorToast } from './error_toast';
 
 const normalizeToast = (toastOrTitle: ToastInput): ToastInputFields => {
@@ -57,11 +54,8 @@ const getApmLabels = (errorType: 'ToastError' | 'ToastDanger') => {
 };
 
 interface StartDeps {
-  analytics: AnalyticsServiceStart;
   overlays: OverlayStart;
-  i18n: I18nStart;
-  theme: ThemeServiceStart;
-  userProfile: UserProfileService;
+  rendering: RenderingService;
 }
 
 /**
@@ -212,7 +206,7 @@ export class ToastsApi implements IToasts {
           error={error}
           title={options.title}
           toastMessage={message}
-          {...this.startDeps!}
+          rendering={this.startDeps!.rendering}
         />
       ),
       ...options,

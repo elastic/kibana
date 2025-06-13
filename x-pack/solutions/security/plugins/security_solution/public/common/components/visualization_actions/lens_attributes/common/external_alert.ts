@@ -9,10 +9,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { COUNT, TOP_VALUE } from '../../translations';
 import type { GetLensAttributes, LensAttributes } from '../../types';
 
-const layerId = uuidv4();
-const columnTimestamp = uuidv4();
-const columnCount = uuidv4();
-const columnTopValue = uuidv4();
+const layerId = `layer-id-${uuidv4()}`;
+const columnTimestamp = `column-timestamp-id-${uuidv4()}`;
+const columnCount = `column-count-id-${uuidv4()}`;
+const columnTopValue = `column-top-value-id-${uuidv4()}`;
 
 export const getExternalAlertLensAttributes: GetLensAttributes = ({
   stackByField = 'event.module',

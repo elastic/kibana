@@ -24,7 +24,7 @@ The following table serves as a quick reference for different logging configurat
 | Unique appender identifier.
 
 | `logging.appenders[].console:`
-| Appender to use for logging records to *stdout*. By default, uses the `[%date][%level][%logger] %message` **pattern** layout. To use a **json**, set the <<log-in-json-ECS-example,layout type to `json`>>.
+| Appender to use for logging records to *stdout*. By default, uses the `[%date][%level][%logger] %message %error` **pattern** layout. To use a **json**, set the <<log-in-json-ECS-example,layout type to `json`>>.
 
 | `logging.appenders[].file:`
 | Allows you to specify a fileName to write log records to disk. To write <<log-to-file-example,all log records to file>>, add the file appender to `root.appenders`. If configured, you also need to specify <<log-to-file-example, `logging.appenders.file.pathName`>>.

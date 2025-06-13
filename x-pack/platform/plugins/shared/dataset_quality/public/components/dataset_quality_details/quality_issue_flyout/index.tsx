@@ -87,6 +87,7 @@ export default function QualityIssueFlyout() {
         ? FAILURE_STORE_SELECTOR
         : undefined,
     sendTelemetry,
+    forceDiscover: true,
   });
 
   return (

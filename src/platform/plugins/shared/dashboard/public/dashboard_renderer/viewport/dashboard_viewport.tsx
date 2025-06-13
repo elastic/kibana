@@ -14,14 +14,14 @@ import { EuiPortal } from '@elastic/eui';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 
-import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
+import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { DashboardGrid } from '../grid';
+import { CONTROL_GROUP_EMBEDDABLE_ID } from '../../dashboard_api/control_group_manager';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
+import { DashboardGrid } from '../grid';
 import { DashboardEmptyScreen } from './empty_screen/dashboard_empty_screen';
-import { CONTROL_GROUP_EMBEDDABLE_ID } from '../../dashboard_api/control_group_manager';
 
 export const DashboardViewport = ({
   dashboardContainerRef,
@@ -54,12 +54,21 @@ export const DashboardViewport = ({
     dashboardApi.setFullScreenMode(false);
   }, [dashboardApi]);
 
-  const panelCount = useMemo(() => {
-    return Object.keys(layout).length;
-  }, [layout]);
+  const { panelCount, visiblePanelCount, sectionCount } = useMemo(() => {
+    const panels = Object.values(layout.panels);
+    const visiblePanels = panels.filter(({ gridData }) => {
+      return !dashboardInternalApi.isSectionCollapsed(gridData.sectionId);
+    });
+    return {
+      panelCount: panels.length,
+      visiblePanelCount: visiblePanels.length,
+      sectionCount: Object.keys(layout.sections).length,
+    };
+  }, [layout, dashboardInternalApi]);
 
   const classes = classNames({
     dshDashboardViewport: true,
+    'dshDashboardViewport--empty': panelCount === 0 && sectionCount === 0,
     'dshDashboardViewport--print': viewMode === 'print',
     'dshDashboardViewport--panelExpanded': Boolean(expandedPanelId),
   });
@@ -124,15 +133,19 @@ export const DashboardViewport = ({
           <ExitFullScreenButton onExit={onExit} toggleChrome={!dashboardApi.isEmbeddedExternally} />
         </EuiPortal>
       )}
-      {panelCount === 0 && <DashboardEmptyScreen />}
       <div
         className={classes}
         data-shared-items-container
         data-title={dashboardTitle}
         data-description={description}
-        data-shared-items-count={panelCount}
+        data-shared-items-count={visiblePanelCount}
+        data-test-subj={'dshDashboardViewport'}
       >
-        <DashboardGrid dashboardContainerRef={dashboardContainerRef} />
+        {panelCount === 0 && sectionCount === 0 ? (
+          <DashboardEmptyScreen />
+        ) : (
+          <DashboardGrid dashboardContainerRef={dashboardContainerRef} />
+        )}
       </div>
     </div>
   );

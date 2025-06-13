@@ -45,7 +45,7 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
     http,
   });
 
-  const { indexPattern } = useSourcererDataView();
+  const { sourcererDataView } = useSourcererDataView();
 
   const { mutateAsync: createAttackDiscoverySchedule, isLoading: isLoadingQuery } =
     useCreateAttackDiscoverySchedule();
@@ -62,7 +62,7 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
           scheduleData,
           alertsIndexPattern ?? '',
           connector,
-          indexPattern,
+          sourcererDataView,
           uiSettings
         );
         await createAttackDiscoverySchedule({ scheduleToCreate });
@@ -76,7 +76,7 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
       alertsIndexPattern,
       createAttackDiscoverySchedule,
       onClose,
-      indexPattern,
+      sourcererDataView,
       uiSettings,
     ]
   );

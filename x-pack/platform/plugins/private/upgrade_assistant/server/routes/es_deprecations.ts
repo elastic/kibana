@@ -36,10 +36,15 @@ export function registerESDeprecationRoutes({
           savedObjects: { client: savedObjectsClient },
           elasticsearch: { client },
         } = await core;
-        const status = await getESUpgradeStatus(client.asCurrentUser, {
-          featureSet,
-          dataSourceExclusions,
-        });
+        const status = await getESUpgradeStatus(
+          client.asCurrentUser,
+          {
+            featureSet,
+            dataSourceExclusions,
+          },
+          log
+        );
+
         const asCurrentUser = client.asCurrentUser;
         const reindexActions = reindexActionsFactory(savedObjectsClient, asCurrentUser, log);
         const reindexService = reindexServiceFactory(asCurrentUser, reindexActions, log, licensing);

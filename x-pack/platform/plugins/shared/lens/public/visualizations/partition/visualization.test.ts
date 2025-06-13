@@ -15,6 +15,7 @@ import {
 } from '../../../common/constants';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { FramePublicAPI, OperationDescriptor, Visualization } from '../../types';
 import { themeServiceMock } from '@kbn/core/public/mocks';
@@ -22,8 +23,8 @@ import { cloneDeep } from 'lodash';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { CollapseFunction } from '../../../common/expressions';
 import { PaletteOutput } from '@kbn/coloring';
-import { PersistedPieVisualizationState } from './persistence';
 import { LegendValue } from '@elastic/charts';
+import { DeprecatedLegendValuePieVisualizationState } from './runtime_state/converters/legend_stats';
 
 jest.mock('../../id_generator');
 
@@ -40,6 +41,7 @@ const paletteServiceMock = chartPluginMock.createPaletteRegistry();
 const pieVisualization = getPieVisualization({
   paletteService: paletteServiceMock,
   kibanaTheme: themeServiceMock.createStartContract(),
+  formatFactory: fieldFormatsServiceMock.createStartContract().deserialize,
 });
 
 function getExampleState(): PieVisualizationState {
@@ -177,7 +179,7 @@ describe('pie_visualization', () => {
         expect('showValuesInLegend' in runtimeState.layers[0]).toEqual(false);
       });
       it('loads a xy chart with `showValuesInLegend` property equal to false and converts to legendStats: []', () => {
-        const persistedState: PersistedPieVisualizationState = getExampleState();
+        const persistedState: DeprecatedLegendValuePieVisualizationState = getExampleState();
         persistedState.layers[0].showValuesInLegend = false;
 
         const runtimeState = pieVisualization.initialize(() => 'first', persistedState);
@@ -187,7 +189,7 @@ describe('pie_visualization', () => {
       });
 
       it('loads a xy chart with `showValuesInLegend` property equal to true and converts to legendStats: [`values`]', () => {
-        const persistedState: PersistedPieVisualizationState = getExampleState();
+        const persistedState: DeprecatedLegendValuePieVisualizationState = getExampleState();
         persistedState.layers[0].showValuesInLegend = true;
 
         const runtimeState = pieVisualization.initialize(() => 'first', persistedState);

@@ -36,9 +36,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let ruleId: string;
   const SPACE_ID = 'test_space';
 
-  /* Skipping test temporarily to unblock development
-   * API is not currently in use */
-  describe.skip('Suggested dashboards', function () {
+  describe('Related dashboards', function () {
     this.tags(['skipCloud', 'skipMKI']);
     before(async () => {
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
@@ -143,7 +141,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   name: 'B',
                 },
               ],
-              threshold: [0.05],
+              threshold: [0.0005],
               timeSize: 1,
               timeUnit: 'm',
             },
@@ -218,8 +216,442 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         linkedDashboards: [],
         suggestedDashboards: rawExpect.arrayContaining([
           {
+            id: '48089ec0-f039-11ed-bdc6-f382ac874aa0',
+            title: 'Message Processor Operations',
+            score: 0.375,
+            matchedBy: {
+              index: ['593f894a-3378-42cc-bafc-61b4877b64b0'],
+              fields: ['processor.processed', 'processor.accepted', 'host.name'],
+            },
+            relevantPanelCount: 2,
+            relevantPanels: [
+              {
+                panel: {
+                  panelIndex: '04857532-a5b3-4de0-a79f-75d8d0b5c8c7',
+                  type: 'lens',
+                  panelConfig: {
+                    enhancements: { dynamicActions: { events: [] } },
+                    syncColors: false,
+                    syncCursor: true,
+                    syncTooltips: false,
+                    filters: [],
+                    query: { query: '', language: 'kuery' },
+                    attributes: {
+                      title: '',
+                      visualizationType: 'lnsXY',
+                      type: 'lens',
+                      references: [
+                        {
+                          type: 'index-pattern',
+                          id: '593f894a-3378-42cc-bafc-61b4877b64b0',
+                          name: 'indexpattern-datasource-layer-9ad575bb-1de0-4b4c-a42f-bd9117f7c123',
+                        },
+                        {
+                          type: 'index-pattern',
+                          id: '593f894a-3378-42cc-bafc-61b4877b64b0',
+                          name: 'indexpattern-datasource-layer-3d6a7da9-b2c1-4dfd-848c-499cbd34f8d1',
+                        },
+                      ],
+                      state: {
+                        visualization: {
+                          title: 'Empty XY chart',
+                          legend: { isVisible: true, position: 'right' },
+                          valueLabels: 'hide',
+                          preferredSeriesType: 'bar_stacked',
+                          layers: [
+                            {
+                              layerId: '9ad575bb-1de0-4b4c-a42f-bd9117f7c123',
+                              accessors: ['5c829b86-8e00-4dec-ae77-409d14f1e9c6'],
+                              position: 'top',
+                              seriesType: 'bar_stacked',
+                              showGridlines: false,
+                              layerType: 'data',
+                              colorMapping: {
+                                assignments: [],
+                                specialAssignments: [
+                                  {
+                                    rule: { type: 'other' },
+                                    color: { type: 'loop' },
+                                    touched: false,
+                                  },
+                                ],
+                                paletteId: 'default',
+                                colorMode: { type: 'categorical' },
+                              },
+                              xAccessor: 'ee21691a-428f-4ad1-8ae2-349459564af4',
+                            },
+                            {
+                              layerId: '3d6a7da9-b2c1-4dfd-848c-499cbd34f8d1',
+                              layerType: 'data',
+                              accessors: ['d6aa9f6b-57b7-46dc-afb2-0e60712da597'],
+                              seriesType: 'bar_stacked',
+                              xAccessor: '79c23309-891f-48be-8290-ab6141ea8761',
+                              yConfig: [
+                                {
+                                  forAccessor: 'd6aa9f6b-57b7-46dc-afb2-0e60712da597',
+                                  color: '#f6726a',
+                                },
+                              ],
+                            },
+                          ],
+                          yTitle: 'Processed vs Rejected',
+                          axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+                        },
+                        query: { query: '', language: 'kuery' },
+                        filters: [],
+                        datasourceStates: {
+                          formBased: {
+                            layers: {
+                              '9ad575bb-1de0-4b4c-a42f-bd9117f7c123': {
+                                columns: {
+                                  'ee21691a-428f-4ad1-8ae2-349459564af4': {
+                                    label: '@timestamp',
+                                    dataType: 'date',
+                                    operationType: 'date_histogram',
+                                    sourceField: '@timestamp',
+                                    isBucketed: true,
+                                    scale: 'interval',
+                                    params: {
+                                      interval: 'auto',
+                                      includeEmptyRows: true,
+                                      dropPartials: false,
+                                    },
+                                  },
+                                  '5c829b86-8e00-4dec-ae77-409d14f1e9c6X0': {
+                                    label: 'Part of sum(processor.processed)',
+                                    dataType: 'number',
+                                    operationType: 'sum',
+                                    sourceField: 'processor.processed',
+                                    isBucketed: false,
+                                    scale: 'ratio',
+                                    params: { emptyAsNull: false },
+                                    customLabel: true,
+                                  },
+                                  '5c829b86-8e00-4dec-ae77-409d14f1e9c6': {
+                                    label: 'Processed',
+                                    dataType: 'number',
+                                    operationType: 'formula',
+                                    isBucketed: false,
+                                    scale: 'ratio',
+                                    params: {
+                                      formula: 'sum(processor.processed)',
+                                      isFormulaBroken: false,
+                                    },
+                                    references: ['5c829b86-8e00-4dec-ae77-409d14f1e9c6X0'],
+                                    customLabel: true,
+                                  },
+                                },
+                                columnOrder: [
+                                  'ee21691a-428f-4ad1-8ae2-349459564af4',
+                                  '5c829b86-8e00-4dec-ae77-409d14f1e9c6',
+                                  '5c829b86-8e00-4dec-ae77-409d14f1e9c6X0',
+                                ],
+                                sampling: 1,
+                                ignoreGlobalFilters: false,
+                                incompleteColumns: {},
+                              },
+                              '3d6a7da9-b2c1-4dfd-848c-499cbd34f8d1': {
+                                linkToLayers: [],
+                                columns: {
+                                  '79c23309-891f-48be-8290-ab6141ea8761': {
+                                    label: '@timestamp',
+                                    dataType: 'date',
+                                    operationType: 'date_histogram',
+                                    sourceField: '@timestamp',
+                                    isBucketed: true,
+                                    scale: 'interval',
+                                    params: {
+                                      interval: 'auto',
+                                      includeEmptyRows: true,
+                                      dropPartials: false,
+                                    },
+                                  },
+                                  'd6aa9f6b-57b7-46dc-afb2-0e60712da597X0': {
+                                    label:
+                                      'Part of sum(processor.accepted) - sum(processor.processed)',
+                                    dataType: 'number',
+                                    operationType: 'sum',
+                                    sourceField: 'processor.accepted',
+                                    isBucketed: false,
+                                    scale: 'ratio',
+                                    params: { emptyAsNull: false },
+                                    customLabel: true,
+                                  },
+                                  'd6aa9f6b-57b7-46dc-afb2-0e60712da597X1': {
+                                    label:
+                                      'Part of sum(processor.accepted) - sum(processor.processed)',
+                                    dataType: 'number',
+                                    operationType: 'sum',
+                                    sourceField: 'processor.processed',
+                                    isBucketed: false,
+                                    scale: 'ratio',
+                                    params: { emptyAsNull: false },
+                                    customLabel: true,
+                                  },
+                                  'd6aa9f6b-57b7-46dc-afb2-0e60712da597X2': {
+                                    label:
+                                      'Part of sum(processor.accepted) - sum(processor.processed)',
+                                    dataType: 'number',
+                                    operationType: 'math',
+                                    isBucketed: false,
+                                    scale: 'ratio',
+                                    params: {
+                                      tinymathAst: {
+                                        type: 'function',
+                                        name: 'subtract',
+                                        args: [
+                                          'd6aa9f6b-57b7-46dc-afb2-0e60712da597X0',
+                                          'd6aa9f6b-57b7-46dc-afb2-0e60712da597X1',
+                                        ],
+                                        location: { min: 0, max: 50 },
+                                        text: 'sum(processor.accepted) - sum(processor.processed)',
+                                      },
+                                    },
+                                    references: [
+                                      'd6aa9f6b-57b7-46dc-afb2-0e60712da597X0',
+                                      'd6aa9f6b-57b7-46dc-afb2-0e60712da597X1',
+                                    ],
+                                    customLabel: true,
+                                  },
+                                  'd6aa9f6b-57b7-46dc-afb2-0e60712da597': {
+                                    label: 'Rejected',
+                                    dataType: 'number',
+                                    operationType: 'formula',
+                                    isBucketed: false,
+                                    scale: 'ratio',
+                                    params: {
+                                      formula: 'sum(processor.accepted) - sum(processor.processed)',
+                                      isFormulaBroken: false,
+                                    },
+                                    references: ['d6aa9f6b-57b7-46dc-afb2-0e60712da597X2'],
+                                    customLabel: true,
+                                  },
+                                },
+                                columnOrder: [
+                                  '79c23309-891f-48be-8290-ab6141ea8761',
+                                  'd6aa9f6b-57b7-46dc-afb2-0e60712da597',
+                                  'd6aa9f6b-57b7-46dc-afb2-0e60712da597X0',
+                                  'd6aa9f6b-57b7-46dc-afb2-0e60712da597X1',
+                                  'd6aa9f6b-57b7-46dc-afb2-0e60712da597X2',
+                                ],
+                                sampling: 1,
+                                ignoreGlobalFilters: false,
+                                incompleteColumns: {},
+                              },
+                            },
+                          },
+                          indexpattern: { layers: {} },
+                          textBased: { layers: {} },
+                        },
+                        internalReferences: [],
+                        adHocDataViews: {},
+                      },
+                    },
+                  },
+                },
+                matchedBy: {
+                  index: ['593f894a-3378-42cc-bafc-61b4877b64b0'],
+                  fields: ['processor.processed', 'processor.accepted'],
+                },
+              },
+              {
+                panel: {
+                  panelIndex: '8db7a201-95c8-4211-89b5-1288e18c8f2e',
+                  type: 'lens',
+                  panelConfig: {
+                    enhancements: { dynamicActions: { events: [] } },
+                    syncColors: false,
+                    syncCursor: true,
+                    syncTooltips: false,
+                    filters: [],
+                    query: { query: '', language: 'kuery' },
+                    attributes: {
+                      title: '',
+                      visualizationType: 'lnsXY',
+                      type: 'lens',
+                      references: [
+                        {
+                          type: 'index-pattern',
+                          id: '593f894a-3378-42cc-bafc-61b4877b64b0',
+                          name: 'indexpattern-datasource-layer-3d6a7da9-b2c1-4dfd-848c-499cbd34f8d1',
+                        },
+                      ],
+                      state: {
+                        visualization: {
+                          title: 'Empty XY chart',
+                          legend: { isVisible: true, position: 'right' },
+                          valueLabels: 'hide',
+                          preferredSeriesType: 'bar_stacked',
+                          layers: [
+                            {
+                              layerId: '3d6a7da9-b2c1-4dfd-848c-499cbd34f8d1',
+                              layerType: 'data',
+                              accessors: ['d6aa9f6b-57b7-46dc-afb2-0e60712da597'],
+                              seriesType: 'bar_stacked',
+                              xAccessor: '79c23309-891f-48be-8290-ab6141ea8761',
+                              yConfig: [
+                                {
+                                  forAccessor: 'd6aa9f6b-57b7-46dc-afb2-0e60712da597',
+                                  color: '#f6726a',
+                                },
+                              ],
+                              splitAccessor: '0fac59b3-04e0-4d9c-84a8-75227c7db151',
+                            },
+                          ],
+                          yTitle: 'Processed vs Rejected',
+                          axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+                        },
+                        query: { query: '', language: 'kuery' },
+                        filters: [],
+                        datasourceStates: {
+                          formBased: {
+                            layers: {
+                              '3d6a7da9-b2c1-4dfd-848c-499cbd34f8d1': {
+                                linkToLayers: [],
+                                columns: {
+                                  '79c23309-891f-48be-8290-ab6141ea8761': {
+                                    label: '@timestamp',
+                                    dataType: 'date',
+                                    operationType: 'date_histogram',
+                                    sourceField: '@timestamp',
+                                    isBucketed: true,
+                                    scale: 'interval',
+                                    params: {
+                                      interval: 'auto',
+                                      includeEmptyRows: true,
+                                      dropPartials: false,
+                                    },
+                                  },
+                                  'd6aa9f6b-57b7-46dc-afb2-0e60712da597X0': {
+                                    label:
+                                      'Part of sum(processor.accepted) - sum(processor.processed)',
+                                    dataType: 'number',
+                                    operationType: 'sum',
+                                    sourceField: 'processor.accepted',
+                                    isBucketed: false,
+                                    scale: 'ratio',
+                                    params: { emptyAsNull: false },
+                                    customLabel: true,
+                                  },
+                                  'd6aa9f6b-57b7-46dc-afb2-0e60712da597X1': {
+                                    label:
+                                      'Part of sum(processor.accepted) - sum(processor.processed)',
+                                    dataType: 'number',
+                                    operationType: 'sum',
+                                    sourceField: 'processor.processed',
+                                    isBucketed: false,
+                                    scale: 'ratio',
+                                    params: { emptyAsNull: false },
+                                    customLabel: true,
+                                  },
+                                  'd6aa9f6b-57b7-46dc-afb2-0e60712da597X2': {
+                                    label:
+                                      'Part of sum(processor.accepted) - sum(processor.processed)',
+                                    dataType: 'number',
+                                    operationType: 'math',
+                                    isBucketed: false,
+                                    scale: 'ratio',
+                                    params: {
+                                      tinymathAst: {
+                                        type: 'function',
+                                        name: 'subtract',
+                                        args: [
+                                          'd6aa9f6b-57b7-46dc-afb2-0e60712da597X0',
+                                          'd6aa9f6b-57b7-46dc-afb2-0e60712da597X1',
+                                        ],
+                                        location: { min: 0, max: 50 },
+                                        text: 'sum(processor.accepted) - sum(processor.processed)',
+                                      },
+                                    },
+                                    references: [
+                                      'd6aa9f6b-57b7-46dc-afb2-0e60712da597X0',
+                                      'd6aa9f6b-57b7-46dc-afb2-0e60712da597X1',
+                                    ],
+                                    customLabel: true,
+                                  },
+                                  'd6aa9f6b-57b7-46dc-afb2-0e60712da597': {
+                                    label: 'Rejected',
+                                    dataType: 'number',
+                                    operationType: 'formula',
+                                    isBucketed: false,
+                                    scale: 'ratio',
+                                    params: {
+                                      formula: 'sum(processor.accepted) - sum(processor.processed)',
+                                      isFormulaBroken: false,
+                                    },
+                                    references: ['d6aa9f6b-57b7-46dc-afb2-0e60712da597X2'],
+                                    customLabel: true,
+                                  },
+                                  '0fac59b3-04e0-4d9c-84a8-75227c7db151': {
+                                    label: 'Top 10 values of host.name',
+                                    dataType: 'string',
+                                    operationType: 'terms',
+                                    scale: 'ordinal',
+                                    sourceField: 'host.name',
+                                    isBucketed: true,
+                                    params: {
+                                      size: 10,
+                                      orderBy: { type: 'alphabetical', fallback: true },
+                                      orderDirection: 'asc',
+                                      otherBucket: true,
+                                      missingBucket: false,
+                                      parentFormat: { id: 'terms' },
+                                      include: [],
+                                      exclude: [],
+                                      includeIsRegex: false,
+                                      excludeIsRegex: false,
+                                    },
+                                  },
+                                },
+                                columnOrder: [
+                                  '0fac59b3-04e0-4d9c-84a8-75227c7db151',
+                                  '79c23309-891f-48be-8290-ab6141ea8761',
+                                  'd6aa9f6b-57b7-46dc-afb2-0e60712da597',
+                                  'd6aa9f6b-57b7-46dc-afb2-0e60712da597X0',
+                                  'd6aa9f6b-57b7-46dc-afb2-0e60712da597X1',
+                                  'd6aa9f6b-57b7-46dc-afb2-0e60712da597X2',
+                                ],
+                                sampling: 1,
+                                ignoreGlobalFilters: false,
+                                incompleteColumns: {},
+                                indexPatternId: '593f894a-3378-42cc-bafc-61b4877b64b0',
+                              },
+                            },
+                            currentIndexPatternId: '593f894a-3378-42cc-bafc-61b4877b64b0',
+                          },
+                          indexpattern: {
+                            layers: {},
+                            currentIndexPatternId: '593f894a-3378-42cc-bafc-61b4877b64b0',
+                          },
+                          textBased: {
+                            layers: {},
+                            indexPatternRefs: [
+                              {
+                                id: '593f894a-3378-42cc-bafc-61b4877b64b0',
+                                title: 'kbn-data-forge-fake_stack.message_processor-*',
+                                timeField: '@timestamp',
+                              },
+                            ],
+                          },
+                        },
+                        internalReferences: [],
+                        adHocDataViews: {},
+                      },
+                    },
+                  },
+                  title: '',
+                },
+                matchedBy: {
+                  index: ['593f894a-3378-42cc-bafc-61b4877b64b0'],
+                  fields: ['processor.processed', 'processor.accepted', 'host.name'],
+                },
+              },
+            ],
+          },
+          {
             id: 'b6fc0f00-f5a3-11ed-9275-13469aefbc4f',
             title: 'Transaction Rates',
+            score: 0.25,
             matchedBy: {
               index: ['593f894a-3378-42cc-bafc-61b4877b64b0'],
               fields: ['processor.processed', 'processor.accepted'],
@@ -230,7 +662,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 panel: {
                   panelIndex: 'f7d97f37-6684-4ab6-8da9-4b9f4f809a22',
                   type: 'lens',
-                  embeddableConfig: {
+                  panelConfig: {
                     enhancements: { dynamicActions: { events: [] } },
                     syncColors: false,
                     syncCursor: true,
@@ -556,440 +988,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ],
           },
           {
-            id: '48089ec0-f039-11ed-bdc6-f382ac874aa0',
-            title: 'Message Processor Operations',
-            matchedBy: {
-              index: ['593f894a-3378-42cc-bafc-61b4877b64b0'],
-              fields: ['processor.processed', 'processor.accepted', 'host.name'],
-            },
-            relevantPanelCount: 2,
-            relevantPanels: [
-              {
-                panel: {
-                  panelIndex: '04857532-a5b3-4de0-a79f-75d8d0b5c8c7',
-                  type: 'lens',
-                  embeddableConfig: {
-                    enhancements: { dynamicActions: { events: [] } },
-                    syncColors: false,
-                    syncCursor: true,
-                    syncTooltips: false,
-                    filters: [],
-                    query: { query: '', language: 'kuery' },
-                    attributes: {
-                      title: '',
-                      visualizationType: 'lnsXY',
-                      type: 'lens',
-                      references: [
-                        {
-                          type: 'index-pattern',
-                          id: '593f894a-3378-42cc-bafc-61b4877b64b0',
-                          name: 'indexpattern-datasource-layer-9ad575bb-1de0-4b4c-a42f-bd9117f7c123',
-                        },
-                        {
-                          type: 'index-pattern',
-                          id: '593f894a-3378-42cc-bafc-61b4877b64b0',
-                          name: 'indexpattern-datasource-layer-3d6a7da9-b2c1-4dfd-848c-499cbd34f8d1',
-                        },
-                      ],
-                      state: {
-                        visualization: {
-                          title: 'Empty XY chart',
-                          legend: { isVisible: true, position: 'right' },
-                          valueLabels: 'hide',
-                          preferredSeriesType: 'bar_stacked',
-                          layers: [
-                            {
-                              layerId: '9ad575bb-1de0-4b4c-a42f-bd9117f7c123',
-                              accessors: ['5c829b86-8e00-4dec-ae77-409d14f1e9c6'],
-                              position: 'top',
-                              seriesType: 'bar_stacked',
-                              showGridlines: false,
-                              layerType: 'data',
-                              colorMapping: {
-                                assignments: [],
-                                specialAssignments: [
-                                  {
-                                    rule: { type: 'other' },
-                                    color: { type: 'loop' },
-                                    touched: false,
-                                  },
-                                ],
-                                paletteId: 'default',
-                                colorMode: { type: 'categorical' },
-                              },
-                              xAccessor: 'ee21691a-428f-4ad1-8ae2-349459564af4',
-                            },
-                            {
-                              layerId: '3d6a7da9-b2c1-4dfd-848c-499cbd34f8d1',
-                              layerType: 'data',
-                              accessors: ['d6aa9f6b-57b7-46dc-afb2-0e60712da597'],
-                              seriesType: 'bar_stacked',
-                              xAccessor: '79c23309-891f-48be-8290-ab6141ea8761',
-                              yConfig: [
-                                {
-                                  forAccessor: 'd6aa9f6b-57b7-46dc-afb2-0e60712da597',
-                                  color: '#f6726a',
-                                },
-                              ],
-                            },
-                          ],
-                          yTitle: 'Processed vs Rejected',
-                          axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
-                        },
-                        query: { query: '', language: 'kuery' },
-                        filters: [],
-                        datasourceStates: {
-                          formBased: {
-                            layers: {
-                              '9ad575bb-1de0-4b4c-a42f-bd9117f7c123': {
-                                columns: {
-                                  'ee21691a-428f-4ad1-8ae2-349459564af4': {
-                                    label: '@timestamp',
-                                    dataType: 'date',
-                                    operationType: 'date_histogram',
-                                    sourceField: '@timestamp',
-                                    isBucketed: true,
-                                    scale: 'interval',
-                                    params: {
-                                      interval: 'auto',
-                                      includeEmptyRows: true,
-                                      dropPartials: false,
-                                    },
-                                  },
-                                  '5c829b86-8e00-4dec-ae77-409d14f1e9c6X0': {
-                                    label: 'Part of sum(processor.processed)',
-                                    dataType: 'number',
-                                    operationType: 'sum',
-                                    sourceField: 'processor.processed',
-                                    isBucketed: false,
-                                    scale: 'ratio',
-                                    params: { emptyAsNull: false },
-                                    customLabel: true,
-                                  },
-                                  '5c829b86-8e00-4dec-ae77-409d14f1e9c6': {
-                                    label: 'Processed',
-                                    dataType: 'number',
-                                    operationType: 'formula',
-                                    isBucketed: false,
-                                    scale: 'ratio',
-                                    params: {
-                                      formula: 'sum(processor.processed)',
-                                      isFormulaBroken: false,
-                                    },
-                                    references: ['5c829b86-8e00-4dec-ae77-409d14f1e9c6X0'],
-                                    customLabel: true,
-                                  },
-                                },
-                                columnOrder: [
-                                  'ee21691a-428f-4ad1-8ae2-349459564af4',
-                                  '5c829b86-8e00-4dec-ae77-409d14f1e9c6',
-                                  '5c829b86-8e00-4dec-ae77-409d14f1e9c6X0',
-                                ],
-                                sampling: 1,
-                                ignoreGlobalFilters: false,
-                                incompleteColumns: {},
-                              },
-                              '3d6a7da9-b2c1-4dfd-848c-499cbd34f8d1': {
-                                linkToLayers: [],
-                                columns: {
-                                  '79c23309-891f-48be-8290-ab6141ea8761': {
-                                    label: '@timestamp',
-                                    dataType: 'date',
-                                    operationType: 'date_histogram',
-                                    sourceField: '@timestamp',
-                                    isBucketed: true,
-                                    scale: 'interval',
-                                    params: {
-                                      interval: 'auto',
-                                      includeEmptyRows: true,
-                                      dropPartials: false,
-                                    },
-                                  },
-                                  'd6aa9f6b-57b7-46dc-afb2-0e60712da597X0': {
-                                    label:
-                                      'Part of sum(processor.accepted) - sum(processor.processed)',
-                                    dataType: 'number',
-                                    operationType: 'sum',
-                                    sourceField: 'processor.accepted',
-                                    isBucketed: false,
-                                    scale: 'ratio',
-                                    params: { emptyAsNull: false },
-                                    customLabel: true,
-                                  },
-                                  'd6aa9f6b-57b7-46dc-afb2-0e60712da597X1': {
-                                    label:
-                                      'Part of sum(processor.accepted) - sum(processor.processed)',
-                                    dataType: 'number',
-                                    operationType: 'sum',
-                                    sourceField: 'processor.processed',
-                                    isBucketed: false,
-                                    scale: 'ratio',
-                                    params: { emptyAsNull: false },
-                                    customLabel: true,
-                                  },
-                                  'd6aa9f6b-57b7-46dc-afb2-0e60712da597X2': {
-                                    label:
-                                      'Part of sum(processor.accepted) - sum(processor.processed)',
-                                    dataType: 'number',
-                                    operationType: 'math',
-                                    isBucketed: false,
-                                    scale: 'ratio',
-                                    params: {
-                                      tinymathAst: {
-                                        type: 'function',
-                                        name: 'subtract',
-                                        args: [
-                                          'd6aa9f6b-57b7-46dc-afb2-0e60712da597X0',
-                                          'd6aa9f6b-57b7-46dc-afb2-0e60712da597X1',
-                                        ],
-                                        location: { min: 0, max: 50 },
-                                        text: 'sum(processor.accepted) - sum(processor.processed)',
-                                      },
-                                    },
-                                    references: [
-                                      'd6aa9f6b-57b7-46dc-afb2-0e60712da597X0',
-                                      'd6aa9f6b-57b7-46dc-afb2-0e60712da597X1',
-                                    ],
-                                    customLabel: true,
-                                  },
-                                  'd6aa9f6b-57b7-46dc-afb2-0e60712da597': {
-                                    label: 'Rejected',
-                                    dataType: 'number',
-                                    operationType: 'formula',
-                                    isBucketed: false,
-                                    scale: 'ratio',
-                                    params: {
-                                      formula: 'sum(processor.accepted) - sum(processor.processed)',
-                                      isFormulaBroken: false,
-                                    },
-                                    references: ['d6aa9f6b-57b7-46dc-afb2-0e60712da597X2'],
-                                    customLabel: true,
-                                  },
-                                },
-                                columnOrder: [
-                                  '79c23309-891f-48be-8290-ab6141ea8761',
-                                  'd6aa9f6b-57b7-46dc-afb2-0e60712da597',
-                                  'd6aa9f6b-57b7-46dc-afb2-0e60712da597X0',
-                                  'd6aa9f6b-57b7-46dc-afb2-0e60712da597X1',
-                                  'd6aa9f6b-57b7-46dc-afb2-0e60712da597X2',
-                                ],
-                                sampling: 1,
-                                ignoreGlobalFilters: false,
-                                incompleteColumns: {},
-                              },
-                            },
-                          },
-                          indexpattern: { layers: {} },
-                          textBased: { layers: {} },
-                        },
-                        internalReferences: [],
-                        adHocDataViews: {},
-                      },
-                    },
-                  },
-                },
-                matchedBy: {
-                  index: ['593f894a-3378-42cc-bafc-61b4877b64b0'],
-                  fields: ['processor.processed', 'processor.accepted'],
-                },
-              },
-              {
-                panel: {
-                  panelIndex: '8db7a201-95c8-4211-89b5-1288e18c8f2e',
-                  type: 'lens',
-                  embeddableConfig: {
-                    enhancements: { dynamicActions: { events: [] } },
-                    syncColors: false,
-                    syncCursor: true,
-                    syncTooltips: false,
-                    filters: [],
-                    query: { query: '', language: 'kuery' },
-                    attributes: {
-                      title: '',
-                      visualizationType: 'lnsXY',
-                      type: 'lens',
-                      references: [
-                        {
-                          type: 'index-pattern',
-                          id: '593f894a-3378-42cc-bafc-61b4877b64b0',
-                          name: 'indexpattern-datasource-layer-3d6a7da9-b2c1-4dfd-848c-499cbd34f8d1',
-                        },
-                      ],
-                      state: {
-                        visualization: {
-                          title: 'Empty XY chart',
-                          legend: { isVisible: true, position: 'right' },
-                          valueLabels: 'hide',
-                          preferredSeriesType: 'bar_stacked',
-                          layers: [
-                            {
-                              layerId: '3d6a7da9-b2c1-4dfd-848c-499cbd34f8d1',
-                              layerType: 'data',
-                              accessors: ['d6aa9f6b-57b7-46dc-afb2-0e60712da597'],
-                              seriesType: 'bar_stacked',
-                              xAccessor: '79c23309-891f-48be-8290-ab6141ea8761',
-                              yConfig: [
-                                {
-                                  forAccessor: 'd6aa9f6b-57b7-46dc-afb2-0e60712da597',
-                                  color: '#f6726a',
-                                },
-                              ],
-                              splitAccessor: '0fac59b3-04e0-4d9c-84a8-75227c7db151',
-                            },
-                          ],
-                          yTitle: 'Processed vs Rejected',
-                          axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
-                        },
-                        query: { query: '', language: 'kuery' },
-                        filters: [],
-                        datasourceStates: {
-                          formBased: {
-                            layers: {
-                              '3d6a7da9-b2c1-4dfd-848c-499cbd34f8d1': {
-                                linkToLayers: [],
-                                columns: {
-                                  '79c23309-891f-48be-8290-ab6141ea8761': {
-                                    label: '@timestamp',
-                                    dataType: 'date',
-                                    operationType: 'date_histogram',
-                                    sourceField: '@timestamp',
-                                    isBucketed: true,
-                                    scale: 'interval',
-                                    params: {
-                                      interval: 'auto',
-                                      includeEmptyRows: true,
-                                      dropPartials: false,
-                                    },
-                                  },
-                                  'd6aa9f6b-57b7-46dc-afb2-0e60712da597X0': {
-                                    label:
-                                      'Part of sum(processor.accepted) - sum(processor.processed)',
-                                    dataType: 'number',
-                                    operationType: 'sum',
-                                    sourceField: 'processor.accepted',
-                                    isBucketed: false,
-                                    scale: 'ratio',
-                                    params: { emptyAsNull: false },
-                                    customLabel: true,
-                                  },
-                                  'd6aa9f6b-57b7-46dc-afb2-0e60712da597X1': {
-                                    label:
-                                      'Part of sum(processor.accepted) - sum(processor.processed)',
-                                    dataType: 'number',
-                                    operationType: 'sum',
-                                    sourceField: 'processor.processed',
-                                    isBucketed: false,
-                                    scale: 'ratio',
-                                    params: { emptyAsNull: false },
-                                    customLabel: true,
-                                  },
-                                  'd6aa9f6b-57b7-46dc-afb2-0e60712da597X2': {
-                                    label:
-                                      'Part of sum(processor.accepted) - sum(processor.processed)',
-                                    dataType: 'number',
-                                    operationType: 'math',
-                                    isBucketed: false,
-                                    scale: 'ratio',
-                                    params: {
-                                      tinymathAst: {
-                                        type: 'function',
-                                        name: 'subtract',
-                                        args: [
-                                          'd6aa9f6b-57b7-46dc-afb2-0e60712da597X0',
-                                          'd6aa9f6b-57b7-46dc-afb2-0e60712da597X1',
-                                        ],
-                                        location: { min: 0, max: 50 },
-                                        text: 'sum(processor.accepted) - sum(processor.processed)',
-                                      },
-                                    },
-                                    references: [
-                                      'd6aa9f6b-57b7-46dc-afb2-0e60712da597X0',
-                                      'd6aa9f6b-57b7-46dc-afb2-0e60712da597X1',
-                                    ],
-                                    customLabel: true,
-                                  },
-                                  'd6aa9f6b-57b7-46dc-afb2-0e60712da597': {
-                                    label: 'Rejected',
-                                    dataType: 'number',
-                                    operationType: 'formula',
-                                    isBucketed: false,
-                                    scale: 'ratio',
-                                    params: {
-                                      formula: 'sum(processor.accepted) - sum(processor.processed)',
-                                      isFormulaBroken: false,
-                                    },
-                                    references: ['d6aa9f6b-57b7-46dc-afb2-0e60712da597X2'],
-                                    customLabel: true,
-                                  },
-                                  '0fac59b3-04e0-4d9c-84a8-75227c7db151': {
-                                    label: 'Top 10 values of host.name',
-                                    dataType: 'string',
-                                    operationType: 'terms',
-                                    scale: 'ordinal',
-                                    sourceField: 'host.name',
-                                    isBucketed: true,
-                                    params: {
-                                      size: 10,
-                                      orderBy: { type: 'alphabetical', fallback: true },
-                                      orderDirection: 'asc',
-                                      otherBucket: true,
-                                      missingBucket: false,
-                                      parentFormat: { id: 'terms' },
-                                      include: [],
-                                      exclude: [],
-                                      includeIsRegex: false,
-                                      excludeIsRegex: false,
-                                    },
-                                  },
-                                },
-                                columnOrder: [
-                                  '0fac59b3-04e0-4d9c-84a8-75227c7db151',
-                                  '79c23309-891f-48be-8290-ab6141ea8761',
-                                  'd6aa9f6b-57b7-46dc-afb2-0e60712da597',
-                                  'd6aa9f6b-57b7-46dc-afb2-0e60712da597X0',
-                                  'd6aa9f6b-57b7-46dc-afb2-0e60712da597X1',
-                                  'd6aa9f6b-57b7-46dc-afb2-0e60712da597X2',
-                                ],
-                                sampling: 1,
-                                ignoreGlobalFilters: false,
-                                incompleteColumns: {},
-                                indexPatternId: '593f894a-3378-42cc-bafc-61b4877b64b0',
-                              },
-                            },
-                            currentIndexPatternId: '593f894a-3378-42cc-bafc-61b4877b64b0',
-                          },
-                          indexpattern: {
-                            layers: {},
-                            currentIndexPatternId: '593f894a-3378-42cc-bafc-61b4877b64b0',
-                          },
-                          textBased: {
-                            layers: {},
-                            indexPatternRefs: [
-                              {
-                                id: '593f894a-3378-42cc-bafc-61b4877b64b0',
-                                title: 'kbn-data-forge-fake_stack.message_processor-*',
-                                timeField: '@timestamp',
-                              },
-                            ],
-                          },
-                        },
-                        internalReferences: [],
-                        adHocDataViews: {},
-                      },
-                    },
-                  },
-                  title: '',
-                },
-                matchedBy: {
-                  index: ['593f894a-3378-42cc-bafc-61b4877b64b0'],
-                  fields: ['processor.processed', 'processor.accepted', 'host.name'],
-                },
-              },
-            ],
-          },
-          {
             id: '121a2498-8e27-4eb8-a7ab-9cb43a9295fc',
             title: 'Message Processor Events Processed vs Rejected',
+            score: 0.25,
             matchedBy: {
               index: ['593f894a-3378-42cc-bafc-61b4877b64b0'],
               fields: ['processor.processed', 'processor.accepted'],
@@ -1000,7 +1001,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 panel: {
                   panelIndex: '26355e5f-5a67-4ed1-84b2-da09b5f69b14',
                   type: 'lens',
-                  embeddableConfig: {
+                  panelConfig: {
                     enhancements: {
                       dynamicActions: {
                         events: [],

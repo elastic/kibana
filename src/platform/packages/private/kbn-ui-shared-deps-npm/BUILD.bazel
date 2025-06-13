@@ -40,6 +40,7 @@ RUNTIME_DEPS = [
   "@npm//@elastic/apm-rum-core",
   "@npm//@elastic/charts",
   "@npm//@elastic/eui",
+  "@npm//@elastic/eui-amsterdam",
   "@npm//@elastic/numeral",
   "@npm//@emotion/cache",
   "@npm//@emotion/react",
@@ -101,6 +102,7 @@ webpack_cli(
     "//conditions:default": {
       "NODE_ENV": "development",
       "REACT_18": "$(REACT_18)",
+      "EUI_AMSTERDAM": "$(EUI_AMSTERDAM)",
     },
   })
 )

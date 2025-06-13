@@ -117,7 +117,13 @@
     "@kbn/ebt-tools",
     "@kbn/dashboard-plugin",
     "@kbn/fields-metadata-plugin",
-    "@kbn/object-utils"
+    "@kbn/deeplinks-analytics",
+    "@kbn/object-utils",
+    "@kbn/task-manager-plugin",
+    "@kbn/core-saved-objects-server",
+    "@kbn/response-ops-rule-params",
+    "@kbn/controls-plugin",
+    "@kbn/core-http-browser"
   ],
   "exclude": ["target/**/*"]
 }

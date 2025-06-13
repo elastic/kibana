@@ -21,7 +21,8 @@
       "kibanaUtils",
       "dataQuality",
       "logsDataAccess",
-      "fieldsMetadata"
+      "fieldsMetadata",
+      "triggersActionsUi"
     ],
     "optionalPlugins": [
       "serverless",

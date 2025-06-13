@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LOG_LEVEL_FIELD } from '@kbn/discover-utils';
+import { LOG_LEVEL_FIELD } from '@kbn/discover-utils/src/field_constants';
 import type { DataSourceProfileProvider } from '../../../../profiles';
 import type { DefaultAppStateColumn } from '../../../../types';
 

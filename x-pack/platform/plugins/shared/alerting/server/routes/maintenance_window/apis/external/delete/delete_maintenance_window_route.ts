@@ -50,6 +50,10 @@ export const deleteMaintenanceWindowRoute = (
         access: 'public',
         summary: 'Delete a maintenance window.',
         tags: ['oas-tag:maintenance-window'],
+        availability: {
+          since: '8.19.0',
+          stability: 'stable',
+        },
       },
     },
     router.handleLegacyErrors(

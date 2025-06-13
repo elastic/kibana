@@ -161,6 +161,9 @@ export function collectUserDefinedColumns(
         // BY and WITH can contain userDefinedColumns
         ret.push(...ctx.visitOptions());
       }
+      if (ctx.node.name === 'fork') {
+        ret.push(...ctx.visitSubQueries());
+      }
       return ret;
     })
     .on('visitQuery', (ctx) => [...ctx.visitCommands()]);

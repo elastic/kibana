@@ -21,21 +21,15 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { isEqual } from 'lodash';
 import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
+import useObservable from 'react-use/lib/useObservable';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  ESQLLang,
-  ESQL_LANG_ID,
-  ESQL_DARK_THEME_ID,
-  ESQL_LIGHT_THEME_ID,
-  monaco,
-  type ESQLCallbacks,
-} from '@kbn/monaco';
 import type { ILicense } from '@kbn/licensing-plugin/public';
+import { ESQLLang, ESQL_LANG_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
 import memoize from 'lodash/memoize';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { fixESQLQueryWithVariables } from '@kbn/esql-utils';
@@ -133,7 +127,8 @@ export const ESQLEditor = memo(function ESQLEditor({
     uiActions,
     data,
   } = kibana.services;
-  const darkMode = core.theme?.getTheme().darkMode;
+
+  const activeSolutionId = useObservable(core.chrome.getActiveSolutionNavId$());
 
   const fixedQuery = useMemo(
     () => fixESQLQueryWithVariables(query.esql, esqlVariables),
@@ -520,14 +515,29 @@ export const ESQLEditor = memo(function ESQLEditor({
         return variablesService?.areSuggestionsEnabled ?? false;
       },
       getJoinIndices: kibana.services?.esql?.getJoinIndicesAutocomplete,
+      getTimeseriesIndices: kibana.services?.esql?.getTimeseriesIndicesAutocomplete,
+      getEditorExtensions: async (queryString: string) => {
+        if (activeSolutionId) {
+          return (
+            (await kibana.services?.esql?.getEditorExtensionsAutocomplete(
+              queryString,
+              activeSolutionId
+            )) ?? { recommendedQueries: [] }
+          );
+        }
+        return {
+          recommendedQueries: [],
+        };
+      },
+      getInferenceEndpoints: kibana.services?.esql?.getInferenceEndpointsAutocomplete,
     };
     return callbacks;
   }, [
     fieldsMetadata,
-    license,
-    kibana.services?.esql?.getJoinIndicesAutocomplete,
+    kibana.services?.esql,
     dataSourcesCache,
     fixedQuery,
+    license,
     memoizedSources,
     dataViews,
     core,
@@ -536,10 +546,11 @@ export const ESQLEditor = memo(function ESQLEditor({
     memoizedFieldsFromESQL,
     expressions,
     abortController,
-    indexManagementApiService,
-    histogramBarTarget,
     variablesService?.esqlVariables,
     variablesService?.areSuggestionsEnabled,
+    indexManagementApiService,
+    histogramBarTarget,
+    activeSolutionId,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {
@@ -710,7 +721,7 @@ export const ESQLEditor = memo(function ESQLEditor({
       hover: {
         above: false,
       },
-      accessibilitySupport: 'off',
+      accessibilitySupport: 'auto',
       autoIndent: 'keep',
       automaticLayout: true,
       fixedOverflowWidgets: true,
@@ -743,12 +754,12 @@ export const ESQLEditor = memo(function ESQLEditor({
         verticalScrollbarSize: 6,
       },
       scrollBeyondLastLine: false,
-      theme: darkMode ? ESQL_DARK_THEME_ID : ESQL_LIGHT_THEME_ID,
+      theme: ESQL_LANG_ID,
       tabSize: 2,
       wordWrap: 'on',
       wrappingIndent: 'none',
     }),
-    [isDisabled, darkMode]
+    [isDisabled]
   );
 
   const editorPanel = (

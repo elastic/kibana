@@ -115,11 +115,8 @@ export class ReportingPublicPlugin
         return [
           {
             application: start.application,
-            analytics: start.analytics,
-            i18n: start.i18n,
-            theme: start.theme,
-            userProfile: start.userProfile,
             notifications: start.notifications,
+            rendering: start.rendering,
             uiSettings: start.uiSettings,
           },
           ...rest,

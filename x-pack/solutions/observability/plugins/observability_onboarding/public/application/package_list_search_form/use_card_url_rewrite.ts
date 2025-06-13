@@ -5,45 +5,50 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import { IntegrationCardItem } from '@kbn/fleet-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { OBSERVABILITY_ONBOARDING_APP_ID } from '@kbn/deeplinks-observability';
 
-export function toOnboardingPath({
-  basePath,
+export function buildOnboardingPath({
   category,
   search,
 }: {
-  basePath?: string;
   category?: string | null;
   search?: string;
-}): string | null {
-  if (typeof basePath !== 'string' && !basePath) return null;
-  const path = `${basePath}/app/observabilityOnboarding`;
-  if (!category && !search) return path;
+}): string {
+  if (!category && !search) return '?';
   const params = new URLSearchParams();
   if (category) params.append('category', category);
   if (search) params.append('search', search);
-  return `${path}?${params.toString()}`;
+  return `?${params.toString()}`;
 }
 
-export function addPathParamToUrl(url: string, onboardingLink: string) {
-  const encoded = encodeURIComponent(onboardingLink);
-  if (url.indexOf('?') >= 0) {
-    return `${url}&observabilityOnboardingLink=${encoded}`;
+export function addPathParamToUrl(
+  url: string,
+  params: {
+    category?: string | null;
+    search?: string;
   }
-  return `${url}?observabilityOnboardingLink=${encoded}`;
+) {
+  const onboardingPath = buildOnboardingPath(params);
+  const encoded = encodeURIComponent(onboardingPath);
+  const paramsString = `returnAppId=${OBSERVABILITY_ONBOARDING_APP_ID}&returnPath=${encoded}`;
+
+  if (url.indexOf('?') >= 0) {
+    return `${url}&${paramsString}`;
+  }
+  return `${url}?${paramsString}`;
 }
 
 export function useCardUrlRewrite(props: { category?: string | null; search?: string }) {
-  const kibana = useKibana();
-  const basePath = kibana.services.http?.basePath.get();
-  const onboardingLink = useMemo(() => toOnboardingPath({ basePath, ...props }), [basePath, props]);
+  const params = new URLSearchParams();
+  if (props.category) params.append('category', props.category);
+  if (props.search) params.append('search', props.search);
+
   return (card: IntegrationCardItem) => ({
     ...card,
     url:
-      card.url.indexOf('/app/integrations') >= 0 && onboardingLink
-        ? addPathParamToUrl(card.url, onboardingLink)
+      card.url.indexOf('/app/integrations') >= 0
+        ? addPathParamToUrl(card.url, { category: props.category, search: props.search })
         : card.url,
   });
 }

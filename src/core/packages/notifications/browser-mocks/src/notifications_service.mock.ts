@@ -9,7 +9,6 @@
 
 import type { DeeplyMockedKeys, MockedKeys } from '@kbn/utility-types-jest';
 import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
-import type { NotificationsServiceContract } from '@kbn/core-notifications-browser-internal';
 import { toastsServiceMock } from './toasts_service.mock';
 
 const createSetupContractMock = () => {
@@ -28,6 +27,15 @@ const createStartContractMock = () => {
   };
   return startContract;
 };
+
+/**
+ * This is declared internally to avoid a circular dependency issue
+ */
+export interface NotificationsServiceContract {
+  setup: typeof createSetupContractMock;
+  start: ({ targetDomElement }: { targetDomElement: HTMLElement }) => void;
+  stop: () => void;
+}
 
 const createMock = () => {
   const mocked: jest.Mocked<NotificationsServiceContract> = {

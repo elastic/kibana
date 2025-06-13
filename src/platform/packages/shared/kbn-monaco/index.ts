@@ -45,8 +45,7 @@ export {
 export type { ParsedRequest } from './src/console';
 
 export {
-  CODE_EDITOR_LIGHT_THEME_ID,
-  CODE_EDITOR_DARK_THEME_ID,
-  CODE_EDITOR_LIGHT_THEME_TRANSPARENT_ID,
-  CODE_EDITOR_DARK_THEME_TRANSPARENT_ID,
+  defaultThemesResolvers,
+  CODE_EDITOR_DEFAULT_THEME_ID,
+  CODE_EDITOR_TRANSPARENT_THEME_ID,
 } from './src/code_editor';

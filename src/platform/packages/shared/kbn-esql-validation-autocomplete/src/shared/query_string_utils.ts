@@ -49,12 +49,3 @@ export function toSingleLine(inputString: string): string {
     .filter((line) => line !== '')
     .join(' | ');
 }
-
-export function getFirstPipeValue(inputString: string): string {
-  const queryNoComments = removeComments(inputString);
-  const parts = queryNoComments.split('|');
-  if (parts.length > 1) {
-    return parts[0].trim();
-  }
-  return queryNoComments.trim();
-}

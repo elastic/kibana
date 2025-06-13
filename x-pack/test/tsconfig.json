@@ -121,9 +121,6 @@
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/stack-connectors-plugin",
     "@kbn/stack-alerts-plugin",
-    "@kbn/apm-data-access-plugin",
-    "@kbn/coloring",
-    "@kbn/coloring",
     "@kbn/es",
     "@kbn/metrics-data-access-plugin",
     "@kbn/dataset-quality-plugin",
@@ -168,6 +165,7 @@
     "@kbn/ai-assistant-common",
     "@kbn/core-deprecations-common",
     "@kbn/usage-collection-plugin",
+    "@kbn/palettes",
     "@kbn/sse-utils-server",
     "@kbn/gen-ai-functional-testing",
     "@kbn/core-elasticsearch-server",
@@ -180,10 +178,13 @@
     "@kbn/aiops-change-point-detection",
     "@kbn/es-errors",
     "@kbn/content-packs-schema",
+    "@kbn/response-ops-alerts-filters-form",
+    "@kbn/embeddable-alerts-table-plugin",
     "@kbn/lock-manager",
     "@kbn/alerts-ui-shared",
     "@kbn/test-suites-xpack-platform",
     "@kbn/test-suites-xpack-observability",
-    "@kbn/management-settings-ids"
+    "@kbn/management-settings-ids",
+    "@kbn/apm-sources-access-plugin",
   ]
 }

@@ -17,9 +17,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
-import { enableInfrastructureHostsView } from '@kbn/observability-plugin/common';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
 import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
@@ -58,7 +57,6 @@ export const InfrastructurePage = () => {
   const config = usePluginConfig();
   const { application } = useKibana<{ share: SharePublicStart }>().services;
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
-  const isHostsViewEnabled = useUiSetting(enableInfrastructureHostsView);
 
   const uiCapabilities = application?.capabilities;
 
@@ -126,7 +124,7 @@ export const InfrastructurePage = () => {
                   <Route path="/explorer" component={MetricsExplorerPage} />
                 )}
                 <Route path="/detail/:type/:node" component={NodeDetail} />
-                {isHostsViewEnabled ? <Route path="/hosts" component={HostsPage} /> : null}
+                <Route path="/hosts" component={HostsPage} />
                 <Route path="/settings" component={MetricsSettingsPage} />
 
                 <RedirectWithQueryParams from="/snapshot" exact to="/inventory" />

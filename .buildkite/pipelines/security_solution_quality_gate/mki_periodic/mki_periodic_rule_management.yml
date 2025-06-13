@@ -1,12 +1,12 @@
 steps:
-  - group: "Serverless MKI QA Rule Management - Cypress Test"
+  - group: 'Serverless MKI QA Rule Management - Cypress Test'
     key: cypress_test_rule_management
     steps:
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:rule_management
-        label: "Cypress MKI - Rule Management"
+        label: 'Cypress MKI - Rule Management'
         key: test_rule_management
         env:
-          BK_TEST_SUITE_KEY: "serverless-cypress-rule-management"
+          BK_TEST_SUITE_KEY: 'serverless-cypress-rule-management'
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
@@ -18,10 +18,10 @@ steps:
         parallelism: 8
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:rule_management:prebuilt_rules
-        label: "Cypress MKI - Rule Management - Prebuilt Rules"
+        label: 'Cypress MKI - Rule Management - Prebuilt Rules'
         key: test_rule_management_prebuilt_rules
         env:
-          BK_TEST_SUITE_KEY: "serverless-cypress-rule-management"
+          BK_TEST_SUITE_KEY: 'serverless-cypress-rule-management'
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
@@ -32,7 +32,7 @@ steps:
         timeout_in_minutes: 300
         parallelism: 4
 
-  - group: "API MKI - Rule Management"
+  - group: 'API MKI - Rule Management'
     key: api_test_rule_management
     steps:
       - label: Running rule_creation:qa:serverless
@@ -47,7 +47,7 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
               limit: 2
 
       - label: Running rule_creation:essentials:qa:serverless
@@ -62,7 +62,7 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
               limit: 2
 
       - label: Running rule_update:qa:serverless
@@ -77,7 +77,7 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
               limit: 2
 
       - label: Running rule_update:essentials:qa:serverless
@@ -92,7 +92,7 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
               limit: 2
 
       - label: Running rule_patch:qa:serverless
@@ -107,7 +107,7 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
               limit: 2
 
       - label: Running rule_patch:essentials:qa:serverless
@@ -122,12 +122,12 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
               limit: 2
 
-      - label: Running prebuilt_rules_management:qa:serverless
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_management:qa:serverless
-        key: prebuilt_rules_management:qa:serverless
+      - label: Running prebuilt_rules_management:customization_disabled:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_management:customization_disabled:qa:serverless
+        key: prebuilt_rules_management:customization_disabled:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
@@ -137,12 +137,12 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
               limit: 2
 
-      - label: Running prebuilt_rules_bundled_prebuilt_rules_package:qa:serverless
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_bundled_prebuilt_rules_package:qa:serverless
-        key: prebuilt_rules_bundled_prebuilt_rules_package:qa:serverless
+      - label: Running prebuilt_rules_management:customization_enabled:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_management:customization_enabled:qa:serverless
+        key: prebuilt_rules_management:customization_enabled:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
@@ -152,12 +152,12 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
               limit: 2
 
-      - label: Running prebuilt_rules_large_prebuilt_rules_package:qa:serverless
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_large_prebuilt_rules_package:qa:serverless
-        key: prebuilt_rules_large_prebuilt_rules_package:qa:serverless
+      - label: Running prebuilt_rules_upgrade_common_fields:customization_enabled:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_upgrade_common_fields:customization_enabled:qa:serverless
+        key: prebuilt_rules_upgrade_common_fields:customization_enabled:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
@@ -167,12 +167,12 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
               limit: 2
 
-      - label: Running prebuilt_rules_update_prebuilt_rules_package:qa:serverless
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_update_prebuilt_rules_package:qa:serverless
-        key: prebuilt_rules_update_prebuilt_rules_package:qa:serverless
+      - label: Running prebuilt_rules_upgrade_type_specific_fields:customization_enabled:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_upgrade_type_specific_fields:customization_enabled:qa:serverless
+        key: prebuilt_rules_upgrade_type_specific_fields:customization_enabled:qa:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
@@ -182,7 +182,7 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
               limit: 2
 
       - label: Running rule_delete:qa:serverless
@@ -197,7 +197,7 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
               limit: 2
 
       - label: Running rule_delete:essentials:qa:serverless
@@ -212,7 +212,7 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
               limit: 2
 
       - label: Running rule_import_export:qa:serverless
@@ -227,7 +227,7 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
               limit: 2
 
       - label: Running rule_import_export:essentials:qa:serverless
@@ -242,7 +242,7 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
               limit: 2
 
       - label: Running rule_management:qa:serverless
@@ -257,7 +257,7 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
               limit: 2
 
       - label: Running rule_bulk_actions:qa:serverless
@@ -272,7 +272,7 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
               limit: 2
 
       - label: Running rule_read:qa:serverless
@@ -287,7 +287,7 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
               limit: 2
 
       - label: Running rule_read:essentials:qa:serverless
@@ -302,7 +302,7 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
               limit: 2
 
       - label: Running rules_management:essentials:qa:serverless
@@ -317,5 +317,5 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
               limit: 2

@@ -22,9 +22,9 @@ import {
   EuiBadge,
   type EuiBasicTableColumn,
   useEuiTheme,
-  COLOR_MODES_STANDARD,
 } from '@elastic/eui';
 import { Chart, BarSeries, Settings, ScaleType } from '@elastic/charts';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
@@ -52,8 +52,8 @@ const headerStyle = css`
 `;
 
 const useCompleteBadgeStyles = () => {
-  const { euiTheme, colorMode } = useEuiTheme();
-  const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
+  const { euiTheme } = useEuiTheme();
+  const isDarkMode = useKibanaIsDarkMode();
   return css`
     background-color: ${isDarkMode
       ? euiTheme.colors.success
@@ -147,7 +147,7 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
                       ) : (
                         translationStats && (
                           <>
-                            <EuiText size="m" style={{ textAlign: 'center' }}>
+                            <EuiText size="m" css={{ textAlign: 'center' }}>
                               <b>{i18n.RULE_MIGRATION_SUMMARY_CHART_TITLE}</b>
                             </EuiText>
                             <TranslationResultsChart translationStats={translationStats} />
@@ -248,7 +248,7 @@ const columns: Array<EuiBasicTableColumn<TranslationResultsTableItem>> = [
     name: i18n.RULE_MIGRATION_TABLE_COLUMN_STATUS,
     render: (title: string, { color }) => (
       <EuiHealth color={color} textSize="xs">
-        {title}
+        <span data-test-subj={`translationStatus-${title}`}>{title} </span>
       </EuiHealth>
     ),
   },
@@ -256,7 +256,11 @@ const columns: Array<EuiBasicTableColumn<TranslationResultsTableItem>> = [
     field: 'value',
     name: i18n.RULE_MIGRATION_TABLE_COLUMN_RULES,
     align: 'right',
-    render: (value: string) => <EuiText size="xs">{value}</EuiText>,
+    render: (value: string, { title }) => (
+      <EuiText size="xs" data-test-subj={`translationStatusCount-${title}`}>
+        {value}
+      </EuiText>
+    ),
   },
 ];
 
@@ -290,6 +294,13 @@ const TranslationResultsTable = React.memo<{
     [translationStats, translationResultColors]
   );
 
-  return <EuiBasicTable items={items} columns={columns} compressed />;
+  return (
+    <EuiBasicTable
+      data-test-subj="translatedResultsTable"
+      items={items}
+      columns={columns}
+      compressed
+    />
+  );
 });
 TranslationResultsTable.displayName = 'TranslationResultsTable';

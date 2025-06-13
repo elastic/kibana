@@ -16,7 +16,7 @@ import {
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import pRetry from 'p-retry';
 import { CoreSetup } from '@kbn/core/server';
-import { KnowledgeBaseState } from '../../common';
+import { EIS_PRECONFIGURED_INFERENCE_IDS, KnowledgeBaseState } from '../../common';
 import { ObservabilityAIAssistantConfig } from '../config';
 import {
   getConcreteWriteIndex,
@@ -76,6 +76,36 @@ async function getInferenceEndpoint({
   return response.endpoints[0];
 }
 
+export async function deleteInferenceEndpoint({
+  esClient,
+  logger,
+  inferenceId,
+}: {
+  esClient: { asInternalUser: ElasticsearchClient };
+  logger: Logger;
+  inferenceId: string;
+}) {
+  try {
+    logger.info(`Attempting to delete inference endpoint with ID: ${inferenceId}`);
+    await esClient.asInternalUser.inference.delete({
+      inference_id: inferenceId,
+    });
+    logger.info(`Successfully deleted inference endpoint with ID: ${inferenceId}`);
+  } catch (error) {
+    if (
+      error instanceof errors.ResponseError &&
+      error.body?.error?.type === 'resource_not_found_exception'
+    ) {
+      logger.debug(`Inference endpoint "${inferenceId}" was already deleted. Skipping deletion.`);
+      return;
+    }
+
+    logger.error(
+      `Failed to delete inference endpoint with ID: ${inferenceId}. Error: ${error.message}`
+    );
+  }
+}
+
 export function isInferenceEndpointMissingOrUnavailable(error: Error) {
   return (
     error instanceof errors.ResponseError &&
@@ -102,7 +132,7 @@ export async function getKbModelStatus({
   modelStats?: MlTrainedModelStats;
   errorMessage?: string;
   kbState: KnowledgeBaseState;
-  currentInferenceId: string | undefined;
+  currentInferenceId?: string | undefined;
   concreteWriteIndex: string | undefined;
   isReIndexing: boolean;
 }> {
@@ -118,7 +148,6 @@ export async function getKbModelStatus({
         enabled,
         errorMessage: 'Inference id not found',
         kbState: KnowledgeBaseState.NOT_INSTALLED,
-        currentInferenceId,
         concreteWriteIndex,
         isReIndexing,
       };
@@ -128,17 +157,33 @@ export async function getKbModelStatus({
     inferenceId = currentInferenceId;
   }
 
+  // check if inference ID is an EIS inference ID
+  const isPreConfiguredInferenceIdInEIS = EIS_PRECONFIGURED_INFERENCE_IDS.includes(inferenceId);
+
   let endpoint: InferenceInferenceEndpointInfo;
   try {
     endpoint = await getInferenceEndpoint({ esClient, inferenceId });
     logger.debug(
       `Inference endpoint "${inferenceId}" found with model id "${endpoint?.service_settings?.model_id}"`
     );
+
+    // if the endpoint is in EIS, the model doesn't have to be downloaded and deployed
+    // Therefore, return the KB state as READY if the endpoint exists
+    if (isPreConfiguredInferenceIdInEIS && endpoint.service === 'elastic') {
+      return {
+        endpoint,
+        enabled,
+        kbState: KnowledgeBaseState.READY,
+        currentInferenceId,
+        concreteWriteIndex,
+        isReIndexing,
+      };
+    }
   } catch (error) {
     if (!isInferenceEndpointMissingOrUnavailable(error)) {
       throw error;
     }
-    logger.error(`Inference endpoint "${inferenceId}" not found or unavailable: ${error.message}`);
+    logger.warn(`Inference endpoint "${inferenceId}" not found or unavailable: ${error.message}`);
 
     return {
       enabled,
@@ -242,6 +287,8 @@ export async function waitForKbModel({
         logger.debug('Knowledge base model is not yet ready. Retrying...');
         throw new Error('Knowledge base model is not yet ready');
       }
+
+      logger.debug('Knowledge base model is ready.');
     },
     { retries: 30, factor: 2, maxTimeout: 30_000 }
   );

@@ -26,8 +26,11 @@ is being formed. This can result in parts of the vis being cut out.
 }
 
 .dshDashboardViewport--print {
-  .kbnGridRow {
+  .kbnGrid {
     display: block !important;
+  }
+  .kbnGridSectionHeader, .kbnGridSectionFooter {
+    display: none;
   }
   .kbnGridPanel {
     height: 100% !important;
