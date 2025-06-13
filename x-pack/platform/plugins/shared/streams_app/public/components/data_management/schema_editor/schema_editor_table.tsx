@@ -26,12 +26,14 @@ import { SchemaField } from './types';
 import { FieldType } from './field_type';
 
 export function FieldsTable({
+  isLoading,
   controls,
   defaultColumns,
   fields,
   stream,
   withTableActions,
 }: {
+  isLoading: boolean;
   controls: TControls;
   defaultColumns: TableColumnName[];
   fields: SchemaField[];
@@ -61,6 +63,11 @@ export function FieldsTable({
 
   return (
     <EuiDataGrid
+      data-test-subj={
+        isLoading
+          ? 'streamsAppSchemaEditorFieldsTableLoading'
+          : 'streamsAppSchemaEditorFieldsTableLoaded'
+      }
       aria-label={i18n.translate(
         'xpack.streams.streamDetailSchemaEditor.fieldsTable.actionsTitle',
         { defaultMessage: 'Preview' }

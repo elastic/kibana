@@ -86,7 +86,7 @@ const IndexTableRowCells: React.FunctionComponent<TableRowProps> = ({
             <EsDeprecationsTableCells
               fieldName={field}
               deprecation={deprecation}
-              resolutionTableCell={<ReindexResolutionCell />}
+              resolutionTableCell={<ReindexResolutionCell deprecation={deprecation} />}
               actionsTableCell={<ReindexActionCell openFlyout={() => setShowFlyout(true)} />}
             />
           </EuiTableRowCell>
