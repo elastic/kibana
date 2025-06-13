@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { ConversationRound, ConversationRoundStepType } from '@kbn/onechat-common';
-import { ChatMessageText } from './chat_message_text';
 import {
   EuiPanel,
   EuiText,
@@ -18,6 +17,7 @@ import {
   EuiAccordion,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { ChatMessageText } from './chat_message_text';
 
 export interface RoundTabAnswerProps {
   round: ConversationRound;
