@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { waitForAlertsToPopulate } from '@kbn/test-suites-xpack/security_solution_cypress/cypress/tasks/create_new_rule';
+import { waitForAlertsToPopulate } from '../../tasks/wait_for_alerts';
 import { disableNewFeaturesTours } from '../../tasks/navigation';
 import { initializeDataViews } from '../../tasks/login';
 import { checkResults, clickRuleName, submitQuery } from '../../tasks/live_query';

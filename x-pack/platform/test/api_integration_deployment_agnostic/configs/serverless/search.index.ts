@@ -7,14 +7,13 @@
 import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
-  describe('Serverless Security - Deployment-agnostic api integration tests', function () {
+  describe('Serverless Search - Deployment-agnostic platform api integration tests', function () {
     this.tags(['esGate']);
 
-    // load new security and platform deployment-agnostic test here
+    // load new search and platform deployment-agnostic test here
     loadTestFile(require.resolve('../../apis/console'));
     loadTestFile(require.resolve('../../apis/core'));
     loadTestFile(require.resolve('../../apis/management'));
-    loadTestFile(require.resolve('../../apis/painless_lab'));
     loadTestFile(require.resolve('../../apis/saved_objects_management'));
   });
 }
