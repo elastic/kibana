@@ -88,13 +88,14 @@ export class RuleMigrationsTaskClient {
     migrationTaskRunner
       .run(invocationConfig)
       .then(() => {
+        // The task runner has finished normally. Abort errors are also handled here, it's an expected finish scenario, nothing special should be done.
         migrationLogger.debug('Migration execution task finished');
         this.data.migrations.saveAsFinished({ id: migrationId }).catch((error) => {
           migrationLogger.error(`Error saving migration as finished: ${error}`);
         });
       })
       .catch((error) => {
-        // no use in throwing the error, the `start` promise is long gone. Just store and log the error message
+        // Unexpected errors, no use in throwing them since the `start` promise is long gone. Just log and store the error message
         migrationLogger.error(`Error executing migration task: ${error}`);
         this.data.migrations
           .saveAsFailed({ id: migrationId, error: error.message })
