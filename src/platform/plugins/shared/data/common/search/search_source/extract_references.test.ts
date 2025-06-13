@@ -11,10 +11,6 @@ import { extractReferences } from './extract_references';
 import { DATA_VIEW_SAVED_OBJECT_TYPE, SerializedSearchSourceFields } from '../..';
 import { FilterMeta } from '@kbn/es-query';
 
-jest.mock('uuid', () => ({
-  v4: jest.fn(() => 'mock-uuid'),
-}));
-
 describe('extractReferences', () => {
   afterEach(() => {
     jest.clearAllMocks();
@@ -27,10 +23,10 @@ describe('extractReferences', () => {
     const references = result[1];
 
     expect(fields.index).toBeUndefined();
-    expect(fields.indexRefName).toBe('data-view-mock-uuid');
+    expect(fields.indexRefName).toBe('kibanaSavedObjectMeta.searchSourceJSON.index');
     expect(references).toEqual([
       {
-        name: 'data-view-mock-uuid',
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
         type: DATA_VIEW_SAVED_OBJECT_TYPE,
         id: 'test-index-id',
       },
@@ -45,10 +41,12 @@ describe('extractReferences', () => {
     const filterMeta: FilterMeta & { indexRefName?: string } = fields.filter?.[0].meta!;
 
     expect(filterMeta.index).toBeUndefined();
-    expect(filterMeta.indexRefName).toBe('filter-data-view-mock-uuid');
+    expect(filterMeta.indexRefName).toBe(
+      'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index'
+    );
     expect(references).toEqual([
       {
-        name: 'filter-data-view-mock-uuid',
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
         type: DATA_VIEW_SAVED_OBJECT_TYPE,
         id: 'filter-index-id',
       },
