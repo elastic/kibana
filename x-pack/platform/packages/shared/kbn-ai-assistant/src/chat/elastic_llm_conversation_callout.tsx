@@ -31,7 +31,7 @@ export const ElasticLlmConversationCallout = () => {
   };
 
   if (dismissed) {
-    return <></>;
+    return null;
   }
 
   const elasticLlmCalloutClassName = css`

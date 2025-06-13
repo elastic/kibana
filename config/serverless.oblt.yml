@@ -4,17 +4,14 @@
 pricing.tiers.enabled: true
 pricing.tiers.products:
   - name: observability
-    tier: complete
-    
-## Disable plugins
-enterpriseSearch.enabled: false
-xpack.cloudSecurityPosture.enabled: false
-xpack.uptime.enabled: true
-xpack.securitySolution.enabled: false
-xpack.search.notebooks.enabled: false
-xpack.searchPlayground.enabled: false
-xpack.searchInferenceEndpoints.enabled: false
-xpack.searchSynonyms.enabled: false
+    tier: complete  # Accepted values for this tier are: complete, logs_essentials
+
+# Make sure the plugins belonging to this project type are loaded
+plugins.allowlistPluginGroups: ['platform', 'observability']
+
+# Disabled Observability plugins
+xpack.ux.enabled: false
+xpack.legacy_uptime.enabled: false
 
 xpack.features.overrides:
   ### Dashboards feature should be moved from Analytics category to the Observability one.
@@ -88,9 +85,6 @@ xpack.uptime.service.tls.key: /mnt/elastic-internal/http-certs/tls.key
 
 # Fleet specific configuration
 xpack.fleet.internal.registry.capabilities: ['apm', 'observability', 'uptime']
-xpack.fleet.internal.registry.spec.min: '3.0'
-xpack.fleet.internal.registry.spec.max: '3.3'
-xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
 xpack.fleet.internal.registry.excludePackages: [
     # Security integrations
     'endpoint',
