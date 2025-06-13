@@ -16,6 +16,7 @@ import {
   EuiLoadingChart,
   EuiResizeObserver,
   EuiText,
+  transparentize,
 } from '@elastic/eui';
 
 import { throttle } from 'lodash';
@@ -333,7 +334,9 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
         },
         brushMask: {
           visible: showBrush,
-          fill: isDarkTheme ? 'rgb(30,31,35,80%)' : 'rgb(247,247,247,50%)',
+          fill: isDarkTheme
+            ? transparentize(euiTheme.colors.backgroundBaseSubdued, 0.65)
+            : 'rgb(247,247,247,50%)',
         },
         brushArea: {
           visible: showBrush,
