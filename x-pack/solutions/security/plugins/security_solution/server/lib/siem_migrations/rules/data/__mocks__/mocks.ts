@@ -48,7 +48,7 @@ export const MockRuleMigrationsDataResourcesClient = jest
 
 export const mockRuleMigrationsDataIntegrationsClient = {
   populate: jest.fn().mockResolvedValue(undefined),
-  retrieveIntegrations: jest.fn().mockResolvedValue([]),
+  semanticSearch: jest.fn().mockResolvedValue([]),
 } as unknown as jest.Mocked<RuleMigrationsDataIntegrationsClient>;
 
 export const mockRuleMigrationsDataPrebuiltRulesClient = {

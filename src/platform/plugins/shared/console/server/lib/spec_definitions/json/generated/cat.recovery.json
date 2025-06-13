@@ -4,9 +4,7 @@
       "format": [
         "text"
       ],
-      "h": [],
       "help": "__flag__",
-      "s": [],
       "v": "__flag__",
       "error_trace": "__flag__",
       "filter_path": [],
@@ -22,6 +20,9 @@
         "pb"
       ],
       "detailed": "__flag__",
+      "index": [],
+      "h": [],
+      "s": [],
       "time": [
         "nanos",
         "micros",
@@ -39,7 +40,7 @@
       "_cat/recovery",
       "_cat/recovery/{index}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cat-recovery.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-recovery",
     "availability": {
       "stack": true,
       "serverless": false

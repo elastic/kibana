@@ -48,6 +48,26 @@
             "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-analytics-browser",
+            "id": "def-public.AnalyticsClientInitContext.getTraceContext",
+            "type": "Function",
+            "tags": [],
+            "label": "getTraceContext",
+            "description": [
+              "\nA function to get trace.id"
+            ],
+            "signature": [
+              "(() => ",
+              "TraceContext",
+              " | undefined) | undefined"
+            ],
+            "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -190,6 +210,23 @@
             ],
             "signature": [
               "EventContext"
+            ],
+            "path": "node_modules/@elastic/ebt/client/src/events/types.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-analytics-browser",
+            "id": "def-public.Event.trace",
+            "type": "Object",
+            "tags": [],
+            "label": "trace",
+            "description": [
+              "\nThe trace context."
+            ],
+            "signature": [
+              "TraceContext",
+              " | undefined"
             ],
             "path": "node_modules/@elastic/ebt/client/src/events/types.d.ts",
             "deprecated": false,

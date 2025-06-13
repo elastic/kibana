@@ -34,6 +34,9 @@ const TEST_IDS = {
   AGENTLESS_STATUS_BADGE: 'agentlessStatusBadge',
   CREATE_AGENT_POLICY_NAME_FIELD: 'createAgentPolicyNameField',
   CREDENTIALS_JSON_SECRET_PANEL: 'credentials_json_secret_panel_test_id',
+  GCP_POLICY_OPTION_TEST_ID: 'cisGcpTestId',
+  AWS_POLICY_OPTION_TEST_ID: 'cisAwsTestId',
+  AZURE_POLICY_OPTION_TEST_ID: 'cisAzureTestId',
 } as const;
 
 export function AddCisIntegrationFormPageProvider({
@@ -352,6 +355,27 @@ export function AddCisIntegrationFormPageProvider({
     await optionToBeClicked.click();
   };
 
+  const isSaveButtonEnabled = async () => {
+    const saveButton = await testSubjects.find(TEST_IDS.CREATE_PACKAGE_POLICY_SAVE_BUTTON);
+    const isEnabled = await saveButton.getAttribute('disabled');
+    return isEnabled === null; // If the button is enabled, it won't have a 'disabled' attribute
+  };
+
+  const clickAwsPolicyOption = async () => {
+    const awsPolicyOption = await findOptionInPage(TEST_IDS.AWS_POLICY_OPTION_TEST_ID);
+    await awsPolicyOption.click();
+  };
+
+  const clickGcpPolicyOption = async () => {
+    const gcpPolicyOption = await findOptionInPage(TEST_IDS.GCP_POLICY_OPTION_TEST_ID);
+    await gcpPolicyOption.click();
+  };
+
+  const clickAzurePolicyOption = async () => {
+    const azurePolicyOption = await findOptionInPage(TEST_IDS.AZURE_POLICY_OPTION_TEST_ID);
+    await azurePolicyOption.click();
+  };
+
   const clickSaveButton = async () => {
     const optionToBeClicked = await findOptionInPage(TEST_IDS.CREATE_PACKAGE_POLICY_SAVE_BUTTON);
     await optionToBeClicked.click();
@@ -377,6 +401,19 @@ export function AddCisIntegrationFormPageProvider({
     const textField = await testSubjects.find(selector);
     await textField.clearValueWithKeyboard();
     await textField.type(text);
+  };
+
+  const fillInComboBox = async (selector: string, text: string) => {
+    const comboBox = await testSubjects.find(selector);
+    // Click to open the combobox
+    await comboBox.click();
+    // Find the input within the combobox
+    const input = await comboBox.findByCssSelector('input');
+    // Clear and type new value
+    await input.clearValueWithKeyboard();
+    await input.type(text);
+    // Press Enter to create the custom option
+    await input.pressKeys(browser.keys.ENTER);
   };
 
   const chooseDropDown = async (selector: string, text: string) => {
@@ -654,5 +691,10 @@ export function AddCisIntegrationFormPageProvider({
     closeAllOpenTabs,
     waitUntilLaunchCloudFormationButtonAppears,
     showCredentialJsonSecretPanel,
+    isSaveButtonEnabled,
+    clickAwsPolicyOption,
+    clickGcpPolicyOption,
+    clickAzurePolicyOption,
+    fillInComboBox,
   };
 }

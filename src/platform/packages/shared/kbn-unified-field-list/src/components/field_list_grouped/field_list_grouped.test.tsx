@@ -10,7 +10,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { EuiText, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiText, EuiLoadingSpinner, EuiThemeProvider } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { ReactWrapper } from 'enzyme';
@@ -22,7 +22,8 @@ import { ExistenceFetchStatus } from '../../types';
 import { FieldsAccordion } from './fields_accordion';
 import { NoFieldsCallout } from './no_fields_callout';
 import { useGroupedFields, type GroupedFieldsParams } from '../../hooks/use_grouped_fields';
-import { render, screen, within } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
+import { render } from '@elastic/eui/lib/test/rtl';
 import userEvent from '@testing-library/user-event';
 
 jest.mock('lodash', () => {
@@ -99,6 +100,9 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
     render(<Wrapper hookParams={hookParams} listProps={listProps} />);
   }
 
+  const mountComponent = async (component: React.ReactElement) =>
+    await mountWithIntl(<EuiThemeProvider>{component}</EuiThemeProvider>);
+
   async function mountGroupedList({ listProps, hookParams }: WrapperProps): Promise<ReactWrapper> {
     const Wrapper: React.FC<WrapperProps> = (props) => {
       const {
@@ -110,10 +114,10 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
       });
 
       return (
-        <>
+        <EuiThemeProvider>
           <FieldListFilters {...fieldListFiltersProps} />
           <FieldListGrouped {...props.listProps} fieldGroups={fieldGroups} />
-        </>
+        </EuiThemeProvider>
       );
     };
 
@@ -128,8 +132,8 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
     return wrapper!;
   }
 
-  it('renders correctly in empty state', () => {
-    const wrapper = mountWithIntl(
+  it('renders correctly in empty state', async () => {
+    const wrapper = await mountComponent(
       <FieldListGrouped
         {...defaultProps}
         fieldGroups={{}}

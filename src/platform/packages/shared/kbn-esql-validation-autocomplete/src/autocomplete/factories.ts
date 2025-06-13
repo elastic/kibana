@@ -210,7 +210,8 @@ export const buildFieldsDefinitionsWithMetadata = (
   getVariables?: () => ESQLControlVariable[] | undefined
 ): SuggestionRawDefinition[] => {
   const fieldsSuggestions = fields.map((field) => {
-    const titleCaseType = field.type.charAt(0).toUpperCase() + field.type.slice(1);
+    const fieldType = field.type.charAt(0).toUpperCase() + field.type.slice(1);
+    const titleCaseType = `${field.name} (${fieldType})`;
     return {
       label: field.name,
       text:
@@ -399,7 +400,7 @@ export function getCompatibleLiterals(
   getVariables?: () => ESQLControlVariable[] | undefined
 ) {
   const suggestions: SuggestionRawDefinition[] = [];
-  if (types.includes('time_literal')) {
+  if (types.includes('time_duration')) {
     const timeLiteralSuggestions = [
       ...buildConstantsDefinitions(getUnitDuration(1), undefined, undefined, options),
     ];
