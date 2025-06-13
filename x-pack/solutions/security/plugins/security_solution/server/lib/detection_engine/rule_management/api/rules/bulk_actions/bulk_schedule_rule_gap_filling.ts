@@ -65,18 +65,28 @@ export const bulkScheduleRuleGapFilling = async ({
   }
   const { start_date: start, end_date: end } = fillGapsPayload;
 
-  const { backfilled, skipped, errored } = await rulesClient.bulkFillGapsByRuleIds({
-    rules: validatedRules.map(({ id, name, consumer, alertTypeId }) => ({
-      id,
-      name,
-      consumer,
-      alertTypeId,
-    })),
-    range: {
-      start,
-      end,
+  // Due to performance considerations we will backfill a maximum of 1000 gaps per rule when called with many rules
+  // however, this endpoint will be called with one rule as well. In that case, we will increase the limit to 10_000
+  // in order to attempt to fill all the gaps of the rule in the specified time range
+  const maxGapCountPerRule = rules.length === 1 ? 10_000 : 1000;
+
+  const { backfilled, skipped, errored } = await rulesClient.bulkFillGapsByRuleIds(
+    {
+      rules: validatedRules.map(({ id, name, consumer, alertTypeId }) => ({
+        id,
+        name,
+        consumer,
+        alertTypeId,
+      })),
+      range: {
+        start,
+        end,
+      },
     },
-  });
+    {
+      maxGapCountPerRule,
+    }
+  );
 
   errored.forEach((backfillingError) => {
     errors.push({

@@ -67,6 +67,7 @@ describe('batchBackfillRuleGaps', () => {
     result = await batchBackfillRuleGaps(context, {
       rule,
       range: backfillingDateRange,
+      maxGapCountPerRule: 1000,
     });
   };
 

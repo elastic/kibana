@@ -16,6 +16,7 @@ import type { RulesClientContext } from '../../../../rules_client';
 interface BatchBackfillRuleGapsParams {
   rule: { id: string; name: string };
   range: BulkFillGapsByRuleIdsParams['range'];
+  maxGapCountPerRule: number;
 }
 
 type BatchBackfillScheduleRuleGapsResult =
@@ -25,7 +26,7 @@ type BatchBackfillScheduleRuleGapsResult =
 
 export const batchBackfillRuleGaps = async (
   context: RulesClientContext,
-  { rule, range }: BatchBackfillRuleGapsParams
+  { rule, range, maxGapCountPerRule }: BatchBackfillRuleGapsParams
 ): Promise<BatchBackfillScheduleRuleGapsResult> => {
   const logger = context.logger;
   const { start, end } = range;
@@ -80,7 +81,7 @@ export const batchBackfillRuleGaps = async (
       eventLogClient,
       logger,
       processGapsBatch,
-      options: { maxFetchedGaps: 1000 },
+      options: { maxFetchedGaps: maxGapCountPerRule },
     });
   } catch (error) {
     logProcessedAsAuditEvent(context, rule, error);

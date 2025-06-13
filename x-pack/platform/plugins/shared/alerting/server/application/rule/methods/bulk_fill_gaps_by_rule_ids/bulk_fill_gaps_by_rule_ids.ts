@@ -8,7 +8,11 @@ import pMap from 'p-map';
 import Boom from '@hapi/boom';
 import { groupBy, mapValues } from 'lodash';
 import type { RulesClientContext } from '../../../../rules_client';
-import type { BulkFillGapsByRuleIdsResult, BulkFillGapsByRuleIdsParams } from './types';
+import type {
+  BulkFillGapsByRuleIdsResult,
+  BulkFillGapsByRuleIdsParams,
+  BulkFillGapsByRuleIdsOptions,
+} from './types';
 import { logProcessedAsAuditEvent, toBulkGapFillError } from './utils';
 import { AlertingAuthorizationEntity, WriteOperations } from '../../../../authorization';
 import { batchBackfillRuleGaps } from './batch_backfill_rule_gaps';
@@ -19,7 +23,7 @@ const DEFAULT_MAX_BACKFILL_CONCURRENCY = 10;
 export const bulkFillGapsByRuleIds = async (
   context: RulesClientContext,
   { rules, range }: BulkFillGapsByRuleIdsParams,
-  options?: { maxBackfillConcurrency: number }
+  options: BulkFillGapsByRuleIdsOptions
 ): Promise<BulkFillGapsByRuleIdsResult> => {
   const result = bulkFillGapsByRuleIdParamsSchema.safeParse(range);
   if (!result.success) {
@@ -72,6 +76,7 @@ export const bulkFillGapsByRuleIds = async (
       const backfillResult = await batchBackfillRuleGaps(context, {
         rule,
         range,
+        maxGapCountPerRule: options.maxGapCountPerRule,
       });
 
       if (backfillResult.outcome === 'backfilled') {

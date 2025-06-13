@@ -102,10 +102,16 @@ describe('bulkFillGapsByRuleIds', () => {
 
     ruleAuditEventMock.mockImplementation((payload) => payload);
 
-    results = await bulkFillGapsByRuleIds(rulesClientContext, {
-      rules: allRules,
-      range: backfillRange,
-    });
+    results = await bulkFillGapsByRuleIds(
+      rulesClientContext,
+      {
+        rules: allRules,
+        range: backfillRange,
+      },
+      {
+        maxGapCountPerRule: 1000,
+      }
+    );
   });
 
   afterEach(() => {
@@ -118,6 +124,7 @@ describe('bulkFillGapsByRuleIds', () => {
       expect(batchBackfillRuleGapsMock).toHaveBeenNthCalledWith(callOrder, rulesClientContext, {
         rule,
         range: backfillRange,
+        maxGapCountPerRule: 1000,
       });
     });
   });
@@ -165,7 +172,7 @@ describe('validation', () => {
   });
 
   const getCallBulkFillGaps = (range: { start: string; end: string }) => () =>
-    bulkFillGapsByRuleIds(rulesClientContext, { rules: [], range });
+    bulkFillGapsByRuleIds(rulesClientContext, { rules: [], range }, { maxGapCountPerRule: 1000 });
 
   it('should throw an error if the start date is in the future', async () => {
     const start = new Date(Date.now() + 1).toISOString();

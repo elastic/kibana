@@ -33,6 +33,11 @@ export interface BulkFillGapsByRuleIdsParams {
   };
 }
 
+export interface BulkFillGapsByRuleIdsOptions {
+  maxGapCountPerRule: number;
+  maxBackfillConcurrency?: number;
+}
+
 export interface BulkFillGapsByRuleIdsResult {
   backfilled: RuleToBackfill[];
   skipped: RuleToBackfill[];
