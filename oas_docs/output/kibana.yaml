@@ -71178,6 +71178,7 @@ components:
         - ESQL_INDEX_PATTERN
         - MANUAL_RULE_RUN_FEATURE
         - MANUAL_RULE_RUN_DISABLED_RULE
+        - RULE_FILL_GAPS_DISABLED_RULE
       type: string
     Security_Detections_API_BulkActionSkipResult:
       type: object
@@ -71443,7 +71444,7 @@ components:
             - fill_gaps
           type: string
         fill_gaps:
-          description: Object that describes applying a manual gap fill action for the specified range.
+          description: Object that describes applying a manual gap fill action for the specified time range.
           type: object
           properties:
             end_date:
