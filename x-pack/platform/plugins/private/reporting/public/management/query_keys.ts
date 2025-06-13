@@ -7,7 +7,7 @@
 
 const root = 'reporting';
 export const queryKeys = {
-  getScheduledList: () => [root, 'scheduledList'],
+  getScheduledList: (params: unknown) => [root, 'scheduledList', params] as const,
   getHealth: () => [root, 'health'] as const,
 };
 

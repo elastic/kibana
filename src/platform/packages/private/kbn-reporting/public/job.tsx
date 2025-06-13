@@ -10,7 +10,14 @@
 import moment from 'moment';
 import React from 'react';
 
-import { EuiText, EuiTextColor } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiText,
+  EuiTextColor,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { JOB_STATUS } from '@kbn/reporting-common';
 import type {
@@ -256,14 +263,25 @@ export class Job {
     return this.formatDate(this.created_at);
   }
 
-  getExportType(): string {
-    return this.scheduled_report_id
+  getExportType(): React.ReactElement {
+    const exportType = this.scheduled_report_id
       ? i18n.translate('reporting.jobExportType.scheduled', {
           defaultMessage: 'Scheduled',
         })
       : i18n.translate('reporting.jobExportType.single', {
           defaultMessage: 'Single',
         });
+
+    return (
+      <EuiBadge data-test-subj={`reportExportType-${exportType}`} color="hollow">
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIconTip type={this.scheduled_report_id ? 'calendar' : 'download'} size="s" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{exportType}</EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiBadge>
+    );
   }
 
   /*

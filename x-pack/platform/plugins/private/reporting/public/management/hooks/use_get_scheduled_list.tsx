@@ -14,13 +14,15 @@ export const getKey = queryKeys.getScheduledList;
 
 interface GetScheduledListQueryProps {
   http: HttpSetup;
-  page?: number;
-  perPage?: number;
+  index?: number;
+  size?: number;
 }
 
-export const useGetScheduledListQuery = (props: GetScheduledListQueryProps) => {
+export const useGetScheduledList = (props: GetScheduledListQueryProps) => {
+  const { index = 1, size = 10 } = props;
   return useQuery({
-    queryKey: getKey(),
+    queryKey: getKey({ index, size }),
     queryFn: () => getScheduledReportsList(props),
+    keepPreviousData: true,
   });
 };

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { Fragment, default as React } from 'react';
+import { Fragment, default as React, useCallback, useState } from 'react';
 import {
-  Criteria,
   EuiAvatar,
   EuiBasicTable,
   EuiBasicTableColumn,
@@ -25,15 +24,32 @@ import { ScheduledReport } from '@kbn/reporting-common/types';
 import moment from 'moment';
 import { ListingPropsInternal } from '..';
 import { guessAppIconTypeFromObjectType, getDisplayNameFromObjectType } from '../utils';
-import { useGetScheduledListQuery } from '../hooks/use_get_scheduled_list_query';
+import { useGetScheduledList } from '../hooks/use_get_scheduled_list';
 import { prettyPrintJobType } from '../../../common/job_utils';
 import { ReportScheduleIndicator } from './report_schedule_indicator';
-import { useBulkDisableQuery } from '../hooks/use_bulk_disable_query';
+import { useBulkDisable } from '../hooks/use_bulk_disable';
+
+interface QueryParams {
+  index: number;
+  size: number;
+}
 
 export const ReportSchedulesTable = (props: ListingPropsInternal) => {
   const { http, toasts } = props;
-  const { data: scheduledList, isLoading } = useGetScheduledListQuery({ http });
-  const { mutateAsync: bulkDisableScheduledReports } = useBulkDisableQuery({ http, toasts });
+  const [queryParams, setQueryParams] = useState<QueryParams>({
+    index: 1,
+    size: 10,
+  });
+  const { data: scheduledList, isLoading } = useGetScheduledList({
+    http,
+    ...queryParams,
+  });
+
+  const { mutateAsync: bulkDisableScheduledReports } = useBulkDisable({
+    http,
+    toasts,
+    ...queryParams,
+  });
 
   const tableColumns: Array<EuiBasicTableColumn<ScheduledReport>> = [
     {
@@ -211,6 +227,17 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
     },
   ];
 
+  const tableOnChangeCallback = useCallback(
+    ({ page }: { page: QueryParams }) => {
+      setQueryParams((prev) => ({
+        ...prev,
+        index: page.index + 1,
+        size: page.size,
+      }));
+    },
+    [setQueryParams]
+  );
+
   return (
     <Fragment>
       <EuiSpacer size={'l'} />
@@ -220,12 +247,11 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
         columns={tableColumns}
         loading={isLoading}
         pagination={{
-          pageIndex: scheduledList?.page || 0,
-          pageSize: scheduledList?.perPage || 10,
-          totalItemCount: scheduledList?.total || 0,
-          showPerPageOptions: true,
+          pageIndex: queryParams.index - 1,
+          pageSize: queryParams.size,
+          totalItemCount: scheduledList?.total ?? 0,
         }}
-        onChange={(criteria: Criteria<ScheduledReport>) => {}}
+        onChange={tableOnChangeCallback}
       />
     </Fragment>
   );

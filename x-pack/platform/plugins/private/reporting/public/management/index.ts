@@ -24,4 +24,4 @@ export type ListingPropsInternal = ListingProps & {
   http: HttpSetup;
 };
 
-export { ReportListing } from './report_listing';
+export { ReportingTabs } from './components/reporting_tabs';
