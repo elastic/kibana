@@ -52,7 +52,13 @@ describe('ElasticLLMCostAwarenessTour', () => {
   });
 
   it('renders tour when there are content references', async () => {
-    (useLocalStorage as jest.Mock).mockReturnValue([false, jest.fn()]);
+    (useLocalStorage as jest.Mock).mockReturnValue([
+      {
+        currentTourStep: 1,
+        isTourActive: true,
+      },
+      jest.fn(),
+    ]);
 
     const { queryByTestId } = render(
       <ElasticLLMCostAwarenessTour
