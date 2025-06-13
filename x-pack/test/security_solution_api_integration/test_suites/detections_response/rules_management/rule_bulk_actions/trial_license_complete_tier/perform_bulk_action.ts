@@ -2740,7 +2740,7 @@ export default ({ getService }: FtrProviderContext): void => {
         }
       });
 
-      it('should return 400 error when there are less than 5 minutes between start and end date', async () => {
+      it('should return 400 error when the end date is not strictly greater than the start date', async () => {
         const { body } = await securitySolutionApi
           .performRulesBulkAction({
             query: {},
@@ -2749,13 +2749,13 @@ export default ({ getService }: FtrProviderContext): void => {
               action: BulkActionTypeEnum.fill_gaps,
               [BulkActionTypeEnum.fill_gaps]: {
                 start_date: backfillStart.toISOString(),
-                end_date: new Date(backfillStart.getTime() - 1 + 5 * 60 * 1000).toISOString(),
+                end_date: backfillStart.toISOString(),
               },
             },
           })
           .expect(400);
 
-        expect(body.message).toContain('end must be at least 5 minutes after start date');
+        expect(body.message).toContain('end must be greater than the start date.');
       });
 
       it('should return 400 error when start date is in the future', async () => {
@@ -2889,9 +2889,9 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.attributes.errors).toEqual(
           expect.arrayContaining([
             {
-              message: 'Cannot schedule manual rule run for a disabled rule',
+              message: 'Cannot bulk fill gaps for a disabled rule',
               status_code: 500,
-              err_code: 'MANUAL_RULE_RUN_DISABLED_RULE',
+              err_code: 'RULE_FILL_GAPS_DISABLED_RULE',
               rules: [{ id: disabledRule.id, name: disabledRule.name }],
             },
           ])
