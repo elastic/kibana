@@ -4265,6 +4265,14 @@
                 "path": "x-pack/solutions/search/plugins/search_query_rules/server/routes.ts"
               },
               {
+                "plugin": "searchQueryRules",
+                "path": "x-pack/solutions/search/plugins/search_query_rules/server/routes.ts"
+              },
+              {
+                "plugin": "searchQueryRules",
+                "path": "x-pack/solutions/search/plugins/search_query_rules/server/routes.ts"
+              },
+              {
                 "plugin": "searchSynonyms",
                 "path": "x-pack/solutions/search/plugins/search_synonyms/server/routes.ts"
               },
@@ -4743,6 +4751,10 @@
               {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/__mocks__/server.ts"
+              },
+              {
+                "plugin": "stackConnectors",
+                "path": "x-pack/platform/plugins/shared/stack_connectors/server/routes/get_well_known_email_service.test.ts"
               },
               {
                 "plugin": "stackConnectors",
@@ -6771,6 +6783,10 @@
               {
                 "plugin": "searchPlayground",
                 "path": "x-pack/solutions/search/plugins/search_playground/server/routes.ts"
+              },
+              {
+                "plugin": "searchQueryRules",
+                "path": "x-pack/solutions/search/plugins/search_query_rules/server/routes.ts"
               },
               {
                 "plugin": "searchSynonyms",
