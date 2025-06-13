@@ -15,7 +15,7 @@ export type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 const getKey = mutationKeys.bulkDisableScheduledReports;
 
-export const useBulkDisableQuery = (props: { http: HttpSetup; toasts: ToastsStart }) => {
+export const useBulkDisable = (props: { http: HttpSetup; toasts: ToastsStart }) => {
   const { http, toasts } = props;
   const queryClient = useQueryClient();
 
@@ -40,7 +40,8 @@ export const useBulkDisableQuery = (props: { http: HttpSetup; toasts: ToastsStar
         })
       );
       queryClient.invalidateQueries({
-        queryKey: queryKeys.getScheduledList(),
+        queryKey: queryKeys.getScheduledList({}),
+        refetchType: 'active',
       });
     },
   });

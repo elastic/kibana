@@ -172,6 +172,7 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
     try {
       jobs = await this.props.apiClient.list(this.state.page);
       total = await this.props.apiClient.total();
+
       this.isInitialJobsFetch = false;
     } catch (fetchError) {
       if (!this.licenseAllowsToShowThisPage()) {
@@ -216,9 +217,10 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
     type: '5%',
     title: '30%',
     status: '20%',
-    createdAt: '25%',
-    content: '10%',
-    actions: '10%',
+    createdAt: '21%',
+    content: '7%',
+    exportType: '12%',
+    actions: '5%',
   };
 
   public render() {
@@ -323,7 +325,7 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
       },
       {
         field: 'exportType',
-        width: tableColumnWidths.content,
+        width: tableColumnWidths.exportType,
         name: i18n.translate('xpack.reporting.exports.tableColumns.exportType', {
           defaultMessage: 'Export type',
         }),
