@@ -17,18 +17,19 @@ export interface Pagination {
 
 export const getScheduledReportsList = async ({
   http,
-  page = 0,
+  index,
+  size,
 }: {
   http: HttpSetup;
-  page?: number;
-  perPage?: number;
+  index?: number;
+  size?: number;
 }): Promise<{
   page: number;
-  perPage: number;
+  size: number;
   total: number;
   data: ScheduledReport[];
 }> => {
-  const query: HttpFetchQuery = { page };
+  const query: HttpFetchQuery = { page: index, size };
 
   const res = await http.get<{
     page: number;
@@ -50,7 +51,7 @@ export const getScheduledReportsList = async ({
 
   return {
     page: res.page,
-    perPage: res.per_page,
+    size: res.per_page,
     total: res.total,
     data: transformedData,
   };
