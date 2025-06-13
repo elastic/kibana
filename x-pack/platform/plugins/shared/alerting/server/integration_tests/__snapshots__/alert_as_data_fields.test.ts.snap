@@ -857,6 +857,21 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.original_data_stream.dataset": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.original_data_stream.namespace": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.original_data_stream.type": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.original_event.action": Object {
       "array": false,
       "ignore_above": 1024,
@@ -1972,6 +1987,21 @@ Object {
     },
     "kibana.alert.new_terms": Object {
       "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.original_data_stream.dataset": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.original_data_stream.namespace": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.original_data_stream.type": Object {
+      "array": false,
       "required": false,
       "type": "keyword",
     },
@@ -3093,6 +3123,21 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.original_data_stream.dataset": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.original_data_stream.namespace": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.original_data_stream.type": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.original_event.action": Object {
       "array": false,
       "ignore_above": 1024,
@@ -4211,6 +4256,21 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.original_data_stream.dataset": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.original_data_stream.namespace": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.original_data_stream.type": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.original_event.action": Object {
       "array": false,
       "ignore_above": 1024,
@@ -5326,6 +5386,21 @@ Object {
     },
     "kibana.alert.new_terms": Object {
       "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.original_data_stream.dataset": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.original_data_stream.namespace": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.original_data_stream.type": Object {
+      "array": false,
       "required": false,
       "type": "keyword",
     },
@@ -6453,6 +6528,21 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.original_data_stream.dataset": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.original_data_stream.namespace": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.original_data_stream.type": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.original_event.action": Object {
       "array": false,
       "ignore_above": 1024,
@@ -7571,6 +7661,21 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.original_data_stream.dataset": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.original_data_stream.namespace": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.original_data_stream.type": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.original_event.action": Object {
       "array": false,
       "ignore_above": 1024,
@@ -8686,6 +8791,21 @@ Object {
     },
     "kibana.alert.new_terms": Object {
       "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.original_data_stream.dataset": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.original_data_stream.namespace": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.original_data_stream.type": Object {
+      "array": false,
       "required": false,
       "type": "keyword",
     },
