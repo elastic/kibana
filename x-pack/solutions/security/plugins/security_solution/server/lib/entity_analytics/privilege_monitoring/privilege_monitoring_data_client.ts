@@ -35,9 +35,7 @@ import {
 import type { ApiKeyManager } from './auth/api_key';
 import { startPrivilegeMonitoringTask } from './tasks/privilege_monitoring_task';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
-import { generateUserIndexMappings, getPrivilegedMonitorUsersIndex } from './indices';
 import { generateUserIndexMappings } from './indices';
-import { PrivilegeMonitoringEngineDescriptorClient } from './saved_object/privilege_monitoring';
 
 import {
   POST_EXCLUDE_INDICES,
@@ -51,8 +49,10 @@ import {
   PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
 } from '../../telemetry/event_based/events';
 import type { PrivMonUserSource } from './types';
-import { PrivilegeMonitoringEngineDescriptorClient, PrivilegeIndexSourceDescriptorClient } from './saved_objects';
-import { PrivilegeMonitoringEngineDescriptorClient, PrivilegeIndexSourceDescriptorClient } from './saved_objects';
+import {
+  PrivilegeMonitoringEngineDescriptorClient,
+  MonitoringEntitySourceDescriptorClient,
+} from './saved_objects';
 
 interface PrivilegeMonitoringClientOpts {
   logger: Logger;
@@ -71,8 +71,7 @@ export class PrivilegeMonitoringDataClient {
   private esClient: ElasticsearchClient;
   private internalUserClient: ElasticsearchClient;
   private engineClient: PrivilegeMonitoringEngineDescriptorClient;
-  private indexSourceClient: PrivilegeIndexSourceDescriptorClient;
-  private indexSourceClient: PrivilegeIndexSourceDescriptorClient;
+  private indexSourceClient: MonitoringEntitySourceDescriptorClient;
 
   constructor(private readonly opts: PrivilegeMonitoringClientOpts) {
     this.esClient = opts.clusterClient.asCurrentUser;
@@ -82,11 +81,7 @@ export class PrivilegeMonitoringDataClient {
       soClient: opts.soClient,
       namespace: opts.namespace,
     });
-    this.indexSourceClient = new PrivilegeIndexSourceDescriptorClient({
-      soClient: opts.soClient,
-      namespace: opts.namespace,
-    });
-    this.indexSourceClient = new PrivilegeIndexSourceDescriptorClient({
+    this.indexSourceClient = new MonitoringEntitySourceDescriptorClient({
       soClient: opts.soClient,
       namespace: opts.namespace,
     });
@@ -108,24 +103,14 @@ export class PrivilegeMonitoringDataClient {
     this.log('debug', `Initialized privileged monitoring engine saved object`);
 
     // TODO: testing this out, remove log in future.
-    const indexSourceDescriptor = await this.indexSourceClient.createIndexSource({
+    const indexSourceDescriptor = await this.indexSourceClient.create({
       type: 'index',
       managed: true,
       indexPattern: this.getIndex(),
+      name: 'defaultName', // TODO: should this be here? Double check with design/jira
     });
     this.log(
-      'debug',
-      `Created index source for privilege monitoring: ${JSON.stringify(indexSourceDescriptor)}`
-    );
-
-    // TODO: testing this out, remove log in future.
-    const indexSourceDescriptor = await this.indexSourceClient.createIndexSource({
-      type: 'index',
-      managed: true,
-      indexPattern: this.getIndex(),
-    });
-    this.log(
-      'debug',
+      'info',
       `Created index source for privilege monitoring: ${JSON.stringify(indexSourceDescriptor)}`
     );
 
