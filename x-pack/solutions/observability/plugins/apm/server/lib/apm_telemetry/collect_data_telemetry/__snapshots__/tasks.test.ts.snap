@@ -367,6 +367,29 @@ Object {
         },
       },
     },
+    "opentelemetry/python/elastic": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
     "otlp": Object {
       "agent": Object {
         "activation_method": Array [
