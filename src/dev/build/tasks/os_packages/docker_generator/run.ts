@@ -151,7 +151,14 @@ export async function runDockerGenerator(
   // Write all the needed docker config files
   // into kibana-docker folder
   for (const [, dockerTemplate] of Object.entries(dockerTemplates)) {
-    await write(resolve(dockerBuildDir, dockerTemplate.name), dockerTemplate.generator(scope));
+    let filename: string;
+    if (!dockerTemplate.name.includes('kibana.yml') && flags.architecture === 'aarch64') {
+      filename = `${dockerTemplate.name}.arm64`;
+    } else {
+      filename = dockerTemplate.name;
+    }
+
+    await write(resolve(dockerBuildDir, filename), dockerTemplate.generator(scope));
   }
 
   // Copy serverless-only configuration files
@@ -182,7 +189,8 @@ export async function runDockerGenerator(
   // In order to do this we just call the file we
   // created from the templates/build_docker_sh.template.js
   // and we just run that bash script
-  await chmodAsync(`${resolve(dockerBuildDir, 'build_docker.sh')}`, '755');
+  const dockerBuildScript = `build_docker.sh${flags.architecture === 'aarch64' ? '.arm64' : ''}`;
+  await chmodAsync(`${resolve(dockerBuildDir, dockerBuildScript)}`, '755');
 
   // Only build images on native targets
   if (flags.image) {
@@ -201,7 +209,7 @@ export async function runDockerGenerator(
       await linkAsync(src, dest);
     }
 
-    await exec(log, `./build_docker.sh`, [], {
+    await exec(log, `./${dockerBuildScript}`, [], {
       cwd: dockerBuildDir,
       level: 'info',
       build,

@@ -70,7 +70,7 @@ export async function exec(
   });
 
   if (bufferLogs) {
-    const isDockerBuild = cmd === './build_docker.sh';
+    const isDockerBuild = cmd.startsWith('./build_docker');
     const stdout$ = fromEvent<Buffer>(proc.stdout!, 'data').pipe<LogLine>(
       map((chunk) => handleBufferChunk(chunk, level))
     );
