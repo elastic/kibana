@@ -7,13 +7,6 @@
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["target/**/*"],
   "kbn_references": [
-    "@kbn/core-overlays-browser",
     "@kbn/i18n-react",
-    "@kbn/react-kibana-mount",
-    "@kbn/core-analytics-browser",
-    "@kbn/core-i18n-browser",
-    "@kbn/core-mount-utils-browser",
-    "@kbn/core-theme-browser",
-    "@kbn/core-user-profile-browser"
   ]
 }
