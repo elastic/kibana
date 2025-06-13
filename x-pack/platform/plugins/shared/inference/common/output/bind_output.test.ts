@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BoundOutputOptions, OutputAPI, UnboundOutputOptions } from '@kbn/inference-common';
+import { BoundOptions, OutputAPI, UnboundOutputOptions } from '@kbn/inference-common';
 import { bindOutput } from './bind_output';
 
 describe('createScopedOutputAPI', () => {
@@ -16,10 +16,10 @@ describe('createScopedOutputAPI', () => {
   });
 
   it('calls chatComplete with both bound and unbound params', async () => {
-    const bound: BoundOutputOptions = {
+    const bound = {
       connectorId: 'some-id',
       functionCalling: 'native',
-    };
+    } as BoundOptions;
 
     const unbound: UnboundOutputOptions = {
       id: 'foo',
@@ -56,7 +56,7 @@ describe('createScopedOutputAPI', () => {
       connectorId: 'some-id',
       functionCalling: 'native',
       foo: 'bar',
-    } as BoundOutputOptions;
+    } as BoundOptions;
 
     const unbound: UnboundOutputOptions = {
       id: 'foo',
@@ -77,10 +77,10 @@ describe('createScopedOutputAPI', () => {
   });
 
   it('ignores mutations of the bound parameters after binding', async () => {
-    const bound: BoundOutputOptions = {
+    const bound = {
       connectorId: 'some-id',
       functionCalling: 'native',
-    };
+    } satisfies BoundOptions;
 
     const unbound: UnboundOutputOptions = {
       id: 'foo',
@@ -103,10 +103,10 @@ describe('createScopedOutputAPI', () => {
   });
 
   it('does not allow overriding bound parameters with the unbound object', async () => {
-    const bound: BoundOutputOptions = {
+    const bound = {
       connectorId: 'some-id',
       functionCalling: 'native',
-    };
+    } as BoundOptions;
 
     const unbound = {
       id: 'foo',

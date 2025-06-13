@@ -27,13 +27,13 @@ interface PanelFooterProps {
   /**
    * Boolean that indicates whether flyout is in preview and action should be hidden
    */
-  isPreview: boolean;
+  isRulePreview: boolean;
 }
 
 /**
  * Bottom section of the flyout that contains the take action button
  */
-export const PanelFooter: FC<PanelFooterProps> = ({ isPreview }) => {
+export const PanelFooter: FC<PanelFooterProps> = ({ isRulePreview }) => {
   const { dataFormattedForFieldBrowser } = useDocumentDetailsContext();
   const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
   const { showAssistant, showAssistantOverlay } = useAssistant({
@@ -41,7 +41,7 @@ export const PanelFooter: FC<PanelFooterProps> = ({ isPreview }) => {
     isAlert,
   });
 
-  if (isPreview) return null;
+  if (isRulePreview) return null;
 
   return (
     <EuiFlyoutFooter data-test-subj={FLYOUT_FOOTER_TEST_ID}>
