@@ -54,7 +54,7 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   const rootLogger = root.logger.get('root');
 
   rawConfigService.getConfig$().subscribe((config) => {
-    const loggerFilePath = Object.values(config.logging.appenders)
+    const loggerFilePath = Object.values(config?.logging?.appenders ?? {})
       // @ts-expect-error
       .filter((appender) => appender.type === 'file')
       // @ts-expect-error
