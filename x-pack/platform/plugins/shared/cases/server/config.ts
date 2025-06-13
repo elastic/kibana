@@ -23,8 +23,10 @@ export const ConfigSchema = schema.object({
   stack: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
-  analyticsIndex: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+  analytics: schema.object({
+    index: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+    }),
   }),
 });
 
