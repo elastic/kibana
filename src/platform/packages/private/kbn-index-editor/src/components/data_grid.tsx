@@ -7,15 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiIcon,
-  EuiLink,
-  EuiText,
-  EuiDataGridCellProps,
-  EuiDataGridCellPopoverElementProps,
-} from '@elastic/eui';
+import { EuiIcon, EuiLink, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DiscoverAppLocator, DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/types';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -23,17 +18,17 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
+  CustomCellRenderer,
   DataLoadingState,
   UnifiedDataTable,
   UnifiedDataTableRenderCustomToolbarProps,
   renderCustomToolbar,
   type SortOrder,
-  CustomCellRenderer,
 } from '@kbn/unified-data-table';
 import React, { useCallback, useMemo, useState } from 'react';
 import { KibanaContextExtra } from '../types';
 import { RowViewer } from './row_viewer_lazy';
-import { EditCellValue, getCellValueRenderer } from './value_input_control';
+import { getCellValueRenderer } from './value_input_control';
 
 interface ESQLDataGridProps {
   rows: DataTableRecord[];
@@ -55,14 +50,12 @@ const ROWS_PER_PAGE_OPTIONS = [10, 25];
 const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   const {
     services: {
-      uiActions,
       fieldFormats,
       theme,
       uiSettings,
       share,
       data,
       notifications,
-      settings,
       dataViewFieldEditor,
       indexUpdateService,
     },
@@ -131,23 +124,24 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       data,
       theme,
       uiSettings,
-      toastNotifications: notifications.toasts,
+      toastNotifications: notifications?.toasts,
       dataViewFieldEditor,
       fieldFormats,
       storage,
     };
-  }, [data, theme, uiSettings, notifications.toasts, dataViewFieldEditor, fieldFormats]);
+  }, [data, theme, uiSettings, notifications?.toasts, dataViewFieldEditor, fieldFormats]);
 
-  const discoverLocator = useMemo(() => {
-    return share?.url.locators.get('DISCOVER_APP_LOCATOR');
+  const discoverLocator = useMemo<DiscoverAppLocator | undefined>(() => {
+    return share?.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR');
   }, [share?.url.locators]);
 
   const renderToolbar = useCallback(
     (customToolbarProps: UnifiedDataTableRenderCustomToolbarProps) => {
       const discoverLink = discoverLocator?.getRedirectUrl({
-        dataViewSpec: props.dataView.toSpec(),
         timeRange: data.query.timefilter.timefilter.getTime(),
-        query: props.query,
+        query: {
+          esql: `FROM ${props.dataView.getIndexPattern()} | LIMIT ${rowsPerPage}`,
+        },
         columns: activeColumns,
       });
       return renderCustomToolbar({
@@ -187,30 +181,8 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         },
       });
     },
-    [activeColumns, discoverLocator, data.query.timefilter.timefilter, props.dataView, props.query]
+    [discoverLocator, data.query.timefilter.timefilter, props.dataView, rowsPerPage, activeColumns]
   );
-
-  // temp solution. need to render an input on click on the cell.
-  const customPopoverRenderer = useMemo<EuiDataGridCellProps['renderCellPopover']>(() => {
-    return ({ rowIndex, columnId, ...rest }: EuiDataGridCellPopoverElementProps) => {
-      const row = rows[rowIndex];
-      const docId = row.id;
-      const cellValue = row.flattened[columnId];
-      if (cellValue == null) {
-        return null;
-      }
-
-      return (
-        <EditCellValue
-          value={cellValue}
-          onSave={(updatedValue) =>
-            indexUpdateService.updateDoc(docId, { [columnId]: updatedValue })
-          }
-          onCancel={() => {}}
-        />
-      );
-    };
-  }, [indexUpdateService, rows]);
 
   const onValueChange = useCallback(
     (docId: string, update: any) => {
@@ -220,7 +192,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       indexUpdateService.updateDoc(docId, update);
       // update rows to reflect the change
     },
-    [rows, editingCell, setEditingCell, indexUpdateService]
+    [setEditingCell, indexUpdateService]
   );
 
   const CellValueRenderer = useMemo(() => {
@@ -245,7 +217,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         `}
         rows={rows}
         columnsMeta={columnsMeta}
-        // cellContext={cellContext}
         services={services}
         enableInTableSearch
         externalCustomRenderers={externalCustomRenderers}
