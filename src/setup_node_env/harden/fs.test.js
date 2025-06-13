@@ -26,20 +26,20 @@ const safeFsPromises = patchFs(fsPromises);
 
 describe('Hardened FS', () => {
   afterAll(() => {
-    safeFs.unlinkSync(join(DATA_PATH, 'good.txt'));
-    safeFs.unlinkSync(join(DATA_PATH, 'stream.txt'));
+    safeFs.unlinkSync(join(DATA_PATH, 'good.json'));
+    safeFs.unlinkSync(join(DATA_PATH, 'stream.json'));
   });
 
   describe('callback', () => {
     it('should allow writing to safe paths', (done) => {
-      safeFs.writeFile(join(DATA_PATH, 'good.txt'), 'hello', (err) => {
+      safeFs.writeFile(join(DATA_PATH, 'good.json'), 'hello', (err) => {
         expect(err).toBeFalsy();
         done();
       });
     });
 
     it('should prevent writing to unsafe paths', (done) => {
-      safeFs.writeFile('../bad.txt', 'pwn', (err) => {
+      safeFs.writeFile('../bad.json', 'pwn', (err) => {
         expect(err).toBeTruthy();
         expect(err.message).toMatch(/Unsafe path/);
         done();
@@ -50,19 +50,19 @@ describe('Hardened FS', () => {
   describe('promise', () => {
     it('should allow writing to safe paths', async () => {
       await expect(
-        safeFsPromises.writeFile(join(DATA_PATH, 'good.txt'), 'world')
+        safeFsPromises.writeFile(join(DATA_PATH, 'good.json'), 'world')
       ).resolves.not.toThrow();
     });
 
     it('should prevent writing to unsafe paths', async () => {
-      expect(() => safeFsPromises.writeFile('../../evil2.txt', 'hax')).toThrow(/Unsafe path/);
+      expect(() => safeFsPromises.writeFile('../../evil2.json', 'hax')).toThrow(/Unsafe path/);
     });
   });
 
   describe('stream', () => {
     it('should allow creating write streams to safe paths', () => {
       expect(() => {
-        const ws = safeFs.createWriteStream(join(DATA_PATH, 'stream.txt'));
+        const ws = safeFs.createWriteStream(join(DATA_PATH, 'stream.json'));
         ws.write('streaming');
         ws.end();
       }).not.toThrow();
@@ -70,7 +70,7 @@ describe('Hardened FS', () => {
 
     it('should prevent creating write streams to unsafe paths', () => {
       expect(() => {
-        safeFs.createWriteStream('../../stream-bad.txt');
+        safeFs.createWriteStream('../../stream-bad.json');
       }).toThrow(/Unsafe path/);
     });
   });

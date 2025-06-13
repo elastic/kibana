@@ -50,6 +50,7 @@ const devOrCIPaths = [
   join(homedir(), '.kibanaSecuritySolutionCliTools'),
   'target',
   '/target',
+  '/opt/buildkite-agent',
 ];
 
 const safePaths = [...baseSafePaths, ...(isDevOrCI ? devOrCIPaths : [])];
@@ -64,7 +65,12 @@ fsEventBus.on('kbn_config_changed', ({ loggerFilePath }) => {
 const getSafePath = (userPath) => {
   const normalizedPath = normalize(userPath);
 
-  if (isDevOrCI && (normalizedPath.endsWith('.txt') || normalizedPath.endsWith('.md'))) {
+  if (
+    isDevOrCI &&
+    (normalizedPath.endsWith('.txt') ||
+      normalizedPath.endsWith('.md') ||
+      normalizedPath.endsWith('.log'))
+  ) {
     return normalizedPath;
   }
 
