@@ -170,7 +170,7 @@ const OutcomePreviewTable = () => {
     return (
       <EuiEmptyPrompt
         titleSize="xs"
-        icon={<AssetImage type="noResults" />}
+        icon={<AssetImage type="unableToGeneratePreview" />}
         title={
           <h2>
             {i18n.translate(

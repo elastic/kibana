@@ -16,21 +16,31 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import {
+  OBSERVABILITY_ONBOARDING_LOCATOR,
+  ObservabilityOnboardingLocatorParams,
+} from '@kbn/deeplinks-observability';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { StreamsTreeTable } from './tree_table';
-import { StreamsEmptyPrompt } from './empty_prompt';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
+import { StreamsListEmptyState } from './streams_list_empty_state';
 
 export function StreamListView() {
   const {
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
+        share,
       },
     },
   } = useKibana();
-
+  const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
+    OBSERVABILITY_ONBOARDING_LOCATOR
+  );
+  const handleAddData = () => {
+    onboardingLocator?.navigate({});
+  };
   const streamsListFetch = useStreamsAppFetch(
     async ({ signal }) => {
       const { streams } = await streamsRepositoryClient.fetch('GET /internal/streams', {
@@ -95,7 +105,7 @@ export function StreamListView() {
       />
       <StreamsAppPageTemplate.Body grow>
         {!streamsListFetch.loading && !streamsListFetch.value?.length ? (
-          <StreamsEmptyPrompt />
+          <StreamsListEmptyState onAddData={handleAddData} />
         ) : (
           <StreamsTreeTable loading={streamsListFetch.loading} streams={streamsListFetch.value} />
         )}

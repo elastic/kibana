@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiBadgeGroup, EuiButton } from '@elastic/eui';
+import { EuiFlexGroup, EuiBadgeGroup, EuiButton, EuiToolTip } from '@elastic/eui';
 import { Streams } from '@kbn/streams-schema';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { StreamDetailDashboardsView } from '../stream_detail_dashboards_view';
@@ -81,8 +81,32 @@ export function StreamDetailView() {
           <EuiFlexGroup gutterSize="s" alignItems="center">
             {key}
             <EuiBadgeGroup gutterSize="s">
-              {Streams.UnwiredStream.GetResponse.is(definition) && <ClassicStreamBadge />}
-              <LifecycleBadge lifecycle={definition.effective_lifecycle} />
+              {Streams.UnwiredStream.GetResponse.is(definition) && (
+                <EuiToolTip
+                  position="top"
+                  title={i18n.translate('xpack.streams.badges.classic.title', {
+                    defaultMessage: 'Classic Stream',
+                  })}
+                  content={i18n.translate('xpack.streams.badges.classic.description', {
+                    defaultMessage:
+                      'Classic streams are based on existing data streams and may not support all Streams features like custom re-routing',
+                  })}
+                >
+                  <ClassicStreamBadge />
+                </EuiToolTip>
+              )}
+              <EuiToolTip
+                position="top"
+                title={i18n.translate('xpack.streams.badges.lifecycle.title', {
+                  defaultMessage: 'Data Retention',
+                })}
+                content={i18n.translate('xpack.streams.badges.lifecycle.description', {
+                  defaultMessage:
+                    'You can edit retention settings from the stream’s management view',
+                })}
+              >
+                <LifecycleBadge lifecycle={definition.effective_lifecycle} />
+              </EuiToolTip>
             </EuiBadgeGroup>
           </EuiFlexGroup>
         }

@@ -39,6 +39,30 @@ const imageSets = {
       defaultMessage: 'Quick links empty image for the streams app',
     }),
   },
+  unableToGeneratePreview: {
+    light: () => import('./unable_to_generate_preview_light.png'),
+    dark: () => import('./unable_to_generate_preview_dark.png'),
+    alt: i18n.translate('xpack.streams.streamDetailView.unableToGeneratePreviewImage', {
+      defaultMessage: 'Unable to generate preview image for the streams app',
+    }),
+  },
+  yourPreviewWillAppearHere: {
+    light: () => import('./your_preview_will_appear_here_light.png'),
+    dark: () => import('./your_preview_will_appear_here_dark.png'),
+    alt: i18n.translate('xpack.streams.streamDetailView.yourPreviewWillAppearHereImage', {
+      defaultMessage: 'Your preview will appear here image for the streams app',
+    }),
+  },
+  processorsCannotBeAddedToRootStreams: {
+    light: () => import('./processors_cannot_be_added_to_root_streams_light.png'),
+    dark: () => import('./processors_cannot_be_added_to_root_streams_dark.png'),
+    alt: i18n.translate(
+      'xpack.streams.streamDetailView.processorsCannotBeAddedToRootStreamsImage',
+      {
+        defaultMessage: 'Processors cannot be added to root streams image for the streams app',
+      }
+    ),
+  },
 };
 
 interface AssetImageProps extends Omit<EuiImageProps, 'src' | 'url' | 'alt'> {

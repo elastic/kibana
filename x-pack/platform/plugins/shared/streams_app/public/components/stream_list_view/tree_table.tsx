@@ -16,8 +16,7 @@ import {
   Criteria,
   useEuiTheme,
 } from '@elastic/eui';
-import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
-import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
+
 import { css } from '@emotion/css';
 import { isRootStreamDefinition, getSegments, Streams } from '@kbn/streams-schema';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
@@ -29,7 +28,6 @@ import { RetentionColumn } from './retention_column';
 import { parseDurationInSeconds } from '../data_management/stream_detail_lifecycle/helpers';
 import { useKibana } from '../../hooks/use_kibana';
 import { useTimefilter } from '../../hooks/use_timefilter';
-import { StreamsListEmptyState } from './streams_list_empty_state';
 
 export function StreamsTreeTable({
   loading,
@@ -45,7 +43,6 @@ export function StreamsTreeTable({
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
-        share,
       },
     },
   } = useKibana();
@@ -190,17 +187,6 @@ export function StreamsTreeTable({
       direction: sortDirection,
     },
   };
-
-  const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
-    OBSERVABILITY_ONBOARDING_LOCATOR
-  );
-  const handleAddData = () => {
-    onboardingLocator?.navigate({});
-  };
-
-  if (!loading && items.length === 0) {
-    return <StreamsListEmptyState onAddData={handleAddData} />;
-  }
 
   return (
     <EuiInMemoryTable
