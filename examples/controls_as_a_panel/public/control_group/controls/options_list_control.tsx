@@ -7,38 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
-import { EuiFormControlLayout, EuiFormLabel, EuiSuperSelect, EuiHealth } from '@elastic/eui';
+import {
+  EuiFilterButton,
+  EuiFilterGroup,
+  EuiFormControlLayout,
+  EuiFormLabel,
+  EuiSuperSelect,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
+import React, { useState } from 'react';
 
-export const OptionsList = () => {
+export const OptionsList = ({ controlSize }: { controlSize: 'normal' | 'compressed' }) => {
   const options = [
     {
       value: 'warning',
-      inputDisplay: (
-        <EuiHealth color="subdued" style={{ lineHeight: 'inherit' }}>
-          Warning
-        </EuiHealth>
-      ),
+      inputDisplay: <>Some other option</>,
       'data-test-subj': 'option-warning',
-      disabled: true,
     },
     {
       value: 'minor',
-      inputDisplay: (
-        <EuiHealth color="warning" style={{ lineHeight: 'inherit' }}>
-          Minor
-        </EuiHealth>
-      ),
+      inputDisplay: <>Any</>,
       'data-test-subj': 'option-minor',
     },
     {
       value: 'critical',
-      inputDisplay: (
-        <EuiHealth color="danger" style={{ lineHeight: 'inherit' }}>
-          Critical
-        </EuiHealth>
-      ),
+      inputDisplay: <>A different option</>,
       'data-test-subj': 'option-critical',
     },
   ];
@@ -48,13 +41,39 @@ export const OptionsList = () => {
     setValue(value);
   };
 
-  return (
+  return controlSize === 'compressed' ? (
+    <EuiFilterGroup
+      compressed
+      fullWidth
+      css={css`
+        width: 100%;
+      `}
+    >
+      <EuiFilterButton
+        grow
+        iconSize={'s'}
+        iconType="arrowDown"
+        badgeColor="subdued"
+        onClick={() => {}}
+        numActiveFilters={Math.floor(Math.random() * 11)}
+      >
+        Label
+      </EuiFilterButton>
+    </EuiFilterGroup>
+  ) : (
     <EuiFormControlLayout
       compressed
+      css={css`
+        min-width: 224px;
+        flex-grow: 1;
+        max-inline-size: none;
+        inline-size: auto;
+      `}
       prepend={<EuiFormLabel htmlFor={'someId'}>Label</EuiFormLabel>}
     >
       <EuiSuperSelect
         compressed
+        fullWidth
         options={options}
         valueOfSelected={value}
         onChange={(value) => onChange(value)}

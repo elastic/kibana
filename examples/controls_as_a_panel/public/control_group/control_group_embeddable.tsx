@@ -10,7 +10,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { map } from 'rxjs';
 
-import { UseEuiTheme, EuiPopover, EuiButton } from '@elastic/eui';
+import { UseEuiTheme, EuiPopover, EuiButton, EuiButtonIcon } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
@@ -64,13 +64,19 @@ export const controlPanelEmbeddableFactory: EmbeddableFactory<
     return {
       api,
       Component: () => {
-        const [compressControls, setCompressControls] = useState<boolean>(false);
+        const [layout, setLayout] = useState<'compressed' | 'normal' | 'popover'>('normal');
         const [popoverOpen, setPopoverOpen] = useState<boolean>(false);
 
         const onResizeObserver = useMemo(() => {
           return new ResizeObserver((entries) => {
             for (const entry of entries) {
-              setCompressControls(entry.contentRect.width < 220);
+              if (entry.contentRect.width < 140) {
+                setLayout('popover');
+              } else if (entry.contentRect.width < 224 + 16) {
+                setLayout('compressed');
+              } else {
+                setLayout('normal');
+              }
             }
           });
         }, []);
@@ -83,7 +89,14 @@ export const controlPanelEmbeddableFactory: EmbeddableFactory<
 
         return (
           <div
-            css={styles}
+            css={({ euiTheme }: UseEuiTheme) =>
+              css({
+                width: '100%',
+                padding: euiTheme.size.s,
+                display: 'flex',
+                alignContent: 'flex-start',
+              })
+            }
             className={'eui-yScroll'}
             ref={(ref) => {
               /**
@@ -93,19 +106,26 @@ export const controlPanelEmbeddableFactory: EmbeddableFactory<
               if (ref && ref.parentElement) onResizeObserver.observe(ref.parentElement);
             }}
           >
-            {compressControls ? (
+            {layout === 'popover' ? (
               <EuiPopover
+                css={css({
+                  width: '100%',
+                })}
                 button={
-                  <EuiButton
-                    iconType="controls"
-                    iconSide="left"
-                    fullWidth={true}
+                  <EuiButtonIcon
+                    color={'text'}
+                    display={'base'}
+                    size={'s'}
+                    iconSize={'m'}
                     onClick={() => {
                       setPopoverOpen(!popoverOpen);
                     }}
-                  >
-                    Controls
-                  </EuiButton>
+                    iconType="controls"
+                    aria-label="Open documentation"
+                    css={css`
+                      width: 100%;
+                    `}
+                  />
                 }
                 isOpen={popoverOpen}
                 closePopover={() => {
@@ -113,30 +133,54 @@ export const controlPanelEmbeddableFactory: EmbeddableFactory<
                 }}
                 repositionOnScroll={false}
               >
-                <div css={styles}>
+                <div
+                  css={({ euiTheme }: UseEuiTheme) =>
+                    css({
+                      maxWidth: '600px',
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      alignContent: 'flex-start',
+                      padding: euiTheme.size.s,
+                      gap: euiTheme.size.s,
+                    })
+                  }
+                >
                   {Object.values(initialState.rawState.controls).map(({ type }, i) => {
                     switch (type) {
                       case 'optionsList': {
-                        return <OptionsList key={`control-${i}`} />;
+                        return <OptionsList key={`control-${i}`} controlSize={'normal'} />;
                       }
                       case 'rangeSlider': {
-                        return <RangeSlider key={`control-${i}`} />;
+                        return <RangeSlider key={`control-${i}`} controlSize={'normal'} />;
                       }
                     }
                   })}
                 </div>
               </EuiPopover>
             ) : (
-              Object.values(initialState.rawState.controls).map(({ type }, i) => {
-                switch (type) {
-                  case 'optionsList': {
-                    return <OptionsList key={`control-${i}`} />;
-                  }
-                  case 'rangeSlider': {
-                    return <RangeSlider key={`control-${i}`} />;
-                  }
+              <div
+                css={({ euiTheme }: UseEuiTheme) =>
+                  css({
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    alignContent: 'flex-start',
+                    margin: 'auto',
+
+                    gap: euiTheme.size.s,
+                  })
                 }
-              })
+              >
+                {Object.values(initialState.rawState.controls).map(({ type }, i) => {
+                  switch (type) {
+                    case 'optionsList': {
+                      return <OptionsList key={`control-${i}`} controlSize={layout} />;
+                    }
+                    case 'rangeSlider': {
+                      return <RangeSlider key={`control-${i}`} controlSize={layout} />;
+                    }
+                  }
+                })}
+              </div>
             )}
           </div>
         );
@@ -144,13 +188,3 @@ export const controlPanelEmbeddableFactory: EmbeddableFactory<
     };
   },
 };
-
-const styles = ({ euiTheme }: UseEuiTheme) =>
-  css({
-    width: '100%',
-    display: 'flex',
-    flexWrap: 'wrap',
-    alignContent: 'flex-start',
-    padding: euiTheme.size.s,
-    gap: euiTheme.size.s,
-  });

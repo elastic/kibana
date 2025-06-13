@@ -7,18 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
 import {
-  EuiFormControlLayout,
-  EuiFormLabel,
-  EuiSuperSelect,
-  EuiHealth,
   EuiDualRange,
   EuiDualRangeProps,
+  EuiFilterButton,
+  EuiFilterGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormControlLayout,
+  EuiFormLabel,
+  EuiNotificationBadge,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import React, { useState } from 'react';
 
-export const RangeSlider = () => {
+export const RangeSlider = ({ controlSize }: { controlSize: 'normal' | 'compressed' }) => {
   const levels = [
     {
       min: 0,
@@ -33,20 +36,53 @@ export const RangeSlider = () => {
   ];
   const [dualValue, setDualValue] = useState<EuiDualRangeProps['value']>([20, 100]);
 
-  return (
+  return controlSize === 'compressed' ? (
+    <EuiFilterGroup
+      compressed
+      fullWidth
+      css={css`
+        width: 100%;
+      `}
+    >
+      <EuiFilterButton
+        iconType="arrowDown"
+        badgeColor="success"
+        onClick={() => {}}
+        grow
+        iconSize={'s'}
+      >
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>Label</EuiFlexItem>
+          <EuiFlexItem>
+            <EuiNotificationBadge color="subdued">1 -{'>'} 2</EuiNotificationBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFilterButton>
+    </EuiFilterGroup>
+  ) : (
     <EuiFormControlLayout
       compressed
+      css={css`
+        min-width: 224px;
+        flex-grow: 1;
+        max-inline-size: none;
+        inline-size: auto;
+      `}
       prepend={<EuiFormLabel htmlFor={'someId'}>Label</EuiFormLabel>}
     >
       <span
         css={css`
           .euiFormControlLayout {
             border: none;
+            input {
+              min-inline-size: auto;
+            }
           }
         `}
       >
         <EuiDualRange
           compressed
+          fullWidth
           id={'dualInputRangeSlider'}
           min={0}
           max={100}
