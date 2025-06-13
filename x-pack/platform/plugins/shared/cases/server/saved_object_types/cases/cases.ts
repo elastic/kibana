@@ -17,7 +17,7 @@ import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import { handleExport } from '../import_export/export';
 import { caseMigrations } from '../migrations';
-import { modelVersion1, modelVersion2, modelVersion3 } from './model_versions';
+import { modelVersion1, modelVersion2 } from './model_versions';
 
 export const createCaseSavedObjectType = (
   coreSetup: CoreSetup,
@@ -76,9 +76,6 @@ export const createCaseSavedObjectType = (
             type: 'keyword',
           },
         },
-      },
-      in_progress_at: {
-        type: 'date',
       },
       duration: {
         type: 'unsigned_long',
@@ -242,22 +239,12 @@ export const createCaseSavedObjectType = (
           },
         },
       },
-      time_to_acknowledge: {
-        type: 'unsigned_long',
-      },
-      time_to_investigate: {
-        type: 'unsigned_long',
-      },
-      time_to_resolve: {
-        type: 'unsigned_long',
-      },
     },
   },
   migrations: caseMigrations,
   modelVersions: {
     1: modelVersion1,
     2: modelVersion2,
-    3: modelVersion3,
   },
   management: {
     importableAndExportable: true,

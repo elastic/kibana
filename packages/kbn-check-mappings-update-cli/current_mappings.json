@@ -600,9 +600,6 @@
           }
         }
       },
-      "in_progress_at": {
-        "type": "date"
-      },
       "observables": {
         "properties": {
           "typeKey": {
@@ -632,15 +629,6 @@
       },
       "tags": {
         "type": "keyword"
-      },
-      "time_to_acknowledge": {
-        "type": "unsigned_long"
-      },
-      "time_to_investigate": {
-        "type": "unsigned_long"
-      },
-      "time_to_resolve": {
-        "type": "unsigned_long"
       },
       "title": {
         "fields": {
