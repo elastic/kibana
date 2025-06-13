@@ -49,6 +49,7 @@ import {
   PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
 } from '../../telemetry/event_based/events';
 import type { PrivMonUserSource } from './types';
+import type { MonitoringEntitySourceDescriptor } from './saved_objects';
 import {
   PrivilegeMonitoringEngineDescriptorClient,
   MonitoringEntitySourceDescriptorClient,
@@ -106,14 +107,12 @@ export class PrivilegeMonitoringDataClient {
     const indexSourceDescriptor = await this.monitoringIndexSourceClient.create({
       type: 'index',
       managed: true,
-      indexPattern: this.getIndex(), // double check with gives 'entity-analytics.privileged-user'
       name: 'defaultName', // TODO: double check what default name should be
     });
     this.log(
       'info',
       `Created index source for privilege monitoring: ${JSON.stringify(indexSourceDescriptor)}`
     );
-
     try {
       await this.createOrUpdateIndex().catch((e) => {
         if (e.meta.body.error.type === 'resource_already_exists_exception') {
@@ -142,6 +141,7 @@ export class PrivilegeMonitoringDataClient {
         'info',
         `Found index sources for privilege monitoring:\n${JSON.stringify(indexSources, null, 2)}`
       );
+      this.queryAllUserNames(indexSources); // TODO: temp naming, to update.
     } catch (e) {
       this.log('error', `Error initializing privilege monitoring engine: ${e}`);
       this.audit(
@@ -166,6 +166,58 @@ export class PrivilegeMonitoringDataClient {
     }
 
     return descriptor;
+  }
+
+  /**
+   * Question: should this be responsibility of the data client or the descriptor client? (monitoring)
+   * @param indexSources
+   * @returns
+   */
+  public async queryAllUserNames(indexSources: MonitoringEntitySourceDescriptor[]) {
+    const results: Record<string, string[]> = {};
+
+    for (const source of indexSources) {
+      const index = source.indexPattern ?? '';
+      const kuery =
+        typeof source.filter?.kuery === 'string' ? (source.filter.kuery as string) : undefined;
+
+      this.log('info', `Querying index: ${index} with kuery: ${kuery ?? 'none'}`);
+
+      try {
+        const usernames = await this.listUserNamesFromSource(index, kuery);
+        results[index] = usernames;
+      } catch (error) {
+        this.log('error', `Failed to query index ${index}: ${error}`);
+      }
+    }
+
+    return results;
+  }
+
+  /**
+   * Question: should this be responsibility of the data client or the descriptor client? (monitoring)
+   * @param indexName
+   * @param kuery
+   */
+  public async listUserNamesFromSource(indexName: string, kuery?: string): Promise<string[]> {
+    const query = kuery ? toElasticsearchQuery(fromKueryExpression(kuery)) : { match_all: {} };
+
+    const response = await this.esClient.search<{ user?: { name?: string } }>({
+      index: indexName,
+      _source: ['user.name'],
+      query,
+    });
+
+    const usernames = new Set<string>();
+
+    for (const hit of response.hits.hits) {
+      const username = hit._source?.user?.name;
+      if (username) {
+        usernames.add(username);
+      }
+    }
+    this.log('info', `Found ${usernames.size} unique usernames in index: ${indexName}`);
+    return Array.from(usernames);
   }
 
   public async createOrUpdateIndex() {
