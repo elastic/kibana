@@ -23,7 +23,7 @@ export function updateGlobalNavigation({
   /* logs is a special case.
    * It is not a nav link but still exists as a
    * Kibana feature privilege with attached rule types */
-  const logs = capabilities.logs.show;
+  const logs = capabilities.logs?.show;
   const someVisible = Object.values({
     apm,
     logs,
