@@ -222,7 +222,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      '"error validating action type config: error configuring webhook action: unable to parse url: TypeError: Invalid URL: example.com/do-something"'
+      `"error validating action type config: error validation webhook action config: unable to parse url: TypeError: Invalid URL: example.com/do-something"`
     );
   });
 
@@ -295,7 +295,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities: configUtils });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: error configuring webhook action: target url is not present in allowedHosts"`
+      `"error validating action type config: error validation webhook action config: target url is not present in allowedHosts"`
     );
   });
 
@@ -308,12 +308,12 @@ describe('config validation', () => {
       hasAuth: true,
     };
     configurationUtilities.getWebhookSettings = jest.fn(() => ({
-      ssl: { pfx: false },
+      ssl: { pfx: { enabled: false } },
     }));
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: error configuring webhook action: certType \\"ssl-pfx\\" is disabled"`
+      `"error validating action type config: error validation webhook action config: certType \\"ssl-pfx\\" is disabled"`
     );
   });
 });

@@ -38,7 +38,9 @@ const createActionsConfigMock = () => {
     getMaxQueued: jest.fn().mockReturnValue(1000),
     getWebhookSettings: jest.fn().mockReturnValue({
       ssl: {
-        pfx: true,
+        pfx: {
+          enabled: true,
+        },
       },
     }),
     getAwsSesConfig: jest.fn().mockReturnValue(null),

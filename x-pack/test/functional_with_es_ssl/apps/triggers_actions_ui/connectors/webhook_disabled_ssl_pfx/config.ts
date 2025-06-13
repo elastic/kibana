@@ -20,7 +20,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...baseConfig.getAll().kbnTestServer,
       serverArgs: [
         ...baseConfig.getAll().kbnTestServer.serverArgs,
-        `--xpack.actions.webhook.ssl.pfx=false`,
+        `--xpack.actions.webhook.ssl.pfx.enabled=false`,
       ],
     },
   };

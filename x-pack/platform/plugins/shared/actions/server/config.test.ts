@@ -257,15 +257,23 @@ describe('config validation', () => {
 
     config.webhook = {};
     result = configSchema.validate(config);
-    expect(result.webhook?.ssl.pfx).toEqual(true);
+    expect(result.webhook?.ssl.pfx.enabled).toEqual(true);
 
     config.webhook = { ssl: {} };
     result = configSchema.validate(config);
-    expect(result.webhook?.ssl.pfx).toEqual(true);
+    expect(result.webhook?.ssl.pfx.enabled).toEqual(true);
 
-    config.webhook = { ssl: { pfx: false } };
+    config.webhook = { ssl: { pfx: {} } };
     result = configSchema.validate(config);
-    expect(result.webhook?.ssl.pfx).toEqual(false);
+    expect(result.webhook?.ssl.pfx.enabled).toEqual(true);
+
+    config.webhook = { ssl: { pfx: { enabled: false } } };
+    result = configSchema.validate(config);
+    expect(result.webhook?.ssl.pfx.enabled).toEqual(false);
+
+    config.webhook = { ssl: { pfx: { enabled: true } } };
+    result = configSchema.validate(config);
+    expect(result.webhook?.ssl.pfx.enabled).toEqual(true);
   });
 
   describe('email.services.ses', () => {

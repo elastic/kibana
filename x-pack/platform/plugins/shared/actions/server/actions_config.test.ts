@@ -572,20 +572,24 @@ describe('getMaxQueued()', () => {
   });
 });
 
-describe('getWebhookSettings', () => {
+describe('getWebhookSettings()', () => {
   test('returns the webhook settings from config', () => {
     const config: ActionsConfig = {
       ...defaultActionsConfig,
       webhook: {
         ssl: {
-          pfx: true,
+          pfx: {
+            enabled: true,
+          },
         },
       },
     };
     const webhookSettings = getActionsConfigurationUtilities(config).getWebhookSettings();
     expect(webhookSettings).toEqual({
       ssl: {
-        pfx: true,
+        pfx: {
+          enabled: true,
+        },
       },
     });
   });
@@ -595,14 +599,18 @@ describe('getWebhookSettings', () => {
       ...defaultActionsConfig,
       webhook: {
         ssl: {
-          pfx: false,
+          pfx: {
+            enabled: false,
+          },
         },
       },
     };
     const webhookSettings = getActionsConfigurationUtilities(config).getWebhookSettings();
     expect(webhookSettings).toEqual({
       ssl: {
-        pfx: false,
+        pfx: {
+          enabled: false,
+        },
       },
     });
   });
@@ -610,7 +618,7 @@ describe('getWebhookSettings', () => {
   test('returns true when no webhook settings are defined', () => {
     const config: ActionsConfig = defaultActionsConfig;
     const webhookSettings = getActionsConfigurationUtilities(config).getWebhookSettings();
-    expect(webhookSettings).toEqual({ ssl: { pfx: true } });
+    expect(webhookSettings).toEqual({ ssl: { pfx: { enabled: true } } });
   });
 });
 

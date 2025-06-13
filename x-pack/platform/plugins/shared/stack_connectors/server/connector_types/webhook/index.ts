@@ -128,7 +128,7 @@ function validateConnectorTypeConfig(
 
   if (configObject.certType === SSLCertType.PFX) {
     const webhookSettings = configurationUtilities.getWebhookSettings();
-    if (!webhookSettings.ssl.pfx) {
+    if (!webhookSettings.ssl.pfx.enabled) {
       throw new Error(
         i18n.translate('xpack.stackConnectors.webhook.pfxConfigurationError', {
           defaultMessage:

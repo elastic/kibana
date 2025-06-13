@@ -169,7 +169,9 @@ export const configSchema = schema.object({
   webhook: schema.maybe(
     schema.object({
       ssl: schema.object({
-        pfx: schema.boolean({ defaultValue: true }),
+        pfx: schema.object({
+          enabled: schema.boolean({ defaultValue: true }),
+        }),
       }),
     })
   ),

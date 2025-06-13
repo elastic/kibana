@@ -67,7 +67,9 @@ describe('Actions Plugin', () => {
       const context = coreMock.createPluginInitializerContext({
         webhook: {
           ssl: {
-            pfx: false,
+            pfx: {
+              enabled: false,
+            },
           },
         },
       });

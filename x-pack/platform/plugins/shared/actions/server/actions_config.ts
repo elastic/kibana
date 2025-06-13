@@ -57,7 +57,9 @@ export interface ActionsConfigurationUtilities {
   getMaxQueued: () => number;
   getWebhookSettings(): {
     ssl: {
-      pfx: boolean;
+      pfx: {
+        enabled: boolean;
+      };
     };
   };
   getAwsSesConfig: () => AwsSesConfig;
@@ -234,7 +236,9 @@ export function getActionsConfigurationUtilities(
     getWebhookSettings: () => {
       return {
         ssl: {
-          pfx: config.webhook?.ssl.pfx ?? true,
+          pfx: {
+            enabled: config.webhook?.ssl.pfx.enabled ?? true,
+          },
         },
       };
     },

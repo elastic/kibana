@@ -23,7 +23,9 @@ export interface Config {
   };
   webhook: {
     ssl: {
-      pfx: boolean;
+      pfx: {
+        enabled: boolean;
+      };
     };
   };
 }
@@ -35,7 +37,7 @@ export class Plugin implements CorePlugin<ActionsPublicPluginSetup> {
   constructor(ctx: PluginInitializerContext<Config>) {
     const config = ctx.config.get();
     this.allowedEmailDomains = config.email?.domain_allowlist || null;
-    this.webhookSslWithPfxEnabled = config.webhook?.ssl.pfx ?? true;
+    this.webhookSslWithPfxEnabled = config.webhook?.ssl.pfx.enabled ?? true;
   }
 
   public setup(): ActionsPublicPluginSetup {
