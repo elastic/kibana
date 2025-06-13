@@ -471,7 +471,7 @@ export function visitSource(
 ): ESQLSource {
   const text = sanitizeSourceString(ctx);
 
-  let cluster: ESQLStringLiteral | undefined;
+  let prefix: ESQLStringLiteral | undefined;
   let index: ESQLStringLiteral | undefined;
   let selector: ESQLStringLiteral | undefined;
 
@@ -481,7 +481,7 @@ export function visitSource(
     const selectorStringCtx = ctx.selectorString();
 
     if (clusterStringCtx) {
-      cluster = visitUnquotedOrQuotedString(clusterStringCtx);
+      prefix = visitUnquotedOrQuotedString(clusterStringCtx);
     }
     if (indexStringCtx) {
       index = visitUnquotedOrQuotedString(indexStringCtx);
@@ -494,7 +494,7 @@ export function visitSource(
   return Builder.expression.source.node(
     {
       sourceType: type,
-      cluster,
+      prefix,
       index,
       selector,
       name: text,

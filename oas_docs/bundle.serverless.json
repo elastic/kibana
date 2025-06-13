@@ -41729,7 +41729,19 @@
                             "type": "string"
                           },
                           "warning": {
-                            "type": "string"
+                            "additionalProperties": false,
+                            "properties": {
+                              "message": {
+                                "type": "string"
+                              },
+                              "title": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "title"
+                            ],
+                            "type": "object"
                           }
                         },
                         "required": [
@@ -41741,7 +41753,19 @@
                       "type": "array"
                     },
                     "warning": {
-                      "type": "string"
+                      "additionalProperties": false,
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "title"
+                      ],
+                      "type": "object"
                     }
                   },
                   "required": [
@@ -41900,7 +41924,19 @@
                             "type": "string"
                           },
                           "warning": {
-                            "type": "string"
+                            "additionalProperties": false,
+                            "properties": {
+                              "message": {
+                                "type": "string"
+                              },
+                              "title": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "title"
+                            ],
+                            "type": "object"
                           }
                         },
                         "required": [
@@ -41912,7 +41948,19 @@
                       "type": "array"
                     },
                     "warning": {
-                      "type": "string"
+                      "additionalProperties": false,
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "title"
+                      ],
+                      "type": "object"
                     }
                   },
                   "required": [
