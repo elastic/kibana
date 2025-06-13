@@ -62,7 +62,7 @@ export const MissingPrivilegesCallOut = React.memo<PropsWithChildren<{}>>(({ chi
     border: 1px solid ${euiTheme.colors.borderBaseSubdued};
   `;
   return (
-    <EuiCallOut title={i18n.PRIVILEGES_MISSING_TITLE} iconType="iInCircle" css={calloutCss}>
+    <EuiCallOut title={i18n.PRIVILEGES_MISSING_TITLE} iconType="info" css={calloutCss}>
       {children}
     </EuiCallOut>
   );

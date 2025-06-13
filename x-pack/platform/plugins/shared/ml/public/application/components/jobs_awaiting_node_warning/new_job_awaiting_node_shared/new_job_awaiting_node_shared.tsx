@@ -106,7 +106,7 @@ const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
           />
         }
         color="primary"
-        iconType="iInCircle"
+        iconType="info"
       >
         <div>
           <FormattedMessage

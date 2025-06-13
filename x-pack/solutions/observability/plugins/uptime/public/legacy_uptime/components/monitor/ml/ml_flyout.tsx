@@ -76,7 +76,7 @@ export function MLFlyoutView({ isCreatingJob, onClickCreate, onClose, canCreateM
           <EuiCallOut
             title={labels.ADD_JOB_PERMISSIONS_NEEDED}
             color="primary"
-            iconType="iInCircle"
+            iconType="info"
           >
             <p>
               <FormattedMessage

@@ -75,7 +75,7 @@ export function ConfirmSwitchModal({ onConfirm, onCancel, unsupportedConfigs }: 
             title={i18n.translate('xpack.apm.settings.schema.confirm.unsupportedConfigs.title', {
               defaultMessage: `The following apm-server.yml user settings are incompatible and will be removed`,
             })}
-            iconType="iInCircle"
+            iconType="info"
           >
             <EuiCodeBlock language="yaml">
               {unsupportedConfigs

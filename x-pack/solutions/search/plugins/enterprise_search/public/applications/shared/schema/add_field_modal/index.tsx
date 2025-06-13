@@ -90,7 +90,7 @@ export const SchemaAddFieldModal: React.FC<Props> = ({
         <EuiCallOut
           size="s"
           color="warning"
-          iconType="iInCircle"
+          iconType="info"
           title={<p>{ADD_FIELD_MODAL_DESCRIPTION}</p>}
         />
         <EuiSpacer size="m" />

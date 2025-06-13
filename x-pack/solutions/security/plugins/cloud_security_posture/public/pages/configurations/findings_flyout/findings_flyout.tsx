@@ -102,7 +102,7 @@ export const MissingFieldsCallout = ({
         overflow: 'hidden',
       }}
       size="s"
-      iconType="iInCircle"
+      iconType="info"
       title={
         <span style={{ color: euiTheme.colors.text }}>
           <FormattedMessage

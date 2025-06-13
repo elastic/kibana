@@ -655,7 +655,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
                   'The Top Influencers list is hidden because no influencers have been configured for the selected jobs.',
               })}
               position="right"
-              type="iInCircle"
+              type="info"
             />
           </EuiFlexItem>
           <EuiFlexItem>{mainPanelContent}</EuiFlexItem>

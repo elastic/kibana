@@ -432,7 +432,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
                   />
                 }
               >
-                <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
+                <EuiIcon color="subdued" type="info" className="eui-alignTop" />
               </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>

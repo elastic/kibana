@@ -228,7 +228,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
             content={displaySingleValueInput ? SINGLE_VALUE_LABEL_HELPER : VALUE_LABEL_HELPER}
           >
             <>
-              {VALUE_LABEL} <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
+              {VALUE_LABEL} <EuiIcon color="subdued" type="info" className="eui-alignTop" />
             </>
           </EuiToolTip>
         </div>

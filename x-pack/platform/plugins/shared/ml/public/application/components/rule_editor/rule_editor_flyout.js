@@ -657,7 +657,7 @@ class RuleEditorFlyoutUI extends Component {
                     values={{ functionName: anomaly.source.function }}
                   />
                 }
-                iconType="iInCircle"
+                iconType="info"
               />
             )}
             <EuiSpacer size="s" />

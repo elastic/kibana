@@ -259,7 +259,7 @@ export class ForecastsTable extends Component {
               defaultMessage="No forecasts have been run for this job"
             />
           }
-          iconType="iInCircle"
+          iconType="info"
           role="alert"
         >
           {isTimeSeriesViewJob(this.props.job) && (
