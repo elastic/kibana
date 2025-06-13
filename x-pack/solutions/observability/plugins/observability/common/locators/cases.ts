@@ -44,8 +44,8 @@ export const CasesOverviewLocatorDefinition =
     getLocation: async (params: CasesOverviewLocatorParams) => {
       const { spaceId, basePath } = params;
       const path = spaceId
-        ? addSpaceIdToPath(basePath ?? '', spaceId, '/app/observability/cases')
-        : (basePath ?? '') + '/app/observability/cases';
+        ? addSpaceIdToPath(basePath ?? '', spaceId, CASE_DETAIL_PATH)
+        : (basePath ?? '') + CASE_DETAIL_PATH;
       return {
         app: 'observability',
         path,
