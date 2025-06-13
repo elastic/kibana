@@ -28,7 +28,11 @@ interface SynchronizationTaskRunnerFactoryConstructorParams {
   logger: Logger;
 }
 
-type SynchronizationTaskState = Record<string, unknown>;
+interface SynchronizationTaskState {
+  lastSyncSuccess?: Date | undefined;
+  lastSyncAttempt?: Date | undefined;
+  esReindexTaskId?: TaskId | undefined;
+}
 
 enum ReindexStatus {
   RUNNING = 'running',
@@ -67,7 +71,6 @@ export class SynchronizationTaskRunner implements CancellableTask {
 
   public async run() {
     const esClient = await this.getESClient();
-    let state: SynchronizationTaskState = {};
 
     try {
       const previousReindexStatus = await this.getPreviousReindexStatus(esClient);
@@ -79,12 +82,32 @@ export class SynchronizationTaskRunner implements CancellableTask {
          * same state and the next run will cover any missing
          * updates.
          **/
-        state = this.getSyncState();
-      } else if (previousReindexStatus === ReindexStatus.COMPLETED) {
+        return {
+          state: this.getSyncState() as Record<string, unknown>,
+        };
+      }
+
+      if (previousReindexStatus === ReindexStatus.COMPLETED) {
+        /*
+         * If the previous reindex task is completed we reindex
+         * with a new time window.
+         **/
         await this.isIndexAvailable(esClient);
+
         this.updateLastSyncTimes({ updateSuccessTime: true });
-        state = await this.synchronizeIndex({ esClient });
-      } else if (
+
+        const esReindexTaskId = await this.synchronizeIndex({ esClient });
+
+        return {
+          state: {
+            lastSyncSuccess: this.lastSyncSuccess,
+            lastSyncAttempt: this.lastSyncAttempt,
+            esReindexTaskId,
+          } as Record<string, unknown>,
+        };
+      }
+
+      if (
         /*
          * A missing task id can only happen if this is
          * the first task execution.
@@ -103,14 +126,19 @@ export class SynchronizationTaskRunner implements CancellableTask {
          * This will ensure the reindex query is built with the correct value.
          **/
         this.updateLastSyncTimes({ updateSuccessTime: false });
-        state = await this.synchronizeIndex({ esClient });
-      } else {
-        throw new Error('Invalid task state.');
+
+        const esReindexTaskId = await this.synchronizeIndex({ esClient });
+
+        return {
+          state: {
+            lastSyncSuccess: this.lastSyncSuccess,
+            lastSyncAttempt: this.lastSyncAttempt,
+            esReindexTaskId,
+          } as Record<string, unknown>,
+        };
       }
 
-      return {
-        state,
-      };
+      throw new Error('Invalid task state.');
     } catch (e) {
       if (isRetryableEsClientError(e)) {
         throwRetryableError(
@@ -130,7 +158,7 @@ export class SynchronizationTaskRunner implements CancellableTask {
     if (updateSuccessTime) {
       this.lastSyncSuccess = this.lastSyncAttempt;
     }
-    this.lastSyncAttempt = new Date(Date.now());
+    this.lastSyncAttempt = new Date();
   }
 
   /**
@@ -144,7 +172,7 @@ export class SynchronizationTaskRunner implements CancellableTask {
     esClient,
   }: {
     esClient: ElasticsearchClient;
-  }): Promise<SynchronizationTaskState> {
+  }): Promise<TaskId | undefined> {
     const painlessScript = await this.getPainlessScript(esClient);
 
     if (painlessScript.found) {
@@ -166,13 +194,7 @@ export class SynchronizationTaskRunner implements CancellableTask {
         wait_for_completion: false,
       });
 
-      this.logDebug(JSON.stringify(reindexResponse));
-
-      return {
-        lastSyncSuccess: this.lastSyncSuccess,
-        lastSyncAttempt: this.lastSyncAttempt,
-        esReindexTaskId: reindexResponse.task,
-      };
+      return reindexResponse.task;
     } else {
       throw createTaskRunError(
         new Error(this.handleErrorMessage('Painless script not found.')),

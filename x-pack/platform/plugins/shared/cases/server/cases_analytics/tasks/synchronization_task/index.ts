@@ -45,6 +45,9 @@ export function registerCAISynchronizationTask({
   });
 }
 
+/**
+ * @param {destIndex} string Should be a key of SYNCHRONIZATION_QUERIES_DICTIONARY
+ */
 export async function scheduleCAISynchronizationTask({
   taskId,
   sourceIndex,
