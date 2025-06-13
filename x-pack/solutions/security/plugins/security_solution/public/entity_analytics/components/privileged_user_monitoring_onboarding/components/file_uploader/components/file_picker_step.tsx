@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiCode,
   EuiCodeBlock,
   EuiFilePicker,
   EuiPanel,
