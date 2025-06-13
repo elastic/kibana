@@ -89,6 +89,8 @@ export const esqlExecutor = async ({
     });
     const isRuleAggregating = computeIsESQLQueryAggregating(completeRule.ruleParams.query);
     const hasMvExpand = getMvExpandFields(ruleParams.query).length > 0;
+    // since pagination is not supported in ES|QL, we will use tuple.maxSignals + 1 to determine if search results are exhausted
+    const size = tuple.maxSignals + 1;
 
     /**
      * ES|QL returns results as a single page, max size of 10,000
@@ -120,7 +122,7 @@ export const esqlExecutor = async ({
           query: ruleParams.query,
           from: tuple.from.toISOString(),
           to: tuple.to.toISOString(),
-          size: tuple.maxSignals,
+          size,
           filters: dataTiersFilters,
           primaryTimestamp,
           secondaryTimestamp,
@@ -274,9 +276,9 @@ export const esqlExecutor = async ({
         });
 
         // no more results will be found
-        if (response.values.length < tuple.maxSignals + 1) {
+        if (response.values.length < size) {
           ruleExecutionLogger.debug(
-            `End of search: Found ${response.values.length} results with page size ${tuple.maxSignals}`
+            `End of search: Found ${response.values.length} results with page size ${size}`
           );
           break;
         }
