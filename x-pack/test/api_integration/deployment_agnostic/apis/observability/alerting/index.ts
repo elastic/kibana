@@ -12,10 +12,5 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./burn_rate_rule'));
     loadTestFile(require.resolve('./es_query'));
     loadTestFile(require.resolve('./custom_threshold'));
-
-    describe('Synthetics Alerting', () => {
-      loadTestFile(require.resolve('./synthetics/synthetics_default_rule'));
-      loadTestFile(require.resolve('./synthetics/custom_status_rule'));
-    });
   });
 }

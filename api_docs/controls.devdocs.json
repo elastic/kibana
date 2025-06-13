@@ -100,11 +100,11 @@
         "references": [
           {
             "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/public/dashboard_app/url/url_utils.ts"
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_app/url/bwc/extract_control_group_state.ts"
           },
           {
             "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/public/dashboard_app/url/url_utils.ts"
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_app/url/bwc/extract_control_group_state.ts"
           }
         ],
         "children": [

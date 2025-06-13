@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const MOCK_QUERY_RULESET_RESPONSE_FIXTURE = {
+import { QueryRulesQueryRuleset } from '@elastic/elasticsearch/lib/api/types';
+
+export const MOCK_QUERY_RULESET_RESPONSE_FIXTURE: QueryRulesQueryRuleset = {
   ruleset_id: 'my-ruleset',
   rules: [
     {

@@ -32,7 +32,6 @@ export const performRuleInstallationHandler = async (
 
   try {
     const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
-    const config = ctx.securitySolution.getConfig();
     const soClient = ctx.core.savedObjects.client;
     const rulesClient = await ctx.alerting.getRulesClient();
     const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
@@ -47,7 +46,7 @@ export const performRuleInstallationHandler = async (
 
     // If this API is used directly without hitting any detection engine
     // pages first, the rules package might be missing.
-    await ensureLatestRulesPackageInstalled(ruleAssetsClient, config, ctx.securitySolution);
+    await ensureLatestRulesPackageInstalled(ruleAssetsClient, ctx.securitySolution);
 
     const allLatestVersions = await ruleAssetsClient.fetchLatestVersions();
     const currentRuleVersions = await ruleObjectsClient.fetchInstalledRuleVersions();

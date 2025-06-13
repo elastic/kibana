@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { render, screen, act as rtlAct } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { BehaviorSubject } from 'rxjs';
 import type { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -40,6 +43,8 @@ import {
 } from '../../state_management/redux';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { TabsPortalsRenderer } from '../portals';
+
+type TestWrapperProps = DiscoverSidebarResponsiveProps & { selectedDataView: DataView };
 
 const mockSearchBarCustomization: SearchBarCustomization = {
   id: 'search_bar',
@@ -149,9 +154,7 @@ jest.mock('@kbn/discover-utils/src/utils/calc_field_counts', () => ({
 
 jest.spyOn(ExistingFieldsServiceApi, 'loadFieldExisting');
 
-function getCompProps(options?: {
-  hits?: DataTableRecord[];
-}): DiscoverSidebarResponsiveProps & { selectedDataView: DataView } {
+function getCompProps(options?: { hits?: DataTableRecord[] }): TestWrapperProps {
   const dataView = stubLogstashDataView;
   dataView.toSpec = jest.fn(() => ({}));
 
@@ -198,11 +201,15 @@ function getStateContainer({ query }: { query?: Query | AggregateQuery }) {
   return stateContainer;
 }
 
-async function mountComponent(
-  { selectedDataView, ...props }: DiscoverSidebarResponsiveProps & { selectedDataView: DataView },
+type EnzymeReturnType = ReactWrapper<TestWrapperProps>;
+type MountReturn<WithRTL extends boolean> = WithRTL extends true ? undefined : EnzymeReturnType;
+
+async function mountComponent<WithReactTestingLibrary extends boolean = false>(
+  { selectedDataView, ...props }: TestWrapperProps,
   appStateParams: { query?: Query | AggregateQuery } = {},
-  services?: DiscoverServices
-): Promise<ReactWrapper<DiscoverSidebarResponsiveProps>> {
+  services?: DiscoverServices,
+  withReactTestingLibrary?: WithReactTestingLibrary
+): Promise<MountReturn<WithReactTestingLibrary>> {
   if (appStateParams.query) {
     props.stateContainer.appState.set({
       query: appStateParams.query,
@@ -210,7 +217,7 @@ async function mountComponent(
     });
   }
 
-  let comp: ReactWrapper<DiscoverSidebarResponsiveProps>;
+  let comp: ReactWrapper<TestWrapperProps>;
   const mockedServices = services ?? createMockServices();
   mockedServices.data.dataViews.getIdsWithTitle = jest.fn(async () =>
     selectedDataView ? [{ id: selectedDataView.id!, title: selectedDataView.title! }] : []
@@ -222,38 +229,41 @@ async function mountComponent(
     .fn()
     .mockImplementation(() => props.stateContainer.appState.getState());
 
-  await act(async () => {
-    comp = mountWithIntl(
-      <EuiProvider>
-        <KibanaContextProvider services={mockedServices}>
-          <InternalStateProvider store={props.stateContainer.internalState}>
-            <TabsPortalsRenderer runtimeStateManager={props.stateContainer.runtimeStateManager}>
-              <DiscoverMainProvider value={props.stateContainer}>
-                <RuntimeStateProvider currentDataView={selectedDataView} adHocDataViews={[]}>
-                  <DiscoverSidebarResponsive {...props} />{' '}
-                </RuntimeStateProvider>
-              </DiscoverMainProvider>
-            </TabsPortalsRenderer>
-          </InternalStateProvider>
-        </KibanaContextProvider>
-      </EuiProvider>
-    );
-  });
+  const component = (
+    <EuiProvider>
+      <KibanaContextProvider services={mockedServices}>
+        <InternalStateProvider store={props.stateContainer.internalState}>
+          <TabsPortalsRenderer runtimeStateManager={props.stateContainer.runtimeStateManager}>
+            <DiscoverMainProvider value={props.stateContainer}>
+              <RuntimeStateProvider currentDataView={selectedDataView} adHocDataViews={[]}>
+                <DiscoverSidebarResponsive {...props} />{' '}
+              </RuntimeStateProvider>
+            </DiscoverMainProvider>
+          </TabsPortalsRenderer>
+        </InternalStateProvider>
+      </KibanaContextProvider>
+    </EuiProvider>
+  );
 
-  // wait for lazy modules
-  await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+  if (withReactTestingLibrary) {
+    await rtlAct(() => render(<IntlProvider locale="en">{component}</IntlProvider>));
+    return undefined as MountReturn<WithReactTestingLibrary>;
+  }
+
   await act(async () => {
+    comp = mountWithIntl(component);
+    // wait for lazy modules
+    await new Promise((resolve) => setTimeout(resolve, 0));
     comp.update();
   });
-  await act(async () => {
-    comp.update();
-  });
 
-  return comp!;
+  comp!.update();
+
+  return comp! as unknown as MountReturn<WithReactTestingLibrary>;
 }
 
 describe('discover responsive sidebar', function () {
-  let props: DiscoverSidebarResponsiveProps & { selectedDataView: DataView };
+  let props: TestWrapperProps;
 
   beforeEach(async () => {
     (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(async () => ({
@@ -355,17 +365,42 @@ describe('discover responsive sidebar', function () {
     expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledTimes(1);
   });
 
-  it('should set a11y attributes for the search input in the field list', async function () {
-    const comp = await mountComponent(props);
+  describe('when the input is not focused', () => {
+    it('should set a11y attributes for the search input in the field list', async function () {
+      // When
+      await mountComponent(props, undefined, undefined, true);
 
-    const a11yDescription = findTestSubject(comp, 'fieldListGrouped__ariaDescription');
-    expect(a11yDescription.prop('aria-live')).toBe('polite');
-    expect(a11yDescription.text()).toBe(
-      '1 selected field. 4 popular fields. 3 available fields. 20 empty fields. 2 meta fields.'
-    );
+      // Then
+      const a11yDescription = screen.getByTestId('fieldListGrouped__ariaDescription');
+      expect(a11yDescription).toHaveAttribute('aria-live', 'off');
+      expect(a11yDescription).toHaveTextContent(
+        '1 selected field. 4 popular fields. 3 available fields. 20 empty fields. 2 meta fields.'
+      );
 
-    const searchInput = findTestSubject(comp, 'fieldListFiltersFieldSearch');
-    expect(searchInput.first().prop('aria-describedby')).toBe(a11yDescription.prop('id'));
+      const searchInput = screen.getByTestId('fieldListFiltersFieldSearch');
+      expect(searchInput).toHaveAttribute('aria-describedby', a11yDescription.id);
+    });
+  });
+
+  describe('when the input is focused', () => {
+    it('should set a11y attributes for the search input in the field list', async function () {
+      // Given
+      const user = userEvent.setup();
+
+      // When
+      await mountComponent(props, undefined, undefined, true);
+
+      // Then
+      const searchInput = screen.getByTestId('fieldListFiltersFieldSearch');
+      const a11yDescription = screen.getByTestId('fieldListGrouped__ariaDescription');
+      await user.click(searchInput);
+      expect(searchInput).toHaveAttribute('aria-describedby', a11yDescription.id);
+
+      expect(a11yDescription).toHaveAttribute('aria-live', 'polite');
+      expect(a11yDescription).toHaveTextContent(
+        '1 selected field. 4 popular fields. 3 available fields. 20 empty fields. 2 meta fields.'
+      );
+    });
   });
 
   it('should not have selected fields if no columns selected', async function () {
@@ -693,7 +728,7 @@ describe('discover responsive sidebar', function () {
 
   it('should render buttons in data view picker correctly', async () => {
     const services = createMockServices();
-    const propsWithPicker: DiscoverSidebarResponsiveProps = {
+    const propsWithPicker: TestWrapperProps = {
       ...props,
       sidebarProps: {
         ...props.sidebarProps,
@@ -728,7 +763,7 @@ describe('discover responsive sidebar', function () {
     const services = createMockServices();
     services.dataViewEditor.userPermissions.editDataView = jest.fn(() => false);
     services.dataViewFieldEditor.userPermissions.editIndexPattern = jest.fn(() => false);
-    const propsWithPicker: DiscoverSidebarResponsiveProps = {
+    const propsWithPicker: TestWrapperProps = {
       ...props,
       sidebarProps: {
         ...props.sidebarProps,

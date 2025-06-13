@@ -7,24 +7,19 @@
 
 import type { Gap } from '../gap';
 import { adHocRunStatus } from '../../../../common/constants';
-import { parseDuration } from '../../../../common';
-import type { BackfillSchedule } from '../../../application/backfill/result/types';
+import type { ScheduledItem } from './utils';
 
 export const updateGapFromSchedule = ({
   gap,
-  backfillSchedule,
+  scheduledItems,
 }: {
   gap: Gap;
-  backfillSchedule: BackfillSchedule[];
+  scheduledItems: ScheduledItem[];
 }) => {
-  for (const scheduleItem of backfillSchedule) {
-    const runAt = new Date(scheduleItem.runAt).getTime();
-    const intervalDuration = parseDuration(scheduleItem.interval);
-    const from = runAt - intervalDuration;
-    const to = runAt;
+  for (const scheduleItem of scheduledItems) {
     const scheduleInterval = {
-      gte: new Date(from),
-      lte: new Date(to),
+      gte: scheduleItem.from,
+      lte: scheduleItem.to,
     };
     if (
       scheduleItem.status === adHocRunStatus.PENDING ||

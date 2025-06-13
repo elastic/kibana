@@ -13,7 +13,7 @@ import {
 } from '../../../common/mocks/constants/session_view_process.mock';
 import { sessionViewIOEventsMock } from '../../../common/mocks/responses/session_view_io_events.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { TTYPlayerDeps, TTYPlayer } from '.';
+import { TTYPlayer, TTYPlayerDeps } from '.';
 import userEvent from '@testing-library/user-event';
 
 describe('TTYPlayer component', () => {
@@ -40,7 +40,6 @@ describe('TTYPlayer component', () => {
       sessionStartTime: TEST_SESSION_START_TIME,
       onClose: jest.fn(),
       onJumpToEvent: jest.fn(),
-      isFullscreen: false,
       trackEvent: jest.fn(),
     };
   });

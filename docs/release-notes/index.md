@@ -21,6 +21,29 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [kibana-X.X.X-fixes]
 % *
 
+## 9.0.2 [kibana-9.0.2-release-notes]
+
+### Enhancements [kibana-9.0.2-features-enhancements]
+**Elastic Observability solution**:
+For the Elastic Observability 9.0.2 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+
+### Fixes [kibana-9.0.2-fixes]
+**Alerting**:
+* Fixes ignored dynamic templates [#219875](https://github.com/elastic/kibana/pull/219875).
+* Fixes an issue where notifications would not trigger after the expiration of maintenance windows on active alerts [#219797](https://github.com/elastic/kibana/pull/219797).
+
+**Dashboards**:
+* When adding a panel using **Add from library**, the interface now shows a success message and scrolls the dashboard to the added panel [#220122](https://github.com/elastic/kibana/pull/220122).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.0.2 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.0.2 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+
+
 ## 9.0.1 [kibana-9.0.1-release-notes]
 
 ::::{important}

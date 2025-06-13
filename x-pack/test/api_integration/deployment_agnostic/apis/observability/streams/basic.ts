@@ -6,8 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { Streams } from '@kbn/streams-schema';
+import { FieldDefinition, Streams } from '@kbn/streams-schema';
 import { MAX_PRIORITY } from '@kbn/streams-plugin/server/lib/streams/index_templates/generate_index_template';
+import { InheritedFieldDefinition } from '@kbn/streams-schema/src/fields';
+import { get, omit } from 'lodash';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
@@ -515,6 +517,24 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
+    async function expectFields(streams: string[], expectedFields: InheritedFieldDefinition) {
+      const definitions = await Promise.all(streams.map((stream) => getStream(apiClient, stream)));
+      for (const definition of definitions) {
+        const inherited = Streams.WiredStream.GetResponse.parse(definition).inherited_fields;
+        for (const [field, config] of Object.entries(expectedFields)) {
+          expect(inherited[field]).to.eql(config);
+        }
+      }
+
+      const mappingsResponse = await esClient.indices.getMapping({ index: streams });
+      for (const { mappings } of Object.values(mappingsResponse)) {
+        for (const [field, config] of Object.entries(expectedFields)) {
+          const fieldPath = field.split('.').join('.properties.');
+          expect(get(mappings.properties, fieldPath)).to.eql(omit(config, ['from']));
+        }
+      }
+    }
+
     describe('Basic setup', () => {
       before(async () => {
         await enableStreams(apiClient);
@@ -522,6 +542,45 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       after(async () => {
         await disableStreams(apiClient);
+      });
+
+      it('inherit fields', async () => {
+        const fields: FieldDefinition = {
+          'attributes.foo': { type: 'keyword' },
+          'attributes.bar': { type: 'long' },
+        };
+        await putStream(apiClient, 'logs.one', {
+          dashboards: [],
+          queries: [],
+          stream: {
+            description: '',
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: [],
+              wired: { fields, routing: [] },
+            },
+          },
+        });
+
+        await putStream(apiClient, 'logs.one.two.three', {
+          dashboards: [],
+          queries: [],
+          stream: {
+            description: '',
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: [],
+              wired: { fields: {}, routing: [] },
+            },
+          },
+        });
+
+        const inheritedFields = Object.entries(fields).reduce((acc, field) => {
+          acc[field[0]] = { ...field[1], from: 'logs.one' };
+          return acc;
+        }, {} as InheritedFieldDefinition);
+
+        await expectFields(['logs.one.two', 'logs.one.two.three'], inheritedFields);
       });
 
       it('fails to create a stream if an existing template takes precedence', async () => {
@@ -543,10 +602,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ingest: {
                 lifecycle: { inherit: {} },
                 processing: [],
-                wired: {
-                  fields: {},
-                  routing: [],
-                },
+                wired: { fields: {}, routing: [] },
               },
             },
           },
