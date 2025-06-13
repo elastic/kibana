@@ -6,7 +6,6 @@
  */
 
 import { z } from '@kbn/zod';
-import { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
   arrayOfStringsSchema,
   keyMetricSchema,
@@ -65,7 +64,6 @@ export const entityDefinitionSchema = z.object({
       })
     )
   ),
-  customIngestProcessors: z.optional(z.array(z.custom<IngestProcessorContainer>())),
 });
 
 export const entityDefinitionUpdateSchema = entityDefinitionSchema

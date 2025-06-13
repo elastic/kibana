@@ -18,26 +18,4 @@ describe('generateLatestProcessors(definition)', () => {
     const processors = generateLatestProcessors(builtInEntityDefinition);
     expect(processors).toMatchSnapshot();
   });
-
-  it('should apply custom processors when customIngestProcessors is defined', () => {
-    const customDefinition = {
-      ...entityDefinition,
-      customIngestProcessors: [
-        {
-          set: {
-            field: 'customField',
-            value: 'customValue',
-          },
-        },
-      ],
-    };
-
-    const processors = generateLatestProcessors(customDefinition);
-    expect(processors).toContainEqual({
-      set: {
-        field: 'customField',
-        value: 'customValue',
-      },
-    });
-  });
 });

@@ -186,7 +186,6 @@ export function generateLatestProcessors(definition: EntityDefinition): IngestPr
         value: `${generateLatestIndexName(definition)}`,
       },
     },
-    ...(definition.customIngestProcessors ?? []),
     ...getCustomIngestPipelines(definition),
   ];
 }
