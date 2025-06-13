@@ -118,33 +118,37 @@ export const transformAndDeleteLegacyActions: TransformAndDeleteLegacyActions = 
         throw new Error('Failed to find rule reference on legacy action Saved Object');
       }
 
-      const ruleId = ruleReference.id;
-      if (
-        savedObject.attributes.ruleThrottle !== 'no_actions' &&
-        savedObject.attributes.ruleThrottle !== 'rule'
-      ) {
-        const transformedActions = transformFromLegacyActions(
-          savedObject.attributes,
-          savedObject.references
-        );
-        const transformedReferences = savedObject.references.filter(
-          ({ type }) => type === 'action'
-        );
+      // ruleThrottle can have special values 'no_actions' or 'rule', or a duration like e.g. '1h'
+      // 'rule' means actions fire each time the rule runs, whereas a duration means the actions are
+      // throttled to only fire once per the specified time duration
+      const hasNoThrottledActions =
+        savedObject.attributes.ruleThrottle === 'no_actions' ||
+        savedObject.attributes.ruleThrottle === 'rule';
 
-        if (!skipActionsValidation) {
-          const rule = rules.find((r) => r.id === ruleId);
-          if (rule == null) {
-            throw new Error(`Failed to find rule id: ${ruleId} for validating migrated actions`);
-          }
-          await validateTransformedActions({
-            context,
-            actions: transformedActions,
-            actionsReferences: transformedReferences,
-            rule,
-          });
-        }
-        transformedActionsByRuleId[ruleId] = { transformedActions, transformedReferences };
+      if (hasNoThrottledActions) {
+        return;
       }
+
+      const ruleId = ruleReference.id;
+      const transformedActions = transformFromLegacyActions(
+        savedObject.attributes,
+        savedObject.references
+      );
+      const transformedReferences = savedObject.references.filter(({ type }) => type === 'action');
+
+      if (!skipActionsValidation) {
+        const rule = rules.find((r) => r.id === ruleId);
+        if (rule == null) {
+          throw new Error(`Failed to find rule id: ${ruleId} for validating migrated actions`);
+        }
+        await validateTransformedActions({
+          context,
+          actions: transformedActions,
+          actionsReferences: transformedReferences,
+          rule,
+        });
+      }
+      transformedActionsByRuleId[ruleId] = { transformedActions, transformedReferences };
     });
 
     await deleteLegacyActions();
