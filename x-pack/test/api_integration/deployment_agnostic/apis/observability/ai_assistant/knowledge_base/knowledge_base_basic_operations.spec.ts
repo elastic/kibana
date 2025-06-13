@@ -77,7 +77,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       };
 
       before(async () => {
-        saveEntry(knowledgeBaseEntry);
+        await saveEntry(knowledgeBaseEntry);
       });
 
       it('can retrieve the entry', async () => {
@@ -112,7 +112,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         await clearKnowledgeBase(es);
 
-        saveEntry(knowledgeBaseEntry);
+        await saveEntry(knowledgeBaseEntry);
       });
 
       it('generates sparse embeddings', async () => {
