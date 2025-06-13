@@ -7,7 +7,6 @@
 
 import { EuiCheckbox, EuiFlexGroup, EuiFormRow, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
 import { ALERT_START, ALERT_UUID } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
@@ -27,7 +26,7 @@ import { AlertsFlyoutFooter } from '../../../../components/alerts_flyout/alerts_
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../../../../../common/constants';
 import { AlertsTableCellValue } from '../../../../components/alerts_table/common/cell_value';
 import { casesFeatureIdV2 } from '../../../../../common';
-import { useProximalFilterParam } from '../../hooks/use_proximal_filter_param';
+import { useFilterProximalParam } from '../../hooks/use_filter_proximal_param';
 
 interface Props {
   alertData: AlertData;
@@ -55,19 +54,17 @@ const RELATED_ALERTS_TABLE_ID = 'xpack.observability.alerts.relatedAlerts';
 
 export function RelatedAlertsTable({ alertData }: Props) {
   const { formatted: alert } = alertData;
-  const filterProximal = useProximalFilterParam();
+  const { filterProximal, setProximalFilterParam } = useFilterProximalParam();
   const esQuery = getBuildRelatedAlertsQuery({ alert, filterProximal });
   const { observabilityRuleTypeRegistry, config } = usePluginContext();
   const services = useKibana().services;
-  const history = useHistory();
-  const { search } = useLocation();
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiSpacer size="s" />
       <EuiPanel paddingSize="m" hasShadow={false} color="subdued">
-        <EuiFlexGroup direction="row" alignItems="flexStart">
-          <EuiText size="xs">
+        <EuiFlexGroup direction="row" alignItems="center" justifyContent="flexStart">
+          <EuiText size="s">
             <strong>
               {i18n.translate('xpack.observability.alerts.relatedAlerts.filtersLabel', {
                 defaultMessage: 'Filters',
@@ -84,9 +81,7 @@ export function RelatedAlertsTable({ alertData }: Props) {
               )}
               checked={filterProximal}
               onChange={(event) => {
-                const searchParams = new URLSearchParams(search);
-                searchParams.set('filterProximal', String(event.target.checked));
-                history.replace({ search: searchParams.toString() });
+                setProximalFilterParam(event.target.checked);
               }}
               id={'proximal-alerts-checkbox'}
               data-test-subj="proximal-alerts-checkbox"
