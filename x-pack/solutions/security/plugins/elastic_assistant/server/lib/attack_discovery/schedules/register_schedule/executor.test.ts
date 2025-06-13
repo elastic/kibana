@@ -412,7 +412,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     });
   });
 
-  it('should not report duplicate attack discoveries as alerts and should log the number of duplicates', async () => {
+  it('should not report duplicate attack discoveries as alerts', async () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
     (deduplicateAttackDiscoveries as jest.Mock).mockResolvedValue([]);
 
