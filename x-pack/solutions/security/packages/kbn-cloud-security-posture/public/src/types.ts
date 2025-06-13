@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
