@@ -39,7 +39,6 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
     timestampField,
     columns,
     height,
-    columns,
   } = props;
 
   const {

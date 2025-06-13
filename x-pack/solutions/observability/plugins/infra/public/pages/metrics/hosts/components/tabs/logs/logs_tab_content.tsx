@@ -56,6 +56,8 @@ export const LogsSavedSearchComponent = () => {
     [hostNodes]
   );
 
+  const memoizedTimeRange = useMemo(() => ({ from, to }), [from, to]);
+
   if (!hostNodes.length && !loading) {
     return <LogsTabNoResults />;
   }
@@ -64,7 +66,7 @@ export const LogsSavedSearchComponent = () => {
     <LazySavedSearchComponent
       dependencies={{ embeddable, searchSource, dataViews }}
       index={logSources.value}
-      timeRange={{ from, to }}
+      timeRange={memoizedTimeRange}
       query={hostsFilterQuery}
       height="60vh"
       displayOptions={{
