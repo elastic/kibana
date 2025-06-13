@@ -11,6 +11,8 @@ import { dedent } from '../lib/indent.mjs';
 import { cleanPaths } from '../lib/clean.mjs';
 import * as Bazel from '../lib/bazel.mjs';
 import { findPluginCleanPaths } from '../lib/find_clean_paths.mjs';
+import Path from 'path';
+import { REPO_ROOT } from '../lib/paths.mjs';
 
 /** @type {import('../lib/command').Command} */
 export const command = {
@@ -33,7 +35,10 @@ export const command = {
       you might need to run 'yarn kbn reset'.
     `);
 
-    await cleanPaths(log, await findPluginCleanPaths(log));
+    await cleanPaths(log, [
+      ...(await findPluginCleanPaths(log)),
+      Path.resolve(REPO_ROOT, '.es', 'cache'),
+    ]);
 
     // Runs Bazel soft clean
     if (await Bazel.isInstalled(log)) {
