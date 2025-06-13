@@ -27,6 +27,10 @@ export class ExportPageObject extends FtrService {
     return await this.testSubjects.exists('exportPopover');
   }
 
+  async popoverItemExists(label: string) {
+    return await this.testSubjects.exists(`exportMenuItem-${label}`);
+  }
+
   async isPopoverItemEnabled(label: string) {
     let isEnabled;
     if (!(isEnabled = await this.testSubjects.isEnabled(`exportMenuItem-${label}`))) {
