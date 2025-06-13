@@ -9,16 +9,14 @@
 
 import { UseEuiTheme } from '@elastic/eui';
 import { css, keyframes } from '@emotion/react';
+import { highlightAnimationDuration } from '../../dashboard_api/track_panel';
 
 const borderSpinKeyframes = keyframes({
   '0%': {
     '--highlight-rotate': '0deg',
     opacity: 0,
   },
-  '10%': {
-    opacity: 1,
-  },
-  '60%': {
+  '10%, 60%': {
     opacity: 1,
   },
   '100%': {
@@ -53,17 +51,13 @@ const shimmerKeyframes = keyframes({
     '--shimmer-position': '0%',
     opacity: 0.3,
   },
-  '35%': {
-    '--shimmer-position': '0%',
-    opacity: 0,
-  },
-  '100%': {
+  '35%, 100%': {
     '--shimmer-position': '0%',
     opacity: 0,
   },
 });
 
-export const highlightGlobalStyles = css`
+const highlightPropertyStyles = css`
   @property --shimmer-position {
     syntax: '<percentage>';
     inherits: false;
@@ -89,52 +83,55 @@ export const getHighlightStyles = (context: UseEuiTheme) => {
   const brightenInDarkMode = (brightness: number) =>
     context.colorMode === 'DARK' ? `brightness(${brightness})` : '';
 
-  return css({
-    '&.dshDashboardGrid__item--highlighted .embPanel': {
-      position: 'relative',
-      overflow: 'visible !important',
-      outline: 'none !important',
+  return css([
+    highlightPropertyStyles,
+    {
+      '&.dshDashboardGrid__item--highlighted .embPanel': {
+        position: 'relative',
+        overflow: 'visible !important',
+        outline: 'none !important',
+      },
+      '&.dshDashboardGrid__item--highlighted .embPanel::before': {
+        content: `""`,
+        opacity: 0,
+        position: 'absolute',
+        left: '-2.5px',
+        top: '-2.5px',
+        'z-index': -1,
+        width: 'calc(100% + 5px)',
+        height: 'calc(100% + 5px)',
+        'background-image': rotatingGradient,
+        filter: brightenInDarkMode(1.5),
+        'border-radius': euiTheme.border.radius.small,
+        animation: `${borderSpinKeyframes} ${highlightAnimationDuration}ms ease-out`,
+      },
+      '&.dshDashboardGrid__item--highlighted .embPanel::after': {
+        content: `""`,
+        opacity: 0,
+        position: 'absolute',
+        left: '-10px',
+        top: '-10px',
+        'z-index': -2,
+        width: 'calc(100% + 20px)',
+        height: 'calc(100% + 20px)',
+        'background-image': rotatingGradient,
+        filter: `${brightenInDarkMode(1.3)} blur(25px)`,
+        animation: `${shineKeyframes} ${highlightAnimationDuration}ms ease-out`,
+      },
+      '&.dshDashboardGrid__item--highlighted .embPanel__content::before': {
+        content: `""`,
+        'z-index': euiTheme.levels.mask,
+        opacity: 0,
+        width: '100%',
+        height: '100%',
+        position: 'absolute',
+        'pointer-events': 'none',
+        filter: brightenInDarkMode(1.75),
+        'background-image': shimmerGradient,
+        animation: `${shimmerKeyframes} ${highlightAnimationDuration}ms linear`,
+        'background-size': '400%',
+        'background-position': 'var(--shimmer-position) 0',
+      },
     },
-    '&.dshDashboardGrid__item--highlighted .embPanel::before': {
-      content: `""`,
-      opacity: 0,
-      position: 'absolute',
-      left: '-2.5px',
-      top: '-2.5px',
-      'z-index': -1,
-      width: 'calc(100% + 5px)',
-      height: 'calc(100% + 5px)',
-      'background-image': rotatingGradient,
-      filter: brightenInDarkMode(1.5),
-      'border-radius': `${euiTheme.border.radius.small}`,
-      animation: `${borderSpinKeyframes} 3s ease-out`,
-    },
-    '&.dshDashboardGrid__item--highlighted .embPanel::after': {
-      content: `""`,
-      opacity: 0,
-      position: 'absolute',
-      left: '-10px',
-      top: '-10px',
-      'z-index': -2,
-      width: 'calc(100% + 20px)',
-      height: 'calc(100% + 20px)',
-      'background-image': rotatingGradient,
-      filter: `${brightenInDarkMode(1.3)} blur(25px)`,
-      animation: `${shineKeyframes} 3s ease-out`,
-    },
-    '&.dshDashboardGrid__item--highlighted .embPanel__content::before': {
-      content: `""`,
-      'z-index': euiTheme.levels.mask,
-      opacity: 0,
-      width: '100%',
-      height: '100%',
-      position: 'absolute',
-      'pointer-events': 'none',
-      filter: brightenInDarkMode(1.75),
-      'background-image': shimmerGradient,
-      animation: `${shimmerKeyframes} 3s linear`,
-      'background-size': '400%',
-      'background-position': 'var(--shimmer-position) 0',
-    },
-  });
+  ]);
 };

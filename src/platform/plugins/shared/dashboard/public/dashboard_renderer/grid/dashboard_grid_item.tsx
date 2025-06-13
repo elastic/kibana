@@ -8,7 +8,7 @@
  */
 
 import { EuiLoadingChart, UseEuiTheme } from '@elastic/eui';
-import { css, Global } from '@emotion/react';
+import { css } from '@emotion/react';
 import { useMemoizedStyles } from '@kbn/core/public';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
@@ -20,7 +20,7 @@ import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_inter
 import { presentationUtilService } from '../../services/kibana_services';
 import { printViewportVisStyles } from '../print_styles';
 import { DASHBOARD_MARGIN_SIZE } from './constants';
-import { getHighlightStyles, highlightGlobalStyles } from './highlight_styles';
+import { getHighlightStyles } from './highlight_styles';
 
 type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style' | 'children'>;
 
@@ -142,7 +142,6 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
 
     return (
       <>
-        <Global styles={highlightGlobalStyles} />
         <div
           css={[focusStyles, styles.item]}
           className={[classes, className].join(' ')}
