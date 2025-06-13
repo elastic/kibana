@@ -22,7 +22,7 @@ export interface ElasticAssistantPublicPluginSetupDependencies {
 export interface ElasticAssistantPublicPluginStartDependencies {
   licensing: LicensingPluginStart;
   triggersActionsUi: TriggersActionsStart;
-  spaces?: SpacesPluginStart;
+  spaces: SpacesPluginStart;
   security: SecurityPluginStart;
   productDocBase: ProductDocBasePluginStart;
   discover: DiscoverStart;

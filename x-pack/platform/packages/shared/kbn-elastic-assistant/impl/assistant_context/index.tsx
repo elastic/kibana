@@ -59,6 +59,7 @@ type ShowAssistantOverlay = ({
   promptContextId,
   selectedConversation,
 }: ShowAssistantOverlayProps) => void;
+
 export interface AssistantProviderProps {
   actionTypeRegistry: ActionTypeRegistryContract;
   alertsIndexPattern?: string;
@@ -71,7 +72,6 @@ export interface AssistantProviderProps {
   basePath: string;
   basePromptContexts?: PromptContextTemplate[];
   docLinks: Omit<DocLinksStart, 'links'>;
-  children: React.ReactNode;
   getComments: GetAssistantMessages;
   http: HttpSetup;
   inferenceEnabled?: boolean;
@@ -142,36 +142,47 @@ export interface UseAssistantContext {
 
 const AssistantContext = React.createContext<UseAssistantContext | undefined>(undefined);
 
-export const AssistantProvider: React.FC<AssistantProviderProps> = ({
-  actionTypeRegistry,
-  alertsIndexPattern,
-  assistantAvailability,
-  assistantTelemetry,
-  augmentMessageCodeBlocks,
-  docLinks,
-  basePath,
-  basePromptContexts = [],
-  children,
-  getComments,
-  http,
-  inferenceEnabled = false,
-  navigateToApp,
-  nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
-  productDocBase,
-  title = DEFAULT_ASSISTANT_TITLE,
-  toasts,
-  currentAppId,
-  userProfileService,
-  chrome,
-}) => {
-  /**
-   * Session storage for traceOptions, including APM URL and LangSmith Project/API Key
-   */
+export const useAssistantContext = () => {
+  const context = React.useContext(AssistantContext);
+
+  if (context == null) {
+    throw new Error('useAssistantContext must be used within a AssistantProvider');
+  }
+
+  return context;
+};
+
+
+
+export const useAssistantContextValue = (props: AssistantProviderProps): UseAssistantContext => {
+  const {
+    actionTypeRegistry,
+    alertsIndexPattern,
+    assistantAvailability,
+    assistantTelemetry,
+    augmentMessageCodeBlocks,
+    docLinks,
+    basePath,
+    basePromptContexts = [],
+    getComments,
+    http,
+    inferenceEnabled = false,
+    navigateToApp,
+    nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
+    productDocBase,
+    title = DEFAULT_ASSISTANT_TITLE,
+    toasts,
+    currentAppId,
+    userProfileService,
+    chrome,
+  } = props;
+
   const defaultTraceOptions: TraceOptions = {
     apmUrl: `${http.basePath.serverBasePath}/app/apm`,
     langSmithProject: '',
     langSmithApiKey: '',
   };
+
   const [sessionStorageTraceOptions = defaultTraceOptions, setSessionStorageTraceOptions] =
     useSessionStorage<TraceOptions>(
       `${nameSpace}.${TRACE_OPTIONS_SESSION_STORAGE_KEY}`,
@@ -249,7 +260,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   /**
    * Global Assistant Overlay actions
    */
-  const [showAssistantOverlay, setShowAssistantOverlay] = useState<ShowAssistantOverlay>(() => {});
+  const [showAssistantOverlay, setShowAssistantOverlay] = useState<ShowAssistantOverlay>(() => { });
 
   /**
    * Current User Avatar
@@ -275,7 +286,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   /**
    * Setting code block ref that can be used to store callback from parent components
    */
-  const codeBlockRef = useRef(() => {});
+  const codeBlockRef = useRef(() => { });
 
   // Fetch assistant capabilities
   const { data: assistantFeatures } = useCapabilities({ http, toasts });
@@ -371,19 +382,20 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     ]
   );
 
-  return (
-    <AssistantContext.Provider value={value}>
-      {children}
-    </AssistantContext.Provider>
-  );
-};
+  return value
 
-export const useAssistantContext = () => {
-  const context = React.useContext(AssistantContext);
+}
 
-  if (context == null) {
-    throw new Error('useAssistantContext must be used within a AssistantProvider');
-  }
-
-  return context;
-};
+export const AssistantProvider: React.FC<{
+  children: React.ReactNode;
+  value: ReturnType<typeof useAssistantContextValue>;
+}> = ({
+  children,
+  value,
+}) => {
+    return (
+      <AssistantContext.Provider value={value}>
+        {children}
+      </AssistantContext.Provider>
+    );
+  };

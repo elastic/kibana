@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import React from 'react'
 import { ElasticAssistantPublicPluginSetupDependencies, ElasticAssistantPublicPluginStartDependencies, StartServices } from './types';
 import { I18nProvider } from '@kbn/i18n-react';
-import { AssistantOverlay, AssistantSpaceIdProvider } from '@kbn/elastic-assistant';
+import { AssistantOverlay } from '@kbn/elastic-assistant';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EuiThemeProvider } from './src/context/eui_them_context/eui_them_provider';
 import { AssistantProvider } from './src/context/assistant_context/assistant_provider';
@@ -11,6 +11,7 @@ import { KibanaContextProvider } from './src/context/typed_kibana_context/typed_
 import { AssistantNavLink } from '@kbn/elastic-assistant/impl/assistant_context/assistant_nav_link';
 import { licenseService } from './src/hooks/licence/use_licence';
 import { ReactQueryClientProvider } from './src/context/query_client_context/elastic_assistant_query_client_provider';
+import { AssistantSpaceIdProvider } from './src/context/assistant_space_id/assistant_space_id_provider';
 
 export type ElasticAssistantPublicPluginSetup = ReturnType<ElasticAssistantPublicPlugin['setup']>;
 export type ElasticAssistantPublicPluginStart = ReturnType<ElasticAssistantPublicPlugin['start']>;
@@ -49,6 +50,7 @@ export class ElasticAssistantPublicPlugin implements Plugin<
         productDocBase: dependencies.productDocBase,
         storage: this.storage,
         discover: dependencies.discover,
+        spaces: dependencies.spaces,
         elasticAssistantSharedState: dependencies.elasticAssistantSharedState,
       };
       return services;
@@ -83,7 +85,7 @@ export class ElasticAssistantPublicPlugin implements Plugin<
         >
           <EuiThemeProvider>
             <ReactQueryClientProvider>
-              <AssistantSpaceIdProvider spaceId={"spaceId"}>
+              <AssistantSpaceIdProvider>
                 <AssistantProvider>
                   <>
                     <AssistantNavLink />
