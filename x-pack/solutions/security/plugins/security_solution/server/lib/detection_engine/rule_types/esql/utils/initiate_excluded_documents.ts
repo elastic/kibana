@@ -13,15 +13,20 @@ export const initiateExcludedDocuments = ({
   isRuleAggregating,
   tuple,
   hasMvExpand,
+  query,
 }: {
   state: EsqlState | undefined;
   isRuleAggregating: boolean;
   tuple: RuleRangeTuple;
   hasMvExpand: boolean;
+  query?: string;
 }): ExcludedDocument[] => {
-  // exclude ids from store if mv_expand used. It's done because mv_expand can produce multiple alerts from a single document and from different expanded fields or its combination
-  // so if we put document id in state to exclude it from runs, we won't be able to create alerts if user changes query
-  if (isRuleAggregating || !state?.excludedDocuments || hasMvExpand) {
+  // exclude ids from store if mv_expand used and query has changed. this would allow to create alerts from changed mv_expand queries
+  if (
+    isRuleAggregating ||
+    !state?.excludedDocuments ||
+    (hasMvExpand && query !== state.lastQuery)
+  ) {
     return [];
   }
   return (

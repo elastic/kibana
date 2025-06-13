@@ -15,4 +15,5 @@ export interface ExcludedDocument {
 export interface EsqlState extends RuleTypeState {
   isLoggedRequestsEnabled?: boolean;
   excludedDocuments?: ExcludedDocument[];
+  lastQuery?: string;
 }

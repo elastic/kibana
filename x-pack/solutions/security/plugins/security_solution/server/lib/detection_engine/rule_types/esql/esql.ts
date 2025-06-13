@@ -106,6 +106,7 @@ export const esqlExecutor = async ({
       isRuleAggregating,
       tuple,
       hasMvExpand,
+      query: ruleParams.query,
     });
 
     let iteration = 0;
@@ -294,7 +295,11 @@ export const esqlExecutor = async ({
 
     return {
       ...result,
-      state: { ...state, excludedDocuments: hasMvExpand ? [] : excludedDocuments },
+      state: {
+        ...state,
+        excludedDocuments,
+        lastQuery: hasMvExpand ? ruleParams.query : undefined, // lastQuery is only relevant for mv_expand queries
+      },
       ...(isLoggedRequestsEnabled ? { loggedRequests } : {}),
     };
   });
