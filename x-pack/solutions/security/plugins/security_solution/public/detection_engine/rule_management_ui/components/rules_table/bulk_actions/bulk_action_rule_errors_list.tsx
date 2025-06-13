@@ -14,7 +14,10 @@ import {
   BulkActionTypeEnum,
   BulkActionsDryRunErrCodeEnum,
 } from '../../../../../../common/api/detection_engine/rule_management';
-
+import {
+  BULK_ACTION_SET_ALERT_SUPPRESSION,
+  BULK_ACTION_SET_ALERT_SUPPRESSION_FOR_THRESHOLD,
+} from '../../../../common/translations';
 import type { DryRunResult, BulkActionForConfirmation } from './types';
 import { usePrebuiltRuleCustomizationUpsellingMessage } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message';
 
@@ -89,8 +92,11 @@ const BulkEditRuleErrorItem = ({
         <li key={message}>
           <FormattedMessage
             id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.thresholdRuleInSuppressionDescription"
-            defaultMessage="{rulesCount, plural, =1 {# threshold rule} other {# threshold rules}} can't be edited with this alert suppression action. Please use dedicated to threshold rules action."
-            values={{ rulesCount }}
+            defaultMessage="{rulesCount, plural, =1 {# threshold rule} other {# threshold rules}} can't be edited. To add alert suppression to these rules, use the {actionStrong} option."
+            values={{
+              rulesCount,
+              actionStrong: <strong>{BULK_ACTION_SET_ALERT_SUPPRESSION_FOR_THRESHOLD}</strong>,
+            }}
           />
         </li>
       );
@@ -99,8 +105,11 @@ const BulkEditRuleErrorItem = ({
         <li key={message}>
           <FormattedMessage
             id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.unsupportedRulesInThresholdSuppressionDescription"
-            defaultMessage="{rulesCount, plural, =1 {# rule} other {# rules}} can't be edited with this alert suppression action. Please use Set alert suppression action."
-            values={{ rulesCount }}
+            defaultMessage="{rulesCount, plural, =1 {# rule} other {# rules}} can't be edited. To add alert suppression to these rules, use the {actionStrong} option."
+            values={{
+              rulesCount,
+              actionStrong: <strong>{BULK_ACTION_SET_ALERT_SUPPRESSION}</strong>,
+            }}
           />
         </li>
       );
