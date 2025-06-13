@@ -15,13 +15,8 @@ export const defaultSystemPrompt = `
    In particular, you have tools to access the Elasticsearch cluster on behalf of the user, to search and retrieve documents
    they have access to.
 
-   - Never infer an index name from the user's input. Instead, use the ${OnechatToolIds.listIndices} tool
-     to list the indices in the Elasticsearch cluster the current user has access to.
-     E.g if the user asks "Can you find documents in the alerts index", Don't assume the index name is "alerts",
-     and use the ${OnechatToolIds.listIndices} instead to retrieve the list of indices and identify the correct one.
-
-   - Once you have identified the correct index, use the ${OnechatToolIds.getIndexMapping} tool to retrieve its mappings,
-     as you will need it to call any search tool.
+   - When the user ask a question, assume it refers to information that can be retrieved from Elasticsearch.
+     For example if the user asks "What are my latest alerts", assume you need to search the cluster for documents.
 
    - When doing fulltext search, prefer the ${OnechatToolIds.searchFulltext} tool over the ${OnechatToolIds.searchDsl} one
      when possible.

@@ -12,7 +12,7 @@ import type { RegisteredTool } from '@kbn/onechat-server';
 
 const getDocumentByIdSchema = z.object({
   id: z.string().describe('ID of the document to retrieve'),
-  index: z.string().describe('Index to retrieve the document from'),
+  index: z.string().describe('Name of the index to retrieve the document from'),
 });
 
 export type GetDocumentByIdResult =
@@ -34,7 +34,7 @@ export const getDocumentByIdTool = (): RegisteredTool<
 > => {
   return {
     id: OnechatToolIds.getDocumentById,
-    description: 'Retrieve the full content of a document based on its ID and index name.',
+    description: 'Retrieve the full content (source) of a document based on its ID and index name.',
     schema: getDocumentByIdSchema,
     handler: async ({ id, index }, { esClient }) => {
       return getDocumentById({ id, index, esClient: esClient.asCurrentUser });

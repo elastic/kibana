@@ -13,3 +13,4 @@ export { searchDslTool } from './search_dsl';
 export { searchFulltextTool } from './search_fulltext';
 export { nlToEsqlTool } from './nl_to_esql';
 export { executeEsqlTool } from './execute_esql';
+export { indexExplorerTool } from './index_explorer';

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { BaseMessageLike } from '@langchain/core/messages';
 import { z } from '@kbn/zod';
 import { filter, toArray, firstValueFrom } from 'rxjs';
@@ -15,13 +16,20 @@ import { INLINE_ESQL_QUERY_REGEX } from '@kbn/inference-plugin/common/tasks/nl_t
 import type { RegisteredTool } from '@kbn/onechat-server';
 import { listIndices, ListIndexInfo } from './list_indices';
 import { getIndexMappings } from './get_index_mapping';
+import { indexExplorer } from './index_explorer';
 
 const nlToEsqlToolSchema = z.object({
   query: z.string().describe('The query to generate an ES|QL query from.'),
+  index: z
+    .string()
+    .optional()
+    .describe(
+      '(optional) Index to search against. If not provided, will use the index explorer to find the best index to use.'
+    ),
   context: z
     .string()
     .optional()
-    .describe('(optional) Additional context that can be used to generate the ES|QL query'),
+    .describe('(optional) Additional context that could be useful to generate the ES|QL query'),
 });
 
 export interface NlToEsqlResponse {
@@ -34,54 +42,49 @@ export const nlToEsqlTool = (): RegisteredTool<typeof nlToEsqlToolSchema, NlToEs
     id: OnechatToolIds.generateEsql,
     description: 'Generate an ES|QL query from a natural language query.',
     schema: nlToEsqlToolSchema,
-    handler: async ({ query, context }, { esClient, modelProvider }) => {
-      const { chatModel, inferenceClient } = await modelProvider.getDefaultModel();
-      const indexInfo = await listIndices({ esClient: esClient.asCurrentUser, pattern: '*' });
+    handler: async ({ query, index, context }, { esClient, modelProvider }) => {
+      const model = await modelProvider.getDefaultModel();
 
-      const indexSelectionModel = chatModel.withStructuredOutput(
-        z.object({
-          indices: z
-            .array(
-              z.object({
-                name: z.string().describe('name of the index'),
-                reason: z
-                  .string()
-                  .optional()
-                  .describe('(optional) reason why the index is relevant'),
-              })
-            )
-            .describe('the index, or indices, that should be used to generate the ES|QL query'),
-        })
-      );
+      let selectedIndex = index;
+      let mappings: MappingTypeMapping;
 
-      const { indices: selectedIndices } = await indexSelectionModel.invoke(
-        getIndexSelectionPrompt({ query, context, indices: indexInfo })
-      );
-
-      const indexMappings = await getIndexMappings({
-        indices: selectedIndices.map((index) => {
-          return index.name;
-        }),
-        esClient: esClient.asCurrentUser,
-      });
-
-      // console.log('selectedIndices: ', selectedIndices);
-      // console.log('indexMappings: ', indexMappings);
+      if (index) {
+        selectedIndex = index;
+        const indexMappings = await getIndexMappings({
+          indices: [index],
+          esClient: esClient.asCurrentUser,
+        });
+        mappings = indexMappings[index].mappings;
+      } else {
+        const {
+          indices: [firstIndex],
+        } = await indexExplorer({
+          query,
+          esClient: esClient.asCurrentUser,
+          limit: 1,
+          model,
+        });
+        selectedIndex = firstIndex.indexName;
+        mappings = firstIndex.mappings;
+      }
 
       const esqlEvents$ = naturalLanguageToEsql({
         // @ts-expect-error using a scoped inference client
         connectorId: undefined,
-        client: inferenceClient,
+        client: model.inferenceClient,
         logger: { debug: () => undefined },
         input: `
-        Generate an ES|QL query for the following:
+        Your task is to generate an ES|QL query.
 
-        *User query*: ${query},
-        *Additional context*"${context}
+        - User query: "${query}",
+        - Additional context: "${context ?? 'N/A'}
+        - Index to use: "${selectedIndex}"
+        - Mapping of this index:
+        \`\`\`json
+        ${JSON.stringify(mappings, undefined, 2)}
+        \`\`\`
 
-        *Indices: ${selectedIndices}*
-
-        *Index mappings: ${indexMappings}*
+        Given those info, please generate an ES|QL query to address the user request
         `,
       });
 
@@ -105,46 +108,6 @@ export const nlToEsqlTool = (): RegisteredTool<typeof nlToEsqlToolSchema, NlToEs
       tags: [OnechatToolTags.retrieval],
     },
   };
-};
-
-export const getIndexSelectionPrompt = ({
-  query,
-  context,
-  indices,
-}: {
-  query: string;
-  context?: string;
-  indices: ListIndexInfo[];
-}): BaseMessageLike[] => {
-  const resultEntry = (document: ListIndexInfo): string => {
-    return `
-    - **${document.index}**
-    `;
-  };
-
-  return [
-    [
-      'system',
-      `
-      ## Current task: Index identification
-
-      Given a user query and additional context, identify the relevant indices that should be searched
-      for documents that contain relevant information for the user query.`,
-    ],
-    [
-      'human',
-      `
-    ## Input
-
-    **Search Query:**: "${query}"
-    **Additional context:**: "${context ?? 'N/A'}"
-
-    ## List of indices
-
-    ${indices.map(resultEntry).join('\n')}
-    `,
-    ],
-  ];
 };
 
 const extractEsqlQueries = (message: string): string[] => {

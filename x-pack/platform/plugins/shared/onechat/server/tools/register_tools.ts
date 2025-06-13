@@ -16,20 +16,22 @@ import {
   rerankDocumentsTool,
   nlToEsqlTool,
   executeEsqlTool,
+  indexExplorerTool,
 } from './retrieval';
 import { researcherTool } from '../services/agents/research';
 
 export const registerTools = ({ tools: registry }: { tools: ToolsServiceSetup }) => {
   const tools: Array<RegisteredTool<any, any>> = [
-    listIndicesTool(),
-    getIndexMappingsTool(),
+    // listIndicesTool(),
+    // getIndexMappingsTool(),
     getDocumentByIdTool(),
     searchFulltextTool(),
-    searchDslTool(),
-    rerankDocumentsTool(),
+    // searchDslTool(),
+    // rerankDocumentsTool(),
     nlToEsqlTool(),
     executeEsqlTool(),
     researcherTool(),
+    indexExplorerTool(),
   ];
 
   tools.forEach((tool) => {
