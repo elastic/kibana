@@ -75,7 +75,7 @@ export interface GetCloudConnectorRemoteRoleTemplateParams {
   input: NewPackagePolicyPostureInput;
   cloud: Pick<
     CloudStart,
-    'isCloudEnabled' | 'kibanaUrl' | 'deploymentUrl' | 'serverless' | 'isServerlessEnabled'
+    'isCloudEnabled' | 'cloudHost' | 'deploymentUrl' | 'serverless' | 'isServerlessEnabled'
   >;
   packageInfo: PackageInfo;
 }
@@ -491,11 +491,11 @@ export const isCloudConnectorsEnabled = (
   return isAgentless && credentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS;
 };
 
-export const getCloudProviderFromKibanaUrl = (
-  kibanaUrl: string | undefined
+export const getCloudProviderFromCloudHost = (
+  cloudHost: string | undefined
 ): string | undefined => {
-  if (!kibanaUrl) return undefined;
-  const match = kibanaUrl.match(/\.(aws|gcp|azure)\./)?.[1];
+  if (!cloudHost) return undefined;
+  const match = cloudHost.match(/\.(aws|gcp|azure)\./)?.[1];
   return match;
 };
 
@@ -512,7 +512,7 @@ export const getCloudConnectorRemoteRoleTemplate = ({
 }: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
   const accountType = input?.streams?.[0]?.vars?.['aws.account_type']?.value ?? AWS_SINGLE_ACCOUNT;
 
-  const provider = getCloudProviderFromKibanaUrl(cloud?.kibanaUrl);
+  const provider = getCloudProviderFromCloudHost(cloud?.cloudHost);
   if (!provider || provider !== 'aws') return undefined;
 
   const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
