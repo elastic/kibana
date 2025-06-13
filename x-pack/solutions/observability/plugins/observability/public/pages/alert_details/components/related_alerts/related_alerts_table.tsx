@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { EuiCheckbox, EuiFlexGroup, EuiFormRow, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { ALERT_START, ALERT_UUID } from '@kbn/rule-data-utils';
-import { i18n } from '@kbn/i18n';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import { getRelatedColumns } from './get_related_columns';
@@ -27,6 +26,7 @@ import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../
 import { AlertsTableCellValue } from '../../../../components/alerts_table/common/cell_value';
 import { casesFeatureIdV2 } from '../../../../../common';
 import { useFilterProximalParam } from '../../hooks/use_filter_proximal_param';
+import { RelatedAlertsTableFilter } from './related_alerts_table_filter';
 
 interface Props {
   alertData: AlertData;
@@ -54,7 +54,7 @@ const RELATED_ALERTS_TABLE_ID = 'xpack.observability.alerts.relatedAlerts';
 
 export function RelatedAlertsTable({ alertData }: Props) {
   const { formatted: alert } = alertData;
-  const { filterProximal, setProximalFilterParam } = useFilterProximalParam();
+  const { filterProximal } = useFilterProximalParam();
   const esQuery = getBuildRelatedAlertsQuery({ alert, filterProximal });
   const { observabilityRuleTypeRegistry, config } = usePluginContext();
   const services = useKibana().services;
@@ -62,33 +62,7 @@ export function RelatedAlertsTable({ alertData }: Props) {
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiSpacer size="s" />
-      <EuiPanel paddingSize="m" hasShadow={false} color="subdued">
-        <EuiFlexGroup direction="row" alignItems="center" justifyContent="flexStart">
-          <EuiText size="s">
-            <strong>
-              {i18n.translate('xpack.observability.alerts.relatedAlerts.filtersLabel', {
-                defaultMessage: 'Filters',
-              })}
-            </strong>
-          </EuiText>
-          <EuiFormRow fullWidth>
-            <EuiCheckbox
-              label={i18n.translate(
-                'xpack.observability.alerts.relatedAlerts.proximityCheckboxLabel',
-                {
-                  defaultMessage: 'Triggered around the same time',
-                }
-              )}
-              checked={filterProximal}
-              onChange={(event) => {
-                setProximalFilterParam(event.target.checked);
-              }}
-              id={'proximal-alerts-checkbox'}
-              data-test-subj="proximal-alerts-checkbox"
-            />
-          </EuiFormRow>
-        </EuiFlexGroup>
-      </EuiPanel>
+      <RelatedAlertsTableFilter />
       <AlertsTable<ObservabilityAlertsTableContext>
         id={RELATED_ALERTS_TABLE_ID}
         query={esQuery}
