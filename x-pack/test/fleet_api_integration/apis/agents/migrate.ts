@@ -224,7 +224,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     // Bulk migrate agents
-    describe.only('POST /agents/bulk_migrate', () => {
+    describe('POST /agents/bulk_migrate', () => {
       it('should return a 200 if the migration action is successful', async () => {
         const {} = await supertest
           .post(`/api/fleet/agents/bulk_migrate`)
