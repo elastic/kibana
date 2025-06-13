@@ -10,7 +10,6 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import type { AlertingAuthorization } from '../authorization';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
-import { fieldsToExcludeFromPublicApi } from './rules_client';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import {
   savedObjectsClientMock,
@@ -22,6 +21,7 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { alertingAuthorizationMock } from '../authorization/alerting_authorization.mock';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
+import { fieldsToExcludeFromPublicApi } from './rules_client';
 import type { RulesClientContext } from './types';
 
 const create = () => {

@@ -205,23 +205,36 @@ export const denormalizeInterval = (interval: Interval): StringInterval => {
 };
 
 /**
- * Clips an interval to ensure it falls within the given boundary range.
- * If there's no overlap, returns null.
+ * Conveninence function that clips an `Interval` given an `Interval` boundary
  */
 export const clipInterval = (interval: Interval, boundary: Interval): Interval | null => {
-  const gte = interval.gte.getTime();
-  const lte = interval.lte.getTime();
-  const boundaryGte = boundary.gte.getTime();
-  const boundaryLte = boundary.lte.getTime();
+  const clipped = clipDateInterval(interval.gte, interval.lte, boundary.gte, boundary.lte);
 
-  const clippedGte = Math.max(gte, boundaryGte);
-  const clippedLte = Math.min(lte, boundaryLte);
-
-  if (clippedGte >= clippedLte) {
+  if (clipped === null) {
     return null;
   }
 
-  return { gte: new Date(clippedGte), lte: new Date(clippedLte) };
+  return { gte: clipped.start, lte: clipped.end };
+};
+
+/**
+ * Clips an date interval to ensure it falls within the given boundary range.
+ * If there's no overlap, returns null.
+ */
+export const clipDateInterval = (
+  start: Date,
+  end: Date,
+  boundaryStart: Date,
+  boundaryEnd: Date
+) => {
+  const clippedStart = Math.max(start.getTime(), boundaryStart.getTime());
+  const clippedEnd = Math.min(end.getTime(), boundaryEnd.getTime());
+
+  if (clippedStart >= clippedEnd) {
+    return null;
+  }
+
+  return { start: new Date(clippedStart), end: new Date(clippedEnd) };
 };
 
 /**

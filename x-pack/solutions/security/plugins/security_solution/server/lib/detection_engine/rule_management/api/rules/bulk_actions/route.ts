@@ -198,7 +198,6 @@ export const performBulkActionRoute = (
             rulesClient,
             query,
             ids: body.ids,
-            abortSignal: abortController.signal,
             maxRules:
               body.action === BulkActionTypeEnum.edit
                 ? MAX_RULES_TO_BULK_EDIT

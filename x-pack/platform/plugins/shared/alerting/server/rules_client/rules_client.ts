@@ -23,7 +23,9 @@ import { snoozeRule } from '../application/rule/methods/snooze';
 import type { UnsnoozeParams } from '../application/rule/methods/unsnooze';
 import { unsnoozeRule } from '../application/rule/methods/unsnooze';
 import type { GetRuleParams } from '../application/rule/methods/get';
+import type { BulkGetRulesParams } from '../application/rule/methods/bulk_get';
 import { getRule } from '../application/rule/methods/get';
+import { bulkGetRules } from '../application/rule/methods/bulk_get';
 import type { ResolveParams } from '../application/rule/methods/resolve';
 import { resolveRule } from '../application/rule/methods/resolve';
 import type { GetAlertStateParams } from './methods/get_alert_state';
@@ -172,6 +174,8 @@ export class RulesClient {
   public getActionErrorLogWithAuth = (params: GetActionErrorLogByIdParams) =>
     getActionErrorLogWithAuth(this.context, params);
 
+  public bulkGetRules = <Params extends RuleTypeParams = never>(params: BulkGetRulesParams) =>
+    bulkGetRules<Params>(this.context, params);
   public bulkDeleteRules = (options: BulkDeleteRulesRequestBody) =>
     bulkDeleteRules(this.context, options);
   public bulkEdit = <Params extends RuleTypeParams>(options: BulkEditOptions<Params>) =>

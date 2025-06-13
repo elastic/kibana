@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export interface StackConnectorsConfigType {
-  enableExperimental: string[];
-}
+import type { AlertsFieldMap8190 } from './alerts';
+import { alertsFieldMap8190 } from './alerts';
+export type { AlertsFieldMap8190 };
+export { alertsFieldMap8190 };
