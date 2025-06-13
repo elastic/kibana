@@ -94,7 +94,8 @@ function getMockedSoClient(options?: { id?: string; findHosts?: boolean; findSet
     }
 
     if (
-      [LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE].includes(type)
+      type === LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE ||
+      type === PACKAGE_POLICY_SAVED_OBJECT_TYPE
     ) {
       return {
         saved_objects: [
