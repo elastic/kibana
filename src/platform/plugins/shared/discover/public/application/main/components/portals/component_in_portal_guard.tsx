@@ -19,6 +19,7 @@ import {
 } from '../../state_management/redux';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
+import { ScopedProfilesManagerProvider } from '../../../../context_awareness';
 
 interface CommonProps {
   stateContainer: DiscoverStateContainer;
@@ -39,6 +40,9 @@ export function ComponentInPortalGuard<ComponentProps>({
 }: ComponentInPortalGuardProps<ComponentProps>) {
   const isSelected = useInternalStateSelector((state) => state.tabs.unsafeCurrentId === tabId);
   const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+  const currentScopedProfilesManager = useRuntimeState(
+    currentTabRuntimeState.scopedProfilesManager$
+  );
   const currentCustomizationService = useRuntimeState(currentTabRuntimeState.customizationService$);
   const currentStateContainer = useRuntimeState(currentTabRuntimeState.stateContainer$);
   const currentDataView = useRuntimeState(currentTabRuntimeState.currentDataView$);
@@ -62,10 +66,12 @@ export function ComponentInPortalGuard<ComponentProps>({
       <DiscoverCustomizationProvider value={currentCustomizationService}>
         <DiscoverMainProvider value={currentStateContainer}>
           <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
-            <Component
-              {...(componentProps as ComponentProps)}
-              stateContainer={currentStateContainer}
-            />
+            <ScopedProfilesManagerProvider scopedProfilesManager={currentScopedProfilesManager}>
+              <Component
+                {...(componentProps as ComponentProps)}
+                stateContainer={currentStateContainer}
+              />
+            </ScopedProfilesManagerProvider>
           </RuntimeStateProvider>
         </DiscoverMainProvider>
       </DiscoverCustomizationProvider>

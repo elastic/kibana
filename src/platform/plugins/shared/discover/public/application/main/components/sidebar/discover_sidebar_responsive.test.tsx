@@ -9,16 +9,14 @@
 
 import { render, screen, act as rtlAct } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { BehaviorSubject } from 'rxjs';
 import type { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { EuiProgress, EuiProvider } from '@elastic/eui';
+import { EuiProgress } from '@elastic/eui';
 import { getDataTableRecords, realHits } from '../../../../__fixtures__/real_hits';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { DiscoverSidebarResponsive } from './discover_sidebar_responsive';
 import type { DiscoverServices } from '../../../../build_services';
@@ -26,7 +24,6 @@ import type { SidebarToggleState } from '../../../types';
 import { FetchStatus } from '../../../types';
 import type { DataDocuments$ } from '../../state_management/discover_data_state_container';
 import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import * as ExistingFieldsServiceApi from '@kbn/unified-field-list/src/services/field_existing/load_field_existing';
 import { resetExistingFieldsCache } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
@@ -36,13 +33,8 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 import type { FieldListCustomization, SearchBarCustomization } from '../../../../customizations';
-import {
-  internalStateActions,
-  InternalStateProvider,
-  RuntimeStateProvider,
-} from '../../state_management/redux';
-import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
-import { TabsPortalsRenderer } from '../portals';
+import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 type TestWrapperProps = DiscoverSidebarResponsiveProps & { selectedDataView: DataView };
 
@@ -230,23 +222,20 @@ async function mountComponent<WithReactTestingLibrary extends boolean = false>(
     .mockImplementation(() => props.stateContainer.appState.getState());
 
   const component = (
-    <EuiProvider>
-      <KibanaContextProvider services={mockedServices}>
-        <InternalStateProvider store={props.stateContainer.internalState}>
-          <TabsPortalsRenderer runtimeStateManager={props.stateContainer.runtimeStateManager}>
-            <DiscoverMainProvider value={props.stateContainer}>
-              <RuntimeStateProvider currentDataView={selectedDataView} adHocDataViews={[]}>
-                <DiscoverSidebarResponsive {...props} />{' '}
-              </RuntimeStateProvider>
-            </DiscoverMainProvider>
-          </TabsPortalsRenderer>
-        </InternalStateProvider>
-      </KibanaContextProvider>
-    </EuiProvider>
+    <DiscoverTestProvider
+      services={mockedServices}
+      stateContainer={stateContainer}
+      runtimeState={{
+        currentDataView: selectedDataView!,
+        adHocDataViews: [],
+      }}
+    >
+      <DiscoverSidebarResponsive {...props} />
+    </DiscoverTestProvider>
   );
 
   if (withReactTestingLibrary) {
-    await rtlAct(() => render(<IntlProvider locale="en">{component}</IntlProvider>));
+    await rtlAct(() => render(component));
     return undefined as MountReturn<WithReactTestingLibrary>;
   }
 
