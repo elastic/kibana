@@ -60,7 +60,7 @@ describe('Proximal callout', () => {
     useFetchAlertDetailMock.mockReturnValue([false, alertDetail]);
     const callout = renderCallout(alertDetail);
     expect(callout.queryByTestId('see-proximal-alerts')).toBeTruthy();
-    fireEvent.click(callout.getByText('See more'));
+    fireEvent.click(callout.getByText('See related alerts'));
     expect(switchTabs).toHaveBeenCalled();
   });
 

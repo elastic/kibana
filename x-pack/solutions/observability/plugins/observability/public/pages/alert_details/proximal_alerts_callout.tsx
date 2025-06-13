@@ -30,7 +30,7 @@ export function ProximalAlertsCallout({ alertDetail, switchTabs }: Props) {
     <EuiCallOut>
       {i18n.translate('xpack.observability.alertDetails.proximalAlert.description', {
         defaultMessage:
-          '{count, plural, one {# alert was} other {# alerts were}} triggered around the same time.',
+          '{count, plural, one {# alert was} other {# alerts were}} created around the same time.',
         values: {
           count,
         },
@@ -43,7 +43,7 @@ export function ProximalAlertsCallout({ alertDetail, switchTabs }: Props) {
           onClick={() => switchTabs()}
         >
           {i18n.translate('xpack.observability.alertDetails.proximalAlert.action', {
-            defaultMessage: 'See more',
+            defaultMessage: 'See related alerts',
           })}{' '}
           <EuiIcon type={'arrowRight'} fontSize={'xs'} />
         </EuiLink>
