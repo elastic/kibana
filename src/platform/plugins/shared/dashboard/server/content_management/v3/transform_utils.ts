@@ -276,7 +276,6 @@ export function savedObjectToItem(
       error: null,
     };
   } catch (e) {
-    console.error(e);
     return { item: null, error: e };
   }
 }
