@@ -10,8 +10,5 @@ import { schema } from '@kbn/config-schema';
 import { casesSchema as casesSchemaV2 } from './v2';
 
 export const casesSchema = casesSchemaV2.extends({
-  in_progress_at: schema.maybe(schema.nullable(schema.string())),
-  time_to_acknowledge: schema.maybe(schema.nullable(schema.number())),
-  time_to_investigate: schema.maybe(schema.nullable(schema.number())),
-  time_to_resolve: schema.maybe(schema.nullable(schema.number())),
+  incremental_id: schema.maybe(schema.nullable(schema.number())),
 });

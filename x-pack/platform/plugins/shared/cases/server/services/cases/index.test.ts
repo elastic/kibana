@@ -238,6 +238,7 @@ describe('CasesService', () => {
                       "username": "elastic",
                     },
                   },
+                  "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
@@ -1694,6 +1695,7 @@ describe('CasesService', () => {
                       "username": "elastic",
                     },
                   },
+                  "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
@@ -2209,6 +2211,8 @@ describe('CasesService', () => {
       'category',
       'customFields',
       'observables',
+      'incremental_id',
+      'observables',
       'in_progress_at',
       'time_to_acknowledge',
       'time_to_resolve',
@@ -2312,6 +2316,7 @@ describe('CasesService', () => {
               "description": "This is a brand new case of a bad meanie defacing data",
               "duration": null,
               "external_service": null,
+              "incremental_id": undefined,
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
@@ -2415,6 +2420,7 @@ describe('CasesService', () => {
                     "username": "elastic",
                   },
                 },
+                "incremental_id": undefined,
                 "observables": Array [],
                 "owner": "securitySolution",
                 "settings": Object {
@@ -2509,6 +2515,7 @@ describe('CasesService', () => {
                       "username": "elastic",
                     },
                   },
+                  "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
@@ -2603,6 +2610,7 @@ describe('CasesService', () => {
                       "username": "elastic",
                     },
                   },
+                  "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
@@ -2710,6 +2718,7 @@ describe('CasesService', () => {
                       "username": "elastic",
                     },
                   },
+                  "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
@@ -2767,6 +2776,7 @@ describe('CasesService', () => {
                       "username": "elastic",
                     },
                   },
+                  "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
@@ -2870,6 +2880,7 @@ describe('CasesService', () => {
                   "username": "elastic",
                 },
               },
+              "incremental_id": undefined,
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
@@ -2989,6 +3000,7 @@ describe('CasesService', () => {
                       "username": "elastic",
                     },
                   },
+                  "incremental_id": undefined,
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
@@ -3216,6 +3228,18 @@ describe('CasesService', () => {
         const persistedAttributes = unsecuredSavedObjectsClient.create.mock.calls[0][1];
         expect(persistedAttributes).not.toHaveProperty('foo');
       });
+
+      it('sets `incremental_id` field to undefined when it is passed', async () => {
+        const attributes = {
+          ...createCasePostParams({ connector: createJiraConnector() }),
+          incremental_id: 200,
+        };
+
+        await expect(service.createCase({ id: 'a', attributes })).resolves.not.toThrow();
+
+        const persistedAttributes = unsecuredSavedObjectsClient.create.mock.calls[0][1];
+        expect((persistedAttributes as CaseAttributes).incremental_id).toBeUndefined();
+      });
     });
 
     describe('bulkCreateCases', () => {
@@ -3257,6 +3281,22 @@ describe('CasesService', () => {
 
         expect(persistedAttributes).not.toHaveProperty('foo');
       });
+
+      it('sets `incremental_id` field to undefined when it is passed', async () => {
+        const attributes = {
+          ...createCasePostParams({ connector: createJiraConnector() }),
+          incremental_id: 200,
+        };
+
+        await expect(
+          service.bulkCreateCases({ cases: [{ id: 'a', ...attributes }] })
+        ).resolves.not.toThrow();
+
+        const persistedAttributes =
+          unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0][0].attributes;
+
+        expect((persistedAttributes as CaseAttributes).incremental_id).toBeUndefined();
+      });
     });
 
     describe('patch case', () => {
@@ -3297,6 +3337,24 @@ describe('CasesService', () => {
 
         const persistedAttributes = unsecuredSavedObjectsClient.update.mock.calls[0][2];
         expect(persistedAttributes).not.toHaveProperty('foo');
+      });
+
+      it('removes incremental_id value', async () => {
+        const updatedAttributes = {
+          ...createCasePostParams({ connector: createJiraConnector() }),
+          incremental_id: 200,
+        };
+
+        await expect(
+          service.patchCase({
+            caseId: '1',
+            updatedAttributes,
+            originalCase: {} as CaseSavedObjectTransformed,
+          })
+        ).resolves.not.toThrow();
+
+        const persistedAttributes = unsecuredSavedObjectsClient.update.mock.calls[0][2];
+        expect((persistedAttributes as CaseAttributes).incremental_id).toBeUndefined();
       });
     });
 
@@ -3348,6 +3406,30 @@ describe('CasesService', () => {
           unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0][0][0].attributes;
 
         expect(persistedAttributes).not.toHaveProperty('foo');
+      });
+
+      it('removes incremental_id values', async () => {
+        const updatedAttributes = {
+          ...createCasePostParams({ connector: createJiraConnector() }),
+          incremental_id: 200,
+        };
+
+        await expect(
+          service.patchCases({
+            cases: [
+              {
+                caseId: '1',
+                updatedAttributes,
+                originalCase: {} as CaseSavedObjectTransformed,
+              },
+            ],
+          })
+        ).resolves.not.toThrow();
+
+        const persistedAttributes =
+          unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0][0][0].attributes;
+
+        expect((persistedAttributes as CaseAttributes).incremental_id).toBeUndefined();
       });
     });
   });

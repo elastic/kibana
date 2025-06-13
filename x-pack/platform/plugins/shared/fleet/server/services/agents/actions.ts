@@ -69,9 +69,6 @@ export async function createAgentAction(
     traceparent: apm.currentTraceparent,
     is_automatic: newAgentAction.is_automatic,
     policyId: newAgentAction.policyId,
-    enrollment_token: newAgentAction.enrollment_token,
-    target_uri: newAgentAction.target_uri,
-    settings: newAgentAction.additionalSettings ? newAgentAction.additionalSettings : undefined,
   };
 
   const messageSigningService = appContextService.getMessageSigningService();

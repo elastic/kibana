@@ -8,12 +8,7 @@
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useState } from 'react';
-import {
-  BottomBarActions,
-  Prompt,
-  useEditableSettings,
-} from '@kbn/observability-shared-plugin/public';
-import { enableInfrastructureProfilingIntegration } from '@kbn/observability-plugin/common';
+import { BottomBarActions, Prompt } from '@kbn/observability-shared-plugin/public';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import {
@@ -31,8 +26,6 @@ import { NameConfigurationPanel } from './name_configuration_panel';
 import { useSourceConfigurationFormState } from './source_configuration_form_state';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { settingsTitle } from '../../../translations';
-import { FeaturesConfigurationPanel } from './features_configuration_panel';
-import { usePluginConfig } from '../../../containers/plugin_config_context';
 interface SourceConfigurationSettingsProps {
   shouldAllowEdit: boolean;
   http?: HttpSetup;
@@ -49,7 +42,6 @@ export const SourceConfigurationSettings = ({
   ]);
 
   const [numberOfInfraRules, setNumberOfInfraRules] = useState(0);
-  const { featureFlags } = usePluginConfig();
 
   useEffect(() => {
     const getNumberOfInfraRules = async () => {
@@ -89,34 +81,20 @@ export const SourceConfigurationSettings = ({
     formStateChanges,
     getUnsavedChanges,
   } = useSourceConfigurationFormState(source?.configuration);
-  const infraUiSettings = useEditableSettings([enableInfrastructureProfilingIntegration]);
 
   const resetAllUnsavedChanges = useCallback(() => {
     resetForm();
-    infraUiSettings.cleanUnsavedChanges();
-  }, [infraUiSettings, resetForm]);
+  }, [resetForm]);
 
   const persistUpdates = useCallback(async () => {
-    await Promise.all([
-      updateSourceConfiguration(sourceExists ? formStateChanges : formState),
-      infraUiSettings.saveAll(),
-    ]);
+    await updateSourceConfiguration(sourceExists ? formStateChanges : formState);
     resetForm();
-  }, [
-    sourceExists,
-    resetForm,
-    updateSourceConfiguration,
-    formStateChanges,
-    infraUiSettings,
-    formState,
-  ]);
+  }, [sourceExists, resetForm, updateSourceConfiguration, formStateChanges, formState]);
 
   const unsavedChangesCount = Object.keys(getUnsavedChanges()).length;
-  const infraUiSettingsUnsavedChangesCount = Object.keys(infraUiSettings.unsavedChanges).length;
   // Count changes from the feature section settings and general infra settings
-  const unsavedFormChangesCount = infraUiSettingsUnsavedChangesCount + unsavedChangesCount;
 
-  const isFormDirty = infraUiSettingsUnsavedChangesCount > 0 || unsavedChangesCount > 0;
+  const isFormDirty = unsavedChangesCount > 0;
 
   const isWriteable = shouldAllowEdit && (!Boolean(source) || source?.origin !== 'internal');
 
@@ -177,14 +155,6 @@ export const SourceConfigurationSettings = ({
           <EuiSpacer />
         </>
       )}
-      {featureFlags.profilingEnabled && (
-        <>
-          <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
-            <FeaturesConfigurationPanel {...infraUiSettings} />
-          </EuiPanel>
-          <EuiSpacer />
-        </>
-      )}
       {errors.length > 0 ? (
         <>
           <EuiCallOut color="danger">
@@ -204,13 +174,13 @@ export const SourceConfigurationSettings = ({
             {isFormDirty && (
               <BottomBarActions
                 areChangesInvalid={!isFormValid}
-                isLoading={infraUiSettings.isSaving}
                 onDiscardChanges={resetAllUnsavedChanges}
                 onSave={persistUpdates}
                 saveLabel={i18n.translate('xpack.infra.sourceConfiguration.saveButton', {
                   defaultMessage: 'Save changes',
                 })}
-                unsavedChangesCount={unsavedFormChangesCount}
+                isLoading={false}
+                unsavedChangesCount={unsavedChangesCount}
                 appTestSubj="infra"
               />
             )}

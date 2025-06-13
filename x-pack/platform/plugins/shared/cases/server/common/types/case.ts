@@ -51,6 +51,7 @@ export interface CasePersistedAttributes {
   category?: string | null;
   customFields?: CasePersistedCustomFields;
   observables?: Observable[];
+  incremental_id?: number | null;
   time_to_acknowledge?: number | null;
   time_to_investigate?: number | null;
   time_to_resolve?: number | null;

@@ -91,6 +91,10 @@ export const exceptionsListDetailsUrl = (listId: string) =>
 export const DISCOVER_URL = '/app/discover';
 export const OSQUERY_URL = '/app/osquery';
 export const FLEET_URL = '/app/fleet';
+export const VISUALIZE_URL = '/app/visualize';
+export const MAPS_URL = '/app/maps';
+export const LENS_URL = '/app/lens';
+export const APP_DASHBOARDS_URL = '/app/dashboards';
 
 // Entity Analytics
 export const ENTITY_ANALYTICS_DASHBOARD_URL = '/app/security/entity_analytics';
