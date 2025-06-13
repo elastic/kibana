@@ -51,6 +51,9 @@ export function getConnectorType(): WebhookConnectorType {
     name: i18n.translate('xpack.stackConnectors.webhook.title', {
       defaultMessage: 'Webhook',
     }),
+    description: i18n.translate('xpack.stackConnectors.webhook.description', {
+      defaultMessage: 'Send data to a custom URL using HTTP requests.',
+    }),
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,

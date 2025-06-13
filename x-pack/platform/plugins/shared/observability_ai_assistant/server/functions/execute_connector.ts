@@ -5,27 +5,6 @@
  * 2.0.
  */
 
-import {
-  EmailParamsSchema,
-  SlackParamsSchema,
-  JiraParamsSchema,
-  PagerdutyParamsSchema,
-  SlackApiParamsSchema,
-  WebhookParamsSchema,
-} from '@kbn/stack-connectors-plugin/server';
-import { BEDROCK_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/bedrock/constants';
-import { GEMINI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/gemini/constants';
-import { INFERENCE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/inference/constants';
-import { OPENAI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import {
-  EmailConnectorTypeId,
-  JiraConnectorTypeId,
-  PagerDutyConnectorTypeId,
-  SlackApiConnectorTypeId,
-  SlackWebhookConnectorTypeId,
-  WebhookConnectorTypeId,
-} from '@kbn/stack-connectors-plugin/server/connector_types';
-import { CompatibleJSONSchema } from '../../common/functions/types';
 import { convertSchemaToOpenApi } from './convert_schema_to_open_api';
 import { FunctionRegistrationParameters } from '.';
 import { FunctionVisibility } from '../../common';
@@ -66,36 +45,6 @@ export function registerExecuteConnectorFunction({
   );
 }
 
-export const connectorParamsSchemas: Record<
-  string,
-  { params: CompatibleJSONSchema; description: string }
-> = {
-  [SlackWebhookConnectorTypeId]: {
-    params: convertSchemaToOpenApi(SlackParamsSchema),
-    description: 'Use this connector to send messages to Slack channels.',
-  },
-  [SlackApiConnectorTypeId]: {
-    params: convertSchemaToOpenApi(SlackApiParamsSchema),
-    description: 'Use this connector to send messages to Slack channels using the Slack API.',
-  },
-  [EmailConnectorTypeId]: {
-    params: convertSchemaToOpenApi(EmailParamsSchema),
-    description: 'Use this connector to send emails.',
-  },
-  [WebhookConnectorTypeId]: {
-    params: convertSchemaToOpenApi(WebhookParamsSchema),
-    description: 'Use this connector to send HTTP requests to a specified URL.',
-  },
-  [JiraConnectorTypeId]: {
-    params: convertSchemaToOpenApi(JiraParamsSchema),
-    description: 'Use this connector to create Jira issues.',
-  },
-  [PagerDutyConnectorTypeId]: {
-    params: convertSchemaToOpenApi(PagerdutyParamsSchema),
-    description: 'Use this connector to trigger PagerDuty incidents.',
-  },
-};
-
 export const GET_CONNECTOR_INFO_FUNCTION_NAME = 'get_connector_info';
 
 export function registerGetConnectorInfoFunction({
@@ -114,15 +63,42 @@ export function registerGetConnectorInfoFunction({
         await resources.plugins.actions.start()
       ).getActionsClientWithRequest(resources.request);
 
-      const allConnectors = await actionsClient.getAll();
+      let allConnectors = await actionsClient.getAll();
+
+      // filter out AI connectors
+      allConnectors = allConnectors.filter(
+        (connector) => !excludedConnectorIds.has(connector.actionTypeId)
+      );
 
       // IDs of connectors to exclude (used for inference/AI purposes)
-      const excludedConnectorIds = new Set([
-        BEDROCK_CONNECTOR_ID,
-        GEMINI_CONNECTOR_ID,
-        INFERENCE_CONNECTOR_ID,
-        OPENAI_CONNECTOR_ID,
-      ]);
+      const excludedConnectorIds = new Set(['.bedrock', '.gemini', '.inference', '.gen-ai']);
+
+      // get all connector parameters schemas
+      const connectorParamsSchemas = await Promise.all(
+        allConnectors.map(async (connector) => {
+          const actionType = await actionsClient.getActionType({
+            actionTypeId: connector.actionTypeId,
+          });
+          if (!actionType) {
+            return {
+              params: { type: 'object', properties: {} },
+              description: `Action type for connector with id ${connector.id} not found.`,
+            };
+          }
+          const paramsSchema = actionType.validate?.params?.schema;
+          if (!paramsSchema) {
+            return {
+              params: { type: 'object', properties: {} },
+              description: `Action type for connector with id ${connector.id} does not have a parameters schema.`,
+            };
+          }
+          return {
+            actionTypeId: connector.actionTypeId,
+            params: convertSchemaToOpenApi(paramsSchema),
+            description: `use this connector to ${actionType.description}` || '',
+          };
+        })
+      );
 
       const filteredConnectors = allConnectors
         // filter out AI connectors
@@ -132,7 +108,9 @@ export function registerGetConnectorInfoFunction({
           actionTypeId: connector.actionTypeId,
           name: connector.name,
           // Include the connector parameters schema and description
-          ...(connectorParamsSchemas[connector.actionTypeId] ?? {}),
+          ...(connectorParamsSchemas.find(
+            (schema) => schema.actionTypeId === connector.actionTypeId
+          ) ?? {}),
         }));
       return { content: filteredConnectors };
     }

@@ -144,6 +144,9 @@ export function getConnectorType(): PagerDutyConnectorType {
     name: i18n.translate('xpack.stackConnectors.pagerduty.title', {
       defaultMessage: 'PagerDuty',
     }),
+    description: i18n.translate('xpack.stackConnectors.pagerduty.description', {
+      defaultMessage: 'Send events to PagerDuty.',
+    }),
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,

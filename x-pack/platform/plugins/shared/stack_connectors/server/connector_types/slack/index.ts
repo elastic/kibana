@@ -77,6 +77,9 @@ export function getConnectorType({
     name: i18n.translate('xpack.stackConnectors.slack.title', {
       defaultMessage: 'Slack',
     }),
+    description: i18n.translate('xpack.stackConnectors.slack.description', {
+      defaultMessage: 'Send messages to Slack channels.',
+    }),
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,
