@@ -73,7 +73,6 @@ export const AssetInventoryBarChart = ({
   const baseTheme = useElasticChartsTheme();
   return (
     <div css={getChartStyles(euiTheme, xsFontSize)}>
-      {/* eslint-disable-next-line @elastic/eui/prefer-css-attributes-for-eui-components */}
       <EuiProgress size="xs" color="accent" style={getProgressStyle(isFetching)} />
       {isLoading ? (
         <EuiFlexGroup
@@ -102,7 +101,7 @@ export const AssetInventoryBarChart = ({
               },
               axes: {
                 axisTitle: {
-                  fontSize: euiTheme.font.scale.xs * 16, // convert rem -> px
+                  fontSize: euiTheme.font.scale.xs * euiTheme.base, // convert rem -> px
                 },
               },
             }}

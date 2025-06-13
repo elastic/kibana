@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { camelCase } from 'lodash';
+import { camelCase, pick } from 'lodash';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -46,6 +46,7 @@ import {
   DatasourceMap,
   VisualizationMap,
   UserMessagesGetter,
+  DatasourceLayers,
 } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import { getDatasourceExpressionsByLayers } from './expression_helpers';
@@ -130,7 +131,7 @@ const PreviewRenderer = ({
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
   const onErrorMessage = (
-    <div css={suggestionStyles.icon(euiThemeContext)}>
+    <div css={suggestionStyles.icon(euiThemeContext)} data-test-subj="lnsSuggestionPanel__error">
       <EuiIconTip
         size="xl"
         color="danger"
@@ -707,6 +708,30 @@ function getPreviewExpression(
     datasourceLayers: { ...frame.datasourceLayers },
   };
   try {
+    // use current frame api and patch apis for changed datasource layers
+    if (
+      visualizableState.keptLayerIds &&
+      visualizableState.datasourceId &&
+      visualizableState.datasourceState
+    ) {
+      const datasource = datasources[visualizableState.datasourceId];
+      const datasourceState = visualizableState.datasourceState;
+      const updatedLayerApis: DatasourceLayers = pick(
+        frame.datasourceLayers,
+        visualizableState.keptLayerIds
+      );
+      const changedLayers = datasource.getLayers(visualizableState.datasourceState);
+      changedLayers.forEach((layerId) => {
+        if (updatedLayerApis[layerId]) {
+          updatedLayerApis[layerId] = datasource.getPublicAPI({
+            layerId,
+            state: datasourceState,
+            indexPatterns: frame.dataViews.indexPatterns,
+          });
+        }
+        suggestionFrameApi.datasourceLayers[layerId] = updatedLayerApis[layerId];
+      });
+    }
     const datasourceExpressionsByLayers = getDatasourceExpressionsByLayers(
       datasources,
       datasourceStates,

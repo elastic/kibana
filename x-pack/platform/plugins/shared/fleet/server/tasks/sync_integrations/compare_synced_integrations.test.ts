@@ -14,6 +14,8 @@ import { appContextService } from '../../services/app_context';
 
 import { getPackageSavedObjects } from '../../services/epm/packages/get';
 
+import { licenseService } from '../../services/license';
+
 import { installCustomAsset, getPipeline, getComponentTemplate } from './custom_assets';
 import {
   getFollowerIndexInfo,
@@ -214,7 +216,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
     });
   });
 
-  it('should return status = synchronizing if there are integrations on sync index but none are installed yet', async () => {
+  it('should return synchronizing status if there are integrations on sync index but none are installed yet', async () => {
     esClientMock.search.mockResolvedValueOnce({
       hits: {
         hits: [
@@ -277,7 +279,76 @@ describe('fetchAndCompareSyncedIntegrations', () => {
       ],
     });
   });
-  it('should compare integrations installed on remote with the ones on sync index', async () => {
+  it('should return a warning for integrations not found in registry', async () => {
+    esClientMock.search.mockResolvedValueOnce({
+      hits: {
+        hits: [
+          {
+            _source: {
+              integrations: [
+                {
+                  package_name: 'custom-pkg',
+                  package_version: '1.0.0',
+                  updated_at: '2025-03-20T14:18:40.111Z',
+                  install_status: 'installed',
+                },
+              ],
+            },
+          },
+        ],
+      },
+    } as any);
+    (getPackageSavedObjects as jest.MockedFunction<any>).mockReturnValue({
+      page: 1,
+      per_page: 10000,
+      total: 1,
+      saved_objects: [
+        {
+          type: 'epm-packages',
+          id: 'custom-pkg',
+          attributes: {
+            version: '1.0.0',
+            install_status: 'install_failed',
+            latest_install_failed_attempts: [
+              {
+                created_at: '2025-06-10T15:30:31.614Z',
+                target_version: '0.0.2',
+                error: {
+                  name: 'PackageNotFoundError',
+                  message: '[agentless_package_links] package not found in registry',
+                },
+              },
+            ],
+          },
+          updated_at: '2025-03-26T14:06:27.611Z',
+        },
+      ],
+    });
+    const res = await fetchAndCompareSyncedIntegrations(
+      esClientMock,
+      soClientMock,
+      'fleet-synced-integrations-ccr-*',
+      mockedLogger
+    );
+    expect(res).toEqual({
+      integrations: [
+        {
+          sync_status: 'warning',
+          package_name: 'custom-pkg',
+          package_version: '1.0.0',
+          install_status: { main: 'installed', remote: 'not_installed' },
+          updated_at: expect.any(String),
+          warning: {
+            message:
+              'This integration must be manually installed on the remote cluster. Automatic updates and remote installs are not supported.',
+            title: "Integration can't be automatically synced",
+          },
+        },
+      ],
+    });
+  });
+
+  it('should return completed state when the integrations are correctly synced', async () => {
     esClientMock.search.mockResolvedValueOnce({
       hits: {
         hits: [
@@ -459,7 +530,10 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           updated_at: expect.any(String),
         },
         {
-          warning: 'failed to uninstall at Wed, 26 Mar 2025 14:06:27 GMT',
+          warning: {
+            message: 'failed to uninstall at Wed, 26 Mar 2025 14:06:27 GMT',
+            title: 'Integration was uninstalled, but removal from remote cluster failed.',
+          },
           install_status: {
             main: 'not_installed',
             remote: 'installed',
@@ -643,7 +717,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           error: 'Found incorrect installed version 1.67.2',
         },
         {
-          error: `Installation status: install_failed error: installation failure at Tue, 20 Jun 2023 08:47:31 GMT`,
+          error: `Installation status: install_failed installation failure at Tue, 20 Jun 2023 08:47:31 GMT`,
           package_name: 'synthetics',
           package_version: '1.4.1',
           install_status: { main: 'installed', remote: 'install_failed' },
@@ -940,7 +1014,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
       });
     });
 
-    it('should return status = completed if custom assets are equal', async () => {
+    it('should return completed status if custom assets are equal', async () => {
       (getPipelineMock as jest.MockedFunction<any>).mockResolvedValueOnce({
         'logs-system.auth@custom': {
           processors: [
@@ -1040,7 +1114,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
         },
       });
     });
-    it('should return status = synchronizing if versions do not match', async () => {
+    it('should return synchronizing status if versions do not match', async () => {
       const searchMockWithVersionedPipeline = jest.fn().mockResolvedValue({
         hits: {
           hits: [
@@ -1640,6 +1714,7 @@ describe('getRemoteSyncedIntegrationsStatus', () => {
     soClientMock = savedObjectsClientMock.create();
     mockedLogger = loggerMock.create();
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
+    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
 
     (installCustomAsset as jest.Mock).mockClear();
   });
@@ -1652,6 +1727,17 @@ describe('getRemoteSyncedIntegrationsStatus', () => {
     jest
       .spyOn(mockedAppContextService, 'getExperimentalFeatures')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: false } as any);
+    expect(await getRemoteSyncedIntegrationsStatus(esClientMock, soClientMock)).toEqual({
+      integrations: [],
+    });
+  });
+
+  it('should return empty integrations array if license is less than Enterprise', async () => {
+    jest
+      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
+      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
+
     expect(await getRemoteSyncedIntegrationsStatus(esClientMock, soClientMock)).toEqual({
       integrations: [],
     });

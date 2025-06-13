@@ -7,15 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiIcon, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useMemo } from 'react';
 import _ from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-
-import './_error.scss';
+import { css } from '@emotion/react';
 
 const guidPattern = /\[[[a-f\d-\\]{36}\]/g;
+
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  const styles = useMemo(() => {
+    return {
+      sectionSpacingStyle: css({
+        marginTop: euiTheme.size.s,
+      }),
+      stackStyle: css({
+        padding: euiTheme.size.s,
+        background: euiTheme.colors.lightestShade,
+        color: euiTheme.colors.text,
+        lineHeight: euiTheme.font.lineHeightMultiplier,
+        fontFamily: euiTheme.font.familyCode,
+        fontWeight: euiTheme.font.weight.regular,
+        whiteSpace: 'pre-wrap',
+      }),
+    };
+  }, [euiTheme]);
+  return styles;
+};
 
 export function ErrorComponent(props) {
   const { error } = props;
@@ -23,6 +43,8 @@ export function ErrorComponent(props) {
   const type = _.get(error, 'error.caused_by.type') || _.get(error, 'error.type');
   let reason = _.get(error, 'error.caused_by.reason');
   const title = _.get(error, 'error.caused_by.title');
+
+  const styles = useStyles();
 
   if (!reason) {
     reason = _.get(error, 'message');
@@ -36,13 +58,19 @@ export function ErrorComponent(props) {
     const scriptStack = _.get(error, 'error.caused_by.script_stack');
     reason = _.get(error, 'error.caused_by.caused_by.reason');
     additionalInfo = (
-      <div className="tvbError__additional">
+      <div className="tvbError__additional" css={styles.sectionSpacingStyle}>
         <div>{reason}</div>
-        <div className="tvbError__stack">{scriptStack.join('\n')}</div>
+        <div className="tvbError__stack" css={[styles.sectionSpacingStyle, styles.stackStyle]}>
+          {scriptStack.join('\n')}
+        </div>
       </div>
     );
   } else if (reason) {
-    additionalInfo = <div className="tvbError__additional">{reason}</div>;
+    additionalInfo = (
+      <div className="tvbError__additional" css={styles.sectionSpacingStyle}>
+        {reason}
+      </div>
+    );
   }
 
   return (

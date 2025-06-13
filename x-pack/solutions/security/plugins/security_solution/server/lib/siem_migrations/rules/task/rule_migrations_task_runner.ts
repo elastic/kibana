@@ -9,7 +9,7 @@ import assert from 'assert';
 import type { AuthenticatedUser, Logger } from '@kbn/core/server';
 import { abortSignalToPromise, AbortError } from '@kbn/kibana-utils-plugin/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
-import type { ElasticRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { type ElasticRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import { initPromisePool } from '../../../../utils/promise_pool';
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';

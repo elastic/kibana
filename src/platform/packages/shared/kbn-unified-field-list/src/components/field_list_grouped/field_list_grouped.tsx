@@ -11,7 +11,7 @@ import { partition, throttle } from 'lodash';
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { i18n } from '@kbn/i18n';
-import { EuiScreenReaderOnly, EuiSpacer } from '@elastic/eui';
+import { EuiScreenReaderOnly, EuiSpacer, EuiSkipLink, useGeneratedHtmlId } from '@elastic/eui';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import { NoFieldsCallout } from './no_fields_callout';
 import { FieldsAccordion, type FieldsAccordionProps, getFieldKey } from './fields_accordion';
@@ -41,6 +41,7 @@ export interface FieldListGroupedProps<T extends FieldListItem> {
   scrollToTopResetCounter: number;
   screenReaderDescriptionId?: string;
   localStorageKeyPrefix?: string; // Your app name: "discover", "lens", etc. If not provided, sections state would not be persisted.
+  muteScreenReader?: boolean; // Changes aria-live from "polite" to "off" - it's useful when the numbers change due to something not directly related to the field list and we want to avoid announcing it.
   'data-test-subj'?: string;
 }
 
@@ -51,11 +52,14 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
   renderFieldItem,
   scrollToTopResetCounter,
   screenReaderDescriptionId,
+  muteScreenReader,
   localStorageKeyPrefix,
   'data-test-subj': dataTestSubject = 'fieldListGrouped',
 }: FieldListGroupedProps<T>) {
   const hasSyncedExistingFields =
     fieldsExistenceStatus && fieldsExistenceStatus !== ExistenceFetchStatus.unknown;
+
+  const buttonIdPrefix = useGeneratedHtmlId({ prefix: 'fieldListGroupedButton' });
 
   const [fieldGroupsToShow, fieldGroupsToCollapse] = partition(
     Object.entries(fieldGroups),
@@ -141,7 +145,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
         {Boolean(screenReaderDescriptionId) && (
           <EuiScreenReaderOnly>
             <div
-              aria-live="polite"
+              aria-live={muteScreenReader ? 'off' : 'polite'}
               id={screenReaderDescriptionId}
               data-test-subj={`${dataTestSubject}__ariaDescription`}
             >
@@ -241,66 +245,83 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
             <EuiSpacer size="s" />
           </>
         )}
-        {fieldGroupsToShow.map(([key, fieldGroup], index) => {
-          const hidden = Boolean(fieldGroup.hideIfEmpty) && !fieldGroup.fields.length;
-          if (hidden) {
-            return null;
-          }
-          return (
-            <Fragment key={key}>
-              <FieldsAccordion<T>
-                id={`${dataTestSubject}${key}`}
-                initialIsOpen={Boolean(accordionState[key])}
-                label={fieldGroup.title}
-                helpTooltip={fieldGroup.helpText}
-                hideDetails={fieldGroup.hideDetails}
-                hasLoaded={hasSyncedExistingFields}
-                fieldsCount={fieldGroup.fields.length}
-                isFiltered={fieldGroup.fieldCount !== fieldGroup.fields.length}
-                fieldSearchHighlight={fieldGroup.fieldSearchHighlight}
-                paginatedFields={paginatedFields[key]}
-                groupIndex={index + 1}
-                groupName={key as FieldsGroupNames}
-                onToggle={(open) => {
-                  setAccordionState((s) => ({
-                    ...s,
-                    [key]: open,
-                  }));
-                  const displayedFieldLength = getDisplayedFieldsLength(fieldGroups, {
-                    ...accordionState,
-                    [key]: open,
-                  });
-                  setPageSize(
-                    Math.max(
-                      PAGINATION_SIZE,
-                      Math.min(Math.ceil(pageSize * 1.5), displayedFieldLength)
-                    )
-                  );
-                  if (localStorageKeyPrefix) {
-                    storeInitiallyOpenSections({
-                      ...storedInitiallyOpenSections,
+        {fieldGroupsToShow
+          .filter(([_, fieldGroup]) => {
+            if (fieldGroup.fields.length) return true;
+            return !Boolean(fieldGroup.hideIfEmpty);
+          })
+          .map(([key, fieldGroup], index, _fieldGroupsToShow) => {
+            const nextFieldGroup = _fieldGroupsToShow.at(index + 1);
+
+            return (
+              <Fragment key={key}>
+                <FieldsAccordion<T>
+                  id={`${dataTestSubject}${key}`}
+                  buttonId={`${buttonIdPrefix}${key}`}
+                  initialIsOpen={Boolean(accordionState[key])}
+                  label={fieldGroup.title}
+                  helpTooltip={fieldGroup.helpText}
+                  hideDetails={fieldGroup.hideDetails}
+                  hasLoaded={hasSyncedExistingFields}
+                  fieldsCount={fieldGroup.fields.length}
+                  isFiltered={fieldGroup.fieldCount !== fieldGroup.fields.length}
+                  fieldSearchHighlight={fieldGroup.fieldSearchHighlight}
+                  paginatedFields={paginatedFields[key]}
+                  groupIndex={index + 1}
+                  groupName={key as FieldsGroupNames}
+                  onToggle={(open) => {
+                    setAccordionState((s) => ({
+                      ...s,
+                      [key]: open,
+                    }));
+                    const displayedFieldLength = getDisplayedFieldsLength(fieldGroups, {
+                      ...accordionState,
                       [key]: open,
                     });
+                    setPageSize(
+                      Math.max(
+                        PAGINATION_SIZE,
+                        Math.min(Math.ceil(pageSize * 1.5), displayedFieldLength)
+                      )
+                    );
+                    if (localStorageKeyPrefix) {
+                      storeInitiallyOpenSections({
+                        ...storedInitiallyOpenSections,
+                        [key]: open,
+                      });
+                    }
+                  }}
+                  showExistenceFetchError={fieldsExistenceStatus === ExistenceFetchStatus.failed}
+                  showExistenceFetchTimeout={fieldsExistenceStatus === ExistenceFetchStatus.failed} // TODO: deprecate timeout logic?
+                  renderCallout={() => (
+                    <NoFieldsCallout
+                      isAffectedByGlobalFilter={fieldGroup.isAffectedByGlobalFilter}
+                      isAffectedByTimerange={fieldGroup.isAffectedByTimeFilter}
+                      isAffectedByFieldFilter={fieldGroup.fieldCount !== fieldGroup.fields.length}
+                      fieldsExistInIndex={!!fieldsExistInIndex}
+                      defaultNoFieldsMessage={fieldGroup.defaultNoFieldsMessage}
+                      data-test-subj={`${dataTestSubject}${key}NoFieldsCallout`}
+                    />
+                  )}
+                  renderFieldItem={renderFieldItem}
+                  extraAction={
+                    nextFieldGroup ? (
+                      <EuiSkipLink
+                        overrideLinkBehavior
+                        destinationId={`${buttonIdPrefix}${nextFieldGroup[0]}`}
+                      >
+                        {i18n.translate('unifiedFieldList.fieldListGrouped.goToNextGroupLink', {
+                          defaultMessage: 'Go to {nextFieldGroup}',
+                          values: { nextFieldGroup: nextFieldGroup[1].title },
+                        })}
+                      </EuiSkipLink>
+                    ) : null
                   }
-                }}
-                showExistenceFetchError={fieldsExistenceStatus === ExistenceFetchStatus.failed}
-                showExistenceFetchTimeout={fieldsExistenceStatus === ExistenceFetchStatus.failed} // TODO: deprecate timeout logic?
-                renderCallout={() => (
-                  <NoFieldsCallout
-                    isAffectedByGlobalFilter={fieldGroup.isAffectedByGlobalFilter}
-                    isAffectedByTimerange={fieldGroup.isAffectedByTimeFilter}
-                    isAffectedByFieldFilter={fieldGroup.fieldCount !== fieldGroup.fields.length}
-                    fieldsExistInIndex={!!fieldsExistInIndex}
-                    defaultNoFieldsMessage={fieldGroup.defaultNoFieldsMessage}
-                    data-test-subj={`${dataTestSubject}${key}NoFieldsCallout`}
-                  />
-                )}
-                renderFieldItem={renderFieldItem}
-              />
-              <EuiSpacer size="m" />
-            </Fragment>
-          );
-        })}
+                />
+                <EuiSpacer size="m" />
+              </Fragment>
+            );
+          })}
       </div>
     </div>
   );

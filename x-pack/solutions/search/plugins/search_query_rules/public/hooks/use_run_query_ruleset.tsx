@@ -8,18 +8,23 @@
 import React, { useMemo } from 'react';
 import dedent from 'dedent';
 import { TryInConsoleButton } from '@kbn/try-in-console';
+import { EuiButtonColor } from '@elastic/eui';
 import { useFetchQueryRuleset } from './use_fetch_query_ruleset';
 import { useKibana } from './use_kibana';
 export interface UseRunQueryRulesetProps {
   rulesetId: string;
   type?: 'link' | 'button' | 'emptyButton' | 'contextMenuItem';
   content?: string;
+  color?: EuiButtonColor;
+  onClick?: () => void;
 }
 
 export const UseRunQueryRuleset = ({
   rulesetId,
   type = 'emptyButton',
   content,
+  color,
+  onClick,
 }: UseRunQueryRulesetProps) => {
   const { application, share, console: consolePlugin } = useKibana().services;
   const { data: queryRulesetData } = useFetchQueryRuleset(rulesetId);
@@ -110,7 +115,9 @@ export const UseRunQueryRuleset = ({
       request={TEST_QUERY_RULESET_API_SNIPPET}
       type={type}
       content={content}
+      color={color}
       showIcon
+      onClick={onClick}
     />
   );
 };

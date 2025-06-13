@@ -98,14 +98,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(isButtonDisabled).to.be(null);
     });
 
-    it('should show a button to re-deploy the model if the model has been stopped', async () => {
+    it('should show a button to redeploy the model if the model has been stopped', async () => {
       await stopTinyElserModel(getService);
-      await browser.refresh();
 
-      const buttonText = await testSubjects.getVisibleText(
-        'observabilityAiAssistantKnowledgeBaseUpdateModelButton'
-      );
-      expect(buttonText).to.be('Re-deploy model');
+      await retry.try(async () => {
+        await browser.refresh();
+
+        const buttonText = await testSubjects.getVisibleText(
+          'observabilityAiAssistantKnowledgeBaseUpdateModelButton'
+        );
+        expect(buttonText).to.be('Redeploy model');
+      });
 
       const statusBadgeText = await testSubjects.getVisibleText(
         'observabilityAiAssistantKnowledgeBaseStatus'

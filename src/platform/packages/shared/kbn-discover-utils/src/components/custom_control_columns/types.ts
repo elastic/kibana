@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonIconProps, EuiDataGridControlColumn, IconType } from '@elastic/eui';
+import { EuiButtonIconProps, IconType } from '@elastic/eui';
 import type { Interpolation, Theme } from '@emotion/react';
 import React, { FC, ReactElement } from 'react';
 import { DataTableRecord } from '../../types';
@@ -32,7 +32,5 @@ export type RowControlComponent = FC<RowControlProps>;
 
 export interface RowControlColumn {
   id: string;
-  headerAriaLabel: string;
-  headerCellRender?: EuiDataGridControlColumn['headerCellRender'];
-  renderControl: (Control: RowControlComponent, props: RowControlRowProps) => ReactElement;
+  render: (Control: RowControlComponent, props: RowControlRowProps) => ReactElement;
 }

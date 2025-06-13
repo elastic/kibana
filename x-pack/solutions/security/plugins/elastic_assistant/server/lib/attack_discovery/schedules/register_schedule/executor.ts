@@ -11,6 +11,7 @@ import { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
+import { ALERT_URL } from '@kbn/rule-data-utils';
 import {
   reportAttackDiscoveryGenerationFailure,
   reportAttackDiscoveryGenerationSuccess,
@@ -28,12 +29,14 @@ import { transformToBaseAlertDocument } from '../../persistence/transforms/trans
 export interface AttackDiscoveryScheduleExecutorParams {
   options: AttackDiscoveryExecutorOptions;
   logger: Logger;
+  publicBaseUrl: string | undefined;
   telemetry: AnalyticsServiceSetup;
 }
 
 export const attackDiscoveryScheduleExecutor = async ({
   options,
   logger,
+  publicBaseUrl,
   telemetry,
 }: AttackDiscoveryScheduleExecutorParams) => {
   const { params, rule, services, spaceId } = options;
@@ -61,6 +64,11 @@ export const attackDiscoveryScheduleExecutor = async ({
   const { query, filters, combinedFilter, ...restParams } = params;
 
   const startTime = moment(); // start timing the generation
+  const scheduleInfo = {
+    id: rule.id,
+    interval: rule.schedule.interval,
+    actions: rule.actions.map(({ actionTypeId }) => actionTypeId),
+  };
 
   try {
     const { anonymizedAlerts, attackDiscoveries, replacements } = await generateAttackDiscoveries({
@@ -92,7 +100,7 @@ export const attackDiscoveryScheduleExecutor = async ({
       durationMs,
       end: restParams.end,
       hasFilter: !!(combinedFilter && Object.keys(combinedFilter).length),
-      schedule: { id: rule.id, interval: rule.schedule.interval },
+      scheduleInfo,
       size: restParams.size,
       start: restParams.start,
       telemetry,
@@ -107,17 +115,25 @@ export const attackDiscoveryScheduleExecutor = async ({
     };
 
     attackDiscoveries?.forEach((attack) => {
-      const payload = transformToBaseAlertDocument({
-        attackDiscovery: attack,
-        alertsParams,
+      const { id, ...restAttack } = attack;
+      const alertId = uuidv4();
+      const { uuid } = alertsClient.report({
+        id: alertId,
+        actionGroup: 'default',
       });
 
-      const { id, ...restAttack } = attack;
-      alertsClient.report({
-        id: uuidv4(),
-        actionGroup: 'default',
+      const payload = transformToBaseAlertDocument({
+        alertId: uuid,
+        attackDiscovery: attack,
+        alertsParams,
+        publicBaseUrl,
+        spaceId,
+      });
+
+      alertsClient.setAlertData({
+        id: alertId,
         payload,
-        context: { attack: restAttack },
+        context: { attack: { ...restAttack, detailsUrl: payload[ALERT_URL] } },
       });
     });
   } catch (error) {
@@ -126,7 +142,7 @@ export const attackDiscoveryScheduleExecutor = async ({
     reportAttackDiscoveryGenerationFailure({
       apiConfig: params.apiConfig,
       errorMessage: transformedError.message,
-      schedule: { id: rule.id, interval: rule.schedule.interval },
+      scheduleInfo,
       telemetry,
     });
     throw error;

@@ -81,7 +81,7 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
       return i18n.translate(
         'xpack.observabilityAiAssistantManagement.knowledgeBase.redeployModelLabel',
         {
-          defaultMessage: 'Re-deploy model',
+          defaultMessage: 'Redeploy model',
         }
       );
     }

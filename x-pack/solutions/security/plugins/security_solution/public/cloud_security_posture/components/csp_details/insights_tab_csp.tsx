@@ -166,7 +166,7 @@ export const InsightsTabCsp = memo(
         {activeInsightsId === CspInsightLeftPanelSubTab.MISCONFIGURATIONS ? (
           <MisconfigurationFindingsDetailsTable field={field} value={value} scopeId={scopeId} />
         ) : activeInsightsId === CspInsightLeftPanelSubTab.VULNERABILITIES ? (
-          <VulnerabilitiesFindingsDetailsTable value={value} />
+          <VulnerabilitiesFindingsDetailsTable value={value} scopeId={scopeId} />
         ) : (
           <AlertsDetailsTable field={field} value={value} />
         )}

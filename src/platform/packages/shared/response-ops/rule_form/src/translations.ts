@@ -227,6 +227,13 @@ export const RULE_ALERT_DELAY_BELOW_MINIMUM_TEXT = i18n.translate(
   }
 );
 
+export const RULE_INVESTIGATION_GUIDE_TOO_LONG_TEXT = (length: number, maxLength: number) =>
+  i18n.translate('responseOpsRuleForm.ruleForm.error.investigationGuideTooLongText', {
+    defaultMessage:
+      'Investigation guide is too long. Current length: {length}. Max length: {maxLength}.',
+    values: { length, maxLength },
+  });
+
 export const INTERVAL_MINIMUM_TEXT = (minimum: string) =>
   i18n.translate('responseOpsRuleForm.ruleForm.error.belowMinimumText', {
     defaultMessage: 'Interval must be at least {minimum}.',
@@ -294,6 +301,13 @@ export const RULE_TAG_PLACEHOLDER = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDetails.ruleTagsPlaceholder',
   {
     defaultMessage: 'Add tags',
+  }
+);
+
+export const RULE_INVESTIGATION_GUIDE_LABEL = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleDetails.investigationGuide.editor.title',
+  {
+    defaultMessage: 'Investigation guide',
   }
 );
 

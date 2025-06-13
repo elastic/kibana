@@ -20,7 +20,7 @@ import type {
 } from './breadcrumb';
 import type { ChromeBadge, ChromeStyle, ChromeUserBanner } from './types';
 import type { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
-import type { PanelSelectedNode } from './project_navigation';
+import type { PanelSelectedNode, SolutionId } from './project_navigation';
 
 /**
  * ChromeStart allows plugins to customize the global chrome header UI and
@@ -219,5 +219,5 @@ export interface ChromeStart {
   /**
    * Get the id of the currently active project navigation or `null` otherwise.
    */
-  getActiveSolutionNavId$(): Observable<string | null>;
+  getActiveSolutionNavId$(): Observable<SolutionId | null>;
 }
