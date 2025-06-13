@@ -194,7 +194,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
   describe('updateLastExecution', () => {
     const lastExecutionParams = {
       started_at: new Date().toISOString(),
-      is_aborted: false,
+      is_stopped: false,
       error: '',
       ended_at: new Date().toISOString(),
       connector_id: 'testConnector',
@@ -215,7 +215,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
         doc: {
           last_execution: {
             started_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
-            is_aborted: false,
+            is_stopped: false,
             error: null,
             ended_at: null,
             connector_id: 'testConnector',
@@ -228,7 +228,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
     it('should update `ended_at` when called saveAsEnded', async () => {
       const migrationId = 'testId';
 
-      await ruleMigrationsDataMigrationClient.saveAsEnded({ id: migrationId });
+      await ruleMigrationsDataMigrationClient.saveAsFinished({ id: migrationId });
 
       expect(esClient.asInternalUser.update).toHaveBeenCalledWith({
         index: '.kibana-siem-rule-migrations',
@@ -243,10 +243,10 @@ describe('RuleMigrationsDataMigrationClient', () => {
       });
     });
 
-    it('should update `is_aborted` & `ended_at` correctly when called setIsAborted', async () => {
+    it('should update `is_stopped` & `ended_at` correctly when called setIsAborted', async () => {
       const migrationId = 'testId';
 
-      await ruleMigrationsDataMigrationClient.setIsAborted({ id: migrationId });
+      await ruleMigrationsDataMigrationClient.setIsStopped({ id: migrationId });
 
       expect(esClient.asInternalUser.update).toHaveBeenCalledWith({
         index: '.kibana-siem-rule-migrations',
@@ -254,7 +254,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
         refresh: 'wait_for',
         doc: {
           last_execution: {
-            is_aborted: true,
+            is_stopped: true,
           },
         },
         retry_on_conflict: 1,

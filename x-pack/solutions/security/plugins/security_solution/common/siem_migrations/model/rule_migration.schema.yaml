@@ -259,7 +259,7 @@ components:
         - running
         - stopped
         - finished
-        - aborted
+        - interrupted
 
     RuleMigrationTranslationStats:
       type: object
@@ -476,10 +476,10 @@ components:
         started_at:
           type: string
           description: The moment the last execution started.
-        ended_at:
+        finished_at:
           type: string
           nullable: true
-          description: The moment the last execution ended.
+          description: The moment the last execution finished.
         connector_id:
           type: string
           description: The connector ID used for the last execution.
@@ -487,6 +487,7 @@ components:
           type: string
           nullable: true
           description: The error message if the last execution failed.
-        is_aborted:
+        is_stopped:
           type: boolean
-          description: Indicates if the last execution was aborted by the user.
+          nullable: true
+          description: Indicates if the last execution was stopped by the user.

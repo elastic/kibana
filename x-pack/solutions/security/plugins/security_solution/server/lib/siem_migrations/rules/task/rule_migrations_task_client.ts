@@ -88,26 +88,19 @@ export class RuleMigrationsTaskClient {
     migrationTaskRunner
       .run(invocationConfig)
       .then(() => {
-        /**
-         * Handles
-         *  - successful completion of this execution
-         *  - Manual Abort of the execution
-         */
-        migrationLogger.info('Migration Execution task completed successfully');
-        // Save the migration execution details on completion
-        this.data.migrations.saveAsEnded({ id: migrationId }).catch((error) => {
-          migrationLogger.error(`Error saving migration as ended: ${error}`);
+        migrationLogger.debug('Migration execution task finished');
+        this.data.migrations.saveAsFinished({ id: migrationId }).catch((error) => {
+          migrationLogger.error(`Error saving migration as finished: ${error}`);
         });
       })
       .catch((error) => {
-        // no use in throwing the error, the `start` promise is long gone. Just store and log the error
+        // no use in throwing the error, the `start` promise is long gone. Just store and log the error message
+        migrationLogger.error(`Error executing migration task: ${error}`);
         this.data.migrations
           .saveAsFailed({ id: migrationId, error: error.message })
           .catch((saveError) => {
             migrationLogger.error(`Error saving migration as failed: ${saveError}`);
           });
-
-        void migrationLogger.error(`Error executing migration task: ${error}`);
       })
       .finally(() => {
         this.migrationsRunning.delete(migrationId);
@@ -185,13 +178,13 @@ export class RuleMigrationsTaskClient {
     if (dataStats.completed + dataStats.failed === dataStats.total) {
       return SiemMigrationTaskStatus.FINISHED;
     }
-    if (lastExecution?.is_aborted) {
-      return SiemMigrationTaskStatus.ABORTED;
+    if (lastExecution?.is_stopped) {
+      return SiemMigrationTaskStatus.STOPPED;
     }
     if (dataStats.pending === dataStats.total) {
       return SiemMigrationTaskStatus.READY;
     }
-    return SiemMigrationTaskStatus.STOPPED;
+    return SiemMigrationTaskStatus.INTERRUPTED;
   }
 
   /** Stops one running migration */
@@ -200,7 +193,7 @@ export class RuleMigrationsTaskClient {
       const migrationRunning = this.migrationsRunning.get(migrationId);
       if (migrationRunning) {
         migrationRunning.abortController.abort();
-        await this.data.migrations.setIsAborted({ id: migrationId });
+        await this.data.migrations.setIsStopped({ id: migrationId });
         return { exists: true, stopped: true };
       }
 

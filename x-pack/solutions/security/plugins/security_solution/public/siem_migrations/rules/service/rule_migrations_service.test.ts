@@ -308,7 +308,7 @@ describe('SiemRulesMigrationsService', () => {
         jest.useFakeTimers();
         const stoppedMigration = {
           id: 'mig-1',
-          status: SiemMigrationTaskStatus.STOPPED,
+          status: SiemMigrationTaskStatus.INTERRUPTED,
           last_error: 'some failure',
         };
         const finishedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.FINISHED };
@@ -340,7 +340,7 @@ describe('SiemRulesMigrationsService', () => {
 
       it('should not start a stopped migration if no connector configured', async () => {
         jest.useFakeTimers();
-        const stoppedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.STOPPED };
+        const stoppedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.INTERRUPTED };
         const finishedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.FINISHED };
 
         service.getRuleMigrationsStats = jest
@@ -373,7 +373,7 @@ describe('SiemRulesMigrationsService', () => {
         // Use fake timers to simulate delays inside the polling loop.
         jest.useFakeTimers();
         // Simulate a migration that is first reported as STOPPED and then FINISHED.
-        const stoppedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.STOPPED };
+        const stoppedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.INTERRUPTED };
         const finishedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.FINISHED };
 
         // Override getRuleMigrationsStats to return our sequence:
@@ -409,7 +409,7 @@ describe('SiemRulesMigrationsService', () => {
 
       it('should automatically start the stopped migration', async () => {
         jest.useFakeTimers();
-        const stoppedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.STOPPED };
+        const stoppedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.INTERRUPTED };
         const finishedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.FINISHED };
 
         service.getRuleMigrationsStats = jest

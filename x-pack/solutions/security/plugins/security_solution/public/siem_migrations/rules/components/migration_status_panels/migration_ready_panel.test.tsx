@@ -47,7 +47,7 @@ const mockMigrationStateWithError = {
 };
 
 const mockMigrationStatsAborted = {
-  status: SiemMigrationTaskStatus.ABORTED,
+  status: SiemMigrationTaskStatus.STOPPED,
   id: 'c44d2c7d-0de1-4231-8b82-0dcfd67a9fe3',
   rules: { total: 6, pending: 6, processing: 0, completed: 0, failed: 0 },
   created_at: '2025-05-27T12:12:17.563Z',

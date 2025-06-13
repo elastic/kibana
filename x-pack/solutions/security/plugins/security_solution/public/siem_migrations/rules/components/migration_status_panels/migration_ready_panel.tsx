@@ -41,7 +41,7 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
   }, [openFlyout, migrationStats, telemetry, missingResources.length]);
 
   const isAborted = useMemo(
-    () => migrationStats.status === SiemMigrationTaskStatus.ABORTED,
+    () => migrationStats.status === SiemMigrationTaskStatus.STOPPED,
     [migrationStats.status]
   );
 
