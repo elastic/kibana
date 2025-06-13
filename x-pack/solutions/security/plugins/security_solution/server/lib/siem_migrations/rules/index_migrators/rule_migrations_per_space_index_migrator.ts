@@ -149,9 +149,7 @@ export class RuleMigrationSpaceIndexMigrator {
           ...migration,
           created_by: migration.created_by ?? '',
           created_at: migration.created_at ?? new Date().toISOString(),
-          name: `SIEM Migration ${
-            existingMigrationsFromRulesIndex.findIndex((m) => m.id === migration.id) + 1
-          }`,
+          name: '',
         }))
       );
       this.logger.info(
@@ -166,7 +164,7 @@ export class RuleMigrationSpaceIndexMigrator {
         created_by: migration.created_by ?? '',
         created_at: migration.created_at ?? new Date().toISOString(),
         name: `SIEM Migration ${
-          existingMigrationsFromRulesIndex.findIndex((m) => m.id === migration.id) + 1
+          existingMigrationsFromMigrationsIndex.findIndex((m) => m.id === migration.id) + 1
         }`,
       }));
 
