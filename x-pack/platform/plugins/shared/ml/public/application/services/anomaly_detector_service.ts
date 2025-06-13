@@ -7,9 +7,10 @@
 
 import type { Observable } from 'rxjs';
 import { map } from 'rxjs';
+
 import type { Job, JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
-import type { HttpService } from './http_service';
-import { type MlApi, mlApiProvider } from './ml_api_service';
+import type { HttpService } from '@kbn/ml-services/http_service';
+import { type MlApi, mlApiProvider } from '@kbn/ml-services/ml_api_service';
 
 export class AnomalyDetectorService {
   private mlApi: MlApi;

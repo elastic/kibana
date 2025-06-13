@@ -106,5 +106,8 @@
     "@kbn/dev-cli-errors",
     "@kbn/journeys",
     "@kbn/lens-plugin",
+    "@kbn/ml-common-types",
+    "@kbn/ml-common-constants",
+    "@kbn/ml-server-api-schemas",
   ]
 }
