@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, CSSProperties } from 'react';
 import { withRouter, RouteComponentProps, useLocation } from 'react-router-dom';
 import {
   EuiFlexGroup,
@@ -25,7 +25,6 @@ import { DataViewType, RuntimeField, DataView } from '@kbn/data-views-plugin/pub
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SavedObjectRelation } from '@kbn/saved-objects-management-plugin/public';
 import { pickBy } from 'lodash';
-import type * as CSS from 'csstype';
 import { RollupDeprecationTooltip } from '@kbn/rollup';
 import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
@@ -34,7 +33,7 @@ import { removeDataView, RemoveDataViewProps } from './remove_data_view';
 
 import { useStateSelector } from '../../management_app/state_utils';
 
-const codeStyle: CSS.Properties = {
+const codeStyle: CSSProperties = {
   marginLeft: '8px',
   overflowWrap: 'anywhere',
 };
