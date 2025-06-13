@@ -34,6 +34,9 @@ const DataSourcesFlyout = dynamic(() =>
   import('./data_sources_flyout').then((mod) => ({ default: mod.DataSourcesFlyout }))
 );
 
+const VISIBLE_DATA_SOURCES_LIMIT = 2;
+const DATA_SOURCE_CARD_MAX_WIDTH = 160;
+
 const manageDataSourcesLabel = i18n.translate(
   'xpack.streams.streamDetailView.managementTab.enrichment.manageDataSources.label',
   { defaultMessage: 'Manage data sources' }
@@ -57,7 +60,7 @@ const DataSourceListItem = ({ dataSourceRef }: DataSourceListItemProps) => {
       alignItems="center"
       gutterSize="xs"
       css={css`
-        max-width: 160px;
+        max-width: ${DATA_SOURCE_CARD_MAX_WIDTH}px;
       `}
     >
       <strong
@@ -77,7 +80,7 @@ const DataSourceListItem = ({ dataSourceRef }: DataSourceListItemProps) => {
   return (
     <EuiPanel paddingSize="s" hasShadow={false} hasBorder>
       <EuiCheckbox
-        id={`dataSourceListItem-${dataSourceRef.id}`}
+        id={dataSourceRef.id}
         label={content}
         checked={isEnabled}
         onChange={toggleActivity}
@@ -94,8 +97,8 @@ export const DataSourcesList = () => {
   );
   const dataSourcesRefs = useStreamEnrichmentSelector((state) => state.context.dataSourcesRefs);
 
-  const visibleDataSourcesRefs = dataSourcesRefs.slice(0, 2);
-  const hiddenDataSourcesRefs = dataSourcesRefs.slice(2);
+  const visibleDataSourcesRefs = dataSourcesRefs.slice(0, VISIBLE_DATA_SOURCES_LIMIT);
+  const hiddenDataSourcesRefs = dataSourcesRefs.slice(VISIBLE_DATA_SOURCES_LIMIT);
   const hasHiddenDataSources = hiddenDataSourcesRefs.length > 0;
 
   return (
