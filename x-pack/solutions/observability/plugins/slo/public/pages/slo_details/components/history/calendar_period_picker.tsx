@@ -47,6 +47,7 @@ export function CalendarPeriodPicker({ slo, onChange }: Props) {
         onClick={() => {
           handleChangePeriod(+1);
         }}
+        iconType="arrowLeft"
       >
         {i18n.translate('xpack.slo.sloDetailsHistory.previousPeriodButtonLabel', {
           defaultMessage: 'Previous',
@@ -62,6 +63,7 @@ export function CalendarPeriodPicker({ slo, onChange }: Props) {
         onClick={() => {
           handleChangePeriod(-1);
         }}
+        iconType="arrowRight"
       >
         {i18n.translate('xpack.slo.sloDetailsHistory.nextPeriodButtonLabel', {
           defaultMessage: 'Next',
