@@ -20,6 +20,7 @@ import {
   useEuiTheme,
   EuiFlexGroup,
   EuiNotificationBadge,
+  EuiIcon,
 } from '@elastic/eui';
 import {
   AlertStatus,
@@ -325,10 +326,17 @@ export function AlertDetails() {
     {
       id: 'investigation_guide',
       name: (
-        <FormattedMessage
-          id="xpack.observability.alertDetails.tab.investigationGuideLabel"
-          defaultMessage="Investigation guide"
-        />
+        <>
+          <FormattedMessage
+            id="xpack.observability.alertDetails.tab.investigationGuideLabel"
+            defaultMessage="Investigation guide"
+          />
+          {rule?.artifacts?.investigation_guide?.blob && (
+            <EuiNotificationBadge color="success" css={{ marginLeft: '5px' }}>
+              <EuiIcon type="dot" size="s" />
+            </EuiNotificationBadge>
+          )}
+        </>
       ),
       'data-test-subj': 'investigationGuideTab',
       content: (
