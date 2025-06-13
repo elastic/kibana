@@ -38,7 +38,6 @@ export const convertToEntityManagerDefinition = (
     },
     version: description.version,
     managed: true,
-    customIngestProcessors: description.pipeline ?? undefined,
   };
 
   return entityDefinitionSchema.parse(definition);
