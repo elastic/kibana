@@ -19,9 +19,7 @@ function fetchWatches(dataClient: IScopedClusterClient) {
       {
         index: INDEX_NAMES.WATCHES,
         scroll: ES_SCROLL_SETTINGS.KEEPALIVE,
-        body: {
-          size: ES_SCROLL_SETTINGS.PAGE_SIZE,
-        },
+        size: ES_SCROLL_SETTINGS.PAGE_SIZE,
       },
       { ignore: [404] }
     )
