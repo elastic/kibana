@@ -28,7 +28,6 @@ import type {
   LifecycleResponseFactory,
   OnPostAuthHandler,
 } from '@kbn/core-http-server';
-import type { SecurityFeatureParams } from '@kbn/security-solution-features/src/security/types';
 
 jest.mock('./product_features');
 const MockedProductFeatures = ProductFeatures as unknown as jest.MockedClass<
@@ -41,14 +40,10 @@ const productFeature = {
   baseKibanaSubFeatureIds: [],
 };
 const mockGetFeature = jest.fn().mockReturnValue(productFeature);
-const mockGetSecurityFeature = jest
-  .fn<typeof productFeature, [SecurityFeatureParams]>()
-  .mockReturnValue(productFeature);
-
 jest.mock('@kbn/security-solution-features/product_features', () => ({
-  getSecurityFeature: (params: SecurityFeatureParams) => mockGetSecurityFeature(params),
-  getSecurityV2Feature: (params: SecurityFeatureParams) => mockGetSecurityFeature(params),
-  getSecurityV3Feature: (params: SecurityFeatureParams) => mockGetSecurityFeature(params),
+  getSecurityFeature: () => mockGetFeature(),
+  getSecurityV2Feature: () => mockGetFeature(),
+  getSecurityV3Feature: () => mockGetFeature(),
   getCasesFeature: () => mockGetFeature(),
   getCasesV2Feature: () => mockGetFeature(),
   getCasesV3Feature: () => mockGetFeature(),
@@ -66,31 +61,17 @@ describe('ProductFeaturesService', () => {
 
   it('should create ProductFeatureService instance', () => {
     const experimentalFeatures = {} as ExperimentalFeatures;
-    new ProductFeaturesService(loggerMock.create(), experimentalFeatures, false);
+    new ProductFeaturesService(loggerMock.create(), experimentalFeatures);
 
-    expect(mockGetFeature).toHaveBeenCalledTimes(8);
-    expect(mockGetSecurityFeature).toHaveBeenCalledTimes(3);
+    expect(mockGetFeature).toHaveBeenCalledTimes(11);
     expect(MockedProductFeatures).toHaveBeenCalledTimes(11);
   });
-
-  it.each([false, true])(
-    'should pass `isServerless = %s` param to security feature getters',
-    (isServerless) => {
-      const experimentalFeatures = {} as ExperimentalFeatures;
-      new ProductFeaturesService(loggerMock.create(), experimentalFeatures, isServerless);
-
-      expect(
-        mockGetSecurityFeature.mock.calls.every((args) => args[0].isServerless === isServerless)
-      ).toBeTruthy();
-    }
-  );
 
   it('should init all ProductFeatures when initialized', () => {
     const experimentalFeatures = {} as ExperimentalFeatures;
     const productFeaturesService = new ProductFeaturesService(
       loggerMock.create(),
-      experimentalFeatures,
-      false
+      experimentalFeatures
     );
 
     const featuresSetup = featuresPluginMock.createSetup();
@@ -105,8 +86,7 @@ describe('ProductFeaturesService', () => {
     const experimentalFeatures = {} as ExperimentalFeatures;
     const productFeaturesService = new ProductFeaturesService(
       loggerMock.create(),
-      experimentalFeatures,
-      false
+      experimentalFeatures
     );
 
     const featuresSetup = featuresPluginMock.createSetup();
@@ -156,8 +136,7 @@ describe('ProductFeaturesService', () => {
     const experimentalFeatures = {} as ExperimentalFeatures;
     const productFeaturesService = new ProductFeaturesService(
       loggerMock.create(),
-      experimentalFeatures,
-      false
+      experimentalFeatures
     );
 
     const featuresSetup = featuresPluginMock.createSetup();
@@ -206,8 +185,7 @@ describe('ProductFeaturesService', () => {
     const experimentalFeatures = {} as ExperimentalFeatures;
     const productFeaturesService = new ProductFeaturesService(
       loggerMock.create(),
-      experimentalFeatures,
-      false
+      experimentalFeatures
     );
 
     productFeaturesService.isApiPrivilegeEnabled('writeEndpointExceptions');
@@ -241,8 +219,7 @@ describe('ProductFeaturesService', () => {
       const experimentalFeatures = {} as ExperimentalFeatures;
       const productFeaturesService = new ProductFeaturesService(
         loggerMock.create(),
-        experimentalFeatures,
-        false
+        experimentalFeatures
       );
       productFeaturesService.registerApiAccessControl(mockHttpSetup);
 
@@ -260,8 +237,7 @@ describe('ProductFeaturesService', () => {
         const experimentalFeatures = {} as ExperimentalFeatures;
         const productFeaturesService = new ProductFeaturesService(
           loggerMock.create(),
-          experimentalFeatures,
-          false
+          experimentalFeatures
         );
         productFeaturesService.registerApiAccessControl(mockHttpSetup);
 
@@ -278,8 +254,7 @@ describe('ProductFeaturesService', () => {
         const experimentalFeatures = {} as ExperimentalFeatures;
         const productFeaturesService = new ProductFeaturesService(
           loggerMock.create(),
-          experimentalFeatures,
-          false
+          experimentalFeatures
         );
         productFeaturesService.registerApiAccessControl(mockHttpSetup);
 
@@ -302,8 +277,7 @@ describe('ProductFeaturesService', () => {
         const experimentalFeatures = {} as ExperimentalFeatures;
         productFeaturesService = new ProductFeaturesService(
           loggerMock.create(),
-          experimentalFeatures,
-          false
+          experimentalFeatures
         );
         productFeaturesService.registerApiAccessControl(mockHttpSetup);
         mockIsActionRegistered = MockedProductFeatures.mock.instances[0]

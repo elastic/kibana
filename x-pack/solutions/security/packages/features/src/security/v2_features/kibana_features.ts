@@ -49,7 +49,6 @@ const alertingFeatures = SECURITY_RULE_TYPES.map((ruleTypeId) => ({
 
 export const getSecurityV2BaseKibanaFeature = ({
   savedObjects,
-  isServerless,
 }: SecurityFeatureParams): BaseKibanaFeatureConfig => ({
   deprecated: {
     notice: i18n.translate(
@@ -93,23 +92,13 @@ export const getSecurityV2BaseKibanaFeature = ({
         default: [
           {
             feature: SECURITY_FEATURE_ID_V3,
-            privileges: [
-              'minimal_all',
-              'global_artifact_management_all',
-              // please do not use `isServerless` for other things
-              ...(isServerless ? [] : ['endpoint_exceptions_all']),
-            ],
+            privileges: ['minimal_all', 'global_artifact_management_all'],
           },
         ],
         minimal: [
           {
             feature: SECURITY_FEATURE_ID_V3,
-            privileges: [
-              'minimal_all',
-              'global_artifact_management_all',
-              // please do not use `isServerless` for other things
-              ...(isServerless ? [] : ['endpoint_exceptions_all']),
-            ],
+            privileges: ['minimal_all', 'global_artifact_management_all'],
           },
         ],
       },
@@ -132,13 +121,7 @@ export const getSecurityV2BaseKibanaFeature = ({
     read: {
       replacedBy: {
         default: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['read'] }],
-        minimal: [
-          {
-            feature: SECURITY_FEATURE_ID_V3,
-            // please do not use `isServerless` for other things
-            privileges: ['minimal_read', ...(isServerless ? [] : ['endpoint_exceptions_read'])],
-          },
-        ],
+        minimal: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['minimal_read'] }],
       },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
       catalogue: [APP_ID],

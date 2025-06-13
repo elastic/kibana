@@ -18,15 +18,10 @@ export interface SecurityFeatureParams {
    */
   experimentalFeatures: Record<string, boolean>;
   savedObjects: string[];
-  /**
-   * Sort of temporary solution for merging diverged ESS/serverless offering Endpoint Exception privileges,
-   * it would be best not to use it for other things.
-   */
-  isServerless: boolean;
 }
 
-// Omit<> not generic security app features here
-export type DefaultSecurityProductFeaturesConfig = Record<
-  ProductFeatureSecurityKey,
-  ProductFeatureKibanaConfig<SecuritySubFeatureId>
+export type DefaultSecurityProductFeaturesConfig = Omit<
+  Record<ProductFeatureSecurityKey, ProductFeatureKibanaConfig<SecuritySubFeatureId>>,
+  ProductFeatureSecurityKey.endpointExceptions
+  // | add not generic security app features here
 >;

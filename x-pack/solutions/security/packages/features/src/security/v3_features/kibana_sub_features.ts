@@ -8,6 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
+import {
+  ProductFeaturesPrivilegeId,
+  ProductFeaturesPrivileges,
+} from '../../product_features_privileges';
 
 import { SecuritySubFeatureId } from '../../product_features_keys';
 import { APP_ID } from '../../constants';
@@ -688,17 +692,10 @@ const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
           includeIn: 'all',
           name: TRANSLATIONS.all,
           savedObject: {
-            all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
+            all: [],
             read: [],
           },
-          api: [
-            'lists-all',
-            'lists-read',
-            'lists-summary',
-            `${APP_ID}-showEndpointExceptions`,
-            `${APP_ID}-crudEndpointExceptions`,
-          ],
-          ui: ['showEndpointExceptions', 'crudEndpointExceptions'],
+          ...ProductFeaturesPrivileges[ProductFeaturesPrivilegeId.endpointExceptions].all,
         },
         {
           id: 'endpoint_exceptions_read',
@@ -708,8 +705,7 @@ const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
             all: [],
             read: [],
           },
-          api: ['lists-read', 'lists-summary', `${APP_ID}-showEndpointExceptions`],
-          ui: ['showEndpointExceptions'],
+          ...ProductFeaturesPrivileges[ProductFeaturesPrivilegeId.endpointExceptions].read,
         },
       ],
     },

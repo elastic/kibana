@@ -135,9 +135,6 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
       SecuritySubFeatureId.globalArtifactManagement,
     ],
   },
-  [ProductFeatureSecurityKey.endpointExceptions]: {
-    subFeatureIds: [SecuritySubFeatureId.endpointExceptions],
-  },
 
   // Endpoint Complete Tier:
   // Allows access to create/update HIEs
