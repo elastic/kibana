@@ -52,6 +52,7 @@ export const deduplicateAttackDiscoveries = async ({
     index: indexPattern,
     size: alertUuids.length,
     query: { bool: { must: [{ terms: { [ALERT_INSTANCE_ID]: alertUuids } }] } },
+    ignore_unavailable: true,
   });
 
   // 3. Collect found alert IDs
