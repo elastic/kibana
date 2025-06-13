@@ -11,8 +11,14 @@ import { ConfigKey, SyntheticsMonitor } from '../../common/runtime_types';
 import * as utils from '../synthetics_service/utils';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { syntheticsMonitorSavedObjectType } from '../../common/types/saved_objects';
+import {
+  SavedObjectsClientContract,
+  type SavedObjectsFindOptions,
+} from '@kbn/core-saved-objects-api-server';
+import {
+  legacySyntheticsMonitorTypeSingle,
+  syntheticsMonitorSavedObjectType,
+} from '../../common/types/saved_objects';
 
 // Mock the utils functions
 jest.mock('../synthetics_service/utils', () => ({
@@ -61,11 +67,13 @@ describe('MonitorConfigRepository', () => {
 
     it('should propagate errors', async () => {
       const id = 'test-id';
-      const error = new Error('Not found');
+      const error = new Error(`Failed to get monitor with id ${id}: Not found`);
 
       soClient.get.mockRejectedValue(error);
 
-      await expect(repository.get(id)).rejects.toThrow(error);
+      await expect(repository.get(id)).rejects.toThrow(
+        /Failed to get monitor with id test-id: Not found/
+      );
     });
   });
 
@@ -85,7 +93,6 @@ describe('MonitorConfigRepository', () => {
       );
       (utils.normalizeSecrets as jest.Mock).mockReturnValue({
         ...mockDecryptedMonitor,
-        normalizedSecrets: true,
       });
 
       const result = await repository.getDecrypted(id, spaceId);
@@ -96,7 +103,10 @@ describe('MonitorConfigRepository', () => {
         { namespace: spaceId }
       );
       expect(utils.normalizeSecrets).toHaveBeenCalledWith(mockDecryptedMonitor);
-      expect(result).toEqual({ ...mockDecryptedMonitor, normalizedSecrets: true });
+      expect(result).toEqual({
+        decryptedMonitor: mockDecryptedMonitor,
+        normalizedMonitor: mockDecryptedMonitor,
+      });
     });
   });
 
@@ -157,14 +167,14 @@ describe('MonitorConfigRepository', () => {
       soClient.create.mockResolvedValue(mockCreatedMonitor);
 
       const result = await repository.create({
-        id: '',
+        id: 'test',
         normalizedMonitor,
       });
 
       expect(utils.formatSecrets).toHaveBeenCalledWith({
         ...normalizedMonitor,
-        [ConfigKey.MONITOR_QUERY_ID]: '',
-        [ConfigKey.CONFIG_ID]: '',
+        [ConfigKey.MONITOR_QUERY_ID]: 'test',
+        [ConfigKey.CONFIG_ID]: 'test',
         revision: 1,
       });
 
@@ -172,12 +182,12 @@ describe('MonitorConfigRepository', () => {
         syntheticsMonitorSavedObjectType,
         {
           ...normalizedMonitor,
-          [ConfigKey.MONITOR_QUERY_ID]: '',
-          [ConfigKey.CONFIG_ID]: '',
+          [ConfigKey.MONITOR_QUERY_ID]: 'test',
+          [ConfigKey.CONFIG_ID]: 'test',
           revision: 1,
           formattedSecrets: true,
         },
-        undefined
+        { id: 'test', overwrite: true }
       );
 
       expect(result).toBe(mockCreatedMonitor);
@@ -338,7 +348,17 @@ describe('MonitorConfigRepository', () => {
         page: 1,
       } as any;
 
-      soClient.find.mockResolvedValue(mockFindResult);
+      soClient.find.mockImplementation((opts: SavedObjectsFindOptions) => {
+        if (opts.type !== syntheticsMonitorSavedObjectType) {
+          return {
+            saved_objects: [],
+            total: 0,
+            per_page: 0,
+            page: 1,
+          };
+        }
+        return mockFindResult;
+      });
 
       const result = await repository.find(options);
 
@@ -347,7 +367,7 @@ describe('MonitorConfigRepository', () => {
         ...options,
       });
 
-      expect(result).toBe(mockFindResult);
+      expect(result).toStrictEqual(mockFindResult);
     });
 
     it('should use default perPage if not provided', async () => {
@@ -411,7 +431,7 @@ describe('MonitorConfigRepository', () => {
         encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser
       ).toHaveBeenCalledWith({
         filter,
-        type: syntheticsMonitorSavedObjectType,
+        type: [syntheticsMonitorSavedObjectType, legacySyntheticsMonitorTypeSingle],
         perPage: 500,
         namespaces: [spaceId],
       });
@@ -524,7 +544,7 @@ describe('MonitorConfigRepository', () => {
         namespaces: ['*'],
       });
 
-      expect(result).toEqual(mockMonitors);
+      expect(result).toEqual([...mockMonitors, ...mockMonitors]);
     });
 
     it('should not include namespaces if showFromAllSpaces is false', async () => {
@@ -599,7 +619,7 @@ describe('MonitorConfigRepository', () => {
       const result = await repository.getAll(options);
 
       expect(pointInTimeFinderMock.close).toHaveBeenCalled();
-      expect(result).toEqual(mockMonitors);
+      expect(result).toEqual([...mockMonitors, ...mockMonitors]);
       // Should not throw an error when close fails
     });
   });

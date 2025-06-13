@@ -176,10 +176,7 @@ export class MonitorConfigRepository {
     const legacyOptions = { ...options };
     if (legacyOptions.filter) {
       // replace all instances of syntheticsMonitorAttributes with legacyMonitorAttributes
-      legacyOptions.filter = legacyOptions.filter.replace(
-        new RegExp(syntheticsMonitorAttributes, 'g'),
-        legacyMonitorAttributes
-      );
+      legacyOptions.filter = this.handleLegacyFilter(legacyOptions.filter);
     }
     const legacyFindResult = this.soClient.find<T>({
       type: legacySyntheticsMonitorTypeSingle,
@@ -242,6 +239,11 @@ export class MonitorConfigRepository {
     showFromAllSpaces?: boolean;
   } & Pick<SavedObjectsFindOptions, 'sortField' | 'sortOrder' | 'fields' | 'searchFields'>) {
     const getConfigs = async (syntheticsMonitorType: string) => {
+      const findFilter =
+        syntheticsMonitorType === legacySyntheticsMonitorTypeSingle
+          ? this.handleLegacyFilter(filter)
+          : filter;
+
       const finder = this.soClient.createPointInTimeFinder<T>({
         type: syntheticsMonitorType,
         perPage: 5000,
@@ -249,7 +251,7 @@ export class MonitorConfigRepository {
         sortField,
         sortOrder,
         fields,
-        filter,
+        filter: findFilter,
         searchFields,
         ...(showFromAllSpaces && { namespaces: ['*'] }),
       });
@@ -272,4 +274,13 @@ export class MonitorConfigRepository {
       return [...configs, ...legacyConfigs];
     });
   }
+
+  handleLegacyFilter = (filter?: string): string | undefined => {
+    if (!filter) {
+      return filter;
+    }
+
+    // Replace syntheticsMonitorAttributes with legacyMonitorAttributes in the filter
+    return filter.replace(new RegExp(syntheticsMonitorAttributes, 'g'), legacyMonitorAttributes);
+  };
 }

@@ -491,14 +491,14 @@ const soData = [
       ...payloadData[0],
       revision: 1,
     } as any),
-    type: 'synthetics-monitor',
+    type: 'synthetics-monitor-multiple',
   },
   {
     attributes: formatSecrets({
       ...payloadData[1],
       revision: 1,
     } as any),
-    type: 'synthetics-monitor',
+    type: 'synthetics-monitor-multiple',
   },
 ];
 

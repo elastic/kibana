@@ -8,7 +8,6 @@ import { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 import { EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
 import { getUptimeESMockClient } from '../../queries/test_helpers';
 
-import * as commonLibs from '../common';
 import * as allLocationsFn from '../../synthetics_service/get_all_locations';
 import { OverviewStatusService, SUMMARIES_PAGE_SIZE } from './overview_status_service';
 import times from 'lodash/times';
@@ -35,29 +34,29 @@ jest.mock('../../saved_objects/synthetics_monitor/process_monitors', () => ({
   getAllMonitors: jest.fn(),
 }));
 
-jest.spyOn(commonLibs, 'getMonitors').mockResolvedValue({
-  per_page: 10,
-  saved_objects: [
-    {
-      id: 'mon-1',
-      attributes: {
-        enabled: false,
-        locations: [{ id: 'us-east1' }, { id: 'us-west1' }, { id: 'japan' }],
-      },
-    },
-    {
-      id: 'mon-2',
-      attributes: {
-        enabled: true,
-        locations: [{ id: 'us-east1' }, { id: 'us-west1' }, { id: 'japan' }],
-        schedule: {
-          number: '10',
-          unit: 'm',
-        },
-      },
-    },
-  ],
-} as any);
+// jest.spyOn(commonLibs, 'getMonitors').mockResolvedValue({
+//   per_page: 10,
+//   saved_objects: [
+//     {
+//       id: 'mon-1',
+//       attributes: {
+//         enabled: false,
+//         locations: [{ id: 'us-east1' }, { id: 'us-west1' }, { id: 'japan' }],
+//       },
+//     },
+//     {
+//       id: 'mon-2',
+//       attributes: {
+//         enabled: true,
+//         locations: [{ id: 'us-east1' }, { id: 'us-west1' }, { id: 'japan' }],
+//         schedule: {
+//           number: '10',
+//           unit: 'm',
+//         },
+//       },
+//     },
+//   ],
+// } as any);
 
 describe('current status route', () => {
   const testMonitors = [
