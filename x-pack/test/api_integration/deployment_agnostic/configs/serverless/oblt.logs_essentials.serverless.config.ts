@@ -12,6 +12,7 @@ export default createServerlessTestConfig({
   tier: 'oblt_logs_essentials',
   testFiles: [require.resolve('./oblt.logs_essentials.index.ts')],
   junit: {
-    reportName: 'Serverless Observability Essentials - Deployment-agnostic API Integration Tests',
+    reportName:
+      'Serverless Observability Logs Essentials - Deployment-agnostic API Integration Tests',
   },
 });
