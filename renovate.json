@@ -690,7 +690,8 @@
     {
       "groupName": "@reduxjs/toolkit",
       "matchDepNames": [
-        "@reduxjs/toolkit"
+        "@reduxjs/toolkit",
+        "immer"
       ],
       "reviewers": [
         "team:ml-ui",
@@ -1028,8 +1029,7 @@
       "groupName": "@elastic/kibana-management dependencies",
       "matchDepNames": [
         "csstype",
-        "cronstrue",
-        "immer"
+        "cronstrue"
       ],
       "reviewers": [
         "team:kibana-management"
