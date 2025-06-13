@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, lens } = getPageObjects(['visualize', 'lens']);
+  const { visualize, lens, timePicker } = getPageObjects(['visualize', 'lens', 'timePicker']);
   const testSubjects = getService('testSubjects');
   const inspector = getService('inspector');
 
@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow switch between table page', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
+      await timePicker.setDefaultAbsoluteRange();
 
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
