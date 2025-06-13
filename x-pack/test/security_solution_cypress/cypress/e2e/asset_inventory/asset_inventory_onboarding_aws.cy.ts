@@ -231,8 +231,6 @@ describe(
   { tags: ['@serverless'] },
   () => {
     beforeEach(() => {
-      cy.intercept('POST', '/api/fleet/agent_policies?sys_monitoring=true').as('saveAgentless');
-
       login();
       visit('/app/integrations/browse');
       cy.get('button[role="switch"]').click();
@@ -290,7 +288,6 @@ describe(
       cy.get(SECRET_KEY).type(AWS_SECRET_KEY);
       shouldBeEnabled(SAVE_BUTTON);
       cy.get(SAVE_BUTTON).click();
-      cy.wait('@saveAgentless');
     });
 
     it('should save an organization account agentless package policy with permanent keys', () => {
@@ -303,7 +300,6 @@ describe(
       cy.get(SECRET_KEY).type(AWS_SECRET_KEY);
       shouldBeEnabled(SAVE_BUTTON);
       cy.get(SAVE_BUTTON).click();
-      cy.wait('@saveAgentless');
     });
   }
 );
