@@ -98,16 +98,17 @@ export function StreamsTreeTable({
   const [sortField, setSortField] = useState<SortableField>('nameSortKey');
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
 
-  interface EnrichedStreamTree extends StreamTree {
+  interface EnrichedStreamTree extends Omit<StreamTree, 'children'> {
+    children: EnrichedStreamTree[];
     nameSortKey: string;
     documentsCount: number;
     retentionMs: number;
   }
   type TableRow = EnrichedStreamTree & {
     level: number;
-    parentNameSortKey: string;
-    parentDocumentsCount: number;
-    parentRetentionMs: number;
+    rootNameSortKey: string;
+    rootDocumentsCount: number;
+    rootRetentionMs: number;
   };
 
   const sortRootsAndFlatten = useCallback(
@@ -124,36 +125,55 @@ export function StreamsTreeTable({
         return 0;
       });
       const result: TableRow[] = [];
-      function walk(node: EnrichedStreamTree, level = 0, parent?: EnrichedStreamTree) {
-        const row: TableRow = {
-          ...node,
-          level,
-          parentNameSortKey: parent ? parent.nameSortKey : node.nameSortKey,
-          parentDocumentsCount: parent ? parent.documentsCount : node.documentsCount,
-          parentRetentionMs: parent ? parent.retentionMs : node.retentionMs,
+      const walk = (node: EnrichedStreamTree, level: number, rootRow: TableRow) => {
+        node.children.forEach((child: EnrichedStreamTree) => {
+          const childRow: TableRow = {
+            ...child,
+            level,
+            rootNameSortKey: rootRow.rootNameSortKey,
+            rootDocumentsCount: rootRow.rootDocumentsCount,
+            rootRetentionMs: rootRow.rootRetentionMs,
+          };
+          result.push(childRow);
+          walk(child, level + 1, rootRow);
+        });
+      };
+      sortedRoots.forEach((root) => {
+        const rootRow: TableRow = {
+          ...root,
+          level: 0,
+          rootNameSortKey: root.nameSortKey,
+          rootDocumentsCount: root.documentsCount,
+          rootRetentionMs: root.retentionMs,
         };
-        result.push(row);
-        node.children.forEach((child: any) => walk(child, level + 1, node));
-      }
-      sortedRoots.forEach((n) => walk(n));
+        result.push(rootRow);
+        walk(root, 1, rootRow);
+      });
       return result;
     },
     []
   );
 
   const items = React.useMemo(() => {
-    const tree = asTrees(streams ?? []).map((item) => {
-      const documentsCount = docCounts[item.name] ?? 0;
+    const enrich = (node: StreamTree): EnrichedStreamTree => {
+      const documentsCount = docCounts[node.name] ?? 0;
       let retentionMs = 0;
-      const lc = item.effective_lifecycle;
+      const lc = node.effective_lifecycle;
       if (isDslLifecycle(lc)) {
         retentionMs = parseDurationInSeconds(lc.dsl.data_retention ?? '') * 1000;
       } else if (isIlmLifecycle(lc)) {
         retentionMs = Number.POSITIVE_INFINITY;
       }
-      const nameSortKey = `${getSegments(item.name).length}_${item.name.toLowerCase()}`;
-      return { ...item, nameSortKey, documentsCount, retentionMs };
-    });
+      const nameSortKey = `${getSegments(node.name).length}_${node.name.toLowerCase()}`;
+      return {
+        ...node,
+        nameSortKey,
+        documentsCount,
+        retentionMs,
+        children: node.children.map(enrich),
+      } as EnrichedStreamTree;
+    };
+    const tree = asTrees(streams ?? []).map(enrich);
     return sortRootsAndFlatten(tree, sortField, sortDirection);
   }, [streams, docCounts, sortField, sortDirection, sortRootsAndFlatten]);
 
@@ -191,7 +211,7 @@ export function StreamsTreeTable({
           name: i18n.translate('xpack.streams.streamsTreeTable.nameColumnName', {
             defaultMessage: 'Name',
           }),
-          sortable: (row: TableRow) => (row.level === 0 ? row.nameSortKey : row.parentNameSortKey),
+          sortable: (row: TableRow) => row.rootNameSortKey,
           dataType: 'string',
           render: (_: any, item) => (
             <EuiFlexGroup
@@ -226,8 +246,7 @@ export function StreamsTreeTable({
             defaultMessage: 'Documents',
           }),
           width: '280px',
-          sortable: (row: TableRow) =>
-            row.level === 0 ? row.documentsCount : row.parentDocumentsCount,
+          sortable: (row: TableRow) => row.rootDocumentsCount,
           dataType: 'number',
           render: (_: any, item: any) =>
             item.data_stream ? (
@@ -241,7 +260,7 @@ export function StreamsTreeTable({
           }),
           width: '160px',
           align: 'left',
-          sortable: (row: TableRow) => (row.level === 0 ? row.retentionMs : row.parentRetentionMs),
+          sortable: (row: TableRow) => row.rootRetentionMs,
           dataType: 'number',
           render: (_: any, item: any) => <RetentionColumn lifecycle={item.effective_lifecycle} />,
         },
