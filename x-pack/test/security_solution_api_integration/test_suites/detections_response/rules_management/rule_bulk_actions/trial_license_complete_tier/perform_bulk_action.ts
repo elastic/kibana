@@ -2691,8 +2691,9 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         const expectedUpdatedRules = Object.values(generatedGapEvents)
-          .map((event) => event.rule)
-          .slice(0, 2);
+          .slice(0, 2)
+          .map((event) => event.rule);
+
         expect(body.attributes.results).toEqual({
           updated: expect.arrayContaining(
             expectedUpdatedRules.map((expected) => expect.objectContaining(expected))
