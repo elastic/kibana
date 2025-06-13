@@ -72,6 +72,7 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
       share,
       dataViews,
       embeddable: plugins.embeddable,
+      mlApi: plugins.ml?.mlApi,
     });
 
     if (!observabilityAIAssistant) {

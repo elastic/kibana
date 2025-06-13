@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { type LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import React from 'react';
-import useAsync from 'react-use/lib/useAsync';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { LogsSourceConfiguration, normalizeLogsSource } from '../../utils/logs_source';
+import { type DataViewsContract } from '@kbn/data-views-plugin/public';
+import { createConsoleInspector } from '@kbn/xstate-utils';
+import { type MlPluginStart } from '@kbn/ml-plugin/public';
+import { LogsSourceConfiguration, resolveLogsSourceActor } from '../../utils/logs_source';
+import { loadMlCapabilitiesActor } from '../../utils/ml_capabilities';
 import { LogCategories, LogCategoriesDependencies } from '../log_categories';
 import { LogsOverviewErrorContent } from './logs_overview_error_content';
 import { LogsOverviewLoadingContent } from './logs_overview_loading_content';
+import { LogsOverviewStateContext, logsOverviewStateMachine } from './logs_overview_state_provider';
 
 export interface LogsOverviewProps {
   dependencies: LogsOverviewDependencies;
@@ -28,6 +31,7 @@ export interface LogsOverviewProps {
 export type LogsOverviewDependencies = LogCategoriesDependencies & {
   logsDataAccess: LogsDataAccessPluginStart;
   dataViews: DataViewsContract;
+  mlApi: MlPluginStart['mlApi'];
 };
 
 export const LogsOverview: React.FC<LogsOverviewProps> = React.memo(
@@ -37,34 +41,74 @@ export const LogsOverview: React.FC<LogsOverviewProps> = React.memo(
     logsSource = defaultLogsSource,
     timeRange,
   }) => {
-    const normalizedLogsSource = useAsync(
-      () =>
-        normalizeLogsSource({
-          logsDataAccess: dependencies.logsDataAccess,
-          dataViewsService: dependencies.dataViews,
-        })(logsSource),
-      [dependencies.dataViews, dependencies.logsDataAccess, logsSource]
-    );
-
-    if (normalizedLogsSource.loading) {
-      return <LogsOverviewLoadingContent />;
-    }
-
-    if (normalizedLogsSource.error != null || normalizedLogsSource.value == null) {
-      return <LogsOverviewErrorContent error={normalizedLogsSource.error} />;
-    }
-
     return (
-      <LogCategories
-        dependencies={dependencies}
-        documentFilters={documentFilters}
-        logsSource={normalizedLogsSource.value}
-        timeRange={timeRange}
-      />
+      <LogsOverviewStateContext.Provider
+        logic={logsOverviewStateMachine.provide({
+          actors: {
+            resolveLogsSource: resolveLogsSourceActor({
+              logsDataAccess: dependencies.logsDataAccess,
+              dataViewsService: dependencies.dataViews,
+            }),
+            loadMlCapabilities: loadMlCapabilitiesActor({
+              mlApi: dependencies.mlApi,
+            }),
+          },
+        })}
+        options={{
+          input: {
+            logsSource,
+          },
+          inspect: consoleInspector,
+        }}
+      >
+        <LogsOverviewContent
+          dependencies={dependencies}
+          documentFilters={documentFilters}
+          timeRange={timeRange}
+        />
+      </LogsOverviewStateContext.Provider>
     );
+  }
+);
+
+export interface LogsOverviewContentProps {
+  dependencies: LogsOverviewDependencies;
+  documentFilters?: QueryDslQueryContainer[];
+  timeRange: {
+    start: string;
+    end: string;
+  };
+}
+
+export const LogsOverviewContent = React.memo<LogsOverviewContentProps>(
+  ({ dependencies, documentFilters, timeRange }) => {
+    const state = LogsOverviewStateContext.useSelector(identity);
+
+    if (state.matches('initializing')) {
+      return <LogsOverviewLoadingContent />;
+    } else if (state.matches('failedToInitialize')) {
+      return <LogsOverviewErrorContent error={state.context.error} />;
+    } else if (state.matches('initialized')) {
+      if (state.context.logsSource.status === 'unresolved') {
+        return <LogsOverviewErrorContent error={new Error('Logs source is unresolved')} />;
+      } else {
+        return (
+          <LogCategories
+            dependencies={dependencies}
+            documentFilters={documentFilters}
+            logsSource={state.context.logsSource.value}
+            timeRange={timeRange}
+          />
+        );
+      }
+    }
   }
 );
 
 const defaultDocumentFilters: QueryDslQueryContainer[] = [];
 
 const defaultLogsSource: LogsSourceConfiguration = { type: 'shared_setting' };
+
+const identity = <T extends any>(value: T): T => value;
+
+const consoleInspector = createConsoleInspector();

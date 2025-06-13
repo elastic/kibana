@@ -7,6 +7,7 @@
 
 import { type DataViewsContract, type DataView } from '@kbn/data-views-plugin/common';
 import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
+import { fromPromise } from 'xstate5';
 
 export type LogsSourceConfiguration =
   | SharedSettingLogsSourceConfiguration
@@ -35,6 +36,27 @@ export interface DataViewLogsSourceConfiguration {
 export type ResolvedIndexNameLogsSourceConfiguration = IndexNameLogsSourceConfiguration & {
   dataView: DataView;
 };
+
+export const resolveLogsSourceActor = ({
+  logsDataAccess,
+  dataViewsService,
+}: {
+  logsDataAccess: LogsDataAccessPluginStart;
+  dataViewsService: DataViewsContract;
+}) =>
+  fromPromise<
+    ResolvedIndexNameLogsSourceConfiguration,
+    {
+      logsSource: LogsSourceConfiguration;
+    }
+  >(async ({ input: { logsSource } }) => {
+    const normalizedLogsSource = await normalizeLogsSource({
+      logsDataAccess,
+      dataViewsService,
+    })(logsSource);
+
+    return normalizedLogsSource;
+  });
 
 export const normalizeLogsSource =
   ({
