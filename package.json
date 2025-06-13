@@ -1311,7 +1311,7 @@
     "react-shortcuts": "^2.1.0",
     "react-use": "^15.3.8",
     "react-virtualized": "^9.22.6",
-    "react-window": "^1.8.10",
+    "react-window": "^1.8.11",
     "react-window-infinite-loader": "^1.0.9",
     "reduce-reducers": "^1.0.4",
     "redux": "^4.2.1",
