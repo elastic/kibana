@@ -7,15 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObject, SavedObjectMigrationFn } from '@kbn/core/server';
-
-import {
-  extractReferences,
-  injectReferences,
-} from '../../../common/dashboard_saved_object/persistable_state/dashboard_saved_object_references';
-import type { DashboardSavedObjectTypeMigrationsDeps } from './dashboard_saved_object_migrations';
+import { inspect } from 'util';
+import { SavedObject, SavedObjectMigrationParams } from '@kbn/core-saved-objects-server';
 import type { DashboardSavedObjectAttributes } from '../schema';
-import { itemAttrsToSavedObject, savedObjectToItem } from '../../content_management/latest';
+import type { DashboardSavedObjectTypeMigrationsDeps } from './dashboard_saved_object_migrations';
+import { itemToSavedObject, savedObjectToItem } from '../../content_management/latest';
 
 /**
  * In 7.8.0 we introduced dashboard drilldowns which are stored inside dashboard saved object as part of embeddable state
@@ -26,52 +22,65 @@ import { itemAttrsToSavedObject, savedObjectToItem } from '../../content_managem
  * 1. In addition to regular `panel_` we will get new references which are extracted by `embeddablePersistableStateService` (dashboard drilldown references)
  * 2. `panel_` references will be regenerated
  * All other references like index-patterns are forwarded non touched
- * @param deps
+ *
+ * This migration uses the deferred flag on {@link SavedObjectMigrationParams | SavedObjectMigrationParams} which means the
+ * migration only runs when the saved object is accessed. This ensures that the embeddable service is available and can be
+ * used to extract the references correctly.
  */
 export function createExtractPanelReferencesMigration(
   deps: DashboardSavedObjectTypeMigrationsDeps
-): SavedObjectMigrationFn<DashboardSavedObjectAttributes> {
-  return (doc) => {
-    const references = doc.references ?? [];
+): SavedObjectMigrationParams<DashboardSavedObjectAttributes> {
+  return {
+    // @ts-expect-error Remove when deferred saved migrations are publicly available
+    deferred: true,
+    transform: (doc, { log }) => {
+      const references = doc.references ?? [];
+      const getExceptionMessage = (error: Error) =>
+        `Exception @ createExtractPanelReferencesMigration while trying to extract dashboard panels!\n` +
+        `${error.stack}\n` +
+        `dashboard: ${inspect(doc, false, null)}`;
+      /**
+       * Remembering this because dashboard's extractReferences won't return those
+       * All other references like `panel_` will be overwritten
+       */
+      const oldNonPanelReferences = references.filter((ref) => !ref.name.startsWith('panel_'));
 
-    /**
-     * Remembering this because dashboard's extractReferences won't return those
-     * All other references like `panel_` will be overwritten
-     */
-    const oldNonPanelReferences = references.filter((ref) => !ref.name.startsWith('panel_'));
+      const embeddableStart = deps.getEmbeddableStart();
+      if (!embeddableStart) {
+        log.warn(
+          `Exception @ createExtractPanelReferencesMigration!\nEmbeddable start service is not available.`
+        );
+        return doc;
+      }
 
-    // Use Content Management to convert the saved object to the DashboardAttributes
-    // expected by injectReferences
-    const { item, error: itemError } = savedObjectToItem(
-      doc as unknown as SavedObject<DashboardSavedObjectAttributes>,
-      false
-    );
+      // Content Management transform functions `savedObjectToItem` and `itemToSavedObject`
+      // will run embeddable inject and extract functions for each panel
+      const { item, error: itemError } = savedObjectToItem(
+        doc as unknown as SavedObject<DashboardSavedObjectAttributes>,
+        embeddableStart,
+        false
+      );
 
-    if (itemError) throw itemError;
+      if (itemError) {
+        log.warn(getExceptionMessage(itemError));
+        return doc;
+      }
 
-    const parsedAttributes = item.attributes;
-    const injectedAttributes = injectReferences(
-      {
-        attributes: parsedAttributes,
-        references,
-      },
-      { embeddablePersistableStateService: deps.embeddable }
-    );
+      const {
+        attributes,
+        error: attributesError,
+        references: newPanelReferences,
+      } = itemToSavedObject({ attributes: item.attributes, embeddable: embeddableStart });
+      if (attributesError) {
+        log.warn(getExceptionMessage(attributesError));
+        return doc;
+      }
 
-    const { attributes: extractedAttributes, references: newPanelReferences } = extractReferences(
-      { attributes: injectedAttributes, references: [] },
-      { embeddablePersistableStateService: deps.embeddable }
-    );
-
-    const { attributes, error: attributesError } = itemAttrsToSavedObject({
-      attributes: extractedAttributes,
-    });
-    if (attributesError) throw attributesError;
-
-    return {
-      ...doc,
-      references: [...oldNonPanelReferences, ...newPanelReferences],
-      attributes,
-    };
+      return {
+        ...doc,
+        references: [...oldNonPanelReferences, ...newPanelReferences],
+        attributes,
+      };
+    },
   };
 }
