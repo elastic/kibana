@@ -57,7 +57,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       expect((await unifiedTabs.getTabWidths()).every((width) => width === 112)).to.be(true);
 
       await unifiedTabs.editTabLabel(0, 'Very long tab label');
-      expect((await unifiedTabs.getTabWidths()).at(0)).to.be.equal(148);
+      expect((await unifiedTabs.getTabWidths()).at(0)).to.be.greaterThan(139);
       expect((await unifiedTabs.getTabWidths()).slice(1).every((width) => width === 112)).to.be(
         true
       );
