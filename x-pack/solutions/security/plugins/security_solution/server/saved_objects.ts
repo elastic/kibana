@@ -36,7 +36,6 @@ const types = [
   riskEngineConfigurationType,
   entityEngineDescriptorType,
   privilegeMonitoringType,
-  privilegeMonitoringIndexSourceType,
   monitoringEntitySourceType,
   protectionUpdatesNoteType,
   promptType,
