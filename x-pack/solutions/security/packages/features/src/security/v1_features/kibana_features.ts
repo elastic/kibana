@@ -94,15 +94,22 @@ export const getSecurityBaseKibanaFeature = ({
         default: [
           { feature: TIMELINE_FEATURE_ID, privileges: ['all'] },
           { feature: NOTES_FEATURE_ID, privileges: ['all'] },
-          { feature: SECURITY_FEATURE_ID_V3, privileges: ['all'] },
+          {
+            feature: SECURITY_FEATURE_ID_V3,
+            privileges: ['minimal_all', 'global_artifact_management_all'],
+          },
         ],
         minimal: [
           { feature: TIMELINE_FEATURE_ID, privileges: ['all'] },
           { feature: NOTES_FEATURE_ID, privileges: ['all'] },
           {
             feature: SECURITY_FEATURE_ID_V3,
-            // please do not use `isServerless` for other things
-            privileges: ['minimal_all', ...(isServerless ? [] : ['endpoint_exceptions_all'])],
+            privileges: [
+              'minimal_all',
+              'global_artifact_management_all',
+              // please do not use `isServerless` for other things
+              ...(isServerless ? [] : ['endpoint_exceptions_all']),
+            ],
           },
         ],
       },

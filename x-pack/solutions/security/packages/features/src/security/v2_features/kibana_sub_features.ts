@@ -734,7 +734,10 @@ const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
       privileges: [
         {
           replacedBy: [
-            { feature: SECURITY_FEATURE_ID_V3, privileges: ['endpoint_exceptions_all'] },
+            {
+              feature: SECURITY_FEATURE_ID_V3,
+              privileges: ['endpoint_exceptions_all', 'global_artifact_management_all'],
+            },
           ],
           id: 'endpoint_exceptions_all',
           includeIn: 'all',

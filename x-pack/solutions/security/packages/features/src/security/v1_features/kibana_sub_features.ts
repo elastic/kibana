@@ -94,7 +94,10 @@ const trustedApplicationsSubFeature = (): SubFeatureConfig => ({
       privileges: [
         {
           replacedBy: [
-            { feature: SECURITY_FEATURE_ID_V3, privileges: ['trusted_applications_all'] },
+            {
+              feature: SECURITY_FEATURE_ID_V3,
+              privileges: ['trusted_applications_all', 'global_artifact_management_all'],
+            },
           ],
           api: [
             'lists-all',
@@ -157,7 +160,10 @@ const hostIsolationExceptionsBasicSubFeature = (): SubFeatureConfig => ({
       privileges: [
         {
           replacedBy: [
-            { feature: SECURITY_FEATURE_ID_V3, privileges: ['host_isolation_exceptions_all'] },
+            {
+              feature: SECURITY_FEATURE_ID_V3,
+              privileges: ['host_isolation_exceptions_all', 'global_artifact_management_all'],
+            },
           ],
           api: [
             'lists-all',
@@ -216,7 +222,12 @@ const blocklistSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['blocklist_all'] }],
+          replacedBy: [
+            {
+              feature: SECURITY_FEATURE_ID_V3,
+              privileges: ['blocklist_all', 'global_artifact_management_all'],
+            },
+          ],
           api: [
             'lists-all',
             'lists-read',
@@ -275,7 +286,12 @@ const eventFiltersSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['event_filters_all'] }],
+          replacedBy: [
+            {
+              feature: SECURITY_FEATURE_ID_V3,
+              privileges: ['event_filters_all', 'global_artifact_management_all'],
+            },
+          ],
           api: [
             'lists-all',
             'lists-read',
@@ -650,7 +666,10 @@ const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
       privileges: [
         {
           replacedBy: [
-            { feature: SECURITY_FEATURE_ID_V3, privileges: ['endpoint_exceptions_all'] },
+            {
+              feature: SECURITY_FEATURE_ID_V3,
+              privileges: ['endpoint_exceptions_all', 'global_artifact_management_all'],
+            },
           ],
           id: 'endpoint_exceptions_all',
           includeIn: 'all',
