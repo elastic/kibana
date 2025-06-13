@@ -45,6 +45,12 @@ export const ALERT_ORIGINAL_EVENT_CATEGORY = `${ALERT_ORIGINAL_EVENT}.category` 
 export const ALERT_ORIGINAL_EVENT_KIND = `${ALERT_ORIGINAL_EVENT}.kind` as const;
 export const ALERT_ORIGINAL_EVENT_MODULE = `${ALERT_ORIGINAL_EVENT}.module` as const;
 
+export const ALERT_ORIGINAL_DATA_STREAM = `${ALERT_NAMESPACE}.original_data_stream` as const;
+export const ALERT_ORIGINAL_DATA_STREAM_DATASET = `${ALERT_ORIGINAL_DATA_STREAM}.dataset` as const;
+export const ALERT_ORIGINAL_DATA_STREAM_NAMESPACE =
+  `${ALERT_ORIGINAL_DATA_STREAM}.namespace` as const;
+export const ALERT_ORIGINAL_DATA_STREAM_TYPE = `${ALERT_ORIGINAL_DATA_STREAM}.type` as const;
+
 export const ALERT_RULE_ACTIONS = `${ALERT_RULE_NAMESPACE}.actions` as const;
 export const ALERT_RULE_EXCEPTIONS_LIST = `${ALERT_RULE_NAMESPACE}.exceptions_list` as const;
 export const ALERT_RULE_FALSE_POSITIVES = `${ALERT_RULE_NAMESPACE}.false_positives` as const;
