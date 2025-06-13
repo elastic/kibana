@@ -6,6 +6,8 @@
  */
 
 import {
+  GetResponse,
+  IndicesGetMappingResponse,
   QueryRulesQueryRule,
   QueryRulesQueryRuleCriteria,
   QueryRulesQueryRuleset,
@@ -32,6 +34,11 @@ export type SearchQueryRulesQueryRule = Omit<QueryRulesQueryRule, 'criteria'> & 
 export type SearchQueryRulesQueryRuleset = Omit<QueryRulesQueryRuleset, 'rules'> & {
   rules: SearchQueryRulesQueryRule[];
 };
+
+export interface SearchQueryDocumentResponse {
+  document: GetResponse<unknown>;
+  mappings: IndicesGetMappingResponse;
+}
 
 export type QueryRuleEditorForm = Pick<
   SearchQueryRulesQueryRule,
