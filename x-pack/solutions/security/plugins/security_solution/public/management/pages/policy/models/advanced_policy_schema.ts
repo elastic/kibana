@@ -1733,13 +1733,13 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
-    key: 'windows.advanced.events.image_load.disable_origin_info_collection',
+    key: 'windows.advanced.events.image_load.enable_origin_info_collection',
     first_supported_version: '8.19.0',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.image_load.disable_origin_info_collection',
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.image_load.enable_origin_info_collection',
       {
         defaultMessage:
-          "If set to true, image load events exclude dll.origin_url, dll.origin_referrer_url, and dll.Ext.windows.zone_identifier. These fields normally show where the loaded DLL was downloaded from, using information taken from the file's Mark of the Web. Default: false",
+          "If set to true, image load events include dll.origin_url, dll.origin_referrer_url, and dll.Ext.windows.zone_identifier. These fields normally show where the loaded DLL was downloaded from, using information taken from the file's Mark of the Web. Default: false",
       }
     ),
   },
@@ -1909,13 +1909,13 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
-    key: 'windows.advanced.events.process.disable_origin_info_collection',
+    key: 'windows.advanced.events.process.enable_origin_info_collection',
     first_supported_version: '8.19.0',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.process.disable_origin_info_collection',
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.process.enable_origin_info_collection',
       {
         defaultMessage:
-          "If set to true, process events exclude process.origin_url, process.origin_referrer_url, and process.Ext.windows.zone_identifier. These fields normally show where the process's executable file was downloaded from, using information taken from the file's Mark of the Web. Default: false",
+          "If set to true, process events include process.origin_url, process.origin_referrer_url, and process.Ext.windows.zone_identifier. These fields normally show where the process's executable file was downloaded from, using information taken from the file's Mark of the Web. Default: false",
       }
     ),
   },
@@ -2104,13 +2104,13 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
-    key: 'windows.advanced.events.file.disable_origin_info_collection',
+    key: 'windows.advanced.events.file.enable_origin_info_collection',
     first_supported_version: '8.19.0',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.file.disable_origin_info_collection',
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.file.enable_origin_info_collection',
       {
         defaultMessage:
-          "If set to true, file events exclude file origin details: file.origin_url, file.origin_referrer_url, and file.Ext.windows.zone_identifier. These fields show the details of file's Mark of the Web. Default: false",
+          "If set to true, file events include file origin details: file.origin_url, file.origin_referrer_url, and file.Ext.windows.zone_identifier. These fields show the details of file's Mark of the Web. Default: false",
       }
     ),
   },
