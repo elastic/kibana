@@ -6,9 +6,15 @@
  */
 
 import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common';
+import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 
-export const getScheduledAndAdHocIndexPattern = (spaceId: string): string =>
-  [
+export const getScheduledAndAdHocIndexPattern = (
+  spaceId: string,
+  adhocAttackDiscoveryDataClient?: IRuleDataClient
+): string => {
+  const adhocAlertsIndex = adhocAttackDiscoveryDataClient?.indexNameWithNamespace(spaceId);
+  return [
     `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-${spaceId}`, // scheduled
-    `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-ad-hoc-${spaceId}`, // ad-hoc
+    ...(adhocAlertsIndex ? [adhocAlertsIndex] : []), // ad-hoc
   ].join(',');
+};
