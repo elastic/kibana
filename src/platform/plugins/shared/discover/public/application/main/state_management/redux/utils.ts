@@ -48,7 +48,7 @@ const DEFAULT_TAB_LABEL = i18n.translate('discover.defaultTabLabel', {
   defaultMessage: 'Untitled session',
 });
 const ESCAPED_DEFAULT_TAB_LABEL = escapeRegExp(DEFAULT_TAB_LABEL);
-const DEFAULT_TAB_REGEX = new RegExp(`^${ESCAPED_DEFAULT_TAB_LABEL}( \\d+)?$`); // tab without a number
+const DEFAULT_TAB_REGEX = new RegExp(`^${ESCAPED_DEFAULT_TAB_LABEL}( \\d+)?$`); // any default tab
 const DEFAULT_TAB_NUMBER_REGEX = new RegExp(`^${ESCAPED_DEFAULT_TAB_LABEL} (?<tabNumber>\\d+)$`); // tab with a number
 
 export const createTabItem = (allTabs: TabState[]): TabItem => {

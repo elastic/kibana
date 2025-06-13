@@ -8,38 +8,13 @@
  */
 
 import { createTabItem } from './utils';
-import { type TabState, LoadingStatus } from './types';
+import { type TabState } from './types';
+import { defaultTabState } from './internal_state';
 
 const createMockTabState = (id: string, label: string): TabState => ({
+  ...defaultTabState,
   id,
   label,
-  lastPersistedGlobalState: {},
-  dataViewId: undefined,
-  isDataViewLoading: false,
-  dataRequestParams: {
-    timeRangeAbsolute: undefined,
-    timeRangeRelative: undefined,
-    searchSessionId: undefined,
-  },
-  overriddenVisContextAfterInvalidation: undefined,
-  resetDefaultProfileState: {
-    resetId: '',
-    columns: false,
-    rowHeight: false,
-    breakdownField: false,
-  },
-  documentsRequest: {
-    loadingStatus: LoadingStatus.Uninitialized,
-    result: [],
-  },
-  totalHitsRequest: {
-    loadingStatus: LoadingStatus.Uninitialized,
-    result: 0,
-  },
-  chartRequest: {
-    loadingStatus: LoadingStatus.Uninitialized,
-    result: {},
-  },
 });
 
 describe('createTabItem', () => {
