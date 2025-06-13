@@ -284,7 +284,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     const agents = await fleetServices.agent.getByIds(agentIds).catch(catchAndWrapError);
 
     this.log.debug(
-      () => `Fleet agent records for agent IDs [${agentIds.join(' | ')}]:\n${stringify(agents)}`
+      () => `Fleet agent records for agent IDs [${agentIds.join(' | ')}]:\n${stringify(agents, 2)}`
     );
 
     for (const agent of agents) {
