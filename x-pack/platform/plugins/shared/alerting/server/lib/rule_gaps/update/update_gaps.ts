@@ -9,6 +9,7 @@ import type { Logger, ISavedObjectsRepository } from '@kbn/core/server';
 import type { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import { withSpan } from '@kbn/apm-utils';
 import type { BackfillClient } from '../../../backfill_client/backfill_client';
 import { AlertingEventLogger } from '../../alerting_event_logger/alerting_event_logger';
 import { findGapsSearchAfter } from '../find_gaps';
@@ -19,6 +20,8 @@ import { adHocRunStatus } from '../../../../common/constants';
 import { calculateGapStateFromAllBackfills } from './calculate_gaps_state';
 import { updateGapFromSchedule } from './update_gap_from_schedule';
 import { mgetGaps } from '../mget_gaps';
+import type { ScheduledItem } from './utils';
+import { findOverlappingIntervals, toScheduledItem } from './utils';
 
 interface UpdateGapsParams {
   ruleId: string;
@@ -36,46 +39,54 @@ interface UpdateGapsParams {
 
 const CONFLICT_STATUS_CODE = 409;
 const MAX_RETRIES = 3;
-const PAGE_SIZE = 500;
+const PAGE_SIZE = 1000;
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export const prepareGapForUpdate = async (
   gap: Gap,
   {
-    backfillSchedule,
+    scheduledItems,
     savedObjectsRepository,
     shouldRefetchAllBackfills,
+    logger,
     backfillClient,
     actionsClient,
     ruleId,
   }: {
-    backfillSchedule?: BackfillSchedule[];
+    scheduledItems: ScheduledItem[];
     savedObjectsRepository: ISavedObjectsRepository;
     shouldRefetchAllBackfills?: boolean;
+    logger: Logger;
     backfillClient: BackfillClient;
     actionsClient: ActionsClient;
     ruleId: string;
   }
 ) => {
-  const hasFailedBackfillTask = backfillSchedule?.some(
+  const hasFailedBackfillTask = scheduledItems.some(
     (scheduleItem) =>
       scheduleItem.status === adHocRunStatus.ERROR || scheduleItem.status === adHocRunStatus.TIMEOUT
   );
 
-  if (backfillSchedule && !hasFailedBackfillTask) {
-    updateGapFromSchedule({
-      gap,
-      backfillSchedule,
-    });
+  if (scheduledItems.length > 0 && !hasFailedBackfillTask) {
+    await withSpan(
+      { name: 'updateGaps.prepareGapForUpdate.updateGapFromSchedule', type: 'rules' },
+      async () => {
+        updateGapFromSchedule({
+          gap,
+          scheduledItems,
+        });
+      }
+    );
   }
 
-  if (hasFailedBackfillTask || !backfillSchedule || shouldRefetchAllBackfills) {
+  if (hasFailedBackfillTask || scheduledItems.length === 0 || shouldRefetchAllBackfills) {
     await calculateGapStateFromAllBackfills({
       gap,
       savedObjectsRepository,
       ruleId,
       backfillClient,
       actionsClient,
+      logger,
     });
   }
 
@@ -110,19 +121,32 @@ const updateGapBatch = async (
 ): Promise<boolean> => {
   try {
     // Prepare all gaps for update
-    const updatedGaps = [];
-    for (const gap of gaps) {
-      // we do async request only if there errors in backfill or no backfill schedule
-      const updatedGap = await prepareGapForUpdate(gap, {
-        backfillSchedule,
-        savedObjectsRepository,
-        shouldRefetchAllBackfills,
-        backfillClient,
-        actionsClient,
-        ruleId,
-      });
-      updatedGaps.push(updatedGap);
-    }
+    const updatedGaps: Gap[] = [];
+    const scheduledItems = (backfillSchedule ?? [])
+      .map((backfill) => {
+        try {
+          return toScheduledItem(backfill);
+        } catch (error) {
+          logger.error(`Error processing a scheduled item while updating gaps: ${error.message}`);
+          return undefined;
+        }
+      })
+      .filter((scheduledItem): scheduledItem is ScheduledItem => scheduledItem !== undefined);
+    await withSpan({ name: 'updateGaps.prepareGapsForUpdate', type: 'rule' }, async () => {
+      for (const { gap, scheduled } of findOverlappingIntervals(gaps, scheduledItems)) {
+        // we do async request only if there errors in backfill or no backfill schedule
+        const updatedGap = await prepareGapForUpdate(gap, {
+          scheduledItems: scheduled,
+          savedObjectsRepository,
+          shouldRefetchAllBackfills,
+          logger,
+          backfillClient,
+          actionsClient,
+          ruleId,
+        });
+        updatedGaps.push(updatedGap);
+      }
+    });
 
     // Convert gaps to the format expected by updateDocuments
     const gapsToUpdate = updatedGaps
@@ -140,7 +164,10 @@ const updateGapBatch = async (
     }
 
     // Attempt bulk update
-    const bulkResponse = await alertingEventLogger.updateGaps(gapsToUpdate);
+    const bulkResponse = await withSpan(
+      { name: 'updateGaps.alertingEventLogger.updateGaps', type: 'rule' },
+      () => alertingEventLogger.updateGaps(gapsToUpdate)
+    );
 
     if (bulkResponse.errors) {
       if (retryCount >= MAX_RETRIES) {
