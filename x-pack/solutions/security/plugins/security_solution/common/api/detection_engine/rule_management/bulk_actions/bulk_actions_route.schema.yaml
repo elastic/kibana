@@ -1060,6 +1060,7 @@ components:
         - ESQL_INDEX_PATTERN
         - MANUAL_RULE_RUN_FEATURE
         - MANUAL_RULE_RUN_DISABLED_RULE
+        - RULE_FILL_GAPS_DISABLED_RULE
 
     NormalizedRuleError:
       type: object

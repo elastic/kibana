@@ -10,7 +10,7 @@ import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { BulkManualRuleFillGaps } from '../../../../../../../common/api/detection_engine';
 import type { PromisePoolError } from '../../../../../../utils/promise_pool';
 import type { RuleAlertType } from '../../../../rule_schema';
-import { validateBulkScheduleBackfill } from '../../../logic/bulk_actions/validations';
+import { validateBulkRuleGapFilling } from '../../../logic/bulk_actions/validations';
 
 interface BuildScheduleRuleGapFillingParams {
   rules: RuleAlertType[];
@@ -39,7 +39,7 @@ export const bulkScheduleRuleGapFilling = async ({
   await Promise.all(
     rules.map(async (rule) => {
       try {
-        await validateBulkScheduleBackfill({
+        await validateBulkRuleGapFilling({
           mlAuthz,
           rule,
         });

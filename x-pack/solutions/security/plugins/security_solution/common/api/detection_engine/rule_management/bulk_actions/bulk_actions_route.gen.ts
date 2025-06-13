@@ -59,6 +59,7 @@ export const BulkActionsDryRunErrCode = z.enum([
   'ESQL_INDEX_PATTERN',
   'MANUAL_RULE_RUN_FEATURE',
   'MANUAL_RULE_RUN_DISABLED_RULE',
+  'RULE_FILL_GAPS_DISABLED_RULE',
 ]);
 export type BulkActionsDryRunErrCodeEnum = typeof BulkActionsDryRunErrCode.enum;
 export const BulkActionsDryRunErrCodeEnum = BulkActionsDryRunErrCode.enum;
