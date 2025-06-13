@@ -7,6 +7,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { TimeRange } from '@kbn/es-query';
+import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
+import { ALERT_START, ALERT_END } from '@kbn/rule-data-utils';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import {
@@ -37,7 +40,14 @@ export function RelatedDashboards({ alert, relatedDashboards }: RelatedDashboard
     },
   } = useKibana();
 
+  const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-15m', to: 'now' });
+  const alertStart = alert.fields[ALERT_START];
+  const alertEnd = alert.fields[ALERT_END];
   const dashboardLocator = urlService.locators.get<DashboardLocatorParams>(DASHBOARD_APP_LOCATOR);
+
+  useEffect(() => {
+    setTimeRange(getPaddedAlertTimeRange(alertStart!, alertEnd));
+  }, [alertStart, alertEnd]);
 
   useEffect(() => {
     if (!relatedDashboards?.length || !dashboardService) {
@@ -102,18 +112,11 @@ export function RelatedDashboards({ alert, relatedDashboards }: RelatedDashboard
             <EuiFlexItem key={dashboard.id}>
               <EuiText size="s">
                 <a
-                  href="#"
-                  onClick={async (e) => {
-                    e.preventDefault();
-                    if (dashboardLocator) {
-                      const url = await dashboardLocator.getUrl({
-                        dashboardId: dashboard.id,
-                      });
-                      window.open(url, '_blank');
-                    } else {
-                      console.error('Dashboard locator is not available');
-                    }
-                  }}
+                  href={dashboardLocator?.getRedirectUrl({
+                    dashboardId: dashboard.id,
+                    timeRange,
+                  })}
+                  target="_blank"
                 >
                   {dashboard.title}
                 </a>
