@@ -510,7 +510,7 @@ export const getCloudConnectorRemoteRoleTemplate = ({
   cloud,
   packageInfo,
 }: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
-  console.log("cloud", cloud);
+  console.log('cloud', cloud);
   const accountType = input?.streams?.[0]?.vars?.['aws.account_type']?.value ?? AWS_SINGLE_ACCOUNT;
   console.debug('kibanaUrl', cloud?.kibanaUrl);
   const provider = getCloudProviderFromKibanaUrl(cloud?.kibanaUrl);
