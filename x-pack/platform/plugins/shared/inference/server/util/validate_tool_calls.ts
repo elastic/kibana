@@ -11,7 +11,10 @@ import {
   ToolOptions,
   UnvalidatedToolCall,
 } from '@kbn/inference-common';
-import { createToolNotFoundError, createToolValidationError } from '../chat_complete/errors';
+import {
+  createToolNotFoundError,
+  createToolValidationError,
+} from '../../common/chat_complete/errors';
 
 export function validateToolCalls<TToolOptions extends ToolOptions>({
   toolCalls,
