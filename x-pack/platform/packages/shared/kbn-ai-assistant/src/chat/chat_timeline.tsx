@@ -7,7 +7,7 @@
 
 import React, { type ReactNode, useMemo } from 'react';
 import { css } from '@emotion/css';
-import { EuiCode, EuiCommentList, useEuiTheme } from '@elastic/eui';
+import { EuiCommentList, useEuiTheme } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { omit } from 'lodash';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
@@ -93,7 +93,6 @@ export function ChatTimeline({
   onActionClick,
   chatState,
 }: ChatTimelineProps) {
-
   const { euiTheme } = useEuiTheme();
   const stickyCalloutContainerClassName = css`
     position: sticky;
