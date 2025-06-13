@@ -7,7 +7,6 @@ disabled:
   - src/platform/test/functional/config.base.js
   - src/platform/test/functional/firefox/config.base.ts
   - x-pack/test/functional/config.base.js
-  - x-pack/platform/test/functional/config.base.ts
   - x-pack/test/localization/config.base.ts
   - src/platform/test/server_integration/config.base.js
   - x-pack/test/functional_with_es_ssl/config.base.ts
@@ -23,7 +22,6 @@ disabled:
   - x-pack/test/upgrade/config.ts
   - src/platform/test/functional/config.edge.js
   - x-pack/test/functional/config.edge.js
-  - x-pack/platform/test/functional/config.edge.ts
 
   # Configs that exist but weren't running in CI when this file was introduced
   - x-pack/test/alerting_api_integration/security_and_spaces/group2/tests/actions/config.ts
@@ -50,6 +48,12 @@ disabled:
 
   # Gen AI suites, running with their own pipeline
   - x-pack/test/functional_gen_ai/inference/config.ts
+
+  # They will be moved to enabled once the first test is added, the first two initial configs are in disabled section
+  - x-pack/platform/test/functional/config.base.ts
+  - x-pack/platform/test/functional/config.edge.ts
+  - x-pack/platform/test/functional/config.firefox.ts
+  - x-pack/platform/test/functional/config_security_basic.ts
 
 defaultQueue: 'n2-4-spot'
 enabled:
@@ -265,10 +269,8 @@ enabled:
   - x-pack/test/functional/apps/visualize/config.ts
   - x-pack/test/functional/apps/watcher/config.ts
   - x-pack/test/functional/config_security_basic.ts
-  - x-pack/platform/test/functional/config_security_basic.ts
   - x-pack/test/functional/config.ccs.ts
   - x-pack/test/functional/config.firefox.js
-  - x-pack/platform/test/functional/config.firefox.ts
   - x-pack/test/functional/config.upgrade_assistant.ts
   - x-pack/test/functional_cloud/config.ts
   - x-pack/test/functional_cloud/saml.config.ts
