@@ -9,24 +9,23 @@
 
 import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
 import {
-  controlGroupSerializedStateToSerializableRuntimeState,
-  serializableRuntimeStateToControlGroupSerializedState,
+  controlGroupSavedObjectStateToSerializableRuntimeState,
+  serializableRuntimeStateToControlGroupSavedObjectState,
 } from '@kbn/controls-plugin/server';
 import { Serializable, SerializableRecord } from '@kbn/utility-types';
 import { SavedObjectMigrationFn } from '@kbn/core/server';
 import { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
-import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
 
 import {
   convertPanelStateToSavedDashboardPanel,
   convertSavedDashboardPanelToPanelState,
-} from '../../../common';
-import { SavedDashboardPanel } from '../../../common/content_management';
+} from './dashboard_panel_converters';
+import { SavedDashboardPanel } from '../schema/v2';
 
-type ValueOrReferenceInput = SavedObjectEmbeddableInput & {
+interface ValueOrReferenceInput {
   attributes?: Serializable;
   savedVis?: Serializable;
-};
+}
 
 // Runs the embeddable migrations on each panel
 export const migrateByValueDashboardPanels =
@@ -35,7 +34,7 @@ export const migrateByValueDashboardPanels =
     const { attributes } = doc;
 
     if (attributes?.controlGroupInput) {
-      const controlGroupState = controlGroupSerializedStateToSerializableRuntimeState(
+      const controlGroupState = controlGroupSavedObjectStateToSerializableRuntimeState(
         attributes.controlGroupInput
       );
       const migratedControlGroupInput = migrate({
@@ -43,7 +42,7 @@ export const migrateByValueDashboardPanels =
         type: CONTROL_GROUP_TYPE,
       } as SerializableRecord);
       attributes.controlGroupInput =
-        serializableRuntimeStateToControlGroupSerializedState(migratedControlGroupInput);
+      serializableRuntimeStateToControlGroupSavedObjectState(migratedControlGroupInput);
     }
 
     // Skip if panelsJSON is missing otherwise this will cause saved object import to fail when
