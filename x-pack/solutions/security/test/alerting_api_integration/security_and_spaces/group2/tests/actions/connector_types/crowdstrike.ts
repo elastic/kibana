@@ -6,25 +6,24 @@
  */
 
 import {
-  SENTINELONE_CONNECTOR_ID,
+  CROWDSTRIKE_CONNECTOR_ID,
   SUB_ACTION,
-} from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+} from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
 import type { FeaturesPrivileges, Role } from '@kbn/security-plugin/common';
 import type SuperTest from 'supertest';
 import expect from '@kbn/expect';
-import { getUrlPrefix } from '../../../../../common/lib';
-import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { createSupertestErrorLogger } from '../../../../../common/lib/log_supertest_errors';
+import { getUrlPrefix } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib';
+import { createSupertestErrorLogger } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib/log_supertest_errors';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function createSentinelOneTests({ getService }: FtrProviderContext) {
+export default function createCrowdstrikeTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const securityService = getService('security');
   const log = getService('log');
   const logErrorDetails = createSupertestErrorLogger(log);
 
-  describe('SentinelOne', () => {
+  describe('Crowdstrike', () => {
     describe('sub-actions authz', () => {
       interface CreatedUser {
         username: string;
@@ -32,17 +31,8 @@ export default function createSentinelOneTests({ getService }: FtrProviderContex
         deleteUser: () => Promise<void>;
       }
 
-      // SentinelOne supported sub-actions
-      const s1SubActions = [
-        SUB_ACTION.GET_AGENTS,
-        SUB_ACTION.ISOLATE_HOST,
-        SUB_ACTION.RELEASE_HOST,
-        SUB_ACTION.GET_REMOTE_SCRIPT_STATUS,
-        SUB_ACTION.GET_REMOTE_SCRIPT_RESULTS,
-        SUB_ACTION.FETCH_AGENT_FILES,
-        SUB_ACTION.DOWNLOAD_AGENT_FILE,
-        SUB_ACTION.GET_ACTIVITIES,
-      ];
+      // Crowdstrike supported sub-actions
+      const crowdstrikeSubActions = [SUB_ACTION.HOST_ACTIONS, SUB_ACTION.GET_AGENT_DETAILS];
 
       let connectorId: string;
 
@@ -67,7 +57,7 @@ export default function createSentinelOneTests({ getService }: FtrProviderContex
               base: [],
               feature: {
                 // Important: Saved Objects Managemnt should be set to `all` to ensure that authz
-                // is not defaulted to the check done against SO's for SentinelOne
+                // is not defaulted to the check done against SO's for Crowdstrike
                 savedObjectsManagement: ['all'],
                 ...kibanaFeatures,
               },
@@ -104,9 +94,9 @@ export default function createSentinelOneTests({ getService }: FtrProviderContex
           .on('error', logErrorDetails)
           .send({
             name: 'My sub connector',
-            connector_type_id: SENTINELONE_CONNECTOR_ID,
+            connector_type_id: CROWDSTRIKE_CONNECTOR_ID,
             config: { url: 'https://some.non.existent.com' },
-            secrets: { token: 'abc-123' },
+            secrets: { clientId: 'abc-123', clientSecret: 'test-secret' },
           })
           .expect(200);
 
@@ -178,11 +168,11 @@ export default function createSentinelOneTests({ getService }: FtrProviderContex
           }
         });
 
-        for (const s1SubAction of s1SubActions) {
-          it(`should deny execute of ${s1SubAction}`, async () => {
+        for (const crowdstrikeSubAction of crowdstrikeSubActions) {
+          it(`should deny execute of ${crowdstrikeSubAction}`, async () => {
             const execRes = await executeSubAction({
               supertest: supertestWithoutAuth,
-              subAction: s1SubAction,
+              subAction: crowdstrikeSubAction,
               subActionParams: {},
               username: user.username,
               password: user.password,
@@ -193,7 +183,7 @@ export default function createSentinelOneTests({ getService }: FtrProviderContex
             expect(execRes.body).to.eql({
               statusCode: 403,
               error: 'Forbidden',
-              message: 'Unauthorized to execute a ".sentinelone" action',
+              message: 'Unauthorized to execute a ".crowdstrike" action',
             });
           });
         }
@@ -216,17 +206,17 @@ export default function createSentinelOneTests({ getService }: FtrProviderContex
           }
         });
 
-        for (const s1SubAction of s1SubActions) {
-          const isAllowedSubAction = s1SubAction === SUB_ACTION.GET_AGENTS;
+        for (const crowdstrikeSubAction of crowdstrikeSubActions) {
+          const isAllowedSubAction = crowdstrikeSubAction === SUB_ACTION.GET_AGENT_DETAILS;
           it(`should ${
             isAllowedSubAction ? 'allow' : 'deny'
-          } execute of ${s1SubAction}`, async () => {
+          } execute of ${crowdstrikeSubAction}`, async () => {
             const {
               // eslint-disable-next-line @typescript-eslint/naming-convention
               body: { status, message, connector_id, statusCode, error },
             } = await executeSubAction({
               supertest: supertestWithoutAuth,
-              subAction: s1SubAction,
+              subAction: crowdstrikeSubAction,
               subActionParams: {},
               username: user.username,
               password: user.password,
@@ -245,7 +235,7 @@ export default function createSentinelOneTests({ getService }: FtrProviderContex
               expect({ statusCode, message, error }).to.eql({
                 statusCode: 403,
                 error: 'Forbidden',
-                message: 'Unauthorized to execute a ".sentinelone" action',
+                message: 'Unauthorized to execute a ".crowdstrike" action',
               });
             }
           });

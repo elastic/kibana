@@ -12,11 +12,10 @@ import {
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
 import type SuperTest from 'supertest';
 import expect from '@kbn/expect';
-import { getUrlPrefix } from '../../../../../common/lib';
-import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { createSupertestErrorLogger } from '../../../../../common/lib/log_supertest_errors';
+import { getUrlPrefix } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib';
+import { createSupertestErrorLogger } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib/log_supertest_errors';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function createMicrosoftDefenderEndpointTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
