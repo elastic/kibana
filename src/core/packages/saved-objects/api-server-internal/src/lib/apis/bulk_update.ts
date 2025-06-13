@@ -159,8 +159,6 @@ export const performBulkUpdate = async <T>(
       ? SavedObjectsUtils.namespaceStringToId(objectNamespace)
       : namespace;
 
-  const getNamespaceString = (objectNamespace?: string) => objectNamespace ?? namespaceString;
-
   const bulkGetDocs = validObjects.map(({ value: { type, id, objectNamespace } }) => ({
     _id: serializer.generateRawId(getNamespaceId(objectNamespace), type, id),
     _index: commonHelper.getIndexForType(type),
@@ -268,7 +266,7 @@ export const performBulkUpdate = async <T>(
         ];
       } else if (registry.isSingleNamespace(type)) {
         // if `objectNamespace` is undefined, fall back to `options.namespace`
-        savedObjectNamespace = getNamespaceString(objectNamespace);
+        savedObjectNamespace = objectNamespace ?? namespaceString;
       }
 
       const document = getSavedObjectFromSource<T>(
@@ -294,7 +292,7 @@ export const performBulkUpdate = async <T>(
       const encryptedUpdatedAttributes = await encryptionHelper.optionallyEncryptAttributes(
         type,
         id,
-        objectNamespace || namespace,
+        savedObjectNamespaces ?? savedObjectNamespace,
         documentToSave[type]
       );
 

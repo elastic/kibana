@@ -666,6 +666,29 @@ describe('#bulkUpdate', () => {
           2
         );
       });
+
+      it('migrates namespace agnsostic objects', async () => {
+        const modifiedObj2 = {
+          ...obj2,
+          type: NAMESPACE_AGNOSTIC_TYPE,
+          coreMigrationVersion: '8.0.0',
+          namespace: 'test', // specify a namespace, but it should be ignored
+        };
+        const objects = [modifiedObj2];
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+
+        await bulkUpdateSuccess(client, repository, registry, objects);
+
+        expect(migrator.migrateDocument).toHaveBeenCalledTimes(2);
+        expectMigrationArgs(
+          {
+            id: modifiedObj2.id,
+            namespaces: [],
+          },
+          true,
+          2
+        );
+      });
     });
 
     describe('returns', () => {
