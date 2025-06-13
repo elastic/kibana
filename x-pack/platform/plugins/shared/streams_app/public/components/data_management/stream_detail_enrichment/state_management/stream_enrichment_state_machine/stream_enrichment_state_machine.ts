@@ -148,7 +148,6 @@ export const streamEnrichmentMachine = setup({
         };
       }
     ),
-    stopDataSource: stopChild((_, params: { id: string }) => params.id),
     deleteDataSource: assign(({ context }, params: { id: string }) => ({
       dataSourcesRefs: context.dataSourcesRefs.filter((proc) => proc.id !== params.id),
     })),
@@ -172,7 +171,6 @@ export const streamEnrichmentMachine = setup({
         };
       }
     ),
-    stopProcessor: stopChild((_, params: { id: string }) => params.id),
     deleteProcessor: assign(({ context }, params: { id: string }) => ({
       processorsRefs: context.processorsRefs.filter((proc) => proc.id !== params.id),
     })),
@@ -247,7 +245,7 @@ export const streamEnrichmentMachine = setup({
     isWiredStream: ({ context }) => Streams.WiredStream.GetResponse.is(context.definition),
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5RgHYCcCWBjAFgZQBc0wBDAWwDoMUMCMSAbDAL2qkOPIGIBtABgC6iUAAcA9rFoYxKYSAAeiALQB2PgDYKAJgCMATnXqV6rQFYt6gMw6ANCACeyvXpXa1AFh1qV7gBy+tLQBfILtUTFwOUkpqKUYWNijuHh0hJBBxSToZOUUEJXVfV2dLPj13Sz0dSp1TO0d8vQsKXy8td3ctMqKVFRCw9Gx8ImiqGjp41hQoADE0MTIAVTQGLgBXFbG4pmZIfjTRCSkc9LyCvT4KdSbrPj9C3xN65R93FvVTS3U+FUstUr0-XAg0iI3IFFgYAIaxEAHF5gBrADCYgYDDAWGyKC4EBkYDGADcxAj8ZDoXDESi0Risfs5JljrJTspKlormVOi5dLUXM98qYDBQ9KZ3GVTHxTB8-jogeEhklKGSYfDiVT0ZjpNiwGh5mgKCIGCQCAAzMRoRVQ5WU1Hq2mCelHLG5ZSilp8PhFLRNDl8Cx1BwvDRCnS6QouCU6O6ykHDTiUTgQexcWBg+MYsAYAl7e3pBlO5kIKXaUw6dwlsse9ruPmqdoUUy+DQ+PSWayt6MRWOjBP2CGpqgQdHJ-vEMl03OOzXOhCfK4NyzmIzWR76Pm-N7fZu+FzVfy+DvykekRN9uMDocps8wiBGsDjw5ZKcFpQXYrqaqVFt3R4qPkGNkVC46juMBpaFOoB6gmePanqM15GmwOJ4oSxL4jCkJoAQCoAIKYma94ZJOJygGcpgqL4QpdD8dzfBKuh-lorj3N4liPNYLiQV24IwZecEiDedDTFw2q6vqhommalDodqWGprhBD4TmD6MtOSitq4IaMToRjGGU6h-q6BilBUJgin87icQqFAwXKuBkKgBA4kaJB4GIGxYPiuAkNMd5KYRj7EQoiCRioOgUMYRhsV0DZ6DWIaXIUWgBJYKjil8Jj7qEwKdlZNkxvZKCOQJLluWgHkUMVSI4N5MAEXmT4kcFvpvGWnRJdujGWJ4NZJXoFC1Co5SMcKIqPJZR4kCetk4AVBAVRgsAGiQ9iJBgZBrOJmpcCI8webAsBmrAFCTRAdVEUyjUIBUFEqElZRdcZKX+g0kYtSKZZWO9XpkeN0HHr202zfNi2Git0x4GtG0ITI227XAB1oEdxBmhA2pnQFF1BVdrHhXdLYVHcT18pKFCtR9C4dN9fRZdNuX-RQgMOcDS1g+wkObTDO1iHtCMUF5PnoypBbXbjjb449qV8hRZOShTnKStTAw5RNU35UzEALSzq3rRz2JczzZp89VAupA6GPTuKYW9E07hVF6rQNr+AYIO0lw6CFGhy1Tv3dvTjOFczoPa1DWKw9z8OG6j6IEL5Bz+ULl0i7dYsPYTkvO2pfUiqYZnATnHiWD73F+2rAcayDy3B7rYcG3qKYkLVfn1YFeSdKYFASr6u7+Dn1Q1o84V6P4fghiBwFjTTMZ05NAOl3N5da+D7PQ3rcP7Yb8Ex4L+aJ7U-XOMYajab8Pg9e6-WtIUKXpT4RRF2mM8M3PgeV0vOsr8my9YhQZDeQ3YAABFnKuXcnAbeDUsaqEjBQBc+gdDbngcKZwfJRSaGuJbawpZjB-HvtZEunYgYLyDm-EOmoKAEgwGAAA7kAggJAAAKxAKHUM-u-b+zCaFQhpJAGYlCGAQFgOAluLoc6k3dKKNQnwfAfH0s7W6VxgLfCHj8SU7tC6T2Vn9R+-t56a2IWzNhZCOG0IYUwyhVDWGkJkEbGqYBGFgGMdzWAvCGAxzQEIzGZxfgUS8CWMwHQrDVFkQ0NSYV2oln0B6aovRgK4LygQ9WejX4GKsSgch5iAFcMxDwvhAjLG63SdQkx9iOEeNUiBS4l8vp-EeKGPkpZLivhzm3EURgOIaMPFo1WCSy5JNZhDQx1jjFZJjhAXhYB+GwHySvCgxpclHQAFRlILCFYMgQLDOBLByLQKC+oPD4ClO6DYQLCjifgoYQNf4oAbmwExICypwCcnQ+5e0+YMAkGAAAsn-GAs1lmXVUCWdkuh-AWH8NpZ6iAupvg5EPd2-xagQQ6VBX22jn5XJudMO5pU9pPJKqAo6J1-mQM6JcSs2kx4hguF1XZmgyi7nKBoDQIozlop6XNDFUBbnAJxY84qLz8RRy4cSs4VRLAd10AYCU-g4WWBQQEK4pZHiij+O6dSIQsooDEKjeA6RaapjNgnSBkYyISv0N8Bs25WhyozpGfwbgDm3WuiGUwuDYgTB2IkA1E5zbPjhR3KoZR2j-FbHwWwGdnBZy6JUL4xgyxmDdeMegnrphzAWMsBghqd6QLUNLCw1wrC3QRb4fu3whQlklPdW2ATcFKgpKqG0NIIHN08S6VKF9UrXFtr0JKxgay-DCnbMw-wLjKJlMirilAoDWmpBqGQMwSAYAYBsMAWaIF5GDYPBFhaRR3F6P2j0pNNLfgCGGn4rLExruEfkSMZQzVSstbKms7h20fEGi+92NEFyK2yp01FJ5eLkCva2xooiDAfhKN+Iwa5QpChuD8d8qVfANgvb2QDMRByrp9Uas4wE+q1C9MYRsbEpYClJk0QIpRyK+kqKh2C4JN5sGA6pIwbwmkPRFO0EU9SPRZw9BUNQUTxQWQndPbpFyHLMb9e+e9FqZXWp6kUK4l9UoXHgWBdRSs-3FzZRJ3pFd+lf2bedVS5FNC+JdQEtswTlAQvCj3bkDY7j2zozol+hnBlpOMc5Ep5ipMAraVcf4OcPQemQ6uORbJDAVOUZ2tRrnn5EOSQM1JhTOEx2yWM+Z-njVJW0GYa4TRyiSNqGuKLijugqKUeOrTKKdPibskzTl3Lnm8t1cpbNuGmik2uI8e6XxfCtmJuYDuYaqjkRSmG5DZyDoMCzBAAASmIMQsk4w5bOJUS4IpwNH0bFYOK7pLi9AOY2Ri9tPgaqCEAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5RgHYCcCWBjAFgZQBc0wBDAWwDoMUMCMSAbDAL2qkOPIGIBtABgC6iUAAcA9rFoYxKYSAAeiALQB2PgDYKAJgCMATnXqV6rQFYt6gMw6ANCACeyvXpXa1AFh1qV7gBy+tLQBfILtUTFwOUkpqKUYWNijuHh0hJBBxSToZOUUEJXVfV2dLPj13Sz0dSp1TO0d8vQsKXy8td3ctMqKVFRCw9Gx8ImiqGjp41hQoADE0MTIAVTQGLgBXFbG4pmZIfjTRCSkc9LyCvT4KdSbrPj9C3xN65R93FvVTS3U+FUstUr0-XAg0iI3IFFgYAIaxEAHF5gBrADCYgYDDAWGyKC4EBkYDGADcxAj8ZDoXDESi0Risfs5JljrJTspKlormVOi5dLUXM98qYDBQ9KZ3GVTHxTB8-jogeEhklKGSYfDiVT0ZjpNiwGh5mgKCIGCQCAAzMRoRVQ5WU1Hq2mCelHLG5ZSilp8PhFLRNDl8Cx1BwvDRCnS6QouCU6O6ykHDTiUTgQexcWBg+MYsAYAl7e3pBlO5kIb6aL46HRWX7C9x81TWCiWfwBKy+EV3dzRiKx0YJ+wQ1NUCDo5N94hkum5x2a52F0x1yqmLweTrqMt83yWN7Lr06dzXHeN9vy4ekRO9uP9wcps8wiBGsBjw5ZScFpS+QVaXx8Lx+ZztIx8yMmBQHTzh+XzuMY-wHqCZ7dqeozXkabA4nihLEviMKQmgBAKgAgpiZr3hkE4nKAZySq4-yvhKnT+CGtgBggkZaK47hNCGtwGNUbahMCHYKhQsGXvBIg3nQ0xcNqur6oaJpmpQGHathqZ4QQBE5g+jJTkofwzh0tTzq8zbfFWDGRq6Bi+O4Arrp6y5QZ24KwXKuBkKgBDrJssD2CgWCEXmT6kYgKjzkKnjmHoYEmOu1aWPWQp3KYnyWMYhivuo9n8U5MauSg7miSQeBiBsWD4rgJDTHe6lEY+JEKIgkZrkB4HCtUIFetWXRXL0oofsxPwWJYGVHiQJ7OTgOV5UaBVFWgJUUPlSI4OVMB+cRTKBYxfBfBQrWVKylQ+NWOivjt5jmN4gQiuUQ0wcePZjRN80YLABokPYiQYGQawyZqXAiPMJWwLAZqwBQI0QKtNXrXVCBWZcopNKYlnLkYwV8l0bxWXono-L0-yBDdXZ3RQD1uU9L2Gu90x4J932ITIf0A3AwNoKDxBmhA2qQ5pBZw0BZRmMjZa9P6DS1JoWM470Kj48EPFjZlxOk7l5OvVT7C0z9DP-WIgMsxQZUVdz+YbXzCOCzuwto6ZHpAQKUt438csDHxw2jdlZMQM9asfV9WvYjretmgbS1G6kDpQ1O86WEBxnbmWkaJb4fLrpcpabl00v44TjlKx7KtexTb2+3TWKM7rzPB5z6IEJVBzVTzpvivziNC6jouIN8dvYzLuMy07OdpiN935wQquUyX-vl0HeopiQK1Vf5tV5BUmi-NUKivvoKhVMx-4x10HxGPbJhFNd8sxorw8k6P4-F9Tmv0wHTNA8HCG18bAUw0uLQfhFGM716JYDu+RIxpwgoUT8sVWgEwvq7W619lZj0Lj7B+fsn7JkfliCgZByrzzAAAESmoVYqcBP7L2UNcXwXUfifH8L0fQeg+TijXu6Gia4PySksoPASecOyPRQRPNBpdNQUAJBgMAAB3IhBASAAAViDiKkZg9B2ClHSKhDSSAMwJEMAgLAch0MzgdBjiofQ7QuiXQ0Oof8MsaG+kSqUZsfgeFZX4Z7b2QiNaqNEeomR8jFESMkSokRMgQ7LTAAosAfjdawB0QwWuaBDFaRlhLCKBg7i1B+F8PkhQKBmOuFtVo84k6AjgYeBB7t3EF08ffbxoSUBiKCQQzRmJtG6P0SE-2TSpH+Kieo5Jz4Oh6B2sA5K3oyyBC0OjcyIYDDOE3sYSZri+FDAEbU9WNMfFhL8a02uEAdFgD0bALpT8KDGg6aDAAVIMjapYRnWVZL6KwrFKj-lYlcCKVlShFM3sAlZiDb64JQPPNg-iSGzTgDiYhM1AYGwYBIMAABZPBMAJq3JhjWEZbFfR-GSqYYwICOjFEMF8RxVkzDO14hUomgLqlj2BaC6Y4LYVQvyhCuF4MMXGNtqKMozgrDunFDkhiApNBlEgfOL0wCykuxpbnOlayyaMqgGCmFpCTnstZfNI5mjuVOE-HWUUO9EoEp8NUZhAQriWMAYlL0fQgQoDEJzeA6QFapgjo3TFZkZypxNYlbqFqGJKAatQvqFRhSZIJb4HhsQJg7ESB68ckdnzYx0BQMokYmidFiqUeiDQlDOAeV0PaRh1AUtMLG8Y9AE3TDmAsZYDBPUm0xWoahS5rjlkCNYZOwbHiXBapKMo65yg7h4UqCkqobQ0i-kvIxLpgo7SKJKcoLgZZFBscG9ewZLr-AuNjT8PCoDWmpBqGQMwSAYAYBsMAzav55Asfkm4ZZ8WinAioasbagIhgxv4LokYHVyugrSxMd6KGNBcEan4woA3mssNWM6-NiX1i8IlKwAKTxCXIGB+djQOjaA-F+V82a-wMSKOmhZHDCgVl6BhnsWGYgDlvcmr1ZxyxATMa0BcFY+TChGaxYw9ZCPWGMHRuC4J35sBw1pUl2gBrXDxUKkyYtjoPOqM2Zi1gOjcSAw5IeVSlW5Wk6mj5fqYNms8PB4Nx1XBlpHaKSB2NBrlOAwqgzLkPFF02Vg2da0Uk+CAukuO4pfiboLR8fJa5PxwwMJ4WV1LXP6ZHvSu+3ntmNL8VNfpQTjMbQKEYUKlEzVLP0LYtkRh3RmE+B6EUMaXN6d4YqjzNSvOTzObs2ubSDmXNy96ssFARTfKXOuD4x0yv2Kq04kUkoxNIJwaitVsiOVwF62xj8kXHh8d9CY5TndzAZuybFId1hYG6cVsDBgWYIAACUxBiCUnGVbLILgDdYsuNQx0NBWYLWAy4vQim+hltjT4IQQhAA */
   id: 'enrichStream',
   context: ({ input }) => ({
     definition: input.definition,
@@ -352,7 +350,7 @@ export const streamEnrichmentMachine = setup({
         enrichment: {
           initial: 'displayingSimulation',
           on: {
-            'dataSource.change': {
+            'url.sync': {
               actions: [
                 {
                   type: 'storeUrlState',
@@ -363,14 +361,17 @@ export const streamEnrichmentMachine = setup({
                 { type: 'updateUrlState' },
               ],
             },
+            'dataSource.change': {
+              actions: raise({ type: 'url.sync' }),
+            },
             'dataSource.dataChange': {
               actions: [{ type: 'sendDataSourcesSamplesToSimulator' }],
             },
           },
           states: {
             displayingSimulation: {
-              entry: [{ type: 'spawnSimulationMachine' }],
               initial: 'viewDataPreview',
+              entry: [{ type: 'spawnSimulationMachine' }],
               on: {
                 'processors.add': {
                   guard: '!hasPendingDraft',
@@ -405,7 +406,7 @@ export const streamEnrichmentMachine = setup({
                 ],
                 'processor.delete': {
                   actions: [
-                    { type: 'stopProcessor', params: ({ event }) => event },
+                    stopChild(({ event }) => event.id),
                     { type: 'deleteProcessor', params: ({ event }) => event },
                     { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
                   ],
@@ -425,6 +426,7 @@ export const streamEnrichmentMachine = setup({
                 'simulation.manageDataSources': 'managingDataSources',
               },
               states: {
+                hist: { type: 'history' },
                 viewDataPreview: {
                   on: {
                     'simulation.viewDetectedFields': 'viewDetectedFields',
@@ -445,30 +447,18 @@ export const streamEnrichmentMachine = setup({
             },
             managingDataSources: {
               on: {
-                'dataSources.closeManagement': 'displayingSimulation',
+                'dataSources.closeManagement': 'displayingSimulation.hist',
                 'dataSources.add': {
                   actions: [
                     { type: 'addDataSource', params: ({ event }) => event },
-                    {
-                      type: 'storeUrlState',
-                      params: ({ context }) => ({
-                        urlState: { v: 1, dataSources: getDataSourcesUrlState(context) },
-                      }),
-                    },
-                    { type: 'updateUrlState' },
+                    raise({ type: 'url.sync' }),
                   ],
                 },
                 'dataSource.delete': {
                   actions: [
-                    { type: 'stopDataSource', params: ({ event }) => event },
+                    stopChild(({ event }) => event.id),
                     { type: 'deleteDataSource', params: ({ event }) => event },
-                    {
-                      type: 'storeUrlState',
-                      params: ({ context }) => ({
-                        urlState: { v: 1, dataSources: getDataSourcesUrlState(context) },
-                      }),
-                    },
-                    { type: 'updateUrlState' },
+                    raise({ type: 'url.sync' }),
                   ],
                 },
               },

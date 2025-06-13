@@ -59,4 +59,5 @@ export type StreamEnrichmentEvent =
   | { type: 'simulation.fields.unmap'; fieldName: string }
   | { type: 'processors.add'; processor: ProcessorDefinitionWithUIAttributes }
   | { type: 'processors.reorder'; processorsRefs: ProcessorActorRef[] }
-  | { type: 'url.initialized'; urlState: EnrichmentUrlState };
+  | { type: 'url.initialized'; urlState: EnrichmentUrlState }
+  | { type: 'url.sync' };

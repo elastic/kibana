@@ -16,6 +16,7 @@ import {
   EuiTab,
   EuiTabs,
 } from '@elastic/eui';
+import { matchesHistoryState } from '@kbn/xstate-utils';
 import { ProcessorOutcomePreview } from './processor_outcome_preview';
 import {
   useSimulatorSelector,
@@ -28,15 +29,29 @@ import { DataSourcesList } from './data_sources_list';
 export const SimulationPlayground = () => {
   const { viewSimulationPreviewData, viewSimulationDetectedFields } = useStreamEnrichmentEvents();
 
-  const isViewingDataPreview = useStreamEnrichmentSelector((state) =>
-    state.matches({
-      ready: { enrichment: { displayingSimulation: 'viewDataPreview' } },
-    })
+  const isViewingDataPreview = useStreamEnrichmentSelector(
+    (state) =>
+      state.matches({
+        ready: { enrichment: { displayingSimulation: 'viewDataPreview' } },
+      }) ||
+      (state.matches({
+        ready: { enrichment: 'managingDataSources' },
+      }) &&
+        matchesHistoryState(state, {
+          ready: { enrichment: { displayingSimulation: 'viewDataPreview' } },
+        }))
   );
-  const isViewingDetectedFields = useStreamEnrichmentSelector((state) =>
-    state.matches({
-      ready: { enrichment: { displayingSimulation: 'viewDetectedFields' } },
-    })
+  const isViewingDetectedFields = useStreamEnrichmentSelector(
+    (state) =>
+      state.matches({
+        ready: { enrichment: { displayingSimulation: 'viewDetectedFields' } },
+      }) ||
+      (state.matches({
+        ready: { enrichment: 'managingDataSources' },
+      }) &&
+        matchesHistoryState(state, {
+          ready: { enrichment: { displayingSimulation: 'viewDetectedFields' } },
+        }))
   );
 
   const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
