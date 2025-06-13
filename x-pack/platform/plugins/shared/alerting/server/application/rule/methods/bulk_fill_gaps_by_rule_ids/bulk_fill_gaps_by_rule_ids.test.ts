@@ -177,11 +177,12 @@ describe('validation', () => {
       getCallBulkFillGaps({ start: new Date(Date.now() - 1).toISOString(), end })
     ).rejects.toThrow();
   });
-  it('should throw an error if there is not at least 5 minutes before the start and end dates', async () => {
+  it('should throw an error if the end date is not strictly greater than the start date', async () => {
+    const now = new Date();
     await expect(
       getCallBulkFillGaps({
-        start: new Date(Date.now() - 1000).toISOString(),
-        end: new Date().toISOString(),
+        start: now.toISOString(),
+        end: now.toISOString(),
       })
     ).rejects.toThrow();
   });

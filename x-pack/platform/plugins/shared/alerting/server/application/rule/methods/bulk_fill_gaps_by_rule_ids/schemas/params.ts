@@ -6,7 +6,6 @@
  */
 import { z } from '@kbn/zod';
 
-const FIVE_MINUTES_MS = 5 * 60 * 1000;
 const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000;
 
 const isoDateString = z.string().refine((val) => !isNaN(Date.parse(val)), {
@@ -45,10 +44,10 @@ const dateRangeSchema = z
       const start = new Date(data.start).getTime();
       const end = new Date(data.end).getTime();
 
-      return end - start >= FIVE_MINUTES_MS;
+      return end - start > 0;
     },
     {
-      message: 'end must be at least 5 minutes after start date.',
+      message: 'end must be greater than the start date.',
     }
   )
   .refine(
