@@ -1,0 +1,25 @@
+{
+  "type": "plugin",
+  "id": "@kbn/elastic-assistant-shared-state-plugin",
+  "owner": [
+    "@elastic/security-generative-ai"
+  ],
+  "group": "security",
+  "visibility": "private",
+  "description": "Provides client side context for the Elastic AI Assistant",
+  "plugin": {
+    "id": "elasticAssistantSharedState",
+    "browser": true,
+    "server": false,
+    "configPath": [
+      "xpack",
+      "elasticAssistantSharedState"
+    ],
+    "requiredPlugins": [
+      
+    ],
+    "requiredBundles": [
+
+    ],
+  }
+}

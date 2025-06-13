@@ -15,7 +15,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
 
@@ -28,13 +27,23 @@ export interface FlyoutNavigationProps {
   isAssistantEnabled: boolean;
 }
 
-const VerticalSeparator = styled.div`
-  :before {
-    content: '';
-    height: 100%;
-    border-left: ${(props) => props.theme.euiTheme.border.thin};
-  }
-`;
+const VerticalSeparator = memo(() => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <div
+      css={css`
+        :before {
+          content: '';
+          height: 100%;
+          border-left: ${euiTheme.border.thin};
+        }
+      `}
+    />
+  );
+});
+
+VerticalSeparator.displayName = 'VerticalSeparator';
 
 /**
  * Navigation menu on the right panel only, with expand/collapse button and option to

@@ -15,7 +15,6 @@ import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistan
 import styled from '@emotion/styled';
 import type { EuiPanelProps } from '@elastic/eui/src/components/panel';
 import { StreamComment } from './stream';
-import { CommentActions } from '../comment_actions';
 import * as i18n from './translations';
 
 // Matches EuiAvatar L
@@ -45,13 +44,17 @@ const transformMessageWithReplacements = ({
     content: showAnonymizedValues
       ? content
       : replaceAnonymizedValuesWithOriginalValues({
-          messageContent: content,
-          replacements,
-        }),
+        messageContent: content,
+        replacements,
+      }),
   };
 };
 
-export const getComments: GetAssistantMessages = ({
+type GetComments = (args: {
+  CommentActions: React.FC<{ message: ClientMessage }>,
+}) => GetAssistantMessages
+
+export const getComments: GetComments = (args) => ({
   abortStream,
   currentConversation,
   isFetchingResponse,
@@ -71,32 +74,32 @@ export const getComments: GetAssistantMessages = ({
 
   const extraLoadingComment = isFetchingResponse
     ? [
-        {
-          username: i18n.ASSISTANT,
-          timelineAvatar: (
-            <SpinnerWrapper>
-              <EuiLoadingSpinner size="xl" />
-            </SpinnerWrapper>
-          ),
-          timestamp: '...',
-          children: (
-            <StreamComment
-              abortStream={abortStream}
-              content=""
-              refetchCurrentConversation={refetchCurrentConversation}
-              regenerateMessage={regenerateMessageOfConversation}
-              setIsStreaming={setIsStreaming}
-              contentReferencesVisible={contentReferencesVisible}
-              transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
-              contentReferences={null}
-              messageRole="assistant"
-              isFetching
-              // we never need to append to a code block in the loading comment, which is what this index is used for
-              index={999}
-            />
-          ),
-        },
-      ]
+      {
+        username: i18n.ASSISTANT,
+        timelineAvatar: (
+          <SpinnerWrapper>
+            <EuiLoadingSpinner size="xl" />
+          </SpinnerWrapper>
+        ),
+        timestamp: '...',
+        children: (
+          <StreamComment
+            abortStream={abortStream}
+            content=""
+            refetchCurrentConversation={refetchCurrentConversation}
+            regenerateMessage={regenerateMessageOfConversation}
+            setIsStreaming={setIsStreaming}
+            contentReferencesVisible={contentReferencesVisible}
+            transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
+            contentReferences={null}
+            messageRole="assistant"
+            isFetching
+            // we never need to append to a code block in the loading comment, which is what this index is used for
+            index={999}
+          />
+        ),
+      },
+    ]
     : [];
 
   const UserAvatar = () => {
@@ -119,30 +122,30 @@ export const getComments: GetAssistantMessages = ({
   return [
     ...(systemPromptContent && currentConversation.messages.length
       ? [
-          {
-            username: i18n.SYSTEM,
-            timelineAvatar: <AssistantAvatar name="machine" size="l" color="subdued" />,
-            timestamp:
-              currentConversation.messages[0].timestamp.length === 0
-                ? new Date().toLocaleString()
-                : new Date(currentConversation.messages[0].timestamp).toLocaleString(),
-            children: (
-              <StreamComment
-                abortStream={abortStream}
-                content={systemPromptContent}
-                refetchCurrentConversation={refetchCurrentConversation}
-                regenerateMessage={regenerateMessageOfConversation}
-                setIsStreaming={setIsStreaming}
-                contentReferences={null}
-                contentReferencesVisible={contentReferencesVisible}
-                transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
-                messageRole={'assistant'}
-                // we never need to append to a code block in the system comment, which is what this index is used for
-                index={999}
-              />
-            ),
-          },
-        ]
+        {
+          username: i18n.SYSTEM,
+          timelineAvatar: <AssistantAvatar name="machine" size="l" color="subdued" />,
+          timestamp:
+            currentConversation.messages[0].timestamp.length === 0
+              ? new Date().toLocaleString()
+              : new Date(currentConversation.messages[0].timestamp).toLocaleString(),
+          children: (
+            <StreamComment
+              abortStream={abortStream}
+              content={systemPromptContent}
+              refetchCurrentConversation={refetchCurrentConversation}
+              regenerateMessage={regenerateMessageOfConversation}
+              setIsStreaming={setIsStreaming}
+              contentReferences={null}
+              contentReferencesVisible={contentReferencesVisible}
+              transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
+              messageRole={'assistant'}
+              // we never need to append to a code block in the system comment, which is what this index is used for
+              index={999}
+            />
+          ),
+        },
+      ]
       : []),
     ...currentConversation.messages.map((message, index) => {
       const isLastComment = index === currentConversation.messages.length - 1;
@@ -202,7 +205,7 @@ export const getComments: GetAssistantMessages = ({
 
       return {
         ...messageProps,
-        actions: <CommentActions message={transformedMessage} />,
+        actions: <args.CommentActions message={transformedMessage} />,
         children: (
           <StreamComment
             abortStream={abortStream}

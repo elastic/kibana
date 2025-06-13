@@ -8,7 +8,7 @@
 import React from 'react';
 import type { UseQueryResult } from '@tanstack/react-query';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { useFetchConnectorsQuery } from '../../../detection_engine/rule_management/api/hooks/use_fetch_connectors_query';
+import { useFetchConnectorsQuery } from '../../../../../../../solutions/security/plugins/security_solution/public/detection_engine/rule_management/api/hooks/use_fetch_connectors_query';
 import { StreamComment } from '.';
 import { useStream } from './use_stream';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';

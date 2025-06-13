@@ -1,0 +1,16 @@
+{
+  "esModuleInterop": true,
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "../../../../../typings/**/*"
+  ],
+  "kbn_references": [
+    
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

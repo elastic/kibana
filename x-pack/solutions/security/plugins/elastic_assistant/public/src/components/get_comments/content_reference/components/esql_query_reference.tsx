@@ -10,7 +10,7 @@ import React, { useCallback } from 'react';
 import { EuiLink } from '@elastic/eui';
 import type { ResolvedContentReferenceNode } from '../content_reference_parser';
 import { PopoverReference } from './popover_reference';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../context/typed_kibana_context/typed_kibana_context';
 
 interface Props {
   contentReferenceNode: ResolvedContentReferenceNode<EsqlContentReference>;

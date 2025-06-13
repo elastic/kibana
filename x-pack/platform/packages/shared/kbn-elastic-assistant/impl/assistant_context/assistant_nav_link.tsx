@@ -7,13 +7,11 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
-import { createHtmlPortalNode, OutPortal, InPortal } from 'react-reverse-portal';
 import { EuiToolTip, EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ChromeStyle } from '@kbn/core-chrome-browser';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
-import { useAssistantContext } from '.';
+import { useAssistantContext } from '@kbn/elastic-assistant';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -29,9 +27,8 @@ const LINK_LABEL = i18n.translate('xpack.elasticAssistant.assistantContext.assis
 });
 
 export const AssistantNavLink: FC = () => {
-  const { chrome, showAssistantOverlay, assistantAvailability, currentAppId } =
+  const { chrome, showAssistantOverlay, assistantAvailability } =
     useAssistantContext();
-  const portalNode = React.useMemo(() => createHtmlPortalNode(), []);
   const [chromeStyle, setChromeStyle] = useState<ChromeStyle | undefined>(undefined);
 
   // useObserverable would change the order of re-renders that are tested against closely.
@@ -39,27 +36,6 @@ export const AssistantNavLink: FC = () => {
     const s = chrome.getChromeStyle$().subscribe(setChromeStyle);
     return () => s.unsubscribe();
   }, [chrome]);
-
-  useEffect(() => {
-    const registerPortalNode = () => {
-      chrome.navControls.registerRight({
-        mount: (element: HTMLElement) => {
-          ReactDOM.render(<OutPortal node={portalNode} />, element);
-          return () => ReactDOM.unmountComponentAtNode(element);
-        },
-        // right before the user profile
-        order: 1001,
-      });
-    };
-
-    if (
-      assistantAvailability.hasAssistantPrivilege &&
-      chromeStyle &&
-      currentAppId !== 'management'
-    ) {
-      registerPortalNode();
-    }
-  }, [chrome, portalNode, assistantAvailability.hasAssistantPrivilege, chromeStyle, currentAppId]);
 
   const showOverlay = useCallback(
     () => showAssistantOverlay({ showOverlay: true }),
@@ -73,11 +49,10 @@ export const AssistantNavLink: FC = () => {
   const EuiButtonBasicOrEmpty = chromeStyle === 'project' ? EuiButtonEmpty : EuiButton;
 
   return (
-    <InPortal node={portalNode}>
       <EuiToolTip content={TOOLTIP_CONTENT}>
         <EuiButtonBasicOrEmpty
           onClick={showOverlay}
-          color="primary"
+          color="success"
           size="s"
           data-test-subj="assistantNavLink"
         >
@@ -89,6 +64,5 @@ export const AssistantNavLink: FC = () => {
           </EuiFlexGroup>
         </EuiButtonBasicOrEmpty>
       </EuiToolTip>
-    </InPortal>
   );
 };

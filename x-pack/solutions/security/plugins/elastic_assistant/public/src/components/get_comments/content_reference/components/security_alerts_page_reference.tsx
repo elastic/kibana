@@ -11,8 +11,8 @@ import { EuiLink } from '@elastic/eui';
 import type { ResolvedContentReferenceNode } from '../content_reference_parser';
 import { PopoverReference } from './popover_reference';
 import { SECURITY_ALERTS_PAGE_REFERENCE_LABEL } from './translations';
-import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
-import { FILTER_OPEN, FILTER_ACKNOWLEDGED } from '../../../../../common/types';
+import { useNavigateToAlertsPageWithFilters } from '../../../../hooks/navigate_to_alerts_page_with_filters/use_navigate_to_alerts_page_with_filters';
+import { ALERTS_PAGE_FILTER_ACKNOWLEDGED, ALERTS_PAGE_FILTER_OPEN } from '../../../../common/constants';
 
 interface Props {
   contentReferenceNode: ResolvedContentReferenceNode<SecurityAlertsPageContentReference>;
@@ -26,7 +26,7 @@ export const SecurityAlertsPageReference: React.FC<Props> = ({ contentReferenceN
       e.preventDefault();
       openAlertsPageWithFilters(
         {
-          selectedOptions: [FILTER_OPEN, FILTER_ACKNOWLEDGED],
+          selectedOptions: [ALERTS_PAGE_FILTER_OPEN, ALERTS_PAGE_FILTER_ACKNOWLEDGED],
           fieldName: 'kibana.alert.workflow_status',
           persist: false,
         },

@@ -5,26 +5,25 @@
  * 2.0.
  */
 
-import type { KnowledgeBaseEntryContentReference } from '@kbn/elastic-assistant-common';
+import type { SecurityAlertContentReference } from '@kbn/elastic-assistant-common';
 import React, { useCallback } from 'react';
 import { EuiLink } from '@elastic/eui';
-import { KNOWLEDGE_BASE_ENTRY_REFERENCE_LABEL } from './translations';
+import { SECURITY_ALERT_REFERENCE_LABEL } from './translations';
 import type { ResolvedContentReferenceNode } from '../content_reference_parser';
 import { PopoverReference } from './popover_reference';
-import { useKibana } from '../../../../common/lib/kibana';
-
+import { useKibana } from '../../../../context/typed_kibana_context/typed_kibana_context';
 interface Props {
-  contentReferenceNode: ResolvedContentReferenceNode<KnowledgeBaseEntryContentReference>;
+  contentReferenceNode: ResolvedContentReferenceNode<SecurityAlertContentReference>;
 }
 
-export const KnowledgeBaseEntryReference: React.FC<Props> = ({ contentReferenceNode }) => {
+export const SecurityAlertReference: React.FC<Props> = ({ contentReferenceNode }) => {
   const { navigateToApp } = useKibana().services.application;
 
   const onClick = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
-      navigateToApp('management', {
-        path: `kibana/securityAiAssistantManagement?tab=knowledge_base&entry_search_term=${contentReferenceNode.contentReference.knowledgeBaseEntryId}`,
+      navigateToApp('security', {
+        path: `alerts/redirect/${contentReferenceNode.contentReference.alertId}`,
         openInNewTab: true,
       });
     },
@@ -34,11 +33,9 @@ export const KnowledgeBaseEntryReference: React.FC<Props> = ({ contentReferenceN
   return (
     <PopoverReference
       contentReferenceCount={contentReferenceNode.contentReferenceCount}
-      data-test-subj="KnowledgeBaseEntryReference"
+      data-test-subj="SecurityAlertReference"
     >
-      <EuiLink onClick={onClick}>
-        {`${KNOWLEDGE_BASE_ENTRY_REFERENCE_LABEL}: ${contentReferenceNode.contentReference.knowledgeBaseEntryName}`}
-      </EuiLink>
+      <EuiLink onClick={onClick}>{SECURITY_ALERT_REFERENCE_LABEL}</EuiLink>
     </PopoverReference>
   );
 };

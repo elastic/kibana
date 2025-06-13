@@ -13,6 +13,7 @@ import { formatPageFilterSearchParam } from '../../../common/utils/format_page_f
 import { useNavigation } from '../lib/kibana';
 import { URL_PARAM_KEY } from './use_url_state';
 
+
 export const useNavigateToAlertsPageWithFilters = () => {
   const { navigateTo } = useNavigation();
 

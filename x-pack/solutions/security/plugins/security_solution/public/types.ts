@@ -91,6 +91,7 @@ import type { ConfigSettings } from '../common/config_settings';
 import type { OnboardingService } from './onboarding/service';
 import type { TelemetryServiceStart } from './common/lib/telemetry';
 import type { SiemMigrationsService } from './siem_migrations/service';
+import type { ElasticAssistantSharedStatePublicPluginStart } from '@kbn/elastic-assistant-shared-state-plugin/public';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -153,6 +154,7 @@ export interface StartPlugins {
   automaticImport?: AutomaticImportPluginStart;
   serverless?: ServerlessPluginStart;
   productDocBase: ProductDocBasePluginStart;
+  elasticAssistantSharedState: ElasticAssistantSharedStatePublicPluginStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {

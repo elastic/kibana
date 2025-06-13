@@ -68,6 +68,10 @@ import { PluginServices } from './plugin_services';
 import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/external_reference';
 import { isSecuritySolutionAccessible } from './helpers_access';
 import { generateAttachmentType } from './threat_intelligence/modules/cases/utils/attachments';
+import ReactDOM from 'react-dom';
+import { SecurityApp } from './app/app';
+import { CommentActions } from './assistant/comment_actions';
+import { PROMPT_CONTEXTS } from './assistant/content/prompt_contexts';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -140,7 +144,27 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
         const subPluginRoutes = getSubPluginRoutesByCapabilities(subPlugins, services);
 
-        return renderApp({ ...params, services, store, usageCollection, subPluginRoutes });
+        const unmountActions = services.elasticAssistantSharedState.comments.registerActions({
+          mount: (args) => (target) => {
+            ReactDOM.render(
+              <SecurityApp history={params.history} services={services} store={store} theme$={params.theme$}>
+                <CommentActions message={args.message} />
+              </SecurityApp>,
+              target
+            );
+            return () => ReactDOM.unmountComponentAtNode(target);
+          }
+        })
+
+        const unmountPromptContext = services.elasticAssistantSharedState.promptContexts.setPromptContext(PROMPT_CONTEXTS)
+
+        const unmountApp = renderApp({ ...params, services, store, usageCollection, subPluginRoutes });
+
+        return () => {
+          unmountApp();
+          unmountActions();
+          unmountPromptContext()
+        };
       },
     });
 

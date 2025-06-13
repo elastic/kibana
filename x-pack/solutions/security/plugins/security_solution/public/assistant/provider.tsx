@@ -27,7 +27,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { APP_ID } from '../../common';
 import { useBasePath, useKibana } from '../common/lib/kibana';
 import { useAssistantTelemetry } from './use_assistant_telemetry';
-import { getComments } from './get_comments';
+//import { getComments } from './get_comments';
 import { LOCAL_STORAGE_KEY, augmentMessageCodeBlocks } from './helpers';
 import { BASE_SECURITY_QUICK_PROMPTS } from './content/quick_prompts';
 import { PROMPT_CONTEXTS } from './content/prompt_contexts';
@@ -229,7 +229,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
       docLinks={{ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }}
       basePath={basePath}
       basePromptContexts={Object.values(PROMPT_CONTEXTS)}
-      getComments={getComments}
+      getComments={()=>[]} //getComments
       http={http}
       inferenceEnabled={inferenceEnabled}
       navigateToApp={navigateToApp}
