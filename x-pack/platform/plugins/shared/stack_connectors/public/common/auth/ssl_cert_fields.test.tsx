@@ -256,6 +256,7 @@ describe('validation with PFX disabled', () => {
           readOnly={false}
           certTypeDefaultValue={certTypeDefaultValue}
           certType={SSLCertType.CRT}
+          isPfxEnabled={false}
         />
       </AuthFormTestProvider>
     );

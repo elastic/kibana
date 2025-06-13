@@ -29,7 +29,7 @@ export const SSLCertFields: React.FC<BasicAuthProps> = ({
   readOnly,
   certTypeDefaultValue,
   certType,
-  isPfxEnabled,
+  isPfxEnabled = true,
 }) => (
   <EuiFlexGroup justifyContent="spaceBetween" data-test-subj="sslCertFields">
     <EuiFlexItem>

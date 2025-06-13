@@ -96,7 +96,7 @@ function validateConnectorTypeConfig(
   } catch (err) {
     throw new Error(
       i18n.translate('xpack.stackConnectors.webhook.configurationErrorNoHostname', {
-        defaultMessage: 'error configuring webhook action: unable to parse url: {err}',
+        defaultMessage: 'error validation webhook action config: unable to parse url: {err}',
         values: {
           err: err.toString(),
         },
@@ -109,7 +109,7 @@ function validateConnectorTypeConfig(
   } catch (allowListError) {
     throw new Error(
       i18n.translate('xpack.stackConnectors.webhook.configurationError', {
-        defaultMessage: 'error configuring webhook action: {message}',
+        defaultMessage: 'error validation webhook action config: {message}',
         values: {
           message: allowListError.message,
         },
@@ -121,7 +121,7 @@ function validateConnectorTypeConfig(
     throw new Error(
       i18n.translate('xpack.stackConnectors.webhook.authConfigurationError', {
         defaultMessage:
-          'error configuring webhook action: authType must be null or undefined if hasAuth is false',
+          'error validation webhook action config: authType must be null or undefined if hasAuth is false',
       })
     );
   }
@@ -131,7 +131,8 @@ function validateConnectorTypeConfig(
     if (!webhookSettings.ssl.pfx) {
       throw new Error(
         i18n.translate('xpack.stackConnectors.webhook.pfxConfigurationError', {
-          defaultMessage: 'error configuring webhook action: certType "{certType}" is disabled',
+          defaultMessage:
+            'error validation webhook action config: certType "{certType}" is disabled',
           values: {
             certType: SSLCertType.PFX,
           },

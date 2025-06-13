@@ -46,7 +46,7 @@ const { emptyField } = fieldValidators;
 
 const VERIFICATION_MODE_DEFAULT = 'full';
 
-export const AuthConfig: FunctionComponent<Props> = ({ readOnly, isPfxEnabled }) => {
+export const AuthConfig: FunctionComponent<Props> = ({ readOnly, isPfxEnabled = true }) => {
   const { setFieldValue, getFieldDefaultValue } = useFormContext();
   const [{ config, __internal__ }] = useFormData({
     watch: [
