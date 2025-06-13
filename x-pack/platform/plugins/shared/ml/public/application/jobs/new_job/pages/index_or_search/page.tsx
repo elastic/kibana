@@ -7,18 +7,18 @@
 
 import type { FC } from 'react';
 import React from 'react';
+
 import { EuiFlexGroup, EuiPageBody, EuiPanel } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+
 import { PageTitle } from '../../../../components/page_title';
 import { CreateDataViewButton } from '../../../../components/create_data_view_button';
-import {
-  useMlKibana,
-  useNavigateToPath,
-  useMlManagementLocator,
-} from '../../../../contexts/kibana';
+import { useNavigateToPath, useMlManagementLocator } from '../../../../contexts/kibana';
 import { MlPageHeader } from '../../../../components/page_header';
 
 export interface PageProps {

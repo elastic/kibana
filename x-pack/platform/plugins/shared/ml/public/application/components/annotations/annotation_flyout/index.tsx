@@ -26,8 +26,8 @@ import {
   EuiTitle,
   EuiCheckbox,
 } from '@elastic/eui';
-
 import type { CommonProps } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { context } from '@kbn/kibana-react-plugin/public';
@@ -38,6 +38,8 @@ import {
   ANNOTATION_MAX_LENGTH_CHARS,
   ANNOTATION_EVENT_USER,
 } from '@kbn/ml-common-constants/annotations';
+import type { MlKibanaReactContextValue } from '@kbn/ml-kibana-context/kibana_context';
+
 import type {
   AnnotationState,
   AnnotationUpdatesService,
@@ -46,7 +48,6 @@ import { annotationsRefreshed } from '../../../services/annotations_service';
 import { AnnotationDescriptionList } from '../annotation_description_list';
 import { DeleteAnnotationModal } from '../delete_annotation_modal';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
-import type { MlKibanaReactContextValue } from '../../../contexts/kibana';
 
 interface ViewableDetector {
   index: number;

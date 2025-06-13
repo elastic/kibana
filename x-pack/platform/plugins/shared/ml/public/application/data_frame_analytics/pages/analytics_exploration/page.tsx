@@ -7,28 +7,32 @@
 
 import type { FC } from 'react';
 import React, { useState, useEffect } from 'react';
-import { EuiEmptyPrompt } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 
+import { EuiEmptyPrompt } from '@elastic/eui';
+
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useUrlState } from '@kbn/ml-url-state';
 import {
   ANALYSIS_CONFIG_TYPE,
   type DataFrameAnalysisConfigType,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { OutlierExploration } from './components/outlier_exploration';
-import { RegressionExploration } from './components/regression_exploration';
-import { ClassificationExploration } from './components/classification_exploration';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 
 import { HelpMenu } from '../../../components/help_menu';
-import { useMlKibana, useMlApi } from '../../../contexts/kibana';
 import { MlPageHeader } from '../../../components/page_header';
+import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
+import { JobInfoFlyoutsProvider } from '../../../jobs/components/job_details_flyout/job_details_flyout_context';
+import { PageTitle } from '../../../components/page_title';
+
 import type { AnalyticsSelectorIds } from '../components/analytics_selector';
 import { AnalyticsIdSelector, AnalyticsIdSelectorControls } from '../components/analytics_selector';
 import { AnalyticsEmptyPrompt } from '../analytics_management/components/empty_prompt';
-import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
-import { JobInfoFlyoutsProvider } from '../../../jobs/components/job_details_flyout/job_details_flyout_context';
+
 import { AnalyticsDetailFlyout } from './components/analytics_detail_flyout';
-import { PageTitle } from '../../../components/page_title';
+import { OutlierExploration } from './components/outlier_exploration';
+import { RegressionExploration } from './components/regression_exploration';
+import { ClassificationExploration } from './components/classification_exploration';
 
 export const Page: FC<{
   jobId: string;
