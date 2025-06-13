@@ -36,8 +36,6 @@ describe('Hardened FS', () => {
         expect(err).toBeFalsy();
         done();
       });
-
-      safeFs.unlinkSync(join(DATA_PATH, 'good.txt'));
     });
 
     it('should prevent writing to unsafe paths', (done) => {

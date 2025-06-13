@@ -25,13 +25,28 @@ const fsEventBus = require('../../platform/packages/shared/kbn-security-hardenin
 
 const { join, normalize } = require('path');
 const { homedir, tmpdir } = require('os');
+const { realpathSync } = require('fs');
 
 const isDevOrCI = process.env.NODE_ENV !== 'production' || process.env.CI === 'true';
 const baseSafePaths = [join(REPO_ROOT, 'data'), join(REPO_ROOT, '.es')];
+
+const tmpPath = tmpdir();
+
+const getRealTmpPath = () => {
+  let realTmpPath;
+  try {
+    realTmpPath = realpathSync(tmpPath);
+  } catch (e) {
+    realTmpPath = tmpPath;
+  }
+
+  return realTmpPath;
+};
+
 const devOrCIPaths = [
   REPO_ROOT,
   tmpdir(),
-  join('/private', tmpdir()),
+  getRealTmpPath(),
   join(homedir(), '.kibanaSecuritySolutionCliTools'),
 ];
 
