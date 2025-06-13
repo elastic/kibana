@@ -553,8 +553,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(body.attributes.errors).toHaveLength(1);
         expect(body.attributes.errors[0]).toEqual({
-          err_code: 'MANUAL_RULE_RUN_DISABLED_RULE',
-          message: 'Cannot schedule manual rule run for a disabled rule',
+          err_code: 'RULE_FILL_GAPS_DISABLED_RULE',
+          message: 'Cannot bulk fill gaps for a disabled rule',
           status_code: 500,
           rules: [
             {
