@@ -768,14 +768,15 @@
             "section": "def-server.ConnectorWithExtraFindData",
             "text": "ConnectorWithExtraFindData"
           },
-          "[] | undefined) => false | ",
+          "[] | undefined) => ",
           {
             "pluginId": "actions",
             "scope": "server",
             "docId": "kibActionsPluginApi",
             "section": "def-server.ConnectorWithExtraFindData",
             "text": "ConnectorWithExtraFindData"
-          }
+          },
+          " | undefined"
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/utils/get_elastic_managed_llm_connector.ts",
         "deprecated": false,
@@ -815,7 +816,7 @@
         "label": "MessageText",
         "description": [],
         "signature": [
-          "({ loading, content, onActionClick }: Props) => React.JSX.Element"
+          "({\n  loading,\n  content,\n  onActionClick,\n  anonymizedHighlightedContent,\n}: Props) => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/components/message_panel/message_text.tsx",
         "deprecated": false,
@@ -826,7 +827,7 @@
             "id": "def-public.MessageText.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ loading, content, onActionClick }",
+            "label": "{\n  loading,\n  content,\n  onActionClick,\n  anonymizedHighlightedContent,\n}",
             "description": [],
             "signature": [
               "Props"
@@ -902,6 +903,109 @@
               "ApplicationStart"
             ],
             "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/utils/navigate_to_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.redactEntities",
+        "type": "Function",
+        "tags": [],
+        "label": "redactEntities",
+        "description": [
+          "\nReplace each entity span in the original with its hash."
+        ],
+        "signature": [
+          "(original: string, entities: ",
+          "DetectedEntity",
+          "[]) => string"
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/utils/anonymization/redaction.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.redactEntities.$1",
+            "type": "string",
+            "tags": [],
+            "label": "original",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/utils/anonymization/redaction.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.redactEntities.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "entities",
+            "description": [],
+            "signature": [
+              "DetectedEntity",
+              "[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/utils/anonymization/redaction.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.unhashString",
+        "type": "Function",
+        "tags": [],
+        "label": "unhashString",
+        "description": [
+          "\nReplace every placeholder in a string with its real value\n(taken from `hashMap`)."
+        ],
+        "signature": [
+          "(contentWithHashes: string, hashMap: Map<string, { value: string; }>) => string"
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/utils/anonymization/redaction.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.unhashString.$1",
+            "type": "string",
+            "tags": [],
+            "label": "contentWithHashes",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/utils/anonymization/redaction.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.unhashString.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "hashMap",
+            "description": [],
+            "signature": [
+              "Map<string, { value: string; }>"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/utils/anonymization/redaction.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1652,7 +1756,9 @@
             "label": "message",
             "description": [],
             "signature": [
-              "{ content?: string | undefined; name?: string | undefined; role: ",
+              "{ content?: string | undefined; unredactions?: ",
+              "Unredaction",
+              "[] | undefined; name?: string | undefined; role: ",
               {
                 "pluginId": "observabilityAIAssistant",
                 "scope": "common",
@@ -1977,7 +2083,7 @@
                 "section": "def-common.Message",
                 "text": "Message"
               },
-              "[]; persist: boolean; disableFunctions: boolean | { except: string[]; }; signal: AbortSignal; instructions?: (string | ",
+              "[]; persist: boolean; disableFunctions: boolean; signal: AbortSignal; instructions?: (string | ",
               "Instruction",
               ")[] | undefined; scopes: ",
               {
@@ -2106,13 +2212,10 @@
                   {
                     "parentPluginId": "observabilityAIAssistant",
                     "id": "def-public.ObservabilityAIAssistantChatService.complete.$1.disableFunctions",
-                    "type": "CompoundType",
+                    "type": "boolean",
                     "tags": [],
                     "label": "disableFunctions",
                     "description": [],
-                    "signature": [
-                      "boolean | { except: string[]; }"
-                    ],
                     "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -3355,16 +3458,8 @@
               "; title: ",
               "StringC",
               "; disableFunctions: ",
-              "UnionC",
-              "<[",
               "Type",
-              "<boolean, boolean, unknown>, ",
-              "TypeC",
-              "<{ except: ",
-              "ArrayC",
-              "<",
-              "StringC",
-              ">; }>]>; instructions: ",
+              "<boolean, boolean, unknown>; instructions: ",
               "ArrayC",
               "<",
               "UnionC",
@@ -3455,16 +3550,8 @@
               "; title: ",
               "StringC",
               "; disableFunctions: ",
-              "UnionC",
-              "<[",
               "Type",
-              "<boolean, boolean, unknown>, ",
-              "TypeC",
-              "<{ except: ",
-              "ArrayC",
-              "<",
-              "StringC",
-              ">; }>]>; instructions: ",
+              "<boolean, boolean, unknown>; instructions: ",
               "ArrayC",
               "<",
               "UnionC",
@@ -4437,16 +4524,8 @@
               "; title: ",
               "StringC",
               "; disableFunctions: ",
-              "UnionC",
-              "<[",
               "Type",
-              "<boolean, boolean, unknown>, ",
-              "TypeC",
-              "<{ except: ",
-              "ArrayC",
-              "<",
-              "StringC",
-              ">; }>]>; instructions: ",
+              "<boolean, boolean, unknown>; instructions: ",
               "ArrayC",
               "<",
               "UnionC",
@@ -4537,16 +4616,8 @@
               "; title: ",
               "StringC",
               "; disableFunctions: ",
-              "UnionC",
-              "<[",
               "Type",
-              "<boolean, boolean, unknown>, ",
-              "TypeC",
-              "<{ except: ",
-              "ArrayC",
-              "<",
-              "StringC",
-              ">; }>]>; instructions: ",
+              "<boolean, boolean, unknown>; instructions: ",
               "ArrayC",
               "<",
               "UnionC",
@@ -5440,6 +5511,21 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.aiAssistantAnonymizationRules",
+        "type": "string",
+        "tags": [],
+        "label": "aiAssistantAnonymizationRules",
+        "description": [],
+        "signature": [
+          "\"observability:aiAssistantAnonymizationRules\""
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/ui_settings/settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
         "id": "def-public.aiAssistantLogsIndexPattern",
         "type": "string",
         "tags": [],
@@ -6303,16 +6389,8 @@
           "; title: ",
           "StringC",
           "; disableFunctions: ",
-          "UnionC",
-          "<[",
           "Type",
-          "<boolean, boolean, unknown>, ",
-          "TypeC",
-          "<{ except: ",
-          "ArrayC",
-          "<",
-          "StringC",
-          ">; }>]>; instructions: ",
+          "<boolean, boolean, unknown>; instructions: ",
           "ArrayC",
           "<",
           "UnionC",
@@ -6403,16 +6481,8 @@
           "; title: ",
           "StringC",
           "; disableFunctions: ",
-          "UnionC",
-          "<[",
           "Type",
-          "<boolean, boolean, unknown>, ",
-          "TypeC",
-          "<{ except: ",
-          "ArrayC",
-          "<",
-          "StringC",
-          ">; }>]>; instructions: ",
+          "<boolean, boolean, unknown>; instructions: ",
           "ArrayC",
           "<",
           "UnionC",
@@ -7696,16 +7766,8 @@
           "; title: ",
           "StringC",
           "; disableFunctions: ",
-          "UnionC",
-          "<[",
           "Type",
-          "<boolean, boolean, unknown>, ",
-          "TypeC",
-          "<{ except: ",
-          "ArrayC",
-          "<",
-          "StringC",
-          ">; }>]>; instructions: ",
+          "<boolean, boolean, unknown>; instructions: ",
           "ArrayC",
           "<",
           "UnionC",
@@ -7796,16 +7858,8 @@
           "; title: ",
           "StringC",
           "; disableFunctions: ",
-          "UnionC",
-          "<[",
           "Type",
-          "<boolean, boolean, unknown>, ",
-          "TypeC",
-          "<{ except: ",
-          "ArrayC",
-          "<",
-          "StringC",
-          ">; }>]>; instructions: ",
+          "<boolean, boolean, unknown>; instructions: ",
           "ArrayC",
           "<",
           "UnionC",
@@ -8932,6 +8986,20 @@
                     "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "observabilityAIAssistant",
+                    "id": "def-server.ObservabilityAIAssistantClient.Unnamed.$1.anonymizationService",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "anonymizationService",
+                    "description": [],
+                    "signature": [
+                      "AnonymizationService"
+                    ],
+                    "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -9030,7 +9098,7 @@
               "ChatFunctionClient",
               "; persist: boolean; conversationId?: string | undefined; title?: string | undefined; isPublic?: boolean | undefined; kibanaPublicUrl?: string | undefined; userInstructions?: ",
               "Instruction",
-              "[] | undefined; simulateFunctionCalling?: boolean | undefined; disableFunctions?: boolean | { except: string[]; } | undefined; }) => ",
+              "[] | undefined; simulateFunctionCalling?: boolean | undefined; disableFunctions?: boolean | undefined; }) => ",
               "Observable",
               "<({ conversation: { id: string; title: string; last_updated: string; }; } & { type: ",
               {
@@ -9269,7 +9337,7 @@
                     "label": "disableFunctions",
                     "description": [],
                     "signature": [
-                      "boolean | { except: string[]; } | undefined"
+                      "boolean | undefined"
                     ],
                     "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
                     "deprecated": false,
@@ -9330,15 +9398,7 @@
                 "section": "def-common.ChatCompleteResponse",
                 "text": "ChatCompleteResponse"
               },
-              "<",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ToolOptions",
-                "text": "ToolOptions"
-              },
-              "<string>>>"
+              "<ChatCompleteResponseOptions>>"
             ],
             "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
             "deprecated": false,
@@ -11338,16 +11398,8 @@
           "; title: ",
           "StringC",
           "; disableFunctions: ",
-          "UnionC",
-          "<[",
           "Type",
-          "<boolean, boolean, unknown>, ",
-          "TypeC",
-          "<{ except: ",
-          "ArrayC",
-          "<",
-          "StringC",
-          ">; }>]>; instructions: ",
+          "<boolean, boolean, unknown>; instructions: ",
           "ArrayC",
           "<",
           "UnionC",
@@ -11438,16 +11490,8 @@
           "; title: ",
           "StringC",
           "; disableFunctions: ",
-          "UnionC",
-          "<[",
           "Type",
-          "<boolean, boolean, unknown>, ",
-          "TypeC",
-          "<{ except: ",
-          "ArrayC",
-          "<",
-          "StringC",
-          ">; }>]>; instructions: ",
+          "<boolean, boolean, unknown>; instructions: ",
           "ArrayC",
           "<",
           "UnionC",
@@ -12231,6 +12275,120 @@
     "interfaces": [
       {
         "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.AnonymizationRule",
+        "type": "Interface",
+        "tags": [],
+        "label": "AnonymizationRule",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-common.AnonymizationRule.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-common.AnonymizationRule.entityClass",
+            "type": "string",
+            "tags": [],
+            "label": "entityClass",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-common.AnonymizationRule.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"regex\" | \"ner\""
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-common.AnonymizationRule.pattern",
+            "type": "string",
+            "tags": [],
+            "label": "pattern",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-common.AnonymizationRule.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-common.AnonymizationRule.builtIn",
+            "type": "boolean",
+            "tags": [],
+            "label": "builtIn",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-common.AnonymizationRule.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-common.AnonymizationRule.normalize",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "normalize",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
         "id": "def-common.Conversation",
         "type": "Interface",
         "tags": [],
@@ -12665,7 +12823,9 @@
             "label": "message",
             "description": [],
             "signature": [
-              "{ content?: string | undefined; name?: string | undefined; role: ",
+              "{ content?: string | undefined; unredactions?: ",
+              "Unredaction",
+              "[] | undefined; name?: string | undefined; role: ",
               {
                 "pluginId": "observabilityAIAssistant",
                 "scope": "common",
@@ -12818,6 +12978,21 @@
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.aiAssistantAnonymizationRules",
+        "type": "string",
+        "tags": [],
+        "label": "aiAssistantAnonymizationRules",
+        "description": [],
+        "signature": [
+          "\"observability:aiAssistantAnonymizationRules\""
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/ui_settings/settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "observabilityAIAssistant",
         "id": "def-common.aiAssistantLogsIndexPattern",
