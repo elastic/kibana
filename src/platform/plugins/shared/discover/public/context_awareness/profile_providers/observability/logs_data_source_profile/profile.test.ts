@@ -250,7 +250,7 @@ describe('logsDataSourceProfileProvider', () => {
         });
       const rowAdditionalLeadingControls = getRowAdditionalLeadingControls?.({
         dataView: dataViewWithLogLevel,
-        enableDocumentViewer: true,
+        isDocViewerEnabled: true,
       });
 
       expect(rowAdditionalLeadingControls).toHaveLength(2);
@@ -268,7 +268,7 @@ describe('logsDataSourceProfileProvider', () => {
         });
       const rowAdditionalLeadingControls = getRowAdditionalLeadingControls?.({
         dataView: dataViewWithLogLevel,
-        enableDocumentViewer: false,
+        isDocViewerEnabled: false,
       });
 
       expect(rowAdditionalLeadingControls).toHaveLength(0);
