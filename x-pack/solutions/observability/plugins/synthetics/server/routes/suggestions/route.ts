@@ -81,39 +81,38 @@ export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
       (data?.aggregations as AggsResponse) ?? {};
     const allLocationsMap = new Map(allLocations.map((obj) => [obj.id, obj.label]));
 
-      return {
-        monitorIds: monitorIdsAggs?.buckets?.map(({ key, doc_count: count, name }) => ({
-          label:
-            name?.hits?.hits[0]?._source?.[syntheticsMonitorSavedObjectType]?.[ConfigKey.NAME] ||
-            key,
+    return {
+      monitorIds: monitorIdsAggs?.buckets?.map(({ key, doc_count: count, name }) => ({
+        label:
+          name?.hits?.hits[0]?._source?.[syntheticsMonitorSavedObjectType]?.[ConfigKey.NAME] || key,
+        value: key,
+        count,
+      })),
+      tags:
+        tagsAggs?.buckets?.map(({ key, doc_count: count }) => ({
+          label: key,
           value: key,
           count,
-        })),
-        tags:
-          tagsAggs?.buckets?.map(({ key, doc_count: count }) => ({
-            label: key,
-            value: key,
-            count,
-          })) ?? [],
-        locations:
-          locationsAggs?.buckets?.map(({ key, doc_count: count }) => ({
-            label: allLocationsMap.get(key) || key,
-            value: key,
-            count,
-          })) ?? [],
-        projects:
-          projectsAggs?.buckets?.map(({ key, doc_count: count }) => ({
-            label: key,
-            value: key,
-            count,
-          })) ?? [],
-        monitorTypes:
-          monitorTypesAggs?.buckets?.map(({ key, doc_count: count }) => ({
-            label: key,
-            value: key,
-            count,
-          })) ?? [],
-      };
+        })) ?? [],
+      locations:
+        locationsAggs?.buckets?.map(({ key, doc_count: count }) => ({
+          label: allLocationsMap.get(key) || key,
+          value: key,
+          count,
+        })) ?? [],
+      projects:
+        projectsAggs?.buckets?.map(({ key, doc_count: count }) => ({
+          label: key,
+          value: key,
+          count,
+        })) ?? [],
+      monitorTypes:
+        monitorTypesAggs?.buckets?.map(({ key, doc_count: count }) => ({
+          label: key,
+          value: key,
+          count,
+        })) ?? [],
+    };
   },
 });
 
