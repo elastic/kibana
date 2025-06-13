@@ -230,7 +230,7 @@ export class ExplorerChartSingleMetric extends React.Component {
         .attr('y', 0)
         .attr('height', CHART_HEIGHT)
         .attr('width', vizWidth)
-        .style('stroke', '#cccccc')
+        .style('stroke', euiTheme.colors.lightestShade)
         .style('fill', 'none')
         .style('stroke-width', 1);
 

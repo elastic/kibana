@@ -12,7 +12,8 @@ import { useEuiFontSize, useEuiTheme, mathWithUnits, transparentize } from '@ela
 import { getThemeResolvedSeverityColor, ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 
 export const useCssMlExplorerChartContainer = () => {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, colorMode } = useEuiTheme();
+  const isDarkMode = colorMode === 'DARK';
   const euiFontSizeXS = useEuiFontSize('xs').fontSize;
 
   return css({
@@ -46,27 +47,27 @@ export const useCssMlExplorerChartContainer = () => {
 
     '.axis path, .axis line': {
       fill: 'none',
-      stroke: euiTheme.border.color,
+      stroke: euiTheme.colors.lightestShade,
       shapeRendering: 'crispEdges',
     },
 
     '.axis .tick line.ml-tick-emphasis': {
-      stroke: transparentize('#000', 0.2),
+      stroke: euiTheme.colors.lightShade,
     },
 
     '.axis text': {
-      fill: euiTheme.colors.lightShade,
+      fill: euiTheme.colors.textParagraph,
     },
 
     '.axis .tick line': {
-      stroke: euiTheme.colors.lightShade,
+      stroke: euiTheme.colors.lightestShade,
       strokeWidth: '1px',
     },
 
     '.values-line': {
       fill: 'none',
-      stroke: euiTheme.colors.primary,
-      strokeWidth: '2px',
+      stroke: isDarkMode ? euiTheme.colors.vis.euiColorVisGrey0 : euiTheme.colors.darkestShade,
+      strokeWidth: '1px',
     },
 
     '.values-dots circle, .values-dots-circle': {
