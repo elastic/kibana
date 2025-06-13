@@ -101,7 +101,7 @@ const normalizeFilterArray = (filters: RuleFilterArray | undefined): RuleFilterA
           disabled: filter.meta.disabled !== undefined ? filter.meta.disabled : false,
           params: filter.meta.params,
           relation: 'relation' in filter.meta ? filter.meta?.relation : undefined,
-          type: filter.meta.type,
+          type: filter.meta.type ?? 'custom',
         }
       : undefined,
   }));
