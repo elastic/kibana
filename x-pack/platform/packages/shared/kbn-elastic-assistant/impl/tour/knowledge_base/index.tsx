@@ -13,6 +13,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiTourStep, EuiTourStepProps } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { SecurityPageName } from '@kbn/deeplinks-security';
 import { KNOWLEDGE_BASE_TAB } from '../../assistant/settings/const';
 import { useAssistantContext } from '../../..';
 import { VideoToast } from './video_toast';
@@ -24,6 +25,23 @@ export interface TourState {
   currentTourStep: number;
   isTourActive: boolean;
 }
+
+const navigateToKnowledgeBasePage = (
+  navigateToApp: ReturnType<typeof useAssistantContext>['navigateToApp'],
+  hasSearchAILakeConfigurations: boolean
+) => {
+  if (hasSearchAILakeConfigurations) {
+    return navigateToApp('securitySolutionUI', {
+      deepLinkId: SecurityPageName.configurationsAiSettings,
+      path: `?tab=${KNOWLEDGE_BASE_TAB}`,
+      openInNewTab: true,
+    });
+  }
+  return navigateToApp('management', {
+    path: `kibana/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}`,
+  });
+};
+
 const KnowledgeBaseTourComp: React.FC<{
   children?: EuiTourStepProps['children'];
   isKbSettingsPage?: boolean;
@@ -58,13 +76,16 @@ const KnowledgeBaseTourComp: React.FC<{
       })),
     [setTourState]
   );
+  const { assistantAvailability } = useAssistantContext();
 
   const navigateToKnowledgeBase = useCallback(
     () =>
-      navigateToApp('management', {
-        path: `kibana/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}`,
-      }),
-    [navigateToApp]
+      navigateToKnowledgeBasePage(
+        navigateToApp,
+        assistantAvailability.hasSearchAILakeConfigurations
+      ),
+
+    [assistantAvailability.hasSearchAILakeConfigurations, navigateToApp]
   );
 
   const nextStep = useCallback(() => {
@@ -81,7 +102,7 @@ const KnowledgeBaseTourComp: React.FC<{
         {i18n.KNOWLEDGE_BASE_TOUR_EXIT}
       </EuiButtonEmpty>,
       // if next, set tour to the video step and navigate to the page
-      <EuiButton color="success" size="s" onClick={nextStep}>
+      <EuiButton color="success" size="s" data-test-subj="tryKb" onClick={nextStep}>
         {i18n.KNOWLEDGE_BASE_TRY_IT}
       </EuiButton>,
     ],
