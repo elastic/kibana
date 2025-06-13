@@ -39,7 +39,7 @@ export const MODULE_NOT_COMPATIBLE_TITLE = (incompatibleJobCount: number) =>
   i18n.translate('xpack.securitySolution.components.mlPopup.moduleNotCompatibleTitle', {
     values: { incompatibleJobCount },
     defaultMessage:
-      '{incompatibleJobCount} {incompatibleJobCount, plural, =1 {job is} other {jobs are}} currently unavailable',
+      '{incompatibleJobCount} {incompatibleJobCount, plural, =1 {job below is} other {jobs below are}} currently unavailable',
   });
 
 export const ANOMALY_DETECTION_DOCS = i18n.translate(

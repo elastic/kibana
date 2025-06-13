@@ -45,163 +45,192 @@ const defaultFilterProps: JobsFilters = {
   selectedGroups: [],
 };
 
-export const MlPopover = React.memo(() => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [filterProperties, setFilterProperties] = useState(defaultFilterProps);
-  const [mlNodesAvailable, setMlNodesAvailable] = useState(false);
+export interface MlPopoverProps {
+  defaultFilters?: Partial<JobsFilters>;
+  popoverDescription?: React.JSX.Element;
+  mlJobStartTime?: number;
+  hideSearchBar?: boolean;
+  hideGroupsFilter?: boolean;
+  hideElasticAndCustomJobsFilter?: boolean;
+}
 
-  const {
-    isMlAdmin,
-    isLicensed,
-    loading: isLoadingSecurityJobs,
-    jobs,
-    refetch: refreshJobs,
-  } = useSecurityJobs();
+export const MlPopover = React.memo<MlPopoverProps>(
+  ({
+    defaultFilters: suppliedDefaultFilters,
+    popoverDescription: suppliedPopoverDescription,
+    mlJobStartTime,
+    hideSearchBar,
+    hideGroupsFilter,
+    hideElasticAndCustomJobsFilter,
+  }) => {
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    const [filterProperties, setFilterProperties] = useState({
+      ...defaultFilterProps,
+      ...suppliedDefaultFilters,
+    });
 
-  const docLinks = useKibana().services.docLinks;
-  const {
-    enableDatafeed,
-    disableDatafeed,
-    isLoading: isLoadingEnableDataFeed,
-  } = useEnableDataFeed();
-  const handleJobStateChange = useCallback(
-    async (job: SecurityJob, latestTimestampMs: number, enable: boolean) => {
-      if (enable) {
-        await enableDatafeed(job, latestTimestampMs);
-      } else {
-        await disableDatafeed(job);
-      }
+    const [mlNodesAvailable, setMlNodesAvailable] = useState(false);
 
-      refreshJobs();
-    },
-    [refreshJobs, enableDatafeed, disableDatafeed]
-  );
+    const {
+      isMlAdmin,
+      isLicensed,
+      loading: isLoadingSecurityJobs,
+      jobs,
+      refetch: refreshJobs,
+    } = useSecurityJobs();
 
-  const filteredJobs = filterJobs({
-    jobs,
-    ...filterProperties,
-  });
-
-  const incompatibleJobCount = jobs.filter((j) => !j.isCompatible).length;
-  const installedJobsIds = useMemo(
-    () => jobs.filter((j) => j.isInstalled).map((j) => j.id),
-    [jobs]
-  );
-
-  if (!isLicensed) {
-    // If the user does not have platinum show upgrade UI
-    return (
-      <EuiPopover
-        anchorPosition="downRight"
-        id="integrations-popover"
-        button={
-          <EuiHeaderSectionItemButton
-            aria-expanded={isPopoverOpen}
-            aria-haspopup="true"
-            aria-label={i18n.ML_JOB_SETTINGS}
-            color="primary"
-            data-test-subj="integrations-button"
-            iconType="arrowDown"
-            iconSide="right"
-            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-            textProps={{ style: { fontSize: '1rem' } }}
-          >
-            {i18n.ML_JOB_SETTINGS}
-          </EuiHeaderSectionItemButton>
+    const docLinks = useKibana().services.docLinks;
+    const {
+      enableDatafeed,
+      disableDatafeed,
+      isLoading: isLoadingEnableDataFeed,
+    } = useEnableDataFeed();
+    const handleJobStateChange = useCallback(
+      async (job: SecurityJob, latestTimestampMs: number, enable: boolean) => {
+        if (enable) {
+          await enableDatafeed(job, latestTimestampMs, mlJobStartTime);
+        } else {
+          await disableDatafeed(job);
         }
-        isOpen={isPopoverOpen}
-        closePopover={() => setIsPopoverOpen(!isPopoverOpen)}
-        repositionOnScroll
-      >
-        <UpgradeContents />
-      </EuiPopover>
+
+        refreshJobs();
+      },
+      [refreshJobs, enableDatafeed, mlJobStartTime, disableDatafeed]
     );
-  } else if (isMlAdmin) {
-    // If the user has Platinum License & ML Admin Permissions, show Anomaly Detection button & full config UI
-    return (
-      <EuiPopover
-        anchorPosition="downRight"
-        id="integrations-popover"
-        button={
-          <EuiHeaderSectionItemButton
-            aria-expanded={isPopoverOpen}
-            aria-haspopup="true"
-            aria-label={i18n.ML_JOB_SETTINGS}
-            color="primary"
-            data-test-subj="integrations-button"
-            iconType="arrowDown"
-            iconSide="right"
-            onClick={() => {
-              setIsPopoverOpen(!isPopoverOpen);
-              refreshJobs();
-            }}
-            textProps={{ style: { fontSize: '1rem' } }}
-          >
-            {i18n.ML_JOB_SETTINGS}
-          </EuiHeaderSectionItemButton>
-        }
-        isOpen={isPopoverOpen}
-        closePopover={() => setIsPopoverOpen(!isPopoverOpen)}
-        repositionOnScroll
-      >
-        <PopoverContentsDiv data-test-subj="ml-popover-contents">
-          <EuiPopoverTitle>{i18n.ML_JOB_SETTINGS}</EuiPopoverTitle>
-          <PopoverDescription />
 
-          <EuiSpacer />
+    const filteredJobs = filterJobs({
+      jobs,
+      ...filterProperties,
+    });
 
-          <JobsTableFilters securityJobs={jobs} onFilterChanged={setFilterProperties} />
-
-          <ShowingCount filterResultsLength={filteredJobs.length} />
-
-          <EuiSpacer size="m" />
-
-          {incompatibleJobCount > 0 && (
-            <>
-              <EuiCallOut
-                title={i18n.MODULE_NOT_COMPATIBLE_TITLE(incompatibleJobCount)}
-                color="warning"
-                iconType="warning"
-                size="s"
-              >
-                <p>
-                  <FormattedMessage
-                    defaultMessage="We could not find any data, see {mlDocs} for more information on Machine Learning job requirements."
-                    id="xpack.securitySolution.components.mlPopup.moduleNotCompatibleDescription"
-                    values={{
-                      mlDocs: (
-                        <a
-                          href={`${docLinks.links.siem.ml}`}
-                          rel="noopener noreferrer"
-                          target="_blank"
-                        >
-                          {i18n.ANOMALY_DETECTION_DOCS}
-                        </a>
-                      ),
-                    }}
-                  />
-                </p>
-              </EuiCallOut>
-
-              <EuiSpacer size="m" />
-            </>
-          )}
-
-          <MLJobsAwaitingNodeWarning jobIds={installedJobsIds} />
-          <MlNodeAvailableWarningShared size="s" nodeAvailableCallback={setMlNodesAvailable} />
-          <JobsTable
-            isLoading={isLoadingSecurityJobs || isLoadingEnableDataFeed}
-            jobs={filteredJobs}
-            onJobStateChange={handleJobStateChange}
-            mlNodesAvailable={mlNodesAvailable}
-          />
-        </PopoverContentsDiv>
-      </EuiPopover>
+    const incompatibleJobCount = filteredJobs.filter((j) => !j.isCompatible).length;
+    const installedJobsIds = useMemo(
+      () => jobs.filter((j) => j.isInstalled).map((j) => j.id),
+      [jobs]
     );
-  } else {
-    // If the user has Platinum License & not ML Admin, hide Anomaly Detection button as they don't have permissions to configure
-    return null;
+
+    if (!isLicensed) {
+      // If the user does not have platinum show upgrade UI
+      return (
+        <EuiPopover
+          anchorPosition="downRight"
+          id="integrations-popover"
+          button={
+            <EuiHeaderSectionItemButton
+              aria-expanded={isPopoverOpen}
+              aria-haspopup="true"
+              aria-label={i18n.ML_JOB_SETTINGS}
+              color="primary"
+              data-test-subj="integrations-button"
+              iconType="arrowDown"
+              iconSide="right"
+              onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+              textProps={{ style: { fontSize: '1rem' } }}
+            >
+              {i18n.ML_JOB_SETTINGS}
+            </EuiHeaderSectionItemButton>
+          }
+          isOpen={isPopoverOpen}
+          closePopover={() => setIsPopoverOpen(!isPopoverOpen)}
+          repositionOnScroll
+        >
+          <UpgradeContents />
+        </EuiPopover>
+      );
+    } else if (isMlAdmin) {
+      // If the user has Platinum License & ML Admin Permissions, show Anomaly Detection button & full config UI
+      return (
+        <EuiPopover
+          anchorPosition="downRight"
+          id="integrations-popover"
+          button={
+            <EuiHeaderSectionItemButton
+              aria-expanded={isPopoverOpen}
+              aria-haspopup="true"
+              aria-label={i18n.ML_JOB_SETTINGS}
+              color="primary"
+              data-test-subj="integrations-button"
+              iconType="arrowDown"
+              iconSide="right"
+              onClick={() => {
+                setIsPopoverOpen(!isPopoverOpen);
+                refreshJobs();
+              }}
+              textProps={{ style: { fontSize: '1rem' } }}
+            >
+              {i18n.ML_JOB_SETTINGS}
+            </EuiHeaderSectionItemButton>
+          }
+          isOpen={isPopoverOpen}
+          closePopover={() => setIsPopoverOpen(!isPopoverOpen)}
+          repositionOnScroll
+        >
+          <PopoverContentsDiv data-test-subj="ml-popover-contents">
+            <EuiPopoverTitle>{i18n.ML_JOB_SETTINGS}</EuiPopoverTitle>
+            {suppliedPopoverDescription ?? <PopoverDescription />}
+
+            <EuiSpacer />
+
+            <JobsTableFilters
+              defaultFilters={{ ...defaultFilterProps, ...suppliedDefaultFilters }}
+              hideSearchBar={hideSearchBar ?? false}
+              hideGroupsFilter={hideGroupsFilter ?? false}
+              hideElasticAndCustomJobsFilter={hideElasticAndCustomJobsFilter ?? false}
+              securityJobs={jobs}
+              onFilterChanged={setFilterProperties}
+            />
+
+            <ShowingCount filterResultsLength={filteredJobs.length} />
+
+            <EuiSpacer size="m" />
+
+            {incompatibleJobCount > 0 && (
+              <>
+                <EuiCallOut
+                  title={i18n.MODULE_NOT_COMPATIBLE_TITLE(incompatibleJobCount)}
+                  color="warning"
+                  iconType="warning"
+                  size="s"
+                >
+                  <p>
+                    <FormattedMessage
+                      defaultMessage="We could not find any data, see {mlDocs} for more information on Machine Learning job requirements."
+                      id="xpack.securitySolution.components.mlPopup.moduleNotCompatibleDescription"
+                      values={{
+                        mlDocs: (
+                          <a
+                            href={`${docLinks.links.siem.ml}`}
+                            rel="noopener noreferrer"
+                            target="_blank"
+                          >
+                            {i18n.ANOMALY_DETECTION_DOCS}
+                          </a>
+                        ),
+                      }}
+                    />
+                  </p>
+                </EuiCallOut>
+
+                <EuiSpacer size="m" />
+              </>
+            )}
+
+            <MLJobsAwaitingNodeWarning jobIds={installedJobsIds} />
+            <MlNodeAvailableWarningShared size="s" nodeAvailableCallback={setMlNodesAvailable} />
+            <JobsTable
+              isLoading={isLoadingSecurityJobs || isLoadingEnableDataFeed}
+              jobs={filteredJobs}
+              onJobStateChange={handleJobStateChange}
+              mlNodesAvailable={mlNodesAvailable}
+            />
+          </PopoverContentsDiv>
+        </EuiPopover>
+      );
+    } else {
+      // If the user has Platinum License & not ML Admin, hide Anomaly Detection button as they don't have permissions to configure
+      return null;
+    }
   }
-});
+);
 
 MlPopover.displayName = 'MlPopover';

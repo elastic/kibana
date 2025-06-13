@@ -28,8 +28,15 @@ export const useEnableDataFeed = () => {
   const { addError } = useAppToasts();
   const [isLoading, setIsLoading] = useState(false);
 
+  /**
+   * Enables the data feed for a given ML job.
+   * The job will start with either `latestTimestampMs` or `mlJobStartTime`, whichever is more recent.
+   * @param job The `SecurityJob` to enable the DataFeed for
+   * @param latestTimestampMs the latest timestamp of data associated with the job
+   * @param mlJobStartTime If not provided, defaults to two weeks ago.
+   */
   const enableDatafeed = useCallback(
-    async (job: SecurityJob, latestTimestampMs: number) => {
+    async (job: SecurityJob, latestTimestampMs: number, mlJobStartTime?: number) => {
       setIsLoading(true);
       track(
         METRIC_TYPE.COUNT,
@@ -65,9 +72,9 @@ export const useEnableDataFeed = () => {
         }
       }
 
-      // Max start time for job is no more than two weeks ago to ensure job performance
+      // By default, the start time for the job is no more than two weeks ago to ensure job performance
       const date = new Date();
-      const maxStartTime = date.setDate(date.getDate() - 14);
+      const maxStartTime = mlJobStartTime ?? date.setDate(date.getDate() - 14);
 
       const datafeedId = `datafeed-${job.id}`;
 
