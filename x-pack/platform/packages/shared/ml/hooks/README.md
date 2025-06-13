@@ -1,3 +1,9 @@
 # @kbn/ml-hooks
 
-ML hooks to use services in React. Moved out of `@kbn/ml-services` to avoid circular dependency issues.
+React hooks for accessing Machine Learning services, designed to avoid circular dependencies while providing clean API access patterns.
+
+## Related Packages
+
+- `@kbn/ml-kibana-context` - Context provider for ML services
+- `@kbn/ml-services` - Service implementations used by these hooks
+- `@kbn/ml-common-types` - Type definitions for hook parameters and returns
