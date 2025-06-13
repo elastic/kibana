@@ -24,6 +24,42 @@ interface Props {
   timeUnit?: TimeUnit;
 }
 
+export function getRelativeTimeText(duration: moment.Duration) {
+  const [day, hour, minute] = [duration.days(), duration.hours(), duration.minutes()];
+  // keeping days for flexibility, but it is not used in the current implementation. If day is detected, it will be displayed without hours or minutes
+  if (day > 0) {
+    return i18n.translate('xpack.observability.alertsTable.highFidelityDurationWithDays', {
+      defaultMessage: '{day, plural, one {# day} other {# days}} ago',
+      values: { day },
+    });
+  }
+  if (hour > 0 && minute === 0) {
+    return i18n.translate('xpack.observability.alertsTable.highFidelityDurationWithHours', {
+      defaultMessage: '{hour, plural, one {# hour} other {# hours}} ago',
+      values: { hour },
+    });
+  }
+  if (hour > 0) {
+    return i18n.translate(
+      'xpack.observability.alertsTable.highFidelityDurationWithHoursAndMinutes',
+      {
+        defaultMessage:
+          '{hour, plural, one {# hour} other {# hours}}, {minute, plural, one {# minute} other {# minutes}} ago',
+        values: { hour, minute },
+      }
+    );
+  }
+  if (minute > 0) {
+    return i18n.translate('xpack.observability.alertsTable.highFidelityDuration', {
+      defaultMessage: '{minute, plural, one {# minute} other {# minutes}} ago',
+      values: { minute },
+    });
+  }
+  return i18n.translate('xpack.observability.alertsTable.highFidelityDurationRecently', {
+    defaultMessage: 'a few seconds ago',
+  });
+}
+
 export function RelativeTimestampTooltip({
   time,
   relativeDisplayThreshold = 24,
@@ -32,26 +68,10 @@ export function RelativeTimestampTooltip({
   const duration = moment.duration(new Date().getTime() - time);
   const absoluteTimeLabel = asAbsoluteDateTime(time, timeUnit);
 
-  const [hour, minute] = [duration.hours(), duration.minutes()];
-
-  const relativeDisplayText =
-    hour > 0 && minute === 0
-      ? i18n.translate('xpack.observability.highFidelityDurationWithHours', {
-          defaultMessage: '{hour, plural, one {# hour} other {# hours}} ago',
-          values: { hour },
-        })
-      : hour > 0
-      ? i18n.translate('xpack.observability.highFidelityDurationWithHoursAndMinutes', {
-          defaultMessage:
-            '{hour, plural, one {# hour} other {# hours}}, {minute, plural, one {# minute} other {# minutes}} ago',
-          values: { hour, minute },
-        })
-      : i18n.translate('xpack.observability.highFidelityDuration', {
-          defaultMessage: '{minute, plural, one {# minute} other {# minutes}} ago',
-          values: { hour, minute },
-        });
-
-  const timeDisplay = hour >= relativeDisplayThreshold ? absoluteTimeLabel : relativeDisplayText;
+  const timeDisplay =
+    duration.hours() >= relativeDisplayThreshold
+      ? absoluteTimeLabel
+      : getRelativeTimeText(duration);
 
   return (
     <EuiToolTip content={absoluteTimeLabel}>
