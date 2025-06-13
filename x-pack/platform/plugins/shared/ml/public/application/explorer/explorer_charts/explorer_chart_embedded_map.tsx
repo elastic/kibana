@@ -9,8 +9,8 @@ import React, { useState, useEffect } from 'react';
 import type { LayerDescriptor } from '@kbn/maps-plugin/common';
 import { INITIAL_LOCATION } from '@kbn/maps-plugin/common';
 import type { Dictionary } from '@kbn/ml-common-types/common';
-import { getMLAnomaliesActualLayer, getMLAnomaliesTypicalLayer } from './map_config';
 import { useMlKibana } from '@kbn/ml-kibana-context';
+import { getMLAnomaliesActualLayer, getMLAnomaliesTypicalLayer } from './map_config';
 interface Props {
   seriesConfig: Dictionary<any>;
 }

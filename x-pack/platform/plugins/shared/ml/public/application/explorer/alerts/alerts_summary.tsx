@@ -18,9 +18,9 @@ import { i18n } from '@kbn/i18n';
 import { ALERT_DURATION, ALERT_END } from '@kbn/rule-data-utils';
 import React, { useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { statusNameMap } from './const';
 import { getAlertFormatters } from '../../../alerting/anomaly_detection_alerts_table/render_cell_value';
-import { useMlKibana } from '@kbn/ml-kibana-context';
 import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
 import { getAlertsSummary } from './get_alerts_summary';
 

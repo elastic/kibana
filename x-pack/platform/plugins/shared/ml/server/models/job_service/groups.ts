@@ -8,8 +8,8 @@
 import type { UpdateGroupsRequest } from '@kbn/ml-common-types/job_service';
 import { GLOBAL_CALENDAR } from '@kbn/ml-common-constants/calendars';
 import type { Group } from '@kbn/ml-common-types/groups';
-import { CalendarManager } from '../calendar';
 import type { MlClient } from '@kbn/ml-client';
+import { CalendarManager } from '../calendar';
 
 export interface Results {
   [id: string]: {
