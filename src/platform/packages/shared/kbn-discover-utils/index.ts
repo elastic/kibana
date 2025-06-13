@@ -59,6 +59,7 @@ export {
   dismissAllFlyoutsExceptFor,
   dismissFlyouts,
   LogLevelBadge,
+  isAppMenuActionSubmenu,
 } from './src';
 
 export type { LogsContextService, TracesContextService } from './src';

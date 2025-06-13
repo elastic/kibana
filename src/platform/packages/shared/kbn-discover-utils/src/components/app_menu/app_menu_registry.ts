@@ -129,7 +129,7 @@ export class AppMenuRegistry {
   }
 }
 
-function isAppMenuActionSubmenu(
+export function isAppMenuActionSubmenu(
   appMenuItem: AppMenuItem
 ): appMenuItem is AppMenuActionSubmenuSecondary | AppMenuActionSubmenuCustom {
   return 'actions' in appMenuItem && Array.isArray(appMenuItem.actions);
