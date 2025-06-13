@@ -10,8 +10,8 @@ import { createMockRouter, MockRouter, routeHandlerContextMock } from './__mocks
 import { createRequestMock } from './__mocks__/request.mock';
 import { handleEsError } from '../shared_imports';
 
-jest.mock('../lib/es_version_precheck', () => ({
-  versionCheckHandlerWrapper: (a: any) => a,
+jest.mock('@kbn/upgrade-assistant-pkg-server', () => ({
+  versionCheckHandlerWrapper: () => (a: any) => a,
 }));
 
 import { registerNodeDiskSpaceRoute } from './node_disk_space';
@@ -25,6 +25,7 @@ describe('Disk space API', () => {
     routeDependencies = {
       router: mockRouter,
       lib: { handleEsError },
+      current: { major: 8 },
     };
     registerNodeDiskSpaceRoute(routeDependencies);
   });

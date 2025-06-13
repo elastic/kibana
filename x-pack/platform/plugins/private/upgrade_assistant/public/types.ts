@@ -8,6 +8,7 @@ import { ManagementSetup } from '@kbn/management-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { SharePluginSetup } from '@kbn/share-plugin/public';
 import { CoreStart, ScopedHistory } from '@kbn/core/public';
+import { ReindexServicePublicSetup } from '@kbn/reindex-service-plugin/public';
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
@@ -29,6 +30,7 @@ export interface SetupDependencies {
   share: SharePluginSetup;
   cloud?: CloudSetup;
   usageCollection?: UsageCollectionSetup;
+  reindexService: ReindexServicePublicSetup;
 }
 
 export interface StartDependencies {
@@ -49,6 +51,7 @@ export interface AppDependencies {
   plugins: {
     cloud?: CloudSetup;
     share: SharePluginSetup;
+    reindexService: ReindexServicePublicSetup;
   };
   services: {
     core: CoreStart;

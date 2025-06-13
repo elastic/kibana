@@ -10,6 +10,7 @@ import SemVer from 'semver/classes/semver';
 import { merge } from 'lodash';
 
 import { HttpSetup } from '@kbn/core/public';
+import { ReindexService } from '@kbn/reindex-service-plugin/public';
 import { AuthorizationContext, Authorization, Privileges } from '../../../public/shared_imports';
 import { AppContextProvider } from '../../../public/application/app_context';
 import { apiService } from '../../../public/application/lib/api';
@@ -33,7 +34,7 @@ const createAuthorizationContextValue = (privileges: Privileges) => {
 export const WithAppDependencies =
   (Comp: any, httpSetup: HttpSetup, { privileges, ...overrides }: Record<string, unknown> = {}) =>
   (props: Record<string, unknown>) => {
-    apiService.setup(httpSetup);
+    apiService.setup(httpSetup, {} as ReindexService);
     breadcrumbService.setup(() => '');
 
     const appContextMock = getAppContextMock(kibanaVersion) as unknown as AppDependencies;

@@ -176,5 +176,7 @@
     "@kbn/test-suites-xpack-observability",
     "@kbn/test-suites-xpack-platform",
     "@kbn/core-chrome-browser",
+    "@kbn/upgrade-assistant-pkg-server",
+    "@kbn/upgrade-assistant-pkg-common",
   ]
 }
