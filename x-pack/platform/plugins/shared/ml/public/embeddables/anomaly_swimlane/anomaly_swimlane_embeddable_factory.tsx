@@ -5,28 +5,7 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { StartServicesAccessor } from '@kbn/core/public';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { useTimeBuckets } from '@kbn/ml-time-buckets';
-import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
-import {
-  apiHasExecutionContext,
-  apiHasParentApi,
-  apiPublishesTimeRange,
-  fetch$,
-  initializeTimeRangeManager,
-  initializeTitleManager,
-  timeRangeComparators,
-  titleComparators,
-  useBatchedPublishingSubjects,
-} from '@kbn/presentation-publishing';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React, { useCallback, useState } from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import type { Observable } from 'rxjs';
@@ -40,9 +19,36 @@ import {
   Subscription,
 } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
+
+import { EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
+
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables/constants';
+import type { StartServicesAccessor } from '@kbn/core/public';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { useTimeBuckets } from '@kbn/ml-time-buckets';
+import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import { apiHasExecutionContext } from '@kbn/presentation-publishing/interfaces/has_execution_context';
+import { apiHasParentApi } from '@kbn/presentation-publishing/interfaces/has_parent_api';
+import { apiPublishesTimeRange } from '@kbn/presentation-publishing/interfaces/fetch/publishes_unified_search';
+import { fetch$ } from '@kbn/presentation-publishing/interfaces/fetch/fetch';
+import {
+  timeRangeComparators,
+  initializeTimeRangeManager,
+} from '@kbn/presentation-publishing/interfaces/fetch/time_range_manager';
+import {
+  initializeTitleManager,
+  titleComparators,
+} from '@kbn/presentation-publishing/interfaces/titles/title_manager';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing/publishing_subject';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import type { AnomalySwimlaneEmbeddableServices } from '..';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '..';
+import { HttpService } from '@kbn/ml-services/http_service';
+
+import type { AnomalySwimlaneEmbeddableServices } from '../types';
 import type { MlDependencies } from '../../application/app';
 import { Y_AXIS_LABEL_WIDTH } from '../../application/explorer/constants';
 import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
@@ -50,7 +56,6 @@ import {
   isViewBySwimLaneData,
   SwimlaneContainer,
 } from '../../application/explorer/swimlane_container';
-import { HttpService } from '../../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import { SWIM_LANE_SELECTION_TRIGGER } from '../../ui_actions';
 import { buildDataViewPublishingApi } from '../common/build_data_view_publishing_api';
@@ -75,8 +80,8 @@ export const getServices = async (
     getStartServices(),
     import('../../application/services/anomaly_detector_service'),
     import('../../application/services/anomaly_timeline_service'),
-    import('../../application/services/ml_api_service'),
-    import('../../application/services/results_service'),
+    import('@kbn/ml-services/ml_api_service'),
+    import('@kbn/ml-services/results_service_2'),
   ]);
 
   const httpService = new HttpService(coreStart.http);

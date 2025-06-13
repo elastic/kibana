@@ -7,9 +7,11 @@
 
 import type { FC } from 'react';
 import React from 'react';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiSpacer, EuiTitle } from '@elastic/eui';
-import type { TrainedModelItem } from '../../../../common/types/trained_models';
+import type { TrainedModelItem } from '@kbn/ml-common-types/trained_models';
+
 import { TestTrainedModelContent } from './test_trained_model_content';
 
 interface Props {

@@ -10,7 +10,7 @@ import { css } from '@emotion/react';
 
 import { useEuiFontSize, useEuiTheme, transparentize } from '@elastic/eui';
 
-import { ML_SEVERITY_COLORS } from '@kbn/ml-anomaly-utils';
+import { ML_SEVERITY_COLORS } from '@kbn/ml-anomaly-utils/severity_colors';
 
 // Annotations constants
 const mlAnnotationBorderWidth = '2px';

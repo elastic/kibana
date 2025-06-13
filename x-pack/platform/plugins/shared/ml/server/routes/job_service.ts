@@ -8,9 +8,10 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { categorizationExamplesProvider } from '@kbn/ml-category-validator';
-import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
-import { wrapError } from '../client/error_wrapper';
-import type { RouteInitialization } from '../types';
+import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+
 import {
   categorizationFieldValidationSchema,
   basicChartSchema,
@@ -27,13 +28,17 @@ import {
   datafeedPreviewSchema,
   bulkCreateSchema,
   deleteJobsSchema,
-} from './schemas/job_service_schema';
+} from '@kbn/ml-server-api-schemas/job_service_schema';
+import {
+  jobForCloningSchema,
+  jobIdSchema,
+} from '@kbn/ml-server-api-schemas/anomaly_detectors_schema';
 
-import { jobForCloningSchema, jobIdSchema } from './schemas/anomaly_detectors_schema';
+import { wrapError } from '../client/error_wrapper';
+import type { RouteInitialization } from '../types';
 
 import { jobServiceProvider } from '../models/job_service';
 import { getAuthorizationHeader } from '../lib/request_authorization';
-import type { Datafeed, Job } from '../../common/types/anomaly_detection_jobs';
 
 /**
  * Routes for job service

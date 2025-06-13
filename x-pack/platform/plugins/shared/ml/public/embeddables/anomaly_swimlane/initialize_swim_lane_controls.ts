@@ -7,10 +7,10 @@
 
 import type { StateComparators, TitlesApi } from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatest, map, merge } from 'rxjs';
-import type { AnomalySwimlaneEmbeddableUserInput } from '..';
-import type { JobId } from '../../../common/types/anomaly_detection_jobs';
-import type { SwimlaneType } from '../../application/explorer/explorer_constants';
-import { SWIM_LANE_DEFAULT_PAGE_SIZE } from '../../application/explorer/explorer_constants';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { SwimlaneType } from '@kbn/ml-common-constants/explorer_constants';
+import { SWIM_LANE_DEFAULT_PAGE_SIZE } from '@kbn/ml-common-constants/explorer_constants';
+import type { AnomalySwimlaneEmbeddableUserInput } from '../types';
 import type { AnomalySwimLaneComponentApi, AnomalySwimLaneEmbeddableState } from './types';
 
 export type AnomalySwimLaneControlsState = Pick<

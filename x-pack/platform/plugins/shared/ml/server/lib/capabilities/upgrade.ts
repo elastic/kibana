@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { MlClient } from '../ml_client';
+import type { MlClient } from '@kbn/ml-client';
+
 import { mlLog } from '../log';
 
 export function upgradeCheckProvider(mlClient: MlClient) {

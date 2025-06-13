@@ -10,10 +10,10 @@ import { combineLatest, tap, debounceTime, switchMap, skipWhile, of } from 'rxjs
 import { Subject, catchError } from 'rxjs';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { CoreStart } from '@kbn/core/public';
-import { fetch$ } from '@kbn/presentation-publishing';
-import type { AnomalyChartsServices, AnomalyChartsApi } from '..';
+import { fetch$ } from '@kbn/presentation-publishing/interfaces/fetch/fetch';
+import { OVERALL_LABEL, SWIMLANE_TYPE } from '@kbn/ml-common-constants/explorer_constants';
+import type { AnomalyChartsServices, AnomalyChartsApi } from '../types';
 import { getJobsObservable } from '../common/get_jobs_observable';
-import { OVERALL_LABEL, SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
 import { processFilters } from '../common/process_filters';
 import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
 import {

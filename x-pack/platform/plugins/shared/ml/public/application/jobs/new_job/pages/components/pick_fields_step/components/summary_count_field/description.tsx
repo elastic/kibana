@@ -10,8 +10,8 @@ import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescribedFormGroup, EuiFormRow, EuiLink } from '@elastic/eui';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import type { Validation } from '../../../../../common/job_validator';
-import { useMlKibana } from '../../../../../../../contexts/kibana';
 
 interface Props {
   validation: Validation;

@@ -6331,6 +6331,26 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-client@link:x-pack/platform/packages/shared/ml/ml_client":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-common-api-schemas@link:x-pack/platform/packages/shared/ml/common_api_schemas":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-common-constants@link:x-pack/platform/packages/shared/ml/common_constants":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-common-types@link:x-pack/platform/packages/shared/ml/common_types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-common-utils@link:x-pack/platform/packages/shared/ml/common_utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-creation-wizard-utils@link:x-pack/platform/packages/private/ml/creation_wizard_utils":
   version "0.0.0"
   uid ""
@@ -6355,11 +6375,19 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-embeddables@link:x-pack/platform/packages/shared/ml/embeddables":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-error-utils@link:x-pack/platform/packages/shared/ml/error_utils":
   version "0.0.0"
   uid ""
 
 "@kbn/ml-field-stats-flyout@link:x-pack/platform/packages/private/ml/field_stats_flyout":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-hooks@link:x-pack/platform/packages/shared/ml/hooks":
   version "0.0.0"
   uid ""
 
@@ -6372,6 +6400,14 @@
   uid ""
 
 "@kbn/ml-is-populated-object@link:x-pack/platform/packages/private/ml/is_populated_object":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-kibana-context@link:x-pack/platform/packages/shared/ml/kibana_context":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-license@link:x-pack/platform/packages/shared/ml/license":
   version "0.0.0"
   uid ""
 
@@ -6412,6 +6448,18 @@
   uid ""
 
 "@kbn/ml-runtime-field-utils@link:x-pack/platform/packages/shared/ml/runtime_field_utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-saved-objects@link:x-pack/platform/packages/shared/ml/saved_objects":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-server-api-schemas@link:x-pack/platform/packages/shared/ml/server_api_schemas":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-services@link:x-pack/platform/packages/shared/ml/services":
   version "0.0.0"
   uid ""
 

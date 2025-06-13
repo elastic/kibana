@@ -6,9 +6,19 @@
  */
 
 import type { CoreSetup } from '@kbn/core/public';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+
+// avoid importing from plugin root
+// import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public/';
+const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
+
 import { CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER } from '@kbn/ml-ui-actions';
-import { type UiActionsSetup, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import { CONTROLLED_BY_SINGLE_METRIC_VIEWER_FILTER } from '@kbn/ml-common-constants/ui_actions';
+
+// avoid importing from plugin root
+// import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+const ADD_PANEL_TRIGGER = 'ADD_PANEL_TRIGGER';
+
 import type { MlPluginStart, MlStartDependencies } from '../plugin';
 import { createApplyEntityFieldFiltersAction } from './apply_entity_filters_action';
 import { createApplyInfluencerFiltersAction } from './apply_influencer_filters_action';
@@ -37,7 +47,6 @@ export { APPLY_TIME_RANGE_SELECTION_ACTION } from './apply_time_range_action';
 export { OPEN_IN_ANOMALY_EXPLORER_ACTION } from './open_in_anomaly_explorer_action';
 export { CREATE_LENS_VIS_TO_ML_AD_JOB_ACTION } from './open_vis_in_ml_action';
 export { SWIM_LANE_SELECTION_TRIGGER };
-import { CONTROLLED_BY_SINGLE_METRIC_VIEWER_FILTER } from './constants';
 /**
  * Register ML UI actions
  */

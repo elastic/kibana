@@ -13,11 +13,12 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useTimefilter } from '@kbn/ml-date-picker';
-import { ML_JOB_ID } from '@kbn/ml-anomaly-utils';
+import { ML_JOB_ID } from '@kbn/ml-anomaly-utils/constants';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
-import { useMlKibana } from '../../../contexts/kibana';
+import type { MlJobWithTimeRange } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { useMlJobService } from '@kbn/ml-services/job_service';
 
-import type { MlJobWithTimeRange } from '../../../../../common/types/anomaly_detection_jobs';
 import { useRefresh } from '../../use_refresh';
 import { Explorer } from '../../../explorer';
 import { useExplorerData } from '../../../explorer/actions';
@@ -29,7 +30,6 @@ import { AnomalyResultsViewSelector } from '../../../components/anomaly_results_
 import { AnomalyDetectionEmptyState } from '../../../jobs/jobs_list/components/anomaly_detection_empty_state';
 import { useAnomalyExplorerContext } from '../../../explorer/anomaly_explorer_context';
 import { getInfluencers } from '../../../explorer/explorer_utils';
-import { useMlJobService } from '../../../services/job_service';
 import type { ExplorerState } from '../../../explorer/explorer_data';
 import { getExplorerDefaultState } from '../../../explorer/explorer_data';
 import type { LoadExplorerDataConfig } from '../../../explorer/actions/load_explorer_data';

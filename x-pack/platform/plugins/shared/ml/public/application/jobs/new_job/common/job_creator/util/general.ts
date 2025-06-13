@@ -8,30 +8,23 @@
 import { i18n } from '@kbn/i18n';
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { Field, AggFieldPair, SparseDataAggregation } from '@kbn/ml-anomaly-utils';
+import { mlCategory } from '@kbn/ml-anomaly-utils/fields';
+import { DOC_COUNT, _DOC_COUNT, MLCATEGORY } from '@kbn/ml-anomaly-utils/field_types';
+import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils/fields_constants';
 import {
-  mlCategory,
-  type Field,
-  type AggFieldPair,
-  type SparseDataAggregation,
-  DOC_COUNT,
-  _DOC_COUNT,
-  EVENT_RATE_FIELD_ID,
-  MLCATEGORY,
   ML_JOB_AGGREGATION,
   SPARSE_DATA_AGGREGATIONS,
-} from '@kbn/ml-anomaly-utils';
+} from '@kbn/ml-anomaly-utils/aggregation_types';
 import { cloneDeep } from 'lodash';
-import type { MlLocatorParams } from '../../../../../../locator';
+import type { MlLocatorParams } from '@kbn/ml-common-types/locator';
+import type { Job, Detector } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { CREATED_BY_LABEL, JOB_TYPE } from '@kbn/ml-common-constants/new_job';
 import { jobCloningService } from '../../../../../services/job_cloning_service';
-import type {
-  Job,
-  Datafeed,
-  Detector,
-} from '../../../../../../../common/types/anomaly_detection_jobs';
 import type { NewJobCapsService } from '../../../../../services/new_job_capabilities/new_job_capabilities_service';
-import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import type { JobCreatorType } from '..';
-import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../../common/constants/new_job';
 
 const getFieldByIdFactory =
   (newJobCapsService: NewJobCapsService, additionalFields: Field[]) => (id: string) => {

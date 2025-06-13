@@ -6,15 +6,17 @@
  */
 
 import React from 'react';
+
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { HttpService } from '../../application/services/http_service';
-import type { AnomalyChartsEmbeddableState } from '..';
+import { getMlGlobalServices } from '@kbn/ml-services/get_services';
+import { HttpService } from '@kbn/ml-services/http_service';
+import { jobsApiProvider } from '@kbn/ml-services/ml_api_service/jobs';
+
+import type { AnomalyChartsEmbeddableState } from '../types';
 import { AnomalyChartsInitializer } from './anomaly_charts_initializer';
-import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';
-import { getMlGlobalServices } from '../../application/util/get_services';
 import type { MlStartDependencies } from '../../plugin';
 
 export async function resolveEmbeddableAnomalyChartsUserInput(

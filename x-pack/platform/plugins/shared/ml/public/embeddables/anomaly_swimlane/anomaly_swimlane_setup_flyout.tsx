@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import React from 'react';
+
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import React from 'react';
-import type { AnomalySwimLaneEmbeddableState, AnomalySwimlaneEmbeddableUserInput } from '..';
-import { HttpService } from '../../application/services/http_service';
-import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';
+import { HttpService } from '@kbn/ml-services/http_service';
+import { jobsApiProvider } from '@kbn/ml-services/ml_api_service/jobs';
+
+import type { AnomalySwimLaneEmbeddableState, AnomalySwimlaneEmbeddableUserInput } from '../types';
 import { AnomalySwimlaneInitializer } from './anomaly_swimlane_initializer';
 
 export async function resolveAnomalySwimlaneUserInput(

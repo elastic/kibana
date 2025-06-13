@@ -24,12 +24,12 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
+import { CONTROLLED_BY_SWIM_LANE_FILTER } from '@kbn/ml-common-constants/ui_actions';
 import {
   ANOMALY_SWIM_LANE_HARD_LIMIT,
   SWIMLANE_TYPE,
-} from '../../application/explorer/explorer_constants';
+} from '@kbn/ml-common-constants/explorer_constants';
 import type { OverallSwimlaneData } from '../../application/explorer/explorer_utils';
-import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../../ui_actions/constants';
 import { getJobsObservable } from '../common/get_jobs_observable';
 import { processFilters } from '../common/process_filters';
 import type { AnomalySwimlaneServices } from '../types';

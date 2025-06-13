@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { memoize, isEqual } from 'lodash';
 
 // @ts-ignore
 import numeral from '@elastic/numeral';
 
+import { i18n } from '@kbn/i18n';
 import { indexPatterns } from '@kbn/data-plugin/public';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import {
@@ -32,6 +32,7 @@ import {
   JOB_ID_MAX_LENGTH,
   ALLOWED_DATA_UNITS,
 } from '@kbn/ml-validators';
+import { isJobIdValid, validateModelMemoryLimitUnits } from '@kbn/ml-common-utils/job_utils';
 
 import { isValidIndexName } from '../../../../../../../common/util/es_utils';
 
@@ -39,10 +40,6 @@ import type { Action } from './actions';
 import { ACTION } from './actions';
 import type { State } from './state';
 import { getInitialState, getFormStateFromJobConfig, getJobConfigFromFormState } from './state';
-import {
-  isJobIdValid,
-  validateModelMemoryLimitUnits,
-} from '../../../../../../../common/util/job_utils';
 import { isAdvancedConfig } from '../../components/action_clone/clone_action_name';
 
 const { collapseLiteralStrings } = XJson;

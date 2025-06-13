@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import type { SwimlaneType } from '@kbn/ml-common-constants/explorer_constants';
 
-import type { SwimlaneType } from '@kbn/ml-plugin/public/application/explorer/explorer_constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import type { CreateCaseParams } from '../cases/create';
 import { MlAnomalyCharts } from './anomaly_charts';

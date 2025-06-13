@@ -7,13 +7,15 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { MlSavedObjectType } from '../../../../common/types/saved_objects';
-import { useMlApi } from '../../contexts/kibana';
-import { JobSpacesSyncFlyout } from '../job_spaces_sync';
-import { usePermissionCheck } from '../../capabilities/check_capabilities';
 
+import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { MlSavedObjectType } from '@kbn/ml-common-types/saved_objects';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_check';
+
+import { JobSpacesSyncFlyout } from '../job_spaces_sync';
 interface Props {
   mlSavedObjectType?: MlSavedObjectType;
   onCloseFlyout?: () => void;

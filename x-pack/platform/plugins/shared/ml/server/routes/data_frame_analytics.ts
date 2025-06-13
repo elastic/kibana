@@ -18,10 +18,7 @@ import { createDataViewFn } from '@kbn/ml-data-view-utils/actions/create';
 import { deleteDataViewFn } from '@kbn/ml-data-view-utils/actions/delete';
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
-import { wrapError } from '../client/error_wrapper';
-import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
-import type { RouteInitialization } from '../types';
+import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
 import {
   dataFrameAnalyticsJobConfigSchema,
   dataFrameAnalyticsJobUpdateSchema,
@@ -36,13 +33,16 @@ import {
   dataFrameAnalyticsNewJobCapsParamsSchema,
   dataFrameAnalyticsNewJobCapsQuerySchema,
   type PutDataFrameAnalyticsResponseSchema,
-} from './schemas/data_frame_analytics_schema';
+} from '@kbn/ml-server-api-schemas/data_frame_analytics_schema';
+import type { MlClient } from '@kbn/ml-client';
+import { wrapError } from '../client/error_wrapper';
+import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
+import type { RouteInitialization } from '../types';
 import type { ExtendAnalyticsMapArgs } from '../models/data_frame_analytics/types';
 import { AnalyticsManager } from '../models/data_frame_analytics/analytics_manager';
 import { validateAnalyticsJob } from '../models/data_frame_analytics/validation';
 import { fieldServiceProvider } from '../models/job_service/new_job_caps/field_service';
 import { getAuthorizationHeader } from '../lib/request_authorization';
-import type { MlClient } from '../lib/ml_client';
 
 function getExtendedMap(
   mlClient: MlClient,

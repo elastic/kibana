@@ -12,13 +12,13 @@ import type {
   GetModelDownloadConfigOptions,
   ModelDefinitionResponse,
 } from '@kbn/ml-trained-models-utils';
-import type { MlFeatures } from '../../../common/constants/app';
 import type {
   MlInferTrainedModelRequest,
   MlStopTrainedModelDeploymentRequest,
   UpdateTrainedModelDeploymentRequest,
   UpdateTrainedModelDeploymentResponse,
-} from '../../lib/ml_client/types';
+} from '@kbn/ml-client/types';
+import type { MlFeatures } from '@kbn/ml-common-constants/app';
 import { modelsProvider } from '../../models/model_management';
 import type { GetCuratedModelConfigParams } from '../../models/model_management/models_provider';
 import type { GetGuards } from '../shared_services';

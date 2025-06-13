@@ -14,12 +14,12 @@ import type {
   PublishingSubject,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
-import { apiIsOfType } from '@kbn/presentation-publishing';
-import type { SwimlaneType } from '../../application/explorer/explorer_constants';
+import { apiIsOfType } from '@kbn/presentation-publishing/interfaces/has_type';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables/constants';
+import type { SwimlaneType } from '@kbn/ml-common-constants/explorer_constants';
 
-import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../constants';
 import type {
   AnomalySwimlaneEmbeddableCustomInput,
   AnomalySwimlaneEmbeddableUserInput,

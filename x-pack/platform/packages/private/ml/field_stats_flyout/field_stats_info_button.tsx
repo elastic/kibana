@@ -16,7 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { type FC } from 'react';
 import { FieldIcon } from '@kbn/react-field';
-import { type Field } from '@kbn/ml-anomaly-utils';
+import type { Field } from '@kbn/ml-anomaly-utils';
 
 import { getKbnFieldIconType } from './get_kbn_field_icon_types';
 

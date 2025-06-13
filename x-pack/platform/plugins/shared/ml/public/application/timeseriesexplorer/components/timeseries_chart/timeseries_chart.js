@@ -20,13 +20,12 @@ import moment from 'moment';
 import { EuiPopover } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import {
-  getFormattedSeverityScore,
-  getSeverityWithLow,
-  ML_SEVERITY_COLORS,
-} from '@kbn/ml-anomaly-utils';
+import { getFormattedSeverityScore } from '@kbn/ml-anomaly-utils/get_formatted_severity_score';
+import { getSeverityWithLow } from '@kbn/ml-anomaly-utils/anomaly_utils';
+import { ML_SEVERITY_COLORS } from '@kbn/ml-anomaly-utils/severity_colors';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { context } from '@kbn/kibana-react-plugin/public';
+import { mlEscape } from '@kbn/ml-common-utils/string_utils';
 
 import { getTableItemClosestToTimestamp } from '../../../../../common/util/anomalies_table_utils';
 
@@ -47,7 +46,6 @@ import { timeBucketsServiceFactory } from '../../../util/time_buckets_service';
 import { mlTableService } from '../../../services/table_service';
 import { ContextChartMask } from '../context_chart_mask';
 import { timeSeriesExplorerServiceFactory } from '../../../util/time_series_explorer_service';
-import { mlEscape } from '../../../util/string_utils';
 import {
   ANNOTATION_MASK_ID,
   getAnnotationBrush,

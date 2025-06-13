@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { BehaviorSubject, mergeMap, take } from 'rxjs';
+
 import { i18n } from '@kbn/i18n';
 import type {
   AppMountParameters,
@@ -13,28 +15,22 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import { BehaviorSubject, mergeMap } from 'rxjs';
-import { take } from 'rxjs';
-
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
-import type { LocatorPublic, SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-
 import { AppStatus, type AppUpdater, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-
 import type { MapsStartApi, MapsSetupApi } from '@kbn/maps-plugin/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
@@ -53,13 +49,6 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import type { MlSharedServices } from './application/services/get_shared_ml_services';
-import { getMlSharedServices } from './application/services/get_shared_ml_services';
-import { registerManagementSections } from './application/management';
-import type { MlLocatorParams } from './locator';
-import { MlLocatorDefinition, type MlLocator } from './locator';
-import { registerHomeFeature } from './register_home_feature';
-import { isFullLicense, isMlEnabled } from '../common/license';
 import {
   initEnabledFeatures,
   type MlFeatures,
@@ -71,14 +60,22 @@ import {
   initExperimentalFeatures,
   initModelDeploymentSettings,
   type NLPSettings,
-} from '../common/constants/app';
+} from '@kbn/ml-common-constants/app';
+import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
+import { isFullLicense } from '@kbn/ml-license/is_full_license';
+import { isMlEnabled } from '@kbn/ml-license/is_ml_enabled';
+import type { ITelemetryClient } from '@kbn/ml-trained-models-utils/src/types/telemetry';
+
+import { getMlSharedServices } from './application/services/get_shared_ml_services';
+import { getElasticModels } from './application/services/get_elastic_models';
+import { getMlLocator } from './locator/get_ml_locator';
 import type { ElasticModels } from './application/services/elastic_models_service';
-import type { MlApi } from './application/services/ml_api_service';
-import type { MlCapabilities } from '../common/types/capabilities';
+import { renderApp } from './application/render_app';
 import { AnomalySwimLane } from './shared_components';
 import { MlManagementLocatorInternal } from './locator/ml_management_locator';
+import type { getMlManagementLocator } from './locator/get_ml_management_locator';
 import { TelemetryService } from './application/services/telemetry/telemetry_service';
-import type { ITelemetryClient } from './application/services/telemetry/types';
 import { registerEmbeddables } from './embeddables';
 
 export interface MlStartDependencies {
@@ -130,11 +127,8 @@ export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
 export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
-  private locator: undefined | MlLocator;
-
-  private managementLocator: undefined | MlManagementLocatorInternal;
-
-  private sharedMlServices: MlSharedServices | undefined;
+  private getLocator: undefined | (() => ReturnType<typeof getMlLocator>);
+  private getManagementLocator: undefined | (() => ReturnType<typeof getMlManagementLocator>);
 
   private isServerless: boolean = false;
   private enabledFeatures: MlFeatures = {
@@ -178,11 +172,10 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     core: MlCoreSetup,
     pluginsSetup: MlSetupDependencies
   ): {
-    locator?: LocatorPublic<MlLocatorParams>;
-    managementLocator?: MlManagementLocatorInternal;
+    getLocator?: () => ReturnType<typeof getMlLocator>;
+    getManagementLocator?: () => ReturnType<typeof getMlManagementLocator>;
     elasticModels?: ElasticModels;
   } {
-    this.sharedMlServices = getMlSharedServices(core.http);
     const deps = {
       home: pluginsSetup.home,
       licenseManagement: pluginsSetup.licenseManagement,
@@ -206,7 +199,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       updater$: this.appUpdater$,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
-        const { renderApp } = await import('./application/app');
         return renderApp(
           coreStart,
           {
@@ -246,8 +238,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     });
 
     if (pluginsSetup.share) {
-      this.locator = pluginsSetup.share.url.locators.create(new MlLocatorDefinition());
-      this.managementLocator = new MlManagementLocatorInternal(pluginsSetup.share);
+      this.getLocator = async () => await getMlLocator(pluginsSetup.share);
+      this.getManagementLocator = async () =>
+        await new MlManagementLocatorInternal(pluginsSetup.share);
     }
 
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
@@ -265,6 +258,16 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           // register various ML plugin features which require a full license
           // note including registerHomeFeature in register_helper would cause the page bundle size to increase significantly
           if (mlEnabled) {
+            const {
+              registerHomeFeature,
+              registerManagementSections,
+              registerMapExtension,
+              registerMlAlerts,
+              registerMlUiActions,
+              registerSearchLinks,
+              registerCasesAttachments,
+            } = await import('./register_helper');
+
             // add ML to home page
             if (pluginsSetup.home) {
               registerHomeFeature(pluginsSetup.home);
@@ -287,8 +290,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
               registerEmbeddables(pluginsSetup.embeddable, core);
             }
 
-            const { registerMlUiActions, registerSearchLinks, registerCasesAttachments } =
-              await import('./register_helper');
             registerSearchLinks(
               this.appUpdater$,
               fullLicense,
@@ -303,10 +304,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
                 // Register rules for basic license to show them in the UI as disabled
                 !fullLicense)
             ) {
-              // This module contains async imports itself, and it is conditionally loaded based on the license. We'll save
-              // traffic if we load it async.
-              const { registerMlAlerts } = await import('./alerting/register_ml_alerts');
-
               registerMlAlerts(
                 pluginsSetup.triggersActionsUi,
                 core.getStartServices,
@@ -324,10 +321,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
                 }
 
                 if (pluginsSetup.maps) {
-                  // This module contains async imports itself, and it is conditionally loaded if maps is enabled. We'll save
-                  // traffic if we load it async.
-                  const { registerMapExtension } = await import('./maps/register_map_extension');
-
                   // Pass canGetJobs as minimum permission to show anomalies card in maps layers
                   await registerMapExtension(pluginsSetup.maps, core, {
                     canGetJobs: mlCapabilities.canGetJobs,
@@ -347,9 +340,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       .subscribe();
 
     return {
-      locator: this.locator,
-      managementLocator: this.managementLocator,
-      elasticModels: this.sharedMlServices.elasticModels,
+      getLocator: this.getLocator,
+      getManagementLocator: this.getManagementLocator,
+      elasticModels: getElasticModels(core.http),
     };
   }
 
@@ -357,17 +350,17 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     core: CoreStart,
     deps: MlStartDependencies
   ): {
-    locator?: LocatorPublic<MlLocatorParams>;
-    managementLocator?: MlManagementLocatorInternal;
+    getLocator?: () => ReturnType<typeof getMlLocator>;
+    getManagementLocator?: () => ReturnType<typeof getMlManagementLocator>;
     elasticModels?: ElasticModels;
-    mlApi?: MlApi;
+    getMlApi: () => Promise<MlApi>;
     components: { AnomalySwimLane: typeof AnomalySwimLane };
   } {
     return {
-      locator: this.locator,
-      managementLocator: this.managementLocator,
-      elasticModels: this.sharedMlServices?.elasticModels,
-      mlApi: this.sharedMlServices?.mlApi,
+      getLocator: this.getLocator,
+      elasticModels: getElasticModels(core.http),
+      getMlApi: async () => await getMlSharedServices(core.http),
+      getManagementLocator: this.getManagementLocator,
       components: {
         AnomalySwimLane,
       },

@@ -7,8 +7,8 @@
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { MlAnomalyResultType } from '@kbn/ml-anomaly-utils';
-import { ML_ALERT_TYPES } from '../../common/constants/alerts';
-import type { MlAnomalyDetectionJobsHealthRuleParams } from '../../common/types/alerts';
+import { ML_ALERT_TYPES } from '@kbn/ml-common-types/alerts';
+import type { MlAnomalyDetectionJobsHealthRuleParams } from '@kbn/ml-common-types/alerts';
 import { getResultJobsHealthRuleConfig } from '../../common/util/alerts';
 
 export interface MlUsageData {

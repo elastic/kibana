@@ -25,9 +25,10 @@ import {
   TOP_CLASSES,
   type DataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { useMlApi } from '../../contexts/kibana';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+
 import { processTextAndKeywordFields, NewJobCapabilitiesServiceBase } from './new_job_capabilities';
-import type { MlApi } from '../ml_api_service';
 
 // Keep top nested field and remove all <nested_field>.* fields
 export function removeNestedFieldChildren(resp: NewJobCapsResponse, indexPatternTitle: string) {

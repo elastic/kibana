@@ -7,8 +7,12 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import { css } from '@emotion/react';
+import useObservable from 'react-use/lib/useObservable';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+
 import {
   htmlIdGenerator,
   EuiCallOut,
@@ -28,14 +32,19 @@ import {
   useIsWithinBreakpoints,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import useObservable from 'react-use/lib/useObservable';
+
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { useStorage } from '@kbn/ml-local-storage';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { TimeBuckets } from '@kbn/ml-time-buckets';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { ML_ANOMALY_EXPLORER_PANELS } from '@kbn/ml-common-types/storage';
+import { useMlIndexUtils } from '@kbn/ml-hooks/use_ml_index_utils';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import type { FilterAction } from '@kbn/ml-common-constants/explorer_constants';
+import { FILTER_ACTION } from '@kbn/ml-common-constants/explorer_constants';
+
 import { HelpPopover } from '../components/help_popover';
 // @ts-ignore
 import { AnnotationsTable } from '../components/annotations/annotations_table';
@@ -64,19 +73,15 @@ import {
   getDataViewsAndIndicesWithGeoFields,
 } from './explorer_utils';
 import { AnomalyTimeline } from './anomaly_timeline';
-import type { FilterAction } from './explorer_constants';
-import { FILTER_ACTION } from './explorer_constants';
 // Anomalies Table
 // @ts-ignore
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
 import { AnomalyContextMenu } from './anomaly_context_menu';
 import type { JobSelectorProps } from '../components/job_selector/job_selector';
 import { useToastNotificationService } from '../services/toast_notification_service';
-import { useMlKibana, useMlLocator } from '../contexts/kibana';
+import { useMlLocator } from '../contexts/kibana';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
-import { ML_ANOMALY_EXPLORER_PANELS } from '../../../common/types/storage';
 import { AlertsPanel } from './alerts';
-import { useMlIndexUtils } from '../util/index_service';
 import type { ExplorerState } from './explorer_data';
 import { useJobSelection } from './hooks/use_job_selection';
 
@@ -114,7 +119,7 @@ const ExplorerPage: FC<PropsWithChildren<ExplorerPageProps>> = ({
 }) => (
   <>
     <EuiPageHeader>
-      <EuiPageHeaderSection style={{ width: '100%' }}>
+      <EuiPageHeaderSection css={{ width: '100%' }}>
         <JobSelector {...jobSelectorProps} />
 
         {indexPattern && updateLanguage ? (
@@ -575,7 +580,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
             </EuiTitle>
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false} style={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
+          <EuiFlexItem grow={false} css={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
             <AnomalyContextMenu
               selectedJobs={selectedJobs!}
               mergedGroupsAndJobsIds={mergedGroupsAndJobsIds}
