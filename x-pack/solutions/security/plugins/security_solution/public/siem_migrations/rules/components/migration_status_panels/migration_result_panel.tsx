@@ -71,12 +71,13 @@ export interface MigrationResultPanelProps {
   migrationStats: RuleMigrationStats;
   isCollapsed: boolean;
   onToggleCollapsed: (isCollapsed: boolean) => void;
+  refreshStats: () => void;
 }
 
 const EMPTY_MISSING_RESOURCES: RuleMigrationResourceBase[] = [];
 
 export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
-  ({ migrationStats, isCollapsed = false, onToggleCollapsed }) => {
+  ({ migrationStats, isCollapsed = false, onToggleCollapsed, refreshStats }) => {
     const { data: translationStats, isLoading: isLoadingTranslationStats } =
       useGetMigrationTranslationStats(migrationStats.id);
 
@@ -92,6 +93,7 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
                   migrationStats={migrationStats}
                   isLoading={isLoadingTranslationStats}
                   missingResources={EMPTY_MISSING_RESOURCES}
+                  refreshStats={refreshStats}
                 />
                 <EuiFlexItem>
                   <PanelText size="s" subdued>

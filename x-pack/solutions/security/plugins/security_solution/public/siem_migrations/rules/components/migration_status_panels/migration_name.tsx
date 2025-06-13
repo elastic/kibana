@@ -5,24 +5,39 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiInlineEditText } from '@elastic/eui';
+import React, { useState, useCallback, useMemo } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiInlineEditText,
+  EuiButtonIcon,
+  EuiConfirmModal,
+} from '@elastic/eui';
 import * as i18n from './translations';
 import type { MigrationReadyPanelProps } from './migration_ready_panel';
 import type { RuleMigrationResourceBase } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
 import { useUpdateMigrationName } from '../../logic/use_update_migration_name';
+import { useDeleteMigration } from '../../logic/use_delete_migration';
+
 type MigrationNameProps = MigrationReadyPanelProps & {
   isLoading?: boolean;
   missingResources?: RuleMigrationResourceBase[];
+  refreshStats?: () => void;
 };
 
-const MigrationName = React.memo<MigrationNameProps>(({ migrationStats }) => {
+const MigrationName = React.memo<MigrationNameProps>(({ migrationStats, refreshStats }) => {
   const [inlineEditValue, setInlineEditValue] = useState<string>(
     migrationStats.name ?? i18n.RULE_MIGRATION_TITLE(migrationStats.number)
   );
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const { mutate: updateMigrationName, isLoading: isUpdatingMigrationName } =
     useUpdateMigrationName();
+  const { mutate: deleteMigration, isLoading: isDeletingMigration } = useDeleteMigration(
+    migrationStats.id,
+    refreshStats
+  );
   const handleInlineEditChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setInlineEditValue(event.target.value);
   }, []);
@@ -37,6 +52,27 @@ const MigrationName = React.memo<MigrationNameProps>(({ migrationStats }) => {
     },
     [updateMigrationName, migrationStats.id]
   );
+
+  const handleDeleteMigration = useCallback(() => {
+    deleteMigration({ migration_id: migrationStats.id });
+    setIsDeleteModalOpen(false);
+  }, [deleteMigration, migrationStats.id]);
+
+  const isDeletable = useMemo(() => {
+    return (
+      migrationStats.status === SiemMigrationTaskStatus.FINISHED ||
+      migrationStats.status === SiemMigrationTaskStatus.ABORTED ||
+      migrationStats.status === SiemMigrationTaskStatus.STOPPED
+    );
+  }, [migrationStats.status]);
+
+  const openDeleteModal = useCallback(() => {
+    setIsDeleteModalOpen(true);
+  }, []);
+
+  const closeDeleteModal = useCallback(() => {
+    setIsDeleteModalOpen(false);
+  }, []);
 
   return (
     <>
@@ -53,8 +89,32 @@ const MigrationName = React.memo<MigrationNameProps>(({ migrationStats }) => {
               isLoading={isUpdatingMigrationName}
             />
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {isDeletable && (
+              <EuiButtonIcon
+                iconType="trash"
+                aria-label="Delete"
+                color="danger"
+                onClick={openDeleteModal}
+                isLoading={isDeletingMigration}
+              />
+            )}
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
+      {isDeleteModalOpen && (
+        <EuiConfirmModal
+          title={i18n.DELETE_MIGRATION_TITLE}
+          onCancel={closeDeleteModal}
+          onConfirm={handleDeleteMigration}
+          confirmButtonText="Delete"
+          cancelButtonText="Cancel"
+          buttonColor="danger"
+          isLoading={isDeletingMigration}
+        >
+          <p>{i18n.DELETE_MIGRATION_DESCRIPTION}</p>
+        </EuiConfirmModal>
+      )}
     </>
   );
 });

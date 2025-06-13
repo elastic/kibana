@@ -137,3 +137,16 @@ export const RULE_MIGRATION_ERROR_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.panel.error',
   { defaultMessage: 'The last execution of this migration failed with the following message:' }
 );
+
+export const DELETE_MIGRATION_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.delete.title',
+  { defaultMessage: 'Are you sure you want to delete this migration?' }
+);
+
+export const DELETE_MIGRATION_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.delete.description',
+  {
+    defaultMessage:
+      'This action cannot be undone. All translations related to this migration will be removed permanently.',
+  }
+);
