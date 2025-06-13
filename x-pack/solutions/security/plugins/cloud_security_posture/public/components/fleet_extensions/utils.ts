@@ -20,7 +20,7 @@ import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
 import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import { getFlattenedObject } from '@kbn/std';
-import { CloudStart } from '@kbn/cloud-plugin/public';
+import { CloudSetup } from '@kbn/cloud-plugin/public';
 import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_AZURE,
@@ -74,7 +74,7 @@ export type CloudSetupAccessInputType = 'cloudbeat/cis_aws' | 'cloudbeat/cloud_c
 export interface GetCloudConnectorRemoteRoleTemplateParams {
   input: NewPackagePolicyPostureInput;
   cloud: Pick<
-    CloudStart,
+    CloudSetup,
     'isCloudEnabled' | 'cloudHost' | 'deploymentUrl' | 'serverless' | 'isServerlessEnabled'
   >;
   packageInfo: PackageInfo;
