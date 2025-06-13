@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectMigrationFn } from '@kbn/core/server';
-import type { SavedDashboardPanel } from '../schema';
+import { SavedObjectMigrationFn } from '@kbn/core/server';
+import { EmbeddableInput } from '@kbn/embeddable-plugin/common';
 
 import {
   convertSavedDashboardPanelToPanelState,
   convertPanelStateToSavedDashboardPanel,
-} from './utils';
+} from '../../../common';
+import { SavedDashboardPanel } from '../../../common/content_management';
 
 /**
  * Before 7.10, hidden panel titles were stored as a blank string on the title attribute. In 7.10, this was replaced
@@ -35,14 +36,14 @@ export const migrateExplicitlyHiddenTitles: SavedObjectMigrationFn<any, any> = (
     const newPanels: SavedDashboardPanel[] = [];
     panels.forEach((panel) => {
       // Convert each panel into the dashboard panel state
-      const originalPanelState = convertSavedDashboardPanelToPanelState(panel);
+      const originalPanelState = convertSavedDashboardPanelToPanelState<EmbeddableInput>(panel);
       newPanels.push(
-        convertPanelStateToSavedDashboardPanel(panel.panelIndex, {
+        convertPanelStateToSavedDashboardPanel({
           ...originalPanelState,
           explicitInput: {
             ...originalPanelState.explicitInput,
-            ...((originalPanelState.explicitInput as { title?: string }).title === '' &&
-            !(originalPanelState.explicitInput as { hidePanelTitles?: boolean }).hidePanelTitles
+            ...(originalPanelState.explicitInput.title === '' &&
+            !originalPanelState.explicitInput.hidePanelTitles
               ? { hidePanelTitles: true }
               : {}),
           },

@@ -9,23 +9,24 @@
 
 import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
 import {
-  controlGroupSavedObjectStateToSerializableRuntimeState,
-  serializableRuntimeStateToControlGroupSavedObjectState,
+  controlGroupSerializedStateToSerializableRuntimeState,
+  serializableRuntimeStateToControlGroupSerializedState,
 } from '@kbn/controls-plugin/server';
 import { Serializable, SerializableRecord } from '@kbn/utility-types';
 import { SavedObjectMigrationFn } from '@kbn/core/server';
 import { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
+import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
 
 import {
   convertPanelStateToSavedDashboardPanel,
   convertSavedDashboardPanelToPanelState,
-} from './utils';
-import type { SavedDashboardPanel } from '..';
+} from '../../../common';
+import { SavedDashboardPanel } from '../../../common/content_management';
 
-interface ValueOrReferenceInput {
+type ValueOrReferenceInput = SavedObjectEmbeddableInput & {
   attributes?: Serializable;
   savedVis?: Serializable;
-}
+};
 
 // Runs the embeddable migrations on each panel
 export const migrateByValueDashboardPanels =
@@ -34,7 +35,7 @@ export const migrateByValueDashboardPanels =
     const { attributes } = doc;
 
     if (attributes?.controlGroupInput) {
-      const controlGroupState = controlGroupSavedObjectStateToSerializableRuntimeState(
+      const controlGroupState = controlGroupSerializedStateToSerializableRuntimeState(
         attributes.controlGroupInput
       );
       const migratedControlGroupInput = migrate({
@@ -42,7 +43,7 @@ export const migrateByValueDashboardPanels =
         type: CONTROL_GROUP_TYPE,
       } as SerializableRecord);
       attributes.controlGroupInput =
-        serializableRuntimeStateToControlGroupSavedObjectState(migratedControlGroupInput);
+        serializableRuntimeStateToControlGroupSerializedState(migratedControlGroupInput);
     }
 
     // Skip if panelsJSON is missing otherwise this will cause saved object import to fail when
@@ -75,9 +76,9 @@ export const migrateByValueDashboardPanels =
         });
         // Convert the embeddable state back into the panel shape
         newPanels.push({
-          ...convertPanelStateToSavedDashboardPanel(panel.panelIndex, {
+          ...convertPanelStateToSavedDashboardPanel({
             ...originalPanelState,
-            explicitInput: { ...migratedInput },
+            explicitInput: { ...migratedInput, id: migratedInput.id as string },
           }),
           version,
         });
