@@ -48,26 +48,6 @@ const buildConversation = (contentMessage: string) => [
       content: expect.any(String),
     },
   },
-  {
-    '@timestamp': expect.any(String),
-    message: {
-      role: MessageRole.Assistant,
-      content: '',
-      function_call: {
-        name: 'get_connectors',
-        arguments: JSON.stringify({}),
-        trigger: MessageRole.Assistant as const,
-      },
-    },
-  },
-  {
-    '@timestamp': expect.any(String),
-    message: {
-      role: MessageRole.User,
-      name: 'get_connectors',
-      content: JSON.stringify({ connectors: [{ id: 'connector_1' }] }),
-    },
-  },
 ];
 
 describe('observabilityAIAssistant rule_connector', () => {
