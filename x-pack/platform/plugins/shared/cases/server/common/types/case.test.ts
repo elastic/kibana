@@ -52,6 +52,7 @@ describe('case types', () => {
       assignees: [],
       observables: [],
     };
+
     const caseTransformedAttributesProps = CaseTransformedAttributesRt.types.reduce(
       (acc, type) => ({ ...acc, ...type.type.props }),
       {}
@@ -77,6 +78,18 @@ describe('case types', () => {
       expect(decodedRes._tag).toEqual('Right');
       // @ts-expect-error: the check above ensures that right exists
       expect(decodedRes.right).toEqual({ description: 'test' });
+    });
+
+    it('does not remove the attachment stats', () => {
+      const decodedRes = type.decode({
+        description: 'test',
+        total_alerts: 0,
+        total_comments: 0,
+      });
+
+      expect(decodedRes._tag).toEqual('Right');
+      // @ts-expect-error: the check above ensures that right exists
+      expect(decodedRes.right).toEqual({ description: 'test', total_alerts: 0, total_comments: 0 });
     });
   });
 

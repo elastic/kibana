@@ -594,6 +594,9 @@ export class CasesService {
       const decodedAttributes = decodeOrThrow(CaseTransformedAttributesRt)(attributes);
       const transformedAttributes = transformAttributesToESModel(decodedAttributes);
 
+      transformedAttributes.attributes.total_alerts = 0;
+      transformedAttributes.attributes.total_comments = 0;
+
       const createdCase = await this.unsecuredSavedObjectsClient.create<CasePersistedAttributes>(
         CASE_SAVED_OBJECT,
         transformedAttributes.attributes,
@@ -622,6 +625,9 @@ export class CasesService {
 
         const { attributes: transformedAttributes, referenceHandler } =
           transformAttributesToESModel(decodedAttributes);
+
+        transformedAttributes.total_alerts = 0;
+        transformedAttributes.total_comments = 0;
 
         return {
           type: CASE_SAVED_OBJECT,
