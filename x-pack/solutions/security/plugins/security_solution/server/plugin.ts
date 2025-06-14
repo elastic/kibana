@@ -133,6 +133,11 @@ import { scheduleEntityAnalyticsMigration } from './lib/entity_analytics/migrati
 import { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_service';
 import { TelemetryConfigProvider } from '../common/telemetry_config/telemetry_config_provider';
 import { TelemetryConfigWatcher } from './endpoint/lib/policy/telemetry_watch';
+import { threatIntelligenceSearchStrategyProvider } from './threat_intelligence/search_strategy';
+import {
+  CASE_ATTACHMENT_TYPE_ID,
+  THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME,
+} from '../common/threat_intelligence/constants';
 import { registerPrivilegeMonitoringTask } from './lib/entity_analytics/privilege_monitoring/tasks/privilege_monitoring_task';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
@@ -515,6 +520,19 @@ export class Plugin implements ISecuritySolutionPlugin {
           ENDPOINT_SEARCH_STRATEGY,
           endpointSearchStrategy
         );
+
+        const threatIntelligenceSearchStrategy = threatIntelligenceSearchStrategyProvider(
+          depsStart.data
+        );
+
+        plugins.data.search.registerSearchStrategy(
+          THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME,
+          threatIntelligenceSearchStrategy
+        );
+
+        plugins.cases.attachmentFramework.registerExternalReference({
+          id: CASE_ATTACHMENT_TYPE_ID,
+        });
 
         /**
          * Register a config for the security guide

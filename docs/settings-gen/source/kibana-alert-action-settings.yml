@@ -3,6 +3,7 @@
 
 product: Kibana
 collection: Alerting and action settings in Kibana
+id: alert-action-settings-kb
 page_description: |
   Alerting and actions are enabled by default in {{kib}}, but require you to configure the following:
 
@@ -16,8 +17,7 @@ groups:
   - group: General settings
     id: general-alert-action-settings
     # description: |
-    #  - ""
-    # example: example-group-name.asciidoc
+    # example: |
     settings:
 
       - setting: xpack.encryptedSavedObjects.encryptionKey
@@ -36,7 +36,7 @@ groups:
         # tip: ""
         # warning: ""
         # important: ""
-        datatype: "string"
+        datatype: string
         # default:
         # options:
         #   - option:
@@ -50,8 +50,7 @@ groups:
   - group: Action settings
     id: action-settings
     # description: |
-    #  - ""
-    # example: example-group-name.asciidoc
+    # example: |
     settings:
 
       - setting: xpack.actions.allowedHosts

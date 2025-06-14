@@ -592,7 +592,39 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [],
+    "setup": {
+      "parentPluginId": "esql",
+      "id": "def-server.EsqlServerPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "EsqlServerPluginSetup",
+      "description": [],
+      "path": "src/platform/plugins/shared/esql/server/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "esql",
+          "id": "def-server.EsqlServerPluginSetup.getExtensionsRegistry",
+          "type": "Function",
+          "tags": [],
+          "label": "getExtensionsRegistry",
+          "description": [],
+          "signature": [
+            "() => ",
+            "ESQLExtensionsRegistry"
+          ],
+          "path": "src/platform/plugins/shared/esql/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
   },
   "common": {
     "classes": [],

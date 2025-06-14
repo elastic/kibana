@@ -8,6 +8,7 @@
 export enum ServiceProviderKeys {
   'alibabacloud-ai-search' = 'alibabacloud-ai-search',
   amazonbedrock = 'amazonbedrock',
+  'amazon_sagemaker' = 'amazon_sagemaker',
   anthropic = 'anthropic',
   azureaistudio = 'azureaistudio',
   azureopenai = 'azureopenai',

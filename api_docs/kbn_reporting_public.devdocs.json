@@ -1832,7 +1832,9 @@
                 "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              ">): void; }"
+              ">): void; availableIntegrations: (objectType: string, groupId?: string | undefined) => ",
+              "ShareActionIntents",
+              "[]; }"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/index.ts",
             "deprecated": false,

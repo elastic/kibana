@@ -53,9 +53,9 @@ export const createCustomizationService = (): DiscoverCustomizationService => {
     id: TCustomizationId
   ): Extract<DiscoverCustomization, { id: TCustomizationId }> | undefined => {
     const entry = customizations.get(id);
-    if (entry && entry.enabled) {
-      return entry.customization as Extract<DiscoverCustomization, { id: TCustomizationId }>;
-    }
+    return entry?.enabled
+      ? (entry.customization as Extract<DiscoverCustomization, { id: TCustomizationId }>)
+      : undefined;
   };
 
   return {

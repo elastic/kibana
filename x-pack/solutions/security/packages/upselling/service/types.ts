@@ -6,8 +6,11 @@
  */
 
 import type { SecurityPageName } from '@kbn/security-solution-navigation';
+import { SecurityPageNameAiSoc } from '@kbn/deeplinks-security';
 
-export type PageUpsellings = Partial<Record<SecurityPageName, React.ComponentType>>;
+export type PageUpsellings = Partial<
+  Record<SecurityPageName | SecurityPageNameAiSoc, React.ComponentType>
+>;
 export type MessageUpsellings = Partial<Record<UpsellingMessageId, string>>;
 export type SectionUpsellings = Partial<Record<UpsellingSectionId, React.ComponentType>>;
 

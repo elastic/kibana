@@ -22,6 +22,19 @@ export type { FetchRulesResponse } from './detection_engine/rule_management/logi
 export { existCapabilities, hasCapabilities } from './common/lib/capabilities';
 export { ContractComponentsService } from './contract_components';
 export { OnboardingService } from './onboarding/service';
+export {
+  SecurityRoutePageWrapper,
+  withSecurityRoutePageWrapper,
+} from './common/components/security_route_page_wrapper/security_route_page_wrapper';
+export { SecuritySolutionPageWrapper } from './common/components/page_wrapper';
+export { UserPrivilegesProvider } from './common/components/user_privileges/user_privileges_context';
+export { AssistantProvider } from './assistant/provider';
+export { UpsellingProvider } from './common/components/upselling_provider';
+export { HomePage } from './app/home';
+export { useUpsellingService } from './common/components/upselling_provider';
+export { NoPrivilegesPage } from './common/components/no_privileges';
+export { SpyRoute } from './common/utils/route/spy_routes';
+export { useNormalizedAppLinks } from './common/links';
 
 export const plugin = (context: PluginInitializerContext): Plugin => new Plugin(context);
 

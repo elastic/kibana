@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import esql_parser, { LimitCommandContext } from '../../antlr/esql_parser';
-import { createCommand, createLiteral } from '../factories';
+import { LimitCommandContext } from '../../antlr/esql_parser';
+import { createCommand } from '../factories';
+import { getConstant } from '../walkers';
 
 export const createLimitCommand = (ctx: LimitCommandContext) => {
   const command = createCommand('limit', ctx);
-  if (ctx.getToken(esql_parser.INTEGER_LITERAL, 0)) {
-    const literal = createLiteral('integer', ctx.INTEGER_LITERAL());
-    if (literal) {
-      command.args.push(literal);
+  if (ctx.constant()) {
+    const limitValue = getConstant(ctx.constant());
+    if (limitValue != null) {
+      command.args.push(limitValue);
     }
   }
 

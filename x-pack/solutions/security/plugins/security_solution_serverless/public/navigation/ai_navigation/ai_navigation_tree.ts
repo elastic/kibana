@@ -113,7 +113,7 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
       children: [
         {
           id: SecurityPageNameAiSoc.landing,
-          link: securityLink(SecurityPageNameAiSoc.landing),
+          link: aiSocLink(SecurityPageNameAiSoc.landing),
           icon: 'launch',
         },
         {

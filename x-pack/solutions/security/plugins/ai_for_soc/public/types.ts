@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-import type { CoreStart, AppMountParameters } from '@kbn/core/public';
+import type { CoreStart, AppMountParameters, ApplicationStart } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import type { CasesPublicSetup } from '@kbn/cases-plugin/public';
+import type {
+  UsageCollectionSetup,
+  UsageCollectionStart,
+} from '@kbn/usage-collection-plugin/public';
+import type { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { FleetStart } from '@kbn/fleet-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { PluginStart as SecuritySolutionPluginStart } from '@kbn/security-solution-plugin/public';
 
 // Setup contracts
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -38,6 +43,11 @@ export interface SecuritySolutionAiForSocStartPluginDependencies {
   licensing: LicensingPluginStart;
   fleet: FleetStart;
   security: SecurityPluginStart;
+  securitySolution: SecuritySolutionPluginStart;
+  uiActions: UiActionsStart;
+  cases: CasesPublicStart;
+  usageCollection?: UsageCollectionStart;
+  application: ApplicationStart;
 }
 
 /**

@@ -6,10 +6,8 @@
  */
 
 import React from 'react';
-import { OnboardingPage } from '@kbn/security-solution-plugin/public/onboarding/components/onboarding';
-import { SecuritySolutionPageWrapper } from '@kbn/security-solution-plugin/public/common/components/page_wrapper';
-import { SpyRoute } from '@kbn/security-solution-plugin/public/common/utils/route/spy_routes';
-import { SecurityPageName } from '@kbn/security-solution-plugin/common';
+import { EuiPageTemplate, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
+import { SecuritySolutionPageWrapper } from '@kbn/security-solution-plugin/public';
 import type { StartServices } from '../../types';
 
 interface LandingPageWrapperProps {
@@ -19,8 +17,22 @@ interface LandingPageWrapperProps {
 export const AiForSocLandingPage: React.FC<LandingPageWrapperProps> = ({ services }) => {
   return (
     <SecuritySolutionPageWrapper>
-      <OnboardingPage />
-      <SpyRoute pageName={SecurityPageName.landing} />
+      <EuiPageTemplate>
+        <EuiPageTemplate.Section>
+          <EuiTitle size="l">
+            <h1>Welcome to AI for SOC</h1>
+          </EuiTitle>
+          <EuiSpacer size="l" />
+          <EuiText>
+            <p>AI for SOC provides intelligent capabilities to enhance your security operations:</p>
+            <ul>
+              <li>AI-powered alert analysis and triage</li>
+              <li>Automated threat detection assistance</li>
+              <li>Intelligent incident response recommendations</li>
+            </ul>
+          </EuiText>
+        </EuiPageTemplate.Section>
+      </EuiPageTemplate>
     </SecuritySolutionPageWrapper>
   );
 };

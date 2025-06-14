@@ -12,12 +12,11 @@ import {
   DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
-  AppStatus,
   AppUpdater,
   Capabilities,
 } from '@kbn/core/public';
 import { BehaviorSubject, combineLatestWith, Subject } from 'rxjs';
-import { AppLinkItems } from '@kbn/security-solution-plugin/public/common/links';
+import { AppLinkItems } from '@kbn/security-solution-plugin/public';
 import {
   SecuritySolutionAiForSocPluginSetup,
   SecuritySolutionAiForSocPluginStart,
@@ -27,8 +26,8 @@ import {
 } from './types';
 import { APP_NAME, APP_ICON, APP_PATH, APP_UI_ID } from '../common/constants';
 import { PluginServices } from './plugin_services';
-import { applicationLinksUpdater } from './application_links_updater';
 import { PluginContract } from './plugin_contract';
+import { applicationLinksUpdater } from './links/application_links_updater';
 
 // Helper function to check if user has access to security solution
 const hasAccessToSecuritySolution = (capabilities: Capabilities): boolean => {
@@ -103,14 +102,6 @@ export class SecuritySolutionAiForSocPlugin
   ) {
     const { license$ } = plugins.licensing;
     const { capabilities } = core.application;
-
-    // When the user does not have any of the capabilities required to access security solution, the plugin should be inaccessible
-    // This is necessary to hide security solution from the selectable solutions in the spaces UI
-    if (!hasAccessToSecuritySolution(capabilities)) {
-      this.appUpdater$.next(() => ({ status: AppStatus.inaccessible, visibleIn: [] }));
-      // no need to register the links updater when the plugin is inaccessible. return early
-      return;
-    }
 
     // Configuration of AppLinks updater registration based on license and capabilities
     const {

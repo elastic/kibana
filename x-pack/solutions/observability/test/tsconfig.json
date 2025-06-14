@@ -49,5 +49,7 @@
     "@kbn/profiling-plugin",
     "@kbn/profiling-utils",
     "@kbn/profiling-data-access-plugin",
+    "@kbn/alerting-comparators",
+    "@kbn/logging",
   ]
 }

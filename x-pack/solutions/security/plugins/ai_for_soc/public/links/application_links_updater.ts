@@ -12,7 +12,6 @@ import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { AppLinkItems, LinkItem, NormalizedLinks } from '@kbn/security-solution-plugin/public';
-import { existCapabilities, hasCapabilities } from '@kbn/security-solution-plugin/public';
 
 /**
  * Dependencies to update the application links
@@ -50,6 +49,7 @@ class ApplicationLinksUpdater {
    */
   public update(appLinksToUpdate: AppLinkItems, params: ApplicationLinksUpdateParams) {
     const processedAppLinks = this.processAppLinks(appLinksToUpdate, params);
+    console.log('processedAppLinks', processedAppLinks);
     this.linksSubject$.next(Object.freeze(processedAppLinks));
     this.normalizedLinksSubject$.next(Object.freeze(this.getNormalizedLinks(processedAppLinks)));
   }
@@ -99,36 +99,12 @@ class ApplicationLinksUpdater {
 
     return appLinks.reduce<LinkItem[]>((acc, appLink) => {
       const { links, ...link } = appLink;
-      // Check experimental flags and uiSettings, removing the link if any of them is defined and disabled
-      if (!this.isLinkUiSettingsAllowed(link, uiSettingsClient)) {
-        return acc;
-      }
 
-      // Extra props to be assigned to the current link and its children
-      const extraProps: Partial<LinkItem> = { ...inheritedProps };
-
-      // Check link availability
-      if (
-        !existCapabilities(capabilities, link.capabilities) ||
-        !this.isLinkLicenseAllowed(link, license)
-      ) {
-        // The link is not available in the current product payment plan
-        if (!upselling.isPageUpsellable(link.id)) {
-          return acc; // no upselling registered for this link, just exclude it
-        }
-        extraProps.unavailable = true;
-
-        // Check link authorization only if it is available
-      } else if (!hasCapabilities(capabilities, link.capabilities)) {
-        // Required capabilities exist but are not granted
-        extraProps.unauthorized = true;
-      }
-
-      const processedAppLink: LinkItem = { ...link, ...extraProps };
+      const processedAppLink: LinkItem = { ...link };
 
       // Process children links if they exist
       if (links) {
-        const childrenLinks = this.processAppLinks(links, params, extraProps);
+        const childrenLinks = this.processAppLinks(links, params);
         if (childrenLinks.length > 0) {
           processedAppLink.links = childrenLinks;
         }
@@ -137,41 +113,6 @@ class ApplicationLinksUpdater {
       acc.push(processedAppLink);
       return acc;
     }, []);
-  }
-
-  /**
-   * Check if the link is allowed based on the uiSettingsClient
-   */
-  private isLinkUiSettingsAllowed(link: LinkItem, uiSettingsClient: IUiSettingsClient) {
-    if (!link.uiSettingRequired) {
-      return true;
-    }
-
-    if (typeof link.uiSettingRequired === 'string') {
-      return uiSettingsClient.get(link.uiSettingRequired) === true;
-    }
-
-    if (typeof link.uiSettingRequired === 'object') {
-      return uiSettingsClient.get(link.uiSettingRequired.key) === link.uiSettingRequired.value;
-    }
-
-    // unsupported uiSettingRequired type
-    return false;
-  }
-
-  /**
-   * Check if the link is allowed based on the license
-   */
-  private isLinkLicenseAllowed(link: LinkItem, license: ILicense | undefined) {
-    const linkLicenseType = link.licenseType ?? 'basic';
-    if (license) {
-      if (!license.hasAtLeast(linkLicenseType)) {
-        return false;
-      }
-    } else if (linkLicenseType !== 'basic') {
-      return false;
-    }
-    return true;
   }
 }
 

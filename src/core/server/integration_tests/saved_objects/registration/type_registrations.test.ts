@@ -38,6 +38,7 @@ const previouslyRegisteredTypes = [
   'cases-comments',
   'cases-configure',
   'cases-connector-mappings',
+  'cases-incrementing-id', // Added in 8.19/9.1 to allow for incremental numerical ids in cases
   'cases-rules',
   'cases-sub-case',
   'cases-user-actions',
@@ -55,6 +56,7 @@ const previouslyRegisteredTypes = [
   'endpoint:user-artifact-manifest',
   'endpoint:unified-user-artifact-manifest',
   'enterprise_search_telemetry',
+  'entity-analytics-monitoring-entity-source',
   'entity-definition',
   'entity-discovery-api-key',
   'epm-packages',

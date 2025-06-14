@@ -8,6 +8,7 @@
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import type { SecurityPageName } from '@kbn/security-solution-navigation';
+import { SecurityPageNameAiSoc } from '@kbn/deeplinks-security';
 import type {
   SectionUpsellings,
   PageUpsellings,
@@ -18,15 +19,17 @@ import type {
 
 export class UpsellingService {
   private sections: Map<UpsellingSectionId, React.ComponentType>;
-  private pages: Map<SecurityPageName, React.ComponentType>;
+  private pages: Map<SecurityPageName | SecurityPageNameAiSoc, React.ComponentType>;
   private messages: Map<UpsellingMessageId, string>;
 
   private messagesSubject$: BehaviorSubject<Map<UpsellingMessageId, string>>;
   private sectionsSubject$: BehaviorSubject<Map<UpsellingSectionId, React.ComponentType>>;
-  private pagesSubject$: BehaviorSubject<Map<SecurityPageName, React.ComponentType>>;
+  private pagesSubject$: BehaviorSubject<
+    Map<SecurityPageName | SecurityPageNameAiSoc, React.ComponentType>
+  >;
 
   public sections$: Observable<Map<UpsellingSectionId, React.ComponentType>>;
-  public pages$: Observable<Map<SecurityPageName, React.ComponentType>>;
+  public pages$: Observable<Map<SecurityPageName | SecurityPageNameAiSoc, React.ComponentType>>;
   public messages$: Observable<Map<UpsellingMessageId, string>>;
 
   constructor() {
@@ -57,7 +60,7 @@ export class UpsellingService {
     this.pages.clear();
 
     Object.entries(pages).forEach(([pageId, component]) => {
-      this.pages.set(pageId as SecurityPageName, component);
+      this.pages.set(pageId as SecurityPageName | SecurityPageNameAiSoc, component);
     });
 
     this.pagesSubject$.next(this.pages);
@@ -77,7 +80,7 @@ export class UpsellingService {
     return this.pages.has(id);
   }
 
-  getPageUpselling(id: SecurityPageName) {
+  getPageUpselling(id: SecurityPageName | SecurityPageNameAiSoc) {
     return this.pages.get(id);
   }
 

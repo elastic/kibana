@@ -97,7 +97,11 @@ describe('attackDiscoveryScheduleExecutor', () => {
   };
   const executorOptions = {
     params,
-    rule: { id: 'rule-1', schedule: { interval: '12m' } },
+    rule: {
+      id: 'rule-1',
+      schedule: { interval: '12m' },
+      actions: [{ actionTypeId: '.slack' }, { actionTypeId: '.jest' }],
+    },
     services: {
       ...services,
       actionsClient,
@@ -222,7 +226,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     expect(reportAttackDiscoveryGenerationFailure).toHaveBeenCalledWith({
       apiConfig: params.apiConfig,
       errorMessage: 'Big time failure',
-      schedule: { id: 'rule-1', interval: '12m' },
+      scheduleInfo: { id: 'rule-1', interval: '12m', actions: ['.slack', '.jest'] },
       telemetry: mockTelemetry,
     });
   });
@@ -242,7 +246,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
       attackDiscoveries: mockAttackDiscoveries,
       durationMs: 0,
       hasFilter: true,
-      schedule: { id: 'rule-1', interval: '12m' },
+      scheduleInfo: { id: 'rule-1', interval: '12m', actions: ['.slack', '.jest'] },
       size: 123,
       start: 'now-24h',
       telemetry: mockTelemetry,

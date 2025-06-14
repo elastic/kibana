@@ -5,12 +5,22 @@
  * 2.0.
  */
 
+import {
+  ToolProviderId,
+  toStructuredToolIdentifier,
+  unknownToolProviderId,
+} from '@kbn/onechat-common';
 import type {
-  ToolProviderHasOptions,
+  RegisteredTool,
   ToolProviderGetOptions,
+  ToolProviderHasOptions,
   ToolProviderListOptions,
 } from '@kbn/onechat-server';
-import type { InternalToolProvider, RegisteredToolWithMeta } from '../types';
+import {
+  InternalToolProvider,
+  RegisteredToolProviderWithId,
+  RegisteredToolWithMeta,
+} from '../types';
 
 /**
  * Creates a tool provider that combines multiple tool providers.
@@ -18,37 +28,61 @@ import type { InternalToolProvider, RegisteredToolWithMeta } from '../types';
  * Note: order matters - providers will be checked in the order they are in the list (in case of ID conflict)
  */
 export const combineToolProviders = (
-  ...providers: InternalToolProvider[]
+  ...providers: RegisteredToolProviderWithId[]
 ): InternalToolProvider => {
+  const addMeta = (tool: RegisteredTool, providerId: ToolProviderId): RegisteredToolWithMeta => {
+    return {
+      ...tool,
+      meta: {
+        ...tool.meta,
+        tags: tool.meta?.tags ?? [],
+        providerId,
+      },
+    };
+  };
+
   return {
     has: async (options: ToolProviderHasOptions) => {
       for (const provider of providers) {
-        const providerHasTool = await provider.has(options);
-        if (providerHasTool) {
-          return true;
+        const { toolId, providerId } = toStructuredToolIdentifier(options.toolId);
+        if (providerId === provider.id || providerId === unknownToolProviderId) {
+          const providerHasTool = await provider.has({
+            ...options,
+            toolId,
+          });
+          if (providerHasTool) {
+            return true;
+          }
         }
       }
       return false;
     },
     get: async (options: ToolProviderGetOptions) => {
       for (const provider of providers) {
-        if (await provider.has(options)) {
-          return provider.get(options);
+        const { toolId, providerId } = toStructuredToolIdentifier(options.toolId);
+        if (providerId === provider.id || providerId === unknownToolProviderId) {
+          const providerHasTool = await provider.has({
+            ...options,
+            toolId,
+          });
+          if (providerHasTool) {
+            const tool = await provider.get({
+              ...options,
+              toolId,
+            });
+            return addMeta(tool, provider.id);
+          }
         }
       }
       throw new Error(`Tool with id ${options.toolId} not found`);
     },
     list: async (options: ToolProviderListOptions) => {
       const tools: RegisteredToolWithMeta[] = [];
-      const toolIds = new Set<string>();
 
       for (const provider of providers) {
         const providerTools = await provider.list(options);
         for (const tool of providerTools) {
-          if (!toolIds.has(tool.id)) {
-            tools.push(tool);
-            toolIds.add(tool.id);
-          }
+          tools.push(addMeta(tool, provider.id));
         }
       }
 

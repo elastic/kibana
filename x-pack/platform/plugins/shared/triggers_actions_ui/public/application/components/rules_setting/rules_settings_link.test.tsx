@@ -68,7 +68,7 @@ const mockQueryDelaySetting: RulesSettingsQueryDelay = {
 const RulesSettingsLinkWithProviders: React.FunctionComponent<{}> = () => (
   <IntlProvider locale="en">
     <QueryClientProvider client={queryClient}>
-      <RulesSettingsLink />
+      <RulesSettingsLink alertDeleteCategoryIds={['management']} />
     </QueryClientProvider>
   </IntlProvider>
 );

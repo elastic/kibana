@@ -85,7 +85,7 @@ const externalLinkSchema = schema.object({
   ),
 });
 
-const linksAttributesSchema = schema.object(
+export const linksAttributesSchema = schema.object(
   {
     title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
     description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
@@ -108,7 +108,7 @@ const linksAttributesSchema = schema.object(
 
 const linksSavedObjectSchema = savedObjectSchema(linksAttributesSchema);
 
-const searchOptionsSchema = schema.maybe(
+export const linksSearchOptionsSchema = schema.maybe(
   schema.object(
     {
       onlyTitle: schema.maybe(schema.boolean()),
@@ -117,14 +117,17 @@ const searchOptionsSchema = schema.maybe(
   )
 );
 
-const linksCreateOptionsSchema = schema.object({
+export const linksCreateOptionsSchema = schema.object({
   references: schema.maybe(createOptionsSchemas.references),
   overwrite: createOptionsSchemas.overwrite,
 });
 
-const linksUpdateOptionsSchema = schema.object({
+export const linksUpdateOptionsSchema = schema.object({
   references: updateOptionsSchema.references,
 });
+
+export const linksGetResultSchema = objectTypeToGetResultSchema(linksSavedObjectSchema);
+export const linksCreateResultSchema = createResultSchema(linksSavedObjectSchema);
 
 // Content management service definition.
 // We need it for BWC support between different versions of the content
@@ -132,7 +135,7 @@ export const serviceDefinition: ServicesDefinition = {
   get: {
     out: {
       result: {
-        schema: objectTypeToGetResultSchema(linksSavedObjectSchema),
+        schema: linksGetResultSchema,
       },
     },
   },
@@ -147,7 +150,7 @@ export const serviceDefinition: ServicesDefinition = {
     },
     out: {
       result: {
-        schema: createResultSchema(linksSavedObjectSchema),
+        schema: linksCreateResultSchema,
       },
     },
   },
@@ -164,7 +167,7 @@ export const serviceDefinition: ServicesDefinition = {
   search: {
     in: {
       options: {
-        schema: searchOptionsSchema,
+        schema: linksSearchOptionsSchema,
       },
     },
   },

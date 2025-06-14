@@ -14,7 +14,7 @@ import { registerActionStatusRoutes } from './status';
 import { registerActionStateRoutes } from './state';
 import { registerActionListRoutes } from './list';
 import { registerResponseActionRoutes } from './response_actions';
-
+import { registerCustomScriptsRoute } from './custom_scripts_handler';
 // wrap route registration
 
 export function registerActionRoutes(
@@ -29,4 +29,5 @@ export function registerActionRoutes(
   registerResponseActionRoutes(router, endpointContext);
   registerActionFileDownloadRoutes(router, endpointContext);
   registerActionFileInfoRoute(router, endpointContext);
+  registerCustomScriptsRoute(router, endpointContext);
 }

@@ -12,8 +12,8 @@ import { configurationsLinks } from '@kbn/security-solution-plugin/public';
 import { rulesLinks } from '@kbn/security-solution-plugin/public';
 import { onboardingLinks } from '@kbn/security-solution-plugin/public';
 import { managementLinks, getManagementFilteredLinks } from '@kbn/security-solution-plugin/public';
-import type { AppLinkItems } from '@kbn/security-solution-plugin/public/common/links/types';
-import { StartPlugins } from '@kbn/security-solution-plugin/public/types';
+import type { AppLinkItems } from '@kbn/security-solution-plugin/public';
+import { StartPlugins } from '@kbn/security-solution-plugin/public';
 import { SecuritySolutionAiForSocStartPluginDependencies } from '../types';
 
 export const appLinks: AppLinkItems = Object.freeze([
@@ -30,7 +30,10 @@ export const getFilteredLinks = async (
   core: CoreStart,
   plugins: SecuritySolutionAiForSocStartPluginDependencies
 ): Promise<AppLinkItems> => {
-  const managementFilteredLinks = await getManagementFilteredLinks(core, plugins as StartPlugins);
+  const managementFilteredLinks = await getManagementFilteredLinks(
+    core,
+    plugins as unknown as StartPlugins
+  );
 
   return Object.freeze([
     alertSummaryLink,

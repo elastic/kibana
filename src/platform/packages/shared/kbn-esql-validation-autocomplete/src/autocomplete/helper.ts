@@ -49,6 +49,7 @@ import {
   isLiteralItem,
   isTimeIntervalItem,
   sourceExists,
+  isParamExpressionType,
 } from '../shared/helpers';
 import type { ESQLSourceResult } from '../shared/types';
 import { listCompleteItem, commaCompleteItem, pipeCompleteItem } from './complete_items';
@@ -605,12 +606,17 @@ export function checkFunctionInvocationComplete(
   if (fnDefinition.name === 'in' && Array.isArray(func.args[1]) && !func.args[1].length) {
     return { complete: false, reason: 'tooFewArgs' };
   }
+
+  // If the function is complete, check that the types of the arguments match the function definition
   const hasCorrectTypes = fnDefinition.signatures.some((def) => {
     return func.args.every((a, index) => {
       return (
         fnDefinition.name.endsWith('null') ||
         def.params[index].type === 'any' ||
-        def.params[index].type === getExpressionType(a)
+        def.params[index].type === getExpressionType(a) ||
+        // this is a special case for expressions with named parameters
+        // e.g. "WHERE field == ?value"
+        isParamExpressionType(getExpressionType(a))
       );
     });
   });
@@ -758,6 +764,17 @@ type ExpressionPosition =
   | 'empty_expression';
 
 /**
+ * Escapes special characters in a string to be used as a literal match in a regular expression.
+ * @param {string} text The input string to escape.
+ * @returns {string} The escaped string.
+ */
+function escapeRegExp(text: string): string {
+  // Characters with special meaning in regex: . * + ? ^ $ { } ( ) | [ ] \
+  // We need to escape all of them. The `$&` in the replacement string means "the matched substring".
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
  * Determines the position of the cursor within an expression.
  * @param innerText
  * @param expressionRoot
@@ -785,7 +802,8 @@ export const getExpressionPosition = (
     if (
       isColumnItem(expressionRoot) &&
       // and not directly after the column name or prefix e.g. "colu/"
-      !new RegExp(`${expressionRoot.parts.join('\\.')}$`).test(innerText)
+      // we are escaping the column name here as it may contain special characters such as ??
+      !new RegExp(`${escapeRegExp(expressionRoot.parts.join('\\.'))}$`).test(innerText)
     ) {
       return 'after_column';
     }
@@ -850,7 +868,9 @@ export async function suggestForExpression({
       suggestions.push(
         ...getOperatorSuggestions({
           location,
-          leftParamType: expressionType,
+          // In case of a param literal, we don't know the type of the left operand
+          // so we can only suggest operators that accept any type as a left operand
+          leftParamType: isParamExpressionType(expressionType) ? undefined : expressionType,
           ignored: ['='],
         })
       );

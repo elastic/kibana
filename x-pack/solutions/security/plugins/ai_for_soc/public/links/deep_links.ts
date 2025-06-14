@@ -11,11 +11,7 @@ import type { AppDeepLink, AppUpdater, AppDeepLinkLocations } from '@kbn/core/pu
 import type { SecurityPageName } from '@kbn/deeplinks-security';
 import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
 import { SecurityLinkGroup } from '@kbn/security-solution-navigation/links';
-import {
-  AppLinkItems,
-  LinkItem,
-  NormalizedLinks,
-} from '@kbn/security-solution-plugin/public/common/links';
+import { AppLinkItems, LinkItem, NormalizedLinks } from '@kbn/security-solution-plugin/public';
 import type { SecurityGroupName } from '@kbn/security-solution-navigation';
 import { applicationLinksUpdater } from './application_links_updater';
 

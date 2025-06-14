@@ -173,7 +173,7 @@ export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets
     }
     const response = await this.request(
       {
-        url: webhookUrl ? webhookUrl : this.urls.getRunWebhookURL(webhook!),
+        url: webhookUrl ?? this.urls.getRunWebhookURL(webhook!),
         method: 'post',
         responseSchema: TinesRunApiResponseSchema,
         data: body,

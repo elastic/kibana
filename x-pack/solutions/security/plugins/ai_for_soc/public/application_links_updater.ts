@@ -10,7 +10,7 @@ import { BehaviorSubject } from 'rxjs';
 import type { Capabilities } from '@kbn/core/types';
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import type { IUiSettingsClient } from '@kbn/core/public';
-import type { AppLinkItems, LinkItem } from '@kbn/security-solution-plugin/public/common/links';
+import type { AppLinkItems, LinkItem } from '@kbn/security-solution-plugin/public';
 import { ApplicationLinksUpdateParams } from './types';
 
 /**

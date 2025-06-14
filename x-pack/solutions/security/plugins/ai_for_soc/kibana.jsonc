@@ -18,13 +18,24 @@
     "requiredPlugins": [
       "home",
       "licensing",
+      "navigation",
+      "actions",
+      "elasticAssistant",
+      "embeddable",
       "management",
       "security",
-      "cases"
+      "cases",
+      "usageCollection",
+      "securitySolution",
+      "uiActions",
+      "data",
+      "dataViews",
+      "fieldFormats",
+      "lens",
+      "savedObjectsManagement",
+      "spaces",
     ],
-    "optionalPlugins": [
-      "usageCollection"
-    ],
+    "optionalPlugins": [],
     "requiredBundles": [
       "kibanaReact",
       "securitySolution"

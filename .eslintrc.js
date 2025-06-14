@@ -391,6 +391,19 @@ const RESTRICTED_IMPORTS = [
   },
 ];
 
+/**
+ * Imports that are deprecated and should be phased out
+ * They are not restricted until fully removed,
+ * but will log a warning
+ **/
+const DEPRECATED_IMPORTS = [
+  {
+    name: 'enzyme',
+    message:
+      'Enzyme is deprecated and no longer maintained. Please use @testing-library/react instead.',
+  },
+];
+
 module.exports = {
   root: true,
 
@@ -918,6 +931,7 @@ module.exports = {
       files: ['**/*.{js,mjs,ts,tsx}'],
       rules: {
         'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
+        '@kbn/eslint/no_deprecated_imports': ['warn', ...DEPRECATED_IMPORTS],
         'no-restricted-modules': [
           'error',
           {
@@ -2089,7 +2103,7 @@ module.exports = {
         'src/platform/packages/shared/kbn-user-profile-components/**/*.{js,mjs,ts,tsx}',
 
         'x-pack/platform/plugins/shared/encrypted_saved_objects/**/*.{js,mjs,ts,tsx}',
-        'x-pack/test/encrypted_saved_objects_api_integration/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/test/encrypted_saved_objects_api_integration/**/*.{js,mjs,ts,tsx}',
 
         'x-pack/platform/plugins/shared/security/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/packages/private/security/**/*.{js,mjs,ts,tsx}',

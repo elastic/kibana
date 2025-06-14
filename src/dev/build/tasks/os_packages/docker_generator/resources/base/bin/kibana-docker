@@ -237,6 +237,7 @@ kibana_vars=(
     xpack.alerting.rules.run.actions.connectorTypeOverrides
     xpack.alerting.rules.maxScheduledPerMinute
     xpack.alerting.disabledRuleTypes
+    xpack.alerting.enabledRuleTypes
     xpack.apm.indices.error
     xpack.apm.indices.metric
     xpack.apm.indices.onboarding
