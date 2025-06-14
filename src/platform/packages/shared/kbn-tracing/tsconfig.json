@@ -15,5 +15,7 @@
   ],
   "kbn_references": [
     "@kbn/telemetry-config",
+    "@kbn/std",
+    "@kbn/inference-tracing",
   ]
 }

@@ -14,10 +14,9 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/tracing",
     "@kbn/inference-common",
-    "@kbn/core",
     "@kbn/safer-lodash-set",
     "@kbn/std",
+    "@kbn/inference-tracing-config",
   ]
 }

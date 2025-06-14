@@ -22,11 +22,14 @@ type ToolsOfChoice<TToolOptions extends ToolOptions> = TToolOptions['toolChoice'
 type ToolCallbacksOfTools<TTools extends Record<string, ToolDefinition> | undefined> =
   TTools extends Record<string, ToolDefinition>
     ? {
-        [TName in keyof TTools & string]: (
-          toolCall: ToolCall<TName, ToolResponseOf<TTools[TName]>>
-        ) => Promise<ToolMessage['response']>;
+        [TName in keyof TTools & string]: ToolCallback<TName, ToolResponseOf<TTools[TName]>>;
       }
     : never;
+
+export type ToolCallback<
+  TName extends string = string,
+  TArguments extends Record<string, any> | undefined = Record<string, any> | undefined
+> = (toolCall: ToolCall<TName, TArguments>) => Promise<ToolMessage['response']>;
 
 export type ToolCallbacksOf<TToolOptions extends ToolOptions> = TToolOptions extends {
   tools?: Record<string, ToolDefinition>;

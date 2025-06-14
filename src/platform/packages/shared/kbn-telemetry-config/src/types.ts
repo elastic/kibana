@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { InferenceTracingExportConfig } from '@kbn/inference-tracing-config';
 
 /**
  * Configuration for OpenTelemetry
@@ -22,6 +23,11 @@ export interface TelemetryConfig {
 }
 
 /**
+ * Allowed configurations for OTLP tracing exporters
+ */
+export type TracingExporterConfig = InferenceTracingExportConfig;
+
+/**
  * Configuration for OpenTelemetry tracing
  */
 export interface TracingConfig {
@@ -34,4 +40,8 @@ export interface TracingConfig {
    * needs to be made. Should be between 0-1.
    */
   sample_rate: number;
+  /**
+   * OTLP exporters for tracing data
+   */
+  exporters?: TracingExporterConfig | TracingExporterConfig[];
 }

@@ -44,6 +44,7 @@ RUNTIME_DEPS = [
   "@npm//babel-plugin-transform-react-remove-prop-types",
   "@npm//babel-plugin-transform-typescript-metadata",
   "@npm//babel-plugin-transform-require-default",
+  "@npm//babel-plugin-inline-import"
 ]
 
 js_library(

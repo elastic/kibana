@@ -7,6 +7,7 @@
 export { createPrompt } from './create_prompt';
 export type {
   PromptAPI,
+  PromptAPIResponse,
   PromptCompositeResponse,
   PromptOptions,
   PromptResponse,

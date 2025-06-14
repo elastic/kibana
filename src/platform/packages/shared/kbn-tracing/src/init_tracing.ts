@@ -22,6 +22,9 @@ import {
   W3CBaggagePropagator,
   W3CTraceContextPropagator,
 } from '@opentelemetry/core';
+import { fromExternalVariant } from '@kbn/std';
+import { LangfuseSpanProcessor, PhoenixSpanProcessor } from '@kbn/inference-tracing';
+import { castArray } from 'lodash';
 import { LateBindingSpanProcessor } from '..';
 
 export function initTracing({
@@ -51,6 +54,19 @@ export function initTracing({
       [ATTR_SERVICE_NAME]: apmConfig.serviceName,
       [ATTR_SERVICE_VERSION]: apmConfig.serviceVersion,
     }),
+  });
+
+  castArray(tracingConfig?.exporters ?? []).forEach((exporter) => {
+    const variant = fromExternalVariant(exporter);
+    switch (variant.type) {
+      case 'langfuse':
+        LateBindingSpanProcessor.get().register(new LangfuseSpanProcessor(variant.value));
+        break;
+
+      case 'phoenix':
+        LateBindingSpanProcessor.get().register(new PhoenixSpanProcessor(variant.value));
+        break;
+    }
   });
 
   trace.setGlobalTracerProvider(nodeTracerProvider);
