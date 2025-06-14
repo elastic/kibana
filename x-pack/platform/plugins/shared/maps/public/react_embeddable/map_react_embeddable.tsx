@@ -12,9 +12,11 @@ import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { EmbeddableFactory, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import {
+  SAVED_OBJECT_REF_NAME,
   SerializedPanelState,
   apiIsOfType,
   areTriggersDisabled,
+  findSavedObjectRef,
   initializeTimeRangeManager,
   initializeTitleManager,
   timeRangeComparators,
@@ -53,12 +55,18 @@ export function getControlledBy(id: string) {
 }
 
 function injectReferences(serializedState?: SerializedPanelState<MapSerializedState>) {
-  return serializedState?.rawState
-    ? (inject(
-        serializedState.rawState as EmbeddableStateWithType,
-        serializedState.references ?? []
-      ) as unknown as MapSerializedState)
-    : {};
+  if (!serializedState) return {};
+
+  const rawState = { ...serializedState.rawState };
+  const references = serializedState.references ?? [];
+
+  const savedObjectRef = findSavedObjectRef(MAP_SAVED_OBJECT_TYPE, references);
+
+  if (savedObjectRef) {
+    rawState.savedObjectId = savedObjectRef.id;
+  }
+
+  return inject(rawState as EmbeddableStateWithType, references) as unknown as MapSerializedState;
 }
 
 export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi> = {
@@ -115,20 +123,34 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
       };
     }
 
-    function serializeState() {
+    function serializeByReference(libraryId: string) {
       const rawState = getLatestState();
 
-      // by-reference embeddable
-      if (rawState.savedObjectId) {
-        // No references to extract for by-reference embeddable since all references are stored with by-reference saved object
+      if (apiIsOfType(parentApi, 'canvas')) {
         return {
-          rawState: getByReferenceState(rawState, rawState.savedObjectId),
+          rawState: getByReferenceState(rawState, libraryId),
           references: [],
         };
       }
 
+      const { savedObjectId, ...byRefState } = getByReferenceState(rawState, libraryId);
+      return {
+        rawState: byRefState,
+        references: [
+          {
+            name: SAVED_OBJECT_REF_NAME,
+            type: MAP_SAVED_OBJECT_TYPE,
+            id: libraryId,
+          },
+        ],
+      };
+    }
+
+    function serializeByValue() {
+      const rawState = getLatestState();
+
       /**
-       * Canvas by-value embeddables do not support references
+       * Canvas embeddables do not support references
        */
       if (apiIsOfType(parentApi, 'canvas')) {
         return {
@@ -146,6 +168,11 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
         rawState: getByValueState(rawState, attributes),
         references,
       };
+    }
+
+    function serializeState() {
+      const savedObjectId = savedMap.getSavedObjectId();
+      return savedObjectId ? serializeByReference(savedObjectId) : serializeByValue();
     }
 
     const unsavedChangesApi = initializeUnsavedChanges<MapSerializedState>({
@@ -205,7 +232,11 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
         parentApi,
         state.savedObjectId
       ),
-      ...initializeLibraryTransforms(savedMap, serializeState),
+      ...initializeLibraryTransforms(
+        Boolean(savedMap.getSavedObjectId()),
+        serializeByReference,
+        serializeByValue
+      ),
       ...initializeDataViews(savedMap.getStore()),
       serializeState,
       supportedTriggers: () => {

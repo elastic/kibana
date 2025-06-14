@@ -6772,19 +6772,11 @@ paths:
                                         - x
                                         - 'y'
                                         - i
-                                    id:
-                                      description: The saved object id for by reference panels
-                                      type: string
                                     panelConfig:
                                       additionalProperties: true
                                       type: object
                                       properties: {}
                                     panelIndex:
-                                      type: string
-                                    panelRefName:
-                                      type: string
-                                    title:
-                                      description: The title of the panel
                                       type: string
                                     type:
                                       description: The embeddable type
@@ -6848,19 +6840,11 @@ paths:
                                               - x
                                               - 'y'
                                               - i
-                                          id:
-                                            description: The saved object id for by reference panels
-                                            type: string
                                           panelConfig:
                                             additionalProperties: true
                                             type: object
                                             properties: {}
                                           panelIndex:
-                                            type: string
-                                          panelRefName:
-                                            type: string
-                                          title:
-                                            description: The title of the panel
                                             type: string
                                           type:
                                             description: The embeddable type
@@ -7309,20 +7293,12 @@ paths:
                                 required:
                                   - x
                                   - 'y'
-                              id:
-                                description: The saved object id for by reference panels
-                                type: string
                               panelConfig:
                                 additionalProperties: true
                                 type: object
                                 properties: {}
                               panelIndex:
                                 description: The unique ID of the panel.
-                                type: string
-                              panelRefName:
-                                type: string
-                              title:
-                                description: The title of the panel
                                 type: string
                               type:
                                 description: The embeddable type
@@ -7387,20 +7363,12 @@ paths:
                                       required:
                                         - x
                                         - 'y'
-                                    id:
-                                      description: The saved object id for by reference panels
-                                      type: string
                                     panelConfig:
                                       additionalProperties: true
                                       type: object
                                       properties: {}
                                     panelIndex:
                                       description: The unique ID of the panel.
-                                      type: string
-                                    panelRefName:
-                                      type: string
-                                    title:
-                                      description: The title of the panel
                                       type: string
                                     type:
                                       description: The embeddable type
@@ -7770,19 +7738,11 @@ paths:
                                         - x
                                         - 'y'
                                         - i
-                                    id:
-                                      description: The saved object id for by reference panels
-                                      type: string
                                     panelConfig:
                                       additionalProperties: true
                                       type: object
                                       properties: {}
                                     panelIndex:
-                                      type: string
-                                    panelRefName:
-                                      type: string
-                                    title:
-                                      description: The title of the panel
                                       type: string
                                     type:
                                       description: The embeddable type
@@ -7846,19 +7806,11 @@ paths:
                                               - x
                                               - 'y'
                                               - i
-                                          id:
-                                            description: The saved object id for by reference panels
-                                            type: string
                                           panelConfig:
                                             additionalProperties: true
                                             type: object
                                             properties: {}
                                           panelIndex:
-                                            type: string
-                                          panelRefName:
-                                            type: string
-                                          title:
-                                            description: The title of the panel
                                             type: string
                                           type:
                                             description: The embeddable type
@@ -8287,20 +8239,12 @@ paths:
                                 required:
                                   - x
                                   - 'y'
-                              id:
-                                description: The saved object id for by reference panels
-                                type: string
                               panelConfig:
                                 additionalProperties: true
                                 type: object
                                 properties: {}
                               panelIndex:
                                 description: The unique ID of the panel.
-                                type: string
-                              panelRefName:
-                                type: string
-                              title:
-                                description: The title of the panel
                                 type: string
                               type:
                                 description: The embeddable type
@@ -8365,20 +8309,12 @@ paths:
                                       required:
                                         - x
                                         - 'y'
-                                    id:
-                                      description: The saved object id for by reference panels
-                                      type: string
                                     panelConfig:
                                       additionalProperties: true
                                       type: object
                                       properties: {}
                                     panelIndex:
                                       description: The unique ID of the panel.
-                                      type: string
-                                    panelRefName:
-                                      type: string
-                                    title:
-                                      description: The title of the panel
                                       type: string
                                     type:
                                       description: The embeddable type
@@ -8744,19 +8680,11 @@ paths:
                                         - x
                                         - 'y'
                                         - i
-                                    id:
-                                      description: The saved object id for by reference panels
-                                      type: string
                                     panelConfig:
                                       additionalProperties: true
                                       type: object
                                       properties: {}
                                     panelIndex:
-                                      type: string
-                                    panelRefName:
-                                      type: string
-                                    title:
-                                      description: The title of the panel
                                       type: string
                                     type:
                                       description: The embeddable type
@@ -8820,19 +8748,11 @@ paths:
                                               - x
                                               - 'y'
                                               - i
-                                          id:
-                                            description: The saved object id for by reference panels
-                                            type: string
                                           panelConfig:
                                             additionalProperties: true
                                             type: object
                                             properties: {}
                                           panelIndex:
-                                            type: string
-                                          panelRefName:
-                                            type: string
-                                          title:
-                                            description: The title of the panel
                                             type: string
                                           type:
                                             description: The embeddable type

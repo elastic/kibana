@@ -72,12 +72,7 @@ const transformPanel = (panel: DashboardPanel): DashboardPanelMap[string] => {
   return {
     type: panel.type,
     gridData: panel.gridData,
-    panelRefName: panel.panelRefName,
-    explicitInput: {
-      ...(panel.id !== undefined && { savedObjectId: panel.id }),
-      ...(panel.title !== undefined && { title: panel.title }),
-      ...panel.panelConfig,
-    },
+    explicitInput: panel.panelConfig,
     version: panel.version,
   };
 };
@@ -94,8 +89,6 @@ export const convertPanelSectionMapsToPanelsArray = (
     panelsInSections[sectionId] = { ...omit(sectionState, 'id'), panels: [] };
   });
   Object.entries(panels).forEach(([panelId, panelState]) => {
-    const savedObjectId = (panelState.explicitInput as { savedObjectId?: string }).savedObjectId;
-    const title = (panelState.explicitInput as { title?: string }).title;
     const { sectionId, ...gridData } = panelState.gridData; // drop section ID
     const convertedPanelState = {
       /**
@@ -108,10 +101,7 @@ export const convertPanelSectionMapsToPanelsArray = (
       type: panelState.type,
       gridData,
       panelIndex: panelId,
-      panelConfig: omit(panelState.explicitInput, ['id', 'savedObjectId', 'title']),
-      ...(title !== undefined && { title }),
-      ...(savedObjectId !== undefined && { id: savedObjectId }),
-      ...(panelState.panelRefName !== undefined && { panelRefName: panelState.panelRefName }),
+      panelConfig: panelState.explicitInput,
     };
 
     if (sectionId) {

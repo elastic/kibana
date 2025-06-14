@@ -92,12 +92,13 @@ describe('dashboardAttributesOut', () => {
       },
       panels: [
         {
-          panelConfig: { enhancements: {} },
+          panelConfig: {
+            enhancements: {},
+            savedObjectId: '1',
+            title: 'title1',
+          },
           gridData: { x: 0, y: 0, w: 10, h: 10, i: '1' },
-          id: '1',
           panelIndex: '1',
-          panelRefName: 'ref1',
-          title: 'title1',
           type: 'type1',
           version: '2',
         },
@@ -179,6 +180,8 @@ describe('dashboardAttributesOut', () => {
         {
           panelConfig: {
             enhancements: {},
+            savedObjectId: '1',
+            title: 'title1',
           },
           gridData: {
             x: 0,
@@ -187,10 +190,7 @@ describe('dashboardAttributesOut', () => {
             h: 10,
             i: '1',
           },
-          id: '1',
           panelIndex: '1',
-          panelRefName: 'ref1',
-          title: 'title1',
           type: 'type1',
           version: '2',
         },
@@ -243,11 +243,12 @@ describe('itemAttrsToSavedObject', () => {
       panels: [
         {
           gridData: { x: 0, y: 0, w: 10, h: 10, i: '1' },
-          id: '1',
-          panelConfig: { enhancements: {} },
+          panelConfig: {
+            enhancements: {},
+            savedObjectId: '1',
+            title: 'title1',
+          },
           panelIndex: '1',
-          panelRefName: 'ref1',
-          title: 'title1',
           type: 'type1',
           version: '2',
         },
@@ -276,7 +277,7 @@ describe('itemAttrsToSavedObject', () => {
             "searchSourceJSON": "{\\"query\\":{\\"query\\":\\"test\\",\\"language\\":\\"KQL\\"}}",
           },
           "optionsJSON": "{\\"hidePanelTitles\\":true,\\"useMargins\\":false,\\"syncColors\\":false,\\"syncTooltips\\":false,\\"syncCursor\\":false}",
-          "panelsJSON": "[{\\"id\\":\\"1\\",\\"panelRefName\\":\\"ref1\\",\\"title\\":\\"title1\\",\\"type\\":\\"type1\\",\\"version\\":\\"2\\",\\"embeddableConfig\\":{\\"enhancements\\":{}},\\"panelIndex\\":\\"1\\",\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":10,\\"h\\":10,\\"i\\":\\"1\\"}}]",
+          "panelsJSON": "[{\\"type\\":\\"type1\\",\\"version\\":\\"2\\",\\"embeddableConfig\\":{\\"enhancements\\":{},\\"savedObjectId\\":\\"1\\",\\"title\\":\\"title1\\"},\\"panelIndex\\":\\"1\\",\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":10,\\"h\\":10,\\"i\\":\\"1\\"}}]",
           "refreshInterval": Object {
             "pause": true,
             "value": 1000,
@@ -384,12 +385,13 @@ describe('savedObjectToItem', () => {
         timeRestore: true,
         panels: [
           {
-            panelConfig: { enhancements: {} },
+            panelConfig: {
+              enhancements: {},
+              savedObjectId: '1',
+              title: 'title1',
+            },
             gridData: { x: 0, y: 0, w: 10, h: 10, i: '1' },
-            id: '1',
             panelIndex: '1',
-            panelRefName: 'ref1',
-            title: 'title1',
             type: 'type1',
             version: '2',
           },

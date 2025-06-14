@@ -46,11 +46,12 @@ function transformPanelProperties({
   const { sectionId, ...rest } = gridData; // drop section ID, if it exists
   return {
     gridData: rest,
-    id,
-    panelConfig: embeddableConfig,
+    panelConfig: {
+      ...embeddableConfig,
+      ...(id ? { savedObjectId: id } : {}),
+      ...(title ? { title } : {}),
+    },
     panelIndex,
-    panelRefName,
-    title,
     type,
     version,
   };

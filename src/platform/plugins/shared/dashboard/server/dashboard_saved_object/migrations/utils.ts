@@ -13,7 +13,7 @@ import type { DashboardPanelState } from '../../../common';
 
 export function convertSavedDashboardPanelToPanelState<PanelState = object>(
   savedDashboardPanel: SavedDashboardPanel
-): DashboardPanelState<PanelState> {
+): DashboardPanelState<PanelState> & { panelRefName?: string } {
   return {
     type: savedDashboardPanel.type,
     gridData: savedDashboardPanel.gridData,
@@ -29,7 +29,7 @@ export function convertSavedDashboardPanelToPanelState<PanelState = object>(
 
 export function convertPanelStateToSavedDashboardPanel(
   panelId: string,
-  panelState: DashboardPanelState
+  panelState: DashboardPanelState & { panelRefName?: string }
 ): SavedDashboardPanel {
   const savedObjectId = (panelState.explicitInput as { savedObjectId?: string }).savedObjectId;
   const title = (panelState.explicitInput as { title?: string }).title;

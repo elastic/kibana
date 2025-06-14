@@ -7508,23 +7508,12 @@
                                         ],
                                         "type": "object"
                                       },
-                                      "id": {
-                                        "description": "The saved object id for by reference panels",
-                                        "type": "string"
-                                      },
                                       "panelConfig": {
                                         "additionalProperties": true,
                                         "properties": {},
                                         "type": "object"
                                       },
                                       "panelIndex": {
-                                        "type": "string"
-                                      },
-                                      "panelRefName": {
-                                        "type": "string"
-                                      },
-                                      "title": {
-                                        "description": "The title of the panel",
                                         "type": "string"
                                       },
                                       "type": {
@@ -7608,23 +7597,12 @@
                                               ],
                                               "type": "object"
                                             },
-                                            "id": {
-                                              "description": "The saved object id for by reference panels",
-                                              "type": "string"
-                                            },
                                             "panelConfig": {
                                               "additionalProperties": true,
                                               "properties": {},
                                               "type": "object"
                                             },
                                             "panelIndex": {
-                                              "type": "string"
-                                            },
-                                            "panelRefName": {
-                                              "type": "string"
-                                            },
-                                            "title": {
-                                              "description": "The title of the panel",
                                               "type": "string"
                                             },
                                             "type": {
@@ -8262,10 +8240,6 @@
                                   ],
                                   "type": "object"
                                 },
-                                "id": {
-                                  "description": "The saved object id for by reference panels",
-                                  "type": "string"
-                                },
                                 "panelConfig": {
                                   "additionalProperties": true,
                                   "properties": {},
@@ -8273,13 +8247,6 @@
                                 },
                                 "panelIndex": {
                                   "description": "The unique ID of the panel.",
-                                  "type": "string"
-                                },
-                                "panelRefName": {
-                                  "type": "string"
-                                },
-                                "title": {
-                                  "description": "The title of the panel",
                                   "type": "string"
                                 },
                                 "type": {
@@ -8364,10 +8331,6 @@
                                         ],
                                         "type": "object"
                                       },
-                                      "id": {
-                                        "description": "The saved object id for by reference panels",
-                                        "type": "string"
-                                      },
                                       "panelConfig": {
                                         "additionalProperties": true,
                                         "properties": {},
@@ -8375,13 +8338,6 @@
                                       },
                                       "panelIndex": {
                                         "description": "The unique ID of the panel.",
-                                        "type": "string"
-                                      },
-                                      "panelRefName": {
-                                        "type": "string"
-                                      },
-                                      "title": {
-                                        "description": "The title of the panel",
                                         "type": "string"
                                       },
                                       "type": {
@@ -8901,23 +8857,12 @@
                                         ],
                                         "type": "object"
                                       },
-                                      "id": {
-                                        "description": "The saved object id for by reference panels",
-                                        "type": "string"
-                                      },
                                       "panelConfig": {
                                         "additionalProperties": true,
                                         "properties": {},
                                         "type": "object"
                                       },
                                       "panelIndex": {
-                                        "type": "string"
-                                      },
-                                      "panelRefName": {
-                                        "type": "string"
-                                      },
-                                      "title": {
-                                        "description": "The title of the panel",
                                         "type": "string"
                                       },
                                       "type": {
@@ -9001,23 +8946,12 @@
                                               ],
                                               "type": "object"
                                             },
-                                            "id": {
-                                              "description": "The saved object id for by reference panels",
-                                              "type": "string"
-                                            },
                                             "panelConfig": {
                                               "additionalProperties": true,
                                               "properties": {},
                                               "type": "object"
                                             },
                                             "panelIndex": {
-                                              "type": "string"
-                                            },
-                                            "panelRefName": {
-                                              "type": "string"
-                                            },
-                                            "title": {
-                                              "description": "The title of the panel",
                                               "type": "string"
                                             },
                                             "type": {
@@ -9627,10 +9561,6 @@
                                   ],
                                   "type": "object"
                                 },
-                                "id": {
-                                  "description": "The saved object id for by reference panels",
-                                  "type": "string"
-                                },
                                 "panelConfig": {
                                   "additionalProperties": true,
                                   "properties": {},
@@ -9638,13 +9568,6 @@
                                 },
                                 "panelIndex": {
                                   "description": "The unique ID of the panel.",
-                                  "type": "string"
-                                },
-                                "panelRefName": {
-                                  "type": "string"
-                                },
-                                "title": {
-                                  "description": "The title of the panel",
                                   "type": "string"
                                 },
                                 "type": {
@@ -9729,10 +9652,6 @@
                                         ],
                                         "type": "object"
                                       },
-                                      "id": {
-                                        "description": "The saved object id for by reference panels",
-                                        "type": "string"
-                                      },
                                       "panelConfig": {
                                         "additionalProperties": true,
                                         "properties": {},
@@ -9740,13 +9659,6 @@
                                       },
                                       "panelIndex": {
                                         "description": "The unique ID of the panel.",
-                                        "type": "string"
-                                      },
-                                      "panelRefName": {
-                                        "type": "string"
-                                      },
-                                      "title": {
-                                        "description": "The title of the panel",
                                         "type": "string"
                                       },
                                       "type": {
@@ -10260,23 +10172,12 @@
                                         ],
                                         "type": "object"
                                       },
-                                      "id": {
-                                        "description": "The saved object id for by reference panels",
-                                        "type": "string"
-                                      },
                                       "panelConfig": {
                                         "additionalProperties": true,
                                         "properties": {},
                                         "type": "object"
                                       },
                                       "panelIndex": {
-                                        "type": "string"
-                                      },
-                                      "panelRefName": {
-                                        "type": "string"
-                                      },
-                                      "title": {
-                                        "description": "The title of the panel",
                                         "type": "string"
                                       },
                                       "type": {
@@ -10360,23 +10261,12 @@
                                               ],
                                               "type": "object"
                                             },
-                                            "id": {
-                                              "description": "The saved object id for by reference panels",
-                                              "type": "string"
-                                            },
                                             "panelConfig": {
                                               "additionalProperties": true,
                                               "properties": {},
                                               "type": "object"
                                             },
                                             "panelIndex": {
-                                              "type": "string"
-                                            },
-                                            "panelRefName": {
-                                              "type": "string"
-                                            },
-                                            "title": {
-                                              "description": "The title of the panel",
                                               "type": "string"
                                             },
                                             "type": {
