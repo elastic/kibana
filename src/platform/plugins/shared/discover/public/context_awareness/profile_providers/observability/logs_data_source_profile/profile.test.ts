@@ -269,7 +269,7 @@ describe('isLogsDataSourceContext', () => {
     logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
   };
 
-  it('should return true for context with DataSourceCategory.Logs with logOverviewContext$', () => {
+  it('should return true for context with DataSourceCategory.Logs and logOverviewContext$', () => {
     expect(isLogsDataSourceContext(logsDataSourceContext)).toBe(true);
   });
 
@@ -279,7 +279,7 @@ describe('isLogsDataSourceContext', () => {
     ).toBe(false);
   });
 
-  it('should return false for contexts without logOverviewContext$', () => {
+  it('should return false for context without logOverviewContext$', () => {
     const { logOverviewContext$, ...restContext } = logsDataSourceContext;
     expect(isLogsDataSourceContext(restContext)).toBe(false);
   });
