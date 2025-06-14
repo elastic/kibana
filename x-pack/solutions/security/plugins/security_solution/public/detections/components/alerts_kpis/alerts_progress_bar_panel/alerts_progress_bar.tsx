@@ -15,20 +15,20 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { ProgressBarRow } from './alerts_progress_bar_row';
 import type { AlertsProgressBarData, GroupBySelection } from './types';
 import type { AddFilterProps } from '../common/types';
 import { getAggregateData } from './helpers';
 import * as i18n from './translations';
 import {
-  SecurityCellActionType,
   CellActionsMode,
-  SecurityCellActionsTrigger,
   SecurityCellActions,
+  SecurityCellActionsTrigger,
+  SecurityCellActionType,
 } from '../../../../common/components/cell_actions';
 import { getSourcererScopeId } from '../../../../helpers';
 
@@ -57,47 +57,22 @@ const EmptyAction = styled.div`
   padding-left: ${({ theme }) => theme.eui.euiSizeL};
 `;
 
-/**
- * Individual progress bar per row
- */
-const ProgressBarRow: React.FC<{ item: AlertsProgressBarData }> = ({ item }) => {
-  const { euiTheme } = useEuiTheme();
-  const color = useMemo(
-    () =>
-      euiTheme.themeName === 'EUI_THEME_BOREALIS'
-        ? euiTheme.colors.vis.euiColorVis6
-        : euiTheme.colors.vis.euiColorVis9,
-    [euiTheme]
-  );
-
-  return (
-    <EuiProgress
-      valueText={
-        <EuiText size="xs" color="default">
-          <strong>{item.percentageLabel}</strong>
-        </EuiText>
-      }
-      max={1}
-      color={color}
-      size="s"
-      value={item.percentage}
-      label={
-        item.key === 'Other' ? (
-          item.label
-        ) : (
-          <EuiText size="xs" className="eui-textTruncate">
-            {item.key}
-          </EuiText>
-        )
-      }
-    />
-  );
-};
-
 export interface AlertsProcessBarProps {
+  /**
+   * Alerts data
+   */
   data: AlertsProgressBarData[];
+  /**
+   * If true, component renders an EuiProgressBar
+   */
   isLoading: boolean;
+  /**
+   * Callback to allow the charts to add filters to the SiemSearchBar
+   */
   addFilter?: ({ field, value, negate }: AddFilterProps) => void;
+  /**
+   * Field the alerts data is grouped by
+   */
   groupBySelection: GroupBySelection;
 }
 

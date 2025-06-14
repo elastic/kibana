@@ -98,7 +98,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
         type: ActionType.Refreshed,
         timestamp: expect.any(moment),
       },
-      value: `AVGAntivirus /Applications/AVGAntivirus.app/Contents/Backend/services/com.avg.activity${
+      value: `/Applications/AVGAntivirus.app/Contents/Backend/services/com.avg.activity${
         signerValue ? ` ${signerValue}` : ''
       }`,
       remediation: {
@@ -106,7 +106,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
           {
             list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
             name: 'AVGAntivirus',
-            description: 'Suggested by Security Workflow Insights',
+            description: 'Suggested by Automatic Troubleshooting',
             entries: [
               {
                 field: 'process.executable.caseless',

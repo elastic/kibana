@@ -7,7 +7,7 @@
 
 import { noop } from 'lodash/fp';
 import type { Dispatch } from 'react';
-import React, { useEffect, useReducer, createContext, useContext } from 'react';
+import React, { useEffect, useReducer, createContext, useContext, useMemo } from 'react';
 
 import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 import { useSignalIndex } from '../../containers/detection_engine/alerts/use_signal_index';
@@ -353,19 +353,38 @@ export const useUserInfo = (): State => {
     signalIndexMappingOutdated,
   ]);
 
-  return {
-    loading,
-    isSignalIndexExists,
-    isAuthenticated,
-    hasEncryptionKey,
-    canUserCRUD,
-    canUserREAD,
-    hasIndexManage,
-    hasIndexMaintenance,
-    hasIndexWrite,
-    hasIndexRead,
-    hasIndexUpdateDelete,
-    signalIndexName,
-    signalIndexMappingOutdated,
-  };
+  const userInfo = useMemo(
+    () => ({
+      loading,
+      isSignalIndexExists,
+      isAuthenticated,
+      hasEncryptionKey,
+      canUserCRUD,
+      canUserREAD,
+      hasIndexManage,
+      hasIndexMaintenance,
+      hasIndexWrite,
+      hasIndexRead,
+      hasIndexUpdateDelete,
+      signalIndexName,
+      signalIndexMappingOutdated,
+    }),
+    [
+      canUserCRUD,
+      canUserREAD,
+      hasEncryptionKey,
+      hasIndexMaintenance,
+      hasIndexManage,
+      hasIndexRead,
+      hasIndexUpdateDelete,
+      hasIndexWrite,
+      isAuthenticated,
+      isSignalIndexExists,
+      loading,
+      signalIndexMappingOutdated,
+      signalIndexName,
+    ]
+  );
+
+  return userInfo;
 };

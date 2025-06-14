@@ -99,8 +99,14 @@ const Template = (args: RulesListProps) => {
   return <RulesList {...args} />;
 };
 
-export const Empty = Template.bind({});
+export const Empty = {
+  render: Template,
+};
 
-export const WithRules = Template.bind({});
+export const WithRules = {
+  render: Template,
+};
 
-export const WithPaginatedRules = Template.bind({});
+export const WithPaginatedRules = {
+  render: Template,
+};

@@ -6,7 +6,7 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import { tasks } from './tasks';
 import { SERVICE_NAME, SERVICE_ENVIRONMENT, AT_TIMESTAMP } from '../../../../common/es_fields/apm';
 import type { IndicesStatsResponse } from '../telemetry_client';
@@ -920,6 +920,10 @@ describe('data telemetry collection tasks', () => {
                   {
                     key: 'opentelemetry/java/elastic',
                     services: { value: 6 },
+                  },
+                  {
+                    key: 'opentelemetry/nodejs/elastic',
+                    services: { value: 7 },
                   },
                 ],
               },

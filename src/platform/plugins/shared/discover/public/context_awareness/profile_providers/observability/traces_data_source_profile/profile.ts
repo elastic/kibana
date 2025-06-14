@@ -7,16 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
-import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
-import { getDocViewer } from './accessors/get_doc_viewer';
+import { TRACES_PRODUCT_FEATURE_ID } from '../../../../../common/constants';
+import {
+  SolutionType,
+  DataSourceCategory,
+  type DataSourceProfileProvider,
+} from '../../../profiles';
+import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
+import type { ProfileProviderServices } from '../../profile_provider_services';
 import { getCellRenderers } from './accessors';
 
-export const createTracesDataSourceProfileProvider = (): DataSourceProfileProvider => ({
-  profileId: 'traces-data-source-profile',
+const OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID = 'observability-traces-data-source-profile';
+
+export const createTracesDataSourceProfileProvider = ({
+  tracesContextService,
+}: ProfileProviderServices): DataSourceProfileProvider => ({
+  profileId: OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID,
   isExperimental: true,
+  restrictedToProductFeature: TRACES_PRODUCT_FEATURE_ID,
   profile: {
-    getDefaultAppState: () => () => ({
+    getDefaultAppState: (prev) => (params) => ({
+      ...prev(params),
       columns: [
         {
           name: '@timestamp',
@@ -28,13 +39,12 @@ export const createTracesDataSourceProfileProvider = (): DataSourceProfileProvid
       ],
       rowHeight: 5,
     }),
-    getDocViewer,
     getCellRenderers,
   },
-  resolve: ({ dataSource }) => {
+  resolve: (params) => {
     if (
-      isDataSourceType(dataSource, DataSourceType.DataView) &&
-      dataSource.dataViewId.includes('apm_static_data_view_id')
+      params.rootContext.solutionType === SolutionType.Observability &&
+      tracesContextService.containsTracesIndexPattern(extractIndexPatternFrom(params))
     ) {
       return {
         isMatch: true,

@@ -48,6 +48,8 @@ import {
   EntityDetailsLeftPanelTab,
 } from '../../../entity_details/shared/components/left_panel/left_panel_header';
 
+const ORDER = ['Low', 'Medium', 'High', 'Critical'];
+
 interface AlertCountInsightProps {
   /**
    * The name of the entity to filter the alerts by.
@@ -97,7 +99,12 @@ export const getFormattedAlertStats = (
     key: capitalize(key),
     count,
     color: getSeverityColor(key, euiTheme),
-  }));
+  })).sort((a, b) => {
+    const aIndex = ORDER.indexOf(a.key);
+    const bIndex = ORDER.indexOf(b.key);
+    return aIndex - bIndex;
+  });
+
   return alertStats;
 };
 
@@ -166,7 +173,8 @@ export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
           content={
             <FormattedMessage
               id="xpack.securitySolution.flyout.insights.alert.alertCountTooltip"
-              defaultMessage="Opens list of alerts in a new flyout"
+              defaultMessage="Opens {count, plural, one {this alert} other {these alerts}} in a new flyout"
+              values={{ count: totalAlertCount }}
             />
           }
         >

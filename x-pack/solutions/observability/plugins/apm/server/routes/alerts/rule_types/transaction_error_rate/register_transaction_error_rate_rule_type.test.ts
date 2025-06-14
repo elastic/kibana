@@ -131,6 +131,15 @@ describe('Transaction error rate alert', () => {
       context: {
         alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-foo',
+        grouping: {
+          service: {
+            environment: 'env-foo',
+            name: 'foo',
+          },
+          transaction: {
+            type: 'type-foo',
+          },
+        },
         interval: '5 mins',
         reason:
           'Failed transactions is 10% in the last 5 mins for service: foo, env: env-foo, type: type-foo. Alert when > 10%.',
@@ -244,6 +253,16 @@ describe('Transaction error rate alert', () => {
       context: {
         alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-foo',
+        grouping: {
+          service: {
+            environment: 'env-foo',
+            name: 'foo',
+          },
+          transaction: {
+            type: 'type-foo',
+            name: 'tx-name-foo',
+          },
+        },
         interval: '5 mins',
         reason:
           'Failed transactions is 10% in the last 5 mins for service: foo, env: env-foo, type: type-foo, name: tx-name-foo. Alert when > 10%.',
@@ -357,6 +376,15 @@ describe('Transaction error rate alert', () => {
       context: {
         alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-foo',
+        grouping: {
+          service: {
+            environment: 'env-foo',
+            name: 'foo',
+          },
+          transaction: {
+            type: 'type-foo',
+          },
+        },
         interval: '5 mins',
         reason:
           'Failed transactions is 10% in the last 5 mins for service: foo, env: env-foo, type: type-foo. Alert when > 10%.',
@@ -470,6 +498,15 @@ describe('Transaction error rate alert', () => {
       context: {
         alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'Not defined',
+        grouping: {
+          service: {
+            environment: 'ENVIRONMENT_NOT_DEFINED',
+            name: 'foo',
+          },
+          transaction: {
+            type: 'type-foo',
+          },
+        },
         interval: '5 mins',
         reason:
           'Failed transactions is 10% in the last 5 mins for service: foo, env: Not defined, type: type-foo. Alert when > 10%.',
@@ -479,7 +516,7 @@ describe('Transaction error rate alert', () => {
         transactionType: 'type-foo',
         triggerValue: '10',
         viewInAppUrl:
-          'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=ENVIRONMENT_ALL',
+          'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=ENVIRONMENT_NOT_DEFINED',
       },
       id: 'foo_ENVIRONMENT_NOT_DEFINED_type-foo',
       payload: {
@@ -571,6 +608,15 @@ describe('Transaction error rate alert', () => {
       context: {
         alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-bar',
+        grouping: {
+          service: {
+            environment: 'env-bar',
+            name: 'bar',
+          },
+          transaction: {
+            type: 'type-bar',
+          },
+        },
         interval: '5 mins',
         reason:
           'Failed transactions is 10% in the last 5 mins for service: bar, env: env-bar, type: type-bar. Alert when > 10%.',
@@ -594,6 +640,137 @@ describe('Transaction error rate alert', () => {
         'transaction.name': undefined,
         'transaction.type': 'type-bar',
       },
+    });
+  });
+
+  it('sends the recovered alerts with their context', async () => {
+    const { services, dependencies, executor } = createRuleTypeMocks();
+
+    registerTransactionErrorRateRuleType({
+      ...dependencies,
+    });
+    services.scopedClusterClient.asCurrentUser.search.mockResponse({
+      hits: {
+        hits: [],
+        total: {
+          relation: 'eq',
+          value: 1,
+        },
+      },
+      aggregations: {
+        series: {
+          buckets: [],
+        },
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        skipped: 0,
+        successful: 1,
+        total: 1,
+      },
+    });
+    services.alertsClient.getRecoveredAlerts.mockReturnValue([
+      {
+        alert: {
+          getId: jest.fn().mockReturnValue('test-id'),
+          getUuid: jest.fn().mockReturnValue('test-uuid'),
+          scheduledExecutionOptions: undefined,
+          meta: [],
+          state: [],
+          context: {},
+          id: 'synthtrace-high-cardinality-0_Synthtrace: many_errors_request',
+          alertAsData: undefined,
+        },
+        hit: {
+          'processor.event': 'transaction',
+          'kibana.alert.evaluation.value': 100,
+          'kibana.alert.evaluation.threshold': 30,
+          'kibana.alert.reason':
+            'Failed transactions is 100% in the last 5 days for service: synthtrace-high-cardinality-0, env: Synthtrace: many_errors, type: request. Alert when > 30%.',
+          'agent.name': 'java',
+          labels: [],
+          'service.environment': 'Synthtrace: many_errors',
+          'service.name': 'synthtrace-high-cardinality-0',
+          'transaction.type': 'request',
+          'kibana.alert.rule.category': 'Failed transaction rate threshold',
+          'kibana.alert.rule.consumer': 'alerts',
+          'kibana.alert.rule.execution.uuid': '3cf39cc5-b538-492e-b45d-35b01b5f56c3',
+          'kibana.alert.rule.name': 'Failed transaction rate threshold rule',
+          'kibana.alert.rule.parameters': {
+            groupBy: [
+              'service.name',
+              'service.environment',
+              'transaction.type',
+              'transaction.name',
+            ],
+          },
+          'kibana.alert.rule.producer': 'apm',
+          'kibana.alert.rule.revision': 1,
+          'kibana.alert.rule.rule_type_id': 'apm.transaction_error_rate',
+          'kibana.alert.rule.tags': [],
+          'kibana.alert.rule.uuid': '7afe1f67-4730-46ed-8cf3-9d0671eca409',
+          'kibana.space_ids': [],
+          '@timestamp': '2025-02-20T11:21:08.787Z',
+          'event.action': 'active',
+          'event.kind': 'signal',
+          'kibana.alert.rule.execution.timestamp': '2025-02-20T11:21:08.787Z',
+          'kibana.alert.action_group': 'threshold_met',
+          'kibana.alert.flapping': false,
+          'kibana.alert.flapping_history': [],
+          'kibana.alert.instance.id':
+            'synthtrace-high-cardinality-0_Synthtrace: many_errors_request',
+          'kibana.alert.maintenance_window_ids': [],
+          'kibana.alert.consecutive_matches': 2,
+          'kibana.alert.status': 'active',
+          'kibana.alert.uuid': 'a1c070ea-5bba-4bbb-8564-8f0e545ccb24',
+          'kibana.alert.workflow_status': 'open',
+          'kibana.alert.duration.us': 21018000,
+          'kibana.alert.start': '2025-02-20T11:20:47.769Z',
+          'kibana.alert.time_range': [],
+          'kibana.version': '9.1.0',
+          tags: [],
+          'kibana.alert.previous_action_group': 'threshold_met',
+        },
+      },
+    ]);
+
+    const params = {
+      threshold: 10,
+      windowSize: 5,
+      windowUnit: 'm',
+    };
+
+    await executor({ params });
+
+    expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
+
+    expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
+      context: {
+        alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
+        environment: 'Synthtrace: many_errors',
+        grouping: {
+          service: {
+            environment: 'Synthtrace: many_errors',
+            name: 'synthtrace-high-cardinality-0',
+          },
+          transaction: {
+            type: 'request',
+          },
+        },
+        interval: '5 mins',
+        reason:
+          'Failed transactions is 100% in the last 5 days for service: synthtrace-high-cardinality-0, env: Synthtrace: many_errors, type: request. Alert when > 30%.',
+        serviceName: 'synthtrace-high-cardinality-0',
+        threshold: 10,
+        transactionName: undefined,
+        transactionType: 'request',
+        triggerValue: '100',
+        viewInAppUrl:
+          'http://localhost:5601/eyr/app/apm/services/synthtrace-high-cardinality-0?transactionType=request&environment=Synthtrace%3A%20many_errors',
+      },
+      id: 'test-id',
     });
   });
 });

@@ -1,4 +1,0 @@
-[[alerting-apis]]
-== Alerting APIs
-
-For the latest details, refer to {api-kibana}/group/endpoint-alerting[alerting APIs].

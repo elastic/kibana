@@ -17,7 +17,7 @@ import { OPEN_FILE_UPLOAD_LITE_TRIGGER } from '@kbn/file-upload-common';
 import { i18n } from '@kbn/i18n';
 
 import {
-  ENTERPRISE_SEARCH_CONTENT_PLUGIN,
+  ENTERPRISE_SEARCH_DATA_PLUGIN,
   ENTERPRISE_SEARCH_ELASTICSEARCH_URL,
   CRAWLER,
 } from '../../../../../common/constants';
@@ -31,8 +31,6 @@ import languageClientsLogo from '../../../../assets/images/search_language_clien
 
 import { IngestionCard } from '../../../enterprise_search_content/components/shared/ingestion_card/ingestion_card';
 import { NEW_INDEX_SELECT_CONNECTOR_PATH } from '../../../enterprise_search_content/routes';
-
-import { ConnectorIcon } from '../../../shared/icons/connector';
 
 import { GithubIcon } from '../../../shared/icons/github_icon';
 import { KibanaLogic } from '../../../shared/kibana';
@@ -111,7 +109,7 @@ export const IngestionSelector: React.FC = () => {
                   defaultMessage: 'Create a connector',
                 }
               )}
-              buttonIcon={ConnectorIcon}
+              buttonIcon="plugs"
               description={i18n.translate(
                 'xpack.enterpriseSearch.ingestSelector.method.connectors.description',
                 {
@@ -120,7 +118,7 @@ export const IngestionSelector: React.FC = () => {
                 }
               )}
               href={generatePath(
-                ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + NEW_INDEX_SELECT_CONNECTOR_PATH
+                ENTERPRISE_SEARCH_DATA_PLUGIN.URL + NEW_INDEX_SELECT_CONNECTOR_PATH
               )}
               logo={connectorLogo}
               title={i18n.translate('xpack.enterpriseSearch.ingestSelector.method.connectors', {

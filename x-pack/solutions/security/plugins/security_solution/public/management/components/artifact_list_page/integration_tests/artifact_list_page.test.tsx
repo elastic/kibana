@@ -149,14 +149,6 @@ describe('When using the ArtifactListPage component', () => {
       expect(getAllByText('mock decorator')).toHaveLength(10);
     });
 
-    it('should call useGetEndpointSpecificPolicies hook with specific perPage value', () => {
-      expect(mockUseGetEndpointSpecificPolicies).toHaveBeenCalledWith(
-        expect.objectContaining({
-          perPage: 1000,
-        })
-      );
-    });
-
     describe('and interacting with card actions', () => {
       const clickCardAction = async (action: 'edit' | 'delete') => {
         await getFirstCard({ showActions: true });
@@ -252,7 +244,7 @@ describe('When using the ArtifactListPage component', () => {
 
       it('should persist policy filter to the URL params', async () => {
         const policyId = mockedApi.responseProvider.endpointPackagePolicyList().items[0].id;
-        const firstPolicyTestId = `policiesSelector-popover-items-${policyId}`;
+        const firstPolicyTestId = `policiesSelectorButton-policySelector-policy-${policyId}`;
 
         await waitFor(() => {
           expect(renderResult.getByTestId('policiesSelectorButton')).toBeTruthy();

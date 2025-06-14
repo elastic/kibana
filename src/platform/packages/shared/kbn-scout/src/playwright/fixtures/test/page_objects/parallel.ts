@@ -8,7 +8,7 @@
  */
 
 import { PageObjects, createCorePageObjects } from '../../../page_objects';
-import { ScoutSpaceParallelFixture } from '../../worker';
+import { ScoutSpaceParallelFixture, ScoutTestConfig } from '../../worker';
 import { scoutPageParallelFixture } from '../scout_page';
 
 /**
@@ -23,11 +23,11 @@ export const pageObjectsParallelFixture = scoutPageParallelFixture.extend<
   {
     pageObjects: PageObjects;
   },
-  { scoutSpace: ScoutSpaceParallelFixture }
+  { scoutSpace: ScoutSpaceParallelFixture; config: ScoutTestConfig }
 >({
-  pageObjects: async ({ page, log, scoutSpace }, use) => {
-    const corePageObjects = createCorePageObjects(page);
-    log.serviceLoaded(`pageObjects:${scoutSpace.id}`);
+  pageObjects: async ({ page, config, log }, use) => {
+    const corePageObjects = createCorePageObjects({ page, config, log });
+    log.serviceLoaded(`pageObjects`);
     await use(corePageObjects);
   },
 });

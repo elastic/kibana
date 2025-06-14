@@ -16,7 +16,7 @@ import {
   UtilityBarSection,
   UtilityBarText,
 } from '../../../../common/components/utility_bar';
-import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
+import * as i18n from '../../../common/translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useRulesTableContext } from '../rules_table/rules_table/rules_table_context';
 import type { PaginationOptions } from '../../../rule_management/logic/types';

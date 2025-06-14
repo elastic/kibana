@@ -96,7 +96,7 @@ describe('math(resp, panel, series)', () => {
     expect(results[0]).toEqual({
       id: 'test╰┄►example-01',
       label: 'example-01',
-      color: 'rgb(255, 0, 0)',
+      color: '#ff0000',
       stack: false,
       seriesId: 'test',
       lines: { show: true, fill: 0, lineWidth: 1, steps: false },
@@ -154,7 +154,7 @@ describe('math(resp, panel, series)', () => {
     expect(results[0]).toEqual({
       id: 'test╰┄►example-01',
       label: 'example-01',
-      color: 'rgb(255, 0, 0)',
+      color: '#ff0000',
       stack: false,
       seriesId: 'test',
       lines: { show: true, fill: 0, lineWidth: 1, steps: false },
@@ -181,7 +181,7 @@ describe('math(resp, panel, series)', () => {
     expect(results[0]).toEqual({
       id: 'test╰┄►example-01',
       label: 'example-01',
-      color: 'rgb(255, 0, 0)',
+      color: '#ff0000',
       stack: false,
       seriesId: 'test',
       lines: { show: true, fill: 0, lineWidth: 1, steps: false },
@@ -253,8 +253,8 @@ describe('math(resp, panel, series)', () => {
         series
       )(await mathAgg(resp, panel, series)((results) => results))([]);
     } catch (e) {
-      expect(e.message).toEqual(
-        'Failed to parse expression. Expected "*", "+", "-", "/", "<", "=", ">", end of input, or whitespace but "(" found.'
+      expect(e.message).toMatchInlineSnapshot(
+        `"Failed to parse expression. Expected \\"=\\", [*/], [+\\\\-], [<>], end of input, or whitespace but \\"(\\" found."`
       );
     }
   });

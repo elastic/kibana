@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { Meta, Story } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react';
 import type { ComponentType } from 'react';
 import React from 'react';
 import { Schema } from '.';
@@ -119,6 +119,6 @@ export default {
   ],
 };
 
-export const Example: Story = () => {
+export const Example: StoryFn = () => {
   return <Schema />;
 };

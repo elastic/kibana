@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 
 import { EuiFlexGroup } from '@elastic/eui';
 import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
@@ -19,28 +19,38 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props: Props) => (
+const Template: StoryFn<typeof Component> = (props: Props) => (
   <EuiFlexGroup>
     <Component {...props} />
   </EuiFlexGroup>
 );
 
-export const With7DaysRolling = Template.bind({});
-With7DaysRolling.args = { slo: buildSlo({ timeWindow: { duration: '7d', type: 'rolling' } }) };
-
-export const With30DaysRolling = Template.bind({});
-With30DaysRolling.args = { slo: buildSlo({ timeWindow: { duration: '30d', type: 'rolling' } }) };
-
-export const WithWeeklyCalendar = Template.bind({});
-WithWeeklyCalendar.args = {
-  slo: buildSlo({
-    timeWindow: { duration: '1w', type: 'calendarAligned' },
-  }),
+export const With7DaysRolling = {
+  render: Template,
+  args: { slo: buildSlo({ timeWindow: { duration: '7d', type: 'rolling' } }) },
 };
 
-export const WithMonthlyCalendar = Template.bind({});
-WithMonthlyCalendar.args = {
-  slo: buildSlo({
-    timeWindow: { duration: '1M', type: 'calendarAligned' },
-  }),
+export const With30DaysRolling = {
+  render: Template,
+  args: { slo: buildSlo({ timeWindow: { duration: '30d', type: 'rolling' } }) },
+};
+
+export const WithWeeklyCalendar = {
+  render: Template,
+
+  args: {
+    slo: buildSlo({
+      timeWindow: { duration: '1w', type: 'calendarAligned' },
+    }),
+  },
+};
+
+export const WithMonthlyCalendar = {
+  render: Template,
+
+  args: {
+    slo: buildSlo({
+      timeWindow: { duration: '1M', type: 'calendarAligned' },
+    }),
+  },
 };

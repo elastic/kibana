@@ -8,14 +8,14 @@
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { renderHook } from '@testing-library/react';
 
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+import { TestProviders } from '../../common/mock';
 import { useCasesFeatures } from '../../common/use_cases_features';
 
 import { useCasesColumnsConfiguration } from './use_cases_columns_configuration';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 import { CustomFieldTypes } from '../../../common/types/domain';
+import React from 'react';
 
 jest.mock('../../common/use_cases_features');
 jest.mock('../../containers/configure/use_get_case_configuration');
@@ -24,14 +24,12 @@ const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
 const useCasesFeaturesMock = useCasesFeatures as jest.Mock;
 
 describe('useCasesColumnsConfiguration ', () => {
-  let appMockRender: AppMockRenderer;
   const license = licensingMock.createLicense({
     license: { type: 'platinum' },
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer({ license });
     useCasesFeaturesMock.mockReturnValue({
       caseAssignmentAuthorized: true,
       isAlertsEnabled: true,
@@ -41,7 +39,7 @@ describe('useCasesColumnsConfiguration ', () => {
 
   it('returns all columns correctly', async () => {
     const { result } = renderHook(() => useCasesColumnsConfiguration(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: (props) => <TestProviders {...props} license={license} />,
     });
 
     expect(result.current).toMatchInlineSnapshot(`
@@ -129,7 +127,7 @@ describe('useCasesColumnsConfiguration ', () => {
     });
 
     const { result } = renderHook(() => useCasesColumnsConfiguration(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: (props) => <TestProviders {...props} license={license} />,
     });
 
     expect(result.current.assignees).toMatchInlineSnapshot(`
@@ -149,7 +147,7 @@ describe('useCasesColumnsConfiguration ', () => {
     });
 
     const { result } = renderHook(() => useCasesColumnsConfiguration(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: (props) => <TestProviders {...props} license={license} />,
     });
 
     expect(result.current.totalAlerts).toMatchInlineSnapshot(`
@@ -180,7 +178,7 @@ describe('useCasesColumnsConfiguration ', () => {
     }));
 
     const { result } = renderHook(() => useCasesColumnsConfiguration(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: (props) => <TestProviders {...props} license={license} />,
     });
 
     expect(result.current[textKey]).toEqual({

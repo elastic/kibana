@@ -9,11 +9,15 @@ import React, { useCallback, useMemo, useState } from 'react';
 
 import { EuiBasicTable, EuiBasicTableColumn, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import { TaskTypes } from '../../../common/types';
+import {
+  InferenceInferenceEndpointInfo,
+  InferenceTaskType,
+} from '@elastic/elasticsearch/lib/api/types';
+import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import * as i18n from '../../../common/translations';
 
 import { useTableData } from '../../hooks/use_table_data';
-import { FilterOptions, InferenceEndpointUI } from './types';
+import { FilterOptions } from './types';
 
 import { useAllInferenceEndpointsState } from '../../hooks/use_all_inference_endpoints_state';
 import { ServiceProviderFilter } from './filter/service_provider_filter';
@@ -39,7 +43,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
   const [showDeleteAction, setShowDeleteAction] = useState(false);
   const [showInferenceFlyout, setShowInferenceFlyout] = useState(false);
   const [selectedInferenceEndpoint, setSelectedInferenceEndpoint] = useState<
-    InferenceEndpointUI | undefined
+    InferenceInferenceEndpointInfo | undefined
   >(undefined);
   const [searchKey, setSearchKey] = React.useState('');
   const { queryParams, setQueryParams, filterOptions, setFilterOptions } =
@@ -56,17 +60,34 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
     [toasts]
   );
 
+  const uniqueProvidersAndTaskTypes = useMemo(() => {
+    return inferenceEndpoints.reduce(
+      (acc, { service, task_type: taskType }) => {
+        acc.providers.add(service as ServiceProviderKeys);
+        acc.taskTypes.add(taskType);
+        return acc;
+      },
+      {
+        providers: new Set<ServiceProviderKeys>(),
+        taskTypes: new Set<InferenceTaskType>(),
+      }
+    );
+  }, [inferenceEndpoints]);
+
   const onCancelDeleteModal = useCallback(() => {
     setSelectedInferenceEndpoint(undefined);
     setShowDeleteAction(false);
   }, []);
 
-  const displayDeleteActionitem = useCallback((selectedEndpoint: InferenceEndpointUI) => {
-    setSelectedInferenceEndpoint(selectedEndpoint);
-    setShowDeleteAction(true);
-  }, []);
+  const displayDeleteActionitem = useCallback(
+    (selectedEndpoint: InferenceInferenceEndpointInfo) => {
+      setSelectedInferenceEndpoint(selectedEndpoint);
+      setShowDeleteAction(true);
+    },
+    []
+  );
 
-  const displayInferenceFlyout = useCallback((selectedEndpoint: InferenceEndpointUI) => {
+  const displayInferenceFlyout = useCallback((selectedEndpoint: InferenceInferenceEndpointInfo) => {
     setShowInferenceFlyout(true);
     setSelectedInferenceEndpoint(selectedEndpoint);
   }, []);
@@ -90,15 +111,19 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
     searchKey
   );
 
-  const tableColumns = useMemo<Array<EuiBasicTableColumn<InferenceEndpointUI>>>(
+  const tableColumns = useMemo<Array<EuiBasicTableColumn<InferenceInferenceEndpointInfo>>>(
     () => [
       {
-        field: 'endpoint',
+        field: 'inference_id',
         name: i18n.ENDPOINT,
         'data-test-subj': 'endpointCell',
-        render: (endpoint: string, additionalInfo: InferenceEndpointUI) => {
-          if (endpoint) {
-            return <EndpointInfo inferenceId={endpoint} provider={additionalInfo.provider} />;
+
+        render: (
+          inferenceId: InferenceInferenceEndpointInfo['inference_id'],
+          endpointInfo: InferenceInferenceEndpointInfo
+        ) => {
+          if (inferenceId) {
+            return <EndpointInfo inferenceId={inferenceId} endpointInfo={endpointInfo} />;
           }
 
           return null;
@@ -107,12 +132,12 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
         width: '300px',
       },
       {
-        field: 'provider',
+        field: 'service',
         name: i18n.SERVICE_PROVIDER,
         'data-test-subj': 'providerCell',
-        render: (provider: InferenceAPIConfigResponse) => {
-          if (provider) {
-            return <ServiceProvider providerEndpoint={provider} />;
+        render: (service: ServiceProviderKeys, endpointInfo: InferenceInferenceEndpointInfo) => {
+          if (service) {
+            return <ServiceProvider service={service} endpointInfo={endpointInfo} />;
           }
 
           return null;
@@ -121,12 +146,12 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
         width: '285px',
       },
       {
-        field: 'type',
+        field: 'task_type',
         name: i18n.TASK_TYPE,
         'data-test-subj': 'typeCell',
-        render: (type: TaskTypes) => {
-          if (type) {
-            return <TaskType type={type} />;
+        render: (taskType: InferenceTaskType) => {
+          if (taskType) {
+            return <TaskType type={taskType} />;
           }
 
           return null;
@@ -149,7 +174,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
             description: i18n.ENDPOINT_COPY_ID_ACTION_LABEL,
             icon: 'copyClipboard',
             type: 'icon',
-            onClick: (item) => copyContent(item.endpoint),
+            onClick: (item) => copyContent(item.inference_id),
             'data-test-subj': 'inference-endpoints-action-copy-id-label',
           },
           {
@@ -157,10 +182,10 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
             description: i18n.ENDPOINT_DELETE_ACTION_LABEL,
             icon: 'trash',
             type: 'icon',
-            enabled: (item) => !isEndpointPreconfigured(item.endpoint),
+            enabled: (item) => !isEndpointPreconfigured(item.inference_id),
             onClick: (item) => displayDeleteActionitem(item),
             'data-test-subj': (item) =>
-              isEndpointPreconfigured(item.endpoint)
+              isEndpointPreconfigured(item.inference_id)
                 ? 'inferenceUIDeleteAction-preconfigured'
                 : 'inferenceUIDeleteAction-user-defined',
           },
@@ -200,11 +225,16 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
             <EuiFlexItem grow={false}>
               <ServiceProviderFilter
                 optionKeys={filterOptions.provider}
+                uniqueProviders={uniqueProvidersAndTaskTypes.providers}
                 onChange={onFilterChangedCallback}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <TaskTypeFilter optionKeys={filterOptions.type} onChange={onFilterChangedCallback} />
+              <TaskTypeFilter
+                optionKeys={filterOptions.type}
+                onChange={onFilterChangedCallback}
+                uniqueTaskTypes={uniqueProvidersAndTaskTypes.taskTypes}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -230,7 +260,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
       {showInferenceFlyout && selectedInferenceEndpoint ? (
         <EditInferenceFlyout
           onFlyoutClose={onCloseInferenceFlyout}
-          inferenceEndpointUI={selectedInferenceEndpoint}
+          selectedInferenceEndpoint={selectedInferenceEndpoint}
         />
       ) : null}
     </>

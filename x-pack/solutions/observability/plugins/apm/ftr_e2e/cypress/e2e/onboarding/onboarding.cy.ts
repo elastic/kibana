@@ -78,7 +78,7 @@ describe('APM Onboarding', () => {
       cy.contains('apk add --allow-untrusted <package-file>.apk');
 
       cy.contains('OpenTelemetry').click();
-      cy.contains('Download the OpenTelemetry APM Agent or SDK');
+      cy.contains('Instrument your app with OpenTelemetry SDK');
     });
   });
 

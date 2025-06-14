@@ -7,7 +7,7 @@
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
-import { Pagination, RulesListFilters } from '../../types';
+import type { Pagination, RulesListFilters } from '../../types';
 import type { LoadRulesProps } from '../lib/rule_api';
 import { loadRulesWithKueryFilter } from '../lib/rule_api/rules_kuery_filter';
 import { useKibana } from '../../common/lib/kibana';

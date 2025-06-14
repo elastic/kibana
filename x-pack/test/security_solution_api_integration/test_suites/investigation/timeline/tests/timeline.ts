@@ -21,7 +21,8 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
   const esArchiver = getService('esArchiver');
   let supertest: TestAgent;
 
-  describe('Timeline', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/213990
+  describe.skip('Timeline', () => {
     before(async () => (supertest = await utils.createSuperTest()));
 
     describe('timelines', () => {

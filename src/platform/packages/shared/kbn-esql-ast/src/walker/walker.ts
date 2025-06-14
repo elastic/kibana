@@ -17,13 +17,14 @@ import type {
   ESQLAstQueryExpression,
   ESQLColumn,
   ESQLCommand,
-  ESQLCommandMode,
   ESQLCommandOption,
   ESQLFunction,
   ESQLIdentifier,
   ESQLInlineCast,
   ESQLList,
   ESQLLiteral,
+  ESQLMap,
+  ESQLMapEntry,
   ESQLParamLiteral,
   ESQLProperNode,
   ESQLSingleAstItem,
@@ -38,7 +39,6 @@ type Node = ESQLAstNode | ESQLAstNode[];
 export interface WalkerOptions {
   visitCommand?: (node: ESQLCommand) => void;
   visitCommandOption?: (node: ESQLCommandOption) => void;
-  visitCommandMode?: (node: ESQLCommandMode) => void;
   /** @todo Rename to `visitExpression`. */
   visitSingleAstItem?: (node: ESQLAstExpression) => void;
   visitQuery?: (node: ESQLAstQueryExpression) => void;
@@ -51,6 +51,8 @@ export interface WalkerOptions {
   visitInlineCast?: (node: ESQLInlineCast) => void;
   visitUnknown?: (node: ESQLUnknownItem) => void;
   visitIdentifier?: (node: ESQLIdentifier) => void;
+  visitMap?: (node: ESQLMap) => void;
+  visitMapEntry?: (node: ESQLMapEntry) => void;
 
   /**
    * Called for any node type that does not have a specific visitor.
@@ -321,11 +323,6 @@ export class Walker {
     }
   }
 
-  public walkMode(node: ESQLCommandMode): void {
-    const { options } = this;
-    (options.visitCommandMode ?? options.visitAny)?.(node);
-  }
-
   public walkListLiteral(node: ESQLList): void {
     const { options } = this;
     (options.visitListLiteral ?? options.visitAny)?.(node);
@@ -367,6 +364,29 @@ export class Walker {
     }
   }
 
+  public walkMap(node: ESQLMap): void {
+    const { options } = this;
+
+    (options.visitMap ?? options.visitAny)?.(node);
+
+    const entries = node.entries;
+    const length = entries.length;
+
+    for (let i = 0; i < length; i++) {
+      const arg = entries[i];
+      this.walkSingleAstItem(arg);
+    }
+  }
+
+  public walkMapEntry(node: ESQLMapEntry): void {
+    const { options } = this;
+
+    (options.visitMapEntry ?? options.visitAny)?.(node);
+
+    this.walkSingleAstItem(node.key);
+    this.walkSingleAstItem(node.value);
+  }
+
   public walkQuery(node: ESQLAstQueryExpression): void {
     const { options } = this;
     (options.visitQuery ?? options.visitAny)?.(node);
@@ -391,12 +411,16 @@ export class Walker {
         this.walkFunction(node as ESQLFunction);
         break;
       }
-      case 'option': {
-        this.walkOption(node);
+      case 'map': {
+        this.walkMap(node as ESQLMap);
         break;
       }
-      case 'mode': {
-        this.walkMode(node);
+      case 'map-entry': {
+        this.walkMapEntry(node as ESQLMapEntry);
+        break;
+      }
+      case 'option': {
+        this.walkOption(node);
         break;
       }
       case 'source': {

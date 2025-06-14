@@ -6,6 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/server/constants';
+
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
@@ -30,6 +32,13 @@ export default function (providerContext: FtrProviderContext) {
         space: TEST_SPACE_1,
       });
       await cleanFleetIndices(esClient);
+      // Create settings to simulate older cluster
+      await kibanaServer.savedObjects.create({
+        type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+        id: 'fleet-default-settings',
+        attributes: {},
+        overwrite: true,
+      });
 
       // Create agent policies it should create a enrollment key for every keys
       const [defaultSpacePolicy1, spaceTest1Policy1] = await Promise.all([

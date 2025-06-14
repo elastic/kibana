@@ -7,21 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Adapters } from '@kbn/inspector-plugin/common';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
-import {
-  BehaviorSubject,
-  combineLatest,
-  distinctUntilChanged,
-  filter,
-  firstValueFrom,
-  race,
-  switchMap,
-} from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
+import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from 'rxjs';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { isEqual } from 'lodash';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { DiscoverAppState } from '../state_management/discover_app_state_container';
+import type { DiscoverAppStateContainer } from '../state_management/discover_app_state_container';
 import { updateVolatileSearchSource } from './update_search_source';
 import {
   checkHitCount,
@@ -35,24 +28,27 @@ import {
 } from '../hooks/use_saved_search_messages';
 import { fetchDocuments } from './fetch_documents';
 import { FetchStatus } from '../../types';
-import {
+import type {
   DataMain$,
   DataMsg,
   SavedSearchData,
 } from '../state_management/discover_data_state_container';
-import { DiscoverServices } from '../../../build_services';
+import type { DiscoverServices } from '../../../build_services';
 import { fetchEsql } from './fetch_esql';
-import { InternalState } from '../state_management/discover_internal_state_container';
+import type { InternalStateStore, TabState } from '../state_management/redux';
+import type { ScopedProfilesManager } from '../../../context_awareness';
 
-export interface FetchDeps {
+export interface CommonFetchParams {
+  dataSubjects: SavedSearchData;
   abortController: AbortController;
-  getAppState: () => DiscoverAppState;
-  getInternalState: () => InternalState;
+  appStateContainer: DiscoverAppStateContainer;
+  internalState: InternalStateStore;
   initialFetchStatus: FetchStatus;
   inspectorAdapters: Adapters;
   savedSearch: SavedSearch;
   searchSessionId: string;
   services: DiscoverServices;
+  scopedProfilesManager: ScopedProfilesManager;
 }
 
 /**
@@ -63,28 +59,34 @@ export interface FetchDeps {
  * have been completed (failed or successfully).
  */
 export function fetchAll(
-  dataSubjects: SavedSearchData,
-  reset = false,
-  fetchDeps: FetchDeps,
-  onFetchRecordsComplete?: () => Promise<void>
+  params: CommonFetchParams & {
+    reset: boolean;
+    getCurrentTab: () => TabState;
+    onFetchRecordsComplete?: () => Promise<void>;
+  }
 ): Promise<void> {
   const {
+    dataSubjects,
+    reset = false,
     initialFetchStatus,
-    getAppState,
-    getInternalState,
+    appStateContainer,
     services,
+    scopedProfilesManager,
     inspectorAdapters,
     savedSearch,
     abortController,
-  } = fetchDeps;
-  const { data, expressions, profilesManager } = services;
-  const searchSource = savedSearch.searchSource.createChild();
+    getCurrentTab,
+    onFetchRecordsComplete,
+  } = params;
+  const { data, expressions } = services;
 
   try {
+    const searchSource = savedSearch.searchSource.createChild();
     const dataView = searchSource.getField('index')!;
-    const query = getAppState().query;
+    const { query, sort } = appStateContainer.getState();
     const prevQuery = dataSubjects.documents$.getValue().query;
     const isEsqlQuery = isOfAggregateQueryType(query);
+    const currentTab = getCurrentTab();
 
     if (reset) {
       sendResetMsg(dataSubjects, initialFetchStatus);
@@ -95,9 +97,8 @@ export function fetchAll(
       updateVolatileSearchSource(searchSource, {
         dataView,
         services,
-        sort: getAppState().sort as SortOrder[],
-        customFilters: getInternalState().customFilters,
-        inputTimeRange: getInternalState().dataRequestParams.timeRangeAbsolute,
+        sort: sort as SortOrder[],
+        inputTimeRange: currentTab.dataRequestParams.timeRangeAbsolute,
       });
     }
 
@@ -117,16 +118,16 @@ export function fetchAll(
           inspectorAdapters,
           data,
           expressions,
-          profilesManager,
-          timeRange: getInternalState().dataRequestParams.timeRangeAbsolute,
+          scopedProfilesManager,
+          timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
         })
-      : fetchDocuments(searchSource, fetchDeps);
+      : fetchDocuments(searchSource, params);
     const fetchType = isEsqlQuery ? 'fetchTextBased' : 'fetchDocuments';
     const startTime = window.performance.now();
 
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
-      .then(({ records, esqlQueryColumns, interceptedWarnings, esqlHeaderWarning }) => {
+      .then(({ records, esqlQueryColumns, interceptedWarnings = [], esqlHeaderWarning }) => {
         if (services.analytics) {
           const duration = window.performance.now() - startTime;
           reportPerformanceMetricEvent(services.analytics, {
@@ -137,8 +138,12 @@ export function fetchAll(
         }
 
         if (isEsqlQuery) {
+          const fetchStatus =
+            interceptedWarnings.filter(({ type }) => type === 'incomplete').length > 0
+              ? FetchStatus.ERROR
+              : FetchStatus.COMPLETE;
           dataSubjects.totalHits$.next({
-            fetchStatus: FetchStatus.COMPLETE,
+            fetchStatus,
             result: records.length,
           });
         } else {
@@ -216,15 +221,13 @@ export function fetchAll(
   }
 }
 
-export async function fetchMoreDocuments(
-  dataSubjects: SavedSearchData,
-  fetchDeps: FetchDeps
-): Promise<void> {
+export async function fetchMoreDocuments(params: CommonFetchParams): Promise<void> {
+  const { dataSubjects, appStateContainer, services, savedSearch } = params;
+
   try {
-    const { getAppState, getInternalState, services, savedSearch } = fetchDeps;
     const searchSource = savedSearch.searchSource.createChild();
     const dataView = searchSource.getField('index')!;
-    const query = getAppState().query;
+    const { query, sort } = appStateContainer.getState();
     const isEsqlQuery = isOfAggregateQueryType(query);
 
     if (isEsqlQuery) {
@@ -248,12 +251,11 @@ export async function fetchMoreDocuments(
     updateVolatileSearchSource(searchSource, {
       dataView,
       services,
-      sort: getAppState().sort as SortOrder[],
-      customFilters: getInternalState().customFilters,
+      sort: sort as SortOrder[],
     });
 
     // Fetch more documents
-    const { records, interceptedWarnings } = await fetchDocuments(searchSource, fetchDeps);
+    const { records, interceptedWarnings } = await fetchDocuments(searchSource, params);
 
     // Update the state and finish the loading state
     sendLoadingMoreFinishedMsg(dataSubjects.documents$, {

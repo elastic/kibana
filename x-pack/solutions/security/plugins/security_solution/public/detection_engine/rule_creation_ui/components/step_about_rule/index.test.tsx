@@ -17,22 +17,13 @@ import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/
 import { mockAboutStepRule } from '../../../rule_management_ui/components/rules_table/__mocks__/mock';
 import { StepRuleDescription } from '../description_step';
 import { stepAboutDefaultValue } from './default_value';
-import type {
-  AboutStepRule,
-  DefineStepRule,
-} from '../../../../detections/pages/detection_engine/rules/types';
-import {
-  DataSourceType,
-  AlertSuppressionDurationType,
-} from '../../../../detections/pages/detection_engine/rules/types';
-import { fillEmptySeverityMappings } from '../../../../detections/pages/detection_engine/rules/helpers';
+import type { AboutStepRule, DefineStepRule } from '../../../common/types';
+import { DataSourceType, AlertSuppressionDurationType } from '../../../common/types';
+import { fillEmptySeverityMappings } from '../../../common/helpers';
 import { TestProviders } from '../../../../common/mock';
 import { useRuleForms } from '../../pages/form';
 import { stepActionsDefaultValue } from '../../../rule_creation/components/step_rule_actions';
-import {
-  defaultSchedule,
-  stepDefineDefaultValue,
-} from '../../../../detections/pages/detection_engine/rules/utils';
+import { defaultSchedule, stepDefineDefaultValue } from '../../../common/utils';
 import type { FormHook } from '../../../../shared_imports';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 import { useKibana } from '../../../../common/lib/kibana';

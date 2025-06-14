@@ -6,15 +6,15 @@
  */
 
 import React from 'react';
-import { addDecorator, DecoratorFn } from '@storybook/react';
-import { Title, Subtitle, Description, Primary, Stories } from '@storybook/addon-docs';
+import { Decorator } from '@storybook/react';
+import { Title, Subtitle, Description, Primary, Stories } from '@storybook/blocks';
 import { StorybookContextDecorator } from './decorator';
 
-const decorator: DecoratorFn = (story, context) => {
+const decorator: Decorator = (story, context) => {
   return <StorybookContextDecorator context={context}>{story()}</StorybookContextDecorator>;
 };
 
-addDecorator(decorator);
+export const decorators = [decorator];
 
 export const parameters = {
   docs: {

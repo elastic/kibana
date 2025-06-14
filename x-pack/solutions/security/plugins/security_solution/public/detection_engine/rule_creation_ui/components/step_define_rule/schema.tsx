@@ -16,8 +16,8 @@ import {
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import type { FormSchema, ValidationFunc } from '../../../../shared_imports';
 import { FIELD_TYPES } from '../../../../shared_imports';
-import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
-import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
+import type { DefineStepRule } from '../../../common/types';
+import { DataSourceType } from '../../../common/types';
 import { dataViewIdValidatorFactory } from '../../validators/data_view_id_validator_factory';
 import { indexPatternValidatorFactory } from '../../validators/index_pattern_validator_factory';
 import { alertSuppressionFieldsValidatorFactory } from '../../validators/alert_suppression_fields_validator_factory';

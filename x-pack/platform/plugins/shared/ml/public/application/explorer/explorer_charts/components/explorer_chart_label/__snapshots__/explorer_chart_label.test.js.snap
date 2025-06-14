@@ -2,12 +2,8 @@
 
 exports[`ExplorerChartLabelBadge Render the chart label in one line. 1`] = `
 <Fragment>
-  <span
-    className="ml-explorer-chart-label"
-  >
-    <span
-      className="ml-explorer-chart-label-detector"
-    >
+  <span>
+    <span>
       high_sum(nginx.access.body_sent.bytes) over nginx.access.remote_ip (population-03)
        – 
     </span>
@@ -22,11 +18,8 @@ exports[`ExplorerChartLabelBadge Render the chart label in one line. 1`] = `
     />
      
      
-    <span
-      className="ml-explorer-chart-info-icon"
-    >
+    <span>
       <EuiIconTip
-        className="ml-explorer-chart-eui-icon-tip"
         content={
           <ExplorerChartInfoTooltip
             aggregationInterval="1h"
@@ -42,6 +35,7 @@ exports[`ExplorerChartLabelBadge Render the chart label in one line. 1`] = `
             jobId="population-03"
           />
         }
+        css="unknown styles"
         position="top"
         size="s"
       />
@@ -52,20 +46,13 @@ exports[`ExplorerChartLabelBadge Render the chart label in one line. 1`] = `
 
 exports[`ExplorerChartLabelBadge Render the chart label in two lines. 1`] = `
 <Fragment>
-  <span
-    className="ml-explorer-chart-label"
-  >
-    <span
-      className="ml-explorer-chart-label-detector"
-    >
+  <span>
+    <span>
       high_sum(nginx.access.body_sent.bytes) over nginx.access.remote_ip (population-03)
        
     </span>
-    <span
-      className="ml-explorer-chart-info-icon"
-    >
+    <span>
       <EuiIconTip
-        className="ml-explorer-chart-eui-icon-tip"
         content={
           <ExplorerChartInfoTooltip
             aggregationInterval="1h"
@@ -81,13 +68,14 @@ exports[`ExplorerChartLabelBadge Render the chart label in two lines. 1`] = `
             jobId="population-03"
           />
         }
+        css="unknown styles"
         position="top"
         size="s"
       />
     </span>
   </span>
   <span
-    className="ml-explorer-chart-label-badges"
+    css="unknown styles"
   >
     <ExplorerChartLabelBadge
       entity={

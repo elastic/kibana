@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { redirectToDetections } from '../../../../detections/pages/detection_engine/rules/helpers';
+import { redirectToDetections } from '../../../common/helpers';
 import { SecurityPageName } from '../../../../app/types';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';

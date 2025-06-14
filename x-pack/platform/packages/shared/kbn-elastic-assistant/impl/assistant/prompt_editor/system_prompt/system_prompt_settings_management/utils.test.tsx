@@ -6,12 +6,12 @@
  */
 import { ProviderEnum } from '@kbn/elastic-assistant-common';
 import { getSelectedConversations } from './utils';
-import { PromptTypeEnum } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptTypeEnum } from '@kbn/elastic-assistant-common/impl/schemas';
 describe('getSelectedConversations', () => {
   const conversationSettings = {
     '8f1e3218-0b02-480a-8791-78c1ed5f3708': {
       timestamp: '2024-06-25T12:33:26.779Z',
-      createdAt: '2024-06-25T12:33:26.779Z' as unknown as Date,
+      createdAt: '2024-06-25T12:33:26.779Z',
       users: [
         {
           id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
@@ -28,7 +28,7 @@ describe('getSelectedConversations', () => {
         model: 'gpt-4',
       },
       messages: [],
-      updatedAt: '2024-06-25T18:35:28.217Z' as unknown as Date,
+      updatedAt: '2024-06-25T18:35:28.217Z',
       namespace: 'default',
       id: '8f1e3218-0b02-480a-8791-78c1ed5f3708',
       replacements: {},

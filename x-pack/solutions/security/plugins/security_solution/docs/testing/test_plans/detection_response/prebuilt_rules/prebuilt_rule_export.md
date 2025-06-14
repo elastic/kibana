@@ -44,6 +44,9 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [Scenario: Exporting both prebuilt and custom rules in bulk](#scenario-exporting-both-prebuilt-and-custom-rules-in-bulk)
   - [Error Handling](#error-handling)
     - [Scenario: Exporting beyond the export limit](#scenario-exporting-beyond-the-export-limit)
+  - [Licensing](#licensing)
+    - [Scenario: Exporting a mixture of prebuilt and custom rules via export API under insufficient license\*\*](#scenario-exporting-a-mixture-of-prebuilt-and-custom-rules-via-export-api-under-insufficient-license)
+    - [Scenario: Exporting a mixture of prebuilt and custom rules via bulk action under insufficient license\*\*](#scenario-exporting-a-mixture-of-prebuilt-and-custom-rules-via-bulk-action-under-insufficient-license)
 
 ## Useful information
 
@@ -209,4 +212,29 @@ And the customized prebuilt rules' "isCustomized" value should be true
 Given a space with prebuilt and custom rules installed
 And the number of rules is greater than the export limit (defaults to 10_000)
 Then the request should be rejected as a bad request
+```
+
+### Licensing
+
+#### Scenario: Exporting a mixture of prebuilt and custom rules via export API under insufficient license**
+
+**Automation**: 1 API integration test.
+
+```Gherkin
+Given a Kibana instance running under an insufficient license
+And a space with prebuilt customized, prebuilt non-customized and custom rules installed
+When the user exports all rules via the export API
+Then all rules should be successfully exported as an NDJSON file
+```
+
+#### Scenario: Exporting a mixture of prebuilt and custom rules via bulk action under insufficient license**
+
+**Automation**: 1 API integration test, 1 e2e test.
+
+```Gherkin
+Given a Kibana instance running under an insufficient license
+And a space with prebuilt customized, prebuilt non-customized and custom rules installed
+When the user selects rules of each type in the rules table
+And chooses "Export" from bulk actions
+Then all selected rules should be successfully exported as an NDJSON file
 ```

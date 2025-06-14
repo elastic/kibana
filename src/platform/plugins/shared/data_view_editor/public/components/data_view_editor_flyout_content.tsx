@@ -13,8 +13,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiLoadingSpinner,
   EuiLink,
+  EuiSkeletonRectangle,
+  EuiSkeletonTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
@@ -96,6 +98,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
     services: { application, dataViews, uiSettings, overlays, docLinks },
   } = useKibana<DataViewEditorContext>();
 
+  const { euiTheme } = useEuiTheme();
   const canSave = dataViews.getCanSaveSync();
 
   const { form } = useForm<IndexPatternConfig, FormInternal>({
@@ -142,7 +145,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
           params: {
             rollup_index: rollupIndex,
           },
-          aggs: rollupIndicesCapabilities[rollupIndex].aggs,
+          aggs: rollupCaps?.aggs,
         };
       }
 
@@ -176,6 +179,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const isLoadingSources = useObservable(dataViewEditorService.isLoadingSources$, true);
   const existingDataViewNames = useObservable(dataViewEditorService.dataViewNames$);
   const rollupIndex = useObservable(dataViewEditorService.rollupIndex$);
+  const rollupCaps = useObservable(dataViewEditorService.rollupCaps$);
   const rollupIndicesCapabilities = useObservable(dataViewEditorService.rollupIndicesCaps$, {});
 
   useDebounce(
@@ -194,7 +198,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
     dataViewEditorService.setType(type);
   }, [dataViewEditorService, type]);
 
-  const getRollupIndices = (rollupCaps: RollupIndicesCapsResponse) => Object.keys(rollupCaps);
+  const getRollupIndices = (rollupCapsRes: RollupIndicesCapsResponse) => Object.keys(rollupCapsRes);
 
   const onTypeChange = useCallback(
     (newType: INDEX_PATTERN_TYPE) => {
@@ -209,7 +213,22 @@ const IndexPatternEditorFlyoutContentComponent = ({
   );
 
   if (isLoadingSources || !existingDataViewNames) {
-    return <EuiLoadingSpinner size="xl" />;
+    return (
+      <EuiFlexGroup css={{ margin: euiTheme.size.l }}>
+        <EuiFlexItem>
+          <EuiSkeletonTitle size="l" css={{ width: '25vw' }} />
+          {Array.from({ length: 3 }).map((_, index) => (
+            <React.Fragment key={index}>
+              <EuiSpacer size="xl" />
+              <EuiSkeletonRectangle width="100%" height="48px" />
+            </React.Fragment>
+          ))}
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiSkeletonRectangle width="100%" height="160px" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
 
   const showIndexPatternTypeSelect = () =>

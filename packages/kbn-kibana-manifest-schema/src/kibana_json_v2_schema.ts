@@ -8,6 +8,7 @@
  */
 
 import type { JSONSchema } from 'json-schema-typed';
+import { KIBANA_GROUPS } from '@kbn/projects-solutions-groups';
 import { desc } from './desc';
 
 export const PLUGIN_ID_PATTERN = /^[a-z][a-zA-Z_]*$/;
@@ -49,7 +50,7 @@ export const MANIFEST_V2: JSONSchema = {
       `,
     },
     group: {
-      enum: ['platform', 'observability', 'security', 'search'],
+      enum: KIBANA_GROUPS,
       description: desc`
         Specifies the group to which this module pertains.
       `,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract, SavedObjectsBulkResponse } from '@kbn/core/server';
-import { MaintenanceWindowAttributes } from '../types';
+import type { SavedObjectsClientContract, SavedObjectsBulkResponse } from '@kbn/core/server';
+import type { MaintenanceWindowAttributes } from '../types';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../../common';
 
 export interface BulkGetMaintenanceWindowObject {

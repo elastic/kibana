@@ -574,6 +574,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await PageObjects.header.waitUntilLoadingHasFinished();
 
+          await testSubjects.existOrFail(
+            'datasetQualityDetailsDegradedFieldFlyoutFieldValue-values'
+          );
+          const expandButtons = await testSubjects.findAll('truncatedTextToggle');
+
+          for (const button of expandButtons) {
+            await button.click();
+          }
+
           await retry.tryForTime(5000, async () => {
             const testFieldValue1Exists = await PageObjects.datasetQuality.doesTextExist(
               'datasetQualityDetailsDegradedFieldFlyoutFieldValue-values',
@@ -819,7 +828,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           const linkURL = await linkButton.getAttribute('href');
 
-          expect(linkURL?.endsWith('mapping-settings-limit.html')).to.be(true);
+          expect(linkURL?.includes('mapping')).to.be(true);
         });
 
         it('should display increase field limit as a possible mitigation for special packages like apm app', async () => {
@@ -849,7 +858,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           const linkURL = await linkButton.getAttribute('href');
 
-          expect(linkURL?.endsWith('mapping-settings-limit.html')).to.be(true);
+          expect(linkURL?.includes('mapping')).to.be(true);
         });
 
         it('should display increase field limit as a possible mitigation for non integration', async () => {

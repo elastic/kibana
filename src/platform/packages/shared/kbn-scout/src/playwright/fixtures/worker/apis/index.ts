@@ -7,15 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mergeTests } from 'playwright/test';
-import { FleetApiFixture, fleetApiFixture } from './fleet';
+import { coreWorkerFixtures } from '../core_fixtures';
+import { FleetApiService, getFleetApiHelper } from './fleet';
+import { StreamsApiService, getStreamsApiService } from './streams';
 
-export const apiFixtures = mergeTests(fleetApiFixture);
-
-export interface ApiFixtures {
-  fleetApi: FleetApiFixture;
+export interface ApiServicesFixture {
+  fleet: FleetApiService;
+  streams: StreamsApiService;
+  // add more services here
 }
 
-export interface ApiParallelWorkerFixtures {
-  fleetApi: FleetApiFixture;
-}
+/**
+ * This fixture provides a helper to interact with the Kibana APIs like Fleet, Spaces, Alerting, etc.
+ */
+export const apiServicesFixture = coreWorkerFixtures.extend<
+  {},
+  { apiServices: ApiServicesFixture }
+>({
+  apiServices: [
+    async ({ kbnClient, log }, use) => {
+      const services = {
+        fleet: getFleetApiHelper(log, kbnClient),
+        streams: getStreamsApiService({ kbnClient, log }),
+      };
+
+      log.serviceLoaded('apiServices');
+      await use(services);
+    },
+    { scope: 'worker' },
+  ],
+});

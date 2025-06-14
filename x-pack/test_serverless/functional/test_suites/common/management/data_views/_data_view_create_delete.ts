@@ -19,6 +19,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['settings', 'common', 'header']);
 
   describe('creating and deleting default data view', function describeIndexTests() {
+    // see details: https://github.com/elastic/kibana/issues/213532
+    this.tags(['failsOnMKI']);
     before(async function () {
       // TODO: emptyKibanaIndex fails in Serverless with
       // "index_not_found_exception: no such index [.kibana_ingest]",
@@ -30,9 +32,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'x-pack/test_serverless/functional/es_archives/kibana_sample_data_flights_index_pattern'
       );
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
+        'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
 
       await kibanaServer.uiSettings.replace({});
       // TODO: Navigation to Data View Management is different in Serverless
@@ -48,9 +52,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'x-pack/test_serverless/functional/es_archives/kibana_sample_data_flights_index_pattern'
       );
       await kibanaServer.importExport.unload(
-        'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
+        'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
     });
 
     describe('can open and close editor', function () {

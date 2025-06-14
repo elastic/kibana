@@ -74,7 +74,6 @@ const packageInstallContext = {
     owner: { github: 'elastic/fleet' },
   } as any,
   paths: ['some/path/1', 'some/path/2'],
-  assetsMap: new Map(),
   archiveIterator: createArchiveIteratorFromMap(new Map()),
 };
 
@@ -99,7 +98,6 @@ describe('stepInstallKibanaAssets', () => {
       esClient,
       logger: loggerMock.create(),
       packageInstallContext: {
-        assetsMap: new Map(),
         archiveIterator: createArchiveIteratorFromMap(new Map()),
         paths: [],
         packageInfo: {
@@ -139,7 +137,6 @@ describe('stepInstallKibanaAssets', () => {
       esClient,
       logger: loggerMock.create(),
       packageInstallContext: {
-        assetsMap: new Map(),
         archiveIterator: createArchiveIteratorFromMap(new Map()),
         paths: [],
         packageInfo: {
@@ -186,7 +183,6 @@ describe('stepInstallKibanaAssetsWithStreaming', () => {
       esClient,
       logger: loggerMock.create(),
       packageInstallContext: {
-        assetsMap,
         archiveIterator,
         paths: [],
         packageInfo: {

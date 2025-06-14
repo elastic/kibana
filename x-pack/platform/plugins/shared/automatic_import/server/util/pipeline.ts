@@ -8,11 +8,12 @@ import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { ESProcessorItem } from '../../common';
 import { createPassthroughFailureProcessor, createRemoveProcessor } from './processors';
 
-interface DocTemplate {
+export interface DocTemplate {
   _index: string;
   _id: string;
   _source: {
     message: string;
+    [key: string]: unknown;
   };
 }
 

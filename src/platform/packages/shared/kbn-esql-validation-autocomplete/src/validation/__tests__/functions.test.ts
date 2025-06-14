@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FunctionDefinition, FunctionDefinitionTypes } from '../../definitions/types';
+import { FunctionDefinition, FunctionDefinitionTypes, Location } from '../../definitions/types';
 import { setTestFunctions } from '../../shared/test_functions';
 import { setup } from './helpers';
 
@@ -25,7 +25,7 @@ describe('function validation', () => {
               name: 'test',
               type: FunctionDefinitionTypes.SCALAR,
               description: '',
-              supportedCommands: ['eval'],
+              locationsAvailable: [Location.EVAL],
               signatures: [
                 {
                   params: [{ name: 'arg1', type: 'integer' }],
@@ -41,7 +41,7 @@ describe('function validation', () => {
               name: 'returns_integer',
               type: FunctionDefinitionTypes.SCALAR,
               description: '',
-              supportedCommands: ['eval'],
+              locationsAvailable: [Location.EVAL],
               signatures: [
                 {
                   params: [],
@@ -53,7 +53,7 @@ describe('function validation', () => {
               name: 'returns_double',
               type: FunctionDefinitionTypes.SCALAR,
               description: '',
-              supportedCommands: ['eval'],
+              locationsAvailable: [Location.EVAL],
               signatures: [
                 {
                   params: [],
@@ -87,9 +87,9 @@ describe('function validation', () => {
           await expectErrors('FROM a_index | EVAL TEST(integerField)', []);
           await expectErrors('FROM a_index | EVAL TEST(dateField)', []);
 
-          // variables
-          await expectErrors('FROM a_index | EVAL var1 = 1 | EVAL TEST(var1)', []);
-          await expectErrors('FROM a_index | EVAL var1 = NOW() | EVAL TEST(var1)', []);
+          // userDefinedColumns
+          await expectErrors('FROM a_index | EVAL col1 = 1 | EVAL TEST(col1)', []);
+          await expectErrors('FROM a_index | EVAL col1 = NOW() | EVAL TEST(col1)', []);
 
           // multiple instances
           await expectErrors('FROM a_index | EVAL TEST(1) | EVAL TEST(1)', []);
@@ -123,9 +123,9 @@ describe('function validation', () => {
             'Argument of [test] must be [integer], found value [doubleField] type [double]',
           ]);
 
-          // variables
-          await expectErrors('FROM a_index | EVAL var1 = 1. | EVAL TEST(var1)', [
-            'Argument of [test] must be [integer], found value [var1] type [double]',
+          // userDefinedColumns
+          await expectErrors('FROM a_index | EVAL col1 = 1. | EVAL TEST(col1)', [
+            'Argument of [test] must be [integer], found value [col1] type [double]',
           ]);
 
           // multiple instances
@@ -147,7 +147,7 @@ describe('function validation', () => {
             name: 'test',
             type: FunctionDefinitionTypes.SCALAR,
             description: '',
-            supportedCommands: ['eval'],
+            locationsAvailable: [Location.EVAL],
             signatures: [
               {
                 params: [{ name: 'arg1', type: 'any' }],
@@ -172,7 +172,7 @@ describe('function validation', () => {
             name: 'in',
             type: FunctionDefinitionTypes.OPERATOR,
             description: '',
-            supportedCommands: ['row'],
+            locationsAvailable: [Location.ROW],
             signatures: [
               {
                 params: [
@@ -200,7 +200,7 @@ describe('function validation', () => {
           name: 'test',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [
@@ -271,7 +271,7 @@ describe('function validation', () => {
           name: 'test',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [{ name: 'arg1', type: 'keyword' }],
@@ -290,7 +290,7 @@ describe('function validation', () => {
           name: 'variadic_fn',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [{ name: 'arg1', type: 'integer' }],
@@ -329,7 +329,7 @@ describe('function validation', () => {
           name: 'test',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [
@@ -356,7 +356,7 @@ describe('function validation', () => {
           name: 'supports_all',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [{ name: 'arg1', type: 'keyword', supportsWildcard: true }],
@@ -368,7 +368,7 @@ describe('function validation', () => {
           name: 'does_not_support_all',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [{ name: 'arg1', type: 'keyword', supportsWildcard: false }],
@@ -399,7 +399,7 @@ describe('function validation', () => {
           name: 'test',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [
@@ -424,13 +424,67 @@ describe('function validation', () => {
       await expectErrors('FROM a_index | EVAL TEST("2024-09-09", "2024-09-09")', []);
     });
 
+    it('treats text and keyword as interchangeable', async () => {
+      setTestFunctions([
+        {
+          name: 'accepts_text',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: '',
+          locationsAvailable: [Location.EVAL],
+          signatures: [
+            {
+              params: [{ name: 'arg1', type: 'text' }],
+              returnType: 'keyword',
+            },
+          ],
+        },
+        {
+          name: 'accepts_keyword',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: '',
+          locationsAvailable: [Location.EVAL],
+          signatures: [
+            {
+              params: [{ name: 'arg1', type: 'keyword' }],
+              returnType: 'keyword',
+            },
+          ],
+        },
+        {
+          name: 'returns_keyword',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: '',
+          locationsAvailable: [Location.EVAL],
+          signatures: [
+            {
+              params: [],
+              returnType: 'keyword',
+            },
+          ],
+        },
+      ]);
+
+      const { expectErrors } = await setup();
+
+      // literals — all string literals are keywords
+      await expectErrors('FROM a_index | EVAL ACCEPTS_TEXT("keyword literal")', []);
+
+      // fields
+      await expectErrors('FROM a_index | EVAL ACCEPTS_KEYWORD(textField)', []);
+      await expectErrors('FROM a_index | EVAL ACCEPTS_TEXT(keywordField)', []);
+
+      // functions
+      // no need to test a function that returns text, because they no longer exist: https://github.com/elastic/elasticsearch/pull/114334
+      await expectErrors('FROM a_index | EVAL ACCEPTS_TEXT(RETURNS_KEYWORD())', []);
+    });
+
     it('enforces constant-only parameters', async () => {
       setTestFunctions([
         {
           name: 'test',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [{ name: 'arg1', type: 'integer', constantOnly: true }],
@@ -442,7 +496,7 @@ describe('function validation', () => {
           name: 'test2',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [
@@ -478,7 +532,7 @@ describe('function validation', () => {
           name: 'test',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [{ name: 'arg1', type: 'keyword', acceptedValues: ['ASC', 'DESC'] }],
@@ -512,7 +566,7 @@ describe('function validation', () => {
           name: 'test1',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [{ name: 'arg1', type: 'keyword' }],
@@ -524,7 +578,7 @@ describe('function validation', () => {
           name: 'test2',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [{ name: 'arg1', type: 'keyword' }],
@@ -536,7 +590,7 @@ describe('function validation', () => {
           name: 'test3',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [{ name: 'arg1', type: 'long' }],
@@ -563,7 +617,7 @@ describe('function validation', () => {
             name: 'eval_fn',
             type: FunctionDefinitionTypes.SCALAR,
             description: '',
-            supportedCommands: ['eval'],
+            locationsAvailable: [Location.EVAL],
             signatures: [
               {
                 params: [],
@@ -575,7 +629,7 @@ describe('function validation', () => {
             name: 'stats_fn',
             type: FunctionDefinitionTypes.AGG,
             description: '',
-            supportedCommands: ['stats'],
+            locationsAvailable: [Location.STATS],
             signatures: [
               {
                 params: [],
@@ -587,7 +641,7 @@ describe('function validation', () => {
             name: 'row_fn',
             type: FunctionDefinitionTypes.SCALAR,
             description: '',
-            supportedCommands: ['row'],
+            locationsAvailable: [Location.ROW],
             signatures: [
               {
                 params: [],
@@ -599,7 +653,7 @@ describe('function validation', () => {
             name: 'where_fn',
             type: FunctionDefinitionTypes.SCALAR,
             description: '',
-            supportedCommands: ['where'],
+            locationsAvailable: [Location.WHERE],
             signatures: [
               {
                 params: [],
@@ -611,7 +665,7 @@ describe('function validation', () => {
             name: 'sort_fn',
             type: FunctionDefinitionTypes.SCALAR,
             description: '',
-            supportedCommands: ['sort'],
+            locationsAvailable: [Location.SORT],
             signatures: [
               {
                 params: [],
@@ -651,8 +705,7 @@ describe('function validation', () => {
             name: 'supports_by_option',
             type: FunctionDefinitionTypes.SCALAR,
             description: '',
-            supportedCommands: ['eval'],
-            supportedOptions: ['by'],
+            locationsAvailable: [Location.EVAL, Location.STATS_BY],
             signatures: [
               {
                 params: [],
@@ -664,8 +717,7 @@ describe('function validation', () => {
             name: 'does_not_support_by_option',
             type: FunctionDefinitionTypes.SCALAR,
             description: '',
-            supportedCommands: ['eval'],
-            supportedOptions: [],
+            locationsAvailable: [Location.EVAL],
             signatures: [
               {
                 params: [],
@@ -678,8 +730,7 @@ describe('function validation', () => {
             name: 'agg_fn',
             type: FunctionDefinitionTypes.AGG,
             description: '',
-            supportedCommands: ['stats'],
-            supportedOptions: [],
+            locationsAvailable: [Location.STATS],
             signatures: [
               {
                 params: [],
@@ -705,7 +756,7 @@ describe('function validation', () => {
             name: 'test',
             type: FunctionDefinitionTypes.SCALAR,
             description: '',
-            supportedCommands: ['eval'],
+            locationsAvailable: [Location.EVAL],
             signatures: [
               {
                 params: [{ name: 'arg1', type: 'keyword' }],
@@ -717,7 +768,7 @@ describe('function validation', () => {
             name: 'test2',
             type: FunctionDefinitionTypes.SCALAR,
             description: '',
-            supportedCommands: ['eval'],
+            locationsAvailable: [Location.EVAL],
             signatures: [
               {
                 params: [{ name: 'arg1', type: 'integer' }],
@@ -738,7 +789,7 @@ describe('function validation', () => {
             name: 'agg_fn',
             type: FunctionDefinitionTypes.AGG,
             description: '',
-            supportedCommands: ['stats'],
+            locationsAvailable: [Location.STATS],
             signatures: [
               {
                 params: [{ name: 'arg1', type: 'keyword' }],
@@ -750,7 +801,7 @@ describe('function validation', () => {
             name: 'scalar_fn',
             type: FunctionDefinitionTypes.SCALAR,
             description: '',
-            supportedCommands: ['stats'],
+            locationsAvailable: [Location.STATS],
             signatures: [
               {
                 params: [{ name: 'arg1', type: 'keyword' }],

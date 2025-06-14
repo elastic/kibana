@@ -9,6 +9,7 @@ import { useCallback, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
+import { useSecretInput, useComboInput } from '../../../../hooks';
 import {
   sendPostDownloadSource,
   useInput,
@@ -20,7 +21,20 @@ import {
 import type { DownloadSource, PostDownloadSourceRequest } from '../../../../types';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
 
+import type { DownloadSourceBase } from '../../../../../../../common/types';
+
 import { confirmUpdate } from './confirm_update';
+
+export interface DownloadSourceFormInputsType {
+  nameInput: ReturnType<typeof useInput>;
+  defaultDownloadSourceInput: ReturnType<typeof useSwitchInput>;
+  hostInput: ReturnType<typeof useInput>;
+  proxyIdInput: ReturnType<typeof useInput>;
+  sslCertificateInput: ReturnType<typeof useInput>;
+  sslKeyInput: ReturnType<typeof useInput>;
+  sslKeySecretInput: ReturnType<typeof useSecretInput>;
+  sslCertificateAuthoritiesInput: ReturnType<typeof useComboInput>;
+}
 
 export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource?: DownloadSource) {
   const authz = useAuthz();
@@ -41,11 +55,34 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
 
   const proxyIdInput = useInput(downloadSource?.proxy_id ?? '', () => undefined, isEditDisabled);
 
+  const sslCertificateAuthoritiesInput = useComboInput(
+    'sslCertificateAuthoritiesComboxBox',
+    downloadSource?.ssl?.certificate_authorities ?? [],
+    undefined,
+    undefined
+  );
+  const sslCertificateInput = useInput(
+    downloadSource?.ssl?.certificate ?? '',
+    undefined,
+    undefined
+  );
+  const sslKeyInput = useInput(downloadSource?.ssl?.key ?? '', undefined, undefined);
+
+  const sslKeySecretInput = useSecretInput(
+    (downloadSource as DownloadSourceBase)?.secrets?.ssl?.key,
+    undefined,
+    undefined
+  );
+
   const inputs = {
     nameInput,
     hostInput,
     defaultDownloadSourceInput,
     proxyIdInput,
+    sslCertificateInput,
+    sslKeyInput,
+    sslCertificateAuthoritiesInput,
+    sslKeySecretInput,
   };
 
   const hasChanged = Object.values(inputs).some((input) => input.hasChanged);
@@ -54,8 +91,12 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     const nameInputValid = nameInput.validate();
     const hostValid = hostInput.validate();
 
-    return nameInputValid && hostValid;
-  }, [nameInput, hostInput]);
+    const sslCertificateValid = sslCertificateInput.validate();
+    const sslKeyValid = sslKeyInput.validate();
+    const sslKeySecretValid = sslKeySecretInput.validate();
+
+    return nameInputValid && hostValid && sslCertificateValid && sslKeyValid && sslKeySecretValid;
+  }, [nameInput, hostInput, sslCertificateInput, sslKeyInput, sslKeySecretInput]);
 
   const submit = useCallback(async () => {
     try {
@@ -69,6 +110,19 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
         host: hostInput.value.trim(),
         is_default: defaultDownloadSourceInput.value,
         proxy_id: proxyIdInput.value || null,
+        ssl: {
+          certificate: sslCertificateInput.value,
+          key: sslKeyInput.value || undefined,
+          certificate_authorities: sslCertificateAuthoritiesInput.value.filter((val) => val !== ''),
+        },
+        ...(!sslKeyInput.value &&
+          sslKeySecretInput.value && {
+            secrets: {
+              ssl: {
+                key: sslKeySecretInput.value || undefined,
+              },
+            },
+          }),
       };
 
       if (downloadSource) {
@@ -109,6 +163,10 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     notifications.toasts,
     onSuccess,
     proxyIdInput.value,
+    sslCertificateAuthoritiesInput.value,
+    sslCertificateInput.value,
+    sslKeyInput.value,
+    sslKeySecretInput.value,
     validate,
   ]);
 

@@ -1,65 +1,28 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`renders matching snapshot 1`] = `
-<KibanaRenderContextProvider
-  analytics={
-    Object {
-      "optIn": [MockFunction],
-      "reportEvent": [MockFunction],
-      "telemetryCounter$": Subject {
-        "closed": false,
-        "currentObservers": null,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-    }
-  }
-  i18n={
-    Object {
-      "Context": [MockFunction],
-    }
-  }
-  theme={
-    Object {
-      "getTheme": [MockFunction],
-      "theme$": Observable {
-        "_subscribe": [Function],
-      },
-    }
-  }
-  userProfile={
-    Object {
-      "bulkGet": [MockFunction],
-      "getCurrent": [MockFunction],
-      "getEnabled$": [MockFunction],
-      "getUserProfile$": [MockFunction],
-      "partialUpdate": [MockFunction],
-      "suggest": [MockFunction],
-      "update": [MockFunction],
-    }
-  }
->
-  <p
-    data-test-subj="errorToastMessage"
-  >
-    This is the toast message
-  </p>
-  <div
-    className="eui-textRight"
-  >
-    <EuiButton
-      color="danger"
-      data-test-subj="errorToastBtn"
-      onClick={[Function]}
-      size="s"
+<I18nProvider>
+  <EuiProvider>
+    <p
+      data-test-subj="errorToastMessage"
     >
-      <MemoizedFormattedMessage
-        defaultMessage="See the full error"
-        id="core.toasts.errorToast.seeFullError"
-      />
-    </EuiButton>
-  </div>
-</KibanaRenderContextProvider>
+      This is the toast message
+    </p>
+    <div
+      className="eui-textRight"
+    >
+      <EuiButton
+        color="danger"
+        data-test-subj="errorToastBtn"
+        onClick={[Function]}
+        size="s"
+      >
+        <MemoizedFormattedMessage
+          defaultMessage="See the full error"
+          id="core.toasts.errorToast.seeFullError"
+        />
+      </EuiButton>
+    </div>
+  </EuiProvider>
+</I18nProvider>
 `;

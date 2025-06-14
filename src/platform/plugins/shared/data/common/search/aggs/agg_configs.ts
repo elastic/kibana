@@ -472,8 +472,9 @@ export class AggConfigs {
     if (!this.hasTimeShifts()) {
       return response;
     }
-    const transformedRawResponse = cloneDeep(response.rawResponse);
-    if (!transformedRawResponse.aggregations) {
+    let transformedRawResponse = response.rawResponse;
+    if (!response.rawResponse.aggregations) {
+      transformedRawResponse = cloneDeep(response.rawResponse);
       transformedRawResponse.aggregations = {
         doc_count: response.rawResponse.hits?.total as estypes.AggregationsAggregate,
       };

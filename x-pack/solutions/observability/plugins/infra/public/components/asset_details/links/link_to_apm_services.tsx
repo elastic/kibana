@@ -9,6 +9,7 @@ import { stringify } from 'querystring';
 import { encode } from '@kbn/rison';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 export interface LinkToApmServicesProps {
@@ -32,6 +33,9 @@ export const LinkToApmServices = ({ assetId, apmField }: LinkToApmServicesProps)
 
   return (
     <EuiButtonEmpty
+      aria-label={i18n.translate('xpack.infra.assetDetails.apmServicesLink.ariaLabel', {
+        defaultMessage: 'Show all APM services',
+      })}
       data-test-subj="infraAssetDetailsViewAPMShowAllServicesButton"
       size="xs"
       flush="both"

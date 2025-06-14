@@ -13,13 +13,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiIcon,
-  EuiPagination,
   EuiPanel,
+  EuiPagination,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { type RefreshInterval } from '@kbn/data-plugin/common';
@@ -90,22 +87,6 @@ export const ChartsGrid: FC<{
                       listItems={[{ title: v.group.name, description: v.group.value }]}
                     />
                   ) : null}
-
-                  {v.reason ? (
-                    <EuiToolTip position="top" content={v.reason}>
-                      <EuiIcon
-                        tabIndex={0}
-                        color={'warning'}
-                        type="warning"
-                        title={i18n.translate(
-                          'xpack.aiops.changePointDetection.notResultsWarning',
-                          {
-                            defaultMessage: 'No change point agg results warning',
-                          }
-                        )}
-                      />
-                    </EuiToolTip>
-                  ) : null}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText color={'subdued'} size={'s'}>
@@ -135,6 +116,7 @@ export const ChartsGrid: FC<{
                     />
                   </EuiFlexItem>
                 ) : null}
+
                 <EuiFlexItem grow={false}>
                   <EuiBadge color="hollow">{v.type}</EuiBadge>
                 </EuiFlexItem>

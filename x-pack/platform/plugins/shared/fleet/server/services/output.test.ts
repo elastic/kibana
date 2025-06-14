@@ -83,6 +83,7 @@ function mockOutputSO(id: string, attributes: any = {}, updatedAt?: string) {
     type: 'ingest-outputs',
     references: [],
     attributes: {
+      name: 'Test',
       output_id: id,
       ...attributes,
     },
@@ -133,6 +134,24 @@ function getMockedSoClient(
         return mockOutputSO('existing-logstash-output', {
           type: 'logstash',
           is_default: false,
+        });
+      }
+
+      case outputIdToUuid('existing-logstash-output-with-ssl'): {
+        return mockOutputSO('existing-logstash-output-with-ssl', {
+          type: 'logstash',
+          is_default: false,
+          ssl: {
+            certificate: 'cert-value',
+            certificate_authorities: ['/path/to/CAs'],
+          },
+          secrets: {
+            ssl: {
+              key: {
+                id: 'wnES3pUBqsj3cVixODPG',
+              },
+            },
+          },
         });
       }
 
@@ -521,6 +540,7 @@ describe('Output Service', () => {
         expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
           action: 'create',
           id: outputIdToUuid('output-test'),
+          name: 'Test',
           savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
         });
       });
@@ -1817,6 +1837,7 @@ describe('Output Service', () => {
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'update',
+        name: 'Test',
         id: outputIdToUuid('existing-es-output'),
         savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
       });
@@ -2317,6 +2338,30 @@ describe('Output Service', () => {
         'Remote_elasticsearch output cannot be used with agentless integration in agentless policy. Please create a new Elasticsearch output.'
       );
     });
+
+    it('Should delete SSL fields if SSL field is null', async () => {
+      const soClient = getMockedSoClient({});
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [{}],
+      } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+      mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
+      mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(false);
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [],
+      } as any);
+
+      await outputService.update(soClient, esClientMock, 'existing-logstash-output-with-ssl', {
+        type: 'logstash',
+        hosts: ['0.0.0.0'],
+        ssl: null,
+      });
+
+      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+        type: 'logstash',
+        hosts: ['0.0.0.0'],
+        ssl: null,
+      });
+    });
   });
 
   describe('delete', () => {
@@ -2387,6 +2432,7 @@ describe('Output Service', () => {
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'delete',
+        name: 'Test',
         id: outputIdToUuid('existing-es-output'),
         savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
       });
@@ -2409,6 +2455,7 @@ describe('Output Service', () => {
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'get',
+        name: 'Test',
         id: outputIdToUuid('existing-es-output'),
         savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
       });

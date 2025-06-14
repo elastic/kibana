@@ -103,6 +103,7 @@ describe('Policy Config helpers', () => {
         file: false,
         process: false,
         network: false,
+        security: false,
       };
 
       const linuxEvents: typeof defaultPolicy.linux.events = {
@@ -331,7 +332,7 @@ describe('Policy Config helpers', () => {
 
 // This constant makes sure that if the type `PolicyConfig` is ever modified,
 // the logic for disabling protections is also modified due to type check.
-export const eventsOnlyPolicy = (): PolicyConfig => ({
+const eventsOnlyPolicy = (): PolicyConfig => ({
   global_manifest_version: 'latest',
   global_telemetry_enabled: false,
   meta: {
@@ -369,7 +370,7 @@ export const eventsOnlyPolicy = (): PolicyConfig => ({
     attack_surface_reduction: { credential_hardening: { enabled: false } },
   },
   mac: {
-    events: { process: true, file: true, network: true },
+    events: { process: true, file: true, network: true, security: true },
     malware: { mode: ProtectionModes.off, blocklist: false, on_write_scan: false },
     behavior_protection: { mode: ProtectionModes.off, supported: true, reputation_service: false },
     memory_protection: { mode: ProtectionModes.off, supported: true },

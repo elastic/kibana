@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Elastic Security - Timeline - Pinned Event API
+  title: Elastic Security - Timeline - pinned event API
   version: '2023-10-31'
 externalDocs:
   url: https://www.elastic.co/guide/en/security/current/_pin_an_event_to_an_existing_timeline.html
@@ -11,12 +11,12 @@ paths:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: PersistPinnedEventRoute
-      summary: Pin an event
-      description: Pin an event to an existing Timeline.
+      summary: Pin/unpin an event
+      description: Pin/unpin an event to/from an existing Timeline.
       tags:
         - access:securitySolution
       requestBody:
-        description: The pinned event to add or update, along with additional metadata.
+        description: The pinned event to add or unpin, along with additional metadata.
         required: true
         content:
           application/json:
@@ -26,14 +26,20 @@ paths:
               properties:
                 eventId:
                   type: string
+                  description: The `_id` of the associated event for this pinned event.
+                  example: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
+                timelineId:
+                  type: string
+                  description: The `savedObjectId` of the timeline that you want this pinned event unpinned from.
+                  example: '15c1929b-0af7-42bd-85a8-56e234cc7c4e'
                 pinnedEventId:
                   type: string
                   nullable: true
-                timelineId:
-                  type: string
+                  description: The `savedObjectId` of the pinned event you want to unpin.
+                  example: '10r1929b-0af7-42bd-85a8-56e234f98h2f3'
       responses:
         '200':
-          description: Indicates the event was successfully pinned to the Timeline.
+          description: Indicates the event was successfully pinned to or unpinned from the Timeline.
           content:
             application/json:
               schema:
@@ -49,3 +55,4 @@ components:
           properties:
             unpinned:
               type: boolean
+              description: Indicates whether the event was successfully unpinned

@@ -88,7 +88,7 @@ const mapLlmToModels: Record<
     getModels: (connectorName) => [
       {
         label: i18n.translate('xpack.searchPlayground.inferenceModel', {
-          defaultMessage: '{name} (AI Connector)',
+          defaultMessage: '{name}',
           values: { name: connectorName },
         }),
       },

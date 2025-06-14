@@ -2,7 +2,6 @@
 
 exports[`DetectorDescriptionList render for detector with anomaly values 1`] = `
 <EuiDescriptionList
-  className="rule-detector-description-list"
   columnWidths={
     Array [
       15,
@@ -31,8 +30,48 @@ exports[`DetectorDescriptionList render for detector with anomaly values 1`] = `
           id="xpack.ml.ruleEditor.detectorDescriptionList.selectedAnomalyDescription"
           values={
             Object {
-              "actual": 50,
-              "typical": 1.23,
+              "actual": <AnomalyValueDisplay
+                function="mean"
+                record={
+                  Object {
+                    "actual": Array [
+                      50,
+                    ],
+                    "source": Object {
+                      "function": "mean",
+                    },
+                    "typical": Array [
+                      1.23,
+                    ],
+                  }
+                }
+                value={
+                  Array [
+                    50,
+                  ]
+                }
+              />,
+              "typical": <AnomalyValueDisplay
+                function="mean"
+                record={
+                  Object {
+                    "actual": Array [
+                      50,
+                    ],
+                    "source": Object {
+                      "function": "mean",
+                    },
+                    "typical": Array [
+                      1.23,
+                    ],
+                  }
+                }
+                value={
+                  Array [
+                    1.23,
+                  ]
+                }
+              />,
             }
           }
         />,
@@ -49,7 +88,6 @@ exports[`DetectorDescriptionList render for detector with anomaly values 1`] = `
 
 exports[`DetectorDescriptionList render for population detector with no anomaly values 1`] = `
 <EuiDescriptionList
-  className="rule-detector-description-list"
   columnWidths={
     Array [
       15,

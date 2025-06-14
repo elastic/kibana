@@ -163,7 +163,6 @@ export interface ParsedOptions {
   includeCoreBundle: boolean;
   themeTags: ThemeTags;
   pluginSelector: PluginSelector;
-  reactVersion: string;
 }
 
 export class OptimizerConfig {
@@ -178,7 +177,6 @@ export class OptimizerConfig {
     const includeCoreBundle = !!options.includeCoreBundle;
     const filters = options.filter || [];
     const focus = options.focus || [];
-    const reactVersion = process.env.REACT_18 ? '18' : '17';
 
     const repoRoot = options.repoRoot;
     if (!Path.isAbsolute(repoRoot)) {
@@ -223,7 +221,6 @@ export class OptimizerConfig {
       outputRoot,
       maxWorkerCount,
       profileWebpack,
-      reactVersion,
       cache,
       filters,
       focus,
@@ -281,8 +278,7 @@ export class OptimizerConfig {
       options.maxWorkerCount,
       options.dist,
       options.profileWebpack,
-      options.themeTags,
-      options.reactVersion
+      options.themeTags
     );
   }
 
@@ -297,8 +293,7 @@ export class OptimizerConfig {
     public readonly maxWorkerCount: number,
     public readonly dist: boolean,
     public readonly profileWebpack: boolean,
-    public readonly themeTags: ThemeTags,
-    public readonly reactVersion: string
+    public readonly themeTags: ThemeTags
   ) {}
 
   getWorkerConfig(optimizerCacheKey: unknown): WorkerConfig {
@@ -311,7 +306,6 @@ export class OptimizerConfig {
       optimizerCacheKey,
       themeTags: this.themeTags,
       browserslistEnv: this.dist ? 'production' : process.env.BROWSERSLIST_ENV || 'dev',
-      reactVersion: this.reactVersion,
     };
   }
 

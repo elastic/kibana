@@ -1,0 +1,8 @@
+{
+  "indices.get_data_stream": {
+    "patterns": [
+      "_data_stream",
+      "_data_stream/{data_stream}"
+    ]
+  }
+}

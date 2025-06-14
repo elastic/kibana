@@ -45,6 +45,11 @@ export default ({ getService }: FtrProviderContext) => {
         await utils.initEntityEngineForEntityTypesAndWait(['host']);
         await utils.expectEngineAssetsExist('host');
       });
+
+      it('should have installed the expected generic resources', async () => {
+        await utils.initEntityEngineForEntityTypesAndWait(['generic']);
+        await utils.expectEngineAssetsExist('generic');
+      });
     });
 
     describe('init error handling', () => {
@@ -55,8 +60,17 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should return "error" when the security data view does not exist', async () => {
         await dataView.delete('security-solution');
-        await utils.initEntityEngineForEntityType('host');
-        await utils.waitForEngineStatus('host', 'error');
+
+        const { body, status } = await api.initEntityEngine(
+          {
+            params: { entityType: 'host' },
+            body: {},
+          },
+          'default'
+        );
+
+        expect(status).toEqual(500);
+        expect(body.message).toContain('Data view not found');
       });
     });
 

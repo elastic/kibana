@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
+import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 
 import { getMicrosoftDefenderEndpointConnectorType } from './microsoft_defender_endpoint';
 import { getConnectorType as getCasesWebhookConnectorType } from './cases_webhook';
@@ -37,7 +37,7 @@ import type { ActionParamsType as ServiceNowITSMActionParams } from './serviceno
 import type { ActionParamsType as ServiceNowSIRActionParams } from './servicenow_sir';
 import { getSentinelOneConnectorType } from './sentinelone';
 import { getCrowdstrikeConnectorType } from './crowdstrike';
-import { ExperimentalFeatures } from '../../common/experimental_features';
+import type { ExperimentalFeatures } from '../../common/experimental_features';
 
 export { ConnectorTypeId as CasesWebhookConnectorTypeId } from './cases_webhook';
 export type { ActionParamsType as CasesWebhookActionParams } from './cases_webhook';

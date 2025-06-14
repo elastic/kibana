@@ -41,7 +41,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
         `--plugin-path=${resolve(
           KIBANA_ROOT,
-          'test/plugin_functional/plugins/core_provider_plugin'
+          'src/platform/test/plugin_functional/plugins/core_provider_plugin'
         )}`,
         ...findTestPluginPaths(resolve(__dirname, 'plugins')),
       ],

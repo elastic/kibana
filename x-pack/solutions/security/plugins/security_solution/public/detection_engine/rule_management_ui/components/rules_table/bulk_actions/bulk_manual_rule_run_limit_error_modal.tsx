@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 
 import { MAX_MANUAL_RULE_RUN_BULK_SIZE } from '../../../../../../common/constants';
-import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
+import * as i18n from '../../../../common/translations';
 
 interface BulkManualRuleRunRulesLimitErrorModalProps {
   onClose: () => void;

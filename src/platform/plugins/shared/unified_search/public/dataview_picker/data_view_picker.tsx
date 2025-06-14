@@ -10,7 +10,6 @@
 import React from 'react';
 import type { EuiButtonProps, EuiSelectableProps } from '@elastic/eui';
 import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
-import { TextBasedLanguages } from '@kbn/esql-utils';
 import { ChangeDataView } from './change_dataview';
 
 export type ChangeDataViewTriggerProps = EuiButtonProps & {
@@ -70,15 +69,13 @@ export interface DataViewPickerProps {
 
   onCreateDefaultAdHocDataView?: (dataViewSpec: DataViewSpec) => void;
   /**
-   * List of the supported text based languages (SQL, ESQL) etc.
-   * Defined per application, if not provided, no text based languages
-   * will be available.
-   */
-  textBasedLanguages?: TextBasedLanguages[];
-  /**
    * Makes the picker disabled by disabling the popover trigger
    */
   isDisabled?: boolean;
+  /**
+   * Optional callback when data view picker is closed
+   */
+  onClosePopover?: () => void;
 }
 
 export const DataViewPicker = ({
@@ -91,9 +88,9 @@ export const DataViewPicker = ({
   onEditDataView,
   onAddField,
   onDataViewCreated,
+  onClosePopover,
   trigger,
   selectableProps,
-  textBasedLanguages,
   onCreateDefaultAdHocDataView,
   isDisabled,
 }: DataViewPickerProps) => {
@@ -105,18 +102,14 @@ export const DataViewPicker = ({
       onEditDataView={onEditDataView}
       onAddField={onAddField}
       onDataViewCreated={onDataViewCreated}
+      onClosePopover={onClosePopover}
       onCreateDefaultAdHocDataView={onCreateDefaultAdHocDataView}
       trigger={trigger}
       adHocDataViews={adHocDataViews}
       managedDataViews={managedDataViews}
       savedDataViews={savedDataViews}
       selectableProps={selectableProps}
-      textBasedLanguages={textBasedLanguages}
       isDisabled={isDisabled}
     />
   );
 };
-
-// React.lazy support
-// eslint-disable-next-line import/no-default-export
-export default DataViewPicker;

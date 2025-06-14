@@ -96,17 +96,6 @@ describe('Update conversation route', () => {
       expect(response.badRequest).toHaveBeenCalled();
     });
 
-    test('rejects isDefault update', async () => {
-      const request = requestMock.create({
-        method: 'put',
-        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
-        body: { ...getUpdateConversationSchemaMock(), isDefault: false },
-      });
-      const result = await server.validate(request);
-
-      expect(result.badRequest).toHaveBeenCalled();
-    });
-
     test('allows title, excludeFromLastConversationStorage, apiConfig, replacements and message', async () => {
       const request = requestMock.create({
         method: 'put',

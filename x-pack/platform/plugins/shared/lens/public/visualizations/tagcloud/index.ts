@@ -7,19 +7,26 @@
 
 import type { CoreSetup } from '@kbn/core/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { FormatFactory } from '@kbn/visualization-ui-components';
 import type { EditorFrameSetup } from '../../types';
 
 export interface TagcloudVisualizationPluginSetupPlugins {
   editorFrame: EditorFrameSetup;
   charts: ChartsPluginSetup;
+  formatFactory: FormatFactory;
 }
 
 export class TagcloudVisualization {
-  setup(core: CoreSetup, { editorFrame, charts }: TagcloudVisualizationPluginSetupPlugins) {
+  setup(
+    core: CoreSetup,
+    { editorFrame, formatFactory, charts }: TagcloudVisualizationPluginSetupPlugins
+  ) {
     editorFrame.registerVisualization(async () => {
-      const { getTagcloudVisualization } = await import('../../async_services');
-      const palettes = await charts.palettes.getPalettes();
-      return getTagcloudVisualization({ paletteService: palettes, kibanaTheme: core.theme });
+      const [{ getTagcloudVisualization }, paletteService] = await Promise.all([
+        import('../../async_services'),
+        charts.palettes.getPalettes(),
+      ]);
+      return getTagcloudVisualization({ paletteService, kibanaTheme: core.theme, formatFactory });
     });
   }
 }

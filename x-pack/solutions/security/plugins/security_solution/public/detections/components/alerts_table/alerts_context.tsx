@@ -10,6 +10,7 @@ import React, {
   memo,
   useContext,
   useRef,
+  useMemo,
   type RefObject,
   type PropsWithChildren,
 } from 'react';
@@ -27,7 +28,8 @@ const AlertsContext = createContext<{
 
 const AlertsContextProviderComponent = ({ children }: PropsWithChildren) => {
   const alertsTableRef = useRef<AlertsTableImperativeApi>(null);
-  return <AlertsContext.Provider value={{ alertsTableRef }}>{children}</AlertsContext.Provider>;
+  const contextValue = useMemo(() => ({ alertsTableRef }), []);
+  return <AlertsContext.Provider value={contextValue}>{children}</AlertsContext.Provider>;
 };
 
 export const AlertsContextProvider = memo(AlertsContextProviderComponent);

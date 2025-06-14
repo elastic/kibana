@@ -60,18 +60,23 @@ function FunctionName({ name: functionName }: { name: string }) {
 }
 
 export function getTimelineItemsfromConversation({
+  conversationId,
   chatService,
   currentUser,
   hasConnector,
   messages,
   chatState,
+  isConversationOwnedByCurrentUser,
   onActionClick,
+  isArchived,
 }: {
+  conversationId?: string;
   chatService: ObservabilityAIAssistantChatService;
   currentUser?: Pick<AuthenticatedUser, 'username' | 'full_name'>;
   hasConnector: boolean;
   messages: Message[];
   chatState: ChatState;
+  isConversationOwnedByCurrentUser: boolean;
   onActionClick: ({
     message,
     payload,
@@ -79,6 +84,7 @@ export function getTimelineItemsfromConversation({
     message: Message;
     payload: ChatActionClickPayload;
   }) => void;
+  isArchived: boolean;
 }): ChatTimelineItem[] {
   const items: ChatTimelineItem[] = [
     {
@@ -89,12 +95,14 @@ export function getTimelineItemsfromConversation({
       loading: false,
       message: {
         '@timestamp': new Date().toISOString(),
-        message: { role: MessageRole.User },
+        message: {
+          role: !!conversationId && !currentUser ? MessageRole.System : MessageRole.User,
+        },
       },
       title: i18n.translate('xpack.aiAssistant.conversationStartTitle', {
         defaultMessage: 'started a conversation',
       }),
-      role: MessageRole.User,
+      role: !!conversationId && !currentUser ? MessageRole.System : MessageRole.User,
     },
     ...messages.map((message, index) => {
       const id = v4();
@@ -192,14 +200,14 @@ export function getTimelineItemsfromConversation({
 
             content = convertMessageToMarkdownCodeBlock(message.message);
 
-            actions.canEdit = hasConnector;
+            actions.canEdit = hasConnector && isConversationOwnedByCurrentUser && !isArchived;
             display.collapsed = true;
           } else {
             // is a prompt by the user
             title = '';
             content = message.message.content;
 
-            actions.canEdit = hasConnector;
+            actions.canEdit = hasConnector && isConversationOwnedByCurrentUser && !isArchived;
             display.collapsed = false;
           }
 
@@ -212,8 +220,8 @@ export function getTimelineItemsfromConversation({
           break;
 
         case MessageRole.Assistant:
-          actions.canRegenerate = hasConnector;
-          actions.canGiveFeedback = true;
+          actions.canRegenerate = hasConnector && isConversationOwnedByCurrentUser && !isArchived;
+          actions.canGiveFeedback = isConversationOwnedByCurrentUser && !isArchived;
           display.hide = false;
 
           // is a function suggestion by the assistant
@@ -240,7 +248,7 @@ export function getTimelineItemsfromConversation({
               display.collapsed = true;
             }
 
-            actions.canEdit = true;
+            actions.canEdit = isConversationOwnedByCurrentUser && !isArchived;
           } else {
             // is an assistant response
             title = '';

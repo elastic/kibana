@@ -43,6 +43,7 @@ describe('ES deprecations API', () => {
       },
       router: mockRouter,
       lib: { handleEsError },
+      log: { error: jest.fn() },
     };
     registerESDeprecationRoutes(routeDependencies);
   });

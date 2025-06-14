@@ -13,7 +13,6 @@ import { ConfigKey, EncryptedSyntheticsMonitorAttributes } from '../../../common
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
-import { getSyntheticsMonitor } from '../../queries/get_monitor';
 
 export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
@@ -39,6 +38,7 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
     server: { encryptedSavedObjects, coreStart },
     savedObjectsClient,
     spaceId,
+    monitorConfigRepository,
   }): Promise<any> => {
     const { monitorId } = request.params;
     try {
@@ -53,13 +53,7 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
       if (Boolean(canSave)) {
         // only user with write permissions can decrypt the monitor
-        const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
-
-        const monitor = await getSyntheticsMonitor({
-          monitorId,
-          encryptedSavedObjectsClient,
-          spaceId,
-        });
+        const monitor = await monitorConfigRepository.getDecrypted(monitorId, spaceId);
         return { ...mapSavedObjectToMonitor({ monitor, internal }), spaceId };
       } else {
         return {

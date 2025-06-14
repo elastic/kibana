@@ -389,12 +389,20 @@ export const TypesFilterButton: FunctionComponent<CustomComponentProps> = ({ que
         <EuiFilterButton
           iconType="user"
           iconSide="left"
+          isToggle
+          isSelected={filters.type === 'rest'}
           hasActiveFilters={filters.type === 'rest'}
           onClick={() => {
             onFilterChange({ ...filters, type: filters.type === 'rest' ? undefined : 'rest' });
           }}
           withNext={types.includes('cross_cluster') || types.includes('managed')}
           data-test-subj="personalFilterButton"
+          aria-label={i18n.translate(
+            'xpack.security.accountManagement.apiKeyBadge.personalAriaLabel',
+            {
+              defaultMessage: 'Filter personal API keys',
+            }
+          )}
         >
           <FormattedMessage
             id="xpack.security.accountManagement.apiKeyBadge.restTitle"
@@ -406,6 +414,8 @@ export const TypesFilterButton: FunctionComponent<CustomComponentProps> = ({ que
         <EuiFilterButton
           iconType="cluster"
           iconSide="left"
+          isToggle
+          isSelected={filters.type === 'cross_cluster'}
           hasActiveFilters={filters.type === 'cross_cluster'}
           onClick={() => {
             onFilterChange({
@@ -415,6 +425,12 @@ export const TypesFilterButton: FunctionComponent<CustomComponentProps> = ({ que
           }}
           withNext={types.includes('managed')}
           data-test-subj="crossClusterFilterButton"
+          aria-label={i18n.translate(
+            'xpack.security.accountManagement.apiKeyBadge.crossClusterAriaLabel',
+            {
+              defaultMessage: 'Filter cross-cluster API keys',
+            }
+          )}
         >
           <FormattedMessage
             id="xpack.security.accountManagement.apiKeyBadge.crossClusterLabel"
@@ -426,6 +442,8 @@ export const TypesFilterButton: FunctionComponent<CustomComponentProps> = ({ que
         <EuiFilterButton
           iconType="gear"
           iconSide="left"
+          isToggle
+          isSelected={filters.type === 'managed'}
           hasActiveFilters={filters.type === 'managed'}
           onClick={() => {
             onFilterChange({
@@ -434,6 +452,12 @@ export const TypesFilterButton: FunctionComponent<CustomComponentProps> = ({ que
             });
           }}
           data-test-subj="managedFilterButton"
+          aria-label={i18n.translate(
+            'xpack.security.accountManagement.apiKeyBadge.managedAriaLabel',
+            {
+              defaultMessage: 'Filter managed API keys',
+            }
+          )}
         >
           <FormattedMessage
             id="xpack.security.accountManagement.apiKeyBadge.managedTitle"
@@ -458,6 +482,8 @@ export const ExpiredFilterButton: FunctionComponent<CustomComponentProps> = ({
   return (
     <>
       <EuiFilterButton
+        isToggle
+        isSelected={filters.expired === false}
         hasActiveFilters={filters.expired === false}
         onClick={() => {
           if (filters.expired === false) {
@@ -475,6 +501,8 @@ export const ExpiredFilterButton: FunctionComponent<CustomComponentProps> = ({
         />
       </EuiFilterButton>
       <EuiFilterButton
+        isToggle
+        isSelected={filters.expired === true}
         hasActiveFilters={filters.expired === true}
         onClick={() => {
           if (filters.expired === true) {
@@ -595,10 +623,10 @@ export const categorizeAggregations = (aggregationResponse?: ApiKeyAggregations)
       : [];
 
     typeBuckets.forEach((type) => {
-      typeFilters.push(type.key);
+      typeFilters.push(type.key as CategorizedApiKey['type']);
     });
     usernameBuckets.forEach((username) => {
-      usernameFilters.push(username.key);
+      usernameFilters.push(`${username.key}`);
     });
     const { namePrefixBased, metadataBased } = managed?.buckets || {};
     if (

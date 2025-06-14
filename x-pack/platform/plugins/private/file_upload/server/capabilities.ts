@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CoreSetup } from '@kbn/core/server';
+import type { CoreSetup } from '@kbn/core/server';
 import { checkFileUploadPrivileges } from './check_privileges';
-import { StartDeps } from './types';
+import type { StartDeps } from './types';
 
 export const setupCapabilities = (
   core: Pick<CoreSetup<StartDeps>, 'capabilities' | 'getStartServices'>

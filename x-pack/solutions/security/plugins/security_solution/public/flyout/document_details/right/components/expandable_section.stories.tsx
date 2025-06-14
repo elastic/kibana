@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { ExpandableSection } from './expandable_section';
 
 const title = <p>{'title'}</p>;
@@ -17,7 +17,7 @@ export default {
   title: 'Flyout/ExpandableSection',
 };
 
-export const Expand: Story<void> = () => {
+export const Expand: StoryFn = () => {
   return (
     <ExpandableSection expanded={false} title={title}>
       {children}
@@ -25,7 +25,7 @@ export const Expand: Story<void> = () => {
   );
 };
 
-export const Collapse: Story<void> = () => {
+export const Collapse: StoryFn = () => {
   return (
     <ExpandableSection expanded={true} title={title}>
       {children}

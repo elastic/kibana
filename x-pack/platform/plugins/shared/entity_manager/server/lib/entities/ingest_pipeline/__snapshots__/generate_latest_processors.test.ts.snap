@@ -10,7 +10,7 @@ Array [
   },
   Object {
     "set": Object {
-      "field": "entity.type",
+      "field": "entity.EngineMetadata.Type",
       "value": "service",
     },
   },
@@ -115,7 +115,7 @@ Array [
   },
   Object {
     "set": Object {
-      "field": "entity.type",
+      "field": "entity.EngineMetadata.Type",
       "value": "service",
     },
   },

@@ -24,6 +24,8 @@ import {
   FlyoutType,
   useJobInfoFlyouts,
 } from '../../../../jobs/components/job_details_flyout/job_details_flyout_context';
+import { useCreateAndNavigateToManagementMlLink } from '../../../../contexts/kibana/use_create_url';
+import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
 interface Props {
   setIsIdSelectorFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
   selectedId?: string;
@@ -92,9 +94,16 @@ export const AnalyticsIdSelectorControls: FC<Props> = ({
   setIsIdSelectorFlyoutVisible,
   selectedId,
 }) => {
+  const [canGetDataFrameAnalytics, canCreateDataFrameAnalytics] = usePermissionCheck([
+    'canGetDataFrameAnalytics',
+    'canCreateDataFrameAnalytics',
+  ]);
+
+  const redirectToDfaJobManagement = useCreateAndNavigateToManagementMlLink('', 'analytics');
+
   return (
     <>
-      <EuiFlexGroup gutterSize="xs" alignItems="center">
+      <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
         <EuiFlexItem grow={false}>
           {selectedId ? (
             <SelectorControl
@@ -125,6 +134,31 @@ export const AnalyticsIdSelectorControls: FC<Props> = ({
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
+        <EuiFlexItem />
+
+        {canGetDataFrameAnalytics ? (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              color="primary"
+              onClick={redirectToDfaJobManagement}
+              disabled={!canGetDataFrameAnalytics}
+              data-test-subj="mlJobSelectorManageJobsButton"
+            >
+              {canCreateDataFrameAnalytics ? (
+                <FormattedMessage
+                  id="xpack.ml.jobSelector.manageJobsLinkLabel"
+                  defaultMessage="Manage jobs"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.ml.jobSelector.viewJobsLinkLabel"
+                  defaultMessage="View jobs"
+                />
+              )}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
       <EuiHorizontalRule />
     </>

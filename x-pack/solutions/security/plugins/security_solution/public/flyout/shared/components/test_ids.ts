@@ -54,3 +54,7 @@ export const USER_HISTORY_ROW_TEST_ID = `${FLYOUT_HISTORY_TEST_ID}UserRow` as co
 export const NETWORK_HISTORY_ROW_TEST_ID = `${FLYOUT_HISTORY_TEST_ID}NetworkRow` as const;
 export const GENERIC_HISTORY_ROW_TEST_ID = `${FLYOUT_HISTORY_TEST_ID}GenericRow` as const;
 export const NO_DATA_HISTORY_ROW_TEST_ID = `${FLYOUT_HISTORY_TEST_ID}NoDataRow` as const;
+export const MISCONFIGURATION_HISTORY_ROW_TEST_ID =
+  `${FLYOUT_HISTORY_TEST_ID}MisconfigurationRow` as const;
+export const VULNERABILITY_HISTORY_ROW_TEST_ID =
+  `${FLYOUT_HISTORY_TEST_ID}VulnerabilityRow` as const;

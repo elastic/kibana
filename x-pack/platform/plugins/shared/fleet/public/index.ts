@@ -10,6 +10,7 @@ import type { PluginInitializerContext } from '@kbn/core/public';
 import { lazy } from 'react';
 
 import { FleetPlugin } from './plugin';
+
 export type { GetPackagesResponse } from './types';
 export { installationStatuses } from '../common/constants';
 
@@ -60,7 +61,7 @@ export { pagePathGetters, EPM_API_ROUTES } from './constants';
 export { pkgKeyFromPackageInfo } from './services';
 export type { CustomAssetsAccordionProps } from './components/custom_assets_accordion';
 export { CustomAssetsAccordion } from './components/custom_assets_accordion';
-export { PackageIcon } from './components/package_icon';
+export { CardIcon, PackageIcon } from './components/package_icon';
 // Export Package editor components for custom editors
 export { PackagePolicyEditorDatastreamPipelines } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_pipelines';
 export type { PackagePolicyEditorDatastreamPipelinesProps } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_pipelines';
@@ -89,3 +90,15 @@ export const AvailablePackagesHook = () => {
     './applications/integrations/sections/epm/screens/home/hooks/use_available_packages'
   );
 };
+
+export const LazyPackageCard = lazy(() =>
+  import('./applications/integrations/sections/epm/components/package_card').then((module) => ({
+    default: module.PackageCard,
+  }))
+);
+
+export { useGetDataStreams } from './hooks/use_request/data_stream';
+export { useGetPackagesQuery, useGetPackageInfoByKeyQuery } from './hooks/use_request/epm';
+export { useGetSettingsQuery } from './hooks/use_request/settings';
+export { useLink } from './hooks/use_link';
+export { NamespaceComboBox } from './components/namespace_combo_box';

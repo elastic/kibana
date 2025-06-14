@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/react-kibana-mount';
+import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
@@ -108,7 +108,7 @@ export async function handleSystemColorModeChange({
           title: i18n.translate('core.ui.chrome.appearanceChange.successNotificationTitle', {
             defaultMessage: 'System color mode updated',
           }),
-          text: toMountPoint(
+          text: mountReactNode(
             <>
               <p>
                 {i18n.translate('core.ui.chrome.appearanceChange.successNotificationText', {
@@ -131,8 +131,7 @@ export async function handleSystemColorModeChange({
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </>,
-            coreStart
+            </>
           ),
         },
         { toastLifeTimeMs: Infinity } // leave it on until discard or page reload

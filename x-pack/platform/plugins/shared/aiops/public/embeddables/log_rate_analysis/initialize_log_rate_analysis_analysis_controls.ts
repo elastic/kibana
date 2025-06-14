@@ -7,14 +7,20 @@
 
 import type { StateComparators } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import type { LogRateAnalysisComponentApi, LogRateAnalysisEmbeddableState } from './types';
+import type {
+  LogRateAnalysisComponentApi,
+  LogRateAnalysisEmbeddableRuntimeState,
+  LogRateAnalysisEmbeddableState,
+} from './types';
 
 type LogRateAnalysisEmbeddableCustomState = Omit<
   LogRateAnalysisEmbeddableState,
   'timeRange' | 'title' | 'description' | 'hidePanelTitles' | 'windowParameters'
 >;
 
-export const initializeLogRateAnalysisControls = (rawState: LogRateAnalysisEmbeddableState) => {
+export const initializeLogRateAnalysisControls = (
+  rawState: LogRateAnalysisEmbeddableRuntimeState
+) => {
   const dataViewId = new BehaviorSubject(rawState.dataViewId);
 
   const updateUserInput = (update: LogRateAnalysisEmbeddableCustomState) => {
@@ -29,14 +35,14 @@ export const initializeLogRateAnalysisControls = (rawState: LogRateAnalysisEmbed
 
   const logRateAnalysisControlsComparators: StateComparators<LogRateAnalysisEmbeddableCustomState> =
     {
-      dataViewId: [dataViewId, (arg) => dataViewId.next(arg)],
+      dataViewId: 'referenceEquality',
     };
 
   return {
     logRateAnalysisControlsApi: {
       dataViewId,
       updateUserInput,
-    } as unknown as LogRateAnalysisComponentApi,
+    } as LogRateAnalysisComponentApi,
     serializeLogRateAnalysisChartState,
     logRateAnalysisControlsComparators,
   };

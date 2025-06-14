@@ -6,8 +6,8 @@
  */
 
 import type { RouteValidationFunction } from '@kbn/core/server';
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/Either';
+import { pipe } from 'fp-ts/pipeable';
 import { Errors, Type } from 'io-ts';
 import { formatErrors } from '../../common/runtime_types';
 

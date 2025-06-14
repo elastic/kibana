@@ -6,8 +6,8 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
+import { IN_APP_EMBEDDABLE_EDIT_TRIGGER } from '../constants';
 
-export const IN_APP_EMBEDDABLE_EDIT_TRIGGER = 'IN_APP_EMBEDDABLE_EDIT_TRIGGER';
 export const inAppEmbeddableEditTrigger: Trigger = {
   id: IN_APP_EMBEDDABLE_EDIT_TRIGGER,
   title: i18n.translate('xpack.lens.inAppEditTrigger.title', {

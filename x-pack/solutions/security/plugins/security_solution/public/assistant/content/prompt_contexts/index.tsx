@@ -8,7 +8,7 @@
 import type { PromptContext, PromptContextTemplate } from '@kbn/elastic-assistant';
 import * as i18nDataQuality from '@kbn/ecs-data-quality-dashboard';
 import * as i18n from './translations';
-import * as i18nDetections from '../../../detections/pages/detection_engine/rules/translations';
+import * as i18nDetections from '../../../detection_engine/common/translations';
 import * as i18nEventDetails from '../../../common/components/event_details/translations';
 import * as i18nUserPrompts from '../prompts/user/translations';
 

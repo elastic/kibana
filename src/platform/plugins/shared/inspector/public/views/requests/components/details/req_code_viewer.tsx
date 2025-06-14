@@ -16,6 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
 import React, { ReactNode } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
+import { css } from '@emotion/react';
 
 interface RequestCodeViewerProps {
   value: string;
@@ -37,6 +38,11 @@ export const RequestCodeViewer = ({ value, actions }: RequestCodeViewerProps) =>
       wrap={false}
       responsive={false}
       className="insRequestCodeViewer"
+      css={css({
+        '.react-monaco-editor-container': {
+          flexGrow: 1, // Ensure the editor takes the full height of its flex container on Safari.
+        },
+      })}
     >
       <EuiFlexItem grow={false}>
         <EuiSpacer size="s" />

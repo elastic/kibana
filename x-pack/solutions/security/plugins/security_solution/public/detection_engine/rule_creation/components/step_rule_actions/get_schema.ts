@@ -6,10 +6,10 @@
  */
 
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
-import { debouncedValidateRuleActionsField } from '../../../../detections/containers/detection_engine/rules/validate_rule_actions_field';
+import { debouncedValidateRuleActionsField } from '../../../../common/containers/rule_actions/validate_rule_actions_field';
 
 import type { FormSchema } from '../../../../shared_imports';
-import type { ActionsStepRule } from '../../../../detections/pages/detection_engine/rules/types';
+import type { ActionsStepRule } from '../../../common/types';
 
 export const getSchema = ({
   actionTypeRegistry,

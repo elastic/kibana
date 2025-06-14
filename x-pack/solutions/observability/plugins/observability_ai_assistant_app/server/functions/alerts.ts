@@ -112,9 +112,10 @@ export function registerAlertsFunction({
           signal,
           chat: (
             operationName,
-            { messages: nextMessages, functionCall, functions: nextFunctions }
+            { messages: nextMessages, functionCall, functions: nextFunctions, systemMessage }
           ) => {
             return chat(operationName, {
+              systemMessage,
               messages: nextMessages,
               functionCall,
               functions: nextFunctions,
@@ -135,7 +136,7 @@ export function registerAlertsFunction({
     functions.registerFunction(
       {
         name: 'alerts',
-        description: `Get alerts for Observability.  Make sure ${GET_ALERTS_DATASET_INFO_NAME} was called before.
+        description: `Get alerts for Observability. Make sure ${GET_ALERTS_DATASET_INFO_NAME} was called before.
         Use this to get open (and optionally recovered) alerts for Observability assets, like services,
         hosts or containers.
         Display the response in tabular format if appropriate.
@@ -194,7 +195,9 @@ export function registerAlertsFunction({
               filter: [
                 {
                   range: {
-                    '@timestamp': {
+                    // Note: The @timestamp field is the value for when the alert was last updated
+                    // and not when the alert was created
+                    'kibana.alert.start': {
                       gte: start,
                       lte: end,
                     },

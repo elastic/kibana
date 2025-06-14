@@ -67,6 +67,7 @@ interface Props {
   userDomain: string | null | undefined;
   userName: string | null | undefined;
   workingDirectory: string | null | undefined;
+  scopeId: string;
 }
 
 export const SystemGenericFileLine = React.memo<Props>(
@@ -109,6 +110,7 @@ export const SystemGenericFileLine = React.memo<Props>(
     userDomain,
     userName,
     workingDirectory,
+    scopeId,
   }) => (
     <>
       <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="none" wrap={true}>
@@ -119,6 +121,7 @@ export const SystemGenericFileLine = React.memo<Props>(
           userName={userName}
           workingDirectory={workingDirectory}
           hostName={hostName}
+          scopeId={scopeId}
         />
         <TokensFlexItem grow={false} component="span">
           {text}
@@ -133,6 +136,7 @@ export const SystemGenericFileLine = React.memo<Props>(
             fileExtOriginalPath={fileExtOriginalPath}
             fileName={fileName}
             filePath={filePath}
+            scopeId={scopeId}
           />
         )}
         {showVia(eventAction) && (
@@ -149,10 +153,18 @@ export const SystemGenericFileLine = React.memo<Props>(
             processPid={processPid}
             processName={processName}
             processExecutable={processExecutable}
+            scopeId={scopeId}
           />
         </TokensFlexItem>
-        <Args args={args} contextId={contextId} eventId={id} processTitle={processTitle} />
+        <Args
+          scopeId={scopeId}
+          args={args}
+          contextId={contextId}
+          eventId={id}
+          processTitle={processTitle}
+        />
         <ExitCodeDraggable
+          scopeId={scopeId}
           contextId={contextId}
           endgameExitCode={endgameExitCode}
           eventId={id}
@@ -161,6 +173,7 @@ export const SystemGenericFileLine = React.memo<Props>(
         />
         {!isProcessStoppedOrTerminationEvent(eventAction) && (
           <ParentProcessDraggable
+            scopeId={scopeId}
             contextId={contextId}
             endgameParentProcessName={endgameParentProcessName}
             eventId={id}
@@ -177,6 +190,7 @@ export const SystemGenericFileLine = React.memo<Props>(
         )}
         <TokensFlexItem grow={false} component="span">
           <DraggableBadge
+            scopeId={scopeId}
             contextId={contextId}
             eventId={id}
             field="event.outcome"
@@ -187,12 +201,14 @@ export const SystemGenericFileLine = React.memo<Props>(
           />
         </TokensFlexItem>
         <AuthSsh
+          scopeId={scopeId}
           contextId={contextId}
           eventId={id}
           sshSignature={sshSignature}
           sshMethod={sshMethod}
         />
         <Package
+          scopeId={scopeId}
           contextId={contextId}
           eventId={id}
           packageName={packageName}
@@ -201,10 +217,20 @@ export const SystemGenericFileLine = React.memo<Props>(
         />
       </EuiFlexGroup>
       {!skipRedundantFileDetails && (
-        <FileHash contextId={contextId} eventId={id} fileHashSha256={fileHashSha256} />
+        <FileHash
+          scopeId={scopeId}
+          contextId={contextId}
+          eventId={id}
+          fileHashSha256={fileHashSha256}
+        />
       )}
       {!skipRedundantProcessDetails && (
-        <ProcessHash contextId={contextId} eventId={id} processHashSha256={processHashSha256} />
+        <ProcessHash
+          scopeId={scopeId}
+          contextId={contextId}
+          eventId={id}
+          processHashSha256={processHashSha256}
+        />
       )}
 
       {message != null && showMessage && (
@@ -232,7 +258,7 @@ interface GenericDetailsProps {
   skipRedundantFileDetails?: boolean;
   skipRedundantProcessDetails?: boolean;
   text: string;
-  timelineId: string;
+  scopeId: string;
 }
 
 export const SystemGenericFileDetails = React.memo<GenericDetailsProps>(
@@ -243,7 +269,7 @@ export const SystemGenericFileDetails = React.memo<GenericDetailsProps>(
     skipRedundantFileDetails = false,
     skipRedundantProcessDetails = false,
     text,
-    timelineId,
+    scopeId,
   }) => {
     const id = data._id;
     const message: string | null = data.message != null ? data.message[0] : null;
@@ -323,9 +349,10 @@ export const SystemGenericFileDetails = React.memo<GenericDetailsProps>(
           sshSignature={sshSignature}
           sshMethod={sshMethod}
           outcome={outcome}
+          scopeId={scopeId}
         />
         <EuiSpacer size="s" />
-        <NetflowRenderer data={data} timelineId={timelineId} />
+        <NetflowRenderer data={data} timelineId={scopeId} />
       </Details>
     );
   }

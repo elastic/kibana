@@ -20,7 +20,6 @@ export {
   FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE,
   FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE,
   FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE,
-  FLEET_CLOUD_DEFEND_PACKAGE,
   FLEET_ENDPOINT_PACKAGE,
   // Saved object type
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -123,6 +122,7 @@ export type {
   // Models
   Agent,
   AgentStatus,
+  DataStream,
   FleetServerAgentMetadata,
   AgentMetadata,
   NewAgentPolicy,
@@ -203,3 +203,5 @@ export type {
 } from './types';
 
 export { ElasticsearchAssetType } from './types';
+
+export { FleetError } from './errors';

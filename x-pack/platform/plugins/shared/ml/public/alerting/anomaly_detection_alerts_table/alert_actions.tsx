@@ -20,6 +20,7 @@ import { ALERT_RULE_NAME, ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-uti
 import type { GetAlertsTableProp } from '@kbn/response-ops-alerts-table/types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
+import { STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX } from '@kbn/response-ops-alerts-table/constants';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { useMlKibana } from '../../application/contexts/kibana';
 
@@ -90,9 +91,7 @@ export const AlertActions: GetAlertsTableProp<'renderActionsCell'> = (props) => 
         onActionExecuted={closeActionsPopover}
         isAlertDetailsEnabled={false}
         resolveRulePagePath={(alertRuleId) =>
-          alertRuleId
-            ? `/app/management/insightsAndAlerting/triggersActions/rule/${alertRuleId}`
-            : null
+          alertRuleId ? `${STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX}${alertRuleId}` : null
         }
         {...props}
       />

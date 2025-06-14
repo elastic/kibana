@@ -33,10 +33,18 @@ export const ConnectorSelectorPanel = React.memo<ConnectorSelectorPanelProps>(
     );
 
     useEffect(() => {
-      if (connectors.length === 1) {
+      if (selectedConnectorId || !connectors.length) {
+        return;
+      }
+      const inferenceConnector = connectors.find(
+        ({ actionTypeId }) => actionTypeId === '.inference'
+      );
+      if (inferenceConnector) {
+        onConnectorSelected(inferenceConnector);
+      } else if (connectors.length === 1) {
         onConnectorSelected(connectors[0]);
       }
-    }, [connectors, onConnectorSelected]);
+    }, [selectedConnectorId, connectors, onConnectorSelected]);
 
     const connectorOptions = useMemo(
       () =>

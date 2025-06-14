@@ -19,7 +19,6 @@ export const createDatasetQuality = ({
   core,
   plugins,
   telemetryClient,
-  isFailureStoreEnabled,
 }: CreateDatasetQualityArgs) => {
   return ({ controller }: DatasetQualityProps) => {
     return (
@@ -28,7 +27,6 @@ export const createDatasetQuality = ({
         core={core}
         plugins={plugins}
         telemetryClient={telemetryClient}
-        isFailureStoreEnabled={isFailureStoreEnabled}
       />
     );
   };

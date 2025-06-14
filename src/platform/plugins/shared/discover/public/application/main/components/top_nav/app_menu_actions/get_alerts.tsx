@@ -10,21 +10,16 @@
 import React, { useCallback, useMemo } from 'react';
 import type { DataView } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
-import {
-  AppMenuActionId,
-  AppMenuActionSubmenuSecondary,
-  AppMenuActionType,
-} from '@kbn/discover-utils';
-import {
-  AlertConsumers,
-  ES_QUERY_ID,
-  RuleCreationValidConsumer,
-  STACK_ALERTS_FEATURE_ID,
-} from '@kbn/rule-data-utils';
-import { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
-import { DiscoverStateContainer } from '../../../state_management/discover_state';
-import { AppMenuDiscoverParams } from './types';
-import { DiscoverServices } from '../../../../../build_services';
+import type { AppMenuActionSubmenuSecondary } from '@kbn/discover-utils';
+import { AppMenuActionId, AppMenuActionType } from '@kbn/discover-utils';
+import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
+import { AlertConsumers, ES_QUERY_ID, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
+import type { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
+import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
+import type { DiscoverStateContainer } from '../../../state_management/discover_state';
+import type { AppMenuDiscoverParams } from './types';
+import type { DiscoverServices } from '../../../../../build_services';
 
 const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
   AlertConsumers.INFRASTRUCTURE,
@@ -38,6 +33,8 @@ interface EsQueryAlertMetaData extends RuleTypeMetaData {
   adHocDataViewList: DataView[];
 }
 
+const RuleFormFlyoutWithType = RuleFormFlyout<EsQueryAlertMetaData>;
+
 const CreateAlertFlyout: React.FC<{
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
@@ -47,7 +44,9 @@ const CreateAlertFlyout: React.FC<{
   const query = stateContainer.appState.getState().query;
 
   const { dataView, isEsqlMode, adHocDataViews, onUpdateAdHocDataViews } = discoverParams;
-  const { triggersActionsUi } = services;
+  const {
+    triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
+  } = services;
   const timeField = getTimeField(dataView);
 
   /**
@@ -79,24 +78,33 @@ const CreateAlertFlyout: React.FC<{
     [adHocDataViews]
   );
 
-  return triggersActionsUi?.getAddRuleFlyout({
-    metadata: discoverMetadata,
-    consumer: 'alerts',
-    onClose: (_, metadata) => {
-      onUpdateAdHocDataViews(metadata!.adHocDataViewList);
-      onFinishAction();
-    },
-    onSave: async (metadata) => {
-      onUpdateAdHocDataViews(metadata!.adHocDataViewList);
-    },
-    canChangeTrigger: false,
-    ruleTypeId: ES_QUERY_ID,
-    initialValues: { params: getParams() },
-    validConsumers: EsQueryValidConsumer,
-    useRuleProducer: true,
-    // Default to the Logs consumer if it's available. This should fall back to Stack Alerts if it's not.
-    initialSelectedConsumer: AlertConsumers.LOGS,
-  });
+  // Some of the rule form's required plugins are from x-pack, so make sure they're defined before
+  // rendering the flyout. The alerting plugin is also part of x-pack, so this check should probably never
+  // return false. This is mostly here because Typescript requires us to mark x-pack plugins as optional.
+  if (!isValidRuleFormPlugins(services)) return null;
+
+  return (
+    <RuleFormFlyoutWithType
+      plugins={{
+        ...services,
+        ruleTypeRegistry,
+        actionTypeRegistry,
+      }}
+      initialMetadata={discoverMetadata}
+      consumer={'alerts'}
+      onCancel={onFinishAction}
+      onSubmit={onFinishAction}
+      onChangeMetaData={(metadata: EsQueryAlertMetaData) =>
+        onUpdateAdHocDataViews(metadata.adHocDataViewList)
+      }
+      ruleTypeId={ES_QUERY_ID}
+      initialValues={{ params: getParams() }}
+      validConsumers={EsQueryValidConsumer}
+      shouldUseRuleProducer
+      // Default to the Logs consumer if it's available. This should fall back to Stack Alerts if it's not.
+      multiConsumerSelection={AlertConsumers.LOGS}
+    />
+  );
 };
 
 export const getAlertsAppMenuItem = ({

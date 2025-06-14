@@ -109,6 +109,12 @@ export interface ReportingServerInfo {
   uuid: string;
 }
 
+export interface ReportingHealthInfo {
+  isSufficientlySecure: boolean;
+  hasPermanentEncryptionKey: boolean;
+  areNotificationsEnabled: boolean;
+}
+
 export type IlmPolicyMigrationStatus = 'policy-not-found' | 'indices-not-managed-by-policy' | 'ok';
 
 export interface IlmPolicyStatusResponse {
@@ -162,6 +168,7 @@ export interface ReportSource {
    */
   kibana_name?: string; // for troubleshooting
   kibana_id?: string; // for troubleshooting
+  space_id?: string;
   timeout?: number; // for troubleshooting: the actual comparison uses the config setting xpack.reporting.queue.timeout
   max_attempts?: number; // for troubleshooting: the actual comparison uses the config setting xpack.reporting.capture.maxAttempts
   started_at?: string; // timestamp in UTC

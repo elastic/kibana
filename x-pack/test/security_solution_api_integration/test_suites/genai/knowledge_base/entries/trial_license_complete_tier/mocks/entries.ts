@@ -21,7 +21,6 @@ export const documentEntry: DocumentEntryCreateFields = {
   namespace: 'default',
   text: 'This is a sample document entry',
   global: false,
-  users: undefined,
 };
 
 export const globalDocumentEntry: DocumentEntryCreateFields = {
@@ -39,6 +38,5 @@ export const indexEntry: IndexEntryCreateFields = {
   field: 'sample-field',
   description: 'This is a sample index entry',
   queryDescription: 'Use sample-field to search in sample-index',
-  users: undefined,
   global: false,
 };

@@ -7,13 +7,13 @@
 
 import pMap from 'p-map';
 import { chunk } from 'lodash';
-import { KueryNode } from '@kbn/es-query';
-import { Logger, SavedObjectsBulkUpdateObject } from '@kbn/core/server';
+import type { KueryNode } from '@kbn/es-query';
+import type { Logger, SavedObjectsBulkUpdateObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { convertRuleIdsToKueryNode } from '../../lib';
-import { BulkOperationError } from '../types';
+import type { BulkOperationError } from '../types';
 import { waitBeforeNextRetry, RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';
-import { RawRule } from '../../types';
+import type { RawRule } from '../../types';
 
 const MAX_RULES_IDS_IN_RETRY = 1000;
 

@@ -8,11 +8,12 @@
 import { combineLatest, of } from 'rxjs';
 import { pick, merge } from 'lodash';
 import { map, startWith } from 'rxjs';
-import { JsonObject } from '@kbn/utility-types';
-import { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
-import { CLAIM_STRATEGY_UPDATE_BY_QUERY, TaskManagerConfig } from '../config';
+import type { JsonObject } from '@kbn/utility-types';
+import type { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
+import type { TaskManagerConfig } from '../config';
+import { CLAIM_STRATEGY_UPDATE_BY_QUERY } from '../config';
 import { getCapacityInCost, getCapacityInWorkers } from '../task_pool';
-import { TaskPollingLifecycle } from '../polling_lifecycle';
+import type { TaskPollingLifecycle } from '../polling_lifecycle';
 
 const CONFIG_FIELDS_TO_EXPOSE = [
   'request_capacity',

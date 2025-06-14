@@ -40,7 +40,7 @@ export const GuideCard = ({
   card,
   guidesState,
   activateGuide,
-  navigateToApp,
+  navigateToUrl,
   activeFilter,
 }: GuideCardsProps & { card: GuideCardConstants }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -52,24 +52,18 @@ export const GuideCard = ({
 
   const onClick = useCallback(async () => {
     setIsLoading(true);
-    if (card.guideId) {
-      await activateGuide(card.guideId, guideState);
-    } else if (card.navigateTo) {
-      await navigateToApp(card.navigateTo?.appId, {
-        path: card.navigateTo.path,
-      });
-    } else if (card.openEndpointModal) {
-      openWiredConnectionDetails();
+    try {
+      if (card.guideId) {
+        await activateGuide(card.guideId, guideState);
+      } else if (card.url) {
+        await navigateToUrl(card.url);
+      } else if (card.openEndpointModal) {
+        openWiredConnectionDetails();
+      }
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
-  }, [
-    activateGuide,
-    card.guideId,
-    card.navigateTo,
-    guideState,
-    navigateToApp,
-    card.openEndpointModal,
-  ]);
+  }, [activateGuide, guideState, navigateToUrl, card.url, card.guideId, card.openEndpointModal]);
 
   const isHighlighted = activeFilter === card.solution;
   const isComplete = guideState && guideState.status === 'complete';

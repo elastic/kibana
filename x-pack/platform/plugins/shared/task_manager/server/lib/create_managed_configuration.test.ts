@@ -17,10 +17,10 @@ import {
   INTERVAL_AFTER_BLOCK_EXCEPTION,
 } from './create_managed_configuration';
 import { mockLogger } from '../test_utils';
+import type { TaskManagerConfig } from '../config';
 import {
   CLAIM_STRATEGY_UPDATE_BY_QUERY,
   CLAIM_STRATEGY_MGET,
-  TaskManagerConfig,
   DEFAULT_CAPACITY,
   DEFAULT_POLL_INTERVAL,
 } from '../config';

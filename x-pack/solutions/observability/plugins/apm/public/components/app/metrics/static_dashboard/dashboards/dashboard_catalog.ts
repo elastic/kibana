@@ -5,53 +5,100 @@
  * 2.0.
  */
 
-export const AGENT_NAME_DASHBOARD_FILE_MAPPING: Record<string, string> = {
-  nodejs: 'nodejs',
-  'opentelemetry/nodejs': 'opentelemetry_nodejs',
-  'opentelemetry/nodejs/elastic': 'opentelemetry_nodejs',
-  java: 'java',
-  'opentelemetry/java': 'opentelemetry_java',
-  'opentelemetry/java/opentelemetry-java-instrumentation': 'opentelemetry_java',
-  'opentelemetry/java/elastic': 'opentelemetry_java',
-  'opentelemetry/dotnet': 'opentelemetry_dotnet',
-  'opentelemetry/dotnet/opentelemetry-dotnet-instrumentation': 'opentelemetry_dotnet',
-  'opentelemetry/dotnet/elastic': 'opentelemetry_dotnet',
-};
+// The new dashboard file names should be added here
+export const existingDashboardFileNames = new Set([
+  'classic_apm-apm-nodejs',
+  'classic_apm-apm-java',
+  'classic_apm-otel_other-nodejs',
+  'classic_apm-otel_other-java',
+  'classic_apm-otel_other-dotnet',
+  'classic_apm-edot-nodejs',
+  'classic_apm-edot-java',
+  'otel_native-edot-java',
+  'classic_apm-edot-dotnet',
+  'otel_native-edot-python',
+  'otel_native-edot-nodejs',
+  'classic_apm-otel_other-go',
+  'otel_native-otel_other-go',
+]);
 
-/**
- * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
- * See https://webpack.js.org/api/module-methods/#magic-comments
- */
-export async function loadDashboardFile(filename: string): Promise<any> {
+// The new dashboard files should be mapped here
+// + changed with the new ones (following the naming convention)
+// + similar mapping for edot needed
+//     - example: otel_native-edot-nodejs
+export async function loadDashboardFile(filename: string) {
   switch (filename) {
-    case 'nodejs': {
+    case 'classic_apm-apm-nodejs': {
       return import(
-        /* webpackChunkName: "lazyNodeJsDashboard" */
+        /* webpackChunkName: "lazyNodeJsClassicApmDashboard" */
         './nodejs.json'
       );
     }
-    case 'opentelemetry_nodejs': {
+    case 'classic_apm-otel_other-nodejs': {
       return import(
-        /* webpackChunkName: "lazyNodeJsDashboard" */
+        /* webpackChunkName: "lazyNodeJsApmOtelDashboard" */
         './opentelemetry_nodejs.json'
       );
     }
-    case 'java': {
+    case 'classic_apm-edot-nodejs': {
       return import(
-        /* webpackChunkName: "lazyJavaDashboard" */
+        /* webpackChunkName: "lazyNodeJsOtelNativeDashboard" */
+        './opentelemetry_nodejs.json'
+      );
+    }
+    case 'classic_apm-apm-java': {
+      return import(
+        /* webpackChunkName: "lazyJavaClassicApmDashboard" */
         './java.json'
       );
     }
-    case 'opentelemetry_java': {
+    case 'classic_apm-otel_other-java': {
       return import(
-        /* webpackChunkName: "lazyJavaDashboard" */
+        /* webpackChunkName: "lazyJavaApmOtelDashboard" */
         './opentelemetry_java.json'
       );
     }
-    case 'opentelemetry_dotnet': {
+    case 'classic_apm-edot-java': {
       return import(
-        /* webpackChunkName: "lazyOtelDotnetDashboard" */
+        /* webpackChunkName: "lazyJavaOtelNativeDashboard" */
+        './opentelemetry_java.json'
+      );
+    }
+    case 'otel_native-edot-java': {
+      return import(
+        /* webpackChunkName: "lazyJavaOtelNativeEdotDashboard" */
+        './otel_native-edot-java.json'
+      );
+    }
+    case 'classic_apm-edot-dotnet': {
+      return import(
+        /* webpackChunkName: "lazyDotnetOtelNativeDashboard" */
         './opentelemetry_dotnet.json'
+      );
+    }
+    case 'classic_apm-otel_other-dotnet': {
+      return import(
+        /* webpackChunkName: "lazyDotnetApmOtelDashboard" */
+        './opentelemetry_dotnet.json'
+      );
+    }
+    case 'otel_native-edot-python': {
+      return import(
+        /* webpackChunkName: "lazyPythonOtelNativeEdotDashboard" */
+        './otel_native-edot-python.json'
+      );
+    }
+    case 'otel_native-edot-nodejs': {
+      return import(
+        /* webpackChunkName: "lazyNodeJsOtelNativeEdotDashboard" */
+        './otel_native-edot-nodejs.json'
+      );
+    }
+    case 'otel_native-otel_other-go':
+    case 'classic_apm-otel_other-go': {
+      return import(
+        /* webpackChunkName: "lazyGoOtelNativeDashboard" */
+        './otel_native-otel_other-go.json'
       );
     }
     default: {

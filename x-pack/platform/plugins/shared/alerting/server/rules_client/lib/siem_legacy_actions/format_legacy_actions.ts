@@ -9,12 +9,13 @@ import { chunk } from 'lodash';
 import type { SavedObjectsFindOptionsReference, Logger } from '@kbn/core/server';
 import pMap from 'p-map';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import { RuleAction, Rule } from '../../../types';
+import type { RuleAction, Rule } from '../../../types';
 import type { RuleExecutorServices } from '../../..';
 import { injectReferencesIntoActions } from '../../common';
 import { transformToNotifyWhen } from './transform_to_notify_when';
 import { transformFromLegacyActions } from './transform_legacy_actions';
-import { LegacyIRuleActionsAttributes, legacyRuleActionsSavedObjectType } from './types';
+import type { LegacyIRuleActionsAttributes } from './types';
+import { legacyRuleActionsSavedObjectType } from './types';
 import { transformToAlertThrottle } from './transform_to_alert_throttle';
 
 /**

@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import './spaces_menu.scss';
-
-import type { ExclusiveUnion } from '@elastic/eui';
+import type { ExclusiveUnion, WithEuiThemeProps } from '@elastic/eui';
 import {
   EuiLoadingSpinner,
   EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSelectable,
   EuiText,
+  withEuiTheme,
 } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable';
 import type {
   EuiSelectableOnChangeEvent,
   EuiSelectableSearchableSearchProps,
 } from '@elastic/eui/src/components/selectable/selectable';
+import { css } from '@emotion/react';
 import React, { Component, Fragment, lazy, Suspense } from 'react';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
@@ -52,9 +52,10 @@ interface Props {
   allowSolutionVisibility: boolean;
   eventTracker: EventTracker;
 }
-class SpacesMenuUI extends Component<Props> {
+class SpacesMenuUI extends Component<Props & WithEuiThemeProps> {
   public render() {
     const spaceOptions: EuiSelectableOption[] = this.getSpaceOptions();
+    const { euiTheme } = this.props.theme;
 
     const noSpacesMessage = (
       <EuiText color="subdued" className="eui-textCenter">
@@ -96,7 +97,9 @@ class SpacesMenuUI extends Component<Props> {
             defaultMessage: 'Spaces',
           })}
           id={this.props.id}
-          className={'spcMenu'}
+          css={css`
+            max-width: calc(${euiTheme.size.l} * 10);
+          `}
           title={i18n.translate('xpack.spaces.navControl.spacesMenu.changeCurrentSpaceTitle', {
             defaultMessage: 'Change current space',
           })}
@@ -217,7 +220,6 @@ class SpacesMenuUI extends Component<Props> {
     return (
       <ManageSpacesButton
         key="manageSpacesButton"
-        className="spcMenu__manageButton"
         size="s"
         onClick={this.props.onClickManageSpaceBtn}
         capabilities={this.props.capabilities}
@@ -227,4 +229,4 @@ class SpacesMenuUI extends Component<Props> {
   };
 }
 
-export const SpacesMenu = injectI18n(SpacesMenuUI);
+export const SpacesMenu = withEuiTheme(injectI18n(SpacesMenuUI));

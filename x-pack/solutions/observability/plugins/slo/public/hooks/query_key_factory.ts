@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Indicator } from '@kbn/slo-schema';
+import type { Indicator, Objective } from '@kbn/slo-schema';
 
 interface SloListFilter {
   kqlQuery: string;
@@ -51,8 +51,14 @@ export const sloKeys = {
   historicalSummaries: () => [...sloKeys.all, 'historicalSummary'] as const,
   historicalSummary: (list: Array<{ sloId: string; instanceId: string }>) =>
     [...sloKeys.historicalSummaries(), list] as const,
-  definitions: (search: string, page: number, perPage: number, includeOutdatedOnly: boolean) =>
-    [...sloKeys.all, 'definitions', search, page, perPage, includeOutdatedOnly] as const,
+  allDefinitions: () => [...sloKeys.all, 'definitions'],
+  definitions: (params: {
+    search: string;
+    page: number;
+    perPage: number;
+    includeOutdatedOnly: boolean;
+    validTags: string;
+  }) => [...sloKeys.allDefinitions(), params],
   globalDiagnosis: () => [...sloKeys.all, 'globalDiagnosis'] as const,
   health: (list: Array<{ sloId: string; sloInstanceId: string }>) =>
     [...sloKeys.all, 'health', list] as const,
@@ -61,11 +67,17 @@ export const sloKeys = {
     instanceId: string | undefined,
     windows: Array<{ name: string; duration: string }>
   ) => [...sloKeys.all, 'burnRates', sloId, instanceId, windows] as const,
-  preview: (
-    indicator: Indicator,
-    range: { from: Date; to: Date },
-    groupings?: Record<string, unknown>
-  ) => [...sloKeys.all, 'preview', indicator, range, groupings] as const,
+  preview: (params: {
+    remoteName?: string;
+    groupings?: Record<string, string | number>;
+    objective?: Objective;
+    indicator: Indicator;
+    range: {
+      from: Date;
+      to: Date;
+    };
+    groupBy?: string[];
+  }) => [...sloKeys.all, 'preview', params] as const,
   burnRateRules: (search: string) => [...sloKeys.all, 'burnRateRules', search],
   groupings: (params: {
     sloId: string;
@@ -76,6 +88,7 @@ export const sloKeys = {
     excludeStale?: boolean;
     remoteName?: string;
   }) => [...sloKeys.all, 'fetch_slo_groupings', params] as const,
+  bulkDeleteStatus: (taskId: string) => [...sloKeys.all, 'bulkDeleteStatus', taskId] as const,
 };
 
 export type SloKeys = typeof sloKeys;

@@ -13,6 +13,10 @@ export class FleetError<TMeta = unknown> extends Error {
   constructor(message?: string, public readonly meta?: TMeta) {
     super(message);
     this.name = this.constructor.name; // for stack traces
+
+    if (meta instanceof Error) {
+      this.stack += `\n----- original error -----\n${meta.stack}`;
+    }
   }
 }
 
@@ -26,3 +30,10 @@ export class FleetActionsClientError extends FleetError {}
 export class UninstallTokenError extends FleetError {}
 
 export class AgentRequestInvalidError extends FleetError {}
+export class OutputInvalidError extends FleetError {}
+
+export class AgentlessAgentCreateOverProvisionedError extends FleetError<{ limit?: number }> {
+  constructor(message: string, limit?: number) {
+    super(`Error creating agentless agent in Fleet, ${message}`, { limit });
+  }
+}

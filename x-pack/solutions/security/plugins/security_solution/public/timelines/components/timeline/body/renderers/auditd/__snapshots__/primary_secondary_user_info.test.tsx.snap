@@ -5,6 +5,7 @@ exports[`UserPrimarySecondary rendering it renders the default PrimarySecondaryU
   contextId="context-123"
   eventId="event-123"
   primary="primary-1"
+  scopeId="some_scope"
   secondary="secondary-1"
 />
 `;

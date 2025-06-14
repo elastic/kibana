@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { API_KEY_PLACEHOLDER, INDEX_PLACEHOLDER } from '../constants';
-import { CodeLanguage, IngestDataCodeDefinition } from '../types';
+import { CodeLanguage, IngestDataCodeDefinition, SearchCodeDefinition } from '../types';
 import { CreateIndexLanguageExamples } from './types';
 
 export const CURL_INFO: CodeLanguage = {
@@ -19,11 +19,11 @@ export const CURL_INFO: CodeLanguage = {
 
 export const CurlCreateIndexExamples: CreateIndexLanguageExamples = {
   default: {
-    createIndex: ({ elasticsearchURL, apiKey, indexName }) => `curl PUT '${elasticsearchURL}/${
+    createIndex: ({ elasticsearchURL, apiKey, indexName }) => `curl -X PUT '${elasticsearchURL}/${
       indexName ?? INDEX_PLACEHOLDER
     }' \
 --header 'Authorization: ApiKey ${apiKey ?? API_KEY_PLACEHOLDER}' \
---header 'Content-Type: application/json
+--header 'Content-Type: application/json' \
 --data-raw '{
   "mappings": {
     "properties":{
@@ -35,7 +35,7 @@ export const CurlCreateIndexExamples: CreateIndexLanguageExamples = {
 }'`,
   },
   dense_vector: {
-    createIndex: ({ elasticsearchURL, apiKey, indexName }) => `curl PUT '${elasticsearchURL}/${
+    createIndex: ({ elasticsearchURL, apiKey, indexName }) => `curl -X PUT '${elasticsearchURL}/${
       indexName ?? INDEX_PLACEHOLDER
     }' \
 --header 'Authorization: ApiKey ${apiKey ?? API_KEY_PLACEHOLDER}' \
@@ -55,11 +55,11 @@ export const CurlCreateIndexExamples: CreateIndexLanguageExamples = {
 }'`,
   },
   semantic: {
-    createIndex: ({ elasticsearchURL, apiKey, indexName }) => `curl PUT '${elasticsearchURL}/${
+    createIndex: ({ elasticsearchURL, apiKey, indexName }) => `curl -X PUT '${elasticsearchURL}/${
       indexName ?? INDEX_PLACEHOLDER
     }' \
 --header 'Authorization: ApiKey ${apiKey ?? API_KEY_PLACEHOLDER}' \
---header 'Content-Type: application/json
+--header 'Content-Type: application/json' \
 --data-raw '{
   "mappings": {
     "properties":{
@@ -95,4 +95,16 @@ ${JSON.stringify(document)}`;
 --header 'Authorization: ApiKey ${apiKey ?? API_KEY_PLACEHOLDER}' \
 --header 'Content-Type: application/json' \
 --data-raw '${JSON.stringify({ properties: mappingProperties })}'`,
+};
+
+export const CurlSearchCodeExample: SearchCodeDefinition = {
+  searchCommand: ({
+    elasticsearchURL,
+    apiKey,
+    indexName,
+    queryObject,
+  }) => `curl -X POST "${elasticsearchURL}/${indexName}/_search" \
+--header 'Authorization: ApiKey ${apiKey ?? API_KEY_PLACEHOLDER}' \
+--header 'Content-Type: application/json' \
+--data-raw '${JSON.stringify(queryObject)}'`,
 };

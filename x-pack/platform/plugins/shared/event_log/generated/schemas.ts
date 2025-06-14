@@ -12,7 +12,8 @@
 // provides TypeScript and config-schema interfaces for ECS for use with
 // the event log
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import semver from 'semver';
 
 type DeepWriteable<T> = { -readonly [P in keyof T]: DeepWriteable<T[P]> };
@@ -143,6 +144,11 @@ export const EventSchema = schema.maybe(
             flapping: ecsBoolean(),
             maintenance_window_ids: ecsStringMulti(),
             uuid: ecsString(),
+            deletion: schema.maybe(
+              schema.object({
+                num_deleted: ecsStringOrNumber(),
+              })
+            ),
             rule: schema.maybe(
               schema.object({
                 consumer: ecsString(),
@@ -189,6 +195,7 @@ export const EventSchema = schema.maybe(
                         total_search_duration_ms: ecsStringOrNumber(),
                         execution_gap_duration_s: ecsStringOrNumber(),
                         gap_range: ecsDateRange(),
+                        frozen_indices_queried_count: ecsStringOrNumber(),
                         rule_type_run_duration_ms: ecsStringOrNumber(),
                         process_alerts_duration_ms: ecsStringOrNumber(),
                         trigger_actions_duration_ms: ecsStringOrNumber(),

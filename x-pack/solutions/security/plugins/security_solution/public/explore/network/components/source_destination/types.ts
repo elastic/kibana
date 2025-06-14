@@ -9,6 +9,7 @@ export type SourceDestinationType = 'source' | 'destination';
 
 export interface GeoFieldsProps {
   contextId: string;
+  scopeId: string;
   destinationGeoContinentName?: string[] | null;
   destinationGeoCountryName?: string[] | null;
   destinationGeoCountryIsoCode?: string[] | null;
@@ -25,6 +26,7 @@ export interface GeoFieldsProps {
 
 export interface SourceDestinationProps {
   contextId: string;
+  scopeId: string;
   destinationBytes?: string[] | null;
   destinationGeoContinentName?: string[] | null;
   destinationGeoCountryName?: string[] | null;
@@ -55,6 +57,7 @@ export interface SourceDestinationProps {
 
 export interface SourceDestinationIpProps {
   contextId: string;
+  scopeId: string;
   destinationGeoContinentName?: string[] | null;
   destinationGeoCountryName?: string[] | null;
   destinationGeoCountryIsoCode?: string[] | null;
@@ -75,6 +78,7 @@ export interface SourceDestinationIpProps {
 
 export interface SourceDestinationWithArrowsProps {
   contextId: string;
+  scopeId: string;
   destinationBytes?: string[] | null;
   destinationGeoContinentName?: string[] | null;
   destinationGeoCountryName?: string[] | null;

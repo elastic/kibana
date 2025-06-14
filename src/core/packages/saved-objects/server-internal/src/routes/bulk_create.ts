@@ -41,6 +41,12 @@ export const registerBulkCreateRoute = (
         access,
         deprecated: deprecationInfo,
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the Saved Objects Client',
+        },
+      },
       validate: {
         query: schema.object({
           overwrite: schema.boolean({ defaultValue: false }),

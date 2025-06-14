@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Meta, Story } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react';
 import React from 'react';
 import { EntityDataStreamType } from '@kbn/observability-shared-plugin/common';
 import { ServiceOverview } from '.';
@@ -58,6 +58,6 @@ const stories: Meta<{}> = {
 };
 export default stories;
 
-export const Example: Story<{}> = () => {
+export const Example: StoryFn<{}> = () => {
   return <ServiceOverview />;
 };

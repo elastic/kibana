@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useStoreEntityTypes } from '../../../../hooks/use_enabled_entity_types';
+import { useEntityStoreTypes } from '../../../../hooks/use_enabled_entity_types';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { downloadBlob } from '../../../../../common/utils/download_blob';
 import { EngineComponentsStatusTable } from './components/engine_components_status';
@@ -25,6 +25,7 @@ import { useEntityStoreStatus } from '../../hooks/use_entity_store';
 import { isEngineLoading } from './helpers';
 import { EngineStatusHeader } from './components/engine_status_header';
 import { EngineStatusHeaderAction } from './components/engine_status_header_action';
+import { EntityStoreErrorCallout } from '../entity_store_error_callout';
 
 const FILE_NAME = 'engines_status.json';
 
@@ -41,7 +42,7 @@ export const EngineStatus: React.FC = () => {
     isLoading: isStatusAPILoading,
     error,
   } = useEntityStoreStatus({ withComponents: true });
-  const enabledEntityTypes = useStoreEntityTypes();
+  const enabledEntityTypes = useEntityStoreTypes();
 
   const downloadJson = () => {
     downloadBlob(new Blob([JSON.stringify(data)]), FILE_NAME);
@@ -93,6 +94,7 @@ export const EngineStatus: React.FC = () => {
                 entityType={type}
                 actionButton={<EngineStatusHeaderAction engine={engine} type={type} />}
               />
+              <EntityStoreErrorCallout engine={engine} size="s" />
               <EuiSpacer size="s" />
               <EuiPanel hasShadow={false} hasBorder={false}>
                 {engine && !isEngineLoading(engine.status) && engine.components && (

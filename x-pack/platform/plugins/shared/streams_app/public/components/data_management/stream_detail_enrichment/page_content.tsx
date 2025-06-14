@@ -5,278 +5,362 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   DragDropContextProps,
+  EuiAccordion,
+  EuiCode,
+  EuiFlexGroup,
   EuiPanel,
   EuiResizableContainer,
   EuiSplitPanel,
   EuiText,
   EuiTitle,
   euiDragDropReorder,
-  useEuiShadow,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IngestStreamGetResponse, isRootStreamDefinition } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
-import { UseDefinitionReturn, useDefinition } from './hooks/use_definition';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { BehaviorSubject } from 'rxjs';
+import { useTimefilter } from '../../../hooks/use_timefilter';
 import { useKibana } from '../../../hooks/use_kibana';
-import { RootStreamEmptyPrompt } from './root_stream_empty_prompt';
 import { DraggableProcessorListItem } from './processors_list';
 import { SortableList } from './sortable_list';
 import { ManagementBottomBar } from '../management_bottom_bar';
 import { AddProcessorPanel } from './processors';
 import { SimulationPlayground } from './simulation_playground';
 import {
-  UseProcessingSimulatorReturn,
-  useProcessingSimulator,
-} from './hooks/use_processing_simulator';
-import { SimulatorContextProvider } from './simulator_context';
+  StreamEnrichmentContextProvider,
+  useSimulatorSelector,
+  useStreamEnrichmentEvents,
+  useStreamsEnrichmentSelector,
+} from './state_management/stream_enrichment_state_machine';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
 interface StreamDetailEnrichmentContentProps {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   refreshDefinition: () => void;
 }
 
-export function StreamDetailEnrichmentContent({
-  definition,
-  refreshDefinition,
-}: StreamDetailEnrichmentContentProps) {
+export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentContentProps) {
+  const { core, dependencies } = useKibana();
+  const {
+    streams: { streamsRepositoryClient },
+  } = dependencies.start;
+
+  const timefilterHook = useTimefilter();
+
+  const timeState$ = useMemo(() => {
+    const subject = new BehaviorSubject(timefilterHook.timeState);
+    return subject;
+    // No need to ever recreate this observable, as we subscribe to it in the
+    // useEffect below.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const subscription = timefilterHook.timeState$.subscribe((value) =>
+      timeState$.next(value.timeState)
+    );
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [timeState$, timefilterHook.timeState$]);
+
+  return (
+    <StreamEnrichmentContextProvider
+      definition={props.definition}
+      refreshDefinition={props.refreshDefinition}
+      core={core}
+      streamsRepositoryClient={streamsRepositoryClient}
+      timeState$={timeState$}
+    >
+      <StreamDetailEnrichmentContentImpl />
+    </StreamEnrichmentContextProvider>
+  );
+}
+
+export function StreamDetailEnrichmentContentImpl() {
   const { appParams, core } = useKibana();
 
-  const {
-    processors,
-    addProcessor,
-    updateProcessor,
-    deleteProcessor,
-    resetChanges,
-    saveChanges,
-    reorderProcessors,
-    hasChanges,
-    isSavingChanges,
-  } = useDefinition(definition, refreshDefinition);
+  const { resetChanges, saveChanges } = useStreamEnrichmentEvents();
 
-  const processingSimulator = useProcessingSimulator({ definition, processors });
+  const hasChanges = useStreamsEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
+  const canManage = useStreamsEnrichmentSelector(
+    (state) => state.context.definition.privileges.manage
+  );
+  const isSavingChanges = useStreamsEnrichmentSelector((state) =>
+    state.matches({ ready: { stream: 'updating' } })
+  );
 
-  const {
-    hasLiveChanges,
-    isLoading,
-    refreshSamples,
-    filteredSamples,
-    simulation,
-    tableColumns,
-    watchProcessor,
-    selectedDocsFilter,
-    setSelectedDocsFilter,
-  } = processingSimulator;
+  const isInitializing = useStreamsEnrichmentSelector((state) => {
+    return !state.matches('ready');
+  });
 
   useUnsavedChangesPrompt({
-    hasUnsavedChanges: hasChanges || hasLiveChanges,
+    hasUnsavedChanges: hasChanges,
     history: appParams.history,
     http: core.http,
     navigateToUrl: core.application.navigateToUrl,
     openConfirm: core.overlays.openConfirm,
   });
 
-  if (isRootStreamDefinition(definition.stream)) {
-    return <RootStreamEmptyPrompt />;
+  if (isInitializing) {
+    return null;
   }
 
-  const isNonAdditiveSimulation = simulation && simulation.is_non_additive_simulation;
-  const isSubmitDisabled = Boolean(!hasChanges || isNonAdditiveSimulation);
-
-  const confirmTooltip = isNonAdditiveSimulation
-    ? {
-        title: i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.nonAdditiveProcessorsTooltip.title',
-          { defaultMessage: 'Non additive simulation detected' }
-        ),
-        content: i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.nonAdditiveProcessorsTooltip.content',
-          {
-            defaultMessage:
-              'We currently prevent adding processors that change/remove existing data. Please update your processor configurations to continue.',
-          }
-        ),
-      }
-    : undefined;
-
   return (
-    <SimulatorContextProvider processingSimulator={processingSimulator} definition={definition}>
-      <EuiSplitPanel.Outer grow hasBorder hasShadow={false}>
-        <EuiSplitPanel.Inner
-          paddingSize="none"
-          css={css`
-            display: flex;
-            overflow: hidden auto;
-          `}
-        >
-          <EuiResizableContainer>
-            {(EuiResizablePanel, EuiResizableButton) => (
-              <>
-                <EuiResizablePanel
-                  initialSize={40}
-                  minSize="480px"
-                  tabIndex={0}
-                  paddingSize="none"
-                  css={verticalFlexCss}
-                >
-                  <ProcessorsEditor
-                    definition={definition}
-                    processors={processors}
-                    onUpdateProcessor={updateProcessor}
-                    onDeleteProcessor={deleteProcessor}
-                    onWatchProcessor={watchProcessor}
-                    onAddProcessor={addProcessor}
-                    onReorderProcessor={reorderProcessors}
-                    simulation={simulation}
-                  />
-                </EuiResizablePanel>
-                <EuiResizableButton indicator="border" accountForScrollbars="both" />
-                <EuiResizablePanel
-                  initialSize={60}
-                  minSize="300px"
-                  tabIndex={0}
-                  paddingSize="s"
-                  css={verticalFlexCss}
-                >
-                  <MemoSimulationPlayground
-                    definition={definition}
-                    columns={tableColumns}
-                    simulation={simulation}
-                    filteredSamples={filteredSamples}
-                    onRefreshSamples={refreshSamples}
-                    isLoading={isLoading}
-                    selectedDocsFilter={selectedDocsFilter}
-                    setSelectedDocsFilter={setSelectedDocsFilter}
-                  />
-                </EuiResizablePanel>
-              </>
-            )}
-          </EuiResizableContainer>
-        </EuiSplitPanel.Inner>
-        <EuiSplitPanel.Inner grow={false} color="subdued">
-          <ManagementBottomBar
-            confirmTooltip={confirmTooltip}
-            onCancel={resetChanges}
-            onConfirm={saveChanges}
-            isLoading={isSavingChanges}
-            disabled={isSubmitDisabled}
-          />
-        </EuiSplitPanel.Inner>
-      </EuiSplitPanel.Outer>
-    </SimulatorContextProvider>
+    <EuiSplitPanel.Outer grow hasBorder hasShadow={false}>
+      <EuiSplitPanel.Inner
+        paddingSize="none"
+        css={css`
+          display: flex;
+          overflow: hidden auto;
+        `}
+      >
+        <EuiResizableContainer>
+          {(EuiResizablePanel, EuiResizableButton) => (
+            <>
+              <EuiResizablePanel
+                initialSize={40}
+                minSize="480px"
+                tabIndex={0}
+                paddingSize="none"
+                css={verticalFlexCss}
+              >
+                <ProcessorsEditor />
+              </EuiResizablePanel>
+              <EuiResizableButton indicator="border" accountForScrollbars="both" />
+              <EuiResizablePanel
+                initialSize={60}
+                minSize="300px"
+                tabIndex={0}
+                paddingSize="s"
+                css={verticalFlexCss}
+              >
+                <MemoSimulationPlayground />
+              </EuiResizablePanel>
+            </>
+          )}
+        </EuiResizableContainer>
+      </EuiSplitPanel.Inner>
+      <EuiSplitPanel.Inner grow={false} color="subdued">
+        <ManagementBottomBar
+          onCancel={resetChanges}
+          onConfirm={saveChanges}
+          isLoading={isSavingChanges}
+          disabled={!hasChanges}
+          insufficientPrivileges={!canManage}
+        />
+      </EuiSplitPanel.Inner>
+    </EuiSplitPanel.Outer>
   );
 }
 
-interface ProcessorsEditorProps {
-  definition: IngestStreamGetResponse;
-  processors: UseDefinitionReturn['processors'];
-  onAddProcessor: UseDefinitionReturn['addProcessor'];
-  onDeleteProcessor: UseDefinitionReturn['deleteProcessor'];
-  onReorderProcessor: UseDefinitionReturn['reorderProcessors'];
-  onUpdateProcessor: UseDefinitionReturn['updateProcessor'];
-  onWatchProcessor: UseProcessingSimulatorReturn['watchProcessor'];
-  simulation: UseProcessingSimulatorReturn['simulation'];
-}
+const ProcessorsEditor = React.memo(() => {
+  const { euiTheme } = useEuiTheme();
 
-const ProcessorsEditor = React.memo(
-  ({
-    definition,
-    processors,
-    onAddProcessor,
-    onDeleteProcessor,
-    onReorderProcessor,
-    onUpdateProcessor,
-    onWatchProcessor,
-    simulation,
-  }: ProcessorsEditorProps) => {
-    const { euiTheme } = useEuiTheme();
+  const { reorderProcessors } = useStreamEnrichmentEvents();
+  const definition = useStreamsEnrichmentSelector((state) => state.context.definition);
 
-    const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
-      if (source && destination) {
-        const items = euiDragDropReorder(processors, source.index, destination.index);
-        onReorderProcessor(items);
-      }
+  const processorsRefs = useStreamsEnrichmentSelector((state) =>
+    state.context.processorsRefs.filter((processorRef) =>
+      processorRef.getSnapshot().matches('configured')
+    )
+  );
+
+  const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
+
+  const errors = useMemo(() => {
+    if (!simulation) {
+      return { ignoredFields: [], mappingFailures: [] };
+    }
+
+    const ignoredFieldsSet = new Set<string>();
+    const mappingFailuresSet = new Set<string>();
+
+    simulation.documents.forEach((doc) => {
+      doc.errors.forEach((error) => {
+        if (error.type === 'ignored_fields_failure') {
+          error.ignored_fields.forEach((ignored) => {
+            ignoredFieldsSet.add(ignored.field);
+          });
+        }
+
+        if (error.type === 'field_mapping_failure' && mappingFailuresSet.size < 2) {
+          mappingFailuresSet.add(error.message);
+        }
+      });
+    });
+
+    return {
+      ignoredFields: Array.from(ignoredFieldsSet),
+      mappingFailures: Array.from(mappingFailuresSet),
     };
+  }, [simulation]);
 
-    const hasProcessors = !isEmpty(processors);
+  const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
+    if (source && destination) {
+      const items = euiDragDropReorder(processorsRefs, source.index, destination.index);
+      reorderProcessors(items);
+    }
+  };
 
-    return (
-      <>
-        <EuiPanel
-          paddingSize="m"
-          hasShadow={false}
-          borderRadius="none"
-          grow={false}
-          css={css`
-            z-index: ${euiTheme.levels.maskBelowHeader};
-            ${useEuiShadow('xs')};
-          `}
-        >
-          <EuiTitle size="xxs">
-            <h2>
-              {i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.enrichment.headingTitle',
-                {
-                  defaultMessage: 'Processors for field extraction',
-                }
-              )}
-            </h2>
-          </EuiTitle>
-          <EuiText component="p" size="xs">
+  const hasProcessors = !isEmpty(processorsRefs);
+
+  return (
+    <>
+      <EuiPanel
+        paddingSize="m"
+        hasShadow={false}
+        borderRadius="none"
+        grow={false}
+        css={css`
+          border-bottom: ${euiTheme.border.thin};
+        `}
+      >
+        <EuiTitle size="xxs">
+          <h2>
             {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.headingSubtitle',
+              'xpack.streams.streamDetailView.managementTab.enrichment.headingTitle',
               {
-                defaultMessage:
-                  'Drag and drop existing processors to update their execution order.',
+                defaultMessage: 'Processors for field extraction',
               }
             )}
-          </EuiText>
-        </EuiPanel>
-        <EuiPanel
-          paddingSize="m"
-          hasShadow={false}
-          borderRadius="none"
-          css={css`
-            overflow: auto;
-          `}
-        >
-          {hasProcessors && (
-            <SortableList onDragItem={handlerItemDrag}>
-              {processors.map((processor, idx) => (
-                <DraggableProcessorListItem
-                  key={processor.id}
-                  idx={idx}
-                  definition={definition}
-                  processor={processor}
-                  onDeleteProcessor={onDeleteProcessor}
-                  onUpdateProcessor={onUpdateProcessor}
-                  onWatchProcessor={onWatchProcessor}
-                  processorMetrics={simulation?.processors_metrics[processor.id]}
-                />
-              ))}
-            </SortableList>
+          </h2>
+        </EuiTitle>
+        <EuiText component="p" size="xs">
+          {i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.headingSubtitle',
+            {
+              defaultMessage: 'Drag and drop existing processors to update their execution order.',
+            }
           )}
-          <AddProcessorPanel
-            key={processors.length} // Used to force reset the inner form state once a new processor is added
-            definition={definition}
-            onAddProcessor={onAddProcessor}
-            onWatchProcessor={onWatchProcessor}
-            processorMetrics={simulation?.processors_metrics.draft}
-          />
-        </EuiPanel>
-      </>
-    );
-  }
-);
+        </EuiText>
+      </EuiPanel>
+      <EuiPanel
+        paddingSize="m"
+        hasShadow={false}
+        borderRadius="none"
+        css={css`
+          overflow: auto;
+        `}
+      >
+        {hasProcessors && (
+          <SortableList onDragItem={handlerItemDrag}>
+            {processorsRefs.map((processorRef, idx) => (
+              <DraggableProcessorListItem
+                disableDrag={!definition.privileges.simulate}
+                key={processorRef.id}
+                idx={idx}
+                processorRef={processorRef}
+                processorMetrics={simulation?.processors_metrics[processorRef.id]}
+              />
+            ))}
+          </SortableList>
+        )}
+        {definition.privileges.simulate && <AddProcessorPanel />}
+      </EuiPanel>
+      <EuiPanel paddingSize="m" hasShadow={false} grow={false}>
+        {!isEmpty(errors.ignoredFields) && (
+          <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
+            <EuiAccordion
+              id="ignored-fields-failures-accordion"
+              initialIsOpen
+              buttonContent={
+                <strong>
+                  {i18n.translate(
+                    'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.title',
+                    { defaultMessage: 'Some fields were ignored during the simulation.' }
+                  )}
+                </strong>
+              }
+            >
+              <EuiText component="p" size="s">
+                <p>
+                  {i18n.translate(
+                    'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.description',
+                    {
+                      defaultMessage:
+                        'Some fields in these documents were ignored during the ingestion simulation. Review the fields’ mapping limits.',
+                    }
+                  )}
+                </p>
+                <p>
+                  <FormattedMessage
+                    id="xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.fieldsList"
+                    defaultMessage="The ignored fields are: {fields}"
+                    values={{
+                      fields: (
+                        <EuiFlexGroup
+                          gutterSize="s"
+                          css={css`
+                            margin-top: ${euiTheme.size.s};
+                          `}
+                        >
+                          {errors.ignoredFields.map((field) => (
+                            <EuiCode>{field}</EuiCode>
+                          ))}
+                        </EuiFlexGroup>
+                      ),
+                    }}
+                  />
+                </p>
+              </EuiText>
+            </EuiAccordion>
+          </EuiPanel>
+        )}
+        {!isEmpty(errors.mappingFailures) && (
+          <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
+            <EuiAccordion
+              id="mapping-failures-accordion"
+              initialIsOpen
+              buttonContent={i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.fieldMappingsFailure.title',
+                {
+                  defaultMessage: 'Field conflicts during simulation',
+                }
+              )}
+            >
+              <EuiText size="s">
+                <p>
+                  <FormattedMessage
+                    id="xpack.streams.streamDetailView.managementTab.enrichment.fieldMappingsFailure.fieldsList"
+                    defaultMessage="These are some mapping failures that occurred during the simulation:"
+                  />
+                </p>
+                <ul>
+                  {errors.mappingFailures.map((failureMessage, id) => (
+                    <li key={id}>
+                      <EuiText css={clampTwoLines} size="s">
+                        {failureMessage}
+                      </EuiText>
+                    </li>
+                  ))}
+                </ul>
+              </EuiText>
+            </EuiAccordion>
+          </EuiPanel>
+        )}
+      </EuiPanel>
+    </>
+  );
+});
 
 const verticalFlexCss = css`
   display: flex;
   flex-direction: column;
+`;
+
+const clampTwoLines = css`
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;

@@ -10,7 +10,10 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { createHash } from 'crypto';
 import { flatten, merge, pickBy, sortBy, sum, uniq, without } from 'lodash';
 import type { SavedObjectsClient } from '@kbn/core/server';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import {
+  type APMIndices,
+  APM_AGENT_CONFIGURATION_INDEX,
+} from '@kbn/apm-sources-access-plugin/server';
 import {
   AGENT_NAMES,
   OPEN_TELEMETRY_AGENT_NAMES,
@@ -72,7 +75,6 @@ import type {
   MetricRollupIntervals,
   MetricSupportingRollUp,
 } from '../types';
-import { APM_AGENT_CONFIGURATION_INDEX } from '../../../routes/settings/apm_indices/apm_system_index_constants';
 import type { IndicesStatsResponse, TelemetryClient } from '../telemetry_client';
 import { RollupInterval } from '../../../../common/rollup';
 import type { SavedApmCustomDashboard } from '../../../../common/custom_dashboards';

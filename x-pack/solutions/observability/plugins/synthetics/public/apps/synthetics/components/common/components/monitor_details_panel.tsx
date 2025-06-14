@@ -111,8 +111,8 @@ export const MonitorDetailsPanel = ({
         </EuiDescriptionListDescription>
         <EuiDescriptionListTitle>{LAST_RUN_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
-          {latestPing?.timestamp ? (
-            <Time timestamp={latestPing?.timestamp} />
+          {latestPing?.['@timestamp'] ? (
+            <Time timestamp={latestPing?.['@timestamp']} />
           ) : (
             <EuiText color="subdued">
               {i18n.translate('xpack.synthetics.monitorDetailsPanel.TextLabel', {

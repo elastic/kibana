@@ -6,16 +6,16 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { ES_FIELD_TYPES } from '@kbn/data-plugin/common';
+import type { ES_FIELD_TYPES } from '@kbn/data-plugin/common';
 
 export interface InputOverrides {
   [key: string]: string | undefined;
 }
 
 export type FormattedOverrides = InputOverrides & {
-  column_names: string[];
-  has_header_row: boolean;
-  should_trim_fields: boolean;
+  column_names?: string[] | string;
+  has_header_row?: boolean | string;
+  should_trim_fields?: boolean | string;
 };
 
 export interface AnalysisResult {

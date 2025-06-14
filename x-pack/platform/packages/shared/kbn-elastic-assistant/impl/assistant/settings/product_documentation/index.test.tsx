@@ -9,7 +9,6 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ProductDocumentationManagement } from '.';
 import * as i18n from './translations';
 import { useInstallProductDoc } from '../../api/product_docs/use_install_product_doc';
-import { useGetProductDocStatus } from '../../api/product_docs/use_get_product_doc_status';
 
 jest.mock('../../api/product_docs/use_install_product_doc');
 jest.mock('../../api/product_docs/use_get_product_doc_status');
@@ -18,69 +17,64 @@ describe('ProductDocumentationManagement', () => {
   const mockInstallProductDoc = jest.fn().mockResolvedValue({});
 
   beforeEach(() => {
-    (useInstallProductDoc as jest.Mock).mockReturnValue({ mutateAsync: mockInstallProductDoc });
-    (useGetProductDocStatus as jest.Mock).mockReturnValue({ status: null, isLoading: false });
+    (useInstallProductDoc as jest.Mock).mockReturnValue({
+      mutateAsync: mockInstallProductDoc,
+      isLoading: false,
+      isSuccess: false,
+    });
     jest.clearAllMocks();
   });
 
-  it('renders loading spinner when status is loading', async () => {
-    (useGetProductDocStatus as jest.Mock).mockReturnValue({
-      status: { overall: 'not_installed' },
-      isLoading: true,
-    });
-    render(<ProductDocumentationManagement />);
-    expect(screen.getByTestId('statusLoading')).toBeInTheDocument();
-  });
-
   it('renders install button when not installed', () => {
-    (useGetProductDocStatus as jest.Mock).mockReturnValue({
-      status: { overall: 'not_installed' },
-      isLoading: false,
-    });
-    render(<ProductDocumentationManagement />);
+    render(<ProductDocumentationManagement status="uninstalled" />);
     expect(screen.getByText(i18n.INSTALL)).toBeInTheDocument();
   });
 
   it('does not render anything when already installed', () => {
-    (useGetProductDocStatus as jest.Mock).mockReturnValue({
-      status: { overall: 'installed' },
+    const { container } = render(<ProductDocumentationManagement status="installed" />);
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('does not render anything when the installation was started by the plugin', () => {
+    (useInstallProductDoc as jest.Mock).mockReturnValue({
+      mutateAsync: mockInstallProductDoc,
       isLoading: false,
+      isSuccess: false,
     });
-    const { container } = render(<ProductDocumentationManagement />);
+    const { container } = render(<ProductDocumentationManagement status="installing" />);
     expect(container).toBeEmptyDOMElement();
   });
 
   it('shows installing spinner and text when installing', async () => {
-    (useGetProductDocStatus as jest.Mock).mockReturnValue({
-      status: { overall: 'not_installed' },
-      isLoading: false,
+    (useInstallProductDoc as jest.Mock).mockReturnValue({
+      mutateAsync: mockInstallProductDoc,
+      isLoading: true,
+      isSuccess: false,
     });
-    render(<ProductDocumentationManagement />);
-    fireEvent.click(screen.getByText(i18n.INSTALL));
-    await waitFor(() => {
-      expect(screen.getByTestId('installing')).toBeInTheDocument();
-      expect(screen.getByText(i18n.INSTALLING)).toBeInTheDocument();
-    });
+    render(<ProductDocumentationManagement status="uninstalled" />);
+    expect(screen.getByTestId('installing')).toBeInTheDocument();
+    expect(screen.getByText(i18n.INSTALLING)).toBeInTheDocument();
   });
 
   it('sets installed state to true after successful installation', async () => {
-    (useGetProductDocStatus as jest.Mock).mockReturnValue({
-      status: { overall: 'not_installed' },
+    (useInstallProductDoc as jest.Mock).mockReturnValue({
+      mutateAsync: mockInstallProductDoc,
       isLoading: false,
+      isSuccess: true,
     });
     mockInstallProductDoc.mockResolvedValueOnce({});
-    render(<ProductDocumentationManagement />);
-    fireEvent.click(screen.getByText(i18n.INSTALL));
-    await waitFor(() => expect(screen.queryByText(i18n.INSTALL)).not.toBeInTheDocument());
+    render(<ProductDocumentationManagement status="uninstalled" />);
+    expect(screen.queryByText(i18n.INSTALL)).not.toBeInTheDocument();
   });
 
   it('sets installed state to false after failed installation', async () => {
-    (useGetProductDocStatus as jest.Mock).mockReturnValue({
-      status: { overall: 'not_installed' },
+    (useInstallProductDoc as jest.Mock).mockReturnValue({
+      mutateAsync: mockInstallProductDoc,
       isLoading: false,
+      isSuccess: false,
     });
     mockInstallProductDoc.mockRejectedValueOnce(new Error('Installation failed'));
-    render(<ProductDocumentationManagement />);
+    render(<ProductDocumentationManagement status="uninstalled" />);
     fireEvent.click(screen.getByText(i18n.INSTALL));
     await waitFor(() => expect(screen.getByText(i18n.INSTALL)).toBeInTheDocument());
   });

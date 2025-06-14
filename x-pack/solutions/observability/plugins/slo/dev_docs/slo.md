@@ -62,7 +62,26 @@ With the data generated from the above section, the easiest SLO you can setup wo
 > **Group By** (optional): `url.domain` or `host.name` or `none`
 
 
+3. Smoke testing
 
+Testing the following screens should be enough:
+
+- Create SLO form
+- Edit SLO form
+- Clone SLO form
+- SLO List page
+  - Sort SLO action
+  - Group SLO action
+  - Pagination List
+  - Delete SLO modal
+  - Reset SLO modal
+  - Check other actions as well
+- SLO Details page
+  - View SLO details charts
+  - View SLO history charts
+  - View SLO related alerts tab
+  - Create SLO burn rate rule
+  - Update SLO burn rate rule
 
 
 ## Supported SLI
@@ -75,8 +94,9 @@ We currently support the following SLI:
 - Custom Metric
 - Histogram Metric
 - Timeslice Metric
+- Synthetics
 
-For the APM SLIs, customer can provide the service, environment, transaction name and type to configure them. For the **APM Latency** SLI, a threshold in milliseconds needs to be provided to discriminate the good and bad responses (events). For the **APM Availability** SLI, we use the `event.outcome` as a way to discriminate the good and the bad responses(events). The API supports an optional kql filter to further filter the apm data.
+For the **APM** SLIs, customer can provide the service, environment, transaction name and type to configure them. For the **APM Latency** SLI, a threshold in milliseconds needs to be provided to discriminate the good and bad responses (events). For the **APM Availability** SLI, we use the `event.outcome` as a way to discriminate the good and the bad responses(events). The API supports an optional kql filter to further filter the apm data.
 
 The **Custom Query** SLI requires an index pattern, an optional filter query, a numerator query, and denominator query. A custom `timestampField` can be provided to override the default @timestamp field.
 
@@ -94,9 +114,9 @@ The **Histogram Metric** SLI requires an index pattern, an optional filter query
 
 ### Time window
 
-We support **calendar aligned** and **rolling** time windows. Any duration greater than 1 day can be used: days, weeks, months, quarters, years.
+We support **calendar aligned** and **rolling** time windows.
 
-**Rolling time window:** Requires a duration, e.g. `1w` for one week, and `type: rolling`. SLOs defined with such time window, will only considere the SLI data from the last duration period as a moving window.
+**Rolling time window:** Limited to 7d, 30d or 90d and `type: rolling`. SLOs defined with such time window, will only considere the SLI data from the last duration period as a moving window.
 
 **Calendar aligned time window:** Requires a duration, limited to `1M` for monthly or `1w` for weekly, and `type: calendarAligned`.
 
@@ -121,6 +141,8 @@ The default settings should be sufficient for most users, but if needed, the fol
 
 - **syncDelay**: The ingest delay in the source data, defaults to `1m`
 - **frequency**: How often do we query the source data, defaults to `1m`
+- **preventInitialBackfill**: A boolean preventing the backfill of the entire lookback window defined on the SLO. Useful for performance reason.
+- **syncField**: The field to use for syncing the source data with the transform. Default to the sli timestampField. It is highly recommended to use an `event.ingested` or similar field.
 
 ## Example
 

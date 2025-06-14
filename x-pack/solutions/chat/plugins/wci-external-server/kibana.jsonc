@@ -1,0 +1,20 @@
+{
+  "type": "plugin",
+  "id": "@kbn/wci-external-server",
+  "owner": [
+    "@elastic/search-kibana",
+    "@elastic/workchat-eng"
+   ],
+  "group": "chat",
+  "visibility": "private",
+  "description": "WorkChat External Server Integration plugin",
+  "plugin": {
+    "id": "wciExternalServer",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "wciExternalServer"],
+    "requiredPlugins": ["workchatApp"],
+    "optionalPlugins": [],
+    "requiredBundles": []
+  }
+}

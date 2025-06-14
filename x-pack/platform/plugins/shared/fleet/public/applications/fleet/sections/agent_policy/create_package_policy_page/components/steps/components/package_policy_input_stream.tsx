@@ -10,10 +10,14 @@ import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 import { uniq } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
+  EuiLink,
+  EuiRadioGroup,
   EuiSwitch,
   EuiText,
   EuiSpacer,
@@ -25,9 +29,12 @@ import { useRouteMatch } from 'react-router-dom';
 
 import { useQuery } from '@tanstack/react-query';
 
-import { DATASET_VAR_NAME } from '../../../../../../../../../common/constants';
+import {
+  DATASET_VAR_NAME,
+  DATA_STREAM_TYPE_VAR_NAME,
+} from '../../../../../../../../../common/constants';
 
-import { useConfig, sendGetDataStreams } from '../../../../../../../../hooks';
+import { useConfig, sendGetDataStreams, useStartServices } from '../../../../../../../../hooks';
 
 import {
   getRegistryDataStreamAssetBaseName,
@@ -65,6 +72,7 @@ interface Props {
   inputStreamValidationResults: PackagePolicyConfigValidationResults;
   forceShowErrors?: boolean;
   isEditPage?: boolean;
+  totalStreams?: number;
 }
 
 export const PackagePolicyInputStreamConfig = memo<Props>(
@@ -76,7 +84,10 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     inputStreamValidationResults,
     forceShowErrors,
     isEditPage,
+    totalStreams,
   }) => {
+    const { docLinks } = useStartServices();
+
     const config = useConfig();
     const isExperimentalDataStreamSettingsEnabled =
       config.enableExperimental?.includes('experimentalDataStreamSettings') ?? false;
@@ -92,9 +103,13 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
       !!packagePolicyInputStream.id &&
       packagePolicyInputStream.id === defaultDataStreamId;
     const isPackagePolicyEdit = !!packagePolicyId;
-
+    const shouldShowStreamsToggles = totalStreams ? totalStreams > 1 : true;
     const customDatasetVar = packagePolicyInputStream.vars?.[DATASET_VAR_NAME];
     const customDatasetVarValue = customDatasetVar?.value?.dataset || customDatasetVar?.value;
+
+    const customDataStreamTypeVar = packagePolicyInputStream.vars?.[DATA_STREAM_TYPE_VAR_NAME];
+    const customDataStreamTypeVarValue =
+      customDataStreamTypeVar?.value || packagePolicyInputStream.data_stream.type || 'logs';
 
     const { exists: indexTemplateExists, isLoading: isLoadingIndexTemplate } =
       useIndexTemplateExists(
@@ -136,7 +151,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
 
     // Errors state
     const hasErrors = forceShowErrors && validationHasErrors(inputStreamValidationResults);
-    const hasRequiredVarGroupErrors = inputStreamValidationResults.required_vars;
+    const hasRequiredVarGroupErrors = inputStreamValidationResults?.required_vars;
     const advancedVarsWithErrorsCount: number = useMemo(
       () =>
         advancedVars.filter(
@@ -182,7 +197,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                   alignItems="flexStart"
                   justifyContent="spaceBetween"
                 >
-                  {packageInfo.type !== 'input' && (
+                  {packageInfo.type !== 'input' && shouldShowStreamsToggles && (
                     <EuiFlexItem grow={false}>
                       <EuiSwitch
                         data-test-subj="streamOptions.switch"
@@ -209,7 +224,9 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                     </EuiFlexItem>
                   ) : null}
                 </EuiFlexGroup>
-                {packageInfo.type !== 'input' && packageInputStream.description ? (
+                {packageInfo.type !== 'input' &&
+                packageInputStream.description &&
+                shouldShowStreamsToggles ? (
                   <>
                     <EuiSpacer size="s" />
                     <EuiText size="s" color="subdued">
@@ -233,7 +250,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                       }
                     >
                       <EuiText size="xs" color="danger">
-                        {Object.entries(inputStreamValidationResults.required_vars || {}).map(
+                        {Object.entries(inputStreamValidationResults?.required_vars || {}).map(
                           ([groupName, vars]) => {
                             return (
                               <>
@@ -279,7 +296,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                           },
                         });
                       }}
-                      errors={inputStreamValidationResults?.vars![varName]}
+                      errors={inputStreamValidationResults?.vars?.[varName]}
                       forceShowErrors={forceShowErrors}
                       packageType={packageInfo.type}
                       packageName={packageInfo.name}
@@ -291,7 +308,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
               })}
 
               {/* Advanced section */}
-              {hasAdvancedOptions && (
+              {(hasAdvancedOptions || packageInfo.type === 'input') && (
                 <Fragment>
                   <EuiFlexItem>
                     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -324,6 +341,75 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                   </EuiFlexItem>
                   {isShowingAdvanced ? (
                     <>
+                      {packageInfo.type === 'input' && (
+                        <EuiFlexItem>
+                          <EuiFormRow
+                            label={
+                              <FormattedMessage
+                                id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataStreamTypeInputLabel"
+                                defaultMessage="Data Stream Type"
+                              />
+                            }
+                            helpText={
+                              isEditPage ? (
+                                <FormattedMessage
+                                  id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyInputOnlyEditDataStreamTypeHelpLabel"
+                                  defaultMessage="The data stream type cannot be changed for this integration. Create a new integration policy to use a different input type."
+                                />
+                              ) : (
+                                <FormattedMessage
+                                  id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataStreamTypeHelpLabel"
+                                  defaultMessage="Select a data stream type for this policy. This setting changes the name of the integration's data stream. {learnMore}."
+                                  values={{
+                                    learnMore: (
+                                      <EuiLink
+                                        href={docLinks.links.fleet.datastreamsNamingScheme}
+                                        target="_blank"
+                                      >
+                                        {i18n.translate(
+                                          'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLearnMoreLabel',
+                                          { defaultMessage: 'Learn more' }
+                                        )}
+                                      </EuiLink>
+                                    ),
+                                  }}
+                                />
+                              )
+                            }
+                          >
+                            <EuiRadioGroup
+                              data-test-subj="packagePolicyDataStreamType"
+                              disabled={isEditPage}
+                              idSelected={customDataStreamTypeVarValue}
+                              options={[
+                                {
+                                  id: 'logs',
+                                  label: 'Logs',
+                                },
+                                {
+                                  id: 'metrics',
+                                  label: 'Metrics',
+                                },
+                                {
+                                  id: 'traces',
+                                  label: 'Traces',
+                                },
+                              ]}
+                              onChange={(type: string) => {
+                                updatePackagePolicyInputStream({
+                                  vars: {
+                                    ...packagePolicyInputStream.vars,
+                                    [DATA_STREAM_TYPE_VAR_NAME]: {
+                                      type: 'string',
+                                      value: type,
+                                    },
+                                  },
+                                });
+                              }}
+                            />
+                          </EuiFormRow>
+                        </EuiFlexItem>
+                      )}
                       {advancedVars.map((varDef) => {
                         if (!packagePolicyInputStream.vars) return null;
                         const { name: varName, type: varType } = varDef;
@@ -345,7 +431,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                                   },
                                 });
                               }}
-                              errors={inputStreamValidationResults?.vars![varName]}
+                              errors={inputStreamValidationResults?.vars?.[varName]}
                               forceShowErrors={forceShowErrors}
                               packageType={packageInfo.type}
                               packageName={packageInfo.name}

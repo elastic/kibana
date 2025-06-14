@@ -20,7 +20,6 @@ interface Option {
 }
 
 export interface Props {
-  allowAllOption?: boolean;
   dataTestSubj: string;
   fieldName: string;
   label: string;
@@ -30,7 +29,6 @@ export interface Props {
 }
 
 export function FieldSelector({
-  allowAllOption = true,
   dataTestSubj,
   fieldName,
   label,
@@ -49,20 +47,14 @@ export function FieldSelector({
 
   const debouncedSearch = debounce((value) => setSearch(value), 200);
 
-  const options = (
-    allowAllOption
-      ? [
-          {
-            value: ALL_VALUE,
-            label: i18n.translate('xpack.slo.sloEdit.fieldSelector.all', {
-              defaultMessage: 'All',
-            }),
-          },
-        ]
-      : []
-  ).concat(createOptions(suggestions));
-
-  const isDisabled = name !== 'indicator.params.service' && !serviceName;
+  const options = [
+    {
+      value: ALL_VALUE,
+      label: i18n.translate('xpack.slo.sloEdit.fieldSelector.all', {
+        defaultMessage: 'All',
+      }),
+    },
+  ].concat(createOptions(suggestions));
 
   return (
     <EuiFlexItem>
@@ -82,7 +74,7 @@ export function FieldSelector({
           defaultValue=""
           name={name}
           control={control}
-          rules={{ required: !isDisabled }}
+          rules={{ required: true }}
           render={({ field, fieldState }) => (
             <EuiComboBox
               {...field}
@@ -90,7 +82,6 @@ export function FieldSelector({
               async
               data-test-subj={dataTestSubj}
               isClearable
-              isDisabled={isDisabled}
               isInvalid={fieldState.invalid}
               isLoading={isLoading}
               onChange={(selected: EuiComboBoxOptionOption[]) => {

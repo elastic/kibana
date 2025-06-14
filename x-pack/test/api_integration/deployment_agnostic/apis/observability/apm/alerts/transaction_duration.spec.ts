@@ -153,6 +153,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expect(Object.keys(results[0]).sort()).to.eql([
             'alertDetailsUrl',
             'environment',
+            'grouping',
             'interval',
             'reason',
             'serviceName',
@@ -175,6 +176,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             transactionName: 'tx-java',
             threshold: '3000',
             triggerValue: '5,000 ms',
+            grouping:
+              '{"service":{"name":"opbeans-java","environment":"production"},"transaction":{"type":"request","name":"tx-java"}}',
           });
 
           const url = new URL(results[0].viewInAppUrl);
@@ -227,7 +230,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let ruleId: string;
       let alerts: ApmAlertFields[];
 
-      beforeEach(async () => {
+      before(async () => {
         const createdRule = await alertingApi.createRule({
           ruleTypeId: ApmRuleType.TransactionDuration,
           name: 'Apm transaction duration with kql filter',
@@ -258,7 +261,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         ).hits.hits.map((hit) => hit._source) as ApmAlertFields[];
       });
 
-      afterEach(() =>
+      after(() =>
         alertingApi.cleanUpAlerts({
           roleAuthc,
           ruleId,

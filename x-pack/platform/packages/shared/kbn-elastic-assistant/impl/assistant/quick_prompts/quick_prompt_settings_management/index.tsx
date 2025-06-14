@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiConfirmModal,
@@ -15,72 +15,62 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import { useQuickPromptUpdater } from '../../settings/use_settings_updater/use_quick_prompt_updater';
 import { QuickPromptSettingsEditor } from '../quick_prompt_settings/quick_prompt_editor';
 import * as i18n from './translations';
 import { useFlyoutModalVisibility } from '../../common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
 import { Flyout } from '../../common/components/assistant_settings_management/flyout';
 import { CANCEL, DELETE, SETTINGS_UPDATED_TOAST_TITLE } from '../../settings/translations';
-import { useQuickPromptEditor } from '../quick_prompt_settings/use_quick_prompt_editor';
 import { useQuickPromptTable } from './use_quick_prompt_table';
 import {
-  DEFAULT_TABLE_OPTIONS,
+  getDefaultTableOptions,
   useSessionPagination,
 } from '../../common/components/assistant_settings_management/pagination/use_session_pagination';
 import { QUICK_PROMPT_TABLE_SESSION_STORAGE_KEY } from '../../../assistant_context/constants';
 import { useAssistantContext } from '../../../assistant_context';
-import {
-  DEFAULT_CONVERSATIONS,
-  useSettingsUpdater,
-} from '../../settings/use_settings_updater/use_settings_updater';
 import { useFetchPrompts } from '../../api';
 
 const QuickPromptSettingsManagementComponent = () => {
-  const { nameSpace, basePromptContexts, toasts } = useAssistantContext();
+  const { currentAppId, http, nameSpace, basePromptContexts, toasts } = useAssistantContext();
 
   const { data: allPrompts, isFetched: promptsLoaded, refetch: refetchPrompts } = useFetchPrompts();
 
   const {
-    promptsBulkActions,
+    onPromptContentChange,
+    onQuickPromptColorChange,
+    onQuickPromptContextChange,
+    onQuickPromptDelete,
+    onQuickPromptSelect,
     quickPromptSettings,
-    resetSettings,
-    saveSettings,
-    setPromptsBulkActions,
-    setUpdatedQuickPromptSettings,
-  } = useSettingsUpdater(
-    DEFAULT_CONVERSATIONS, // Quick Prompt settings do not require conversations
+    resetQuickPromptSettings,
+    saveQuickPromptSettings,
+    selectedQuickPrompt,
+  } = useQuickPromptUpdater({
     allPrompts,
-    false, // Quick Prompt settings do not require conversations
-    promptsLoaded
-  );
-
-  // Quick Prompt Selection State
-  const [selectedQuickPrompt, setSelectedQuickPrompt] = useState<PromptResponse | undefined>();
-  const onSelectedQuickPromptChange = useCallback((quickPrompt?: PromptResponse) => {
-    setSelectedQuickPrompt(quickPrompt);
-  }, []);
-
-  useEffect(() => {
-    if (selectedQuickPrompt != null) {
-      setSelectedQuickPrompt(quickPromptSettings.find((q) => q.name === selectedQuickPrompt.name));
-    }
-  }, [quickPromptSettings, selectedQuickPrompt]);
+    currentAppId,
+    http,
+    promptsLoaded,
+    toasts,
+  });
 
   const handleSave = useCallback(
     async (param?: { callback?: () => void }) => {
-      await saveSettings();
-      toasts?.addSuccess({
-        iconType: 'check',
-        title: SETTINGS_UPDATED_TOAST_TITLE,
-      });
-      param?.callback?.();
+      const didSucceed = await saveQuickPromptSettings();
+      if (didSucceed) {
+        toasts?.addSuccess({
+          iconType: 'check',
+          title: SETTINGS_UPDATED_TOAST_TITLE,
+        });
+        param?.callback?.();
+      }
     },
-    [saveSettings, toasts]
+    [saveQuickPromptSettings, toasts]
   );
 
   const onCancelClick = useCallback(() => {
-    resetSettings();
-  }, [resetSettings]);
+    resetQuickPromptSettings();
+  }, [resetQuickPromptSettings]);
 
   const { isFlyoutOpen: editFlyoutVisible, openFlyout, closeFlyout } = useFlyoutModalVisibility();
   const [deletedQuickPrompt, setDeletedQuickPrompt] = useState<PromptResponse | null>();
@@ -90,28 +80,21 @@ const QuickPromptSettingsManagementComponent = () => {
     closeFlyout: closeConfirmModal,
   } = useFlyoutModalVisibility();
 
-  const { onQuickPromptDeleted, onQuickPromptSelectionChange } = useQuickPromptEditor({
-    onSelectedQuickPromptChange,
-    setUpdatedQuickPromptSettings,
-    promptsBulkActions,
-    setPromptsBulkActions,
-  });
-
   const onEditActionClicked = useCallback(
     (prompt: PromptResponse) => {
-      onQuickPromptSelectionChange(prompt);
+      onQuickPromptSelect(prompt);
       openFlyout();
     },
-    [onQuickPromptSelectionChange, openFlyout]
+    [onQuickPromptSelect, openFlyout]
   );
 
   const onDeleteActionClicked = useCallback(
     (prompt: PromptResponse) => {
       setDeletedQuickPrompt(prompt);
-      onQuickPromptDeleted(prompt.id);
+      onQuickPromptDelete(prompt.id);
       openConfirmModal();
     },
-    [onQuickPromptDeleted, openConfirmModal]
+    [onQuickPromptDelete, openConfirmModal]
   );
 
   const onDeleteCancelled = useCallback(() => {
@@ -126,21 +109,19 @@ const QuickPromptSettingsManagementComponent = () => {
   }, [closeConfirmModal, handleSave, refetchPrompts]);
 
   const onCreate = useCallback(() => {
-    onSelectedQuickPromptChange();
+    onQuickPromptSelect();
     openFlyout();
-  }, [onSelectedQuickPromptChange, openFlyout]);
+  }, [onQuickPromptSelect, openFlyout]);
 
   const onSaveCancelled = useCallback(() => {
-    onSelectedQuickPromptChange();
     closeFlyout();
     onCancelClick();
-  }, [closeFlyout, onSelectedQuickPromptChange, onCancelClick]);
+  }, [closeFlyout, onCancelClick]);
 
   const onSaveConfirmed = useCallback(() => {
     handleSave({ callback: refetchPrompts });
-    onSelectedQuickPromptChange();
     closeFlyout();
-  }, [closeFlyout, handleSave, onSelectedQuickPromptChange, refetchPrompts]);
+  }, [closeFlyout, handleSave, refetchPrompts]);
 
   const { getColumns } = useQuickPromptTable();
   const columns = getColumns({
@@ -152,8 +133,8 @@ const QuickPromptSettingsManagementComponent = () => {
     isEditEnabled: () => true,
   });
 
-  const { onTableChange, pagination, sorting } = useSessionPagination({
-    defaultTableOptions: DEFAULT_TABLE_OPTIONS,
+  const { onTableChange, pagination, sorting } = useSessionPagination<PromptResponse, true>({
+    defaultTableOptions: getDefaultTableOptions<PromptResponse>({ sortField: 'updatedAt' }),
     nameSpace,
     storageKey: QUICK_PROMPT_TABLE_SESSION_STORAGE_KEY,
   });
@@ -197,13 +178,14 @@ const QuickPromptSettingsManagementComponent = () => {
         saveButtonDisabled={selectedQuickPrompt?.name == null || selectedQuickPrompt?.name === ''}
       >
         <QuickPromptSettingsEditor
-          onSelectedQuickPromptChange={onSelectedQuickPromptChange}
-          quickPromptSettings={quickPromptSettings}
-          resetSettings={resetSettings}
+          onPromptContentChange={onPromptContentChange}
+          onQuickPromptColorChange={onQuickPromptColorChange}
+          onQuickPromptContextChange={onQuickPromptContextChange}
+          onQuickPromptDelete={onQuickPromptDelete}
+          onQuickPromptSelect={onQuickPromptSelect}
+          resetSettings={resetQuickPromptSettings}
           selectedQuickPrompt={selectedQuickPrompt}
-          setUpdatedQuickPromptSettings={setUpdatedQuickPromptSettings}
-          promptsBulkActions={promptsBulkActions}
-          setPromptsBulkActions={setPromptsBulkActions}
+          quickPromptSettings={quickPromptSettings}
         />
       </Flyout>
       {deleteConfirmModalVisibility && deletedQuickPrompt && (

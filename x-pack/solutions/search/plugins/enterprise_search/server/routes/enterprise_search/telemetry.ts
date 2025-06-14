@@ -20,6 +20,12 @@ export function registerTelemetryRoute({ router, getSavedObjectsService }: Route
   router.put(
     {
       path: '/internal/enterprise_search/stats',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: schema.object({
           product: schema.oneOf([schema.literal('enterprise_search')]),

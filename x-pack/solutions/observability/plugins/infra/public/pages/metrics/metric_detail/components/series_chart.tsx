@@ -44,6 +44,7 @@ export const AreaChart = ({ id, color, series, name, type, stack }: Props) => {
     <AreaSeries
       id={id}
       name={name}
+      // Defaults to multi layer time axis as of Elastic Charts v70
       xScaleType={ScaleType.Time}
       yScaleType={ScaleType.Linear}
       xAccessor="timestamp"
@@ -73,6 +74,7 @@ export const BarChart = ({ id, color, series, name, stack }: Props) => {
     <BarSeries
       id={id}
       name={name}
+      // Defaults to multi layer time axis as of Elastic Charts v70
       xScaleType={ScaleType.Time}
       yScaleType={ScaleType.Linear}
       xAccessor="timestamp"

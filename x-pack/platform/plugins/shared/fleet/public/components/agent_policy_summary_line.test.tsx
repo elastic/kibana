@@ -37,8 +37,16 @@ describe('AgentPolicySummaryLine', () => {
   test('it should render policy with agent revision if an agent is provided', async () => {
     const results = render(
       { name: 'test', revision: 2 } as AgentPolicy,
+      { policy_revision: 2 } as Agent
+    );
+    expect(results.container.textContent).toBe('testrev. 2');
+  });
+
+  test('it should render policy with agent revision with outdated callout if agent revision is less than policy', async () => {
+    const results = render(
+      { name: 'test', revision: 2 } as AgentPolicy,
       { policy_revision: 1 } as Agent
     );
-    expect(results.container.textContent).toBe('testrev. 1');
+    expect(results.container.textContent).toBe('testrev. 1Outdated policy');
   });
 });

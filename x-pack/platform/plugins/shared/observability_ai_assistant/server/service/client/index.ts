@@ -5,12 +5,11 @@
  * 2.0.
  */
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { notFound } from '@hapi/boom';
+import { notFound, forbidden } from '@hapi/boom';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { context } from '@opentelemetry/api';
 import { last, merge, omit } from 'lodash';
 import {
   catchError,
@@ -29,9 +28,14 @@ import {
 } from 'rxjs';
 import { v4 } from 'uuid';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
-import type { InferenceClient } from '@kbn/inference-plugin/server';
-import { ChatCompleteResponse, FunctionCallingMode, ToolChoiceType } from '@kbn/inference-common';
-
+import { withInferenceSpan } from '@kbn/inference-tracing';
+import {
+  ChatCompleteResponse,
+  FunctionCallingMode,
+  InferenceClient,
+  ToolChoiceType,
+} from '@kbn/inference-common';
+import { isLockAcquisitionError } from '@kbn/lock-manager';
 import { resourceNames } from '..';
 import {
   ChatCompletionChunkEvent,
@@ -46,7 +50,7 @@ import {
 import { convertMessagesForInference } from '../../../common/convert_messages_for_inference';
 import { CompatibleJSONSchema } from '../../../common/functions/types';
 import {
-  type AdHocInstruction,
+  type Instruction,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
@@ -58,23 +62,23 @@ import {
 import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
 import type { ChatFunctionClient } from '../chat_function_client';
 import { KnowledgeBaseService, RecalledEntry } from '../knowledge_base_service';
+import { AnonymizationService } from '../anonymization';
 import { getAccessQuery } from '../util/get_access_query';
 import { getSystemMessageFromInstructions } from '../util/get_system_message_from_instructions';
 import { failOnNonExistingFunctionCall } from './operators/fail_on_non_existing_function_call';
 import { getContextFunctionRequestIfNeeded } from './get_context_function_request_if_needed';
-import { LangTracer } from './instrumentation/lang_tracer';
 import { continueConversation } from './operators/continue_conversation';
 import { convertInferenceEventsToStreamingEvents } from './operators/convert_inference_events_to_streaming_events';
 import { extractMessages } from './operators/extract_messages';
 import { getGeneratedTitle } from './operators/get_generated_title';
-import {
-  reIndexKnowledgeBaseAndPopulateSemanticTextField,
-  scheduleKbSemanticTextMigrationTask,
-} from '../task_manager_definitions/register_kb_semantic_text_migration_task';
+import { runStartupMigrations } from '../startup_migrations/run_startup_migrations';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
-import { getElserModelId } from '../knowledge_base_service/get_elser_model_id';
-import { apmInstrumentation } from './operators/apm_instrumentation';
+import { deleteInferenceEndpoint, waitForKbModel, warmupModel } from '../inference_endpoint';
+import { reIndexKnowledgeBaseWithLock } from '../knowledge_base_service/reindex_knowledge_base';
+import { createOrUpdateKnowledgeBaseIndexAssets } from '../index_assets/create_or_update_knowledge_base_index_assets';
+import { getInferenceIdFromWriteIndex } from '../knowledge_base_service/get_inference_id_from_write_index';
+import { LEGACY_CUSTOM_INFERENCE_ID } from '../../../common/preconfigured_inference_ids';
 
 const MAX_FUNCTION_CALLS = 8;
 
@@ -98,6 +102,7 @@ export class ObservabilityAIAssistantClient {
       };
       knowledgeBaseService: KnowledgeBaseService;
       scopes: AssistantScope[];
+      anonymizationService: AnonymizationService;
     }
   ) {}
 
@@ -105,7 +110,7 @@ export class ObservabilityAIAssistantClient {
     conversationId: string
   ): Promise<SearchHit<Conversation> | undefined> => {
     const response = await this.dependencies.esClient.asInternalUser.search<Conversation>({
-      index: resourceNames.aliases.conversations,
+      index: resourceNames.writeIndexAlias.conversations,
       query: {
         bool: {
           filter: [
@@ -134,6 +139,17 @@ export class ObservabilityAIAssistantClient {
     };
   };
 
+  private isConversationOwnedByUser = (conversation: Conversation): boolean => {
+    const user = this.dependencies.user;
+    if (!conversation.user || !user) {
+      return false;
+    }
+
+    return conversation.user.id && user.id
+      ? conversation.user.id === user.id
+      : conversation.user.name === user.name;
+  };
+
   get = async (conversationId: string): Promise<Conversation> => {
     const conversation = await this.getConversationWithMetaFields(conversationId);
 
@@ -150,6 +166,10 @@ export class ObservabilityAIAssistantClient {
       throw notFound();
     }
 
+    if (!this.isConversationOwnedByUser(conversation._source!)) {
+      throw forbidden('Deleting a conversation is only allowed for the owner of the conversation.');
+    }
+
     await this.dependencies.esClient.asInternalUser.delete({
       id: conversation._id!,
       index: conversation._index,
@@ -161,7 +181,7 @@ export class ObservabilityAIAssistantClient {
     functionClient,
     connectorId,
     simulateFunctionCalling = false,
-    instructions: adHocInstructions = [],
+    userInstructions: apiUserInstructions = [],
     messages: initialMessages,
     signal,
     persist,
@@ -180,80 +200,71 @@ export class ObservabilityAIAssistantClient {
     title?: string;
     isPublic?: boolean;
     kibanaPublicUrl?: string;
-    instructions?: AdHocInstruction[];
+    userInstructions?: Instruction[];
     simulateFunctionCalling?: boolean;
-    disableFunctions?:
-      | boolean
-      | {
-          except: string[];
-        };
+    disableFunctions?: boolean;
   }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
-    return new LangTracer(context.active()).startActiveSpan(
-      'complete',
-      ({ tracer: completeTracer }) => {
-        const isConversationUpdate = persist && !!predefinedConversationId;
+    return withInferenceSpan('run_tools', () => {
+      const isConversationUpdate = persist && !!predefinedConversationId;
+      const conversationId = persist ? predefinedConversationId || v4() : '';
 
-        const conversationId = persist ? predefinedConversationId || v4() : '';
+      if (persist && !isConversationUpdate && kibanaPublicUrl) {
+        functionClient.registerInstruction(
+          `This conversation will be persisted in Kibana and available at this url: ${kibanaPublicUrl}/app/observabilityAIAssistant/conversations/${conversationId}.`
+        );
+      }
 
-        if (persist && !isConversationUpdate && kibanaPublicUrl) {
-          adHocInstructions.push({
-            instruction_type: 'application_instruction',
-            text: `This conversation will be persisted in Kibana and available at this url: ${
-              kibanaPublicUrl + `/app/observabilityAIAssistant/conversations/${conversationId}`
-            }.`,
-          });
-        }
+      const kbUserInstructions$ = from(this.getKnowledgeBaseUserInstructions()).pipe(shareReplay());
 
-        const userInstructions$ = from(this.getKnowledgeBaseUserInstructions()).pipe(shareReplay());
-
-        const registeredAdhocInstructions = functionClient.getAdhocInstructions();
-        const allAdHocInstructions = adHocInstructions.concat(registeredAdhocInstructions);
-
-        // if it is:
-        // - a new conversation
-        // - no predefined title is given
-        // - we need to store the conversation
-        // we generate a title
-        // if not, we complete with an empty string
-        const title$ =
-          predefinedTitle || isConversationUpdate || !persist
-            ? of(predefinedTitle || '').pipe(shareReplay())
-            : getGeneratedTitle({
-                messages: initialMessages,
-                logger: this.dependencies.logger,
-                chat: (name, chatParams) =>
+      // if it is:
+      // - a new conversation
+      // - no predefined title is given
+      // - we need to store the conversation
+      // we generate a title
+      // if not, we complete with an empty string
+      const title$ =
+        predefinedTitle || isConversationUpdate || !persist
+          ? of(predefinedTitle || '').pipe(shareReplay())
+          : getGeneratedTitle({
+              messages: initialMessages,
+              logger: this.dependencies.logger,
+              chat: (name, chatParams) =>
+                withInferenceSpan('get_title', () =>
                   this.chat(name, {
                     ...chatParams,
                     simulateFunctionCalling,
                     connectorId,
                     signal,
                     stream: false,
-                  }),
-                tracer: completeTracer,
-              }).pipe(shareReplay());
+                  })
+                ),
+            }).pipe(shareReplay());
 
-        const systemMessage$ = userInstructions$.pipe(
-          map((userInstructions) => {
-            return getSystemMessageFromInstructions({
-              applicationInstructions: functionClient.getInstructions(),
-              userInstructions,
-              adHocInstructions: allAdHocInstructions,
-              availableFunctionNames: functionClient.getFunctions().map((fn) => fn.definition.name),
-            });
-          }),
-          shareReplay()
-        );
+      const systemMessage$ = kbUserInstructions$.pipe(
+        map((kbUserInstructions) =>
+          getSystemMessageFromInstructions({
+            applicationInstructions: functionClient.getInstructions(),
+            kbUserInstructions,
+            apiUserInstructions,
+            availableFunctionNames: disableFunctions
+              ? []
+              : functionClient.getFunctions().map((fn) => fn.definition.name),
+          })
+        ),
+        shareReplay()
+      );
 
-        // we continue the conversation here, after resolving both the materialized
-        // messages and the knowledge base instructions
-        const nextEvents$ = forkJoin([systemMessage$, userInstructions$]).pipe(
-          switchMap(([systemMessage, userInstructions]) => {
-            // if needed, inject a context function request here
-            const contextRequest = functionClient.hasFunction(CONTEXT_FUNCTION_NAME)
-              ? getContextFunctionRequestIfNeeded(initialMessages)
-              : undefined;
+      // we continue the conversation here, after resolving both the materialized
+      // messages and the knowledge base instructions
+      const nextEvents$ = forkJoin([systemMessage$, kbUserInstructions$]).pipe(
+        switchMap(([systemMessage, kbUserInstructions]) => {
+          // if needed, inject a context function request here
+          const contextRequest = functionClient.hasFunction(CONTEXT_FUNCTION_NAME)
+            ? getContextFunctionRequestIfNeeded(initialMessages)
+            : undefined;
 
-            return mergeOperator(
+          return withInferenceSpan('run_tools', () =>
+            mergeOperator(
               // if we have added a context function request, also emit
               // the messageAdd event for it, so we can notify the consumer
               // and add it to the conversation
@@ -263,8 +274,8 @@ export class ObservabilityAIAssistantClient {
                 chat: (name, chatParams) => {
                   // inject a chat function with predefined parameters
                   return this.chat(name, {
-                    ...chatParams,
                     systemMessage,
+                    ...chatParams,
                     signal,
                     simulateFunctionCalling,
                     connectorId,
@@ -274,145 +285,154 @@ export class ObservabilityAIAssistantClient {
                 // start out with the max number of function calls
                 functionCallsLeft: MAX_FUNCTION_CALLS,
                 functionClient,
-                userInstructions,
-                adHocInstructions,
+                kbUserInstructions,
+                apiUserInstructions,
                 signal,
                 logger: this.dependencies.logger,
                 disableFunctions,
-                tracer: completeTracer,
                 connectorId,
                 simulateFunctionCalling,
               })
+            )
+          );
+        }),
+        shareReplay()
+      );
+
+      const conversationWithMetaFields$ = from(
+        this.getConversationWithMetaFields(conversationId)
+      ).pipe(
+        switchMap((conversation) => {
+          if (isConversationUpdate && !conversation) {
+            return throwError(() => createConversationNotFoundError());
+          }
+
+          if (conversation?._source && !this.isConversationOwnedByUser(conversation._source)) {
+            return throwError(
+              () => new Error('Cannot update conversation that is not owned by the user')
             );
-          }),
-          shareReplay()
-        );
+          }
 
-        const output$ = mergeOperator(
-          // get all the events from continuing the conversation
-          nextEvents$,
-          // wait until all dependencies have completed
-          forkJoin([
-            // get just the new messages
-            nextEvents$.pipe(extractMessages()),
-            // get just the title, and drop the token count events
-            title$.pipe(filter((value): value is string => typeof value === 'string')),
-            systemMessage$,
-          ]).pipe(
-            switchMap(([addedMessages, title, systemMessage]) => {
-              const initialMessagesWithAddedMessages = initialMessages.concat(addedMessages);
+          return of(conversation);
+        })
+      );
 
-              const lastMessage = last(initialMessagesWithAddedMessages);
+      const output$ = conversationWithMetaFields$.pipe(
+        switchMap((conversation) => {
+          return mergeOperator(
+            // get all the events from continuing the conversation
+            nextEvents$,
+            // wait until all dependencies have completed
+            forkJoin([
+              // get just the new messages
+              nextEvents$.pipe(extractMessages()),
+              // get just the title, and drop the token count events
+              title$.pipe(filter((value): value is string => typeof value === 'string')),
+              systemMessage$,
+            ]).pipe(
+              switchMap(([addedMessages, title, systemMessage]) => {
+                const { unredactedMessages } =
+                  this.dependencies.anonymizationService.unredactMessages(
+                    initialMessages.concat(addedMessages)
+                  );
+                const lastMessage = last(unredactedMessages);
 
-              // if a function request is at the very end, close the stream to consumer
-              // without persisting or updating the conversation. we need to wait
-              // on the function response to have a valid conversation
-              const isFunctionRequest = !!lastMessage?.message.function_call?.name;
+                // if a function request is at the very end, close the stream to consumer
+                // without persisting or updating the conversation. we need to wait
+                // on the function response to have a valid conversation
+                const isFunctionRequest = !!lastMessage?.message.function_call?.name;
 
-              if (!persist || isFunctionRequest) {
-                return of();
-              }
+                if (!persist || isFunctionRequest) {
+                  return of();
+                }
 
-              if (isConversationUpdate) {
-                return from(this.getConversationWithMetaFields(conversationId))
-                  .pipe(
-                    switchMap((conversation) => {
-                      if (!conversation) {
-                        return throwError(() => createConversationNotFoundError());
-                      }
+                if (isConversationUpdate && conversation) {
+                  return from(
+                    this.update(
+                      conversationId,
 
-                      return from(
-                        this.update(
-                          conversationId,
+                      merge(
+                        {},
 
-                          merge(
-                            {},
+                        // base conversation without messages
+                        omit(conversation._source, 'messages'),
 
-                            // base conversation without messages
-                            omit(conversation._source, 'messages'),
+                        // update messages and system message
+                        { messages: unredactedMessages, systemMessage },
 
-                            // update messages and system message
-                            { messages: initialMessagesWithAddedMessages, systemMessage },
-
-                            // update title
-                            {
-                              conversation: {
-                                title: title || conversation._source?.conversation.title,
-                              },
-                            }
-                          )
-                        )
-                      );
-                    })
-                  )
-                  .pipe(
-                    map((conversation): ConversationUpdateEvent => {
+                        // update title
+                        {
+                          conversation: {
+                            title: title || conversation._source?.conversation.title,
+                          },
+                        }
+                      )
+                    )
+                  ).pipe(
+                    map((conversationUpdated): ConversationUpdateEvent => {
                       return {
-                        conversation: conversation.conversation,
+                        conversation: conversationUpdated.conversation,
                         type: StreamingChatResponseEventType.ConversationUpdate,
                       };
                     })
                   );
-              }
+                }
 
-              return from(
-                this.create({
-                  '@timestamp': new Date().toISOString(),
-                  conversation: {
-                    title,
-                    id: conversationId,
-                  },
-                  public: !!isPublic,
-                  labels: {},
-                  numeric_labels: {},
-                  systemMessage,
-                  messages: initialMessagesWithAddedMessages,
-                })
-              ).pipe(
-                map((conversation): ConversationCreateEvent => {
-                  return {
-                    conversation: conversation.conversation,
-                    type: StreamingChatResponseEventType.ConversationCreate,
-                  };
-                })
+                return from(
+                  this.create({
+                    '@timestamp': new Date().toISOString(),
+                    conversation: {
+                      title,
+                      id: conversationId,
+                    },
+                    public: !!isPublic,
+                    labels: {},
+                    numeric_labels: {},
+                    systemMessage,
+                    messages: unredactedMessages,
+                    archived: false,
+                  })
+                ).pipe(
+                  map((conversationCreated): ConversationCreateEvent => {
+                    return {
+                      conversation: conversationCreated.conversation,
+                      type: StreamingChatResponseEventType.ConversationCreate,
+                    };
+                  })
+                );
+              })
+            )
+          );
+        })
+      );
+
+      return output$.pipe(
+        catchError((error) => {
+          this.dependencies.logger.error(error);
+          return throwError(() => error);
+        }),
+        tap((event) => {
+          switch (event.type) {
+            case StreamingChatResponseEventType.MessageAdd:
+              this.dependencies.logger.debug(
+                () => `Added message: ${JSON.stringify(event.message)}`
               );
-            })
-          )
-        );
-
-        return output$.pipe(
-          apmInstrumentation('complete'),
-          catchError((error) => {
-            this.dependencies.logger.error(error);
-            return throwError(() => error);
-          }),
-          tap((event) => {
-            if (this.dependencies.logger.isLevelEnabled('debug')) {
-              switch (event.type) {
-                case StreamingChatResponseEventType.MessageAdd:
-                  this.dependencies.logger.debug(
-                    () => `Added message: ${JSON.stringify(event.message)}`
-                  );
-                  break;
-
-                case StreamingChatResponseEventType.ConversationCreate:
-                  this.dependencies.logger.debug(
-                    () => `Created conversation: ${JSON.stringify(event.conversation)}`
-                  );
-                  break;
-
-                case StreamingChatResponseEventType.ConversationUpdate:
-                  this.dependencies.logger.debug(
-                    () => `Updated conversation: ${JSON.stringify(event.conversation)}`
-                  );
-                  break;
-              }
-            }
-          }),
-          shareReplay()
-        );
-      }
-    );
+              break;
+            case StreamingChatResponseEventType.ConversationCreate:
+              this.dependencies.logger.debug(
+                () => `Created conversation: ${JSON.stringify(event.conversation)}`
+              );
+              break;
+            case StreamingChatResponseEventType.ConversationUpdate:
+              this.dependencies.logger.debug(
+                () => `Updated conversation: ${JSON.stringify(event.conversation)}`
+              );
+              break;
+          }
+        }),
+        shareReplay()
+      );
+    });
   };
 
   chat<TStream extends boolean>(
@@ -425,7 +445,6 @@ export class ObservabilityAIAssistantClient {
       functionCall,
       signal,
       simulateFunctionCalling,
-      tracer,
       stream,
     }: {
       systemMessage?: string;
@@ -435,7 +454,6 @@ export class ObservabilityAIAssistantClient {
       functionCall?: string;
       signal: AbortSignal;
       simulateFunctionCalling?: boolean;
-      tracer: LangTracer;
       stream: TStream;
     }
   ): TStream extends true
@@ -463,33 +481,48 @@ export class ObservabilityAIAssistantClient {
     const options = {
       connectorId,
       system: systemMessage,
-      messages: convertMessagesForInference(messages),
       toolChoice,
       tools,
       functionCalling: (simulateFunctionCalling ? 'simulated' : 'auto') as FunctionCallingMode,
+      metadata: {
+        connectorTelemetry: {
+          pluginId: 'observability_ai_assistant',
+        },
+      },
     };
 
     this.dependencies.logger.debug(
       () =>
-        `Calling inference client with for name: "${name}" with options: ${JSON.stringify(options)}`
+        `Options for inference client for name: "${name}" before anonymization: ${JSON.stringify({
+          ...options,
+          messages,
+        })}`
     );
 
     if (stream) {
       return defer(() =>
-        this.dependencies.inferenceClient.chatComplete({
-          ...options,
-          stream: true,
-        })
+        from(this.dependencies.anonymizationService.redactMessages(messages)).pipe(
+          switchMap(({ redactedMessages }) => {
+            return (
+              this.dependencies.inferenceClient
+                .chatComplete({
+                  ...options,
+                  stream: true,
+                  messages: convertMessagesForInference(redactedMessages, this.dependencies.logger),
+                })
+                // unredact complete assistant response event
+                .pipe(this.dependencies.anonymizationService.unredactChatCompletionEvent())
+            );
+          })
+        )
       ).pipe(
         convertInferenceEventsToStreamingEvents(),
-        apmInstrumentation(name),
         failOnNonExistingFunctionCall({ functions }),
         tap((event) => {
-          if (
-            event.type === StreamingChatResponseEventType.ChatCompletionChunk &&
-            this.dependencies.logger.isLevelEnabled('trace')
-          ) {
-            this.dependencies.logger.trace(`Received chunk: ${JSON.stringify(event.message)}`);
+          if (event.type === StreamingChatResponseEventType.ChatCompletionChunk) {
+            this.dependencies.logger.trace(
+              () => `Received chunk: ${JSON.stringify(event.message)}`
+            );
           }
         }),
         shareReplay()
@@ -499,6 +532,7 @@ export class ObservabilityAIAssistantClient {
     } else {
       return this.dependencies.inferenceClient.chatComplete({
         ...options,
+        messages: convertMessagesForInference(messages, this.dependencies.logger),
         stream: false,
       }) as TStream extends true ? never : Promise<ChatCompleteResponse>;
     }
@@ -506,7 +540,7 @@ export class ObservabilityAIAssistantClient {
 
   find = async (options?: { query?: string }): Promise<Conversation[]> => {
     const response = await this.dependencies.esClient.asInternalUser.search<Conversation>({
-      index: resourceNames.aliases.conversations,
+      index: resourceNames.writeIndexAlias.conversations,
       allow_no_indices: true,
       query: {
         bool: {
@@ -537,6 +571,10 @@ export class ObservabilityAIAssistantClient {
       throw notFound();
     }
 
+    if (!this.isConversationOwnedByUser(persistedConversation._source!)) {
+      throw forbidden('Updating a conversation is only allowed for the owner of the conversation.');
+    }
+
     const updatedConversation: Conversation = merge(
       {},
       conversation,
@@ -547,35 +585,6 @@ export class ObservabilityAIAssistantClient {
       id: persistedConversation._id!,
       index: persistedConversation._index,
       doc: updatedConversation,
-      refresh: true,
-    });
-
-    return updatedConversation;
-  };
-
-  setTitle = async ({ conversationId, title }: { conversationId: string; title: string }) => {
-    const document = await this.getConversationWithMetaFields(conversationId);
-    if (!document) {
-      throw notFound();
-    }
-
-    const conversation = await this.get(conversationId);
-
-    if (!conversation) {
-      throw notFound();
-    }
-
-    const updatedConversation: Conversation = merge(
-      {},
-      conversation,
-      { conversation: { title } },
-      this.getConversationUpdateValues(new Date().toISOString())
-    );
-
-    await this.dependencies.esClient.asInternalUser.update({
-      id: document._id!,
-      index: document._index,
-      doc: { conversation: { title } },
       refresh: true,
     });
 
@@ -596,12 +605,50 @@ export class ObservabilityAIAssistantClient {
     );
 
     await this.dependencies.esClient.asInternalUser.index({
-      index: resourceNames.aliases.conversations,
+      index: resourceNames.writeIndexAlias.conversations,
       document: createdConversation,
       refresh: true,
     });
 
     return createdConversation;
+  };
+
+  updatePartial = async ({
+    conversationId,
+    updates,
+  }: {
+    conversationId: string;
+    updates: Partial<{ public: boolean; archived: boolean }>;
+  }): Promise<Conversation> => {
+    const conversation = await this.get(conversationId);
+    if (!conversation) {
+      throw notFound();
+    }
+
+    const updatedConversation: Conversation = merge({}, conversation, {
+      ...(updates.public !== undefined && { public: updates.public }),
+      ...(updates.archived !== undefined && { archived: updates.archived }),
+    });
+
+    return this.update(conversationId, updatedConversation);
+  };
+
+  duplicateConversation = async (conversationId: string): Promise<Conversation> => {
+    const conversation = await this.getConversationWithMetaFields(conversationId);
+
+    if (!conversation) {
+      throw notFound();
+    }
+    const _source = conversation._source!;
+    return this.create({
+      ..._source,
+      conversation: {
+        ..._source.conversation,
+        id: v4(),
+      },
+      public: false,
+      archived: false,
+    });
   };
 
   recall = async ({
@@ -626,40 +673,110 @@ export class ObservabilityAIAssistantClient {
     );
   };
 
-  getKnowledgeBaseStatus = () => {
-    return this.dependencies.knowledgeBaseService.getStatus();
+  getInferenceEndpointsForEmbedding = () => {
+    return this.dependencies.knowledgeBaseService.getInferenceEndpointsForEmbedding();
   };
 
-  setupKnowledgeBase = async (modelId: string | undefined) => {
-    const { esClient, core, logger, knowledgeBaseService } = this.dependencies;
+  getKnowledgeBaseStatus = () => {
+    return this.dependencies.knowledgeBaseService.getModelStatus();
+  };
 
-    if (!modelId) {
-      modelId = await getElserModelId({ core, logger });
+  setupKnowledgeBase = async (
+    nextInferenceId: string,
+    waitUntilComplete: boolean = false
+  ): Promise<{
+    reindex: boolean;
+    currentInferenceId: string | undefined;
+    nextInferenceId: string;
+  }> => {
+    const { esClient, core, logger } = this.dependencies;
+
+    logger.debug(`Setting up knowledge base with inference_id: ${nextInferenceId}`);
+
+    const currentInferenceId = await getInferenceIdFromWriteIndex(esClient, logger);
+    if (currentInferenceId === nextInferenceId) {
+      logger.debug('Inference ID is unchanged. No need to re-index knowledge base.');
+      const warmupModelPromise = warmupModel({ esClient, logger, inferenceId: nextInferenceId });
+      if (waitUntilComplete) {
+        logger.debug('Waiting for warmup to complete...');
+        await warmupModelPromise;
+        logger.debug('Warmup completed.');
+      }
+      return { reindex: false, currentInferenceId, nextInferenceId };
     }
 
-    // setup the knowledge base
-    const res = await knowledgeBaseService.setup(esClient, modelId);
+    await createOrUpdateKnowledgeBaseIndexAssets({
+      core: this.dependencies.core,
+      logger: this.dependencies.logger,
+      inferenceId: nextInferenceId,
+    });
 
-    core
-      .getStartServices()
-      .then(([_, pluginsStart]) =>
-        scheduleKbSemanticTextMigrationTask({ taskManager: pluginsStart.taskManager, logger })
-      )
-      .catch((error) => {
-        logger.error(`Failed to schedule semantic text migration task: ${error}`);
+    const kbSetupPromise = waitForKbModel({
+      core: this.dependencies.core,
+      esClient,
+      logger,
+      config: this.dependencies.config,
+      inferenceId: nextInferenceId,
+    })
+      .then(async () => {
+        logger.info(
+          `Inference ID has changed from "${currentInferenceId}" to "${nextInferenceId}". Re-indexing knowledge base.`
+        );
+
+        await reIndexKnowledgeBaseWithLock({
+          core,
+          logger,
+          esClient,
+        });
+
+        // If the inference ID switched to a preconfigured inference endpoint, delete the legacy custom inference endpoint if it exists.
+        if (currentInferenceId === LEGACY_CUSTOM_INFERENCE_ID) {
+          void deleteInferenceEndpoint({
+            esClient,
+            logger,
+            inferenceId: LEGACY_CUSTOM_INFERENCE_ID,
+          });
+        }
+      })
+      .catch((e) => {
+        if (isLockAcquisitionError(e)) {
+          logger.info(e.message);
+        } else {
+          logger.error(
+            `Failed to setup knowledge base with inference_id: ${nextInferenceId}. Error: ${e.message}`
+          );
+          logger.debug(e);
+        }
       });
 
-    return res;
+    if (waitUntilComplete) {
+      logger.debug('Waiting for knowledge base setup to complete...');
+      await kbSetupPromise;
+      logger.debug('Knowledge base setup completed.');
+    }
+
+    return { reindex: true, currentInferenceId, nextInferenceId };
   };
 
-  resetKnowledgeBase = () => {
-    const { esClient } = this.dependencies;
-    return this.dependencies.knowledgeBaseService.reset(esClient);
+  warmupKbModel = (inferenceId: string) => {
+    const { esClient, logger } = this.dependencies;
+
+    logger.debug(`Warming up model for for inference ID: ${inferenceId}`);
+    warmupModel({ esClient, logger, inferenceId }).catch(() => {});
+    return;
   };
 
-  reIndexKnowledgeBaseAndPopulateSemanticTextField = () => {
-    return reIndexKnowledgeBaseAndPopulateSemanticTextField({
+  reIndexKnowledgeBaseWithLock = () => {
+    return reIndexKnowledgeBaseWithLock({
+      core: this.dependencies.core,
       esClient: this.dependencies.esClient,
+      logger: this.dependencies.logger,
+    });
+  };
+
+  runStartupMigrations = () => {
+    return runStartupMigrations({
+      core: this.dependencies.core,
       logger: this.dependencies.logger,
       config: this.dependencies.config,
     });
@@ -668,14 +785,11 @@ export class ObservabilityAIAssistantClient {
   addUserInstruction = async ({
     entry,
   }: {
-    entry: Omit<
-      KnowledgeBaseEntry,
-      '@timestamp' | 'confidence' | 'is_correction' | 'type' | 'role'
-    >;
+    entry: Omit<KnowledgeBaseEntry, '@timestamp' | 'type' | 'role'>;
   }): Promise<void> => {
     // for now we want to limit the number of user instructions to 1 per user
     // if a user instruction already exists for the user, we get the id and update it
-    this.dependencies.logger.debug('Adding user instruction entry');
+
     const existingId = await this.dependencies.knowledgeBaseService.getPersonalUserInstructionId({
       isPublic: entry.public,
       namespace: this.dependencies.namespace,
@@ -683,8 +797,14 @@ export class ObservabilityAIAssistantClient {
     });
 
     if (existingId) {
+      this.dependencies.logger.debug(
+        `Updating user instruction. id = "${existingId}", user = "${this.dependencies.user?.name}"`
+      );
       entry.id = existingId;
-      this.dependencies.logger.debug(`Updating user instruction with id "${existingId}"`);
+    } else {
+      this.dependencies.logger.debug(
+        `Creating user instruction. id = "${entry.id}", user = "${this.dependencies.user?.name}"`
+      );
     }
 
     return this.dependencies.knowledgeBaseService.addEntry({
@@ -692,8 +812,6 @@ export class ObservabilityAIAssistantClient {
       user: this.dependencies.user,
       entry: {
         ...entry,
-        confidence: 'high',
-        is_correction: false,
         type: KnowledgeBaseType.UserInstruction,
         labels: {},
         role: KnowledgeBaseEntryRole.UserEntry,
@@ -716,6 +834,21 @@ export class ObservabilityAIAssistantClient {
     });
   };
 
+  addKnowledgeBaseBulkEntries = async ({
+    entries,
+  }: {
+    entries: Array<Omit<KnowledgeBaseEntry, '@timestamp' | 'type'>>;
+  }): Promise<void> => {
+    return this.dependencies.knowledgeBaseService.addBulkEntries({
+      entries: entries.map((entry) => ({
+        ...entry,
+        type: KnowledgeBaseType.Contextual,
+      })),
+      user: this.dependencies.user,
+      namespace: this.dependencies.namespace,
+    });
+  };
+
   getKnowledgeBaseEntries = async ({
     query,
     sortBy,
@@ -725,7 +858,12 @@ export class ObservabilityAIAssistantClient {
     sortBy: string;
     sortDirection: 'asc' | 'desc';
   }) => {
-    return this.dependencies.knowledgeBaseService.getEntries({ query, sortBy, sortDirection });
+    return this.dependencies.knowledgeBaseService.getEntries({
+      query,
+      sortBy,
+      sortDirection,
+      namespace: this.dependencies.namespace,
+    });
   };
 
   deleteKnowledgeBaseEntry = async (id: string) => {

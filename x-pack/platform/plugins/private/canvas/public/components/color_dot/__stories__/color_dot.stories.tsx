@@ -6,13 +6,19 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { ColorDot } from '../color_dot';
 
-storiesOf('components/Color/ColorDot', module)
-  .addParameters({ info: { propTablesExclude: [EuiIcon] } })
-  .add('color dots', () => (
+export default {
+  title: 'components/Color/ColorDot',
+
+  parameters: {
+    info: { propTablesExclude: [EuiIcon] },
+  },
+};
+
+export const ColorDots = {
+  render: () => (
     <>
       <ColorDot key="1" value="white" />
       <ColorDot key="2" value="#000" />
@@ -22,8 +28,13 @@ storiesOf('components/Color/ColorDot', module)
       <ColorDot key="6" value="rgb(100, 150, 250)" />
       <ColorDot key="7" value="rgba(100, 150, 250, .5)" />
     </>
-  ))
-  .add('invalid dots', () => (
+  ),
+
+  name: 'color dots',
+};
+
+export const InvalidDots = {
+  render: () => (
     <>
       <ColorDot key="1" value="elastic" />
       <ColorDot key="2" value="#xyz" />
@@ -33,8 +44,13 @@ storiesOf('components/Color/ColorDot', module)
       <ColorDot key="6" value="rgb(a,b,c)" />
       <ColorDot key="7" value="rgba(w,x,y,z)" />
     </>
-  ))
-  .add('color dots with children', () => (
+  ),
+
+  name: 'invalid dots',
+};
+
+export const ColorDotsWithChildren = {
+  render: () => (
     <>
       <ColorDot key="1" value="#FFF">
         <EuiIcon type="plusInCircle" color="#000" />
@@ -49,4 +65,7 @@ storiesOf('components/Color/ColorDot', module)
         <EuiIcon type="check" color="#fff" />
       </ColorDot>
     </>
-  ));
+  ),
+
+  name: 'color dots with children',
+};

@@ -29,11 +29,31 @@ export interface PendingMessage {
   aborted?: boolean;
   error?: any;
 }
+export interface DetectedEntity {
+  entity: string;
+  class_name: string;
+  start_pos: number;
+  end_pos: number;
+  hash: string;
+  type: 'ner' | 'regex';
+}
+
+export type DetectedEntityType = DetectedEntity['type'];
+export interface Unredaction {
+  entity: string;
+  class_name: string;
+  start_pos: number;
+  end_pos: number;
+  type: 'ner' | 'regex';
+}
+
+export type UnredactionType = Unredaction['type'];
 
 export interface Message {
   '@timestamp': string;
   message: {
     content?: string;
+    unredactions?: Unredaction[];
     name?: string;
     role: MessageRole;
     function_call?: {
@@ -62,6 +82,7 @@ export interface Conversation {
   numeric_labels: Record<string, number>;
   namespace: string;
   public: boolean;
+  archived?: boolean;
 }
 
 type ConversationRequestBase = Omit<Conversation, 'user' | 'conversation' | 'namespace'> & {
@@ -78,8 +99,6 @@ export interface KnowledgeBaseEntry {
   id: string;
   title?: string;
   text: string;
-  confidence: 'low' | 'medium' | 'high';
-  is_correction: boolean;
   type?: 'user_instruction' | 'contextual';
   public: boolean;
   labels?: Record<string, string>;
@@ -87,6 +106,8 @@ export interface KnowledgeBaseEntry {
   user?: {
     name: string;
   };
+  confidence?: 'low' | 'medium' | 'high'; // deprecated
+  is_correction?: boolean; // deprecated
 }
 
 export interface Instruction {
@@ -94,20 +115,21 @@ export interface Instruction {
   text: string;
 }
 
-export interface AdHocInstruction {
-  id?: string;
-  text: string;
-  instruction_type: 'user_instruction' | 'application_instruction';
-}
-
-export type InstructionOrPlainText = string | Instruction;
-
 export enum KnowledgeBaseType {
   // user instructions are included in the system prompt regardless of the user's input
   UserInstruction = 'user_instruction',
 
   // contextual entries are only included in the system prompt if the user's input matches the context
   Contextual = 'contextual',
+}
+
+export enum KnowledgeBaseState {
+  NOT_INSTALLED = 'NOT_INSTALLED',
+  MODEL_PENDING_DEPLOYMENT = 'MODEL_PENDING_DEPLOYMENT',
+  DEPLOYING_MODEL = 'DEPLOYING_MODEL',
+  MODEL_PENDING_ALLOCATION = 'MODEL_PENDING_ALLOCATION',
+  READY = 'READY',
+  ERROR = 'ERROR',
 }
 
 export interface ObservabilityAIAssistantScreenContextRequest {
@@ -152,4 +174,25 @@ export interface ObservabilityAIAssistantScreenContext {
   }>;
   actions?: Array<ScreenContextActionDefinition<any>>;
   starterPrompts?: StarterPrompt[];
+}
+
+export enum ConversationAccess {
+  SHARED = 'shared',
+  PRIVATE = 'private',
+}
+
+export interface InferenceChunk {
+  chunkText: string;
+  charStartOffset: number;
+}
+
+export interface AnonymizationRule {
+  id: string;
+  entityClass: string;
+  type: 'regex' | 'ner';
+  pattern?: string;
+  enabled: boolean;
+  builtIn: boolean;
+  description?: string;
+  normalize?: boolean;
 }

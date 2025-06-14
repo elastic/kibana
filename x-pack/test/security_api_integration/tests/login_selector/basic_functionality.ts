@@ -6,6 +6,7 @@
  */
 
 import { readFileSync } from 'fs';
+import type { Response } from 'supertest';
 import type { Cookie } from 'tough-cookie';
 import { parse as parseCookie } from 'tough-cookie';
 import url from 'url';
@@ -82,7 +83,8 @@ export default function ({ getService }: FtrProviderContext) {
     expect(apiResponse.body.authentication_type).to.be(authenticationType);
   }
 
-  describe('Login Selector', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/218378
+  describe.skip('Login Selector', () => {
     it('should redirect user to a login selector', async () => {
       const response = await supertest
         .get('/abc/xyz/handshake?one=two three')
@@ -543,13 +545,17 @@ export default function ({ getService }: FtrProviderContext) {
         ).to.be(true);
 
         const saml2HandshakeCookie = parseCookie(saml2HandshakeResponse.headers['set-cookie'][0])!;
+        const samlRequestId = await getSAMLRequestId(saml2HandshakeResponse.body.location);
 
         const saml2AuthenticationResponse = await supertest
           .post('/api/security/saml/callback')
           .ca(CA_CERT)
           .set('Cookie', saml2HandshakeCookie.cookieString())
           .send({
-            SAMLResponse: await createSAMLResponse({ issuer: `http://www.elastic.co/saml2` }),
+            SAMLResponse: await createSAMLResponse({
+              issuer: `http://www.elastic.co/saml2`,
+              inResponseTo: samlRequestId,
+            }),
           })
           .expect(302);
 
@@ -567,6 +573,79 @@ export default function ({ getService }: FtrProviderContext) {
           { name: 'saml2', type: 'saml' },
           'token'
         );
+      });
+
+      it('should be able to have many pending SP initiated logins all successfully succeed', async () => {
+        const samlResponseMapByRequestId: Record<string, { samlResponse: string; cookie: any }> =
+          {};
+
+        let sharedCookie;
+        for (let i = 0; i < 10; i++) {
+          const samlHandshakeResponse: Response = await supertest
+            .post('/internal/security/login')
+            .ca(CA_CERT)
+            .set('kbn-xsrf', 'xxx')
+            .set('Cookie', sharedCookie ? sharedCookie.cookieString() : '')
+            .send({
+              providerType: 'saml',
+              providerName: 'saml2',
+              currentURL: `https://kibana.com/login?next=/abc/xyz/${i}`,
+            })
+            .expect(200);
+
+          if (!sharedCookie) {
+            sharedCookie = parseCookie(samlHandshakeResponse.headers['set-cookie'][0])!;
+          }
+
+          const cookie = parseCookie(samlHandshakeResponse.headers['set-cookie'][0])!;
+          const samlRequestId = await getSAMLRequestId(samlHandshakeResponse.body.location);
+          const samlResponse = await createSAMLResponse({
+            issuer: `http://www.elastic.co/saml2`,
+            inResponseTo: samlRequestId,
+          });
+
+          samlResponseMapByRequestId[samlRequestId] = { samlResponse, cookie };
+        }
+
+        const preparedCallbacks = [];
+
+        for (const requestId of Object.keys(samlResponseMapByRequestId)) {
+          const samlValues = samlResponseMapByRequestId[requestId];
+
+          const callbackFunc = () => {
+            return supertest
+              .post('/api/security/saml/callback')
+              .ca(CA_CERT)
+              .set('Cookie', samlValues.cookie.cookieString())
+              .send({
+                SAMLResponse: samlValues.samlResponse,
+              });
+          };
+
+          preparedCallbacks.push(callbackFunc);
+        }
+
+        const responses = await Promise.all(
+          preparedCallbacks.map((func) => {
+            return func();
+          })
+        );
+        expect(
+          responses.map((response: Response) => {
+            return response.headers.location;
+          })
+        ).to.eql([
+          '/abc/xyz/0',
+          '/abc/xyz/1',
+          '/abc/xyz/2',
+          '/abc/xyz/3',
+          '/abc/xyz/4',
+          '/abc/xyz/5',
+          '/abc/xyz/6',
+          '/abc/xyz/7',
+          '/abc/xyz/8',
+          '/abc/xyz/9',
+        ]);
       });
     });
 

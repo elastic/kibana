@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionVariable } from '@kbn/alerting-plugin/common';
+import type { ActionVariable } from '@kbn/alerting-plugin/common';
 import { validateParamsForWarnings } from './validate_params_for_warnings';
 
 describe('validateParamsForWarnings', () => {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { AlertingPluginStart } from '../plugin';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { AlertingPluginStart } from '../plugin';
 
 export type StartServices<AdditionalServices extends object = {}> = CoreStart &
   AlertingPluginStart &

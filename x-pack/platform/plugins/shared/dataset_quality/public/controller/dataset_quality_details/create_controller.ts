@@ -22,17 +22,10 @@ interface Dependencies {
   plugins: DatasetQualityStartDeps;
   dataStreamStatsService: DataStreamsStatsServiceStart;
   dataStreamDetailsService: DataStreamDetailsServiceStart;
-  isFailureStoreEnabled: boolean;
 }
 
 export const createDatasetQualityDetailsControllerFactory =
-  ({
-    core,
-    plugins,
-    dataStreamStatsService,
-    dataStreamDetailsService,
-    isFailureStoreEnabled,
-  }: Dependencies) =>
+  ({ core, plugins, dataStreamStatsService, dataStreamDetailsService }: Dependencies) =>
   async ({
     initialState,
   }: {
@@ -51,7 +44,6 @@ export const createDatasetQualityDetailsControllerFactory =
       toasts: core.notifications.toasts,
       dataStreamStatsClient,
       dataStreamDetailsClient,
-      isFailureStoreEnabled,
     });
 
     const service = interpret(machine, {

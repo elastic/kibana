@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { IngestStreamDefinition } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { conditionToPainless } from '../helpers/condition_to_painless';
 import { getReroutePipelineName } from './name';
 
 interface GenerateReroutePipelineParams {
-  definition: IngestStreamDefinition;
+  definition: Streams.WiredStream.Definition;
 }
 
 export function generateReroutePipeline({ definition }: GenerateReroutePipelineParams) {
   return {
     id: getReroutePipelineName(definition.name),
-    processors: definition.ingest.routing.map((child) => {
+    processors: definition.ingest.wired.routing.map((child) => {
       return {
         reroute: {
           destination: child.destination,
@@ -26,7 +26,7 @@ export function generateReroutePipeline({ definition }: GenerateReroutePipelineP
       };
     }),
     _meta: {
-      description: `Reoute pipeline for the ${definition.name} stream`,
+      description: `Reroute pipeline for the ${definition.name} stream`,
       managed: true,
     },
     version: ASSET_VERSION,

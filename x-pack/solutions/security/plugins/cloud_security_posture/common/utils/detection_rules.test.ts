@@ -9,8 +9,6 @@ import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-commo
 import {
   convertRuleTagsToMatchAllKQL,
   convertRuleTagsToMatchAnyKQL,
-  generateBenchmarkRuleTags,
-  getFindingsDetectionRuleSearchTags,
   getFindingsDetectionRuleSearchTagsFromArrayOfRules,
 } from './detection_rules';
 
@@ -51,38 +49,6 @@ describe('Detection rules utils', () => {
     expect(result).toBe(expectedKQL);
   });
 
-  it('Should generate search tags for a CSP benchmark rule', () => {
-    const cspBenchmarkRule = {
-      benchmark: {
-        id: 'cis_gcp',
-        rule_number: '1.1',
-      },
-    } as unknown as CspBenchmarkRuleMetadata;
-
-    const result = getFindingsDetectionRuleSearchTags(cspBenchmarkRule);
-
-    const expectedTags = ['CIS', 'GCP', 'CIS GCP 1.1'];
-    expect(result).toEqual(expectedTags);
-  });
-
-  it('Should handle undefined benchmark object gracefully', () => {
-    const cspBenchmarkRule = { benchmark: {} } as any;
-    const expectedTags: string[] = [];
-    const result = getFindingsDetectionRuleSearchTags(cspBenchmarkRule);
-    expect(result).toEqual(expectedTags);
-  });
-
-  it('Should handle undefined rule number gracefully', () => {
-    const cspBenchmarkRule = {
-      benchmark: {
-        id: 'cis_gcp',
-      },
-    } as unknown as CspBenchmarkRuleMetadata;
-    const result = getFindingsDetectionRuleSearchTags(cspBenchmarkRule);
-    const expectedTags = ['CIS', 'GCP', 'CIS GCP'];
-    expect(result).toEqual(expectedTags);
-  });
-
   it('Should generate search tags for a CSP benchmark rule given an array of Benchmarks', () => {
     const cspBenchmarkRule = [
       {
@@ -109,54 +75,6 @@ describe('Detection rules utils', () => {
     const cspBenchmarkRule = [{ benchmark: {} }] as any;
     const expectedTags: string[] = [];
     const result = getFindingsDetectionRuleSearchTagsFromArrayOfRules(cspBenchmarkRule);
-    expect(result).toEqual(expectedTags);
-  });
-
-  it('Should generate tags for a CSPM benchmark rule', () => {
-    const cspBenchmarkRule = {
-      benchmark: {
-        id: 'cis_gcp',
-        rule_number: '1.1',
-        posture_type: 'cspm',
-      },
-    } as unknown as CspBenchmarkRuleMetadata;
-
-    const result = generateBenchmarkRuleTags(cspBenchmarkRule);
-
-    const expectedTags = [
-      'Cloud Security',
-      'Use Case: Configuration Audit',
-      'CIS',
-      'GCP',
-      'CIS GCP 1.1',
-      'CSPM',
-      'Data Source: CSPM',
-      'Domain: Cloud',
-    ];
-    expect(result).toEqual(expectedTags);
-  });
-
-  it('Should generate tags for a KSPM benchmark rule', () => {
-    const cspBenchmarkRule = {
-      benchmark: {
-        id: 'cis_gcp',
-        rule_number: '1.1',
-        posture_type: 'kspm',
-      },
-    } as unknown as CspBenchmarkRuleMetadata;
-
-    const result = generateBenchmarkRuleTags(cspBenchmarkRule);
-
-    const expectedTags = [
-      'Cloud Security',
-      'Use Case: Configuration Audit',
-      'CIS',
-      'GCP',
-      'CIS GCP 1.1',
-      'KSPM',
-      'Data Source: KSPM',
-      'Domain: Container',
-    ];
     expect(result).toEqual(expectedTags);
   });
 });

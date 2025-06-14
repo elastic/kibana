@@ -5,11 +5,10 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, RIGHT_ALIGNMENT } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ChartType, getTimeSeriesColor } from '../charts/helper/get_timeseries_color';
 import { ListMetric } from '../list_metric';
-import type { ITableColumn } from '../managed_table';
 import type { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { isPending } from '../../../hooks/use_fetcher';
 import {
@@ -20,6 +19,7 @@ import {
 import type { Coordinate } from '../../../../typings/timeseries';
 import { ImpactBar } from '../impact_bar';
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
+import type { ITableColumn } from '../managed_table';
 
 export interface SpanMetricGroup {
   latency: number | null;
@@ -28,17 +28,17 @@ export interface SpanMetricGroup {
   impact: number | null;
   currentStats:
     | {
-        latency: Coordinate[];
-        throughput: Coordinate[];
-        failureRate: Coordinate[];
+        latency?: Coordinate[];
+        throughput?: Coordinate[];
+        failureRate?: Coordinate[];
       }
     | undefined;
   previousStats:
     | {
-        latency: Coordinate[];
-        throughput: Coordinate[];
-        failureRate: Coordinate[];
-        impact: number;
+        latency?: Coordinate[];
+        throughput?: Coordinate[];
+        failureRate?: Coordinate[];
+        impact?: number;
       }
     | undefined;
 }
@@ -107,24 +107,15 @@ export function getSpanMetricColumns({
     },
     {
       field: 'failureRate',
-      name: (
-        <>
-          {i18n.translate('xpack.apm.dependenciesTable.columnErrorRate', {
-            defaultMessage: 'Failed transaction rate',
-          })}
-          &nbsp;
-          <EuiIconTip
-            size="s"
-            color="subdued"
-            type="questionInCircle"
-            content={i18n.translate('xpack.apm.dependenciesTable.columnErrorRateTip', {
-              defaultMessage:
-                "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
-            })}
-            className="eui-alignCenter"
-          />
-        </>
-      ),
+      name: i18n.translate('xpack.apm.dependenciesTable.columnErrorRate', {
+        defaultMessage: 'Failed transaction rate',
+      }),
+      nameTooltip: {
+        content: i18n.translate('xpack.apm.dependenciesTable.columnErrorRateTip', {
+          defaultMessage:
+            "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
+        }),
+      },
       align: RIGHT_ALIGNMENT,
       render: (_, { failureRate, currentStats, previousStats }) => {
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
@@ -148,24 +139,15 @@ export function getSpanMetricColumns({
     },
     {
       field: 'impact',
-      name: (
-        <>
-          {i18n.translate('xpack.apm.dependenciesTable.columnImpact', {
-            defaultMessage: 'Impact',
-          })}
-          &nbsp;
-          <EuiIconTip
-            size="s"
-            color="subdued"
-            type="questionInCircle"
-            className="eui-alignCenter"
-            content={i18n.translate('xpack.apm.dependenciesTable.columnImpactTip', {
-              defaultMessage:
-                'The most used and slowest endpoints in your service. Calculated by multiplying latency by throughput.',
-            })}
-          />
-        </>
-      ),
+      name: i18n.translate('xpack.apm.dependenciesTable.columnImpact', {
+        defaultMessage: 'Impact',
+      }),
+      nameTooltip: {
+        content: i18n.translate('xpack.apm.dependenciesTable.columnImpactTip', {
+          defaultMessage:
+            'The most used and slowest endpoints in your service. Calculated by multiplying latency by throughput.',
+        }),
+      },
       align: RIGHT_ALIGNMENT,
       render: (_, { impact, previousStats }) => {
         return (

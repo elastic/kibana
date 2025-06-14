@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export const LOOKUPS_DATA_INPUT_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.lookups.title',
-  { defaultMessage: 'Upload identified lookups' }
+  { defaultMessage: 'Upload lookups' }
 );
 export const LOOKUPS_DATA_INPUT_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.lookups.description',

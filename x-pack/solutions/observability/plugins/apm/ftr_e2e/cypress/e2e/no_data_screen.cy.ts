@@ -48,7 +48,7 @@ describe('No data screen', () => {
 
 function setApmIndices(body: Record<string, string>) {
   cy.request({
-    url: '/internal/apm/settings/apm-indices/save',
+    url: '/internal/apm-sources/settings/apm-indices/save',
     method: 'POST',
     body,
     headers: { 'kbn-xsrf': true },

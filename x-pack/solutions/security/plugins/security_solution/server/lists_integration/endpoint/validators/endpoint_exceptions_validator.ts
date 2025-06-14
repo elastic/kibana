@@ -11,8 +11,8 @@ import type {
 } from '@kbn/lists-plugin/server';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { hasArtifactOwnerSpaceId } from '../../../../common/endpoint/service/artifacts/utils';
-import { BaseValidator } from './base_validator';
+import { EndpointExceptionsValidationError } from './endpoint_exception_errors';
+import { BaseValidator, GLOBAL_ARTIFACT_MANAGEMENT_NOT_ALLOWED_MESSAGE } from './base_validator';
 
 export class EndpointExceptionsValidator extends BaseValidator {
   static isEndpointException(item: { listId: string }): boolean {
@@ -24,14 +24,26 @@ export class EndpointExceptionsValidator extends BaseValidator {
   }
 
   protected async validateHasWritePrivilege(): Promise<void> {
-    return this.validateHasEndpointExceptionsPrivileges('canWriteEndpointExceptions');
+    await this.validateHasEndpointExceptionsPrivileges('canWriteEndpointExceptions');
+
+    if (this.endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
+      // Endpoint Exceptions are currently ONLY global, so we need to make sure the user
+      // also has the new Global Artifacts privilege
+      try {
+        await this.validateHasPrivilege('canManageGlobalArtifacts');
+      } catch (error) {
+        // We provide a more detailed error here
+        throw new EndpointExceptionsValidationError(
+          `${error.message}. ${GLOBAL_ARTIFACT_MANAGEMENT_NOT_ALLOWED_MESSAGE}`,
+          403
+        );
+      }
+    }
   }
 
   async validatePreCreateItem(item: CreateExceptionListItemOptions) {
     await this.validateHasWritePrivilege();
     await this.validateCreateOwnerSpaceIds(item);
-
-    await this.setOwnerSpaceId(item);
 
     return item;
   }
@@ -43,19 +55,17 @@ export class EndpointExceptionsValidator extends BaseValidator {
     await this.validateHasWritePrivilege();
     await this.validateUpdateOwnerSpaceIds(item, currentItem);
 
-    if (!hasArtifactOwnerSpaceId(item)) {
-      await this.setOwnerSpaceId(item);
-    }
-
     return item;
   }
 
-  async validatePreDeleteItem(): Promise<void> {
+  async validatePreDeleteItem(currentItem: ExceptionListItemSchema): Promise<void> {
     await this.validateHasWritePrivilege();
+    await this.validateCanDeleteItemInActiveSpace(currentItem);
   }
 
-  async validatePreGetOneItem(): Promise<void> {
+  async validatePreGetOneItem(currentItem: ExceptionListItemSchema): Promise<void> {
     await this.validateHasReadPrivilege();
+    await this.validateCanReadItemInActiveSpace(currentItem);
   }
 
   async validatePreMultiListFind(): Promise<void> {

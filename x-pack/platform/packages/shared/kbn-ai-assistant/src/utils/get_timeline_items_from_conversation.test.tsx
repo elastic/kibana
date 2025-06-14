@@ -37,11 +37,13 @@ function Providers({ children }: { children: React.ReactNode }) {
 describe('getTimelineItemsFromConversation', () => {
   describe('returns an opening message only', () => {
     items = getTimelineItemsfromConversation({
+      isConversationOwnedByCurrentUser: true,
       chatService: mockChatService,
       hasConnector: true,
       messages: [],
       chatState: ChatState.Ready,
       onActionClick: jest.fn(),
+      isArchived: false,
     });
 
     expect(items.length).toBe(1);
@@ -51,6 +53,7 @@ describe('getTimelineItemsFromConversation', () => {
   describe('with a start of a conversation', () => {
     beforeEach(() => {
       items = getTimelineItemsfromConversation({
+        isConversationOwnedByCurrentUser: true,
         chatService: mockChatService,
         hasConnector: true,
         currentUser: {
@@ -68,8 +71,10 @@ describe('getTimelineItemsFromConversation', () => {
           },
         ],
         onActionClick: jest.fn(),
+        isArchived: false,
       });
     });
+
     it('includes the opening message and the user message', () => {
       expect(items.length).toBe(2);
       expect(items[0].title).toBe('started a conversation');
@@ -102,6 +107,7 @@ describe('getTimelineItemsFromConversation', () => {
     beforeEach(() => {
       mockChatService.hasRenderFunction.mockImplementation(() => false);
       items = getTimelineItemsfromConversation({
+        isConversationOwnedByCurrentUser: true,
         chatService: mockChatService,
         hasConnector: true,
         chatState: ChatState.Ready,
@@ -134,6 +140,7 @@ describe('getTimelineItemsFromConversation', () => {
           },
         ],
         onActionClick: jest.fn(),
+        isArchived: false,
       });
     });
 
@@ -186,6 +193,7 @@ describe('getTimelineItemsFromConversation', () => {
       mockChatService.hasRenderFunction.mockImplementation(() => true);
       mockChatService.renderFunction.mockImplementation(() => 'Rendered');
       items = getTimelineItemsfromConversation({
+        isConversationOwnedByCurrentUser: true,
         chatService: mockChatService,
         hasConnector: true,
         chatState: ChatState.Ready,
@@ -218,6 +226,7 @@ describe('getTimelineItemsFromConversation', () => {
           },
         ],
         onActionClick: jest.fn(),
+        isArchived: false,
       });
     });
 
@@ -257,6 +266,7 @@ describe('getTimelineItemsFromConversation', () => {
   describe('with a function that errors out', () => {
     beforeEach(() => {
       items = getTimelineItemsfromConversation({
+        isConversationOwnedByCurrentUser: true,
         chatService: mockChatService,
         hasConnector: true,
         chatState: ChatState.Ready,
@@ -293,6 +303,7 @@ describe('getTimelineItemsFromConversation', () => {
           },
         ],
         onActionClick: jest.fn(),
+        isArchived: false,
       });
     });
 
@@ -328,6 +339,7 @@ describe('getTimelineItemsFromConversation', () => {
   describe('with an invalid JSON response', () => {
     beforeEach(() => {
       items = getTimelineItemsfromConversation({
+        isConversationOwnedByCurrentUser: true,
         chatService: mockChatService,
         hasConnector: true,
         currentUser: {
@@ -358,6 +370,7 @@ describe('getTimelineItemsFromConversation', () => {
           },
         ],
         onActionClick: jest.fn(),
+        isArchived: false,
       });
     });
 
@@ -376,6 +389,7 @@ describe('getTimelineItemsFromConversation', () => {
     beforeEach(() => {
       mockChatService.hasRenderFunction.mockImplementation(() => false);
       items = getTimelineItemsfromConversation({
+        isConversationOwnedByCurrentUser: true,
         chatService: mockChatService,
         hasConnector: true,
         chatState: ChatState.Ready,
@@ -408,6 +422,7 @@ describe('getTimelineItemsFromConversation', () => {
           },
         ],
         onActionClick: jest.fn(),
+        isArchived: false,
       });
     });
 
@@ -445,6 +460,7 @@ describe('getTimelineItemsFromConversation', () => {
   describe('while the chat is loading', () => {
     const renderWithLoading = (extraMessages: Message[]) => {
       items = getTimelineItemsfromConversation({
+        isConversationOwnedByCurrentUser: true,
         chatService: mockChatService,
         hasConnector: true,
         chatState: ChatState.Loading,
@@ -459,6 +475,7 @@ describe('getTimelineItemsFromConversation', () => {
           ...extraMessages,
         ],
         onActionClick: jest.fn(),
+        isArchived: false,
       });
     };
 

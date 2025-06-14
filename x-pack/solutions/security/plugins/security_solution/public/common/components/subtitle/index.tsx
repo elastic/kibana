@@ -54,11 +54,13 @@ SubtitleItem.displayName = 'SubtitleItem';
 
 export interface SubtitleProps {
   items: string | React.ReactNode | Array<string | React.ReactNode>;
+  'data-test-subj'?: string;
 }
 
-export const Subtitle = React.memo<SubtitleProps>(({ items }) => {
+export const Subtitle = React.memo<SubtitleProps>(({ items, ...props }) => {
+  const { 'data-test-subj': dataTestSubj = 'subtitle' } = props;
   return (
-    <Wrapper className="siemSubtitle">
+    <Wrapper data-test-subj={dataTestSubj} className="siemSubtitle">
       {Array.isArray(items) ? (
         items.map((item, i) => <SubtitleItem key={i}>{item}</SubtitleItem>)
       ) : (

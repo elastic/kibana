@@ -8,18 +8,14 @@
 import { Replacements } from '@kbn/elastic-assistant-common';
 import { useCallback, useEffect, useMemo } from 'react';
 
+import { Conversation } from '../../assistant_context/types';
 import { useAssistantContext } from '../../assistant_context';
 import { getUniquePromptContextId } from '../../assistant_context/helpers';
 import type { PromptContext } from '../prompt_context/types';
-import { useConversation } from '../use_conversation';
-import { getDefaultConnector, mergeBaseWithPersistedConversations } from '../helpers';
-import { getGenAiConfig } from '../../connectorland/helpers';
-import { useLoadConnectors } from '../../connectorland/use_load_connectors';
-import { FetchConversationsResponse, useFetchCurrentUserConversations } from '../api';
-import { Conversation } from '../../assistant_context/types';
+import { useFetchCurrentUserConversations } from '../api';
 
 interface UseAssistantOverlay {
-  showAssistantOverlay: (show: boolean, silent?: boolean) => void;
+  showAssistantOverlay: (show: boolean) => void;
   promptContextId: string;
 }
 
@@ -82,26 +78,13 @@ export const useAssistantOverlay = (
    */
   replacements?: Replacements | null
 ): UseAssistantOverlay => {
-  const { http, inferenceEnabled } = useAssistantContext();
-  const { data: connectors } = useLoadConnectors({
+  const { http } = useAssistantContext();
+
+  const { refetch } = useFetchCurrentUserConversations({
     http,
-    inferenceEnabled,
-  });
-
-  const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
-  const apiConfig = useMemo(() => getGenAiConfig(defaultConnector), [defaultConnector]);
-
-  const { createConversation } = useConversation();
-
-  const onFetchedConversations = useCallback(
-    (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
-      mergeBaseWithPersistedConversations({}, conversationsData),
-    []
-  );
-  const { data: conversations, isLoading } = useFetchCurrentUserConversations({
-    http,
-    onFetch: onFetchedConversations,
-    isAssistantEnabled,
+    filter: `title:"${conversationTitle}"`,
+    // prevent from running automatically
+    isAssistantEnabled: false,
   });
   // memoize the props so that we can use them in the effect below:
   const _category: PromptContext['category'] = useMemo(() => category, [category]);
@@ -131,52 +114,29 @@ export const useAssistantOverlay = (
   // proxy show / hide calls to assistant context, using our internal prompt context id:
   // silent:boolean doesn't show the toast notification if the conversation is not found
   const showAssistantOverlay = useCallback(
-    // shouldCreateConversation should only be passed for
-    // non-default conversations that may need to be initialized
-    async (showOverlay: boolean, shouldCreateConversation: boolean = false) => {
-      if (promptContextId != null) {
-        if (shouldCreateConversation) {
-          let conversation;
-          if (!isLoading) {
-            conversation = conversationTitle
-              ? Object.values(conversations).find((conv) => conv.title === conversationTitle)
-              : undefined;
-          }
+    async (showOverlay: boolean) => {
+      if (promptContextId != null && isAssistantEnabled && conversationTitle != null) {
+        const refetched = await refetch();
+        const conversation =
+          refetched && conversationTitle
+            ? Object.values(refetched?.data?.pages[0].data ?? []).find(
+                (conv: Conversation) => conv.title === conversationTitle
+              )
+            : undefined;
 
-          if (isAssistantEnabled && !conversation && defaultConnector && !isLoading) {
-            try {
-              await createConversation({
-                apiConfig: {
-                  ...apiConfig,
-                  actionTypeId: defaultConnector?.actionTypeId,
-                  connectorId: defaultConnector?.id,
-                },
-                category: 'assistant',
-                title: conversationTitle ?? '',
-              });
-            } catch (e) {
-              /* empty */
-            }
-          }
-        }
         assistantContextShowOverlay({
           showOverlay,
           promptContextId,
-          conversationTitle: conversationTitle ?? undefined,
+          // conversation with id exists in the data stream, title if it's a new conversation
+          selectedConversation: conversation?.id
+            ? { id: conversation.id }
+            : {
+                title: conversationTitle ?? '',
+              },
         });
       }
     },
-    [
-      apiConfig,
-      assistantContextShowOverlay,
-      conversationTitle,
-      conversations,
-      createConversation,
-      defaultConnector,
-      isAssistantEnabled,
-      isLoading,
-      promptContextId,
-    ]
+    [assistantContextShowOverlay, conversationTitle, isAssistantEnabled, promptContextId, refetch]
   );
 
   useEffect(() => {

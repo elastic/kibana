@@ -106,11 +106,13 @@ export class SearchNavigationPlugin
   ) {
     if (forClassicChromeStyle === true && this.currentChromeStyle !== 'classic') return;
 
-    const searchBreadcrumbs = [this.getSearchHomeBreadcrumb(), ...breadcrumbs];
     if (this.pluginsStart?.serverless) {
-      this.pluginsStart.serverless.setBreadcrumbs(searchBreadcrumbs);
+      this.pluginsStart.serverless.setBreadcrumbs(breadcrumbs);
     } else {
-      this.coreStart?.chrome.setBreadcrumbs(searchBreadcrumbs);
+      const searchBreadcrumbs = [this.getSearchHomeBreadcrumb(), ...breadcrumbs];
+      this.coreStart?.chrome.setBreadcrumbs(searchBreadcrumbs, {
+        project: { value: breadcrumbs, absolute: true },
+      });
     }
   }
 

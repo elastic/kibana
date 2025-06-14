@@ -11,7 +11,7 @@ import type {
   AggregationsStringTermsBucketKeys,
   AggregationsBuckets,
 } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { replaceDotSymbols } from './replace_dots_with_underscores';
 import { NUM_ALERTING_RULE_TYPES } from '../alerting_usage_collector';
 import { parseAndLogError } from './parse_and_log_error';
@@ -163,12 +163,14 @@ export function parseBucket(
 > {
   return (buckets ?? []).reduce(
     (summary, bucket) => {
-      const status: string = bucket.key;
+      const status: string = `${bucket.key}`;
       const taskTypeBuckets = bucket?.by_task_type?.buckets as AggregationsStringTermsBucketKeys[];
 
       const byTaskType = (taskTypeBuckets ?? []).reduce<Record<string, number>>(
         (acc, taskTypeBucket: AggregationsStringTermsBucketKeys) => {
-          const taskType: string = replaceDotSymbols(taskTypeBucket.key.replace('alerting:', ''));
+          const taskType: string = replaceDotSymbols(
+            `${taskTypeBucket.key}`.replace('alerting:', '')
+          );
           acc[taskType] = taskTypeBucket.doc_count ?? 0;
           return acc;
         },

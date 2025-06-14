@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { AxiosResponse } from 'axios';
+import type { AxiosResponse } from 'axios';
 
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { isEmpty } from 'lodash';
-import {
+import type {
   ExternalService,
   ExternalServiceParamsCreate,
   ExternalServiceParamsUpdate,
@@ -22,7 +22,7 @@ import {
 } from './types';
 
 import * as i18n from './translations';
-import { ServiceNowPublicConfigurationType, ServiceNowSecretConfigurationType } from './types';
+import type { ServiceNowPublicConfigurationType, ServiceNowSecretConfigurationType } from './types';
 import {
   createServiceError,
   getPushedDate,
@@ -157,6 +157,9 @@ export const createExternalService: ServiceFactory = ({
 
   const getIncident = async (id: string): Promise<ServiceNowIncident> => {
     try {
+      if (id?.trim() === '') {
+        throw new Error('Incident id is empty.');
+      }
       const res = await request({
         axios: axiosInstance,
         url: `${tableApiIncidentUrl}/${id}`,
@@ -273,6 +276,9 @@ export const createExternalService: ServiceFactory = ({
     correlationId: string
   ): Promise<ServiceNowIncident | null> => {
     try {
+      if (correlationId?.trim() === '') {
+        throw new Error('Correlation ID is empty.');
+      }
       const res = await request({
         axios: axiosInstance,
         url: getIncidentByCorrelationIdUrl(correlationId),

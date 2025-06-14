@@ -148,7 +148,7 @@ export class SearchService {
     const usage = usageCollection ? usageProvider(core) : undefined;
 
     const router = core.http.createRouter<DataRequestHandlerContext>();
-    registerSearchRoute(router);
+    registerSearchRoute(router, this.logger, core.executionContext);
     registerSessionRoutes(router, this.logger);
 
     this.sessionService.setup(core, {});

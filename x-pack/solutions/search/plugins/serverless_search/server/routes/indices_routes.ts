@@ -26,6 +26,12 @@ export const registerIndicesRoutes = ({ logger, router }: RouteDependencies) => 
           size: schema.number({ defaultValue: 20, min: 0 }),
         }),
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the es client',
+        },
+      },
     },
     errorHandler(logger)(async (context, request, response) => {
       const core = await context.core;
@@ -59,6 +65,12 @@ export const registerIndicesRoutes = ({ logger, router }: RouteDependencies) => 
           query: schema.maybe(schema.string()),
         }),
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the es client',
+        },
+      },
     },
     errorHandler(logger)(async (context, request, response) => {
       const client = (await context.core).elasticsearch.client.asCurrentUser;
@@ -85,6 +97,12 @@ export const registerIndicesRoutes = ({ logger, router }: RouteDependencies) => 
         params: schema.object({
           indexName: schema.string(),
         }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the es client',
+        },
       },
     },
     errorHandler(logger)(async (context, request, response) => {
@@ -119,6 +137,12 @@ export const registerIndicesRoutes = ({ logger, router }: RouteDependencies) => 
             min: 0,
           }),
         }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the es client',
+        },
       },
     },
     errorHandler(logger)(async (context, request, response) => {

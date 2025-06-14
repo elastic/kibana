@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import LRUCache from 'lru-cache';
+import { LRUCache } from 'lru-cache';
 import type { DashboardGetOut } from '../../../server/content_management';
 
 const DASHBOARD_CACHE_SIZE = 20; // only store a max of 20 dashboards
@@ -19,7 +19,7 @@ export class DashboardContentManagementCache {
   constructor() {
     this.cache = new LRUCache<string, DashboardGetOut>({
       max: DASHBOARD_CACHE_SIZE,
-      maxAge: DASHBOARD_CACHE_TTL,
+      ttl: DASHBOARD_CACHE_TTL,
     });
   }
 
@@ -38,6 +38,6 @@ export class DashboardContentManagementCache {
 
   /** Delete the dashboard with `id` from the cache */
   public deleteDashboard(id: string) {
-    this.cache.del(id);
+    this.cache.delete(id);
   }
 }

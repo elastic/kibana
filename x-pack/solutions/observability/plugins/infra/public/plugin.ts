@@ -107,14 +107,12 @@ export class Plugin implements InfraClientPluginClass {
       createMetricThresholdRuleType({ assetDetailsLocator, metricsExplorerLocator })
     );
 
-    if (this.config.featureFlags.logsUIEnabled) {
-      // fetchData `appLink` redirects to logs explorer
-      pluginsSetup.observability.dashboard.register({
-        appName: 'infra_logs',
-        hasData: getLogsHasDataFetcher(core.getStartServices),
-        fetchData: getLogsOverviewDataFetcher(core.getStartServices),
-      });
-    }
+    // fetchData `appLink` redirects to logs explorer
+    pluginsSetup.observability.dashboard.register({
+      appName: 'infra_logs',
+      hasData: getLogsHasDataFetcher(core.getStartServices),
+      fetchData: getLogsOverviewDataFetcher(core.getStartServices),
+    });
 
     pluginsSetup.observability.dashboard.register({
       appName: 'infra_metrics',

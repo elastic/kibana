@@ -9,8 +9,9 @@ import { type EuiComboBoxOptionOption, EuiHealth, EuiFormRow } from '@elastic/eu
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
-import { useAgentPoliciesSpaces } from '../../../../../../hooks';
+import { useAgentPoliciesSpaces, useStartServices } from '../../../../../../hooks';
 
 export interface SpaceSelectorProps {
   value: string[];
@@ -19,22 +20,62 @@ export interface SpaceSelectorProps {
   setInvalidSpaceError?: (hasError: boolean) => void;
 }
 
-export const SpaceSelector: React.FC<SpaceSelectorProps> = ({
+const useSpacesContextWrapper = () => {
+  const { spaces } = useStartServices();
+
+  return useMemo(
+    () =>
+      spaces ? spaces.ui.components.getSpacesContextProvider : ({ children }: any) => children,
+    [spaces]
+  );
+};
+
+function useAllSpaces() {
+  const start = useStartServices();
+  const useSpace = start.spaces?.ui.useSpaces;
+  const spacesManager = useSpace?.()?.spacesManager;
+  const { data } = useQuery(
+    ['get-all-spaces'],
+    () =>
+      spacesManager?.getSpaces({
+        purpose: 'any',
+      }) ?? []
+  );
+
+  const allSpaces = useMemo(() => data ?? [], [data]);
+
+  return { allSpaces };
+}
+
+export const SpaceSelector: React.FC<SpaceSelectorProps> = (props) => {
+  const Wrapper = useSpacesContextWrapper();
+
+  return (
+    <Wrapper>
+      <SpaceSelectorComponent {...props} />
+    </Wrapper>
+  );
+};
+
+export const SpaceSelectorComponent: React.FC<SpaceSelectorProps> = ({
   setInvalidSpaceError,
   value,
   onChange,
   isDisabled,
 }) => {
   const res = useAgentPoliciesSpaces();
+  const { allSpaces } = useAllSpaces();
 
   const [error, setError] = React.useState<string>();
 
   const renderOption = React.useCallback(
-    (option: any, searchValue: string, contentClassName: string) => (
-      <EuiHealth color={option.color}>
-        <span className={contentClassName}>{option.label}</span>
-      </EuiHealth>
-    ),
+    (option: any, searchValue: string, contentClassName: string) => {
+      return (
+        <EuiHealth color={option.color}>
+          <span className={contentClassName}>{option.label}</span>
+        </EuiHealth>
+      );
+    },
     []
   );
 
@@ -43,7 +84,7 @@ export const SpaceSelector: React.FC<SpaceSelectorProps> = ({
       res.data?.items.map((item: any) => ({
         label: item.name,
         key: item.id,
-        ...item,
+        color: item.color,
       })) ?? []
     );
   }, [res.data]);
@@ -55,14 +96,22 @@ export const SpaceSelector: React.FC<SpaceSelectorProps> = ({
     return value.map((v) => {
       const existingOption = options.find((opt) => opt.key === v);
 
+      if (existingOption) {
+        return existingOption;
+      }
+      const existingSpace = allSpaces.find((space) => space.id === v);
+      const color = existingSpace?.color;
+      const label = existingSpace?.name ?? v;
+
       return existingOption
         ? existingOption
         : {
-            label: v,
+            label,
             key: v,
+            color,
           };
     });
-  }, [options, value, res.isInitialLoading]);
+  }, [options, value, res.isInitialLoading, allSpaces]);
 
   return (
     <EuiFormRow

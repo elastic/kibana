@@ -8,6 +8,10 @@
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
+import { PublishingSubject } from '@kbn/presentation-publishing';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { LensInspector } from '../../../lens_inspector_service';
+import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import type { IndexPatternServiceAPI } from '../../../data_views_service/service';
 
 import {
@@ -30,15 +34,38 @@ export interface ConfigPanelWrapperProps {
   visualizationMap: VisualizationMap;
   core: DatasourceDimensionEditorProps['core'];
   dataViews: DataViewsPublicPluginStart;
+  data: DataPublicPluginStart;
   indexPatternService?: IndexPatternServiceAPI;
   uiActions: UiActionsStart;
   getUserMessages?: UserMessagesGetter;
   hideLayerHeader?: boolean;
   setIsInlineFlyoutVisible?: (status: boolean) => void;
   onlyAllowSwitchToSubtypes?: boolean;
+  attributes?: TypedLensSerializedState['attributes'];
+  /** Embeddable output observable, useful for dashboard flyout  */
+  dataLoading$?: PublishingSubject<boolean | undefined>;
+  /** Contains the active data, necessary for some panel configuration such as coloring */
+  lensAdapters?: ReturnType<LensInspector['getInspectorAdapters']>;
+  updateSuggestion?: (attrs: TypedLensSerializedState['attributes']) => void;
+  /** Set the attributes state */
+  setCurrentAttributes?: (attrs: TypedLensSerializedState['attributes']) => void;
+  parentApi?: unknown;
+  panelId?: string;
+  closeFlyout?: () => void;
+  canEditTextBasedQuery?: boolean;
+  editorContainer?: HTMLElement;
 }
 
 export interface LayerPanelProps {
+  attributes?: TypedLensSerializedState['attributes'];
+  /** Embeddable output observable, useful for dashboard flyout  */
+  dataLoading$?: PublishingSubject<boolean | undefined>;
+  /** Contains the active data, necessary for some panel configuration such as coloring */
+  lensAdapters?: ReturnType<LensInspector['getInspectorAdapters']>;
+  data: DataPublicPluginStart;
+  updateSuggestion?: (attrs: TypedLensSerializedState['attributes']) => void;
+  /** Set the attributes state */
+  setCurrentAttributes?: (attrs: TypedLensSerializedState['attributes']) => void;
   visualizationState: unknown;
   datasourceMap: DatasourceMap;
   visualizationMap: VisualizationMap;
@@ -85,6 +112,11 @@ export interface LayerPanelProps {
   displayLayerSettings: boolean;
   setIsInlineFlyoutVisible?: (status: boolean) => void;
   onlyAllowSwitchToSubtypes?: boolean;
+  panelId?: string;
+  parentApi?: unknown;
+  closeFlyout?: () => void;
+  canEditTextBasedQuery?: boolean;
+  editorContainer?: HTMLElement;
 }
 
 export interface LayerDatasourceDropProps {

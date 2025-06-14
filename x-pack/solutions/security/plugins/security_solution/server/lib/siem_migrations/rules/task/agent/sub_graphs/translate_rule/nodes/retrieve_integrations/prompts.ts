@@ -40,7 +40,9 @@ Here is the Elastic integrations context for you to reference for your task, rea
 <expected_output>
 - Always reply with a JSON object with the key "match" and the value being the most relevant matched integration title, and a "summary" entry with the reasons behind the match. Do not reply with anything else.
 - Only reply with exact matches or an empty string inside the "match" value, do not guess or reply with anything else.
-- If there are multiple elastic integrations in the list that match, answer the most specific of them, for example if the rule is related to "Sysmon" then the Sysmon integration is more specific than Windows.
+- If there are multiple elastic integrations in the list that match, answer the most specific of them, as long as it is compatible with the rule:
+  - For example, if the rule is related to "Linux Sysmon" then the "Sysmon for Linux" integration is more specific than any other "Linux" integration.
+  - Operating System needs to be compatible, so if the rule is related to "Windows Sysmon", then the "Linux Sysmon" integration is not compatible, so we should assign the "Windows" integration.
 - Finally, write a "summary" in markdown format with the reasoning behind the integration matching, or otherwise, why none of the integrations suggested matched. Starting with "## Integration Matching Summary\n".
 - Make sure the JSON object is formatted correctly and the values properly escaped.
 </expected_output>

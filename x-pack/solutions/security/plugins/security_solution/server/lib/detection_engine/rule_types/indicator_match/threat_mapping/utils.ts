@@ -25,6 +25,7 @@ import type {
   GetSignalValuesMap,
   ThreatMatchNamedQuery,
 } from './types';
+import { checkErrorDetails } from '../../utils/check_error_details';
 
 export const MANY_NESTED_CLAUSES_ERR =
   'Query contains too many nested clauses; maxClauseCount is set to';
@@ -95,7 +96,6 @@ export const combineResults = (
     currentResult.searchAfterTimes,
     newResult.searchAfterTimes
   ),
-  lastLookBackDate: newResult.lastLookBackDate,
   createdSignalsCount: currentResult.createdSignalsCount + newResult.createdSignalsCount,
   createdSignals: [...currentResult.createdSignals, ...newResult.createdSignals],
   warningMessages: [...currentResult.warningMessages, ...newResult.warningMessages],
@@ -118,29 +118,29 @@ export const combineConcurrentResults = (
       const maxSearchAfterTime = calculateMax(accum.searchAfterTimes, item.searchAfterTimes);
       const maxEnrichmentTimes = calculateMax(accum.enrichmentTimes, item.enrichmentTimes);
       const maxBulkCreateTimes = calculateMax(accum.bulkCreateTimes, item.bulkCreateTimes);
-      const lastLookBackDate = calculateMaxLookBack(accum.lastLookBackDate, item.lastLookBackDate);
       return {
         success: accum.success && item.success,
         warning: accum.warning || item.warning,
         searchAfterTimes: [maxSearchAfterTime],
         bulkCreateTimes: [maxBulkCreateTimes],
         enrichmentTimes: [maxEnrichmentTimes],
-        lastLookBackDate,
         createdSignalsCount: accum.createdSignalsCount + item.createdSignalsCount,
         createdSignals: [...accum.createdSignals, ...item.createdSignals],
         warningMessages: [...accum.warningMessages, ...item.warningMessages],
         errors: [...new Set([...accum.errors, ...item.errors])],
+        userError:
+          accum.userError || item.errors.every((err) => checkErrorDetails(err).isUserError),
         suppressedAlertsCount:
           (accum.suppressedAlertsCount ?? 0) + (item.suppressedAlertsCount ?? 0),
       };
     },
     {
       success: true,
+      userError: false,
       warning: false,
       searchAfterTimes: [],
       bulkCreateTimes: [],
       enrichmentTimes: [],
-      lastLookBackDate: undefined,
       createdSignalsCount: 0,
       suppressedAlertsCount: 0,
       createdSignals: [],

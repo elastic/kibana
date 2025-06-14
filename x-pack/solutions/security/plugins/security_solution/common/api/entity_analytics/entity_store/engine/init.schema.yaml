@@ -39,7 +39,7 @@ paths:
                   type: string
                   description: The field to use as the timestamp for the entity type.
                   default: '@timestamp'
-                lookbackPeriod: 
+                lookbackPeriod:
                   type: string
                   default: 24h
                   pattern: '[smdh]$'
@@ -50,20 +50,18 @@ paths:
                   pattern: '[smdh]$'
                   description: The timeout for initializing the aggregating transform.
                 frequency:
-                  type: string 
+                  type: string
                   default: 1m
                   pattern: '[smdh]$'
                   description: The frequency at which the transform will run.
                 delay:
                   type: string
-                  default: 1m 
-                  pattern: '[smdh]$'               
+                  default: 1m
+                  pattern: '[smdh]$'
                   description: The delay before the transform will run.
                 docsPerSecond:
-                  type: integer  
-                  description: The number of documents per second to process.     
-
-   
+                  type: integer
+                  description: The number of documents per second to process.
       responses:
         '200':
           description: Successful response
@@ -71,4 +69,5 @@ paths:
             application/json:
               schema:
                 $ref: '../common.schema.yaml#/components/schemas/EngineDescriptor'
-                  
+        '400':
+          description: Invalid request

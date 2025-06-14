@@ -33,6 +33,7 @@ export function readCliArgs(argv: string[]) {
       'skip-docker-ubi',
       'skip-docker-wolfi',
       'skip-docker-cloud',
+      'skip-docker-cloud-fips',
       'skip-docker-serverless',
       'skip-docker-fips',
       'release',
@@ -141,6 +142,8 @@ export function readCliArgs(argv: string[]) {
     createDebPackage: isOsPackageDesired('deb'),
     createDockerWolfi: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-wolfi']),
     createDockerCloud: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-cloud']),
+    createDockerCloudFIPS:
+      isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-cloud-fips']),
     createDockerServerless:
       (isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-serverless'])) ||
       Boolean(flags.serverless),

@@ -14,6 +14,11 @@ import { css } from '@emotion/react';
 import { createGlobalStyle } from 'styled-components';
 import { ShowAssistantOverlayProps, useAssistantContext } from '../../assistant_context';
 import { Assistant, CONVERSATION_SIDE_PANEL_WIDTH } from '..';
+import {
+  useAssistantLastConversation,
+  useAssistantSpaceId,
+  type LastConversation,
+} from '../use_space_aware_context';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -29,12 +34,15 @@ export const UnifiedTimelineGlobalStyles = createGlobalStyle`
 `;
 
 export const AssistantOverlay = React.memo(() => {
+  const spaceId = useAssistantSpaceId();
   const [isModalVisible, setIsModalVisible] = useState(false);
-  // Why is this named Title and not Id?
-  const [conversationTitle, setConversationTitle] = useState<string | undefined>(undefined);
+  // id if the conversation exists in the data stream, title if it's a new conversation
+  const [lastConversation, setSelectedConversation] = useState<LastConversation | undefined>(
+    undefined
+  );
   const [promptContextId, setPromptContextId] = useState<string | undefined>();
-  const { assistantTelemetry, setShowAssistantOverlay, getLastConversationId } =
-    useAssistantContext();
+  const { assistantTelemetry, setShowAssistantOverlay } = useAssistantContext();
+  const { getLastConversation } = useAssistantLastConversation({ spaceId });
 
   const [chatHistoryVisible, setChatHistoryVisible] = useState(false);
 
@@ -44,16 +52,16 @@ export const AssistantOverlay = React.memo(() => {
       ({
         showOverlay: so,
         promptContextId: pid,
-        conversationTitle: cTitle,
+        selectedConversation,
       }: ShowAssistantOverlayProps) => {
-        const conversationId = getLastConversationId(cTitle);
-        if (so) assistantTelemetry?.reportAssistantInvoked({ conversationId, invokedBy: 'click' });
+        const nextConversation = getLastConversation(selectedConversation);
+        if (so) assistantTelemetry?.reportAssistantInvoked({ invokedBy: 'click' });
 
         setIsModalVisible(so);
         setPromptContextId(pid);
-        setConversationTitle(conversationId);
+        setSelectedConversation(nextConversation);
       },
-    [assistantTelemetry, getLastConversationId]
+    [assistantTelemetry, getLastConversation]
   );
   useEffect(() => {
     setShowAssistantOverlay(showOverlay);
@@ -63,15 +71,14 @@ export const AssistantOverlay = React.memo(() => {
   const handleShortcutPress = useCallback(() => {
     // Try to restore the last conversation on shortcut pressed
     if (!isModalVisible) {
-      setConversationTitle(getLastConversationId());
+      setSelectedConversation(getLastConversation());
       assistantTelemetry?.reportAssistantInvoked({
         invokedBy: 'shortcut',
-        conversationId: getLastConversationId(),
       });
     }
 
     setIsModalVisible(!isModalVisible);
-  }, [isModalVisible, getLastConversationId, assistantTelemetry]);
+  }, [isModalVisible, getLastConversation, assistantTelemetry]);
 
   // Register keyboard listener to show the modal when cmd + ; is pressed
   const onKeyDown = useCallback(
@@ -89,8 +96,8 @@ export const AssistantOverlay = React.memo(() => {
   const cleanupAndCloseModal = useCallback(() => {
     setIsModalVisible(false);
     setPromptContextId(undefined);
-    setConversationTitle(conversationTitle);
-  }, [conversationTitle]);
+    setSelectedConversation(lastConversation);
+  }, [lastConversation]);
 
   const handleCloseModal = useCallback(() => {
     cleanupAndCloseModal();
@@ -132,7 +139,7 @@ export const AssistantOverlay = React.memo(() => {
         hideCloseButton
       >
         <Assistant
-          conversationTitle={conversationTitle}
+          lastConversation={lastConversation}
           promptContextId={promptContextId}
           onCloseFlyout={handleCloseModal}
           chatHistoryVisible={chatHistoryVisible}

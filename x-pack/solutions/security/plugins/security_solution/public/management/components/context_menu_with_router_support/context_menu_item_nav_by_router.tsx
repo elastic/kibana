@@ -57,7 +57,6 @@ const StyledEuiText = styled(EuiText)`
  * Just like `EuiContextMenuItem`, but allows for additional props to be defined which will
  * allow navigation to a URL path via React Router
  */
-
 export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
   ({
     navigateAppId,
@@ -74,10 +73,11 @@ export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
       onClick,
     });
     const getTestId = useTestIdGenerator(otherMenuItemProps['data-test-subj']);
+
     const hoverComponentInstance = useMemo(() => {
       // If the `hoverInfo` is not an object (ex. text, number), then auto-add the text truncation className.
-      // Adding this when the `hoverInfo` is a react component could cause issue, thus in htose cases, we
-      // assume the componet will handle how the data is truncated (if applicable)
+      // Adding this when the `hoverInfo` is a react component could cause issue, thus in those cases, we
+      // assume the component will handle how the data is truncated (if applicable)
       const cssClassNames = `additional-info ${
         'object' !== typeof hoverInfo ? 'eui-textTruncate' : ''
       }`;

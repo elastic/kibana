@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  CreateMicrosoftDefenderConnectorMockResponse,
-  microsoftDefenderEndpointConnectorMocks,
-} from './mocks';
+import type { CreateMicrosoftDefenderConnectorMockResponse } from './mocks';
+import { microsoftDefenderEndpointConnectorMocks } from './mocks';
 
 describe('Microsoft Defender for Endpoint Connector', () => {
   let connectorMock: CreateMicrosoftDefenderConnectorMockResponse;
@@ -31,6 +29,7 @@ describe('Microsoft Defender for Endpoint Connector', () => {
           'API call to Machine Isolate was successful',
           'API call to Machine Release was successful',
           'API call to Machine Actions was successful',
+          'API call to Machine RunScript was successful',
         ],
       });
 

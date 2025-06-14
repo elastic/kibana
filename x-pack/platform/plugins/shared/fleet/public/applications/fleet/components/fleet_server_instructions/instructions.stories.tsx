@@ -9,12 +9,14 @@ import React from 'react';
 
 import { AddFleetServerLanding } from '.';
 
-export const FleetServerInstructions = () => {
-  return <AddFleetServerLanding />;
-};
+export const FleetServerInstructions = {
+  render: () => {
+    return <AddFleetServerLanding />;
+  },
 
-FleetServerInstructions.args = {
-  isCloudEnabled: false,
+  args: {
+    isCloudEnabled: false,
+  },
 };
 
 export default {

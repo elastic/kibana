@@ -7,13 +7,66 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ErrorLike } from '@kbn/expressions-plugin/common';
-import { Adapters } from '@kbn/inspector-plugin/public';
 import { Observable } from 'rxjs';
-import type { EmbeddableInput } from '@kbn/embeddable-plugin/common';
+import { ErrorLike } from '@kbn/expressions-plugin/common';
+import type { KibanaExecutionContext } from '@kbn/core/public';
+import { Adapters } from '@kbn/inspector-plugin/public';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { ViewMode } from '@kbn/presentation-publishing';
 
 export type EmbeddableError = ErrorLike;
-export type { EmbeddableInput };
+
+export interface EmbeddableInput {
+  version?: string;
+  viewMode?: ViewMode;
+  title?: string;
+  description?: string;
+  /**
+   * Note this is not a saved object id. It is used to uniquely identify this
+   * Embeddable instance from others (e.g. inside a container).  It's possible to
+   * have two Embeddables where everything else is the same but the id.
+   */
+  id: string;
+  lastReloadRequestTime?: number;
+  hidePanelTitles?: boolean;
+
+  /**
+   * Reserved key for enhancements added by other plugins.
+   */
+  enhancements?: SerializableRecord;
+
+  /**
+   * List of action IDs that this embeddable should not render.
+   */
+  disabledActions?: string[];
+
+  /**
+   * Whether this embeddable should not execute triggers.
+   */
+  disableTriggers?: boolean;
+
+  /**
+   * Search session id to group searches
+   */
+  searchSessionId?: string;
+
+  /**
+   * Flag whether colors should be synced with other panels
+   */
+  syncColors?: boolean;
+
+  /**
+   * Flag whether cursor should be synced with other panels on hover
+   */
+  syncCursor?: boolean;
+
+  /**
+   * Flag whether tooltips should be synced with other panels on hover
+   */
+  syncTooltips?: boolean;
+
+  executionContext?: KibanaExecutionContext;
+}
 
 export interface EmbeddableOutput {
   // Whether the embeddable is actively loading.

@@ -8,15 +8,15 @@
  */
 
 import './setup_jest_mocks';
-import React from 'react';
-import { BehaviorSubject, of } from 'rxjs';
-import type {
-  ChromeProjectNavigationNode,
-  NavigationTreeDefinitionUI,
-} from '@kbn/core-chrome-browser';
 
-import { PanelContentProvider } from '../src/ui';
+import { userEvent } from '@testing-library/user-event';
+import React from 'react';
+import { of } from 'rxjs';
+
+import type { NavigationTreeDefinitionUI } from '@kbn/core-chrome-browser';
+
 import { renderNavigation } from './utils';
+import { act } from '@testing-library/react';
 
 describe('Panel', () => {
   test('should render group as panel opener', async () => {
@@ -53,9 +53,12 @@ describe('Panel', () => {
       navTreeDef: of(navigationTree),
     });
 
-    expect(await findByTestId(/panelOpener-root.group1/)).toBeVisible();
+    expect(await findByTestId(/nav-item-root.group1/)).toBeVisible();
     expect(queryByTestId(/sideNavPanel/)).toBeNull();
-    (await findByTestId(/panelOpener-root.group1/)).click(); // open the panel
+    await act(async () => {
+      (await findByTestId(/nav-item-root.group1/)).click(); // open the panel
+    });
+
     expect(queryByTestId(/sideNavPanel/)).toBeVisible();
   });
 
@@ -74,7 +77,7 @@ describe('Panel', () => {
               title: 'Group 1',
               path: 'root.group1',
               href: '/app/item1',
-              renderAs: 'panelOpener',
+              renderAs: 'block',
               children: [
                 // All children are hidden, this group should not render
                 {
@@ -106,49 +109,14 @@ describe('Panel', () => {
       navTreeDef: of(navigationTree),
     });
 
-    expect(queryByTestId(/panelOpener-root.group1/)).toBeNull();
-    expect(queryByTestId(/panelOpener-root.group2/)).toBeVisible();
+    expect(queryByTestId(/nav-item-root.group1.item1/)).toBeNull();
+    expect(queryByTestId(/nav-item-root.group2/)).toBeVisible();
   });
 
-  describe('custom content', () => {
-    test('should render custom component inside the panel', async () => {
-      const panelContentProvider: PanelContentProvider = (id) => {
-        return {
-          content: ({ closePanel, selectedNode, activeNodes }) => {
-            const [path0 = []] = activeNodes;
-            return (
-              <div data-test-subj="customPanelContent">
-                <p data-test-subj="customPanelSelectedNode">{selectedNode.path}</p>
-                <ul data-test-subj="customPanelActiveNodes">
-                  {path0.map((node) => (
-                    <li key={node.id}>{node.id}</li>
-                  ))}
-                </ul>
-                <button data-test-subj="customPanelCloseBtn" onClick={closePanel}>
-                  Close panel
-                </button>
-              </div>
-            );
-          },
-        };
-      };
-
-      const activeNodes$ = new BehaviorSubject<ChromeProjectNavigationNode[][]>([
-        [
-          {
-            id: 'activeGroup1',
-            title: 'Group 1',
-            path: 'activeGroup1',
-          },
-          {
-            id: 'activeItem1',
-            title: 'Item 1',
-            path: 'activeGroup1.activeItem1',
-          },
-        ],
-      ]);
-
-      const navTree: NavigationTreeDefinitionUI = {
+  describe('toggle the panel open and closed', () => {
+    let navigationTree: NavigationTreeDefinitionUI;
+    beforeAll(() => {
+      navigationTree = {
         id: 'es',
         body: [
           {
@@ -161,7 +129,6 @@ describe('Panel', () => {
                 id: 'group1',
                 title: 'Group 1',
                 path: 'root.group1',
-                href: '/app/item1',
                 renderAs: 'panelOpener',
                 children: [
                   { id: 'item1', title: 'Item 1', href: '/app/item1', path: 'root.group1.item1' },
@@ -171,28 +138,81 @@ describe('Panel', () => {
           },
         ],
       };
+    });
 
-      const { queryByTestId } = renderNavigation({
-        navTreeDef: of(navTree),
-        panelContentProvider,
-        services: { activeNodes$ },
+    test('should allow button to toggle', async () => {
+      const { findByTestId, queryByTestId } = renderNavigation({
+        navTreeDef: of(navigationTree),
       });
 
+      // open the panel
+      await act(async () => {
+        (await findByTestId(/nav-item-id-group1/)).click();
+      });
+      expect(queryByTestId(/sideNavPanel/)).toBeVisible();
+
+      // close the panel
+      await userEvent.click(await findByTestId(/nav-item-id-group1/));
       expect(queryByTestId(/sideNavPanel/)).toBeNull();
-      expect(queryByTestId(/customPanelContent/)).toBeNull();
+    });
 
-      queryByTestId(/panelOpener-root.group1/)?.click(); // open the panel
+    test('should allow the button label to toggle', async () => {
+      const { findByTestId, queryByTestId, container } = renderNavigation({
+        navTreeDef: of(navigationTree),
+      });
 
-      expect(queryByTestId(/sideNavPanel/)).not.toBeNull();
-      expect(queryByTestId(/customPanelContent/)).not.toBeNull();
-      expect(queryByTestId(/customPanelContent/)).toBeVisible();
-      // Test that the selected node is correclty passed
-      expect(queryByTestId(/customPanelSelectedNode/)?.textContent).toBe('root.group1');
-      // Test that the active nodes are correclty passed
-      expect(queryByTestId(/customPanelActiveNodes/)?.textContent).toBe('activeGroup1activeItem1');
-      // Test that handler to close the panel is correctly passed
-      queryByTestId(/customPanelCloseBtn/)?.click(); // close the panel
-      expect(queryByTestId(/customPanelContent/)).toBeNull();
+      // open the panel via the button
+      await act(async () => {
+        (await findByTestId(/nav-item-id-group1/)).click();
+      });
+      expect(queryByTestId(/sideNavPanel/)).toBeVisible();
+
+      // click the label element
+      const buttonLabel = container.querySelectorAll('span span')[0];
+      expect(buttonLabel).toBeInTheDocument();
+      await userEvent.click(buttonLabel!);
+
+      expect(queryByTestId(/sideNavPanel/)).toBeNull();
+    });
+
+    test('should allow the button icon to toggle', async () => {
+      const { findByTestId, queryByTestId, container } = renderNavigation({
+        navTreeDef: of(navigationTree),
+      });
+
+      // open the panel via the button
+      await act(async () => {
+        (await findByTestId(/nav-item-id-group1/)).click();
+      });
+      expect(queryByTestId(/sideNavPanel/)).toBeVisible();
+
+      // click the label element
+      const buttonIcon = container.querySelectorAll('span span')[1];
+      expect(buttonIcon).toBeInTheDocument();
+      await userEvent.click(buttonIcon!);
+
+      expect(queryByTestId(/sideNavPanel/)).toBeNull();
+    });
+
+    test('should allow outside click to close the panel', async () => {
+      const { findByTestId, queryByTestId } = renderNavigation({
+        navTreeDef: of(navigationTree),
+      });
+
+      // open the panel via the button
+      await act(async () => {
+        (await findByTestId(/nav-item-id-group1/)).click();
+      });
+      expect(queryByTestId(/sideNavPanel/)).toBeVisible();
+
+      // click an element outside of the panel
+      const navRoot = await findByTestId(/nav-item-id-root/);
+      expect(navRoot).toBeInTheDocument();
+
+      const navRootParent = navRoot!.parentNode! as Element;
+      expect(navRootParent).toBeInTheDocument();
+      await userEvent.click(navRootParent);
+
       expect(queryByTestId(/sideNavPanel/)).toBeNull();
     });
   });
@@ -252,7 +272,9 @@ describe('Panel', () => {
         navTreeDef: of(navTree),
       });
 
-      queryByTestId(/panelOpener-root.group1/)?.click(); // open the panel
+      act(() => {
+        queryByTestId(/nav-item-root.group1/)?.click(); // open the panel
+      });
 
       expect(queryByTestId(/panelGroupId-foo/)).toBeVisible();
       expect(queryByTestId(/panelGroupTitleId-foo/)?.textContent).toBe('Foo');
@@ -319,7 +341,9 @@ describe('Panel', () => {
         navTreeDef: of(navTree),
       });
 
-      queryByTestId(/panelOpener-root.group1/)?.click(); // open the panel
+      act(() => {
+        queryByTestId(/nav-item-root.group1/)?.click(); // open the panel
+      });
 
       expect(queryByTestId(/panelGroupTitleId-foo/)).toBeNull(); // No title rendered
 
@@ -386,7 +410,9 @@ describe('Panel', () => {
         navTreeDef: of(navTree),
       });
 
-      queryByTestId(/panelOpener-root.group1/)?.click(); // open the panel
+      act(() => {
+        queryByTestId(/nav-item-root.group1/)?.click(); // open the panel
+      });
 
       expect(queryByTestId(/panelGroupId-foo/)).toBeVisible();
 
@@ -396,10 +422,133 @@ describe('Panel', () => {
       expect(queryByTestId(/panelNavItem-id-item1/)).not.toBeVisible(); // Accordion is collapsed
       expect(queryByTestId(/panelNavItem-id-item3/)).not.toBeVisible(); // Accordion is collapsed
 
-      queryByTestId(/panelAccordionBtnId-foo/)?.click(); // Expand accordion
+      act(() => {
+        queryByTestId(/panelAccordionBtnId-foo/)?.click(); // Expand accordion
+      });
 
       expect(queryByTestId(/panelNavItem-id-item1/)).toBeVisible();
       expect(queryByTestId(/panelNavItem-id-item3/)).toBeVisible();
+    });
+
+    test('allows panel to contain a mix of ungrouped items and grouped items', () => {
+      const navTree: NavigationTreeDefinitionUI = {
+        id: 'es',
+        body: [
+          {
+            id: 'root',
+            title: 'Root',
+            path: 'root',
+            isCollapsible: false,
+            children: [
+              {
+                id: 'group1',
+                title: 'Group 1',
+                path: 'root.group1',
+                href: '/app/item1',
+                renderAs: 'panelOpener',
+                children: [
+                  {
+                    id: 'item0',
+                    title: 'Item 0',
+                    href: '/app/item0',
+                    path: 'root.group1.foo.item0',
+                  },
+                  {
+                    id: 'foo',
+                    title: 'Group 1',
+                    path: 'root.group1.foo',
+                    children: [
+                      {
+                        id: 'item1',
+                        href: '/app/item1',
+                        path: 'root.group1.foo.item1',
+                        title: 'Item 1',
+                      },
+                      {
+                        id: 'item2',
+                        href: '/app/item2',
+                        path: 'root.group1.foo.item2',
+                        title: 'Item 2',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      const { queryByTestId } = renderNavigation({
+        navTreeDef: of(navTree),
+      });
+
+      act(() => {
+        queryByTestId(/nav-item-root.group1/)?.click(); // open the panel
+      });
+
+      expect(queryByTestId(/sideNavPanelError/)).toHaveTextContent(
+        'Side navigation parsing error[Chrome navigation] Error in node [group1]. Children must either all be "groups" or all "items" but not a mix of both.'
+      );
+    });
+
+    test('allows panel items to use custom rendering', () => {
+      const componentSpy = jest.fn();
+
+      const Custom: React.FC = () => {
+        componentSpy();
+        return <>Hello</>;
+      };
+
+      const navTree: NavigationTreeDefinitionUI = {
+        id: 'es',
+        body: [
+          {
+            id: 'root',
+            title: 'Root',
+            path: 'root',
+            isCollapsible: false,
+            children: [
+              {
+                id: 'group1',
+                title: 'Group 1',
+                path: 'root.group1',
+                href: '/app/item1',
+                renderAs: 'panelOpener',
+                children: [
+                  {
+                    id: 'foo',
+                    title: 'Group 1',
+                    path: 'root.group1.foo',
+                    children: [
+                      {
+                        id: 'item1',
+                        title: 'Item 1',
+                        path: 'root.group1.foo.item1',
+                        renderItem: () => {
+                          return <Custom />;
+                        },
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      const { queryByTestId } = renderNavigation({
+        navTreeDef: of(navTree),
+      });
+
+      expect(componentSpy).not.toHaveBeenCalled();
+
+      act(() => {
+        queryByTestId(/nav-item-root.group1/)?.click(); // open the panel
+      });
+
+      expect(componentSpy).toHaveBeenCalled();
     });
   });
 });

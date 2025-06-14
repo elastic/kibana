@@ -8,13 +8,7 @@
 import React from 'react';
 import { useController } from 'react-hook-form';
 import { EuiFormRow, EuiFormRowProps, EuiSwitch, htmlIdGenerator } from '@elastic/eui';
-import { ProcessorFormState } from '../types';
-
-type ExtractBooleanFields<TInput> = NonNullable<
-  {
-    [K in keyof TInput]: boolean extends TInput[K] ? K : never;
-  }[keyof TInput]
->;
+import { ExtractBooleanFields, ProcessorFormState } from '../types';
 
 interface ToggleFieldProps {
   helpText?: EuiFormRowProps['helpText'];

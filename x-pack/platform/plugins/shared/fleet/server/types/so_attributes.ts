@@ -92,6 +92,7 @@ export interface AgentSOAttributes {
   tags?: string[];
   components?: FleetServerAgentComponent[];
   packages?: string[];
+  namespaces?: string[];
 }
 
 export interface FleetProxySOAttributes {
@@ -111,6 +112,13 @@ export interface FleetServerHostSOAttributes {
   is_preconfigured: boolean;
   is_internal?: boolean;
   proxy_id?: string | null;
+  secrets?: {
+    ssl?: {
+      key?: { id: string };
+      es_key?: { id: string };
+    };
+  };
+  ssl?: string | null;
 }
 
 export interface PackagePolicySOAttributes {
@@ -175,7 +183,6 @@ export interface OutputSoRemoteElasticsearchAttributes extends OutputSoBaseAttri
   service_token?: string;
   secrets?: {
     service_token?: { id: string };
-    kibana_api_key?: { id: string };
     ssl?: {
       key?: { id: string };
     };
@@ -183,6 +190,7 @@ export interface OutputSoRemoteElasticsearchAttributes extends OutputSoBaseAttri
   sync_integrations?: boolean;
   kibana_url?: string;
   kibana_api_key?: string;
+  sync_uninstalled_integrations?: boolean;
 }
 
 interface OutputSoLogstashAttributes extends OutputSoBaseAttributes {
@@ -268,5 +276,11 @@ export interface DownloadSourceSOAttributes {
   is_default: boolean;
   source_id?: string;
   proxy_id?: string | null;
+  ssl?: string | null; // encrypted ssl field
+  secrets?: {
+    ssl?: {
+      key?: { id: string };
+    };
+  };
 }
 export type SimpleSOAssetAttributes = SimpleSOAssetType['attributes'];

@@ -8,6 +8,9 @@
  */
 
 import { ScoutPage } from '..';
+import { ScoutLogger } from '../../common';
+import { ScoutTestConfig } from '../../types';
+import { CollapsibleNav } from './collapsible_nav';
 import { DashboardApp } from './dashboard_app';
 import { DatePicker } from './date_picker';
 import { DiscoverApp } from './discover_app';
@@ -16,6 +19,12 @@ import { MapsPage } from './maps_page';
 import { RenderablePage } from './renderable_page';
 import { createLazyPageObject } from './utils';
 
+export interface PageObjectsFixtures {
+  page: ScoutPage;
+  config: ScoutTestConfig;
+  log: ScoutLogger;
+}
+
 export interface PageObjects {
   datePicker: DatePicker;
   discover: DiscoverApp;
@@ -23,6 +32,7 @@ export interface PageObjects {
   filterBar: FilterBar;
   maps: MapsPage;
   renderable: RenderablePage;
+  collapsibleNav: CollapsibleNav;
 }
 
 /**
@@ -31,14 +41,15 @@ export interface PageObjects {
  * @param page - `ScoutPage` instance used for initializing page objects.
  * @returns An object containing lazy-loaded core page objects.
  */
-export function createCorePageObjects(page: ScoutPage): PageObjects {
+export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObjects {
   return {
-    datePicker: createLazyPageObject(DatePicker, page),
-    dashboard: createLazyPageObject(DashboardApp, page),
-    discover: createLazyPageObject(DiscoverApp, page),
-    filterBar: createLazyPageObject(FilterBar, page),
-    maps: createLazyPageObject(MapsPage, page),
-    renderable: createLazyPageObject(RenderablePage, page),
+    datePicker: createLazyPageObject(DatePicker, fixtures.page),
+    dashboard: createLazyPageObject(DashboardApp, fixtures.page),
+    discover: createLazyPageObject(DiscoverApp, fixtures.page),
+    filterBar: createLazyPageObject(FilterBar, fixtures.page),
+    maps: createLazyPageObject(MapsPage, fixtures.page),
+    renderable: createLazyPageObject(RenderablePage, fixtures.page),
+    collapsibleNav: createLazyPageObject(CollapsibleNav, fixtures.page, fixtures.config),
     // Add new page objects here
   };
 }

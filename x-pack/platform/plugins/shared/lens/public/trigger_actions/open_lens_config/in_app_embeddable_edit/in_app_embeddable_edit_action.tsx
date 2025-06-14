@@ -10,8 +10,7 @@ import { Action } from '@kbn/ui-actions-plugin/public';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import type { VisualizationMap, DatasourceMap } from '../../../types';
 import type { InlineEditLensEmbeddableContext } from './types';
-
-const ACTION_EDIT_LENS_EMBEDDABLE = 'ACTION_EDIT_LENS_EMBEDDABLE';
+import { ACTION_EDIT_LENS_EMBEDDABLE } from '../constants';
 
 export class EditLensEmbeddableAction implements Action<InlineEditLensEmbeddableContext> {
   public type = ACTION_EDIT_LENS_EMBEDDABLE;
@@ -20,12 +19,10 @@ export class EditLensEmbeddableAction implements Action<InlineEditLensEmbeddable
 
   constructor(
     protected readonly core: CoreStart,
-    protected readonly getServices: () => Promise<
-      LensPluginStartDependencies & {
-        visualizationMap: VisualizationMap;
-        datasourceMap: DatasourceMap;
-      }
-    >
+    protected readonly dependencies: LensPluginStartDependencies & {
+      visualizationMap: VisualizationMap;
+      datasourceMap: DatasourceMap;
+    }
   ) {}
 
   public getDisplayName(): string {
@@ -51,14 +48,11 @@ export class EditLensEmbeddableAction implements Action<InlineEditLensEmbeddable
     onApply,
     onCancel,
   }: InlineEditLensEmbeddableContext) {
-    const [{ executeEditEmbeddableAction }, services] = await Promise.all([
-      import('../../../async_services'),
-      this.getServices(),
-    ]);
+    const { executeEditEmbeddableAction } = await import('../../../async_services');
     if (attributes) {
       executeEditEmbeddableAction({
         core: this.core,
-        deps: services,
+        deps: this.dependencies,
         attributes,
         lensEvent,
         container,

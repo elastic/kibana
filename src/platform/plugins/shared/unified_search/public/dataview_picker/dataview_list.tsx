@@ -207,7 +207,3 @@ export function DataViewsList({
     </EuiSelectable>
   );
 }
-
-// React.lazy support
-// eslint-disable-next-line import/no-default-export
-export default DataViewsList;

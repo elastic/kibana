@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { CoreStart } from '@kbn/core/public';
-import type { Meta, Story } from '@storybook/react';
+import type { StoryObj, Meta } from '@storybook/react';
 import type { ComponentProps } from 'react';
 import React from 'react';
 import { ErrorGroupList } from '.';
@@ -106,18 +106,24 @@ const stories: Meta<Args> = {
 };
 export default stories;
 
-export const Example: Story<Args> = (args) => {
-  return <ErrorGroupList {...args} />;
-};
-Example.args = {
-  serviceName: 'test service',
-  initialPageSize: 5,
+export const Example: StoryObj<Args> = {
+  render: (args) => {
+    return <ErrorGroupList {...args} />;
+  },
+
+  args: {
+    serviceName: 'test service',
+    initialPageSize: 5,
+  },
 };
 
-export const EmptyState: Story<Args> = (args) => {
-  return <ErrorGroupList {...args} />;
-};
-EmptyState.args = {
-  serviceName: 'foo',
-  initialPageSize: 5,
+export const EmptyState: StoryObj<Args> = {
+  render: (args) => {
+    return <ErrorGroupList {...args} />;
+  },
+
+  args: {
+    serviceName: 'foo',
+    initialPageSize: 5,
+  },
 };

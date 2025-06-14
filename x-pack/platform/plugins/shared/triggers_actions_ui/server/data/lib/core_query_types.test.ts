@@ -7,7 +7,7 @@
 
 // tests of common properties on time_series_query and alert_type_params
 
-import { ObjectType } from '@kbn/config-schema';
+import type { ObjectType } from '@kbn/config-schema';
 import type { Writable } from '@kbn/utility-types';
 import type { CoreQueryParams } from '@kbn/response-ops-rule-params/index_threshold';
 import { MAX_GROUPS } from '@kbn/response-ops-rule-params/common';

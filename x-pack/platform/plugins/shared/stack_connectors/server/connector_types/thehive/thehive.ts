@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { ServiceParams, CaseConnector } from '@kbn/actions-plugin/server';
+import type { ServiceParams } from '@kbn/actions-plugin/server';
+import { CaseConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
-import { Type } from '@kbn/config-schema';
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import type { Type } from '@kbn/config-schema';
+import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { SUB_ACTION } from '../../../common/thehive/constants';
 import {
   TheHiveIncidentResponseSchema,

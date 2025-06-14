@@ -12,6 +12,7 @@ import { sortBy } from 'lodash';
 import { Readable } from 'stream';
 import { createSpanMetricsAggregator } from '../../lib/apm/aggregators/create_span_metrics_aggregator';
 import { awaitStream } from '../../lib/utils/wait_until_stream_finished';
+import { ToolingLog } from '@kbn/tooling-log';
 
 describe('span destination metrics', () => {
   let events: Array<Record<string, any>>;
@@ -26,7 +27,8 @@ describe('span destination metrics', () => {
 
     const range = timerange(
       new Date('2021-01-01T00:00:00.000Z'),
-      new Date('2021-01-01T00:15:00.000Z')
+      new Date('2021-01-01T00:15:00.000Z'),
+      {} as ToolingLog
     );
 
     const serialized = [

@@ -65,7 +65,7 @@ export function AddDashboardFlyout({
   const dashboardSuggestionsFetch = useStreamsAppFetch(
     ({ signal }) => {
       return streamsRepositoryClient
-        .fetch('POST /api/streams/{name}/dashboards/_suggestions', {
+        .fetch('POST /internal/streams/{name}/dashboards/_suggestions', {
           signal,
           params: {
             path: {
@@ -202,10 +202,12 @@ export function AddDashboardFlyout({
             </EuiFlexItem>
           </EuiFlexGroup>
           <DashboardsTable
+            entityId={entityId}
             dashboards={allDashboards}
             loading={dashboardSuggestionsFetch.loading}
             selectedDashboards={selectedDashboards}
             setSelectedDashboards={setSelectedDashboards}
+            dataTestSubj="streamsAppAddDashboardFlyoutDashboardsTable"
           />
         </EuiFlexGroup>
       </EuiFlyoutBody>

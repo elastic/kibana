@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { ExampleContext } from '../../test/context_example';
 
@@ -13,19 +12,36 @@ import { Page, PageComponent } from '../page';
 import { sharedWorkpads } from '../../test';
 const { austin } = sharedWorkpads;
 
-storiesOf('shareables/Page', module)
-  .add('contextual: austin', () => (
+export default {
+  title: 'shareables/Page',
+};
+
+export const ContextualAustin = {
+  render: () => (
     <ExampleContext source="austin" style={{ height: 720 }}>
       <Page index={3} />
     </ExampleContext>
-  ))
-  .add('contextual: hello', () => (
+  ),
+
+  name: 'contextual: austin',
+};
+
+export const ContextualHello = {
+  render: () => (
     <ExampleContext source="hello" style={{ height: 720 }}>
       <Page index={0} />
     </ExampleContext>
-  ))
-  .add('component', () => (
+  ),
+
+  name: 'contextual: hello',
+};
+
+export const Component = {
+  render: () => (
     <ExampleContext source="austin" style={{ height: 720 }}>
       <PageComponent height={720} width={1280} page={austin.pages[3]} />
     </ExampleContext>
-  ));
+  ),
+
+  name: 'component',
+};

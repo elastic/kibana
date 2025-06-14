@@ -16,9 +16,8 @@ import {
   transformRawData,
   contentReferenceBlock,
 } from '@kbn/elastic-assistant-common';
-import { DynamicStructuredTool } from '@langchain/core/tools';
+import { tool } from '@langchain/core/tools';
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
-import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { APP_UI_ID } from '../../../../common';
 
@@ -63,11 +62,8 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
       size,
       contentReferencesStore,
     } = params as OpenAndAcknowledgedAlertsToolParams;
-    return new DynamicStructuredTool({
-      name: 'OpenAndAcknowledgedAlertsTool',
-      description: params.description || OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL_DESCRIPTION,
-      schema: z.object({}),
-      func: async () => {
+    return tool(
+      async () => {
         const query = getOpenAndAcknowledgedAlertsQuery({
           alertsIndexPattern,
           anonymizationFields: anonymizationFields ?? [],
@@ -97,7 +93,7 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
 
             const hitId = hit._id;
             const reference = hitId
-              ? contentReferencesStore?.add((p) => securityAlertReference(p.id, hitId))
+              ? contentReferencesStore.add((p) => securityAlertReference(p.id, hitId))
               : undefined;
             const citation = reference && `\nCitation,${contentReferenceBlock(reference)}`;
 
@@ -105,7 +101,11 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
           })
         );
       },
-      tags: ['alerts', 'open-and-acknowledged-alerts'],
-    });
+      {
+        name: 'OpenAndAcknowledgedAlertsTool',
+        description: params.description || OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL_DESCRIPTION,
+        tags: ['alerts', 'open-and-acknowledged-alerts'],
+      }
+    );
   },
 };

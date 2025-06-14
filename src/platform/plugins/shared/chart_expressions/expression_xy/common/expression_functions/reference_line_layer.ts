@@ -42,7 +42,7 @@ export const referenceLineLayerFunction: ReferenceLineLayerFn = {
     },
   },
   async fn(input, args, context) {
-    const { referenceLineLayerFn } = await import('./reference_line_layer_fn');
+    const { referenceLineLayerFn } = await import('./expression_module');
     return await referenceLineLayerFn(input, args, context);
   },
 };

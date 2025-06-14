@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const COLOR_MAPPING_SETTING = 'visualization:colorMapping';
 export const LEGACY_TIME_AXIS = 'visualization:useLegacyTimeAxis';
 
 export type {
@@ -34,7 +33,6 @@ export {
   ColorMode,
   LabelRotation,
   defaultCountLabel,
-  MULTILAYER_TIME_AXIS_STYLE,
 } from './static';
 
 export type { ColorSchemaParams, Labels, Style } from './types';

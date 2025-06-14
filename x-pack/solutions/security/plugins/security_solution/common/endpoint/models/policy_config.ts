@@ -98,6 +98,7 @@ export const policyFactory = ({
         process: true,
         file: true,
         network: true,
+        security: true,
       },
       malware: {
         mode: ProtectionModes.prevent,

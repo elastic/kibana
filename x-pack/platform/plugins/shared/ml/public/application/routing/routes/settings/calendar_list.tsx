@@ -11,49 +11,46 @@ import { i18n } from '@kbn/i18n';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { ML_PAGES } from '../../../../locator';
-import type { NavigateToPath } from '../../../contexts/kibana';
 import type { MlRoute, PageProps } from '../../router';
 import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { usePermissionCheck } from '../../../capabilities/check_capabilities';
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
-import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { type NavigateToApp, getADSettingsBreadcrumbs } from '../../breadcrumbs';
 
 const CalendarsList = dynamic(async () => ({
   default: (await import('../../../settings/calendars')).CalendarsList,
 }));
 
-export const calendarListRouteFactory = (
-  navigateToPath: NavigateToPath,
-  basePath: string
-): MlRoute => ({
+export const calendarListRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
   path: createPath(ML_PAGES.CALENDARS_MANAGE),
   title: i18n.translate('xpack.ml.settings.calendarList.docTitle', {
     defaultMessage: 'Calendars',
   }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} isDst={false} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('CALENDAR_MANAGEMENT_BREADCRUMB'),
+    ...getADSettingsBreadcrumbs(navigateToApp),
+    {
+      text: i18n.translate('xpack.ml.anomalyDetection.calendarManagementLabel', {
+        defaultMessage: 'Calendar management',
+      }),
+    },
   ],
 });
 
-export const calendarDstListRouteFactory = (
-  navigateToPath: NavigateToPath,
-  basePath: string
-): MlRoute => ({
+export const calendarDstListRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
   path: createPath(ML_PAGES.CALENDARS_DST_MANAGE),
   title: i18n.translate('xpack.ml.settings.calendarList.docTitle', {
     defaultMessage: 'Calendars',
   }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} isDst={true} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('CALENDAR_DST_MANAGEMENT_BREADCRUMB'),
+    ...getADSettingsBreadcrumbs(navigateToApp),
+    {
+      text: i18n.translate('xpack.ml.anomalyDetection.dstCalendarManagementLabel', {
+        defaultMessage: 'DST Calendar management',
+      }),
+    },
   ],
 });
 

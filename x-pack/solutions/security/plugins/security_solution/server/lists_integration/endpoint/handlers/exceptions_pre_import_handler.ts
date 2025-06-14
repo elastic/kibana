@@ -9,23 +9,23 @@ import type { ExceptionsListPreImportServerExtension } from '@kbn/lists-plugin/s
 import { EndpointArtifactExceptionValidationError } from '../validators/errors';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../common/endpoint/service/artifacts/constants';
 
-type ValidatorCallback = ExceptionsListPreImportServerExtension['callback'];
-export const getExceptionsPreImportHandler = (): ValidatorCallback => {
-  return async ({ data }) => {
-    const hasEndpointArtifactListOrListItems = [...data.lists, ...data.items].some((item) => {
-      if ('list_id' in item) {
-        return ALL_ENDPOINT_ARTIFACT_LIST_IDS.includes(item.list_id);
+export const getExceptionsPreImportHandler =
+  (): ExceptionsListPreImportServerExtension['callback'] => {
+    return async ({ data }) => {
+      const hasEndpointArtifactListOrListItems = [...data.lists, ...data.items].some((item) => {
+        if ('list_id' in item) {
+          return (ALL_ENDPOINT_ARTIFACT_LIST_IDS as string[]).includes(item.list_id);
+        }
+
+        return false;
+      });
+
+      if (hasEndpointArtifactListOrListItems) {
+        throw new EndpointArtifactExceptionValidationError(
+          'Import is not supported for Endpoint artifact exceptions'
+        );
       }
 
-      return false;
-    });
-
-    if (hasEndpointArtifactListOrListItems) {
-      throw new EndpointArtifactExceptionValidationError(
-        'Import is not supported for Endpoint artifact exceptions'
-      );
-    }
-
-    return data;
+      return data;
+    };
   };
-};

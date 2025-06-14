@@ -128,7 +128,7 @@ function GroupSelection({
   return (
     <>
       <EuiModalHeader>
-        <EuiModalHeaderTitle data-test-subj="groupModalHeader">
+        <EuiModalHeaderTitle data-test-subj="groupModalHeader" id="vis-wizard-modal-title">
           <FormattedMessage
             id="visualizations.newVisWizard.title"
             defaultMessage="Create visualization"

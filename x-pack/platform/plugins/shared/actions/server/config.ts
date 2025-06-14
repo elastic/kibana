@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { Logger } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { Logger } from '@kbn/core/server';
 import {
   DEFAULT_MICROSOFT_EXCHANGE_URL,
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
@@ -120,9 +121,30 @@ export const configSchema = schema.object({
   microsoftGraphApiScope: schema.string({ defaultValue: DEFAULT_MICROSOFT_GRAPH_API_SCOPE }),
   microsoftExchangeUrl: schema.string({ defaultValue: DEFAULT_MICROSOFT_EXCHANGE_URL }),
   email: schema.maybe(
-    schema.object({
-      domain_allowlist: schema.arrayOf(schema.string()),
-    })
+    schema.object(
+      {
+        domain_allowlist: schema.maybe(schema.arrayOf(schema.string())),
+        services: schema.maybe(
+          schema.object({
+            ses: schema.object({
+              host: schema.maybe(schema.string({ minLength: 1 })),
+              port: schema.maybe(schema.number({ min: 1, max: 65535 })),
+            }),
+          })
+        ),
+      },
+      {
+        validate: (obj) => {
+          if (!obj.domain_allowlist && !obj.services?.ses.host && !obj.services?.ses.port) {
+            return 'Email configuration requires either domain_allowlist or services.ses to be specified';
+          }
+
+          if (obj.services?.ses && (!obj.services.ses.host || !obj.services.ses.port)) {
+            return 'Email configuration requires both services.ses.host and services.ses.port to be specified';
+          }
+        },
+      }
+    )
   ),
   run: schema.maybe(
     schema.object({
@@ -138,6 +160,7 @@ export const configSchema = schema.object({
   ),
   usage: schema.object({
     url: schema.string({ defaultValue: DEFAULT_USAGE_API_URL }),
+    enabled: schema.maybe(schema.boolean({ defaultValue: true })),
     ca: schema.maybe(
       schema.object({
         path: schema.string(),

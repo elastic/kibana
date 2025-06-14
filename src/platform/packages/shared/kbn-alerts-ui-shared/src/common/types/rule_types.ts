@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { ComponentType } from 'react';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -21,9 +21,9 @@ import type {
   RuleSystemAction,
   ResolvedSanitizedRule,
 } from '@kbn/alerting-types';
-import { RuleType } from '@kbn/triggers-actions-ui-types';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { TypeRegistry } from '../type_registry';
+import type { RuleType } from '@kbn/triggers-actions-ui-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { TypeRegistry } from '../type_registry';
 
 export type { SanitizedRuleAction as RuleAction } from '@kbn/alerting-types';
 
@@ -32,6 +32,7 @@ export type RuleTypeWithDescription = RuleType<string, string> & { description?:
 export type RuleTypeIndexWithDescriptions = Map<string, RuleTypeWithDescription>;
 
 export type RuleTypeParams = Record<string, unknown>;
+export type RuleTypeMetaData = Record<string, unknown>;
 
 export interface RuleFormBaseErrors {
   name?: string[];
@@ -104,7 +105,7 @@ export interface RuleTypeParamsExpressionProps<
   metadata?: MetaData;
   charts: ChartsPluginSetup;
   data: DataPublicPluginStart;
-  dataViews: DataViewsPublicPluginStart;
+  dataViews?: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 

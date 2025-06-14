@@ -30,7 +30,7 @@ export function makeFtrConfigProvider(
       : config.getFtrConfigPath();
     const defaultConfigPath = config.isXpack()
       ? 'x-pack/test/functional/config.base.js'
-      : 'test/functional/config.base.js';
+      : 'src/platform/test/functional/config.base.js';
     const ftrConfigPath = configPath ?? defaultConfigPath;
     const baseConfig = (await readConfigFile(Path.resolve(REPO_ROOT, ftrConfigPath))).getAll();
 

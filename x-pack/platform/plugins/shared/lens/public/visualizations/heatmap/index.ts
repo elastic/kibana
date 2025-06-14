@@ -17,10 +17,12 @@ export interface HeatmapVisualizationPluginSetupPlugins {
 export class HeatmapVisualization {
   setup(core: CoreSetup, { editorFrame, charts }: HeatmapVisualizationPluginSetupPlugins) {
     editorFrame.registerVisualization(async () => {
-      const { getHeatmapVisualization } = await import('../../async_services');
-      const palettes = await charts.palettes.getPalettes();
+      const [{ getHeatmapVisualization }, paletteService] = await Promise.all([
+        import('../../async_services'),
+        charts.palettes.getPalettes(),
+      ]);
 
-      return getHeatmapVisualization({ paletteService: palettes, theme: core.theme });
+      return getHeatmapVisualization({ paletteService, theme: core.theme });
     });
   }
 }

@@ -13,7 +13,7 @@ import type {
   ExternalReferenceAttachmentType,
   PersistableStateAttachmentTypeSetup,
 } from '@kbn/cases-plugin/server/attachment_framework/types';
-import { BulkCreateCasesRequest, CasesPatchRequest } from '@kbn/cases-plugin/common/types/api';
+import type { BulkCreateCasesRequest, CasesPatchRequest } from '@kbn/cases-plugin/common/types/api';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import { CASES_TELEMETRY_TASK_NAME } from '@kbn/cases-plugin/common/constants';
 import type { FixtureStartDeps } from './plugin';
@@ -41,6 +41,12 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
   router.patch(
     {
       path: '/api/cases_user/cases',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({}, { unknowns: 'allow' }),
       },
@@ -61,7 +67,16 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
   );
 
   router.get(
-    { path: '/api/cases_fixture/registered_external_reference_attachments', validate: {} },
+    {
+      path: '/api/cases_fixture/registered_external_reference_attachments',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {},
+    },
     async (context, request, response) => {
       try {
         const [_, { cases }] = await core.getStartServices();
@@ -86,7 +101,16 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
   );
 
   router.get(
-    { path: '/api/cases_fixture/registered_persistable_state_attachments', validate: {} },
+    {
+      path: '/api/cases_fixture/registered_persistable_state_attachments',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {},
+    },
     async (context, request, response) => {
       try {
         const [_, { cases }] = await core.getStartServices();
@@ -118,6 +142,12 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
   router.get(
     {
       path: '/api/cases_fixture/cases/{id}/comments',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -146,6 +176,12 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
   router.post(
     {
       path: '/api/cases_fixture/cases:bulkCreate',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({}, { unknowns: 'allow' }),
       },
@@ -177,6 +213,12 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
   router.post(
     {
       path: '/api/cases_fixture/{id}/connectors:execute',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -216,6 +258,12 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
   router.post(
     {
       path: '/api/cases_fixture/telemetry/run_soon',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           taskId: schema.string({

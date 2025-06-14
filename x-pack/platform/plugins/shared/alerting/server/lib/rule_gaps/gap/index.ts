@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { InternalFields } from '@kbn/event-log-plugin/server/es/cluster_client_adapter';
-import { GapStatus, gapStatus } from '../../../../common/constants';
+import type { InternalFields } from '@kbn/event-log-plugin/server/es/cluster_client_adapter';
+import type { GapStatus } from '../../../../common/constants';
+import { gapStatus } from '../../../../common/constants';
 
-import { Interval, StringInterval, GapBase } from '../types';
+import type { Interval, StringInterval, GapBase } from '../types';
 
 import {
   mergeIntervals,

@@ -345,13 +345,13 @@ export function registerMlSnapshotRoutes({
   router.get(
     {
       path: `${API_BASE_PATH}/ml_upgrade_mode`,
+      validate: false,
       security: {
         authz: {
           enabled: false,
-          reason: 'Relies on es client for authorization',
+          reason: 'Relies on es and saved object clients for authorization',
         },
       },
-      validate: false,
     },
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
       try {
@@ -396,7 +396,7 @@ export function registerMlSnapshotRoutes({
       security: {
         authz: {
           enabled: false,
-          reason: 'Relies on es client for authorization',
+          reason: 'Relies on es and saved object clients for authorization',
         },
       },
       validate: {

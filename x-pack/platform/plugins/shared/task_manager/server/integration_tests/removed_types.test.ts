@@ -6,12 +6,14 @@
  */
 
 import { v4 as uuidV4 } from 'uuid';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { TaskManagerPlugin, TaskManagerStartContract } from '../plugin';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { TaskManagerStartContract } from '../plugin';
+import { TaskManagerPlugin } from '../plugin';
 import { injectTask, retry, setupTestServers } from './lib';
-import { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
-import { ConcreteTaskInstance, TaskStatus } from '../task';
-import { CreateWorkloadAggregatorOpts } from '../monitoring/workload_statistics';
+import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
+import type { ConcreteTaskInstance } from '../task';
+import { TaskStatus } from '../task';
+import type { CreateWorkloadAggregatorOpts } from '../monitoring/workload_statistics';
 
 const taskManagerStartSpy = jest.spyOn(TaskManagerPlugin.prototype, 'start');
 
@@ -122,6 +124,15 @@ describe('unrecognized task types', () => {
       } catch (err) {
         // ignore errors and retry
       }
+    });
+
+    // wait until the task finishes
+    await retry(async () => {
+      const hasRun = await taskManagerPlugin
+        .get('mark_removed_tasks_as_unrecognized')
+        .then((t) => t.runAt != null)
+        .catch(() => false);
+      expect(hasRun).toBe(true);
     });
 
     await retry(async () => {

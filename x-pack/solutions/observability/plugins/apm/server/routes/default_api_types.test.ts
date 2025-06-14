@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isLeft } from 'fp-ts/lib/Either';
+import { isLeft } from 'fp-ts/Either';
 import { filtersRt } from './default_api_types';
 
 describe('filtersRt', () => {

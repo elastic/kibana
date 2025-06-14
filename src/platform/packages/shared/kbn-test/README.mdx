@@ -23,7 +23,7 @@ Functional testing methods exist in the `src/functional_tests` directory. They d
 
 For each config file specified in configPaths, starts Elasticsearch and Kibana once, runs tests specified in that config file, and shuts down Elasticsearch and Kibana once completed. (Repeats for every config file.)
 
-`configPaths`: array of strings, each an absolute path to a config file that looks like [this](../../../../../test/functional/config.base.js), following the config schema specified [here](../../src/functional_test_runner/lib/config/schema.js).
+`configPaths`: array of strings, each an absolute path to a config file that looks like [this](../../../../../src/platform/test/functional/config.base.js), following the config schema specified [here](../../../../../src/functional_test_runner/lib/config/schema.js).
 
 Internally the method that starts Elasticsearch comes from [kbn-es](../../../../../src/platform/packages/shared/kbn-es).
 
@@ -31,7 +31,7 @@ Internally the method that starts Elasticsearch comes from [kbn-es](../../../../
 
 Starts Elasticsearch and Kibana servers given a specified config.
 
-`configPath`: absolute path to a config file that looks like [this](../../../../../test/functional/config.base.js), following the config schema specified [here](../../src/functional_test_runner/lib/config/schema.js).
+`configPath`: absolute path to a config file that looks like [this](../../../../../src/platform/test/functional/config.base.js), following the config schema specified [here](../../../../../src/functional_test_runner/lib/config/schema.js).
 
 Allows users to start another process to run just the tests while keeping the servers running with this method. Start servers _and_ run tests using the same config file ([see how](../../../../../scripts/README.md)).
 

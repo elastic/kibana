@@ -6,7 +6,7 @@
  */
 
 import React, { ComponentProps } from 'react';
-import { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { ALERT_STATUS_RECOVERED, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import {
   AlertLifecycleStatusBadge,
@@ -35,24 +35,33 @@ export default {
   },
 };
 
-const Template: Story<Args> = (args: AlertLifecycleStatusBadgeProps) => {
+const Template: StoryFn<Args> = (args: AlertLifecycleStatusBadgeProps) => {
   return <AlertLifecycleStatusBadge {...args} />;
 };
 
-export const Active = Template.bind({});
-Active.args = {
-  alertStatus: ALERT_STATUS_ACTIVE,
-  flapping: false,
+export const Active = {
+  render: Template,
+
+  args: {
+    alertStatus: ALERT_STATUS_ACTIVE,
+    flapping: false,
+  },
 };
 
-export const Flapping = Template.bind({});
-Flapping.args = {
-  alertStatus: ALERT_STATUS_ACTIVE,
-  flapping: true,
+export const Flapping = {
+  render: Template,
+
+  args: {
+    alertStatus: ALERT_STATUS_ACTIVE,
+    flapping: true,
+  },
 };
 
-export const Recovered = Template.bind({});
-Recovered.args = {
-  alertStatus: ALERT_STATUS_RECOVERED,
-  flapping: false,
+export const Recovered = {
+  render: Template,
+
+  args: {
+    alertStatus: ALERT_STATUS_RECOVERED,
+    flapping: false,
+  },
 };

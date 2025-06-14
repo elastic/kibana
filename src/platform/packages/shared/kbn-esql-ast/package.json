@@ -4,11 +4,12 @@
   "private": true,
   "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
   "scripts": {
-    "build:antlr4:esql:parser": "antlr -Dlanguage=TypeScript -lib src/antlr/parser src/antlr/esql_parser.g4",
-    "build:antlr4:esql:lexer": "antlr -Dlanguage=TypeScript -lib src/antlr/lexer src/antlr/esql_lexer.g4",
-    "build:antlr4:esql": "npm run build:antlr4:esql:parser && npm run build:antlr4:esql:lexer",
     "prebuild:antlr4": "brew bundle --file=./scripts/antlr4_tools/brewfile",
-    "build:antlr4": "npm run build:antlr4:esql"
+    "build:antlr4": "npm run build:antlr4:esql",
+    "build:antlr4:esql": "npm run build:antlr4:esql:lexer && npm run build:antlr4:esql:parser",
+    "postbuild:antlr4:esql": "./scripts/postbuild.sh",
+    "build:antlr4:esql:parser": "antlr -Dlanguage=TypeScript -lib src/antlr/parser src/antlr/esql_parser.g4",
+    "build:antlr4:esql:lexer": "antlr -Dlanguage=TypeScript -lib src/antlr/lexer src/antlr/esql_lexer.g4"
   },
   "sideEffects": false
 }

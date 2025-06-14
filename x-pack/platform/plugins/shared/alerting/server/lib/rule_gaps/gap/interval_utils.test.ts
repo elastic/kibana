@@ -15,8 +15,9 @@ import {
   normalizeInterval,
   denormalizeInterval,
   clipInterval,
+  clipDateInterval,
 } from './interval_utils';
-import { Interval, StringInterval } from '../types';
+import type { Interval, StringInterval } from '../types';
 
 describe('interval_utils', () => {
   describe('getOverlap', () => {
@@ -258,6 +259,34 @@ describe('interval_utils', () => {
         lte: new Date('2025-01-01T12:30:00Z'),
       };
       expect(clipInterval(interval, boundary)).toBeNull();
+    });
+  });
+
+  describe('clipDateInterval', () => {
+    it('clips date interval to boundary', () => {
+      const expected = {
+        start: new Date('2025-01-01T12:00:00Z'),
+        end: new Date('2025-01-01T12:30:00Z'),
+      };
+      expect(
+        clipDateInterval(
+          new Date('2025-01-01T11:00:00Z'),
+          new Date('2025-01-01T13:00:00Z'),
+          new Date('2025-01-01T12:00:00Z'),
+          new Date('2025-01-01T12:30:00Z')
+        )
+      ).toEqual(expected);
+    });
+
+    it('returns null when no overlap with boundary', () => {
+      expect(
+        clipDateInterval(
+          new Date('2025-01-01T11:00:00Z'),
+          new Date('2025-01-01T11:30:00Z'),
+          new Date('2025-01-01T12:00:00Z'),
+          new Date('2025-01-01T12:30:00Z')
+        )
+      ).toBeNull();
     });
   });
 });

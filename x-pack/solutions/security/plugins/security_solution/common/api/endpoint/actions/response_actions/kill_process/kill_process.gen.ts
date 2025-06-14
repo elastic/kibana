@@ -16,23 +16,36 @@
 
 import { z } from '@kbn/zod';
 
-import { SuccessResponse, BaseActionSchema, Pid, EntityId } from '../../../model/schema/common.gen';
+import { BaseActionSchema } from '../../../model/schema/common.gen';
 
 export type KillProcessRouteRequestBody = z.infer<typeof KillProcessRouteRequestBody>;
 export const KillProcessRouteRequestBody = BaseActionSchema.merge(
   z.object({
     parameters: z.union([
-      Pid,
-      EntityId,
       z.object({
         /**
-         * Valid for SentinelOne agent type only
+         * The process ID (PID) of the process to terminate.
+         */
+        pid: z.number().int().min(1).optional(),
+      }),
+      z.object({
+        /**
+         * The entity ID of the process to terminate.
+         */
+        entity_id: z.string().min(1).optional(),
+      }),
+      z.object({
+        /**
+         * The name of the process to terminate. Valid for SentinelOne agent type only.
          */
         process_name: z.string().min(1).optional(),
       }),
     ]),
   })
 );
+
+export type KillProcessRouteResponse = z.infer<typeof KillProcessRouteResponse>;
+export const KillProcessRouteResponse = z.object({});
 
 export type EndpointKillProcessActionRequestBody = z.infer<
   typeof EndpointKillProcessActionRequestBody
@@ -43,4 +56,4 @@ export type EndpointKillProcessActionRequestBodyInput = z.input<
 >;
 
 export type EndpointKillProcessActionResponse = z.infer<typeof EndpointKillProcessActionResponse>;
-export const EndpointKillProcessActionResponse = SuccessResponse;
+export const EndpointKillProcessActionResponse = KillProcessRouteResponse;

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { Client, HttpConnection } = require('@elastic/elasticsearch');
+const { Client, HttpConnection } = require('elasticsearch-8.x'); // Switch to `@elastic/elasticsearch` when the CI cluster is upgraded.
 import { RESEARCH_CI_JOB_NAME } from './constants';
 import { whichIndex } from './ingest_helpers';
 import { fromNullable } from './either';

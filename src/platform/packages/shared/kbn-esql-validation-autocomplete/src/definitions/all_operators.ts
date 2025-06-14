@@ -13,6 +13,7 @@ import {
   type FunctionParameterType,
   type FunctionReturnType,
   FunctionDefinitionTypes,
+  Location,
 } from './types';
 import { operatorFunctionDefinitions } from './generated/operators';
 type MathFunctionSignature = [FunctionParameterType, FunctionParameterType, FunctionReturnType];
@@ -65,8 +66,14 @@ function createComparisonDefinition(
     type: FunctionDefinitionTypes.OPERATOR,
     name,
     description,
-    supportedCommands: ['eval', 'where', 'row', 'sort'],
-    supportedOptions: ['by'],
+    locationsAvailable: [
+      Location.EVAL,
+      Location.WHERE,
+      Location.ROW,
+      Location.SORT,
+      Location.STATS_BY,
+      Location.STATS_WHERE,
+    ],
     validate,
     signatures: [
       ...commonSignatures,
@@ -212,40 +219,20 @@ export const logicalOperators: FunctionDefinition[] = [
   type: FunctionDefinitionTypes.OPERATOR,
   name,
   description,
-  supportedCommands: ['eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.WHERE,
+    Location.ROW,
+    Location.SORT,
+    Location.STATS_BY,
+    Location.STATS_WHERE,
+  ],
   signatures: [
     {
       params: [
         { name: 'left', type: 'boolean' as const },
         { name: 'right', type: 'boolean' as const },
       ],
-      returnType: 'boolean',
-    },
-  ],
-}));
-
-const nullFunctions: FunctionDefinition[] = [
-  {
-    name: 'is null',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.isNullDoc', {
-      defaultMessage: 'Predicate for NULL comparison: returns true if the value is NULL',
-    }),
-  },
-  {
-    name: 'is not null',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.isNotNullDoc', {
-      defaultMessage: 'Predicate for NULL comparison: returns true if the value is not NULL',
-    }),
-  },
-].map<FunctionDefinition>(({ name, description }) => ({
-  type: FunctionDefinitionTypes.OPERATOR,
-  name,
-  description,
-  supportedCommands: ['eval', 'where', 'row', 'sort'],
-  signatures: [
-    {
-      params: [{ name: 'left', type: 'any' }],
       returnType: 'boolean',
     },
   ],
@@ -258,8 +245,14 @@ const otherDefinitions: FunctionDefinition[] = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.notDoc', {
       defaultMessage: 'Not',
     }),
-    supportedCommands: ['eval', 'where', 'row', 'sort'],
-    supportedOptions: ['by'],
+    locationsAvailable: [
+      Location.EVAL,
+      Location.WHERE,
+      Location.ROW,
+      Location.SORT,
+      Location.STATS_BY,
+      Location.STATS_WHERE,
+    ],
     signatures: [
       {
         params: [{ name: 'expression', type: 'boolean' }],
@@ -273,17 +266,16 @@ const otherDefinitions: FunctionDefinition[] = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.assignDoc', {
       defaultMessage: 'Assign (=)',
     }),
-    supportedCommands: [
-      'eval',
-      'stats',
-      'inlinestats',
-      'metrics',
-      'row',
-      'dissect',
-      'where',
-      'enrich',
+    locationsAvailable: [
+      Location.EVAL,
+      Location.STATS,
+      Location.STATS_BY,
+      Location.ROW,
+      Location.WHERE,
+      Location.ENRICH,
+      Location.ENRICH_WITH,
+      Location.DISSECT,
     ],
-    supportedOptions: ['by', 'with'],
     signatures: [
       {
         params: [
@@ -300,8 +292,7 @@ const otherDefinitions: FunctionDefinition[] = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.asDoc', {
       defaultMessage: 'Rename as (AS)',
     }),
-    supportedCommands: ['rename', 'join'],
-    supportedOptions: [],
+    locationsAvailable: [Location.RENAME, Location.JOIN],
     signatures: [
       {
         params: [
@@ -318,8 +309,7 @@ const otherDefinitions: FunctionDefinition[] = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.whereDoc', {
       defaultMessage: 'WHERE operator',
     }),
-    supportedCommands: ['stats', 'inlinestats', 'metrics'],
-    supportedOptions: [],
+    locationsAvailable: [Location.STATS],
     signatures: [
       {
         params: [
@@ -337,7 +327,7 @@ const otherDefinitions: FunctionDefinition[] = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.infoDoc', {
       defaultMessage: 'Show information about the current ES node',
     }),
-    supportedCommands: ['show'],
+    locationsAvailable: [Location.SHOW],
     signatures: [
       {
         params: [],
@@ -350,6 +340,5 @@ const otherDefinitions: FunctionDefinition[] = [
 export const operatorsDefinitions: FunctionDefinition[] = [
   ...operatorFunctionDefinitions,
   ...logicalOperators,
-  ...nullFunctions,
   ...otherDefinitions,
 ];

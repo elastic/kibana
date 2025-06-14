@@ -169,6 +169,9 @@ export class KibanaClient {
       async () => {
         const response = await this.callKibana<{}>('POST', {
           pathname: '/internal/observability_ai_assistant/kb/setup',
+          query: {
+            inference_id: '.elser-2-elasticsearch',
+          },
         });
         this.log.info('Knowledge base is ready');
         return response.data;
@@ -328,10 +331,10 @@ export class KibanaClient {
               }
 
               if (error.message.includes('Status code: 429')) {
-                that.log.info(`429, backing off 20s`);
-
-                return timer(20000);
+                that.log.info(`429, backing off 30s`);
+                return timer(30000);
               }
+
               that.log.info(`Retrying in 5s`);
               return timer(5000);
             },

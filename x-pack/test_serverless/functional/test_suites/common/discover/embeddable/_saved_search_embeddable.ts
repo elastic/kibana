@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
+  const dataViews = getService('dataViews');
   const { common, svlCommonPage, dashboard, header, discover } = getPageObjects([
     'common',
     'svlCommonPage',
@@ -25,15 +26,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'discover',
   ]);
 
+  const nonLogsSavedSearchName = 'Rendering-Test:-saved-search-non-logs';
+
   describe('discover saved search embeddable', () => {
     before(async () => {
       await browser.setWindowSize(1300, 800);
       await svlCommonPage.loginWithPrivilegedRole();
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
+      );
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+        'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
@@ -42,11 +49,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         from: 'Sep 22, 2015 @ 00:00:00.000',
         to: 'Sep 23, 2015 @ 00:00:00.000',
       });
+      await createNonLogsSavedSearch();
     });
 
     after(async () => {
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.unload('test/functional/fixtures/es_archiver/dashboard/current/data');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
+      );
       await kibanaServer.savedObjects.cleanStandardList();
       await common.unsetTime();
     });
@@ -58,8 +70,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.clickNewDashboard();
     });
 
-    const addSearchEmbeddableToDashboard = async () => {
-      await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
+    const createNonLogsSavedSearch = async () => {
+      await common.navigateToActualUrl('discover', undefined, {
+        ensureCurrentUrl: false,
+      });
+      await dataViews.createFromSearchBar({
+        name: 'lo', // Must be anything but log/logs, since pagination is disabled for log sources
+        adHoc: true,
+        hasTimeField: true,
+      });
+      await discover.waitUntilSearchingHasFinished();
+
+      await discover.saveSearch(nonLogsSavedSearchName);
+    };
+
+    const addSearchEmbeddableToDashboard = async (
+      saveSearchName: string = 'Rendering-Test:-saved-search'
+    ) => {
+      await dashboardAddPanel.addSavedSearch(saveSearchName);
       await header.waitUntilLoadingHasFinished();
       await dashboard.waitForRenderComplete();
       const rows = await dataGrid.getDocTableRows();
@@ -74,7 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('can save a search embeddable with a defined rows per page number', async function () {
       const dashboardName = 'Dashboard with a Paginated Saved Search';
-      await addSearchEmbeddableToDashboard();
+      await addSearchEmbeddableToDashboard(nonLogsSavedSearchName);
       await dataGrid.checkCurrentRowsPerPageToBe(100);
 
       await dashboard.saveDashboard(dashboardName, {

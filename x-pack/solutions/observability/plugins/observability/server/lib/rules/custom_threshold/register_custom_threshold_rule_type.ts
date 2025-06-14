@@ -21,7 +21,8 @@ import {
   alertDetailUrlActionVariableDescription,
   cloudActionVariableDescription,
   containerActionVariableDescription,
-  groupByKeysActionVariableDescription,
+  groupActionVariableDescription,
+  groupingObjectActionVariableDescription,
   hostActionVariableDescription,
   labelsActionVariableDescription,
   orchestratorActionVariableDescription,
@@ -35,13 +36,27 @@ import {
   createCustomThresholdExecutor,
   CustomThresholdLocators,
 } from './custom_threshold_executor';
-import { CUSTOM_THRESHOLD_AAD_FIELDS, FIRED_ACTION, NO_DATA_ACTION } from './constants';
+import { FIRED_ACTION, NO_DATA_ACTION } from './constants';
 import { ObservabilityConfig } from '../../..';
 import { CustomThresholdAlert } from './types';
 
 export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts<CustomThresholdAlert> = {
   context: THRESHOLD_RULE_REGISTRATION_CONTEXT,
-  mappings: { fieldMap: legacyExperimentalFieldMap },
+  mappings: {
+    fieldMap: legacyExperimentalFieldMap,
+    dynamicTemplates: [
+      {
+        strings_as_keywords: {
+          path_match: 'kibana.alert.grouping.*',
+          match_mapping_type: 'string',
+          mapping: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+        },
+      },
+    ],
+  },
   useEcs: true,
   useLegacyAlerts: false,
   shouldWrite: true,
@@ -58,7 +73,6 @@ export function thresholdRuleType(
     name: i18n.translate('xpack.observability.threshold.ruleName', {
       defaultMessage: 'Custom threshold',
     }),
-    fieldsForAAD: CUSTOM_THRESHOLD_AAD_FIELDS,
     validate: {
       params: customThresholdParamsSchema,
     },
@@ -76,7 +90,8 @@ export function thresholdRuleType(
     doesSetRecoveryContext: true,
     actionVariables: {
       context: [
-        { name: 'group', description: groupByKeysActionVariableDescription },
+        { name: 'group', description: groupActionVariableDescription },
+        { name: 'grouping', description: groupingObjectActionVariableDescription },
         {
           name: 'alertDetailsUrl',
           description: alertDetailUrlActionVariableDescription,
@@ -111,6 +126,7 @@ export function thresholdRuleType(
     },
     category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: observabilityFeatureId,
+    solution: 'observability' as const,
     alerts: MetricsRulesTypeAlertDefinition,
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),

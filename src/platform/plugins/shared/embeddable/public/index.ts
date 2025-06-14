@@ -31,7 +31,6 @@ export {
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
 } from './ui_actions/triggers';
-export { ViewMode } from '../common/types';
 export type {
   CellValueContext,
   ChartActionContext,
@@ -44,9 +43,9 @@ export type { EmbeddableSetup, EmbeddableStart } from './types';
 export type { EnhancementRegistryDefinition } from './enhancements/types';
 
 export {
-  ReactEmbeddableRenderer,
+  EmbeddableRenderer,
   type DefaultEmbeddableApi,
-  type ReactEmbeddableFactory,
+  type EmbeddableFactory,
 } from './react_embeddable_system';
 
 export function plugin(initializerContext: PluginInitializerContext) {

@@ -34,12 +34,7 @@ export const LicenseModal: React.FunctionComponent<Props> = ({
 }) => {
   const { notifications } = useStartServices();
 
-  const {
-    data: licenseResponse,
-    error: licenseError,
-    isLoading,
-  } = useGetFileByPathQuery(licensePath);
-  const licenseText = licenseResponse?.data;
+  const { data: licenseText, error: licenseError, isLoading } = useGetFileByPathQuery(licensePath);
 
   if (licenseError) {
     notifications.toasts.addError(licenseError, {

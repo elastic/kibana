@@ -213,10 +213,10 @@ export const RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS: Readonly<
   ],
   crowdstrike: ['device.id'],
   microsoft_defender_endpoint: [
+    'cloud.instance.id',
     'm365_defender.alerts.entities.deviceId',
     'm365_defender.alerts.devices.mdatpDeviceId',
     'm365_defender.incident.alert.evidence.mde_device_id',
-    'cloud.instance.id',
   ],
 });
 

@@ -22,6 +22,7 @@ import { ruleParamsModifier } from './rule_params_modifier';
 import { splitBulkEditActions } from './split_bulk_edit_actions';
 import { validateBulkEditRule } from './validations';
 import type { PrebuiltRulesCustomizationStatus } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
+import { invariant } from '../../../../../../common/utils/invariant';
 
 export interface BulkEditRulesArguments {
   actionsClient: ActionsClient;
@@ -66,12 +67,15 @@ export const bulkEditRules = async ({
   const baseVersionsMap = new Map(
     baseVersions.map((baseVersion) => [baseVersion.rule_id, baseVersion])
   );
+  const currentRulesMap = new Map(rules.map((rule) => [rule.id, rule]));
 
   const result = await rulesClient.bulkEdit<RuleParams>({
-    ids: rules.map((rule) => rule.id),
+    ids: Array.from(currentRulesMap.keys()),
     operations,
-    paramsModifier: async (rule) => {
-      const ruleParams = rule.params;
+    // Rules Client applies operations to rules client aware fields like tags
+    // the rule before passing it to paramsModifier().
+    paramsModifier: async (partiallyModifiedRule) => {
+      const ruleParams = partiallyModifiedRule.params;
 
       await validateBulkEditRule({
         mlAuthz,
@@ -80,28 +84,32 @@ export const bulkEditRules = async ({
         immutable: ruleParams.immutable,
         ruleCustomizationStatus,
       });
+
+      const currentRule = currentRulesMap.get(partiallyModifiedRule.id);
+
+      invariant(currentRule, "Unable to extract rule's current data in paramsModifier");
+
       const { modifiedParams, isParamsUpdateSkipped } = ruleParamsModifier(
         ruleParams,
         paramsActions
       );
 
-      // Update rule source
-      const updatedRule = {
-        ...rule,
+      const nextRule = convertAlertingRuleToRuleResponse({
+        ...partiallyModifiedRule,
         params: modifiedParams,
-      };
-      const ruleResponse = convertAlertingRuleToRuleResponse(updatedRule);
+      });
+
       let isCustomized = false;
-      if (ruleResponse.immutable === true) {
+      if (nextRule.immutable === true) {
         isCustomized = calculateIsCustomized({
-          baseRule: baseVersionsMap.get(ruleResponse.rule_id),
-          nextRule: ruleResponse,
-          ruleCustomizationStatus,
+          baseRule: baseVersionsMap.get(nextRule.rule_id),
+          currentRule: convertAlertingRuleToRuleResponse(currentRule),
+          nextRule,
         });
       }
 
       const ruleSource =
-        ruleResponse.immutable === true
+        nextRule.immutable === true
           ? {
               type: 'external' as const,
               isCustomized,

@@ -48,7 +48,6 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
       data,
       share,
       uiSettings,
-      dashboardService,
       mlServices: { mlApi },
     },
   } = useMlFromLensKibanaContext();
@@ -88,11 +87,11 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
         data.dataViews,
         uiSettings,
         data.query.timefilter.timefilter,
-        dashboardService,
+        share,
         data,
         mlApi
       ),
-    [dashboardService, data, mlApi, uiSettings]
+    [share, data, mlApi, uiSettings]
   );
 
   function createADJobInWizard() {

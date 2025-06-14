@@ -14,7 +14,7 @@ export type {
   KibanaUrl,
   EsClient,
   KbnClient,
-  SamlSessionManager,
+  SamlAuth,
 } from './core_fixtures';
 
 export { esArchiverFixture } from './es_archiver';
@@ -26,8 +26,11 @@ export type { UiSettingsFixture } from './ui_settings';
 export { scoutSpaceParallelFixture } from './scout_space';
 export type { ScoutSpaceParallelFixture } from './scout_space';
 
-export { apiFixtures } from './apis';
-export type { ApiFixtures, ApiParallelWorkerFixtures } from './apis';
+export { apiServicesFixture } from './apis';
+export type { ApiServicesFixture } from './apis';
 
 export { synthtraceFixture } from './synthtrace';
 export type { SynthtraceFixture } from './synthtrace';
+
+export { lighthouseFixture } from './lighthouse';
+export type { LighthouseFixture, LighthouseAuditOptions } from './lighthouse';

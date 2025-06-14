@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import type { estypes } from '@elastic/elasticsearch';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { Client } from '@elastic/elasticsearch';
-import { GetResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 
 import type SuperTest from 'supertest';
@@ -26,20 +26,20 @@ import {
   INTERNAL_GET_CASE_CATEGORIES_URL,
   INTERNAL_CASE_SIMILAR_CASES_URL,
 } from '@kbn/cases-plugin/common/constants';
-import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
+import type { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import type { SingleCaseMetricsResponse, CasesMetricsResponse } from '@kbn/cases-plugin/common';
-import { SignalHit } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
-import { CasePersistedAttributes } from '@kbn/cases-plugin/server/common/types/case';
+import type { SignalHit } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
+import type { CasePersistedAttributes } from '@kbn/cases-plugin/server/common/types/case';
 import type { SavedObjectsRawDocSource } from '@kbn/core/server';
 import type { ConfigurationPersistedAttributes } from '@kbn/cases-plugin/server/common/types/configure';
-import {
+import type {
   ConnectorMappingsAttributes,
   Case,
   Cases,
   CaseStatuses,
   CaseCustomField,
 } from '@kbn/cases-plugin/common/types/domain';
-import {
+import type {
   AddObservableRequest,
   UpdateObservableRequest,
   AlertResponse,
@@ -60,7 +60,7 @@ import {
   getCaseDeleteObservableUrl,
   getCaseFindUserActionsUrl,
 } from '@kbn/cases-plugin/common/api';
-import { User } from '../authentication/types';
+import type { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix, setupAuth } from './helpers';
 

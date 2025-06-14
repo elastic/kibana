@@ -8,12 +8,14 @@
 import { z } from '@kbn/zod';
 import { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
 import { internal } from '@hapi/boom';
+import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { Asset, DashboardAsset } from '../../../common/assets';
 import { createServerRoute } from '../create_server_route';
+import { ASSET_ID, ASSET_TYPE } from '../../lib/streams/assets/fields';
 
 export interface SanitizedDashboardAsset {
   id: string;
-  label: string;
+  title: string;
   tags: string[];
 }
 
@@ -41,16 +43,22 @@ export type BulkUpdateAssetsResponse =
 
 function sanitizeDashboardAsset(asset: DashboardAsset): SanitizedDashboardAsset {
   return {
-    id: asset.assetId,
-    label: asset.label,
+    id: asset[ASSET_ID],
+    title: asset.title,
     tags: asset.tags,
   };
 }
 
 const listDashboardsRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{name}/dashboards',
+  endpoint: 'GET /api/streams/{name}/dashboards 2023-10-31',
   options: {
-    access: 'internal',
+    access: 'public',
+    summary: 'Get stream dashboards',
+    description:
+      'Fetches all dashboards linked to a stream that are visible to the current user in the current space.',
+    availability: {
+      stability: 'experimental',
+    },
   },
   params: z.object({
     path: z.object({
@@ -59,9 +67,7 @@ const listDashboardsRoute = createServerRoute({
   }),
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   async handler({ params, request, getScopedClients }): Promise<ListDashboardsResponse> {
@@ -73,16 +79,11 @@ const listDashboardsRoute = createServerRoute({
     } = params;
 
     function isDashboard(asset: Asset): asset is DashboardAsset {
-      return asset.assetType === 'dashboard';
+      return asset[ASSET_TYPE] === 'dashboard';
     }
 
     return {
-      dashboards: (
-        await assetClient.getAssets({
-          entityId: streamName,
-          entityType: 'stream',
-        })
-      )
+      dashboards: (await assetClient.getAssets(streamName))
         .filter(isDashboard)
         .map(sanitizeDashboardAsset),
     };
@@ -90,15 +91,19 @@ const listDashboardsRoute = createServerRoute({
 });
 
 const linkDashboardRoute = createServerRoute({
-  endpoint: 'PUT /api/streams/{name}/dashboards/{dashboardId}',
+  endpoint: 'PUT /api/streams/{name}/dashboards/{dashboardId} 2023-10-31',
   options: {
-    access: 'internal',
+    access: 'public',
+    summary: 'Link a dashboard to a stream',
+    description:
+      'Links a dashboard to a stream. Noop if the dashboard is already linked to the stream.',
+    availability: {
+      stability: 'experimental',
+    },
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -109,19 +114,15 @@ const linkDashboardRoute = createServerRoute({
   }),
   handler: async ({ params, request, getScopedClients }): Promise<LinkDashboardResponse> => {
     const { assetClient, streamsClient } = await getScopedClients({ request });
-
-    await streamsClient.ensureStream(params.path.name);
     const {
       path: { dashboardId, name: streamName },
     } = params;
 
     await streamsClient.ensureStream(streamName);
 
-    await assetClient.linkAsset({
-      entityId: streamName,
-      entityType: 'stream',
-      assetId: dashboardId,
-      assetType: 'dashboard',
+    await assetClient.linkAsset(streamName, {
+      [ASSET_TYPE]: 'dashboard',
+      [ASSET_ID]: dashboardId,
     });
 
     return {
@@ -131,15 +132,19 @@ const linkDashboardRoute = createServerRoute({
 });
 
 const unlinkDashboardRoute = createServerRoute({
-  endpoint: 'DELETE /api/streams/{name}/dashboards/{dashboardId}',
+  endpoint: 'DELETE /api/streams/{name}/dashboards/{dashboardId} 2023-10-31',
   options: {
-    access: 'internal',
+    access: 'public',
+    summary: 'Unlink a dashboard from a stream',
+    description:
+      'Unlinks a dashboard from a stream. Noop if the dashboard is not linked to the stream.',
+    availability: {
+      stability: 'experimental',
+    },
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -157,11 +162,9 @@ const unlinkDashboardRoute = createServerRoute({
       path: { dashboardId, name: streamName },
     } = params;
 
-    await assetClient.unlinkAsset({
-      entityId: streamName,
-      entityType: 'stream',
-      assetId: dashboardId,
-      assetType: 'dashboard',
+    await assetClient.unlinkAsset(streamName, {
+      [ASSET_ID]: dashboardId,
+      [ASSET_TYPE]: 'dashboard',
     });
 
     return {
@@ -171,15 +174,13 @@ const unlinkDashboardRoute = createServerRoute({
 });
 
 const suggestDashboardsRoute = createServerRoute({
-  endpoint: 'POST /api/streams/{name}/dashboards/_suggestions',
+  endpoint: 'POST /internal/streams/{name}/dashboards/_suggestions',
   options: {
     access: 'internal',
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -224,15 +225,19 @@ const dashboardSchema = z.object({
 });
 
 const bulkDashboardsRoute = createServerRoute({
-  endpoint: `POST /api/streams/{name}/dashboards/_bulk`,
+  endpoint: `POST /api/streams/{name}/dashboards/_bulk 2023-10-31`,
   options: {
-    access: 'internal',
+    access: 'public',
+    summary: 'Bulk update dashboards',
+    description:
+      'Bulk update dashboards linked to a stream. Can link new dashboards and delete existing ones.',
+    availability: {
+      stability: 'experimental',
+    },
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -268,17 +273,14 @@ const bulkDashboardsRoute = createServerRoute({
     await streamsClient.ensureStream(streamName);
 
     const result = await assetClient.bulk(
-      {
-        entityId: streamName,
-        entityType: 'stream',
-      },
+      streamName,
       operations.map((operation) => {
         if ('index' in operation) {
           return {
             index: {
               asset: {
-                assetType: 'dashboard',
-                assetId: operation.index.id,
+                [ASSET_TYPE]: 'dashboard',
+                [ASSET_ID]: operation.index.id,
               },
             },
           };
@@ -286,8 +288,8 @@ const bulkDashboardsRoute = createServerRoute({
         return {
           delete: {
             asset: {
-              assetType: 'dashboard',
-              assetId: operation.delete.id,
+              [ASSET_TYPE]: 'dashboard',
+              [ASSET_ID]: operation.delete.id,
             },
           },
         };

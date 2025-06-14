@@ -43,7 +43,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('Unmapped fields API', () => {
       it('Returns unmapped fields', async () => {
         const response = await apiClient
-          .fetch('GET /api/streams/{name}/schema/unmapped_fields', {
+          .fetch('GET /internal/streams/{name}/schema/unmapped_fields', {
             params: {
               path: {
                 name: 'logs',
@@ -51,21 +51,25 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           })
           .expect(200);
-        expect(response.body.unmappedFields).to.eql(['another.field', 'lastField', 'some.field']);
+        expect(response.body.unmappedFields).to.eql([
+          'attributes.another.field',
+          'attributes.lastField',
+          'attributes.some.field',
+        ]);
       });
     });
 
     describe('Fields simulation API', () => {
       it('Returns failure status when simulation would fail', async () => {
         const response = await apiClient.fetch(
-          'POST /api/streams/{name}/schema/fields_simulation',
+          'POST /internal/streams/{name}/schema/fields_simulation',
           {
             params: {
               path: {
                 name: 'logs',
               },
               body: {
-                field_definitions: [{ name: 'message', type: 'boolean' }],
+                field_definitions: [{ name: 'body.text', type: 'boolean' }],
               },
             },
           }
@@ -77,14 +81,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
       it('Returns success status when simulation would succeed', async () => {
         const response = await apiClient.fetch(
-          'POST /api/streams/{name}/schema/fields_simulation',
+          'POST /internal/streams/{name}/schema/fields_simulation',
           {
             params: {
               path: {
                 name: 'logs',
               },
               body: {
-                field_definitions: [{ name: 'message', type: 'keyword' }],
+                field_definitions: [{ name: 'body.text', type: 'keyword' }],
               },
             },
           }
@@ -100,7 +104,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             name: 'logs.nginx',
           },
           if: {
-            field: 'log.logger',
+            field: 'attributes.log.logger',
             operator: 'eq' as const,
             value: 'nginx',
           },
@@ -108,14 +112,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         await forkStream(apiClient, 'logs', forkBody);
         const response = await apiClient.fetch(
-          'POST /api/streams/{name}/schema/fields_simulation',
+          'POST /internal/streams/{name}/schema/fields_simulation',
           {
             params: {
               path: {
                 name: 'logs.nginx',
               },
               body: {
-                field_definitions: [{ name: 'message', type: 'keyword' }],
+                field_definitions: [{ name: 'body.text', type: 'keyword' }],
               },
             },
           }

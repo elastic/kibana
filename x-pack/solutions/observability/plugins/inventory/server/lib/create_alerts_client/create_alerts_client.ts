@@ -30,6 +30,7 @@ export async function createAlertsClient({
     sort?: SortOptions[];
     size: number;
     track_total_hits: boolean | number;
+    search_after?: Array<string | number>;
   };
 
   return {

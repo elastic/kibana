@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
-import { createIsNarrowSchema } from '../../../helpers';
+import { createIsNarrowSchema } from '../../../shared/type_guards';
 
 export interface IngestStreamLifecycleDSL {
   dsl: {
@@ -66,7 +66,7 @@ export const ingestStreamLifecycleSchema: z.Schema<IngestStreamLifecycle> = z.un
 ]);
 
 export const unwiredIngestStreamEffectiveLifecycleSchema: z.Schema<UnwiredIngestStreamEffectiveLifecycle> =
-  z.union([ingestStreamLifecycleSchema, disabledLifecycleSchema]);
+  z.union([ingestStreamLifecycleSchema, disabledLifecycleSchema, errorLifecycleSchema]);
 
 export const wiredIngestStreamEffectiveLifecycleSchema: z.Schema<WiredIngestStreamEffectiveLifecycle> =
   ingestStreamLifecycleSchema.and(z.object({ from: NonEmptyString }));

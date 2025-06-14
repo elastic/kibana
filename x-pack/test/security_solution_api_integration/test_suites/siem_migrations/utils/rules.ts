@@ -18,21 +18,37 @@ import {
   SIEM_RULE_MIGRATIONS_PREBUILT_RULES_PATH,
   SIEM_RULE_MIGRATION_INSTALL_PATH,
   SIEM_RULE_MIGRATION_PATH,
+  SIEM_RULE_MIGRATION_START_PATH,
   SIEM_RULE_MIGRATION_STATS_PATH,
   SIEM_RULE_MIGRATION_TRANSLATION_STATS_PATH,
+  SIEM_RULE_MIGRATION_STOP_PATH,
+  SIEM_RULE_MIGRATIONS_INTEGRATIONS_PATH,
+  SIEM_RULE_MIGRATION_RULES_PATH,
+  SIEM_RULE_MIGRATIONS_INTEGRATIONS_STATS_PATH,
 } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
 import {
   CreateRuleMigrationResponse,
   GetAllStatsRuleMigrationResponse,
+  GetRuleMigrationIntegrationsResponse,
   GetRuleMigrationPrebuiltRulesResponse,
-  GetRuleMigrationRequestQuery,
   GetRuleMigrationResponse,
+  GetRuleMigrationRulesRequestQuery,
+  GetRuleMigrationRulesResponse,
   GetRuleMigrationStatsResponse,
   InstallMigrationRulesResponse,
-  UpdateRuleMigrationResponse,
+  StartRuleMigrationRequestBody,
+  StartRuleMigrationResponse,
+  StopRuleMigrationResponse,
+  UpdateRuleMigrationRulesResponse,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import { API_VERSIONS } from '@kbn/security-solution-plugin/common/constants';
 import { assertStatusCode } from './asserts';
+
+export interface SiemMigrationsAPIErrorResponse {
+  status_code: number;
+  error: string;
+  message: string;
+}
 
 export interface RequestParams {
   /** Optional expected status code parameter */
@@ -44,15 +60,15 @@ export interface MigrationRequestParams extends RequestParams {
   migrationId: string;
 }
 
-export interface GetRuleMigrationParams extends MigrationRequestParams {
+export interface GetRuleMigrationRulesParams extends MigrationRequestParams {
   /** Optional query parameters */
-  queryParams?: GetRuleMigrationRequestQuery;
+  queryParams?: GetRuleMigrationRulesRequestQuery;
 }
 
-export interface CreateRuleMigrationParams extends RequestParams {
+export interface CreateRuleMigrationRulesParams extends RequestParams {
   /** Optional `id` of migration to add the rules to.
    * The id is necessary only for batching the migration creation in multiple requests */
-  migrationId?: string;
+  migrationId: string;
   /** Optional payload to send */
   payload?: any;
 }
@@ -67,15 +83,66 @@ export interface InstallRulesParams extends MigrationRequestParams {
   payload?: any;
 }
 
-export const migrationRulesRouteHelpersFactory = (supertest: SuperTest.Agent) => {
+export type StartMigrationRuleParams = MigrationRequestParams & {
+  payload: StartRuleMigrationRequestBody;
+};
+
+export const ruleMigrationRouteHelpersFactory = (supertest: SuperTest.Agent) => {
   return {
+    create: async ({
+      expectStatusCode = 200,
+    }: RequestParams): Promise<{ body: CreateRuleMigrationResponse }> => {
+      const response = await supertest
+        .put(SIEM_RULE_MIGRATIONS_PATH)
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send();
+
+      assertStatusCode(expectStatusCode, response);
+
+      return response;
+    },
+
     get: async ({
+      migrationId,
+      expectStatusCode = 200,
+    }: MigrationRequestParams): Promise<{ body: GetRuleMigrationResponse }> => {
+      const response = await supertest
+        .get(replaceParams(SIEM_RULE_MIGRATION_PATH, { migration_id: migrationId }))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send();
+
+      assertStatusCode(expectStatusCode, response);
+
+      return response;
+    },
+
+    delete: async ({
+      migrationId,
+      expectStatusCode = 200,
+    }: MigrationRequestParams): Promise<{ body: null }> => {
+      const response = await supertest
+        .delete(replaceParams(SIEM_RULE_MIGRATION_PATH, { migration_id: migrationId }))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send();
+
+      assertStatusCode(expectStatusCode, response);
+
+      return response;
+    },
+
+    getRules: async ({
       migrationId,
       queryParams = {},
       expectStatusCode = 200,
-    }: GetRuleMigrationParams): Promise<{ body: GetRuleMigrationResponse }> => {
+    }: GetRuleMigrationRulesParams): Promise<{ body: GetRuleMigrationRulesResponse }> => {
       const response = await supertest
-        .get(replaceParams(SIEM_RULE_MIGRATION_PATH, { migration_id: migrationId }))
+        .get(replaceParams(SIEM_RULE_MIGRATION_RULES_PATH, { migration_id: migrationId }))
         .query(queryParams)
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
@@ -87,13 +154,14 @@ export const migrationRulesRouteHelpersFactory = (supertest: SuperTest.Agent) =>
       return response;
     },
 
-    create: async ({
+    addRulesToMigration: async ({
       migrationId,
       payload,
       expectStatusCode = 200,
-    }: CreateRuleMigrationParams): Promise<{ body: CreateRuleMigrationResponse }> => {
+    }: CreateRuleMigrationRulesParams): Promise<{ body: null }> => {
+      const route = replaceParams(SIEM_RULE_MIGRATION_RULES_PATH, { migration_id: migrationId });
       const response = await supertest
-        .post(`${SIEM_RULE_MIGRATIONS_PATH}${migrationId ? `/${migrationId}` : ''}`)
+        .post(route)
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -104,13 +172,14 @@ export const migrationRulesRouteHelpersFactory = (supertest: SuperTest.Agent) =>
       return response;
     },
 
-    update: async ({
+    updateRules: async ({
       migrationId,
       payload,
       expectStatusCode = 200,
-    }: UpdateRulesParams): Promise<{ body: UpdateRuleMigrationResponse }> => {
+    }: UpdateRulesParams): Promise<{ body: UpdateRuleMigrationRulesResponse }> => {
+      const route = replaceParams(SIEM_RULE_MIGRATION_RULES_PATH, { migration_id: migrationId });
       const response = await supertest
-        .put(replaceParams(SIEM_RULE_MIGRATION_PATH, { migration_id: migrationId }))
+        .patch(route)
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -193,6 +262,83 @@ export const migrationRulesRouteHelpersFactory = (supertest: SuperTest.Agent) =>
     }: MigrationRequestParams): Promise<{ body: GetRuleMigrationPrebuiltRulesResponse }> => {
       const response = await supertest
         .get(replaceParams(SIEM_RULE_MIGRATIONS_PREBUILT_RULES_PATH, { migration_id: migrationId }))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send();
+
+      assertStatusCode(expectStatusCode, response);
+
+      return response;
+    },
+
+    start: async ({
+      migrationId,
+      expectStatusCode = 200,
+      payload,
+    }: StartMigrationRuleParams): Promise<{
+      body: StartRuleMigrationResponse;
+    }> => {
+      const response = await supertest
+        .post(
+          replaceParams(SIEM_RULE_MIGRATION_START_PATH, {
+            migration_id: migrationId,
+          })
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(payload);
+
+      assertStatusCode(expectStatusCode, response);
+
+      return response;
+    },
+
+    stop: async ({
+      migrationId,
+      expectStatusCode = 200,
+    }: MigrationRequestParams): Promise<{
+      body: StopRuleMigrationResponse;
+    }> => {
+      const response = await supertest
+        .post(
+          replaceParams(SIEM_RULE_MIGRATION_STOP_PATH, {
+            migration_id: migrationId,
+          })
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send();
+
+      assertStatusCode(expectStatusCode, response);
+
+      return response;
+    },
+
+    getIntegrations: async ({
+      expectStatusCode = 200,
+    }: RequestParams): Promise<{
+      body: GetRuleMigrationIntegrationsResponse;
+    }> => {
+      const response = await supertest
+        .get(SIEM_RULE_MIGRATIONS_INTEGRATIONS_PATH)
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send();
+
+      assertStatusCode(expectStatusCode, response);
+
+      return response;
+    },
+
+    integrationStats: async ({ expectStatusCode = 200 }: RequestParams = {}): Promise<{
+      body: GetRuleMigrationIntegrationsResponse;
+    }> => {
+      const response = await supertest
+        .get(SIEM_RULE_MIGRATIONS_INTEGRATIONS_STATS_PATH)
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')

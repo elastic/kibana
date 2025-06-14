@@ -8,5 +8,8 @@
 export const SEARCH_PLAYGROUND_APP_ID = `search_playground`;
 export const ROOT_PATH = '/';
 
+export const SEARCH_PLAYGROUND_NOT_FOUND = `${ROOT_PATH}not_found`;
 export const SEARCH_PLAYGROUND_CHAT_PATH = `${ROOT_PATH}chat`;
+export const PLAYGROUND_CHAT_QUERY_PATH = `${SEARCH_PLAYGROUND_CHAT_PATH}/query`;
 export const SEARCH_PLAYGROUND_SEARCH_PATH = `${ROOT_PATH}search`;
+export const PLAYGROUND_SEARCH_QUERY_PATH = `${SEARCH_PLAYGROUND_SEARCH_PATH}/query`;

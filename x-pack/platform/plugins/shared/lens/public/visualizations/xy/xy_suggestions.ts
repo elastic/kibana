@@ -408,8 +408,6 @@ function asPercentageSeriesType(oldSeriesType: SeriesType) {
   }
 }
 
-// Until the area chart rendering bug is fixed, avoid suggesting area charts
-// https://github.com/elastic/elastic-charts/issues/388
 function altSeriesType(oldSeriesType: SeriesType) {
   switch (oldSeriesType) {
     case 'area':
@@ -419,8 +417,9 @@ function altSeriesType(oldSeriesType: SeriesType) {
     case 'bar':
       return 'line';
     case 'bar_stacked':
-      return 'line';
+      return 'area_stacked';
     case 'line':
+      return 'area';
     default:
       return 'bar_stacked';
   }
@@ -572,6 +571,7 @@ function buildSuggestion({
     fittingFunction: currentState?.fittingFunction ?? FittingFunctions.LINEAR,
     curveType: currentState?.curveType,
     fillOpacity: currentState?.fillOpacity,
+    pointVisibility: currentState?.pointVisibility,
     xTitle: currentState?.xTitle,
     yTitle: currentState?.yTitle,
     yRightTitle: currentState?.yRightTitle,

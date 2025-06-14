@@ -39,7 +39,8 @@
     "@kbn/shared-ux-table-persist",
     "@kbn/core-http-browser",
     "@kbn/core-plugins-server",
-    "@kbn/delete-managed-asset-callout"
+    "@kbn/delete-managed-asset-callout",
+    "@kbn/shared-ux-utility"
   ],
   "exclude": [
     "target/**/*",

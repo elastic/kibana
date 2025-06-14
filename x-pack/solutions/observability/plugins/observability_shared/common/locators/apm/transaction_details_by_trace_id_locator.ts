@@ -24,9 +24,10 @@ export class TransactionDetailsByTraceIdLocatorDefinition
   public readonly getLocation = async ({
     rangeFrom,
     rangeTo,
+    waterfallItemId,
     traceId,
   }: TransactionDetailsByTraceIdLocatorParams) => {
-    const params = { rangeFrom, rangeTo };
+    const params = { rangeFrom, rangeTo, waterfallItemId };
     return {
       app: 'apm',
       path: `/link-to/trace/${encodeURIComponent(traceId)}?${qs.stringify(params)}`,

@@ -145,5 +145,6 @@ export interface ThreeWayDiff<TValue> {
  * Given the three versions of a value, calculates a three-way diff for it.
  */
 export type ThreeWayDiffAlgorithm<TValue> = (
-  versions: ThreeVersionsOf<TValue>
+  versions: ThreeVersionsOf<TValue>,
+  isRuleCustomized: boolean
 ) => ThreeWayDiff<TValue>;

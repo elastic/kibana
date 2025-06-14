@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ValuesType, SetIntersection, OmitByValueExact } from 'utility-types';
+import type { ValuesType, SetIntersection, OmitByValueExact } from 'utility-types';
 import { pick } from 'lodash';
 
 type SplitByDot<

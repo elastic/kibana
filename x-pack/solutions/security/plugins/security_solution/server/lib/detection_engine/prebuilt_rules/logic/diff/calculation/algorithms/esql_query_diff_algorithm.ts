@@ -14,5 +14,7 @@ import { simpleDiffAlgorithm } from './simple_diff_algorithm';
 /**
  * Diff algorithm for esql query types
  */
-export const esqlQueryDiffAlgorithm = (versions: ThreeVersionsOf<RuleEsqlQuery>) =>
-  simpleDiffAlgorithm<RuleEsqlQuery>(versions);
+export const esqlQueryDiffAlgorithm = (
+  versions: ThreeVersionsOf<RuleEsqlQuery>,
+  isRuleCustomized: boolean
+) => simpleDiffAlgorithm<RuleEsqlQuery>(versions, isRuleCustomized);

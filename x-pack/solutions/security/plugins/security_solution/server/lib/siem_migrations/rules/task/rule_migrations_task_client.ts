@@ -14,13 +14,15 @@ import type { RuleMigrationTaskStats } from '../../../../../common/siem_migratio
 import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/types';
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
 import type { RuleMigrationDataStats } from '../data/rule_migrations_data_rules_client';
-import type { SiemRuleMigrationsClientDependencies } from '../types';
+import type { SiemRuleMigrationsClientDependencies, StoredSiemMigration } from '../types';
 import type {
+  RuleMigrationTaskEvaluateParams,
   RuleMigrationTaskStartParams,
   RuleMigrationTaskStartResult,
   RuleMigrationTaskStopResult,
 } from './types';
 import { RuleMigrationTaskRunner } from './rule_migrations_task_runner';
+import { RuleMigrationTaskEvaluator } from './rule_migrations_task_evaluator';
 
 export type MigrationsRunning = Map<string, RuleMigrationTaskRunner>;
 
@@ -72,16 +74,40 @@ export class RuleMigrationsTaskClient {
       // Just to prevent a race condition in the setup
       throw new Error('Task already running for this migration');
     }
-    this.migrationsRunning.set(migrationId, migrationTaskRunner);
 
     migrationLogger.info('Starting migration');
+
+    this.migrationsRunning.set(migrationId, migrationTaskRunner);
+
+    await this.data.migrations.saveAsStarted({
+      id: migrationId,
+      connectorId,
+    });
 
     // run the migration in the background without awaiting and resolve the `start` promise
     migrationTaskRunner
       .run(invocationConfig)
+      .then(() => {
+        /**
+         * Handles
+         *  - successful completion of this execution
+         *  - Manual Abort of the execution
+         */
+        migrationLogger.info('Migration Execution task completed successfully');
+        // Save the migration execution details on completion
+        this.data.migrations.saveAsEnded({ id: migrationId }).catch((error) => {
+          migrationLogger.error(`Error saving migration as ended: ${error}`);
+        });
+      })
       .catch((error) => {
-        // no need to throw, the `start` promise is long gone. Just log the error
-        migrationLogger.error('Error executing migration', error);
+        // no use in throwing the error, the `start` promise is long gone. Just store and log the error
+        this.data.migrations
+          .saveAsFailed({ id: migrationId, error: error.message })
+          .catch((saveError) => {
+            migrationLogger.error(`Error saving migration as failed: ${saveError}`);
+          });
+
+        void migrationLogger.error(`Error executing migration task: ${error}`);
       })
       .finally(() => {
         this.migrationsRunning.delete(migrationId);
@@ -108,32 +134,62 @@ export class RuleMigrationsTaskClient {
 
   /** Returns the stats of a migration */
   public async getStats(migrationId: string): Promise<RuleMigrationTaskStats> {
+    const migration = await this.data.migrations.get({ id: migrationId });
+    if (!migration) {
+      throw new Error(`Migration with ID ${migrationId} not found`);
+    }
     const dataStats = await this.data.rules.getStats(migrationId);
-    const status = this.getTaskStatus(migrationId, dataStats.rules);
-    return { status, ...dataStats };
+    const taskStats = this.getTaskStats(migration, dataStats.rules);
+    return { ...taskStats, ...dataStats };
   }
 
   /** Returns the stats of all migrations */
   async getAllStats(): Promise<RuleMigrationTaskStats[]> {
     const allDataStats = await this.data.rules.getAllStats();
-    return allDataStats.map((dataStats) => {
-      const status = this.getTaskStatus(dataStats.id, dataStats.rules);
-      return { status, ...dataStats };
-    });
+    const allMigrations = await this.data.migrations.getAll();
+    const allMigrationsMap = new Map<string, StoredSiemMigration>(
+      allMigrations.map((migration) => [migration.id, migration])
+    );
+
+    const allStats: RuleMigrationTaskStats[] = [];
+
+    for (const dataStats of allDataStats) {
+      const migration = allMigrationsMap.get(dataStats.id);
+      if (migration) {
+        const taksStats = this.getTaskStats(migration, dataStats.rules);
+        allStats.push({ ...taksStats, ...dataStats });
+      }
+    }
+    return allStats;
+  }
+
+  private getTaskStats(
+    migration: StoredSiemMigration,
+    dataStats: RuleMigrationDataStats['rules']
+  ): Pick<RuleMigrationTaskStats, 'status' | 'last_error'> {
+    const lastError = migration?.last_execution?.error;
+    return {
+      status: this.getTaskStatus(migration, dataStats),
+      ...(lastError && { last_error: lastError }),
+    };
   }
 
   private getTaskStatus(
-    migrationId: string,
+    migration: StoredSiemMigration,
     dataStats: RuleMigrationDataStats['rules']
   ): SiemMigrationTaskStatus {
+    const { id: migrationId, last_execution: lastExecution } = migration;
     if (this.migrationsRunning.has(migrationId)) {
       return SiemMigrationTaskStatus.RUNNING;
     }
-    if (dataStats.pending === dataStats.total) {
-      return SiemMigrationTaskStatus.READY;
-    }
     if (dataStats.completed + dataStats.failed === dataStats.total) {
       return SiemMigrationTaskStatus.FINISHED;
+    }
+    if (lastExecution?.is_aborted) {
+      return SiemMigrationTaskStatus.ABORTED;
+    }
+    if (dataStats.pending === dataStats.total) {
+      return SiemMigrationTaskStatus.READY;
     }
     return SiemMigrationTaskStatus.STOPPED;
   }
@@ -144,17 +200,46 @@ export class RuleMigrationsTaskClient {
       const migrationRunning = this.migrationsRunning.get(migrationId);
       if (migrationRunning) {
         migrationRunning.abortController.abort();
+        await this.data.migrations.setIsAborted({ id: migrationId });
         return { exists: true, stopped: true };
       }
 
       const { rules } = await this.data.rules.getStats(migrationId);
       if (rules.total > 0) {
-        return { exists: true, stopped: false };
+        return { exists: true, stopped: true };
       }
-      return { exists: false, stopped: false };
+      return { exists: false, stopped: true };
     } catch (err) {
       this.logger.error(`Error stopping migration ID:${migrationId}`, err);
       return { exists: true, stopped: false };
     }
+  }
+
+  /** Creates a new evaluator for the rule migration task */
+  async evaluate(params: RuleMigrationTaskEvaluateParams): Promise<void> {
+    const { evaluationId, langsmithSettings, connectorId, invocationConfig, abortController } =
+      params;
+
+    const migrationLogger = this.logger.get('evaluate');
+
+    const migrationTaskEvaluator = new RuleMigrationTaskEvaluator(
+      evaluationId,
+      this.currentUser,
+      abortController,
+      this.data,
+      migrationLogger,
+      this.dependencies
+    );
+
+    await migrationTaskEvaluator.evaluate({
+      connectorId,
+      langsmithSettings,
+      invocationConfig,
+    });
+  }
+
+  /** Returns if a migration is running or not */
+  isMigrationRunning(migrationId: string): boolean {
+    return this.migrationsRunning.has(migrationId);
   }
 }

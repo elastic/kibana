@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo, memo, type ComponentProps } from 'react';
+import React, { useMemo, memo, type ComponentProps, useContext } from 'react';
 import { EuiIcon, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { find, getOr } from 'lodash/fp';
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
-import { tableDefaults, dataTableSelectors } from '@kbn/securitysolution-data-table';
-import { useLicense } from '../../../common/hooks/use_license';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { useKibana } from '../../../common/lib/kibana';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
 import { isDetectionsAlertsTable } from '../../../common/components/top_n/helpers';
@@ -20,15 +18,12 @@ import {
   SecurityStepId,
 } from '../../../common/components/guided_onboarding_tour/tour_config';
 import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 
 import { SUPPRESSED_ALERT_TOOLTIP } from './translations';
-import { VIEW_SELECTION } from '../../../../common/constants';
-import { getAllFieldsByName } from '../../../common/containers/source';
-import { eventRenderedViewColumns, getColumns } from './columns';
 import type { GetSecurityAlertsTableProp } from '../../components/alerts_table/types';
 import type { CellValueElementProps, ColumnHeaderOptions } from '../../../../common/types';
+import { AlertTableCellContext } from './cell_value_context';
 
 /**
  * This implementation of `EuiDataGrid`'s `renderCellValue`
@@ -36,7 +31,7 @@ import type { CellValueElementProps, ColumnHeaderOptions } from '../../../../com
  * from the TGrid
  */
 
-type RenderCellValueProps = Pick<
+export type RenderCellValueProps = Pick<
   ComponentProps<GetSecurityAlertsTableProp<'renderCellValue'>>,
   | 'columnId'
   | 'rowIndex'
@@ -76,6 +71,7 @@ export const CellValue = memo(function RenderCellValue({
   truncate,
   userProfiles,
 }: RenderCellValueProps) {
+  const { notifications } = useKibana().services;
   const isTourAnchor = useMemo(
     () =>
       columnId === SIGNAL_RULE_NAME_FIELD_NAME &&
@@ -84,22 +80,21 @@ export const CellValue = memo(function RenderCellValue({
       !isDetails,
     [columnId, isDetails, rowIndex, tableType]
   );
-  const { browserFields } = useSourcererDataView(sourcererScope);
-  const browserFieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
-  const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
-  const license = useLicense();
-  const viewMode =
-    useDeepEqualSelector((state) => (getTable(state, tableId ?? '') ?? tableDefaults).viewMode) ??
-    tableDefaults.viewMode;
+  const cellValueContext = useContext(AlertTableCellContext);
 
-  const gridColumns = useMemo(() => {
-    return getColumns(license);
-  }, [license]);
+  if (!cellValueContext) {
+    const contextMissingError = new Error(
+      'render_cell_value.tsx: CellValue must be used within AlertTableCellContextProvider'
+    );
 
-  const columnHeaders = useMemo(() => {
-    return viewMode === VIEW_SELECTION.gridView ? gridColumns : eventRenderedViewColumns;
-  }, [gridColumns, viewMode]);
+    notifications.toasts.addError(contextMissingError, {
+      title: 'AlertTableCellContextProvider is missing',
+      toastMessage: 'CellValue must be used within AlertTableCellContextProvider',
+    });
+    throw new Error(contextMissingError.message);
+  }
 
+  const { browserFields, browserFieldsByName, columnHeaders } = cellValueContext;
   /**
    * There is difference between how `triggers actions` fetched data v/s
    * how security solution fetches data via timelineSearchStrategy
@@ -134,11 +129,21 @@ export const CellValue = memo(function RenderCellValue({
     return ecsSuppressionCount ? parseInt(ecsSuppressionCount, 10) : dataSuppressionCount;
   }, [ecsAlert, legacyAlert]);
 
-  const Renderer = useMemo(() => {
-    const myHeader =
-      header ?? ({ id: columnId, ...browserFieldsByName[columnId] } as ColumnHeaderOptions);
-    const colHeader = columnHeaders.find((col) => col.id === columnId);
-    const localLinkValues = getOr([], colHeader?.linkField ?? '', ecsAlert);
+  const myHeader = useMemo(
+    () => header ?? ({ id: columnId, ...browserFieldsByName[columnId] } as ColumnHeaderOptions),
+    [browserFieldsByName, columnId, header]
+  );
+
+  const colHeader = useMemo(
+    () => columnHeaders.find((col) => col.id === columnId),
+    [columnHeaders, columnId]
+  );
+  const localLinkValues = useMemo(
+    () => getOr([], colHeader?.linkField ?? '', ecsAlert),
+    [colHeader?.linkField, ecsAlert]
+  );
+
+  const CellRenderer = useMemo(() => {
     return (
       <GuidedOnboardingTourStep
         isTourAnchor={isTourAnchor}
@@ -168,20 +173,18 @@ export const CellValue = memo(function RenderCellValue({
       </GuidedOnboardingTourStep>
     );
   }, [
-    header,
-    columnId,
-    browserFieldsByName,
-    columnHeaders,
-    ecsAlert,
     isTourAnchor,
     browserFields,
+    columnId,
     finalData,
+    ecsAlert,
     eventId,
+    myHeader,
     isDetails,
-
     isExpandable,
     isExpanded,
     linkValues,
+    localLinkValues,
     rowIndex,
     colIndex,
     rowRenderers,
@@ -198,9 +201,9 @@ export const CellValue = memo(function RenderCellValue({
           <EuiIcon type="layers" />
         </EuiToolTip>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>{Renderer}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{CellRenderer}</EuiFlexItem>
     </EuiFlexGroup>
   ) : (
-    <>{Renderer}</>
+    <>{CellRenderer}</>
   );
 });

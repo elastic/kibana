@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
-import { RuleTypeParams } from '@kbn/alerting-types';
+import type { Logger } from '@kbn/logging';
+import type { RuleTypeParams } from '@kbn/alerting-types';
 import { getRuleDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
-import { GetViewInAppRelativeUrlFn } from '../../../types';
-import { ActionSchedulerRule } from '../types';
+import type { GetViewInAppRelativeUrlFn } from '../../../types';
+import type { ActionSchedulerRule } from '../types';
 
 interface BuildRuleUrlOpts<Params extends RuleTypeParams> {
   end?: number;

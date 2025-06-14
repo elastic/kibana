@@ -21,6 +21,9 @@ import {
   type MicrosoftDefenderEndpointMachineAction,
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/types';
 import { groupBy } from 'lodash';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import { buildIndexNameWithNamespace } from '../../../../../../../../common/endpoint/utils/index_name_utilities';
+import { MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../../../../common/endpoint/service/response_actions/microsoft_defender';
 import type {
   IsolationRouteRequestBody,
   UnisolationRouteRequestBody,
@@ -32,6 +35,7 @@ import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
   MicrosoftDefenderEndpointActionRequestCommonMeta,
+  MicrosoftDefenderEndpointLogEsDoc,
 } from '../../../../../../../../common/endpoint/types';
 import type {
   ResponseActionAgentType,
@@ -53,6 +57,7 @@ import type {
   CommonResponseActionMethodOptions,
   ProcessPendingActionsMethodOptions,
 } from '../../../lib/types';
+import { catchAndWrapError } from '../../../../../../utils';
 
 export type MicrosoftDefenderActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: NormalizedExternalConnectorClient;
@@ -66,6 +71,146 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     super(options);
     this.connectorActionsClient = connectorActions;
     connectorActions.setup(MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID);
+  }
+
+  /**
+   * Returns a list of all indexes for Microsoft Defender data supported for response actions
+   * @private
+   */
+  private async fetchIndexNames(): Promise<string[]> {
+    const cachedInfo = this.cache.get<string[]>('fetchIndexNames');
+
+    if (cachedInfo) {
+      this.log.debug(
+        `Returning cached response with list of index names:\n${stringify(cachedInfo)}`
+      );
+      return cachedInfo;
+    }
+
+    const integrationNames = Object.keys(MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION);
+    const fleetServices = this.options.endpointService.getInternalFleetServices(
+      this.options.spaceId
+    );
+    const indexNamespaces = await fleetServices.getIntegrationNamespaces(integrationNames);
+    const indexNames: string[] = [];
+
+    for (const [integrationName, namespaces] of Object.entries(indexNamespaces)) {
+      if (namespaces.length > 0) {
+        const indexPatterns =
+          MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION[
+            integrationName as keyof typeof MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION
+          ];
+
+        for (const indexPattern of indexPatterns) {
+          indexNames.push(
+            ...namespaces.map((namespace) => buildIndexNameWithNamespace(indexPattern, namespace))
+          );
+        }
+      }
+    }
+
+    this.cache.set('fetchIndexNames', indexNames);
+    this.log.debug(() => `MS Defender indexes with namespace:\n${stringify(indexNames)}`);
+
+    return indexNames;
+  }
+
+  protected async fetchAgentPolicyInfo(
+    agentIds: string[]
+  ): Promise<LogsEndpointAction['agent']['policy']> {
+    const cacheKey = `fetchAgentPolicyInfo:${agentIds.sort().join('#')}`;
+    const cacheResponse = this.cache.get<LogsEndpointAction['agent']['policy']>(cacheKey);
+
+    if (cacheResponse) {
+      this.log.debug(
+        () => `Cached agent policy info. found - returning it:\n${stringify(cacheResponse)}`
+      );
+      return cacheResponse;
+    }
+
+    const esClient = this.options.esClient;
+    const esSearchRequest: SearchRequest = {
+      index: await this.fetchIndexNames(),
+      query: { bool: { filter: [{ terms: { 'cloud.instance.id': agentIds } }] } },
+      collapse: {
+        field: 'cloud.instance.id',
+        inner_hits: {
+          name: 'most_recent',
+          size: 1,
+          _source: ['agent', 'cloud.instance.id', 'event.created'],
+          sort: [{ 'event.created': 'desc' }],
+        },
+      },
+      _source: false,
+      ignore_unavailable: true,
+    };
+
+    if (!esSearchRequest.index || esSearchRequest.index.length === 0) {
+      throw new ResponseActionsClientError(
+        `Unable to build list of indexes while retrieving policy information for Microsoft Defender agents [${agentIds.join(
+          ', '
+        )}]. Check to ensure at least one integration policy exists.`,
+        400
+      );
+    }
+
+    this.log.debug(() => `Searching for agents with:\n${stringify(esSearchRequest)}`);
+
+    const msDefenderLogEsResults = await esClient
+      .search<
+        MicrosoftDefenderEndpointLogEsDoc,
+        { most_recent: MicrosoftDefenderEndpointLogEsDoc }
+      >(esSearchRequest)
+      .catch(catchAndWrapError);
+
+    this.log.debug(
+      () => `MS Defender Log records found:\n${stringify(msDefenderLogEsResults, 20)}`
+    );
+
+    const agentIdsFound: string[] = [];
+    const fleetAgentIdToMsDefenderAgentIdMap: Record<string, string> = (
+      msDefenderLogEsResults.hits.hits ?? []
+    ).reduce((acc, esDoc) => {
+      const doc = esDoc.inner_hits?.most_recent.hits.hits[0]._source;
+
+      if (doc) {
+        agentIdsFound.push(doc.cloud.instance.id);
+        acc[doc.agent.id] = doc.cloud.instance.id;
+      }
+
+      return acc;
+    }, {} as Record<string, string>);
+    const elasticAgentIds = Object.keys(fleetAgentIdToMsDefenderAgentIdMap);
+
+    if (elasticAgentIds.length === 0) {
+      throw new ResponseActionsClientError(
+        `Unable to find Elastic agent IDs for Microsoft Defender agent ids: [${agentIds.join(
+          ', '
+        )}]`,
+        400
+      );
+    }
+
+    // ensure all MS agent ids were found
+    for (const agentId of agentIds) {
+      if (!agentIdsFound.includes(agentId)) {
+        throw new ResponseActionsClientError(
+          `Microsoft Defender agent id [${agentId}] not found`,
+          404
+        );
+      }
+    }
+
+    const agentPolicyInfo = await this.fetchFleetInfoForAgents(elasticAgentIds, [
+      'microsoft_defender_endpoint',
+    ]);
+
+    for (const agentInfo of agentPolicyInfo) {
+      agentInfo.agentId = fleetAgentIdToMsDefenderAgentIdMap[agentInfo.elasticAgentId];
+    }
+
+    this.cache.set(cacheKey, agentPolicyInfo);
+    return agentPolicyInfo;
   }
 
   protected async handleResponseActionCreation<
@@ -180,7 +325,8 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
 
   /** Gets agent details directly from MS Defender for Endpoint */
   private async getAgentDetails(agentId: string): Promise<MicrosoftDefenderEndpointMachine> {
-    const cachedEntry = this.cache.get<MicrosoftDefenderEndpointMachine>(agentId);
+    const cacheKey = `getAgentDetails:${agentId}`;
+    const cachedEntry = this.cache.get<MicrosoftDefenderEndpointMachine>(cacheKey);
 
     if (cachedEntry) {
       this.log.debug(
@@ -215,7 +361,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
       );
     }
 
-    this.cache.set(agentId, msDefenderEndpointGetMachineDetailsApiResponse);
+    this.cache.set(cacheKey, msDefenderEndpointGetMachineDetailsApiResponse);
 
     return msDefenderEndpointGetMachineDetailsApiResponse;
   }

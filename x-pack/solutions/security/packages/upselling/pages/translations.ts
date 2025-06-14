@@ -25,6 +25,13 @@ export const ENTITY_ANALYTICS_LICENSE_DESC = i18n.translate(
 export const ENTITY_ANALYTICS_TITLE = i18n.translate(
   'securitySolutionPackages.entityAnalytics.navigation',
   {
-    defaultMessage: 'Entity Analytics',
+    defaultMessage: 'Entity analytics',
+  }
+);
+
+export const SIEM_MIGRATION_UPSELLING_PAGE_TITLE = i18n.translate(
+  'securitySolutionPackages.siemMigration.pageTitle',
+  {
+    defaultMessage: 'Translate Rules',
   }
 );

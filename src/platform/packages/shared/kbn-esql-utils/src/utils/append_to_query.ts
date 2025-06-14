@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { parse, mutate, BasicPrettyPrinter } from '@kbn/esql-ast';
 import { sanitazeESQLInput } from './sanitaze_input';
 
@@ -61,7 +60,7 @@ export function appendWhereClauseToESQLQuery(
     filterValue = '';
   }
 
-  const { ast } = getAstAndSyntaxErrors(baseESQLQuery);
+  const { ast } = parse(baseESQLQuery);
 
   const lastCommandIsWhere = ast[ast.length - 1].name === 'where';
   // if where command already exists in the end of the query:

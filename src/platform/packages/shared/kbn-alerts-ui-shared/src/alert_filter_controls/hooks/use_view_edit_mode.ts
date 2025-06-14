@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ViewMode } from '@kbn/embeddable-plugin/common';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import { useCallback, useEffect, useState } from 'react';
 
 interface UseViewEditModeArgs {
   initialMode?: ViewMode;
 }
 
-export const useViewEditMode = ({ initialMode = ViewMode.VIEW }: UseViewEditModeArgs) => {
+export const useViewEditMode = ({ initialMode = 'view' }: UseViewEditModeArgs) => {
   const [filterGroupMode, setFilterGroupMode] = useState(initialMode);
 
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
@@ -33,15 +33,15 @@ export const useViewEditMode = ({ initialMode = ViewMode.VIEW }: UseViewEditMode
   }, [hasPendingChanges]);
 
   const switchToEditMode = useCallback(() => {
-    setFilterGroupMode(ViewMode.EDIT);
+    setFilterGroupMode('edit');
   }, []);
 
   const switchToViewMode = useCallback(() => {
     setHasPendingChanges(false);
-    setFilterGroupMode(ViewMode.VIEW);
+    setFilterGroupMode('view');
   }, []);
 
-  const isViewMode = filterGroupMode === ViewMode.VIEW;
+  const isViewMode = filterGroupMode === 'view';
 
   return {
     filterGroupMode,

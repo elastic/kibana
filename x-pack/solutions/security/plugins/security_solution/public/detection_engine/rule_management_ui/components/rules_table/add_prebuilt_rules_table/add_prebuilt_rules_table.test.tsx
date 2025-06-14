@@ -18,13 +18,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Mock components not needed in this test suite
 jest.mock('../../../../rule_management/components/rule_details/rule_details_flyout', () => ({
-  RuleDetailsFlyout: jest.fn().mockReturnValue(<></>),
+  RuleDetailsFlyout: jest.fn(() => <></>),
 }));
 jest.mock('../rules_changelog_link', () => ({
-  RulesChangelogLink: jest.fn().mockReturnValue(<></>),
+  RulesChangelogLink: jest.fn(() => <></>),
 }));
 jest.mock('./add_prebuilt_rules_table_filters', () => ({
-  AddPrebuiltRulesTableFilters: jest.fn().mockReturnValue(<></>),
+  AddPrebuiltRulesTableFilters: jest.fn(() => <></>),
 }));
 
 jest.mock('../../../../rule_management/logic/prebuilt_rules/use_perform_rule_install', () => ({

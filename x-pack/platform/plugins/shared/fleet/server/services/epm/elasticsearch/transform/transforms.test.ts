@@ -22,6 +22,7 @@ import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../constants';
 
 import { getESAssetMetadata } from '../meta';
 
+import { createArchiveIteratorFromMap } from '../../archive/archive_iterator';
 import { createAppContextStartContractMock } from '../../../../mocks';
 import type { PackageInstallContext } from '../../../../../common/types';
 
@@ -268,28 +269,30 @@ _meta:
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
         ],
-        assetsMap: new Map([
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/beats.yml',
-            sourceData.BEATS_FIELDS,
-          ],
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/agent.yml',
-            sourceData.AGENT_FIELDS,
-          ],
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
-            sourceData.FIELDS,
-          ],
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
-            sourceData.MANIFEST,
-          ],
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
-            sourceData.TRANSFORM,
-          ],
-        ]),
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/beats.yml',
+              Buffer.from(sourceData.BEATS_FIELDS),
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/agent.yml',
+              Buffer.from(sourceData.AGENT_FIELDS),
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
+              Buffer.from(sourceData.FIELDS),
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+              Buffer.from(sourceData.MANIFEST),
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+              Buffer.from(sourceData.TRANSFORM),
+            ],
+          ])
+        ),
       } as unknown as PackageInstallContext,
       esClient,
       savedObjectsClient,
@@ -380,17 +383,19 @@ _meta:
     expect(esClient.indices.putIndexTemplate.mock.calls).toEqual([
       [
         {
-          body: {
-            _meta: meta,
-            composed_of: [
-              'logs-endpoint.metadata_current-template@package',
-              'logs-endpoint.metadata_current-template@custom',
-            ],
-            index_patterns: ['.metrics-endpoint.metadata_united_default'],
-            priority: 250,
-            template: { mappings: undefined, settings: undefined },
-            ignore_missing_component_templates: ['logs-endpoint.metadata_current-template@custom'],
-          },
+          _meta: meta,
+          composed_of: [
+            'logs-endpoint.metadata_current-template@package',
+            'endpoint@custom',
+            'logs-endpoint.metadata_current-template@custom',
+          ],
+          index_patterns: ['.metrics-endpoint.metadata_united_default'],
+          priority: 250,
+          template: { mappings: undefined, settings: undefined },
+          ignore_missing_component_templates: [
+            'endpoint@custom',
+            'logs-endpoint.metadata_current-template@custom',
+          ],
           name: 'logs-endpoint.metadata_current-template',
         },
         { ignore: [404] },
@@ -570,20 +575,22 @@ _meta:
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
         ],
-        assetsMap: new Map([
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
-            Buffer.from(sourceData.FIELDS),
-          ],
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
-            Buffer.from(sourceData.MANIFEST),
-          ],
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
-            Buffer.from(sourceData.TRANSFORM),
-          ],
-        ]),
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
+              Buffer.from(sourceData.FIELDS),
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+              Buffer.from(sourceData.MANIFEST),
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+              Buffer.from(sourceData.TRANSFORM),
+            ],
+          ])
+        ),
       } as unknown as PackageInstallContext,
       esClient,
       savedObjectsClient,
@@ -664,17 +671,19 @@ _meta:
     expect(esClient.indices.putIndexTemplate.mock.calls).toEqual([
       [
         {
-          body: {
-            _meta: meta,
-            composed_of: [
-              'logs-endpoint.metadata_current-template@package',
-              'logs-endpoint.metadata_current-template@custom',
-            ],
-            index_patterns: ['.metrics-endpoint.metadata_united_default'],
-            priority: 250,
-            template: { mappings: undefined, settings: undefined },
-            ignore_missing_component_templates: ['logs-endpoint.metadata_current-template@custom'],
-          },
+          _meta: meta,
+          composed_of: [
+            'logs-endpoint.metadata_current-template@package',
+            'endpoint@custom',
+            'logs-endpoint.metadata_current-template@custom',
+          ],
+          index_patterns: ['.metrics-endpoint.metadata_united_default'],
+          priority: 250,
+          template: { mappings: undefined, settings: undefined },
+          ignore_missing_component_templates: [
+            'endpoint@custom',
+            'logs-endpoint.metadata_current-template@custom',
+          ],
           name: 'logs-endpoint.metadata_current-template',
         },
         { ignore: [404] },
@@ -852,16 +861,18 @@ _meta:
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
         ],
-        assetsMap: new Map([
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
-            Buffer.from(sourceData.FIELDS),
-          ],
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
-            Buffer.from(sourceData.TRANSFORM),
-          ],
-        ]),
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
+              Buffer.from(sourceData.FIELDS),
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+              Buffer.from(sourceData.TRANSFORM),
+            ],
+          ]) as any
+        ),
       } as unknown as PackageInstallContext,
       esClient,
       savedObjectsClient,
@@ -925,17 +936,19 @@ _meta:
     expect(esClient.indices.putIndexTemplate.mock.calls).toEqual([
       [
         {
-          body: {
-            _meta: meta,
-            composed_of: [
-              'logs-endpoint.metadata_current-template@package',
-              'logs-endpoint.metadata_current-template@custom',
-            ],
-            index_patterns: ['.metrics-endpoint.metadata_united_default'],
-            priority: 250,
-            template: { mappings: undefined, settings: undefined },
-            ignore_missing_component_templates: ['logs-endpoint.metadata_current-template@custom'],
-          },
+          _meta: meta,
+          composed_of: [
+            'logs-endpoint.metadata_current-template@package',
+            'endpoint@custom',
+            'logs-endpoint.metadata_current-template@custom',
+          ],
+          index_patterns: ['.metrics-endpoint.metadata_united_default'],
+          priority: 250,
+          template: { mappings: undefined, settings: undefined },
+          ignore_missing_component_templates: [
+            'endpoint@custom',
+            'logs-endpoint.metadata_current-template@custom',
+          ],
           name: 'logs-endpoint.metadata_current-template',
         },
         { ignore: [404] },
@@ -1080,16 +1093,18 @@ _meta:
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
         ],
-        assetsMap: new Map([
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
-            sourceData.MANIFEST,
-          ],
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
-            sourceData.TRANSFORM,
-          ],
-        ]),
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+              sourceData.MANIFEST,
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+              sourceData.TRANSFORM,
+            ],
+          ]) as any
+        ),
       } as unknown as PackageInstallContext,
       esClient,
       savedObjectsClient,
@@ -1184,16 +1199,18 @@ _meta:
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
         ],
-        assetsMap: new Map([
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
-            sourceData.MANIFEST,
-          ],
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
-            sourceData.TRANSFORM,
-          ],
-        ]),
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+              sourceData.MANIFEST,
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+              sourceData.TRANSFORM,
+            ],
+          ]) as any
+        ),
       } as unknown as PackageInstallContext,
       esClient,
       savedObjectsClient,
@@ -1279,20 +1296,22 @@ _meta:
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
           'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
         ],
-        assetsMap: new Map([
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
-            sourceData.FIELDS,
-          ],
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
-            sourceData.MANIFEST,
-          ],
-          [
-            'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
-            sourceData.TRANSFORM,
-          ],
-        ]),
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
+              sourceData.FIELDS,
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+              sourceData.MANIFEST,
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+              sourceData.TRANSFORM,
+            ],
+          ]) as any
+        ),
       } as unknown as PackageInstallContext,
       esClient,
       savedObjectsClient,

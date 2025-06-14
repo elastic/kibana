@@ -7,7 +7,6 @@
 
 import React, { useState, useEffect } from 'react';
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -82,7 +81,7 @@ async function getCreationOptions(
 
     return {
       getInitialInput: () => ({
-        viewMode: ViewMode.VIEW,
+        viewMode: 'view',
         panels,
         controlGroupState,
       }),

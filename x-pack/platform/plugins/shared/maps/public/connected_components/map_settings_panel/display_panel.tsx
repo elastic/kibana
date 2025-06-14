@@ -5,12 +5,27 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFormRow, EuiPanel, EuiSwitch, EuiSwitchEvent, EuiTitle } from '@elastic/eui';
+import React, { ChangeEvent } from 'react';
+import { EuiFormRow, EuiPanel, EuiSelect, EuiSwitch, EuiSwitchEvent, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MapSettings } from '../../../common/descriptor_types';
 import { MbValidatedColorPicker } from '../../classes/styles/vector/components/color/mb_validated_color_picker';
+
+const PROJECTION_OPTIONS = [
+  {
+    value: 'globeInterpolate',
+    text: i18n.translate('xpack.maps.mapSettingsPanel.projection.globeLabel', {
+      defaultMessage: 'Globe',
+    }),
+  },
+  {
+    value: 'mercator',
+    text: i18n.translate('xpack.maps.mapSettingsPanel.projection.mercatorLabel', {
+      defaultMessage: 'Mercator',
+    }),
+  },
+];
 
 interface Props {
   settings: MapSettings;
@@ -20,6 +35,10 @@ interface Props {
 export function DisplayPanel({ settings, updateMapSetting }: Props) {
   const onBackgroundColorChange = (color: string) => {
     updateMapSetting('backgroundColor', color);
+  };
+
+  const onProjectionChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    updateMapSetting('projection', event.target.value);
   };
 
   const onShowScale = (event: EuiSwitchEvent) => {
@@ -46,6 +65,19 @@ export function DisplayPanel({ settings, updateMapSetting }: Props) {
         <MbValidatedColorPicker
           color={settings.backgroundColor}
           onChange={onBackgroundColorChange}
+        />
+      </EuiFormRow>
+
+      <EuiFormRow
+        label={i18n.translate('xpack.maps.mapSettingsPanel.projectionLabel', {
+          defaultMessage: 'Projection',
+        })}
+        display="columnCompressed"
+      >
+        <EuiSelect
+          options={PROJECTION_OPTIONS}
+          value={settings.projection}
+          onChange={onProjectionChange}
         />
       </EuiFormRow>
 

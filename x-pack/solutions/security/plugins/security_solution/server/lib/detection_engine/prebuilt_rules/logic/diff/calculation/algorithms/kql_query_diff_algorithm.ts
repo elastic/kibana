@@ -15,5 +15,6 @@ import { simpleDiffAlgorithm } from './simple_diff_algorithm';
  * Diff algorithm for all kql query types (`inline_query` and `saved_query`)
  */
 export const kqlQueryDiffAlgorithm = <TValue extends RuleKqlQuery>(
-  versions: ThreeVersionsOf<TValue>
-) => simpleDiffAlgorithm<TValue>(versions);
+  versions: ThreeVersionsOf<TValue>,
+  isRuleCustomized: boolean
+) => simpleDiffAlgorithm<TValue>(versions, isRuleCustomized);

@@ -22,7 +22,10 @@ export async function createAndInstallTransforms(
     });
     return [{ type: 'transform', id: latestTransform.transform_id }];
   } catch (e) {
-    logger.error(`Cannot create entity history transform for [${definition.id}] entity definition`);
+    logger.error(
+      `Cannot create entity history transform for [${definition.id}] entity definition`,
+      { error: e }
+    );
     throw e;
   }
 }

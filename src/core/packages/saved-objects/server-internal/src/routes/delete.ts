@@ -41,6 +41,12 @@ export const registerDeleteRoute = (
         access,
         deprecated: deprecationInfo,
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the Saved Objects Client',
+        },
+      },
       validate: {
         params: schema.object({
           type: schema.string(),

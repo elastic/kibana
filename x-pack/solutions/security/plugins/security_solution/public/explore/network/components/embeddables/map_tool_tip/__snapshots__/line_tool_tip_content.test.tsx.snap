@@ -1,101 +1,291 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`LineToolTipContent renders correctly against snapshot 1`] = `
-<EuiFlexGroup
-  gutterSize="none"
-  justifyContent="center"
+<div
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-none-center-stretch-row"
 >
-  <EuiFlexItem>
-    <Styled(EuiBadge)
-      color="hollow"
+  <div
+    class="euiFlexItem emotion-euiFlexItem-grow-1"
+  >
+    <span
+      class="euiBadge etu9os01 emotion-euiBadge-hollow-FlowBadge"
+      title="Source"
     >
-      <Styled(EuiFlexGroup)
-        direction="column"
+      <span
+        class="euiBadge__content emotion-euiBadge__content"
       >
-        <EuiFlexItem
-          grow={false}
+        <span
+          class="euiBadge__text emotion-euiBadge__text"
         >
-          Source
-        </EuiFlexItem>
-      </Styled(EuiFlexGroup)>
-    </Styled(EuiBadge)>
-  </EuiFlexItem>
-  <SourceDestinationArrows
-    contextId="contextId"
-    destinationBytes={
-      Array [
-        "testPropValue",
-      ]
-    }
-    eventId="map-line-tooltip-contextId"
-    sourceBytes={
-      Array [
-        "testPropValue",
-      ]
-    }
-  />
-  <EuiFlexItem>
-    <Styled(EuiBadge)
-      color="hollow"
+          <div
+            class="euiFlexGroup etu9os00 emotion-euiFlexGroup-l-flexStart-stretch-column-EuiFlexGroupStyled"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              Source
+            </div>
+          </div>
+        </span>
+      </span>
+    </span>
+  </div>
+  <div
+    class="euiFlexGroup e1jag3831 emotion-euiFlexGroup-none-center-center-column-SourceDestinationArrowsContainer"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
-      <Styled(EuiFlexGroup)>
-        <EuiFlexItem
-          grow={false}
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-none-center-center-row"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
-          Destination
-        </EuiFlexItem>
-      </Styled(EuiFlexGroup)>
-    </Styled(EuiBadge)>
-  </EuiFlexItem>
-</EuiFlexGroup>
+          <span
+            class="css-zsu1jv-ArrowBody e1do9oav0"
+            height="1"
+          />
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <span
+            class="css-zsu1jv-ArrowBody e1do9oav0"
+            height="1"
+          />
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <span
+            class="css-zsu1jv-ArrowBody e1do9oav0"
+            height="1"
+          />
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <span
+            color="subdued"
+            data-euiicon-type="arrowRight"
+            data-test-subj="arrow-icon"
+          />
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-none-center-center-row"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <span
+            color="subdued"
+            data-euiicon-type="arrowLeft"
+            data-test-subj="arrow-icon"
+          />
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <span
+            class="css-zsu1jv-ArrowBody e1do9oav0"
+            height="1"
+          />
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <span
+            class="css-zsu1jv-ArrowBody e1do9oav0"
+            height="1"
+          />
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <span
+            class="css-zsu1jv-ArrowBody e1do9oav0"
+            height="1"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-grow-1"
+  >
+    <span
+      class="euiBadge etu9os01 emotion-euiBadge-hollow-FlowBadge"
+      title="Destination"
+    >
+      <span
+        class="euiBadge__content emotion-euiBadge__content"
+      >
+        <span
+          class="euiBadge__text emotion-euiBadge__text"
+        >
+          <div
+            class="euiFlexGroup etu9os00 emotion-euiFlexGroup-responsive-l-flexStart-stretch-row-EuiFlexGroupStyled"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              Destination
+            </div>
+          </div>
+        </span>
+      </span>
+    </span>
+  </div>
+</div>
 `;
 
 exports[`LineToolTipContent renders correctly against snapshot when rendering client & server 1`] = `
-<EuiFlexGroup
-  gutterSize="none"
-  justifyContent="center"
+<div
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-none-center-stretch-row"
 >
-  <EuiFlexItem>
-    <Styled(EuiBadge)
-      color="hollow"
+  <div
+    class="euiFlexItem emotion-euiFlexItem-grow-1"
+  >
+    <span
+      class="euiBadge etu9os01 emotion-euiBadge-hollow-FlowBadge"
+      title="Client"
     >
-      <Styled(EuiFlexGroup)
-        direction="column"
+      <span
+        class="euiBadge__content emotion-euiBadge__content"
       >
-        <EuiFlexItem
-          grow={false}
+        <span
+          class="euiBadge__text emotion-euiBadge__text"
         >
-          Client
-        </EuiFlexItem>
-      </Styled(EuiFlexGroup)>
-    </Styled(EuiBadge)>
-  </EuiFlexItem>
-  <SourceDestinationArrows
-    contextId="contextId"
-    destinationBytes={
-      Array [
-        "testPropValue",
-      ]
-    }
-    eventId="map-line-tooltip-contextId"
-    sourceBytes={
-      Array [
-        "testPropValue",
-      ]
-    }
-  />
-  <EuiFlexItem>
-    <Styled(EuiBadge)
-      color="hollow"
+          <div
+            class="euiFlexGroup etu9os00 emotion-euiFlexGroup-l-flexStart-stretch-column-EuiFlexGroupStyled"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              Client
+            </div>
+          </div>
+        </span>
+      </span>
+    </span>
+  </div>
+  <div
+    class="euiFlexGroup e1jag3831 emotion-euiFlexGroup-none-center-center-column-SourceDestinationArrowsContainer"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
-      <Styled(EuiFlexGroup)>
-        <EuiFlexItem
-          grow={false}
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-none-center-center-row"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
-          Server
-        </EuiFlexItem>
-      </Styled(EuiFlexGroup)>
-    </Styled(EuiBadge)>
-  </EuiFlexItem>
-</EuiFlexGroup>
+          <span
+            class="css-zsu1jv-ArrowBody e1do9oav0"
+            height="1"
+          />
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <span
+            class="css-zsu1jv-ArrowBody e1do9oav0"
+            height="1"
+          />
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <span
+            class="css-zsu1jv-ArrowBody e1do9oav0"
+            height="1"
+          />
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <span
+            color="subdued"
+            data-euiicon-type="arrowRight"
+            data-test-subj="arrow-icon"
+          />
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-none-center-center-row"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <span
+            color="subdued"
+            data-euiicon-type="arrowLeft"
+            data-test-subj="arrow-icon"
+          />
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <span
+            class="css-zsu1jv-ArrowBody e1do9oav0"
+            height="1"
+          />
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <span
+            class="css-zsu1jv-ArrowBody e1do9oav0"
+            height="1"
+          />
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <span
+            class="css-zsu1jv-ArrowBody e1do9oav0"
+            height="1"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-grow-1"
+  >
+    <span
+      class="euiBadge etu9os01 emotion-euiBadge-hollow-FlowBadge"
+      title="Server"
+    >
+      <span
+        class="euiBadge__content emotion-euiBadge__content"
+      >
+        <span
+          class="euiBadge__text emotion-euiBadge__text"
+        >
+          <div
+            class="euiFlexGroup etu9os00 emotion-euiFlexGroup-responsive-l-flexStart-stretch-row-EuiFlexGroupStyled"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              Server
+            </div>
+          </div>
+        </span>
+      </span>
+    </span>
+  </div>
+</div>
 `;

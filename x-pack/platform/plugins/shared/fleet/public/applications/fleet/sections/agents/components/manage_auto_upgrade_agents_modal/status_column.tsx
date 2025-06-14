@@ -18,7 +18,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useGetAutoUpgradeAgentsStatusQuery, useLink } from '../../../../../../hooks';
-
 export const StatusColumn: React.FunctionComponent<{
   agentPolicyId: string;
   version: string;
@@ -26,7 +25,6 @@ export const StatusColumn: React.FunctionComponent<{
 }> = ({ agentPolicyId, version, percentage }) => {
   const { getHref } = useLink();
   const { data: autoUpgradeAgentsStatus } = useGetAutoUpgradeAgentsStatusQuery(agentPolicyId);
-
   const getAgentsHref = useCallback(
     (failed?: boolean): string => {
       const kuery = failed
@@ -120,7 +118,7 @@ export const StatusColumn: React.FunctionComponent<{
           agentVersionCounts.agents > 0 ? (
             <FormattedMessage
               id="xpack.fleet.manageAutoUpgradeAgents.currentStatusTooltip"
-              defaultMessage="{agents} agents on target version"
+              defaultMessage="{agents, plural, one {# agent} other {# agents}} on target version"
               values={{
                 agents: agentVersionCounts.agents,
               }}

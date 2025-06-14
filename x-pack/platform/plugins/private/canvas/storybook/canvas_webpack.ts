@@ -6,9 +6,10 @@
  */
 
 import { resolve } from 'path';
-import { defaultConfig, mergeWebpackFinal } from '@kbn/storybook';
+import { defaultConfig } from '@kbn/storybook';
 import type { StorybookConfig } from '@kbn/storybook';
 import { Configuration } from 'webpack';
+import { merge as webpackMerge } from 'webpack-merge';
 import { KIBANA_ROOT } from './constants';
 
 export const canvasWebpack: Configuration = {
@@ -62,5 +63,6 @@ export const canvasWebpack: Configuration = {
 export const canvasStorybookConfig: StorybookConfig = {
   ...defaultConfig,
   addons: [...(defaultConfig.addons || []), require.resolve('./addon/register')],
-  ...mergeWebpackFinal(canvasWebpack),
+  webpackFinal: (config, options) =>
+    webpackMerge(defaultConfig.webpackFinal?.(config, options) ?? {}, canvasWebpack),
 };

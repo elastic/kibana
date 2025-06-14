@@ -101,8 +101,6 @@ export const RequestFlyout: FunctionComponent<Props> = ({
             },
           ]}
         />
-
-        <div className="painlessLabBottomBarPlaceholder" />
       </EuiFlyoutBody>
     </EuiFlyout>
   );

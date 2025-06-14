@@ -6,23 +6,23 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBadge, EuiText, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiLink, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { RulesTableEmptyColumnName } from '../rules_table_empty_column_name';
 import { SHOW_RELATED_INTEGRATIONS_SETTING } from '../../../../../../common/constants';
 import { PopoverItems } from '../../../../../common/components/popover_items';
 import { useUiSetting$ } from '../../../../../common/lib/kibana';
-import { IntegrationsPopover } from '../../../../../detections/components/rules/related_integrations/integrations_popover';
+import { IntegrationsPopover } from '../../../../common/components/related_integrations/integrations_popover';
 import { SeverityBadge } from '../../../../../common/components/severity_badge';
-import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
+import * as i18n from '../../../../common/translations';
 import type { Rule } from '../../../../rule_management/logic';
 import { useUserData } from '../../../../../detections/components/user_info';
 import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
 import type { AddPrebuiltRulesTableActions } from './add_prebuilt_rules_table_context';
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
 import type {
-  RuleSignatureId,
   RuleResponse,
+  RuleSignatureId,
 } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { getNormalizedSeverity } from '../helpers';
 import { PrebuiltRulesInstallButton } from './add_prebuilt_rules_install_button';

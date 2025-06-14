@@ -8,7 +8,8 @@
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';
 import { ruleDataServiceMock } from '../rule_data_plugin_service/rule_data_plugin_service.mock';
-import { AlertsClient, ConstructorOptions } from './alerts_client';
+import type { ConstructorOptions } from './alerts_client';
+import { AlertsClient } from './alerts_client';
 import { fromKueryExpression } from '@kbn/es-query';
 
 describe('AlertsClient', () => {

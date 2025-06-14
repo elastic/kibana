@@ -11,6 +11,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
+import { USER_SETTINGS_TEMPLATE_SUFFIX } from '../../../../../common/constants';
 import type { InstallablePackage, RegistryDataStream } from '../../../../types';
 import { getRegistryDataStreamAssetBaseName } from '../../../../../common/services';
 const LEGACY_TEMPLATE_SUFFIXES = ['@mappings', '@settings'];
@@ -108,6 +109,9 @@ export const _filterComponentTemplatesInUse = ({
   const usedByLookup = _getIndexTemplatesToUsedByMap(indexTemplates);
 
   return componentTemplateNames.filter((componentTemplateName) => {
+    if (componentTemplateName.endsWith(USER_SETTINGS_TEMPLATE_SUFFIX)) {
+      return false;
+    }
     const indexTemplatesUsingComponentTemplate = usedByLookup.get(componentTemplateName);
 
     if (indexTemplatesUsingComponentTemplate?.length) {

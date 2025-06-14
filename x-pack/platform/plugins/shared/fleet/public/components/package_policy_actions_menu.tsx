@@ -143,7 +143,12 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       ? DangerEuiContextMenuItem
       : EuiContextMenuItem;
     menuItems.push(
-      <PackagePolicyDeleteProvider agentPolicies={agentPolicies} key="packagePolicyDelete">
+      <PackagePolicyDeleteProvider
+        from={from}
+        agentPolicies={agentPolicies}
+        key="packagePolicyDelete"
+        packagePolicyPackage={packagePolicy.package}
+      >
         {(deletePackagePoliciesPrompt) => {
           return (
             <ContextMenuItem

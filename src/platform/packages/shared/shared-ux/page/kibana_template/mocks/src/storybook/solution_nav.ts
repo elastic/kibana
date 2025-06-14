@@ -29,16 +29,16 @@ const noDataConfigMock = new NoDataConfigPageStorybookMock();
 
 export const solutionNavArguments: ArgumentParams<SolutionNavArguments> = {
   name: {
-    control: 'text',
+    control: { control: 'text' },
     defaultValue: 'Kibana',
   },
   icon: {
-    control: { type: 'radio' },
+    control: { control: 'radio' },
     options: ['logoKibana', 'logoObservability', 'logoSecurity'],
     defaultValue: 'logoKibana',
   },
   canBeCollapsed: {
-    control: 'boolean',
+    control: { control: 'boolean' },
     defaultValue: true,
   },
 };

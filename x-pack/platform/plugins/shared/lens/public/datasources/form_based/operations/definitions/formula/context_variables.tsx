@@ -17,7 +17,7 @@ import {
   ExpressionFunctionFormulaInterval,
   ExpressionFunctionFormulaNow,
   ExpressionFunctionFormulaTimeRange,
-} from '../../../../../../common/expressions/formula_context/context_fns';
+} from '../../../../../../common/expressions/defs/formula_context/context_fns';
 import type {
   DateHistogramIndexPatternColumn,
   FormBasedLayer,

@@ -145,6 +145,7 @@ export function runFtrCli() {
           'throttle',
           'headless',
           'dry-run',
+          'pauseOnError',
         ],
         help: `
           --config=path      path to a config file (either this or --journey is required)
@@ -170,6 +171,7 @@ export function runFtrCli() {
           --throttle         enable network throttling in Chrome browser
           --headless         run browser in headless mode
           --dry-run          report tests without executing them
+          --pauseOnError     pause test runner on error
         `,
       },
     }

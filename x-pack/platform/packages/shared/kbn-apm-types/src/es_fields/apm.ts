@@ -48,6 +48,7 @@ export const HTTP_RESPONSE_STATUS_CODE = 'http.response.status_code';
 export const USER_ID = 'user.id';
 export const USER_AGENT_ORIGINAL = 'user_agent.original';
 export const USER_AGENT_NAME = 'user_agent.name';
+export const USER_AGENT_VERSION = 'user_agent.version';
 
 export const OBSERVER_VERSION = 'observer.version';
 export const OBSERVER_VERSION_MAJOR = 'observer.version_major';
@@ -56,7 +57,7 @@ export const OBSERVER_LISTENING = 'observer.listening';
 export const PROCESSOR_EVENT = 'processor.event';
 export const PROCESSOR_NAME = 'processor.name';
 
-export const TRANSACTION_AGENT_MARKS = 'transaction.agent.marks';
+export const TRANSACTION_MARKS_AGENT = 'transaction.marks.agent';
 export const TRANSACTION_DURATION = 'transaction.duration.us';
 export const TRANSACTION_DURATION_HISTOGRAM = 'transaction.duration.histogram';
 export const TRANSACTION_DURATION_SUMMARY = 'transaction.duration.summary';
@@ -72,6 +73,9 @@ export const TRANSACTION_OVERFLOW_COUNT = 'transaction.aggregation.overflow_coun
 // for transaction metrics
 export const TRANSACTION_ROOT = 'transaction.root';
 export const TRANSACTION_PROFILER_STACK_TRACE_IDS = 'transaction.profiler_stack_trace_ids';
+
+// OTel field to link profiling and APM
+export const ELASTIC_PROFILER_STACK_TRACE_IDS = 'elastic.profiler_stack_trace_ids';
 
 export const EVENT_OUTCOME = 'event.outcome';
 
@@ -188,10 +192,22 @@ export const METRIC_OTEL_JVM_SYSTEM_CPU_PERCENT = 'process.runtime.jvm.system.cp
 export const METRIC_OTEL_JVM_GC_DURATION = 'process.runtime.jvm.gc.duration';
 export const VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP = 'heap';
 export const VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP = 'non_heap';
+
 // OpenTelemetry semconv fields for AgentName https://opentelemetry.io/docs/specs/semconv/resource/#telemetry-sdk
 export const TELEMETRY_SDK_NAME = 'telemetry.sdk.name';
 export const TELEMETRY_SDK_LANGUAGE = 'telemetry.sdk.language';
 export const TELEMETRY_SDK_VERSION = 'telemetry.sdk.version';
+
+// OpenTelemetry semconv fields for HTTP server https://opentelemetry.io/docs/specs/semconv/http/http-spans/#http-server-semantic-conventions
+export const URL_PATH = 'url.path';
+export const URL_SCHEME = 'url.scheme';
+export const SERVER_ADDRESS = 'server.address';
+export const SERVER_PORT = 'server.port';
+
+// OpenTelemetry span links
+export const OTEL_SPAN_LINKS = 'links';
+export const OTEL_SPAN_LINKS_SPAN_ID = 'links.span_id';
+export const OTEL_SPAN_LINKS_TRACE_ID = 'links.trace_id';
 
 // Metadata
 export const TIER = '_tier';

@@ -12,7 +12,7 @@ import {
   isFilterCondition,
   isAndCondition,
   isOrCondition,
-} from '../models';
+} from '../conditions';
 
 function conditionToClause(condition: FilterCondition) {
   switch (condition.operator) {

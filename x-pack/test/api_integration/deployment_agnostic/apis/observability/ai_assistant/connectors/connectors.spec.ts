@@ -10,6 +10,7 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provi
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
+
   describe('List connectors', function () {
     before(async () => {
       await observabilityAIAssistantAPIClient.deleteAllActionConnectors();

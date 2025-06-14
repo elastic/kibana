@@ -6,7 +6,7 @@
  */
 
 import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { isEmpty, chunk, get, pick, isNumber } from 'lodash/fp';
+import { chunk, get, isEmpty, isNumber, pick } from 'lodash/fp';
 import React, { memo, useState } from 'react';
 import styled from 'styled-components';
 import type { ThreatMapping, Threats, Type } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -17,39 +17,35 @@ import type {
   RelatedIntegrationArray,
   RequiredFieldArray,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
-import { buildRelatedIntegrationsDescription } from '../../../../detections/components/rules/related_integrations/integrations_description';
+import { buildRelatedIntegrationsDescription } from '../../../common/components/related_integrations/integrations_description';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import type { EqlOptions } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
-import type {
-  AboutStepRiskScore,
-  AboutStepSeverity,
-  Duration,
-} from '../../../../detections/pages/detection_engine/rules/types';
+import type { AboutStepRiskScore, AboutStepSeverity, Duration } from '../../../common/types';
 import type { FieldValueTimeline } from '../../../rule_creation/components/pick_timeline';
 import type { FormSchema } from '../../../../shared_imports';
 import type { ListItems } from './types';
 import {
+  buildAlertSuppressionDescription,
+  buildAlertSuppressionMissingFieldsDescription,
+  buildAlertSuppressionWindowDescription,
+  buildEqlOptionsDescription,
+  buildHighlightedFieldsOverrideDescription,
+  buildIntervalDescription,
+  buildNoteDescription,
   buildQueryBarDescription,
+  buildRequiredFieldsDescription,
+  buildRiskScoreDescription,
+  buildRuleTypeDescription,
+  buildSetupDescription,
   buildSeverityDescription,
   buildStringArrayDescription,
   buildThreatDescription,
+  buildThreatMappingDescription,
+  buildThresholdDescription,
   buildUnorderedListArrayDescription,
   buildUrlsDescription,
-  buildNoteDescription,
-  buildRiskScoreDescription,
-  buildRuleTypeDescription,
-  buildThresholdDescription,
-  buildThreatMappingDescription,
-  buildEqlOptionsDescription,
-  buildRequiredFieldsDescription,
-  buildAlertSuppressionDescription,
-  buildAlertSuppressionWindowDescription,
-  buildAlertSuppressionMissingFieldsDescription,
-  buildHighlightedFieldsOverrideDescription,
-  buildSetupDescription,
   getQueryLabel,
-  buildIntervalDescription,
 } from './helpers';
 import * as i18n from './translations';
 import { buildMlJobsDescription } from './build_ml_jobs_description';
@@ -59,10 +55,10 @@ import { filterEmptyThreats } from '../../pages/rule_creation/helpers';
 import { useLicense } from '../../../../common/hooks/use_license';
 import type { LicenseService } from '../../../../../common/license';
 import {
-  isThresholdRule,
-  isSuppressionRuleConfiguredWithMissingFields,
-  isSuppressionRuleConfiguredWithGroupBy,
   isSuppressionRuleConfiguredWithDuration,
+  isSuppressionRuleConfiguredWithGroupBy,
+  isSuppressionRuleConfiguredWithMissingFields,
+  isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
 import {
   ALERT_SUPPRESSION_DURATION_FIELD_NAME,
@@ -84,6 +80,7 @@ import type { FieldValueQueryBar } from '../query_bar_field';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   max-width: 600px;
+
   .euiDescriptionList__description {
     overflow-wrap: anywhere;
   }

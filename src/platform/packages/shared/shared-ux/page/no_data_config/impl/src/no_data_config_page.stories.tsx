@@ -29,12 +29,14 @@ export default {
   },
 };
 
-export const NoDataConfigPage = (params: NoDataConfigPageStorybookParams) => {
-  return (
-    <NoDataConfigPageProvider {...mock.getServices(params)}>
-      <Component {...mock.getProps(params)} />
-    </NoDataConfigPageProvider>
-  );
-};
+export const NoDataConfigPage = {
+  render: (params: NoDataConfigPageStorybookParams) => {
+    return (
+      <NoDataConfigPageProvider {...mock.getServices(params)}>
+        <Component {...mock.getProps(params)} />
+      </NoDataConfigPageProvider>
+    );
+  },
 
-NoDataConfigPage.argTypes = mock.getArgumentTypes();
+  argTypes: mock.getArgumentTypes(),
+};

@@ -12,6 +12,7 @@ export const genericErrorResponse = () =>
     {
       statusCode: schema.maybe(schema.number()),
       error: schema.maybe(schema.string()),
+      errorType: schema.maybe(schema.string()),
       message: schema.string(),
       attributes: schema.maybe(schema.any()),
     },

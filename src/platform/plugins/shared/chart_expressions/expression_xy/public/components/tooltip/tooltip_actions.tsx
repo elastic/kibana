@@ -18,6 +18,8 @@ import { i18n } from '@kbn/i18n';
 import { MultiClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { BooleanRelation } from '@kbn/es-query';
+import type { AlertRuleFromVisUIActionData } from '@kbn/alerts-ui-shared';
+import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import { isTimeChart } from '../../../common/helpers';
 import { CommonXYDataLayerConfig } from '../../../common';
 import { DatatablesWithFormatInfo, LayersFieldFormats } from '../../helpers';
@@ -112,10 +114,13 @@ function getXSeriesValue(dataLayers: CommonXYDataLayerConfig[], firstSeries: XYT
 export const getTooltipActions = (
   dataLayers: CommonXYDataLayerConfig[],
   onClickMultiValue: (data: MultiFilterEvent['data']) => void,
+  onCreateAlertRule: (data: AlertRuleFromVisUIActionData) => void,
   fieldFormats: LayersFieldFormats,
   formattedDatatables: DatatablesWithFormatInfo,
   xAxisFormatter: FieldFormat,
   formatFactory: FormatFactory,
+  isEsqlMode?: boolean,
+  canCreateAlerts?: boolean,
   isEnabled?: boolean
 ) => {
   if (!isEnabled) return;
@@ -123,71 +128,165 @@ export const getTooltipActions = (
   const hasXAxis = dataLayers.every((l) => l.xAccessor);
   const isTimeViz = isTimeChart(dataLayers);
 
-  if (!hasSplitAccessors && !hasXAxis) return;
+  const xSeriesActions: Array<TooltipAction<Datum, XYChartSeriesIdentifier>> =
+    !isEsqlMode && hasXAxis
+      ? [
+          {
+            disabled: () => !hasXAxis,
+            label: (_, [firstSeries]: XYTooltipValue[]) => {
+              if (isTimeViz) {
+                return i18n.translate('expressionXY.tooltipActions.filterByTime', {
+                  defaultMessage: 'Filter by time',
+                });
+              }
 
-  const xSeriesActions: Array<TooltipAction<Datum, XYChartSeriesIdentifier>> = hasXAxis
-    ? [
-        {
-          disabled: () => !hasXAxis,
-          label: (_, [firstSeries]: XYTooltipValue[]) => {
-            if (isTimeViz) {
-              return i18n.translate('expressionXY.tooltipActions.filterByTime', {
-                defaultMessage: 'Filter by time',
-              });
-            }
+              const value = getXSeriesValue(dataLayers, firstSeries);
 
-            const value = getXSeriesValue(dataLayers, firstSeries);
-
-            return i18n.translate('expressionXY.tooltipActions.filterForXSeries', {
-              defaultMessage: 'Filter for {value}',
-              values: {
-                value: xAxisFormatter.convert(value) || value,
-              },
-            });
-          },
-
-          onSelect: (_: XYTooltipValue[], [firstSeries]: XYTooltipValue[]) => {
-            const layer = dataLayers.find((l) =>
-              firstSeries.seriesIdentifier.seriesKeys.some((key: string | number) =>
-                l.accessors.some(
-                  (accessor) => getAccessorByDimension(accessor, l.table.columns) === key.toString()
-                )
-              )
-            );
-            if (!layer) return;
-
-            const value = getXSeriesValue(dataLayers, firstSeries);
-
-            const xSeriesPoint = getXSeriesPoint(
-              layer,
-              value,
-              fieldFormats,
-              formattedDatatables,
-              xAxisFormatter,
-              formatFactory
-            );
-
-            const context: MultiFilterEvent['data'] = {
-              data: [
-                {
-                  table: xSeriesPoint.table,
-                  cells: [
-                    {
-                      row: xSeriesPoint.row,
-                      column: xSeriesPoint.column,
-                    },
-                  ],
+              return i18n.translate('expressionXY.tooltipActions.filterForXSeries', {
+                defaultMessage: 'Filter for {value}',
+                values: {
+                  value: xAxisFormatter.convert(value) || value,
                 },
-              ],
-            };
-            onClickMultiValue(context);
+              });
+            },
+
+            onSelect: (_: XYTooltipValue[], [firstSeries]: XYTooltipValue[]) => {
+              const layer = dataLayers.find((l) =>
+                firstSeries.seriesIdentifier.seriesKeys.some((key: string | number) =>
+                  l.accessors.some(
+                    (accessor) =>
+                      getAccessorByDimension(accessor, l.table.columns) === key.toString()
+                  )
+                )
+              );
+              if (!layer) return;
+
+              const value = getXSeriesValue(dataLayers, firstSeries);
+
+              const xSeriesPoint = getXSeriesPoint(
+                layer,
+                value,
+                fieldFormats,
+                formattedDatatables,
+                xAxisFormatter,
+                formatFactory
+              );
+
+              const context: MultiFilterEvent['data'] = {
+                data: [
+                  {
+                    table: xSeriesPoint.table,
+                    cells: [
+                      {
+                        row: xSeriesPoint.row,
+                        column: xSeriesPoint.column,
+                      },
+                    ],
+                  },
+                ],
+              };
+              onClickMultiValue(context);
+            },
           },
-        },
-      ]
-    : [];
+        ]
+      : [];
+
+  const alertRulesTooltipActions: Array<TooltipAction<Datum, XYChartSeriesIdentifier>> =
+    isEsqlMode && canCreateAlerts
+      ? [
+          {
+            disabled: () => !isEsqlMode,
+            label: () =>
+              i18n.translate('expressionXY.tooltipActions.addAlertRule', {
+                defaultMessage: 'Create alert rule',
+              }),
+
+            onSelect: (selectedValues: XYTooltipValue[], series: XYTooltipValue[]) => {
+              const [firstSeries] = series;
+              const layer = dataLayers.find((l) =>
+                firstSeries.seriesIdentifier.seriesKeys.some((key: string | number) =>
+                  l.accessors.some(
+                    (accessor) =>
+                      getAccessorByDimension(accessor, l.table.columns) === key.toString()
+                  )
+                )
+              );
+              if (!layer) return;
+
+              const { xAccessor } = firstSeries.seriesIdentifier;
+
+              const xSeriesValue = getXSeriesValue(dataLayers, firstSeries);
+
+              const xSeriesPoint = getXSeriesPoint(
+                layer,
+                xSeriesValue,
+                fieldFormats,
+                formattedDatatables,
+                xAxisFormatter,
+                formatFactory
+              );
+
+              const { table } = xSeriesPoint;
+              const xColumn = getColumnByAccessor(xAccessor.toString(), table.columns);
+
+              // Get the field name and value for the Y axis
+              const selectedYValues = selectedValues.length ? selectedValues : [firstSeries];
+              const thresholdValues = selectedYValues
+                .map((value) => {
+                  const { yAccessor, splitAccessors } = value.seriesIdentifier;
+                  const yColumn = getColumnByAccessor(yAccessor.toString(), table.columns);
+                  if (!yColumn || !yColumn.meta.sourceParams) return null;
+                  const { sourceField } = yColumn.meta.sourceParams;
+                  const yValue = value.value as number;
+                  // If there is no sourceField, wrap the Y axis label in {curly braces} to let the user set the field name manually
+                  const esqlFieldName = String(sourceField ?? `{${yColumn?.name ?? 'Y'}}`);
+                  const values: Record<string, string | number> = {
+                    [esqlFieldName]: yValue,
+                  };
+                  if (splitAccessors.size > 0) {
+                    for (const [accessor, splitValue] of splitAccessors) {
+                      const splitColumn = getColumnByAccessor(accessor.toString(), table.columns);
+                      const { sourceField: splitSourceField } =
+                        splitColumn?.meta?.sourceParams ?? {};
+                      if (!splitSourceField) continue;
+                      values[String(splitSourceField)] = splitValue;
+                    }
+                  }
+                  return { values, yField: esqlFieldName };
+                })
+                .filter(Boolean) as AlertRuleFromVisUIActionData['thresholdValues'];
+
+              // Get the time field name from the X axis for time vizzes, default to timestamp for non-time vizzes
+              const { sourceField: xSourceField } = xColumn?.meta?.sourceParams ?? {};
+
+              // For non-time vizzes, report the X axis
+              const xValues =
+                isTimeViz || !hasXAxis
+                  ? {}
+                  : {
+                      // If there is no sourceField, wrap the X axis label in [brackets] to let the user set the field name manually
+                      [String(xSourceField ?? `[${xColumn?.name ?? 'X'}]`)]:
+                        // Use xSeriesPoint.value instead of xSeriesValue; this is always the raw ES value, xSeriesValue sometimes returns
+                        // the display value
+                        xSeriesPoint.value,
+                    };
+
+              const query =
+                table.meta?.type === ESQL_TABLE_TYPE ? (table.meta.query as string) : null;
+
+              const context = {
+                thresholdValues,
+                xValues,
+                query,
+              };
+              onCreateAlertRule(context);
+            },
+          },
+        ]
+      : [];
 
   const breakdownTooltipActions: Array<TooltipAction<Datum, XYChartSeriesIdentifier>> =
-    hasSplitAccessors
+    !isEsqlMode && hasSplitAccessors
       ? [
           {
             disabled: (selected) => selected.length < 1,
@@ -256,5 +355,7 @@ export const getTooltipActions = (
           },
         ]
       : [];
-  return [...xSeriesActions, ...breakdownTooltipActions];
+  const actions = [...xSeriesActions, ...breakdownTooltipActions, ...alertRulesTooltipActions];
+  if (!actions.length) return;
+  return actions;
 };

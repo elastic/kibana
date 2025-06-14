@@ -15,15 +15,16 @@ import { getNestedParentPath } from './get_nested_parent_path';
 
 export const buildEcsObjects = (hit: EventHit): Ecs => {
   const ecsFields = [...TIMELINE_EVENTS_FIELDS];
+  const fieldsKeys = Object.keys(hit.fields ?? {});
   return ecsFields.reduce(
     (acc, field) => {
-      const nestedParentPath = getNestedParentPath(field, hit.fields);
+      const nestedParentPath = getNestedParentPath(field, fieldsKeys);
       if (
         nestedParentPath != null ||
         has(field, hit.fields) ||
         ECS_METADATA_FIELDS.includes(field)
       ) {
-        return merge(acc, buildObjectRecursive(field, hit.fields));
+        return merge(acc, buildObjectRecursive(field, hit.fields, fieldsKeys));
       }
       return acc;
     },

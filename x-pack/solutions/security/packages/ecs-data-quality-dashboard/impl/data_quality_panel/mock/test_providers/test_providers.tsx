@@ -48,6 +48,7 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
   const mockNavigateToApp = jest.fn();
   const mockAssistantAvailability: AssistantAvailability = {
+    hasSearchAILakeConfigurations: false,
     hasAssistantPrivilege: false,
     hasConnectorsAllPrivilege: true,
     hasConnectorsReadPrivilege: true,
@@ -86,7 +87,6 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
               }}
               getComments={mockGetComments}
               http={mockHttp}
-              baseConversations={{}}
               navigateToApp={mockNavigateToApp}
               productDocBase={{
                 installation: { getStatus: jest.fn(), install: jest.fn(), uninstall: jest.fn() },

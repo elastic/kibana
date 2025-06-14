@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ModuleGroup, ModuleVisibility } from '@kbn/repo-info/types';
+import {
+  KIBANA_SOLUTIONS,
+  type ModuleGroup,
+  type ModuleVisibility,
+} from '@kbn/projects-solutions-groups';
 
 interface ModuleAttrs {
   group: ModuleGroup;
@@ -37,20 +41,28 @@ const MODULE_GROUPING_BY_PATH: Record<string, ModuleAttrs> = ['packages', 'plugi
       group: 'platform',
       visibility: 'private',
     },
-    [`x-pack/solutions/observability/${type}`]: {
-      group: 'observability',
-      visibility: 'private',
-    },
-    [`x-pack/solutions/security/${type}`]: {
-      group: 'security',
-      visibility: 'private',
-    },
-    [`x-pack/solutions/search/${type}`]: {
-      group: 'search',
-      visibility: 'private',
-    },
+    ...KIBANA_SOLUTIONS.reduce<Record<string, ModuleAttrs>>((acc, solution) => {
+      acc[`x-pack/solutions/${solution}/${type}`] = {
+        group: solution,
+        visibility: 'private',
+      };
+      acc[`x-pack/solutions/${solution}/test`] = {
+        group: solution,
+        visibility: 'private',
+      };
+      return acc;
+    }, {}),
   }))
-  .reduce((acc, current) => ({ ...acc, ...current }), {});
+  .reduce((acc, current) => ({ ...acc, ...current }), {
+    'src/platform/test': {
+      group: 'platform',
+      visibility: 'shared',
+    },
+    'x-pack/platform/test': {
+      group: 'platform',
+      visibility: 'shared',
+    },
+  });
 
 /**
  * Determine a plugin's grouping information based on the path where it is defined

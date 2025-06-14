@@ -7,7 +7,7 @@
 
 import { FtrService } from '../ftr_provider_context';
 
-export class UpgradeAssistantPageObject extends FtrService {
+export class UpgradeAssistantFlyoutObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly log = this.ctx.getService('log');
   private readonly browser = this.ctx.getService('browser');
@@ -20,8 +20,9 @@ export class UpgradeAssistantPageObject extends FtrService {
 
   async navigateToPage() {
     return await this.retry.try(async () => {
-      await this.common.navigateToApp('settings');
-      await this.testSubjects.click('upgrade_assistant');
+      await this.common.navigateToUrl('management', 'stack/upgrade_assistant/overview', {
+        shouldUseHashForSubUrl: false,
+      });
       await this.retry.waitFor('url to contain /upgrade_assistant', async () => {
         const url = await this.browser.getCurrentUrl();
         return url.includes('/upgrade_assistant');
@@ -29,18 +30,27 @@ export class UpgradeAssistantPageObject extends FtrService {
     });
   }
 
-  async navigateToEsDeprecationLogs() {
+  async clickVerifyLoggingButton() {
     return await this.retry.try(async () => {
-      await this.common.navigateToUrl('management', 'stack/upgrade_assistant/es_deprecation_logs', {
-        shouldUseHashForSubUrl: false,
-      });
-      await this.retry.waitFor(
-        'url to contain /upgrade_assistant/es_deprecation_logs',
-        async () => {
-          const url = await this.browser.getCurrentUrl();
-          return url.includes('/es_deprecation_logs');
-        }
-      );
+      await this.testSubjects.click('viewDetailsLink');
+    });
+  }
+
+  async clickEnableLoggingButton() {
+    return await this.retry.try(async () => {
+      await this.testSubjects.click('enableLogsLink');
+    });
+  }
+
+  async clickOpenEsDeprecationsFlyoutButton() {
+    return await this.retry.try(async () => {
+      if (await this.testSubjects.exists('enableLogsLink')) {
+        await this.clickEnableLoggingButton();
+      } else if (await this.testSubjects.exists('viewDetailsLink')) {
+        await this.clickVerifyLoggingButton();
+      } else {
+        this.log.debug('No relevant button found to open ES Deprecations Flyout');
+      }
     });
   }
 

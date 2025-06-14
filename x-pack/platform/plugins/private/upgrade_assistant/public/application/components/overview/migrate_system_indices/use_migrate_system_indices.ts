@@ -18,7 +18,7 @@ const FLYOUT_ID = 'migrateSystemIndicesFlyout';
 const { useGlobalFlyout } = GlobalFlyout;
 
 export type StatusType = 'idle' | 'error' | 'started';
-interface MigrationStatus {
+export interface MigrationStatus {
   statusType: StatusType;
   error?: ResponseError;
 }
@@ -49,22 +49,6 @@ export const useMigrateSystemIndices = () => {
     removeContentFromGlobalFlyout(FLYOUT_ID);
   }, [removeContentFromGlobalFlyout]);
 
-  useEffect(() => {
-    if (showFlyout) {
-      addContentToGlobalFlyout<SystemIndicesFlyoutProps>({
-        id: FLYOUT_ID,
-        Component: SystemIndicesFlyout,
-        props: {
-          data: data!,
-          closeFlyout,
-        },
-        flyoutProps: {
-          onClose: closeFlyout,
-        },
-      });
-    }
-  }, [addContentToGlobalFlyout, data, showFlyout, closeFlyout]);
-
   const beginSystemIndicesMigration = useCallback(async () => {
     const { error: startMigrationError } = await api.migrateSystemIndices();
 
@@ -77,6 +61,36 @@ export const useMigrateSystemIndices = () => {
       resendRequest();
     }
   }, [api, resendRequest]);
+
+  useEffect(() => {
+    if (showFlyout) {
+      addContentToGlobalFlyout<SystemIndicesFlyoutProps>({
+        id: FLYOUT_ID,
+        Component: SystemIndicesFlyout,
+        props: {
+          data: data!,
+          closeFlyout,
+          beginSystemIndicesMigration,
+          isInitialRequest,
+          isLoading,
+          migrationStatus: data?.migration_status,
+        },
+        flyoutProps: {
+          onClose: closeFlyout,
+          'data-test-subj': 'migrateSystemIndicesFlyout',
+          'aria-labelledby': 'migrateSystemIndicesFlyoutTitle',
+        },
+      });
+    }
+  }, [
+    addContentToGlobalFlyout,
+    data,
+    showFlyout,
+    closeFlyout,
+    beginSystemIndicesMigration,
+    isLoading,
+    isInitialRequest,
+  ]);
 
   return {
     setShowFlyout,

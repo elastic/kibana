@@ -4,10 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AssetInventoryDataClient } from './asset_inventory_data_client';
+
+import {
+  loggingSystemMock,
+  elasticsearchServiceMock,
+  uiSettingsServiceMock,
+} from '@kbn/core/server/mocks';
+import type { InitEntityStoreRequestBody } from '../../../common/api/entity_analytics/entity_store/enable.gen';
 import type { SecuritySolutionApiRequestHandlerContext } from '../..';
-import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { mockGlobalState } from '../../../public/common/mock';
+import { AssetInventoryDataClient } from './asset_inventory_data_client';
 
 const mockSecSolutionContext = {
   getEntityStoreDataClient: jest.fn(),
@@ -26,19 +31,29 @@ const mockEntityStorePrivileges = {
 describe('AssetInventoryDataClient', () => {
   const loggerMock = loggingSystemMock.createLogger();
   const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
+  const uiSettingsClientMock = uiSettingsServiceMock.createClient();
 
   const client: AssetInventoryDataClient = new AssetInventoryDataClient({
     logger: loggerMock,
     clusterClient: clusterClientMock,
-    experimentalFeatures: mockGlobalState.app.enableExperimental,
+    uiSettingsClient: uiSettingsClientMock,
   });
 
   describe('status function', () => {
     beforeEach(() => {
       jest.clearAllMocks();
+      uiSettingsClientMock.get.mockResolvedValue(true);
     });
 
-    it('returns INSUFFICIENT_PRIVILEGES when user lacks required privileges', async () => {
+    it('returns INACTIVE_FEATURE when uisetting is disabled', async () => {
+      uiSettingsClientMock.get.mockResolvedValue(false);
+
+      const result = await client.status(mockSecSolutionContext, mockEntityStorePrivileges);
+
+      expect(result).toEqual({ status: 'inactive_feature' });
+    });
+
+    it('returns INSUFFICIENT_PRIVILEGES with missing privileges when user lacks required privileges', async () => {
       const noPrivileges = {
         ...mockEntityStorePrivileges,
         has_all_required: false,
@@ -48,7 +63,7 @@ describe('AssetInventoryDataClient', () => {
 
       expect(result).toEqual({
         status: 'insufficient_privileges',
-        privileges: noPrivileges.privileges,
+        privileges: noPrivileges,
       });
     });
 
@@ -78,7 +93,7 @@ describe('AssetInventoryDataClient', () => {
       expect(result).toEqual({ status: 'initializing' });
     });
 
-    it('returns DISABLED when host entity engine is missing', async () => {
+    it('returns DISABLED when generic entity engine is missing', async () => {
       (mockSecSolutionContext.getEntityStoreDataClient as unknown as jest.Mock).mockReturnValue({
         status: () => ({
           status: 'ready',
@@ -91,13 +106,13 @@ describe('AssetInventoryDataClient', () => {
       expect(result).toEqual({ status: 'disabled' });
     });
 
-    it('returns READY when documents have been processed', async () => {
+    it('returns READY when documents have been processed in the generic entity store', async () => {
       (mockSecSolutionContext.getEntityStoreDataClient as unknown as jest.Mock).mockReturnValue({
         status: () => ({
           status: 'ready',
           engines: [
             {
-              type: 'host',
+              type: 'generic',
               components: [
                 { resource: 'transform', metadata: { documents_processed: 10, trigger_count: 5 } },
               ],
@@ -117,7 +132,7 @@ describe('AssetInventoryDataClient', () => {
           status: 'ready',
           engines: [
             {
-              type: 'host',
+              type: 'generic',
               components: [
                 { resource: 'transform', metadata: { documents_processed: 0, trigger_count: 1 } },
               ],
@@ -137,7 +152,7 @@ describe('AssetInventoryDataClient', () => {
           status: 'ready',
           engines: [
             {
-              type: 'host',
+              type: 'generic',
               components: [
                 { resource: 'transform', metadata: { documents_processed: 0, trigger_count: 0 } },
               ],
@@ -149,6 +164,34 @@ describe('AssetInventoryDataClient', () => {
       const result = await client.status(mockSecSolutionContext, mockEntityStorePrivileges);
 
       expect(result).toEqual({ status: 'initializing' });
+    });
+  });
+
+  describe('enable function', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      uiSettingsClientMock.get.mockResolvedValue(true);
+    });
+
+    it('throws error when uisetting is disabled', async () => {
+      uiSettingsClientMock.get.mockResolvedValue(false);
+
+      await expect(
+        client.enable(mockSecSolutionContext, {} as InitEntityStoreRequestBody)
+      ).rejects.toThrowError('uiSetting');
+    });
+  });
+
+  describe('delete function', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      uiSettingsClientMock.get.mockResolvedValue(true);
+    });
+
+    it('throws error when uisetting is disabled', async () => {
+      uiSettingsClientMock.get.mockResolvedValue(false);
+
+      await expect(client.delete()).rejects.toThrowError('uiSetting');
     });
   });
 });

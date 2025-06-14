@@ -9,6 +9,7 @@ import React from 'react';
 
 import { TestProviders } from '../../../../../common/mock';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
+import { CellActionsWrapper } from '../../../../../common/components/drag_and_drop/cell_actions_wrapper';
 
 import { ProcessHash } from './process_hash';
 
@@ -23,12 +24,26 @@ jest.mock('@elastic/eui', () => {
 });
 
 const allProps = {
+  scopeId: 'some_scope',
   contextId: 'test',
   eventId: '1',
   processHashSha256: undefined,
 };
 
+jest.mock('../../../../../common/components/drag_and_drop/cell_actions_wrapper', () => {
+  return {
+    CellActionsWrapper: jest.fn(),
+  };
+});
+
+const MockedCellActionsWrapper = jest.fn(({ children }) => {
+  return <div data-test-subj="mock-cell-action-wrapper">{children}</div>;
+});
+
 describe('ProcessHash', () => {
+  beforeEach(() => {
+    (CellActionsWrapper as unknown as jest.Mock).mockImplementation(MockedCellActionsWrapper);
+  });
   const mount = useMountAppended();
 
   test('displays the processHashSha256 when provided', () => {
@@ -56,5 +71,20 @@ describe('ProcessHash', () => {
       </TestProviders>
     );
     expect(wrapper.text()).toEqual('');
+  });
+
+  test('should passing correct scopeId to cell actions', () => {
+    mount(
+      <TestProviders>
+        <ProcessHash {...allProps} />
+      </TestProviders>
+    );
+
+    expect(MockedCellActionsWrapper).toHaveBeenCalledWith(
+      expect.objectContaining({
+        scopeId: 'some_scope',
+      }),
+      {}
+    );
   });
 });

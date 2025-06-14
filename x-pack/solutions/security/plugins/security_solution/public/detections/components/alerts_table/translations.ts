@@ -393,6 +393,13 @@ export const STATS_GROUP_SEVERITY_MEDIUM = i18n.translate(
   }
 );
 
+export const STATS_GROUP_SEVERITY_UNKNOWN = i18n.translate(
+  'xpack.securitySolution.detectionEngine.groups.stats.severity.unknown',
+  {
+    defaultMessage: 'Unknown',
+  }
+);
+
 export const INSPECT_GROUPING_TITLE = i18n.translate(
   'xpack.securitySolution.detectionsEngine.grouping.inspectTitle',
   {

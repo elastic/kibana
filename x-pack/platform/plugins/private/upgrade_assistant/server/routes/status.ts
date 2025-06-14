@@ -6,23 +6,25 @@
  */
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { API_BASE_PATH } from '../../common/constants';
+import { API_BASE_PATH, RECENT_DURATION_MS } from '../../common/constants';
 import { getESUpgradeStatus } from '../lib/es_deprecations_status';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { getKibanaUpgradeStatus } from '../lib/kibana_status';
 import { getESSystemIndicesMigrationStatus } from '../lib/es_system_indices_migration';
 import { RouteDependencies } from '../types';
 import { getUpgradeType } from '../lib/upgrade_type';
+import { getRecentEsDeprecationLogs } from '../lib/es_deprecation_logging_apis';
 
 /**
  * Note that this route is primarily intended for consumption by Cloud.
  */
 export function registerUpgradeStatusRoute({
-  config: { featureSet },
+  config: { featureSet, dataSourceExclusions },
   router,
   lib: { handleEsError },
   current,
   defaultTarget,
+  log,
 }: RouteDependencies) {
   router.get(
     {
@@ -57,7 +59,13 @@ export function registerUpgradeStatusRoute({
         const {
           totalCriticalDeprecations, // critical deprecations
           totalCriticalHealthIssues, // critical health issues
-        } = await getESUpgradeStatus(esClient, featureSet);
+        } = await getESUpgradeStatus(esClient.asCurrentUser, { featureSet, dataSourceExclusions });
+
+        // Fetch recent ES deprecation logs (last 24 hours)
+        const recentEsDeprecationLogs = await getRecentEsDeprecationLogs(
+          esClient,
+          RECENT_DURATION_MS
+        );
 
         const getSystemIndicesMigrationStatus = async () => {
           /**
@@ -84,9 +92,11 @@ export function registerUpgradeStatusRoute({
         ).length;
 
         // Fetch Kibana upgrade status
-        const { totalCriticalDeprecations: kibanaTotalCriticalDeps } = await getKibanaUpgradeStatus(
-          deprecationsClient
-        );
+        const {
+          totalCriticalDeprecations: kibanaTotalCriticalDeps,
+          apiDeprecations: kibanaApiDeprecations,
+        } = await getKibanaUpgradeStatus(deprecationsClient);
+
         // non-major upgrades blocked only for health issues (status !== green)
         let upgradeTypeBasedReadyForUpgrade: boolean;
         if (upgradeType === 'major') {
@@ -156,9 +166,15 @@ export function registerUpgradeStatusRoute({
           body: {
             readyForUpgrade,
             details: getStatusMessage(),
+            recentEsDeprecationLogs: {
+              count: recentEsDeprecationLogs.count,
+              logs: recentEsDeprecationLogs.logs,
+            },
+            kibanaApiDeprecations,
           },
         });
       } catch (error) {
+        log.error(error);
         return handleEsError({ error, response });
       }
     })

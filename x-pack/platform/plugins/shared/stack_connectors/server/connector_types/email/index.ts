@@ -7,10 +7,11 @@
 
 import { curry } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { Logger } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { Logger } from '@kbn/core/server';
 import nodemailerGetService from 'nodemailer/lib/well-known';
-import SMTPConnection from 'nodemailer/lib/smtp-connection';
+import type SMTPConnection from 'nodemailer/lib/smtp-connection';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
@@ -30,7 +31,8 @@ import {
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { AdditionalEmailServices } from '../../../common';
-import { sendEmail, JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport } from './send_email';
+import type { SendEmailOptions, Transport } from './send_email';
+import { sendEmail, JSON_TRANSPORT_SERVICE } from './send_email';
 import { portSchema } from '../lib/schemas';
 
 export type EmailConnectorType = ConnectorType<
@@ -79,10 +81,11 @@ function validateConfig(
 ) {
   const config = configObject;
   const { configurationUtilities } = validatorServices;
+  const awsSesConfig = configurationUtilities.getAwsSesConfig();
 
   const emails = [config.from];
   const invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails);
-  if (!!invalidEmailsMessage) {
+  if (invalidEmailsMessage) {
     throw new Error(`[from]: ${invalidEmailsMessage}`);
   }
 
@@ -103,6 +106,21 @@ function validateConfig(
 
     if (config.tenantId == null) {
       throw new Error('[tenantId] is required');
+    }
+  } else if (awsSesConfig && config.service === AdditionalEmailServices.AWS_SES) {
+    if (awsSesConfig.host !== config.host && awsSesConfig.port !== config.port) {
+      throw new Error(
+        '[ses.host]/[ses.port] does not match with the configured AWS SES host/port combination'
+      );
+    }
+    if (awsSesConfig.host !== config.host) {
+      throw new Error('[ses.host] does not match with the configured AWS SES host');
+    }
+    if (awsSesConfig.port !== config.port) {
+      throw new Error('[ses.port] does not match with the configured AWS SES port');
+    }
+    if (awsSesConfig.secure !== config.secure) {
+      throw new Error(`[ses.secure] must be ${awsSesConfig.secure} for AWS SES`);
     }
   } else if (CUSTOM_HOST_PORT_SERVICES.indexOf(config.service) >= 0) {
     // If configured `service` requires custom host/port/secure settings, validate that they are set
@@ -151,6 +169,15 @@ const SecretsSchema = schema.object(SecretsSchemaProps);
 
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 
+const AttachmentSchemaProps = {
+  content: schema.string(),
+  contentType: schema.maybe(schema.string()),
+  filename: schema.string(),
+  encoding: schema.maybe(schema.string()),
+};
+export const AttachmentSchema = schema.object(AttachmentSchemaProps);
+export type Attachment = TypeOf<typeof AttachmentSchema>;
+
 const ParamsSchemaProps = {
   to: schema.arrayOf(schema.string(), { defaultValue: [] }),
   cc: schema.arrayOf(schema.string(), { defaultValue: [] }),
@@ -168,6 +195,7 @@ const ParamsSchemaProps = {
       }),
     }),
   }),
+  attachments: schema.maybe(schema.arrayOf(AttachmentSchema)),
 };
 
 export const ParamsSchema = schema.object(ParamsSchemaProps);
@@ -285,6 +313,7 @@ async function executor(
     connectorUsageCollector,
   } = execOptions;
   const connectorTokenClient = services.connectorTokenClient;
+  const awsSesConfig = configurationUtilities.getAwsSesConfig();
 
   const emails = params.to.concat(params.cc).concat(params.bcc);
   let invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails);
@@ -303,6 +332,16 @@ async function executor(
         status: 'error',
         actionId,
         message: `HTML email can only be sent via notifications`,
+      };
+    }
+  }
+
+  if (params.attachments != null) {
+    if (execOptions.source?.type !== ActionExecutionSourceType.NOTIFICATION) {
+      return {
+        status: 'error',
+        actionId,
+        message: `Email attachments can only be sent via notifications`,
       };
     }
   }
@@ -326,6 +365,10 @@ async function executor(
     if (config.oauthTokenUrl !== null) {
       transport.oauthTokenUrl = config.oauthTokenUrl;
     }
+  } else if (awsSesConfig && config.service === AdditionalEmailServices.AWS_SES) {
+    transport.host = awsSesConfig.host;
+    transport.port = awsSesConfig.port;
+    transport.secure = awsSesConfig.secure;
   } else if (CUSTOM_HOST_PORT_SERVICES.indexOf(config.service) >= 0) {
     // use configured host/port/secure values
     // already validated service or host/port is not null ...
@@ -369,6 +412,7 @@ async function executor(
     },
     hasAuth: config.hasAuth,
     configurationUtilities,
+    attachments: params.attachments,
   };
 
   let result;

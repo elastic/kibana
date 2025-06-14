@@ -9,18 +9,18 @@ import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CancelLoadingState } from '../../../../../../types';
-import { DataStreamReindexStatus } from '../../../../../../../../../common/types';
-import type { ReindexState } from '../../../use_reindex_state';
+import { DataStreamMigrationStatus } from '../../../../../../../../../common/types';
+import type { MigrationState } from '../../../use_migration_state';
 
-export const ReindexingDocumentsStepTitle: React.FunctionComponent<{
-  reindexState: ReindexState;
-}> = ({ reindexState: { status, cancelLoadingState } }) => {
+export const MigrateDocumentsStepTitle: React.FunctionComponent<{
+  migrationState: MigrationState;
+}> = ({ migrationState: { status, cancelLoadingState, resolutionType } }) => {
   switch (cancelLoadingState) {
     case CancelLoadingState.Requested:
     case CancelLoadingState.Loading: {
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.cancellingLabel"
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.reindexingChecklist.cancelButton.cancellingLabel"
           defaultMessage="Cancelling…"
         />
       );
@@ -28,7 +28,7 @@ export const ReindexingDocumentsStepTitle: React.FunctionComponent<{
     case CancelLoadingState.Success: {
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.cancelledLabel"
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.reindexingChecklist.cancelButton.cancelledLabel"
           defaultMessage="Cancelled"
         />
       );
@@ -36,56 +36,61 @@ export const ReindexingDocumentsStepTitle: React.FunctionComponent<{
     case CancelLoadingState.Error: {
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.errorLabel"
-          defaultMessage="Failed to cancel reindexing"
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.reindexingChecklist.cancelButton.errorLabel"
+          defaultMessage="Failed to cancel {resolutionType, select, reindex {reindexing} readonly {read-only} other {}}"
+          values={{ resolutionType }}
         />
       );
     }
   }
 
   switch (status) {
-    case DataStreamReindexStatus.inProgress: {
+    case DataStreamMigrationStatus.inProgress: {
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.reindexingDocumentsStepTitle"
-          defaultMessage="Reindexing data stream"
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.reindexingChecklist.inProgress.reindexingDocumentsStepTitle"
+          defaultMessage="{resolutionType, select, reindex {Reindexing} readonly {Marking as read-only} other {}}"
+          values={{ resolutionType }}
         />
       );
     }
-    case DataStreamReindexStatus.failed:
+    case DataStreamMigrationStatus.failed:
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklist.failed.reindexingDocumentsStepTitle"
-          defaultMessage="Reindexing failed"
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.reindexingChecklist.failed.reindexingDocumentsStepTitle"
+          defaultMessage="Failed to {resolutionType, select, reindex {reindex} readonly {mark as read-only} other {}}"
+          values={{ resolutionType }}
         />
       );
-    case DataStreamReindexStatus.fetchFailed:
+    case DataStreamMigrationStatus.fetchFailed:
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklist.fetchFailed.reindexingDocumentsStepTitle"
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.reindexingChecklist.fetchFailed.reindexingDocumentsStepTitle"
           defaultMessage="Fetching status failed"
         />
       );
-    case DataStreamReindexStatus.cancelled:
+    case DataStreamMigrationStatus.cancelled:
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklist.cancelled.reindexingDocumentsStepTitle"
-          defaultMessage="Reindexing cancelled"
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.reindexingChecklist.cancelled.reindexingDocumentsStepTitle"
+          defaultMessage="{resolutionType, select, reindex {Reindexing} readonly {Marking as read-only} other {}} cancelled"
+          values={{ resolutionType }}
         />
       );
-    case DataStreamReindexStatus.completed:
+    case DataStreamMigrationStatus.completed:
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklist.completed.reindexingDocumentsStepTitle"
-          defaultMessage="Reindexing completed"
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.reindexingChecklist.completed.reindexingDocumentsStepTitle"
+          defaultMessage="{resolutionType, select, reindex {Reindexing} readonly {Marking as read-only} other {}} completed"
+          values={{ resolutionType }}
         />
       );
-    case DataStreamReindexStatus.notStarted:
+    case DataStreamMigrationStatus.notStarted:
     default: {
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.reindexingDocumentsStepTitle"
-          defaultMessage="Reindex data stream"
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.reindexingChecklist.inProgress.reindexingDocumentsStepTitle"
+          defaultMessage="{resolutionType, select, reindex {Reindex data stream} readonly {Mark data stream as read-only} other {Unknown action}}"
         />
       );
     }

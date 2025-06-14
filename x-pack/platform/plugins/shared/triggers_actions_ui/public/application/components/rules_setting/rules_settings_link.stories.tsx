@@ -6,7 +6,7 @@
  */
 
 import React, { ComponentProps } from 'react';
-import { Meta, Story } from '@storybook/react';
+import { Meta, StoryFn, StoryObj } from '@storybook/react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { RulesSettingsLink } from './rules_settings_link';
 import { StorybookContextDecorator } from '../../../../.storybook/decorator';
@@ -19,82 +19,90 @@ export default {
   component: RulesSettingsLink,
 } as Meta<Args>;
 
-const Template: Story<Args> = () => {
-  return <RulesSettingsLink />;
+const Template: StoryFn<Args> = ({ alertDeleteCategoryIds }) => {
+  return <RulesSettingsLink alertDeleteCategoryIds={alertDeleteCategoryIds} />;
 };
 
-export const withAllPermission = Template.bind({});
+export const withAllPermission: StoryObj<Args> = {
+  render: Template,
+  args: {
+    alertDeleteCategoryIds: ['management'],
+  },
+  decorators: [
+    (StoryComponent, context) => (
+      <StorybookContextDecorator
+        context={context}
+        servicesApplicationOverride={{
+          capabilities: getDefaultCapabilities({
+            rulesSettings: {
+              show: true,
+              save: true,
+              readFlappingSettingsUI: true,
+              writeFlappingSettingsUI: true,
+              readQueryDelaySettingsUI: true,
+              writeQueryDelaySettingsUI: true,
+            },
+          }),
+        }}
+      >
+        <StoryComponent />
+      </StorybookContextDecorator>
+    ),
+  ],
+};
 
-withAllPermission.decorators = [
-  (StoryComponent, context) => (
-    <StorybookContextDecorator
-      context={context}
-      servicesApplicationOverride={{
-        capabilities: getDefaultCapabilities({
-          rulesSettings: {
-            show: true,
-            save: true,
-            readFlappingSettingsUI: true,
-            writeFlappingSettingsUI: true,
-            readQueryDelaySettingsUI: true,
-            writeQueryDelaySettingsUI: true,
-          },
-        }),
-      }}
-    >
-      <StoryComponent />
-    </StorybookContextDecorator>
-  ),
-];
+export const withReadPermission: StoryObj<Args> = {
+  render: Template,
 
-export const withReadPermission = Template.bind({});
+  decorators: [
+    (StoryComponent, context) => (
+      <StorybookContextDecorator
+        context={context}
+        servicesApplicationOverride={{
+          capabilities: getDefaultCapabilities({
+            rulesSettings: {
+              show: true,
+              save: false,
+              readFlappingSettingsUI: true,
+              writeFlappingSettingsUI: false,
+              readQueryDelaySettingsUI: true,
+              writeQueryDelaySettingsUI: false,
+            },
+          }),
+        }}
+      >
+        <StoryComponent />
+      </StorybookContextDecorator>
+    ),
+  ],
+};
 
-withReadPermission.decorators = [
-  (StoryComponent, context) => (
-    <StorybookContextDecorator
-      context={context}
-      servicesApplicationOverride={{
-        capabilities: getDefaultCapabilities({
-          rulesSettings: {
-            show: true,
-            save: false,
-            readFlappingSettingsUI: true,
-            writeFlappingSettingsUI: false,
-            readQueryDelaySettingsUI: true,
-            writeQueryDelaySettingsUI: false,
-          },
-        }),
-      }}
-    >
-      <StoryComponent />
-    </StorybookContextDecorator>
-  ),
-];
+export const withNoPermission: StoryObj<Args> = {
+  render: Template,
 
-export const withNoPermission = Template.bind({});
-
-withNoPermission.decorators = [
-  (StoryComponent, context) => (
-    <StorybookContextDecorator
-      context={context}
-      servicesApplicationOverride={{
-        capabilities: getDefaultCapabilities({
-          rulesSettings: {
-            show: false,
-            save: false,
-            readFlappingSettingsUI: false,
-            writeFlappingSettingsUI: false,
-            readQueryDelaySettingsUI: false,
-            writeQueryDelaySettingsUI: false,
-          },
-        }),
-      }}
-    >
-      <EuiCallOut title="No Permissions">
-        When the user does not have capabilities to view rules settings, the entire link is hidden
-      </EuiCallOut>
-      <EuiSpacer />
-      <StoryComponent />
-    </StorybookContextDecorator>
-  ),
-];
+  decorators: [
+    (StoryComponent, context) => (
+      <StorybookContextDecorator
+        context={context}
+        servicesApplicationOverride={{
+          capabilities: getDefaultCapabilities({
+            rulesSettings: {
+              show: false,
+              save: false,
+              readFlappingSettingsUI: false,
+              writeFlappingSettingsUI: false,
+              readQueryDelaySettingsUI: false,
+              writeQueryDelaySettingsUI: false,
+            },
+          }),
+        }}
+      >
+        <EuiCallOut title="No Permissions">
+          When the user does not have capabilities to view rules settings, the entire link is hidden
+        </EuiCallOut>
+        <EuiSpacer />
+        <StoryComponent />
+      </StorybookContextDecorator>
+    ),
+  ],
+};

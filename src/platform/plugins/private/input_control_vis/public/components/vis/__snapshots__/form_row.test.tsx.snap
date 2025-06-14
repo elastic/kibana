@@ -9,6 +9,7 @@ exports[`renders control with warning 1`] = `
       <EuiToolTip
         content="This is a warning"
         delay="regular"
+        disableScreenReaderOutput={false}
         display="inlineBlock"
         position="top"
       >
@@ -36,6 +37,7 @@ exports[`renders disabled control with tooltip 1`] = `
     anchorClassName="eui-displayBlock"
     content="I am disabled for testing purposes"
     delay="regular"
+    disableScreenReaderOutput={false}
     display="inlineBlock"
     position="top"
   >

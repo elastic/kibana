@@ -11,7 +11,7 @@ import {
   Client as ESClient,
   ClientOptions as ESClientOptions,
   HttpConnection,
-} from '@elastic/elasticsearch';
+} from 'elasticsearch-8.x'; // Switch to `@elastic/elasticsearch` when the CI cluster is upgraded.
 import { ToolingLog } from '@kbn/tooling-log';
 import { createFailError } from '@kbn/dev-cli-errors';
 

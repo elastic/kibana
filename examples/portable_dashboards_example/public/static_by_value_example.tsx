@@ -9,7 +9,6 @@
 
 import React from 'react';
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { DashboardPanelMap } from '@kbn/dashboard-plugin/common';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
@@ -32,7 +31,7 @@ export const StaticByValueExample = () => {
             return {
               getInitialInput: () => ({
                 timeRange: { from: 'now-30d', to: 'now' },
-                viewMode: ViewMode.VIEW,
+                viewMode: 'view',
                 panels: panelsJson as DashboardPanelMap,
               }),
             };

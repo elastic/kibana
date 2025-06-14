@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { httpServiceMock } from '@kbn/core/public/mocks';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { unmuteAlertInstance } from './unmute_alert_instance';
 
 const http = httpServiceMock.createStartContract();

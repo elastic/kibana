@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import {
+import type {
   IndicesPutIndexTemplateRequest,
   MappingTypeMapping,
   Metadata,
 } from '@elastic/elasticsearch/lib/api/types';
-import { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
-import { IIndexPatternString } from '../resource_installer_utils';
+import type { IIndexPatternString } from '../resource_installer_utils';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
-import { DataStreamAdapter } from './data_stream_adapter';
+import type { DataStreamAdapter } from './data_stream_adapter';
 
 interface GetIndexTemplateOpts {
   componentTemplateRefs: string[];
@@ -71,6 +71,7 @@ export const getIndexTemplate = ({
             }),
         'index.mapping.ignore_malformed': true,
         'index.mapping.total_fields.limit': totalFieldsLimit,
+        'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
       },
       mappings: {
         dynamic: false,
