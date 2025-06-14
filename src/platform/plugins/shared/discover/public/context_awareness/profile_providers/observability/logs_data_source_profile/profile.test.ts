@@ -265,7 +265,6 @@ describe('logsDataSourceProfileProvider', () => {
 
 describe('isLogsDataSourceContext', () => {
   const logsDataSourceContext = {
-    profileId: 'any-profile-id',
     category: DataSourceCategory.Logs,
     logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
   };
