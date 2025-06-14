@@ -10,15 +10,13 @@
 import { EuiBadge, EuiLink, EuiFlyout, EuiPanel } from '@elastic/eui';
 import type { RowControlColumn } from '@kbn/discover-utils';
 import { AppMenuActionId, AppMenuActionType, getFieldValue } from '@kbn/discover-utils';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { capitalize } from 'lodash';
 import React from 'react';
-import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
 import { useExampleContext } from '../example_context';
 import { RESOLUTION_MISMATCH } from '../../../profile_service';
+import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 
 export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvider<{
   formatRecord: (flattenedRecord: Record<string, unknown>) => string;
@@ -261,17 +259,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
     }),
   },
   resolve: (params) => {
-    let indexPattern: string | undefined;
-
-    if (isDataSourceType(params.dataSource, DataSourceType.Esql)) {
-      if (!isOfAggregateQueryType(params.query)) {
-        return RESOLUTION_MISMATCH;
-      }
-
-      indexPattern = getIndexPatternFromESQLQuery(params.query.esql);
-    } else if (isDataSourceType(params.dataSource, DataSourceType.DataView) && params.dataView) {
-      indexPattern = params.dataView.getIndexPattern();
-    }
+    const indexPattern = extractIndexPatternFrom(params);
 
     if (indexPattern !== 'my-example-logs' && indexPattern !== 'my-example-logs,logstash*') {
       return RESOLUTION_MISMATCH;

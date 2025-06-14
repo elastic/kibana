@@ -113,11 +113,9 @@ Example profile provider implementations are located in [`profile_providers/exam
 
 import React from 'react';
 import { getFieldValue } from '@kbn/discover-utils';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { DataSourceType, isDataSourceType } from '../../../../../../../common/data_sources';
 import { DataSourceCategory, DataSourceProfileProvider } from '../../../../../profiles';
 import { ProfileProviderServices } from '../../profile_provider_services';
+import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 import { RESOLUTION_MISMATCH } from '../../../profile_service';
 
 // Export profile provider factory function, optionally accepting ProfileProviderServices,
@@ -151,18 +149,8 @@ export const createExampleDataSourceProfileProvider = (
   // passed a params object with props specific to the context level,
   // as well as providing access to higher level context objects
   resolve: (params) => {
-    let indexPattern: string | undefined;
-
     // Extract the index pattern from the current ES|QL query or data view
-    if (isDataSourceType(params.dataSource, DataSourceType.Esql)) {
-      if (!isOfAggregateQueryType(params.query)) {
-        return RESOLUTION_MISMATCH;
-      }
-
-      indexPattern = getIndexPatternFromESQLQuery(params.query.esql);
-    } else if (isDataSourceType(params.dataSource, DataSourceType.DataView) && params.dataView) {
-      indexPattern = params.dataView.getIndexPattern();
-    }
+    const indexPattern = extractIndexPatternFrom(params);
 
     // If the profile is not a match, return RESOLUTION_MISMATCH in the result
     if (indexPattern !== 'my-example-logs') {
