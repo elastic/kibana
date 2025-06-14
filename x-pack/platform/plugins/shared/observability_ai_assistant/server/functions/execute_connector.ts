@@ -65,13 +65,13 @@ export function registerGetConnectorInfoFunction({
 
       let allConnectors = await actionsClient.getAll();
 
+      // IDs of connectors to exclude (used for inference/AI purposes)
+      const excludedConnectorIds = new Set(['.bedrock', '.gemini', '.inference', '.gen-ai']);
+
       // filter out AI connectors
       allConnectors = allConnectors.filter(
         (connector) => !excludedConnectorIds.has(connector.actionTypeId)
       );
-
-      // IDs of connectors to exclude (used for inference/AI purposes)
-      const excludedConnectorIds = new Set(['.bedrock', '.gemini', '.inference', '.gen-ai']);
 
       // get all connector parameters schemas
       const connectorParamsSchemas = await Promise.all(
