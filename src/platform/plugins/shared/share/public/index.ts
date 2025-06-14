@@ -27,6 +27,7 @@ export type {
   ShareContextMenuPanelItem,
   BrowserUrlService,
   ExportShare,
+  ExportShareDerivatives,
 } from './types';
 
 export type { RedirectOptions } from '../common/url_service';
