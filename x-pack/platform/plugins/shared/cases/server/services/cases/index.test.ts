@@ -667,6 +667,33 @@ describe('CasesService', () => {
           expect(patchAttributes.status).toEqual(expectedStatus);
         }
       );
+
+      it('updates the total attachment stats', async () => {
+        unsecuredSavedObjectsClient.update.mockResolvedValue(
+          {} as SavedObjectsUpdateResponse<CasePersistedAttributes>
+        );
+
+        await service.patchCase({
+          caseId: '1',
+          updatedAttributes: {
+            ...createCasePostParams({
+              connector: createJiraConnector(),
+              externalService: createExternalService(),
+              severity: CaseSeverity.CRITICAL,
+              status: CaseStatuses['in-progress'],
+            }),
+            total_alerts: 10,
+            total_comments: 5,
+          },
+          originalCase: {} as CaseSavedObjectTransformed,
+        });
+
+        const patchAttributes = unsecuredSavedObjectsClient.update.mock
+          .calls[0][2] as CasePersistedAttributes;
+
+        expect(patchAttributes.total_alerts).toEqual(10);
+        expect(patchAttributes.total_comments).toEqual(5);
+      });
     });
 
     describe('bulkPatch', () => {
