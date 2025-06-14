@@ -13,8 +13,7 @@ import { DataSourceCategory, DocumentType, SolutionType } from '../../../../prof
 import { createObservabilityTracesTransactionDocumentProfileProvider } from './profile';
 import type { ContextWithProfileId } from '../../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
-import { createContextAwarenessMocks } from '../../../../__mocks__';
-import type { ProfileProviderServices } from '../../../profile_provider_services';
+import { createProfileProviderServicesMock } from '../../../../__mocks__';
 
 describe('transactionDocumentProfileProvider', () => {
   const getRootContext = ({
@@ -44,9 +43,7 @@ describe('transactionDocumentProfileProvider', () => {
     isMatch: false,
   };
 
-  const mockServices: ProfileProviderServices = {
-    ...createContextAwarenessMocks().profileProviderServices,
-  };
+  const mockServices = createProfileProviderServicesMock();
 
   describe('when root profile is observability', () => {
     const profileId = OBSERVABILITY_ROOT_PROFILE_ID;

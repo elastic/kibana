@@ -8,13 +8,13 @@
  */
 
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { createContextAwarenessMocks } from '../../../../__mocks__';
+import { createProfileProviderServicesMock } from '../../../../__mocks__';
 import { SolutionType } from '../../../../profiles';
 import { createObservabilityRootProfileProvider } from '../profile';
 import { createObservabilityRootProfileProviderWithAttributesTab } from './observability_root_profile_with_attributes_tab';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 
-const mockServices = createContextAwarenessMocks().profileProviderServices;
+const mockServices = createProfileProviderServicesMock();
 
 describe('createObservabilityRootProfileProviderWithAttributesTab', () => {
   const observabilityRootProfileProvider = createObservabilityRootProfileProvider(mockServices);

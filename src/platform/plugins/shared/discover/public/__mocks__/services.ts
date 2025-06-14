@@ -262,7 +262,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     profilesManager: profilesManagerMock,
     ebtManager: new DiscoverEBTManager(),
     setHeaderActionMenu: jest.fn(),
-    discoverShared: discoverSharedPluginMock.createStartContract().features,
+    discoverShared: discoverSharedPluginMock.createStartContract(),
   } as unknown as DiscoverServices;
 }
 
