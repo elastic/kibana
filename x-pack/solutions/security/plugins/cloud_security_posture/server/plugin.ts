@@ -219,25 +219,25 @@ export class CspPlugin
     await initializeCspIndices(esClient, this.config, this.logger);
     await initializeCspTransforms(esClient, this.logger);
     await scheduleFindingsStatsTask(taskManager, this.logger);
-    await this.intializeIndexAlias(esClient, this.logger);
+    await this.initializeIndexAlias(esClient, this.logger);
     this.#isInitialized = true;
   }
 
   // For integration versions earlier than 2.00, we will manually create an index alias for the deprecated latest index 'logs-cloud_security_posture.findings_latest-default'.
   // For integration versions 2.00 and above, the index alias will be automatically created or updated as part of the Transform setup.
-  intializeIndexAlias = async (esClient: ElasticsearchClient, logger: Logger): Promise<void> => {
+  initializeIndexAlias = async (esClient: ElasticsearchClient, logger: Logger): Promise<void> => {
     const isAliasExists = await esClient.indices.existsAlias({
       name: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
     });
 
-    const isIDeprecatedLatestIndexExists = await esClient.indices.exists({
+    const isDeprecatedLatestIndexExists = await esClient.indices.exists({
       index: DEPRECATED_CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
     });
 
     // This handles the following scenarios:
     // 1. A customer using an older integration version (pre-2.00) who has upgraded their Kibana stack.
     // 2. A customer with a new Kibana stack who installs an integration version earlier than 2.00 for the first time (e.g., in a serverless environment).
-    if (isIDeprecatedLatestIndexExists && !isAliasExists) {
+    if (isDeprecatedLatestIndexExists && !isAliasExists) {
       try {
         await esClient.indices.updateAliases({
           actions: [
@@ -251,7 +251,7 @@ export class CspPlugin
           ],
         });
         this.logger.info(
-          `Index alias ${CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS} created successfully}`
+          `Index alias ${CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS} created successfully`
         );
       } catch (error) {
         this.logger.error(
