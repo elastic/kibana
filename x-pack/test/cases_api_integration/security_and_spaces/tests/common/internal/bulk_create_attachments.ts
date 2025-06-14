@@ -26,6 +26,7 @@ import {
   postExternalReferenceSOReq,
   fileMetadata,
   postCommentAlertMultipleIdsReq,
+  postCommentActionsReq,
 } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -41,6 +42,7 @@ import {
   deleteAllFiles,
   getAllComments,
   createComment,
+  getCaseSavedObjectsFromES,
 } from '../../../../common/lib/api';
 import {
   createAlertsIndex,
@@ -1536,6 +1538,32 @@ export default ({ getService }: FtrProviderContext): void => {
           params: [postCommentUserReq],
           expectedHttpCode: 200,
         });
+      });
+
+      it('should set the attachment stats correctly', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            postCommentUserReq,
+            postCommentUserReq,
+            postCommentAlertReq,
+            // an attachment that is not a comment or an alert should not affect the stats
+            postCommentActionsReq,
+          ],
+          expectedHttpCode: 200,
+        });
+
+        const res = await getCaseSavedObjectsFromES({ es });
+
+        expect(res.body.hits.hits.length).to.eql(1);
+
+        const theCase = res.body.hits.hits[0]._source?.cases!;
+
+        expect(theCase.total_alerts).to.eql(1);
+        expect(theCase.total_comments).to.eql(2);
       });
     });
 

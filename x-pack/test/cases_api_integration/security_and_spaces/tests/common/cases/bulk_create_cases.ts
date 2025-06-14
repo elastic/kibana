@@ -18,6 +18,7 @@ import {
   getSpaceUrlPrefix,
   removeServerGeneratedPropertiesFromCase,
   removeServerGeneratedPropertiesFromUserAction,
+  getCaseSavedObjectsFromES,
 } from '../../../../common/lib/api';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -229,6 +230,28 @@ export default ({ getService }: FtrProviderContext): void => {
           category: null,
           customFields: [],
         },
+      });
+    });
+
+    describe('attachment stats', () => {
+      it('should set the attachment stats to zero', async () => {
+        await bulkCreateCases({
+          data: {
+            cases: [getPostCaseRequest(), getPostCaseRequest({ severity: CaseSeverity.MEDIUM })],
+          },
+        });
+
+        const res = await getCaseSavedObjectsFromES({ es });
+
+        expect(res.body.hits.hits.length).to.eql(2);
+
+        const firstCase = res.body.hits.hits[0]._source?.cases!;
+        const secondCase = res.body.hits.hits[1]._source?.cases!;
+
+        expect(firstCase.total_alerts).to.eql(0);
+        expect(firstCase.total_comments).to.eql(0);
+        expect(secondCase.total_alerts).to.eql(0);
+        expect(secondCase.total_comments).to.eql(0);
       });
     });
 
