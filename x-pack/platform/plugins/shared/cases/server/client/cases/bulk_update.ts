@@ -514,7 +514,7 @@ export const bulkUpdate = async (
       alertsService,
     });
 
-    const commentsMap = await attachmentService.getter.getCaseCommentStats({
+    const commentsMap = await attachmentService.getter.getCaseAttatchmentStats({
       caseIds,
     });
 

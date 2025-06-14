@@ -49,7 +49,7 @@ export const bulkGet = async (
         operation: Operations.bulkGetCases,
       });
 
-    const commentTotals = await attachmentService.getter.getCaseCommentStats({
+    const commentTotals = await attachmentService.getter.getCaseAttatchmentStats({
       caseIds: authorizedCases.map((theCase) => theCase.id),
     });
 

@@ -12,6 +12,7 @@ import type {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
+import { groupBy } from 'lodash';
 import type {
   AlertAttachmentPayload,
   AttachmentAttributes,
@@ -44,6 +45,7 @@ import {
 } from '../utils';
 import { decodeOrThrow } from '../runtime_types';
 import type { AttachmentRequest, AttachmentPatchRequest } from '../../../common/types/api';
+import type { AttachmentSavedObjectTransformed } from '../types/attachments';
 
 type CaseCommentModelParams = Omit<CasesClientArgs, 'authorization'>;
 type CommentRequestWithId = Array<{ id: string } & AttachmentRequest>;
@@ -129,7 +131,7 @@ export class CaseCommentModel {
           },
           options,
         }),
-        this.partialUpdateCaseUserAndDateSkipRefresh(updatedAt),
+        this.partialUpdateCaseWithAttachmentDataSkipRefresh({ date: updatedAt }),
       ]);
 
       await commentableCase.createUpdateCommentUserAction(comment, updateRequest, owner);
@@ -144,21 +146,40 @@ export class CaseCommentModel {
     }
   }
 
-  private async partialUpdateCaseUserAndDateSkipRefresh(date: string) {
-    return this.partialUpdateCaseUserAndDate(date, false);
+  private async partialUpdateCaseWithAttachmentDataSkipRefresh({
+    date,
+    newlyCreatedAttachments = [],
+  }: {
+    date: string;
+    newlyCreatedAttachments?: AttachmentSavedObjectTransformed[];
+  }): Promise<CaseCommentModel> {
+    return this.partialUpdateCaseWithAttachmentData({
+      date,
+      newlyCreatedAttachments,
+      refresh: false,
+    });
   }
 
-  private async partialUpdateCaseUserAndDate(
-    date: string,
-    refresh: RefreshSetting
-  ): Promise<CaseCommentModel> {
+  private async partialUpdateCaseWithAttachmentData({
+    date,
+    refresh,
+    newlyCreatedAttachments = [],
+  }: {
+    date: string;
+    refresh: RefreshSetting;
+    newlyCreatedAttachments?: AttachmentSavedObjectTransformed[];
+  }): Promise<CaseCommentModel> {
     try {
+      const { totalComments, totalAlerts } = await this.getAttachmentStats(newlyCreatedAttachments);
+
       const updatedCase = await this.params.services.caseService.patchCase({
         originalCase: this.caseInfo,
         caseId: this.caseInfo.id,
         updatedAttributes: {
           updated_at: date,
           updated_by: { ...this.params.user },
+          total_comments: totalComments,
+          total_alerts: totalAlerts,
         },
         refresh,
       });
@@ -178,6 +199,31 @@ export class CaseCommentModel {
         logger: this.params.logger,
       });
     }
+  }
+
+  private async getAttachmentStats(
+    newlyCreatedAttachments: AttachmentSavedObjectTransformed[] = []
+  ) {
+    const attachmentStats =
+      await this.params.services.attachmentService.getter.getCaseAttatchmentStats({
+        caseIds: [this.caseInfo.id],
+      });
+
+    const groupedAttachments = groupBy(
+      newlyCreatedAttachments,
+      (attachment) => attachment.attributes.type
+    );
+
+    const newlyCreatedAlerts = groupedAttachments[AttachmentType.alert] ?? [];
+    const newlyCreatedComments = groupedAttachments[AttachmentType.user] ?? [];
+
+    const totalComments = attachmentStats.get(this.caseInfo.id)?.userComments ?? 0;
+    const totalAlerts = attachmentStats.get(this.caseInfo.id)?.alerts ?? 0;
+
+    return {
+      totalComments: totalComments + newlyCreatedComments.length,
+      totalAlerts: totalAlerts + newlyCreatedAlerts.length,
+    };
   }
 
   private newObjectWithInfo(caseInfo: CaseSavedObjectTransformed): CaseCommentModel {
@@ -230,19 +276,21 @@ export class CaseCommentModel {
 
       const references = [...this.buildRefsToCase(), ...this.getCommentReferences(attachment)];
 
-      const [comment, commentableCase] = await Promise.all([
-        this.params.services.attachmentService.create({
-          attributes: transformNewComment({
-            createdDate,
-            ...attachment,
-            ...this.params.user,
-          }),
-          references,
-          id,
-          refresh: false,
+      const comment = await this.params.services.attachmentService.create({
+        attributes: transformNewComment({
+          createdDate,
+          ...attachment,
+          ...this.params.user,
         }),
-        this.partialUpdateCaseUserAndDateSkipRefresh(createdDate),
-      ]);
+        references,
+        id,
+        refresh: false,
+      });
+
+      const commentableCase = await this.partialUpdateCaseWithAttachmentDataSkipRefresh({
+        date: createdDate,
+        newlyCreatedAttachments: [comment],
+      });
 
       await Promise.all([
         commentableCase.handleAlertComments([attachment]),
@@ -486,23 +534,25 @@ export class CaseCommentModel {
 
       const caseReference = this.buildRefsToCase();
 
-      const [newlyCreatedAttachments, commentableCase] = await Promise.all([
-        this.params.services.attachmentService.bulkCreate({
-          attachments: attachmentWithoutDuplicateAlerts.map(({ id, ...attachment }) => {
-            return {
-              attributes: transformNewComment({
-                createdDate: new Date().toISOString(),
-                ...attachment,
-                ...this.params.user,
-              }),
-              references: [...caseReference, ...this.getCommentReferences(attachment)],
-              id,
-            };
-          }),
-          refresh: false,
+      const newlyCreatedAttachments = await this.params.services.attachmentService.bulkCreate({
+        attachments: attachmentWithoutDuplicateAlerts.map(({ id, ...attachment }) => {
+          return {
+            attributes: transformNewComment({
+              createdDate: new Date().toISOString(),
+              ...attachment,
+              ...this.params.user,
+            }),
+            references: [...caseReference, ...this.getCommentReferences(attachment)],
+            id,
+          };
         }),
-        this.partialUpdateCaseUserAndDateSkipRefresh(new Date().toISOString()),
-      ]);
+        refresh: false,
+      });
+
+      const commentableCase = await this.partialUpdateCaseWithAttachmentDataSkipRefresh({
+        date: new Date().toISOString(),
+        newlyCreatedAttachments: newlyCreatedAttachments.saved_objects,
+      });
 
       const savedObjectsWithoutErrors = newlyCreatedAttachments.saved_objects.filter(
         (attachment) => attachment.error == null

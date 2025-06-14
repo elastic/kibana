@@ -181,7 +181,7 @@ export class CasesService {
       return accMap;
     }, new Map<string, SavedObjectsFindResult<CaseTransformedAttributes>>());
 
-    const commentTotals = await this.attachmentService.getter.getCaseCommentStats({
+    const commentTotals = await this.attachmentService.getter.getCaseAttatchmentStats({
       caseIds: Array.from(casesMap.keys()),
     });
 
@@ -594,9 +594,6 @@ export class CasesService {
       const decodedAttributes = decodeOrThrow(CaseTransformedAttributesRt)(attributes);
       const transformedAttributes = transformAttributesToESModel(decodedAttributes);
 
-      transformedAttributes.attributes.total_alerts = -1;
-      transformedAttributes.attributes.total_comments = -1;
-
       const createdCase = await this.unsecuredSavedObjectsClient.create<CasePersistedAttributes>(
         CASE_SAVED_OBJECT,
         transformedAttributes.attributes,
@@ -625,9 +622,6 @@ export class CasesService {
 
         const { attributes: transformedAttributes, referenceHandler } =
           transformAttributesToESModel(decodedAttributes);
-
-        transformedAttributes.total_alerts = -1;
-        transformedAttributes.total_comments = -1;
 
         return {
           type: CASE_SAVED_OBJECT,

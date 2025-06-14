@@ -130,6 +130,8 @@ export const CaseAttributesRt = rt.intersection([
   rt.exact(
     rt.partial({
       incremental_id: rt.union([rt.number, rt.null]),
+      total_alerts: rt.number,
+      total_comments: rt.number,
     })
   ),
 ]);

@@ -90,6 +90,8 @@ export const transformNewCase = ({
   customFields: newCase.customFields ?? [],
   observables: [],
   incremental_id: undefined,
+  total_alerts: 0,
+  total_comments: 0,
 });
 
 export const transformCases = ({
