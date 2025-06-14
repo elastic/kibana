@@ -53,7 +53,10 @@ export const useShareTypeContext = <
     ? Array<Extract<ShareConfigs, { shareType: T; groupId?: G }>>
     : Extract<ShareConfigs, { shareType: T }> = (
     shareType === 'integration' ? Array.prototype.filter : Array.prototype.find
-  ).call(shareMenuItems, (item) => item.shareType === shareType && item?.groupId === groupId);
+  ).call(
+    shareMenuItems,
+    (item) => item.shareType === shareType && item?.groupId === (groupId ?? item?.groupId)
+  );
 
   type ObjectTypeMetaConfig = IShareContext['objectTypeMeta']['config'];
 
