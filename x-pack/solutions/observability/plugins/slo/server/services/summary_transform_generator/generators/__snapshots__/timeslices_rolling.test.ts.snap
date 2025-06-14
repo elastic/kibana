@@ -5,12 +5,12 @@ Object {
   "_meta": Object {
     "managed": true,
     "managed_by": "observability",
-    "version": 3.4,
+    "version": 3.5,
   },
   "defer_validation": true,
   "description": "Summarise the rollup data of SLO: irrelevant [id: irrelevant, revision: 1].",
   "dest": Object {
-    "index": ".slo-observability.summary-v3.4",
+    "index": ".slo-observability.summary-v3.5",
     "pipeline": ".slo-observability.summary.pipeline-irrelevant-1",
   },
   "frequency": "1m",
@@ -212,7 +212,7 @@ Object {
     "unattended": true,
   },
   "source": Object {
-    "index": ".slo-observability.sli-v3.4*",
+    "index": ".slo-observability.sli-v3.5*",
     "query": Object {
       "bool": Object {
         "filter": Array [

@@ -99,4 +99,20 @@ describe('SelectInput', () => {
 
     expect(container).toBeInTheDocument();
   });
+
+  it('renders with an error message when isInvalid is true', () => {
+    const props = {
+      ...defaultProps,
+      optionValues: ['option1', 'option2', 'option3'],
+    } as SelectInputProps;
+
+    const { getByTestId, getByText } = render(
+      wrap(<SelectInput {...props} field={{ ...props.field, defaultValue: 'invalidOption' }} />)
+    );
+
+    const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`) as HTMLSelectElement;
+    expect(input).toBeInvalid();
+    expect(input.options[0].value).toBe('');
+    expect(getByText('The saved option is unavailable. Select a new option')).toBeInTheDocument();
+  });
 });

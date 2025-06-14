@@ -26,6 +26,7 @@ import {
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { SecurityPageName } from '@kbn/deeplinks-security';
 import { KnowledgeBaseTour } from '../../../tour/knowledge_base';
 import { AnonymizationSettingsManagement } from '../../../data_anonymization/settings/anonymization_settings_management';
 import { Conversation, useAssistantContext } from '../../../..';
@@ -59,12 +60,14 @@ const ConditionalWrap = ({
 export const SettingsContextMenu: React.FC<Params> = React.memo(
   ({ isDisabled = false, onChatCleared, selectedConversation }: Params) => {
     const {
+      assistantAvailability,
       navigateToApp,
       knowledgeBase,
       setContentReferencesVisible,
       contentReferencesVisible,
       showAnonymizedValues,
       setShowAnonymizedValues,
+      showAssistantOverlay,
     } = useAssistantContext();
 
     const [isPopoverOpen, setPopover] = useState(false);
@@ -94,26 +97,37 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
       setIsResetConversationModalVisible(true);
     }, [closePopover]);
 
-    const handleNavigateToSettings = useCallback(
-      () =>
+    const handleNavigateToSettings = useCallback(() => {
+      if (assistantAvailability.hasSearchAILakeConfigurations) {
+        navigateToApp('securitySolutionUI', {
+          deepLinkId: SecurityPageName.configurationsAiSettings,
+        });
+        showAssistantOverlay?.({ showOverlay: false });
+      } else {
         navigateToApp('management', {
           path: 'kibana/securityAiAssistantManagement',
-        }),
-      [navigateToApp]
-    );
+        });
+      }
+    }, [assistantAvailability.hasSearchAILakeConfigurations, navigateToApp, showAssistantOverlay]);
 
     const handleNavigateToAnonymization = useCallback(() => {
       showAnonymizationModal();
       closePopover();
     }, [closePopover, showAnonymizationModal]);
 
-    const handleNavigateToKnowledgeBase = useCallback(
-      () =>
+    const handleNavigateToKnowledgeBase = useCallback(() => {
+      if (assistantAvailability.hasSearchAILakeConfigurations) {
+        navigateToApp('securitySolutionUI', {
+          deepLinkId: SecurityPageName.configurationsAiSettings,
+          path: `?tab=${KNOWLEDGE_BASE_TAB}`,
+        });
+        showAssistantOverlay?.({ showOverlay: false });
+      } else {
         navigateToApp('management', {
           path: `kibana/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}`,
-        }),
-      [navigateToApp]
-    );
+        });
+      }
+    }, [assistantAvailability.hasSearchAILakeConfigurations, navigateToApp, showAssistantOverlay]);
 
     const handleShowAlertsModal = useCallback(() => {
       showAlertSettingsModal();
@@ -214,6 +228,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
                     <EuiToolTip
                       position="top"
                       key={'disabled-anonymize-values-tooltip'}
+                      data-test-subj={'disabled-anonymize-values-tooltip'}
                       content={
                         <FormattedMessage
                           id="xpack.elasticAssistant.assistant.settings.anonymizeValues.disabled.tooltip"
@@ -226,6 +241,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
                   )}
                 >
                   <EuiSwitch
+                    data-test-subj={'anonymize-switch'}
                     label={i18n.ANONYMIZE_VALUES}
                     checked={showAnonymizedValues}
                     onChange={onChangeShowAnonymizedValues}
@@ -266,7 +282,8 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
                   wrap={(children) => (
                     <EuiToolTip
                       position="top"
-                      key={'disabled-anonymize-values-tooltip'}
+                      key={'disabled-citations-values-tooltip'}
+                      data-test-subj={'disabled-citations-values-tooltip'}
                       content={
                         <FormattedMessage
                           id="xpack.elasticAssistant.assistant.settings.showCitationsLabel.disabled.tooltip"
@@ -279,6 +296,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
                   )}
                 >
                   <EuiSwitch
+                    data-test-subj={'citations-switch'}
                     label={i18n.SHOW_CITATIONS}
                     checked={contentReferencesVisible}
                     onChange={onChangeContentReferencesVisible}

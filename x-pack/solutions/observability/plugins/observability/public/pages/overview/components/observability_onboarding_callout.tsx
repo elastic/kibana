@@ -59,7 +59,7 @@ export function ObservabilityOnboardingCallout() {
               <p>
                 <FormattedMessage
                   id="xpack.observability.overview.observabilityOnboarding.description"
-                  defaultMessage="Onboard your data in up to 5 minutes to start analysing it straight away."
+                  defaultMessage="Onboard your data in up to 5 minutes to start analyzing it straight away."
                 />
               </p>
             </EuiText>
