@@ -13,7 +13,7 @@ import type { RootContext } from '../../../../profiles';
 import { SolutionType } from '../../../../profiles';
 import { createProfileProviderServicesMock } from '../../../../__mocks__';
 import { createLogsDataSourceProfileProvider } from '../profile';
-import type { ContextWithProfileId } from '../../../../profile_service';
+import { RESOLUTION_MISMATCH, type ContextWithProfileId } from '../../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
 import { createCuratedLogsDataSourceProfileProviders } from './curated_logs';
 import { RESOLUTION_MATCH } from '../__mocks__';
@@ -131,7 +131,7 @@ describe('createCuratedLogsDataSourceProfileProviders', () => {
           dataSource: createEsqlDataSource(),
           query: { esql: `FROM ${indexPatternMap[profileId].invalid}` },
         });
-        expect(result).toEqual({ isMatch: false });
+        expect(result).toEqual(RESOLUTION_MISMATCH);
       });
 
       it('should return default app state', () => {

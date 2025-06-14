@@ -14,7 +14,7 @@ import type {
   ContextWithProfileId,
   ProfileProvider,
 } from './profile_service';
-import { AsyncProfileService, ProfileService } from './profile_service';
+import { AsyncProfileService, ProfileService, RESOLUTION_MISMATCH } from './profile_service';
 import type { CellRenderersExtensionParams, Profile } from './types';
 
 interface TestParams {
@@ -53,7 +53,7 @@ const provider: TestProfileProvider = {
   profile: {
     getCellRenderers: jest.fn((prev) => (params) => prev(params)),
   },
-  resolve: jest.fn(() => ({ isMatch: false })),
+  resolve: jest.fn(() => RESOLUTION_MISMATCH),
 };
 
 const provider2: TestProfileProvider = {

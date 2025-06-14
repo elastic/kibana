@@ -10,6 +10,7 @@
 import { SolutionType } from '../../../profiles';
 import { createProfileProviderServicesMock } from '../../../__mocks__';
 import { createObservabilityRootProfileProvider } from './profile';
+import { RESOLUTION_MISMATCH } from '../../../profile_service';
 
 const mockServices = createProfileProviderServicesMock();
 
@@ -18,9 +19,6 @@ describe('observabilityRootProfileProvider', () => {
   const RESOLUTION_MATCH = {
     isMatch: true,
     context: expect.objectContaining({ solutionType: SolutionType.Observability }),
-  };
-  const RESOLUTION_MISMATCH = {
-    isMatch: false,
   };
 
   it('should match when the solution project is observability', async () => {

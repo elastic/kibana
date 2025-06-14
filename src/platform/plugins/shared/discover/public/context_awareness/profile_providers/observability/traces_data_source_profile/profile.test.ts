@@ -17,7 +17,7 @@ import {
 import { DataSourceType, createDataViewDataSource } from '../../../../../common/data_sources';
 import { createTracesDataSourceProfileProvider } from './profile';
 import { createProfileProviderServicesMock } from '../../../__mocks__';
-import type { ContextWithProfileId } from '../../../profile_service';
+import { RESOLUTION_MISMATCH, type ContextWithProfileId } from '../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
 
 const mockServices = createProfileProviderServicesMock();
@@ -28,10 +28,6 @@ describe('tracesDataSourceProfileProvider', () => {
   const RESOLUTION_MATCH = {
     isMatch: true,
     context: { category: DataSourceCategory.Traces },
-  };
-
-  const RESOLUTION_MISMATCH = {
-    isMatch: false,
   };
 
   const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {

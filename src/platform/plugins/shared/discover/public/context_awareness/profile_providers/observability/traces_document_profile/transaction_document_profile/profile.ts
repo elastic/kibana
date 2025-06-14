@@ -14,6 +14,7 @@ import type { DocumentProfileProvider } from '../../../../profiles';
 import { DocumentType, SolutionType } from '../../../../profiles';
 import { createGetDocViewer } from './accessors';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
+import { RESOLUTION_MISMATCH } from '../../../../profile_service';
 
 const OBSERVABILITY_TRACES_TRANSACTION_DOCUMENT_PROFILE_ID =
   'observability-traces-transaction-document-profile';
@@ -31,7 +32,7 @@ export const createObservabilityTracesTransactionDocumentProfileProvider = ({
     const isObservabilitySolutionView = rootContext.solutionType === SolutionType.Observability;
 
     if (!isObservabilitySolutionView) {
-      return { isMatch: false };
+      return RESOLUTION_MISMATCH;
     }
 
     const isTransactionRecord = getIsTransactionRecord({
@@ -39,7 +40,7 @@ export const createObservabilityTracesTransactionDocumentProfileProvider = ({
     });
 
     if (!isTransactionRecord) {
-      return { isMatch: false };
+      return RESOLUTION_MISMATCH;
     }
 
     return {

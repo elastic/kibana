@@ -12,6 +12,7 @@ import { BehaviorSubject } from 'rxjs';
 import { DataSourceCategory, SolutionType } from '../../../../profiles';
 import { extractIndexPatternFrom } from '../../../extract_index_pattern_from';
 import type { LogOverviewContext, LogsDataSourceProfileProvider } from '../profile';
+import { RESOLUTION_MISMATCH } from '../../../../profile_service';
 
 export const createResolve = (
   baseIndexPattern: string
@@ -22,13 +23,13 @@ export const createResolve = (
 
   return (params) => {
     if (params.rootContext.solutionType !== SolutionType.Observability) {
-      return { isMatch: false };
+      return RESOLUTION_MISMATCH;
     }
 
     const indexPattern = extractIndexPatternFrom(params);
 
     if (!indexPattern || !testIndexPattern(indexPattern)) {
-      return { isMatch: false };
+      return RESOLUTION_MISMATCH;
     }
 
     return {

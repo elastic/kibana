@@ -18,6 +18,7 @@ import { DataSourceType, isDataSourceType } from '../../../../../common/data_sou
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
 import { useExampleContext } from '../example_context';
+import { RESOLUTION_MISMATCH } from '../../../profile_service';
 
 export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvider<{
   formatRecord: (flattenedRecord: Record<string, unknown>) => string;
@@ -264,7 +265,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
 
     if (isDataSourceType(params.dataSource, DataSourceType.Esql)) {
       if (!isOfAggregateQueryType(params.query)) {
-        return { isMatch: false };
+        return RESOLUTION_MISMATCH;
       }
 
       indexPattern = getIndexPatternFromESQLQuery(params.query.esql);
@@ -273,7 +274,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
     }
 
     if (indexPattern !== 'my-example-logs' && indexPattern !== 'my-example-logs,logstash*') {
-      return { isMatch: false };
+      return RESOLUTION_MISMATCH;
     }
 
     return {

@@ -41,6 +41,8 @@ interface ProfileResolutionMismatch {
   isMatch: false;
 }
 
+export const RESOLUTION_MISMATCH: ProfileResolutionMismatch = { isMatch: false };
+
 /**
  * The profile provider resolution result
  */

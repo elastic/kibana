@@ -20,6 +20,7 @@ import React, { useState } from 'react';
 import type { RootProfileProvider } from '../../../profiles';
 import { SolutionType } from '../../../profiles';
 import { ExampleContextProvider } from '../example_context';
+import { RESOLUTION_MISMATCH } from '../../../profile_service';
 
 export const createExampleRootProfileProvider = (): RootProfileProvider => ({
   profileId: 'example-root-profile',
@@ -104,7 +105,7 @@ export const createExampleRootProfileProvider = (): RootProfileProvider => ({
   },
   resolve: (params) => {
     if (params.solutionNavId != null) {
-      return { isMatch: false };
+      return RESOLUTION_MISMATCH;
     }
 
     return { isMatch: true, context: { solutionType: SolutionType.Default } };

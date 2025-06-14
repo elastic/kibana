@@ -10,6 +10,7 @@
 import { getFieldValue } from '@kbn/discover-utils';
 import type { DocumentProfileProvider } from '../../../profiles';
 import { DocumentType } from '../../../profiles';
+import { RESOLUTION_MISMATCH } from '../../../profile_service';
 
 export const createExampleDocumentProfileProvider = (): DocumentProfileProvider => ({
   profileId: 'example-document-profile',
@@ -17,7 +18,7 @@ export const createExampleDocumentProfileProvider = (): DocumentProfileProvider 
   profile: {},
   resolve: (params) => {
     if (getFieldValue(params.record, 'data_stream.type') !== 'example') {
-      return { isMatch: false };
+      return RESOLUTION_MISMATCH;
     }
 
     return {

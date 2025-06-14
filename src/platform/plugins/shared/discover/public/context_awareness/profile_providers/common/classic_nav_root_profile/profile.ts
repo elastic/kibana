@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { RESOLUTION_MISMATCH } from '../../../profile_service';
 import { SolutionType } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import { getDefaultAdHocDataViews } from './accessors';
@@ -19,7 +20,7 @@ export const createClassicNavRootProfileProvider = (
   profile: { getDefaultAdHocDataViews },
   resolve: (params) => {
     if (typeof params.solutionNavId === 'string') {
-      return { isMatch: false };
+      return RESOLUTION_MISMATCH;
     }
 
     return {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ContextWithProfileId } from '../../../../profile_service';
+import { RESOLUTION_MISMATCH, type ContextWithProfileId } from '../../../../profile_service';
 import { createEsqlDataSource } from '../../../../../../common/data_sources';
 import type { DataSourceProfileProviderParams, RootContext } from '../../../../profiles';
 import { SolutionType } from '../../../../profiles';
@@ -21,9 +21,6 @@ describe('createResolve', () => {
   const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
     profileId: OBSERVABILITY_ROOT_PROFILE_ID,
     solutionType: SolutionType.Observability,
-  };
-  const RESOLUTION_MISMATCH = {
-    isMatch: false,
   };
   const resolve = createResolve(VALID_INDEX_PATTERN);
 

@@ -17,7 +17,7 @@ import type {
 import { DataSourceCategory, SolutionType } from '../../../profiles';
 import { createProfileProviderServicesMock } from '../../../__mocks__';
 import { createObservabilityLogDocumentProfileProvider } from './profile';
-import type { ContextWithProfileId } from '../../../profile_service';
+import { RESOLUTION_MISMATCH, type ContextWithProfileId } from '../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
 import { RESOLUTION_MATCH } from './__mocks__';
 
@@ -32,9 +32,6 @@ describe('logDocumentProfileProvider', () => {
   const DATA_SOURCE_CONTEXT: ContextWithProfileId<DataSourceContext> = {
     profileId: 'data-source-profile',
     category: DataSourceCategory.Logs,
-  };
-  const RESOLUTION_MISMATCH = {
-    isMatch: false,
   };
 
   it('matches records with the correct data stream type', () => {

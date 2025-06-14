@@ -11,7 +11,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataSourceContext, RootContext } from '../../../../profiles';
 import { DataSourceCategory, DocumentType, SolutionType } from '../../../../profiles';
 import { createObservabilityTracesTransactionDocumentProfileProvider } from './profile';
-import type { ContextWithProfileId } from '../../../../profile_service';
+import { RESOLUTION_MISMATCH, type ContextWithProfileId } from '../../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
 import { createProfileProviderServicesMock } from '../../../../__mocks__';
 
@@ -38,9 +38,6 @@ describe('transactionDocumentProfileProvider', () => {
     context: {
       type: DocumentType.Transaction,
     },
-  };
-  const RESOLUTION_MISMATCH = {
-    isMatch: false,
   };
 
   const mockServices = createProfileProviderServicesMock();

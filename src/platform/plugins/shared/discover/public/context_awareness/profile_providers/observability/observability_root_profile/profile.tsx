@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { RESOLUTION_MISMATCH } from '../../../profile_service';
 import { SolutionType } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
@@ -23,7 +24,7 @@ export const createObservabilityRootProfileProvider = (
   },
   resolve: (params) => {
     if (params.solutionNavId !== SolutionType.Observability) {
-      return { isMatch: false };
+      return RESOLUTION_MISMATCH;
     }
 
     return {

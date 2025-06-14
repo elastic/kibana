@@ -108,7 +108,7 @@ Example profile provider implementations are located in [`profile_providers/exam
 
 ```ts
 /**
- * profile_providers/common/example_data_source_profile/profile.tsx
+ * profile_providers/example/example_data_source_profile/profile.tsx
  */
 
 import React from 'react';
@@ -118,6 +118,7 @@ import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { DataSourceType, isDataSourceType } from '../../../../../../../common/data_sources';
 import { DataSourceCategory, DataSourceProfileProvider } from '../../../../../profiles';
 import { ProfileProviderServices } from '../../profile_provider_services';
+import { RESOLUTION_MISMATCH } from '../../../profile_service';
 
 // Export profile provider factory function, optionally accepting ProfileProviderServices,
 // and returning a profile provider for a specific context level
@@ -155,7 +156,7 @@ export const createExampleDataSourceProfileProvider = (
     // Extract the index pattern from the current ES|QL query or data view
     if (isDataSourceType(params.dataSource, DataSourceType.Esql)) {
       if (!isOfAggregateQueryType(params.query)) {
-        return { isMatch: false };
+        return RESOLUTION_MISMATCH;
       }
 
       indexPattern = getIndexPatternFromESQLQuery(params.query.esql);
@@ -163,9 +164,9 @@ export const createExampleDataSourceProfileProvider = (
       indexPattern = params.dataView.getIndexPattern();
     }
 
-    // If the profile is not a match, return isMatch: false in the result
+    // If the profile is not a match, return RESOLUTION_MISMATCH in the result
     if (indexPattern !== 'my-example-logs') {
-      return { isMatch: false };
+      return RESOLUTION_MISMATCH;
     }
 
     // If the profile is a match, return isMatch: true in the result,
@@ -284,7 +285,7 @@ export const createSecurityRootProfileProvider = (): RootProfileProvider => ({
       };
     }
 
-    return { isMatch: false };
+    return RESOLUTION_MISMATCH;
   },
 });
 ```
@@ -316,7 +317,7 @@ export const createSecurityRootProfileProvider = (
   },
   resolve: async (params) => {
     if (params.solutionNavId !== SolutionType.Security) {
-      return { isMatch: false };
+      return RESOLUTION_MISMATCH;
     }
 
     // Perform async service initialization within the `resolve` method
@@ -364,7 +365,7 @@ export const createSecurityRootProfileProvider = (): RootProfileProvider => ({
       };
     }
 
-    return { isMatch: false };
+    return RESOLUTION_MISMATCH;
   },
 });
 
@@ -399,7 +400,7 @@ export const createSecurityLogsDataSourceProfileProivder = (
     resolve: (params) => {
       // Only match this profile when in the target solution context
       if (params.rootContext.solutionType !== SolutionType.Security) {
-        return { isMatch: false };
+        return RESOLUTION_MISMATCH;
       }
 
       // Delegate to the base implementation

@@ -10,6 +10,7 @@
 import { SolutionType } from '../../../profiles';
 import { createProfileProviderServicesMock } from '../../../__mocks__';
 import { createClassicNavRootProfileProvider } from './profile';
+import { RESOLUTION_MISMATCH } from '../../../profile_service';
 
 const mockServices = createProfileProviderServicesMock();
 
@@ -18,9 +19,6 @@ describe('classicNavRootProfileProvider', () => {
   const RESOLUTION_MATCH = {
     isMatch: true,
     context: expect.objectContaining({ solutionType: SolutionType.Default }),
-  };
-  const RESOLUTION_MISMATCH = {
-    isMatch: false,
   };
 
   it('should match when the solution nav ID is null or undefined', async () => {

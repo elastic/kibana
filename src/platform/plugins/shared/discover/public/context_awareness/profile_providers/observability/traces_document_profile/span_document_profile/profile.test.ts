@@ -12,7 +12,7 @@ import type { DataSourceContext, RootContext } from '../../../../profiles';
 import { DataSourceCategory, DocumentType, SolutionType } from '../../../../profiles';
 import { createProfileProviderServicesMock } from '../../../../__mocks__';
 import { createObservabilityTracesSpanDocumentProfileProvider } from './profile';
-import type { ContextWithProfileId } from '../../../../profile_service';
+import { RESOLUTION_MISMATCH, type ContextWithProfileId } from '../../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
 
 describe('spanDocumentProfileProvider', () => {
@@ -38,9 +38,6 @@ describe('spanDocumentProfileProvider', () => {
     context: {
       type: DocumentType.Span,
     },
-  };
-  const RESOLUTION_MISMATCH = {
-    isMatch: false,
   };
 
   const mockServices = createProfileProviderServicesMock();

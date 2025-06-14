@@ -17,7 +17,7 @@ import { createProfileProviderServicesMock } from '../../../__mocks__';
 import { createLogsDataSourceProfileProvider } from './profile';
 import { DataGridDensity } from '@kbn/unified-data-table';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
-import type { ContextWithProfileId } from '../../../profile_service';
+import { RESOLUTION_MISMATCH, type ContextWithProfileId } from '../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
 import { RESOLUTION_MATCH } from './__mocks__';
 
@@ -42,9 +42,6 @@ describe('logsDataSourceProfileProvider', () => {
   const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
     profileId: OBSERVABILITY_ROOT_PROFILE_ID,
     solutionType: SolutionType.Observability,
-  };
-  const RESOLUTION_MISMATCH = {
-    isMatch: false,
   };
 
   it.each(VALID_INDEX_PATTERNS)(

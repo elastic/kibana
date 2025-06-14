@@ -17,6 +17,7 @@ import type { CellRenderersExtensionParams } from '../types';
 import type { AppliedProfile } from '../composable_profile';
 import { SolutionType } from '../profiles';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
+import { RESOLUTION_MISMATCH } from '../profile_service';
 
 const {
   rootProfileProviderMock,
@@ -38,7 +39,7 @@ rootProfileServiceMock.registerProvider({
       return { isMatch: true, context: { solutionType: SolutionType.Default } };
     }
 
-    return { isMatch: false };
+    return RESOLUTION_MISMATCH;
   },
 });
 
