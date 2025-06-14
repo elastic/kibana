@@ -62,7 +62,7 @@ export interface BulkCreateCasesArgs extends IndexRefresh {
 
 export interface PatchCase extends IndexRefresh {
   caseId: string;
-  updatedAttributes: Partial<CaseTransformedAttributes & PushedArgs>;
+  updatedAttributes: Partial<CaseTransformedAttributes & PushedArgs & AttachmentStatsAttributes>;
   originalCase: CaseSavedObjectTransformed;
   version?: string;
 }

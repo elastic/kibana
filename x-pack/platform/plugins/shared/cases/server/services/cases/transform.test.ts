@@ -703,6 +703,7 @@ describe('case transforms', () => {
       });
 
       expect(
+        // @ts-expect-error: total_comments is not defined in the attributes
         transformSavedObjectToExternalModel(resWithTotalComments).attributes.total_comments
       ).not.toBeDefined();
     });
@@ -715,6 +716,7 @@ describe('case transforms', () => {
       });
 
       expect(
+        // @ts-expect-error: total_alerts is not defined in the attributes
         transformSavedObjectToExternalModel(resWithTotalAlerts).attributes.total_alerts
       ).not.toBeDefined();
     });

@@ -287,12 +287,16 @@ describe('CasesService', () => {
 
         await service.patchCase({
           caseId: '1',
-          updatedAttributes: createCasePostParams({
-            connector: createJiraConnector(),
-            externalService: createExternalService(),
-            severity: CaseSeverity.CRITICAL,
-            status: CaseStatuses['in-progress'],
-          }),
+          updatedAttributes: {
+            ...createCasePostParams({
+              connector: createJiraConnector(),
+              externalService: createExternalService(),
+              severity: CaseSeverity.CRITICAL,
+              status: CaseStatuses['in-progress'],
+            }),
+            total_alerts: 10,
+            total_comments: 5,
+          },
           originalCase: {} as CaseSavedObjectTransformed,
         });
 
@@ -781,10 +785,14 @@ describe('CasesService', () => {
           cases: [
             {
               caseId: '1',
-              updatedAttributes: createCasePostParams({
-                connector: getNoneCaseConnector(),
-                status: CaseStatuses.open,
-              }),
+              updatedAttributes: {
+                ...createCasePostParams({
+                  connector: getNoneCaseConnector(),
+                  status: CaseStatuses.open,
+                }),
+                total_alerts: 10,
+                total_comments: 5,
+              },
               originalCase: {} as CaseSavedObjectTransformed,
             },
           ],

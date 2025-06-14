@@ -167,8 +167,6 @@ export const basicCaseFields: CaseAttributes = {
   customFields: [],
   observables: [],
   incremental_id: undefined,
-  total_alerts: 10,
-  total_comments: 5,
 };
 
 export const createCaseSavedObjectResponse = ({
