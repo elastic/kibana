@@ -7,12 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { Type, schema } from '@kbn/config-schema';
+import { inferenceTracingExportConfigSchema } from '@kbn/inference-tracing-config';
 import { TracingConfig } from './types';
 
 /**
  * The tracing config schema that is exposed by the Telemetry plugin.
  */
+
 export const telemetryTracingSchema: Type<TracingConfig> = schema.object({
   enabled: schema.maybe(schema.boolean()),
   sample_rate: schema.number({ defaultValue: 1, min: 0, max: 1 }),
+  exporters: schema.maybe(
+    schema.oneOf([
+      inferenceTracingExportConfigSchema,
+      schema.arrayOf(inferenceTracingExportConfigSchema),
+    ])
+  ),
 });

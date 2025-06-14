@@ -35,3 +35,9 @@ declare module '*.peggy' {
    */
   export function parse(input: string, options?: ParserOptions): any;
 }
+
+declare module '*.text' {
+  const content: string;
+  // eslint-disable-next-line import/no-default-export
+  export default content;
+}

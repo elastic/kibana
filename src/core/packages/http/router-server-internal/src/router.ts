@@ -31,6 +31,7 @@ import type {
 } from '@kbn/core-http-server';
 import type { RouteSecurityGetter } from '@kbn/core-http-server';
 import { Env } from '@kbn/config';
+import { context, defaultTextMapGetter, propagation } from '@opentelemetry/api';
 import { CoreVersionedRouter } from './versioned_router';
 import { CoreKibanaRequest, getProtocolFromRequest } from './request';
 import { kibanaResponseFactory } from './response';
@@ -183,8 +184,13 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
   public registerRoute(route: InternalRouterRoute) {
     this.routes.push({
       ...route,
-      handler: async (request, responseToolkit) =>
-        await this.handle({ request, responseToolkit, handler: route.handler }),
+      handler: async (request, responseToolkit) => {
+        const ctx = propagation.extract(context.active(), request.headers, defaultTextMapGetter);
+        return context.with(
+          ctx,
+          async () => await this.handle({ request, responseToolkit, handler: route.handler })
+        );
+      },
     });
   }
 

@@ -14,6 +14,12 @@ module.exports = () => ({
     // our explicit plugin configs to a sub-preset
     {
       plugins: [
+        [
+          require.resolve('babel-plugin-inline-import'),
+          {
+            extensions: ['.text'],
+          },
+        ],
         require.resolve('babel-plugin-add-module-exports'),
 
         // The class properties proposal was merged with the private fields proposal
