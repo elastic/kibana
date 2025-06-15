@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
+import { useVisibility } from '../../../../common/hooks/use_visibility';
 import type { RelatedIntegration, RuleResponse } from '../../../../../common/api/detection_engine';
 import { isMigrationPrebuiltRule } from '../../../../../common/siem_migrations/rules/utils';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
@@ -234,16 +235,11 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       [migrationStats.last_execution]
     );
 
-    const [isReprocessFailedRulesModalVisible, setReprocessFailedRulesModalVisibility] =
-      useState(false);
-
-    const showReprocessFailedRulesModal = useCallback(() => {
-      setReprocessFailedRulesModalVisibility(true);
-    }, []);
-
-    const closeReprocessFailedRulesModal = useCallback(() => {
-      setReprocessFailedRulesModalVisibility(false);
-    }, []);
+    const [
+      isReprocessFailedRulesModalVisible,
+      showReprocessFailedRulesModal,
+      closeReprocessFailedRulesModal,
+    ] = useVisibility(false);
 
     const isRulesLoading =
       isPrebuiltRulesLoading || isDataLoading || isTableLoading || isRetryLoading;
