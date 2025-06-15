@@ -116,7 +116,7 @@ export class CspPlugin
 
         // If package is installed we want to make sure all needed assets are installed
         if (packageInfo) {
-          this.initialize(core, plugins.taskManager).catch(() => {});
+          this.initialize(core, plugins.taskManager, packageInfo.install_version).catch(() => {});
         }
 
         plugins.fleet.registerExternalCallback(
@@ -174,7 +174,8 @@ export class CspPlugin
             soClient: SavedObjectsClientContract
           ): Promise<PackagePolicy> => {
             if (isCspPackage(packagePolicy.package?.name)) {
-              await this.initialize(core, plugins.taskManager);
+              console.log({ packagePolicy });
+              await this.initialize(core, plugins.taskManager, packagePolicy.package?.version);
               return packagePolicy;
             }
 
@@ -212,12 +213,30 @@ export class CspPlugin
   /**
    * Initialization is idempotent and required for (re)creating indices and transforms.
    */
-  async initialize(core: CoreStart, taskManager: TaskManagerStartContract): Promise<void> {
+  async initialize(
+    core: CoreStart,
+    taskManager: TaskManagerStartContract,
+    packagePolicyVersion: string
+  ): Promise<void> {
     this.logger.debug('initialize');
+
+    console.log({ packagePolicyVersion });
+    const isIntegrationVersionIncludesTransformAsset =
+      parseInt(packagePolicyVersion.split('.')[0], 10) >= 2;
+
     const esClient = core.elasticsearch.client.asInternalUser;
 
-    await initializeCspIndices(esClient, this.config, this.logger);
-    await initializeCspTransforms(esClient, this.logger);
+    await initializeCspIndices(
+      esClient,
+      this.config,
+      isIntegrationVersionIncludesTransformAsset,
+      this.logger
+    );
+    await initializeCspTransforms(
+      esClient,
+      isIntegrationVersionIncludesTransformAsset,
+      this.logger
+    );
     await scheduleFindingsStatsTask(taskManager, this.logger);
     await this.initializeIndexAlias(esClient, this.logger);
     this.#isInitialized = true;
