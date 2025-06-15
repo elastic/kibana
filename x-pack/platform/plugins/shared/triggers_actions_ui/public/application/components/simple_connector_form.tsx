@@ -15,10 +15,6 @@ import {
 import { FIELD_TYPES, getUseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { i18n } from '@kbn/i18n';
-import {
-  ValidationError,
-  ValidationFunc,
-} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 export interface CommonFieldSchema {
   id: string;
@@ -31,10 +27,8 @@ export interface CommonFieldSchema {
 
 export interface ConfigFieldSchema extends CommonFieldSchema {
   isUrlField?: boolean;
+  requireTld?: boolean;
   defaultValue?: string | string[];
-  customUrlFieldValidator?: (
-    message: string
-  ) => (...args: Parameters<ValidationFunc>) => ValidationError | undefined;
 }
 
 export interface SecretsFieldSchema extends CommonFieldSchema {
@@ -59,18 +53,16 @@ const getFieldConfig = ({
   label,
   isRequired = true,
   isUrlField = false,
+  requireTld = true,
   defaultValue,
   type,
-  customUrlFieldValidator,
 }: {
   label: string;
   isRequired?: boolean;
   isUrlField?: boolean;
+  requireTld?: boolean;
   defaultValue?: string | string[];
   type?: keyof typeof FIELD_TYPES;
-  customUrlFieldValidator?: (
-    message: string
-  ) => (...args: Parameters<ValidationFunc>) => ValidationError | undefined;
 }) => ({
   label,
   validations: [
@@ -92,23 +84,15 @@ const getFieldConfig = ({
     ...(isUrlField
       ? [
           {
-            validator: customUrlFieldValidator
-              ? customUrlFieldValidator(
-                  i18n.translate(
-                    'xpack.triggersActionsUI.sections.actionConnectorForm.error.invalidURL',
-                    {
-                      defaultMessage: 'Invalid URL',
-                    }
-                  )
-                )
-              : urlField(
-                  i18n.translate(
-                    'xpack.triggersActionsUI.sections.actionConnectorForm.error.invalidURL',
-                    {
-                      defaultMessage: 'Invalid URL',
-                    }
-                  )
-                ),
+            validator: urlField(
+              i18n.translate(
+                'xpack.triggersActionsUI.sections.actionConnectorForm.error.invalidURL',
+                {
+                  defaultMessage: 'Invalid URL',
+                }
+              ),
+              { requireTld }
+            ),
           },
         ]
       : []),
@@ -138,7 +122,6 @@ const FormRow: React.FC<FormRowProps> = ({
   defaultValue,
   euiFieldProps = {},
   type,
-  customUrlFieldValidator,
 }) => {
   const dataTestSub = `${id}-input`;
   const UseField = getComponentByType(type);
@@ -149,13 +132,7 @@ const FormRow: React.FC<FormRowProps> = ({
           {!isPasswordField ? (
             <UseField
               path={id}
-              config={getFieldConfig({
-                label,
-                isUrlField,
-                defaultValue,
-                type,
-                isRequired,
-              })}
+              config={getFieldConfig({ label, isUrlField, defaultValue, type, isRequired })}
               helpText={helpText}
               componentProps={{
                 euiFieldProps: {
@@ -169,12 +146,7 @@ const FormRow: React.FC<FormRowProps> = ({
           ) : (
             <UseField
               path={id}
-              config={getFieldConfig({
-                label,
-                type,
-                isRequired,
-                customUrlFieldValidator,
-              })}
+              config={getFieldConfig({ label, type, isRequired })}
               helpText={helpText}
               component={PasswordField}
               componentProps={{

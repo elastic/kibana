@@ -12,7 +12,6 @@ import { EuiLink, EuiText } from '@elastic/eui';
 import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/openai/constants';
 import * as i18n from './translations';
 import { Config } from './types';
-import { validateURL } from './validators';
 
 export const DEFAULT_URL = 'https://api.openai.com/v1/chat/completions' as const;
 export const DEFAULT_URL_AZURE =
@@ -61,7 +60,7 @@ export const openAiConfig: ConfigFieldSchema[] = [
     label: i18n.API_URL_LABEL,
     isUrlField: true,
     defaultValue: DEFAULT_URL,
-    customUrlFieldValidator: validateURL,
+    requireTld: false,
     helpText: (
       <FormattedMessage
         defaultMessage="The OpenAI API endpoint URL. For more information on the URL, refer to the {genAiAPIUrlDocs}."
@@ -139,8 +138,8 @@ export const azureAiConfig: ConfigFieldSchema[] = [
     id: 'apiUrl',
     label: i18n.API_URL_LABEL,
     isUrlField: true,
+    requireTld: false,
     defaultValue: DEFAULT_URL_AZURE,
-    customUrlFieldValidator: validateURL,
     helpText: (
       <FormattedMessage
         defaultMessage="The Azure OpenAI API endpoint URL. For more information on the URL, refer to the {genAiAPIUrlDocs}."
@@ -166,7 +165,7 @@ export const otherOpenAiConfig: ConfigFieldSchema[] = [
     id: 'apiUrl',
     label: i18n.API_URL_LABEL,
     isUrlField: true,
-    customUrlFieldValidator: validateURL,
+    requireTld: false,
     helpText: (
       <FormattedMessage
         defaultMessage="The Other (OpenAI Compatible Service) endpoint URL. For more information on the URL, refer to the {genAiAPIUrlDocs}."
