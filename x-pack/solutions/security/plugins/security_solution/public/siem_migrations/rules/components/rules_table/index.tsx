@@ -43,7 +43,7 @@ import type { FilterOptions, RuleMigrationSettings, RuleMigrationStats } from '.
 import { MigrationRulesFilter } from './filters';
 import { convertFilterOptions } from './utils/filters';
 import { SiemTranslatedRulesTour } from '../tours/translation_guide';
-import { useStartMigrationModal } from './start_rule_migration_modal';
+import { StartRuleMigrationModal } from './start_rule_migration_modal';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
@@ -234,13 +234,16 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       [migrationStats.last_execution]
     );
 
-    const { getModal, showModal: showReprocessFailedRulesModal } = useStartMigrationModal({
-      defaultSettings: defaultSettingsForModal,
-      onStartMigrationWithSettings: reprocessFailedRulesWithSettings,
-      numberOfRules: translationStats?.rules.failed ?? 0,
-    });
+    const [isReprocessFailedRulesModalVisible, setReprocessFailedRulesModalVisibility] =
+      useState(false);
 
-    const ReprocessFailedRulesModal = useMemo(() => getModal(), [getModal]);
+    const showReprocessFailedRulesModal = useCallback(() => {
+      setReprocessFailedRulesModalVisibility(true);
+    }, []);
+
+    const closeReprocessFailedRulesModal = useCallback(() => {
+      setReprocessFailedRulesModalVisibility(false);
+    }, []);
 
     const isRulesLoading =
       isPrebuiltRulesLoading || isDataLoading || isTableLoading || isRetryLoading;
@@ -334,7 +337,14 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
 
     return (
       <>
-        <ReprocessFailedRulesModal />
+        {isReprocessFailedRulesModalVisible && (
+          <StartRuleMigrationModal
+            defaultSettings={defaultSettingsForModal}
+            onStartMigrationWithSettings={reprocessFailedRulesWithSettings}
+            onClose={closeReprocessFailedRulesModal}
+            numberOfRules={translationStats?.rules.failed ?? 0}
+          />
+        )}
 
         {!isStatsLoading && translationStats?.rules.total && <SiemTranslatedRulesTour />}
 
