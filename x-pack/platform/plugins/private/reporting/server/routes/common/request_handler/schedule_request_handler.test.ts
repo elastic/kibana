@@ -10,6 +10,7 @@ jest.mock('uuid', () => ({ v4: () => 'mock-report-id' }));
 import rison from '@kbn/rison';
 
 import {
+  AuditLogger,
   FakeRawRequest,
   KibanaRequest,
   KibanaResponseFactory,
@@ -73,8 +74,10 @@ describe('Handle request to schedule', () => {
   let mockResponseFactory: ReturnType<typeof getMockResponseFactory>;
   let requestHandler: ScheduleRequestHandler;
   let soClient: SavedObjectsClientContract;
+  let auditLogger: AuditLogger;
 
   beforeEach(async () => {
+    jest.clearAllMocks();
     const mockConfig = createMockConfigSchema({});
     reportingCore = await createMockReportingCore(
       mockConfig,
@@ -105,6 +108,8 @@ describe('Handle request to schedule', () => {
     mockContext = getMockContext();
     mockContext.reporting = Promise.resolve({} as ReportingSetup);
 
+    auditLogger = await reportingCore.getAuditLogger(fakeRawRequest as unknown as KibanaRequest);
+    auditLogger.log = jest.fn();
     soClient = await reportingCore.getScopedSoClient(fakeRawRequest as unknown as KibanaRequest);
     soClient.create = jest.fn().mockImplementation(async (_, opts) => {
       return {
@@ -189,27 +194,42 @@ describe('Handle request to schedule', () => {
         }
       `);
 
-      expect(soClient.create).toHaveBeenCalledWith('scheduled_report', {
-        jobType: 'printable_pdf_v2',
-        createdAt: expect.any(String),
-        createdBy: 'testymcgee',
-        title: 'cool_title',
-        enabled: true,
-        payload: JSON.stringify(payload),
-        schedule: {
-          rrule: {
-            freq: 1,
-            interval: 2,
-            tzid: 'UTC',
+      expect(auditLogger.log).toHaveBeenCalledWith({
+        event: {
+          action: 'scheduled_report_schedule',
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['creation'],
+        },
+        kibana: { saved_object: { id: 'mock-report-id', name: 'PDF', type: 'scheduled_report' } },
+        message: 'User is creating scheduled report [id=mock-report-id] [name=PDF]',
+      });
+
+      expect(soClient.create).toHaveBeenCalledWith(
+        'scheduled_report',
+        {
+          jobType: 'printable_pdf_v2',
+          createdAt: expect.any(String),
+          createdBy: 'testymcgee',
+          title: 'cool_title',
+          enabled: true,
+          payload: JSON.stringify(payload),
+          schedule: {
+            rrule: {
+              freq: 1,
+              interval: 2,
+              tzid: 'UTC',
+            },
+          },
+          migrationVersion: 'unknown',
+          meta: {
+            objectType: 'cool_object_type',
+            layout: 'preserve_layout',
+            isDeprecated: false,
           },
         },
-        migrationVersion: 'unknown',
-        meta: {
-          objectType: 'cool_object_type',
-          layout: 'preserve_layout',
-          isDeprecated: false,
-        },
-      });
+        { id: 'mock-report-id' }
+      );
 
       expect(reportingCore.scheduleRecurringTask).toHaveBeenCalledWith(mockRequest, {
         id: 'foo',
@@ -267,28 +287,57 @@ describe('Handle request to schedule', () => {
         }
       `);
 
-      expect(soClient.create).toHaveBeenCalledWith('scheduled_report', {
-        jobType: 'printable_pdf_v2',
-        createdAt: expect.any(String),
-        createdBy: 'testymcgee',
-        title: 'cool_title',
-        enabled: true,
-        payload: JSON.stringify(payload),
-        schedule: {
-          rrule: {
-            freq: 1,
-            interval: 2,
-            tzid: 'UTC',
-          },
+      expect(auditLogger.log).toHaveBeenCalledWith({
+        event: {
+          action: 'scheduled_report_schedule',
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['creation'],
         },
-        migrationVersion: 'unknown',
-        meta: {
-          objectType: 'cool_object_type',
-          layout: 'preserve_layout',
-          isDeprecated: false,
-        },
-        notification: { email: { to: ['a@b.com'] } },
+        kibana: { saved_object: { id: 'mock-report-id', name: 'PDF', type: 'scheduled_report' } },
+        message: 'User is creating scheduled report [id=mock-report-id] [name=PDF]',
       });
+
+      expect(soClient.create).toHaveBeenCalledWith(
+        'scheduled_report',
+        {
+          jobType: 'printable_pdf_v2',
+          createdAt: expect.any(String),
+          createdBy: 'testymcgee',
+          title: 'cool_title',
+          enabled: true,
+          payload: JSON.stringify(payload),
+          schedule: {
+            rrule: {
+              freq: 1,
+              interval: 2,
+              tzid: 'UTC',
+            },
+          },
+          migrationVersion: 'unknown',
+          meta: {
+            objectType: 'cool_object_type',
+            layout: 'preserve_layout',
+            isDeprecated: false,
+          },
+          notification: { email: { to: ['a@b.com'] } },
+        },
+        { id: 'mock-report-id' }
+      );
+    });
+
+    test('throws errors from so client create', async () => {
+      soClient.create = jest.fn().mockImplementationOnce(async () => {
+        throw new Error('SO create error');
+      });
+
+      await expect(
+        requestHandler.enqueueJob({
+          exportTypeId: 'printablePdfV2',
+          jobParams: mockJobParams,
+          schedule: { rrule: { freq: 1, interval: 2, tzid: 'UTC' } },
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"SO create error"`);
     });
   });
 
@@ -694,6 +743,44 @@ describe('Handle request to schedule', () => {
           "body": "Security and API keys must be enabled for scheduled reporting",
         }
       `);
+    });
+
+    test('handles errors from so client create', async () => {
+      soClient.create = jest.fn().mockImplementationOnce(async () => {
+        throw new Error('SO create error');
+      });
+
+      expect(
+        await requestHandler.handleRequest({
+          exportTypeId: 'csv_searchsource',
+          jobParams: mockJobParams,
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "body": "SO create error",
+          "statusCode": 500,
+        }
+      `);
+
+      expect(auditLogger.log).toHaveBeenCalledWith({
+        error: {
+          code: 'Error',
+          message: 'SO create error',
+        },
+        event: {
+          action: 'scheduled_report_schedule',
+          category: ['database'],
+          outcome: 'failure',
+          type: ['creation'],
+        },
+        kibana: {
+          saved_object: {
+            id: 'mock-report-id',
+            type: 'scheduled_report',
+          },
+        },
+        message: 'Failed attempt to create scheduled report [id=mock-report-id]',
+      });
     });
   });
 });

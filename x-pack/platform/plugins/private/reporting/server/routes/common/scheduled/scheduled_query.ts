@@ -22,6 +22,7 @@ import type {
   ScheduledReportType,
 } from '../../../types';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from '../../../saved_objects';
+import { ScheduledReportAuditAction, scheduledReportAuditEvent } from '../audit_events';
 
 export const MAX_SCHEDULED_REPORT_LIST_SIZE = 100;
 export const DEFAULT_SCHEDULED_REPORT_LIST_SIZE = 10;
@@ -117,6 +118,7 @@ export function scheduledQueryFactory(reportingCore: ReportingCore): ScheduledQu
     async list(req, res, user, page = 1, size = DEFAULT_SCHEDULED_REPORT_LIST_SIZE) {
       try {
         const esClient = await reportingCore.getEsClient();
+        const auditLogger = await reportingCore.getAuditLogger(req);
         const savedObjectsClient = await reportingCore.getScopedSoClient(req);
         const username = getUsername(user);
 
@@ -143,6 +145,18 @@ export function scheduledQueryFactory(reportingCore: ReportingCore): ScheduledQu
         if (!scheduledReportSoIds || scheduledReportSoIds.length === 0) {
           return getEmptyApiResponse(page, size);
         }
+
+        scheduledReportSoIds.forEach((id) =>
+          auditLogger.log(
+            scheduledReportAuditEvent({
+              action: ScheduledReportAuditAction.LIST,
+              savedObject: {
+                type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
+                id,
+              },
+            })
+          )
+        );
 
         let lastRunResponse;
         try {
@@ -182,6 +196,7 @@ export function scheduledQueryFactory(reportingCore: ReportingCore): ScheduledQu
       try {
         const savedObjectsClient = await reportingCore.getScopedSoClient(req);
         const taskManager = await reportingCore.getTaskManager();
+        const auditLogger = await reportingCore.getAuditLogger(req);
 
         const bulkErrors: BulkOperationError[] = [];
         const disabledScheduledReportIds: Set<string> = new Set();
@@ -216,10 +231,31 @@ export function scheduledQueryFactory(reportingCore: ReportingCore): ScheduledQu
               logger.warn(
                 `User "${username}" attempted to disable scheduled report "${so.id}" created by "${so.attributes.createdBy}" without sufficient privileges.`
               );
+              auditLogger.log(
+                scheduledReportAuditEvent({
+                  action: ScheduledReportAuditAction.DISABLE,
+                  savedObject: {
+                    type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
+                    id: so.id,
+                  },
+                  error: new Error(`Not found.`),
+                })
+              );
             } else if (so.attributes.enabled === false) {
               logger.debug(`Scheduled report ${so.id} is already disabled`);
               disabledScheduledReportIds.add(so.id);
             } else {
+              auditLogger.log(
+                scheduledReportAuditEvent({
+                  action: ScheduledReportAuditAction.DISABLE,
+                  savedObject: {
+                    type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
+                    id: so.id,
+                    name: so.attributes.title,
+                  },
+                  outcome: 'unknown',
+                })
+              );
               scheduledReportSavedObjectsToUpdate.push(so);
             }
           }
@@ -244,6 +280,16 @@ export function scheduledQueryFactory(reportingCore: ReportingCore): ScheduledQu
                 status: so.error.statusCode,
                 id: so.id,
               });
+              auditLogger.log(
+                scheduledReportAuditEvent({
+                  action: ScheduledReportAuditAction.DISABLE,
+                  savedObject: {
+                    type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
+                    id: so.id,
+                  },
+                  error: new Error(so.error.message),
+                })
+              );
             } else {
               taskIdsToDisable.push(so.id);
             }
