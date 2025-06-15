@@ -5,4 +5,16 @@
  * 2.0.
  */
 
-export { getCreateSemanticQueryNode } from './create_semantic_query';
+export interface RuleSummaryResponse {
+  keywords: string;
+  mitre_attack: {
+    tactic: {
+      id: string;
+      name: string;
+      techniques: Array<{
+        id: string;
+        name: string;
+      }>;
+    };
+  };
+}

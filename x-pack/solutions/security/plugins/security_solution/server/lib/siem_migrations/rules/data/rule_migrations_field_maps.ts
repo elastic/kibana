@@ -7,13 +7,20 @@
 
 import type { FieldMap, SchemaFieldMapKeys } from '@kbn/data-stream-adapter';
 import type {
+  ElasticRule,
   RuleMigration,
   RuleMigrationResource,
-  RuleMigrationRule,
+  RuleMigrationRuleData,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationIntegration, RuleMigrationPrebuiltRule } from '../types';
 
-export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<Omit<RuleMigrationRule, 'id'>>> = {
+// This type is used to create the mapping of the index
+export type MappedRuleMigrationRuleData = Omit<RuleMigrationRuleData, 'elastic_rule'> & {
+  // Skip mapping for the `threat` field from the `ElasticRule` type, it can be added later if needed
+  elastic_rule: Omit<ElasticRule, 'threat'>;
+};
+
+export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<MappedRuleMigrationRuleData>> = {
   '@timestamp': { type: 'date', required: false },
   migration_id: { type: 'keyword', required: true },
   created_by: { type: 'keyword', required: true },

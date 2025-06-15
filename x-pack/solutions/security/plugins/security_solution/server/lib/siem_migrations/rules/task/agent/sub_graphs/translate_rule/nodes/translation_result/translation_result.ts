@@ -20,6 +20,7 @@ export const getTranslationResultNode = (): GraphNode => {
       description: state.original_rule.description || state.original_rule.title,
       severity: DEFAULT_TRANSLATION_SEVERITY,
       risk_score: DEFAULT_TRANSLATION_RISK_SCORE,
+      threat: null,
       ...state.elastic_rule,
     };
 

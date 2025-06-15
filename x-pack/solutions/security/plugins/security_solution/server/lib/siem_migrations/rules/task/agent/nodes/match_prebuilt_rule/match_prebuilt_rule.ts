@@ -38,7 +38,7 @@ export const getMatchPrebuiltRuleNode = ({
   logger,
 }: GetMatchPrebuiltRuleNodeParams): GraphNode => {
   return async (state) => {
-    const query = state.semantic_query;
+    const query = state.keywords;
     const techniqueIds = state.original_rule.annotations?.mitre_attack || [];
     const prebuiltRules = await ruleMigrationsRetriever.prebuiltRules.search(
       query,
@@ -102,6 +102,7 @@ export const getMatchPrebuiltRuleNode = ({
             integration_ids: matchedRule.target?.related_integrations?.map((i) => i.package),
             severity: matchedRule.target?.severity ?? DEFAULT_TRANSLATION_SEVERITY,
             risk_score: matchedRule.target?.risk_score ?? DEFAULT_TRANSLATION_RISK_SCORE,
+            threat: matchedRule.target?.threat,
           },
           translation_result: RuleTranslationResult.FULL,
         };

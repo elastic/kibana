@@ -12,6 +12,8 @@ import { evaluate } from 'langsmith/evaluation';
 import { isLangSmithEnabled } from '@kbn/langchain/server/tracers/langsmith';
 import { Client } from 'langsmith';
 import { distance } from 'fastest-levenshtein';
+import { calculateObjectDiff } from '@kbn/object-utils';
+import { isEqual } from 'lodash';
 import type { LangSmithEvaluationSettings } from '../../../../../common/siem_migrations/model/common.gen';
 import { RuleMigrationTaskRunner } from './rule_migrations_task_runner';
 import type { MigrateRuleState } from './agent/types';
@@ -159,6 +161,32 @@ export class RuleMigrationTaskEvaluator extends RuleMigrationTaskRunner {
       return {
         score: false,
         comment: `Incorrect match, expected ID is "${expectedPrebuiltRuleId}" but got "${runPrebuiltRuleId}"`,
+      };
+    },
+
+    mitre_attack: ({ run, example }) => {
+      // We only generate one `threat` object currently, so we can safely destruct the first element
+      const [runThreat] = (run?.outputs as MigrateRuleState)?.elastic_rule?.threat ?? [];
+      const [expectedThreat] = (example?.outputs as MigrateRuleState)?.elastic_rule?.threat ?? [];
+
+      if (!expectedThreat) {
+        if (runThreat) {
+          return { score: false, comment: 'No mitre attack information expected, but received' };
+        }
+        return { comment: 'No mitre attack information expected' };
+      }
+      if (!runThreat) {
+        return { score: false, comment: 'Mitre attack information expected, but not received' };
+      }
+
+      if (isEqual(runThreat, expectedThreat)) {
+        return { score: true, comment: 'Correct mitre attack information' };
+      }
+
+      const diff = calculateObjectDiff(runThreat, expectedThreat);
+      return {
+        score: false,
+        comment: `Incorrect mitre attack information: ${JSON.stringify(diff, null, 2)}"`,
       };
     },
   };
