@@ -13,7 +13,10 @@ import { esqlResponseToRecords } from '../../../../../../common/utils/esql';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { useErrorToast } from '../../../../../../common/hooks/use_error_toast';
 import type { AnomalyBand } from './pad_anomaly_bands';
-import { usePadAnomalyDataEsqlSource } from './pad_esql_source_query';
+import {
+  usePadAnomalyDataEsqlSource,
+  usePadTopAnomalousUsersEsqlSource,
+} from './pad_esql_source_query';
 
 interface ESQLRawAnomalyRecord extends Record<string, string | number> {
   '@timestamp': number | string;
@@ -30,42 +33,83 @@ export interface ESQLAnomalyRecord {
   'user.name': string;
 }
 
-export const usePrivilegedAccessDetectionAnomaliesQuery = ({
-  jobIds,
-  anomalyBands,
-  spaceId,
-}: {
+const usePrivilegedAccessDetectionTopUsersQuery = (params: {
   jobIds: string[];
   spaceId: string;
   anomalyBands: AnomalyBand[];
 }) => {
-  const {
-    data: {
-      search: { search },
-    },
-  } = useKibana().services;
-
-  const padAnomalyDataEsqlSource = usePadAnomalyDataEsqlSource(jobIds, anomalyBands, spaceId);
+  const search = useKibana().services.data.search.search;
 
   const filterQuery = useEsqlGlobalFilterQuery();
 
-  const {
+  const padTopAnomalousUsersEsqlSource = usePadTopAnomalousUsersEsqlSource({
+    ...params,
+    usersLimit: 10,
+  });
+
+  const { isLoading, data, isError } = useQuery(
+    [filterQuery, padTopAnomalousUsersEsqlSource],
+    async ({ signal }) => {
+      return esqlResponseToRecords<{ 'user.name': string }>(
+        (
+          await getESQLResults({
+            esqlQuery: padTopAnomalousUsersEsqlSource,
+            search,
+            signal,
+            filter: filterQuery,
+          })
+        )?.response
+      );
+    }
+  );
+  return {
     isLoading,
-    isRefetching,
-    data: result,
-    error,
+    userNames: data?.map((each) => each['user.name']),
     isError,
-    refetch,
-  } = useQuery(
-    [filterQuery, padAnomalyDataEsqlSource],
-    async ({ signal }) =>
-      getESQLResults({
-        esqlQuery: padAnomalyDataEsqlSource,
-        search,
-        signal,
-        filter: filterQuery,
-      }),
+  };
+};
+
+export const usePrivilegedAccessDetectionAnomaliesQuery = (params: {
+  jobIds: string[];
+  spaceId: string;
+  anomalyBands: AnomalyBand[];
+}) => {
+  const search = useKibana().services.data.search.search;
+  const filterQuery = useEsqlGlobalFilterQuery();
+
+  const { userNames } = usePrivilegedAccessDetectionTopUsersQuery(params);
+
+  const padAnomalyDataEsqlSource = usePadAnomalyDataEsqlSource({ ...params, userNames });
+
+  const { isLoading, isRefetching, data, error, isError, refetch } = useQuery<{
+    anomalyRecords: ESQLAnomalyRecord[];
+    userNames: string[];
+  }>(
+    [filterQuery, padAnomalyDataEsqlSource, userNames],
+    async ({ signal }) => {
+      if (!padAnomalyDataEsqlSource || !userNames || userNames.length === 0) {
+        return { anomalyRecords: [], userNames: [] };
+      }
+      const anomalyRecords = esqlResponseToRecords<ESQLRawAnomalyRecord>(
+        (
+          await getESQLResults({
+            esqlQuery: padAnomalyDataEsqlSource,
+            search,
+            signal,
+            filter: filterQuery,
+          })
+        ).response
+      ).map((eachRawRecord) => ({
+        ...eachRawRecord,
+        '@timestamp': new Date(eachRawRecord['@timestamp']).getTime(),
+      }));
+      return {
+        anomalyRecords: anomalyRecords ?? [],
+        userNames: userNames ?? [],
+      };
+    },
     {
+      enabled: !!padAnomalyDataEsqlSource && !!userNames,
       keepPreviousData: true,
     }
   );
@@ -80,15 +124,8 @@ export const usePrivilegedAccessDetectionAnomaliesQuery = ({
     error
   );
 
-  const records: ESQLAnomalyRecord[] = esqlResponseToRecords<ESQLRawAnomalyRecord>(
-    result?.response
-  ).map((eachRawRecord) => ({
-    ...eachRawRecord,
-    '@timestamp': new Date(eachRawRecord['@timestamp']).getTime(),
-  }));
-
   return {
-    records,
+    data,
     isLoading: isLoading || isRefetching,
     refetch,
     error,

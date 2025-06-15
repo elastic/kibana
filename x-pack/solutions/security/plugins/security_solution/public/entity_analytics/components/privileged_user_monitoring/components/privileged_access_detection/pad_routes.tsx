@@ -8,21 +8,20 @@
 import { useMemo } from 'react';
 import { API_VERSIONS } from '../../../../../../common/entity_analytics/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
-import type { PadMlJob } from '../../../../../../server/lib/entity_analytics/privilege_monitoring/privileged_access_detection/pad_package_installation_client';
+import type { GetStatusPrivilegedAccessDetectionPackageResponse } from '../../../../../../common/api/entity_analytics/privilege_monitoring/privileged_access_detection/status.gen';
 
 export const usePrivilegedAccessDetectionRoutes = () => {
   const http = useKibana().services.http;
 
   return useMemo(() => {
     const getPrivilegedAccessDetectionStatus = async () => {
-      return http.fetch<{
-        packageInstallationStatus: string;
-        mlModuleSetupStatus: string;
-        jobs: PadMlJob[];
-      }>('/api/entity_analytics/privileged_user_monitoring/pad/status', {
-        method: 'GET',
-        version: API_VERSIONS.public.v1,
-      });
+      return http.fetch<GetStatusPrivilegedAccessDetectionPackageResponse>(
+        '/api/entity_analytics/privileged_user_monitoring/pad/status',
+        {
+          method: 'GET',
+          version: API_VERSIONS.public.v1,
+        }
+      );
     };
 
     const installPrivilegedAccessDetectionPackage = async () => {

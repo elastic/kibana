@@ -22,6 +22,12 @@ describe('GroupsFilterPopover', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
       <GroupsFilterPopoverComponent
+        defaultFilters={{
+          filterQuery: '',
+          showCustomJobs: false,
+          showElasticJobs: false,
+          selectedGroups: [],
+        }}
         securityJobs={securityJobs}
         onSelectedGroupsChanged={jest.fn()}
       />

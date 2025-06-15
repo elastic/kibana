@@ -51,7 +51,7 @@ export const usePrivilegedAccessDetectionIntegration = () => {
       prerelease: true, // This is a technical preview package, delete this line when it is GA
     },
     {
-      suspense: true,
+      suspense: false,
     }
   );
 

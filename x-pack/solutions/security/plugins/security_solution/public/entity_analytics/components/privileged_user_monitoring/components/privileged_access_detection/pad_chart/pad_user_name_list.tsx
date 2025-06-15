@@ -12,7 +12,7 @@ import {
   EntityPanelKeyByType,
   EntityPanelParamByType,
 } from '../../../../../../flyout/entity_details/shared/constants';
-import { padChartStyling } from './pad_chart';
+import { padChartStyling } from '.';
 
 export const UserNameList: React.FC<{ userNames: string[] }> = ({ userNames }) => {
   const { openRightPanel } = useExpandableFlyoutApi();
@@ -43,6 +43,7 @@ export const UserNameList: React.FC<{ userNames: string[] }> = ({ userNames }) =
       <EuiFlexGroup gutterSize={'none'} direction={'column'} justifyContent={'center'}>
         {userNames.map((eachUserName) => (
           <EuiFlexItem
+            key={eachUserName}
             css={{ justifyContent: 'center', height: padChartStyling.heightOfEachCell }}
             grow={false}
           >

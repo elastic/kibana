@@ -12,6 +12,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
 
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
+import { GetStatusPrivilegedAccessDetectionPackageResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/privilege_monitoring/privileged_access_detection/status.gen';
 
 export const padGetStatusRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -34,7 +35,11 @@ export const padGetStatusRoute = (
         validate: {},
       },
 
-      async (context, request, response): Promise<IKibanaResponse> => {
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<GetStatusPrivilegedAccessDetectionPackageResponse>> => {
         const siemResponse = buildSiemResponse(response);
         const secSol = await context.securitySolution;
 

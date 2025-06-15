@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { useIntervalForHeatmap } from '.';
 import { getPrivilegedMonitorUsersJoin } from '../../../helpers';
-import { useIntervalForHeatmap } from './pad_chart';
 import type { AnomalyBand } from './pad_anomaly_bands';
 
 const getHiddenBandsFilters = (anomalyBands: AnomalyBand[]) => {
@@ -16,26 +16,60 @@ const getHiddenBandsFilters = (anomalyBands: AnomalyBand[]) => {
   return hiddenBands.map(recordScoreFilterClause).join('');
 };
 
-export const usePadAnomalyDataEsqlSource = (
-  jobIds: string[],
-  anomalyBands: AnomalyBand[],
-  spaceId: string
-) => {
-  const interval = useIntervalForHeatmap();
+export const usePadTopAnomalousUsersEsqlSource = ({
+  jobIds,
+  anomalyBands,
+  spaceId,
+  usersLimit,
+}: {
+  jobIds: string[];
+  anomalyBands: AnomalyBand[];
+  spaceId: string;
+  usersLimit: number;
+}) => {
   const formattedJobIds = jobIds.map((each) => `"${each}"`).join(', ');
 
   return `FROM .ml-anomalies-shared
     | WHERE job_id IN (${formattedJobIds})
-    ${getPrivilegedMonitorUsersJoin(spaceId)}
+    | WHERE record_score IS NOT NULL AND user.name IS NOT NULL
     ${getHiddenBandsFilters(anomalyBands)}
-    | WHERE record_score IS NOT NULL
+    ${getPrivilegedMonitorUsersJoin(spaceId)}
+    | STATS max_record_score = MAX(record_score), is_privileged = TOP(is_privileged, 1, "desc") by user.name
+    | WHERE is_privileged == true
+    | SORT max_record_score DESC
+    | KEEP user.name
+    | LIMIT ${usersLimit}`;
+  // NOTE: the final `WHERE is_privileged == true` should not be necessary, as we've already performed the join and filtered by privileged users by that point. I believe this is a bug in ES|QL. The workaround doesn't cause any issues, however.
+};
+
+export const usePadAnomalyDataEsqlSource = ({
+  jobIds,
+  anomalyBands,
+  spaceId,
+  userNames,
+}: {
+  jobIds: string[];
+  anomalyBands: AnomalyBand[];
+  spaceId: string;
+  userNames?: string[];
+}) => {
+  const interval = useIntervalForHeatmap();
+
+  if (!userNames) return undefined;
+  const formattedJobIds = jobIds.map((each) => `"${each}"`).join(', ');
+  const formattedUserNames = userNames.map((each) => `"${each}"`).join(', ');
+
+  return `FROM .ml-anomalies-shared
+    | WHERE job_id IN (${formattedJobIds})
+    | WHERE record_score IS NOT NULL AND user.name IS NOT NULL AND user.name IN (${formattedUserNames})
+    ${getHiddenBandsFilters(anomalyBands)}
+    ${getPrivilegedMonitorUsersJoin(spaceId)}
     | EVAL user_name_to_record_score = CONCAT(user.name, " : ", TO_STRING(record_score))
     | STATS user_name_to_record_score = VALUES(user_name_to_record_score) BY @timestamp = BUCKET(@timestamp, ${interval}h)
     | MV_EXPAND user_name_to_record_score
     | DISSECT user_name_to_record_score """%{user.name} : %{record_score}"""
     | EVAL record_score = TO_DOUBLE(record_score)
     | KEEP @timestamp, user.name, record_score
-    | WHERE user.name IS NOT NULL AND record_score IS NOT NULL
     | STATS record_score = MAX(record_score) BY @timestamp, user.name
     | SORT record_score DESC
 `;

@@ -23,6 +23,8 @@ import type {
 } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { MlJobStats } from '@elastic/elasticsearch/lib/api/types';
+import type { Installable, RegistrySearchResult } from '@kbn/fleet-plugin/common';
+import type { GetStatusPrivilegedAccessDetectionPackageResponse } from '../../../../../common/api/entity_analytics/privilege_monitoring/privileged_access_detection/status.gen';
 
 interface PadPackageInstallationClientOpts {
   logger: Logger;
@@ -68,17 +70,7 @@ export class PadPackageInstallationClient {
     return installedPadPackages.items.find((installedPackage) => installedPackage.name === 'pad');
   }
 
-  public async getStatus(): Promise<{
-    packageInstallationStatus: string;
-    mlModuleSetupStatus: string;
-    jobs: PadMlJob[];
-  }> {
-    const packageInstalled = !!(await this.getCurrentlyInstalledPADPackage());
-    const packageInstallationStatus = packageInstalled ? 'COMPLETE' : 'INCOMPLETE';
-    if (!packageInstalled) {
-      return { packageInstallationStatus, mlModuleSetupStatus: 'INCOMPLETE', jobs: [] };
-    }
-
+  private async getJobs() {
     const jobs = (await this.esClient.ml.getJobs({ job_id: 'pad' })).jobs.filter(
       (each) => each.custom_settings.created_by === 'ml-module-pad'
     );
@@ -88,74 +80,104 @@ export class PadPackageInstallationClient {
       {} as JobStatsByJobId
     );
 
-    const enrichedJobs = jobs.map((eachJob) => ({
+    return jobs.map((eachJob) => ({
       jobId: eachJob.job_id,
       description: eachJob.description,
       state: jobStatsByJobId[eachJob.job_id].state,
     }));
-
-    const mlModuleSetupStatus = enrichedJobs.length > 0 ? 'COMPLETE' : 'INCOMPLETE';
-
-    return {
-      packageInstallationStatus,
-      mlModuleSetupStatus,
-      jobs: enrichedJobs,
-    };
   }
 
-  public async installPrivilegedAccessDetectionPackage() {
-    const alreadyInstalledPadPackage = await this.getCurrentlyInstalledPADPackage();
-    if (alreadyInstalledPadPackage) {
-      return {
-        status_code: 200,
-        message: 'Privileged access detection package was already installed.',
-      };
+  public async getStatus(): Promise<GetStatusPrivilegedAccessDetectionPackageResponse> {
+    const packageInstalled = !!(await this.getCurrentlyInstalledPADPackage());
+    const packageInstallationStatus = packageInstalled ? 'complete' : 'incomplete';
+    if (!packageInstalled) {
+      // even if there happen to be jobs that match our search criteria, if the package is not installed, we consider the ML installation incomplete and the jobs to not be associated with our privileged access detection usage
+      return { packageInstallationStatus, mlModuleSetupStatus: 'incomplete', jobs: [] };
     }
-    const availablePadPackage = (
+
+    try {
+      const jobs = await this.getJobs();
+
+      const mlModuleSetupStatus = jobs.length > 0 ? 'complete' : 'incomplete';
+
+      return {
+        packageInstallationStatus,
+        mlModuleSetupStatus,
+        jobs,
+      };
+    } catch (e) {
+      this.log(
+        'info',
+        'The privileged access detection package is installed, but the ML jobs are not yet set up.'
+      );
+      return { packageInstallationStatus, mlModuleSetupStatus: 'incomplete', jobs: [] };
+    }
+  }
+
+  private async getPrivilegedAccessDetectionPackageFromRegistry() {
+    return (
       await getPackages({
         savedObjectsClient: this.soClient,
         category: 'security',
         prerelease: true,
       })
     ).find((availablePackage) => availablePackage.name === 'pad');
+  }
+
+  public async installPrivilegedAccessDetectionPackage() {
+    const alreadyInstalledPadPackage = await this.getCurrentlyInstalledPADPackage();
+    if (alreadyInstalledPadPackage) {
+      return {
+        message: 'Privileged access detection package was already installed.',
+      };
+    }
+
+    const availablePadPackage = await this.getPrivilegedAccessDetectionPackageFromRegistry();
 
     if (!availablePadPackage) {
       this.log('info', 'Privileged access detection package was not found');
-      return { status_code: 404, message: 'Privileged access detection package was not found.' };
+      throw new Error('Privileged access detection package was not found.');
     }
 
+    const installationResponse = await this.installPackage(availablePadPackage);
+
+    if (!installationResponse || this.isInstallError(installationResponse)) {
+      throw new Error(
+        `Failed to install privileged access detection package. ${installationResponse?.error}`
+      );
+    }
+    return {
+      message: 'Successfully installed privileged access detection package.',
+    };
+  }
+
+  /**
+   * A type guard function to determine if the bulk package installation response is an error type
+   *
+   * @param potentialInstallResponseError the `BulkInstallResponse` to check type of
+   */
+  private isInstallError = (
+    potentialInstallResponseError: BulkInstallResponse
+  ): potentialInstallResponseError is IBulkInstallPackageError => {
+    return (potentialInstallResponseError as IBulkInstallPackageError).error !== undefined;
+  };
+
+  private async installPackage(installablePackage: Installable<RegistrySearchResult>) {
     this.log(
       'info',
-      `Installing Privileged Access Detection package: ${availablePadPackage.name} ${availablePadPackage.version}`
+      `Installing Privileged Access Detection package: ${installablePackage.name} ${installablePackage.version}`
     );
 
-    const installResponse = await bulkInstallPackages({
+    const bulkInstallResponse = await bulkInstallPackages({
       savedObjectsClient: this.soClient,
       packagesToInstall: [
-        { name: availablePadPackage.name, version: availablePadPackage.version, prerelease: true },
+        { name: installablePackage.name, version: installablePackage.version, prerelease: true },
       ],
       esClient: this.esClient,
       spaceId: this.opts.namespace,
       skipIfInstalled: true,
       force: true,
     });
-
-    const isInstallError = (
-      potentialInstallResponseError: BulkInstallResponse
-    ): potentialInstallResponseError is IBulkInstallPackageError => {
-      return (potentialInstallResponseError as IBulkInstallPackageError).error !== undefined;
-    };
-
-    const padInstallResponse = installResponse.length > 0 ? installResponse[0] : undefined;
-    if (!padInstallResponse || isInstallError(padInstallResponse)) {
-      return {
-        status_code: 500,
-        message: `Failed to install privileged access detection package. ${padInstallResponse?.error}`,
-      };
-    }
-    return {
-      status_code: 200,
-      message: 'Successfully installed privileged access detection package.',
-    };
+    return bulkInstallResponse.length > 0 ? bulkInstallResponse[0] : undefined;
   }
 }

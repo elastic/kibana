@@ -18,7 +18,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiText, EuiTitle } from '@elastic
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { padChartStyling, useIntervalForHeatmap } from './pad_chart';
+import { padChartStyling, useIntervalForHeatmap } from '.';
 import type { ESQLAnomalyRecord } from './pad_query';
 import { useGlobalTime } from '../../../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../../../common/lib/kibana';

@@ -12,6 +12,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
 
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
+import { InstallPrivilegedAccessDetectionPackageResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/privilege_monitoring/privileged_access_detection/install.gen';
 
 export const padInstallRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -34,7 +35,11 @@ export const padInstallRoute = (
         validate: {},
       },
 
-      async (context, request, response): Promise<IKibanaResponse> => {
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<InstallPrivilegedAccessDetectionPackageResponse>> => {
         const siemResponse = buildSiemResponse(response);
         const secSol = await context.securitySolution;
 
@@ -42,10 +47,9 @@ export const padInstallRoute = (
           const clientResponse = await secSol
             .getPrivilegedAccessDetectionClient()
             .installPrivilegedAccessDetectionPackage();
-          logger.info(`PAD installation status: ${clientResponse?.status_code}`);
           return response.ok({
             body: {
-              data: clientResponse,
+              ...clientResponse,
             },
           });
         } catch (e) {

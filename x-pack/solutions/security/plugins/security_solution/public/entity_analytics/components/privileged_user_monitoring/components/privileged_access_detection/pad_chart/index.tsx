@@ -63,16 +63,11 @@ export const PrivilegedAccessDetectionChart: React.FC<PrivilegedAccessDetectionC
 }) => {
   const { bands, toggleHiddenBand } = useAnomalyBands();
 
-  const { records, isLoading, isError } = usePrivilegedAccessDetectionAnomaliesQuery({
+  const { data, isLoading, isError } = usePrivilegedAccessDetectionAnomaliesQuery({
     jobIds,
     anomalyBands: bands,
     spaceId,
   });
-
-  /**
-   * The unique list of userNames. Because the ordering is based on the order of the records, this list is always sorted properly
-   */
-  const uniqueUserNames = [...new Set(records.map((each) => each['user.name']))];
 
   return (
     <>
@@ -81,11 +76,11 @@ export const PrivilegedAccessDetectionChart: React.FC<PrivilegedAccessDetectionC
         toggleHiddenBand={toggleHiddenBand}
       />
       <EuiFlexGroup>
-        <UserNameList userNames={uniqueUserNames} />
+        <UserNameList userNames={data?.userNames ?? []} />
         <PrivilegedAccessDetectionHeatmap
           anomalyBands={bands}
-          records={records}
-          userNames={uniqueUserNames}
+          records={data?.anomalyRecords ?? []}
+          userNames={data?.userNames ?? []}
           isLoading={isLoading}
           isError={isError}
         />

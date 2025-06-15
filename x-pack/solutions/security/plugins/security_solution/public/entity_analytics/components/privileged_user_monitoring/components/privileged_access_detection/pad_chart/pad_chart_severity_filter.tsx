@@ -37,6 +37,7 @@ export const PrivilegedAccessDetectionSeverityFilter: React.FC<SeverityFilterPro
             if (eachBand.hidden) {
               return (
                 <EuiFlexItem
+                  key={`${eachBand.start}-${eachBand.end}`}
                   css={{ cursor: 'pointer' }}
                   onClick={() => toggleHiddenBand(eachBand)}
                   grow={false}
@@ -52,6 +53,7 @@ export const PrivilegedAccessDetectionSeverityFilter: React.FC<SeverityFilterPro
             }
             return (
               <EuiHealth
+                key={`${eachBand.start}-${eachBand.end}`}
                 css={{ cursor: 'pointer' }}
                 onClick={() => toggleHiddenBand(eachBand)}
                 color={eachBand.color}
