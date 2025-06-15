@@ -96,7 +96,73 @@ const mockFindingUserName = (matches: boolean) => {
     },
   };
 };
+const putIndexMapping = () => {
+  rootRequest({
+    method: 'PUT',
+    url: `${Cypress.env('ELASTICSEARCH_URL')}/${CDR_MOCK_THIRD_PARTY_INDEX_PATTERN}`,
+    body: {},
+  });
 
+  rootRequest({
+    method: 'PUT',
+    url: `${Cypress.env('ELASTICSEARCH_URL')}/${CDR_MOCK_THIRD_PARTY_INDEX_PATTERN}/_mapping`,
+    body: {
+      properties: {
+        'result.evaluation': {
+          type: 'keyword',
+        },
+        'host.name': {
+          type: 'keyword',
+        },
+        'resource.id': {
+          type: 'keyword',
+        },
+        resource: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'keyword',
+            },
+            name: {
+              type: 'keyword',
+            },
+            sub_type: {
+              type: 'keyword',
+            },
+          },
+        },
+        rule: {
+          type: 'object',
+          properties: {
+            name: {
+              type: 'keyword',
+            },
+            section: {
+              type: 'keyword',
+            },
+            benchmark: {
+              type: 'object',
+              properties: {
+                id: {
+                  type: 'keyword',
+                },
+                posture_type: {
+                  type: 'keyword',
+                },
+                name: {
+                  type: 'keyword',
+                },
+                version: {
+                  type: 'keyword',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+};
 const createMockFinding = (isNameMatches: boolean, findingType: 'host.name' | 'user.name') => {
   return rootRequest({
     method: 'POST',
@@ -113,6 +179,7 @@ const deleteDataStream = () => {
     method: 'DELETE',
     url: `${Cypress.env('ELASTICSEARCH_URL')}/${CDR_MOCK_THIRD_PARTY_INDEX_PATTERN}`,
   });
+  return;
 };
 
 describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless'] }, () => {
@@ -126,6 +193,7 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
 
   context('Host name - Has misconfiguration findings', () => {
     beforeEach(() => {
+      putIndexMapping();
       createMockFinding(true, 'host.name');
       cy.reload();
       expandFirstAlertHostFlyout();
@@ -152,6 +220,7 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
     'Host name - Has misconfiguration findings but host name is not the same as alert host name',
     () => {
       beforeEach(() => {
+        putIndexMapping();
         createMockFinding(false, 'host.name');
         cy.reload();
         expandFirstAlertHostFlyout();
@@ -172,6 +241,7 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
 
   context('User name - Has misconfiguration findings', () => {
     beforeEach(() => {
+      putIndexMapping();
       createMockFinding(true, 'user.name');
       cy.reload();
       expandFirstAlertUserFlyout();
@@ -197,6 +267,7 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
     'User name - Has misconfiguration findings but host name is not the same as alert host name',
     () => {
       beforeEach(() => {
+        putIndexMapping();
         createMockFinding(false, 'user.name');
         cy.reload();
         expandFirstAlertHostFlyout();
