@@ -18,7 +18,7 @@ import { createFunctionResponseMessage } from '@kbn/observability-ai-assistant-p
 import { convertMessagesForInference } from '@kbn/observability-ai-assistant-plugin/common/convert_messages_for_inference';
 import { map } from 'rxjs';
 import { v4 } from 'uuid';
-import { VISUALIZE_QUERY_NAME } from '../../../common/functions/visualize_esql';
+import { VISUALIZE_QUERY_NAME } from '../../../common';
 import type { FunctionRegistrationParameters } from '..';
 import { runAndValidateEsqlQuery } from './validate_esql_query';
 
