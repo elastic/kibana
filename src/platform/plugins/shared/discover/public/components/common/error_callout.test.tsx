@@ -8,13 +8,13 @@
  */
 
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { findTestSubject } from '@kbn/test-jest-helpers';
 import { mount } from 'enzyme';
 import type { ReactNode } from 'react';
 import React from 'react';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { ErrorCallout } from './error_callout';
-import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 
 const mockRenderSearchError = jest.fn();
 
@@ -28,7 +28,9 @@ jest.mock('@kbn/search-errors', () => {
 
 describe('ErrorCallout', () => {
   const mountWithServices = (component: ReactNode) =>
-    mount(<DiscoverTestProvider services={discoverServiceMock}>{component}</DiscoverTestProvider>);
+    mount(
+      <KibanaContextProvider services={discoverServiceMock}>{component}</KibanaContextProvider>
+    );
 
   afterEach(() => {
     mockRenderSearchError.mockReset();

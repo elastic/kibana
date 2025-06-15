@@ -8,7 +8,6 @@
 import type http from 'http';
 import expect from '@kbn/expect';
 import { UserActionTypes } from '@kbn/cases-plugin/common/types/domain';
-import { ObjectRemover as ActionsRemover } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib';
 import { getPostCaseRequest } from '../../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -20,6 +19,7 @@ import {
   findCaseUserActions,
 } from '../../../../../common/lib/api';
 
+import { ObjectRemover as ActionsRemover } from '../../../../../../alerting_api_integration/common/lib';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export

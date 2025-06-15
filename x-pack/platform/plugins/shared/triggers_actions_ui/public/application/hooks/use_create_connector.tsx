@@ -62,18 +62,13 @@ export const useCreateConnector = (): UseCreateConnectorReturnValue => {
         setIsLoading(false);
 
         if (error.name !== 'AbortError') {
-          toasts.addError(error, {
-            title: i18n.translate(
-              'xpack.triggersActionsUI.sections.useCreateConnector.updateErrorNotificationTitle',
-              { defaultMessage: 'Unable to create a connector.' }
-            ),
-            toastMessage:
-              error.body?.message ??
+          toasts.addDanger(
+            error.body?.message ??
               i18n.translate(
                 'xpack.triggersActionsUI.sections.useCreateConnector.updateErrorNotificationText',
-                { defaultMessage: 'Check the Kibana logs for more information.' }
-              ),
-          });
+                { defaultMessage: 'Cannot create a connector.' }
+              )
+          );
         }
       }
     }

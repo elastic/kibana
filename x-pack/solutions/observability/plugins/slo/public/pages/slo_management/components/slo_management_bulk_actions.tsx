@@ -5,30 +5,31 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiContextMenu,
-  EuiIcon,
-  EuiPopover,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SLODefinitionResponse } from '@kbn/slo-schema';
-import React, { useState } from 'react';
+import React from 'react';
 import { useActionModal } from '../../../context/action_modal';
 
-interface Props {
+export function SloManagementBulkActions({
+  items,
+  setSelectedItems,
+}: {
   items: SLODefinitionResponse[];
-  setSelectedItems: (items: SLODefinitionResponse[]) => void;
-}
-
-export function SloManagementBulkActions({ items, setSelectedItems }: Props) {
+  setSelectedItems: Function;
+}) {
   const { triggerAction } = useActionModal();
-  const popoverId = useGeneratedHtmlId();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = React.useState(false);
 
   const resetSelectedItems = () => {
     setSelectedItems([]);
+  };
+
+  const SELECTED_SLOS = (count: number) => {
+    return i18n.translate('xpack.slo.sloManagementTable.selectedSLOsButton', {
+      values: { count },
+      defaultMessage: 'Selected {count} {count, plural, =1 {SLO} other {SLOs}}',
+    });
   };
 
   const panels = [
@@ -42,15 +43,15 @@ export function SloManagementBulkActions({ items, setSelectedItems }: Props) {
             triggerAction({ items, type: 'bulk_delete', onConfirm: () => resetSelectedItems() });
             setIsOpen(false);
           },
-          icon: 'trash',
           name: i18n.translate(
             'xpack.slo.sloManagementTable.sloSloManagementTableBulkDeleteButtonLabel',
-            { defaultMessage: 'Delete' }
+            {
+              defaultMessage: 'Delete',
+            }
           ),
         },
         {
           'data-test-subj': 'sloSloManagementTableBulkPurgeButton',
-          icon: 'logstashOutput',
           onClick: () => {
             triggerAction({
               items,
@@ -61,7 +62,9 @@ export function SloManagementBulkActions({ items, setSelectedItems }: Props) {
           },
           name: i18n.translate(
             'xpack.slo.sloManagementTable.sloSloManagementTableBulkPurgeButtonLabel',
-            { defaultMessage: 'Purge Rollup Data' }
+            {
+              defaultMessage: 'Purge Rollup Data',
+            }
           ),
         },
       ],
@@ -70,23 +73,16 @@ export function SloManagementBulkActions({ items, setSelectedItems }: Props) {
 
   return (
     <EuiPopover
-      id={popoverId}
+      id={`popover-slo-management-bulk-actions`}
       panelPaddingSize="none"
       button={
         <EuiButtonEmpty
           data-test-subj="sloManagementTableBulkMenuButton"
-          css={{
-            blockSize: '16px',
-            marginBottom: '5px',
-          }}
+          css={{ blockSize: '0px', marginBottom: '5px' }}
           size="xs"
-          onClick={() => setIsOpen((curr) => !curr)}
+          onClick={() => setIsOpen(!isOpen)}
         >
-          {i18n.translate('xpack.slo.sloManagementTable.selectedSLOsButton', {
-            defaultMessage: 'Selected {count} {count, plural, =1 {SLO} other {SLOs}}',
-            values: { count: items.length },
-          })}{' '}
-          <EuiIcon type="arrowDown" size="s" />
+          {SELECTED_SLOS(items.length)} <EuiIcon type="arrowDown" size="s" />
         </EuiButtonEmpty>
       }
       isOpen={isOpen}

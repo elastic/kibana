@@ -19,14 +19,12 @@ import type { ProfileProviderServices } from '../../../profile_provider_services
 describe('transactionDocumentProfileProvider', () => {
   const getRootContext = ({
     profileId,
-    solutionType,
   }: {
     profileId: string;
-    solutionType?: SolutionType;
   }): ContextWithProfileId<RootContext> => {
     return {
       profileId,
-      solutionType: solutionType ?? SolutionType.Observability,
+      solutionType: SolutionType.Observability,
     };
   };
 
@@ -77,16 +75,15 @@ describe('transactionDocumentProfileProvider', () => {
     });
   });
 
-  describe('when solutionType is NOT observability', () => {
-    const profileId = OBSERVABILITY_ROOT_PROFILE_ID;
-    const solutionType = SolutionType.Default;
+  describe('when root profile is NOT observability', () => {
+    const profileId = 'another-profile';
     const transactionDocumentProfileProvider =
       createObservabilityTracesTransactionDocumentProfileProvider(mockServices);
 
     it('does not match records with the correct data stream type and the correct processor event', () => {
       expect(
         transactionDocumentProfileProvider.resolve({
-          rootContext: getRootContext({ profileId, solutionType }),
+          rootContext: getRootContext({ profileId }),
           dataSourceContext: DATA_SOURCE_CONTEXT,
           record: buildMockRecord('index', {
             'data_stream.type': ['traces'],

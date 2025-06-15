@@ -47,7 +47,37 @@ describe('getInitialMultiConsumer', () => {
   } as RuleTypeWithDescription;
 
   const ruleTypes = [
-    ruleType,
+    {
+      id: '.es-query',
+      name: 'Test',
+      actionGroups: [
+        {
+          id: 'testActionGroup',
+          name: 'Test Action Group',
+        },
+        {
+          id: 'recovered',
+          name: 'Recovered',
+        },
+      ],
+      defaultActionGroupId: 'testActionGroup',
+      minimumLicenseRequired: 'basic',
+      recoveryActionGroup: {
+        id: 'recovered',
+      },
+      producer: 'logs',
+      authorizedConsumers: {
+        alerting: { read: true, all: true },
+        test: { read: true, all: true },
+        stackAlerts: { read: true, all: true },
+        logs: { read: true, all: true },
+      },
+      actionVariables: {
+        params: [],
+        state: [],
+      },
+      enabledInLicense: true,
+    },
     {
       enabledInLicense: true,
       recoveryActionGroup: {
@@ -78,12 +108,13 @@ describe('getInitialMultiConsumer', () => {
   test('should return null when rule type id does not match', () => {
     const res = getInitialMultiConsumer({
       multiConsumerSelection: null,
-      validConsumers: ['logs'],
+      validConsumers: ['logs', 'observability'],
       ruleType: {
         ...ruleType,
         id: 'test',
       },
       ruleTypes,
+      isServerless: false,
     });
 
     expect(res).toBe(null);
@@ -95,6 +126,7 @@ describe('getInitialMultiConsumer', () => {
       validConsumers: [],
       ruleType,
       ruleTypes,
+      isServerless: false,
     });
 
     expect(res).toBe(null);
@@ -106,6 +138,7 @@ describe('getInitialMultiConsumer', () => {
       validConsumers: ['alerts'],
       ruleType,
       ruleTypes,
+      isServerless: false,
     });
 
     expect(res).toBe('alerts');
@@ -114,49 +147,25 @@ describe('getInitialMultiConsumer', () => {
   test('should not return observability consumer for non serverless', () => {
     const res = getInitialMultiConsumer({
       multiConsumerSelection: null,
-      validConsumers: ['logs', 'infrastructure'],
+      validConsumers: ['logs', 'infrastructure', 'observability'],
       ruleType,
       ruleTypes,
+      isServerless: false,
     });
 
     expect(res).toBe('logs');
   });
 
-  test('should return valid consumer when user has only logs privileges', () => {
+  test('should return observability consumer for serverless', () => {
     const res = getInitialMultiConsumer({
       multiConsumerSelection: null,
-      validConsumers: ['infrastructure', 'logs'],
-      ruleType: {
-        ...ruleType,
-        authorizedConsumers: {
-          logs: { read: true, all: true },
-        },
-      },
+      validConsumers: ['logs', 'infrastructure', 'observability'],
+      ruleType,
       ruleTypes,
+      isServerless: true,
     });
 
-    expect(res).toBe('logs');
-  });
-
-  test('should return valid consumer when user has only infrastructure privileges', () => {
-    const res = getInitialMultiConsumer({
-      multiConsumerSelection: null,
-      validConsumers: ['infrastructure', 'logs'],
-      ruleType: {
-        ...ruleType,
-        authorizedConsumers: {
-          infrastructure: { read: true, all: true },
-        },
-      },
-      ruleTypes: ruleTypes.map((rule) => ({
-        ...rule,
-        authorizedConsumers: {
-          infrastructure: { read: true, all: true },
-        },
-      })),
-    });
-
-    expect(res).toBe('infrastructure');
+    expect(res).toBe('observability');
   });
 
   test('should return null when there is no authorized consumers', () => {
@@ -168,6 +177,7 @@ describe('getInitialMultiConsumer', () => {
         authorizedConsumers: {},
       },
       ruleTypes,
+      isServerless: false,
     });
 
     expect(res).toBe(null);
@@ -184,6 +194,7 @@ describe('getInitialMultiConsumer', () => {
         },
       },
       ruleTypes,
+      isServerless: false,
     });
 
     expect(res).toBe(null);
@@ -200,6 +211,7 @@ describe('getInitialMultiConsumer', () => {
         },
       },
       ruleTypes,
+      isServerless: false,
     });
 
     expect(res).toBe('logs');
@@ -214,6 +226,7 @@ describe('getInitialMultiConsumer', () => {
         authorizedConsumers: {},
       },
       ruleTypes,
+      isServerless: false,
     });
 
     expect(res).toBe('stackAlerts');
@@ -228,6 +241,7 @@ describe('getInitialMultiConsumer', () => {
         authorizedConsumers: {},
       },
       ruleTypes: [],
+      isServerless: false,
     });
 
     expect(res).toBe(null);

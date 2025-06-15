@@ -42,7 +42,6 @@ import { getAppTarget } from './initialize_edit_api';
 import type { PublishesSavedSearch, SearchEmbeddableStateManager } from './types';
 import { getTimeRangeFromFetchContext, updateSearchSource } from './utils/update_search_source';
 import { createDataSource } from '../../common/data_sources';
-import type { ScopedProfilesManager } from '../context_awareness';
 
 type SavedSearchPartialFetchApi = PublishesSavedSearch &
   PublishesSavedObjectId &
@@ -86,14 +85,12 @@ export function initializeFetch({
   api,
   stateManager,
   discoverServices,
-  scopedProfilesManager,
   setDataLoading,
   setBlockingError,
 }: {
   api: SavedSearchPartialFetchApi;
   stateManager: SearchEmbeddableStateManager;
   discoverServices: DiscoverServices;
-  scopedProfilesManager: ScopedProfilesManager;
   setDataLoading: (dataLoading: boolean | undefined) => void;
   setBlockingError: (error: Error | undefined) => void;
 }) {
@@ -141,7 +138,7 @@ export function initializeFetch({
           const currentAbortController = new AbortController();
           abortController = currentAbortController;
 
-          await scopedProfilesManager.resolveDataSourceProfile({
+          await discoverServices.profilesManager.resolveDataSourceProfile({
             dataSource: createDataSource({ dataView, query: searchSourceQuery }),
             dataView,
             query: searchSourceQuery,
@@ -164,7 +161,7 @@ export function initializeFetch({
               inspectorAdapters,
               data: discoverServices.data,
               expressions: discoverServices.expressions,
-              scopedProfilesManager,
+              profilesManager: discoverServices.profilesManager,
             });
             return {
               columnsMeta: result.esqlQueryColumns
@@ -210,7 +207,8 @@ export function initializeFetch({
             rows: buildDataTableRecordList({
               records: resp.hits.hits,
               dataView,
-              processRecord: (record) => scopedProfilesManager.resolveDocumentProfile({ record }),
+              processRecord: (record) =>
+                discoverServices.profilesManager.resolveDocumentProfile({ record }),
             }),
             hitCount: resp.hits.total as number,
             fetchContext,

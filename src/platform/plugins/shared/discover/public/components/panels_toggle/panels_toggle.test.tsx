@@ -13,8 +13,8 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { BehaviorSubject } from 'rxjs';
 import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
 import { PanelsToggle, type PanelsToggleProps } from './panels_toggle';
+import { DiscoverAppStateProvider } from '../../application/main/state_management/discover_app_state_container';
 import type { SidebarToggleState } from '../../application/types';
-import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 
 describe('Panels toggle component', () => {
   const mountComponent = ({
@@ -24,19 +24,20 @@ describe('Panels toggle component', () => {
     hideChart,
   }: Omit<PanelsToggleProps, 'stateContainer'> & { hideChart: boolean }) => {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-    stateContainer.appState.set({
+    const appStateContainer = stateContainer.appState;
+    appStateContainer.set({
       hideChart,
     });
 
     return mountWithIntl(
-      <DiscoverTestProvider stateContainer={stateContainer}>
+      <DiscoverAppStateProvider value={appStateContainer}>
         <PanelsToggle
           stateContainer={stateContainer}
           sidebarToggleState$={sidebarToggleState$}
           isChartAvailable={isChartAvailable}
           renderedFor={renderedFor}
         />
-      </DiscoverTestProvider>
+      </DiscoverAppStateProvider>
     );
   };
 

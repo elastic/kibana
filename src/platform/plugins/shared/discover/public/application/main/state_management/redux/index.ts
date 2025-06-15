@@ -68,7 +68,6 @@ export { selectAllTabs, selectRecentlyClosedTabs, selectTab } from './selectors'
 
 export {
   type RuntimeStateManager,
-  type CombinedRuntimeState,
   createRuntimeStateManager,
   useRuntimeState,
   selectTabRuntimeState,

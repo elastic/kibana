@@ -152,7 +152,6 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
                   value={tag.name}
                   onChange={(e) => setName(e.target.value)}
                   isLoading={isValidating}
-                  isInvalid={!!validation.errors.name}
                   data-test-subj="createModalField-name"
                 />
               </EuiFormRow>
@@ -190,7 +189,6 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
                   fullWidth={true}
                   onChange={(text) => setColor(text)}
                   format="hex"
-                  isInvalid={!!validation.errors.color}
                   data-test-subj="createModalField-color"
                 />
               </EuiFormRow>
@@ -223,7 +221,6 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
               resize="none"
               fullWidth={true}
               compressed={true}
-              isInvalid={!!validation.errors.description}
               aria-describedby={optionalMessageId}
             />
           </EuiFormRow>

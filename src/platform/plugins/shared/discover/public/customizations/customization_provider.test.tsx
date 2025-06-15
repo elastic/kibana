@@ -12,6 +12,7 @@ import React from 'react';
 import { getDiscoverStateMock } from '../__mocks__/discover_state.mock';
 import {
   type ConnectedCustomizationService,
+  DiscoverCustomizationProvider,
   getConnectedCustomizationService,
   useDiscoverCustomization,
   useDiscoverCustomization$,
@@ -19,7 +20,6 @@ import {
 import type { DiscoverCustomization, DiscoverCustomizationId } from './customization_service';
 import { createCustomizationService } from './customization_service';
 import type { CustomizationCallback } from './types';
-import { DiscoverTestProvider } from '../__mocks__/test_provider';
 
 describe('getConnectedCustomizationService', () => {
   it('should provide customization service', async () => {
@@ -63,7 +63,7 @@ describe('useDiscoverCustomization', () => {
         const service = createCustomizationService();
         service.set(customization);
         return (
-          <DiscoverTestProvider customizationService={service}>{children}</DiscoverTestProvider>
+          <DiscoverCustomizationProvider value={service}>{children}</DiscoverCustomizationProvider>
         );
       },
     });
@@ -80,7 +80,7 @@ describe('useDiscoverCustomization', () => {
       wrapper: ({ children }) => {
         service.set(customization);
         return (
-          <DiscoverTestProvider customizationService={service}>{children}</DiscoverTestProvider>
+          <DiscoverCustomizationProvider value={service}>{children}</DiscoverCustomizationProvider>
         );
       },
     });
@@ -96,7 +96,7 @@ describe('useDiscoverCustomization', () => {
       wrapper: ({ children }: React.PropsWithChildren<{}>) => {
         const service = createCustomizationService();
         return (
-          <DiscoverTestProvider customizationService={service}>{children}</DiscoverTestProvider>
+          <DiscoverCustomizationProvider value={service}>{children}</DiscoverCustomizationProvider>
         );
       },
     });
@@ -112,7 +112,7 @@ describe('useDiscoverCustomization$', () => {
         const service = createCustomizationService();
         service.set(customization);
         return (
-          <DiscoverTestProvider customizationService={service}>{children}</DiscoverTestProvider>
+          <DiscoverCustomizationProvider value={service}>{children}</DiscoverCustomizationProvider>
         );
       },
     });
@@ -133,7 +133,7 @@ describe('useDiscoverCustomization$', () => {
       wrapper: ({ children }) => {
         service.set(customization);
         return (
-          <DiscoverTestProvider customizationService={service}>{children}</DiscoverTestProvider>
+          <DiscoverCustomizationProvider value={service}>{children}</DiscoverCustomizationProvider>
         );
       },
     });
@@ -156,7 +156,7 @@ describe('useDiscoverCustomization$', () => {
       wrapper: ({ children }: React.PropsWithChildren<{}>) => {
         const service = createCustomizationService();
         return (
-          <DiscoverTestProvider customizationService={service}>{children}</DiscoverTestProvider>
+          <DiscoverCustomizationProvider value={service}>{children}</DiscoverCustomizationProvider>
         );
       },
     });

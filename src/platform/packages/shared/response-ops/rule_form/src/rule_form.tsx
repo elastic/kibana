@@ -41,6 +41,7 @@ export interface RuleFormProps<MetaData extends RuleTypeMetaData = RuleTypeMetaD
   showMustacheAutocompleteSwitch?: boolean;
   initialValues?: Partial<Omit<RuleFormData, 'ruleTypeId'>>;
   initialMetadata?: MetaData;
+  isServerless?: boolean;
 }
 
 export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
@@ -65,6 +66,7 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     showMustacheAutocompleteSwitch,
     initialValues,
     initialMetadata,
+    isServerless,
   } = props;
 
   const {
@@ -145,6 +147,7 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
           showMustacheAutocompleteSwitch={showMustacheAutocompleteSwitch}
           initialValues={initialValues}
           initialMetadata={initialMetadata}
+          isServerless={isServerless}
         />
       );
     }
@@ -176,6 +179,7 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     ruleTypeRegistry,
     actionTypeRegistry,
     contentManagement,
+    isServerless,
     id,
     ruleTypeId,
     validConsumers,

@@ -9,8 +9,9 @@
 
 import { createRegExpPatternFrom, testPatternAgainstAllowedList } from '@kbn/data-view-utils';
 import { BehaviorSubject } from 'rxjs';
-import { DataSourceCategory, SolutionType } from '../../../../profiles';
+import { DataSourceCategory } from '../../../../profiles';
 import { extractIndexPatternFrom } from '../../../extract_index_pattern_from';
+import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
 import type { LogOverviewContext, LogsDataSourceProfileProvider } from '../profile';
 
 export const createResolve = (
@@ -21,7 +22,7 @@ export const createResolve = (
   ]);
 
   return (params) => {
-    if (params.rootContext.solutionType !== SolutionType.Observability) {
+    if (params.rootContext.profileId !== OBSERVABILITY_ROOT_PROFILE_ID) {
       return { isMatch: false };
     }
 

@@ -73,12 +73,7 @@ export const getCreateEsoModelVersion =
       incomingChanges
     );
 
-    return {
-      ...modelVersion,
-      changes: [
-        { type: 'unsafe_transform', transformFn: (typeSafeGuard) => typeSafeGuard(transformFn) },
-      ],
-    };
+    return { ...modelVersion, changes: [{ type: 'unsafe_transform', transformFn }] };
   };
 
 function createMergedTransformFn(

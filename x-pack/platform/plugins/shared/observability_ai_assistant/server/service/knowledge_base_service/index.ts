@@ -47,6 +47,7 @@ export interface RecalledEntry {
   title?: string;
   text: string;
   esScore: number | null;
+  is_correction?: boolean;
   labels?: Record<string, string>;
 }
 
@@ -69,7 +70,7 @@ export class KnowledgeBaseService {
     user?: { name: string };
   }): Promise<RecalledEntry[]> {
     const response = await this.dependencies.esClient.asInternalUser.search<
-      Pick<KnowledgeBaseEntry, 'text' | 'labels' | 'title'> & { doc_id?: string }
+      Pick<KnowledgeBaseEntry, 'text' | 'is_correction' | 'labels' | 'title'> & { doc_id?: string }
     >({
       index: [resourceNames.writeIndexAlias.kb],
       query: {
@@ -95,12 +96,13 @@ export class KnowledgeBaseService {
       },
       size: 20,
       _source: {
-        includes: ['text', 'labels', 'doc_id', 'title'],
+        includes: ['text', 'is_correction', 'labels', 'doc_id', 'title'],
       },
     });
 
     return response.hits.hits.map((hit) => ({
       text: hit._source?.text!,
+      is_correction: hit._source?.is_correction,
       labels: hit._source?.labels,
       title: hit._source?.title ?? hit._source?.doc_id, // use `doc_id` as fallback title for backwards compatibility
       esScore: hit._score!,
@@ -282,7 +284,19 @@ export class KnowledgeBaseService {
             : [{ [String(sortBy)]: { order: sortDirection } }],
         size: 500,
         _source: {
-          excludes: ['confidence', 'is_correction'], // fields deprecated in https://github.com/elastic/kibana/pull/222814
+          includes: [
+            'title',
+            'doc_id',
+            'text',
+            'is_correction',
+            'labels',
+            'confidence',
+            'public',
+            '@timestamp',
+            'role',
+            'user.name',
+            'type',
+          ],
         },
       });
 

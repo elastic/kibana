@@ -21,7 +21,6 @@ import {
 } from '../../../../common/routes/connector/apis/update';
 import { transformUpdateConnectorResponseV1 } from './transforms';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from '../../constants';
-import { errorHandler } from '../error_handler';
 
 export const updateConnectorRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
@@ -51,22 +50,18 @@ export const updateConnectorRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        try {
-          const actionsClient = (await context.actions).getActionsClient();
-          const { id }: UpdateConnectorParamsV1 = req.params;
-          const { name, config, secrets }: UpdateConnectorBodyV1 = req.body;
+        const actionsClient = (await context.actions).getActionsClient();
+        const { id }: UpdateConnectorParamsV1 = req.params;
+        const { name, config, secrets }: UpdateConnectorBodyV1 = req.body;
 
-          return res.ok({
-            body: transformUpdateConnectorResponseV1(
-              await actionsClient.update({
-                id,
-                action: { name, config, secrets },
-              })
-            ),
-          });
-        } catch (error) {
-          return errorHandler(res, error);
-        }
+        return res.ok({
+          body: transformUpdateConnectorResponseV1(
+            await actionsClient.update({
+              id,
+              action: { name, config, secrets },
+            })
+          ),
+        });
       })
     )
   );

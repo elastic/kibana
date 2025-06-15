@@ -153,7 +153,16 @@ function ChartAreaSeries({
         />
       </Chart>
 
-      <Legend interval={ingestionRate.interval} />
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow>
+          <EuiText size="xs">
+            <b>
+              {toLegendFormat(ingestionRate.start)} - {toLegendFormat(ingestionRate.end)} (interval:{' '}
+              {ingestionRate.interval})
+            </b>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 }
@@ -214,24 +223,20 @@ function ChartBarSeries({
         />
       </Chart>
 
-      <Legend interval={ingestionRate.interval} />
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow>
+          <EuiText size="xs">
+            <b>
+              {toLegendFormat(ingestionRate.start)} - {toLegendFormat(ingestionRate.end)} (interval:{' '}
+              {ingestionRate.interval})
+            </b>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 }
 
-function Legend({ interval }: { interval: string }) {
-  return (
-    <EuiFlexGroup alignItems="center">
-      <EuiFlexItem grow>
-        <EuiText size="xs">
-          <b>
-            {i18n.translate('xpack.streams.streamDetailLifecycle.ingestionRateLegend', {
-              defaultMessage: 'per {interval}',
-              values: { interval },
-            })}
-          </b>
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
+function toLegendFormat(date: moment.Moment) {
+  return date.format('MMM DD, YYYY @ HH:mm:ss');
 }

@@ -17,20 +17,18 @@ import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DiscoverServices } from '../../../build_services';
 import { createDataSource } from '../../../../common/data_sources';
-import type { ScopedProfilesManager } from '../../../context_awareness';
 
 export async function fetchAnchor(
   anchorId: string,
   dataView: DataView,
   searchSource: ISearchSource,
   sort: EsQuerySortValue[],
-  services: DiscoverServices,
-  scopedProfilesManager: ScopedProfilesManager
+  services: DiscoverServices
 ): Promise<{
   anchorRow: DataTableRecord;
   interceptedWarnings: SearchResponseWarning[];
 }> {
-  await scopedProfilesManager.resolveDataSourceProfile({
+  await services.profilesManager.resolveDataSourceProfile({
     dataSource: createDataSource({ dataView, query: undefined }),
     dataView,
     query: { query: '', language: 'kuery' },
@@ -65,7 +63,7 @@ export async function fetchAnchor(
   });
 
   return {
-    anchorRow: scopedProfilesManager.resolveDocumentProfile({
+    anchorRow: services.profilesManager.resolveDocumentProfile({
       record: buildDataTableRecord(doc, dataView, true),
     }),
     interceptedWarnings,

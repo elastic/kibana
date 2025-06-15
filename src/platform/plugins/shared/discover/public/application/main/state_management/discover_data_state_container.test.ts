@@ -17,7 +17,7 @@ import type { DataDocuments$ } from './discover_data_state_container';
 import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 import { fetchDocuments } from '../data_fetching/fetch_documents';
 import { omit } from 'lodash';
-import { internalStateActions, selectTabRuntimeState } from './redux';
+import { internalStateActions } from './redux';
 
 jest.mock('../data_fetching/fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue({ records: [] }),
@@ -57,12 +57,8 @@ describe('test getDataStateContainer', () => {
 
     const dataState = stateContainer.dataState;
     const unsubscribe = dataState.subscribe();
-    const { scopedProfilesManager$ } = selectTabRuntimeState(
-      stateContainer.runtimeStateManager,
-      stateContainer.getCurrentTab().id
-    );
     const resolveDataSourceProfileSpy = jest.spyOn(
-      scopedProfilesManager$.getValue(),
+      discoverServiceMock.profilesManager,
       'resolveDataSourceProfile'
     );
 
@@ -133,12 +129,8 @@ describe('test getDataStateContainer', () => {
 
     const dataState = stateContainer.dataState;
     const unsubscribe = dataState.subscribe();
-    const { scopedProfilesManager$ } = selectTabRuntimeState(
-      stateContainer.runtimeStateManager,
-      stateContainer.getCurrentTab().id
-    );
     const resolveDataSourceProfileSpy = jest.spyOn(
-      scopedProfilesManager$.getValue(),
+      discoverServiceMock.profilesManager,
       'resolveDataSourceProfile'
     );
 
@@ -170,12 +162,7 @@ describe('test getDataStateContainer', () => {
     const dataState = stateContainer.dataState;
     const dataUnsub = dataState.subscribe();
     const appUnsub = stateContainer.appState.initAndSync();
-    const { scopedProfilesManager$ } = selectTabRuntimeState(
-      stateContainer.runtimeStateManager,
-      stateContainer.getCurrentTab().id
-    );
-
-    await scopedProfilesManager$.getValue().resolveDataSourceProfile({});
+    await discoverServiceMock.profilesManager.resolveDataSourceProfile({});
     stateContainer.actions.setDataView(dataViewMock);
     stateContainer.internalState.dispatch(
       stateContainer.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
@@ -212,12 +199,7 @@ describe('test getDataStateContainer', () => {
     const dataState = stateContainer.dataState;
     const dataUnsub = dataState.subscribe();
     const appUnsub = stateContainer.appState.initAndSync();
-    const { scopedProfilesManager$ } = selectTabRuntimeState(
-      stateContainer.runtimeStateManager,
-      stateContainer.getCurrentTab().id
-    );
-
-    await scopedProfilesManager$.getValue().resolveDataSourceProfile({});
+    await discoverServiceMock.profilesManager.resolveDataSourceProfile({});
     stateContainer.actions.setDataView(dataViewMock);
     stateContainer.internalState.dispatch(
       stateContainer.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({

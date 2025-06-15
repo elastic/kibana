@@ -10,84 +10,76 @@ import {
   EuiPanel,
   EuiSuperDatePicker,
   EuiTitle,
+  OnRefreshProps,
   OnTimeChangeProps,
 } from '@elastic/eui';
 import DateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import moment from 'moment';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ErrorRateChart } from '../../../../components/slo/error_rate_chart';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { toDuration } from '../../../../utils/slo/duration';
 import { TimeBounds } from '../../types';
 import { EventsChartPanel } from '../events_chart_panel/events_chart_panel';
 import { HistoricalDataCharts } from '../historical_data_charts';
-import { CalendarPeriodPicker } from './calendar_period_picker';
+import { SloTabId } from '../slo_details';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
   isAutoRefreshing: boolean;
+  selectedTabId: SloTabId;
 }
 
-export function SloDetailsHistory({ slo, isAutoRefreshing }: Props) {
+export function SLODetailsHistory({ slo, isAutoRefreshing, selectedTabId }: Props) {
   const { uiSettings } = useKibana().services;
+  const [start, setStart] = useState(`now-${slo.timeWindow.duration}`);
+  const [end, setEnd] = useState('now');
 
-  const [range, setRange] = useState<TimeBounds>(() => {
-    if (slo.timeWindow.type === 'calendarAligned') {
-      const now = moment();
-      const duration = toDuration(slo.timeWindow.duration);
-      const unit = duration.unit === 'w' ? 'isoWeek' : 'month';
+  const onTimeChange = (val: OnTimeChangeProps) => {
+    setStart(val.start);
+    setEnd(val.end);
+  };
 
-      return {
-        from: moment.utc(now).startOf(unit).toDate(),
-        to: moment.utc(now).endOf(unit).toDate(),
-      };
-    }
+  const onRefresh = (val: OnRefreshProps) => {};
 
+  const range = useMemo(() => {
     return {
-      from: new Date(DateMath.parse(`now-${slo.timeWindow.duration}`)!.valueOf()),
-      to: new Date(DateMath.parse('now', { roundUp: true })!.valueOf()),
+      from: new Date(DateMath.parse(start)!.valueOf()),
+      to: new Date(DateMath.parse(end, { roundUp: true })!.valueOf()),
     };
-  });
+  }, [start, end]);
 
   const onBrushed = ({ from, to }: TimeBounds) => {
-    setRange({ from, to });
+    setStart(from.toISOString());
+    setEnd(to.toISOString());
   };
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
-      <EuiFlexGroup justifyContent="flexEnd" direction="row" gutterSize="s">
-        <EuiFlexItem grow css={{ maxWidth: 500 }}>
-          {slo.timeWindow.type === 'calendarAligned' ? (
-            <CalendarPeriodPicker
-              slo={slo}
-              onChange={(updatedRange: TimeBounds) => {
-                setRange(updatedRange);
-              }}
-            />
-          ) : (
-            <EuiSuperDatePicker
-              isLoading={false}
-              start={range.from.toISOString()}
-              end={range.to.toISOString()}
-              onTimeChange={(val: OnTimeChangeProps) => {
-                setRange({
-                  from: new Date(DateMath.parse(val.start)!.valueOf()),
-                  to: new Date(DateMath.parse(val.end, { roundUp: true })!.valueOf()),
-                });
-              }}
-              width="full"
-              showUpdateButton={false}
-              commonlyUsedRanges={uiSettings
-                .get('timepicker:quickRanges')
-                .map(({ from, to, display }: { from: string; to: string; display: string }) => ({
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem
+          grow
+          css={{
+            maxWidth: 500,
+          }}
+        >
+          <EuiSuperDatePicker
+            isLoading={false}
+            start={start}
+            end={end}
+            onTimeChange={onTimeChange}
+            onRefresh={onRefresh}
+            width="full"
+            commonlyUsedRanges={uiSettings
+              .get('timepicker:quickRanges')
+              .map(({ from, to, display }: { from: string; to: string; display: string }) => {
+                return {
                   start: from,
                   end: to,
                   label: display,
-                }))}
-            />
-          )}
+                };
+              })}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -113,7 +105,7 @@ export function SloDetailsHistory({ slo, isAutoRefreshing }: Props) {
 
       <HistoricalDataCharts
         slo={slo}
-        hideMetadata={true}
+        selectedTabId={selectedTabId}
         isAutoRefreshing={isAutoRefreshing}
         range={range}
         onBrushed={onBrushed}

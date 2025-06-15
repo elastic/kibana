@@ -87,8 +87,7 @@ describe('context successors', function () {
           size,
           [],
           dataPluginMock,
-          discoverServiceMock,
-          discoverServiceMock.profilesManager.createScopedProfilesManager()
+          discoverServiceMock
         );
       };
     });
@@ -240,8 +239,7 @@ describe('context successors', function () {
           size,
           [],
           dataPluginMock,
-          discoverServiceMock,
-          discoverServiceMock.profilesManager.createScopedProfilesManager()
+          discoverServiceMock
         );
       };
     });
@@ -315,8 +313,7 @@ describe('context successors', function () {
           {
             ...discoverServiceMock,
             data: dataPluginMock,
-          },
-          discoverServiceMock.profilesManager.createScopedProfilesManager()
+          }
         );
       };
     });

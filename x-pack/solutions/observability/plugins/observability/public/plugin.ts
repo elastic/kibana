@@ -90,10 +90,6 @@ import {
   createObservabilityRuleTypeRegistry,
 } from './rules/create_observability_rule_type_registry';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
-import {
-  CaseDetailsLocatorDefinition,
-  CasesOverviewLocatorDefinition,
-} from '../common/locators/cases';
 
 export interface ConfigSchema {
   unsafe: {
@@ -244,8 +240,6 @@ export class Plugin
     );
 
     const rulesLocator = pluginsSetup.share.url.locators.create(new RulesLocatorDefinition());
-    pluginsSetup.share.url.locators.create(CaseDetailsLocatorDefinition());
-    pluginsSetup.share.url.locators.create(CasesOverviewLocatorDefinition());
 
     const ruleDetailsLocator = pluginsSetup.share.url.locators.create(
       new RuleDetailsLocatorDefinition()

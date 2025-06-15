@@ -315,17 +315,7 @@ export const createNavigationTree = ({
                       defaultMessage: 'Access',
                     }),
                     breadcrumbStatus: 'hidden',
-                    children: [
-                      { link: 'management:api_keys', breadcrumbStatus: 'hidden' },
-                      { link: 'management:roles', breadcrumbStatus: 'hidden' },
-                      {
-                        cloudLink: 'userAndRoles',
-                        title: i18n.translate(
-                          'xpack.serverlessObservability.navLinks.projectSettings.mngt.usersAndRoles',
-                          { defaultMessage: 'Manage organization members' }
-                        ),
-                      },
-                    ],
+                    children: [{ link: 'management:api_keys', breadcrumbStatus: 'hidden' }],
                   },
                   {
                     title: i18n.translate(
@@ -383,6 +373,10 @@ export const createNavigationTree = ({
               },
               {
                 link: 'fleet',
+              },
+              {
+                id: 'cloudLinkUserAndRoles',
+                cloudLink: 'userAndRoles',
               },
               {
                 id: 'cloudLinkBilling',

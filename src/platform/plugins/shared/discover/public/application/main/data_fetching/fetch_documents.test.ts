@@ -14,32 +14,22 @@ import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { CommonFetchParams } from './fetch_all';
+import type { FetchDeps } from './fetch_all';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
-import { selectTabRuntimeState } from '../state_management/redux';
 
-const getDeps = (): CommonFetchParams => {
-  const { appState, internalState, dataState, runtimeStateManager, getCurrentTab } =
-    getDiscoverStateMock({});
-  const { scopedProfilesManager$ } = selectTabRuntimeState(runtimeStateManager, getCurrentTab().id);
-  appState.update({ sampleSize: 100 });
-  return {
-    dataSubjects: dataState.data$,
-    initialFetchStatus: dataState.getInitialFetchStatus(),
+const getDeps = () =>
+  ({
     abortController: new AbortController(),
     inspectorAdapters: { requests: new RequestAdapter() },
+    onResults: jest.fn(),
     searchSessionId: '123',
     services: discoverServiceMock,
     savedSearch: savedSearchMock,
-    internalState,
-    appStateContainer: appState,
-    scopedProfilesManager: scopedProfilesManager$.getValue(),
-  };
-};
+    getAppState: () => ({ sampleSize: 100 }),
+  } as unknown as FetchDeps);
 
 describe('test fetchDocuments', () => {
   beforeEach(() => {
@@ -54,12 +44,11 @@ describe('test fetchDocuments', () => {
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     savedSearchMock.searchSource.fetch$ = <T>() =>
       of({ rawResponse: { hits: { hits } } } as IKibanaSearchResponse<SearchResponse<T>>);
-    const deps = getDeps();
     const resolveDocumentProfileSpy = jest.spyOn(
-      deps.scopedProfilesManager,
+      discoverServiceMock.profilesManager,
       'resolveDocumentProfile'
     );
-    expect(await fetchDocuments(savedSearchMock.searchSource, deps)).toEqual({
+    expect(await fetchDocuments(savedSearchMock.searchSource, getDeps())).toEqual({
       interceptedWarnings: [],
       records: documents,
     });

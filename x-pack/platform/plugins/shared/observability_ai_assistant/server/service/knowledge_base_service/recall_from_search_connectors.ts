@@ -113,6 +113,7 @@ async function recallFromSemanticTextConnectors({
   const results = response.hits.hits.map((hit) => ({
     text: JSON.stringify(hit._source),
     esScore: hit._score!,
+    is_correction: false,
     id: hit._id!,
   }));
 
@@ -198,6 +199,7 @@ async function recallFromLegacyConnectors({
   const results = response.hits.hits.map((hit) => ({
     text: JSON.stringify(hit._source),
     esScore: hit._score!,
+    is_correction: false,
     id: hit._id!,
   }));
 

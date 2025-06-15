@@ -20,7 +20,7 @@ import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common'
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { RecordsFetchResponse } from '../../types';
-import type { ScopedProfilesManager } from '../../../context_awareness';
+import type { ProfilesManager } from '../../../context_awareness';
 
 interface EsqlErrorResponse {
   error: {
@@ -39,7 +39,7 @@ export function fetchEsql({
   inspectorAdapters,
   data,
   expressions,
-  scopedProfilesManager,
+  profilesManager,
 }: {
   query: Query | AggregateQuery;
   inputQuery?: Query;
@@ -50,7 +50,7 @@ export function fetchEsql({
   inspectorAdapters: Adapters;
   data: DataPublicPluginStart;
   expressions: ExpressionsStart;
-  scopedProfilesManager: ScopedProfilesManager;
+  profilesManager: ProfilesManager;
 }): Promise<RecordsFetchResponse> {
   const props = getTextBasedQueryStateToAstProps({
     query,
@@ -88,7 +88,7 @@ export function fetchEsql({
                 flattened: row,
               };
 
-              return scopedProfilesManager.resolveDocumentProfile({ record });
+              return profilesManager.resolveDocumentProfile({ record });
             });
           }
         });

@@ -8,11 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type {
-  SavedObjectsType,
-  SavedObject,
-  SavedObjectModelUnsafeTransformFn,
-} from '@kbn/core-saved-objects-server';
+import type { SavedObjectsType, SavedObject } from '@kbn/core-saved-objects-server';
 import { createModelVersionTestMigrator } from './model_version_tester';
 
 const createObject = (parts: Partial<SavedObject>): SavedObject => {
@@ -26,26 +22,6 @@ const createObject = (parts: Partial<SavedObject>): SavedObject => {
 };
 
 describe('modelVersionTester', () => {
-  interface V3 {
-    someExistingField: string;
-  }
-
-  interface V4 extends V3 {
-    fieldUnsafelyAddedInV4: string;
-  }
-
-  const testTypeUnsafeTransform: SavedObjectModelUnsafeTransformFn<V3, V4> = (doc) => {
-    const transformedDoc = {
-      ...doc,
-      attributes: {
-        ...doc.attributes,
-        fieldUnsafelyAddedInV4: '4',
-      },
-    };
-
-    return { document: transformedDoc };
-  };
-
   const testType: SavedObjectsType = {
     name: 'test-type',
     hidden: false,
@@ -114,7 +90,14 @@ describe('modelVersionTester', () => {
         changes: [
           {
             type: 'unsafe_transform',
-            transformFn: (typeSafeGuard) => typeSafeGuard(testTypeUnsafeTransform),
+            transformFn: (doc) => {
+              doc.attributes = {
+                ...doc.attributes,
+                fieldUnsafelyAddedInV4: '4',
+              };
+
+              return { document: doc };
+            },
           },
         ],
         schemas: {

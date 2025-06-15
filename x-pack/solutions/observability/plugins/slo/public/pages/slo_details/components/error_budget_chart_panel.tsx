@@ -6,37 +6,31 @@
  */
 
 import { EuiFlexGroup, EuiPanel } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import {
   LazySavedObjectSaveModalDashboard,
-  SaveModalDashboardProps,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import React, { useCallback, useState } from 'react';
-import { SLO_ERROR_BUDGET_ID } from '../../../embeddable/slo/error_budget/constants';
+import React, { useState, useCallback } from 'react';
+import { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
+import { TimeBounds } from '../types';
+import { SloTabId } from './slo_details';
 import { useKibana } from '../../../hooks/use_kibana';
 import { ChartData } from '../../../typings/slo';
-import { TimeBounds } from '../types';
 import { ErrorBudgetChart } from './error_budget_chart';
 import { ErrorBudgetHeader } from './error_budget_header';
-
+import { SLO_ERROR_BUDGET_ID } from '../../../embeddable/slo/error_budget/constants';
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 export interface Props {
   data: ChartData[];
   isLoading: boolean;
   slo: SLOWithSummaryResponse;
-  hideMetadata?: boolean;
+  selectedTabId: SloTabId;
   onBrushed?: (timeBounds: TimeBounds) => void;
 }
 
-export function ErrorBudgetChartPanel({
-  data,
-  isLoading,
-  slo,
-  hideMetadata = false,
-  onBrushed,
-}: Props) {
+export function ErrorBudgetChartPanel({ data, isLoading, slo, selectedTabId, onBrushed }: Props) {
   const [isMouseOver, setIsMouseOver] = useState(false);
 
   const [isDashboardAttachmentReady, setDashboardAttachmentReady] = useState(false);
@@ -88,16 +82,17 @@ export function ErrorBudgetChartPanel({
         <EuiFlexGroup direction="column" gutterSize="l">
           <ErrorBudgetHeader
             slo={slo}
+            showTitle={true}
             isMouseOver={isMouseOver}
             setDashboardAttachmentReady={setDashboardAttachmentReady}
-            hideMetadata={hideMetadata}
+            selectedTabId={selectedTabId}
           />
 
           <ErrorBudgetChart
             slo={slo}
             data={data}
             isLoading={isLoading}
-            hideMetadata={hideMetadata}
+            selectedTabId={selectedTabId}
             onBrushed={onBrushed}
           />
         </EuiFlexGroup>

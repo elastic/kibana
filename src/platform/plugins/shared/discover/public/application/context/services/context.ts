@@ -20,7 +20,6 @@ import { generateIntervals } from '../utils/generate_intervals';
 import { getEsQuerySearchAfter } from '../utils/get_es_query_search_after';
 import { getEsQuerySort } from '../../../../common/utils/sorting/get_es_query_sort';
 import type { DiscoverServices } from '../../../build_services';
-import type { ScopedProfilesManager } from '../../../context_awareness';
 
 export enum SurrDocType {
   SUCCESSORS = 'successors',
@@ -55,8 +54,7 @@ export async function fetchSurroundingDocs(
   size: number,
   filters: Filter[],
   data: DataPublicPluginStart,
-  services: DiscoverServices,
-  scopedProfilesManager: ScopedProfilesManager
+  services: DiscoverServices
 ): Promise<{
   rows: DataTableRecord[];
   interceptedWarnings: SearchResponseWarning[] | undefined;
@@ -109,8 +107,7 @@ export async function fetchSurroundingDocs(
       nanos,
       anchor.raw._id,
       type,
-      services,
-      scopedProfilesManager
+      services
     );
 
     rows =

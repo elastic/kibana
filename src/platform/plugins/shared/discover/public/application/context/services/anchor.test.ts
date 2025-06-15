@@ -14,43 +14,42 @@ import { fetchAnchor, updateSearchSource } from './anchor';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
-import { createDiscoverServicesMock } from '../../../__mocks__/services';
-import type { DiscoverServices } from '../../../build_services';
+import { discoverServiceMock } from '../../../__mocks__/services';
 
 describe('context app', function () {
-  let searchSourceStub: ReturnType<typeof createSearchSourceStub>;
-  let discoverServices: DiscoverServices;
-
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let searchSourceStub: any;
   const dataView = {
     id: 'DATA_VIEW_ID',
     isTimeNanosBased: () => false,
     popularizeField: () => {},
   } as unknown as DataView;
 
-  const doFetchAnchor = () =>
-    fetchAnchor(
-      'id',
-      dataView,
-      searchSourceStub,
-      [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
-      discoverServices,
-      discoverServices.profilesManager.createScopedProfilesManager()
-    );
-
   describe('function fetchAnchor', function () {
     beforeEach(() => {
       searchSourceStub = createSearchSourceStub([{ _id: 'hit1', _index: 'test' }]);
-      discoverServices = createDiscoverServicesMock();
     });
 
     it('should use the `fetch$` method of the SearchSource', function () {
-      return doFetchAnchor().then(() => {
+      return fetchAnchor(
+        'id',
+        dataView,
+        searchSourceStub,
+        [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
+        discoverServiceMock
+      ).then(() => {
         expect(searchSourceStub.fetch$.calledOnce).toBe(true);
       });
     });
 
     it('should configure the SearchSource to not inherit from the implicit root', function () {
-      return doFetchAnchor().then(() => {
+      return fetchAnchor(
+        'id',
+        dataView,
+        searchSourceStub,
+        [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
+        discoverServiceMock
+      ).then(() => {
         const setParentSpy = searchSourceStub.setParent;
         expect(setParentSpy.calledOnce).toBe(true);
         expect(setParentSpy.firstCall.args[0]).toBe(undefined);
@@ -58,14 +57,26 @@ describe('context app', function () {
     });
 
     it('should set the SearchSource data view', function () {
-      return doFetchAnchor().then(() => {
+      return fetchAnchor(
+        'id',
+        dataView,
+        searchSourceStub,
+        [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
+        discoverServiceMock
+      ).then(() => {
         const setFieldSpy = searchSourceStub.setField;
         expect(setFieldSpy.firstCall.args[1].id).toEqual('DATA_VIEW_ID');
       });
     });
 
     it('should set the SearchSource version flag to true', function () {
-      return doFetchAnchor().then(() => {
+      return fetchAnchor(
+        'id',
+        dataView,
+        searchSourceStub,
+        [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
+        discoverServiceMock
+      ).then(() => {
         const setVersionSpy = searchSourceStub.setField.withArgs('version');
         expect(setVersionSpy.calledOnce).toBe(true);
         expect(setVersionSpy.firstCall.args[1]).toEqual(true);
@@ -73,7 +84,13 @@ describe('context app', function () {
     });
 
     it('should set the SearchSource size to 1', function () {
-      return doFetchAnchor().then(() => {
+      return fetchAnchor(
+        'id',
+        dataView,
+        searchSourceStub,
+        [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
+        discoverServiceMock
+      ).then(() => {
         const setSizeSpy = searchSourceStub.setField.withArgs('size');
         expect(setSizeSpy.calledOnce).toBe(true);
         expect(setSizeSpy.firstCall.args[1]).toEqual(1);
@@ -81,7 +98,13 @@ describe('context app', function () {
     });
 
     it('should set the SearchSource query to an ids query', function () {
-      return doFetchAnchor().then(() => {
+      return fetchAnchor(
+        'id',
+        dataView,
+        searchSourceStub,
+        [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
+        discoverServiceMock
+      ).then(() => {
         const setQuerySpy = searchSourceStub.setField.withArgs('query');
         expect(setQuerySpy.calledOnce).toBe(true);
         expect(setQuerySpy.firstCall.args[1]).toEqual({
@@ -100,7 +123,13 @@ describe('context app', function () {
     });
 
     it('should set the SearchSource sort order', function () {
-      return doFetchAnchor().then(() => {
+      return fetchAnchor(
+        'id',
+        dataView,
+        searchSourceStub,
+        [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
+        discoverServiceMock
+      ).then(() => {
         const setSortSpy = searchSourceStub.setField.withArgs('sort');
         expect(setSortSpy.calledOnce).toBe(true);
         expect(setSortSpy.firstCall.args[1]).toEqual([
@@ -120,7 +149,13 @@ describe('context app', function () {
     it('should reject with an error when no hits were found', function () {
       searchSourceStub = createSearchSourceStub([]);
 
-      return doFetchAnchor().then(
+      return fetchAnchor(
+        'id',
+        dataView,
+        searchSourceStub,
+        [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
+        discoverServiceMock
+      ).then(
         () => {
           fail('expected the promise to be rejected');
         },
@@ -136,7 +171,13 @@ describe('context app', function () {
         { _id: '3', _index: 't' },
       ]);
 
-      return doFetchAnchor().then(({ anchorRow, interceptedWarnings }) => {
+      return fetchAnchor(
+        'id',
+        dataView,
+        searchSourceStub,
+        [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
+        discoverServiceMock
+      ).then(({ anchorRow, interceptedWarnings }) => {
         expect(anchorRow).toHaveProperty('raw._id', '1');
         expect(anchorRow).toHaveProperty('isAnchor', true);
         expect(interceptedWarnings).toEqual([]);
@@ -149,12 +190,19 @@ describe('context app', function () {
         { _id: '3', _index: 't' },
       ]);
 
-      discoverServices.data.search.showWarnings = jest.fn((adapter, callback) => {
+      const services = discoverServiceMock;
+      services.data.search.showWarnings = jest.fn((adapter, callback) => {
         // @ts-expect-error for empty meta
         callback?.(searchResponseIncompleteWarningLocalCluster, {});
       });
 
-      return doFetchAnchor().then(({ anchorRow, interceptedWarnings }) => {
+      return fetchAnchor(
+        'id',
+        dataView,
+        searchSourceStub,
+        [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
+        services
+      ).then(({ anchorRow, interceptedWarnings }) => {
         expect(anchorRow).toHaveProperty('raw._id', '1');
         expect(anchorRow).toHaveProperty('isAnchor', true);
         expect(interceptedWarnings?.length).toBe(1);
@@ -166,7 +214,13 @@ describe('context app', function () {
     searchSourceStub = createSearchSourceStub([{ _id: 'hit1', _index: 't' }]);
     searchSourceStub._stubHits = [{ property1: 'value1' }, { property2: 'value2' }];
 
-    return doFetchAnchor().then(() => {
+    return fetchAnchor(
+      'id',
+      dataView,
+      searchSourceStub,
+      [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
+      discoverServiceMock
+    ).then(() => {
       const setFieldsSpy = searchSourceStub.setField.withArgs('fields');
       const removeFieldsSpy = searchSourceStub.removeField.withArgs('fieldsFromSource');
       expect(setFieldsSpy.calledOnce).toBe(true);

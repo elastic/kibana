@@ -5,15 +5,16 @@
  * 2.0.
  */
 
+import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import React from 'react';
-import { useKibana } from '../../../hooks/use_kibana';
-import { ChartData } from '../../../typings/slo';
-import { toDuration, toMinutes } from '../../../utils/slo/duration';
 import { TimeBounds } from '../types';
+import { SloTabId } from './slo_details';
+import { useKibana } from '../../../hooks/use_kibana';
+import { toDuration, toMinutes } from '../../../utils/slo/duration';
+import { ChartData } from '../../../typings/slo';
 import { WideChart } from './wide_chart';
 
 function formatTime(minutes: number) {
@@ -30,16 +31,15 @@ function formatTime(minutes: number) {
     values: { minutes },
   });
 }
-
 export interface Props {
   data: ChartData[];
   isLoading: boolean;
   slo: SLOWithSummaryResponse;
-  hideMetadata?: boolean;
+  selectedTabId?: SloTabId;
   onBrushed?: (timeBounds: TimeBounds) => void;
 }
 
-export function ErrorBudgetChart({ data, isLoading, slo, hideMetadata = false, onBrushed }: Props) {
+export function ErrorBudgetChart({ data, isLoading, slo, selectedTabId, onBrushed }: Props) {
   const { uiSettings } = useKibana().services;
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
   const isSloFailed = slo.summary.status === 'DEGRADING' || slo.summary.status === 'VIOLATED';
@@ -57,7 +57,7 @@ export function ErrorBudgetChart({ data, isLoading, slo, hideMetadata = false, o
   }
   return (
     <>
-      {!hideMetadata && (
+      {selectedTabId !== 'history' && (
         <EuiFlexGroup direction="row" gutterSize="l" alignItems="flexStart" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiStat

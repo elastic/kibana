@@ -185,7 +185,7 @@ describe('buildModelVersionTransformFn', () => {
       const changes: SavedObjectsModelChange[] = [
         {
           type: 'unsafe_transform',
-          transformFn: (typeSafeGuard) => typeSafeGuard(transformFn),
+          transformFn,
         },
       ];
 
@@ -203,20 +203,11 @@ describe('buildModelVersionTransformFn', () => {
       const changes: SavedObjectsModelChange[] = [
         {
           type: 'unsafe_transform',
-          transformFn: (typeSafeGuard) =>
-            typeSafeGuard(
-              (
-                document: SavedObjectModelTransformationDoc<{
-                  oldProp?: string;
-                  newProp: string;
-                }>,
-                ctx
-              ) => {
-                delete document.attributes.oldProp;
-                document.attributes.newProp = 'newValue';
-                return { document };
-              }
-            ),
+          transformFn: (document, ctx) => {
+            delete document.attributes.oldProp;
+            document.attributes.newProp = 'newValue';
+            return { document };
+          },
         },
       ];
 
@@ -314,17 +305,10 @@ describe('buildModelVersionTransformFn', () => {
         },
         {
           type: 'unsafe_transform',
-          transformFn: (typeSafeGuard) =>
-            typeSafeGuard(
-              (
-                document: SavedObjectModelTransformationDoc<{
-                  unsafeNewProp: string;
-                }>
-              ) => {
-                document.attributes.unsafeNewProp = 'unsafeNewValue';
-                return { document };
-              }
-            ),
+          transformFn: (document) => {
+            document.attributes.unsafeNewProp = 'unsafeNewValue';
+            return { document };
+          },
         },
       ];
 

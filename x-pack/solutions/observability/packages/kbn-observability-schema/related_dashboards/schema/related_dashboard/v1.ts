@@ -11,7 +11,6 @@ import { relevantPanelSchema } from '../relevant_panel/latest';
 export const relatedDashboardSchema = z.object({
   id: z.string(),
   title: z.string(),
-  description: z.string(),
   matchedBy: z.object({
     fields: z.array(z.string()).optional(),
     index: z.array(z.string()).optional(),
@@ -24,7 +23,6 @@ export const relatedDashboardSchema = z.object({
 export const suggestedDashboardSchema = z.object({
   id: z.string(),
   title: z.string(),
-  description: z.string(),
   matchedBy: z.object({
     fields: z.array(z.string()).optional(),
     index: z.array(z.string()).optional(),

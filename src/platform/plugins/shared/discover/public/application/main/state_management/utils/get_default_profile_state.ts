@@ -11,21 +11,21 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { uniqBy } from 'lodash';
 import type { DiscoverAppState } from '../discover_app_state_container';
-import type { DefaultAppStateColumn, ScopedProfilesManager } from '../../../../context_awareness';
+import type { DefaultAppStateColumn, ProfilesManager } from '../../../../context_awareness';
 import { getMergedAccessor } from '../../../../context_awareness';
 import type { DataDocumentsMsg } from '../discover_data_state_container';
 import type { TabState } from '../redux';
 
 export const getDefaultProfileState = ({
-  scopedProfilesManager,
+  profilesManager,
   resetDefaultProfileState,
   dataView,
 }: {
-  scopedProfilesManager: ScopedProfilesManager;
+  profilesManager: ProfilesManager;
   resetDefaultProfileState: TabState['resetDefaultProfileState'];
   dataView: DataView;
 }) => {
-  const defaultState = getDefaultState(scopedProfilesManager, dataView);
+  const defaultState = getDefaultState(profilesManager, dataView);
 
   return {
     /**
@@ -94,9 +94,9 @@ export const getDefaultProfileState = ({
   };
 };
 
-const getDefaultState = (scopedProfilesManager: ScopedProfilesManager, dataView: DataView) => {
+const getDefaultState = (profilesManager: ProfilesManager, dataView: DataView) => {
   const getDefaultAppState = getMergedAccessor(
-    scopedProfilesManager.getProfiles(),
+    profilesManager.getProfiles(),
     'getDefaultAppState',
     () => ({})
   );

@@ -14,7 +14,6 @@ import {
   CaseSeverity,
   CaseStatuses,
 } from '@kbn/cases-plugin/common/types/domain';
-import { ObjectRemover as ActionsRemover } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -26,6 +25,7 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
+import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   createCase,

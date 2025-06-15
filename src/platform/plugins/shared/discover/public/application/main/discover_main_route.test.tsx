@@ -11,6 +11,7 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { waitFor } from '@testing-library/react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
 import type { MainRouteProps } from './discover_main_route';
 import { DiscoverMainRoute } from './discover_main_route';
@@ -23,7 +24,6 @@ import { mockCustomizationContext } from '../../customizations/__mocks__/customi
 import type { MainHistoryLocationState } from '../../../common';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { RootProfileState } from '../../context_awareness';
-import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 
 let mockCustomizationService: Promise<DiscoverCustomizationService> | undefined;
 
@@ -167,9 +167,9 @@ const mountComponent = (
 
   return mountWithIntl(
     <MemoryRouter>
-      <DiscoverTestProvider services={getServicesMock(hasESData, hasUserDataView, locationState)}>
+      <KibanaContextProvider services={getServicesMock(hasESData, hasUserDataView, locationState)}>
         <DiscoverMainRoute {...props} />
-      </DiscoverTestProvider>
+      </KibanaContextProvider>
     </MemoryRouter>
   );
 };

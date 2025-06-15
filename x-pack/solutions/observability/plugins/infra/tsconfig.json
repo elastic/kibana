@@ -119,8 +119,7 @@
     "@kbn/core-chrome-browser",
     "@kbn/presentation-containers",
     "@kbn/object-utils",
-    "@kbn/coloring",
-    "@kbn/core-saved-objects-server"
+    "@kbn/coloring"
   ],
   "exclude": ["target/**/*"]
 }

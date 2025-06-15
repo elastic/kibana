@@ -7132,7 +7132,11 @@
         "tags": [],
         "label": "SavedObjectsModelUnsafeTransformChange",
         "description": [
-          "\nA {@link SavedObjectsModelChange | model change} executing an arbitrary transformation function.\nPlease define your transform function on a separate const.\nUse explicit types for the generic arguments, as shown below.\nThis will reduce the chances of introducing bugs."
+          "\nA {@link SavedObjectsModelChange | model change} executing an arbitrary transformation function.\n"
+        ],
+        "signature": [
+          "SavedObjectsModelUnsafeTransformChange",
+          "<PreviousAttributes, NewAttributes>"
         ],
         "path": "src/core/packages/saved-objects/server/src/model_version/model_change.ts",
         "deprecated": false,
@@ -7162,39 +7166,51 @@
               "\nThe transform function to execute."
             ],
             "signature": [
-              "(typeSafeGuard: <PreviousAttributes, NewAttributes>(fn: ",
-              "SavedObjectModelUnsafeTransformFn",
-              "<PreviousAttributes, NewAttributes>) => ",
-              "SavedObjectModelTransformationFn",
-              "<unknown, unknown>) => ",
-              "SavedObjectModelTransformationFn",
-              "<unknown, unknown>"
+              "(document: ",
+              "SavedObjectModelTransformationDoc",
+              "<PreviousAttributes>, context: ",
+              "SavedObjectModelTransformationContext",
+              ") => ",
+              "SavedObjectModelTransformationResult",
+              "<NewAttributes>"
             ],
             "path": "src/core/packages/saved-objects/server/src/model_version/model_change.ts",
             "deprecated": false,
             "trackAdoption": false,
+            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-server",
                 "id": "def-server.SavedObjectsModelUnsafeTransformChange.transformFn.$1",
-                "type": "Function",
+                "type": "CompoundType",
                 "tags": [],
-                "label": "typeSafeGuard",
+                "label": "document",
                 "description": [],
                 "signature": [
-                  "<PreviousAttributes, NewAttributes>(fn: ",
-                  "SavedObjectModelUnsafeTransformFn",
-                  "<PreviousAttributes, NewAttributes>) => ",
-                  "SavedObjectModelTransformationFn",
-                  "<unknown, unknown>"
+                  "SavedObjectDoc",
+                  "<InputAttributes> & { references?: ",
+                  "SavedObjectReference",
+                  "[] | undefined; }"
                 ],
-                "path": "src/core/packages/saved-objects/server/src/model_version/model_change.ts",
+                "path": "src/core/packages/saved-objects/server/src/model_version/transformations.ts",
                 "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsModelUnsafeTransformChange.transformFn.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "SavedObjectModelTransformationContext"
+                ],
+                "path": "src/core/packages/saved-objects/server/src/model_version/transformations.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
-            ],
-            "returnComment": []
+            ]
           }
         ],
         "initialIsOpen": false
@@ -11345,7 +11361,8 @@
           "<any, any> | ",
           "SavedObjectsModelDataRemovalChange",
           " | ",
-          "SavedObjectsModelUnsafeTransformChange"
+          "SavedObjectsModelUnsafeTransformChange",
+          "<any, any>"
         ],
         "path": "src/core/packages/saved-objects/server/src/model_version/model_change.ts",
         "deprecated": false,

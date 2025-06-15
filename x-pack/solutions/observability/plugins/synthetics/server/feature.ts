@@ -12,7 +12,6 @@ import {
   SubFeaturePrivilegeGroupType,
 } from '@kbn/features-plugin/common';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { DEPRECATED_ALERTING_CONSUMERS } from '@kbn/rule-data-utils';
 import { UPTIME_RULE_TYPE_IDS, SYNTHETICS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { syntheticsMonitorType, syntheticsParamType } from '../common/types/saved_objects';
@@ -33,7 +32,7 @@ const ruleTypes = [...UPTIME_RULE_TYPE_IDS, ...SYNTHETICS_RULE_TYPE_IDS];
 
 const alertingFeatures = ruleTypes.map((ruleTypeId) => ({
   ruleTypeId,
-  consumers: [PLUGIN.ID, ALERTING_FEATURE_ID, ...DEPRECATED_ALERTING_CONSUMERS],
+  consumers: [PLUGIN.ID, ALERTING_FEATURE_ID],
 }));
 
 const elasticManagedLocationsEnabledPrivilege: SubFeaturePrivilegeGroupConfig = {

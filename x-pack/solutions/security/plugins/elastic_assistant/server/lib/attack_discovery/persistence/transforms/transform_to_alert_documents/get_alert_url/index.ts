@@ -10,15 +10,15 @@ import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { SECURITY_APP_PATH } from '../../../../schedules/constants';
 
 export const getAlertUrl = ({
-  alertDocId,
+  alertId,
   basePath,
   spaceId,
 }: {
-  alertDocId: string;
+  alertId: string;
   basePath?: string;
   spaceId?: string | null;
 }) => {
-  const alertDetailPath = `/attack_discovery?id=${alertDocId}`;
+  const alertDetailPath = `/attack_discovery?id=${alertId}`;
   const alertDetailPathWithAppPath = `${SECURITY_APP_PATH}${alertDetailPath}`;
   return basePath
     ? addSpaceIdToPath(basePath, spaceId ?? undefined, alertDetailPathWithAppPath)

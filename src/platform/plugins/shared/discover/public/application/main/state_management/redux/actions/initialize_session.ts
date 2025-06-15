@@ -77,8 +77,11 @@ export const initializeSession: InternalStateThunkActionCreator<
 
     const discoverSessionLoadTracker =
       services.ebtManager.trackPerformanceEvent('discoverLoadSavedSearch');
-    const { currentDataView$, stateContainer$, customizationService$, scopedProfilesManager$ } =
-      selectTabRuntimeState(runtimeStateManager, tabId);
+
+    const { currentDataView$, stateContainer$, customizationService$ } = selectTabRuntimeState(
+      runtimeStateManager,
+      tabId
+    );
     let initialUrlState = defaultUrlState ?? urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY);
 
     /**
@@ -93,7 +96,6 @@ export const initializeSession: InternalStateThunkActionCreator<
       currentDataView$.next(undefined);
       stateContainer$.next(undefined);
       customizationService$.next(undefined);
-      scopedProfilesManager$.next(services.profilesManager.createScopedProfilesManager());
     }
 
     if (TABS_ENABLED && !wasTabInitialized) {
@@ -293,8 +295,6 @@ export const initializeSession: InternalStateThunkActionCreator<
     // Make sure app state container is completely reset
     stateContainer.appState.resetToState(initialState);
     stateContainer.appState.resetInitialState();
-
-    // Set runtime state
     stateContainer$.next(stateContainer);
     customizationService$.next(customizationService);
 

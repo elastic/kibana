@@ -21,16 +21,6 @@ import { StatusBar, StatusBarProps } from './status_bar';
 jest.mock('../../../utils/kibana_react');
 
 const useKibanaMock = useKibana as jest.Mock;
-const unsubscribeMock = jest.fn();
-const subscribeMock = jest.fn().mockReturnValue({ unsubscribe: unsubscribeMock });
-const mockSpaces = {
-  getActiveSpace$: jest.fn().mockReturnValue({
-    subscribe: subscribeMock,
-    pipe: () => ({
-      subscribe: subscribeMock,
-    }),
-  }),
-};
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
@@ -40,7 +30,6 @@ const mockKibana = () => {
           prepend: jest.fn(),
         },
       },
-      spaces: mockSpaces,
     },
   });
 };

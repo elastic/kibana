@@ -10,7 +10,6 @@
 import type { SavedObjectsMappingProperties } from '../mapping_definition';
 import type {
   SavedObjectModelDataBackfillFn,
-  SavedObjectModelTransformationFn,
   SavedObjectModelUnsafeTransformFn,
 } from './transformations';
 
@@ -144,26 +143,15 @@ export interface SavedObjectsModelDataRemovalChange {
 
 /**
  * A {@link SavedObjectsModelChange | model change} executing an arbitrary transformation function.
- * Please define your transform function on a separate const.
- * Use explicit types for the generic arguments, as shown below.
- * This will reduce the chances of introducing bugs.
+ *
  * @example
  * ```ts
- * const transformFn: SavedObjectModelUnsafeTransformFn<BeforeType, AfterType> = (
- *   doc: SavedObjectModelTransformationDoc<BeforeType>
- * ) => {
- *   const attributes: AfterType = {
- *     ...doc.attributes,
- *     someAddedField: 'defaultValue',
- *   };
- *
- *   return { document: { ...doc, attributes } };
- * };
- *
- * // this is how you would specify a change in the changes: []
- * const change: SavedObjectsModelUnsafeTransformChange = {
+ * let change: SavedObjectsModelUnsafeTransformChange = {
  *   type: 'unsafe_transform',
- *   transformFn: (typeSafeGuard) => typeSafeGuard(transformFn),
+ *   transformFn: (document) => {
+ *     document.attributes.someAddedField = 'defaultValue';
+ *     return { document };
+ *   },
  * };
  * ```
  *
@@ -172,14 +160,13 @@ export interface SavedObjectsModelDataRemovalChange {
  *         Those should only be used when there's no other way to cover one's migration needs.
  *         Please reach out to the Core team if you think you need to use this, as you theoretically shouldn't.
  */
-export interface SavedObjectsModelUnsafeTransformChange {
+export interface SavedObjectsModelUnsafeTransformChange<
+  PreviousAttributes = any,
+  NewAttributes = any
+> {
   type: 'unsafe_transform';
   /**
    * The transform function to execute.
    */
-  transformFn: (
-    typeSafeGuard: <PreviousAttributes, NewAttributes>(
-      fn: SavedObjectModelUnsafeTransformFn<PreviousAttributes, NewAttributes>
-    ) => SavedObjectModelTransformationFn
-  ) => SavedObjectModelTransformationFn;
+  transformFn: SavedObjectModelUnsafeTransformFn<PreviousAttributes, NewAttributes>;
 }

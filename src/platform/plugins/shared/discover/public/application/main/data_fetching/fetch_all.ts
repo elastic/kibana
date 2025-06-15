@@ -14,7 +14,7 @@ import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, swit
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { isEqual } from 'lodash';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { DiscoverAppStateContainer } from '../state_management/discover_app_state_container';
+import type { DiscoverAppState } from '../state_management/discover_app_state_container';
 import { updateVolatileSearchSource } from './update_search_source';
 import {
   checkHitCount,
@@ -35,20 +35,17 @@ import type {
 } from '../state_management/discover_data_state_container';
 import type { DiscoverServices } from '../../../build_services';
 import { fetchEsql } from './fetch_esql';
-import type { InternalStateStore, TabState } from '../state_management/redux';
-import type { ScopedProfilesManager } from '../../../context_awareness';
+import { type InternalStateStore, type TabState } from '../state_management/redux';
 
-export interface CommonFetchParams {
-  dataSubjects: SavedSearchData;
+export interface FetchDeps {
   abortController: AbortController;
-  appStateContainer: DiscoverAppStateContainer;
+  getAppState: () => DiscoverAppState;
   internalState: InternalStateStore;
   initialFetchStatus: FetchStatus;
   inspectorAdapters: Adapters;
   savedSearch: SavedSearch;
   searchSessionId: string;
   services: DiscoverServices;
-  scopedProfilesManager: ScopedProfilesManager;
 }
 
 /**
@@ -59,31 +56,26 @@ export interface CommonFetchParams {
  * have been completed (failed or successfully).
  */
 export function fetchAll(
-  params: CommonFetchParams & {
-    reset: boolean;
-    getCurrentTab: () => TabState;
-    onFetchRecordsComplete?: () => Promise<void>;
-  }
+  dataSubjects: SavedSearchData,
+  reset = false,
+  fetchDeps: FetchDeps,
+  getCurrentTab: () => TabState,
+  onFetchRecordsComplete?: () => Promise<void>
 ): Promise<void> {
   const {
-    dataSubjects,
-    reset = false,
     initialFetchStatus,
-    appStateContainer,
+    getAppState,
     services,
-    scopedProfilesManager,
     inspectorAdapters,
     savedSearch,
     abortController,
-    getCurrentTab,
-    onFetchRecordsComplete,
-  } = params;
-  const { data, expressions } = services;
+  } = fetchDeps;
+  const { data, expressions, profilesManager } = services;
+  const searchSource = savedSearch.searchSource.createChild();
 
   try {
-    const searchSource = savedSearch.searchSource.createChild();
     const dataView = searchSource.getField('index')!;
-    const { query, sort } = appStateContainer.getState();
+    const query = getAppState().query;
     const prevQuery = dataSubjects.documents$.getValue().query;
     const isEsqlQuery = isOfAggregateQueryType(query);
     const currentTab = getCurrentTab();
@@ -97,7 +89,7 @@ export function fetchAll(
       updateVolatileSearchSource(searchSource, {
         dataView,
         services,
-        sort: sort as SortOrder[],
+        sort: getAppState().sort as SortOrder[],
         inputTimeRange: currentTab.dataRequestParams.timeRangeAbsolute,
       });
     }
@@ -118,10 +110,10 @@ export function fetchAll(
           inspectorAdapters,
           data,
           expressions,
-          scopedProfilesManager,
+          profilesManager,
           timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
         })
-      : fetchDocuments(searchSource, params);
+      : fetchDocuments(searchSource, fetchDeps);
     const fetchType = isEsqlQuery ? 'fetchTextBased' : 'fetchDocuments';
     const startTime = window.performance.now();
 
@@ -221,13 +213,15 @@ export function fetchAll(
   }
 }
 
-export async function fetchMoreDocuments(params: CommonFetchParams): Promise<void> {
-  const { dataSubjects, appStateContainer, services, savedSearch } = params;
-
+export async function fetchMoreDocuments(
+  dataSubjects: SavedSearchData,
+  fetchDeps: FetchDeps
+): Promise<void> {
   try {
+    const { getAppState, services, savedSearch } = fetchDeps;
     const searchSource = savedSearch.searchSource.createChild();
     const dataView = searchSource.getField('index')!;
-    const { query, sort } = appStateContainer.getState();
+    const query = getAppState().query;
     const isEsqlQuery = isOfAggregateQueryType(query);
 
     if (isEsqlQuery) {
@@ -251,11 +245,11 @@ export async function fetchMoreDocuments(params: CommonFetchParams): Promise<voi
     updateVolatileSearchSource(searchSource, {
       dataView,
       services,
-      sort: sort as SortOrder[],
+      sort: getAppState().sort as SortOrder[],
     });
 
     // Fetch more documents
-    const { records, interceptedWarnings } = await fetchDocuments(searchSource, params);
+    const { records, interceptedWarnings } = await fetchDocuments(searchSource, fetchDeps);
 
     // Update the state and finish the loading state
     sendLoadingMoreFinishedMsg(dataSubjects.documents$, {

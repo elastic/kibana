@@ -13,7 +13,7 @@ import { SolutionsViewBadge } from './solutions_view_badge';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 jest.mock('../../../../hooks/use_discover_services');
 const useDiscoverServicesMock = jest.mocked(useDiscoverServices);
@@ -44,9 +44,9 @@ const setup = () => {
   const user = userEvent.setup();
 
   const { container } = render(
-    <DiscoverTestProvider>
+    <IntlProvider locale="en">
       <SolutionsViewBadge badgeText="Toggle popover" />
-    </DiscoverTestProvider>
+    </IntlProvider>
   );
 
   return { container, user };

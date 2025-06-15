@@ -17,7 +17,7 @@ import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { RecordsFetchResponse } from '../../types';
 import { getAllowedSampleSize } from '../../../utils/get_allowed_sample_size';
-import type { CommonFetchParams } from './fetch_all';
+import type { FetchDeps } from './fetch_all';
 
 /**
  * Requests the documents for Discover. This will return a promise that will resolve
@@ -25,16 +25,9 @@ import type { CommonFetchParams } from './fetch_all';
  */
 export const fetchDocuments = (
   searchSource: ISearchSource,
-  {
-    abortController,
-    inspectorAdapters,
-    searchSessionId,
-    services,
-    appStateContainer,
-    scopedProfilesManager,
-  }: CommonFetchParams
+  { abortController, inspectorAdapters, searchSessionId, services, getAppState }: FetchDeps
 ): Promise<RecordsFetchResponse> => {
-  const { sampleSize } = appStateContainer.getState();
+  const sampleSize = getAppState().sampleSize;
   searchSource.setField('size', getAllowedSampleSize(sampleSize, services.uiSettings));
   searchSource.setField('trackTotalHits', false);
   searchSource.setField('highlightAll', true);
@@ -79,7 +72,7 @@ export const fetchDocuments = (
         return buildDataTableRecordList({
           records: res.rawResponse.hits.hits,
           dataView,
-          processRecord: (record) => scopedProfilesManager.resolveDocumentProfile({ record }),
+          processRecord: (record) => services.profilesManager.resolveDocumentProfile({ record }),
         });
       })
     );

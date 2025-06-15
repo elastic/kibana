@@ -46,6 +46,7 @@ export interface CreateRuleFormProps {
   canShowConsumerSelection?: boolean;
   showMustacheAutocompleteSwitch?: boolean;
   isFlyout?: boolean;
+  isServerless?: boolean;
   onCancel?: () => void;
   onSubmit?: (ruleId: string) => void;
   onChangeMetaData?: (metadata?: RuleTypeMetaData) => void;
@@ -66,6 +67,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     canShowConsumerSelection = true,
     showMustacheAutocompleteSwitch = false,
     isFlyout,
+    isServerless = false,
     onCancel,
     onSubmit,
     onChangeMetaData,
@@ -211,6 +213,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
           validConsumers,
           ruleType,
           ruleTypes,
+          isServerless,
         }),
       }}
     >

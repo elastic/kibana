@@ -263,7 +263,6 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       consumer,
       notifyWhen,
       enabled = true,
-      expectedStatusCode = 200,
     }: {
       roleAuthc: RoleCredentials;
       ruleTypeId: string;
@@ -275,7 +274,6 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       schedule?: { interval: string };
       notifyWhen?: string;
       enabled?: boolean;
-      expectedStatusCode?: number;
     }) {
       const { body } = await supertestWithoutAuth
         .post(`/api/alerting/rule`)
@@ -294,7 +292,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
           actions,
           ...(notifyWhen ? { notify_when: notifyWhen, throttle: '5m' } : {}),
         })
-        .expect(expectedStatusCode);
+        .expect(200);
       return body;
     },
 
@@ -928,15 +926,13 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       expectedStatus,
       roleAuthc,
       spaceId,
-      timeout = retryTimeout,
     }: {
       ruleId: string;
       expectedStatus: string;
       roleAuthc: RoleCredentials;
       spaceId?: string;
-      timeout?: number;
     }) {
-      return await retry.tryForTime(timeout, async () => {
+      return await retry.tryForTime(retryTimeout, async () => {
         const response = await supertestWithoutAuth
           .get(`${spaceId ? '/s/' + spaceId : ''}/api/alerting/rule/${ruleId}`)
           .set(roleAuthc.apiKeyHeader)

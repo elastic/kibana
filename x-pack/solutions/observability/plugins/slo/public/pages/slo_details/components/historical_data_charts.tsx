@@ -12,11 +12,12 @@ import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { TimeBounds } from '../types';
 import { ErrorBudgetChartPanel } from './error_budget_chart_panel';
 import { SliChartPanel } from './sli_chart_panel';
+import { SloTabId } from './slo_details';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
   isAutoRefreshing: boolean;
-  hideMetadata?: boolean;
+  selectedTabId: SloTabId;
   range?: { from: Date; to: Date };
   onBrushed?: (timeBounds: TimeBounds) => void;
 }
@@ -25,14 +26,15 @@ export function HistoricalDataCharts({
   slo,
   range,
   isAutoRefreshing,
-  hideMetadata = false,
+  selectedTabId,
   onBrushed,
 }: Props) {
-  const { data: historicalSummaries = [], isLoading } = useFetchHistoricalSummary({
-    sloList: [slo],
-    shouldRefetch: isAutoRefreshing,
-    range,
-  });
+  const { data: historicalSummaries = [], isLoading: historicalSummaryLoading } =
+    useFetchHistoricalSummary({
+      sloList: [slo],
+      shouldRefetch: isAutoRefreshing,
+      range,
+    });
 
   const sloHistoricalSummary = historicalSummaries.find(
     (historicalSummary) =>
@@ -50,18 +52,18 @@ export function HistoricalDataCharts({
       <EuiFlexItem>
         <SliChartPanel
           data={historicalSliData}
-          isLoading={isLoading}
+          isLoading={historicalSummaryLoading}
           slo={slo}
-          hideMetadata={hideMetadata}
+          selectedTabId={selectedTabId}
           onBrushed={onBrushed}
         />
       </EuiFlexItem>
       <EuiFlexItem>
         <ErrorBudgetChartPanel
           data={errorBudgetBurnDownData}
-          isLoading={isLoading}
+          isLoading={historicalSummaryLoading}
           slo={slo}
-          hideMetadata={hideMetadata}
+          selectedTabId={selectedTabId}
           onBrushed={onBrushed}
         />
       </EuiFlexItem>

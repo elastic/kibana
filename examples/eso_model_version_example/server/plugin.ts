@@ -104,10 +104,9 @@ export class EsoModelVersionExample
             changes: [
               {
                 type: 'unsafe_transform',
-                transformFn: (typeSafeGuard) =>
-                  typeSafeGuard((document) => {
-                    return { document };
-                  }),
+                transformFn: (document) => {
+                  return { document };
+                },
               },
             ],
             schemas: {

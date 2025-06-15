@@ -156,7 +156,6 @@ export const EmailParamsFields = ({
           )}
         >
           <EuiComboBox
-            autoFocus
             noSuggestions
             isInvalid={isCCInvalid}
             isLoading={isLoading}
@@ -200,7 +199,6 @@ export const EmailParamsFields = ({
           )}
         >
           <EuiComboBox
-            autoFocus
             noSuggestions
             isInvalid={isBCCInvalid}
             isDisabled={isDisabled}
