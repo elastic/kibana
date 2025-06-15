@@ -59,7 +59,7 @@ export const CreateRulesetModal = ({ onClose }: CreateRulesetModalProps) => {
   return (
     <EuiModal onClose={onClose}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle id={titleId}>
+        <EuiModalHeaderTitle id={titleId} data-test-subj="searchRulesetCreateRulesetModalHeader">
           <FormattedMessage
             id="xpack.queryRules.createRulesetModal.title"
             defaultMessage="Create ruleset"
@@ -159,7 +159,7 @@ export const CreateRulesetModal = ({ onClose }: CreateRulesetModalProps) => {
           type="submit"
         >
           <FormattedMessage
-            id="xp{ack.queryRules.createRulesetModal.createButton"
+            id="xpack.queryRules.createRulesetModal.createButton"
             defaultMessage="Create ruleset"
           />
         </EuiButton>
