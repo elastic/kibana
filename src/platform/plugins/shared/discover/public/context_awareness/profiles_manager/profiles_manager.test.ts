@@ -8,13 +8,13 @@
  */
 
 import { firstValueFrom, Subject } from 'rxjs';
-import { createEsqlDataSource } from '../../common/data_sources';
-import { addLog } from '../utils/add_log';
-import { SolutionType } from './profiles/root_profile';
-import { createContextAwarenessMocks } from './__mocks__';
-import type { ComposableProfile } from './composable_profile';
+import { createEsqlDataSource } from '../../../common/data_sources';
+import { addLog } from '../../utils/add_log';
+import { SolutionType } from '../profiles/root_profile';
+import { createContextAwarenessMocks } from '../__mocks__';
+import type { ComposableProfile } from '../composable_profile';
 
-jest.mock('../utils/add_log');
+jest.mock('../../utils/add_log');
 
 let mocks = createContextAwarenessMocks();
 
@@ -30,19 +30,22 @@ describe('ProfilesManager', () => {
   });
 
   it('should return default profiles', () => {
-    const profiles = mocks.profilesManagerMock.getProfiles();
+    const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager();
+    const profiles = scopedProfilesManager.getProfiles();
     expect(profiles).toEqual([{}, {}, {}]);
   });
 
   it('should resolve root profile', async () => {
     await mocks.profilesManagerMock.resolveRootProfile({});
-    const profiles = mocks.profilesManagerMock.getProfiles();
+    const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager();
+    const profiles = scopedProfilesManager.getProfiles();
     expect(profiles).toEqual([toAppliedProfile(mocks.rootProfileProviderMock.profile), {}, {}]);
   });
 
   it('should resolve data source profile', async () => {
-    await mocks.profilesManagerMock.resolveDataSourceProfile({});
-    const profiles = mocks.profilesManagerMock.getProfiles();
+    const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager();
+    await scopedProfilesManager.resolveDataSourceProfile({});
+    const profiles = scopedProfilesManager.getProfiles();
     expect(profiles).toEqual([
       {},
       toAppliedProfile(mocks.dataSourceProfileProviderMock.profile),
@@ -51,20 +54,22 @@ describe('ProfilesManager', () => {
   });
 
   it('should resolve document profile', async () => {
-    const record = mocks.profilesManagerMock.resolveDocumentProfile({
+    const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager();
+    const record = scopedProfilesManager.resolveDocumentProfile({
       record: mocks.contextRecordMock,
     });
-    const profiles = mocks.profilesManagerMock.getProfiles({ record });
+    const profiles = scopedProfilesManager.getProfiles({ record });
     expect(profiles).toEqual([{}, {}, toAppliedProfile(mocks.documentProfileProviderMock.profile)]);
   });
 
   it('should resolve multiple profiles', async () => {
     await mocks.profilesManagerMock.resolveRootProfile({});
-    await mocks.profilesManagerMock.resolveDataSourceProfile({});
-    const record = mocks.profilesManagerMock.resolveDocumentProfile({
+    const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager();
+    await scopedProfilesManager.resolveDataSourceProfile({});
+    const record = scopedProfilesManager.resolveDocumentProfile({
       record: mocks.contextRecordMock,
     });
-    const profiles = mocks.profilesManagerMock.getProfiles({ record });
+    const profiles = scopedProfilesManager.getProfiles({ record });
     expect(profiles).toEqual([
       toAppliedProfile(mocks.rootProfileProviderMock.profile),
       toAppliedProfile(mocks.dataSourceProfileProviderMock.profile),
@@ -87,11 +92,12 @@ describe('ProfilesManager', () => {
   });
 
   it('should expose profiles as an observable', async () => {
-    const getProfilesSpy = jest.spyOn(mocks.profilesManagerMock, 'getProfiles');
-    const record = mocks.profilesManagerMock.resolveDocumentProfile({
+    const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager();
+    const getProfilesSpy = jest.spyOn(scopedProfilesManager, 'getProfiles');
+    const record = scopedProfilesManager.resolveDocumentProfile({
       record: mocks.contextRecordMock,
     });
-    const profiles$ = mocks.profilesManagerMock.getProfiles$({ record });
+    const profiles$ = scopedProfilesManager.getProfiles$({ record });
     const next = jest.fn();
     profiles$.subscribe(next);
     expect(getProfilesSpy).toHaveBeenCalledTimes(1);
@@ -107,7 +113,7 @@ describe('ProfilesManager', () => {
       {},
       toAppliedProfile(mocks.documentProfileProviderMock.profile),
     ]);
-    await mocks.profilesManagerMock.resolveDataSourceProfile({});
+    await scopedProfilesManager.resolveDataSourceProfile({});
     expect(getProfilesSpy).toHaveBeenCalledTimes(3);
     expect(next).toHaveBeenCalledWith([
       toAppliedProfile(mocks.rootProfileProviderMock.profile),
@@ -129,12 +135,13 @@ describe('ProfilesManager', () => {
   });
 
   it('should not resolve data source profile again if params have not changed', async () => {
-    await mocks.profilesManagerMock.resolveDataSourceProfile({
+    const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager();
+    await scopedProfilesManager.resolveDataSourceProfile({
       dataSource: createEsqlDataSource(),
       query: { esql: 'from *' },
     });
     expect(mocks.dataSourceProfileProviderMock.resolve).toHaveBeenCalledTimes(1);
-    await mocks.profilesManagerMock.resolveDataSourceProfile({
+    await scopedProfilesManager.resolveDataSourceProfile({
       dataSource: createEsqlDataSource(),
       query: { esql: 'from *' },
     });
@@ -142,12 +149,13 @@ describe('ProfilesManager', () => {
   });
 
   it('should resolve data source profile again if params have changed', async () => {
-    await mocks.profilesManagerMock.resolveDataSourceProfile({
+    const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager();
+    await scopedProfilesManager.resolveDataSourceProfile({
       dataSource: createEsqlDataSource(),
       query: { esql: 'from *' },
     });
     expect(mocks.dataSourceProfileProviderMock.resolve).toHaveBeenCalledTimes(1);
-    await mocks.profilesManagerMock.resolveDataSourceProfile({
+    await scopedProfilesManager.resolveDataSourceProfile({
       dataSource: createEsqlDataSource(),
       query: { esql: 'from logs-*' },
     });
@@ -156,7 +164,8 @@ describe('ProfilesManager', () => {
 
   it('should log an error and fall back to the default profile if root profile resolution fails', async () => {
     await mocks.profilesManagerMock.resolveRootProfile({ solutionNavId: 'solutionNavId' });
-    let profiles = mocks.profilesManagerMock.getProfiles();
+    const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager();
+    let profiles = scopedProfilesManager.getProfiles();
     expect(profiles).toEqual([toAppliedProfile(mocks.rootProfileProviderMock.profile), {}, {}]);
     const resolveSpy = jest.spyOn(mocks.rootProfileProviderMock, 'resolve');
     resolveSpy.mockRejectedValue(new Error('Failed to resolve'));
@@ -165,16 +174,17 @@ describe('ProfilesManager', () => {
       '[ProfilesManager] rootLevel context resolution failed with params: {\n  "solutionNavId": "newSolutionNavId"\n}',
       new Error('Failed to resolve')
     );
-    profiles = mocks.profilesManagerMock.getProfiles();
+    profiles = scopedProfilesManager.getProfiles();
     expect(profiles).toEqual([{}, {}, {}]);
   });
 
   it('should log an error and fall back to the default profile if data source profile resolution fails', async () => {
-    await mocks.profilesManagerMock.resolveDataSourceProfile({
+    const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager();
+    await scopedProfilesManager.resolveDataSourceProfile({
       dataSource: createEsqlDataSource(),
       query: { esql: 'from *' },
     });
-    let profiles = mocks.profilesManagerMock.getProfiles();
+    let profiles = scopedProfilesManager.getProfiles();
     expect(profiles).toEqual([
       {},
       toAppliedProfile(mocks.dataSourceProfileProviderMock.profile),
@@ -182,7 +192,7 @@ describe('ProfilesManager', () => {
     ]);
     const resolveSpy = jest.spyOn(mocks.dataSourceProfileProviderMock, 'resolve');
     resolveSpy.mockRejectedValue(new Error('Failed to resolve'));
-    await mocks.profilesManagerMock.resolveDataSourceProfile({
+    await scopedProfilesManager.resolveDataSourceProfile({
       dataSource: createEsqlDataSource(),
       query: { esql: 'from logs-*' },
     });
@@ -190,24 +200,25 @@ describe('ProfilesManager', () => {
       '[ProfilesManager] dataSourceLevel context resolution failed with params: {\n  "esqlQuery": "from logs-*"\n}',
       new Error('Failed to resolve')
     );
-    profiles = mocks.profilesManagerMock.getProfiles();
+    profiles = scopedProfilesManager.getProfiles();
     expect(profiles).toEqual([{}, {}, {}]);
   });
 
   it('should log an error and fall back to the default profile if document profile resolution fails', () => {
-    const record = mocks.profilesManagerMock.resolveDocumentProfile({
+    const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager();
+    const record = scopedProfilesManager.resolveDocumentProfile({
       record: mocks.contextRecordMock,
     });
-    let profiles = mocks.profilesManagerMock.getProfiles({ record });
+    let profiles = scopedProfilesManager.getProfiles({ record });
     expect(profiles).toEqual([{}, {}, toAppliedProfile(mocks.documentProfileProviderMock.profile)]);
     const resolveSpy = jest.spyOn(mocks.documentProfileProviderMock, 'resolve');
     resolveSpy.mockImplementation(() => {
       throw new Error('Failed to resolve');
     });
-    const record2 = mocks.profilesManagerMock.resolveDocumentProfile({
+    const record2 = scopedProfilesManager.resolveDocumentProfile({
       record: mocks.contextRecordMock2,
     });
-    profiles = mocks.profilesManagerMock.getProfiles({ record: record2 });
+    profiles = scopedProfilesManager.getProfiles({ record: record2 });
     expect(addLog).toHaveBeenCalledWith(
       '[ProfilesManager] documentLevel context resolution failed with params: {\n  "recordId": "logstash-2014.09.09::388::"\n}',
       new Error('Failed to resolve')
@@ -234,7 +245,8 @@ describe('ProfilesManager', () => {
     });
     expect(resolveSpy).toHaveReturnedTimes(1);
     expect(resolveSpy).toHaveLastReturnedWith(deferredResult);
-    expect(mocks.profilesManagerMock.getProfiles()).toEqual([{}, {}, {}]);
+    const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager();
+    expect(scopedProfilesManager.getProfiles()).toEqual([{}, {}, {}]);
     const resolvedDeferredResult2$ = new Subject();
     const deferredResult2 = firstValueFrom(resolvedDeferredResult2$).then(() => newContext);
     resolveSpy.mockResolvedValueOnce(deferredResult2);
@@ -243,13 +255,13 @@ describe('ProfilesManager', () => {
     });
     expect(resolveSpy).toHaveReturnedTimes(2);
     expect(resolveSpy).toHaveLastReturnedWith(deferredResult2);
-    expect(mocks.profilesManagerMock.getProfiles()).toEqual([{}, {}, {}]);
+    expect(scopedProfilesManager.getProfiles()).toEqual([{}, {}, {}]);
     resolvedDeferredResult$.next(undefined);
     await promise1;
-    expect(mocks.profilesManagerMock.getProfiles()).toEqual([{}, {}, {}]);
+    expect(scopedProfilesManager.getProfiles()).toEqual([{}, {}, {}]);
     resolvedDeferredResult2$.next(undefined);
     await promise2;
-    expect(mocks.profilesManagerMock.getProfiles()).toEqual([
+    expect(scopedProfilesManager.getProfiles()).toEqual([
       toAppliedProfile(mocks.rootProfileProviderMock.profile),
       {},
       {},
@@ -272,29 +284,30 @@ describe('ProfilesManager', () => {
     const resolvedDeferredResult$ = new Subject();
     const deferredResult = firstValueFrom(resolvedDeferredResult$).then(() => context);
     resolveSpy.mockResolvedValueOnce(deferredResult);
-    const promise1 = mocks.profilesManagerMock.resolveDataSourceProfile({
+    const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager();
+    const promise1 = scopedProfilesManager.resolveDataSourceProfile({
       dataSource: createEsqlDataSource(),
       query: { esql: 'from *' },
     });
     expect(resolveSpy).toHaveReturnedTimes(1);
     expect(resolveSpy).toHaveLastReturnedWith(deferredResult);
-    expect(mocks.profilesManagerMock.getProfiles()).toEqual([{}, {}, {}]);
+    expect(scopedProfilesManager.getProfiles()).toEqual([{}, {}, {}]);
     const resolvedDeferredResult2$ = new Subject();
     const deferredResult2 = firstValueFrom(resolvedDeferredResult2$).then(() => newContext);
     resolveSpy.mockResolvedValueOnce(deferredResult2);
-    const promise2 = mocks.profilesManagerMock.resolveDataSourceProfile({
+    const promise2 = scopedProfilesManager.resolveDataSourceProfile({
       dataSource: createEsqlDataSource(),
       query: { esql: 'from logs-*' },
     });
     expect(resolveSpy).toHaveReturnedTimes(2);
     expect(resolveSpy).toHaveLastReturnedWith(deferredResult2);
-    expect(mocks.profilesManagerMock.getProfiles()).toEqual([{}, {}, {}]);
+    expect(scopedProfilesManager.getProfiles()).toEqual([{}, {}, {}]);
     resolvedDeferredResult$.next(undefined);
     await promise1;
-    expect(mocks.profilesManagerMock.getProfiles()).toEqual([{}, {}, {}]);
+    expect(scopedProfilesManager.getProfiles()).toEqual([{}, {}, {}]);
     resolvedDeferredResult2$.next(undefined);
     await promise2;
-    expect(mocks.profilesManagerMock.getProfiles()).toEqual([
+    expect(scopedProfilesManager.getProfiles()).toEqual([
       {},
       toAppliedProfile(mocks.dataSourceProfileProviderMock.profile),
       {},
