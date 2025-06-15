@@ -36,6 +36,9 @@ export function summarizeBulkSuccess(action: BulkActionType): string {
 
     case BulkActionTypeEnum.run:
       return i18n.RULES_BULK_MANUAL_RULE_RUN_SUCCESS;
+    
+    case BulkActionTypeEnum.fill_gaps:
+        return i18n.RULES_BULK_MANUAL_RULE_RUN_SUCCESS;
 
     case BulkActionTypeEnum.fill_gaps:
       return i18n.RULES_BULK_FILL_GAPS_SUCCESS;
@@ -115,6 +118,9 @@ export function summarizeBulkError(action: BulkActionType): string {
 
     case BulkActionTypeEnum.run:
       return i18n.RULES_BULK_MANUAL_RULE_RUN_FAILURE;
+    
+    case BulkActionTypeEnum.fill_gaps:
+      return i18n.RULES_BULK_FILL_GAPS_FAILURE;
 
     case BulkActionTypeEnum.fill_gaps:
       return i18n.RULES_BULK_FILL_GAPS_FAILURE;
@@ -150,6 +156,9 @@ export function explainBulkError(action: BulkActionType, error: HTTPError): stri
 
     case BulkActionTypeEnum.run:
       return i18n.RULES_BULK_MANUAL_RULE_RUN_FAILURE_DESCRIPTION(summary.failed);
+    
+    case BulkActionTypeEnum.fill_gaps:
+      return i18n.RULES_BULK_FILL_GAPS_FAILURE_DESCRIPTION(summary.failed);
 
     case BulkActionTypeEnum.fill_gaps:
       return i18n.RULES_BULK_FILL_GAPS_FAILURE_DESCRIPTION(summary.failed);

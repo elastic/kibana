@@ -62,6 +62,8 @@ interface ActionColumnsProps {
   confirmDeletion: () => Promise<boolean>;
 }
 
+const loadingActionsSet = new Set(['disable', 'enable', 'edit', 'delete', 'run', 'fill_gaps'])
+
 export const useEnabledColumn = ({
   hasCRUDPermissions,
   startMlJobs,
@@ -72,7 +74,7 @@ export const useEnabledColumn = ({
 
   const loadingIds = useMemo(
     () =>
-      ['disable', 'enable', 'edit', 'delete', 'run'].includes(loadingRulesAction ?? '')
+      loadingActionsSet.has(loadingRulesAction ?? '')
         ? loadingRuleIds
         : [],
     [loadingRuleIds, loadingRulesAction]

@@ -110,6 +110,13 @@ export const BULK_ACTION_MANUAL_RULE_RUN = i18n.translate(
   }
 );
 
+export const BULK_ACTION_FILL_GAPS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.fillGapsTitle',
+  {
+    defaultMessage: 'Fill gaps',
+  }
+);
+
 export const BULK_ACTION_DUPLICATE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicateTitle',
   {
@@ -238,6 +245,29 @@ export const BULK_EDIT_WARNING_TOAST_NOTIFY = i18n.translate(
   }
 );
 
+export const BULK_FILL_RULE_GAPS_WARNING_TOAST_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkFillRuleGapsWarningToastTitle',
+  {
+    defaultMessage: 'Rules updates are in progress',
+  }
+);
+
+export const BULK_FILL_RULE_GAPS_WARNING_TOAST_DESCRIPTION = (rulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkFillRuleGapsWarningToastDescription',
+    {
+      values: { rulesCount },
+      defaultMessage: '{rulesCount, plural, =1 {# rule is} other {# rules are}} updating.',
+    }
+  );
+
+export const BULK_FILL_RULE_GAPS_WARNING_TOAST_NOTIFY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkFillRuleGapsWarningToastNotifyButtonLabel',
+  {
+    defaultMessage: `Notify me when done`,
+  }
+);
+
 export const BULK_EXPORT_CONFIRMATION_REJECTED_TITLE = (rulesCount: number) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkExportConfirmationDeniedTitle',
@@ -250,6 +280,15 @@ export const BULK_EXPORT_CONFIRMATION_REJECTED_TITLE = (rulesCount: number) =>
 export const BULK_MANUAL_RULE_RUN_CONFIRMATION_REJECTED_TITLE = (rulesCount: number) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkManualRuleRunConfirmationDeniedTitle',
+    {
+      values: { rulesCount },
+      defaultMessage: '{rulesCount, plural, =1 {# rule} other {# rules}} cannot be scheduled',
+    }
+  );
+
+export const BULK_FILL_RULE_GAPS_CONFIRMATION_REJECTED_TITLE = (rulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkFillRuleGapsConfirmationDeniedTitle',
     {
       values: { rulesCount },
       defaultMessage: '{rulesCount, plural, =1 {# rule} other {# rules}} cannot be scheduled',
@@ -313,6 +352,15 @@ export const BULK_MANUAL_RULE_RUN_CONFIRMATION_CONFIRM = (rulesCount: number) =>
     {
       values: { rulesCount },
       defaultMessage: 'Schedule {rulesCount, plural, =1 {# rule} other {# rules}}',
+    }
+  );
+
+export const BULK_FILL_RULE_GAPS_CONFIRMATION_CONFIRM = (rulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkFillRuleGapsConfirmation.confirmButtonLabel',
+    {
+      values: { rulesCount },
+      defaultMessage: 'Schedule gaps filling for {rulesCount, plural, =1 {# rule} other {# rules}}',
     }
   );
 

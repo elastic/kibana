@@ -165,6 +165,35 @@ const BulkManualRuleRunErrorItem = ({
   }
 };
 
+const BulkFillRuleGapsErrorItem = ({
+  errorCode,
+  message,
+  rulesCount,
+}: BulkActionRuleErrorItemProps) => {
+  switch (errorCode) {
+    case BulkActionsDryRunErrCodeEnum.RULE_FILL_GAPS_DISABLED_RULE:
+      return (
+        <li key={message}>
+          <FormattedMessage
+            id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.fillGapsDisabledRuleDescription"
+            defaultMessage="{rulesCount, plural, =1 {# rule} other {# rules}} (Cannot fill gaps for disabled rules)"
+            values={{ rulesCount }}
+          />
+        </li>
+      );
+    default:
+      return (
+        <li key={message}>
+          <FormattedMessage
+            id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.defaultScheduleRuleRunFailureDescription"
+            defaultMessage="Cannot fill gaps for {rulesCount, plural, =1 {# rule} other {# rules}} ({message})"
+            values={{ rulesCount, message }}
+          />
+        </li>
+      );
+  }
+};
+
 interface BulkActionRuleErrorsListProps {
   ruleErrors: DryRunResult['ruleErrors'];
   bulkAction: BulkActionForConfirmation;
@@ -210,6 +239,15 @@ const BulkActionRuleErrorsListComponent = ({
             case BulkActionTypeEnum.run:
               return (
                 <BulkManualRuleRunErrorItem
+                  message={message}
+                  errorCode={errorCode}
+                  rulesCount={rulesCount}
+                />
+              );
+            
+            case BulkActionTypeEnum.fill_gaps:
+              return (
+                <BulkFillRuleGapsErrorItem
                   message={message}
                   errorCode={errorCode}
                   rulesCount={rulesCount}

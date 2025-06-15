@@ -119,4 +119,7 @@ export const BULK_EXPORT_ACTION_BTN = '[data-test-subj="exportRuleBulk"]';
 // SCHEDULE MANUAL RULE RUN
 export const BULK_MANUAL_RULE_RUN_BTN = '[data-test-subj="scheduleRuleRunBulk"]';
 
+// SCHEDULE BULK FILL GAPS
+export const BULK_FILL_RULE_GAPS_BTN = '[data-test-subj="scheduleFillGaps"]';
+
 export const BULK_MANUAL_RULE_RUN_WARNING_MODAL = '[data-test-subj="bulkActionConfirmationModal"]';

@@ -862,7 +862,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                   </>
                 </Route>
                 <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionEvents})`}>
-                  <ExecutionEventsTable ruleId={ruleId} />
+                  <ExecutionEventsTable ruleId={ruleId} shouldRefetch={false} />
                 </Route>
               </Routes>
             </StyledMinHeightTabContainer>

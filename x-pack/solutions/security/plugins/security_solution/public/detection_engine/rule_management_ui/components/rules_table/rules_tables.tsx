@@ -46,6 +46,8 @@ import { ManualRuleRunModal } from '../../../rule_gaps/components/manual_rule_ru
 import { BulkManualRuleRunLimitErrorModal } from './bulk_actions/bulk_manual_rule_run_limit_error_modal';
 import { RulesWithGapsOverviewPanel } from '../../../rule_gaps/components/rules_with_gaps_overview_panel';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { ManualRuleGapsFillingModal } from '../../../rule_gaps/components/manual_rule_fill_gaps';
+import { useManualRuleGapsFillingConfirmation } from '../../../rule_gaps/components/manual_rule_fill_gaps/use_manual_rule_gaps_filling_confirmation';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -126,6 +128,13 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     confirmManualRuleRun,
   } = useManualRuleRunConfirmation();
 
+  const {
+    isManualRuleGapsFillingConfirmationVisible,
+    showManualRuleGapsFillingConfirmation,
+    cancelManualRuleGapsFilling,
+    confirmManualRuleGapsFilling,
+  } = useManualRuleGapsFillingConfirmation();
+
   const [
     isManualRuleRunLimitErrorVisible,
     showManualRuleRunLimitError,
@@ -148,6 +157,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     showBulkActionConfirmation,
     showBulkDuplicateConfirmation,
     showManualRuleRunConfirmation,
+    showManualRuleGapsFillingConfirmation,
     showManualRuleRunLimitError,
     completeBulkEditForm,
     executeBulkActionsDryRun,
@@ -294,6 +304,9 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       )}
       {isManualRuleRunConfirmationVisible && (
         <ManualRuleRunModal onCancel={cancelManualRuleRun} onConfirm={confirmManualRuleRun} />
+      )}
+      {isManualRuleGapsFillingConfirmationVisible && (
+        <ManualRuleGapsFillingModal onCancel={cancelManualRuleGapsFilling} onConfirm={confirmManualRuleGapsFilling} rulesCount={selectedRuleIds.length} />
       )}
       {isManualRuleRunLimitErrorVisible && (
         <BulkManualRuleRunLimitErrorModal onClose={hideManualRuleRunLimitError} />
