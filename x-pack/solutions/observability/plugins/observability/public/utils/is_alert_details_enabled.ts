@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { ALERT_RULE_TYPE_ID, SYNTHETICS_STATUS_RULE } from '@kbn/rule-data-utils';
 import {
   ApmRuleType,
   LOG_THRESHOLD_ALERT_TYPE_ID,
@@ -22,6 +22,7 @@ const ALLOWED_RULE_TYPES = [
   METRIC_THRESHOLD_ALERT_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   SLO_BURN_RATE_RULE_TYPE_ID,
+  SYNTHETICS_STATUS_RULE,
 ];
 
 const isUnsafeAlertDetailsFlag = (

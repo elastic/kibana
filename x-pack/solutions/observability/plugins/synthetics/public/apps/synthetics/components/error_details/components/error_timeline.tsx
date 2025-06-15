@@ -10,7 +10,13 @@ import moment from 'moment';
 import { Ping } from '../../../../../../common/runtime_types';
 import { MonitorFailedTests } from '../../monitor_details/monitor_errors/failed_tests';
 
-export const ErrorTimeline = ({ lastTestRun }: { lastTestRun?: Ping }) => {
+export const ErrorTimeline = ({
+  lastTestRun,
+  errorStateId,
+}: {
+  lastTestRun?: Ping;
+  errorStateId?: string;
+}) => {
   if (!lastTestRun) {
     return <EuiSkeletonText lines={3} />;
   }
@@ -31,6 +37,7 @@ export const ErrorTimeline = ({ lastTestRun }: { lastTestRun?: Ping }) => {
           .toISOString(),
       }}
       allowBrushing={false}
+      errorStateId={errorStateId}
     />
   );
 };
