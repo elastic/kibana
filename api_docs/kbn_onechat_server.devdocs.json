@@ -2247,10 +2247,10 @@
             ],
             "signature": [
               {
-                "pluginId": "inference",
-                "scope": "server",
-                "docId": "kibInferencePluginApi",
-                "section": "def-server.BoundInferenceClient",
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.BoundInferenceClient",
                 "text": "BoundInferenceClient"
               }
             ],

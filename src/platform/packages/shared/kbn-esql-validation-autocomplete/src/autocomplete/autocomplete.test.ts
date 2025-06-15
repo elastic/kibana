@@ -95,7 +95,7 @@ describe('autocomplete', () => {
     );
     testSuggestions('/', [
       ...sourceCommands.map((name) => name.toUpperCase() + ' '),
-      ...mapRecommendedQueriesFromExtensions(editorExtensions),
+      ...mapRecommendedQueriesFromExtensions(editorExtensions.recommendedQueries),
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
     const commands = commandDefinitions
@@ -255,7 +255,7 @@ describe('autocomplete', () => {
     );
     testSuggestions('f/', [
       ...sourceCommands.map((cmd) => `${cmd.toUpperCase()} `),
-      ...mapRecommendedQueriesFromExtensions(editorExtensions),
+      ...mapRecommendedQueriesFromExtensions(editorExtensions.recommendedQueries),
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
 
@@ -482,7 +482,7 @@ describe('autocomplete', () => {
     // Source command
     testSuggestions('F/', [
       ...['FROM ', 'ROW ', 'SHOW '].map(attachTriggerCommand),
-      ...mapRecommendedQueriesFromExtensions(editorExtensions),
+      ...mapRecommendedQueriesFromExtensions(editorExtensions.recommendedQueries),
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
 

@@ -1290,7 +1290,7 @@
                 "section": "def-public.AutoRefreshDoneFn",
                 "text": "AutoRefreshDoneFn"
               },
-              ">; getFetch$: () => ",
+              ">; triggerFetch: () => void; getFetch$: () => ",
               "Observable",
               "<void>; getTime: () => ",
               {
@@ -3166,6 +3166,69 @@
       },
       {
         "parentPluginId": "discover",
+        "id": "def-public.PublishesWritableSavedSearch",
+        "type": "Interface",
+        "tags": [],
+        "label": "PublishesWritableSavedSearch",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "discover",
+            "scope": "public",
+            "docId": "kibDiscoverPluginApi",
+            "section": "def-public.PublishesWritableSavedSearch",
+            "text": "PublishesWritableSavedSearch"
+          },
+          " extends ",
+          {
+            "pluginId": "discover",
+            "scope": "public",
+            "docId": "kibDiscoverPluginApi",
+            "section": "def-public.PublishesSavedSearch",
+            "text": "PublishesSavedSearch"
+          }
+        ],
+        "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.PublishesWritableSavedSearch.setColumns",
+            "type": "Function",
+            "tags": [],
+            "label": "setColumns",
+            "description": [],
+            "signature": [
+              "(columns: string[] | undefined) => void"
+            ],
+            "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "discover",
+                "id": "def-public.PublishesWritableSavedSearch.setColumns.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "columns",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
         "id": "def-public.SearchBarCustomization",
         "type": "Interface",
         "tags": [],
@@ -3547,8 +3610,8 @@
             "pluginId": "discover",
             "scope": "public",
             "docId": "kibDiscoverPluginApi",
-            "section": "def-public.PublishesSavedSearch",
-            "text": "PublishesSavedSearch"
+            "section": "def-public.PublishesWritableSavedSearch",
+            "text": "PublishesWritableSavedSearch"
           },
           " & ",
           {

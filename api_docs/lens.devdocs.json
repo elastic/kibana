@@ -6303,7 +6303,7 @@
                 "section": "def-common.DynamicActionsState",
                 "text": "DynamicActionsState"
               },
-              "; } | undefined; savedObjectId?: string | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
+              "; } | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; forceDSL?: boolean | undefined; savedObjectId?: string | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "public",
@@ -7042,7 +7042,7 @@
                     "section": "def-common.DynamicActionsState",
                     "text": "DynamicActionsState"
                   },
-                  "; } | undefined; savedObjectId?: string | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
+                  "; } | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; forceDSL?: boolean | undefined; savedObjectId?: string | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
                   {
                     "pluginId": "@kbn/presentation-publishing",
                     "scope": "public",
@@ -14993,6 +14993,27 @@
             "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYState.pointVisibility",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "pointVisibility",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.PointVisibility",
+                "text": "PointVisibility"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -15531,7 +15552,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; savedObjectId?: string | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
+          "; } | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; forceDSL?: boolean | undefined; savedObjectId?: string | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -16255,7 +16276,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; savedObjectId?: string | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
+          "; } | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; forceDSL?: boolean | undefined; savedObjectId?: string | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18305,7 +18326,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; savedObjectId?: string | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; noPadding?: boolean | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
+          "; } | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; noPadding?: boolean | undefined; forceDSL?: boolean | undefined; savedObjectId?: string | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -20437,7 +20458,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; savedObjectId?: string | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
+          "; } | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; forceDSL?: boolean | undefined; savedObjectId?: string | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -21176,7 +21197,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; savedObjectId?: string | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
+          "; } | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; forceDSL?: boolean | undefined; savedObjectId?: string | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",

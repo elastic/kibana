@@ -8,6 +8,7 @@
 import React from 'react';
 import type { EuiEmptyPromptProps } from '@elastic/eui';
 import { EuiEmptyPrompt, EuiImage } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 export const MLEmptyPromptCard = ({
   title,
@@ -15,9 +16,18 @@ export const MLEmptyPromptCard = ({
   actions,
   iconSrc,
   iconAlt,
+  css: customCss,
   'data-test-subj': dataTestSubj,
 }: Omit<EuiEmptyPromptProps, 'title'> & { title: string; iconSrc: string; iconAlt: string }) => (
   <EuiEmptyPrompt
+    css={
+      customCss ??
+      css`
+        .euiEmptyPrompt__icon {
+          min-inline-size: 32px !important;
+        }
+      `
+    }
     layout="horizontal"
     hasBorder={true}
     hasShadow={false}
