@@ -47,14 +47,10 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
   const monitorList = useSelector(monitorListSelector);
   useMappingCheck(monitorList.error);
 
-  const [isInitialLoadReported, setIsInitialLoadReported] = useState(false);
-
   usePageReady({
     isReady: Boolean(monitorList.isLoaded),
     // Do we still care about uptime metrics?
     isRefreshing: false,
-    isInitialLoadReported,
-    onInitialLoadReported: () => setIsInitialLoadReported(true),
   });
 
   useEffect(() => {
