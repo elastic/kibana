@@ -24485,7 +24485,7 @@ paths:
               additionalProperties: false
               type: object
               properties:
-                agentIds:
+                agents:
                   items:
                     type: string
                   type: array
@@ -24529,7 +24529,7 @@ paths:
                   format: uri
                   type: string
               required:
-                - agentIds
+                - agents
                 - uri
                 - enrollment_token
       responses:
