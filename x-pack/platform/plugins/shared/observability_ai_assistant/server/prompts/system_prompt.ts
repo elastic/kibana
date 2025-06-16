@@ -36,7 +36,7 @@ export function getObservabilitySystemPrompt({
     }
     ${
       availableFunctionNames.length
-        ? 'You have access to a set of tools (functions) defined below to interact with the Elastic environment and knowledge base.'
+        ? 'You have access to a set of tools (functions) to interact with the Elastic environment and knowledge base.'
         : ''
     }
   `)
@@ -90,9 +90,7 @@ export function getObservabilitySystemPrompt({
   );
 
   // Core Principles: Format Responses
-  corePrinciples.push(
-    `4. **Format Responses:** Use Github-flavored Markdown for your responses. When a function returns structured data (like an array or list of objects), use Markdown tables for better readability.`
-  );
+  corePrinciples.push(`4. **Format Responses:** Use Github-flavored Markdown for your responses.`);
 
   // Core Principles: Single Function Call
   if (availableFunctionNames.length) {
