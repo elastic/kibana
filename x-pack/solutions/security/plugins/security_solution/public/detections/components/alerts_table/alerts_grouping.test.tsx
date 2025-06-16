@@ -27,6 +27,8 @@ import {
   defaultGroupStatsRenderer,
   defaultGroupTitleRenderers,
 } from './grouping_settings';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
 jest.mock('../../containers/detection_engine/alerts/use_query');
 jest.mock('../../../sourcerer/containers');
@@ -117,6 +119,9 @@ const sourcererDataView = {
 };
 const renderChildComponent = (groupingFilters: Filter[]) => <p data-test-subj="alerts-table" />;
 
+const dataViewSpec: DataViewSpec = { title: 'test' };
+const dataView: DataView = createStubDataView({ spec: dataViewSpec });
+
 const testProps: AlertsTableComponentProps = {
   ...mockDate,
   accordionButtonContent: defaultGroupTitleRenderers,
@@ -124,6 +129,7 @@ const testProps: AlertsTableComponentProps = {
     aggregations: defaultGroupStatsAggregations,
     renderer: defaultGroupStatsRenderer,
   },
+  dataViewSpec: dataView.toSpec(),
   defaultFilters: [],
   defaultGroupingOptions,
   globalFilters: [],
@@ -133,8 +139,6 @@ const testProps: AlertsTableComponentProps = {
   },
   loading: false,
   renderChildComponent,
-  runtimeMappings: {},
-  signalIndexName: 'test',
   tableId: TableId.test,
 };
 

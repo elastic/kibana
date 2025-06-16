@@ -26,11 +26,11 @@ import {
 } from './constants';
 import { AssetCriticalityAuditActions } from './audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
-import { getImplicitEntityFields } from './helpers';
+import { getImplicitEntityFields, getImplicitEntityFieldsWithDeleted } from './helpers';
 import {
   getIngestPipelineName,
-  createEventIngestedFromTimestamp,
-} from '../utils/create_ingest_pipeline';
+  createEventIngestedPipeline,
+} from '../utils/event_ingested_pipeline';
 
 interface AssetCriticalityClientOpts {
   logger: Logger;
@@ -67,7 +67,7 @@ export class AssetCriticalityDataClient {
    * Initialize asset criticality resources.
    */
   public async init() {
-    await createEventIngestedFromTimestamp(this.options.esClient, this.options.namespace);
+    await createEventIngestedPipeline(this.options.esClient, this.options.namespace);
     await this.createOrUpdateIndex();
 
     this.options.auditLogger?.log({
@@ -338,7 +338,7 @@ export class AssetCriticalityDataClient {
               asset: {
                 criticality: criticalityLevel,
               },
-              ...getImplicitEntityFields({
+              ...getImplicitEntityFieldsWithDeleted({
                 ...record,
                 criticalityLevel,
               }),
@@ -392,7 +392,7 @@ export class AssetCriticalityDataClient {
             criticality: CRITICALITY_VALUES.DELETED,
           },
           '@timestamp': new Date().toISOString(),
-          ...getImplicitEntityFields({
+          ...getImplicitEntityFieldsWithDeleted({
             ...idParts,
             criticalityLevel: CRITICALITY_VALUES.DELETED,
           }),

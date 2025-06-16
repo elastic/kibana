@@ -25,10 +25,9 @@ import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { TIME_SLIDER_CONTROL } from '../../../common';
 import {
   defaultControlComparators,
-  initializeDefaultControlApi,
-} from '../initialize_default_control_api';
+  initializeDefaultControlManager,
+} from '../default_control_manager';
 import { ControlFactory } from '../types';
-import './components/index.scss';
 import { TimeSliderPopoverButton } from './components/time_slider_popover_button';
 import { TimeSliderPopoverContent } from './components/time_slider_popover_content';
 import { TimeSliderPrepend } from './components/time_slider_prepend';
@@ -196,7 +195,10 @@ export const getTimesliderControlFactory = (): ControlFactory<
       const viewModeSubject =
         getViewModeSubject(controlGroupApi) ?? new BehaviorSubject('view' as ViewMode);
 
-      const defaultControl = initializeDefaultControlApi({ ...initialState, width: 'large' });
+      const defaultControlManager = initializeDefaultControlManager({
+        ...initialState,
+        width: 'large',
+      });
 
       const dashboardDataLoading$ =
         apiHasParentApi(controlGroupApi) && apiPublishesDataLoading(controlGroupApi.parentApi)
@@ -216,10 +218,9 @@ export const getTimesliderControlFactory = (): ControlFactory<
       );
 
       function serializeState() {
-        const { rawState: defaultControlState } = defaultControl.getLatestState();
         return {
           rawState: {
-            ...defaultControlState,
+            ...defaultControlManager.getLatestState(),
             ...timeRangePercentage.getLatestState(),
             isAnchored: isAnchored$.value,
           },
@@ -232,7 +233,7 @@ export const getTimesliderControlFactory = (): ControlFactory<
         parentApi: controlGroupApi,
         serializeState,
         anyStateChange$: merge(
-          defaultControl.anyStateChange$,
+          defaultControlManager.anyStateChange$,
           timeRangePercentage.anyStateChange$,
           isAnchored$.pipe(map(() => undefined))
         ),
@@ -245,7 +246,7 @@ export const getTimesliderControlFactory = (): ControlFactory<
           };
         },
         onReset: (lastSaved) => {
-          defaultControl.reinitializeState(lastSaved?.rawState);
+          defaultControlManager.reinitializeState(lastSaved?.rawState);
           timeRangePercentage.reinitializeState(lastSaved?.rawState);
           setIsAnchored(lastSaved?.rawState?.isAnchored);
         },
@@ -253,7 +254,7 @@ export const getTimesliderControlFactory = (): ControlFactory<
 
       const api = finalizeApi({
         ...unsavedChangesApi,
-        ...defaultControl.api,
+        ...defaultControlManager.api,
         defaultTitle$: new BehaviorSubject<string | undefined>(displayName),
         timeslice$,
         serializeState,

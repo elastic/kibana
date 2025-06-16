@@ -15,7 +15,6 @@ export type {
   ESQLAstJoinCommand,
   ESQLCommand,
   ESQLCommandOption,
-  ESQLCommandMode,
   ESQLFunction,
   ESQLTimeInterval,
   ESQLLocation,
@@ -53,7 +52,6 @@ export { Builder, type AstNodeParserFields, type AstNodeTemplate } from './src/b
 
 export {
   createParser,
-  getLexer,
   parse,
   parseErrors,
   type ParseOptions,
@@ -76,3 +74,5 @@ export {
 export { EsqlQuery } from './src/query';
 
 export * as mutate from './src/mutate';
+
+export { singleItems, resolveItem, lastItem, firstItem } from './src/visitor/utils';

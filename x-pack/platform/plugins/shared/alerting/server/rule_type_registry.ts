@@ -274,22 +274,6 @@ export class RuleTypeRegistry {
       }
     }
 
-    // validate cancelAlertsOnTimeout if set
-    if (
-      ruleType.cancelAlertsOnRuleTimeout === false &&
-      (ruleType.autoRecoverAlerts == null || ruleType.autoRecoverAlerts === true)
-    ) {
-      throw new Error(
-        i18n.translate('xpack.alerting.ruleTypeRegistry.register.cancelAlertsOnTimeoutError', {
-          defaultMessage:
-            'Rule type "{id}" cannot have both cancelAlertsOnRuleTimeout set to false and autoRecoverAlerts set to true.',
-          values: {
-            id: ruleType.id,
-          },
-        })
-      );
-    }
-
     const normalizedRuleType = augmentActionGroupsWithReserved<
       Params,
       ExtractedParams,
@@ -432,6 +416,12 @@ export class RuleTypeRegistry {
 
   public getAllTypes(): string[] {
     return [...this.ruleTypes.keys()];
+  }
+
+  public getAllTypesForCategories(categories: string[]): string[] {
+    return [...this.ruleTypes.values()]
+      .filter((ruleType) => categories.includes(ruleType.category))
+      .map((ruleType) => ruleType.id);
   }
 }
 

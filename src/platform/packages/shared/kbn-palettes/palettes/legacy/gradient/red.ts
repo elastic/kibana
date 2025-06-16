@@ -14,6 +14,9 @@ import { KbnPalette } from '../../../constants';
 
 export const redPalette = new KbnColorFnPalette({
   id: KbnPalette.Red,
+  aliases: [
+    'negative', // used in legacy chart palette service
+  ],
   type: 'gradient',
   name: i18n.translate('palettes.red.name', {
     defaultMessage: 'Negative',

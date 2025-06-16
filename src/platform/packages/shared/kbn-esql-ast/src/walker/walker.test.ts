@@ -8,10 +8,10 @@
  */
 
 import { parse } from '../parser';
+import { Parser } from '../parser/parser';
 import {
   ESQLColumn,
   ESQLCommand,
-  ESQLCommandMode,
   ESQLCommandOption,
   ESQLFunction,
   ESQLLiteral,
@@ -106,6 +106,21 @@ describe('structurally can walk all nodes', () => {
       expect(columns.map(({ name }) => name).sort()).toStrictEqual(['c', 'd']);
     });
 
+    test('can traverse SAMPLE command', () => {
+      const { root } = Parser.parse('FROM index | SAMPLE 0.25');
+      const commands: ESQLCommand[] = [];
+      const literals: ESQLLiteral[] = [];
+
+      walk(root, {
+        visitCommand: (cmd) => commands.push(cmd),
+        visitLiteral: (lit) => literals.push(lit),
+      });
+
+      expect(commands.map(({ name }) => name).sort()).toStrictEqual(['from', 'sample']);
+      expect(literals.length).toBe(1);
+      expect(literals[0].value).toBe(0.25);
+    });
+
     test('"visitAny" can capture command nodes', () => {
       const { ast } = parse('FROM index | STATS a = 123 | WHERE 123 | LIMIT 10');
       const commands: ESQLCommand[] = [];
@@ -149,34 +164,6 @@ describe('structurally can walk all nodes', () => {
 
         expect(options.length).toBe(1);
         expect(options[0].name).toBe('metadata');
-      });
-    });
-
-    describe('command mode', () => {
-      test('visits "mode" nodes', () => {
-        const { ast } = parse('FROM index | ENRICH a:b');
-        const modes: ESQLCommandMode[] = [];
-
-        walk(ast, {
-          visitCommandMode: (opt) => modes.push(opt),
-        });
-
-        expect(modes.length).toBe(1);
-        expect(modes[0].name).toBe('a');
-      });
-
-      test('"visitAny" can capture a mode node', () => {
-        const { ast } = parse('FROM index | ENRICH a:b');
-        const modes: ESQLCommandMode[] = [];
-
-        walk(ast, {
-          visitAny: (node) => {
-            if (node.type === 'mode') modes.push(node);
-          },
-        });
-
-        expect(modes.length).toBe(1);
-        expect(modes[0].name).toBe('a');
       });
     });
 

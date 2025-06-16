@@ -1290,7 +1290,7 @@
                 "section": "def-public.AutoRefreshDoneFn",
                 "text": "AutoRefreshDoneFn"
               },
-              ">; getFetch$: () => ",
+              ">; triggerFetch: () => void; getFetch$: () => ",
               "Observable",
               "<void>; getTime: () => ",
               {
@@ -2283,13 +2283,19 @@
               ", ",
               "MiddlewareArray",
               "<[",
+              "ListenerMiddleware",
+              "<unknown, ",
+              "ThunkDispatch",
+              "<unknown, unknown, ",
+              "AnyAction",
+              ">, unknown>, ",
               "ThunkMiddleware",
               "<",
               "DiscoverInternalState",
               ", ",
               "AnyAction",
               ", ",
-              "InternalStateThunkDependencies",
+              "InternalStateDependencies",
               ">]>>"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_state.ts",
@@ -3160,6 +3166,69 @@
       },
       {
         "parentPluginId": "discover",
+        "id": "def-public.PublishesWritableSavedSearch",
+        "type": "Interface",
+        "tags": [],
+        "label": "PublishesWritableSavedSearch",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "discover",
+            "scope": "public",
+            "docId": "kibDiscoverPluginApi",
+            "section": "def-public.PublishesWritableSavedSearch",
+            "text": "PublishesWritableSavedSearch"
+          },
+          " extends ",
+          {
+            "pluginId": "discover",
+            "scope": "public",
+            "docId": "kibDiscoverPluginApi",
+            "section": "def-public.PublishesSavedSearch",
+            "text": "PublishesSavedSearch"
+          }
+        ],
+        "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.PublishesWritableSavedSearch.setColumns",
+            "type": "Function",
+            "tags": [],
+            "label": "setColumns",
+            "description": [],
+            "signature": [
+              "(columns: string[] | undefined) => void"
+            ],
+            "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "discover",
+                "id": "def-public.PublishesWritableSavedSearch.setColumns.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "columns",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
         "id": "def-public.SearchBarCustomization",
         "type": "Interface",
         "tags": [],
@@ -3496,14 +3565,6 @@
             "section": "def-public.SearchEmbeddableSerializedState",
             "text": "SearchEmbeddableSerializedState"
           },
-          ", ",
-          {
-            "pluginId": "discover",
-            "scope": "public",
-            "docId": "kibDiscoverPluginApi",
-            "section": "def-public.SearchEmbeddableRuntimeState",
-            "text": "SearchEmbeddableRuntimeState"
-          },
           "> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
@@ -3528,21 +3589,29 @@
             "section": "def-public.PublishesBlockingError",
             "text": "PublishesBlockingError"
           },
-          " & ",
+          " & Required<",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesTitle",
-            "text": "PublishesTitle"
+            "section": "def-public.PublishesWritableTitle",
+            "text": "PublishesWritableTitle"
           },
-          " & { setTitle: (newTitle: string | undefined) => void; setHideTitle: (hide: boolean | undefined) => void; } & ",
+          "> & Required<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesDescription",
+            "text": "PublishesDescription"
+          },
+          "> & ",
           {
             "pluginId": "discover",
             "scope": "public",
             "docId": "kibDiscoverPluginApi",
-            "section": "def-public.PublishesSavedSearch",
-            "text": "PublishesSavedSearch"
+            "section": "def-public.PublishesWritableSavedSearch",
+            "text": "PublishesWritableSavedSearch"
           },
           " & ",
           {

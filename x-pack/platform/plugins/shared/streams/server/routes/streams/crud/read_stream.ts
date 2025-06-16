@@ -18,6 +18,7 @@ import {
   getDataStreamLifecycle,
   getUnmanagedElasticsearchAssets,
 } from '../../../lib/streams/stream_crud';
+import { addAliasesForNamespacedFields } from '../../../lib/streams/component_templates/logs_layer';
 import { DashboardLink } from '../../../../common/assets';
 import { ASSET_TYPE } from '../../../lib/streams/assets/fields';
 
@@ -85,13 +86,18 @@ export async function readStream({
     } satisfies Streams.UnwiredStream.GetResponse;
   }
 
+  const inheritedFields = addAliasesForNamespacedFields(
+    streamDefinition,
+    getInheritedFieldsFromAncestors(ancestors)
+  );
+
   const body: Streams.WiredStream.GetResponse = {
     stream: streamDefinition,
     dashboards,
     privileges,
     queries,
     effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
-    inherited_fields: getInheritedFieldsFromAncestors(ancestors),
+    inherited_fields: inheritedFields,
   };
 
   return body;

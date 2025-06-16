@@ -281,6 +281,8 @@ export type {
   ErrorToastOptions,
 } from '@kbn/core-notifications-browser';
 
+export type { PricingServiceStart } from '@kbn/core-pricing-browser';
+
 export type { ToastsApi } from '@kbn/core-notifications-browser-internal';
 
 export type { CustomBrandingStart, CustomBrandingSetup } from '@kbn/core-custom-branding-browser';
@@ -313,4 +315,5 @@ export {
   kibanaFullBodyHeightCss,
   fullScreenGraphicsMixinStyles,
   useMemoizedStyles,
+  type EmotionStyles,
 } from './css_utils';

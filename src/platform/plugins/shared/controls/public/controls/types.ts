@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
-
 import { PanelCompatibleComponent } from '@kbn/presentation-panel-plugin/public/panel_component/types';
 import {
   HasParentApi,
@@ -42,8 +40,8 @@ export type DefaultControlApi = PublishesDataLoading &
   HasParentApi<ControlGroupApi> & {
     setDataLoading: (loading: boolean) => void;
     setBlockingError: (error: Error | undefined) => void;
-    grow: PublishingSubject<boolean | undefined>;
-    width: PublishingSubject<ControlWidth | undefined>;
+    grow$: PublishingSubject<boolean | undefined>;
+    width$: PublishingSubject<ControlWidth | undefined>;
   };
 
 export type ControlApiRegistration<ControlApi extends DefaultControlApi = DefaultControlApi> = Omit<
@@ -77,11 +75,6 @@ export interface ControlFactory<
     controlGroupApi: ControlGroupApi;
   }) => Promise<{ api: ControlApi; Component: React.FC<{ className: string }> }>;
 }
-
-// TODO replace with StateManager from @kbn/presentation-publishing
-export type ControlStateManager<State extends object = object> = {
-  [key in keyof Required<State>]: BehaviorSubject<State[key]>;
-};
 
 export interface ControlPanelProps<
   ApiType extends DefaultControlApi = DefaultControlApi,

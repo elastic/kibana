@@ -14,7 +14,7 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import type { DiscoverInternalState, TabState } from './types';
 import type {
   InternalStateDispatch,
-  InternalStateThunkDependencies,
+  InternalStateDependencies,
   TabActionPayload,
 } from './internal_state';
 
@@ -24,7 +24,7 @@ type CreateInternalStateAsyncThunk = ReturnType<
   typeof createAsyncThunk.withTypes<{
     state: DiscoverInternalState;
     dispatch: InternalStateDispatch;
-    extra: InternalStateThunkDependencies;
+    extra: InternalStateDependencies;
   }>
 >;
 
@@ -44,7 +44,7 @@ export const createTabActionInjector =
 export type TabActionInjector = ReturnType<typeof createTabActionInjector>;
 
 const DEFAULT_TAB_LABEL = i18n.translate('discover.defaultTabLabel', {
-  defaultMessage: 'Untitled session',
+  defaultMessage: 'Untitled',
 });
 const DEFAULT_TAB_REGEX = new RegExp(`^${DEFAULT_TAB_LABEL}( \\d+)?$`);
 

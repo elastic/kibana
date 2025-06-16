@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiDataGrid } from '@elastic/eui';
+import { EuiDataGrid, EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SampleDocument } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
@@ -13,9 +13,13 @@ import React, { useMemo } from 'react';
 export function PreviewTable({
   documents,
   displayColumns,
+  renderCellValue,
+  rowHeightsOptions,
 }: {
   documents: SampleDocument[];
   displayColumns?: string[];
+  renderCellValue?: (doc: SampleDocument, columnId: string) => React.ReactNode | undefined;
+  rowHeightsOptions?: EuiDataGridRowHeightsOptions;
 }) {
   const columns = useMemo(() => {
     if (displayColumns && !isEmpty(displayColumns)) return displayColumns;
@@ -54,11 +58,20 @@ export function PreviewTable({
       }}
       toolbarVisibility={false}
       rowCount={documents.length}
+      rowHeightsOptions={rowHeightsOptions}
       renderCellValue={({ rowIndex, columnId }) => {
         const doc = documents[rowIndex];
         if (!doc || typeof doc !== 'object') {
           return '';
         }
+
+        if (renderCellValue) {
+          const renderedValue = renderCellValue(doc, columnId);
+          if (renderedValue !== undefined) {
+            return renderedValue;
+          }
+        }
+
         const value = (doc as SampleDocument)[columnId];
         if (value === undefined || value === null) {
           return '';

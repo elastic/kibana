@@ -354,42 +354,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(JSON.parse(contextMessage?.message.data!).suggestions.length).to.be(0);
       });
 
-      it('does not add the instruction conversation for other users', async () => {
+      it('does not add the user instruction for other users', async () => {
         const conversation = await getConversationForUser('admin');
 
         expect(conversation.systemMessage).to.not.contain(userInstructionText);
         expect(conversation.messages.length).to.be(4);
-      });
-    });
-
-    describe('Instructions can be saved and cleared again', () => {
-      async function updateInstruction(text: string) {
-        const { status } = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
-          params: {
-            body: {
-              id: 'my-instruction-that-will-be-cleared',
-              text,
-              public: false,
-            },
-          },
-        });
-        expect(status).to.be(200);
-
-        const res = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
-        });
-        expect(res.status).to.be(200);
-
-        return res.body.userInstructions[0].text;
-      }
-
-      it('can clear the instruction', async () => {
-        const res1 = await updateInstruction('This is a user instruction that will be cleared');
-        expect(res1).to.be('This is a user instruction that will be cleared');
-
-        const res2 = await updateInstruction('');
-        expect(res2).to.be('');
       });
     });
 

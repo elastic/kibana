@@ -31,12 +31,13 @@ import { IntegrationStatus } from './integration_status';
 
 interface Props {
   onClose: () => void;
-  syncedIntegrationsStatus?: GetRemoteSyncedIntegrationsStatusResponse;
   outputName: string;
+  syncedIntegrationsStatus?: GetRemoteSyncedIntegrationsStatusResponse;
+  syncUninstalledIntegrations?: boolean;
 }
 
 export const IntegrationSyncFlyout: React.FunctionComponent<Props> = memo(
-  ({ onClose, syncedIntegrationsStatus, outputName }) => {
+  ({ onClose, syncedIntegrationsStatus, outputName, syncUninstalledIntegrations }) => {
     const { docLinks } = useStartServices();
     return (
       <EuiFlyout onClose={onClose}>
@@ -89,20 +90,30 @@ export const IntegrationSyncFlyout: React.FunctionComponent<Props> = memo(
             </EuiCallOut>
           )}
           <EuiFlexGroup direction="column" gutterSize="m">
-            {(syncedIntegrationsStatus?.integrations ?? []).map((integration) => {
-              const customAssets = Object.values(
-                syncedIntegrationsStatus?.custom_assets ?? {}
-              ).filter((asset) => asset.package_name === integration.package_name);
-              return (
-                <EuiFlexItem grow={false} key={integration.package_name}>
-                  <IntegrationStatus
-                    data-test-subj={`${integration.package_name}-accordion`}
-                    integration={integration}
-                    customAssets={customAssets}
-                  />
-                </EuiFlexItem>
-              );
-            })}
+            {(syncedIntegrationsStatus?.integrations ?? [])
+              // don't show integrations that were successfully uninstalled
+              .filter(
+                (integration) =>
+                  !(
+                    integration.install_status?.main === 'not_installed' &&
+                    integration.install_status?.remote === 'not_installed'
+                  )
+              )
+              .map((integration) => {
+                const customAssets = Object.values(
+                  syncedIntegrationsStatus?.custom_assets ?? {}
+                ).filter((asset) => asset.package_name === integration.package_name);
+                return (
+                  <EuiFlexItem grow={false} key={integration.package_name}>
+                    <IntegrationStatus
+                      data-test-subj={`${integration.package_name}-accordion`}
+                      integration={integration}
+                      customAssets={customAssets}
+                      syncUninstalledIntegrations={syncUninstalledIntegrations}
+                    />
+                  </EuiFlexItem>
+                );
+              })}
           </EuiFlexGroup>
         </EuiFlyoutBody>
         <EuiFlyoutFooter>

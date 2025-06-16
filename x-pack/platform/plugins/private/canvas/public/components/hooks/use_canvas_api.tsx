@@ -20,6 +20,12 @@ import { getSelectedPage } from '../../state/selectors/workpad';
 import { CANVAS_APP } from '../../../common/lib';
 import { coreServices } from '../../services/kibana_services';
 
+const reload$ = new Subject<void>();
+
+export function forceReload() {
+  reload$.next();
+}
+
 export const useCanvasApi: () => CanvasContainerApi = () => {
   const selectedPageId = useSelector(getSelectedPage);
   const dispatch = useDispatch();
@@ -39,7 +45,6 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
 
   const getCanvasApi = useCallback((): CanvasContainerApi => {
     const panelStateMap: Record<string, BehaviorSubject<SerializedPanelState<object>>> = {};
-    const reload$ = new Subject<void>();
 
     function getSerializedStateForChild(childId: string) {
       return panelStateMap[childId]?.value ?? { rawState: {} };
@@ -55,9 +60,6 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
         currentAppId: CANVAS_APP,
       }),
       reload$,
-      reload: () => {
-        reload$.next();
-      },
       viewMode$: new BehaviorSubject<ViewMode>('edit'), // always in edit mode
       addNewPanel: async ({
         panelType,

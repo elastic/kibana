@@ -150,7 +150,7 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
 
   async createCustomPipeline(processors: IngestProcessorContainer[], id = LogsCustom) {
     try {
-      this.client.ingest.putPipeline({
+      await this.client.ingest.putPipeline({
         id,
         processors,
         version: 1,
@@ -163,7 +163,7 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
 
   async deleteCustomPipeline(id = LogsCustom) {
     try {
-      this.client.ingest.deletePipeline({
+      await this.client.ingest.deletePipeline({
         id,
       });
       this.logger.info(`Custom pipeline deleted: ${id}`);

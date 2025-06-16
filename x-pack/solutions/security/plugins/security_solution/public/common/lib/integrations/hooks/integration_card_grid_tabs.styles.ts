@@ -6,10 +6,14 @@
  */
 
 import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
+import { COLOR_MODES_STANDARD, useEuiTheme } from '@elastic/eui';
 
 export const useIntegrationCardGridTabsStyles = () => {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, colorMode } = useEuiTheme();
+  if (colorMode !== COLOR_MODES_STANDARD.dark) {
+    return undefined;
+  }
+  // only apply styles in dark mode
   return css`
     button {
       position: relative;
