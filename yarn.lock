@@ -10036,7 +10036,7 @@
     "@types/node" ">=18.0.0"
     axios "^1.6.0"
 
-"@smithy/abort-controller@^4.0.1", "@smithy/abort-controller@^4.0.4":
+"@smithy/abort-controller@^4.0.4":
   version "4.0.4"
   resolved "https://registry.yarnpkg.com/@smithy/abort-controller/-/abort-controller-4.0.4.tgz#ab991d521fc78b5c7f24907fcd6803c0f2da51d9"
   integrity sha512-gJnEjZMvigPDQWHrW3oPrFhQtkrgqBkyjj3pCIdF3A5M6vsZODG93KNlfJprv6bp4245bdT32fsHK4kkH3KYDA==
