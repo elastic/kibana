@@ -65,14 +65,10 @@ export const StartRuleMigrationModal: FC<StartRuleMigrationModalProps> = React.m
 
     const { aiConnectors, isLoading } = useAIConnectors();
 
-    const siemMigrationsStoredConnectorId = useMemo(
-      () => siemMigrations.rules.connectorIdStorage.get(),
-      [siemMigrations.rules.connectorIdStorage]
+    const [selectedConnectorId, setSelectedConnectorId] = useState<string | undefined>(
+      connectorId || siemMigrations.rules.connectorIdStorage.get() || aiConnectors[0]?.id
     );
 
-    const [selectedConnectorId, setSelectedConnectorId] = useState<string | undefined>(
-      connectorId || siemMigrationsStoredConnectorId || aiConnectors[0]?.id
-    );
     const [enablePrebuiltRulesMatching, setEnablePrebuiltRuleMatching] = useState<boolean>(
       !skipPrebuiltRulesMatching
     );
