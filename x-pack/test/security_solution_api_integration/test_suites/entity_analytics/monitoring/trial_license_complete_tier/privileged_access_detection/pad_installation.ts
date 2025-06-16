@@ -116,8 +116,8 @@ export default ({ getService }: FtrProviderContext) => {
         expect(statusResponseBeforeInstallation.status).eql(200);
 
         const {
-          packageInstallationStatus: packageInstallationStatusBeforeInstallation,
-          mlModuleSetupStatus: mlModuleSetupStatusBeforeInstallation,
+          package_installation_status: packageInstallationStatusBeforeInstallation,
+          ml_module_setup_status: mlModuleSetupStatusBeforeInstallation,
         } = statusResponseBeforeInstallation.body;
 
         expect(packageInstallationStatusBeforeInstallation).eql('incomplete');
@@ -146,8 +146,8 @@ export default ({ getService }: FtrProviderContext) => {
         expect(statusResponseAfterInstallation.status).eql(200);
 
         const {
-          packageInstallationStatus: packageInstallationStatusAfterInstallation,
-          mlModuleSetupStatus: mlModuleSetupStatusAfterInstallation,
+          package_installation_status: packageInstallationStatusAfterInstallation,
+          ml_module_setup_status: mlModuleSetupStatusAfterInstallation,
           jobs: jobsAfterInstallation,
         } = statusResponseAfterInstallation.body;
 

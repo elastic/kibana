@@ -33,10 +33,10 @@ paths:
                     items:
                       type: object
                       required:
-                        - jobId
+                        - job_id
                         - state
                       properties:
-                        jobId:
+                        job_id:
                           type: string
                         description:
                           type: string

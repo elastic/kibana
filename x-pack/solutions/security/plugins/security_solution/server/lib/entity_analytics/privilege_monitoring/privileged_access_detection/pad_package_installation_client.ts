@@ -81,7 +81,7 @@ export class PadPackageInstallationClient {
     );
 
     return jobs.map((eachJob) => ({
-      jobId: eachJob.job_id,
+      job_id: eachJob.job_id,
       description: eachJob.description,
       state: jobStatsByJobId[eachJob.job_id].state,
     }));
@@ -92,7 +92,11 @@ export class PadPackageInstallationClient {
     const packageInstallationStatus = packageInstalled ? 'complete' : 'incomplete';
     if (!packageInstalled) {
       // even if there happen to be jobs that match our search criteria, if the package is not installed, we consider the ML installation incomplete and the jobs to not be associated with our privileged access detection usage
-      return { packageInstallationStatus, mlModuleSetupStatus: 'incomplete', jobs: [] };
+      return {
+        package_installation_status: packageInstallationStatus,
+        ml_module_setup_status: 'incomplete',
+        jobs: [],
+      };
     }
 
     try {
@@ -101,8 +105,8 @@ export class PadPackageInstallationClient {
       const mlModuleSetupStatus = jobs.length > 0 ? 'complete' : 'incomplete';
 
       return {
-        packageInstallationStatus,
-        mlModuleSetupStatus,
+        package_installation_status: packageInstallationStatus,
+        ml_module_setup_status: mlModuleSetupStatus,
         jobs,
       };
     } catch (e) {
@@ -110,7 +114,11 @@ export class PadPackageInstallationClient {
         'info',
         'The privileged access detection package is installed, but the ML jobs are not yet set up.'
       );
-      return { packageInstallationStatus, mlModuleSetupStatus: 'incomplete', jobs: [] };
+      return {
+        package_installation_status: packageInstallationStatus,
+        ml_module_setup_status: 'incomplete',
+        jobs: [],
+      };
     }
   }
 

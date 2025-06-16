@@ -60,8 +60,8 @@ describe('PrivilegedAccessDetectionsPanel', () => {
     mockUsePrivilegedAccessDetectionRoutes.mockReturnValue({
       ...mockAllRoutes,
       getPrivilegedAccessDetectionStatus: () => ({
-        packageInstallationStatus: 'incomplete',
-        mlModuleSetupStatus: 'incomplete',
+        package_installation_status: 'incomplete',
+        ml_module_setup_status: 'incomplete',
         jobs: [],
       }),
     });
@@ -76,8 +76,8 @@ describe('PrivilegedAccessDetectionsPanel', () => {
     mockUsePrivilegedAccessDetectionRoutes.mockReturnValue({
       ...mockAllRoutes,
       getPrivilegedAccessDetectionStatus: () => ({
-        packageInstallationStatus: 'complete',
-        mlModuleSetupStatus: 'incomplete',
+        package_installation_status: 'complete',
+        ml_module_setup_status: 'incomplete',
         jobs: [],
       }),
     });
@@ -92,8 +92,8 @@ describe('PrivilegedAccessDetectionsPanel', () => {
     mockUsePrivilegedAccessDetectionRoutes.mockReturnValue({
       ...mockAllRoutes,
       getPrivilegedAccessDetectionStatus: () => ({
-        packageInstallationStatus: 'complete',
-        mlModuleSetupStatus: 'complete',
+        package_installation_status: 'complete',
+        ml_module_setup_status: 'complete',
         jobs: [],
       }),
     });
@@ -106,8 +106,8 @@ describe('PrivilegedAccessDetectionsPanel', () => {
     mockUsePrivilegedAccessDetectionRoutes.mockReturnValue({
       ...mockAllRoutes,
       getPrivilegedAccessDetectionStatus: () => ({
-        packageInstallationStatus: 'incomplete',
-        mlModuleSetupStatus: 'incomplete',
+        package_installation_status: 'incomplete',
+        ml_module_setup_status: 'incomplete',
         jobs: [],
       }),
       installPrivilegedAccessDetectionPackage: () => promiseThatNeverSettles(),

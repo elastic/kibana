@@ -20,11 +20,11 @@ export type GetStatusPrivilegedAccessDetectionPackageResponse = z.infer<
   typeof GetStatusPrivilegedAccessDetectionPackageResponse
 >;
 export const GetStatusPrivilegedAccessDetectionPackageResponse = z.object({
-  packageInstallationStatus: z.enum(['complete', 'incomplete']),
-  mlModuleSetupStatus: z.enum(['complete', 'incomplete']),
+  package_installation_status: z.enum(['complete', 'incomplete']),
+  ml_module_setup_status: z.enum(['complete', 'incomplete']),
   jobs: z.array(
     z.object({
-      jobId: z.string(),
+      job_id: z.string(),
       description: z.string().optional(),
       state: z.enum(['closing', 'closed', 'opened', 'failed', 'opening']),
     })

@@ -57,8 +57,8 @@ export const PrivilegedAccessDetectionsPanel: React.FC<{ spaceId: string }> = ({
   };
 
   const packageInstallationComplete =
-    padInstallationStatus?.packageInstallationStatus === 'complete' &&
-    padInstallationStatus?.mlModuleSetupStatus === 'complete';
+    padInstallationStatus?.package_installation_status === 'complete' &&
+    padInstallationStatus?.ml_module_setup_status === 'complete';
 
   return (
     <>
@@ -106,7 +106,7 @@ export const PrivilegedAccessDetectionsPanel: React.FC<{ spaceId: string }> = ({
           {toggleStatus && (
             <>
               <PrivilegedAccessDetectionChart
-                jobIds={padInstallationStatus.jobs.map((eachJob) => eachJob.jobId)}
+                jobIds={padInstallationStatus.jobs.map((eachJob) => eachJob.job_id)}
                 spaceId={spaceId}
               />
             </>
