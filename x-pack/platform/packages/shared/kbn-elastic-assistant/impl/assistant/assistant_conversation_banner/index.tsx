@@ -6,10 +6,11 @@
  */
 
 import React, { useMemo } from 'react';
-import { AIConnector, Conversation, useAssistantContext } from '../../..';
+import { Conversation, useAssistantContext } from '../../..';
 import { isElasticManagedLlmConnector } from '../../connectorland/helpers';
 import { ConnectorMissingCallout } from '../../connectorland/connector_missing_callout';
 import { ElasticLlmCallout } from './elastic_llm_callout';
+import { AIConnector } from '../../connectorland/connector_selector';
 
 export const AssistantConversationBanner = React.memo(
   ({
