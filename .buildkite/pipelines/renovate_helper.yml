@@ -1,0 +1,14 @@
+agents:
+  provider: gcp
+  image: family/kibana-ubuntu-2004
+  imageProject: elastic-images-prod
+  machineType: n2-standard-2
+steps:
+  - command: .buildkite/scripts/steps/renovate_helper.sh
+    label: 'Run Renovate Helper'
+    key: renovate_helper
+    timeout_in_minutes: 20
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
