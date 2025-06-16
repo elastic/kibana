@@ -12,11 +12,15 @@ import {
   ConnectorSelectorInline,
   DEFAULT_ASSISTANT_NAMESPACE,
   useLoadConnectors,
+  useAssistantContext,
+  AssistantSpaceIdProvider,
 } from '@kbn/elastic-assistant';
 import { noop } from 'lodash/fp';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { some } from 'lodash';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
+import { ElasticLLMCostAwarenessTour } from '@kbn/elastic-assistant/impl/tour/elastic_llm';
+import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '@kbn/elastic-assistant/impl/tour/const';
 import { useUserPrivileges } from '../../../../../../../common/components/user_privileges';
 import { useSpaceId } from '../../../../../../../common/hooks/use_space_id';
 import { WORKFLOW_INSIGHTS } from '../../../translations';
@@ -45,6 +49,7 @@ export const WorkflowInsightsScanSection = ({
     http,
   });
   const { canWriteWorkflowInsights } = useUserPrivileges().endpointPrivileges;
+  const { inferenceEnabled } = useAssistantContext();
 
   // Store the selected connector id in local storage so that it persists across page reloads
   const [localStorageWorkflowInsightsConnectorId, setLocalStorageWorkflowInsightsConnectorId] =
@@ -133,11 +138,22 @@ export const WorkflowInsightsScanSection = ({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <ConnectorSelectorInline
-                onConnectorSelected={noop}
-                onConnectorIdSelected={onConnectorIdSelected}
-                selectedConnectorId={connectorId}
-              />
+              <AssistantSpaceIdProvider spaceId={spaceId}>
+                <ElasticLLMCostAwarenessTour
+                  isDisabled={!inferenceEnabled}
+                  selectedConnectorId={connectorId}
+                  zIndex={1000}
+                  storageKey={
+                    NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM_USAGE_AUTOMATIC_TROUBLESHOOTING
+                  }
+                >
+                  <ConnectorSelectorInline
+                    onConnectorSelected={noop}
+                    onConnectorIdSelected={onConnectorIdSelected}
+                    selectedConnectorId={connectorId}
+                  />
+                </ElasticLLMCostAwarenessTour>
+              </AssistantSpaceIdProvider>
             </EuiFlexItem>
             {scanButton}
           </EuiFlexGroup>
