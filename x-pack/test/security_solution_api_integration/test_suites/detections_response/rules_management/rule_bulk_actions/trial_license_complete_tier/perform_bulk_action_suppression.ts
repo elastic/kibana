@@ -37,7 +37,7 @@ export default ({ getService }: FtrProviderContext): void => {
         };
         const suppressionToSet = {
           group_by: ['field2'],
-          duration: { value: 10, unit: 'm' },
+          duration: { value: 10, unit: 'm' as const },
           missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
         };
         const resultingSuppression = {
@@ -54,7 +54,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { body: bulkEditResponse } = await securitySolutionApi
           .performRulesBulkAction({
-            query: '',
+            query: { dry_run: false },
             body: {
               action: BulkActionTypeEnum.edit,
               [BulkActionTypeEnum.edit]: [
@@ -105,7 +105,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { body: bulkEditResponse } = await securitySolutionApi
           .performRulesBulkAction({
-            query: '',
+            query: { dry_run: false },
             body: {
               action: BulkActionTypeEnum.edit,
               [BulkActionTypeEnum.edit]: [
@@ -154,7 +154,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { body: bulkEditResponse } = await securitySolutionApi
           .performRulesBulkAction({
-            query: '',
+            query: { dry_run: false },
             body: {
               action: BulkActionTypeEnum.edit,
               [BulkActionTypeEnum.edit]: [
@@ -200,7 +200,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { body: bulkEditResponse } = await securitySolutionApi
           .performRulesBulkAction({
-            query: '',
+            query: { dry_run: false },
             body: {
               action: BulkActionTypeEnum.edit,
               [BulkActionTypeEnum.edit]: [
@@ -247,8 +247,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { body: bulkEditResponse } = await securitySolutionApi
           .performRulesBulkAction({
-            query: '',
+            query: { dry_run: false },
             body: {
+              query: '',
               action: BulkActionTypeEnum.edit,
               [BulkActionTypeEnum.edit]: [
                 {
@@ -290,7 +291,7 @@ export default ({ getService }: FtrProviderContext): void => {
           duration: { value: 5, unit: 'm' as const },
         };
         const suppressionToSet = {
-          duration: { value: 10, unit: 'm' },
+          duration: { value: 10, unit: 'm' as const },
         };
         const resultingSuppression = {
           duration: { value: 10, unit: 'm' },
@@ -303,7 +304,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { body: bulkEditResponse } = await securitySolutionApi
           .performRulesBulkAction({
-            query: '',
+            query: { dry_run: false },
             body: {
               action: BulkActionTypeEnum.edit,
               [BulkActionTypeEnum.edit]: [
@@ -341,7 +342,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should set suppression to rule without configured suppression', async () => {
         const ruleId = 'ruleId';
         const suppressionToSet = {
-          duration: { value: 10, unit: 'm' },
+          duration: { value: 10, unit: 'm' as const },
         };
         const resultingSuppression = {
           duration: { value: 10, unit: 'm' },
@@ -351,7 +352,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { body: bulkEditResponse } = await securitySolutionApi
           .performRulesBulkAction({
-            query: '',
+            query: { dry_run: false },
             body: {
               action: BulkActionTypeEnum.edit,
               [BulkActionTypeEnum.edit]: [
@@ -393,7 +394,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { body: bulkEditResponse } = await securitySolutionApi
           .performRulesBulkAction({
-            query: '',
+            query: { dry_run: false },
             body: {
               action: BulkActionTypeEnum.edit,
               [BulkActionTypeEnum.edit]: [

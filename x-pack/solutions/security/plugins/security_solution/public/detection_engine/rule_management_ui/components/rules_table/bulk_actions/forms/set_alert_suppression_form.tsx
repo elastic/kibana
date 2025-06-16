@@ -20,6 +20,7 @@ import type {
   AlertSuppressionDuration,
 } from '../../../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
 import { useForm, fieldValidators } from '../../../../../../shared_imports';
+import type { FormSchema } from '../../../../../../shared_imports';
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
 import {
   AlertSuppressionEdit,
@@ -27,8 +28,6 @@ import {
   ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
   ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
   ALERT_SUPPRESSION_DURATION_FIELD_NAME,
-  ALERT_SUPPRESSION_DURATION_VALUE_FIELD_NAME,
-  ALERT_SUPPRESSION_DURATION_UNIT_FIELD_NAME,
   ALERT_SUPPRESSION_DEFAULT_DURATION,
 } from '../../../../../rule_creation/components/alert_suppression_edit';
 import { AlertSuppressionDurationType } from '../../../../../common/types';
@@ -42,28 +41,20 @@ interface AlertSuppressionFormData {
   alertSuppressionMissingFields?: AlertSuppressionMissingFieldsStrategy;
 }
 
-const getSchema = () => {
-  return {
-    [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: {
-      validations: [
-        {
-          validator: fieldValidators.emptyField(i18n.SUPPRESSION_REQUIRED_ERROR),
-        },
-        {
-          validator: fieldValidators.maxLengthField({
-            message: i18n.SUPPRESSION_MAX_LENGTH_ERROR,
-            length: 3,
-          }),
-        },
-      ],
-    },
-    [ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME]: {},
-    [ALERT_SUPPRESSION_DURATION_FIELD_NAME]: {
-      [ALERT_SUPPRESSION_DURATION_VALUE_FIELD_NAME]: {},
-      [ALERT_SUPPRESSION_DURATION_UNIT_FIELD_NAME]: {},
-    },
-    [ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME]: {},
-  };
+const formSchema: FormSchema<AlertSuppressionFormData> = {
+  [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: {
+    validations: [
+      {
+        validator: fieldValidators.emptyField(i18n.SUPPRESSION_REQUIRED_ERROR),
+      },
+      {
+        validator: fieldValidators.maxLengthField({
+          message: i18n.SUPPRESSION_MAX_LENGTH_ERROR,
+          length: 3,
+        }),
+      },
+    ],
+  },
 };
 
 const initialFormData: AlertSuppressionFormData = {
@@ -88,7 +79,7 @@ const SetAlertSuppressionFormComponent = ({
 }: AlertSuppressionFormProps) => {
   const { form } = useForm({
     defaultValue: initialFormData,
-    schema: getSchema(),
+    schema: formSchema,
   });
   const { uiSettings } = useKibana().services;
   const defaultPatterns = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);

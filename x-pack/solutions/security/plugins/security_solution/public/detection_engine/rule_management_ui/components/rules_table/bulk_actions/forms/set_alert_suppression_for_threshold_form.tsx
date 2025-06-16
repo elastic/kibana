@@ -8,7 +8,6 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiIcon, EuiFormRow } from '@elastic/eui';
 
-import type { FormSchema } from '../../../../../../shared_imports';
 import { METRIC_TYPE, track, TELEMETRY_EVENT } from '../../../../../../common/lib/telemetry';
 import { BulkActionEditTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
 import type { BulkActionEditPayload } from '../../../../../../../common/api/detection_engine/rule_management';
@@ -20,11 +19,6 @@ import { bulkAlertSuppression as i18n } from '../translations';
 import { DurationInput } from '../../../../../rule_creation/components/duration_input';
 
 type FormData = AlertSuppressionDuration;
-
-const formSchema: FormSchema<FormData> = {
-  value: {},
-  unit: {},
-};
 
 const initialFormData: FormData = ALERT_SUPPRESSION_DEFAULT_DURATION;
 
@@ -43,7 +37,6 @@ const SetAlertSuppressionForThresholdFormComponent = ({
 }: AlertSuppressionFormProps) => {
   const { form } = useForm<FormData>({
     defaultValue: initialFormData,
-    schema: formSchema,
   });
 
   const handleSubmit = async () => {
