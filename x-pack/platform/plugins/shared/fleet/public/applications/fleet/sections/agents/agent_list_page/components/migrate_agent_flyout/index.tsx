@@ -61,8 +61,8 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose, onSave })
   const [formContent, setFormContent] = React.useState<
     MigrateSingleAgentRequest['body'] | BulkMigrateAgentsRequest['body']
   >({
-    id: null,
-    agents: null,
+    id: '',
+    agents: [],
     uri: '',
     enrollment_token: '',
     settings: {},
@@ -137,7 +137,10 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose, onSave })
             <h1>
               <FormattedMessage
                 id="xpack.fleet.agentList.migrateAgentFlyout.title"
-                defaultMessage="Migrate Agent"
+                defaultMessage="Migrate {plural}"
+                values={{
+                  plural: agents.length > 1 ? 'agents' : 'agent',
+                }}
               />
             </h1>
           </EuiTitle>
@@ -145,7 +148,10 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose, onSave })
           <EuiText>
             <FormattedMessage
               id="xpack.fleet.agentList.migrateAgentFlyout.title"
-              defaultMessage="Move this Elastic Agent to a different Fleet server by specifying a new cluster URL and enrollment token."
+              defaultMessage="Move {plural} to a different Fleet server by specifying a new cluster URL and enrollment token."
+              values={{
+                plural: agents.length > 1 ? 'these agents' : 'this agent',
+              }}
             />
           </EuiText>
         </EuiFlyoutHeader>
