@@ -43,7 +43,7 @@ export const WorkflowInsightsScanSection = ({
 }: WorkflowInsightsScanSectionProps) => {
   const CONNECTOR_ID_LOCAL_STORAGE_KEY = 'connectorId';
 
-  const spaceId = useSpaceId() ?? 'default';
+  const spaceId = useSpaceId();
   const { http } = useKibana().services;
   const { data: aiConnectors } = useLoadConnectors({
     http,
@@ -54,7 +54,9 @@ export const WorkflowInsightsScanSection = ({
   // Store the selected connector id in local storage so that it persists across page reloads
   const [localStorageWorkflowInsightsConnectorId, setLocalStorageWorkflowInsightsConnectorId] =
     useLocalStorage<string>(
-      `${DEFAULT_ASSISTANT_NAMESPACE}.${DEFEND_INSIGHTS_STORAGE_KEY}.${spaceId}.${CONNECTOR_ID_LOCAL_STORAGE_KEY}`
+      `${DEFAULT_ASSISTANT_NAMESPACE}.${DEFEND_INSIGHTS_STORAGE_KEY}.${
+        spaceId || 'default'
+      }.${CONNECTOR_ID_LOCAL_STORAGE_KEY}`
     );
 
   const [connectorId, setConnectorId] = React.useState<string | undefined>(
@@ -138,22 +140,24 @@ export const WorkflowInsightsScanSection = ({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <AssistantSpaceIdProvider spaceId={spaceId}>
-                <ElasticLLMCostAwarenessTour
-                  isDisabled={!inferenceEnabled}
-                  selectedConnectorId={connectorId}
-                  zIndex={1000}
-                  storageKey={
-                    NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM_USAGE_AUTOMATIC_TROUBLESHOOTING
-                  }
-                >
-                  <ConnectorSelectorInline
-                    onConnectorSelected={noop}
-                    onConnectorIdSelected={onConnectorIdSelected}
+              {spaceId && (
+                <AssistantSpaceIdProvider spaceId={spaceId}>
+                  <ElasticLLMCostAwarenessTour
+                    isDisabled={!inferenceEnabled}
                     selectedConnectorId={connectorId}
-                  />
-                </ElasticLLMCostAwarenessTour>
-              </AssistantSpaceIdProvider>
+                    zIndex={1000}
+                    storageKey={
+                      NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM_USAGE_AUTOMATIC_TROUBLESHOOTING
+                    }
+                  >
+                    <ConnectorSelectorInline
+                      onConnectorSelected={noop}
+                      onConnectorIdSelected={onConnectorIdSelected}
+                      selectedConnectorId={connectorId}
+                    />
+                  </ElasticLLMCostAwarenessTour>
+                </AssistantSpaceIdProvider>
+              )}
             </EuiFlexItem>
             {scanButton}
           </EuiFlexGroup>
