@@ -22,9 +22,7 @@ import { SECURITY_AI_SETTINGS } from '@kbn/elastic-assistant/impl/assistant/sett
 import { CONVERSATIONS_TAB } from '@kbn/elastic-assistant/impl/assistant/settings/const';
 import type { SettingsTabs } from '@kbn/elastic-assistant/impl/assistant/settings/types';
 
-import { AssistantSpaceIdProvider } from '@kbn/elastic-assistant/impl/assistant/use_space_aware_context';
 import { useKibana } from '../../common/lib/kibana';
-import { useSpaceId } from '../../common/hooks/use_space_id';
 
 const defaultSelectedConversationId = WELCOME_CONVERSATION_TITLE;
 
@@ -46,7 +44,6 @@ export const ManagementSettings = React.memo(() => {
     chrome: { docTitle, setBreadcrumbs },
     serverless,
   } = useKibana().services;
-  const spaceId = useSpaceId();
 
   const onFetchedConversations = useCallback(
     (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
@@ -133,16 +130,14 @@ export const ManagementSettings = React.memo(() => {
     navigateToApp('home');
   }
 
-  if (conversations && spaceId) {
+  if (conversations) {
     return (
-      <AssistantSpaceIdProvider spaceId={spaceId}>
         <AssistantSettingsManagement
           selectedConversation={currentConversation}
           dataViews={dataViews}
           onTabChange={handleTabChange}
           currentTab={currentTab}
         />
-      </AssistantSpaceIdProvider>
     );
   }
 

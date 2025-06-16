@@ -24,9 +24,6 @@ jest.mock('react-router', () => ({
 }));
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../sourcerer/containers');
-jest.mock('../../../../common/hooks/use_space_id', () => ({
-  useSpaceId: jest.fn().mockReturnValue('default'),
-}));
 
 const defaultProps = {
   alertsPreviewStackBy0: 'defaultAlertPreview',

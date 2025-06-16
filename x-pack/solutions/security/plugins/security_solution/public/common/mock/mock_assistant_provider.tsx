@@ -9,7 +9,7 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import React from 'react';
 import type { AssistantAvailability } from '@kbn/elastic-assistant';
-import { AssistantProvider, AssistantSpaceIdProvider } from '@kbn/elastic-assistant';
+import { AssistantProvider } from '@kbn/elastic-assistant';
 import type { UserProfileService } from '@kbn/core/public';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
@@ -66,7 +66,7 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
       userProfileService={mockUserProfileService}
       chrome={chrome}
     >
-      <AssistantSpaceIdProvider spaceId="default">{children}</AssistantSpaceIdProvider>
+      {children}
     </AssistantProvider>
   );
 };

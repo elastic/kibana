@@ -7,8 +7,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { AssistantConversationBanner } from '.';
-import { AIConnector, Conversation, useAssistantContext } from '../../..';
+import { Conversation, useAssistantContext } from '../../..';
 import { customConvo } from '../../mock/conversation';
+import { AIConnector } from '../../connectorland/connector_selector';
 
 jest.mock('../../..');
 

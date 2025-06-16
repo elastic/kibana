@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { useAssistantSpaceId } from '../../../assistant/use_space_aware_context';
 import {
   NEW_TOUR_FEATURES_TOUR_STORAGE_KEYS,
   type NEW_FEATURES_TOUR_STORAGE_KEYS,
@@ -17,6 +16,5 @@ import {
  * @returns A unique storage key for the feature based on the space ID
  */
 export const useTourStorageKey = (featureKey: NEW_FEATURES_TOUR_STORAGE_KEYS) => {
-  const spaceId = useAssistantSpaceId();
-  return `${NEW_TOUR_FEATURES_TOUR_STORAGE_KEYS[featureKey]}.${spaceId}`;
+  return `${NEW_TOUR_FEATURES_TOUR_STORAGE_KEYS[featureKey]}`;
 };

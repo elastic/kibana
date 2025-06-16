@@ -21,7 +21,7 @@ import {
 import { useSettingsUpdater } from '../../assistant/settings/use_settings_updater/use_settings_updater';
 import { useUpdateKnowledgeBaseEntries } from '../../assistant/api/knowledge_base/entries/use_update_knowledge_base_entries';
 import { MOCK_QUICK_PROMPTS } from '../../mock/quick_prompt';
-import { AssistantSpaceIdProvider, useAssistantContext } from '../../..';
+import { useAssistantContext } from '../../..';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useKnowledgeBaseIndices } from '../../assistant/api/knowledge_base/use_knowledge_base_indices';
@@ -71,11 +71,9 @@ const Wrapper = ({
   history?: History;
 }) => (
   <I18nProvider>
-    <AssistantSpaceIdProvider spaceId="default">
-      <Router history={history}>
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-      </Router>
-    </AssistantSpaceIdProvider>
+    <Router history={history}>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    </Router>
   </I18nProvider>
 );
 describe('KnowledgeBaseSettingsManagement', () => {

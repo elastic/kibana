@@ -49,7 +49,6 @@ const ElasticLLMNewIntegrationMessage = React.memo(() => {
     docLinks: {
       links: {
         securitySolution: {
-          thirdPartyLlmProviders: THIRD_PARTY_LLM_LINK,
           llmPerformanceMatrix: LLM_PERFORMANCE_LINK,
         },
         observability: { elasticManagedLlmUsageCost: ELASTIC_LLM_USAGE_COST_LINK },
@@ -72,11 +71,7 @@ const ElasticLLMNewIntegrationMessage = React.memo(() => {
             {ELASTIC_LLM_USAGE_COSTS}
           </EuiLink>
         ),
-        thirdParty: (
-          <EuiLink href={THIRD_PARTY_LLM_LINK} target="_blank" rel="noopener noreferrer" external>
-            {ELASTIC_LLM_THIRD_PARTY}
-          </EuiLink>
-        ),
+        thirdParty: ELASTIC_LLM_THIRD_PARTY,
         performance: (
           <EuiLink href={LLM_PERFORMANCE_LINK} target="_blank" rel="noopener noreferrer" external>
             {ELASTIC_LLM_TOUR_PERFORMANCE}

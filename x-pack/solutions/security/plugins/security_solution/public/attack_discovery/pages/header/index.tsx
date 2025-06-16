@@ -15,7 +15,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { AssistantSpaceIdProvider, ConnectorSelectorInline, useAssistantContext } from '@kbn/elastic-assistant';
+import { ConnectorSelectorInline, useAssistantContext } from '@kbn/elastic-assistant';
 import { type AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -132,25 +132,21 @@ const HeaderComponent: React.FC<Props> = ({
           `}
           grow={false}
         >
-          {spaceId && (
-            <AssistantSpaceIdProvider spaceId={spaceId}>
-              <ElasticLLMCostAwarenessTour
-                isDisabled={isEISCostTourDisabled}
-                selectedConnectorId={connectorId}
-                zIndex={999} // Should lower than the flyout
-                storageKey={
-                  NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM_USAGE_ATTACK_DISCOVERY
-                }
-              >
-                <ConnectorSelectorInline
-                  onConnectorSelected={noop}
-                  onConnectorIdSelected={onConnectorIdSelected}
-                  selectedConnectorId={connectorId}
-                  stats={stats}
-                />
-              </ElasticLLMCostAwarenessTour>
-            </AssistantSpaceIdProvider>
-          )}
+          <ElasticLLMCostAwarenessTour
+            isDisabled={isEISCostTourDisabled}
+            selectedConnectorId={connectorId}
+            zIndex={999} // Should lower than the flyout
+            storageKey={
+              NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM_USAGE_ATTACK_DISCOVERY
+            }
+          >
+            <ConnectorSelectorInline
+              onConnectorSelected={noop}
+              onConnectorIdSelected={onConnectorIdSelected}
+              selectedConnectorId={connectorId}
+              stats={stats}
+            />
+          </ElasticLLMCostAwarenessTour>
         </EuiFlexItem>
       )}
 
