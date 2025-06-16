@@ -8,7 +8,6 @@
 import { EuiSkeletonText } from '@elastic/eui';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type { IBasePath } from '@kbn/core-http-browser';
-import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
@@ -35,9 +34,9 @@ import { useSelectedTab } from './hooks/use_selected_tab';
 import { useSloDetailsTabs } from './hooks/use_slo_details_tabs';
 import type { SloDetailsPathParams } from './types';
 import { ActionModalProvider } from '../../context/action_modal';
+import { useSloPageReady } from '../../hooks/use_slo_page_ready';
 
 export function SloDetailsPage() {
-  const { onPageReady } = usePerformanceContext();
   const {
     application: { navigateToUrl },
     http: { basePath },
@@ -53,7 +52,11 @@ export function SloDetailsPage() {
   const { instanceId: sloInstanceId, remoteName } = useGetQueryParams();
   const { storeAutoRefreshState, getAutoRefreshState } = useAutoRefreshStorage();
   const [isAutoRefreshing, setIsAutoRefreshing] = useState(getAutoRefreshState());
-  const { isLoading, data: slo } = useFetchSloDetails({
+  const {
+    isLoading,
+    data: slo,
+    isRefetching,
+  } = useFetchSloDetails({
     sloId,
     remoteName,
     instanceId: sloInstanceId,
@@ -102,11 +105,10 @@ export function SloDetailsPage() {
     }
   }, [hasRightLicense, permissions, navigateToUrl, basePath]);
 
-  useEffect(() => {
-    if (!isLoading && slo !== undefined) {
-      onPageReady();
-    }
-  }, [onPageReady, slo, isLoading]);
+  useSloPageReady({
+    isReady: !isLoading && slo !== undefined,
+    isLoading: isRefetching,
+  });
 
   useBreadcrumbs(getBreadcrumbs(basePath, slo), { serverless });
 
