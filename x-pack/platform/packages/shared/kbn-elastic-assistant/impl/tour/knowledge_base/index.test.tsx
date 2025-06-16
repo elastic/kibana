@@ -7,21 +7,28 @@
 
 import React from 'react';
 
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiTourStepProps } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { KnowledgeBaseTour } from '.';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { useAssistantContext } from '../../..';
+import { KNOWLEDGE_BASE_TAB } from '../../assistant/settings/const';
+import { SecurityPageName } from '@kbn/deeplinks-security';
 jest.mock('../../..');
 jest.mock('react-use/lib/useLocalStorage');
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    EuiTourStep: ({ children, panelProps }: EuiTourStepProps) =>
+    EuiTourStep: ({ children, footerAction, panelProps }: EuiTourStepProps) =>
       children ? (
-        <div data-test-subj={panelProps?.['data-test-subj']}>{children}</div>
+        <div data-test-subj={panelProps?.['data-test-subj']}>
+          {children}
+          {(Array.isArray(footerAction) ? footerAction : [footerAction])?.map((action, i) => (
+            <span key={i}>{action}</span>
+          ))}
+        </div>
       ) : (
         <div data-test-subj={panelProps?.['data-test-subj']} />
       ),
@@ -35,6 +42,7 @@ describe('Attack discovery tour', () => {
     jest.clearAllMocks();
     (useAssistantContext as jest.Mock).mockReturnValue({
       navigateToApp,
+      assistantAvailability: { hasSearchAILakeConfigurations: false },
     });
     jest.mocked(useLocalStorage).mockReturnValue([
       {
@@ -95,6 +103,42 @@ describe('Attack discovery tour', () => {
     );
 
     expect(getByTestId('knowledgeBase-tour-step-1')).toBeInTheDocument();
+  });
+
+  it('should go to stack management kb settings', async () => {
+    const { getByTestId } = render(
+      <KnowledgeBaseTour>
+        <h1>{'Hello world'}</h1>
+      </KnowledgeBaseTour>,
+      {
+        wrapper: TestProviders,
+      }
+    );
+    fireEvent.click(getByTestId('tryKb'));
+    expect(navigateToApp).toHaveBeenCalledWith('management', {
+      path: `kibana/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}`,
+    });
+  });
+
+  it('should go to ai4dsoc kb settings', async () => {
+    (useAssistantContext as jest.Mock).mockReturnValue({
+      navigateToApp,
+      assistantAvailability: { hasSearchAILakeConfigurations: true },
+    });
+    const { getByTestId } = render(
+      <KnowledgeBaseTour>
+        <h1>{'Hello world'}</h1>
+      </KnowledgeBaseTour>,
+      {
+        wrapper: TestProviders,
+      }
+    );
+    fireEvent.click(getByTestId('tryKb'));
+    expect(navigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
+      deepLinkId: SecurityPageName.configurationsAiSettings,
+      path: `?tab=${KNOWLEDGE_BASE_TAB}`,
+      openInNewTab: true,
+    });
   });
 
   it('should render tour video when tour is on step 2 and page is knowledge base', () => {
