@@ -38,6 +38,7 @@ viewer:
         - '.asset-criticality.asset-criticality-*'
         - '.entities.v1.latest.security_*'
         - '.ml-anomalies-*'
+        - 'security_solution-cloud_security_posture.misconfiguration_latest'
       privileges:
         - read
   applications:
@@ -113,6 +114,7 @@ editor:
       allow_restricted_indices: false
     - names:
         - '.ml-anomalies-*'
+        - 'security_solution-cloud_security_posture.misconfiguration_latest'
       privileges:
         - read
   applications:
@@ -178,6 +180,7 @@ t1_analyst:
         - .asset-criticality.asset-criticality-*
         - .entities.v1.latest.security_*
         - '.ml-anomalies-*'
+        - 'security_solution-cloud_security_posture.misconfiguration_latest'
       privileges:
         - read
   applications:
@@ -235,6 +238,7 @@ t2_analyst:
         - read
     - names:
         - .asset-criticality.asset-criticality-*
+        - 'security_solution-cloud_security_posture.misconfiguration_latest'
       privileges:
         - read
         - write
@@ -299,6 +303,7 @@ t3_analyst:
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
         - '.ml-anomalies-*'
+        - 'security_solution-cloud_security_posture.misconfiguration_latest'
       privileges:
         - read
   applications:
@@ -349,6 +354,7 @@ threat_intelligence_analyst:
         - packetbeat-*
         - winlogbeat-*
         - logstash-*
+        - 'security_solution-cloud_security_posture.misconfiguration_latest'
       privileges:
         - read
     - names:
@@ -443,6 +449,7 @@ rule_author:
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
         - '.ml-anomalies-*'
+        - 'security_solution-cloud_security_posture.misconfiguration_latest'
       privileges:
         - read
   applications:
@@ -517,6 +524,7 @@ soc_manager:
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
         - '.ml-anomalies-*'
+        - 'security_solution-cloud_security_posture.misconfiguration_latest'
       privileges:
         - read
   applications:
@@ -586,6 +594,7 @@ detections_admin:
         - .fleet-agents*
         - .fleet-actions*
         - '.ml-anomalies-*'
+        - 'security_solution-cloud_security_posture.misconfiguration_latest'
       privileges:
         - read
     - names:
@@ -653,6 +662,7 @@ platform_engineer:
         - write
     - names:
         - '.ml-anomalies-*'
+        - 'security_solution-cloud_security_posture.misconfiguration_latest'
       privileges:
         - read
   applications:
@@ -730,6 +740,10 @@ endpoint_operations_analyst:
       privileges:
         - read
         - write
+    - names:
+        - 'security_solution-cloud_security_posture.misconfiguration_latest'
+      privileges:
+        - read
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -774,6 +788,7 @@ endpoint_policy_manager:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
         - .fleet-actions*
+        - 'security_solution-cloud_security_posture.misconfiguration_latest'
       privileges:
         - read
     - names:
