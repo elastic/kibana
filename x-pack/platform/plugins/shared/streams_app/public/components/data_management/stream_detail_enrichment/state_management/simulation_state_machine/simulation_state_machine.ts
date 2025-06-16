@@ -131,7 +131,7 @@ export const simulationMachine = setup({
           type: 'hasProcessors',
           params: ({ context }) => ({ processors: context.processors }),
         },
-        target: '.assertingSimulationRequirements',
+        target: '.debouncingChanges',
         actions: [{ type: 'storeSamples', params: ({ event }) => event }],
       },
       {

@@ -42,53 +42,6 @@ const manageDataSourcesLabel = i18n.translate(
   { defaultMessage: 'Manage data sources' }
 );
 
-interface DataSourceListItemProps {
-  readonly dataSourceRef: DataSourceActorRef;
-}
-
-const DataSourceListItem = ({ dataSourceRef }: DataSourceListItemProps) => {
-  const { euiTheme } = useEuiTheme();
-  const dataSourceState = useDataSourceSelector(dataSourceRef, (snapshot) => snapshot);
-
-  const isEnabled = dataSourceState.matches('enabled');
-  const toggleActivity = () => {
-    dataSourceRef.send({ type: 'dataSource.toggleActivity' });
-  };
-
-  const content = (
-    <EuiFlexGroup
-      alignItems="center"
-      gutterSize="xs"
-      css={css`
-        max-width: ${DATA_SOURCE_CARD_MAX_WIDTH}px;
-      `}
-    >
-      <strong
-        className="eui-textTruncate"
-        css={css`
-          font-weight: ${euiTheme.font.weight.semiBold};
-        `}
-      >
-        {dataSourceState.context.dataSource.name || dataSourceState.context.dataSource.type}
-      </strong>
-      <EuiText component="span" size="s" color="subdued">
-        ({dataSourceState.context.data.length})
-      </EuiText>
-    </EuiFlexGroup>
-  );
-
-  return (
-    <EuiPanel paddingSize="s" hasShadow={false} hasBorder>
-      <EuiCheckbox
-        id={dataSourceRef.id}
-        label={content}
-        checked={isEnabled}
-        onChange={toggleActivity}
-      />
-    </EuiPanel>
-  );
-};
-
 export const DataSourcesList = () => {
   const { closeDataSourcesManagement, openDataSourcesManagement } = useStreamEnrichmentEvents();
 
@@ -136,5 +89,52 @@ export const DataSourcesList = () => {
       </EuiFlexItem>
       {isManagingDataSources && <DataSourcesFlyout onClose={closeDataSourcesManagement} />}
     </EuiFlexGroup>
+  );
+};
+
+interface DataSourceListItemProps {
+  readonly dataSourceRef: DataSourceActorRef;
+}
+
+const DataSourceListItem = ({ dataSourceRef }: DataSourceListItemProps) => {
+  const { euiTheme } = useEuiTheme();
+  const dataSourceState = useDataSourceSelector(dataSourceRef, (snapshot) => snapshot);
+
+  const isEnabled = dataSourceState.matches('enabled');
+  const toggleActivity = () => {
+    dataSourceRef.send({ type: 'dataSource.toggleActivity' });
+  };
+
+  const content = (
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="xs"
+      css={css`
+        max-width: ${DATA_SOURCE_CARD_MAX_WIDTH}px;
+      `}
+    >
+      <strong
+        className="eui-textTruncate"
+        css={css`
+          font-weight: ${euiTheme.font.weight.semiBold};
+        `}
+      >
+        {dataSourceState.context.dataSource.name || dataSourceState.context.dataSource.type}
+      </strong>
+      <EuiText component="span" size="s" color="subdued">
+        ({dataSourceState.context.data.length})
+      </EuiText>
+    </EuiFlexGroup>
+  );
+
+  return (
+    <EuiPanel paddingSize="s" hasShadow={false} hasBorder>
+      <EuiCheckbox
+        id={dataSourceRef.id}
+        label={content}
+        checked={isEnabled}
+        onChange={toggleActivity}
+      />
+    </EuiPanel>
   );
 };

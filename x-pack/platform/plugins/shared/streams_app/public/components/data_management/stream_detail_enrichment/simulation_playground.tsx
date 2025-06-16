@@ -8,6 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiNotificationBadge,
@@ -26,7 +27,8 @@ import { DetectedFieldsEditor } from './detected_fields_editor';
 import { DataSourcesList } from './data_sources_list';
 
 export const SimulationPlayground = () => {
-  const { viewSimulationPreviewData, viewSimulationDetectedFields } = useStreamEnrichmentEvents();
+  const { refreshSimulation, viewSimulationPreviewData, viewSimulationDetectedFields } =
+    useStreamEnrichmentEvents();
 
   const isViewingDataPreview = useStreamEnrichmentSelector((state) =>
     state.matches({
@@ -50,7 +52,17 @@ export const SimulationPlayground = () => {
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem>
             <EuiTabs bottomBorder={false}>
-              <EuiTab isSelected={isViewingDataPreview} onClick={viewSimulationPreviewData}>
+              <EuiTab
+                isSelected={isViewingDataPreview}
+                onClick={viewSimulationPreviewData}
+                append={
+                  <EuiButtonIcon
+                    iconType="refresh"
+                    onClick={refreshSimulation}
+                    isLoading={isLoading}
+                  />
+                }
+              >
                 {i18n.translate(
                   'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.dataPreview',
                   { defaultMessage: 'Data preview' }

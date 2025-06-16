@@ -49,6 +49,7 @@ export type StreamEnrichmentEvent =
   | { type: 'stream.received'; definition: Streams.ingest.all.GetResponse }
   | { type: 'stream.reset' }
   | { type: 'stream.update' }
+  | { type: 'simulation.refresh' }
   | { type: 'simulation.viewDataPreview' }
   | { type: 'simulation.viewDetectedFields' }
   | { type: 'dataSources.add'; dataSource: EnrichmentDataSource }

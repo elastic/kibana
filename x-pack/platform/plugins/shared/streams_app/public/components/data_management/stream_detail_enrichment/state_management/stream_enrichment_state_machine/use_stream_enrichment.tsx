@@ -50,6 +50,9 @@ export const useStreamEnrichmentEvents = () => {
       saveChanges: () => {
         service.send({ type: 'stream.update' });
       },
+      refreshSimulation: () => {
+        service.send({ type: 'simulation.refresh' });
+      },
       viewSimulationPreviewData: () => {
         service.send({ type: 'simulation.viewDataPreview' });
       },

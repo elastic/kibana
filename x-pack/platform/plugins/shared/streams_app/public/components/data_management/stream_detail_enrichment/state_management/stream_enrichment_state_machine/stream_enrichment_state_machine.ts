@@ -174,6 +174,11 @@ export const streamEnrichmentMachine = setup({
     deleteProcessor: assign(({ context }, params: { id: string }) => ({
       processorsRefs: context.processorsRefs.filter((proc) => proc.id !== params.id),
     })),
+    refreshDataSources: ({ context }) => {
+      context.dataSourcesRefs.forEach((dataSourceRef) =>
+        dataSourceRef.send({ type: 'dataSource.refresh' })
+      );
+    },
     reorderProcessors: assign((_, params: { processorsRefs: ProcessorActorRef[] }) => ({
       processorsRefs: params.processorsRefs,
     })),
@@ -422,6 +427,9 @@ export const streamEnrichmentMachine = setup({
                     { type: 'reassignProcessors' },
                     { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
                   ],
+                },
+                'simulation.refresh': {
+                  actions: [{ type: 'refreshDataSources' }],
                 },
               },
               states: {

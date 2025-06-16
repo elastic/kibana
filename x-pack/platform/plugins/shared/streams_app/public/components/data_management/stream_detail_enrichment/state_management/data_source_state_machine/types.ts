@@ -39,4 +39,5 @@ export interface DataSourceContext {
 export type DataSourceEvent =
   | { type: 'dataSource.change'; dataSource: EnrichmentDataSourceWithUIAttributes }
   | { type: 'dataSource.delete' }
+  | { type: 'dataSource.refresh' }
   | { type: 'dataSource.toggleActivity' };

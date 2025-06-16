@@ -116,6 +116,7 @@ export const dataSourceMachine = setup({
     enabled: {
       initial: 'loadingData',
       on: {
+        'dataSource.refresh': '.loadingData',
         'dataSource.change': [
           {
             guard: 'shouldCollectData',
