@@ -14,6 +14,7 @@ import {
   REFERENCE_LINE_LAYER,
   LAYERED_XY_VIS,
   REFERENCE_LINE,
+  PointVisibilityOptions,
 } from '../constants';
 import { commonXYArgs } from './common_xy_args';
 import { strings } from '../i18n';
@@ -52,6 +53,11 @@ export const layeredXyVisFunction: LayeredXyVisFn = {
         defaultMessage: 'All layers use the one datatable',
       }),
       default: false,
+    },
+    pointVisibility: {
+      types: ['string'],
+      help: strings.getPointVisibilityHelp(),
+      options: Object.values(PointVisibilityOptions),
     },
   },
   async fn(data, args, handlers) {

@@ -4,14 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHeaderLink,
-  EuiHeaderLinks,
-  EuiIcon,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiHeaderLink, EuiHeaderLinks, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import qs from 'query-string';
 import React from 'react';
@@ -32,7 +25,7 @@ export function ProfilingHeaderActionMenu() {
         })}
       >
         <EuiHeaderLink
-          color="text"
+          color="primary"
           onClick={() => {
             const query = qs.parse(window.location.search);
             const storageExplorerURL = url.format({
@@ -46,38 +39,24 @@ export function ProfilingHeaderActionMenu() {
             history.push(storageExplorerURL);
           }}
         >
-          <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="beta" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {i18n.translate('xpack.profiling.headerActionMenu.storageExplorer', {
-                defaultMessage: 'Storage Explorer',
-              })}
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          {i18n.translate('xpack.profiling.headerActionMenu.storageExplorer', {
+            defaultMessage: 'Storage Explorer',
+          })}
         </EuiHeaderLink>
       </EuiToolTip>
+      <EuiHeaderLink href={router.link('/settings')} color="primary">
+        {i18n.translate('xpack.profiling.headerActionMenu.settings', {
+          defaultMessage: 'Settings',
+        })}
+      </EuiHeaderLink>
       <EuiHeaderLink
         href={router.link('/add-data-instructions', {
           query: { selectedTab: AddDataTabs.Kubernetes },
         })}
         color="primary"
       >
-        <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="indexOpen" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {i18n.translate('xpack.profiling.headerActionMenu.addData', {
-              defaultMessage: 'Add Data',
-            })}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiHeaderLink>
-      <EuiHeaderLink href={router.link('/settings')} color="text">
-        {i18n.translate('xpack.profiling.headerActionMenu.settings', {
-          defaultMessage: 'Settings',
+        {i18n.translate('xpack.profiling.headerActionMenu.addData', {
+          defaultMessage: 'Add Data',
         })}
       </EuiHeaderLink>
     </EuiHeaderLinks>

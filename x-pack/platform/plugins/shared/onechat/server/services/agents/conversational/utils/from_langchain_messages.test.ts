@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { extractTextContent, getToolCalls } from './from_langchain_messages';
 import { AIMessage, HumanMessage } from '@langchain/core/messages';
+import { extractTextContent, getToolCalls } from './from_langchain_messages';
+import { toolIdToLangchain } from './tool_provider_to_langchain_tools';
 
 describe('extractTextContent', () => {
   it('should extract string content from a message', () => {
@@ -43,12 +44,12 @@ describe('getToolCalls', () => {
       tool_calls: [
         {
           id: 'tool-1',
-          name: 'search',
+          name: toolIdToLangchain({ toolId: 'search', providerId: 'test' }),
           args: { query: 'test' },
         },
         {
           id: 'tool-2',
-          name: 'lookup',
+          name: toolIdToLangchain({ toolId: 'lookup', providerId: 'test' }),
           args: { id: 42 },
         },
       ],
@@ -57,12 +58,12 @@ describe('getToolCalls', () => {
     expect(result).toEqual([
       {
         toolCallId: 'tool-1',
-        toolId: 'search',
+        toolId: { toolId: 'search', providerId: 'test' },
         args: { query: 'test' },
       },
       {
         toolCallId: 'tool-2',
-        toolId: 'lookup',
+        toolId: { toolId: 'lookup', providerId: 'test' },
         args: { id: 42 },
       },
     ]);

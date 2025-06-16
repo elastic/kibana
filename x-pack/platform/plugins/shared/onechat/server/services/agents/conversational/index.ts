@@ -6,3 +6,4 @@
  */
 
 export { createDefaultAgentProvider } from './provider';
+export { runChatAgent } from './run_chat_agent';
