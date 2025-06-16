@@ -25,8 +25,10 @@ import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
+import { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import { RenderingService as IRenderingService } from '@kbn/core-rendering-browser';
 import { AppWrapper } from './app_containers';
+import { LayoutFeatureFlag, LAYOUT_FEATURE_FLAG_KEY } from './layout/layout_feature_flag';
 
 export interface RenderingServiceContextDeps {
   analytics: AnalyticsServiceStart;
@@ -40,6 +42,7 @@ export interface RenderingServiceRenderCoreDeps {
   application: InternalApplicationStart;
   chrome: InternalChromeStart;
   overlays: OverlayStart;
+  featureFlags: FeatureFlagsStart;
 }
 
 export interface RenderingServiceInternalStart extends IRenderingService {
@@ -80,7 +83,11 @@ export class RenderingService implements IRenderingService {
     renderCoreDeps: RenderingServiceRenderCoreDeps,
     targetDomElement: HTMLDivElement
   ) {
-    const { chrome, application, overlays } = renderCoreDeps;
+    const { chrome, application, overlays, featureFlags } = renderCoreDeps;
+    const layoutType = featureFlags.getStringValue<LayoutFeatureFlag>(
+      LAYOUT_FEATURE_FLAG_KEY,
+      'legacy-fixed'
+    );
     const startServices = this.contextDeps.getValue()!;
     const chromeHeader = chrome.getHeaderComponent();
     const appComponent = application.getComponent();
@@ -95,30 +102,36 @@ export class RenderingService implements IRenderingService {
         body.classList.add(...newClasses);
       });
 
-    ReactDOM.render(
-      <KibanaRootContextProvider {...startServices} globalStyles={true}>
-        <>
-          {/* Global Styles that apply across the entire app */}
-          <GlobalAppStyle />
+    if (layoutType === 'grid') {
+      throw new Error(
+        'The "grid" layout type is not supported yet. Please use "legacy-fixed" instead.'
+      );
+    } else {
+      ReactDOM.render(
+        <KibanaRootContextProvider {...startServices} globalStyles={true}>
+          <>
+            {/* Global Styles that apply across the entire app */}
+            <GlobalAppStyle />
 
-          {/* Fixed headers */}
-          {chromeHeader}
+            {/* Fixed headers */}
+            {chromeHeader}
 
-          {/* banners$.subscribe() for things like the No data banner */}
-          <div id="globalBannerList">{bannerComponent}</div>
+            {/* banners$.subscribe() for things like the No data banner */}
+            <div id="globalBannerList">{bannerComponent}</div>
 
-          {/* The App Wrapper outside of the fixed headers that accepts custom class names from apps */}
-          <AppWrapper chromeVisible$={chrome.getIsVisible$()}>
-            {/* Affixes a div to restrict the position of charts tooltip to the visible viewport minus the header */}
-            <div id={APP_FIXED_VIEWPORT_ID} />
+            {/* The App Wrapper outside of the fixed headers that accepts custom class names from apps */}
+            <AppWrapper chromeVisible$={chrome.getIsVisible$()}>
+              {/* Affixes a div to restrict the position of charts tooltip to the visible viewport minus the header */}
+              <div id={APP_FIXED_VIEWPORT_ID} />
 
-            {/* The actual plugin/app */}
-            {appComponent}
-          </AppWrapper>
-        </>
-      </KibanaRootContextProvider>,
-      targetDomElement
-    );
+              {/* The actual plugin/app */}
+              {appComponent}
+            </AppWrapper>
+          </>
+        </KibanaRootContextProvider>,
+        targetDomElement
+      );
+    }
   }
 
   /**
