@@ -7,75 +7,75 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
-
-expect.addSnapshotSerializer({
-  test: (val) => val instanceof Observable,
-  print: () => `Rx.Observable`,
-});
-
+import { type ReactElement } from 'react';
+import ReactDOM from 'react-dom';
+import { render } from '@testing-library/react';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
-import { mockRender } from './fatal_errors_service.test.mocks';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
+import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
+import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 
 import { FatalErrorsService } from './fatal_errors_service';
 
-function setupService() {
-  const rootDomElement = document.createElement('div');
+describe('FatalErrorsService', () => {
+  let fatalErrorsSetup: FatalErrorsSetup;
+  let analytics: ReturnType<typeof analyticsServiceMock.createAnalyticsServiceStart>;
+  let i18n: ReturnType<typeof i18nServiceMock.createStartContract>;
+  let injectedMetadata: ReturnType<typeof injectedMetadataServiceMock.createSetupContract>;
+  let rootDomElement: HTMLElement;
+  let stopCoreSystem: jest.Mock;
+  let theme: ReturnType<typeof themeServiceMock.createSetupContract>;
 
-  const analytics = analyticsServiceMock.createAnalyticsServiceStart();
-  const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
-  const theme = themeServiceMock.createSetupContract();
+  beforeEach(() => {
+    rootDomElement = document.createElement('div');
+    analytics = analyticsServiceMock.createAnalyticsServiceStart();
+    i18n = i18nServiceMock.createStartContract();
+    injectedMetadata = injectedMetadataServiceMock.createSetupContract();
+    theme = themeServiceMock.createSetupContract();
+    stopCoreSystem = jest.fn();
 
-  const stopCoreSystem = jest.fn();
+    const fatalErrorsService = new FatalErrorsService(rootDomElement, stopCoreSystem);
 
-  const i18n: any = {
-    Context: function I18nContext() {
-      return '';
-    },
-  };
-
-  const fatalErrorsService = new FatalErrorsService(rootDomElement, stopCoreSystem);
-
-  return {
-    rootDomElement,
-    injectedMetadata,
-    stopCoreSystem,
-    fatalErrors: fatalErrorsService.setup({ analytics, injectedMetadata, i18n, theme }),
-  };
-}
-
-afterEach(() => {
-  jest.resetAllMocks();
-});
-
-describe('#add()', () => {
-  it('calls stopCoreSystem() param', () => {
-    const { stopCoreSystem, fatalErrors } = setupService();
-
-    expect(stopCoreSystem).not.toHaveBeenCalled();
-    expect(() => {
-      fatalErrors.add(new Error('foo'));
-    }).toThrowError();
-    expect(stopCoreSystem).toHaveBeenCalled();
-    expect(stopCoreSystem).toHaveBeenCalledWith();
+    fatalErrorsSetup = fatalErrorsService.setup({ analytics, injectedMetadata, i18n, theme });
   });
 
-  it('deletes all children of rootDomElement and renders <FatalErrorScreen /> into it', () => {
-    const { fatalErrors, rootDomElement } = setupService();
+  describe('add', () => {
+    it('should call the `stopCoreSystem` param', () => {
+      expect(stopCoreSystem).not.toHaveBeenCalled();
+      expect(() => fatalErrorsSetup.add(new Error('foo'))).toThrowError();
+      expect(stopCoreSystem).toHaveBeenCalledWith();
+    });
 
-    rootDomElement.innerHTML = `
-      <h1>Loading...</h1>
-      <div class="someSpinner"></div>
-    `;
+    describe('when rendering', () => {
+      let element: ReactElement;
 
-    expect(mockRender).not.toHaveBeenCalled();
-    expect(rootDomElement.children).toHaveLength(2);
-    expect(() => {
-      fatalErrors.add(new Error('foo'));
-    }).toThrowError();
-    expect(rootDomElement).toMatchSnapshot('fatal error screen container');
-    expect(mockRender.mock.calls).toMatchSnapshot('fatal error screen component');
+      beforeEach(() => {
+        rootDomElement.innerHTML = `
+          <h1>Loading...</h1>
+          <div class="someSpinner"></div>
+        `;
+
+        const renderSpy = jest.spyOn(ReactDOM, 'render').mockImplementation(() => {});
+        expect(() => fatalErrorsSetup.add(new Error('foo'))).toThrowError();
+        [element] = renderSpy.mock.lastCall as unknown as [ReactElement];
+      });
+
+      afterEach(() => {
+        jest.resetAllMocks();
+      });
+
+      it('should clean up the root element', async () => {
+        expect(rootDomElement).toMatchInlineSnapshot(`
+          <div>
+            <div />
+          </div>
+        `);
+      });
+
+      it('should render a generic error screen', async () => {
+        expect(render(element).queryByTestId('fatalErrorScreen')).toBeTruthy();
+      });
+    });
   });
 });

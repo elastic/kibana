@@ -17,8 +17,10 @@ import type { ThemeServiceSetup } from '@kbn/core-theme-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
-import { FatalErrorsScreen } from './fatal_errors_screen';
-import { FatalErrorInfo, getErrorInfo } from './get_error_info';
+import { FatalErrorScreen } from './fatal_error_screen';
+import { formatError, formatStack } from './utils';
+import { GenericError } from './errors';
+import { FatalError } from './fatal_error';
 
 /** @internal */
 export interface FatalErrorsServiceSetupDeps {
@@ -30,7 +32,7 @@ export interface FatalErrorsServiceSetupDeps {
 
 /** @internal */
 export class FatalErrorsService {
-  private readonly errorInfo$ = new ReplaySubject<FatalErrorInfo>();
+  private readonly error$ = new ReplaySubject<FatalError>();
   private fatalErrors?: FatalErrorsSetup;
 
   /**
@@ -42,7 +44,7 @@ export class FatalErrorsService {
   constructor(private rootDomElement: HTMLElement, private onFirstErrorCb: () => void) {}
 
   public setup(deps: FatalErrorsServiceSetupDeps) {
-    this.errorInfo$
+    this.error$
       .pipe(
         first(),
         tap(() => {
@@ -59,9 +61,7 @@ export class FatalErrorsService {
 
     this.fatalErrors = {
       add: (error, source?) => {
-        const errorInfo = getErrorInfo(error, source);
-
-        this.errorInfo$.next(errorInfo);
+        this.error$.next({ error, source });
 
         if (error instanceof Error) {
           // make stack traces clickable by putting whole error in the console
@@ -75,18 +75,19 @@ export class FatalErrorsService {
 
     this.setupGlobalErrorHandlers();
 
-    return this.fatalErrors!;
+    return this.fatalErrors;
   }
 
   public start() {
-    const { fatalErrors } = this;
-    if (!fatalErrors) {
+    if (!this.fatalErrors) {
       throw new Error('FatalErrorsService#setup() must be invoked before start.');
     }
-    return fatalErrors;
+
+    return this.fatalErrors;
   }
 
-  private renderError({ analytics, i18n, theme, injectedMetadata }: FatalErrorsServiceSetupDeps) {
+  private renderError(deps: FatalErrorsServiceSetupDeps) {
+    const { analytics, i18n, theme, injectedMetadata } = deps;
     // delete all content in the rootDomElement
     this.rootDomElement.textContent = '';
 
@@ -101,25 +102,26 @@ export class FatalErrorsService {
         theme={theme}
         globalStyles={true}
       >
-        <FatalErrorsScreen
-          buildNumber={injectedMetadata.getKibanaBuildNumber()}
-          kibanaVersion={injectedMetadata.getKibanaVersion()}
-          errorInfo$={this.errorInfo$}
-        />
+        <FatalErrorScreen error$={this.error$}>
+          {(errors) => (
+            <GenericError
+              buildNumber={injectedMetadata.getKibanaBuildNumber()}
+              errors={errors}
+              kibanaVersion={injectedMetadata.getKibanaVersion()}
+            />
+          )}
+        </FatalErrorScreen>
       </KibanaRootContextProvider>,
       container
     );
   }
 
   private setupGlobalErrorHandlers() {
-    if (window.addEventListener) {
-      window.addEventListener('unhandledrejection', (e) => {
-        const { message, stack } = getErrorInfo(e.reason);
-        // eslint-disable-next-line no-console
-        console.log(`Detected an unhandled Promise rejection.\n
-        Message: ${message}\n
-        Stack: ${stack}`);
-      });
-    }
+    window.addEventListener?.('unhandledrejection', (e) => {
+      // eslint-disable-next-line no-console
+      console.log(`Detected an unhandled Promise rejection.\n
+      Message: ${formatError(e.reason)}\n
+      Stack: ${formatStack(e.reason)}`);
+    });
   }
 }
