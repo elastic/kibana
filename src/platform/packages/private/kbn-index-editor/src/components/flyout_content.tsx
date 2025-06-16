@@ -109,7 +109,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
           </CellActionsProvider>
         </EuiFlyoutBody>
 
-        <FlyoutFooter indexUpdateService={deps.indexUpdateService} />
+        <FlyoutFooter indexUpdateService={deps.indexUpdateService} onClose={props.onClose} />
       </>
     </KibanaContextProvider>
   );

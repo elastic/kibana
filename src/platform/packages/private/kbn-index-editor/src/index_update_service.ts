@@ -58,12 +58,12 @@ export class IndexUpdateService {
   }
 
   private indexName: string | null = null;
-
   private indexName$ = new Subject<string | null>();
 
-  private readonly undoChangeSubject$ = new Subject<number>();
-
   private readonly actions$ = new Subject<Action>();
+
+  private readonly _isSaving$ = new BehaviorSubject<boolean>(false);
+  public readonly isSaving$: Observable<boolean> = this._isSaving$.asObservable();
 
   /** ES Documents */
   private readonly _rows$ = new BehaviorSubject<DataTableRecord[]>([]);
@@ -149,6 +149,9 @@ export class IndexUpdateService {
     this._subscription.add(
       this.bufferState$
         .pipe(
+          tap(() => {
+            this._isSaving$.next(true);
+          }),
           debounceTime(BUFFER_TIMEOUT_MS),
           filter((updates) => updates.length > 0),
           switchMap((updates) => {
@@ -217,11 +220,15 @@ export class IndexUpdateService {
               })
             );
 
+            this._isSaving$.next(false);
+
             // TODO handle index docs
           },
           error: (err) => {
             // TODO handle API errors
             console.error('API error:', err);
+
+            this._isSaving$.next(false);
           },
         })
     );
@@ -304,6 +311,5 @@ export class IndexUpdateService {
 
   public destroy() {
     this._subscription.unsubscribe();
-    this.undoChangeSubject$.complete();
   }
 }

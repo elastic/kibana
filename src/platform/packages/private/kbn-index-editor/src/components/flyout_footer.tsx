@@ -8,7 +8,6 @@
  */
 
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,21 +18,24 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { type FC } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { IndexUpdateService } from '../index_update_service';
+import { EditLookupIndexContentContext } from '../types';
 
 export interface FlyoutFooterProps {
   indexUpdateService: IndexUpdateService;
+  onClose: EditLookupIndexContentContext['onClose'];
 }
 
-export const FlyoutFooter: FC<FlyoutFooterProps> = ({ indexUpdateService }) => {
+export const FlyoutFooter: FC<FlyoutFooterProps> = ({ indexUpdateService, onClose }) => {
   const undoTimeLeft = useObservable(indexUpdateService.undoTimer$);
+  const isSaving = useObservable(indexUpdateService.isSaving$, false);
 
-  const undoInSeconds: string = undoTimeLeft ? `${Math.floor(undoTimeLeft / 1000)}s` : null;
+  const undoInSeconds = undoTimeLeft ? `${Math.floor(undoTimeLeft / 1000)}s` : null;
 
   return (
     <EuiFlyoutFooter>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty iconType="cross" onClick={() => {}} flush="left">
+          <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
             <FormattedMessage
               id="xpack.dataVisualizer.file.uploadView.closeButton"
               defaultMessage="Close"
@@ -64,7 +66,7 @@ export const FlyoutFooter: FC<FlyoutFooterProps> = ({ indexUpdateService }) => {
               </EuiFlexItem>
             ) : null}
 
-            {false ? (
+            {isSaving ? (
               <EuiFlexGroup gutterSize="none" alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiLoadingSpinner size="m" />
@@ -78,16 +80,6 @@ export const FlyoutFooter: FC<FlyoutFooterProps> = ({ indexUpdateService }) => {
                   </EuiButtonEmpty>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            ) : null}
-            {true ? (
-              <EuiFlexItem grow={false}>
-                <EuiButton onClick={() => {}}>
-                  <FormattedMessage
-                    id="indexEditor.flyout.footer.primaryButtonLabel.save"
-                    defaultMessage="Save"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
             ) : null}
           </EuiFlexGroup>
         </EuiFlexItem>
