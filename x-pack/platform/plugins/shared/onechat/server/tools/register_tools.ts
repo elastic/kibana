@@ -17,7 +17,7 @@ import {
   listIndicesTool,
   indexExplorerTool,
 } from './retrieval';
-import { researcherTool } from '../services/agents/research';
+import { researcherTool } from '../services/agents/researcher';
 
 export const registerTools = ({ tools: registry }: { tools: ToolsServiceSetup }) => {
   const tools: Array<RegisteredTool<any, any>> = [

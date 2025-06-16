@@ -8,7 +8,6 @@
 import { z } from '@kbn/zod';
 import type { RegisteredTool } from '@kbn/onechat-server';
 import { BuiltinToolIds, BuiltinTags } from '@kbn/onechat-common';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { runSearchAgent } from './run_researcher_agent';
 
 const researcherSchema = z.object({
@@ -21,7 +20,7 @@ export interface ResearcherResponse {
 
 export const researcherTool = (): RegisteredTool<typeof researcherSchema, ResearcherResponse> => {
   return {
-    id: 'researcher',
+    id: BuiltinToolIds.researcherAgent,
     description: 'An agentic researcher agent to perform search tasks',
     schema: researcherSchema,
     handler: async ({ instructions }, { toolProvider, request, modelProvider, runner, logger }) => {

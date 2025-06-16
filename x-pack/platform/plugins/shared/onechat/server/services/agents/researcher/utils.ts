@@ -6,7 +6,7 @@
  */
 
 import { BaseMessage, isToolMessage } from '@langchain/core/messages';
-import { extractTextContent } from '../conversational/utils/from_langchain_messages';
+import { extractTextContent } from '../chat/utils/from_langchain_messages';
 
 interface ToolResult {
   toolCallId: string;

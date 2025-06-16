@@ -14,7 +14,7 @@ import type { Logger } from '@kbn/core/server';
 import { InferenceChatModel } from '@kbn/inference-langchain';
 import { getReflectionPrompt, getExecutionPrompt, getAnswerPrompt } from './prompts';
 import { extractToolResults } from './utils';
-import { getToolCalls, extractTextContent } from '../conversational/utils/from_langchain_messages';
+import { getToolCalls, extractTextContent } from '../chat/utils/from_langchain_messages';
 
 // tool_choice: toolName
 
