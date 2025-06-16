@@ -108,4 +108,4 @@ const EntityAnalyticsComponent: React.FC<EntityAnalyticsComponentProps> = ({
   );
 };
 
-export const EntityAnalyticsPage = React.memo(EntityAnalyticsComponent);
+export const EntityAnalyticsPage = EntityAnalyticsComponent;

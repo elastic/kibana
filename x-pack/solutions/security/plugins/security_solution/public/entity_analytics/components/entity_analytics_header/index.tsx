@@ -47,7 +47,7 @@ const HOST_RISK_QUERY_ID = 'hostRiskScoreKpiQuery';
 const USER_RISK_QUERY_ID = 'userRiskScoreKpiQuery';
 
 export const EntityAnalyticsHeader: React.FC<EntityAnalyticsComponentProps> = ({
-  isRiskAnalytics = false,
+  isOverview = false,
 }) => {
   const { from, to } = useGlobalTime();
   const { filterQuery } = useGlobalFilterQuery();
@@ -198,7 +198,7 @@ export const EntityAnalyticsHeader: React.FC<EntityAnalyticsComponentProps> = ({
             </EuiFlexItem>
           </>
         )}
-        {!isRiskAnalytics && (
+        {!isOverview && (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
               <EuiFlexItem className="eui-textCenter">

@@ -120,14 +120,14 @@ describe('EntityAnalyticsPage', () => {
     expect(screen.getByText('Entity analytics')).toBeInTheDocument();
   });
 
-  it('renders risk analytics title when isRiskAnalytics is true', () => {
+  it('renders Entity analytics title when isOverview is true', () => {
     render(
       <MemoryRouter>
-        <EntityAnalyticsPage isRiskAnalytics />
+        <EntityAnalyticsPage isOverview />
       </MemoryRouter>,
       { wrapper: TestProviders }
     );
-    expect(screen.getByText('Risk Analytics')).toBeInTheDocument();
+    expect(screen.getByText('Entity Analytics overview')).toBeInTheDocument();
   });
 
   it('renders loading spinner when sourcerer is loading', () => {
@@ -225,7 +225,7 @@ describe('EntityAnalyticsPage', () => {
     expect(screen.queryByTestId('entityAnalyticsRiskScores-user')).not.toBeInTheDocument();
   });
 
-  it('does not render anomalies section for risk analytics', async () => {
+  it('does not render anomalies section for entity analytics Overview page', async () => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
       indicesExist: false,
       loading: false,
@@ -234,7 +234,7 @@ describe('EntityAnalyticsPage', () => {
 
     render(
       <MemoryRouter>
-        <EntityAnalyticsPage isRiskAnalytics />
+        <EntityAnalyticsPage isOverview />
       </MemoryRouter>,
       { wrapper: TestProviders }
     );
