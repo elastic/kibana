@@ -43,10 +43,10 @@ import ReactDOM from 'react-dom';
 import useAsync from 'react-use/lib/useAsync';
 import { v4 as uuidv4 } from 'uuid';
 import {
+  VISUALIZE_QUERY_NAME,
   type VisualizeESQLFunctionArguments,
   type VisualizeQueryResponse,
 } from '../../common/functions/visualize_esql';
-import { VISUALIZE_QUERY_NAME } from '../../common';
 
 import { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
 
