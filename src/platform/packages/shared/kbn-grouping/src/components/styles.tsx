@@ -110,14 +110,3 @@ export const StyledContextMenu = euiStyled(EuiContextMenu)`
     border: none;
   }
 `;
-
-export const StyledEuiButtonEmpty = euiStyled(EuiButtonEmpty)`
-  font-weight: 'normal';
-
-  .euiButtonEmpty__text {
-    max-width: 300px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-`;
