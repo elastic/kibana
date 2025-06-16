@@ -285,7 +285,7 @@ export function ChangeDataView({
                 padding: 11px;
                 border-radius: ${euiTheme.border.radius.small} 0 0 ${euiTheme.border.radius.small};
                 background-color: ${euiTheme.colors.lightestShade};
-                border: ${euiTheme.border.thin};
+                border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain};
                 border-right: 0;
               `}
             >

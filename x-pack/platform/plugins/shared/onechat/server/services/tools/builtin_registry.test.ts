@@ -10,7 +10,6 @@ import type { RegisteredTool } from '@kbn/onechat-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { BuiltinToolRegistry, createBuiltinToolRegistry } from './builtin_registry';
-import { addBuiltinSystemMeta } from './utils/tool_conversion';
 
 describe('BuiltinToolRegistry', () => {
   let registry: BuiltinToolRegistry;
@@ -25,16 +24,13 @@ describe('BuiltinToolRegistry', () => {
     it('should register a tool', async () => {
       const mockTool: RegisteredTool = {
         id: 'test-tool',
-        name: 'Test Tool',
         description: 'A test tool',
         schema: z.object({}),
         handler: async () => 'test',
       };
 
       registry.register(mockTool);
-      await expect(registry.list({ request: mockRequest })).resolves.toEqual([
-        addBuiltinSystemMeta(mockTool),
-      ]);
+      await expect(registry.list({ request: mockRequest })).resolves.toEqual([mockTool]);
     });
   });
 
@@ -42,7 +38,6 @@ describe('BuiltinToolRegistry', () => {
     it('should return true when tool exists', async () => {
       const mockTool: RegisteredTool = {
         id: 'test-tool',
-        name: 'Test Tool',
         description: 'A test tool',
         schema: z.object({}),
         handler: async () => 'test',
@@ -56,7 +51,6 @@ describe('BuiltinToolRegistry', () => {
     it('should return false when tool does not exist', async () => {
       const mockTool: RegisteredTool = {
         id: 'test-tool',
-        name: 'Test Tool',
         description: 'A test tool',
         schema: z.object({}),
         handler: async () => 'test',
@@ -72,7 +66,6 @@ describe('BuiltinToolRegistry', () => {
     it('should return the tool when it exists', async () => {
       const mockTool: RegisteredTool = {
         id: 'test-tool',
-        name: 'Test Tool',
         description: 'A test tool',
         schema: z.object({}),
         handler: async () => 'test',
@@ -80,13 +73,12 @@ describe('BuiltinToolRegistry', () => {
 
       registry.register(mockTool);
       const tool = await registry.get({ toolId: 'test-tool', request: mockRequest });
-      expect(tool).toEqual(addBuiltinSystemMeta(mockTool));
+      expect(tool).toEqual(mockTool);
     });
 
     it('should throw an error when tool does not exist', async () => {
       const mockTool: RegisteredTool = {
         id: 'test-tool',
-        name: 'Test Tool',
         description: 'A test tool',
         schema: z.object({}),
         handler: async () => 'test',
@@ -103,7 +95,6 @@ describe('BuiltinToolRegistry', () => {
     it('should return all registered tools', async () => {
       const mockTool1: RegisteredTool = {
         id: 'test-tool-1',
-        name: 'Test Tool 1',
         description: 'A test tool',
         schema: z.object({}),
         handler: async () => 'test1',
@@ -111,7 +102,6 @@ describe('BuiltinToolRegistry', () => {
 
       const mockTool2: RegisteredTool = {
         id: 'test-tool-2',
-        name: 'Test Tool 2',
         description: 'Another test tool',
         schema: z.object({}),
         handler: async () => 'test2',
@@ -121,7 +111,7 @@ describe('BuiltinToolRegistry', () => {
       registry.register(mockTool2);
 
       const tools = await registry.list({ request: mockRequest });
-      expect(tools).toEqual([addBuiltinSystemMeta(mockTool1), addBuiltinSystemMeta(mockTool2)]);
+      expect(tools).toEqual([mockTool1, mockTool2]);
     });
 
     it('should return empty array when no tools are registered', async () => {

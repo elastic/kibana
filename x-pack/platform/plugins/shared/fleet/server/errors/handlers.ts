@@ -47,6 +47,7 @@ import {
   AgentlessPolicyExistsRequestError,
   PackageInvalidDeploymentMode,
   PackagePolicyContentPackageError,
+  CustomPackagePolicyNotAllowedForAgentlessError,
   OutputInvalidError,
   AgentlessAgentCreateOverProvisionnedError,
   FleetErrorWithStatusCode,
@@ -93,6 +94,9 @@ const getHTTPResponseCode = (error: FleetError): number => {
     return 400;
   }
   if (error instanceof PackagePolicyContentPackageError) {
+    return 400;
+  }
+  if (error instanceof CustomPackagePolicyNotAllowedForAgentlessError) {
     return 400;
   }
   // Unauthorized

@@ -8,8 +8,11 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/server';
+import type { EsqlServerPluginSetup } from './plugin';
 
 export const plugin = async (initContext: PluginInitializerContext) => {
   const { EsqlServerPlugin } = await import('./plugin');
   return new EsqlServerPlugin(initContext);
 };
+
+export type { EsqlServerPluginSetup as PluginSetup };

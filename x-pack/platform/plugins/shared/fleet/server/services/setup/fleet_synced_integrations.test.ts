@@ -17,9 +17,13 @@ jest.mock('../app_context', () => ({
     getExperimentalFeatures: jest.fn().mockReturnValue({ enableSyncIntegrationsOnRemote: true }),
     getLogger: jest.fn().mockReturnValue({
       error: jest.fn(),
+      debug: jest.fn(),
     }),
     getConfig: jest.fn().mockReturnValue({
       enableManagedLogsAndMetricsDataviews: true,
+    }),
+    getCloud: jest.fn().mockReturnValue({
+      isServerlessEnabled: false,
     }),
   },
 }));
@@ -145,32 +149,6 @@ describe('fleet_synced_integrations', () => {
   describe('with less than Enterprise license', () => {
     beforeAll(() => {
       jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
-    });
-
-    it('should not create index', async () => {
-      mockExists.mockResolvedValue(false);
-      jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
-
-      await createOrUpdateFleetSyncedIntegrationsIndex(esClientMock);
-
-      expect(esClientMock.indices.create).not.toHaveBeenCalled();
-    });
-
-    it('should not update index', async () => {
-      mockExists.mockResolvedValue(true);
-      mockGetMapping.mockResolvedValue({
-        'fleet-synced-integrations': {
-          mappings: {
-            _meta: {
-              version: '0.0',
-            },
-          },
-        },
-      });
-
-      await createOrUpdateFleetSyncedIntegrationsIndex(esClientMock);
-
-      expect(esClientMock.indices.putMapping).not.toHaveBeenCalled();
     });
 
     it('should not create index patterns for remote clusters', async () => {
