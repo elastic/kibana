@@ -14,9 +14,6 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('run', () => {
-    // TODO: Enable task manager in the test environment
-    // TODO: Upload some URLs to test against
-
     it('can run unused URLs cleanup', async () => {
       const response = await supertest.post('/internal/unused_urls_task/run');
 
