@@ -1006,9 +1006,7 @@
     },
     {
       "query": "row 1 year + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1071,9 +1069,7 @@
     },
     {
       "query": "row 1 years + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1136,9 +1132,7 @@
     },
     {
       "query": "row 1 quarter + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1201,9 +1195,7 @@
     },
     {
       "query": "row 1 quarters + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1266,9 +1258,7 @@
     },
     {
       "query": "row 1 month + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1331,9 +1321,7 @@
     },
     {
       "query": "row 1 months + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1396,9 +1384,7 @@
     },
     {
       "query": "row 1 week + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1461,9 +1447,7 @@
     },
     {
       "query": "row 1 weeks + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1526,9 +1510,7 @@
     },
     {
       "query": "row 1 day + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1591,9 +1573,7 @@
     },
     {
       "query": "row 1 days + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1656,9 +1636,7 @@
     },
     {
       "query": "row 1 hour + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1721,9 +1699,7 @@
     },
     {
       "query": "row 1 hours + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1786,9 +1762,7 @@
     },
     {
       "query": "row 1 minute + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1851,9 +1825,7 @@
     },
     {
       "query": "row 1 minutes + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1916,9 +1888,7 @@
     },
     {
       "query": "row 1 second + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1981,9 +1951,7 @@
     },
     {
       "query": "row 1 seconds + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -2046,9 +2014,7 @@
     },
     {
       "query": "row 1 millisecond + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -2111,9 +2077,7 @@
     },
     {
       "query": "row 1 milliseconds + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -2264,28 +2228,28 @@
     {
       "query": "from index | project ",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
+        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
     {
       "query": "from index | project textField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
+        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
     {
       "query": "from index | PROJECT textField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'PROJECT' expecting {'change_point', 'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
+        "SyntaxError: mismatched input 'PROJECT' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
     {
       "query": "from index | project missingField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
+        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
@@ -6884,9 +6848,7 @@
     },
     {
       "query": "from a_index | eval 1 year + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -6954,9 +6916,7 @@
     },
     {
       "query": "from a_index | eval 1 years + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7024,9 +6984,7 @@
     },
     {
       "query": "from a_index | eval 1 quarter + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7094,9 +7052,7 @@
     },
     {
       "query": "from a_index | eval 1 quarters + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7164,9 +7120,7 @@
     },
     {
       "query": "from a_index | eval 1 month + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7234,9 +7188,7 @@
     },
     {
       "query": "from a_index | eval 1 months + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7304,9 +7256,7 @@
     },
     {
       "query": "from a_index | eval 1 week + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7374,9 +7324,7 @@
     },
     {
       "query": "from a_index | eval 1 weeks + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7444,9 +7392,7 @@
     },
     {
       "query": "from a_index | eval 1 day + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7514,9 +7460,7 @@
     },
     {
       "query": "from a_index | eval 1 days + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7584,9 +7528,7 @@
     },
     {
       "query": "from a_index | eval 1 hour + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7654,9 +7596,7 @@
     },
     {
       "query": "from a_index | eval 1 hours + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7724,9 +7664,7 @@
     },
     {
       "query": "from a_index | eval 1 minute + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7794,9 +7732,7 @@
     },
     {
       "query": "from a_index | eval 1 minutes + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7864,9 +7800,7 @@
     },
     {
       "query": "from a_index | eval 1 second + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7934,9 +7868,7 @@
     },
     {
       "query": "from a_index | eval 1 seconds + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8004,9 +7936,7 @@
     },
     {
       "query": "from a_index | eval 1 millisecond + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8074,9 +8004,7 @@
     },
     {
       "query": "from a_index | eval 1 milliseconds + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8144,9 +8072,7 @@
     },
     {
       "query": "from a_index | eval 1 ms + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8214,9 +8140,7 @@
     },
     {
       "query": "from a_index | eval 1 s + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8284,9 +8208,7 @@
     },
     {
       "query": "from a_index | eval 1 m + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8354,9 +8276,7 @@
     },
     {
       "query": "from a_index | eval 1 h + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8424,9 +8344,7 @@
     },
     {
       "query": "from a_index | eval 1 d + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8494,9 +8412,7 @@
     },
     {
       "query": "from a_index | eval 1 w + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8564,9 +8480,7 @@
     },
     {
       "query": "from a_index | eval 1 mo + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8634,9 +8548,7 @@
     },
     {
       "query": "from a_index | eval 1 q + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8704,9 +8616,7 @@
     },
     {
       "query": "from a_index | eval 1 y + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8774,9 +8684,7 @@
     },
     {
       "query": "from a_index | eval 1 yr + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
