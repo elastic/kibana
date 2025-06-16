@@ -56,7 +56,7 @@ viewer:
         - '.asset-criticality.asset-criticality-*'
         - '.entities.v1.latest.security_*'
         - '.ml-anomalies-*'
-        - 'security_solution-cloud_security_posture.misconfiguration_latest'
+        - 'security_solution-*.misconfiguration_latest*'
       privileges:
         - read
   applications:
@@ -132,7 +132,7 @@ editor:
       allow_restricted_indices: false
     - names:
         - '.ml-anomalies-*'
-        - 'security_solution-cloud_security_posture.misconfiguration_latest'
+        - 'security_solution-*.misconfiguration_latest*'
       privileges:
         - read
   applications:
@@ -197,7 +197,7 @@ t1_analyst:
         - .asset-criticality.asset-criticality-*
         - .entities.v1.latest.security_*
         - '.ml-anomalies-*'
-        - 'security_solution-cloud_security_posture.misconfiguration_latest'
+        - 'security_solution-*.misconfiguration_latest*'
       privileges:
         - read
   applications:
@@ -256,7 +256,7 @@ t2_analyst:
         - read
     - names:
         - .asset-criticality.asset-criticality-*
-        - 'security_solution-cloud_security_posture.misconfiguration_latest'
+        - 'security_solution-*.misconfiguration_latest*'
       privileges:
         - read
         - write
@@ -321,7 +321,7 @@ t3_analyst:
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
         - '.ml-anomalies-*'
-        - 'security_solution-cloud_security_posture.misconfiguration_latest'
+        - 'security_solution-*.misconfiguration_latest*'
       privileges:
         - read
   applications:
@@ -396,7 +396,7 @@ threat_intelligence_analyst:
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
         - '.ml-anomalies-*'
-        - 'security_solution-cloud_security_posture.misconfiguration_latest'
+        - 'security_solution-*.misconfiguration_latest*'
       privileges:
         - read
   applications:
@@ -464,7 +464,7 @@ rule_author:
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
         - '.ml-anomalies-*'
-        - 'security_solution-cloud_security_posture.misconfiguration_latest'
+        - 'security_solution-*.misconfiguration_latest*'
       privileges:
         - read
   applications:
@@ -540,7 +540,7 @@ soc_manager:
         - risk-score.risk-score-*
         - .asset-criticality.asset-criticality-*
         - '.ml-anomalies-*'
-        - 'security_solution-cloud_security_posture.misconfiguration_latest'
+        - 'security_solution-*.misconfiguration_latest*'
       privileges:
         - read
   applications:
@@ -611,7 +611,7 @@ detections_admin:
         - .fleet-agents*
         - .fleet-actions*
         - '.ml-anomalies-*'
-        - 'security_solution-cloud_security_posture.misconfiguration_latest'
+        - 'security_solution-*.misconfiguration_latest*'
       privileges:
         - read
     - names:
@@ -680,7 +680,7 @@ platform_engineer:
         - write
     - names:
         - '.ml-anomalies-*'
-        - 'security_solution-cloud_security_posture.misconfiguration_latest'
+        - 'security_solution-*.misconfiguration_latest*'
       privileges:
         - read
   applications:
@@ -741,7 +741,7 @@ endpoint_operations_analyst:
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
         - '.ml-anomalies-*'
-        - 'security_solution-cloud_security_posture.misconfiguration_latest'
+        - 'security_solution-*.misconfiguration_latest*'
       privileges:
         - read
     - names:
@@ -820,7 +820,7 @@ endpoint_policy_manager:
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
         - '.ml-anomalies-*'
-        - 'security_solution-cloud_security_posture.misconfiguration_latest'
+        - 'security_solution-*.misconfiguration_latest*'
       privileges:
         - read
     - names:
