@@ -13,7 +13,7 @@ import { InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
 import { uniqBy } from 'lodash';
 import { findFinalWord, getFunctionDefinition } from '../../../shared/helpers';
 import { getNewUserDefinedColumnSuggestion, TRIGGER_SUGGESTION_COMMAND } from '../../factories';
-import { EDITOR_MARKER } from '../../../shared/constants';
+import { EDITOR_MARKER, ESQL_VARIABLES_PREFIX } from '../../../shared/constants';
 import { pipeCompleteItem } from '../../complete_items';
 import { CommandSuggestParams, Location } from '../../../definitions/types';
 
@@ -137,7 +137,11 @@ export async function suggest(
     case CompletionPosition.AFTER_PROMPT_OR_TARGET: {
       const lastWord = findFinalWord(innerText);
 
-      if (!lastWord.length && !columnExists(prompt.text)) {
+      if (
+        !lastWord.length &&
+        !columnExists(prompt.text) &&
+        !prompt.text.startsWith(ESQL_VARIABLES_PREFIX)
+      ) {
         return [assignCompletionItem];
       }
 

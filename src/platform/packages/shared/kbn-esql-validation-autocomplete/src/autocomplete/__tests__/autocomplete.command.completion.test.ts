@@ -59,6 +59,10 @@ describe('autocomplete.suggest', () => {
       await assertSuggestions(`FROM a | COMPLETION textField /`, ['WITH ']);
     });
 
+    it('suggests WITH after the user writes a param as prompt', async () => {
+      await assertSuggestions(`FROM a | COMPLETION ? /`, ['WITH ']);
+    });
+
     it('suggests WITH after the prompt', async () => {
       await assertSuggestions(`FROM a | COMPLETION "prompt" /`, ['WITH ']);
       await assertSuggestions(`FROM a | COMPLETION "prompt" WIT/`, ['WITH ']);
