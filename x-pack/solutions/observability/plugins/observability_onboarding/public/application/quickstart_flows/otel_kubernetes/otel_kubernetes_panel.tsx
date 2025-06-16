@@ -375,7 +375,7 @@ kubectl describe pod <myapp-pod-name> -n my-namespace`}
                     'xpack.observability_onboarding.otelKubernetesPanel.onceYourKubernetesInfrastructureLabel',
                     {
                       defaultMessage:
-                        'Analyse your Kubernetes cluster’s health and monitor your container workloads.',
+                        'Analyze your Kubernetes cluster’s health and monitor your container workloads.',
                     }
                   )}
                 </p>
