@@ -8,7 +8,7 @@
  */
 
 import { EsqlQuery } from '../../query';
-import { ESQLAstCompletionCommand, ESQLCommandOption } from '../../types';
+import { ESQLAstCompletionCommand, ESQLAstItem, ESQLCommandOption } from '../../types';
 
 describe('COMPLETION command', () => {
   describe('correctly formatted', () => {
@@ -38,13 +38,13 @@ describe('COMPLETION command', () => {
         const text = `FROM index | COMPLETION ? WITH inferenceId`;
         const query = EsqlQuery.fromSrc(text);
 
-        expect(query.ast.commands[1].args[0]).toMatchObject([
-          {
-            type: 'literal',
-            literalType: 'param',
-            paramType: 'unnamed',
-          },
-        ]);
+        const promptArg = query.ast.commands[1].args[0] as ESQLAstItem[];
+
+        expect(promptArg[0]).toMatchObject({
+          type: 'literal',
+          literalType: 'param',
+          paramType: 'unnamed',
+        });
       });
 
       it('parses the WITH command option as the second argument', () => {
@@ -173,6 +173,12 @@ describe('COMPLETION command', () => {
       expect(errors.length).toBe(1);
 
       expect(ast.commands).toHaveLength(2);
+
+      const completionCommand = ast.commands[1] as ESQLAstCompletionCommand;
+      expect(completionCommand.args[0]).toMatchObject({
+        name: 'prompt',
+        incomplete: true,
+      });
     });
 
     test('just the command keyword and a prompt', () => {
@@ -195,6 +201,29 @@ describe('COMPLETION command', () => {
         type: 'literal',
         literalType: 'keyword',
         value: '"prompt"',
+      });
+    });
+
+    test('just the command keyword and a param prompt', () => {
+      const text = `FROM index | COMPLETION ?`;
+      const { errors, ast } = EsqlQuery.fromSrc(text);
+      expect(errors.length).toBe(1);
+
+      expect(ast.commands).toHaveLength(2);
+
+      const completionCommand = ast.commands[1] as ESQLAstCompletionCommand;
+      expect(completionCommand.args).toHaveLength(2);
+
+      expect(completionCommand.args[1]).toMatchObject({
+        type: 'option',
+        name: 'with',
+        incomplete: true,
+      });
+
+      expect(completionCommand.prompt).toMatchObject({
+        type: 'literal',
+        literalType: 'param',
+        paramType: 'unnamed',
       });
     });
 
