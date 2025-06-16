@@ -114,44 +114,42 @@ export const runDeleteUnusedUrlsTask = async ({
 
   const savedObjectsRepository = coreStart.savedObjects.createInternalRepository();
 
+  let deletedCount = 0;
+
   let { unusedUrls, hasMore, namespace } = await fetchUnusedUrlsFromFirstNamespace({
     savedObjectsRepository,
     urlExpirationDuration,
     urlLimit,
   });
 
-  let deletedCount = unusedUrls.length || 0;
-
-  while (unusedUrls.length > 0) {
+  while (unusedUrls.length > 0 && deletedCount < urlLimit) {
     await deleteUnusedUrls({
       savedObjectsRepository,
       unusedUrls,
-      namespace,
       logger,
+      namespace,
     });
 
-    const shouldContinue = hasMore && deletedCount < urlLimit;
+    deletedCount += unusedUrls.length;
 
-    if (shouldContinue) {
-      const nextPageData = await fetchUnusedUrlsFromFirstNamespace({
+    if (hasMore && deletedCount < urlLimit) {
+      const nextPage = await fetchUnusedUrlsFromFirstNamespace({
         savedObjectsRepository,
         urlExpirationDuration,
-        urlLimit,
+        urlLimit: urlLimit - deletedCount,
       });
-      unusedUrls = nextPageData.unusedUrls;
-      hasMore = nextPageData.hasMore;
-      namespace = nextPageData.namespace;
-      deletedCount += unusedUrls.length;
+
+      unusedUrls = nextPage.unusedUrls;
+      hasMore = nextPage.hasMore;
+      namespace = nextPage.namespace;
     } else {
-      unusedUrls = [];
+      break;
     }
   }
 
   logger.debug('Unused URLs cleanup finished');
 
-  return {
-    deletedCount,
-  };
+  return { deletedCount };
 };
 
 export const scheduleUnusedUrlsCleanupTask = async ({
