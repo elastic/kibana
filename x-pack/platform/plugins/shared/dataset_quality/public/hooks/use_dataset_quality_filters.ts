@@ -18,7 +18,7 @@ import { QualityItem } from '../components/dataset_quality/filters/qualities_sel
 import { Item } from '../components/dataset_quality/filters/selector';
 
 export const useDatasetQualityFilters = () => {
-  const { service, isCompleteDatasetQualityAvailable } = useDatasetQualityContext();
+  const { service, isDatasetQualityAllSignalsAvailable } = useDatasetQualityContext();
 
   const isLoading = useSelector(
     service,
@@ -173,13 +173,15 @@ export const useDatasetQualityFilters = () => {
   );
 
   const typeItems: Item[] = useMemo(() => {
-    const validTypeItems = isCompleteDatasetQualityAvailable ? KNOWN_TYPES : [DEFAULT_DATASET_TYPE];
+    const validTypeItems = isDatasetQualityAllSignalsAvailable
+      ? KNOWN_TYPES
+      : [DEFAULT_DATASET_TYPE];
 
     return validTypeItems.map((type) => ({
       label: type,
       checked: selectedTypes.includes(type) ? 'on' : undefined,
     }));
-  }, [isCompleteDatasetQualityAvailable, selectedTypes]);
+  }, [isDatasetQualityAllSignalsAvailable, selectedTypes]);
 
   const onTypesChange = useCallback(
     (newTypeItems: Item[]) => {
@@ -219,6 +221,6 @@ export const useDatasetQualityFilters = () => {
     isLoading,
     selectedQuery,
     onQueryChange,
-    isCompleteDatasetQualityAvailable,
+    isDatasetQualityAllSignalsAvailable,
   };
 };

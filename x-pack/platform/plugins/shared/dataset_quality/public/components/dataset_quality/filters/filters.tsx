@@ -54,7 +54,7 @@ export default function Filters() {
     onTypesChange,
     selectedQuery,
     onQueryChange,
-    isCompleteDatasetQualityAvailable,
+    isDatasetQualityAllSignalsAvailable,
   } = useDatasetQualityFilters();
 
   const commonlyUsedRanges = useQuickTimeRanges();
@@ -70,7 +70,7 @@ export default function Filters() {
           integrations={integrations}
           onIntegrationsChange={onIntegrationsChange}
         />
-        {isCompleteDatasetQualityAvailable && (
+        {isDatasetQualityAllSignalsAvailable && (
           <Selector
             dataTestSubj="datasetQualityFilterType"
             label={typesLabel}

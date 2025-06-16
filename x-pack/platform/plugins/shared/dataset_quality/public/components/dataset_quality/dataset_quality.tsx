@@ -44,7 +44,7 @@ export const DatasetQuality = ({
     () => ({
       service: controller.service,
       telemetryClient,
-      isCompleteDatasetQualityAvailable: core.pricing.isFeatureAvailable(
+      isDatasetQualityAllSignalsAvailable: core.pricing.isFeatureAvailable(
         DATASET_QUALITY_ALL_SIGNALS_ID
       ),
     }),

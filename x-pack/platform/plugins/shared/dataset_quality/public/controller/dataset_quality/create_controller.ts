@@ -41,7 +41,7 @@ export const createDatasetQualityControllerFactory =
       initialContext,
       toasts: core.notifications.toasts,
       dataStreamStatsClient,
-      isCompleteDatasetQualityAvailable: core.pricing.isFeatureAvailable(
+      isDatasetQualityAllSignalsAvailable: core.pricing.isFeatureAvailable(
         DATASET_QUALITY_ALL_SIGNALS_ID
       ),
     });

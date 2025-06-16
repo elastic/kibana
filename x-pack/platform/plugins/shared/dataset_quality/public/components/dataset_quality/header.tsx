@@ -17,10 +17,10 @@ import { useDatasetQualityFilters } from '../../hooks/use_dataset_quality_filter
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function Header() {
-  const { isCompleteDatasetQualityAvailable } = useDatasetQualityFilters();
+  const { isDatasetQualityAllSignalsAvailable } = useDatasetQualityFilters();
   const validTypes = useMemo(
-    () => (isCompleteDatasetQualityAvailable ? KNOWN_TYPES : [DEFAULT_DATASET_TYPE]),
-    [isCompleteDatasetQualityAvailable]
+    () => (isDatasetQualityAllSignalsAvailable ? KNOWN_TYPES : [DEFAULT_DATASET_TYPE]),
+    [isDatasetQualityAllSignalsAvailable]
   );
 
   return (

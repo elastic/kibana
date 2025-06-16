@@ -486,14 +486,14 @@ export interface DatasetQualityControllerStateMachineDependencies {
   initialContext?: DatasetQualityControllerContext;
   toasts: IToasts;
   dataStreamStatsClient: IDataStreamsStatsClient;
-  isCompleteDatasetQualityAvailable: boolean;
+  isDatasetQualityAllSignalsAvailable: boolean;
 }
 
 export const createDatasetQualityControllerStateMachine = ({
   initialContext = DEFAULT_CONTEXT,
   toasts,
   dataStreamStatsClient,
-  isCompleteDatasetQualityAvailable,
+  isDatasetQualityAllSignalsAvailable,
 }: DatasetQualityControllerStateMachineDependencies) =>
   createPureDatasetQualityControllerStateMachine(initialContext).withConfig({
     actions: {
@@ -512,7 +512,7 @@ export const createDatasetQualityControllerStateMachine = ({
     },
     services: {
       loadDataStreamStats: (context, _event) => {
-        const validTypes = isCompleteDatasetQualityAvailable
+        const validTypes = isDatasetQualityAllSignalsAvailable
           ? context.filters.types
           : [DEFAULT_DATASET_TYPE];
         return dataStreamStatsClient.getDataStreamsStats({
