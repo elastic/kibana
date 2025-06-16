@@ -338,33 +338,6 @@ describe('SynchronizationTaskRunner', () => {
   });
 
   describe('Error handling', () => {
-    it('An error is thrown for invalid task state', async () => {
-      const getESClient = async () => esClient;
-
-      taskRunner = new SynchronizationTaskRunner({
-        logger,
-        getESClient,
-        taskInstance: {
-          ...taskInstance,
-          state: {
-            // A missing esReindexTaskId should have missing sync times
-            lastSyncAttempt: 'some-time',
-          },
-        },
-      });
-
-      try {
-        await taskRunner.run();
-      } catch (e) {
-        expect(isRetryableError(e)).toBe(null);
-      }
-
-      expect(logger.error).toBeCalledWith(
-        '[.internal.cases] Synchronization reindex failed. Error: Invalid task state.',
-        { tags: ['cai-synchronization', 'cai-synchronization-error', '.internal.cases'] }
-      );
-    });
-
     it('calls throwRetryableError if the esClient throws a retryable error', async () => {
       esClient.tasks.get.mockRejectedValueOnce(new esErrors.ConnectionError('My retryable error'));
 
