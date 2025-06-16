@@ -52,17 +52,32 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
     RecommendedQuery[]
   >([]);
 
-  const { queryForRecommendedQueries, timeFieldName } = useMemo(() => {
+  const { queryForRecommendedQueries, timeFieldName, patternAnalysisField } = useMemo(() => {
     if (adHocDataview && typeof adHocDataview !== 'string') {
+      const textFields = adHocDataview.fields?.getByType('string') ?? [];
+      let tempPatternAnalysisField;
+      if (textFields.length) {
+        const labels = new Set(textFields.map((field) => field.name));
+        tempPatternAnalysisField = labels.has('message')
+          ? 'message'
+          : labels.has('error.message')
+          ? 'error.message'
+          : labels.has('event.original')
+          ? 'event.original'
+          : undefined;
+      }
+
       return {
         queryForRecommendedQueries: `FROM ${adHocDataview.name}`,
         timeFieldName:
           adHocDataview.timeFieldName ?? adHocDataview.fields?.getByType('date')?.[0]?.name,
+        patternAnalysisField: tempPatternAnalysisField,
       };
     }
     return {
       queryForRecommendedQueries: '',
       timeFieldName: undefined,
+      patternAnalysisField: undefined,
     };
   }, [adHocDataview]);
 
@@ -130,11 +145,13 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
         }))
       );
     }
+
     // Handle the static recommended queries, no solutions specific
     if (queryForRecommendedQueries && timeFieldName) {
       const recommendedQueriesFromStaticTemplates = getRecommendedQueries({
         fromCommand: queryForRecommendedQueries,
         timeField: timeFieldName,
+        patternAnalysisField,
       });
 
       recommendedQueries.push(...recommendedQueriesFromStaticTemplates);
@@ -233,12 +250,13 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
     ];
     return panels as EuiContextMenuPanelDescriptor[];
   }, [
-    docLinks.links.query.queryESQL,
-    onESQLQuerySubmit,
+    solutionsRecommendedQueries,
     queryForRecommendedQueries,
     timeFieldName,
+    patternAnalysisField,
     toggleLanguageComponent,
-    solutionsRecommendedQueries, // This dependency is fine here, as it *uses* the state
+    docLinks.links.query.queryESQL,
+    onESQLQuerySubmit,
   ]);
 
   const esqlMenuPopoverStyles = css`
