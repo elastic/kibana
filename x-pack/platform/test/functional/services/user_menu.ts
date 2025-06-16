@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-export function UserMenuProvider({ getService }) {
+
+import { FtrProviderContext } from '../ftr_provider_context';
+
+export function UserMenuProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 

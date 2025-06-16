@@ -6,9 +6,13 @@
  */
 
 import { pageObjects as kibanaFunctionalPageObjects } from '@kbn/test-suites-src/functional/page_objects';
+import { RoleMappingsPageProvider } from './role_mappings_page';
+import { SecurityPageObject } from './security_page';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
 export const pageObjects = {
   ...kibanaFunctionalPageObjects,
+  rolaMapping: RoleMappingsPageProvider,
+  security: SecurityPageObject
 };
