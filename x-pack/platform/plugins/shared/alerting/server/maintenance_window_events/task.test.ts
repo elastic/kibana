@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import type { KueryNode } from '@kbn/es-query';
+import { fromKueryExpression, type KueryNode } from '@kbn/es-query';
 import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../types';
@@ -15,6 +15,7 @@ import {
   generateEvents,
   getStatusFilter,
   updateMaintenanceWindowsEvents,
+  createEventsGeneratorTaskRunner,
 } from './task';
 
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
@@ -172,119 +173,9 @@ const runningMaintenanceWindowMock1 = {
   references: [],
 };
 
-const statusFilter = {
-  arguments: [
-    {
-      arguments: [
-        {
-          isQuoted: false,
-          type: 'literal',
-          value: 'maintenance-window.attributes.events',
-        },
-        {
-          isQuoted: true,
-          type: 'literal',
-          value: 'now',
-        },
-      ],
-      function: 'is',
-      type: 'function',
-    },
-    {
-      arguments: [
-        {
-          arguments: [
-            {
-              arguments: [
-                {
-                  isQuoted: false,
-                  type: 'literal',
-                  value: 'maintenance-window.attributes.events',
-                },
-                {
-                  isQuoted: true,
-                  type: 'literal',
-                  value: 'now',
-                },
-              ],
-              function: 'is',
-              type: 'function',
-            },
-          ],
-          function: 'not',
-          type: 'function',
-        },
-        {
-          arguments: [
-            {
-              isQuoted: false,
-              type: 'literal',
-              value: 'maintenance-window.attributes.events',
-            },
-            'gt',
-            {
-              isQuoted: true,
-              type: 'literal',
-              value: 'now',
-            },
-          ],
-          function: 'range',
-          type: 'function',
-        },
-      ],
-      function: 'and',
-      type: 'function',
-    },
-    {
-      arguments: [
-        {
-          arguments: [
-            {
-              arguments: [
-                {
-                  isQuoted: false,
-                  type: 'literal',
-                  value: 'maintenance-window.attributes.events',
-                },
-                'gte',
-                {
-                  isQuoted: true,
-                  type: 'literal',
-                  value: 'now',
-                },
-              ],
-              function: 'range',
-              type: 'function',
-            },
-          ],
-          function: 'not',
-          type: 'function',
-        },
-        {
-          arguments: [
-            {
-              isQuoted: false,
-              type: 'literal',
-              value: 'maintenance-window.attributes.expirationDate',
-            },
-            'gt',
-            {
-              isQuoted: true,
-              type: 'literal',
-              value: 'now',
-            },
-          ],
-          function: 'range',
-          type: 'function',
-        },
-      ],
-      function: 'and',
-      type: 'function',
-    },
-  ],
-  function: 'or',
-  type: 'function',
-};
+const statusFilter: KueryNode = fromKueryExpression(
+  `maintenance-window.attributes.events is now or (not maintenance-window.attributes.events is now and maintenance-window.attributes.events range gt now) or (not maintenance-window.attributes.events range gte now and maintenance-window.attributes.expirationDate range gt now)`
+);
 
 const mockCreatePointInTimeFinderAsInternalUser = (
   response = {
@@ -296,7 +187,7 @@ const mockCreatePointInTimeFinderAsInternalUser = (
     ],
   } as unknown
 ) => {
-  internalSavedObjectsRepository.createPointInTimeFinder = jest.fn().mockResolvedValueOnce({
+  internalSavedObjectsRepository.createPointInTimeFinder = jest.fn().mockReturnValueOnce({
     close: jest.fn(),
     find: function* asyncGenerator() {
       yield response;
@@ -314,20 +205,135 @@ describe('Maintenance window events generator task', () => {
 
   afterEach(() => {
     jest.clearAllTimers();
+    jest.runOnlyPendingTimers();
     jest.useRealTimers();
   });
 
   describe('getStatusFilter', () => {
     test('should build status filter', () => {
-      expect(getStatusFilter()).toEqual(statusFilter);
+      expect(getStatusFilter()).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Array [
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "maintenance-window.attributes.events",
+                },
+                Object {
+                  "isQuoted": true,
+                  "type": "literal",
+                  "value": "now",
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "arguments": Array [
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "maintenance-window.attributes.events",
+                        },
+                        Object {
+                          "isQuoted": true,
+                          "type": "literal",
+                          "value": "now",
+                        },
+                      ],
+                      "function": "is",
+                      "type": "function",
+                    },
+                  ],
+                  "function": "not",
+                  "type": "function",
+                },
+                Object {
+                  "arguments": Array [
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "maintenance-window.attributes.events",
+                    },
+                    "gt",
+                    Object {
+                      "isQuoted": true,
+                      "type": "literal",
+                      "value": "now",
+                    },
+                  ],
+                  "function": "range",
+                  "type": "function",
+                },
+              ],
+              "function": "and",
+              "type": "function",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "arguments": Array [
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "maintenance-window.attributes.events",
+                        },
+                        "gte",
+                        Object {
+                          "isQuoted": true,
+                          "type": "literal",
+                          "value": "now",
+                        },
+                      ],
+                      "function": "range",
+                      "type": "function",
+                    },
+                  ],
+                  "function": "not",
+                  "type": "function",
+                },
+                Object {
+                  "arguments": Array [
+                    Object {
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "maintenance-window.attributes.expirationDate",
+                    },
+                    "gt",
+                    Object {
+                      "isQuoted": true,
+                      "type": "literal",
+                      "value": "now",
+                    },
+                  ],
+                  "function": "range",
+                  "type": "function",
+                },
+              ],
+              "function": "and",
+              "type": "function",
+            },
+          ],
+          "function": "or",
+          "type": "function",
+        }
+      `);
     });
   });
 
   describe('getSOFinder', () => {
-    it('should return finder', async () => {
+    it('should return finder', () => {
       mockCreatePointInTimeFinderAsInternalUser();
 
-      const result = await getSOFinder({
+      const result = getSOFinder({
         savedObjectsClient: internalSavedObjectsRepository,
         logger,
         filter: statusFilter as KueryNode,
@@ -528,10 +534,14 @@ describe('Maintenance window events generator task', () => {
       mockCreatePointInTimeFinderAsInternalUser({
         saved_objects: [],
       });
+
       const total = await updateMaintenanceWindowsEvents({
         logger,
         savedObjectsClient: internalSavedObjectsRepository,
-        filter: statusFilter as KueryNode,
+        soFinder: internalSavedObjectsRepository.createPointInTimeFinder({
+          type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+          filter: statusFilter as KueryNode,
+        }),
         startRangeDate: '2025-04-23T09:00:00.000Z',
       });
 
@@ -573,7 +583,10 @@ describe('Maintenance window events generator task', () => {
         ],
       });
       const total = await updateMaintenanceWindowsEvents({
-        filter: statusFilter as KueryNode,
+        soFinder: internalSavedObjectsRepository.createPointInTimeFinder({
+          type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+          filter: statusFilter as KueryNode,
+        }),
         startRangeDate: '2025-04-23T09:00:00.000Z',
         logger,
         savedObjectsClient: internalSavedObjectsRepository,
@@ -697,7 +710,10 @@ describe('Maintenance window events generator task', () => {
       });
 
       const total = await updateMaintenanceWindowsEvents({
-        filter: statusFilter as KueryNode,
+        soFinder: internalSavedObjectsRepository.createPointInTimeFinder({
+          type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+          filter: statusFilter as KueryNode,
+        }),
         startRangeDate: '2025-04-23T09:00:00.000Z',
         logger,
         savedObjectsClient: internalSavedObjectsRepository,
@@ -743,10 +759,13 @@ describe('Maintenance window events generator task', () => {
       );
 
       const total = await updateMaintenanceWindowsEvents({
-        filter: statusFilter as KueryNode,
         startRangeDate: '2025-05-23T09:00:00.000Z',
         logger,
         savedObjectsClient: internalSavedObjectsRepository,
+        soFinder: internalSavedObjectsRepository.createPointInTimeFinder({
+          type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+          filter: statusFilter as KueryNode,
+        }),
       });
 
       expect(logger.error).toHaveBeenCalledWith(
@@ -754,6 +773,67 @@ describe('Maintenance window events generator task', () => {
       );
       expect(total).toEqual(0);
       expect(logger.debug).toHaveBeenCalledWith(`Total updated maintenance windows "0"`);
+    });
+
+    test('logs error when bulkUpdate returns any errored saved object', async () => {
+      mockCreatePointInTimeFinderAsInternalUser();
+
+      internalSavedObjectsRepository.bulkUpdate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: '3',
+            type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+            attributes: {},
+            references: [],
+          },
+          {
+            type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+            id: '4',
+            error: {
+              error: 'NotFound',
+              message: 'NotFound',
+              statusCode: 404,
+            },
+            references: [],
+            attributes: {},
+          },
+        ],
+      });
+
+      const total = await updateMaintenanceWindowsEvents({
+        startRangeDate: '2025-05-23T09:00:00.000Z',
+        logger,
+        savedObjectsClient: internalSavedObjectsRepository,
+        soFinder: internalSavedObjectsRepository.createPointInTimeFinder({
+          type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+          filter: statusFilter as KueryNode,
+        }),
+      });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'MW event generator: Failed to update maintenance window "4". Error: NotFound'
+      );
+
+      expect(total).toEqual(1);
+    });
+  });
+
+  describe('createEventsGeneratorTaskRunner', () => {
+    it('should log when the task is cancelled', async () => {
+      const startDependencies = [
+        {
+          savedObjectsRepositoryMock: internalSavedObjectsRepository,
+        },
+      ];
+      const getStartServices = jest.fn().mockResolvedValue(startDependencies);
+      const mwTask = createEventsGeneratorTaskRunner(logger, getStartServices)();
+
+      await mwTask.run();
+      await mwTask.cancel();
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Cancelling maintenance windows events generator task - execution error due to timeout.'
+      );
     });
   });
 });

@@ -79,9 +79,11 @@ export function createEventsGeneratorTaskRunner(
   coreStartServices: StartServicesAccessor<AlertingPluginsStart, unknown>
 ) {
   return () => {
+    let cancelled = false;
+    let soFinder: ISavedObjectsPointInTimeFinder<MaintenanceWindowAttributes, unknown> | null;
+
     return {
       async run() {
-        let totalMaintenanceWindowsWithGeneratedEvents = 0;
         try {
           const [{ savedObjects }] = await coreStartServices();
 
@@ -108,11 +110,17 @@ export function createEventsGeneratorTaskRunner(
 
           const filter = nodeBuilder.and([startRangeFilter, endRangeFilter, statusFilter]);
 
-          totalMaintenanceWindowsWithGeneratedEvents = await updateMaintenanceWindowsEvents({
+          soFinder = getSOFinder({
+            savedObjectsClient,
+            logger,
             filter,
+          });
+
+          const totalMaintenanceWindowsWithGeneratedEvents = await updateMaintenanceWindowsEvents({
             savedObjectsClient,
             logger,
             startRangeDate,
+            soFinder,
           });
 
           logger.debug(
@@ -123,9 +131,18 @@ export function createEventsGeneratorTaskRunner(
         }
       },
       async cancel() {
+        if (cancelled) {
+          return;
+        }
+
         logger.debug(
           `Cancelling maintenance windows events generator task - execution error due to timeout.`
         );
+
+        cancelled = true;
+
+        await soFinder?.close();
+
         return;
       },
     };
@@ -148,23 +165,19 @@ export function getStatusFilter() {
 }
 
 export const updateMaintenanceWindowsEvents = async ({
-  filter,
+  soFinder,
   savedObjectsClient,
   logger,
   startRangeDate,
 }: {
   logger: Logger;
   savedObjectsClient: ISavedObjectsRepository;
-  filter: KueryNode;
+  soFinder: ISavedObjectsPointInTimeFinder<MaintenanceWindowAttributes, unknown> | null;
   startRangeDate: string;
 }) => {
   let totalUpdatedMaintenanceWindows = 0;
   let mwsWithNewEvents = [];
-  const soFinder = await getSOFinder({
-    savedObjectsClient,
-    logger,
-    filter,
-  });
+  let mwSOWithErrors = 0;
 
   if (soFinder) {
     for await (const findResults of soFinder.find()) {
@@ -192,8 +205,17 @@ export const updateMaintenanceWindowsEvents = async ({
             bulkUpdateReq
           );
 
+          for (const savedObject of result.saved_objects) {
+            if (savedObject.error) {
+              logger.error(
+                `MW event generator: Failed to update maintenance window "${savedObject.id}". Error: ${savedObject.error.message}`
+              );
+              mwSOWithErrors++;
+            }
+          }
+
           totalUpdatedMaintenanceWindows =
-            totalUpdatedMaintenanceWindows + result.saved_objects.length;
+            totalUpdatedMaintenanceWindows + (result.saved_objects.length - mwSOWithErrors);
         }
       } catch (e) {
         logger.error(
@@ -210,7 +232,7 @@ export const updateMaintenanceWindowsEvents = async ({
   return totalUpdatedMaintenanceWindows;
 };
 
-export async function getSOFinder({
+export function getSOFinder({
   savedObjectsClient,
   logger,
   filter,
@@ -218,7 +240,7 @@ export async function getSOFinder({
   logger: Logger;
   savedObjectsClient: ISavedObjectsRepository;
   filter: KueryNode;
-}): Promise<ISavedObjectsPointInTimeFinder<MaintenanceWindowAttributes, unknown> | null> {
+}): ISavedObjectsPointInTimeFinder<MaintenanceWindowAttributes, unknown> | null {
   try {
     return savedObjectsClient.createPointInTimeFinder<MaintenanceWindowAttributes>({
       type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,

@@ -57,7 +57,7 @@ export default function eventsGenerationTaskTests({ getService }: FtrProviderCon
     const createAndUpdateTestMaintenanceWindows = async (): Promise<string[]> => {
       const maintenanceWindowIds: string[] = [];
 
-      // 1. Recurring which ends after a year
+      // Recurring which ends after a year
       const recurring1 = await createMaintenanceWindow({
         title: 'Test recurring 1',
         enabled: false,
@@ -81,7 +81,7 @@ export default function eventsGenerationTaskTests({ getService }: FtrProviderCon
 
       maintenanceWindowIds.push(recurring1);
 
-      // 2. Recurring which ends after 10 days
+      // Recurring which ends after 10 days
       const recurring2 = await createMaintenanceWindow({
         title: 'Test recurring 2',
         enabled: false,
@@ -106,6 +106,7 @@ export default function eventsGenerationTaskTests({ getService }: FtrProviderCon
 
       maintenanceWindowIds.push(recurring2);
 
+      // non recurring
       const nonRecurring = await createMaintenanceWindow({
         title: 'Test non recurring',
         schedule: {
@@ -124,6 +125,7 @@ export default function eventsGenerationTaskTests({ getService }: FtrProviderCon
 
       maintenanceWindowIds.push(nonRecurring);
 
+      // archived
       const archived = await createMaintenanceWindow(
         {
           title: 'Test archived',
@@ -151,6 +153,7 @@ export default function eventsGenerationTaskTests({ getService }: FtrProviderCon
 
       maintenanceWindowIds.push(archived);
 
+      // running
       const running = await createMaintenanceWindow({
         title: 'Test running',
         enabled: false,
@@ -167,7 +170,7 @@ export default function eventsGenerationTaskTests({ getService }: FtrProviderCon
         },
       });
 
-      // should be updated as expiration date is more than 1 week away
+      // should not be updated as expiration date is more than 1 week away
       await updateMaintenanceWindowSO({
         id: running,
         expirationDate: moment().utc().add(10, 'days').toISOString(),
@@ -194,15 +197,12 @@ export default function eventsGenerationTaskTests({ getService }: FtrProviderCon
       return res.body.id;
     };
 
-    // perform an update to an maintenance window doc
     async function updateMaintenanceWindowSO({
       id,
       expirationDate,
-    }: //    events,
-    {
+    }: {
       id: string;
       expirationDate: string;
-      //  events: { gte: string; lte: string }[];
     }) {
       await es.update({
         index: ALERTING_CASES_SAVED_OBJECT_INDEX,
@@ -220,6 +220,7 @@ export default function eventsGenerationTaskTests({ getService }: FtrProviderCon
         .expect(200);
     }
 
+    // get maintenance windows which have expiration date after 1 year from today
     async function getUpdatedMaintenanceWindows() {
       const result = await es.search({
         index: ALERTING_CASES_SAVED_OBJECT_INDEX,
