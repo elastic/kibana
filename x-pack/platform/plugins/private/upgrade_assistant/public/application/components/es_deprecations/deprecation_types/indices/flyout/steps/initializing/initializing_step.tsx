@@ -50,7 +50,7 @@ export const InitializingFlyoutStep: React.FunctionComponent<InitializingFlyoutS
               ) : (
                 <FormattedMessage
                   id="xpack.upgradeAssistant.esDeprecations.indices.flyout.initializingStep.loadingIndexInfo"
-                  defaultMessage="Loading Index info"
+                  defaultMessage="Loading index info"
                 />
               )}
             </EuiTitle>

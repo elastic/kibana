@@ -20,40 +20,43 @@ interface Props {
 }
 export const NodesLowSpaceCallOut: React.FunctionComponent<Props> = ({ nodes }) => {
   return (
-    <EuiCallOut
-      color="warning"
-      iconType="warning"
-      data-test-subj="lowDiskSpaceCallout"
-      title={
-        <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.lowDiskSpaceCalloutTitle"
-          defaultMessage="Nodes with low disk space"
-        />
-      }
-    >
-      <>
-        <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.lowDiskSpaceCalloutDescription"
-          defaultMessage="Disk usage has exceeded the low watermark, which may prevent migration. The following nodes are impacted:"
-        />
+    <>
+      <EuiCallOut
+        color="warning"
+        iconType="warning"
+        data-test-subj="lowDiskSpaceCallout"
+        title={
+          <FormattedMessage
+            id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.lowDiskSpaceCalloutTitle"
+            defaultMessage="Nodes with low disk space"
+          />
+        }
+      >
+        <>
+          <FormattedMessage
+            id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.lowDiskSpaceCalloutDescription"
+            defaultMessage="Disk usage has exceeded the low watermark, which may prevent migration. The following nodes are impacted:"
+          />
 
-        <EuiSpacer size="s" />
+          <EuiSpacer size="s" />
 
-        <ul>
-          {nodes.map(({ nodeName, available, nodeId }) => (
-            <li key={nodeId} data-test-subj="impactedNodeListItem">
-              <FormattedMessage
-                id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.lowDiskSpaceUsedText"
-                defaultMessage="{nodeName} ({available} available)"
-                values={{
-                  nodeName,
-                  available,
-                }}
-              />
-            </li>
-          ))}
-        </ul>
-      </>
-    </EuiCallOut>
+          <ul>
+            {nodes.map(({ nodeName, available, nodeId }) => (
+              <li key={nodeId} data-test-subj="impactedNodeListItem">
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.lowDiskSpaceUsedText"
+                  defaultMessage="{nodeName} ({available} available)"
+                  values={{
+                    nodeName,
+                    available,
+                  }}
+                />
+              </li>
+            ))}
+          </ul>
+        </>
+      </EuiCallOut>
+      <EuiSpacer size="m" />
+    </>
   );
 };

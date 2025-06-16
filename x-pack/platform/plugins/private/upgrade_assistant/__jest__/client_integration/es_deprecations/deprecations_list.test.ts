@@ -607,7 +607,11 @@ describe('ES deprecations table', () => {
       it('it only displays unfreeze button if unfreezing in progress', async () => {
         const { find, exists, actions } = testBed;
 
-        await actions.table.clickDeprecationRowAt('unfreeze', 0, 'unfreeze');
+        await actions.table.clickDeprecationRowAt({
+          deprecationType: 'unfreeze',
+          index: 0,
+          action: 'unfreeze',
+        });
 
         expect(find('reindexTableCell-actions').length).toBe(1);
 
@@ -708,7 +712,11 @@ describe('ES deprecations table', () => {
       });
       it('it only displays readonly button if readonly in progress', async () => {
         const { exists, actions } = testBed;
-        await actions.table.clickDeprecationRowAt('reindex', 0, 'readonly');
+        await actions.table.clickDeprecationRowAt({
+          deprecationType: 'reindex',
+          index: 0,
+          action: 'readonly',
+        });
         await actions.reindexDeprecationFlyout.clickReadOnlyButton();
 
         expect(exists('deprecation-reindex-readonly')).toBe(true);

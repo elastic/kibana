@@ -39,7 +39,7 @@ const createActions = (testBed: TestBed) => {
 
       component.update();
     },
-    clickDeprecationRowAt: async (
+    clickDeprecationRowAt: async (config: {
       deprecationType:
         | 'mlSnapshot'
         | 'indexSetting'
@@ -47,10 +47,11 @@ const createActions = (testBed: TestBed) => {
         | 'default'
         | 'clusterSetting'
         | 'dataStream'
-        | 'unfreeze',
-      index: number,
-      action?: 'reindex' | 'readonly' | 'unfreeze'
-    ) => {
+        | 'unfreeze';
+      index: number;
+      action?: 'reindex' | 'readonly' | 'unfreeze';
+    }) => {
+      const { deprecationType, index, action } = config;
       await act(async () => {
         find(`deprecation-${deprecationType}${action ? `-${action}` : ''}`)
           .at(index)

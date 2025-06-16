@@ -109,7 +109,11 @@ describe('Data streams deprecation flyout', () => {
 
     const { actions, find } = testBed;
 
-    await actions.table.clickDeprecationRowAt('dataStream', 0, 'reindex');
+    await actions.table.clickDeprecationRowAt({
+      deprecationType: 'dataStream',
+      index: 0,
+      action: 'reindex',
+    });
 
     expect(find('lowDiskSpaceCallout').text()).toContain('Nodes with low disk space');
     expect(find('impactedNodeListItem').length).toEqual(1);
@@ -140,7 +144,11 @@ describe('Data streams deprecation flyout', () => {
       const dataStreamDeprecation = esDeprecationsMockResponse.migrationsDeprecations[6];
       const { actions, find, exists } = testBed;
 
-      await actions.table.clickDeprecationRowAt('dataStream', 1, 'reindex');
+      await actions.table.clickDeprecationRowAt({
+        deprecationType: 'dataStream',
+        index: 1,
+        action: 'reindex',
+      });
 
       expect(exists('reindexDataStreamDetails')).toBe(true);
       expect(find('reindexDataStreamDetails.flyoutTitle').text()).toBe(
@@ -225,7 +233,11 @@ describe('Data streams deprecation flyout', () => {
         testBed.component.update();
         const { actions, find, exists } = testBed;
 
-        await actions.table.clickDeprecationRowAt('dataStream', 1, 'reindex');
+        await actions.table.clickDeprecationRowAt({
+          deprecationType: 'dataStream',
+          index: 1,
+          action: 'reindex',
+        });
 
         expect(exists('dataStreamMigrationChecklistFlyout')).toBe(true);
         expect(find('dataStreamMigrationChecklistFlyout').text()).toContain(
@@ -276,7 +288,11 @@ describe('Data streams deprecation flyout', () => {
         testBed.component.update();
         const { actions, find, exists } = testBed;
 
-        await actions.table.clickDeprecationRowAt('dataStream', 1, 'reindex');
+        await actions.table.clickDeprecationRowAt({
+          deprecationType: 'dataStream',
+          index: 1,
+          action: 'reindex',
+        });
 
         expect(exists('dataStreamMigrationChecklistFlyout')).toBe(true);
         expect(find('dataStreamMigrationChecklistFlyout').text()).toContain(
@@ -326,7 +342,11 @@ describe('Data streams deprecation flyout', () => {
         testBed.component.update();
         const { actions, find, exists } = testBed;
 
-        await actions.table.clickDeprecationRowAt('dataStream', 1, 'reindex');
+        await actions.table.clickDeprecationRowAt({
+          deprecationType: 'dataStream',
+          index: 1,
+          action: 'reindex',
+        });
 
         expect(exists('dataStreamMigrationChecklistFlyout')).toBe(true);
 
@@ -377,7 +397,11 @@ describe('Data streams deprecation flyout', () => {
         testBed.component.update();
         const { actions, find, exists } = testBed;
 
-        await actions.table.clickDeprecationRowAt('dataStream', 1, 'reindex');
+        await actions.table.clickDeprecationRowAt({
+          deprecationType: 'dataStream',
+          index: 1,
+          action: 'reindex',
+        });
 
         expect(exists('dataStreamMigrationChecklistFlyout')).toBe(true);
 
@@ -416,7 +440,11 @@ describe('Data streams deprecation flyout', () => {
           );
           const { actions, find, exists } = testBed;
 
-          await actions.table.clickDeprecationRowAt('dataStream', 1, 'reindex');
+          await actions.table.clickDeprecationRowAt({
+            deprecationType: 'dataStream',
+            index: 1,
+            action: 'reindex',
+          });
 
           expect(exists('dataStreamMigrationFailedCallout')).toBe(true);
           expect(find('dataStreamMigrationFailedCallout').text()).toBe('Reindexing error');
@@ -450,7 +478,11 @@ describe('Data streams deprecation flyout', () => {
     it('renders a flyout with data stream confirm step for read-only', async () => {
       const { actions, find, exists } = testBed;
 
-      await actions.table.clickDeprecationRowAt('dataStream', 1, 'readonly');
+      await actions.table.clickDeprecationRowAt({
+        deprecationType: 'dataStream',
+        index: 1,
+        action: 'readonly',
+      });
 
       expect(exists('readOnlyDsWarningCallout')).toBe(true);
       expect(find('readOnlyDsWarningCallout').text()).toContain(
@@ -504,7 +536,11 @@ describe('Data streams deprecation flyout', () => {
         testBed.component.update();
         const { actions, find, exists } = testBed;
 
-        await actions.table.clickDeprecationRowAt('dataStream', 1, 'readonly');
+        await actions.table.clickDeprecationRowAt({
+          deprecationType: 'dataStream',
+          index: 1,
+          action: 'readonly',
+        });
 
         expect(exists('dataStreamMigrationChecklistFlyout')).toBe(true);
         expect(find('dataStreamMigrationChecklistFlyout').text()).toContain(
@@ -555,7 +591,11 @@ describe('Data streams deprecation flyout', () => {
         testBed.component.update();
         const { actions, find, exists } = testBed;
 
-        await actions.table.clickDeprecationRowAt('dataStream', 1, 'readonly');
+        await actions.table.clickDeprecationRowAt({
+          deprecationType: 'dataStream',
+          index: 1,
+          action: 'readonly',
+        });
 
         expect(exists('dataStreamMigrationChecklistFlyout')).toBe(true);
         expect(find('dataStreamMigrationChecklistFlyout').text()).toContain(
@@ -604,7 +644,11 @@ describe('Data streams deprecation flyout', () => {
         testBed.component.update();
         const { actions, find, exists } = testBed;
 
-        await actions.table.clickDeprecationRowAt('dataStream', 1, 'readonly');
+        await actions.table.clickDeprecationRowAt({
+          deprecationType: 'dataStream',
+          index: 1,
+          action: 'readonly',
+        });
 
         expect(exists('dataStreamMigrationChecklistFlyout')).toBe(true);
         expect(find('dataStreamMigrationChecklistFlyout').text()).toContain(
@@ -653,7 +697,11 @@ describe('Data streams deprecation flyout', () => {
         testBed.component.update();
         const { actions, find, exists } = testBed;
 
-        await actions.table.clickDeprecationRowAt('dataStream', 1, 'readonly');
+        await actions.table.clickDeprecationRowAt({
+          deprecationType: 'dataStream',
+          index: 1,
+          action: 'readonly',
+        });
 
         expect(exists('dataStreamMigrationChecklistFlyout')).toBe(true);
 
@@ -686,7 +734,11 @@ describe('Data streams deprecation flyout', () => {
 
     const { actions, exists, find } = testBed;
 
-    await actions.table.clickDeprecationRowAt('dataStream', 0, 'reindex');
+    await actions.table.clickDeprecationRowAt({
+      deprecationType: 'dataStream',
+      index: 0,
+      action: 'reindex',
+    });
 
     expect(exists('fetchFailedCallout')).toBe(true);
     expect(find('fetchFailedCallout').text()).toBe('Migration status not available');

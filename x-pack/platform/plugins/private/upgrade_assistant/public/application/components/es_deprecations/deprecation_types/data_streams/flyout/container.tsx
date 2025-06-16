@@ -99,6 +99,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
   }, [loadDataStreamMetadata, switchFlyoutStep, flyoutStep]);
   useMemo(() => switchFlyoutStep(), [switchFlyoutStep]);
 
+  // Temporary useEffect. With the upcoming changes this won't be needed anymore because the migration actions will have different flows.
   useEffect(() => {
     if (selectedResolutionType && status === DataStreamMigrationStatus.notStarted) {
       initMigration(selectedResolutionType);
