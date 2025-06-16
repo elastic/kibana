@@ -320,13 +320,21 @@ describe('RuleMigrationsTaskClient', () => {
       expect(stats.status).toEqual(SiemMigrationTaskStatus.INTERRUPTED);
     });
 
-    it('should include last_error if one exists', async () => {
-      const error = new Error('Test error');
-      // @ts-expect-error private property
-      RuleMigrationsTaskClient.migrationsLastError.set(migrationId, error);
+    it('should include error if one exists', async () => {
+      const errorMessage = 'Test error';
       data.rules.getStats.mockResolvedValue({
+        id: 'migration-1',
         rules: { total: 10, pending: 2, completed: 3, failed: 2 },
       } as RuleMigrationDataStats);
+
+      data.migrations.get.mockResolvedValue({
+        id: 'migration-1',
+        created_at: new Date().toISOString(),
+        created_by: 'test-user',
+        last_execution: {
+          error: errorMessage,
+        },
+      });
 
       data.migrations.get.mockResolvedValue({
         id: migrationId,
@@ -343,7 +351,7 @@ describe('RuleMigrationsTaskClient', () => {
         dependencies
       );
       const stats = await client.getStats(migrationId);
-      expect(stats.last_error).toEqual('Test error');
+      expect(stats.last_execution?.error).toEqual('Test error');
     });
   });
 

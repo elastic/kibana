@@ -46,7 +46,7 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
   );
 
   const migrationPanelDescription = useMemo(() => {
-    if (migrationStats.last_error) {
+    if (migrationStats.last_execution?.error) {
       return i18n.RULE_MIGRATION_ERROR_DESCRIPTION(migrationStats.rules.total);
     }
 
@@ -55,7 +55,7 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
     }
 
     return i18n.RULE_MIGRATION_READY_DESCRIPTION(migrationStats.rules.total);
-  }, [migrationStats.last_error, migrationStats.rules.total, isAborted]);
+  }, [migrationStats.last_execution?.error, migrationStats.rules.total, isAborted]);
 
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize="m">
@@ -100,10 +100,10 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      {migrationStats.last_error && (
+      {migrationStats.last_execution?.error && (
         <>
           <EuiSpacer size="m" />
-          <RuleMigrationsLastError message={migrationStats.last_error} />
+          <RuleMigrationsLastError message={migrationStats.last_execution.error} />
         </>
       )}
     </EuiPanel>

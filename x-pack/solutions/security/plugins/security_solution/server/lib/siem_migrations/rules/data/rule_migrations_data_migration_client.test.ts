@@ -209,6 +209,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
             error: null,
             finished_at: null,
             connector_id: connectorId,
+            skip_prebuilt_rules_matching: false,
           },
         },
         retry_on_conflict: 1,

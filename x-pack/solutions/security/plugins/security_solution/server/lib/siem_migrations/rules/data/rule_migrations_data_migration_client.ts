@@ -96,13 +96,22 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
   /**
    * Saves a migration as started, updating the last execution parameters with the current timestamp.
    */
-  async saveAsStarted({ id, connectorId }: { id: string; connectorId: string }): Promise<void> {
+  async saveAsStarted({
+    id,
+    connectorId,
+    skipPrebuiltRulesMatching = false,
+  }: {
+    id: string;
+    connectorId: string;
+    skipPrebuiltRulesMatching?: boolean;
+  }): Promise<void> {
     await this.updateLastExecution(id, {
       started_at: new Date().toISOString(),
       connector_id: connectorId,
       is_stopped: false,
       error: null,
       finished_at: null,
+      skip_prebuilt_rules_matching: skipPrebuiltRulesMatching,
     });
   }
 
