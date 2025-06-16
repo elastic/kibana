@@ -201,11 +201,7 @@ export class ObservabilityAIAssistantClient {
     kibanaPublicUrl?: string;
     userInstructions?: Instruction[];
     simulateFunctionCalling?: boolean;
-    disableFunctions?:
-      | boolean
-      | {
-          except: string[];
-        };
+    disableFunctions?: boolean;
   }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
     return withInferenceSpan('run_tools', () => {
       const isConversationUpdate = persist && !!predefinedConversationId;
@@ -252,7 +248,9 @@ export class ObservabilityAIAssistantClient {
             applicationInstructions: functionClient.getInstructions(),
             kbUserInstructions,
             apiUserInstructions,
-            availableFunctionNames: functionClient.getFunctions().map((fn) => fn.definition.name),
+            availableFunctionNames: disableFunctions
+              ? []
+              : functionClient.getFunctions().map((fn) => fn.definition.name),
           });
         }),
         shareReplay()
@@ -781,10 +779,7 @@ export class ObservabilityAIAssistantClient {
   addUserInstruction = async ({
     entry,
   }: {
-    entry: Omit<
-      KnowledgeBaseEntry,
-      '@timestamp' | 'confidence' | 'is_correction' | 'type' | 'role'
-    >;
+    entry: Omit<KnowledgeBaseEntry, '@timestamp' | 'type' | 'role'>;
   }): Promise<void> => {
     // for now we want to limit the number of user instructions to 1 per user
     // if a user instruction already exists for the user, we get the id and update it
@@ -811,8 +806,6 @@ export class ObservabilityAIAssistantClient {
       user: this.dependencies.user,
       entry: {
         ...entry,
-        confidence: 'high',
-        is_correction: false,
         type: KnowledgeBaseType.UserInstruction,
         labels: {},
         role: KnowledgeBaseEntryRole.UserEntry,
