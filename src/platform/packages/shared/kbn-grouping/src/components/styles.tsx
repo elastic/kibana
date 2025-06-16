@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonEmpty, EuiContextMenu } from '@elastic/eui';
+import { EuiContextMenu } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
