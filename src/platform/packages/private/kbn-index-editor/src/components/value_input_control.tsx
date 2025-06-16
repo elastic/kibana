@@ -49,7 +49,7 @@ export const getCellValueRenderer =
   ): FunctionComponent<DataGridCellValueElementProps> =>
   ({ rowIndex, columnId }) => {
     const row = rows[rowIndex];
-    const docId = row.id;
+    const docId = row.raw._id;
     const cellValue = row.flattened[columnId];
     if (cellValue == null) {
       return null;
@@ -78,7 +78,7 @@ export const getCellValueRenderer =
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 // Submit the value change
-                onValueChange(docId, { [columnId]: editValue });
+                onValueChange(docId!, { [columnId]: editValue });
               }
             }}
           />
