@@ -45,9 +45,12 @@ const sendToTimelineEligibleQueryTypes: Array<CodeBlockDetails['type']> = [
  * @param currentConversation
  */
 export const augmentMessageCodeBlocks = (
-  currentConversation: Conversation,
+  currentConversation: Conversation | undefined,
   showAnonymizedValues: boolean
 ): CodeBlockDetails[][] => {
+  if (!currentConversation?.messages) {
+    return [];
+  }
   const cbd = currentConversation.messages.map(({ content }) =>
     analyzeMarkdown(
       showAnonymizedValues

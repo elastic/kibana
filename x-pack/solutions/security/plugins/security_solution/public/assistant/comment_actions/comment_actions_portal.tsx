@@ -20,7 +20,7 @@ interface PortalInfo {
 export const CommentActionsPortal = () => {
     const { elasticAssistantSharedState } = useKibana().services;
     const [portals, setPortals] = useState<Record<string, PortalInfo>>({})
-
+    
     useEffect(() => {
         const unmountActions = elasticAssistantSharedState.comments.registerActions({
             mount: (args) => (target) => {
