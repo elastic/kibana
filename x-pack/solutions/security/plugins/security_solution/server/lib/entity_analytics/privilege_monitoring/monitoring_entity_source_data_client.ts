@@ -32,8 +32,6 @@ export class MonitoringEntitySourceDataClient {
     input: MonitoringEntitySourceDescriptor
   ): Promise<MonitoringEntitySourceResponse> {
     const descriptor = await this.monitoringEntitySourceClient.create({
-      type: input.type,
-      name: input.name,
       ...input,
     });
     this.log('debug', 'Initializing MonitoringEntitySourceDataClient Saved Object');

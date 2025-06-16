@@ -19,7 +19,10 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { merge } from 'lodash';
-import { getPrivilegedMonitorUsersIndex } from '../../../../common/entity_analytics/privilege_monitoring/constants';
+import {
+  defaultMonitoringUsersIndex,
+  getPrivilegedMonitorUsersIndex,
+} from '../../../../common/entity_analytics/privilege_monitoring/constants';
 import type { UpdatePrivMonUserRequestBody } from '../../../../common/api/entity_analytics/privilege_monitoring/users/update.gen';
 
 import type {
@@ -107,6 +110,7 @@ export class PrivilegeMonitoringDataClient {
     const indexSourceDescriptor = await this.monitoringIndexSourceClient.create({
       type: 'index',
       managed: true,
+      indexPattern: defaultMonitoringUsersIndex,
       name: 'defaultName', // TODO: double check what default name should be
     });
     this.log(
@@ -136,12 +140,25 @@ export class PrivilegeMonitoringDataClient {
         duration,
       });
       // get all monitoring index sources of type 'index
-      const indexSources = await this.monitoringIndexSourceClient.findByIndex();
+      const indexSources: MonitoringEntitySourceDescriptor[] =
+        await this.monitoringIndexSourceClient.findByIndex();
       this.log(
         'info',
         `Found index sources for privilege monitoring:\n${JSON.stringify(indexSources, null, 2)}`
       );
-      this.queryAllUserNames(indexSources); // TODO: temp naming, to update.
+      const userNames = await this.queryAllUserNames(indexSources); // TODO: temp naming, to update.
+      this.log(
+        'info',
+        `Queried all usernames from index sources: ${JSON.stringify(userNames, null, 2)}`
+      );
+      // for each user in the userNames, create user is called. ITERATION I - will need to do update later?
+      // save down into internal index
+      Object.entries(userNames).forEach(([index, usernames]) => {
+        this.log('info', `Index: ${index}`);
+        usernames.forEach((username) => {
+          this.log('info', ` - Username: ${username}`);
+        });
+      });
     } catch (e) {
       this.log('error', `Error initializing privilege monitoring engine: ${e}`);
       this.audit(
@@ -175,7 +192,6 @@ export class PrivilegeMonitoringDataClient {
    */
   public async queryAllUserNames(indexSources: MonitoringEntitySourceDescriptor[]) {
     const results: Record<string, string[]> = {};
-
     for (const source of indexSources) {
       const index = source.indexPattern ?? '';
       const kuery =
@@ -190,7 +206,6 @@ export class PrivilegeMonitoringDataClient {
         this.log('error', `Failed to query index ${index}: ${error}`);
       }
     }
-
     return results;
   }
 
