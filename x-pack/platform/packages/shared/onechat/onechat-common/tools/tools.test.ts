@@ -12,7 +12,8 @@ import {
   createBuiltinToolId,
   toStructuredToolIdentifier,
   toSerializedToolIdentifier,
-  ToolSourceType,
+  builtinToolProviderId,
+  unknownToolProviderId,
   StructuredToolIdentifier,
 } from './tools';
 
@@ -23,15 +24,14 @@ describe('Tool Identifier utilities', () => {
     });
 
     it('should return false for an unstructured identifier', () => {
-      expect(isPlainToolIdentifier('my-tool||builtIn||none')).toBe(false);
+      expect(isPlainToolIdentifier('builtIn::my-tool')).toBe(false);
     });
 
     it('should return false for a structured identifier', () => {
       expect(
         isPlainToolIdentifier({
           toolId: 'my-tool',
-          sourceType: 'builtIn' as ToolSourceType,
-          sourceId: 'none',
+          providerId: builtinToolProviderId,
         })
       ).toBe(false);
     });
@@ -41,8 +41,7 @@ describe('Tool Identifier utilities', () => {
     it('should return true for a valid structured identifier', () => {
       const structuredId: StructuredToolIdentifier = {
         toolId: 'my-tool',
-        sourceType: ToolSourceType.builtIn,
-        sourceId: 'none',
+        providerId: builtinToolProviderId,
       };
       expect(isStructuredToolIdentifier(structuredId)).toBe(true);
     });
@@ -52,13 +51,13 @@ describe('Tool Identifier utilities', () => {
     });
 
     it('should return false for an unstructured identifier', () => {
-      expect(isStructuredToolIdentifier('my-tool||builtIn||none')).toBe(false);
+      expect(isStructuredToolIdentifier('builtIn::my-tool')).toBe(false);
     });
   });
 
-  describe('isUnstructuredToolIdentifier', () => {
-    it('should return true for a valid unstructured identifier', () => {
-      expect(isSerializedToolIdentifier('my-tool||builtIn||none')).toBe(true);
+  describe('isSerializedToolIdentifier', () => {
+    it('should return true for a valid serialized identifier', () => {
+      expect(isSerializedToolIdentifier('builtIn::my-tool')).toBe(true);
     });
 
     it('should return false for a plain string identifier', () => {
@@ -69,8 +68,7 @@ describe('Tool Identifier utilities', () => {
       expect(
         isSerializedToolIdentifier({
           toolId: 'my-tool',
-          sourceType: ToolSourceType.builtIn,
-          sourceId: 'none',
+          providerId: builtinToolProviderId,
         })
       ).toBe(false);
     });
@@ -81,33 +79,31 @@ describe('Tool Identifier utilities', () => {
       const result = createBuiltinToolId('my-tool');
       expect(result).toEqual({
         toolId: 'my-tool',
-        sourceType: ToolSourceType.builtIn,
-        sourceId: 'builtIn',
+        providerId: builtinToolProviderId,
       });
     });
   });
 
   describe('toSerializedToolIdentifier', () => {
     it('should return the same string for a serialized identifier', () => {
-      const serializedId = 'my-tool||builtIn||none';
+      const serializedId = 'builtIn::my-tool';
       expect(toSerializedToolIdentifier(serializedId)).toBe(serializedId);
     });
 
     it('should convert a structured identifier to serialized format', () => {
       const structuredId = {
         toolId: 'my-tool',
-        sourceType: ToolSourceType.builtIn,
-        sourceId: 'none',
+        providerId: builtinToolProviderId,
       };
-      expect(toSerializedToolIdentifier(structuredId)).toBe('my-tool||builtIn||none');
+      expect(toSerializedToolIdentifier(structuredId)).toBe(`${builtinToolProviderId}::my-tool`);
     });
 
     it('should convert a plain identifier to serialized format with unknown source', () => {
-      expect(toSerializedToolIdentifier('my-tool')).toBe('my-tool||unknown||unknown');
+      expect(toSerializedToolIdentifier('my-tool')).toBe(`${unknownToolProviderId}::my-tool`);
     });
 
     it('should throw an error for malformed identifiers', () => {
-      expect(() => toSerializedToolIdentifier('invalid||format')).toThrow(
+      expect(() => toSerializedToolIdentifier('invalid::tool::format')).toThrow(
         'Malformed tool identifier'
       );
     });
@@ -117,18 +113,16 @@ describe('Tool Identifier utilities', () => {
     it('should return the same object for a structured identifier', () => {
       const structuredId = {
         toolId: 'my-tool',
-        sourceType: ToolSourceType.builtIn,
-        sourceId: 'none',
+        providerId: builtinToolProviderId,
       };
       expect(toStructuredToolIdentifier(structuredId)).toEqual(structuredId);
     });
 
     it('should convert an unstructured identifier to structured', () => {
-      const result = toStructuredToolIdentifier('my-tool||builtIn||none');
+      const result = toStructuredToolIdentifier(`${builtinToolProviderId}::my-tool`);
       expect(result).toEqual({
         toolId: 'my-tool',
-        sourceType: ToolSourceType.builtIn,
-        sourceId: 'none',
+        providerId: builtinToolProviderId,
       });
     });
 
@@ -136,13 +130,12 @@ describe('Tool Identifier utilities', () => {
       const result = toStructuredToolIdentifier('my-tool');
       expect(result).toEqual({
         toolId: 'my-tool',
-        sourceType: ToolSourceType.unknown,
-        sourceId: 'unknown',
+        providerId: unknownToolProviderId,
       });
     });
 
     it('should throw an error for malformed identifiers', () => {
-      expect(() => toStructuredToolIdentifier('invalid||format')).toThrow(
+      expect(() => toStructuredToolIdentifier('invalid::tool::format')).toThrow(
         'Malformed tool identifier'
       );
     });
