@@ -6,7 +6,7 @@
  */
 
 import { difference, intersection, isEqual } from 'lodash';
-import { LockAcquisitionError } from '@kbn/lock-manager';
+import { isLockAcquisitionError } from '@kbn/lock-manager';
 import { StatusError } from '../errors/status_error';
 import { FailedToApplyRequestedChangesError } from './errors/failed_to_apply_requested_changes_error';
 import { FailedToDetermineElasticsearchActionsError } from './errors/failed_to_determine_elasticsearch_actions_error';
@@ -85,7 +85,7 @@ export class State {
     } else {
       const lmService = dependencies.lockManager;
       return lmService
-        .withLock('streams_api', async () => {
+        .withLock('streams/apply_changes', async () => {
           try {
             await desiredState.commitChanges(startingState);
             return { status: 'success' as const, changes: desiredState.changes(startingState) };
@@ -101,7 +101,7 @@ export class State {
           }
         })
         .catch((error) => {
-          if (error instanceof LockAcquisitionError) {
+          if (isLockAcquisitionError(error)) {
             throw new ConcurrentAccessError('Could not acquire lock for applying changes');
           }
           throw error;
