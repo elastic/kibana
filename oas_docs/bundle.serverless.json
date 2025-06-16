@@ -17260,7 +17260,7 @@
               "schema": {
                 "additionalProperties": false,
                 "properties": {
-                  "agentIds": {
+                  "agents": {
                     "items": {
                       "type": "string"
                     },
@@ -17326,7 +17326,7 @@
                   }
                 },
                 "required": [
-                  "agentIds",
+                  "agents",
                   "uri",
                   "enrollment_token"
                 ],
