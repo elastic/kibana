@@ -45,7 +45,8 @@
     "@kbn/react-hooks",
     "@kbn/embeddable-plugin",
     "@kbn/apm-types-shared",
-    "@kbn/es-query"
+    "@kbn/object-utils",
+    "@kbn/es-query",
   ],
   "exclude": ["target/**/*"]
 }
