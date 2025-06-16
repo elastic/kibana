@@ -35,12 +35,7 @@ const chatCompleteBaseRt = t.type({
     t.partial({
       conversationId: t.string,
       title: t.string,
-      disableFunctions: t.union([
-        toBooleanRt,
-        t.type({
-          except: t.array(t.string),
-        }),
-      ]),
+      disableFunctions: toBooleanRt,
       instructions: t.array(
         t.union([
           t.string,
