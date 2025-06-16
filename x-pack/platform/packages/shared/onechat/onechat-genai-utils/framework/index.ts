@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export { conversationToLangchainMessages } from './to_langchain_messages';
-export { toLangchainTool, providerToLangchainTools } from './tool_provider_to_langchain_tools';
-export { extractTextContent } from './from_langchain_messages';
+export {
+  filterProviderTools,
+  type ByProviderIdRule,
+  type ToolFilterRule,
+  type ByToolIdRule,
+} from './compose_provider';

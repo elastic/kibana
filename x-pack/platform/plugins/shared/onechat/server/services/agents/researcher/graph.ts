@@ -35,9 +35,9 @@ export interface ExecutedAction {
 
 // tools:
 // - index explorer
-// - fulltext search
+// - relevance search
+// - nl search
 // - get_document_by_id
-// - ES|QL?
 
 interface ReflectionResult {
   isSufficient: boolean;

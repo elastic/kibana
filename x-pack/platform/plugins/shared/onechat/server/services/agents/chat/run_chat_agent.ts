@@ -22,7 +22,7 @@ import type {
   ExecutableTool,
   ToolProvider,
 } from '@kbn/onechat-server';
-import { providerToLangchainTools, toLangchainTool, conversationLangchainMessages } from './utils';
+import { providerToLangchainTools, toLangchainTool, conversationToLangchainMessages } from './utils';
 import { createAgentGraph } from './graph';
 import { convertGraphEvents, addRoundCompleteEvent } from './convert_graph_events';
 
@@ -93,7 +93,7 @@ export const runChatAgent: RunChatAgentFn = async (
   const langchainTools = Array.isArray(tools)
     ? tools.map((tool) => toLangchainTool({ tool, logger }))
     : await providerToLangchainTools({ request, toolProvider: tools, logger });
-  const initialMessages = conversationLangchainMessages({
+  const initialMessages = conversationToLangchainMessages({
     nextInput,
     previousRounds: conversation,
   });

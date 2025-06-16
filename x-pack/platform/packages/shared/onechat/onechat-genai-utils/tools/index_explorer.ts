@@ -10,7 +10,7 @@ import { z } from '@kbn/zod';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ScopedModel } from '@kbn/onechat-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { ListIndexInfo, listIndices } from './utils/listings';
+import { ListIndexInfo, listIndices } from './steps/list_indices';
 import { getIndexMappings } from './steps/get_mappings';
 
 export interface RelevantIndex {

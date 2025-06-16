@@ -10,15 +10,21 @@ import { Observable, from, filter, shareReplay, firstValueFrom, map, lastValueFr
 import type { Logger } from '@kbn/logging';
 import { StreamEvent } from '@langchain/core/tracers/log_stream';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { ChatAgentEvent, isRoundCompleteEvent } from '@kbn/onechat-common';
+import {
+  ChatAgentEvent,
+  isRoundCompleteEvent,
+  BuiltinToolIds,
+  builtinToolProviderId,
+} from '@kbn/onechat-common';
 import type { ModelProvider, ScopedRunner, ToolProvider } from '@kbn/onechat-server';
+import { filterProviderTools } from '@kbn/onechat-genai-utils/framework';
 import {
   providerToLangchainTools,
   toLangchainTool,
-  conversationLangchainMessages,
-} from '../conversational/utils';
+  conversationToLangchainMessages,
+} from '../chat/utils';
 import { createAgentGraph } from './graph';
-import { convertGraphEvents, addRoundCompleteEvent } from '../conversational/convert_graph_events';
+import { convertGraphEvents, addRoundCompleteEvent } from '../chat/convert_graph_events';
 
 export interface RunSearchAgentContext {
   logger: Logger;
@@ -63,7 +69,26 @@ export const runSearchAgent: RunChatAgentFn = async (
   { logger, request, modelProvider }
 ) => {
   const model = await modelProvider.getDefaultModel();
-  const langchainTools = await providerToLangchainTools({ request, toolProvider, logger });
+
+  const researcherTools = await filterProviderTools({
+    request,
+    provider: toolProvider,
+    rules: [
+      {
+        type: 'by_tool_id',
+        providerId: builtinToolProviderId,
+        toolIds: [
+          BuiltinToolIds.relevanceSearch,
+          BuiltinToolIds.naturalLanguageSearch,
+          BuiltinToolIds.indexExplorer,
+          BuiltinToolIds.getDocumentById,
+        ],
+      },
+    ],
+  });
+
+  const langchainTools = researcherTools.map((tool) => toLangchainTool({ tool, logger }));
+
   const agentGraph = await createAgentGraph({
     logger,
     chatModel: model.chatModel,
@@ -92,7 +117,9 @@ export const runSearchAgent: RunChatAgentFn = async (
     shareReplay()
   );
 
-  events$.subscribe(onEvent);
+  events$.subscribe((event) => {
+    // later we should emit reasoning events from there.
+  });
 
   await lastValueFrom(events$);
 
@@ -100,15 +127,6 @@ export const runSearchAgent: RunChatAgentFn = async (
   return {
     answer: 'hello',
   };
-};
-
-export const extractRound = async (events$: Observable<ChatAgentEvent>) => {
-  return await firstValueFrom(
-    events$.pipe(
-      filter(isRoundCompleteEvent),
-      map((event) => event.data.round)
-    )
-  );
 };
 
 const isStreamEvent = (input: any): input is StreamEvent => {

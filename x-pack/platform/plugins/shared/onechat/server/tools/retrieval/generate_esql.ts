@@ -24,7 +24,10 @@ const nlToEsqlToolSchema = z.object({
     .describe('(optional) Additional context that could be useful to generate the ES|QL query'),
 });
 
-export const generateEsqlTool = (): RegisteredTool<typeof nlToEsqlToolSchema, GenerateEsqlResponse> => {
+export const generateEsqlTool = (): RegisteredTool<
+  typeof nlToEsqlToolSchema,
+  GenerateEsqlResponse
+> => {
   return {
     id: BuiltinToolIds.generateEsql,
     description: 'Generate an ES|QL query from a natural language query.',
