@@ -13,15 +13,15 @@ import { EuiInMemoryTable } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { Profiles } from '../../../../application/main/hooks/use_active_profiles';
 import { ProfileSection } from '../profile_section';
-import { DocumentProfileDisplay } from './document_profile_table';
+import { DocumentProfileTable } from './document_profile_table';
 import { getExpandAction } from './get_expand_action';
 
 export function DocumentsProfilesSection({
   documentsProfiles,
-  openDocDetails,
+  onViewRecordDetails,
 }: {
   documentsProfiles: Profiles['documentContexts'];
-  openDocDetails: (record: DataTableRecord) => void;
+  onViewRecordDetails: (record: DataTableRecord) => void;
 }) {
   const [expandedProfileId, setExpandedProfileId] = useState<string | undefined>(undefined);
   const sortedDocumentProfiles = useMemo(() => {
@@ -89,6 +89,7 @@ export function DocumentsProfilesSection({
                     defaultMessage: 'Expand to view records for this profile',
                   }
                 ),
+                'data-test-subj': 'documentsProfilesSectionExpandAction',
                 isExpanded: ({ profileId }) => expandedProfileId === profileId,
                 onClick: (value) => setExpandedProfileId(value?.profileId),
               }),
@@ -99,8 +100,8 @@ export function DocumentsProfilesSection({
           expandedProfileId
             ? {
                 [expandedProfileId]: (
-                  <DocumentProfileDisplay
-                    onViewRecordDetails={(record) => openDocDetails(record)}
+                  <DocumentProfileTable
+                    onViewRecordDetails={(record) => onViewRecordDetails(record)}
                     profileId={expandedProfileId}
                     records={documentsProfiles?.[expandedProfileId] ?? []}
                   />

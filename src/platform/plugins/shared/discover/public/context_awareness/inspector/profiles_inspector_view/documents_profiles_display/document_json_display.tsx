@@ -15,6 +15,7 @@ export const DocumentJsonDisplay = ({ record }: { record: DataTableRecordWithCon
   return (
     <EuiCodeBlock
       language="json"
+      data-test-subj="profilesInspectorViewDocumentJsonDisplay"
       overflowHeight={300}
       isVirtualized
       isCopyable

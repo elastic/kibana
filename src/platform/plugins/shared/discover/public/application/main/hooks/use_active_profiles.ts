@@ -13,7 +13,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DataSourceContext, RootContext } from '../../../context_awareness';
 import type { ContextWithProfileId } from '../../../context_awareness/profile_service';
 import type { DataTableRecordWithContext } from '../../../context_awareness/profiles_manager';
-import { recordHasContext } from '../../../context_awareness/record_has_context';
+import { recordHasContext } from '../../../context_awareness/profiles_manager/record_has_context';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import type { DiscoverStateContainer } from '../state_management/discover_state';
 import { FetchStatus } from '../../types';
@@ -46,7 +46,10 @@ export function useActiveProfiles({ stateContainer }: { stateContainer: Discover
       map(({ result }) => result ?? [])
     );
 
-    const subscription = combineLatest([profilesManager.getContexts$(), documentsSubscription])
+    const subscription = combineLatest([
+      profilesManager.createScopedProfilesManager().getContexts$(),
+      documentsSubscription,
+    ])
       .pipe(
         map(([contexts, documents]) => {
           const documentContexts: Record<string, DataTableRecordWithContext[]> = {};
