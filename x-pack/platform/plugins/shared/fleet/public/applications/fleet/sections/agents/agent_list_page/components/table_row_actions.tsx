@@ -47,7 +47,7 @@ export const TableRowActions: React.FunctionComponent<{
   const authz = useAuthz();
   const isFleetServerAgent =
     agentPolicy?.package_policies?.some((p) => p.package?.name === FLEET_SERVER_PACKAGE) ?? false;
-  const isBulkMigrationsEnabled = ExperimentalFeaturesService.get().enableAgentMigrations;
+  const agentMigrationsEnabled = ExperimentalFeaturesService.get().enableAgentMigrations;
   const isUnenrolling = agent.status === 'unenrolling';
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuItems = [
@@ -59,7 +59,7 @@ export const TableRowActions: React.FunctionComponent<{
       <FormattedMessage id="xpack.fleet.agentList.viewActionText" defaultMessage="View agent" />
     </EuiContextMenuItem>,
   ];
-  if (!agentPolicy?.is_protected && !isFleetServerAgent && isBulkMigrationsEnabled) {
+  if (!agentPolicy?.is_protected && !isFleetServerAgent && agentMigrationsEnabled) {
     menuItems.push(
       <EuiContextMenuItem
         icon="cluster"
