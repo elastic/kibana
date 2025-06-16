@@ -10,7 +10,6 @@ import seriesConfig from './__mocks__/mock_series_config_filebeat.json';
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import '@testing-library/jest-dom';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@elastic/eui';
