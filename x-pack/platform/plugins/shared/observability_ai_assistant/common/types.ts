@@ -99,8 +99,6 @@ export interface KnowledgeBaseEntry {
   id: string;
   title?: string;
   text: string;
-  confidence: 'low' | 'medium' | 'high';
-  is_correction: boolean;
   type?: 'user_instruction' | 'contextual';
   public: boolean;
   labels?: Record<string, string>;
@@ -108,6 +106,8 @@ export interface KnowledgeBaseEntry {
   user?: {
     name: string;
   };
+  confidence?: 'low' | 'medium' | 'high'; // deprecated
+  is_correction?: boolean; // deprecated
 }
 
 export interface Instruction {
