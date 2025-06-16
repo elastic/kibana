@@ -311,9 +311,11 @@ export function createCustomCallbackMocks(
     getTimeseriesIndices: jest.fn(async () => ({ indices: timeseriesIndices })),
     getEditorExtensions: jest.fn(async (queryString: string) => {
       if (queryString.includes('logs*')) {
-        return editorExtensions;
+        return {
+          recommendedQueries: editorExtensions.recommendedQueries,
+        };
       }
-      return [];
+      return { recommendedQueries: [] };
     }),
     getInferenceEndpoints: jest.fn(async () => ({ inferenceEndpoints })),
   };

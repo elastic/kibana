@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
 import { MiddlewareAPI } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
@@ -349,7 +348,7 @@ export async function loadInitial(
   }
   if (initialStateFromLocator) {
     const newFilters = initialStateFromLocator.filters
-      ? cloneDeep(initialStateFromLocator.filters)
+      ? structuredClone(initialStateFromLocator.filters)
       : undefined;
 
     if (newFilters) {
@@ -390,7 +389,7 @@ export async function loadInitial(
   ) {
     const newFilters =
       initialContext && 'searchFilters' in initialContext && initialContext.searchFilters
-        ? cloneDeep(initialContext.searchFilters)
+        ? structuredClone(initialContext.searchFilters)
         : undefined;
 
     if (newFilters) {
