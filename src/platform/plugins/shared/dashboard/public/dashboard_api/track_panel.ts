@@ -9,7 +9,7 @@
 
 import { BehaviorSubject, Subject } from 'rxjs';
 
-export const highlightAnimationDuration = 3000;
+export const highlightAnimationDuration = 2000;
 
 export function initializeTrackPanel(untilLoaded: (id: string) => Promise<undefined>) {
   const expandedPanelId$ = new BehaviorSubject<string | undefined>(undefined);

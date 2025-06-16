@@ -20,49 +20,36 @@ const borderSpinKeyframes = keyframes({
     opacity: 1,
   },
   '100%': {
-    '--highlight-rotate': '360deg',
+    '--highlight-rotate': '180deg',
     opacity: 0,
   },
 });
+
+const getOutlineFadeKeyframes = ({ euiTheme }: UseEuiTheme) =>
+  keyframes({
+    '0%, 70%': {
+      outline: `${euiTheme.border.width.thin} dashed transparent`,
+    },
+    '100%': {
+      outline: `${euiTheme.border.width.thin} dashed ${euiTheme.colors.borderBaseFormsControl}`,
+    },
+  });
 
 const shineKeyframes = keyframes({
   '0%': {
     '--highlight-rotate': '0deg',
     opacity: 0,
   },
-  '30%': {
+  '10%': {
     opacity: 0.7,
   },
-  '60%': {
-    opacity: 0,
-  },
   '100%': {
-    '--highlight-rotate': '360deg',
-    opacity: 0,
-  },
-});
-
-const shimmerKeyframes = keyframes({
-  '0%': {
-    '--shimmer-position': '100%',
-    opacity: 0,
-  },
-  '30%': {
-    '--shimmer-position': '0%',
-    opacity: 0.3,
-  },
-  '35%, 100%': {
-    '--shimmer-position': '0%',
+    '--highlight-rotate': '180deg',
     opacity: 0,
   },
 });
 
 const highlightPropertyStyles = css`
-  @property --shimmer-position {
-    syntax: '<percentage>';
-    inherits: false;
-    initial-value: 50%;
-  }
   @property --highlight-rotate {
     syntax: '<angle>';
     inherits: false;
@@ -78,7 +65,6 @@ export const getHighlightStyles = (context: UseEuiTheme) => {
     ${euiTheme.colors.borderBaseAccent} 46%,
     ${euiTheme.colors.borderBaseAccentSecondary} 100%
   )`;
-  const shimmerGradient = `linear-gradient(-45deg, transparent 45%, ${euiTheme.colors.backgroundLightNeutral} 50%, transparent 55%)`;
 
   const brightenInDarkMode = (brightness: number) =>
     context.colorMode === 'DARK' ? `brightness(${brightness})` : '';
@@ -89,48 +75,35 @@ export const getHighlightStyles = (context: UseEuiTheme) => {
       '&.dshDashboardGrid__item--highlighted .embPanel': {
         position: 'relative',
         overflow: 'visible !important',
-        outline: 'none !important',
+        backgroundColor: euiTheme.colors.backgroundBasePlain,
+        animation: `${getOutlineFadeKeyframes(context)} ${highlightAnimationDuration}ms ease-out`,
       },
       '&.dshDashboardGrid__item--highlighted .embPanel::before': {
         content: `""`,
         opacity: 0,
         position: 'absolute',
-        left: '-2.5px',
-        top: '-2.5px',
+        left: '-5px',
+        top: '-5px',
         'z-index': -1,
-        width: 'calc(100% + 5px)',
-        height: 'calc(100% + 5px)',
+        width: 'calc(100% + 10px)',
+        height: 'calc(100% + 10px)',
         'background-image': rotatingGradient,
         filter: brightenInDarkMode(1.5),
-        'border-radius': euiTheme.border.radius.small,
+        'border-radius': euiTheme.border.radius.medium,
         animation: `${borderSpinKeyframes} ${highlightAnimationDuration}ms ease-out`,
       },
       '&.dshDashboardGrid__item--highlighted .embPanel::after': {
         content: `""`,
         opacity: 0,
         position: 'absolute',
-        left: '-10px',
-        top: '-10px',
+        left: '-15px',
+        top: '-15px',
         'z-index': -2,
-        width: 'calc(100% + 20px)',
-        height: 'calc(100% + 20px)',
+        width: 'calc(100% + 30px)',
+        height: 'calc(100% + 30px)',
         'background-image': rotatingGradient,
         filter: `${brightenInDarkMode(1.3)} blur(25px)`,
         animation: `${shineKeyframes} ${highlightAnimationDuration}ms ease-out`,
-      },
-      '&.dshDashboardGrid__item--highlighted .embPanel__content::before': {
-        content: `""`,
-        'z-index': euiTheme.levels.mask,
-        opacity: 0,
-        width: '100%',
-        height: '100%',
-        position: 'absolute',
-        'pointer-events': 'none',
-        filter: brightenInDarkMode(1.75),
-        'background-image': shimmerGradient,
-        animation: `${shimmerKeyframes} ${highlightAnimationDuration}ms linear`,
-        'background-size': '400%',
-        'background-position': 'var(--shimmer-position) 0',
       },
     },
   ]);
