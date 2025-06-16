@@ -19,6 +19,7 @@ import { validatePrebuiltRuleAssets } from './prebuilt_rule_assets_validation';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from './prebuilt_rule_assets_type';
 import type { RuleVersionSpecifier } from '../rule_versions/rule_version_specifier';
 
+const RULE_ASSET_ATTRIBUTES = `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes`;
 const MAX_PREBUILT_RULES_COUNT = 10_000;
 const ES_MAX_CLAUSE_COUNT = 1024;
 const ES_MAX_CONCURRENT_REQUESTS = 2;
@@ -84,14 +85,6 @@ export const createPrebuiltRuleAssetsClient = (
           return [];
         }
 
-        const processChunk = async (ruleIdsChunk?: string[]) => {
-          const filter = ruleIdsChunk
-            ?.map((ruleId) => `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.rule_id: ${ruleId}`)
-            .join(' OR ');
-
-          return fetchLatestVersionInfo(filter);
-        };
-
         const fetchLatestVersionInfo = async (filter?: string) => {
           const findResult = await savedObjectsClient.find<
             PrebuiltRuleAsset,
@@ -135,21 +128,15 @@ export const createPrebuiltRuleAssetsClient = (
           return aggregatedBuckets;
         };
 
-        let buckets: Array<{
-          latest_version: AggregationsTopHitsAggregate;
-        }> = [];
+        const filters = ruleIds
+          ? createChunkedFilters({
+              items: ruleIds,
+              mapperFn: (ruleId) => `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.rule_id: ${ruleId}`,
+              clausesPerItem: 2,
+            })
+          : undefined;
 
-        if (!ruleIds) {
-          buckets = await fetchLatestVersionInfo();
-        } else {
-          // If ruleIds are provided, we need to chunk them to avoid exceeding the ES max clause count.
-          // See: https://github.com/elastic/kibana/pull/223240
-          // We divide by 2 because filter has 2 clauses per version.
-          const ruleIdChunks = chunk(ruleIds, ES_MAX_CLAUSE_COUNT / 2);
-          buckets = await pMap(ruleIdChunks, processChunk, {
-            concurrency: ES_MAX_CONCURRENT_REQUESTS,
-          }).then((results) => results.flat());
-        }
+        const buckets = await chunkedFetch(fetchLatestVersionInfo, filters);
 
         const latestVersions = buckets.map((bucket) => {
           const hit = bucket.latest_version.hits.hits[0];
@@ -172,12 +159,14 @@ export const createPrebuiltRuleAssetsClient = (
           return [];
         }
 
-        const processChunk = async (versionsChunk: RuleVersionSpecifier[]) => {
-          const attr = `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes`;
-          const filter = versionsChunk
-            .map((v) => `(${attr}.rule_id: ${v.rule_id} AND ${attr}.version: ${v.version})`)
-            .join(' OR ');
+        const filters = createChunkedFilters({
+          items: versions,
+          mapperFn: (versionSpecifier) =>
+            `(${RULE_ASSET_ATTRIBUTES}.rule_id: ${versionSpecifier.rule_id} AND ${RULE_ASSET_ATTRIBUTES}.version: ${versionSpecifier.version})`,
+          clausesPerItem: 4,
+        });
 
+        const ruleAssets = await chunkedFetch(async (filter) => {
           // Usage of savedObjectsClient.bulkGet() is ~25% more performant and
           // simplifies deduplication but too many tests get broken.
           // See https://github.com/elastic/kibana/issues/218198
@@ -187,18 +176,8 @@ export const createPrebuiltRuleAssetsClient = (
             perPage: MAX_PREBUILT_RULES_COUNT,
           });
 
-          const ruleAssets = findResult.saved_objects.map((so) => so.attributes);
-          return ruleAssets;
-        };
-
-        // We need to chunk versions to avoid exceeding the ES max clause count.
-        // See: https://github.com/elastic/kibana/pull/223240
-        // We divide by 4 because filter has 4 clauses per version.
-        const versionChunks = chunk(versions, ES_MAX_CLAUSE_COUNT / 4);
-
-        const ruleAssets = await pMap(versionChunks, processChunk, {
-          concurrency: ES_MAX_CONCURRENT_REQUESTS,
-        }).then((results) => results.flat());
+          return findResult.saved_objects.map((so) => so.attributes);
+        }, filters);
 
         // Rule assets may have duplicates we have to get rid of.
         // In particular prebuilt rule assets package v8.17.1 has duplicates.
@@ -209,3 +188,50 @@ export const createPrebuiltRuleAssetsClient = (
     },
   };
 };
+
+/**
+ * Creates an array of KQL filter strings for a collection of items.
+ * Uses chunking to ensure that the number of filter clauses does not exceed the ES "too_many_clauses" limit.
+ * See: https://github.com/elastic/kibana/pull/223240
+ *
+ * @param {object} options
+ * @param {T[]} options.items - Array of items to create filters for.
+ * @param {(item: T) => string} options.mapperFn - A function that maps an item to a filter string.
+ * @param {number} options.clausesPerItem - Number of Elasticsearch clauses generated per item. Determined empirically by converting a KQL filter into a Query DSL query.
+ * More complex filters will result in more clauses. Info about clauses in docs: https://www.elastic.co/docs/explore-analyze/query-filter/languages/querydsl#query-dsl
+ * @returns {string[]} An array of filter strings
+ */
+function createChunkedFilters<T>({
+  items,
+  mapperFn,
+  clausesPerItem,
+}: {
+  items: T[];
+  mapperFn: (item: T) => string;
+  clausesPerItem: number;
+}): string[] {
+  return chunk(items, ES_MAX_CLAUSE_COUNT / clausesPerItem).map((singleChunk) =>
+    singleChunk.map(mapperFn).join(' OR ')
+  );
+}
+
+/**
+ * Fetches objects using a provided function.
+ * If filters are provided fetches concurrently in chunks.
+ *
+ * @param {(filter?: string) => Promise<T[]>} chunkFetchFn - Function that fetches a chunk.
+ * @param {string[]} [filters] - An optional array of filter strings. If provided, `chunkFetchFn` will be called for each filter concurrently.
+ * @returns {Promise<T[]>} A promise that resolves to an array of fetched objects.
+ */
+function chunkedFetch<T>(
+  chunkFetchFn: (filter?: string) => Promise<T[]>,
+  filters?: string[]
+): Promise<T[]> {
+  if (filters?.length) {
+    return pMap(filters, chunkFetchFn, {
+      concurrency: ES_MAX_CONCURRENT_REQUESTS,
+    }).then((results) => results.flat());
+  }
+
+  return chunkFetchFn();
+}
