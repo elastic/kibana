@@ -162,7 +162,6 @@ export function translate(
         description,
       },
       values,
-      // @ts-expect-error - There’s a small mismatch between @formatjs type and Intl API that only applies to the date function, we’re ignoring that
       { ignoreTag, shouldParseSkeletons: true, formatters }
     );
   } catch (e) {
