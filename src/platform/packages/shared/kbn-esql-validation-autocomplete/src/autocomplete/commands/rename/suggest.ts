@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../factories';
+import { getNewUserDefinedColumnSuggestion, TRIGGER_SUGGESTION_COMMAND } from '../../factories';
 import { CommandSuggestParams } from '../../../definitions/types';
 
 import type { SuggestionRawDefinition } from '../../types';
@@ -17,6 +17,7 @@ import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 export async function suggest({
   getColumnsByType,
   innerText,
+  getSuggestedUserDefinedColumnName,
 }: CommandSuggestParams<'rename'>): Promise<SuggestionRawDefinition[]> {
   if (/(?:rename|,)\s+\S+\s+a?$/i.test(innerText)) {
     return [asCompletionItem, assignCompletionItem];
@@ -30,7 +31,16 @@ export async function suggest({
     return [];
   }
 
-  return getColumnsByType('any', [], { advanceCursor: true, openSuggestions: true });
+  const suggestions = await getColumnsByType('any', [], {
+    advanceCursor: true,
+    openSuggestions: true,
+  });
+
+  if (!/=\s+$/i.test(innerText)) {
+    suggestions.push(getNewUserDefinedColumnSuggestion(getSuggestedUserDefinedColumnName()));
+  }
+
+  return suggestions;
 }
 
 const asCompletionItem: SuggestionRawDefinition = {

@@ -374,9 +374,6 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
     if (ctx._probability) {
       command.args.push(createLiteral('double', ctx._probability.DECIMAL_LITERAL()));
     }
-    if (ctx._seed) {
-      command.args.push(createLiteral('integer', ctx._seed.INTEGER_LITERAL()));
-    }
   }
 
   /**
