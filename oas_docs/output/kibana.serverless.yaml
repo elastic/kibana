@@ -11292,6 +11292,72 @@ paths:
       summary: List all monitored users
       tags:
         - Security Entity Analytics API
+  /api/entity_analytics/privileged_user_monitoring/pad/install:
+    post:
+      operationId: InstallPrivilegedAccessDetectionPackage
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Successful response
+      summary: Installs the privileged access detection package for the Entity Analytics privileged user monitoring experience
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/privileged_user_monitoring/pad/status:
+    get:
+      operationId: GetStatusPrivilegedAccessDetectionPackage
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jobs:
+                    items:
+                      type: object
+                      properties:
+                        description:
+                          type: string
+                        jobId:
+                          type: string
+                        state:
+                          enum:
+                            - closing
+                            - closed
+                            - opened
+                            - failed
+                            - opening
+                          type: string
+                      required:
+                        - jobId
+                        - state
+                    type: array
+                  mlModuleSetupStatus:
+                    enum:
+                      - complete
+                      - incomplete
+                    type: string
+                  packageInstallationStatus:
+                    enum:
+                      - complete
+                      - incomplete
+                    type: string
+                required:
+                  - packageInstallationStatus
+                  - mlModuleSetupStatus
+                  - jobs
+          description: Privileged access detection status retrieved
+      summary: Gets the status of the privileged access detection package for the Entity Analytics privileged user monitoring experience
+      tags:
+        - Security Entity Analytics API
   /api/entity_store/enable:
     post:
       operationId: InitEntityStore
