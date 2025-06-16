@@ -7,21 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiFlyoutHeader, EuiSkeletonText, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { FC } from 'react';
 import React, { Suspense, lazy } from 'react';
 import { distinctUntilChanged, from, skip, takeUntil } from 'rxjs';
-import { EuiFlyoutHeader, EuiSkeletonText, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { IndexUpdateService } from '../index_update_service';
-import type { EditLookupIndexContentContext, EditLookupIndexFlyoutDeps } from '../types';
+import type { EditLookupIndexContentContext, FlyoutDeps } from '../types';
 
-export function createFlyout(
-  deps: EditLookupIndexFlyoutDeps & {
-    indexUpdateService: IndexUpdateService;
-  },
-  props: EditLookupIndexContentContext
-) {
+export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentContext) {
   const {
     http,
     overlays,

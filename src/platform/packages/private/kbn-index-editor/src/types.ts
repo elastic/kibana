@@ -30,6 +30,10 @@ export interface EditLookupIndexFlyoutDeps {
   fieldFormats: FieldFormatsStart;
 }
 
+export type FlyoutDeps = EditLookupIndexFlyoutDeps & {
+  indexUpdateService: IndexUpdateService;
+};
+
 /** Extended kibana context */
 export interface KibanaContextExtra {
   share: SharePluginStart;

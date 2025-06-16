@@ -8,28 +8,31 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { DataPublicPluginStart, ISearchSource } from '@kbn/data-plugin/public';
-import { DataTableRecord } from '@kbn/discover-utils';
+import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
 import type { Filter } from '@kbn/es-query';
 import {
   BehaviorSubject,
+  Observable,
+  Subject,
+  Subscription,
   combineLatest,
   debounceTime,
   filter,
   from,
   map,
-  Observable,
   of,
   scan,
   shareReplay,
-  Subject,
-  Subscription,
+  skipWhile,
+  startWith,
   switchMap,
   takeUntil,
   takeWhile,
   tap,
   timer,
+  withLatestFrom,
 } from 'rxjs';
 
 const BUFFER_TIMEOUT_MS = 5000; // 5 seconds
@@ -58,9 +61,8 @@ export class IndexUpdateService {
 
   private readonly actions$ = new Subject<Action>();
 
-  private searhchSource$: Observable<ISearchSource>;
-
   private readonly _$rows = new BehaviorSubject<DataTableRecord[]>([]);
+  public readonly $rows: Observable<DataTableRecord[]> = this._$rows.asObservable();
 
   private readonly _subscription = new Subscription();
 
@@ -94,22 +96,30 @@ export class IndexUpdateService {
     )
   );
 
+  private readonly _$dataView: Observable<DataView> = this.indexName$.pipe(
+    skipWhile((indexName) => !indexName),
+    switchMap((indexName) => {
+      return from(this.getDataView(indexName!));
+    }),
+    shareReplay({ bufferSize: 1, refCount: true })
+  );
+
   /**
    * Finds an existing data view or creates a new one based on the index name.
    * Ad-hoc data view should only be created if the index has been saved.
    */
-  private async getDataView(): Promise<DataView> {
-    if (!this.indexName) {
+  private async getDataView(indexName: string): Promise<DataView> {
+    if (!indexName) {
       throw new Error('Index name is not set');
     }
 
-    const dataView: DataView | undefined = (await this.data.dataViews.find(this.indexName, 1))[0];
+    const dataView: DataView | undefined = (await this.data.dataViews.find(indexName, 1))[0];
 
     if (dataView) {
       return dataView;
     }
 
-    return await this.data.dataViews.create({ title: this.indexName, name: this.indexName });
+    return await this.data.dataViews.create({ title: indexName, name: indexName });
   }
 
   private listenForUpdates() {
@@ -119,7 +129,6 @@ export class IndexUpdateService {
           debounceTime(BUFFER_TIMEOUT_MS),
           filter((updates) => updates.length > 0),
           switchMap((updates) => {
-            console.log('🚀 ~ IndexUpdateService ~ switchMap ~ updates:', updates);
             return from(
               // TODO create an API endpoint for bulk updates
               this.http.post(`/api/console/proxy`, {
@@ -158,19 +167,16 @@ export class IndexUpdateService {
 
     this._subscription.add(
       combineLatest([
-        this.indexName$.pipe(
-          switchMap((indexName) => {
-            return from(this.getDataView());
-          })
-        ),
+        this._$dataView,
         // Time range updates
-        this.data.query.timefilter.timefilter.getTimeUpdate$(),
+        this.data.query.timefilter.timefilter.getTimeUpdate$().pipe(startWith(null)),
       ])
         .pipe(
           switchMap(([dataView, timeRangeEmit]) => {
             return from(
               this.data.search.searchSource.create({
-                index: this.indexName!,
+                // index: this.indexName!,
+                index: dataView.toSpec(),
                 size: 1000, // Adjust size as needed
               })
             ).pipe(
@@ -184,19 +190,24 @@ export class IndexUpdateService {
             );
           }),
           switchMap((searchSource) => {
+            // Set the query to match all documents
             return searchSource.fetch$({
               disableWarningToasts: true,
             });
-          })
+          }),
+          withLatestFrom(this._$dataView)
         )
         .subscribe({
-          next: (result) => {
-            console.log('🚀 ~ IndexUpdateService ~ listenForUpdates ~ result:', result);
+          next: ([response, dataView]) => {
+            const { hits, total } = response.rawResponse.hits;
+
+            const resultRows: DataTableRecord[] = hits.map((hit) => {
+              return buildDataTableRecord(hit, dataView);
+            });
+
+            this._$rows.next(resultRows);
           },
           error: (error) => {
-            if (error.name === 'AbortError') {
-              // return resolve(null);
-            }
             // setIsFetching(false);
           },
         })

@@ -8,22 +8,20 @@
  */
 
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
-import { useCancellableSearch } from '@kbn/ml-cancellable-search';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import type { FC } from 'react';
-import React, { lazy, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { lazy, useEffect, useMemo, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
-import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import useObservable from 'react-use/lib/useObservable';
+import type { EditLookupIndexContentContext, FlyoutDeps } from '../types';
 import { FlyoutFooter } from './flyout_footer';
-import type { EditLookupIndexContentContext, EditLookupIndexFlyoutDeps } from '../types';
 
 export interface FlyoutContentProps {
-  deps: EditLookupIndexFlyoutDeps;
+  deps: FlyoutDeps;
   props: EditLookupIndexContentContext;
 }
 
@@ -40,11 +38,7 @@ const docsCount = 10_000;
 export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
   const isMounted = useMountedState();
 
-  const { runRequest, cancelRequest, isLoading } = useCancellableSearch(deps.data);
-
   const [columns, setColumns] = useState<DatatableColumn[]>([]);
-  const [rows, setRows] = useState<DataTableRecord[]>([]);
-  const [totalHits, setTotalHits] = useState<number>(0);
   const [dataView, setDataView] = useState<DataView>();
 
   // Index
@@ -99,51 +93,11 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
     );
   }, [dataView]);
 
-  const fetchRows = useCallback(async () => {
-    cancelRequest();
-    try {
-      const response = await runRequest(
-        {
-          params: {
-            index: props.indexName,
-          },
-        }
-        // { searchStrategy: ESQL_SEARCH_STRATEGY }
-      );
+  const totalHits = 10;
 
-      if (!response || !isMounted()) {
-        return;
-      }
-      const { hits, total } = response.rawResponse.hits;
+  const rows = useObservable(deps.indexUpdateService.$rows, []);
 
-      const resultRows: DataTableRecord[] = hits.map((hit: any, idx: number) => {
-        return buildDataTableRecord(hit, dataView);
-        return {
-          id: String(hit._id),
-          raw: hit._source,
-          flattened: hit._source,
-        } as unknown as DataTableRecord;
-      });
-
-      setRows(resultRows);
-      setTotalHits(total);
-    } catch (e) {
-      // TODO error handling
-    }
-  }, [cancelRequest, isMounted, props.indexName, runRequest, dataView]);
-
-  useEffect(
-    function fetchIndexInfo() {
-      if (!dataView) return;
-      // TODO
-      // - check if the user has read/write access to the index
-      // - fetch index settings, e.g. if it is open/closed, etc
-      fetchRows();
-    },
-    [fetchRows, dataView]
-  );
-
-  if (!dataView || !dataViewColumns.length || !totalHits) return null;
+  if (!dataView || !dataViewColumns.length) return null;
 
   return (
     <KibanaContextProvider
