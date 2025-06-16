@@ -356,6 +356,7 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
           onClose={flyoutOnCloseHandler}
           css={() => ({
             ['--euiFixedHeadersOffset']: 0,
+            isolation: 'isolate', // ensures that tooltips within this flyout render as should
           })}
           ownFocus
           maskProps={{
