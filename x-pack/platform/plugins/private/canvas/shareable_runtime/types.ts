@@ -6,7 +6,7 @@
  */
 
 import { RefObject } from 'react';
-import { SavedObject, SavedObjectAttributes } from '@kbn/core/public';
+import type { SavedObject, SavedObjectAttributes } from '@kbn/core/server';
 
 import { ElementPosition, CanvasPage, CanvasWorkpad, RendererSpec } from '../types';
 

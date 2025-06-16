@@ -11,8 +11,8 @@ import {
   SavedObjectReferenceWithContext,
   SavedObjectsFindResult,
   SavedObjectsResolveResponse,
+  LegacyUrlAliasTarget,
 } from '@kbn/core-saved-objects-api-server';
-import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { SavedObject, BulkResolveError } from '../..';
 

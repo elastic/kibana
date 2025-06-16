@@ -12,7 +12,7 @@ import {
   ExpressionAstFunction,
 } from '@kbn/expressions-plugin/common';
 import { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import { SavedObjectReference } from '@kbn/core/types';
+import type { SavedObjectReference } from '@kbn/core/server';
 import { ExpressionValueFilter } from '../../../types';
 import { EmbeddableExpressionType, EmbeddableExpression } from '../../expression_types';
 import { getFunctionHelp } from '../../../i18n';

@@ -16,7 +16,7 @@ import { Subject } from 'rxjs';
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
-import type { SavedObjectError } from '@kbn/core-saved-objects-common';
+import type { SavedObjectError } from '@kbn/core/server';
 
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 

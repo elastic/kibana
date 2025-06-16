@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectAttribute, SavedObjectReference } from '@kbn/core/public';
+import type { SavedObjectAttribute, SavedObjectReference } from '@kbn/core/server';
 import {
   extractSearchSourceReferences,
   injectSearchSourceReferences,

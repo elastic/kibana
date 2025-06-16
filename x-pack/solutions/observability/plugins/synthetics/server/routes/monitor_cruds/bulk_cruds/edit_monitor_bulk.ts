@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
-import { SavedObjectError } from '@kbn/core-saved-objects-common';
+import type { SavedObject, SavedObjectsUpdateResponse, SavedObjectError } from '@kbn/core/server';
 import { RouteContext } from '../../types';
 import { FailedPolicyUpdate } from '../../../synthetics_service/private_location/synthetics_private_location';
 import {

@@ -9,10 +9,9 @@
 
 import { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, SavedObjectReference } from '@kbn/core/server';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 
-import { SavedObjectReference } from '@kbn/core/types';
 import {
   MigrateFunctionsObject,
   PersistableStateService,

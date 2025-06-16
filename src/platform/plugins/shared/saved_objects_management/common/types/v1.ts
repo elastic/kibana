@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectError } from '@kbn/core/types';
-import type { SavedObjectsNamespaceType } from '@kbn/core/public';
+import type { SavedObjectError, SavedObjectsNamespaceType } from '@kbn/core/server';
 
 /** Domain interfaces */
 

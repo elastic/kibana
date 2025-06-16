@@ -8,7 +8,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { SavedObjectReference } from '@kbn/core-saved-objects-common/src/server_types';
+import type { SavedObjectReference } from '@kbn/core/server';
 import type { DataViewSpec, DataView } from '@kbn/data-views-plugin/public';
 import type {
   FormBasedPersistedState,

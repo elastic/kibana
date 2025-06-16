@@ -42,7 +42,7 @@ import {
 } from '@kbn/alerts-ui-shared';
 import { isEmpty, some } from 'lodash';
 import { css } from '@emotion/react';
-import { SavedObjectAttribute } from '@kbn/core/types';
+import type { SavedObjectAttribute } from '@kbn/core/server';
 import { useRuleFormDispatch, useRuleFormState } from '../hooks';
 import { RuleFormParamsErrors } from '../common/types';
 import { validateAction, validateParamsForWarnings } from '../validation';

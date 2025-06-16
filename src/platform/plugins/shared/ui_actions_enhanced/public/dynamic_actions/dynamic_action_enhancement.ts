@@ -9,7 +9,7 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import { EnhancementRegistryDefinition } from '@kbn/embeddable-plugin/public';
-import { SavedObjectReference } from '@kbn/core/types';
+import type { SavedObjectReference } from '@kbn/core/server';
 import { DynamicActionsState } from '..';
 import { UiActionsServiceEnhancements } from '../services';
 

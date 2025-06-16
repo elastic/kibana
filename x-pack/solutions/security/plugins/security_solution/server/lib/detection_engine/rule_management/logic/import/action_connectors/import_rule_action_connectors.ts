@@ -7,7 +7,7 @@
 import { Readable } from 'stream';
 import { isBoom } from '@hapi/boom';
 
-import type { SavedObjectsImportResponse } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsImportResponse } from '@kbn/core/server';
 
 import type { WarningSchema } from '../../../../../../../common/api/detection_engine';
 import { mapSOErrorsToBulkErrors } from './utils';

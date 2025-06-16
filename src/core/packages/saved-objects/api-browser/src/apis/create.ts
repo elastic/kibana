@@ -10,7 +10,7 @@
 import type {
   SavedObjectReference,
   SavedObjectsMigrationVersion,
-} from '@kbn/core-saved-objects-common';
+} from '@kbn/core-saved-objects-api-server';
 
 /**
  * Options for creating a saved object.

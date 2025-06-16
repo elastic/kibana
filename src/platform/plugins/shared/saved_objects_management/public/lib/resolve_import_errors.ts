@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { HttpStart } from '@kbn/core/public';
 import type {
-  HttpStart,
   SavedObjectsImportConflictError,
   SavedObjectsImportRetry,
   SavedObjectsImportResponse,
   SavedObjectsImportAmbiguousConflictError,
-} from '@kbn/core/public';
+} from '@kbn/core/server';
 import { Required } from '@kbn/utility-types';
 import { FailedImport, ProcessedImportResponse } from './process_import_response';
 

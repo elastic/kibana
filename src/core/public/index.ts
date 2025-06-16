@@ -186,29 +186,6 @@ export type {
   SavedObjectsBulkResolveResponse,
   SavedObjectsBulkCreateObject,
 } from '@kbn/core-saved-objects-api-browser';
-export type {
-  SavedObject,
-  SavedObjectTypeIdTuple,
-  SavedObjectAttribute,
-  SavedObjectAttributes,
-  SavedObjectAttributeSingle,
-  SavedObjectError,
-  SavedObjectReference,
-  SavedObjectsMigrationVersion,
-  SavedObjectsImportResponse,
-  SavedObjectsImportSuccess,
-  SavedObjectsImportConflictError,
-  SavedObjectsImportAmbiguousConflictError,
-  SavedObjectsImportUnsupportedTypeError,
-  SavedObjectsImportMissingReferencesError,
-  SavedObjectsImportUnknownError,
-  SavedObjectsImportFailure,
-  SavedObjectsImportRetry,
-  SavedObjectsNamespaceType,
-  SavedObjectsImportSimpleWarning,
-  SavedObjectsImportActionRequiredWarning,
-  SavedObjectsImportWarning,
-} from '@kbn/core-saved-objects-common';
 
 export type {
   HttpHeadersInit,

@@ -13,7 +13,7 @@ import * as expressionFunctions from '../expression_functions';
 import { Execution, FunctionCacheItem } from '../execution';
 import { ExpressionAstFunction, parseExpression, formatExpression } from '../ast';
 import { MigrateFunction } from '@kbn/kibana-utils-plugin/common/persistable_state';
-import { SavedObjectReference } from '@kbn/core/types';
+import type { SavedObjectReference } from '@kbn/core/server';
 
 describe('Executor', () => {
   test('can instantiate', () => {

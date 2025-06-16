@@ -9,7 +9,7 @@
 
 import { compare as semverCompare } from 'semver';
 import { getFlattenedObject } from '@kbn/std';
-import type { SavedObjectsNamespaceType } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsNamespaceType } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { aggregateMappingAdditions } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsModelChange } from '@kbn/core-saved-objects-server';

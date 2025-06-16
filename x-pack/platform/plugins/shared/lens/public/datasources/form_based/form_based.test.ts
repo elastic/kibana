@@ -6,7 +6,7 @@
  */
 
 import { ReactElement } from 'react';
-import { SavedObjectReference } from '@kbn/core/public';
+import type { SavedObjectReference } from '@kbn/core/server';
 import { isFragment } from 'react-is';
 import { coreMock } from '@kbn/core/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';

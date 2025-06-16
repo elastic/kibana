@@ -7,11 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  CoreStart,
-  SavedObjectsMigrationVersion,
-  ResolvedSimpleSavedObject,
-} from '@kbn/core/public';
+import type { CoreStart, ResolvedSimpleSavedObject } from '@kbn/core/public';
+import type { SavedObjectsMigrationVersion } from '@kbn/core/server';
 import {
   IAggConfigs,
   SerializedSearchSourceFields,

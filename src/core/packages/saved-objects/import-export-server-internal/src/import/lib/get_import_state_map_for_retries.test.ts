@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectsImportRetry } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsImportRetry } from '@kbn/core-saved-objects-api-server';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 
 import { getImportStateMapForRetries } from './get_import_state_map_for_retries';

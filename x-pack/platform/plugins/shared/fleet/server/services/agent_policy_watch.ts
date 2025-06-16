@@ -12,11 +12,10 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
   SavedObjectsUpdateResponse,
+  SavedObjectError,
 } from '@kbn/core/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
-
-import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import type { AgentPolicySOAttributes } from '../types';
 

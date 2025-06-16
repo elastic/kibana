@@ -6,9 +6,8 @@
  */
 
 import { Boom, isBoom } from '@hapi/boom';
-import type { SavedObjectError } from '@kbn/core-saved-objects-common';
+import type { SavedObjectError, Logger } from '@kbn/core/server';
 import type { DecoratedError } from '@kbn/core-saved-objects-server';
-import type { Logger } from '@kbn/core/server';
 import type { CaseErrorResponse, SOWithErrors } from './types';
 
 export interface HTTPError extends Error {

@@ -8,7 +8,7 @@
 import { v5 as uuidv5 } from 'uuid';
 import { omit, uniqBy } from 'lodash';
 import pMap from 'p-map';
-import type { SavedObjectsImportSuccess } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsImportSuccess } from '@kbn/core/server';
 import { taggableTypes } from '@kbn/saved-objects-tagging-plugin/common/constants';
 import type { IAssignmentService } from '@kbn/saved-objects-tagging-plugin/server';
 import type { ITagsClient } from '@kbn/saved-objects-tagging-plugin/common/types';

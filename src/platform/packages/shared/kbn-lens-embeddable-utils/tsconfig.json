@@ -16,7 +16,6 @@
     "@kbn/es-query",
     "@kbn/expressions-plugin",
     "@kbn/visualizations-plugin",
-    "@kbn/core-saved-objects-common",
     "@kbn/esql-utils",
   ]
 }

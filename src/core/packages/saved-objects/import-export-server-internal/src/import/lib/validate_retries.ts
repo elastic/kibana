@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectsImportRetry } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsImportRetry } from '@kbn/core-saved-objects-api-server';
 import { getNonUniqueEntries } from './get_non_unique_entries';
 import { SavedObjectsImportError } from '../errors';
 

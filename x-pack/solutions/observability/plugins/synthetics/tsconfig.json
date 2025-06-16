@@ -58,7 +58,6 @@
     "@kbn/telemetry-plugin",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/core-saved-objects-api-server",
-    "@kbn/core-saved-objects-common",
     "@kbn/features-plugin",
     "@kbn/actions-plugin",
     "@kbn/core-elasticsearch-server",

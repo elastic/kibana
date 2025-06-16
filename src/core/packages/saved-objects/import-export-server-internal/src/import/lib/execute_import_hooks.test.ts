@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectsImportWarning } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsImportWarning } from '@kbn/core-saved-objects-api-server';
 import type { SavedObject, SavedObjectsImportHookResult } from '@kbn/core-saved-objects-server';
 import { executeImportHooks } from './execute_import_hooks';
 

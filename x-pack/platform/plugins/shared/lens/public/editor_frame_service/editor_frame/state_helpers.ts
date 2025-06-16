@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { SavedObjectReference } from '@kbn/core/server';
 import { Ast } from '@kbn/interpreter';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { difference } from 'lodash';

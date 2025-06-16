@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
-import type { SavedObjectReference } from '../..';
+import type { SavedObjectsMigrationVersion, SavedObjectReference } from '../types';
 
 /**
  * Object parameters for the bulk create operation

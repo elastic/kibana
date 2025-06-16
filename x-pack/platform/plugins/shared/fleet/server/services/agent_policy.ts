@@ -20,6 +20,7 @@ import type {
   SavedObjectsUpdateResponse,
   SavedObjectsFindOptions,
   Logger,
+  SavedObjectError,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
@@ -27,8 +28,6 @@ import { SavedObjectsUtils } from '@kbn/core/server';
 import type { BulkResponseItem } from '@elastic/elasticsearch/lib/api/types';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
-
-import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import { withSpan } from '@kbn/apm-utils';
 

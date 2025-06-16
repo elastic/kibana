@@ -13,7 +13,7 @@ import type {
   SavedObjectsImportUnknownError,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportResponse,
-} from '@kbn/core/public';
+} from '@kbn/core/server';
 import { processImportResponse } from './process_import_response';
 
 describe('processImportResponse()', () => {

@@ -9,7 +9,7 @@
 
 import Semver from 'semver';
 import { getFlattenedObject } from '@kbn/std';
-import type { SavedObjectsNamespaceType } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsNamespaceType } from '@kbn/core-saved-objects-api-server';
 import type {
   SavedObjectsType,
   SavedObjectsTypeMappingDefinition,

@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidV4 } from 'uuid';
-import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
+import { SavedObject } from '@kbn/core/server';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { DeleteMonitorAPI } from '../services/delete_monitor_api';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObject as SavedObjectType } from '@kbn/core-saved-objects-common';
+import type { SavedObject as SavedObjectType } from '@kbn/core-saved-objects-api-server';
 
 /**
  * Very simple wrapper for SavedObjects loaded from the server

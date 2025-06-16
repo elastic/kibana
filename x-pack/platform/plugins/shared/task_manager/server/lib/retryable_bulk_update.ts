@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectError } from '@kbn/core-saved-objects-common';
+import type { SavedObjectError } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '../task';
 import type { TaskStore, BulkUpdateResult, BulkGetResult } from '../task_store';
 import { isErr, isOk, asErr } from './result_type';

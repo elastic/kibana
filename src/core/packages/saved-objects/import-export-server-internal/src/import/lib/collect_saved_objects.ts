@@ -14,7 +14,7 @@ import {
   createMapStream,
   createPromiseFromStreams,
 } from '@kbn/utils';
-import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-api-server';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { SavedObjectsImportError } from '../errors';
 import { getNonUniqueEntries } from './get_non_unique_entries';

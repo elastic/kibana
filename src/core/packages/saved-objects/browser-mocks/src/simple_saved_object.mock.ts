@@ -11,7 +11,7 @@ import type {
   SavedObjectsClientContract,
   SimpleSavedObject,
 } from '@kbn/core-saved-objects-api-browser';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-api-server';
 
 type T = unknown;
 

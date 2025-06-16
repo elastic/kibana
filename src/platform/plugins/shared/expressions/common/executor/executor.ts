@@ -13,7 +13,7 @@ import { cloneDeep, mapValues } from 'lodash';
 import { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { SavedObjectReference } from '@kbn/core/types';
+import type { SavedObjectReference } from '@kbn/core/server';
 import {
   MigrateFunctionsObject,
   migrateToLatest,

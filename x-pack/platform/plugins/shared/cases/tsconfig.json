@@ -44,7 +44,6 @@
     "@kbn/task-manager-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/core-saved-objects-server",
-    "@kbn/core-saved-objects-common",
     "@kbn/safer-lodash-set",
     "@kbn/logging-mocks",
     "@kbn/core-saved-objects-api-server",

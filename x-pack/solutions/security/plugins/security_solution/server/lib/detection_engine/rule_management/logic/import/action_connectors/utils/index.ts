@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsImportFailure } from '@kbn/core/server';
 import type { BulkError } from '../../../../../routes/utils';
 import { createBulkErrorObject } from '../../../../../routes/utils';
 

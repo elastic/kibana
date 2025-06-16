@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { SavedObjectReference } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { Query, TimeRange } from '@kbn/es-query';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';

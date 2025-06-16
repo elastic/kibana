@@ -11,7 +11,7 @@ import {
   EmbeddableStateWithType,
   EmbeddablePersistableStateService,
 } from '@kbn/embeddable-plugin/common';
-import { SavedObjectReference } from '@kbn/core/types';
+import type { SavedObjectReference } from '@kbn/core/server';
 
 export const createEsqlControlInject = (): EmbeddablePersistableStateService['inject'] => {
   return (state: EmbeddableStateWithType, references: SavedObjectReference[]) => {

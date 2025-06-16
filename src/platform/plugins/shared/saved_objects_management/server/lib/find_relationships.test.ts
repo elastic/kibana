@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObject, SavedObjectError } from '@kbn/core/types';
+import type { SavedObject, SavedObjectError } from '@kbn/core/server';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { findRelationships } from './find_relationships';
 import { managementMock } from '../services/management.mock';

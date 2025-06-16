@@ -8,7 +8,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
+import { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-api-server';
 
 export interface OutdatedDocumentsQueryParams {
   coreMigrationVersionPerType: SavedObjectsMigrationVersion;

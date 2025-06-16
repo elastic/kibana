@@ -11,7 +11,8 @@ import React, { useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import type { Capabilities, SavedObjectsNamespaceType } from '@kbn/core/public';
+import type { Capabilities } from '@kbn/core/public';
+import type { SavedObjectsNamespaceType } from '@kbn/core/server';
 import { EuiIconTip, EuiToolTip } from '@elastic/eui';
 
 import type {

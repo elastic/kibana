@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { SavedObject } from '@kbn/core/types';
+import type { SavedObject } from '@kbn/core/server';
 import type { SavedObjectsExportResultDetails } from '@kbn/core/server';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 

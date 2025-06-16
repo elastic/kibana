@@ -9,7 +9,7 @@
 
 import Boom from '@hapi/boom';
 import type { Logger } from '@kbn/logging';
-import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-api-server';
 import type {
   SavedObjectUnsanitizedDoc,
   ISavedObjectTypeRegistry,

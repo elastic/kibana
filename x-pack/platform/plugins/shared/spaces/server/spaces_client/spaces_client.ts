@@ -11,9 +11,9 @@ import type { BuildFlavor } from '@kbn/config/src/types';
 import type {
   ISavedObjectsPointInTimeFinder,
   ISavedObjectsRepository,
+  LegacyUrlAliasTarget,
   SavedObject,
 } from '@kbn/core/server';
-import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/server';

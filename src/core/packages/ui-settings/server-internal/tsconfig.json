@@ -31,7 +31,6 @@
     "@kbn/core-saved-objects-server-mocks",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-saved-objects-api-server-internal",
-    "@kbn/core-saved-objects-common",
     "@kbn/utility-types",
   ],
   "exclude": [

@@ -7,7 +7,7 @@
 
 import { uniq, mapValues, difference } from 'lodash';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type { SavedObjectReference } from '@kbn/core/public';
+import type { SavedObjectReference } from '@kbn/core/server';
 import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,

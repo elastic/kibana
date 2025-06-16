@@ -309,9 +309,6 @@ export type {
   SavedObjectsImportActionRequiredWarning,
   SavedObjectsImportWarning,
   SavedObjectTypeIdTuple,
-} from '@kbn/core-saved-objects-common';
-
-export type {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkUpdateObject,
@@ -361,7 +358,10 @@ export type {
   SavedObjectsBulkDeleteResponse,
   SavedObjectsPointInTimeFinderClient,
   SavedObjectsBulkDeleteStatus,
+  SavedObjectError,
+  LegacyUrlAliasTarget,
 } from '@kbn/core-saved-objects-api-server';
+
 export type {
   SavedObject,
   SavedObjectAttribute,

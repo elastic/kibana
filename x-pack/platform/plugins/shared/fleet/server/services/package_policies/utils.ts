@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
 
 import {
   LICENCE_FOR_OUTPUT_PER_INTEGRATION,

@@ -12,7 +12,7 @@ import { LENS_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { DataViewSpec, SavedQuery } from '@kbn/data-plugin/common';
-import { SavedObjectReference } from '@kbn/core-saved-objects-common';
+import type { SavedObjectReference } from '@kbn/core/server';
 import type { DateRange } from '../types';
 
 export const LENS_SHARE_STATE_ACTION = 'LENS_SHARE_STATE_ACTION';

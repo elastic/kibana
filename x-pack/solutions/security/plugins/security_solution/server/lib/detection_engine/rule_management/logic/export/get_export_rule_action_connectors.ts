@@ -6,7 +6,7 @@
  */
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
+import type { SavedObjectTypeIdTuple } from '@kbn/core/server';
 import type {
   SavedObjectsExportResultDetails,
   ISavedObjectsExporter,

@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectsImportResponse } from '@kbn/core-saved-objects-common';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectsImportResponse,
+  SavedObjectsClientContract,
+} from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import type {
   ISavedObjectTypeRegistry,

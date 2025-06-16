@@ -8,13 +8,13 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type {
+  SavedObjectsClientContract,
   SavedObjectsImportFailure,
   SavedObjectError,
   SavedObjectsImportRetry,
-} from '@kbn/core-saved-objects-common';
-import type { SavedObject } from '@kbn/core-saved-objects-server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+} from '@kbn/core-saved-objects-api-server';
 import type { ImportStateMap } from './types';
 
 interface CheckConflictsParams {

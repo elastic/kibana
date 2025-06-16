@@ -8,7 +8,7 @@
  */
 
 import { identity } from 'lodash';
-import { SavedObjectReference } from '@kbn/core/types';
+import type { SavedObjectReference } from '@kbn/core/server';
 import {
   MigrateFunctionsObject,
   GetMigrationFunctionObjectFn,

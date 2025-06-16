@@ -10,7 +10,7 @@
 import { Observable } from 'rxjs';
 import { SearchFilterConfig, EuiTableFieldDataColumnType, EuiComboBoxProps } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
-import { SavedObject, SavedObjectReference } from '@kbn/core/types';
+import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
 import { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { ITagsClient, Tag, TagWithOptionalId } from '../common';
 

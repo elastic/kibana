@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type {
+  SavedObjectsClientContract,
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
-} from '@kbn/core-saved-objects-common';
-import type { SavedObject } from '@kbn/core-saved-objects-server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+} from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsImportError } from '../errors';
 import type { ImportStateMap } from './types';
 

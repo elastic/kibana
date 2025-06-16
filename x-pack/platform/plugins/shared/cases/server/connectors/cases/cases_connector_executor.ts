@@ -10,8 +10,7 @@ import pMap from 'p-map';
 import { get, partition, pick } from 'lodash';
 import dateMath from '@kbn/datemath';
 import { CaseStatuses } from '@kbn/cases-components';
-import type { SavedObjectError } from '@kbn/core-saved-objects-common';
-import type { Logger } from '@kbn/core/server';
+import type { Logger, SavedObjectError } from '@kbn/core/server';
 import { getFlattenedObject } from '@kbn/std';
 import type {
   CustomFieldsConfiguration,

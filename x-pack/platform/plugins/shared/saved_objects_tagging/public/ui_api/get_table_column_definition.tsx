@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { SavedObject, SavedObjectReference } from '@kbn/core/public';
+import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
 import {
   SavedObjectsTaggingApiUi,
   SavedObjectsTaggingApiUiComponent,

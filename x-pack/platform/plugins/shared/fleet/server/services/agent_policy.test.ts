@@ -8,8 +8,7 @@ import type { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { Logger } from '@kbn/core/server';
-import type { SavedObjectError } from '@kbn/core-saved-objects-common';
+import type { Logger, SavedObjectError } from '@kbn/core/server';
 
 import { createSavedObjectClientMock } from '../mocks';
 
