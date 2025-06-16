@@ -193,6 +193,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       upgrade9x: `${ENTERPRISE_SEARCH_DOCS}upgrading-to-9-x.html`,
       usersAccess: `${ENTERPRISE_SEARCH_DOCS}users-access.html`,
     },
+    visitSearchLabs: `${ELASTIC_WEBSITE_URL}search-labs/tutorials`,
+    notebooksExamples: `${ELASTIC_WEBSITE_URL}search-labs/tutorials/examples`,
+    customerEngineerRequestForm: `${ELASTIC_WEBSITE_URL}contact/ce-help`,
     metricbeat: {
       base: `${ELASTIC_DOCS}reference/beats/metricbeat`,
       configure: `${ELASTIC_DOCS}reference/beats/metricbeat/configuring-howto-metricbeat`,

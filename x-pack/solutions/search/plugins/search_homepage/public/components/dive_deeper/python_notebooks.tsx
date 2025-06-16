@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { docLinks } from '../../../common/doc_links';
 
 export const PythonNotebooks: React.FC = () => (
   <EuiFlexGroup direction="column" gutterSize="m">
@@ -33,7 +34,7 @@ export const PythonNotebooks: React.FC = () => (
     <EuiFlexItem grow={false}>
       <span>
         <EuiButton
-          href="https://www.elastic.co/search-labs/tutorials/examples"
+          href={docLinks.notebooksExamples}
           target="_blank"
           data-test-subj="openNotebooksButton"
         >

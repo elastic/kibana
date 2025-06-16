@@ -18,6 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../hooks/use_kibana';
+import { docLinks } from '../../common/doc_links';
 
 const UPLOAD_FILE_URL = '/app/home#/tutorial_directory/fileDataViz';
 
@@ -107,7 +108,7 @@ export const ConnectToElasticsearchSidePanel = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiLink
-              href="https://www.elastic.co/contact/ce-help"
+              href={docLinks.customerEngineerRequestForm}
               target="_blank"
               data-test-subj="customerEngineerRequestFormLink"
             >

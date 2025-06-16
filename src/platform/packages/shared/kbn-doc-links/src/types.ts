@@ -80,6 +80,9 @@ export interface DocLinks {
     readonly auditdModule: string;
     readonly systemModule: string;
   };
+  readonly visitSearchLabs: string;
+  readonly notebooksExamples: string;
+  readonly customerEngineerRequestForm: string;
   readonly metricbeat: {
     readonly base: string;
     readonly configure: string;

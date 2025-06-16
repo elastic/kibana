@@ -14,7 +14,7 @@ export const Footer: React.FC = () => (
   <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m">
     <EuiFlexItem grow={false}>
       <EuiLink
-        href="https://www.elastic.co/community/"
+        href={docLinks.elasticCommunity}
         target="_blank"
         data-test-subj="elasticCommunityLink"
       >

@@ -6,6 +6,7 @@
  */
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { docLinks } from '../../../common/doc_links';
 import React from 'react';
 
 export const ElasticsearchDocumentation: React.FC = () => (
@@ -32,8 +33,9 @@ export const ElasticsearchDocumentation: React.FC = () => (
     <EuiFlexItem grow={false}>
       <span>
         <EuiButton
-          href="https://www.elastic.co/docs/solutions/search/get-started"
+          href={docLinks.elasticsearchGettingStarted}
           iconType={'documentation'}
+          target="_blank"
           data-test-subj="viewDocumentationButton"
         >
           {i18n.translate('xpack.searchHomepage.elasticsearchDocumentation.buttonText', {

@@ -6,6 +6,8 @@
  */
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { docLinks } from '../../../common/doc_links';
+
 import React from 'react';
 
 export const SearchLabs: React.FC = () => (
@@ -33,7 +35,7 @@ export const SearchLabs: React.FC = () => (
       <span>
         <EuiButton
           iconType={'popout'}
-          href="https://www.elastic.co/search-labs/tutorials"
+          href={docLinks.visitSearchLabs}
           target="_blank"
           iconSide="right"
           data-test-subj="searchLabsButton"
