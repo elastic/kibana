@@ -51,6 +51,8 @@ export const INTEGRATION_POLICIES_UPGRADE_CHECKBOX = 'epmDetails.upgradePolicies
 
 export const getIntegrationCard = (integration: string) => `integration-card:epr:${integration}`;
 export const getIntegrationCategories = (category: string) => `epmList.categories.${category}`;
+export const getIntegrationTableIntegrationName = (integration: string) =>
+  `installedIntegrationsTable.integrationNameColumn.${integration}`;
 
 export const ADD_INTEGRATION_FLYOUT = {
   SELECT_INTEGRATION_COMBOBOX: 'comboBoxToggleListButton',
