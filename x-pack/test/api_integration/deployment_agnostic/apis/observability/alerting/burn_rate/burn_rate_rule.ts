@@ -4,11 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { v4 as uuidv4 } from 'uuid';
 import { cleanup, Dataset, generate, PartialConfig } from '@kbn/data-forge';
 import { RoleCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
 import expect from '@kbn/expect';
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+
+const RULE_TYPE_ID = 'slo.rules.burnRate';
+const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
+const RULE_ALERT_INDEX = '.alerts-observability.slo.alerts-default';
+const RULE_ALERT_INDEX_PATTERN = '.alerts-observability.slo.alerts-*';
+const ALERT_ACTION_INDEX = 'alert-action-slo';
+const DATA_VIEW_ID = 'data-view-id';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');
@@ -21,24 +28,33 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const sloApi = getService('sloApi');
   const config = getService('config');
   const isServerless = config.get('serverless');
+  const kibanaServer = getService('kibanaServer');
   const expectedConsumer = isServerless ? 'observability' : 'slo';
 
   describe('Burn rate rule', () => {
-    const RULE_TYPE_ID = 'slo.rules.burnRate';
-    const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
-    const RULE_ALERT_INDEX = '.alerts-observability.slo.alerts-default';
-    const ALERT_ACTION_INDEX = 'alert-action-slo';
-    const DATA_VIEW_ID = 'data-view-id';
     let dataForgeConfig: PartialConfig;
     let dataForgeIndices: string[];
     let actionId: string;
     let ruleId: string;
     let dependencyRuleId: string;
+    let editorRoleAuthc: RoleCredentials;
     let adminRoleAuthc: RoleCredentials;
+    let currentRoleAuthc: RoleCredentials;
     let internalHeaders: InternalRequestHeader;
+    let sloId: string;
 
     before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+      await esClient.deleteByQuery({
+        index: RULE_ALERT_INDEX_PATTERN,
+        query: {
+          match_all: {},
+        },
+        conflicts: 'proceed',
+      });
+      editorRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+      currentRoleAuthc = isServerless ? editorRoleAuthc : adminRoleAuthc;
       internalHeaders = samlAuth.getInternalRequestHeader();
       dataForgeConfig = {
         schedule: [
@@ -66,7 +82,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         docCountTarget: 360,
       });
       await dataViewApi.create({
-        roleAuthc: adminRoleAuthc,
+        roleAuthc: currentRoleAuthc,
         name: DATA_VIEW,
         id: DATA_VIEW_ID,
         title: DATA_VIEW,
@@ -76,53 +92,67 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     after(async () => {
       await supertestWithoutAuth
         .delete(`/api/alerting/rule/${ruleId}`)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(currentRoleAuthc.apiKeyHeader)
         .set(internalHeaders);
       await supertestWithoutAuth
         .delete(`/api/actions/connector/${actionId}`)
-        .set(adminRoleAuthc.apiKeyHeader)
+        .set(currentRoleAuthc.apiKeyHeader)
         .set(internalHeaders);
-      await esClient.deleteByQuery({
-        index: RULE_ALERT_INDEX,
-        query: {
-          bool: {
-            should: [
-              { term: { 'kibana.alert.rule.uuid': ruleId } },
-              { term: { 'kibana.alert.rule.uuid': dependencyRuleId } },
-            ],
+      if (ruleId) {
+        await esClient.deleteByQuery({
+          index: RULE_ALERT_INDEX,
+          query: {
+            bool: {
+              should: [
+                { term: { 'kibana.alert.rule.uuid': ruleId } },
+                ...(dependencyRuleId
+                  ? [{ term: { 'kibana.alert.rule.uuid': dependencyRuleId } }]
+                  : []),
+              ],
+            },
           },
-        },
-        conflicts: 'proceed',
-      });
-      await esClient.deleteByQuery({
-        index: '.kibana-event-log-*',
-        query: { term: { 'rule.id': ruleId } },
-        conflicts: 'proceed',
-      });
+          conflicts: 'proceed',
+        });
+
+        await esClient.deleteByQuery({
+          index: '.kibana-event-log-*',
+          query: { term: { 'rule.id': ruleId } },
+          conflicts: 'proceed',
+        });
+      }
       await dataViewApi.delete({
-        roleAuthc: adminRoleAuthc,
+        roleAuthc: currentRoleAuthc,
         id: DATA_VIEW_ID,
       });
       await supertestWithoutAuth
-        .delete('/api/observability/slos/my-custom-id')
-        .set(adminRoleAuthc.apiKeyHeader)
+        .delete(`/api/observability/slos/${sloId}`)
+        .set(currentRoleAuthc.apiKeyHeader)
         .set(internalHeaders);
       await esDeleteAllIndices([ALERT_ACTION_INDEX, ...dataForgeIndices]);
       await cleanup({ client: esClient, config: dataForgeConfig, logger });
-      await samlAuth.invalidateM2mApiKeyWithRoleScope(adminRoleAuthc);
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(currentRoleAuthc);
+      await kibanaServer.savedObjects.cleanStandardList();
+      await esClient.deleteByQuery({
+        index: RULE_ALERT_INDEX_PATTERN,
+        query: {
+          match_all: {},
+        },
+        conflicts: 'proceed',
+      });
     });
 
-    describe('Rule creation', () => {
+    describe('Rule creation', function () {
       it('creates rule successfully', async () => {
+        sloId = uuidv4();
         actionId = await alertingApi.createIndexConnector({
-          roleAuthc: adminRoleAuthc,
+          roleAuthc: currentRoleAuthc,
           name: 'Index Connector: Slo Burn rate API test',
           indexName: ALERT_ACTION_INDEX,
         });
 
         await sloApi.create(
           {
-            id: 'my-custom-id',
+            id: sloId,
             name: 'my custom name',
             description: 'my custom description',
             indicator: {
@@ -144,11 +174,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
             groupBy: '*',
           },
-          adminRoleAuthc
+          currentRoleAuthc
         );
 
         const dependencyRule = await alertingApi.createRule({
-          roleAuthc: adminRoleAuthc,
+          roleAuthc: currentRoleAuthc,
           tags: ['observability'],
           consumer: expectedConsumer,
           name: 'SLO Burn Rate rule - Dependency',
@@ -157,7 +187,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             interval: '1m',
           },
           params: {
-            sloId: 'my-custom-id',
+            sloId,
             windows: [
               {
                 id: '1',
@@ -222,7 +252,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         dependencyRuleId = dependencyRule.id;
         const createdRule = await alertingApi.createRule({
-          roleAuthc: adminRoleAuthc,
+          roleAuthc: currentRoleAuthc,
           tags: ['observability'],
           consumer: expectedConsumer,
           name: 'SLO Burn Rate rule',
@@ -231,7 +261,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             interval: '1m',
           },
           params: {
-            sloId: 'my-custom-id',
+            sloId,
             dependencies: [
               {
                 ruleId: dependencyRule.id,
@@ -305,7 +335,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('should be active', async () => {
         const executionStatus = await alertingApi.waitForRuleStatus({
-          roleAuthc: adminRoleAuthc,
+          roleAuthc: currentRoleAuthc,
           ruleId,
           expectedStatus: 'active',
         });
@@ -325,10 +355,88 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should find the created rule with correct information about the consumer', async () => {
-        const match = await alertingApi.findInRules(adminRoleAuthc, ruleId);
+        const match = await alertingApi.findInRules(currentRoleAuthc, ruleId);
         expect(match).not.to.be(undefined);
         expect(match.consumer).to.be(expectedConsumer);
       });
     });
   });
 }
+
+export const getSloBurnRateRuleConfiguration = ({
+  sloId,
+  consumer,
+}: {
+  sloId: string;
+  consumer: string;
+}) => ({
+  tags: ['observability'],
+  consumer,
+  name: 'SLO Burn Rate rule',
+  ruleTypeId: RULE_TYPE_ID,
+  schedule: {
+    interval: '1m',
+  },
+  params: {
+    sloId,
+    windows: [
+      {
+        id: '1',
+        actionGroup: 'slo.burnRate.alert',
+        burnRateThreshold: 3.36,
+        maxBurnRateThreshold: 720,
+        longWindow: {
+          value: 1,
+          unit: 'h',
+        },
+        shortWindow: {
+          value: 5,
+          unit: 'm',
+        },
+      },
+      {
+        id: '2',
+        actionGroup: 'slo.burnRate.high',
+        burnRateThreshold: 1.4,
+        maxBurnRateThreshold: 120,
+        longWindow: {
+          value: 6,
+          unit: 'h',
+        },
+        shortWindow: {
+          value: 30,
+          unit: 'm',
+        },
+      },
+      {
+        id: '3',
+        actionGroup: 'slo.burnRate.medium',
+        burnRateThreshold: 0.7,
+        maxBurnRateThreshold: 30,
+        longWindow: {
+          value: 24,
+          unit: 'h',
+        },
+        shortWindow: {
+          value: 120,
+          unit: 'm',
+        },
+      },
+      {
+        id: '4',
+        actionGroup: 'slo.burnRate.low',
+        burnRateThreshold: 0.234,
+        maxBurnRateThreshold: 10,
+        longWindow: {
+          value: 72,
+          unit: 'h',
+        },
+        shortWindow: {
+          value: 360,
+          unit: 'm',
+        },
+      },
+    ],
+  },
+  actions: [],
+});
