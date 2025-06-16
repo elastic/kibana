@@ -69,10 +69,10 @@ describe('TheHiveParamsFields renders', () => {
       'subActionParams',
       {
         tlp: 2,
-        severity: TheHiveSeverity.RULE_SEVERITY,
+        severity: TheHiveSeverity.MEDIUM,
+        isRuleSeverity: false,
         tags: [],
         sourceRef: '{{alert.uuid}}',
-        body: null,
       },
       0
     );

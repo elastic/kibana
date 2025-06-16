@@ -41,7 +41,7 @@ export const renderParameterTemplates: RenderParameterTemplates<ExecutorParams> 
       subActionParams: {
         ...renderMustacheObject(logger, params.subActionParams, variables),
         severity:
-          params.subActionParams.severity === 5
+          params.subActionParams.isRuleSeverity === true
             ? mapSeverity(
                 renderMustacheString(logger, '{{context.rule.severity}}', variables, 'json')
               )

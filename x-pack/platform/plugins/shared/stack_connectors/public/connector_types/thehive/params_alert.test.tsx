@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { TheHiveParamsAlertFields } from './params_alert';
-import { SUB_ACTION, TheHiveSeverity } from '../../../common/thehive/constants';
+import { SUB_ACTION } from '../../../common/thehive/constants';
 import { ExecutorParams, ExecutorSubActionCreateAlertParams } from '../../../common/thehive/types';
 
 describe('TheHiveParamsFields renders', () => {
@@ -18,6 +18,7 @@ describe('TheHiveParamsFields renders', () => {
     description: 'description test',
     tlp: 2,
     severity: 2,
+    isRuleSeverity: false,
     tags: ['test1'],
     source: 'source test',
     type: 'sourceType test',
@@ -59,7 +60,6 @@ describe('TheHiveParamsFields renders', () => {
     expect(getByTestId('titleInput')).toBeInTheDocument();
     expect(getByTestId('descriptionTextArea')).toBeInTheDocument();
     expect(getByTestId('tagsInput')).toBeInTheDocument();
-    expect(getByTestId('rule-severity-toggle')).toBeInTheDocument();
     expect(getByTestId('severitySelectInput')).toBeInTheDocument();
     expect(getByTestId('tlpSelectInput')).toBeInTheDocument();
     expect(getByTestId('typeInput')).toBeInTheDocument();
@@ -67,22 +67,6 @@ describe('TheHiveParamsFields renders', () => {
     expect(getByTestId('sourceRefInput')).toBeInTheDocument();
 
     expect(getByTestId('severitySelectInput')).toHaveValue('2');
-    expect(getByTestId('rule-severity-toggle')).not.toBeChecked();
     expect(getByTestId('tlpSelectInput')).toHaveValue('2');
-  });
-
-  it('hides the severity select input when rule severity is enabled', () => {
-    const { getByTestId } = render(<TheHiveParamsAlertFields {...defaultProps} />);
-    const ruleSeverityToggleEl = getByTestId('rule-severity-toggle');
-
-    fireEvent.click(ruleSeverityToggleEl);
-    expect(getByTestId('rule-severity-toggle')).toBeEnabled();
-    expect(editAction).toHaveBeenCalledWith(
-      'subActionParams',
-      { ...subActionParams, severity: TheHiveSeverity.RULE_SEVERITY },
-      0
-    );
-
-    expect(screen.queryByTestId('severitySelectInput')).not.toBeInTheDocument();
   });
 });

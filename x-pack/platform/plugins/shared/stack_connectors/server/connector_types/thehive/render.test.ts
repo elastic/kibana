@@ -19,7 +19,8 @@ const params = {
     source: 'source',
     sourceRef: '{{alert.uuid}}',
     tlp: 2,
-    severity: 5,
+    severity: 3,
+    isRuleSeverity: true,
     body: '{"observables":[{"datatype":"url","data":"{{url}}"}],"tags":["test"]}',
   },
 };
@@ -43,6 +44,7 @@ describe('TheHive - renderParameterTemplates', () => {
       sourceRef: variables.alert.uuid,
       tlp: 2,
       severity: 3,
+      isRuleSeverity: true,
       body: `{"observables":[{"datatype":"url","data":"${variables.url}"}],"tags":["test"]}`,
     });
   });
@@ -57,6 +59,7 @@ describe('TheHive - renderParameterTemplates', () => {
       body: 'error rendering mustache template "{"observables":[{"datatype":"url","data":"{{url}}"}],"tags":["test"]}": test error',
       description: 'error rendering mustache template "description": test error',
       severity: 2,
+      isRuleSeverity: true,
       source: 'error rendering mustache template "source": test error',
       sourceRef: 'error rendering mustache template "{{alert.uuid}}": test error',
       title: 'error rendering mustache template "title": test error',

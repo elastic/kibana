@@ -24,7 +24,6 @@ export enum TheHiveSeverity {
   MEDIUM = 2,
   HIGH = 3,
   CRITICAL = 4,
-  RULE_SEVERITY = 5,
 }
 export enum TheHiveTLP {
   CLEAR = 0,
@@ -32,10 +31,4 @@ export enum TheHiveTLP {
   AMBER = 2,
   AMBER_STRICT = 3,
   RED = 4,
-}
-export enum TheHiveTemplate {
-  CUSTOM_TEMPLATE = 'Custom Template',
-  COMPROMISED_USER_ACCOUNT_INVESTIGATION = 'Compromised User Account Investigation',
-  MALICIOUS_FILE_ANALYSIS = 'Malicious File Analysis',
-  SUSPICIOUS_NETWORK_ACTIVITY = 'Suspicious Network Activity',
 }
