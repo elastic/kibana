@@ -914,7 +914,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
               requiresApproval: false,
               outputDestination: 'SentinelCloud',
               inputParams: terminateScriptInfo.buildScriptArgs({
-                processName: (reqIndexOptions.parameters as ResponseActionParametersWithProcessName).process_name,
+                processName: (reqIndexOptions.parameters as ResponseActionParametersWithProcessName)
+                  .process_name,
               }),
             },
           });
