@@ -32,7 +32,7 @@ interface InferenceFlyoutWrapperProps {
   http: HttpSetup;
   toasts: IToasts;
   isEdit?: boolean;
-  isServerless: boolean;
+  isServerless?: boolean;
   onSubmitSuccess?: (inferenceId: string) => void;
   inferenceEndpoint?: InferenceEndpoint;
 }

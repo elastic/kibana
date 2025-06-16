@@ -7,7 +7,7 @@
 
 import { ConfigProperties } from './dynamic_config/types';
 
-export interface ConfigEntry extends ConfigProperties {
+interface ConfigEntry extends ConfigProperties {
   key: string;
 }
 

@@ -33,7 +33,6 @@ import { hasSaveActionsCapability } from '../../../lib/capabilities';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionTypeMenu } from '../action_type_menu';
 import { useCreateConnector } from '../../../hooks/use_create_connector';
-import { useConnectorContext } from '../../../context/use_connector_context';
 import { ConnectorForm, ConnectorFormState, ResetForm } from '../connector_form';
 import { ConnectorFormSchema } from '../types';
 import { FlyoutHeader } from './header';
@@ -52,15 +51,17 @@ export interface CreateConnectorFlyoutProps {
 const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   actionTypeRegistry,
   featureId,
+  isServerless: isServerlessProp,
   onClose,
   onConnectorCreated,
   onTestConnector,
 }) => {
   const {
     application: { capabilities },
+    isServerless: isServerlessContext,
   } = useKibana().services;
-  const { isServerless } = useConnectorContext();
   const { isLoading: isSavingConnector, createConnector } = useCreateConnector();
+  const isServerless = isServerlessProp ?? isServerlessContext;
 
   const isMounted = useRef(false);
   const [allActionTypes, setAllActionTypes] = useState<ActionTypeIndex | undefined>(undefined);
@@ -283,6 +284,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
               actionTypeModel={actionTypeModel}
               connector={initialConnector}
               isEdit={false}
+              isServerless={isServerless}
               onChange={setFormState}
               setResetForm={setResetForm}
             />

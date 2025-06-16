@@ -14,26 +14,28 @@ import { ActionTypeModel, ConnectorValidationFunc } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { useKibana } from '../../../common/lib/kibana';
-import { useConnectorContext } from '../../context/use_connector_context';
 import { ConnectorFormFieldsGlobal } from './connector_form_fields_global';
 
 interface ConnectorFormFieldsProps {
   actionTypeModel: ActionTypeModel | null;
   isEdit: boolean;
+  isServerless?: boolean;
   registerPreSubmitValidator: (validator: ConnectorValidationFunc) => void;
 }
 
 const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
   actionTypeModel,
   isEdit,
+  isServerless: isServerlessProp,
   registerPreSubmitValidator,
 }) => {
   const {
     application: { capabilities },
+    isServerless: isServerlessContext,
   } = useKibana().services;
-  const { isServerless } = useConnectorContext();
   const canSave = hasSaveActionsCapability(capabilities);
   const FieldsComponent = actionTypeModel?.actionConnectorFields ?? null;
+  const isServerless = isServerlessProp ?? isServerlessContext;
 
   return (
     <>

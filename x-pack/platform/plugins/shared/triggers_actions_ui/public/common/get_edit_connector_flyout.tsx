@@ -18,9 +18,7 @@ export const getEditConnectorFlyoutLazy = (
   props: EditConnectorFlyoutProps & { connectorServices: ConnectorServices }
 ) => {
   return (
-    <ConnectorProvider
-      value={{ services: props.connectorServices, isServerless: props.isServerless }}
-    >
+    <ConnectorProvider value={{ services: props.connectorServices }}>
       <QueryClientProvider client={queryClient}>
         <EditConnectorFlyout {...props} />
       </QueryClientProvider>

@@ -19,9 +19,7 @@ export const getAddConnectorFlyoutLazy = (
 ) => {
   return (
     <QueryClientProvider client={queryClient}>
-      <ConnectorProvider
-        value={{ services: props.connectorServices, isServerless: props.isServerless }}
-      >
+      <ConnectorProvider value={{ services: props.connectorServices }}>
         <CreateConnectorFlyout {...props} />
       </ConnectorProvider>
     </QueryClientProvider>

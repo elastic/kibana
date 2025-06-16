@@ -31,7 +31,6 @@ import { ConnectorForm, ConnectorFormState } from '../connector_form';
 import type { ConnectorFormSchema } from '../types';
 import { useUpdateConnector } from '../../../hooks/use_edit_connector';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useConnectorContext } from '../../../context/use_connector_context';
 import { hasSaveActionsCapability } from '../../../lib/capabilities';
 import { TestConnectorForm } from '../test_connector_form';
 import { ConnectorRulesList } from '../connector_rules_list';
@@ -59,6 +58,7 @@ const getConnectorWithoutSecrets = (
 const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   actionTypeRegistry,
   connector,
+  isServerless: isServerlessProp,
   onClose,
   tab = EditConnectorTabs.Configuration,
   onConnectorUpdated,
@@ -66,8 +66,9 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const {
     docLinks,
     application: { capabilities },
+    isServerless: isServerlessContext,
   } = useKibana().services;
-  const { isServerless } = useConnectorContext();
+  const isServerless = isServerlessProp ?? isServerlessContext;
 
   const isMounted = useRef(false);
   const canSave = hasSaveActionsCapability(capabilities);
@@ -256,6 +257,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
                 actionTypeModel={actionTypeModel}
                 connector={getConnectorWithoutSecrets(connector)}
                 isEdit={isEdit}
+                isServerless={isServerless}
                 onChange={setFormState}
                 onFormModifiedChange={onFormModifiedChange}
               />
@@ -308,6 +310,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     showButtons,
     isSaved,
     isSaving,
+    isServerless,
     onClickSave,
     isFormModified,
     hasErrors,
