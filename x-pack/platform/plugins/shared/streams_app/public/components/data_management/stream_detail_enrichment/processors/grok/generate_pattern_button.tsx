@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { AIFeatures } from './use_ai_features';
 import { useKibana } from '../../../../../hooks/use_kibana';
 
@@ -140,17 +141,47 @@ export const GeneratePatternButton = ({
             </EuiFlexItem>
           )}
       </EuiFlexGroup>
-      {aiFeatures.isManagedAIConnector && !aiFeatures.hasAcknowledgedAdditionalCharges && (
-        <EuiCallOut onDismiss={() => aiFeatures.acknowledgeAdditionalCharges(true)}>
-          {i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.managedConnectorTooltip',
-            {
-              defaultMessage:
-                'Generating patterns is powered by a preconfigured LLM. Additional charges apply',
-            }
-          )}
-        </EuiCallOut>
-      )}
     </>
+  );
+};
+
+export interface AdditionalChargesCalloutProps {
+  aiFeatures: AIFeatures;
+}
+
+export const AdditionalChargesCallout = ({ aiFeatures }: AdditionalChargesCalloutProps) => {
+  const {
+    core: { docLinks },
+  } = useKibana();
+
+  return (
+    <EuiCallOut onDismiss={() => aiFeatures.acknowledgeAdditionalCharges(true)}>
+      <FormattedMessage
+        id="xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.managedConnectorTooltip"
+        defaultMessage="Elastic Managed LLM is the new default for generating patterns and incurs <costLink>additional charges</costLink>. Other LLM connectors remain available. <learnMoreLink>Learn more</learnMoreLink>"
+        values={{
+          costLink: (...chunks: React.ReactNode[]) => (
+            <EuiLink
+              href={docLinks?.links?.observability?.elasticManagedLlmUsageCost}
+              target="_blank"
+              rel="noopener noreferrer"
+              external
+            >
+              {chunks}
+            </EuiLink>
+          ),
+          learnMoreLink: (...chunks: React.ReactNode[]) => (
+            <EuiLink
+              href={docLinks?.links?.observability?.elasticManagedLlm}
+              target="_blank"
+              rel="noopener noreferrer"
+              external
+            >
+              {chunks}
+            </EuiLink>
+          ),
+        }}
+      />
+    </EuiCallOut>
   );
 };

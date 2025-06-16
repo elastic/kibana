@@ -129,7 +129,7 @@ export function createTestConfig(
           port: dockerRegistryPort,
           args: dockerArgs,
           waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 2 * 10000, // 2 minutes
+          waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
         },
       }),
       servicesRequiredForTestAnalysis: ['datasetQualityFtrConfig', 'registry'],

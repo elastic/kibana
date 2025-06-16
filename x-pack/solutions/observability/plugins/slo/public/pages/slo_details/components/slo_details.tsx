@@ -12,7 +12,7 @@ import React, { useEffect, useState } from 'react';
 import { BurnRatePanel } from './burn_rate_panel/burn_rate_panel';
 import { EventsChartPanel } from './events_chart_panel/events_chart_panel';
 import { HistoricalDataCharts } from './historical_data_charts';
-import { SLODetailsHistory } from './history/slo_details_history';
+import { SloDetailsHistory } from './history/slo_details_history';
 import { Definition } from './definition/definition';
 import { SloDetailsAlerts } from './slo_detail_alerts';
 import { SloHealthCallout } from './slo_health_callout';
@@ -36,16 +36,20 @@ export interface Props {
   selectedTabId: SloTabId;
 }
 export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
-  const [range, setRange] = useState<{ from: Date; to: Date }>({
-    from: moment().subtract(1, 'day').toDate(),
-    to: new Date(),
+  const [range, setRange] = useState<{ from: Date; to: Date }>(() => {
+    const now = new Date();
+    return {
+      from: moment(now).subtract(1, 'day').toDate(),
+      to: now,
+    };
   });
 
   useEffect(() => {
     let intervalId: any;
     if (isAutoRefreshing) {
       intervalId = setInterval(() => {
-        setRange({ from: moment().subtract(1, 'day').toDate(), to: new Date() });
+        const now = new Date();
+        setRange({ from: moment(now).subtract(1, 'day').toDate(), to: now });
       }, 60 * 1000);
     }
 
@@ -53,13 +57,7 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
   }, [isAutoRefreshing]);
 
   if (selectedTabId === HISTORY_TAB_ID) {
-    return (
-      <SLODetailsHistory
-        slo={slo}
-        isAutoRefreshing={isAutoRefreshing}
-        selectedTabId={selectedTabId}
-      />
-    );
+    return <SloDetailsHistory slo={slo} isAutoRefreshing={isAutoRefreshing} />;
   }
 
   if (selectedTabId === DEFINITION_TAB_ID) {
@@ -77,13 +75,7 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
 
       <EuiFlexGroup direction="column" gutterSize="l">
         <BurnRatePanel slo={slo} isAutoRefreshing={isAutoRefreshing} />
-
-        <HistoricalDataCharts
-          slo={slo}
-          selectedTabId={selectedTabId}
-          isAutoRefreshing={isAutoRefreshing}
-        />
-
+        <HistoricalDataCharts slo={slo} isAutoRefreshing={isAutoRefreshing} />
         <EventsChartPanel slo={slo} range={range} />
       </EuiFlexGroup>
     </EuiFlexGroup>
