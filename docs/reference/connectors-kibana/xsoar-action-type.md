@@ -1,5 +1,5 @@
 ---
-navigation_title: "XSOAR"
+navigation_title: "{{xsoar}}"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/xsoar-action-type.html
 ---
