@@ -11,18 +11,24 @@ import { FilterFn } from 'elastic-apm-node';
 import { isPlainObject, has } from 'lodash';
 
 export const piiFilter: FilterFn = (payload) => {
-  // if user context is defined, apply the pii filter
-  if (has(payload.context, 'user')) {
-    // if the user context has loopable properties, redact the values
-    if (payload.context.user != null && isPlainObject(payload.context.user)) {
-      const userContextKeys = Object.keys(payload.context.user);
-      for (const key of userContextKeys) {
-        payload.context.user[key] = '[REDACTED]';
+  try {
+    // if user context is defined, apply the pii filter
+    if (has(payload.context, 'user')) {
+      // if the user context has loopable properties, redact the values
+      if (payload.context.user != null && isPlainObject(payload.context.user)) {
+        const userContextKeys = Object.keys(payload.context.user);
+        for (const key of userContextKeys) {
+          payload.context.user[key] = '[REDACTED]';
+        }
+      } else {
+        // Replace with a known invalid object to avoid APM trace discards
+        payload.context.user = { id: '[INVALID]' };
       }
-    } else {
-      // Replace with a known invalid object to avoid APM trace discards
-      payload.context.user = { id: '[INVALID]' };
     }
+  } catch (error) {
+    // If there's an error for any reason in the context access, override the whole user context.
+    Object.assign(payload.context, { user: { id: '[INVALID]' } });
   }
+
   return payload;
 };

@@ -9,11 +9,10 @@
 
 import { isPlainObject } from 'lodash';
 import { piiFilter } from './pii_filter';
-import { Payload as ApmPayload } from 'elastic-apm-node';
 
-interface Payload extends ApmPayload {
+interface Payload {
   context?: {
-    user?: unknown;
+    user?: any;
     [key: string]: any;
   };
   [key: string]: any;
@@ -46,8 +45,37 @@ describe('piiFilter', () => {
       { context: { user: 42 } },
       { context: { user: null } },
       { context: { user: undefined } },
+
       { context: { user: [1, 2, 3] } },
     ];
+    for (const payload of payloads) {
+      const result = piiFilter({ ...payload });
+      expect(isPayload(result) && result.context?.user).toEqual({ id: '[INVALID]' });
+    }
+  });
+
+  it('replaces user context with { id: "[INVALID]" } on any error', () => {
+    const payloads: Payload[] = [
+      // Proxy is not a valid user context
+      {
+        context: {
+          user: new Proxy(
+            { username: 'alice' },
+            {
+              set(target, prop) {
+                if (prop === 'username') {
+                  throw new Error('Access denied');
+                }
+                return true;
+              },
+            }
+          ),
+        },
+      },
+      // Object.freeze is not a valid user context
+      { context: { user: Object.freeze({ username: 'alice' }) } },
+    ];
+
     for (const payload of payloads) {
       const result = piiFilter({ ...payload });
       expect(isPayload(result) && result.context?.user).toEqual({ id: '[INVALID]' });
