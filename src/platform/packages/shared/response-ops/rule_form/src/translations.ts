@@ -110,6 +110,14 @@ export const ALERT_LINK_DASHBOARDS_TITLE = i18n.translate(
   }
 );
 
+export const ALERT_LINK_DASHBOARDS_LABEL_TOOLTIP_CONTENT = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleDefinition.alertLinkDashboards.label.tooltipContent',
+  {
+    defaultMessage:
+      'Choose dashboards to link to this rule. Alerts created by this rule will include links to these dashboards.',
+  }
+);
+
 export const ALERT_LINK_DASHBOARDS_PLACEHOLDER = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDefinition.alertLinkDashboardsTitle',
   {
@@ -308,6 +316,14 @@ export const RULE_INVESTIGATION_GUIDE_LABEL = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDetails.investigationGuide.editor.title',
   {
     defaultMessage: 'Investigation guide',
+  }
+);
+
+export const RULE_INVESTIGATION_GUIDE_LABEL_TOOLTIP_CONTENT = i18n.translate(
+  'responseOpsRuleForm.ruleDetails.investigationGuideFormRow.toolTip.content',
+  {
+    defaultMessage:
+      'These details will be included in a new tab on the alert details page for every alert triggered by this rule.',
   }
 );
 
