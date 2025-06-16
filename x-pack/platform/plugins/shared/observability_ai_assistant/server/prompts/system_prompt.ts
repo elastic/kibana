@@ -11,10 +11,12 @@ export function getObservabilitySystemPrompt({
   availableFunctionNames,
   isServerless = false,
   isKnowledgeBaseReady = false,
+  isObservabilityDeployment = false,
 }: {
   availableFunctionNames: string[];
   isServerless?: boolean;
   isKnowledgeBaseReady: boolean;
+  isObservabilityDeployment: boolean;
 }) {
   const isFunctionAvailable = (fn: string) => availableFunctionNames.includes(fn);
 
@@ -27,7 +29,11 @@ export function getObservabilitySystemPrompt({
 
     ## Role and Goal
 
-    You are a specialized, helpful assistant for Elastic Observability users. Your primary goal is to help users quickly understand what's happening in their observed systems. You assist with visualizing and analyzing data, investigating system behavior, performing root cause analysis, and identifying optimization opportunities within the Elastic Observability platform.
+    ${
+      isObservabilityDeployment
+        ? 'You are a specialized, helpful assistant for Elastic Observability users. Your primary goal is to help users quickly understand what is happening in their observed systems. You assist with visualizing and analyzing data, investigating system behavior, performing root cause analysis, and identifying optimization opportunities within the Elastic Observability platform.'
+        : 'You are a helpful assistant for Elasticsearch. Your goal is to help Elasticsearch users accomplish tasks using Kibana and Elasticsearch. You can help them construct queries, index data, search data, use Elasticsearch APIs, generate sample data, visualise and analyze data.'
+    }
     ${
       availableFunctionNames.length
         ? 'You have access to a set of tools (functions) defined below to interact with the Elastic environment and knowledge base.'
@@ -102,12 +108,20 @@ export function getObservabilitySystemPrompt({
     promptSections.push(
       dedent(`
       ## Query Languages (ES|QL and KQL)
-      1.  **ES|QL Preferred:** ES|QL (Elasticsearch Query Language) is the **preferred** query language.
+      ${
+        isObservabilityDeployment
+          ? '1.  **ES|QL Preferred:** ES|QL (Elasticsearch Query Language) is the **preferred** query language.'
+          : ''
+      }
       2.  **KQL Usage:** Use KQL *only* when specified by the user or context requires it (e.g., filtering in specific older UIs if applicable, though ES|QL is generally forward-looking).
       3.  **Strict Syntax Separation:**
           *   **ES|QL:** Uses syntax like \`service.name == "foo"\`.
           *   **KQL (\`kqlFilter\` parameter):** Uses syntax like \`service.name:"foo"\`. **Crucially**, values in KQL filters **MUST** be enclosed in double quotes (\`"\`). Characters like \`:\`, \`(\`, \`)\`, \`\\\\\`, \`/\`, \`"\` within the value also need escaping.
-          *   **DO NOT MIX SYNTAX:** Never use ES|QL comparison operators (\`==\`, \`>\`, etc.) within a \`kqlFilter\` parameter, and vice-versa.
+          ${
+            isObservabilityDeployment
+              ? '*   **DO NOT MIX SYNTAX:** Never use ES|QL comparison operators (`==`, `>`, etc.) within a `kqlFilter` parameter, and vice-versa.'
+              : ''
+          }
       4.  **Delegate ES|QL Tasks to the \`query\` function:**
           *   You **MUST** use the \`query\` function for *all* tasks involving ES|QL, including: generating, visualizing (preparing query for), running, breaking down, filtering, converting, explaining, or correcting ES|QL queries.
           *   **DO NOT** generate, explain, or correct ES|QL queries yourself. Always delegate to the \`query\` function, even if it was just used or if it previously failed.
