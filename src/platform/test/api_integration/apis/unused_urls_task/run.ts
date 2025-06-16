@@ -21,6 +21,13 @@ export default function ({ getService }: FtrProviderContext) {
       );
     });
 
+    afterEach(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.importExport.unload(
+        'src/platform/test/api_integration/fixtures/unused_urls_task/urls.ndjson'
+      );
+    });
+
     it('runs unused URLs cleanup', async () => {
       const response = await supertest.post('/internal/unused_urls_task/run');
 
