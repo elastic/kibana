@@ -71,7 +71,7 @@ export class OnechatPlugin
         coreStart.chrome.docTitle.change(ONECHAT_TITLE);
         const services = getServices();
 
-        return renderApp({ core: coreStart, services, element, history });
+        return renderApp({ core: coreStart, services, element, history, plugins: startPluginDeps });
       },
     });
     return {};
