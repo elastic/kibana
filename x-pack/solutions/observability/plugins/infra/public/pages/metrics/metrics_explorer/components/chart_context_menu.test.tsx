@@ -15,20 +15,10 @@ import type { Capabilities } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { MetricsDataViewProvider, SourceProvider } from '../../../../containers/metrics_source';
-import { TIMESTAMP_FIELD } from '../../../../../common/constants';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 
 const coreStartMock = coreMock.createStart();
-const mockDataView = {
-  id: 'mock-id',
-  title: 'mock-title',
-  timeFieldName: TIMESTAMP_FIELD,
-  isPersisted: () => false,
-  getName: () => 'mock-data-view',
-  toSpec: () => ({}),
-} as jest.Mocked<DataView>;
 
 const series = { id: 'example-01', rows: [], columns: [] };
 const uiCapabilities: Capabilities = {

@@ -119,7 +119,11 @@ describe('ConditionalToolTip', () => {
       interval: '60s',
       reload: jest.fn(() => Promise.resolve({} as SnapshotNodeResponse)),
     });
-    mockedUseWaffleOptionsContext.mockReturnValue(mockedUseWaffleOptionsContextReturnValue);
+    mockedUseWaffleOptionsContext.mockReturnValue(
+      mockedUseWaffleOptionsContextReturnValue as unknown as ReturnType<
+        typeof useWaffleOptionsContext
+      >
+    );
 
     render(<ConditionalToolTip currentTime={currentTime} node={NODE} nodeType="host" />);
 

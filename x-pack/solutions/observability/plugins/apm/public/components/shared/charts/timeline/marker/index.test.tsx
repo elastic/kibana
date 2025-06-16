@@ -42,8 +42,9 @@ describe('Marker', () => {
       error: {
         trace: { id: '123' },
         transaction: { id: '456' },
-        error: { grouping_key: '123' },
+        error: { grouping_key: '123', id: '123test' },
         service: { name: 'bar' },
+        timestamp: { us: 1000000 },
       },
       serviceColor: '#fff',
     };
