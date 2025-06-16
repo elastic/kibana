@@ -31,8 +31,16 @@ import {
   ConditionEntryField,
   OperatingSystem,
 } from '@kbn/securitysolution-utils';
+import type { ValueSuggestionsGetFn } from '@kbn/unified-search-plugin/public/autocomplete/providers/value_suggestion_provider';
 import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
+import { useKibana } from '../../../../../common/lib/kibana';
 import { useCanAssignArtifactPerPolicy, useGetUpdatedTags } from '../../../../hooks/artifacts';
+import { useSuggestions } from '../../../../hooks/use_suggestions'
+import { useFetchIndex } from '../../../../../common/containers/source';
+import {
+  ENDPOINT_FIELDS_SEARCH_STRATEGY,
+  eventsIndexPattern,
+} from '../../../../../../common/endpoint/constants';
 import { FormattedError } from '../../../../components/formatted_error';
 import type {
   TrustedAppConditionEntry,
@@ -67,6 +75,7 @@ import { TrustedAppsArtifactsDocsLink } from './artifacts_docs_link';
 import { isAdvancedModeEnabled } from '../../../../../../common/endpoint/service/artifacts/utils';
 import { ADVANCED_MODE_TAG } from '../../../../../../common/endpoint/service/artifacts/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { TrustedAppsApiClient } from '../../service';
 
 interface FieldValidationState {
   /** If this fields state is invalid. Drives display of errors on the UI */
@@ -242,6 +251,7 @@ const defaultConditionEntry = (): TrustedAppConditionEntry<ConditionEntryField.H
 
 export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
   ({ item, onChange, mode, error: submitError }) => {
+    const isTAAdvancedModeFeatureFlagEnabled = useIsExperimentalFeatureEnabled('trustedAppsAdvancedMode');
     const getTestId = useTestIdGenerator('trustedApps-form');
     const [visited, setVisited] = useState<
       Partial<{
@@ -253,8 +263,25 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
     const [validationResult, setValidationResult] = useState<ValidationResult>(() =>
       validateValues(item)
     );
+    const { http } = useKibana().services;
+    const getSuggestionsFn = useCallback<ValueSuggestionsGetFn>(
+      ({ field, query }) => {
+        const trustedAppsAPIClient = new TrustedAppsApiClient(http);
+        return trustedAppsAPIClient.getSuggestions({ field: field.name, query });
+      },
+      [http]
+    );
 
-    const isTAAdvancedModeFeatureFlagEnabled = useIsExperimentalFeatureEnabled('trustedAppsAdvancedMode');
+    const autocompleteSuggestions = useSuggestions(getSuggestionsFn);
+    
+    // This value has to be memoized to avoid infinite useEffect loop on useFetchIndex
+    const indexNames = useMemo(() => [eventsIndexPattern], []);
+    const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(
+      indexNames,
+      undefined,
+      ENDPOINT_FIELDS_SEARCH_STRATEGY
+    );
+
     const isFormAdvancedMode: boolean = useMemo(() => isAdvancedModeEnabled(item), [item]);
     const { getTagsUpdatedBy } = useGetUpdatedTags(item);
 

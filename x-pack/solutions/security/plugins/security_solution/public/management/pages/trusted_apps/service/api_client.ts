@@ -20,6 +20,9 @@ import {
 } from '../../../../common/utils/exception_list_items';
 import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 import { TRUSTED_APPS_EXCEPTION_LIST_DEFINITION } from '../constants';
+import { SUGGESTIONS_INTERNAL_ROUTE } from '../../../../../common/endpoint/constants';
+import type { EndpointSuggestionsBody } from '../../../../../common/api/endpoint';
+import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 
 function readTransform(item: ExceptionListItemSchema): ExceptionListItemSchema {
   return {
@@ -61,5 +64,20 @@ export class TrustedAppsApiClient extends ExceptionsListApiClient {
       readTransform,
       writeTransform
     );
+  }
+  
+  /**
+   * Returns suggestions for given field
+   */
+  async getSuggestions(body: EndpointSuggestionsBody): Promise<string[]> {
+    const result: string[] = await this.getHttp().post(
+      resolvePathVariables(SUGGESTIONS_INTERNAL_ROUTE, { suggestion_type: 'trustedApps' }),
+      {
+        version: '1',
+        body: JSON.stringify(body),
+      }
+    );
+
+    return result;
   }
 }
