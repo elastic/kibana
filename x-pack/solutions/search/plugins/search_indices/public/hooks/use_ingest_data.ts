@@ -1,0 +1,61 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { useMutation } from '@tanstack/react-query';
+import { i18n } from '@kbn/i18n';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import { PerformInstallResponse } from '@kbn/sample-data-ingest/common/http_api/installation';
+import { useKibana } from './use_kibana';
+import { navigateToIndexDetails } from '../components/utils';
+
+type ServerError = IHttpFetchError<ResponseErrorBody>;
+
+export function useIngestSampleData() {
+  const {
+    application,
+    http,
+    sampleDataIngest,
+    notifications: { toasts },
+  } = useKibana().services;
+
+  const { mutate: ingestSampleData, isLoading } = useMutation<
+    PerformInstallResponse,
+    ServerError,
+    void
+  >(
+    ['ingestSampleData'],
+    () => {
+      return sampleDataIngest.installation.install();
+    },
+    {
+      onSuccess: ({ indexName }) => {
+        toasts?.addSuccess(
+          i18n.translate(
+            'xpack.searchIndices.shared.createIndex.ingestSampleData.successNotification',
+            {
+              defaultMessage: 'The Sample Data was successfully installed',
+            }
+          )
+        );
+
+        navigateToIndexDetails(application, http, indexName);
+      },
+      onError: (error) => {
+        toasts?.addError(new Error(error.body?.message ?? error.message), {
+          title: i18n.translate(
+            'xpack.searchIndices.shared.createIndex.ingestSampleData.errorNotification',
+            {
+              defaultMessage: 'Something went wrong while installing the Sample Data',
+            }
+          ),
+        });
+      },
+    }
+  );
+
+  return { ingestSampleData, isLoading };
+}

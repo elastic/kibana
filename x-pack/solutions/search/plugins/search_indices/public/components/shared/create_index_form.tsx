@@ -8,6 +8,7 @@
 import React from 'react';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,7 +16,6 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiIcon,
-  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -30,8 +30,11 @@ export interface CreateIndexFormProps {
   indexName: string;
   indexNameHasError: boolean;
   isLoading: boolean;
+  isCreateIndexDisabled: boolean;
+  isIngestingSampleData: boolean;
   onCreateIndex: (e: React.FormEvent<HTMLFormElement>) => void;
   onFileUpload: () => void;
+  onIngestSampleData: () => void;
   onIndexNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   showAPIKeyCreateLabel: boolean;
   userPrivileges?: UserStartPrivilegesResponse;
@@ -41,9 +44,12 @@ export const CreateIndexForm = ({
   indexName,
   indexNameHasError,
   isLoading,
+  isCreateIndexDisabled,
+  isIngestingSampleData,
   onCreateIndex,
   onFileUpload,
   onIndexNameChange,
+  onIngestSampleData,
   showAPIKeyCreateLabel,
   userPrivileges,
 }: CreateIndexFormProps) => {
@@ -103,7 +109,8 @@ export const CreateIndexForm = ({
                 disabled={
                   userPrivileges?.privileges?.canManageIndex === false ||
                   indexNameHasError ||
-                  isLoading
+                  isLoading ||
+                  isCreateIndexDisabled
                 }
                 isLoading={isLoading}
                 type="submit"
@@ -135,28 +142,66 @@ export const CreateIndexForm = ({
       </EuiForm>
       <EuiHorizontalRule margin="none" />
       <EuiPanel color="transparent" paddingSize="s">
-        <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexGroup gutterSize="l" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="documents" />
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
+              <EuiFlexItem>
+                <EuiText color="subdued" size="s">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.searchIndices.shared.createIndex.fileUpload.text"
+                      defaultMessage="Already have some data?"
+                    />
+                  </p>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  color="primary"
+                  iconSide="left"
+                  iconType="documents"
+                  size="s"
+                  data-test-subj="uploadFileLink"
+                  onClick={onFileUpload}
+                >
+                  <FormattedMessage
+                    id="xpack.searchIndices.shared.createIndex.fileUpload.link"
+                    defaultMessage="Upload a file"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText color="subdued" size="s">
-              <p>
-                <FormattedMessage
-                  id="xpack.searchIndices.shared.createIndex.fileUpload.text"
-                  defaultMessage="Already have some data? {link}"
-                  values={{
-                    link: (
-                      <EuiLink data-test-subj="uploadFileLink" onClick={onFileUpload}>
-                        {i18n.translate('xpack.searchIndices.shared.createIndex.fileUpload.link', {
-                          defaultMessage: 'Upload a file',
-                        })}
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </p>
-            </EuiText>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiText color="subdued" size="s">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.searchIndices.shared.createIndex.sampleData.text"
+                      defaultMessage="Want to try sample data?"
+                    />
+                  </p>
+                </EuiText>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  color="primary"
+                  iconSide="left"
+                  iconType="download"
+                  size="s"
+                  data-test-subj="instalSampleBtn"
+                  isLoading={isIngestingSampleData}
+                  onClick={onIngestSampleData}
+                >
+                  <FormattedMessage
+                    id="xpack.searchIndices.shared.createIndex.ingestSampleData.btn"
+                    defaultMessage="Install a sample dataset"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
