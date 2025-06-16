@@ -25,13 +25,12 @@ import useObservable from 'react-use/lib/useObservable';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { AggregateQuery, TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ILicense } from '@kbn/licensing-plugin/public';
 import { ESQLLang, ESQL_LANG_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { fixESQLQueryWithVariables } from '@kbn/esql-utils';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
@@ -59,6 +58,7 @@ import {
   esqlEditorStyles,
 } from './esql_editor.styles';
 import type { ESQLEditorProps, ESQLEditorDeps, ControlsContext } from './types';
+import { useEditorQuerySync } from './useEditorQuerySync';
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
@@ -129,16 +129,8 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   const activeSolutionId = useObservable(core.chrome.getActiveSolutionNavId$());
 
-  const fixedQuery = useMemo(
-    () => fixESQLQueryWithVariables(query.esql, esqlVariables),
-    [esqlVariables, query.esql]
-  );
-
   const variablesService = kibana.services?.esql?.variablesService;
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
-  const [code, setCode] = useState<string>(fixedQuery ?? '');
-  // To make server side errors less "sticky", register the state of the code when submitting
-  const [codeWhenSubmitted, setCodeStateOnSubmission] = useState(code);
   const [editorHeight, setEditorHeight] = useState(
     editorIsInline ? EDITOR_INITIAL_HEIGHT_INLINE_EDITING : EDITOR_INITIAL_HEIGHT
   );
@@ -156,7 +148,6 @@ export const ESQLEditor = memo(function ESQLEditor({
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
-  const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
   const [license, setLicense] = useState<ILicense | undefined>(undefined);
 
@@ -168,33 +159,26 @@ export const ESQLEditor = memo(function ESQLEditor({
     errors: serverErrors ? parseErrors(serverErrors, code) : [],
     warnings: serverWarning ? parseWarning(serverWarning) : [],
   });
-  const onQueryUpdate = useCallback(
-    (value: string) => {
-      if (!editorIsInline) {
-        // preventing a race condition in the inline editor mode
-        setCode(value);
-      }
-      onTextLangQueryChange({ esql: value } as AggregateQuery);
-    },
-    [onTextLangQueryChange, setCode, editorIsInline]
-  );
 
-  const onQuerySubmit = useCallback(() => {
-    if (isQueryLoading && isLoading && allowQueryCancellation) {
-      abortController?.abort();
-      setIsQueryLoading(false);
-    } else {
-      setIsQueryLoading(true);
-      const abc = new AbortController();
-      setAbortController(abc);
-
-      const currentValue = editor1.current?.getValue();
-      if (currentValue != null) {
-        setCodeStateOnSubmission(currentValue);
-      }
-      onTextLangQuerySubmit({ esql: currentValue } as AggregateQuery, abc);
-    }
-  }, [isQueryLoading, isLoading, allowQueryCancellation, abortController, onTextLangQuerySubmit]);
+  const {
+    handleQuerySubmit,
+    handleQueryUpdate,
+    isQueryLoading,
+    code,
+    codeWhenSubmitted,
+    fixedQuery,
+  } = useEditorQuerySync({
+    isLoading: isLoading ?? false,
+    initialQueryEsql: query.esql,
+    esqlVariables,
+    editorIsInline,
+    isEditorMounted: Boolean(editor1.current), // Pass boolean indicating if editor is mounted
+    allowQueryCancellation,
+    onTextLangQuerySubmit,
+    currentAbortController: abortController,
+    setNewAbortController: setAbortController,
+    onTextLangQueryChange,
+  });
 
   const onCommentLine = useCallback(() => {
     const currentSelection = editor1?.current?.getSelection();
@@ -221,18 +205,6 @@ export const ESQLEditor = memo(function ESQLEditor({
       editor1.current?.executeEdits('comment', edits);
     }
   }, []);
-
-  useEffect(() => {
-    if (!isLoading) setIsQueryLoading(false);
-  }, [isLoading]);
-
-  useEffect(() => {
-    if (editor1.current) {
-      if (code !== fixedQuery && (editorIsInline || !isQueryLoading)) {
-        setCode(fixedQuery);
-      }
-    }
-  }, [code, fixedQuery, isQueryLoading, editorIsInline]);
 
   // Enable the variables service if the feature is supported in the consumer app
   useEffect(() => {
@@ -301,7 +273,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   monaco.editor.registerCommand('esql.control.time_literal.create', async (...args) => {
     const position = editor1.current?.getPosition();
     await triggerControl(
-      fixedQuery,
+      code, // Use code from hook
       ESQLVariableType.TIME_LITERAL,
       position,
       uiActions,
@@ -314,7 +286,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   monaco.editor.registerCommand('esql.control.fields.create', async (...args) => {
     const position = editor1.current?.getPosition();
     await triggerControl(
-      fixedQuery,
+      code, // Use code from hook
       ESQLVariableType.FIELDS,
       position,
       uiActions,
@@ -327,7 +299,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   monaco.editor.registerCommand('esql.control.values.create', async (...args) => {
     const position = editor1.current?.getPosition();
     await triggerControl(
-      fixedQuery,
+      code, // Use code from hook
       ESQLVariableType.VALUES,
       position,
       uiActions,
@@ -340,7 +312,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   monaco.editor.registerCommand('esql.control.functions.create', async (...args) => {
     const position = editor1.current?.getPosition();
     await triggerControl(
-      fixedQuery,
+      code, // Use code from hook
       ESQLVariableType.FUNCTIONS,
       position,
       uiActions,
@@ -353,7 +325,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   editor1.current?.addCommand(
     // eslint-disable-next-line no-bitwise
     monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-    onQuerySubmit
+    handleQuerySubmit // Use handleQuerySubmit from the hook
   );
 
   const styles = esqlEditorStyles(
@@ -838,7 +810,7 @@ export const ESQLEditor = memo(function ESQLEditor({
                       return hoverProvider?.provideHover(model, position, token);
                     },
                   }}
-                  onChange={onQueryUpdate}
+                  onChange={handleQueryUpdate} // Use handleQueryUpdate from hook
                   editorDidMount={(editor) => {
                     editor1.current = editor;
                     const model = editor.getModel();
@@ -929,8 +901,8 @@ export const ESQLEditor = memo(function ESQLEditor({
         }}
         code={code}
         onErrorClick={onErrorClick}
-        runQuery={onQuerySubmit}
-        updateQuery={onQueryUpdate}
+        runQuery={handleQuerySubmit} // Use handleQuerySubmit from the hook
+        updateQuery={handleQueryUpdate} // Add updateQuery prop back
         detectedTimestamp={detectedTimestamp}
         hideRunQueryText={hideRunQueryText}
         editorIsInline={editorIsInline}
