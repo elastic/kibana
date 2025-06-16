@@ -14,6 +14,7 @@ import type {
 import { schema } from '@kbn/config-schema';
 import type { LogMeta, Logger, EventTypeOpts, AnalyticsServiceStart } from '@kbn/core/server';
 import type {
+  Action,
   HealthDiagnosticQuery,
   HealthDiagnosticQueryResult,
   HealthDiagnosticQueryStats,
@@ -43,6 +44,8 @@ const TIMEOUT = '5m';
 const QUERY_ARTIFACT_ID = 'health-diagnostic-query';
 
 export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
+  private readonly salt = 'c2a5d101-d0ef-49cc-871e-6ee55f9546f8';
+
   private readonly logger: Logger;
   private queryExecutor?: CircuitBreakingQueryExecutor;
   private analytics?: AnalyticsServiceStart;
@@ -148,7 +151,11 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
             currentPage,
           } as LogMeta);
 
-          this.reportEBT(TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_RESULT_EVENT, queryResult);
+          const filtered = query.filterlist
+            ? await this.applyFilterlist(queryResult, query.filterlist)
+            : queryResult;
+
+          this.reportEBT(TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_RESULT_EVENT, filtered);
 
           currentPage++;
         }
@@ -281,5 +288,53 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       } as LogMeta);
       return [];
     }
+  }
+
+  private async applyFilterlist(
+    result: HealthDiagnosticQueryResult,
+    rules: Record<string, Action>
+  ): Promise<HealthDiagnosticQueryResult> {
+    const documents: Array<Record<string, unknown>> = result.data as Array<Record<string, unknown>>;
+    const filtered: Array<Record<string, unknown>> = [];
+
+    for (const doc of documents) {
+      const newDoc: Record<string, unknown> = {};
+
+      for (const path of Object.keys(rules)) {
+        const keys = path.split('.');
+        let src = doc;
+        let dst = newDoc;
+
+        for (let i = 0; i < keys.length; i++) {
+          const key = keys[i];
+
+          if (!(key in src)) break;
+
+          if (i === keys.length - 1) {
+            const value = src[key];
+            dst[key] = rules[path] === 'mask' ? await this.hashField(String(value)) : value;
+          } else {
+            dst[key] ??= {};
+            src = src[key] as Record<string, unknown>;
+            dst = dst[key] as Record<string, unknown>;
+          }
+        }
+      }
+
+      filtered.push(newDoc);
+    }
+
+    return {
+      ...result,
+      data: filtered as unknown[],
+    };
+  }
+
+  private async hashField(value: string): Promise<string> {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(this.salt + value);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
   }
 }

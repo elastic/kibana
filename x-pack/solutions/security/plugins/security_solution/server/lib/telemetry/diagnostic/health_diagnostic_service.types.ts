@@ -6,7 +6,6 @@
  */
 
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-export type Stats = Record<string, unknown>;
 import type { AnalyticsServiceStart, ElasticsearchClient } from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
@@ -14,6 +13,9 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { ITelemetryReceiver } from '../receiver';
 import type { CdnConfig } from '../artifact';
+
+export type Action = 'mask' | 'keep';
+export type Stats = Record<string, unknown>;
 
 export interface HealthDiagnosticServiceSetup {
   taskManager: TaskManagerSetupContract;
@@ -31,6 +33,7 @@ export interface HealthDiagnosticQuery {
   esQuery: SearchRequest;
   scheduleInterval: string;
   isEnabled?: boolean;
+  filterlist?: Record<string, Action>;
 }
 
 export interface HealthDiagnosticService {

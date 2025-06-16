@@ -6,7 +6,7 @@
  */
 
 import { type Interval, intervalFromDate } from '@kbn/task-manager-plugin/server/lib/intervals';
-import type { HealthDiagnosticQuery } from './health_diagnostic_service.types';
+import type { Action, HealthDiagnosticQuery } from './health_diagnostic_service.types';
 
 export function nextExecution(
   startDate: Date,
@@ -25,6 +25,7 @@ export function parseDiagnosticQueries(input: unknown): HealthDiagnosticQuery[] 
       esQuery: query.esQuery,
       scheduleInterval: query.scheduleInterval,
       isEnabled: query.isEnabled,
+      filterlist: query.filterlist as Record<string, Action>,
     } as HealthDiagnosticQuery;
   });
 }
