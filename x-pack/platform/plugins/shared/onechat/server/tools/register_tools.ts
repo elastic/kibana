@@ -8,30 +8,28 @@
 import type { RegisteredTool } from '@kbn/onechat-server';
 import type { ToolsServiceSetup } from '../services/tools';
 import {
-  listIndicesTool,
-  getIndexMappingsTool,
   getDocumentByIdTool,
-  searchFulltextTool,
-  searchDslTool,
-  rerankDocumentsTool,
-  nlToEsqlTool,
   executeEsqlTool,
+  naturalLanguageSearchTool,
+  generateEsqlTool,
+  relevanceSearchTool,
+  getIndexMappingsTool,
+  listIndicesTool,
   indexExplorerTool,
 } from './retrieval';
 import { researcherTool } from '../services/agents/research';
 
 export const registerTools = ({ tools: registry }: { tools: ToolsServiceSetup }) => {
   const tools: Array<RegisteredTool<any, any>> = [
-    // listIndicesTool(),
-    // getIndexMappingsTool(),
     getDocumentByIdTool(),
-    searchFulltextTool(),
-    // searchDslTool(),
-    // rerankDocumentsTool(),
-    nlToEsqlTool(),
     executeEsqlTool(),
-    researcherTool(),
+    naturalLanguageSearchTool(),
+    generateEsqlTool(),
+    relevanceSearchTool(),
+    getIndexMappingsTool(),
+    listIndicesTool(),
     indexExplorerTool(),
+    researcherTool(),
   ];
 
   tools.forEach((tool) => {

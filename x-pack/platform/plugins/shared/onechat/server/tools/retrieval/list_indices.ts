@@ -6,9 +6,9 @@
  */
 
 import { z } from '@kbn/zod';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { OnechatToolIds, OnechatToolTags } from '@kbn/onechat-common';
+import { BuiltinToolIds, BuiltinTags } from '@kbn/onechat-common';
 import type { RegisteredTool } from '@kbn/onechat-server';
+import { listIndices, ListIndexInfo } from '@kbn/onechat-genai-utils';
 
 const listIndicesSchema = z.object({
   pattern: z
@@ -19,49 +19,16 @@ const listIndicesSchema = z.object({
     ),
 });
 
-export interface ListIndexInfo {
-  index: string;
-  status: string;
-  health: string;
-  uuid: string;
-  docsCount: number;
-  primaries: number;
-  replicas: number;
-}
-
 export const listIndicesTool = (): RegisteredTool<typeof listIndicesSchema, ListIndexInfo[]> => {
   return {
-    id: OnechatToolIds.listIndices,
+    id: BuiltinToolIds.listIndices,
     description: 'List the indices in the Elasticsearch cluster the current user has access to.',
     schema: listIndicesSchema,
     handler: async ({ pattern = '*' }, { esClient }) => {
       return listIndices({ pattern, esClient: esClient.asCurrentUser });
     },
     meta: {
-      tags: [OnechatToolTags.retrieval],
+      tags: [BuiltinTags.retrieval],
     },
   };
-};
-
-export const listIndices = async ({
-  pattern = '*',
-  esClient,
-}: {
-  pattern?: string;
-  esClient: ElasticsearchClient;
-}): Promise<ListIndexInfo[]> => {
-  const response = await esClient.cat.indices({
-    index: pattern,
-    format: 'json',
-  });
-
-  return response.map(({ index, status, health, uuid, 'docs.count': docsCount, pri, rep }) => ({
-    index: index ?? 'unknown',
-    status: status ?? 'unknown',
-    health: health ?? 'unknown',
-    uuid: uuid ?? 'unknown',
-    docsCount: parseInt(docsCount ?? '0', 10),
-    primaries: parseInt(pri ?? '1', 10),
-    replicas: parseInt(rep ?? '0', 10),
-  }));
 };

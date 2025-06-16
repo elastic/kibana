@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import type { RegisteredTool } from '@kbn/onechat-server';
-import { OnechatToolIds, OnechatToolTags } from '@kbn/onechat-common';
+import { BuiltinToolIds, BuiltinTags } from '@kbn/onechat-common';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { runSearchAgent } from './run_researcher_agent';
 
@@ -38,7 +38,7 @@ export const researcherTool = (): RegisteredTool<typeof researcherSchema, Resear
       };
     },
     meta: {
-      tags: [OnechatToolTags.retrieval],
+      tags: [BuiltinTags.retrieval],
     },
   };
 };

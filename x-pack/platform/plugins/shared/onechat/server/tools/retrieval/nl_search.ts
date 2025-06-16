@@ -6,12 +6,10 @@
  */
 
 import { z } from '@kbn/zod';
-import { OnechatToolIds, OnechatToolTags } from '@kbn/onechat-common';
+import { BuiltinToolIds, BuiltinTags } from '@kbn/onechat-common';
 import type { RegisteredTool } from '@kbn/onechat-server';
-import { generateEsql } from './nl_to_esql';
-import { executeEsql, ExecuteEsqlResponse } from './execute_esql';
+import { naturalLanguageSearch, NaturalLanguageSearchResponse } from '@kbn/onechat-genai-utils';
 
-// smart search
 const searchDslSchema = z.object({
   query: z.string().describe('A natural language query expressing the search request'),
   index: z
@@ -26,37 +24,26 @@ const searchDslSchema = z.object({
     .describe('(optional) Additional context that could be useful to perform the search'),
 });
 
-export type SearchDslResponse = ExecuteEsqlResponse | { success: false; reason: string };
-
-export const searchDslTool = (): RegisteredTool<typeof searchDslSchema, SearchDslResponse> => {
+export const naturalLanguageSearchTool = (): RegisteredTool<
+  typeof searchDslSchema,
+  NaturalLanguageSearchResponse
+> => {
   return {
-    id: OnechatToolIds.searchDsl,
+    id: BuiltinToolIds.naturalLanguageSearch,
     description: 'Run a DSL search query on one index and return matching documents.',
     schema: searchDslSchema,
     handler: async ({ query, index, context }, { esClient, modelProvider }) => {
       const model = await modelProvider.getDefaultModel();
-
-      const generateResponse = await generateEsql({
+      return naturalLanguageSearch({
         query,
         context,
         index,
         model,
         esClient: esClient.asCurrentUser,
       });
-
-      if (generateResponse.queries.length < 1) {
-        return { success: false, reason: 'No query was generated' };
-      }
-
-      const executeResponse = await executeEsql({
-        query: generateResponse.queries[0],
-        esClient: esClient.asCurrentUser,
-      });
-
-      return executeResponse;
     },
     meta: {
-      tags: [OnechatToolTags.retrieval],
+      tags: [BuiltinTags.retrieval],
     },
   };
 };

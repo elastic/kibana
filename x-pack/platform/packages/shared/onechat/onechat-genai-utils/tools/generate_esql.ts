@@ -6,56 +6,19 @@
  */
 
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import { z } from '@kbn/zod';
 import { filter, toArray, firstValueFrom } from 'rxjs';
-import { isChatCompletionMessageEvent, isChatCompletionEvent } from '@kbn/inference-common';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { isChatCompletionMessageEvent, isChatCompletionEvent } from '@kbn/inference-common';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
-import { OnechatToolIds, OnechatToolTags } from '@kbn/onechat-common';
-import { INLINE_ESQL_QUERY_REGEX } from '@kbn/inference-plugin/common/tasks/nl_to_esql/constants';
-import type { RegisteredTool, ScopedModel } from '@kbn/onechat-server';
-import { getIndexMappings } from './get_index_mapping';
+import type { ScopedModel } from '@kbn/onechat-server';
 import { indexExplorer } from './index_explorer';
+import { getIndexMappings } from './steps/get_mappings';
+import { extractEsqlQueries } from './utils/esql';
 
-const nlToEsqlToolSchema = z.object({
-  query: z.string().describe('The query to generate an ES|QL query from.'),
-  index: z
-    .string()
-    .optional()
-    .describe(
-      '(optional) Index to search against. If not provided, will use the index explorer to find the best index to use.'
-    ),
-  context: z
-    .string()
-    .optional()
-    .describe('(optional) Additional context that could be useful to generate the ES|QL query'),
-});
-
-export interface NlToEsqlResponse {
+export interface GenerateEsqlResponse {
   answer: string;
   queries: string[];
 }
-
-export const nlToEsqlTool = (): RegisteredTool<typeof nlToEsqlToolSchema, NlToEsqlResponse> => {
-  return {
-    id: OnechatToolIds.generateEsql,
-    description: 'Generate an ES|QL query from a natural language query.',
-    schema: nlToEsqlToolSchema,
-    handler: async ({ query, index, context }, { esClient, modelProvider }) => {
-      const model = await modelProvider.getDefaultModel();
-      return generateEsql({
-        query,
-        context,
-        index,
-        model,
-        esClient: esClient.asCurrentUser,
-      });
-    },
-    meta: {
-      tags: [OnechatToolTags.retrieval],
-    },
-  };
-};
 
 export const generateEsql = async ({
   query,
@@ -69,7 +32,7 @@ export const generateEsql = async ({
   index?: string;
   model: ScopedModel;
   esClient: ElasticsearchClient;
-}): Promise<NlToEsqlResponse> => {
+}): Promise<GenerateEsqlResponse> => {
   let selectedIndex: string | undefined;
   let mappings: MappingTypeMapping;
 
@@ -124,8 +87,4 @@ export const generateEsql = async ({
     answer: fullContent,
     queries: esqlQueries,
   };
-};
-
-const extractEsqlQueries = (message: string): string[] => {
-  return Array.from(message.matchAll(INLINE_ESQL_QUERY_REGEX)).map(([match, query]) => query);
 };

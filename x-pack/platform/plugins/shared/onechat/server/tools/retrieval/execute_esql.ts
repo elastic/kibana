@@ -6,47 +6,24 @@
  */
 
 import { z } from '@kbn/zod';
-import type { EsqlEsqlColumnInfo, FieldValue } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { OnechatToolIds, OnechatToolTags } from '@kbn/onechat-common';
+import { BuiltinToolIds, BuiltinTags } from '@kbn/onechat-common';
 import type { RegisteredTool } from '@kbn/onechat-server';
+import { executeEsql, EsqlResponse } from '@kbn/onechat-genai-utils';
 
 const executeEsqlToolSchema = z.object({
   query: z.string().describe('The ES|QL query to execute'),
 });
 
-export interface ExecuteEsqlResponse {
-  columns: EsqlEsqlColumnInfo[];
-  values: FieldValue[][];
-}
-
-export const executeEsqlTool = (): RegisteredTool<
-  typeof executeEsqlToolSchema,
-  ExecuteEsqlResponse
-> => {
+export const executeEsqlTool = (): RegisteredTool<typeof executeEsqlToolSchema, EsqlResponse> => {
   return {
-    id: OnechatToolIds.executeEsql,
+    id: BuiltinToolIds.executeEsql,
     description: 'Execute an ES|QL query and return the results.',
     schema: executeEsqlToolSchema,
     handler: async ({ query }, { esClient }) => {
       return executeEsql({ query, esClient: esClient.asCurrentUser });
     },
     meta: {
-      tags: [OnechatToolTags.retrieval],
+      tags: [BuiltinTags.retrieval],
     },
-  };
-};
-
-export const executeEsql = async ({
-  query,
-  esClient,
-}: {
-  query: string;
-  esClient: ElasticsearchClient;
-}): Promise<ExecuteEsqlResponse> => {
-  const response = await esClient.esql.query({ query, drop_null_columns: true });
-  return {
-    columns: response.columns,
-    values: response.values,
   };
 };
