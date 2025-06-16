@@ -6,7 +6,6 @@
  */
 
 import type { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
-import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { getErrorMessage, getErrorStatusCode } from '../../../../../utils/error_helpers';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
@@ -39,7 +38,6 @@ export const revertPrebuiltRuleHandler = async (
 ) => {
   const siemResponse = buildSiemResponse(response);
   const { id, revision, version } = request.body;
-  const abortController = new AbortController();
 
   try {
     const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
@@ -54,7 +52,6 @@ export const revertPrebuiltRuleHandler = async (
       rulesClient,
       query: undefined,
       ids: [id],
-      abortSignal: abortController.signal,
       maxRules: MAX_RULES_TO_REVERT,
     });
 
@@ -136,10 +133,6 @@ export const revertPrebuiltRuleHandler = async (
 
     errors.push(...formattedInstallationErrors);
     updated.push(...upgradeResults.map(({ result }) => result));
-
-    if (abortController.signal.aborted === true) {
-      throw new AbortError('Rule reversion was aborted');
-    }
 
     return buildRuleReversionResponse(response, {
       updated,
