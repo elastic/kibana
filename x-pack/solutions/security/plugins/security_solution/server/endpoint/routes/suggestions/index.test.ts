@@ -225,59 +225,6 @@ describe('when calling the Suggestions route handler', () => {
         expect(mockResponse.ok).toHaveBeenCalled();
       });
 
-      it('should return bad request when space-aware index pattern retrieval fails', async () => {
-        const spaceId = 'custom-space';
-        const mockIntegrationNamespaces = { endpoint: ['custom-namespace'] };
-
-        applyActionsEsSearchMock(mockScopedEsClient.asInternalUser);
-
-        const mockContext = requestContextMock.convertContext(
-          createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
-        );
-
-        // Mock the space ID retrieval using the correct pattern
-        ((await mockContext.securitySolution).getSpaceId as jest.Mock).mockReturnValue(spaceId);
-
-        // Mock the fleet services
-        const mockFleetServices = {
-          getIntegrationNamespaces: jest.fn().mockResolvedValue(mockIntegrationNamespaces),
-        };
-        mockEndpointContext.service.getInternalFleetServices = jest
-          .fn()
-          .mockReturnValue(mockFleetServices);
-
-        buildIndexNameWithNamespaceMock.mockReturnValue(null);
-
-        const mockRequest = httpServerMock.createKibanaRequest<
-          TypeOf<typeof EndpointSuggestionsSchema.params>,
-          never,
-          never
-        >({
-          params: { suggestion_type: 'eventFilters' },
-          body: {
-            field: 'process.id',
-            query: 'test-query',
-            filters: 'test-filters',
-            fieldMeta: 'test-field-meta',
-          },
-        });
-
-        await suggestionsRouteHandler(mockContext, mockRequest, mockResponse);
-
-        expect((await mockContext.securitySolution).getSpaceId as jest.Mock).toHaveBeenCalled();
-        expect(mockEndpointContext.service.getInternalFleetServices).toHaveBeenCalledWith(spaceId);
-        expect(mockFleetServices.getIntegrationNamespaces).toHaveBeenCalledWith(['endpoint']);
-        expect(buildIndexNameWithNamespaceMock).toHaveBeenCalledWith(
-          eventsIndexPattern,
-          'custom-namespace'
-        );
-
-        expect(mockResponse.badRequest).toHaveBeenCalledWith({
-          body: 'Failed to retrieve current space index patterns',
-        });
-        expect(termsEnumSuggestionsMock).not.toHaveBeenCalled();
-      });
-
       it('should handle errors during space-aware processing gracefully', async () => {
         const spaceId = 'custom-space';
         const mockIntegrationNamespaces = { endpoint: ['custom-namespace'] };

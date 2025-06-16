@@ -98,14 +98,6 @@ export const getEndpointSuggestionsRequestHandler = (
             return buildIndexNameWithNamespace(eventsIndexPattern, namespace);
           });
 
-          // Check if any pattern building failed
-          if (indexPatterns.some((pattern) => !pattern)) {
-            logger.error('Failed to retrieve current space index patterns');
-            return response.badRequest({
-              body: 'Failed to retrieve current space index patterns',
-            });
-          }
-
           const indexPattern = indexPatterns.join(',');
           logger.debug(`Index pattern to be used: ${indexPattern}`);
           index = indexPattern;
