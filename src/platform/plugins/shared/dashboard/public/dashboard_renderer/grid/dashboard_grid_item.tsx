@@ -141,27 +141,25 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
         });
 
     return (
-      <>
-        <div
-          css={[focusStyles, styles.item]}
-          className={[classes, className].join(' ')}
-          data-test-subj="dashboardPanel"
-          id={`panel-${id}`}
-          ref={ref}
-          {...rest}
-        >
-          {isRenderable ? (
-            <>
-              {renderedEmbeddable}
-              {children}
-            </>
-          ) : (
-            <div>
-              <EuiLoadingChart size="l" />
-            </div>
-          )}
-        </div>
-      </>
+      <div
+        css={[focusStyles, styles.item]}
+        className={[classes, className].join(' ')}
+        data-test-subj="dashboardPanel"
+        id={`panel-${id}`}
+        ref={ref}
+        {...rest}
+      >
+        {isRenderable ? (
+          <>
+            {renderedEmbeddable}
+            {children}
+          </>
+        ) : (
+          <div>
+            <EuiLoadingChart size="l" />
+          </div>
+        )}
+      </div>
     );
   }
 );
