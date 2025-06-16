@@ -316,7 +316,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
         />
       )}
       {isBulkEditFlyoutVisible &&
-        bulkEditActionType !== undefined &&
+        bulkEditActionType &&
         (bulkEditActionType === BulkActionEditTypeEnum.delete_alert_suppression ? (
           <BulkEditDeleteAlertSuppressionConfirmation
             rulesCount={bulkActionsDryRunResult?.succeededRulesCount ?? 0}
