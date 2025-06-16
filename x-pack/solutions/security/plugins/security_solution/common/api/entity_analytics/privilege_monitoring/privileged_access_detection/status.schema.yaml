@@ -18,14 +18,14 @@ paths:
               schema:
                 type: object
                 required:
-                  - packageInstallationStatus
-                  - mlModuleSetupStatus
+                  - package_installation_status
+                  - ml_module_setup_status
                   - jobs
                 properties:
-                  packageInstallationStatus:
+                  package_installation_status:
                     type: string
                     enum: [complete, incomplete]
-                  mlModuleSetupStatus:
+                  ml_module_setup_status:
                     type: string
                     enum: [complete, incomplete]
                   jobs:
