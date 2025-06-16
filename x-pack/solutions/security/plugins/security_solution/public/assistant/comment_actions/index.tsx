@@ -40,7 +40,7 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
   const { cases } = useKibana().services;
   const dispatch = useDispatch();
   const isModelEvaluationEnabled = useIsExperimentalFeatureEnabled('assistantModelEvaluation');
-
+  
   const { traceOptions } = useAssistantContext();
 
   const associateNote = useCallback(

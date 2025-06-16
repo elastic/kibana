@@ -21,6 +21,7 @@ import { useKibana } from '../common/lib/kibana';
 import { BASE_SECURITY_QUICK_PROMPTS } from './content/quick_prompts';
 import { useAssistantAvailability } from './use_assistant_availability';
 import { licenseService } from '../common/hooks/use_license';
+import { CommentActionsPortal } from './comment_actions/comment_actions_portal';
 
 
 export const createBasePrompts = async (notifications: NotificationsStart, http: HttpSetup) => {
@@ -92,6 +93,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
     <ElasticAssistantProvider
       value={assistantContextValue}
     >
+      <CommentActionsPortal />
       {children}
     </ElasticAssistantProvider>
   );
