@@ -75,6 +75,21 @@ export class ServerlessSearchPlugin
     });
 
     core.application.register({
+      id: 'serverlessHomeRedirect',
+      title: homeTitle,
+      appRoute: '/app/elasticsearch',
+      euiIconType: 'logoElastic',
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      visibleIn: [],
+      async mount({}: AppMountParameters) {
+        const [coreStart] = await core.getStartServices();
+        coreStart.chrome.docTitle.change(homeTitle);
+        coreStart.application.navigateToApp('searchHomepage');
+        return () => {};
+      },
+    });
+
+    core.application.register({
       id: 'serverlessElasticsearch',
       title: i18n.translate('xpack.serverlessSearch.app.elasticsearch.title', {
         defaultMessage: 'Elasticsearch',
@@ -141,22 +156,6 @@ export class ServerlessSearchPlugin
       },
     });
 
-    const { searchIndices } = setupDeps;
-    core.application.register({
-      id: 'serverlessHomeRedirect',
-      title: homeTitle,
-      appRoute: '/app/elasticsearch',
-      euiIconType: 'logoElastic',
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      visibleIn: [],
-      async mount({}: AppMountParameters) {
-        const [coreStart] = await core.getStartServices();
-        coreStart.chrome.docTitle.change(homeTitle);
-        coreStart.application.navigateToApp(searchIndices.startAppId);
-        return () => {};
-      },
-    });
-
     return {};
   }
 
@@ -165,7 +164,7 @@ export class ServerlessSearchPlugin
     services: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
     const { serverless, management, indexManagement, security } = services;
-    serverless.setProjectHome(services.searchIndices.startRoute);
+    serverless.setProjectHome('/app/elasticsearch/home');
     const aiAssistantIsEnabled = core.application.capabilities.observabilityAIAssistant?.show;
 
     const navigationTree$ = of(navigationTree(core.application));
