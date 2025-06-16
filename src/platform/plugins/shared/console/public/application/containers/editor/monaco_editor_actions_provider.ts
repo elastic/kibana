@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { ErrorAnnotation } from '@kbn/monaco/src/languages/console/types';
+import { isInsideTripleQuotes } from '@kbn/monaco/src/languages/console/utils';
 import { isQuotaExceededError } from '../../../services/history';
 import { DEFAULT_VARIABLES, KIBANA_API_PREFIX } from '../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../services';
@@ -38,7 +39,6 @@ import {
   shouldTriggerSuggestions,
   trackSentRequests,
   getRequestFromEditor,
-  isInsideTripleQuotes,
 } from './utils';
 
 import type { AdjustedParsedRequest } from './types';

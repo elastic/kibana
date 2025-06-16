@@ -293,45 +293,4 @@ describe('autocomplete_utils', () => {
       );
     });
   });
-
-  describe('isInsideTripleQuotes', () => {
-    it('should return false for both flags for an empty string', () => {
-      expect(isInsideTripleQuotes('')).toEqual({
-        insideTripleQuotes: false,
-        insideQuery: false,
-      });
-    });
-
-    it('should return false for both flags for a request without triple quotes', () => {
-      const request = `POST _search\n{\n  "query": {\n    "match": {\n      "message": "hello world"\n    }\n  }\n}`;
-      expect(isInsideTripleQuotes(request)).toEqual({
-        insideTripleQuotes: false,
-        insideQuery: false,
-      });
-    });
-
-    it('should return true for insideTripleQuotes and false for insideQuery if triple quotes are not in query', () => {
-      const request = `POST _ingest/pipeline/_simulate\n{\n  "pipeline": {\n    "processors": [\n      {\n        "script": {\n          "source":\n          """\n            for (field in params['fields']){\n                if (!$(field, '').isEmpty()){\n`;
-      expect(isInsideTripleQuotes(request)).toEqual({
-        insideTripleQuotes: true,
-        insideQuery: false,
-      });
-    });
-
-    it('should return false for both flags if triple-quoted string is properly closed', () => {
-      const request = `POST _ingest/pipeline/_simulate\n{\n  "pipeline": {\n    "processors": [\n      {\n        "script": {\n          "source":\n          """\n            return 'hello';\n          """\n        }\n      }\n    ]\n  }\n}`;
-      expect(isInsideTripleQuotes(request)).toEqual({
-        insideTripleQuotes: false,
-        insideQuery: false,
-      });
-    });
-
-    it('should return true for both flags if inside triple quotes and inside a "query" field', () => {
-      const request = `POST _query\n{\n  "query": """FROM test `;
-      expect(isInsideTripleQuotes(request)).toEqual({
-        insideTripleQuotes: true,
-        insideQuery: true,
-      });
-    });
-  });
 });

@@ -519,23 +519,3 @@ export const hasUnclosedQuote = (lineContent: string): boolean => {
 
   return insideString;
 };
-
-export const isInsideTripleQuotes = (text: string) => {
-  let insideTripleQuotes = false;
-  let isCurrentTripleQuoteQuery = false;
-  let i = 0;
-
-  while (i < text.length) {
-    if (text.startsWith('"""', i)) {
-      insideTripleQuotes = !insideTripleQuotes;
-      if (insideTripleQuotes) {
-        isCurrentTripleQuoteQuery = /.*"query"\s*:\s*/.test(text.slice(0, i));
-      }
-      i += 3; // Skip the triple quotes
-    } else {
-      i++;
-    }
-  }
-
-  return { insideTripleQuotes, insideQuery: insideTripleQuotes && isCurrentTripleQuoteQuery };
-};

@@ -17,6 +17,7 @@ import { ESQL_AUTOCOMPLETE_TRIGGER_CHARS } from '../esql';
 import { wrapAsMonacoSuggestions } from '../esql/lib/converters/suggestions';
 import { ConsoleParsedRequestsProvider } from './console_parsed_requests_provider';
 import { buildConsoleTheme } from './theme';
+import { isInsideTripleQuotes } from './utils';
 import type { LangModuleType } from '../../types';
 
 const workerProxyService = new ConsoleWorkerProxyService();
@@ -30,27 +31,6 @@ import {
 import { foldingRangeProvider } from './folding_range_provider';
 
 export const CONSOLE_TRIGGER_CHARS = ['/', '.', '_', ',', '?', '=', '&', '"'];
-
-// TODO: Move to a utils folder or inside actions providers
-const isInsideTripleQuotes = (text: string) => {
-  let insideTripleQuotes = false;
-  let isCurrentTripleQuoteQuery = false;
-  let i = 0;
-
-  while (i < text.length) {
-    if (text.startsWith('"""', i)) {
-      insideTripleQuotes = !insideTripleQuotes;
-      if (insideTripleQuotes) {
-        isCurrentTripleQuoteQuery = /.*"query"\s*:\s*/.test(text.slice(0, i));
-      }
-      i += 3; // Skip the triple quotes
-    } else {
-      i++;
-    }
-  }
-
-  return { insideTripleQuotes, insideQuery: insideTripleQuotes && isCurrentTripleQuoteQuery };
-};
 
 /**
  * @description This language definition is used for the console input panel
