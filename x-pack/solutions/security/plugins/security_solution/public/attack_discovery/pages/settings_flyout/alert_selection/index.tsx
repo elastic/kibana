@@ -5,15 +5,23 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs, EuiText, EuiSpacer } from '@elastic/eui';
+import { AssistantSpaceIdProvider, ConnectorSelectorInline } from '@kbn/elastic-assistant';
+import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
+import { EuiForm, EuiFormRow, EuiTab, EuiTabs, EuiText, EuiSpacer } from '@elastic/eui';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 import React, { useMemo, useState } from 'react';
 
+import { ElasticLLMCostAwarenessTour } from '@kbn/elastic-assistant/impl/tour/elastic_llm';
+import { css } from '@emotion/react';
+import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '@kbn/elastic-assistant/impl/tour/const';
 import { AlertSelectionQuery } from './alert_selection_query';
 import { AlertSelectionRange } from './alert_selection_range';
 import { getTabs } from './helpers/get_tabs';
 import * as i18n from './translations';
+import type { AlertsSelectionSettings } from '../types';
+import { useKibanaFeatureFlags } from '../../use_kibana_feature_flags';
+import { useSpaceId } from '../../../../common/hooks/use_space_id';
 
 interface Props {
   alertsPreviewStackBy0: string;
@@ -48,6 +56,9 @@ const AlertSelectionComponent: React.FC<Props> = ({
   setStart,
   start,
 }) => {
+  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
+  const spaceId = useSpaceId();
+
   const tabs = useMemo(
     () =>
       getTabs({
