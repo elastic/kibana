@@ -38,45 +38,59 @@ export const useEditorQuerySync = ({
   setNewAbortController,
   onTextLangQueryChange,
 }: UseEditorQuerySyncArgs) => {
-  const fixedQuery = useMemo(
-    () => fixESQLQueryWithVariables(initialQueryEsql, esqlVariables),
+  const fixedQueryObj = useMemo(
+    () => ({
+      changed: Date.now(),
+      query: fixESQLQueryWithVariables(initialQueryEsql, esqlVariables),
+    }),
     [initialQueryEsql, esqlVariables]
   );
+  const isLoadingObj = useMemo(
+    () => ({
+      changed: Date.now(),
+      isLoading,
+    }),
+    [isLoading]
+  );
+  const { query: fixedQuery } = fixedQueryObj;
   const [query, setQuery] = useState({
     edited: fixedQuery ?? '',
     editedTs: Date.now(),
     submitted: fixedQuery ?? '',
-    isSubmittedTs: isLoading ? Date.now() : undefined,
     isLoading,
-    isLoadingTs: isLoading ? Date.now() : undefined,
+    isLoadingChanged: isLoadingObj.changed,
   });
 
   useEffect(() => {
     if (isEditorMounted) {
-      const isLoadingTs = isLoading && !query.isLoading ? Date.now() : query.isLoadingTs;
-
-      const isLoadingTsNewer =
-        isLoadingTs &&
-        (!query.editedTs || isLoadingTs > query.editedTs) &&
-        (!query.isSubmittedTs || isLoadingTs > query.isSubmittedTs);
-
       const nextQuery = { ...query };
-      if (isLoadingTsNewer) {
-        nextQuery.isLoading = isLoading;
-        nextQuery.isLoadingTs = isLoadingTs;
-      }
 
-      if (query.edited !== fixedQuery && (editorIsInline || isLoadingTsNewer)) {
+      if (
+        query.edited !== fixedQuery &&
+        (editorIsInline || fixedQueryObj.changed >= query.editedTs)
+      ) {
         nextQuery.edited = fixedQuery;
-        nextQuery.submitted = fixedQuery;
-      } else {
-        nextQuery.isLoadingTs = isLoadingTs;
+        nextQuery.editedTs = fixedQueryObj.changed;
       }
-      if (!isEqual(nextQuery, query)) {
+      if (isLoadingObj.changed >= query.isLoadingChanged) {
+        nextQuery.isLoading = isLoading;
+        nextQuery.isLoadingChanged = isLoadingObj.changed;
+      }
+      const applyChange = !isEqual(nextQuery, query);
+
+      if (applyChange) {
         setQuery(nextQuery);
       }
     }
-  }, [fixedQuery, editorIsInline, isEditorMounted, isLoading, query]);
+  }, [
+    fixedQuery,
+    editorIsInline,
+    isEditorMounted,
+    isLoading,
+    query,
+    fixedQueryObj.changed,
+    isLoadingObj.changed,
+  ]);
 
   const handleQuerySubmit = useCallback(() => {
     if (query.isLoading && isLoading && allowQueryCancellation) {
@@ -84,7 +98,7 @@ export const useEditorQuerySync = ({
       setQuery((prevState) => ({
         ...prevState,
         isLoading: false,
-        isLoadingTs: undefined,
+        isLoadingChanged: Date.now(),
       }));
     } else {
       const abc = new AbortController();
@@ -92,9 +106,8 @@ export const useEditorQuerySync = ({
       setQuery((prevState) => ({
         ...prevState,
         submitted: query.edited,
-        isSubmittedTs: Date.now(),
         isLoading: true,
-        isLoadingTs: Date.now(),
+        isLoadingChanged: Date.now(),
       }));
       onTextLangQuerySubmit({ esql: query.edited } as AggregateQuery, abc);
     }

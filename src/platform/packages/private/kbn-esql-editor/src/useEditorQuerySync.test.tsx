@@ -187,5 +187,15 @@ describe('useEditorQuerySync', () => {
       result.current.handleQueryUpdate('FROM test | LIMIT 10');
     });
     expect(result.current.code).toBe('FROM test | LIMIT 10');
+
+    // Now, simulate another query prop change (should overwrite)
+    rerender({
+      ...defaultProps,
+      isLoading: false,
+      initialQueryEsql: 'FROM test | LIMIT 1000',
+      isEditorMounted: true,
+    });
+
+    expect(result.current.code).toBe('FROM test | LIMIT 1000');
   });
 });
