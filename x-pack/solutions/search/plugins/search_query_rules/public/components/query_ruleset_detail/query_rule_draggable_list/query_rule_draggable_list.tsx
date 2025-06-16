@@ -37,9 +37,10 @@ import { DeleteRulesetRuleModal } from './delete_ruleset_rule_modal';
 export interface QueryRuleDraggableListItemProps {
   rules: SearchQueryRulesQueryRule[];
   queryRule: QueryRulesQueryRule;
-  rulesetId: string; // Add this prop to pass down the ruleset ID
+  rulesetId: string;
   index: number;
   onEditRuleFlyoutOpen: (ruleId: string) => void;
+  deleteRule?: (ruleId: string) => void;
   isLastItem?: boolean;
   tourInfo?: {
     title: string;
@@ -50,9 +51,10 @@ export interface QueryRuleDraggableListItemProps {
 
 export const QueryRuleDraggableListItem: React.FC<QueryRuleDraggableListItemProps> = ({
   index,
-  rulesetId, // Add this prop
+  rulesetId,
   rules,
   onEditRuleFlyoutOpen,
+  deleteRule,
   queryRule,
   tourInfo,
   isLastItem = false,
@@ -67,14 +69,19 @@ export const QueryRuleDraggableListItem: React.FC<QueryRuleDraggableListItemProp
   const openPopover = useCallback(() => {
     setIsPopoverOpen(true);
   }, []);
-  const [ruleToDelete, setRuleToDelete] = useState<string | null>(null); // Rename to be clearer
+  const [ruleToDelete, setRuleToDelete] = useState<string | null>(null);
   return (
     <>
       {ruleToDelete && (
         <DeleteRulesetRuleModal
-          rulesetId={rulesetId} // Pass the ruleset ID from props
-          ruleId={ruleToDelete} // Pass the rule ID to delete
+          rulesetId={rulesetId}
+          ruleId={ruleToDelete}
           closeDeleteModal={() => setRuleToDelete(null)}
+          onSuccessAction={() => {
+            if (deleteRule) {
+              deleteRule(ruleToDelete);
+            }
+          }}
         />
       )}
       <EuiDraggable
@@ -224,11 +231,24 @@ export const QueryRuleDraggableListItem: React.FC<QueryRuleDraggableListItemProp
   );
 };
 
+export interface QueryRuleDraggableListItemProps {
+  queryRule: QueryRulesQueryRule;
+  index: number;
+  onEditRuleFlyoutOpen: (ruleId: string) => void;
+  isLastItem?: boolean;
+  tourInfo?: {
+    title: string;
+    content: string;
+    tourTargetRef?: React.RefObject<HTMLDivElement>;
+  };
+}
+
 export interface QueryRuleDraggableListProps {
   rules: SearchQueryRulesQueryRule[];
-  rulesetId: string; // Add this prop
+  rulesetId: string;
   onReorder: (queryRules: SearchQueryRulesQueryRule[]) => void;
   onEditRuleFlyoutOpen: (ruleId: string) => void;
+  deleteRule?: (ruleId: string) => void;
   tourInfo?: {
     title: string;
     content: string;
@@ -240,6 +260,7 @@ export const QueryRuleDraggableList: React.FC<QueryRuleDraggableListProps> = ({
   rules,
   rulesetId,
   onEditRuleFlyoutOpen,
+  deleteRule,
   onReorder,
   tourInfo,
 }) => {
@@ -266,7 +287,9 @@ export const QueryRuleDraggableList: React.FC<QueryRuleDraggableListProps> = ({
             <QueryRuleDraggableListItem
               key={queryRule.rule_id}
               queryRule={queryRule}
-              rulesetId={rulesetId} // Pass down the ruleset ID
+              deleteRule={deleteRule}
+              rulesetId={rulesetId}
+              tourInfo={tourInfo}
               index={index}
               rules={rules}
               data-test-subj={`searchQueryRulesDraggableItem-${queryRule.rule_id}`}
