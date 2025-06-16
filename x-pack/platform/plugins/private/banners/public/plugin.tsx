@@ -19,16 +19,13 @@ export class BannersPlugin implements Plugin<{}, {}, {}, BannerPluginStartDepend
     return {};
   }
 
-  start(
-    { chrome, http, ...startServices }: CoreStart,
-    { screenshotMode }: BannerPluginStartDependencies
-  ) {
+  start({ chrome, http, rendering }: CoreStart, { screenshotMode }: BannerPluginStartDependencies) {
     if (!(screenshotMode?.isScreenshotMode() ?? false)) {
       getBannerInfo(http).then(
         ({ allowed, banner }) => {
           if (allowed && banner.placement === 'top') {
             chrome.setHeaderBanner({
-              content: toMountPoint(<Banner bannerConfig={banner} />, startServices),
+              content: toMountPoint(<Banner bannerConfig={banner} />, rendering),
             });
           }
         },
