@@ -7,17 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isPlainObject } from 'lodash';
 import { piiFilter } from './pii_filter';
+import { Payload as ApmPayload } from 'elastic-apm-node';
 
-interface Payload {
+interface Payload extends ApmPayload {
   context?: {
-    user?: any;
+    user?: unknown;
     [key: string]: any;
   };
   [key: string]: any;
 }
 
-const isPayload = (result: any): result is Payload => typeof result === 'object' && result !== null;
+const isPayload = (result: unknown): result is Payload => isPlainObject(result) && result !== null;
 
 describe('piiFilter', () => {
   it('redacts all keys in a valid user object', () => {
