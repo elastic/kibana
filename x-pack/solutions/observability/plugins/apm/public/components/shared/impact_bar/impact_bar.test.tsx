@@ -25,9 +25,11 @@ describe('ImpactBar', () => {
     );
 
     const bar = screen.getByTestId('impact-bar');
+
     expect(bar).toBeInTheDocument();
     expect(bar).toHaveStyle({ width: '96px' });
-    expect(bar).toHaveClass('css-kyxcro-euiProgress-native-s-static-danger');
-    expect(bar).toHaveClass('euiProgress');
+    expect(bar.className).toContain('danger');
+    expect(bar).toHaveAttribute('max', '5');
+    expect(bar).toHaveAttribute('value', '2');
   });
 });

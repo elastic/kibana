@@ -72,8 +72,10 @@ describe('HttpStatusBadge', () => {
     renderWithTheme(<HttpStatusBadge status={700} />);
 
     const badge = screen.getByTestId('httpStatusBadge');
-
-    expect(badge).toHaveClass('euiBadge css-10ll625-euiBadge-default');
+    expect(badge).not.toHaveStyle({
+      '--euiBadgeBackgroundColor': expect.any(String),
+    });
+    expect(badge.className).toContain('default');
     expect(badge).toHaveTextContent('700');
   });
 });
