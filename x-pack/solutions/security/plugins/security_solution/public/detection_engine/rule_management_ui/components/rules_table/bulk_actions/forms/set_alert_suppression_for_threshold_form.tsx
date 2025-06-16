@@ -29,12 +29,12 @@ interface AlertSuppressionFormProps {
   onConfirm: (bulkActionEditPayload: BulkActionEditPayload) => void;
 }
 
-const SetAlertSuppressionForThresholdFormComponent = ({
+export const SetAlertSuppressionForThresholdForm = React.memo(function SetAlertSuppressionForm({
   editAction,
   rulesCount,
   onClose,
   onConfirm,
-}: AlertSuppressionFormProps) => {
+}: AlertSuppressionFormProps) {
   const { form } = useForm<FormData>({
     defaultValue: initialFormData,
   });
@@ -101,9 +101,4 @@ const SetAlertSuppressionForThresholdFormComponent = ({
       </EuiFormRow>
     </BulkEditFormWrapper>
   );
-};
-
-export const SetAlertSuppressionForThresholdForm = React.memo(
-  SetAlertSuppressionForThresholdFormComponent
-);
-SetAlertSuppressionForThresholdForm.displayName = 'SetAlertSuppressionForThresholdForm';
+});

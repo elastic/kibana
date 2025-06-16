@@ -71,12 +71,12 @@ interface AlertSuppressionFormProps {
   onConfirm: (bulkActionEditPayload: BulkActionEditPayload) => void;
 }
 
-const SetAlertSuppressionFormComponent = ({
+export const SetAlertSuppressionForm = React.memo(function SetAlertSuppressionForm({
   editAction,
   rulesCount,
   onClose,
   onConfirm,
-}: AlertSuppressionFormProps) => {
+}: AlertSuppressionFormProps) {
   const { form } = useForm({
     defaultValue: initialFormData,
     schema: formSchema,
@@ -132,7 +132,4 @@ const SetAlertSuppressionFormComponent = ({
       <AlertSuppressionEdit suppressibleFields={suppressibleFields} />
     </BulkEditFormWrapper>
   );
-};
-
-export const SetAlertSuppressionForm = React.memo(SetAlertSuppressionFormComponent);
-SetAlertSuppressionForm.displayName = 'SetAlertSuppressionForm';
+});
