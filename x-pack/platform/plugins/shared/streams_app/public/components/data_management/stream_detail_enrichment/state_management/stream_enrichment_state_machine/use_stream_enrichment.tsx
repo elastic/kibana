@@ -65,8 +65,8 @@ export const useStreamEnrichmentEvents = () => {
       unmapField: (fieldName: string) => {
         service.send({ type: 'simulation.fields.unmap', fieldName });
       },
-      manageDataSources: () => {
-        service.send({ type: 'simulation.manageDataSources' });
+      openDataSourcesManagement: () => {
+        service.send({ type: 'dataSources.openManagement' });
       },
       closeDataSourcesManagement: () => {
         service.send({ type: 'dataSources.closeManagement' });

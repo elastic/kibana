@@ -38,7 +38,7 @@ const VISIBLE_DATA_SOURCES_LIMIT = 2;
 const DATA_SOURCE_CARD_MAX_WIDTH = 160;
 
 const manageDataSourcesLabel = i18n.translate(
-  'xpack.streams.streamDetailView.managementTab.enrichment.manageDataSources.label',
+  'xpack.streams.streamDetailView.managementTab.enrichment.openDataSourcesManagement.label',
   { defaultMessage: 'Manage data sources' }
 );
 
@@ -90,10 +90,10 @@ const DataSourceListItem = ({ dataSourceRef }: DataSourceListItemProps) => {
 };
 
 export const DataSourcesList = () => {
-  const { closeDataSourcesManagement, manageDataSources } = useStreamEnrichmentEvents();
+  const { closeDataSourcesManagement, openDataSourcesManagement } = useStreamEnrichmentEvents();
 
   const isManagingDataSources = useStreamEnrichmentSelector((state) =>
-    state.matches({ ready: { enrichment: 'managingDataSources' } })
+    state.matches({ ready: { enrichment: { managingDataSources: 'open' } } })
   );
   const dataSourcesRefs = useStreamEnrichmentSelector((state) => state.context.dataSourcesRefs);
 
@@ -115,7 +115,7 @@ export const DataSourcesList = () => {
               <EuiButtonEmpty
                 iconType="controls"
                 iconSide="right"
-                onClick={manageDataSources}
+                onClick={openDataSourcesManagement}
                 aria-label={manageDataSourcesLabel}
                 size="s"
               >
@@ -126,7 +126,7 @@ export const DataSourcesList = () => {
             ) : (
               <EuiButtonIcon
                 iconType="controls"
-                onClick={manageDataSources}
+                onClick={openDataSourcesManagement}
                 aria-label={manageDataSourcesLabel}
                 size="s"
               />

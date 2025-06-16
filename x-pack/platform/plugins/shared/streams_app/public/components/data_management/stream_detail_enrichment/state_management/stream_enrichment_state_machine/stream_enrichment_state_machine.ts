@@ -348,7 +348,7 @@ export const streamEnrichmentMachine = setup({
           },
         },
         enrichment: {
-          initial: 'displayingSimulation',
+          type: 'parallel',
           on: {
             'url.sync': {
               actions: [
@@ -423,10 +423,8 @@ export const streamEnrichmentMachine = setup({
                     { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
                   ],
                 },
-                'simulation.manageDataSources': 'managingDataSources',
               },
               states: {
-                hist: { type: 'history' },
                 viewDataPreview: {
                   on: {
                     'simulation.viewDetectedFields': 'viewDetectedFields',
@@ -446,20 +444,30 @@ export const streamEnrichmentMachine = setup({
               },
             },
             managingDataSources: {
-              on: {
-                'dataSources.closeManagement': 'displayingSimulation.hist',
-                'dataSources.add': {
-                  actions: [
-                    { type: 'addDataSource', params: ({ event }) => event },
-                    raise({ type: 'url.sync' }),
-                  ],
+              initial: 'closed',
+              states: {
+                closed: {
+                  on: {
+                    'dataSources.openManagement': 'open',
+                  },
                 },
-                'dataSource.delete': {
-                  actions: [
-                    stopChild(({ event }) => event.id),
-                    { type: 'deleteDataSource', params: ({ event }) => event },
-                    raise({ type: 'url.sync' }),
-                  ],
+                open: {
+                  on: {
+                    'dataSources.closeManagement': 'closed',
+                    'dataSources.add': {
+                      actions: [
+                        { type: 'addDataSource', params: ({ event }) => event },
+                        raise({ type: 'url.sync' }),
+                      ],
+                    },
+                    'dataSource.delete': {
+                      actions: [
+                        stopChild(({ event }) => event.id),
+                        { type: 'deleteDataSource', params: ({ event }) => event },
+                        raise({ type: 'url.sync' }),
+                      ],
+                    },
+                  },
                 },
               },
             },
