@@ -148,7 +148,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                   <span>
                     &nbsp;
                     <EuiToolTip content={packagePolicy.description}>
-                      <EuiIcon type="help" />
+                      <EuiIcon type="question" />
                     </EuiToolTip>
                   </span>
                 ) : null}

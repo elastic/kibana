@@ -160,7 +160,7 @@ export class JobListUi extends Component {
             <EuiButtonEmpty
               href={documentationLinks.rollupJobs}
               target="_blank"
-              iconType="help"
+              iconiconType="question"
               data-test-subj="documentationLink"
             >
               <FormattedMessage

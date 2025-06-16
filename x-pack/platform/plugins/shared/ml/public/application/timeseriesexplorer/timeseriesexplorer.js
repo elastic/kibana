@@ -1062,7 +1062,7 @@ export class TimeSeriesExplorer extends React.Component {
                   }}
                 />
               }
-              iconType="help"
+              iconiconType="question"
               size="s"
             />
             <EuiSpacer size="m" />

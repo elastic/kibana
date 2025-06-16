@@ -74,7 +74,7 @@ export const ImportSummary: FC<Props> = ({
               />
             }
             color="warning"
-            iconType="help"
+            iconiconType="question"
           >
             <p>
               <FormattedMessage

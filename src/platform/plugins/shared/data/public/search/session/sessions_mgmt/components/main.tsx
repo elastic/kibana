@@ -50,7 +50,7 @@ export function SearchSessionsMgmtMain({ documentation, ...tableProps }: Props) 
           <EuiButtonEmpty
             href={documentation.getElasticsearchDocLink()}
             target="_blank"
-            iconType="help"
+            iconiconType="question"
           >
             <FormattedMessage
               id="data.mgmt.searchSessions.main.backgroundSessionsDocsLinkText"

@@ -297,7 +297,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                 <EuiFlexItem grow={false}>
                   <EuiIconTip
                     color="primary"
-                    type="help"
+                    iconType="question"
                     content={
                       <FormattedMessage
                         id="xpack.ml.jobsList.datafeedChart.headerTooltipContent"

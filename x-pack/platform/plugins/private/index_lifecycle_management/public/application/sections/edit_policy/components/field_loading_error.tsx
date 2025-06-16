@@ -23,7 +23,7 @@ export const FieldLoadingError: FunctionComponent<Props> = (props) => {
       <EuiSpacer size="m" />
       <EuiCallOut
         data-test-subj={props['data-test-subj']}
-        iconType="help"
+        iconiconType="question"
         color="warning"
         title={
           <>

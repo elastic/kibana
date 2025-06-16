@@ -110,7 +110,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
           <EuiButtonEmpty
             href={documentationService.getIdxMgmtDocumentationLink()}
             target="_blank"
-            iconType="help"
+            iconiconType="question"
             data-test-subj="documentationLink"
           >
             <FormattedMessage

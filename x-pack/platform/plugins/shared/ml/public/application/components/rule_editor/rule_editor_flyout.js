@@ -688,7 +688,7 @@ class RuleEditorFlyoutUI extends Component {
                 />
               }
               color="warning"
-              iconType="help"
+              iconiconType="question"
             >
               <p>
                 <FormattedMessage

@@ -32,7 +32,7 @@ export function SetupInstructionsLink({ buttonFill = false }: { buttonFill?: boo
           size="s"
           color="primary"
           fill={buttonFill}
-          iconType="help"
+          iconiconType="question"
         >
           {SETUP_INSTRUCTIONS_LABEL}
         </EuiButton>

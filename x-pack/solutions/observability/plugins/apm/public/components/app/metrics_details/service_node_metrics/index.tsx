@@ -128,7 +128,7 @@ export function ServiceNodeMetrics({ serviceNodeName }: Props) {
               defaultMessage: 'Could not identify JVMs',
             }
           )}
-          iconType="help"
+          iconiconType="question"
           color="warning"
         >
           <FormattedMessage

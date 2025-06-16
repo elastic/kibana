@@ -32,7 +32,7 @@ export function getSecurityStep(url) {
       <EuiSpacer size="m" />
       <EuiCallOut
         color="warning"
-        iconType="help"
+        iconiconType="question"
         title={
           <EuiText>
             <FormattedMessage

@@ -577,7 +577,7 @@ export class FlyoutClass extends Component<
             />
           }
           color="warning"
-          iconType="help"
+          iconiconType="question"
         >
           <p>
             <FormattedMessage

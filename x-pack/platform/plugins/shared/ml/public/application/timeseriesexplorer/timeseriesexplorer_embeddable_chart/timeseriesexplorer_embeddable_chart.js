@@ -882,7 +882,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
                   }}
                 />
               }
-              iconType="help"
+              iconiconType="question"
               size="s"
             />
             <EuiSpacer size="m" />

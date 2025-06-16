@@ -120,7 +120,7 @@ export const EditField = React.memo(
                       flush="right"
                       href={linkDocumentation}
                       target="_blank"
-                      iconType="help"
+                      iconiconType="question"
                       data-test-subj="documentationLink"
                     >
                       {i18n.translate('xpack.idxMgmt.mappingsEditor.editField.typeDocumentation', {

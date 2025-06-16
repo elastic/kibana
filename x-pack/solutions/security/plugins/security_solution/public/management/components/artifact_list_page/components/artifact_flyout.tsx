@@ -471,7 +471,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
           <EuiCallOut
             title={labels.flyoutDowngradedLicenseTitle}
             color="warning"
-            iconType="help"
+            iconiconType="question"
             data-test-subj={getTestId('expiredLicenseCallout')}
           >
             {labels.flyoutDowngradedLicenseInfo}{' '}

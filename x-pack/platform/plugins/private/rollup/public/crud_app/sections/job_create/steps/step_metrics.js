@@ -389,7 +389,7 @@ export class StepMetrics extends Component {
               flush="right"
               href={documentationLinks.apis.createRollupJobsRequest}
               target="_blank"
-              iconType="help"
+              iconiconType="question"
               data-test-subj="rollupJobCreateMetricsDocsButton"
             >
               <FormattedMessage

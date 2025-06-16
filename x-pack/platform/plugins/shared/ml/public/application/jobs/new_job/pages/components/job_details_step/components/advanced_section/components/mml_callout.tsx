@@ -30,7 +30,7 @@ export const MMLCallout: FC = () => {
         />
       }
       color="warning"
-      iconType="help"
+      iconiconType="question"
     >
       <EuiText>
         <FormattedMessage

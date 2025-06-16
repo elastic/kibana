@@ -573,7 +573,7 @@ export const WatchListPage = () => {
           <EuiButtonEmpty
             href={watcherGettingStartedUrl}
             target="_blank"
-            iconType="help"
+            iconiconType="question"
             data-test-subj="documentationLink"
           >
             <FormattedMessage

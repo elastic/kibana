@@ -264,7 +264,7 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
         docsLink={
           <EuiButtonEmpty
             target="_blank"
-            iconType="help"
+            iconiconType="question"
             iconSide="left"
             size="xs"
             color="primary"

@@ -789,7 +789,7 @@ function NoShardDelayCallout() {
         </>
       }
       color="warning"
-      iconType="help"
+      iconiconType="question"
     >
       <p>
         This demo works best with <EuiCode>shardDelay</EuiCode> aggregation which simulates slow
@@ -805,7 +805,7 @@ function NoShardDelayCallout() {
 
 function NoDataViewsCallout() {
   return (
-    <EuiCallOut title={<>Missing data views!</>} color="warning" iconType="help">
+    <EuiCallOut title={<>Missing data views!</>} color="warning" iconiconType="question">
       <p>This demo requires at least one data view.</p>
     </EuiCallOut>
   );

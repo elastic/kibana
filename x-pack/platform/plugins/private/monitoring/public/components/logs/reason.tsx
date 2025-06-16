@@ -198,7 +198,7 @@ export const Reason = ({ reason }: { reason?: IReason }) => {
   }
 
   return (
-    <EuiCallOut title={title} color="warning" iconType="help">
+    <EuiCallOut title={title} color="warning" iconiconType="question">
       <p>{message}</p>
     </EuiCallOut>
   );

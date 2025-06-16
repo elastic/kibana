@@ -43,7 +43,7 @@ export const EnrichPolicyCreate: React.FunctionComponent<RouteComponentProps> = 
           <EuiButtonEmpty
             href={documentationService.getCreateEnrichPolicyLink()}
             target="_blank"
-            iconType="help"
+            iconiconType="question"
             data-test-subj="createEnrichPolicyDocumentationLink"
           >
             <FormattedMessage
