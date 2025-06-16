@@ -29,28 +29,10 @@ import {
   getInjectFunction,
   getMigrateFunction,
   getTelemetryFunction,
-<<<<<<< HEAD
-} from '../common/lib';
-import {
-  EmbeddableStateWithType,
-  CommonEmbeddableStartContract,
-  EmbeddableRegistryDefinition,
-  EmbeddableContentManagementDefinition,
-} from '../common/types';
-import { getAllMigrations } from '../common/lib/get_all_migrations';
-import { EmbeddableContentManagementRegistryServer } from '../common/embeddable_content_management/registry';
-||||||| f23212db318f
-} from '../common/lib';
-import {
-  EmbeddableStateWithType,
-  CommonEmbeddableStartContract,
-  EmbeddableRegistryDefinition,
-} from '../common/types';
-import { getAllMigrations } from '../common/lib/get_all_migrations';
-=======
 } from './persistable_state';
 import { getAllMigrations } from './persistable_state/get_all_migrations';
->>>>>>> upstream/main
+import { EmbeddableContentManagementDefinition } from '../common/types';
+import { EmbeddableContentManagementRegistryServer } from '../common/embeddable_content_management/registry';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
