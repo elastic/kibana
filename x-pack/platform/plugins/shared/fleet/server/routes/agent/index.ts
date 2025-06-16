@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { FleetAuthz } from '../../../common';
 import { API_VERSIONS } from '../../../common/constants';
 import { getRouteRequiredAuthz, type FleetAuthzRouter } from '../../services/security';
+import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 
 import { AGENT_API_ROUTES } from '../../constants';
 import {
@@ -127,37 +128,40 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     );
 
   // Migrate
-  router.versioned
-    .post({
-      path: AGENT_API_ROUTES.MIGRATE_PATTERN,
-      security: {
-        authz: {
-          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+  const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
+  if (experimentalFeatures.enableAgentMigrations) {
+    router.versioned
+      .post({
+        path: AGENT_API_ROUTES.MIGRATE_PATTERN,
+        security: {
+          authz: {
+            requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+          },
         },
-      },
-      summary: `Migrate a single agent`,
-      description: `Migrate a single agent to another cluster.`,
-      options: {
-        tags: ['oas-tag:Elastic Agents'],
-      },
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.public.v1,
-        validate: {
-          request: MigrateSingleAgentRequestSchema,
-          response: {
-            200: {
-              body: () => MigrateSingleAgentResponseSchema,
-            },
-            400: {
-              body: genericErrorResponse,
+        summary: `Migrate a single agent`,
+        description: `Migrate a single agent to another cluster.`,
+        options: {
+          tags: ['oas-tag:Elastic Agents'],
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: {
+            request: MigrateSingleAgentRequestSchema,
+            response: {
+              200: {
+                body: () => MigrateSingleAgentResponseSchema,
+              },
+              400: {
+                body: genericErrorResponse,
+              },
             },
           },
         },
-      },
-      migrateSingleAgentHandler
-    );
+        migrateSingleAgentHandler
+      );
+  }
   // Update
   router.versioned
     .put({
