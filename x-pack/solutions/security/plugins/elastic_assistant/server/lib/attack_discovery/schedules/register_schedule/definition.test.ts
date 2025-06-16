@@ -26,6 +26,7 @@ describe('getAttackDiscoveryScheduleType', () => {
   it('should return schedule type definition', async () => {
     const scheduleType = getAttackDiscoveryScheduleType({
       logger: mockLogger,
+      publicBaseUrl: undefined,
       telemetry: mockTelemetry,
     });
 

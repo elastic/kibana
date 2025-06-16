@@ -123,7 +123,7 @@ describe('CorrelationsDetailsAlertsTable', () => {
     });
   });
 
-  it('opens rule preview when isPreview is false', () => {
+  it('opens rule preview when isRulePreview is false', () => {
     const { getAllByTestId } = renderCorrelationsTable(mockContextValue);
 
     expect(getAllByTestId(`${TEST_ID}RulePreview`).length).toBe(2);
@@ -139,8 +139,8 @@ describe('CorrelationsDetailsAlertsTable', () => {
     });
   });
 
-  it('does not render preview link when isPreview is true', () => {
-    const { queryByTestId } = renderCorrelationsTable({ ...mockContextValue, isPreview: true });
+  it('does not render preview link when isRulePreview is true', () => {
+    const { queryByTestId } = renderCorrelationsTable({ ...mockContextValue, isRulePreview: true });
     expect(queryByTestId(`${TEST_ID}RulePreview`)).not.toBeInTheDocument();
   });
 });
