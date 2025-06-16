@@ -250,13 +250,13 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
     ];
     return panels as EuiContextMenuPanelDescriptor[];
   }, [
-    solutionsRecommendedQueries,
-    queryForRecommendedQueries,
-    timeFieldName,
-    patternAnalysisField,
-    toggleLanguageComponent,
     docLinks.links.query.queryESQL,
     onESQLQuerySubmit,
+    queryForRecommendedQueries,
+    timeFieldName,
+    toggleLanguageComponent,
+    solutionsRecommendedQueries, // This dependency is fine here, as it *uses* the state
+    patternAnalysisField,
   ]);
 
   const esqlMenuPopoverStyles = css`
