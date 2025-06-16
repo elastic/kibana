@@ -202,7 +202,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // Expect to see a success toast
         const successToast = await toasts.getElementByIndex(1);
-        expect(await successToast.getVisibleText()).to.contain('Failure store configured');
+        expect(await successToast.getVisibleText()).to.contain('Failure store enabled');
         // Clear up toasts for next test
         await toasts.dismissAll();
       });

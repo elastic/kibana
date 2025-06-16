@@ -81,7 +81,7 @@ export const ConfigureFailureStoreModal: React.FunctionComponent<Props> = ({
           'xpack.idxMgmt.dataStreams.configureFailureStoreModal.successFailureStoreNotification',
           {
             defaultMessage:
-              'Failure store {disabledFailureStore, plural, one { disabled } other { configured } }',
+              'Failure store {disabledFailureStore, plural, one { disabled } other { enabled } }',
             values: { disabledFailureStore: !data.dsFailureStore ? 1 : 0 },
           }
         );
@@ -125,7 +125,7 @@ export const ConfigureFailureStoreModal: React.FunctionComponent<Props> = ({
         <EuiModalBody>
           <FormattedMessage
             id="xpack.idxMgmt.dataStreams.configureFailureStoreModal.modalDescriptionText"
-            defaultMessage="A failure store is a seconday set of indices inside a data stream, dedicated to storing failed documents. {docLink}."
+            defaultMessage="A failure store is a secondary set of indices inside a data stream, dedicated to storing failed documents. {docLink}."
             values={{
               docLink: (
                 <EuiLink
