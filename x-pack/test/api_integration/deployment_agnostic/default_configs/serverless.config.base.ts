@@ -26,6 +26,7 @@ interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
   testFiles: string[];
   junit: { reportName: string };
   suiteTags?: { include?: string[]; exclude?: string[] };
+  tier?: 'oblt_logs_essentials';
 }
 
 // include settings from elasticsearch controller
@@ -135,6 +136,13 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
           '--xpack.alerting.rules.minimumScheduleInterval.value="1s"',
           ...(dockerRegistryPort
             ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
+            : []),
+          ...(options.tier && options.tier === 'oblt_logs_essentials'
+            ? [
+                `--pricing.tiers.products=${JSON.stringify([
+                  { name: 'observability', tier: 'logs_essentials' },
+                ])}`,
+              ]
             : []),
         ],
       },
