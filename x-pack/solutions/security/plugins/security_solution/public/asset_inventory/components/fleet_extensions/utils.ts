@@ -569,7 +569,6 @@ export const getCloudConnectorRemoteRoleTemplate = ({
   const accountType = input?.streams?.[0]?.vars?.['aws.account_type']?.value ?? AWS_SINGLE_ACCOUNT;
 
   const provider = getCloudProviderFromCloudHost(cloud?.cloudHost);
-  console.log("provider", provider);
   if (!provider || provider !== 'aws') return undefined;
 
   const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
