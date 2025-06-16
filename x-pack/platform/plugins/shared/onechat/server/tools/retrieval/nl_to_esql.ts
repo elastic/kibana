@@ -6,15 +6,14 @@
  */
 
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import { BaseMessageLike } from '@langchain/core/messages';
 import { z } from '@kbn/zod';
 import { filter, toArray, firstValueFrom } from 'rxjs';
 import { isChatCompletionMessageEvent, isChatCompletionEvent } from '@kbn/inference-common';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import { OnechatToolIds, OnechatToolTags } from '@kbn/onechat-common';
 import { INLINE_ESQL_QUERY_REGEX } from '@kbn/inference-plugin/common/tasks/nl_to_esql/constants';
-import type { RegisteredTool } from '@kbn/onechat-server';
-import { listIndices, ListIndexInfo } from './list_indices';
+import type { RegisteredTool, ScopedModel } from '@kbn/onechat-server';
 import { getIndexMappings } from './get_index_mapping';
 import { indexExplorer } from './index_explorer';
 
@@ -44,36 +43,62 @@ export const nlToEsqlTool = (): RegisteredTool<typeof nlToEsqlToolSchema, NlToEs
     schema: nlToEsqlToolSchema,
     handler: async ({ query, index, context }, { esClient, modelProvider }) => {
       const model = await modelProvider.getDefaultModel();
+      return generateEsql({
+        query,
+        context,
+        index,
+        model,
+        esClient: esClient.asCurrentUser,
+      });
+    },
+    meta: {
+      tags: [OnechatToolTags.retrieval],
+    },
+  };
+};
 
-      let selectedIndex = index;
-      let mappings: MappingTypeMapping;
+export const generateEsql = async ({
+  query,
+  context,
+  index,
+  model,
+  esClient,
+}: {
+  query: string;
+  context?: string;
+  index?: string;
+  model: ScopedModel;
+  esClient: ElasticsearchClient;
+}): Promise<NlToEsqlResponse> => {
+  let selectedIndex: string | undefined;
+  let mappings: MappingTypeMapping;
 
-      if (index) {
-        selectedIndex = index;
-        const indexMappings = await getIndexMappings({
-          indices: [index],
-          esClient: esClient.asCurrentUser,
-        });
-        mappings = indexMappings[index].mappings;
-      } else {
-        const {
-          indices: [firstIndex],
-        } = await indexExplorer({
-          query,
-          esClient: esClient.asCurrentUser,
-          limit: 1,
-          model,
-        });
-        selectedIndex = firstIndex.indexName;
-        mappings = firstIndex.mappings;
-      }
+  if (index) {
+    selectedIndex = index;
+    const indexMappings = await getIndexMappings({
+      indices: [index],
+      esClient,
+    });
+    mappings = indexMappings[index].mappings;
+  } else {
+    const {
+      indices: [firstIndex],
+    } = await indexExplorer({
+      query,
+      esClient,
+      limit: 1,
+      model,
+    });
+    selectedIndex = firstIndex.indexName;
+    mappings = firstIndex.mappings;
+  }
 
-      const esqlEvents$ = naturalLanguageToEsql({
-        // @ts-expect-error using a scoped inference client
-        connectorId: undefined,
-        client: model.inferenceClient,
-        logger: { debug: () => undefined },
-        input: `
+  const esqlEvents$ = naturalLanguageToEsql({
+    // @ts-expect-error using a scoped inference client
+    connectorId: undefined,
+    client: model.inferenceClient,
+    logger: { debug: () => undefined },
+    input: `
         Your task is to generate an ES|QL query.
 
         - User query: "${query}",
@@ -86,27 +111,18 @@ export const nlToEsqlTool = (): RegisteredTool<typeof nlToEsqlToolSchema, NlToEs
 
         Given those info, please generate an ES|QL query to address the user request
         `,
-      });
+  });
 
-      const messages = await firstValueFrom(
-        esqlEvents$.pipe(
-          filter(isChatCompletionEvent),
-          filter(isChatCompletionMessageEvent),
-          toArray()
-        )
-      );
+  const messages = await firstValueFrom(
+    esqlEvents$.pipe(filter(isChatCompletionEvent), filter(isChatCompletionMessageEvent), toArray())
+  );
 
-      const fullContent = messages.map((message) => message.content).join('\n');
-      const esqlQueries = extractEsqlQueries(fullContent);
+  const fullContent = messages.map((message) => message.content).join('\n');
+  const esqlQueries = extractEsqlQueries(fullContent);
 
-      return {
-        answer: fullContent,
-        queries: esqlQueries,
-      };
-    },
-    meta: {
-      tags: [OnechatToolTags.retrieval],
-    },
+  return {
+    answer: fullContent,
+    queries: esqlQueries,
   };
 };
 

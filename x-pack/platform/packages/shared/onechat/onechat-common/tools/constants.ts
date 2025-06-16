@@ -10,6 +10,7 @@
  */
 export const OnechatToolIds = {
   indexExplorer: 'index_explorer',
+  // relevanceSearch: 'relevance_search',
 
   /// old
   listIndices: 'list_indices',
