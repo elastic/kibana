@@ -14,6 +14,33 @@ import {
   aiAssistantAnonymizationRules,
 } from '@kbn/observability-ai-assistant-plugin/common';
 
+const baseRuleSchema = schema.object({
+  id: schema.string(),
+  enabled: schema.boolean(),
+  description: schema.maybe(schema.string()),
+});
+
+const regexRuleSchema = schema.allOf([
+  baseRuleSchema,
+  schema.object({
+    type: schema.literal('regex'),
+    pattern: schema.string(),
+    entityClass: schema.maybe(schema.string()),
+  }),
+]);
+
+const nerRuleSchema = schema.allOf([
+  baseRuleSchema,
+  schema.object({
+    type: schema.literal('ner'),
+    entityClass: schema.oneOf([
+      schema.literal('PER'),
+      schema.literal('ORG'),
+      schema.literal('LOC'),
+    ]),
+  }),
+]);
+
 export const uiSettings: Record<string, UiSettingsParams> = {
   [aiAssistantSimulatedFunctionCalling]: {
     category: ['observability'],
@@ -64,33 +91,47 @@ export const uiSettings: Record<string, UiSettingsParams> = {
       'xpack.observabilityAiAssistantManagement.settingsTab.anonymizationRulesLabel',
       { defaultMessage: 'Anonymization Rules' }
     ),
-    value: [], // Default is an empty array, which disables all anonymization rules.
+    value: JSON.stringify(
+      [
+        {
+          id: 'person_ner',
+          entityClass: 'PER',
+          type: 'ner',
+          enabled: false,
+          description: 'Anonymize person names using named entity recognition',
+        },
+        {
+          id: 'location_ner',
+          entityClass: 'LOC',
+          type: 'ner',
+          enabled: false,
+          description: 'Anonymize location names using named entity recognition',
+        },
+        {
+          id: 'organization_ner',
+          entityClass: 'ORG',
+          type: 'ner',
+          enabled: false,
+          description: 'Anonymize organization names using named entity recognition',
+        },
+      ],
+      null,
+      2
+    ),
     description: i18n.translate(
       'xpack.observabilityAiAssistantManagement.settingsPage.anonymizationRulesDescription',
       {
         defaultMessage:
-          'JSON array of anonymization rules. Each rule is an object with properties:\n' +
+          'List of anonymization rules.\n' +
           '- id: unique string identifier\n' +
-          '- entityClass: class of entity (e.g., PER, ORG, EMAIL, URL)\n' +
           '- type: "ner" or "regex"\n' +
-          '- pattern: (for regex rules) the regex string to match\n' +
+          '- entityClass: (NER rules only) one of PER, ORG, LOC\n' +
+          '- pattern: (regex rules only) the regular‑expression string to match\n' +
           '- enabled: boolean flag to turn the rule on or off\n' +
-          '- builtIn: boolean indicating this is a built‑in rule\n' +
-          '- description: optional human‑readable description\n' +
-          'Default is an empty array, which disables all anonymization rules.',
+          '- description: optional human‑readable description\n',
       }
     ),
-    schema: schema.arrayOf(
-      schema.object({
-        id: schema.string(),
-        entityClass: schema.string(),
-        type: schema.oneOf([schema.literal('ner'), schema.literal('regex')]),
-        pattern: schema.string(),
-        enabled: schema.boolean(),
-        builtIn: schema.boolean(),
-        description: schema.maybe(schema.string()),
-      })
-    ),
+    schema: schema.arrayOf(schema.oneOf([regexRuleSchema, nerRuleSchema])),
     type: 'json',
     requiresPageReload: true,
     solution: 'oblt',
