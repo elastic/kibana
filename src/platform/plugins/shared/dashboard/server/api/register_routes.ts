@@ -25,7 +25,7 @@ import {
   dashboardCreateResultSchema,
   dashboardSearchResultsSchema,
   referenceSchema,
-} from '../content_management/v3';
+} from '../content_management/v1';
 
 interface RegisterAPIRoutesArgs {
   http: HttpServiceSetup;
