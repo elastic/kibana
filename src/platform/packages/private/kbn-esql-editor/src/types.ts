@@ -108,7 +108,7 @@ export interface EsqlPluginStartBase {
   getEditorExtensionsAutocomplete: (
     queryString: string,
     activeSolutionId: string
-  ) => Promise<RecommendedQuery[]>;
+  ) => Promise<{ recommendedQueries: RecommendedQuery[] }>;
   variablesService: ESQLVariableService;
   getLicense: () => Promise<ILicense | undefined>;
   getInferenceEndpointsAutocomplete: () => Promise<InferenceEndpointsAutocompleteResult>;
