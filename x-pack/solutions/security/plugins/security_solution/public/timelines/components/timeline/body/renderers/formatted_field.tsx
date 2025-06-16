@@ -8,10 +8,10 @@
 /* eslint-disable complexity */
 
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { isEmpty, isNumber } from 'lodash/fp';
 import React from 'react';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
 import { getAgentTypeForAgentIdField } from '../../../../../common/lib/endpoint/utils/get_agent_type_for_agent_id_field';
@@ -37,6 +37,7 @@ import {
   EVENT_URL_FIELD_NAME,
   GEO_FIELD_TYPE,
   IP_FIELD_TYPE,
+  PROCESS_ARGS_FIELD_NAME,
   REFERENCE_URL_FIELD_NAME,
   RULE_REFERENCE_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
@@ -96,6 +97,8 @@ const FormattedFieldValueComponent: React.FC<{
   value,
   linkValue,
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   if (isObjectArray || asPlainText) {
     return <span data-test-subj={`formatted-field-${fieldName}`}>{value}</span>;
   } else if (fieldType === IP_FIELD_TYPE) {
@@ -119,7 +122,7 @@ const FormattedFieldValueComponent: React.FC<{
         fieldName={fieldName}
         value={value}
         tooltipProps={
-          isUnifiedDataTable ? undefined : { position: 'bottom', className: dataGridToolTipOffset }
+          isUnifiedDataTable ? undefined : { position: 'bottom', css: dataGridToolTipOffset }
         }
       />
     );
@@ -221,13 +224,24 @@ const FormattedFieldValueComponent: React.FC<{
       title,
       value,
     });
+  } else if (fieldName === PROCESS_ARGS_FIELD_NAME) {
+    return (
+      <span
+        css={css`
+          margin-bottom: ${euiTheme.size.s};
+        `}
+        data-test-subj={`formatted-field-${fieldName}`}
+      >
+        {getOrEmptyTagFromValue(value)}
+      </span>
+    );
   } else {
     return truncate && !isEmpty(value) ? (
       <TruncatableText data-test-subj="truncatable-message">
         <EuiToolTip
           data-test-subj="message-tool-tip"
           position="bottom"
-          className={dataGridToolTipOffset}
+          css={dataGridToolTipOffset}
           content={
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem grow={false}>
