@@ -428,6 +428,20 @@ export class DiscoverPlugin
         discoverServices,
       });
     });
+
+    // We register the saved search embeddable factory for the log stream embeddable to support old log stream panels.
+    plugins.embeddable.registerReactEmbeddableFactory('LOG_STREAM_EMBEDDABLE', async () => {
+      const [startServices, discoverServices, { getSearchEmbeddableFactory }] = await Promise.all([
+        getStartServices(),
+        getDiscoverServicesForEmbeddable(),
+        getEmbeddableServices(),
+      ]);
+
+      return getSearchEmbeddableFactory({
+        startServices,
+        discoverServices,
+      });
+    });
   }
 }
 

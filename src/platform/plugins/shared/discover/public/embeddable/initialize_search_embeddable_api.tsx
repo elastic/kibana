@@ -25,6 +25,7 @@ import type { SortOrder, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import type { DataGridDensity, DataTableColumnsMeta } from '@kbn/unified-data-table';
 
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import { ALL_LOGS_DATA_VIEW_ID, getAllLogsDataViewSpec } from '@kbn/discover-utils/src';
 import type { DiscoverServices } from '../build_services';
 import { EDITABLE_SAVED_SEARCH_KEYS } from './constants';
 import { getSearchEmbeddableDefaults } from './get_search_embeddable_defaults';
@@ -38,6 +39,7 @@ import type {
 
 const initializeSearchSource = async (
   dataService: DiscoverServices['data'],
+  logsDataAccess: DiscoverServices['logsDataAccess'] | undefined,
   serializedSearchSource?: SerializedSearchSourceFields
 ) => {
   const [searchSource, parentSearchSource] = await Promise.all([
@@ -45,7 +47,27 @@ const initializeSearchSource = async (
     dataService.search.searchSource.create(),
   ]);
   searchSource.setParent(parentSearchSource);
-  const dataView = searchSource.getField('index');
+  let dataView = searchSource.getField('index');
+
+  // If the search source has no data view, fall back to the default "All logs" ad-hoc data view
+  if (!dataView) {
+    try {
+      // Try to load with the "All logs" data view ID. This is faster
+      dataView = await dataService.dataViews.get(ALL_LOGS_DATA_VIEW_ID);
+    } catch (e) {
+      // 2. If it does not exist yet, create it on-the-fly (ad-hoc; not persisted). This will make the dashboard go slower
+      if (logsDataAccess) {
+        const fallbackPattern =
+          await logsDataAccess.services.logSourcesService.getFlattenedLogSources();
+        const spec = getAllLogsDataViewSpec({ allLogsIndexPattern: fallbackPattern });
+        dataView = await dataService.dataViews.create(spec);
+      }
+    }
+
+    // Finally assign the data view to the search source
+    searchSource.setField('index', dataView);
+  }
+
   return { searchSource, dataView };
 };
 
@@ -85,6 +107,7 @@ export const initializeSearchEmbeddableApi = async (
   /** We **must** have a search source, so start by initializing it  */
   const { searchSource, dataView } = await initializeSearchSource(
     discoverServices.data,
+    discoverServices.logsDataAccess,
     initialState.serializedSearchSource
   );
   const searchSource$ = new BehaviorSubject<ISearchSource>(searchSource);
