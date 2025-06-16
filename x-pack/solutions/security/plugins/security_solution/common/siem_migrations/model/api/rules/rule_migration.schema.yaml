@@ -44,6 +44,23 @@ paths:
                 additionalProperties:
                   $ref: '../../../../../common/api/detection_engine/model/rule_schema/common_attributes.schema.yaml#/components/schemas/RelatedIntegration'
 
+  /internal/siem_migrations/rules/integrations/stats:
+    get:
+      summary: Retrieves the stats of all the integrations for all the rule migrations
+      operationId: GetRuleMigrationIntegrationsStats
+      x-codegen-enabled: true
+      x-internal: true
+      description: Retrieves the stats of all the integrations for all the rule migrations, including the number of rules associated with the integration
+      tags:
+        - SIEM Rule Migrations
+      responses:
+        200:
+          description: Indicates that related integrations stats have been retrieved correctly.
+          content:
+            application/json:
+              schema:
+                $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationAllIntegrationsStats'
+
   /internal/siem_migrations/rules:
     put:
       summary: Creates a new rule migration

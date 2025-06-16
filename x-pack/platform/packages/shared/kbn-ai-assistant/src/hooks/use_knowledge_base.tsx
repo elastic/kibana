@@ -18,39 +18,64 @@ import { useAIAssistantAppService } from './use_ai_assistant_app_service';
 
 export interface UseKnowledgeBaseResult {
   status: AbortableAsyncState<APIReturnType<'GET /internal/observability_ai_assistant/kb/status'>>;
-  isInstalling: boolean;
   isPolling: boolean;
   install: (inferenceId: string) => Promise<void>;
   warmupModel: (inferenceId: string) => Promise<void>;
   isWarmingUpModel: boolean;
+  isInstalling: boolean;
 }
 
 export function useKnowledgeBase(): UseKnowledgeBaseResult {
   const { notifications, ml } = useKibana().services;
   const service = useAIAssistantAppService();
 
+  const [isWarmingUpModel, setIsWarmingUpModel] = useState(false);
+  const [installingInferenceId, setInstallingInferenceId] = useState<string>();
+
   const statusRequest = useAbortableAsync(
     ({ signal }) => {
-      return service.callApi('GET /internal/observability_ai_assistant/kb/status', { signal });
+      return service.callApi('GET /internal/observability_ai_assistant/kb/status', {
+        signal,
+      });
     },
     [service]
   );
 
-  const [isInstalling, setIsInstalling] = useState(false);
-  const [isWarmingUpModel, setIsWarmingUpModel] = useState(false);
+  let isPolling = false;
 
-  // poll for status when installing, until install is complete and the KB is ready
-  const isPolling =
-    ((isInstalling || isWarmingUpModel) &&
-      statusRequest.value?.kbState !== KnowledgeBaseState.READY) ||
-    statusRequest.value?.kbState === KnowledgeBaseState.DEPLOYING_MODEL;
+  // Poll if either:
+  // 1. The model is currently being deployed to ML nodes
+  // 2. The knowledge base is being reindexed (e.g., during model updates)
+  if (
+    statusRequest.value?.kbState === KnowledgeBaseState.DEPLOYING_MODEL ||
+    statusRequest.value?.isReIndexing
+  ) {
+    isPolling = true;
+  }
+  // Poll if we're in the process of installing a new model or warming up an existing one
+  else if (installingInferenceId !== undefined || isWarmingUpModel) {
+    // Continue polling if either:
+    // 1. The knowledge base is not in READY state yet
+    // 2. We're installing a specific model but its ID doesn't match the current model
+    if (
+      statusRequest.value?.kbState !== KnowledgeBaseState.READY ||
+      (installingInferenceId !== undefined &&
+        statusRequest.value?.currentInferenceId !== installingInferenceId)
+    ) {
+      isPolling = true;
+    }
+  }
 
   useEffect(() => {
-    // toggle installing state to false once KB is ready
-    if (isInstalling && statusRequest.value?.kbState === KnowledgeBaseState.READY) {
-      setIsInstalling(false);
+    // Only reset installation state when the KB is ready and the endpoint model matches what we're installing
+    if (
+      installingInferenceId &&
+      statusRequest.value?.kbState === KnowledgeBaseState.READY &&
+      statusRequest.value?.currentInferenceId === installingInferenceId
+    ) {
+      setInstallingInferenceId(undefined);
     }
-  }, [isInstalling, statusRequest]);
+  }, [statusRequest, installingInferenceId]);
 
   useEffect(() => {
     // toggle warming up state to false once KB is ready
@@ -61,7 +86,8 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
 
   const install = useCallback(
     async (inferenceId: string) => {
-      setIsInstalling(true);
+      setInstallingInferenceId(inferenceId);
+
       try {
         // Retry the setup with a maximum of 5 attempts
         await pRetry(
@@ -130,7 +156,10 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
 
     const interval = setInterval(statusRequest.refresh, 5000);
 
-    if (statusRequest.value?.kbState === KnowledgeBaseState.READY) {
+    if (
+      statusRequest.value?.kbState === KnowledgeBaseState.READY &&
+      statusRequest.value?.currentInferenceId === installingInferenceId
+    ) {
       // done installing
       clearInterval(interval);
       return;
@@ -140,12 +169,12 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
     return () => {
       clearInterval(interval);
     };
-  }, [statusRequest, isPolling]);
+  }, [statusRequest, isPolling, installingInferenceId]);
 
   return {
     status: statusRequest,
     install,
-    isInstalling,
+    isInstalling: installingInferenceId !== undefined,
     isPolling,
     warmupModel,
     isWarmingUpModel,

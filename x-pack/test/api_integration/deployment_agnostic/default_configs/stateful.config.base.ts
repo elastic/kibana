@@ -25,6 +25,7 @@ import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
 import { DeploymentAgnosticCommonServices, services } from '../services';
+import { AI_ASSISTANT_SNAPSHOT_REPO_PATH, LOCAL_PRODUCT_DOC_PATH } from './common_paths';
 
 interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
   esServerArgs?: string[];
@@ -34,11 +35,6 @@ interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
   junit: { reportName: string };
   suiteTags?: { include?: string[]; exclude?: string[] };
 }
-
-export const AI_ASSISTANT_SNAPSHOT_REPO_PATH = path.resolve(
-  REPO_ROOT,
-  'x-pack/test/api_integration/deployment_agnostic/apis/observability/ai_assistant/knowledge_base/snapshots/'
-);
 
 export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServices>(
   options: CreateTestConfigOptions<T>
@@ -100,7 +96,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
           port: dockerRegistryPort,
           args: dockerArgs,
           waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 2 * 1000, // 2 minutes
+          waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
         },
       }),
       testFiles: options.testFiles,
@@ -161,6 +157,10 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
           '--xpack.uptime.service.devUrl=mockDevUrl',
           '--xpack.uptime.service.manifestUrl=mockDevUrl',
           '--xpack.observabilityAIAssistant.disableKbSemanticTextMigration=true',
+          `--xpack.productDocBase.artifactRepositoryUrl=file:///${LOCAL_PRODUCT_DOC_PATH}`,
+          ...(dockerRegistryPort
+            ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
+            : []),
         ],
       },
     };

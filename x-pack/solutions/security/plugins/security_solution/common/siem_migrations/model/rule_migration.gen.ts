@@ -142,6 +142,33 @@ export const PrebuiltRuleVersion = z.object({
 });
 
 /**
+ * The last execution of the rule migration task.
+ */
+export type RuleMigrationLastExecution = z.infer<typeof RuleMigrationLastExecution>;
+export const RuleMigrationLastExecution = z.object({
+  /**
+   * The moment the last execution started.
+   */
+  started_at: z.string().optional(),
+  /**
+   * The moment the last execution ended.
+   */
+  ended_at: z.string().nullable().optional(),
+  /**
+   * The connector ID used for the last execution.
+   */
+  connector_id: z.string().optional(),
+  /**
+   * The error message if the last execution failed.
+   */
+  error: z.string().nullable().optional(),
+  /**
+   * Indicates if the last execution was aborted by the user.
+   */
+  is_aborted: z.boolean().optional(),
+});
+
+/**
  * The rule migration object ( without Id ) with its settings.
  */
 export type RuleMigrationData = z.infer<typeof RuleMigrationData>;
@@ -154,6 +181,10 @@ export const RuleMigrationData = z.object({
    * The moment migration was created
    */
   created_at: NonEmptyString,
+  /**
+   * The last execution of the rule migration task.
+   */
+  last_execution: RuleMigrationLastExecution.optional(),
 });
 
 /**
@@ -274,7 +305,13 @@ export const RuleMigrationRule = z
  * The status of the migration task.
  */
 export type RuleMigrationTaskStatus = z.infer<typeof RuleMigrationTaskStatus>;
-export const RuleMigrationTaskStatus = z.enum(['ready', 'running', 'stopped', 'finished']);
+export const RuleMigrationTaskStatus = z.enum([
+  'ready',
+  'running',
+  'stopped',
+  'finished',
+  'aborted',
+]);
 export type RuleMigrationTaskStatusEnum = typeof RuleMigrationTaskStatus.enum;
 export const RuleMigrationTaskStatusEnum = RuleMigrationTaskStatus.enum;
 
@@ -414,6 +451,27 @@ export type RuleMigrationRetryFilter = z.infer<typeof RuleMigrationRetryFilter>;
 export const RuleMigrationRetryFilter = z.enum(['failed', 'not_fully_translated']);
 export type RuleMigrationRetryFilterEnum = typeof RuleMigrationRetryFilter.enum;
 export const RuleMigrationRetryFilterEnum = RuleMigrationRetryFilter.enum;
+
+/**
+ * The migration rules integration stats object.
+ */
+export type RuleMigrationIntegrationStats = z.infer<typeof RuleMigrationIntegrationStats>;
+export const RuleMigrationIntegrationStats = z.object({
+  /**
+   * The integration id
+   */
+  id: NonEmptyString,
+  /**
+   * The number of rules that are associated with the integration.
+   */
+  total_rules: z.number().int(),
+});
+
+/**
+ * The integrations stats objects of all the rule of all the migrations.
+ */
+export type RuleMigrationAllIntegrationsStats = z.infer<typeof RuleMigrationAllIntegrationsStats>;
+export const RuleMigrationAllIntegrationsStats = z.array(RuleMigrationIntegrationStats);
 
 /**
  * The type of the rule migration resource.

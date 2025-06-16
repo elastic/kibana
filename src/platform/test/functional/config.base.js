@@ -42,6 +42,9 @@ export default async function ({ readConfigFile }) {
 
         // disable fleet task that writes to metrics.fleet_server.* data streams, impacting functional tests
         `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
+
+        // disable product intercept
+        '--xpack.intercepts.enabled=false',
       ],
     },
 
@@ -49,7 +52,6 @@ export default async function ({ readConfigFile }) {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
-        'visualization:useLegacyTimeAxis': true,
       },
     },
 

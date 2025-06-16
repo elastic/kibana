@@ -191,7 +191,7 @@
             "signature": [
               "({ http, savedObjects, elasticsearch, executionContext, security }: ",
               "CoreStart",
-              ", { cloud, spaces }: ",
+              ", { cloud }: ",
               "TaskManagerPluginsStart",
               ") => ",
               {
@@ -226,7 +226,7 @@
                 "id": "def-server.TaskManagerPlugin.start.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{ cloud, spaces }",
+                "label": "{ cloud }",
                 "description": [],
                 "signature": [
                   "TaskManagerPluginsStart"
@@ -646,7 +646,12 @@
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
             "deprecated": true,
             "trackAdoption": false,
-            "references": []
+            "references": [
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/plugin_api_integration/test_suites/task_manager/task_management.ts"
+              }
+            ]
           },
           {
             "parentPluginId": "taskManager",

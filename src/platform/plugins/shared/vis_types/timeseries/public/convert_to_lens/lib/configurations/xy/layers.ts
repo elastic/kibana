@@ -14,10 +14,9 @@ import {
   XYLayerConfig,
   YAxisMode,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { PaletteOutput } from '@kbn/coloring';
+import { PaletteOutput, getValidColor } from '@kbn/coloring';
 import { v4 } from 'uuid';
 import { transparentize } from '@elastic/eui';
-import Color from 'color';
 import { euiLightVars } from '@kbn/ui-theme';
 import { groupBy } from 'lodash';
 import { DataViewsPublicPluginStart, DataView } from '@kbn/data-plugin/public/data_views';
@@ -215,7 +214,9 @@ const convertAnnotation = (
     key: {
       type: 'point_in_time',
     },
-    color: new Color(transparentize(annotation.color || euiLightVars.euiColorAccent, 1)).hex(),
+    color: getValidColor(transparentize(annotation.color || euiLightVars.euiColorAccent, 1), {
+      shouldBeCompatibleWithColorJs: true,
+    }).hex(),
     timeField: annotation.time_field || dataView.timeFieldName,
     icon:
       annotation.icon &&

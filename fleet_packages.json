@@ -24,7 +24,7 @@
 [
   {
     "name": "apm",
-    "version": "9.0.0-preview-1738343125",
+    "version": "9.1.0-preview-1747764883",
     "forceAlignStackVersion": true,
     "allowSyncToPrerelease": true
   },
@@ -34,7 +34,7 @@
   },
   {
     "name": "endpoint",
-    "version": "9.0.1"
+    "version": "9.0.2"
   },
   {
     "name": "fleet_server",
@@ -56,6 +56,6 @@
   },
   {
     "name": "security_detection_engine",
-    "version": "9.0.3"
+    "version": "9.0.6"
   }
 ]

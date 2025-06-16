@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import color from 'color';
 import { getCoreStart } from '../../services';
+import { getValidColor } from '@kbn/coloring';
 
 /**
  * Returns true if the color that is passed has low luminosity
  */
 const isColorDark = (c) => {
-  return color(c).luminosity() < 0.45;
+  return getValidColor(c, { shouldBeCompatibleWithColorJs: true }).luminance() < 0.45;
 };
 
 /**

@@ -1074,6 +1074,16 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
+     * Retrieves the stats of all the integrations for all the rule migrations, including the number of rules associated with the integration
+     */
+    getRuleMigrationIntegrationsStats(kibanaSpace: string = 'default') {
+      return supertest
+        .get(routeWithNamespace('/internal/siem_migrations/rules/integrations/stats', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
      * Retrieves all available prebuilt rules (installed and installable)
      */
     getRuleMigrationPrebuiltRules(
@@ -1593,6 +1603,13 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object)
         .query(props.query);
+    },
+    runEntityAnalyticsMigrations(kibanaSpace: string = 'default') {
+      return supertest
+        .post(routeWithNamespace('/internal/entity_analytics/migrations/run', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
      * Run a shell command on an endpoint.

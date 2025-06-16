@@ -406,6 +406,8 @@ export interface DocLinks {
     slo: string;
     sloBurnRateRule: string;
     aiAssistant: string;
+    elasticManagedLlm: string;
+    elasticManagedLlmUsageCost: string;
   }>;
   readonly alerting: Readonly<{
     authorization: string;
@@ -529,6 +531,7 @@ export interface DocLinks {
     unprivilegedMode: string;
     httpMonitoring: string;
     agentLevelLogging: string;
+    remoteESOoutputTroubleshooting: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;

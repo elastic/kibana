@@ -117,6 +117,11 @@ describe('Template serialization', () => {
           ).toHaveProperty('template.settings.index.mode', value);
         });
       });
+      test(`correctly serializes data_stream_options`, () => {
+        expect(
+          serializeTemplate(defaultDeserializedTemplate, { failure_store: { enabled: true } })
+        ).toHaveProperty('template.data_stream_options', { failure_store: { enabled: true } });
+      });
     });
   });
 });

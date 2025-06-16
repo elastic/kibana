@@ -90,6 +90,7 @@ import type {
   RulesListNotifyBadgePropsWithApi,
   RulesListProps,
 } from './types';
+import type { RuleSettingsLinkProps } from './application/components/rules_setting/rules_settings_link';
 import type { UntrackAlertsModalProps } from './application/sections/common/components/untrack_alerts_modal';
 import { isRuleSnoozed } from './application/lib';
 import { getNextRuleSnoozeSchedule } from './application/sections/rules_list/components/notify_badge/helpers';
@@ -133,7 +134,7 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getAlertSummaryWidget: (props: AlertSummaryWidgetProps) => ReactElement<AlertSummaryWidgetProps>;
   getRuleSnoozeModal: (props: RuleSnoozeModalProps) => ReactElement<RuleSnoozeModalProps>;
   getUntrackModal: (props: UntrackAlertsModalProps) => ReactElement<UntrackAlertsModalProps>;
-  getRulesSettingsLink: () => ReactElement;
+  getRulesSettingsLink: (props: RuleSettingsLinkProps) => ReactElement<RuleSettingsLinkProps>;
   getRuleHelpers: (rule: Rule<RuleTypeParams>) => {
     isRuleSnoozed: boolean;
     getNextRuleSnoozeSchedule: {
@@ -439,7 +440,10 @@ export class Plugin
 
   public start(core: CoreStart, plugins: PluginsStart): TriggersAndActionsUIPublicPluginStart {
     const createAlertRuleAction = async () => {
-      const action = new AlertRuleFromVisAction(this.ruleTypeRegistry, this.actionTypeRegistry);
+      const action = new AlertRuleFromVisAction(this.ruleTypeRegistry, this.actionTypeRegistry, {
+        coreStart: core,
+        ...plugins,
+      });
       return action;
     };
 
@@ -541,8 +545,8 @@ export class Plugin
       getUntrackModal: (props: UntrackAlertsModalProps) => {
         return getUntrackModalLazy(props);
       },
-      getRulesSettingsLink: () => {
-        return getRulesSettingsLinkLazy();
+      getRulesSettingsLink: (props: RuleSettingsLinkProps) => {
+        return getRulesSettingsLinkLazy(props);
       },
       getRuleHelpers: (rule: Rule<RuleTypeParams>) => {
         return {

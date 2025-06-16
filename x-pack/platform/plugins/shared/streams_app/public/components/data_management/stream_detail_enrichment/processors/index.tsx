@@ -24,7 +24,7 @@ import { useSelector } from '@xstate5/react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useEffect, useMemo, useCallback } from 'react';
-import { useForm, SubmitHandler, FormProvider, useWatch } from 'react-hook-form';
+import { useForm, SubmitHandler, FormProvider, useWatch, DeepPartial } from 'react-hook-form';
 import { css } from '@emotion/react';
 import { DiscardPromptOptions, useDiscardConfirm } from '../../../../hooks/use_discard_confirm';
 import { DissectProcessorForm } from './dissect';
@@ -53,6 +53,7 @@ import { DateProcessorForm } from './date';
 import { ConfigDrivenProcessorFields } from './config_driven/components/fields';
 import { ConfigDrivenProcessorType } from './config_driven/types';
 import { selectPreviewDocuments } from '../state_management/simulation_state_machine/selectors';
+import { ManualIngestPipelineProcessorForm } from './manual_ingest_pipeline';
 
 export function AddProcessorPanel() {
   const { euiTheme } = useEuiTheme();
@@ -67,19 +68,23 @@ export function AddProcessorPanel() {
   );
   const getEnrichmentState = useGetStreamEnrichmentState();
 
+  const grokCollection = useStreamsEnrichmentSelector((state) => state.context.grokCollection);
+
   const isOpen = Boolean(processorRef);
   const defaultValuesGetter = useCallback(
     () =>
       getDefaultFormStateByType(
         'grok',
-        selectPreviewDocuments(getEnrichmentState().context.simulatorRef?.getSnapshot().context)
+        selectPreviewDocuments(getEnrichmentState().context.simulatorRef?.getSnapshot().context),
+        { grokCollection }
       ),
-    [getEnrichmentState]
+    [getEnrichmentState, grokCollection]
   );
   const initialDefaultValues = useMemo(() => defaultValuesGetter(), [defaultValuesGetter]);
 
   const methods = useForm<ProcessorFormState>({
-    defaultValues: initialDefaultValues,
+    // cast necessary because DeepPartial does not work with `unknown`
+    defaultValues: initialDefaultValues as DeepPartial<ProcessorFormState>,
     mode: 'onChange',
   });
 
@@ -94,8 +99,14 @@ export function AddProcessorPanel() {
   useEffect(() => {
     if (processorRef) {
       const { unsubscribe } = methods.watch((value) => {
-        const processor = convertFormStateToProcessor(value as ProcessorFormState);
-        processorRef.send({ type: 'processor.change', processor });
+        const { processorDefinition, processorResources } = convertFormStateToProcessor(
+          value as ProcessorFormState
+        );
+        processorRef.send({
+          type: 'processor.change',
+          processor: processorDefinition,
+          resources: processorResources,
+        });
       });
 
       return () => unsubscribe();
@@ -189,6 +200,7 @@ export function AddProcessorPanel() {
             {type === 'date' && <DateProcessorForm />}
             {type === 'dissect' && <DissectProcessorForm />}
             {type === 'grok' && <GrokProcessorForm />}
+            {type === 'manual_ingest_pipeline' && <ManualIngestPipelineProcessorForm />}
             {!SPECIALISED_TYPES.includes(type) && (
               <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />
             )}
@@ -205,12 +217,12 @@ export function AddProcessorPanel() {
 const createDraftProcessorFromForm = (
   formState: ProcessorFormState
 ): ProcessorDefinitionWithUIAttributes => {
-  const processingDefinition = convertFormStateToProcessor(formState);
+  const { processorDefinition } = convertFormStateToProcessor(formState);
 
   return {
     id: 'draft',
     type: formState.type,
-    ...processingDefinition,
+    ...processorDefinition,
   };
 };
 
@@ -223,6 +235,7 @@ export function EditProcessorPanel({ processorRef, processorMetrics }: EditProce
   const { euiTheme } = useEuiTheme();
   const state = useSelector(processorRef, (s) => s);
   const getEnrichmentState = useGetStreamEnrichmentState();
+  const grokCollection = useStreamsEnrichmentSelector((_state) => _state.context.grokCollection);
   const canEdit = useStreamsEnrichmentSelector((s) => s.context.definition.privileges.simulate);
   const previousProcessor = state.context.previousProcessor;
   const processor = state.context.processor;
@@ -237,13 +250,14 @@ export function EditProcessorPanel({ processorRef, processorMetrics }: EditProce
     () =>
       getFormStateFrom(
         selectPreviewDocuments(getEnrichmentState().context.simulatorRef?.getSnapshot().context),
+        { grokCollection },
         processor
       ),
-    [getEnrichmentState, processor]
+    [getEnrichmentState, grokCollection, processor]
   );
 
   const methods = useForm<ProcessorFormState>({
-    defaultValues,
+    defaultValues: defaultValues as DeepPartial<ProcessorFormState>,
     mode: 'onChange',
   });
 
@@ -251,10 +265,13 @@ export function EditProcessorPanel({ processorRef, processorMetrics }: EditProce
 
   useEffect(() => {
     const { unsubscribe } = methods.watch((value) => {
-      const processingDefinition = convertFormStateToProcessor(value as ProcessorFormState);
+      const { processorDefinition, processorResources } = convertFormStateToProcessor(
+        value as ProcessorFormState
+      );
       processorRef.send({
         type: 'processor.change',
-        processor: processingDefinition,
+        processor: processorDefinition,
+        resources: processorResources,
       });
     });
     return () => unsubscribe();
@@ -265,13 +282,14 @@ export function EditProcessorPanel({ processorRef, processorMetrics }: EditProce
       methods.reset(
         getFormStateFrom(
           selectPreviewDocuments(getEnrichmentState().context.simulatorRef?.getSnapshot().context),
+          { grokCollection },
           previousProcessor
         )
       );
     });
 
     return () => subscription.unsubscribe();
-  }, [getEnrichmentState, methods, previousProcessor, processorRef]);
+  }, [getEnrichmentState, grokCollection, methods, previousProcessor, processorRef]);
 
   const handleCancel = useDiscardConfirm(
     () => processorRef?.send({ type: 'processor.cancel' }),
@@ -393,6 +411,7 @@ export function EditProcessorPanel({ processorRef, processorMetrics }: EditProce
             {type === 'date' && <DateProcessorForm />}
             {type === 'grok' && <GrokProcessorForm />}
             {type === 'dissect' && <DissectProcessorForm />}
+            {type === 'manual_ingest_pipeline' && <ManualIngestPipelineProcessorForm />}
             {!SPECIALISED_TYPES.includes(type) && (
               <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />
             )}

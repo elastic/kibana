@@ -591,6 +591,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       slo: `${ELASTIC_DOCS}solutions/observability/incident-management/service-level-objectives-slos`,
       sloBurnRateRule: `${ELASTIC_DOCS}solutions/observability/incident-management/create-an-slo-burn-rate-rule`,
       aiAssistant: `${ELASTIC_DOCS}solutions/observability/observability-ai-assistant`,
+      elasticManagedLlm: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/elastic-managed-llm`,
+      elasticManagedLlmUsageCost: `${ELASTIC_WEBSITE_URL}pricing`,
     },
     alerting: {
       guide: `${ELASTIC_DOCS}explore-analyze/alerts-cases/alerts/create-manage-rules`,
@@ -811,6 +813,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       pipelines: `${ELASTIC_DOCS}manage-data/ingest/transform-enrich/ingest-pipelines`,
       csvPipelines: `${ELASTIC_DOCS}reference/ecs/ecs-converting`,
       pipelineFailure: `${ELASTIC_DOCS}manage-data/ingest/transform-enrich/ingest-pipelines#handling-pipeline-failures`,
+      conditionalProcessor: `${ELASTIC_DOCS}manage-data/ingest/transform-enrich/ingest-pipelines#conditionally-run-processor`,
       processors: `${ELASTIC_DOCS}reference/enrich-processor`,
       arrayOrJson: `${ELASTIC_DOCS}reference/enrich-processor#ingest-process-category-array-json-handling`,
       dataEnrichment: `${ELASTIC_DOCS}reference/enrich-processor#ingest-process-category-data-enrichment`,
@@ -882,6 +885,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       unprivilegedMode: `${ELASTIC_DOCS}reference/fleet/elastic-agent-unprivileged#unprivileged-change-mode`,
       httpMonitoring: `${ELASTIC_DOCS}reference/fleet/agent-policy#change-policy-enable-agent-monitoring`,
       agentLevelLogging: `${ELASTIC_DOCS}reference/fleet/monitor-elastic-agent#change-logging-level`,
+      remoteESOoutputTroubleshooting: `${ELASTIC_DOCS}reference/fleet/remote-elasticsearch-output#troubleshooting`,
     },
     integrationDeveloper: {
       upload: `${ELASTIC_DOCS}extend/integrations/upload-new-integration`,

@@ -43,6 +43,8 @@ export interface IndexDetailsPageTestBed extends TestBed {
       addNewMappingFieldNameAndType: (mappingFields?: MappingField[]) => Promise<void>;
       clickFilterByFieldType: () => Promise<void>;
       selectFilterFieldType: (fieldType: string) => Promise<void>;
+      isClearFilterFieldTypeDisabled: () => boolean;
+      clearFilterFieldType: () => Promise<void>;
       clickAddFieldButton: () => Promise<void>;
       clickSaveMappingsButton: () => Promise<void>;
       getCodeBlockContent: () => string;
@@ -241,6 +243,17 @@ export const setup = async ({
       expect(testBed.exists(fieldType)).toBe(true);
       await act(async () => {
         find(fieldType).simulate('click');
+      });
+      component.update();
+    },
+    isClearFilterFieldTypeDisabled: () => {
+      expect(testBed.exists('clearFilters')).toBe(true);
+      return find('clearFilters').prop('disabled');
+    },
+    clearFilterFieldType: async () => {
+      expect(testBed.exists('clearFilters')).toBe(true);
+      await act(async () => {
+        find('clearFilters').simulate('click');
       });
       component.update();
     },

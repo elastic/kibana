@@ -20,7 +20,7 @@ pageLoadAssetSize:
   console: 61298
   contentConnectors: 65000
   contentManagement: 16254
-  controls: 12000
+  controls: 13000
   core: 564663
   crossClusterReplication: 65408
   customIntegrations: 22034
@@ -82,6 +82,7 @@ pageLoadAssetSize:
   inputControlVis: 172675
   inspector: 18000
   interactiveSetup: 80000
+  intercepts: 26158
   inventory: 27430
   kibanaOverview: 56279
   kibanaReact: 74422
@@ -112,11 +113,13 @@ pageLoadAssetSize:
   observabilityLogsExplorer: 46650
   observabilityOnboarding: 19573
   observabilityShared: 111036
+  onechat: 25000
   osquery: 107090
   painlessLab: 179748
   presentationPanel: 11550
   presentationUtil: 9000
   productDocBase: 22500
+  productIntercept: 23846
   profiling: 36694
   remoteClusters: 51327
   reporting: 58600
@@ -161,7 +164,6 @@ pageLoadAssetSize:
   synthetics: 55971
   telemetry: 51957
   telemetryManagementSection: 38586
-  threatIntelligence: 44299
   timelines: 327300
   transform: 41007
   triggersActionsUi: 135613
