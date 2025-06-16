@@ -9,7 +9,7 @@
 
 import React, { useEffect } from 'react';
 import { AttachmentType } from '@kbn/cases-plugin/common';
-import { LINK_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import { PAGE_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { DashboardLocatorParams } from '../../../../common/types';
 import { cases, shareService } from '../../../services/kibana_services';
@@ -49,7 +49,7 @@ export const AddToCaseOpenModal = ({
           imgData: screenshot,
         },
       },
-      persistableStateAttachmentTypeId: LINK_ATTACHMENT_TYPE,
+      persistableStateAttachmentTypeId: PAGE_ATTACHMENT_TYPE,
       type: AttachmentType.persistableState,
     };
     casesModal.open({ getAttachments: () => [attachments] });

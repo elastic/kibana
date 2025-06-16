@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const LINK_ATTACHMENT_TYPE = '.link';
+export const PAGE_ATTACHMENT_TYPE = '.page';

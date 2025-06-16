@@ -4,13 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { PersistableStateAttachmentState } from '../../../../common/types/domain';
 
-export interface LinkAttachmentPersistedState {
-  pathname: string;
+export interface PageAttachmentPersistedState extends PersistableStateAttachmentState {
   type: string;
-  icon: string;
   label: string;
+  icon: string;
+  url: {
+    pathAndQuery: string;
+    label: string;
+  };
   snapshot: {
     imgData: string;
-  };
+  } | null;
 }

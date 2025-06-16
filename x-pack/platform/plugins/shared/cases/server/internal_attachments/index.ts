@@ -9,7 +9,7 @@ import { badRequest } from '@hapi/boom';
 import { FileAttachmentMetadataRt } from '../../common/types/domain';
 import {
   FILE_ATTACHMENT_TYPE,
-  LINK_ATTACHMENT_TYPE,
+  PAGE_ATTACHMENT_TYPE,
   LENS_ATTACHMENT_TYPE,
 } from '../../common/constants';
 
@@ -24,7 +24,7 @@ export const registerInternalAttachments = (
   externalRefRegistry.register({ id: FILE_ATTACHMENT_TYPE, schemaValidator });
   persistableStateRegistry.register({ id: LENS_ATTACHMENT_TYPE });
   persistableStateRegistry.register({
-    id: LINK_ATTACHMENT_TYPE,
+    id: PAGE_ATTACHMENT_TYPE,
   });
 };
 

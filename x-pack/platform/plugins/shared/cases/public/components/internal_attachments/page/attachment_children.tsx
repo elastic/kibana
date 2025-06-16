@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { EuiImage, EuiLink } from '@elastic/eui';
-import type { LinkAttachmentPersistedState } from './types';
+import type { PageAttachmentPersistedState } from './types';
 
 interface AttachmentChildrenProps {
-  persistableStateAttachmentState: LinkAttachmentPersistedState;
+  persistableStateAttachmentState: PageAttachmentPersistedState;
 }
 
-export const LinkAttachmentChildren: React.FC<AttachmentChildrenProps> = ({
+export const PageAttachmentChildren: React.FC<AttachmentChildrenProps> = ({
   persistableStateAttachmentState,
 }) => {
   const { pathname, label, snapshot } = persistableStateAttachmentState;
@@ -28,8 +28,8 @@ export const LinkAttachmentChildren: React.FC<AttachmentChildrenProps> = ({
   );
 };
 
-LinkAttachmentChildren.displayName = 'LinkAttachmentChildren';
+PageAttachmentChildren.displayName = 'PageAttachmentChildren';
 
 // Note: This is for lazy loading
 // eslint-disable-next-line import/no-default-export
-export default LinkAttachmentChildren;
+export default PageAttachmentChildren;
