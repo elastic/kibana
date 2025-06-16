@@ -16,14 +16,14 @@ import { registerDeleteUnusedUrlsRoute } from './register_delete_unused_urls_rou
 import { runDeleteUnusedUrlsTask } from './task';
 
 jest.mock('./task', () => ({
-  runDeleteUnusedUrlsTask: jest.fn(),
+  runDeleteUnusedUrlsTask: jest.fn().mockResolvedValue({ deletedCount: 5 }),
 }));
 
 describe('registerDeleteUnusedUrlsRoute', () => {
   const mockRouter = router.create();
   const mockCoreSetup = coreMock.createSetup();
   const mockUrlExpirationDuration = moment.duration(1, 'year');
-  const mockMaxPageSize = 1000;
+  const mockUrlLimit = 1000;
   const mockLogger = loggingSystemMock.create().get();
   const mockResponseFactory = httpResourcesMock.createResponseFactory();
 
@@ -32,7 +32,7 @@ describe('registerDeleteUnusedUrlsRoute', () => {
       router: mockRouter,
       core: mockCoreSetup,
       urlExpirationDuration: mockUrlExpirationDuration,
-      maxPageSize: mockMaxPageSize,
+      urlLimit: mockUrlLimit,
       logger: mockLogger,
     });
 
@@ -60,7 +60,7 @@ describe('registerDeleteUnusedUrlsRoute', () => {
       router: mockRouter,
       core: mockCoreSetup,
       urlExpirationDuration: mockUrlExpirationDuration,
-      maxPageSize: mockMaxPageSize,
+      urlLimit: mockUrlLimit,
       logger: mockLogger,
     });
 
@@ -74,7 +74,7 @@ describe('registerDeleteUnusedUrlsRoute', () => {
     expect(runDeleteUnusedUrlsTask).toHaveBeenCalledWith({
       core: mockCoreSetup,
       urlExpirationDuration: mockUrlExpirationDuration,
-      maxPageSize: mockMaxPageSize,
+      urlLimit: mockUrlLimit,
       logger: mockLogger,
     });
 
@@ -82,6 +82,7 @@ describe('registerDeleteUnusedUrlsRoute', () => {
     expect(mockResponseFactory.ok).toHaveBeenCalledWith({
       body: {
         message: 'Unused URLs cleanup task has finished.',
+        deletedCount: 5,
       },
     });
   });

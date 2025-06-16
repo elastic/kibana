@@ -113,7 +113,7 @@ describe('unused_urls_task', () => {
 
   describe('fetchUnusedUrls', () => {
     it('should fetch unused URLs and determine hasMore correctly', async () => {
-      const maxPageSize = 2;
+      const urlLimit = 2;
       const savedObjects = [
         {
           id: '1',
@@ -130,20 +130,20 @@ describe('unused_urls_task', () => {
       mockSavedObjectsRepository.find.mockResolvedValue({
         saved_objects: savedObjects,
         total: 3,
-        per_page: maxPageSize,
+        per_page: urlLimit,
         page: 1,
       });
 
       const result = await fetchUnusedUrlsFromFirstNamespace({
         savedObjectsRepository: mockSavedObjectsRepository,
         urlExpirationDuration,
-        maxPageSize,
+        urlLimit,
       });
 
       expect(mockSavedObjectsRepository.find).toHaveBeenCalledWith({
         type: SAVED_OBJECT_TYPE,
         filter: 'url.attributes.accessDate <= now-2592000s',
-        perPage: maxPageSize,
+        perPage: urlLimit,
         namespaces: ['*'],
         fields: ['type'],
       });
@@ -164,8 +164,8 @@ describe('unused_urls_task', () => {
       expect(result.namespace).toBe('test-namespace');
     });
 
-    it('should set hasMore to false if fewer items than maxPageSize are returned', async () => {
-      const maxPageSize = 2;
+    it('should set hasMore to false if fewer items than urlLimit are returned', async () => {
+      const urlLimit = 2;
       const savedObjects = [
         {
           id: '1',
@@ -177,14 +177,14 @@ describe('unused_urls_task', () => {
       mockSavedObjectsRepository.find.mockResolvedValue({
         saved_objects: savedObjects,
         total: 1,
-        per_page: maxPageSize,
+        per_page: urlLimit,
         page: 1,
       });
 
       const result = await fetchUnusedUrlsFromFirstNamespace({
         savedObjectsRepository: mockSavedObjectsRepository,
         urlExpirationDuration,
-        maxPageSize,
+        urlLimit,
       });
 
       const savedObjectsDeleteObjects = [
@@ -200,7 +200,7 @@ describe('unused_urls_task', () => {
     });
 
     it('should return default namespace if first object has no namespaces', async () => {
-      const maxPageSize = 10;
+      const urlLimit = 10;
       const savedObjects = [
         {
           id: `id-1`,
@@ -211,14 +211,14 @@ describe('unused_urls_task', () => {
       mockSavedObjectsRepository.find.mockResolvedValue({
         saved_objects: savedObjects,
         total: 1,
-        per_page: maxPageSize,
+        per_page: urlLimit,
         page: 1,
       });
 
       const result = await fetchUnusedUrlsFromFirstNamespace({
         savedObjectsRepository: mockSavedObjectsRepository,
         urlExpirationDuration,
-        maxPageSize,
+        urlLimit,
       });
 
       expect(result.namespace).toBe('default');
@@ -232,18 +232,18 @@ describe('unused_urls_task', () => {
     });
 
     it('should not call delete if there are no saved objects', async () => {
-      const maxPageSize = 2;
+      const urlLimit = 2;
       mockSavedObjectsRepository.find.mockResolvedValue({
         saved_objects: [],
         total: 0,
-        per_page: maxPageSize,
+        per_page: urlLimit,
         page: 1,
       });
 
       await runDeleteUnusedUrlsTask({
         core: mockCoreSetup,
         urlExpirationDuration,
-        maxPageSize,
+        urlLimit,
         logger: mockLogger,
       });
 
@@ -269,11 +269,15 @@ describe('unused_urls_task', () => {
 
       mockSavedObjectsRepository.bulkDelete.mockResolvedValue({} as SavedObjectsBulkDeleteResponse);
 
-      await runDeleteUnusedUrlsTask({
+      const response = await runDeleteUnusedUrlsTask({
         core: mockCoreSetup,
         urlExpirationDuration,
-        maxPageSize: 100,
+        urlLimit: 100,
         logger: mockLogger,
+      });
+
+      expect(response).toEqual({
+        deletedCount: 1,
       });
 
       const savedObjectsDeleteObjects = [
@@ -309,27 +313,45 @@ describe('unused_urls_task', () => {
         },
       ] as SavedObjectsFindResult[];
 
+      const page3 = [
+        {
+          id: '3',
+          type: SAVED_OBJECT_TYPE,
+          namespaces: ['other-namespace'],
+        },
+      ] as SavedObjectsFindResult[];
+
       mockSavedObjectsRepository.find
         .mockResolvedValueOnce({
           saved_objects: page1,
-          total: 2,
+          total: 3,
           per_page: 1,
           page: 1,
         })
         .mockResolvedValueOnce({
           saved_objects: page2,
-          total: 2,
+          total: 3,
           per_page: 1,
           page: 2,
+        })
+        .mockResolvedValueOnce({
+          saved_objects: page3,
+          total: 3,
+          per_page: 1,
+          page: 3,
         });
 
       mockSavedObjectsRepository.bulkDelete.mockResolvedValue({} as SavedObjectsBulkDeleteResponse);
 
-      await runDeleteUnusedUrlsTask({
+      const response = await runDeleteUnusedUrlsTask({
         core: mockCoreSetup,
         urlExpirationDuration,
-        maxPageSize: 1,
+        urlLimit: 2,
         logger: mockLogger,
+      });
+
+      expect(response).toEqual({
+        deletedCount: 2,
       });
 
       expect(mockSavedObjectsRepository.bulkDelete).toHaveBeenCalledTimes(2);
@@ -388,7 +410,7 @@ describe('unused_urls_task', () => {
         runDeleteUnusedUrlsTask({
           core: mockCoreSetup,
           urlExpirationDuration,
-          maxPageSize: 100,
+          urlLimit: 100,
           logger: mockLogger,
         })
       ).rejects.toThrow('Failed to delete unused URL(s) in namespace "default": bulkDelete failed');

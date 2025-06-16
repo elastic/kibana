@@ -15,20 +15,20 @@ export const registerUrlServiceRoutes = ({
   router,
   core,
   urlExpirationDuration,
-  maxPageSize,
+  urlLimit,
   logger,
 }: {
   router: IRouter;
   core: CoreSetup;
   urlExpirationDuration: Duration;
-  maxPageSize: number;
+  urlLimit: number;
   logger: Logger;
 }) => {
   registerDeleteUnusedUrlsRoute({
     router,
     core,
     urlExpirationDuration,
-    maxPageSize,
+    urlLimit,
     logger,
   });
 };

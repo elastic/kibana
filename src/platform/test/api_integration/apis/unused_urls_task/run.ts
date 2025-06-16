@@ -21,11 +21,14 @@ export default function ({ getService }: FtrProviderContext) {
       );
     });
 
-    it('can run unused URLs cleanup', async () => {
+    it('runs unused URLs cleanup', async () => {
       const response = await supertest.post('/internal/unused_urls_task/run');
 
       expect(response.status).to.be(200);
-      expect(response.body).to.have.property('message', 'Unused URLs cleanup task has finished.');
+      expect(response.body).to.eql({
+        message: 'Unused URLs cleanup task has finished.',
+        deletedCount: 5,
+      });
     });
   });
 }

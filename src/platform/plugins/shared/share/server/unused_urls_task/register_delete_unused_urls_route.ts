@@ -16,13 +16,13 @@ export const registerDeleteUnusedUrlsRoute = ({
   router,
   core,
   urlExpirationDuration,
-  maxPageSize,
+  urlLimit,
   logger,
 }: {
   router: IRouter;
   core: CoreSetup;
   urlExpirationDuration: Duration;
-  maxPageSize: number;
+  urlLimit: number;
   logger: Logger;
 }) => {
   router.post(
@@ -40,16 +40,17 @@ export const registerDeleteUnusedUrlsRoute = ({
       validate: {},
     },
     async (_ctx, _req, res) => {
-      await runDeleteUnusedUrlsTask({
+      const { deletedCount } = await runDeleteUnusedUrlsTask({
         core,
         urlExpirationDuration,
-        maxPageSize,
+        urlLimit,
         logger,
       });
 
       return res.ok({
         body: {
           message: 'Unused URLs cleanup task has finished.',
+          deletedCount,
         },
       });
     }

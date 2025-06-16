@@ -58,11 +58,11 @@ export const deleteUnusedUrls = async ({
 export const fetchUnusedUrlsFromFirstNamespace = async ({
   savedObjectsRepository,
   urlExpirationDuration,
-  maxPageSize,
+  urlLimit,
 }: {
   savedObjectsRepository: ISavedObjectsRepository;
   urlExpirationDuration: Duration;
-  maxPageSize: number;
+  urlLimit: number;
 }) => {
   const filter = `url.attributes.accessDate <= now-${durationToSeconds(urlExpirationDuration)}`;
 
@@ -74,7 +74,7 @@ export const fetchUnusedUrlsFromFirstNamespace = async ({
   } = await savedObjectsRepository.find({
     type: SAVED_OBJECT_TYPE,
     filter,
-    perPage: maxPageSize,
+    perPage: urlLimit,
     namespaces: ['*'],
     fields: ['type'],
   });
@@ -100,12 +100,12 @@ export const fetchUnusedUrlsFromFirstNamespace = async ({
 export const runDeleteUnusedUrlsTask = async ({
   core,
   urlExpirationDuration,
-  maxPageSize,
+  urlLimit,
   logger,
 }: {
   core: CoreSetup;
   urlExpirationDuration: Duration;
-  maxPageSize: number;
+  urlLimit: number;
   logger: Logger;
 }) => {
   logger.debug('Unused URLs cleanup started');
@@ -117,8 +117,10 @@ export const runDeleteUnusedUrlsTask = async ({
   let { unusedUrls, hasMore, namespace } = await fetchUnusedUrlsFromFirstNamespace({
     savedObjectsRepository,
     urlExpirationDuration,
-    maxPageSize,
+    urlLimit,
   });
+
+  let deletedCount = unusedUrls.length || 0;
 
   while (unusedUrls.length > 0) {
     await deleteUnusedUrls({
@@ -128,21 +130,28 @@ export const runDeleteUnusedUrlsTask = async ({
       logger,
     });
 
-    if (hasMore) {
+    const shouldContinue = hasMore && deletedCount < urlLimit;
+
+    if (shouldContinue) {
       const nextPageData = await fetchUnusedUrlsFromFirstNamespace({
         savedObjectsRepository,
         urlExpirationDuration,
-        maxPageSize,
+        urlLimit,
       });
       unusedUrls = nextPageData.unusedUrls;
       hasMore = nextPageData.hasMore;
       namespace = nextPageData.namespace;
+      deletedCount += unusedUrls.length;
     } else {
       unusedUrls = [];
     }
   }
 
   logger.debug('Unused URLs cleanup finished');
+
+  return {
+    deletedCount,
+  };
 };
 
 export const scheduleUnusedUrlsCleanupTask = async ({

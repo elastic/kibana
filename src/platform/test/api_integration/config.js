@@ -41,7 +41,7 @@ export default async function ({ readConfigFile }) {
         '--usageCollection.usageCounters.bufferDuration=0',
         // unused URLs task
         '--share.url_expiration.enabled=true',
-        '--share.url_expiration.max_page_size=5',
+        '--share.url_expiration.url_limit=5',
       ],
     },
   };

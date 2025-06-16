@@ -9,7 +9,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import {
-  DEFAULT_MAX_PAGE_SIZE,
+  DEFAULT_URL_LIMIT,
   DEFAULT_URL_EXPIRATION_CHECK_INTERVAL,
   DEFAULT_URL_EXPIRATION_DURATION,
 } from './unused_urls_task';
@@ -30,8 +30,8 @@ export const configSchema = schema.object({
     check_interval: schema.duration({
       defaultValue: DEFAULT_URL_EXPIRATION_CHECK_INTERVAL,
     }),
-    max_page_size: schema.number({
-      defaultValue: DEFAULT_MAX_PAGE_SIZE,
+    url_limit: schema.number({
+      defaultValue: DEFAULT_URL_LIMIT,
     }),
   }),
 });

@@ -97,7 +97,7 @@ export class SharePlugin
         router: core.http.createRouter(),
         core,
         urlExpirationDuration: this.config.url_expiration.duration,
-        maxPageSize: this.config.url_expiration.max_page_size,
+        urlLimit: this.config.url_expiration.url_limit,
         logger: this.logger,
       });
     }
@@ -137,7 +137,7 @@ export class SharePlugin
                 core,
                 urlExpirationDuration: this.config.url_expiration.duration,
                 logger: this.logger,
-                maxPageSize: this.config.url_expiration.max_page_size,
+                urlLimit: this.config.url_expiration.url_limit,
               });
             },
           }),

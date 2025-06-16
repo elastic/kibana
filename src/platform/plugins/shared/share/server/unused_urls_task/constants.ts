@@ -9,6 +9,6 @@
 
 export const TASK_ID = 'unusedUrlsCleanupTask';
 export const SAVED_OBJECT_TYPE = 'url';
-export const DEFAULT_MAX_PAGE_SIZE = 10000;
+export const DEFAULT_URL_LIMIT = 10000;
 export const DEFAULT_URL_EXPIRATION_DURATION = '1y';
 export const DEFAULT_URL_EXPIRATION_CHECK_INTERVAL = '7d';
