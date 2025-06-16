@@ -20,6 +20,8 @@ import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { ElasticLLMCostAwarenessTour } from '@kbn/elastic-assistant/impl/tour/elastic_llm';
+import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '@kbn/elastic-assistant/impl/tour/const';
 import { StatusBell } from './status_bell';
 import * as i18n from './translations';
 
@@ -35,6 +37,7 @@ interface Props {
   openFlyout: () => void;
   setLocalStorageAttackDiscoveryMaxAlerts: React.Dispatch<React.SetStateAction<string | undefined>>;
   stats: AttackDiscoveryStats | null;
+  showFlyout: boolean;
 }
 
 const HeaderComponent: React.FC<Props> = ({
@@ -49,11 +52,37 @@ const HeaderComponent: React.FC<Props> = ({
   openFlyout,
   setLocalStorageAttackDiscoveryMaxAlerts,
   stats,
+  showFlyout,
 }) => {
   const { euiTheme } = useEuiTheme();
   const disabled = connectorId == null;
 
   const [didCancel, setDidCancel] = useState(false);
+  const { inferenceEnabled } = useAssistantContext();
+
+
+  const [isEISCostTourDisabled, setIsEISCostTourDisabled] = useState<boolean>(
+      !connectorsAreConfigured ||
+      !inferenceEnabled ||
+      showFlyout
+  );
+
+  useEffect(() => {
+    if (
+      !connectorsAreConfigured ||
+      !inferenceEnabled ||
+      showFlyout
+    ) {
+      setIsEISCostTourDisabled(true);
+    } else {
+      setIsEISCostTourDisabled(false);
+    }
+  }, [
+    connectorsAreConfigured,
+    inferenceEnabled,
+    isEISCostTourDisabled,
+    showFlyout,
+  ]);
 
   const handleCancel = useCallback(() => {
     setDidCancel(true);
@@ -100,12 +129,21 @@ const HeaderComponent: React.FC<Props> = ({
           `}
           grow={false}
         >
-          <ConnectorSelectorInline
-            onConnectorSelected={noop}
-            onConnectorIdSelected={onConnectorIdSelected}
+          <ElasticLLMCostAwarenessTour
+            isDisabled={isEISCostTourDisabled}
             selectedConnectorId={connectorId}
-            stats={stats}
-          />
+            zIndex={999} // Should lower than the flyout
+            storageKey={
+              NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM_USAGE_ATTACK_DISCOVERY
+            }
+          >
+            <ConnectorSelectorInline
+              onConnectorSelected={noop}
+              onConnectorIdSelected={onConnectorIdSelected}
+              selectedConnectorId={connectorId}
+              stats={stats}
+            />
+          </ElasticLLMCostAwarenessTour>
         </EuiFlexItem>
       )}
 

@@ -21,7 +21,9 @@ import type { FetchConversationsResponse } from '@kbn/elastic-assistant/impl/ass
 import { SECURITY_AI_SETTINGS } from '@kbn/elastic-assistant/impl/assistant/settings/translations';
 import { CONVERSATIONS_TAB } from '@kbn/elastic-assistant/impl/assistant/settings/const';
 import type { SettingsTabs } from '@kbn/elastic-assistant/impl/assistant/settings/types';
+
 import { useKibana } from '../../common/lib/kibana';
+import { useSpaceId } from '../../common/hooks/use_space_id';
 
 const defaultSelectedConversationId = WELCOME_CONVERSATION_TITLE;
 
@@ -43,6 +45,7 @@ export const ManagementSettings = React.memo(() => {
     chrome: { docTitle, setBreadcrumbs },
     serverless,
   } = useKibana().services;
+  const spaceId = useSpaceId();
 
   const onFetchedConversations = useCallback(
     (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
