@@ -58,7 +58,7 @@ const hasDefaultRandomSamplesDataSource = (dataSources: EnrichmentDataSource[]) 
   return dataSources.some((dataSource) => dataSource.type === 'random-samples');
 };
 
-export function createUrlUpdaterAction({
+export function createUrlSyncAction({
   urlStateStorageContainer,
 }: Pick<StreamEnrichmentServiceDependencies, 'urlStateStorageContainer'>) {
   return ({ context }: { context: StreamEnrichmentContextType }) => {

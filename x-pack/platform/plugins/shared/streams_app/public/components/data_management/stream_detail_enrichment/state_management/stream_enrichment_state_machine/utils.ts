@@ -7,6 +7,7 @@
 
 import { FieldDefinition, Streams } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
+import { AssignArgs } from 'xstate5';
 import { StreamEnrichmentContextType } from './types';
 import {
   convertToFieldDefinition,
@@ -18,6 +19,7 @@ import {
   KqlSamplesDataSource,
   RandomSamplesDataSource,
   CustomSamplesDataSource,
+  EnrichmentDataSource,
 } from '../../../../../../common/url_schema';
 import { dataSourceConverter } from '../../utils';
 
@@ -113,3 +115,20 @@ export function getUpsertWiredFields(
 
   return { ...originalFieldDefinition, ...simulationMappedFieldDefinition };
 }
+
+export const spawnDataSource = <TAssignArgs extends AssignArgs<any, any, any, any>>(
+  dataSource: EnrichmentDataSource,
+  assignArgs: TAssignArgs
+) => {
+  const { spawn, context, self } = assignArgs;
+  const dataSourceWithUIAttributes = dataSourceConverter.toUIDefinition(dataSource);
+
+  return spawn('dataSourceMachine', {
+    id: dataSourceWithUIAttributes.id,
+    input: {
+      parentRef: self,
+      streamName: context.definition.stream.name,
+      dataSource: dataSourceWithUIAttributes,
+    },
+  });
+};

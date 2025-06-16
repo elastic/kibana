@@ -28,7 +28,7 @@ import {
   StreamEnrichmentInput,
   StreamEnrichmentServiceDependencies,
 } from './types';
-import { dataSourceConverter, isGrokProcessor, processorConverter } from '../../utils';
+import { isGrokProcessor, processorConverter } from '../../utils';
 import {
   createUpsertStreamActor,
   createUpsertStreamFailureNofitier,
@@ -48,8 +48,9 @@ import {
   getDataSourcesUrlState,
   getStagedProcessors,
   getUpsertWiredFields,
+  spawnDataSource,
 } from './utils';
-import { createUrlInitializerActor, createUrlUpdaterAction } from './url_state_actor';
+import { createUrlInitializerActor, createUrlSyncAction } from './url_state_actor';
 import {
   createDataSourceMachineImplementations,
   dataSourceMachine,
@@ -86,72 +87,38 @@ export const streamEnrichmentMachine = setup({
           },
         }),
     })),
-    updateUrlState: getPlaceholderFor(createUrlUpdaterAction),
     notifyUpsertStreamSuccess: getPlaceholderFor(createUpsertStreamSuccessNofitier),
     notifyUpsertStreamFailure: getPlaceholderFor(createUpsertStreamFailureNofitier),
     refreshDefinition: () => {},
+    /* URL state actions */
+    storeUrlState: assign((_, params: { urlState: EnrichmentUrlState }) => ({
+      urlState: params.urlState,
+    })),
+    syncUrlState: getPlaceholderFor(createUrlSyncAction),
     storeDefinition: assign((_, params: { definition: Streams.ingest.all.GetResponse }) => ({
       definition: params.definition,
     })),
-
-    stopProcessors: ({ context }) => context.processorsRefs.forEach(stopChild),
-    setupProcessors: assign(
-      ({ self, spawn }, params: { definition: Streams.ingest.all.GetResponse }) => {
-        const processorsRefs = params.definition.stream.ingest.processing.map((proc) => {
-          const processor = processorConverter.toUIDefinition(proc);
-          return spawn('processorMachine', {
-            id: processor.id,
-            input: {
-              parentRef: self,
-              processor,
-            },
-          });
-        });
-
-        return {
-          initialProcessorsRefs: processorsRefs,
-          processorsRefs,
-        };
-      }
-    ),
-    setupDataSources: assign(({ context, self, spawn }) => {
-      const dataSourcesRefs = context.urlState.dataSources.map((dataSource) => {
-        const dataSourceWithUIAttributes = dataSourceConverter.toUIDefinition(dataSource);
-        return spawn('dataSourceMachine', {
-          id: dataSourceWithUIAttributes.id,
+    /* Processors actions */
+    setupProcessors: assign(({ context, self, spawn }) => {
+      // Clean-up pre-existing processors
+      context.processorsRefs.forEach(stopChild);
+      // Setup processors from the stream definition
+      const processorsRefs = context.definition.stream.ingest.processing.map((proc) => {
+        const processor = processorConverter.toUIDefinition(proc);
+        return spawn('processorMachine', {
+          id: processor.id,
           input: {
             parentRef: self,
-            streamName: context.definition.stream.name,
-            dataSource: dataSourceWithUIAttributes,
+            processor,
           },
         });
       });
 
       return {
-        dataSourcesRefs,
+        initialProcessorsRefs: processorsRefs,
+        processorsRefs,
       };
     }),
-    addDataSource: assign(
-      ({ context, spawn, self }, { dataSource }: { dataSource: EnrichmentDataSource }) => {
-        const dataSourceWithUIAttributes = dataSourceConverter.toUIDefinition(dataSource);
-
-        const newDataSourceRef = spawn('dataSourceMachine', {
-          id: dataSourceWithUIAttributes.id,
-          input: {
-            parentRef: self,
-            streamName: context.definition.stream.name,
-            dataSource: dataSourceWithUIAttributes,
-          },
-        });
-
-        return {
-          dataSourcesRefs: [newDataSourceRef, ...context.dataSourcesRefs],
-        };
-      }
-    ),
-    deleteDataSource: assign(({ context }, params: { id: string }) => ({
-      dataSourcesRefs: context.dataSourcesRefs.filter((proc) => proc.id !== params.id),
-    })),
     addProcessor: assign(
       (
         { context, spawn, self },
@@ -175,20 +142,33 @@ export const streamEnrichmentMachine = setup({
     deleteProcessor: assign(({ context }, params: { id: string }) => ({
       processorsRefs: context.processorsRefs.filter((proc) => proc.id !== params.id),
     })),
-    refreshDataSources: ({ context }) => {
-      context.dataSourcesRefs.forEach((dataSourceRef) =>
-        dataSourceRef.send({ type: 'dataSource.refresh' })
-      );
-    },
     reorderProcessors: assign((_, params: { processorsRefs: ProcessorActorRef[] }) => ({
       processorsRefs: params.processorsRefs,
     })),
     reassignProcessors: assign(({ context }) => ({
       processorsRefs: [...context.processorsRefs],
     })),
-    storeUrlState: assign((_, params: { urlState: EnrichmentUrlState }) => ({
-      urlState: params.urlState,
+    /* Data sources actions */
+    setupDataSources: assign((assignArgs) => ({
+      dataSourcesRefs: assignArgs.context.urlState.dataSources.map((dataSource) =>
+        spawnDataSource(dataSource, assignArgs)
+      ),
     })),
+    addDataSource: assign((assignArgs, { dataSource }: { dataSource: EnrichmentDataSource }) => {
+      const newDataSourceRef = spawnDataSource(dataSource, assignArgs);
+
+      return {
+        dataSourcesRefs: [newDataSourceRef, ...assignArgs.context.dataSourcesRefs],
+      };
+    }),
+    deleteDataSource: assign(({ context }, params: { id: string }) => ({
+      dataSourcesRefs: context.dataSourcesRefs.filter((proc) => proc.id !== params.id),
+    })),
+    refreshDataSources: ({ context }) => {
+      context.dataSourcesRefs.forEach((dataSourceRef) =>
+        dataSourceRef.send({ type: 'dataSource.refresh' })
+      );
+    },
     sendProcessorsEventToSimulator: sendTo(
       'simulator',
       ({ context }, params: { type: StreamEnrichmentEvent['type'] }) => ({
@@ -211,7 +191,7 @@ export const streamEnrichmentMachine = setup({
         ?.getSnapshot().context;
       if (processorRefContext && isGrokProcessor(processorRefContext.processor)) {
         context.grokCollection.setCustomPatterns(
-          processorRefContext?.processor.grok.pattern_definitions ?? {}
+          processorRefContext.processor.grok.pattern_definitions ?? {}
         );
       }
       return { grokCollection: context.grokCollection };
@@ -252,10 +232,9 @@ export const streamEnrichmentMachine = setup({
       return processorRef.getSnapshot().matches('draft');
     },
     isRootStream: ({ context }) => isRootStreamDefinition(context.definition.stream),
-    isWiredStream: ({ context }) => Streams.WiredStream.GetResponse.is(context.definition),
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5RgHYCcCWBjAFgZQBc0wBDAWwDoMUMCMSAbDAL2qkOPIGIBtABgC6iUAAcA9rFoYxKYSAAeiALQB2PgDYKAJgCMATnXqV6rQFYt6gMw6ANCACeyvXpXa1AFh1qV7gBy+tLQBfILtUTFwOUkpqKUYWNijuHh0hJBBxSToZOUUEJXVfV2dLPj13Sz0dSp1TO0d8vQsKXy8td3ctMqKVFRCw9Gx8ImiqGjp41hQoADE0MTIAVTQGLgBXFbG4pmZIfjTRCSkc9LyCvT4KdSbrPj9C3xN65R93FvVTS3U+FUstUr0-XAg0iI3IFFgYAIaxEAHF5gBrADCYgYDDAWGyKC4EBkYDGADcxAj8ZDoXDESi0Risfs5JljrJTspKlormVOi5dLUXM98qYDBQ9KZ3GVTHxTB8-jogeEhklKGSYfDiVT0ZjpNiwGh5mgKCIGCQCAAzMRoRVQ5WU1Hq2mCelHLG5ZSilp8PhFLRNDl8Cx1BwvDRCnS6QouCU6O6ykHDTiUTgQexcWBg+MYsAYAl7e3pBlO5kIb6aL46HRWX7C9x81TWCiWfwBKy+EV3dzRiKx0YJ+wQ1NUCDo5N94hkum5x2a52F0x1yqmLweTrqMt83yWN7Lr06dzXHeN9vy4ekRO9uP9wcps8wiBGsBjw5ZScFpS+QVaXx8Lx+ZztIx8yMmBQHTzh+XzuMY-wHqCZ7dqeozXkabA4nihLEviMKQmgBAKgAgpiZr3hkE4nKAZySq4-yvhKnT+CGtgBggkZaK47hNCGtwGNUbahMCHYKhQsGXvBIg3nQ0xcNqur6oaJpmpQGHathqZ4QQBE5g+jJTkofwzh0tTzq8zbfFWDGRq6Bi+O4Arrp6y5QZ24KwXKuBkKgBDrJssD2CgWCEXmT6kYgKjzkKnjmHoYEmOu1aWPWQp3KYnyWMYhivuo9n8U5MauSg7miSQeBiBsWD4rgJDTHe6lEY+JEKIgkZrkB4HCtUIFetWXRXL0oofsxPwWJYGVHiQJ7OTgOV5UaBVFWgJUUPlSI4OVMB+cRTKBYxfBfBQrWVKylQ+NWOivjt5jmN4gQiuUQ0wcePZjRN80YLABokPYiQYGQawyZqXAiPMJWwLAZqwBQI0QKtNXrXVCBWZcopNKYlnLkYwV8l0bxWXono-L0-yBDdXZ3RQD1uU9L2Gu90x4J932ITIf0A3AwNoKDxBmhA2qQ5pBZw0BZRmMjZa9P6DS1JoWM470Kj48EPFjZlxOk7l5OvVT7C0z9DP-WIgMsxQZUVdz+YbXzCOCzuwto6ZHpAQKUt438csDHxw2jdlZMQM9asfV9WvYjretmgbS1G6kDpQ1O86WEBxnbmWkaJb4fLrpcpabl00v44TjlKx7KtexTb2+3TWKM7rzPB5z6IEJVBzVTzpvivziNC6jouIN8dvYzLuMy07OdpiN935wQquUyX-vl0HeopiQK1Vf5tV5BUmi-NUKivvoKhVMx-4x10HxGPbJhFNd8sxorw8k6P4-F9Tmv0wHTNA8HCG18bAUw0uLQfhFGM716JYDu+RIxpwgoUT8sVWgEwvq7W619lZj0Lj7B+fsn7JkfliCgZByrzzAAAESmoVYqcBP7L2UNcXwXUfifH8L0fQeg+TijXu6Gia4PySksoPASecOyPRQRPNBpdNQUAJBgMAAB3IhBASAAAViDiKkZg9B2ClHSKhDSSAMwJEMAgLAch0MzgdBjiofQ7QuiXQ0Oof8MsaG+kSqUZsfgeFZX4Z7b2QiNaqNEeomR8jFESMkSokRMgQ7LTAAosAfjdawB0QwWuaBDFaRlhLCKBg7i1B+F8PkhQKBmOuFtVo84k6AjgYeBB7t3EF08ffbxoSUBiKCQQzRmJtG6P0SE-2TSpH+Kieo5Jz4Oh6B2sA5K3oyyBC0OjcyIYDDOE3sYSZri+FDAEbU9WNMfFhL8a02uEAdFgD0bALpT8KDGg6aDAAVIMjapYRnWVZL6KwrFKj-lYlcCKVlShFM3sAlZiDb64JQPPNg-iSGzTgDiYhM1AYGwYBIMAABZPBMAJq3JhjWEZbFfR-GSqYYwICOjFEMF8RxVkzDO14hUomgLqlj2BaC6Y4LYVQvyhCuF4MMXGNtqKMozgrDunFDkhiApNBlEgfOL0wCykuxpbnOlayyaMqgGCmFpCTnstZfNI5mjuVOE-HWUUO9EoEp8NUZhAQriWMAYlL0fQgQoDEJzeA6QFapgjo3TFZkZypxNYlbqFqGJKAatQvqFRhSZIJb4HhsQJg7ESB68ckdnzYx0BQMokYmidFiqUeiDQlDOAeV0PaRh1AUtMLG8Y9AE3TDmAsZYDBPUm0xWoahS5rjlkCNYZOwbHiXBapKMo65yg7h4UqCkqobQ0i-kvIxLpgo7SKJKcoLgZZFBscG9ewZLr-AuNjT8PCoDWmpBqGQMwSAYAYBsMAzav55Asfkm4ZZ8WinAioasbagIhgxv4LokYHVyugrSxMd6KGNBcEan4woA3mssNWM6-NiX1i8IlKwAKTxCXIGB+djQOjaA-F+V82a-wMSKOmhZHDCgVl6BhnsWGYgDlvcmr1ZxyxATMa0BcFY+TChGaxYw9ZCPWGMHRuC4J35sBw1pUl2gBrXDxUKkyYtjoPOqM2Zi1gOjcSAw5IeVSlW5Wk6mj5fqYNms8PB4Nx1XBlpHaKSB2NBrlOAwqgzLkPFF02Vg2da0Uk+CAukuO4pfiboLR8fJa5PxwwMJ4WV1LXP6ZHvSu+3ntmNL8VNfpQTjMbQKEYUKlEzVLP0LYtkRh3RmE+B6EUMaXN6d4YqjzNSvOTzObs2ubSDmXNy96ssFARTfKXOuD4x0yv2Kq04kUkoxNIJwaitVsiOVwF62xj8kXHh8d9CY5TndzAZuybFId1hYG6cVsDBgWYIAACUxBiCUnGVbLILgDdYsuNQx0NBWYLWAy4vQim+hltjT4IQQhAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5RgHYCcCWBjAFgZQBc0wBDAWwDoMUMCMSAbDAL2qkOPIGIBtABgC6iUAAcA9rFoYxKYSAAeiALQB2PgDYKAJgCMATnXqV6rQFYt6gMw6ANCACeyvXpXa1AFh1qV7gBy+tLQBfILtUTFwOUkpqKUYWNijuHh0hJBBxSToZOUUEJXVfV2dLPj13Sz0dSp1TO0d8vQsKXy8td3ctMqKVFRCw9Gx8ImiqGjp41hQoADE0MTIAVTQGLgBXFbG4pmZIfjTRCSkc9LyCvT4KdSbrPj9C3xN65R93FvVTS3U+FUstUr0-XAg0iI3IFFgYAIaxEAHF5gBrADCYgYDDAWGyKC4EBkYDGADcxAj8ZDoXDESi0Risfs5JljrJTspKlormVOi5dLUXM98qYDBQ9KZ3GVTHxTB8-jogeEhklKGSYfDiVT0ZjpNiwGh5mgKCIGCQCAAzMRoRVQ5WU1Hq2mCelHLG5ZSilp8PhFLRNDl8Cx1BwvDRCnS6QouCU6O6ykHDTiUTgQexcWBg+MYsAYAl7e3pBlO5kIa56bTqDoi0tedzOPmqawUSz+R4R9wqLx9ULAiKx0YJ+wQ1NUCDo5MD4hkum5x2a535HTVYumWqGYWN-T+ho+SzsvjWdwivQBUymaNdhUUXv9uOD4cpq8wiBGsATw5ZacF1S+S5VnQVLpqLQ+Hyc6thQ7iGGUfwdKy7gnvKo6kIml6jPeRpsDieKEsS+IwpCaAEAqACCmJms+GRTicoBnHuOigeKOgmAKB6VF8QHVJoi6lJYAq+E0FTHh2cqgleF63shIgPnQ0xcNqur6oaJpmpQOHavhqZEQQJE5i+jIzkoXTFh8WifjxtT+H8KisVWQo8ZYKiBEZXEmLBQk9ghfaCTgZCoAQ6ybLA9goFgpF5m+lGIHotkUB6pitB87pHlYQFfNo9EXN+YHCr6znduCF4eV5KA+RJJB4GIGxYPiuAkNMT5aWRr4UQo4U6L4bq+KYxh8CGPyPDWby6Ky3yeN8JiVNlZ55TGBVFUaJVlWgFUUMVSI4NVMDBeRTJhQgRQ0VW3G7VYdxaDW9FbsKYG6D87QJeN8EkIh+XeUtGCwAaJD2IkGBkGs8malwIjzBVsCwGasAUA9EAbQ1W1NQgZagQ2Zjci2ah6KxxZVp4xkfI8MUygJMYTW5FBPYVL1vYan3THg32-ahMgA0DcCg2g4PEGaEDatDOkFsNVzOFUPjdN466INYBkhl87rqC1JgWHdwkk2TBAU+91PsHTf2M4DYjA6zFBVTVPP5ttnRst8-x3C4w0SjWIoltY7VVv4IoqAYiuuQ97lTc9ECverX0-dr2K6-rZqG6txupA6MMzoElzih8HUmPoljWGLs4RW67ufAeGhNr4nu5crvvk-7lMfUH9NYkzessxHXPogQtUHPVvPbUokZvPoBgRQNpk-DWCcUMYc4hrLHy9DBhOnvdj1l6rFeBzTWsM6HzMgxHKYkOtdUhY1VFztoLjpxo1hmOU6jDz82i+Huray0ZjydMXabe6Ti9q1T1ch3X4d6hQi3E2oU4aqDMBQSMRgfx3CMO7SwN9XBGT3OnL0jxrA+DfueUuXZprfyrqvYO69kxryxNg40Y4cAgMPogaoNFehT2cEYUUko+Q1CuJUe+B5J4thngMOeSsP4q3wRrWmRCyEEgwGAAA7gAEVmgABWIJImRJDxGagoCouRUIaSQBmFIhgEBYDUNhlRCoo99DtC6IEJO18AwIDaFcNQvojylGdkXWecFBEL1wX7AOP9CE1w0Vo+RBASBKLAFotRQSZCRzWmACJIS9awH0QwFuaATG6TspoKslQhq1B+CxexhQLHXB3K0RcR4eJYMmr48u-iCGa3UbEkJOjMR6IMUY6JIdNFSLkYo5RfTMnvg6MWaonx3ZdHovZPk7RLhVC9EWFQRRJ7BE8S5EuQiv7LwCU0mJKBekyNkW0luEB9FgEMbAbp68KDGk6eDAAVMM7ac4FwRVZL6KwuT0b2J-AZCKKD3QNmWVxGpOChh4LINVXebBQlzXKnAQ2DAJCQBxLNUqCLwZiBEKgAAstCmA01nlgLsm8bwVgDA8SaCdexnxNAXF+JUDoXgNBrP4V4r2PiIXPShSgGF0w4UYoWoi7FqA0VhKFcDJFKL8V8sJd5YlVF071kCD+YwHUzBlD5HSoUhSmWeDUE5dZOV35ctwJCglsL0XzSlaK7ExVJWIshoq5Qhgtx0SaBFHcVQfkNGgZA1sngXAhnKBUMFWy6mq15fyqAgqbUipxfa61CKloXJ0S6-IookEAV+LoL0Zh3Z2L9SUu4pQ2ylHdFUEIHYUBiC5vAdIHkFSxw7mAqWpgKCVOXDFfwa5ToelagBcpe5AiVB+Fg2IEwdiJFTC202YCDw0TKJGXi-wz62HsUoQWnaujMSMKWcw-F2UbJiOMeg07phzAWMsBgc7QFnDUK1Toy4rB2X+C1GsTYhRdogljMCWClQUlVDaGkoCD6mJdCoDtLUoPXCrL0Iyxgay-Bogs5GY784E2PSaigUBrTUg1DIGYJAMAMA2GAO9NCEBWNHjcM6UHRSo2Qx6UCIYuh+ACF1cdxribe0oxB2cMHO1LmuD21owo+rlFHrLaoNieq+EsOGxColyD8d0gEJ9VRfw-F9IBexi6ootTdhUWor8ePzz7CpmIQ4KOTjju+cwNFCilDDH4A1CDfkF2E+1RchQOS9CU5ZgcQC2BqYcy2RGxgLBYx3ABICaDO2WBbB8GTPxPCBc-pGsLncAhsm+fk8Uvwi0shYxYcehQPhMQy8InZjSxH7OyySnwoEIoGDuAUorNYPijwU91O4vpdDmGq9shpojSHBL6XCxJfTGtnEMMUToDYOoMNeUBOyTj3RmE+NFPww3I0iN-jc1pLd2lnPubN5Qc52JliSxYJLHwP2-PW0YTbriduSj29y8m0aoBWolfGht2l50PvW+SvJVLAhsLUJ2j0qVWgtQyp981PLLUCuTcK8GWBkWQggBdzN-hIGPCqGUDQ3VfB8j3K1d0rRhZP0PYp8z3ifb7Z+39+FGOKB2rx0oPwbIM4BG+EUKozm+TfFcB0UsnQ1yxTZZ2DlJdQYMCzBAAASmIMQqk4zc7HZ2qsss1AtXPv290o81ANl02gz41aghAA */
   id: 'enrichStream',
   context: ({ input }) => ({
     definition: input.definition,
@@ -281,7 +260,7 @@ export const streamEnrichmentMachine = setup({
         'url.initialized': {
           actions: [
             { type: 'storeUrlState', params: ({ event }) => event },
-            { type: 'updateUrlState' },
+            { type: 'syncUrlState' },
           ],
           target: 'setupGrokCollection',
         },
@@ -302,11 +281,7 @@ export const streamEnrichmentMachine = setup({
     ready: {
       id: 'ready',
       type: 'parallel',
-      entry: [
-        { type: 'stopProcessors' },
-        { type: 'setupProcessors', params: ({ context }) => ({ definition: context.definition }) },
-        { type: 'setupDataSources' },
-      ],
+      entry: [{ type: 'setupProcessors' }, { type: 'setupDataSources' }],
       on: {
         'stream.received': {
           target: '#ready',
@@ -368,7 +343,7 @@ export const streamEnrichmentMachine = setup({
                     urlState: { v: 1, dataSources: getDataSourcesUrlState(context) },
                   }),
                 },
-                { type: 'updateUrlState' },
+                { type: 'syncUrlState' },
               ],
             },
             'dataSource.change': {
@@ -524,7 +499,7 @@ export const createStreamEnrichmentMachineImplementations = ({
   },
   actions: {
     refreshDefinition,
-    updateUrlState: createUrlUpdaterAction({ urlStateStorageContainer }),
+    syncUrlState: createUrlSyncAction({ urlStateStorageContainer }),
     notifyUpsertStreamSuccess: createUpsertStreamSuccessNofitier({
       toasts: core.notifications.toasts,
     }),
