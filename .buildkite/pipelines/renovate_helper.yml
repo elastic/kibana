@@ -4,11 +4,16 @@ agents:
   imageProject: elastic-images-prod
   machineType: n2-standard-2
 steps:
-  - command: .buildkite/scripts/steps/renovate_helper.sh
-    label: 'Run Renovate Helper'
-    key: renovate_helper
-    timeout_in_minutes: 20
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
+  - group: 'Renovate PR opened'
+    if: "build.env('GITHUB_PR_USER') == 'elastic-renovate-prod[bot]' && build.env('GITHUB_PR_EVENT_TYPE') == 'opened'"
+
+    steps:
+      - command: .buildkite/scripts/steps/renovate_helper.sh
+        label: 'Run Renovate helper on PR opened'
+        key: renovate_helper
+        timeout_in_minutes: 20
+        retry:
+          automatic:
+            - exit_status: '*'
+              limit: 1
+# TODO trigger build when event is updated and commit author is not renovate
