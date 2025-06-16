@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-/** Allow list of integrations to be available in the AI4DSOC integrations page */
-export const SEARCH_AI_LAKE_ALLOWED_INTEGRATIONS: string[] = [
-  'crowdstrike',
-  'google_secops',
-  'microsoft_sentinel',
-  'sentinel_one',
-  'splunk',
-];
+import { FtrProviderContext } from '../../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('logs essentials only', function () {
+    loadTestFile(require.resolve('./disabled_apis'));
+  });
+}
