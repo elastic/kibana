@@ -1254,6 +1254,7 @@ Object {
     "opentelemetry/java": 5,
     "opentelemetry/java/elastic": 6,
     "opentelemetry/nodejs/elastic": 7,
+    "opentelemetry/python/elastic": 8,
     "otlp": 1,
     "otlp/java": 2,
     "otlp/java/elastic": 3,
