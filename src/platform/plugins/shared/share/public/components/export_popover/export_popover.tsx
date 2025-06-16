@@ -303,6 +303,8 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
       : setIsFlyoutVisible(false);
   }, [exportDerivatives.length, exportIntegrations.length, onClose]);
 
+  const flyoutRef = useRef<HTMLDivElement | null>(null);
+
   return (
     <Fragment>
       <EuiWrappingPopover
@@ -360,6 +362,10 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
           maskProps={{
             headerZindexLocation: 'above',
           }}
+          ref={flyoutRef}
+          {...(selectedMenuItem?.groupId === 'exportDerivatives'
+            ? selectedMenuItem.config.flyoutSizing || {}
+            : {})}
         >
           {selectedMenuItemMeta!.group === 'export' ? (
             <ManagedFlyout
@@ -374,6 +380,7 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
             />
           ) : (
             (selectedMenuItem as ExportShareDerivativesConfig)?.config.flyoutContent({
+              flyoutRef,
               closeFlyout: flyoutOnCloseHandler,
             })
           )}

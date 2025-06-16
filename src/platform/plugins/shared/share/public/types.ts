@@ -9,7 +9,12 @@
 
 import type { ComponentType, ReactNode } from 'react';
 import type { InjectedIntl } from '@kbn/i18n-react';
-import { EuiContextMenuPanelDescriptor, type EuiCodeProps, type EuiIconProps } from '@elastic/eui';
+import {
+  EuiContextMenuPanelDescriptor,
+  type EuiCodeProps,
+  type EuiIconProps,
+  type EuiFlyoutProps,
+} from '@elastic/eui';
 import { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { ILicense } from '@kbn/licensing-plugin/public';
 import type { Capabilities } from '@kbn/core/public';
@@ -175,7 +180,11 @@ export interface ExportShareDerivatives
   extends ShareIntegration<{
     label: React.FC<{ openFlyout: () => void }>;
     toolTipContent?: ReactNode;
-    flyoutContent: React.FC<{ closeFlyout: () => void }>;
+    flyoutContent: React.FC<{
+      closeFlyout: () => void;
+      flyoutRef: React.RefObject<HTMLDivElement>;
+    }>;
+    flyoutSizing?: Pick<EuiFlyoutProps, 'size' | 'maxWidth'>;
   }> {
   groupId: 'exportDerivatives';
 }
