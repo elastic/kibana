@@ -7,12 +7,11 @@
 import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
-  describe('Stateful Observability - Deployment-agnostic Synthetics Alerting API integration tests', function () {
-    loadTestFile(
-      require.resolve('../../apis/observability/alerting/synthetics/synthetics_default_rule')
-    );
-    loadTestFile(
-      require.resolve('../../apis/observability/alerting/synthetics/custom_status_rule')
-    );
+  describe('Serverless Observability Logs Essentials - Deployment-agnostic API integration tests', function () {
+    this.tags(['esGate']);
+
+    // load new oblt and platform deployment-agnostic test here
+    // Note: if your tests runtime is over 5 minutes, create a new index and config file
+    loadTestFile(require.resolve('../../apis/core'));
   });
 }
