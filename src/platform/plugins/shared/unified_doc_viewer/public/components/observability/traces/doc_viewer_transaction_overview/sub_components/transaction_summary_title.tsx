@@ -24,6 +24,7 @@ export interface TransactionSummaryTitleProps {
   formattedTransactionName?: string;
   id?: string;
   formattedId?: string;
+  showActions?: boolean;
 }
 
 export const TransactionSummaryTitle = ({
@@ -32,16 +33,39 @@ export const TransactionSummaryTitle = ({
   id,
   formattedId,
   formattedTransactionName,
+  showActions = true,
 }: TransactionSummaryTitleProps) => {
+  const FieldContent = ({
+    children,
+    field,
+    title,
+    value,
+  }: {
+    children: React.ReactNode;
+    field: string;
+    title: string;
+    value: string;
+    showActions: boolean;
+  }) => {
+    return showActions ? (
+      <FieldHoverActionPopover title={title} value={value} field={field}>
+        <>{children}</>
+      </FieldHoverActionPopover>
+    ) : (
+      <>{children}</>
+    );
+  };
+
   return (
     <>
       <EuiTitle size="xs">
         <h2>
           {transactionName ? (
-            <FieldHoverActionPopover
+            <FieldContent
               title={transactionName}
               value={transactionName}
               field={TRANSACTION_NAME_FIELD}
+              showActions={showActions}
             >
               <HighlightField
                 value={transactionName}
@@ -56,23 +80,24 @@ export const TransactionSummaryTitle = ({
                   />
                 )}
               </HighlightField>
-            </FieldHoverActionPopover>
+            </FieldContent>
           ) : (
-            <FieldHoverActionPopover
+            <FieldContent
               title={serviceName}
               value={serviceName}
               field={SERVICE_NAME_FIELD}
+              showActions={showActions}
             >
               {serviceName}
-            </FieldHoverActionPopover>
+            </FieldContent>
           )}
         </h2>
       </EuiTitle>
 
       {id && (
-        <FieldHoverActionPopover title={id} value={id} field={TRANSACTION_ID_FIELD}>
+        <FieldContent title={id} value={id} field={TRANSACTION_ID_FIELD} showActions={showActions}>
           <HighlightField value={id} formattedValue={formattedId} textSize="xs" />
-        </FieldHoverActionPopover>
+        </FieldContent>
       )}
     </>
   );

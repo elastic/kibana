@@ -37,7 +37,7 @@ export const MonitorDetailsLinkPortal = ({ name, configId, locationId, updateUrl
 };
 
 const MonitorDetailsLinkWithLocation = ({ name, configId, locationId, updateUrl }: Props) => {
-  const selectedLocation = useSelectedLocation(updateUrl);
+  const selectedLocation = useSelectedLocation({ updateUrl });
 
   let locId = locationId;
 
