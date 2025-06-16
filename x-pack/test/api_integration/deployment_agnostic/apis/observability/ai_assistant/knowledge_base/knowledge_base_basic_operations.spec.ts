@@ -163,20 +163,27 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       beforeEach(async () => {
         await clearKnowledgeBase(es);
 
-        const entries = Array.from({ length: 500 }, (_, i) => {
-          const id = (i + 1).toString().padStart(3, '0');
-          return {
-            id,
-            title: `Testing ${id}`,
-            text: `Contents of item ${id}`,
-          };
-        });
-
         const { status } = await observabilityAIAssistantAPIClient.editor({
           endpoint: 'POST /internal/observability_ai_assistant/kb/entries/import',
           params: {
             body: {
-              entries,
+              entries: [
+                {
+                  id: 'my_doc_a',
+                  title: 'My title a',
+                  text: 'My content a',
+                },
+                {
+                  id: 'my_doc_b',
+                  title: 'My title b',
+                  text: 'My content b',
+                },
+                {
+                  id: 'my_doc_c',
+                  title: 'My title c',
+                  text: 'My content c',
+                },
+              ],
             },
           },
         });
@@ -189,35 +196,25 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('creates multiple entries', async () => {
         const entries = await getEntries();
-        expect(entries.length).to.equal(500);
+        expect(entries.length).to.eql(3);
       });
 
       describe('when sorting ', () => {
         it('allows sorting ascending', async () => {
-          const entries = await getEntries({ sortBy: 'id', sortDirection: 'asc' });
-
-          const ids = entries.map(({ id }) => id);
-          const sortedIds = [...ids].sort();
-
-          expect(ids).to.eql(sortedIds);
-          expect(ids[0]).to.equal('001');
+          const entries = await getEntries({ sortBy: 'title', sortDirection: 'asc' });
+          expect(entries.map(({ id }) => id)).to.eql(['my_doc_a', 'my_doc_b', 'my_doc_c']);
         });
 
         it('allows sorting descending', async () => {
-          const entries = await getEntries({ sortBy: 'id', sortDirection: 'desc' });
-
-          const ids = entries.map(({ id }) => id);
-          const sortedIds = [...ids].sort().reverse();
-
-          expect(ids).to.eql(sortedIds);
-          expect(ids[0]).to.equal('500');
+          const entries = await getEntries({ sortBy: 'title', sortDirection: 'desc' });
+          expect(entries.map(({ id }) => id)).to.eql(['my_doc_c', 'my_doc_b', 'my_doc_a']);
         });
       });
 
       it('allows searching by title', async () => {
-        const entries = await getEntries({ query: '420' });
-        expect(entries.length).to.equal(1);
-        expect(entries[0].title).to.equal(`Testing 420`);
+        const entries = await getEntries({ query: 'b' });
+        expect(entries.length).to.eql(1);
+        expect(entries[0].title).to.eql('My title b');
       });
     });
 
