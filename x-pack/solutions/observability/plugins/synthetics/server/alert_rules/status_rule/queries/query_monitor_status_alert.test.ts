@@ -77,7 +77,7 @@ describe('queryMonitorStatusAlert', () => {
       monitorQueryIds: ['monitor1'],
       numberOfChecks: 3,
       monitorsData: {
-        monitor1: { scheduleInMs: 60000, locations: ['location1'] },
+        monitor1: { scheduleInMs: 60000, locations: ['location1'], type: 'http' },
       },
       monitors: [],
       logger,
@@ -270,6 +270,7 @@ describe('queryMonitorStatusAlert', () => {
         monitor1: {
           scheduleInMs: 300000,
           locations: ['location1', 'location2', 'location3'],
+          type: 'http',
         },
       },
       monitors,

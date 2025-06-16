@@ -10,6 +10,7 @@ import { times } from 'lodash';
 import { intersection } from 'lodash';
 import { SavedObjectsFindResult } from '@kbn/core/server';
 import { Logger } from '@kbn/core/server';
+import { MonitorData } from '../../../saved_objects/synthetics_monitor/get_all_monitors';
 import {
   AlertStatusConfigs,
   AlertStatusMetaData,
@@ -50,7 +51,7 @@ export async function queryMonitorStatusAlert({
   monitorQueryIds: string[];
   numberOfChecks: number;
   includeRetests?: boolean;
-  monitorsData: Record<string, { scheduleInMs: number; locations: string[] }>;
+  monitorsData: Record<string, MonitorData>;
   monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>>;
   logger: Logger;
 }): Promise<AlertStatusResponse> {

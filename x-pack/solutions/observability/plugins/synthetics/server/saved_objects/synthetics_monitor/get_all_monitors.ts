@@ -14,6 +14,12 @@ import {
   SourceType,
 } from '../../../common/runtime_types';
 
+export interface MonitorData {
+  scheduleInMs: number;
+  locations: string[];
+  type: string;
+}
+
 export const processMonitors = (
   allMonitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>>,
   queryLocations?: string[] | string
@@ -32,7 +38,7 @@ export const processMonitors = (
   const allIds: string[] = [];
   let listOfLocationsSet = new Set<string>();
   const monitorQueryIdToConfigIdMap: Record<string, string> = {};
-  const monitorsData: Record<string, { scheduleInMs: number; locations: string[] }> = {};
+  const monitorsData: Record<string, MonitorData> = {};
 
   for (const monitor of allMonitors) {
     const attrs = monitor.attributes;
@@ -60,6 +66,7 @@ export const processMonitors = (
       monitorsData[attrs[ConfigKey.MONITOR_QUERY_ID]] = {
         scheduleInMs: periodToMs(attrs[ConfigKey.SCHEDULE]),
         locations: queryLocations ? intersection(monitorLocIds, queryLocations) : monitorLocIds,
+        type: attrs[ConfigKey.MONITOR_TYPE],
       };
 
       listOfLocationsSet = new Set([...listOfLocationsSet, ...monitorLocIds]);

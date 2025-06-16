@@ -8,6 +8,7 @@
 import moment from 'moment';
 import { SavedObjectsFindResult } from '@kbn/core/server';
 import { Logger } from '@kbn/core/server';
+import { MonitorData } from '../../../saved_objects/synthetics_monitor/get_all_monitors';
 import {
   AlertStatusConfigs,
   AlertPendingStatusConfigs,
@@ -60,6 +61,21 @@ export const getMissingPingMonitorInfo = ({
   };
 };
 
+const isMonitorReadyForData = ({
+  createdAt,
+  monitorType,
+}: {
+  createdAt?: string;
+  monitorType: string;
+}) => {
+  const waitMinutesBeforePending = monitorType === 'browser' ? 5 : 1;
+  return (
+    !createdAt ||
+    (createdAt &&
+      moment(createdAt).isBefore(moment().subtract(waitMinutesBeforePending, 'minutes')))
+  );
+};
+
 export const getPendingConfigs = ({
   monitorQueryIds,
   monitorLocationIds,
@@ -73,7 +89,7 @@ export const getPendingConfigs = ({
   monitorLocationIds: string[];
   upConfigs: AlertStatusConfigs;
   downConfigs: AlertStatusConfigs;
-  monitorsData: Record<string, { scheduleInMs: number; locations: string[] }>;
+  monitorsData: Record<string, MonitorData>;
   monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>>;
   logger: Logger;
 }) => {
@@ -98,9 +114,7 @@ export const getPendingConfigs = ({
         if (res) {
           const { createdAt, ...monitorInfo } = res;
           if (
-            !createdAt ||
-            // Wait at least 5 minutes since monitor creation before setting the monitor as pending
-            (createdAt && moment(createdAt).isBefore(moment().subtract(5, 'minutes')))
+            isMonitorReadyForData({ monitorType: monitorsData[monitorQueryId].type, createdAt })
           ) {
             pendingConfigs[configWithLocationId] = {
               status: 'pending',
