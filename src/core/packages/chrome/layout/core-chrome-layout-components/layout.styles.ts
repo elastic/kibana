@@ -22,7 +22,7 @@ const cssProp = css`
   grid-template-areas:
     'banner banner banner banner banner'
     'navigation navigationPanel header sidebarPanel sidebar'
-    'navigation navigationPanel app sidebarPanel sidebar'
+    'navigation navigationPanel application sidebarPanel sidebar'
     'navigation navigationPanel footer sidebarPanel sidebar';
 `;
 

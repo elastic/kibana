@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { LayoutFooter } from './layout_footer';
+export { LayoutFooter, type LayoutFooterProps } from './layout_footer';

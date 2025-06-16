@@ -12,7 +12,7 @@ import { EmotionFn } from '../types';
 
 const root: EmotionFn = ({ euiTheme }) =>
   css`
-    grid-area: app;
+    grid-area: application;
     height: 100%;
     position: relative;
     width: 100%;

@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { LayoutBanner } from './layout_banner';
+export { LayoutBanner, type LayoutBannerProps } from './layout_banner';

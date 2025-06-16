@@ -38,10 +38,10 @@ Wrap your layout in a `LayoutConfigProvider` to set region sizes:
 ```tsx
 import {
   ChromeLayout,
-  LayoutConfigProvider,
+  ChromeLayoutConfigProvider,
 } from '@kbn/core-chrome-layout-components';
 
-<LayoutConfigProvider
+<ChromeLayoutConfigProvider
   value={{
     bannerHeight: 32,
     headerHeight: 48,
@@ -52,7 +52,7 @@ import {
     sidebarPanelWidth: 280,
   }}
 >
-  <ChromeLayoutComponent
+  <ChromeLayout
     header={<MyHeader />}
     footer={<MyFooter />}
     navigation={<MyNav />}
@@ -62,8 +62,8 @@ import {
     banner={<MyBanner />}
   >
     <AppContent />
-  </ChromeLayoutComponent>
-</LayoutConfigProvider>;
+  </ChromeLayout>
+</ChromeLayoutConfigProvider>;
 ```
 
 Each slot can also be a function: `header={state => <Header expanded={state.hasSidebar} />}`
