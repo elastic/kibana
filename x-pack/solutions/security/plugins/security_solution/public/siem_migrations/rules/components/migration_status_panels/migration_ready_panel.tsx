@@ -6,7 +6,14 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiPanel, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiPanel,
+  EuiSpacer,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
 import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
@@ -49,11 +56,9 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
     if (migrationStats.last_error) {
       return i18n.RULE_MIGRATION_ERROR_DESCRIPTION(migrationStats.rules.total);
     }
-
     if (isAborted) {
       return i18n.RULE_MIGRATION_ABORTED_DESCRIPTION(migrationStats.rules.total);
     }
-
     return i18n.RULE_MIGRATION_READY_DESCRIPTION(migrationStats.rules.total);
   }, [migrationStats.last_error, migrationStats.rules.total, isAborted]);
 
@@ -70,11 +75,9 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
             <EuiFlexItem>
               <PanelText data-test-subj="ruleMigrationDescription" size="s" subdued>
                 <span>{migrationPanelDescription}</span>
-                <span>
-                  {!isLoading && missingResources.length > 0
-                    ? ` ${i18n.RULE_MIGRATION_READY_MISSING_RESOURCES}`
-                    : ''}
-                </span>
+                {!isLoading && missingResources.length > 0 && (
+                  <span> {i18n.RULE_MIGRATION_READY_MISSING_RESOURCES}</span>
+                )}
               </PanelText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -82,22 +85,24 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
         {isLoading ? (
           <CenteredLoadingSpinner />
         ) : (
-          <EuiFlexItem grow={false}>
-            {missingResources.length > 0 ? (
-              <EuiButton
-                data-test-subj="ruleMigrationMissingResourcesButton"
-                fill
-                iconType="download"
-                iconSide="right"
-                onClick={onOpenFlyout}
-                size="s"
-              >
-                {i18n.RULE_MIGRATION_UPLOAD_BUTTON}
-              </EuiButton>
-            ) : (
-              <StartTranslationButton migrationId={migrationStats.id} isAborted={isAborted} />
+          <>
+            {missingResources.length > 0 && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  data-test-subj="ruleMigrationMissingResourcesButton"
+                  iconType="download"
+                  iconSide="right"
+                  onClick={onOpenFlyout}
+                  size="s"
+                >
+                  {i18n.RULE_MIGRATION_UPLOAD_BUTTON}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
             )}
-          </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <StartTranslationButton migrationId={migrationStats.id} isAborted={isAborted} />
+            </EuiFlexItem>
+          </>
         )}
       </EuiFlexGroup>
       {migrationStats.last_error && (
@@ -118,6 +123,18 @@ const StartTranslationButton = React.memo<{ migrationId: string; isAborted: bool
       startMigration(migrationId);
     }, [migrationId, startMigration]);
 
+    const text = useMemo(() => {
+      if (isLoading) {
+        return isAborted
+          ? i18n.RULE_MIGRATION_RESUMING_TRANSLATION_BUTTON
+          : i18n.RULE_MIGRATION_STARTING_TRANSLATION_BUTTON;
+      } else {
+        return isAborted
+          ? i18n.RULE_MIGRATION_RESUME_TRANSLATION_BUTTON
+          : i18n.RULE_MIGRATION_START_TRANSLATION_BUTTON;
+      }
+    }, [isLoading, isAborted]);
+
     return (
       <EuiButton
         data-test-subj={'startMigrationButton'}
@@ -126,9 +143,7 @@ const StartTranslationButton = React.memo<{ migrationId: string; isAborted: bool
         isLoading={isLoading}
         size="s"
       >
-        {isAborted
-          ? i18n.RULE_MIGRATION_RESTART_TRANSLATION_BUTTON
-          : i18n.RULE_MIGRATION_START_TRANSLATION_BUTTON}
+        {text}
       </EuiButton>
     );
   }

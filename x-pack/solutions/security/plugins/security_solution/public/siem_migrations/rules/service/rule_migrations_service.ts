@@ -17,6 +17,7 @@ import type { RuleMigrationTaskStats } from '../../../../common/siem_migrations/
 import type {
   CreateRuleMigrationRulesRequestBody,
   StartRuleMigrationResponse,
+  StopRuleMigrationResponse,
   UpsertRuleMigrationResourcesRequestBody,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SiemMigrationRetryFilter } from '../../../../common/siem_migrations/constants';
@@ -205,6 +206,31 @@ export class SiemRulesMigrationsService {
     }
   }
 
+  public async stopRuleMigration(migrationId: string): Promise<StopRuleMigrationResponse> {
+    const missingCapabilities = this.getMissingCapabilities('all');
+    if (missingCapabilities.length > 0) {
+      this.core.notifications.toasts.add(
+        getMissingCapabilitiesToast(missingCapabilities, this.core)
+      );
+      return { stopped: false };
+    }
+
+    const params: api.StopRuleMigrationParams = { migrationId };
+    try {
+      const result = await api.stopRuleMigration(params);
+      await this.migrationTaskPollingUntil(
+        migrationId,
+        ({ status }) => status !== SiemMigrationTaskStatus.RUNNING // may be STOPPED, FINISHED or ABORTED
+      );
+
+      this.telemetry.reportStopTranslation(params);
+      return result;
+    } catch (error) {
+      this.telemetry.reportStopTranslation({ ...params, error });
+      throw error;
+    }
+  }
+
   public async getRuleMigrationsStats(
     params: api.GetRuleMigrationsStatsAllParams = {}
   ): Promise<RuleMigrationStats[]> {
@@ -215,6 +241,24 @@ export class SiemRulesMigrationsService {
     );
     this.latestStats$.next(results); // Always update the latest stats
     return results;
+  }
+
+  private async migrationTaskPollingUntil(
+    migrationId: string,
+    condition: (stats: RuleMigrationTaskStats) => boolean,
+    sleepSecs: number = 1
+  ): Promise<void> {
+    let retry = true;
+    do {
+      const stats = await api.getRuleMigrationStats({ migrationId });
+      if (condition(stats)) {
+        retry = false; // Stop polling if the condition is met
+      } else {
+        await new Promise((resolve) => setTimeout(resolve, sleepSecs * 1000));
+      }
+    } while (retry);
+    // updates the latest stats observable for all migrations to make sure they are in sync
+    await this.getRuleMigrationsStats();
   }
 
   private async getRuleMigrationsStatsWithRetry(
