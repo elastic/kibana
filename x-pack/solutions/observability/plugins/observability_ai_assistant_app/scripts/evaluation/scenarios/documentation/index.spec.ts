@@ -51,7 +51,7 @@ describe('Retrieve documentation function', () => {
     }
   });
 
-  it('retrieves Elasticsearch documentation', async () => {
+  it('retrieves ES documentation', async () => {
     const prompt = 'How can I configure HTTPS in Elasticsearch?';
     const conversation = await chatClient.complete({ messages: prompt });
 

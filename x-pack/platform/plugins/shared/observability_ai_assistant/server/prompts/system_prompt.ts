@@ -86,7 +86,7 @@ export function getObservabilitySystemPrompt({
   corePrinciples.push(
     `3. **Confirm Function Use (If Uncertain):** If you are unsure which specific function (tool) to use or what non-standard arguments are needed${
       isFunctionAvailable('context') ? ' even after checking context' : ''
-    }, ask the user for clarification or confirmation before proceeding.`
+    }, ask the user for clarification`
   );
 
   // Core Principles: Format Responses
@@ -198,13 +198,29 @@ export function getObservabilitySystemPrompt({
 
     if (isFunctionAvailable('elasticsearch')) {
       usage.push(
-        `8.  **Raw Elasticsearch API:** Use the \`elasticsearch\` function *only* for advanced use cases not covered by other functions. Be cautious.`
+        `8.  **Elasticsearch API:** Use the \`elasticsearch\` function to call Elasticsearch APIs on behalf of the user\n
+           * **When to use:** Whenever the user asks for information or an action that maps directly to an Elasticsearch REST API **(e.g. cluster health, license, index statistics, index creation, adding documents, etc.)** you **MUST** call the \`elasticsearch\` function. You have to derive which endpoint to call without explicitly asking the user. **NEVER** ask for permission to proceed with GET requests. You **MUST** call the \`elasticsearch\` function with the appropriate method and path. Only call the \`elasticsearch\` function with the DELETE method when the user specifically asks to do a delete operation. Don't call the API for any destructive action if the user has not asked you to do so.
+           * **Path parameter tips:** When requesting index stats, append the **specific path paramater** to the API endpoint if the user mentions it (example: \`{index}/_stats/store\` for *store stats*) instead of the generic \`{index}/_stats\`. Always populate the path with the index name if the user is referring to a specific index.
+           * **Follow-up requests:** If the user subsequently asks for more information about an index **without explicitly repeating the index name**, assume they mean the **same index you just used** in the prior Elasticsearch call and build the path accordingly. Do **not** ask the user to re-state the index name in such follow-up questions.`
       );
     }
 
     if (isFunctionAvailable('get_apm_downstream_dependencies')) {
       usage.push(
         `9.  **APM Dependencies:** Use \`get_apm_downstream_dependencies\`. Extract the \`service.name\` correctly from the user query. **Important Exception:** For this function, if the user does not explicitly provide a time range in their request, you **MUST** ask them for the desired start and end times before calling the function. Do not rely on the \`context\` function or default time ranges (\`now-15m\` to \`now\`) for this specific function unless the user provides the time range.`
+      );
+    }
+
+    if (isFunctionAvailable('get_dataset_info')) {
+      usage.push(
+        `10. **Get Dataset Info:** Use the \`get_dataset_info\` function to get information about indices/datasets available and the fields available on them. Providing an empty string as index name will retrieve all indices,
+        else list of all fields for the given index will be given. If no fields are returned this means no indices were matched by provided index pattern. Wildcards can be part of index name.`
+      );
+    }
+
+    if (isFunctionAvailable('get_dataset_info') && isFunctionAvailable('elasticsearch')) {
+      usage.push(
+        `11. Always use the \`get_dataset_info\` function to get information about indices/datasets available and the fields and field types available on them instead of using Elasticsearch APIs directly.`
       );
     }
 
