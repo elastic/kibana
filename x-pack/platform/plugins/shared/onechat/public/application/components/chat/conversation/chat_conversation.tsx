@@ -26,8 +26,8 @@ export const ChatConversation: React.FC<ChatConversationProps> = ({
 
   return (
     <>
-      {rounds.map((round) => {
-        return <ChatConversationRound round={round} />;
+      {rounds.map((round, index) => {
+        return <ChatConversationRound key={index} round={round} />;
       })}
     </>
   );

@@ -92,7 +92,7 @@ export const ChatNewConversationPrompt: React.FC<ChatNewConversationPromptProps>
                 <EuiFlexItem className={inputFlexItemClass}>
                   <EuiTextArea
                     inputRef={inputRef}
-                    data-test-subj="workchatAppChatNewConvTextArea"
+                    data-test-subj="onechatAppChatNewConvTextArea"
                     fullWidth
                     rows={1}
                     resize="vertical"
@@ -104,7 +104,8 @@ export const ChatNewConversationPrompt: React.FC<ChatNewConversationPromptProps>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
-                    data-test-subj="workchatAppChatNewConvSubmitButton"
+                    aria-label="Submit"
+                    data-test-subj="onechatAppChatNewConvSubmitButton"
                     iconType="kqlFunction"
                     display="fill"
                     size="m"

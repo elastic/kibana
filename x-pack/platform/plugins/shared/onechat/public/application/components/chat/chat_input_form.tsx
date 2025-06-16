@@ -68,7 +68,7 @@ export const ChatInputForm: React.FC<ChatInputFormProps> = ({ disabled, loading,
     >
       <EuiFlexItem className={inputFlexItemClass}>
         <EuiTextArea
-          data-test-subj="workchatAppChatInputFormTextArea"
+          data-test-subj="onechatAppChatInputFormTextArea"
           fullWidth
           rows={1}
           value={message}
@@ -79,7 +79,8 @@ export const ChatInputForm: React.FC<ChatInputFormProps> = ({ disabled, loading,
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
-          data-test-subj="workchatAppChatInputFormSubmitButton"
+          aria-label="Submit"
+          data-test-subj="onechatAppChatInputFormSubmitButton"
           iconType="kqlFunction"
           display="fill"
           size="m"
