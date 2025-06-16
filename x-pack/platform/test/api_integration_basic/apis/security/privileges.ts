@@ -233,8 +233,6 @@ export default function ({ getService }: FtrProviderContext) {
               'file_operations_all',
               'execute_operations_all',
               'scan_operations_all',
-              'endpoint_exceptions_all',
-              'endpoint_exceptions_read',
             ],
             siemV2: [
               'actions_log_management_all',
@@ -262,13 +260,12 @@ export default function ({ getService }: FtrProviderContext) {
               'scan_operations_all',
               'workflow_insights_all',
               'workflow_insights_read',
-              'endpoint_exceptions_all',
-              'endpoint_exceptions_read',
             ],
             siemV3: [
               'actions_log_management_all',
               'actions_log_management_read',
               'all',
+              'global_artifact_management_all',
               'blocklist_all',
               'blocklist_read',
               'endpoint_list_all',
@@ -291,8 +288,6 @@ export default function ({ getService }: FtrProviderContext) {
               'scan_operations_all',
               'workflow_insights_all',
               'workflow_insights_read',
-              'endpoint_exceptions_all',
-              'endpoint_exceptions_read',
             ],
             uptime: [
               'all',
