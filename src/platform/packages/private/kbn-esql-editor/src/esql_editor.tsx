@@ -151,15 +151,6 @@ export const ESQLEditor = memo(function ESQLEditor({
   const [abortController, setAbortController] = useState(new AbortController());
   const [license, setLicense] = useState<ILicense | undefined>(undefined);
 
-  // contains both client side validation and server messages
-  const [editorMessages, setEditorMessages] = useState<{
-    errors: MonacoMessage[];
-    warnings: MonacoMessage[];
-  }>({
-    errors: serverErrors ? parseErrors(serverErrors, code) : [],
-    warnings: serverWarning ? parseWarning(serverWarning) : [],
-  });
-
   const {
     handleQuerySubmit,
     handleQueryUpdate,
@@ -171,13 +162,22 @@ export const ESQLEditor = memo(function ESQLEditor({
     isLoading: isLoading ?? false,
     initialQueryEsql: query.esql,
     esqlVariables,
-    editorIsInline,
+    editorIsInline: Boolean(editorIsInline),
     isEditorMounted: Boolean(editor1.current), // Pass boolean indicating if editor is mounted
     allowQueryCancellation,
     onTextLangQuerySubmit,
     currentAbortController: abortController,
     setNewAbortController: setAbortController,
     onTextLangQueryChange,
+  });
+
+  // contains both client side validation and server messages
+  const [editorMessages, setEditorMessages] = useState<{
+    errors: MonacoMessage[];
+    warnings: MonacoMessage[];
+  }>({
+    errors: serverErrors ? parseErrors(serverErrors, code) : [],
+    warnings: serverWarning ? parseWarning(serverWarning) : [],
   });
 
   const onCommentLine = useCallback(() => {

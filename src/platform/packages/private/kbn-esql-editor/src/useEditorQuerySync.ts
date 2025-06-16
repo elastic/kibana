@@ -15,10 +15,10 @@ import { isEqual } from 'lodash';
 
 export interface UseEditorQuerySyncArgs {
   isLoading: boolean;
-  initialQueryEsql: string; // New: for query.esql
-  esqlVariables?: ESQLControlVariable[]; // New: for esqlVariables
-  editorIsInline?: boolean;
-  isEditorMounted: boolean; // Add this line
+  initialQueryEsql: string;
+  esqlVariables?: ESQLControlVariable[];
+  editorIsInline: boolean;
+  isEditorMounted: boolean;
   allowQueryCancellation?: boolean;
   onTextLangQuerySubmit: (query: AggregateQuery, controller: AbortController) => void;
   currentAbortController: AbortController;
