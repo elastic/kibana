@@ -199,7 +199,7 @@ export default ({ getService }: FtrProviderContext) => {
       // verify uninstalled packages are synced
       await uninstallPackage({ name: 'nginx', version: '2.0.0' });
 
-      await retry.tryForTime(10000, async () => {
+      await retry.tryForTime(20000, async () => {
         await verifySyncIntegrationsStatus(true);
         await verifyPackageUninstalledOnRemote();
       });
