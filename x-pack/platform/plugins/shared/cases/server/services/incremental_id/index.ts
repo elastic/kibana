@@ -277,7 +277,12 @@ export class CasesIncrementalIdService {
       }
     );
 
-    await this.internalSavedObjectsClient.bulkDelete(incrementersToDelete);
+    try {
+      await this.internalSavedObjectsClient.bulkDelete(incrementersToDelete);
+    } catch (e) {
+      this.logger.debug('Could not delete all duplicate incrementers.');
+      this.logger.error(e);
+    }
 
     // If a max incrementer exists, update it with the max value found
     if (incrementerWithHighestId) {
