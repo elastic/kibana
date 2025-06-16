@@ -10,6 +10,7 @@
 import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
