@@ -7,7 +7,7 @@
 
 import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import { Logger } from '@kbn/logging';
-
+import { OBSERVABILITY_ENABLE_STREAMS_UI } from '@kbn/management-settings-ids';
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import { Observable, from, shareReplay, startWith } from 'rxjs';
 import { once } from 'lodash';
@@ -21,7 +21,6 @@ import {
   StreamsStatus,
 } from './types';
 import { StreamsRepositoryClient } from './api';
-import { OBSERVABILITY_ENABLE_STREAMS_UI } from '../common/constants';
 
 export class Plugin implements StreamsPluginClass {
   public config: StreamsPublicConfig;

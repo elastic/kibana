@@ -20,9 +20,9 @@ import { i18n } from '@kbn/i18n';
 import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { schema } from '@kbn/config-schema';
+import { OBSERVABILITY_ENABLE_STREAMS_UI } from '@kbn/management-settings-ids';
 import { StreamsConfig, configSchema, exposeToBrowserConfig } from '../common/config';
 import {
-  OBSERVABILITY_ENABLE_STREAMS_UI,
   STREAMS_API_PRIVILEGES,
   STREAMS_CONSUMER,
   STREAMS_FEATURE_ID,
@@ -203,7 +203,8 @@ export class StreamsPlugin
     });
 
     const isObservabilityServerless =
-      plugins.cloud?.isServerlessEnabled && plugins.cloud?.serverless.projectType === 'oblt';
+      plugins.cloud?.isServerlessEnabled &&
+      plugins.cloud?.serverless.projectType === 'observability';
     core.uiSettings.register({
       [OBSERVABILITY_ENABLE_STREAMS_UI]: {
         category: ['observability'],
