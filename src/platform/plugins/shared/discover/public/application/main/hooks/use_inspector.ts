@@ -36,7 +36,7 @@ export function useInspector({
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
 
   const getProfilesAdapter = useActiveProfiles({
-    stateContainer,
+    dataDocuments$: stateContainer.dataState.data$.documents$,
   });
 
   const onOpenInspector = useCallback(() => {
