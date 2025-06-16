@@ -228,10 +228,10 @@ export function getActionsConfigurationUtilities(
     enableFooterInEmail: () => config.enableFooterInEmail,
     getMaxQueued: () => config.queued?.max || DEFAULT_QUEUED_MAX,
     getAwsSesConfig: () => {
-      if (config.email?.services?.ses.host && config.email?.services?.ses.port) {
+      if (config.email?.services?.ses?.host && config.email?.services?.ses?.port) {
         return {
-          host: config.email?.services?.ses.host,
-          port: config.email?.services?.ses.port,
+          host: config.email?.services?.ses?.host,
+          port: config.email?.services?.ses?.port,
           secure: true,
         };
       }

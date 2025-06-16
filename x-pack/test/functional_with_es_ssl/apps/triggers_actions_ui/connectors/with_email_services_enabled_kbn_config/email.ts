@@ -6,30 +6,28 @@
  */
 
 import expect from '@kbn/expect/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
+  const find = getService('find');
 
-  describe('Email', () => {
+  describe('Email - with multiple enabled services config', () => {
     beforeEach(async () => {
       await pageObjects.common.navigateToApp('triggersActionsConnectors');
     });
 
-    it('should use the kibana config for aws ses defaults', async () => {
-      await new Promise((resolve) => setTimeout(resolve, 10000));
+    it('should use the kibana config for enabled services', async () => {
       await pageObjects.triggersActionsUI.clickCreateConnectorButton();
       await testSubjects.click('.email-card');
-      await testSubjects.selectValue('emailServiceSelectInput', 'ses');
-
-      await testSubjects.waitForAttributeToChange(
-        'emailHostInput',
-        'value',
-        'email-smtp.us-east-1.amazonaws.com'
+      const emailServicesOptions = await find.allByCssSelector(
+        '[data-test-subj="emailServiceSelectInput"] > option'
       );
-      expect(await testSubjects.getAttribute('emailPortInput', 'value')).to.be('465');
-      expect(await testSubjects.getAttribute('emailSecureSwitch', 'aria-checked')).to.be('true');
+      expect(emailServicesOptions.length).to.be(3);
+      expect(await emailServicesOptions[0].getVisibleText()).to.be(' '); // empty option
+      expect(await emailServicesOptions[1].getVisibleText()).to.be('Gmail');
+      expect(await emailServicesOptions[2].getVisibleText()).to.be('Amazon SES');
     });
   });
 };

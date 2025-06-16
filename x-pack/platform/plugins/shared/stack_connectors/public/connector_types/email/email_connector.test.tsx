@@ -294,7 +294,7 @@ describe('EmailActionConnectorFields', () => {
         <ConnectorFormTestProvider
           connector={actionConnector}
           onSubmit={onSubmit}
-          connectorServices={{ validateEmailAddresses, enabledEmailServices: ['*'] }}
+          connectorServices={{ validateEmailAddresses, enabledEmailServices }}
         >
           <EmailActionConnectorFields
             readOnly={false}
