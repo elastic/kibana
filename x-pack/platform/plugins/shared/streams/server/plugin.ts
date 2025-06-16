@@ -202,11 +202,13 @@ export class StreamsPlugin
       runDevModeChecks: this.isDev,
     });
 
+    const isObservabilityServerless =
+      plugins.cloud?.isServerlessEnabled && plugins.cloud?.serverless.projectType === 'oblt';
     core.uiSettings.register({
       [OBSERVABILITY_ENABLE_STREAMS_UI]: {
         category: ['observability'],
         name: 'Streams',
-        value: false,
+        value: isObservabilityServerless,
         description: i18n.translate('xpack.streams.enableStreamsUIDescription', {
           defaultMessage: '{technicalPreviewLabel} Enable the {streamsLink}.',
           values: {
