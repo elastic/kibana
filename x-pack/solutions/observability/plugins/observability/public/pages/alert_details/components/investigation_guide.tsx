@@ -9,22 +9,18 @@ import { EuiEmptyPrompt, EuiButton, EuiSpacer, EuiMarkdownFormat } from '@elasti
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RuleFormStepId } from '@kbn/response-ops-rule-form/src/constants';
-import React from 'react';
+import React, { useState } from 'react';
 import {
-  useEditRuleFormFlyout,
-  type UseEditRuleFormFlyoutProps,
-} from '../hooks/use_edit_rule_form_flyout';
+  AlertDetailsRuleFormFlyout,
+  type AlertDetailsRuleFormFlyoutBaseProps,
+} from './AlertDetailsRuleFormFlyout';
 
-interface InvestigationGuideProps extends UseEditRuleFormFlyoutProps {
+interface InvestigationGuideProps extends AlertDetailsRuleFormFlyoutBaseProps {
   blob?: string;
 }
 
 export function InvestigationGuide({ blob, onUpdate, refetch, rule }: InvestigationGuideProps) {
-  const { AlertDetailsRuleFormFlyout, handleEditRuleDetails } = useEditRuleFormFlyout({
-    onUpdate,
-    refetch,
-    rule,
-  });
+  const [alertDetailsRuleFormFlyoutOpen, setAlertDetailsRuleFormFlyoutOpen] = useState(false);
   return blob ? (
     <>
       <EuiSpacer size="m" />
@@ -62,7 +58,7 @@ export function InvestigationGuide({ blob, onUpdate, refetch, rule }: Investigat
           <EuiButton
             data-test-subj="xpack.observability.alertDetails.investigationGuide.emptyPrompt.addGuide"
             color="primary"
-            onClick={handleEditRuleDetails}
+            onClick={() => setAlertDetailsRuleFormFlyoutOpen(true)}
             fill
           >
             <FormattedMessage
@@ -72,7 +68,16 @@ export function InvestigationGuide({ blob, onUpdate, refetch, rule }: Investigat
           </EuiButton>
         }
       />
-      <AlertDetailsRuleFormFlyout initialEditStep={RuleFormStepId.DETAILS} />
+      {!!rule && (
+        <AlertDetailsRuleFormFlyout
+          initialEditStep={RuleFormStepId.DETAILS}
+          isRuleFormFlyoutOpen={alertDetailsRuleFormFlyoutOpen}
+          setIsRuleFormFlyoutOpen={setAlertDetailsRuleFormFlyoutOpen}
+          onUpdate={onUpdate}
+          refetch={refetch}
+          rule={rule}
+        />
+      )}
     </>
   );
 }

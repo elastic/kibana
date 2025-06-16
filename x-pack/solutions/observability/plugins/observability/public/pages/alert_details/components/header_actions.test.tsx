@@ -104,6 +104,7 @@ describe('Header Actions', () => {
           alertIndex={'alert-index'}
           alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
           onUntrackAlert={mockOnUntrackAlert}
+          refetch={jest.fn()}
         />
       );
 

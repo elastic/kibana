@@ -32,11 +32,11 @@ import type { TopAlert } from '../../../typings/alerts';
 import { paths } from '../../../../common/locators/paths';
 import { useBulkUntrackAlerts } from '../hooks/use_bulk_untrack_alerts';
 import {
-  useEditRuleFormFlyout,
-  type UseEditRuleFormFlyoutProps,
-} from '../hooks/use_edit_rule_form_flyout';
+  AlertDetailsRuleFormFlyout,
+  type AlertDetailsRuleFormFlyoutBaseProps,
+} from './AlertDetailsRuleFormFlyout';
 
-export interface HeaderActionsProps extends UseEditRuleFormFlyoutProps {
+export interface HeaderActionsProps extends AlertDetailsRuleFormFlyoutBaseProps {
   alert: TopAlert | null;
   alertIndex?: string;
   alertStatus?: AlertStatus;
@@ -78,11 +78,7 @@ export function HeaderActions({
     }
   }, [alert, untrackAlerts, onUntrackAlert]);
 
-  const { handleEditRuleDetails, AlertDetailsRuleFormFlyout } = useEditRuleFormFlyout({
-    onUpdate,
-    refetch,
-    rule,
-  });
+  const [alertDetailsRuleFormFlyoutOpen, setAlertDetailsRuleFormFlyoutOpen] = useState(false);
 
   const handleTogglePopover = () => setIsPopoverOpen(!isPopoverOpen);
   const handleClosePopover = () => setIsPopoverOpen(false);
@@ -172,7 +168,7 @@ export function HeaderActions({
                   iconType="pencil"
                   onClick={() => {
                     setIsPopoverOpen(false);
-                    handleEditRuleDetails();
+                    setAlertDetailsRuleFormFlyoutOpen(true);
                   }}
                   disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
                   data-test-subj="edit-rule-button"
@@ -223,7 +219,15 @@ export function HeaderActions({
           </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <AlertDetailsRuleFormFlyout />
+      {rule && (
+        <AlertDetailsRuleFormFlyout
+          isRuleFormFlyoutOpen={alertDetailsRuleFormFlyoutOpen}
+          setIsRuleFormFlyoutOpen={setAlertDetailsRuleFormFlyoutOpen}
+          onUpdate={onUpdate}
+          refetch={refetch}
+          rule={rule}
+        />
+      )}
 
       {rule && snoozeModalOpen ? (
         <RuleSnoozeModal
