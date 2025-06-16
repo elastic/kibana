@@ -38,12 +38,22 @@ describe('Stack frame metadata operations', () => {
     expect(getCalleeFunction(metadata)).toEqual('promtail');
   });
 
-  test('metadata has executable name but no function name or source line', () => {
+  test('metadata has executable name but no function name or source line, address = 0', () => {
     const metadata = createStackFrameMetadata({
       ExeFileName: 'promtail',
       FrameType: FrameType.Native,
+      AddressOrLine: 0,
     });
-    expect(getCalleeSource(metadata)).toEqual('promtail+0x0');
+    expect(getCalleeSource(metadata)).toEqual('promtail');
+  });
+
+  test('metadata has executable name but no function name or source line, address > 0', () => {
+    const metadata = createStackFrameMetadata({
+      ExeFileName: 'promtail',
+      FrameType: FrameType.Native,
+      AddressOrLine: 0x1234,
+    });
+    expect(getCalleeSource(metadata)).toEqual('promtail+0x1234');
   });
 
   test('metadata has no executable name, function name, or source line', () => {
