@@ -52,7 +52,7 @@ class EmbeddableContentManagementRegistry<IsAsync extends true | false = false> 
 }
 
 export class EmbeddableContentManagementRegistryPublic extends EmbeddableContentManagementRegistry<true> {
-  // @ts-expect-error Overload arrow function with member function to correctly bind `this` to superclass
+  // @ts-expect-error https://github.com/microsoft/TypeScript/issues/61882
   public async getContentManagementDefinition(
     id: string
   ): Promise<MaybeEmbeddableContentManagementDefinition> {
@@ -61,7 +61,7 @@ export class EmbeddableContentManagementRegistryPublic extends EmbeddableContent
 }
 
 export class EmbeddableContentManagementRegistryServer extends EmbeddableContentManagementRegistry<false> {
-  // @ts-expect-error Overload arrow function with member function to correctly bind `this` to superclass
+  // @ts-expect-error https://github.com/microsoft/TypeScript/issues/61882
   public getContentManagementDefinition(id: string): MaybeEmbeddableContentManagementDefinition {
     return super.getContentManagementDefinition(id);
   }
