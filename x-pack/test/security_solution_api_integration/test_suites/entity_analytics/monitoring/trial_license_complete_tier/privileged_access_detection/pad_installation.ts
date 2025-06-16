@@ -23,7 +23,7 @@ export default ({ getService }: FtrProviderContext) => {
         retries: 1,
       });
     } catch (e) {
-      console.log('No existing package found for deletion, continuing');
+      log.info('No existing package found for deletion, continuing');
     }
   };
 
@@ -64,7 +64,7 @@ export default ({ getService }: FtrProviderContext) => {
         },
       });
     } catch (e) {
-      console.log('Job deletion unsuccessful, but continuing');
+      log.info('Job deletion unsuccessful, but continuing');
     }
   };
 
@@ -84,7 +84,7 @@ export default ({ getService }: FtrProviderContext) => {
         },
       });
     } catch (e) {
-      console.log(e);
+      log.error(e);
       throw Error('Failed to setup ML module');
     }
   };
@@ -133,7 +133,7 @@ export default ({ getService }: FtrProviderContext) => {
         const mlModuleSetupResponse = await simulateMlModuleSetupFromUI();
         expect(mlModuleSetupResponse.status).eql(200);
 
-        console.log('Installation was successful');
+        log.info('Privileged access detection installation was successful');
 
         const statusResponseAfterInstallation =
           await api.getStatusPrivilegedAccessDetectionPackage();
