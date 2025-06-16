@@ -15,7 +15,6 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { ENABLE_ESQL, getInitialESQLQuery } from '@kbn/esql-utils';
 import {
   AppMenuRegistry,
-  isAppMenuActionSubmenu,
   type AppMenuItemPrimary,
   type AppMenuItemSecondary,
 } from '@kbn/discover-utils';
@@ -183,14 +182,12 @@ export const useTopNavLinks = ({
   }, [getAppMenuAccessor, discoverParams, appMenuPrimaryAndSecondaryItems]);
 
   return useMemo(() => {
-    const entries = appMenuRegistry.getSortedItems().reduce((acc, appMenuItem) => {
-      const hasEmptyActions =
-        isAppMenuActionSubmenu(appMenuItem) && appMenuItem.actions.length === 0;
-
-      return hasEmptyActions
-        ? acc
-        : [...acc, convertAppMenuItemToTopNavItem({ appMenuItem, services })];
-    }, [] as TopNavMenuData[]);
+    const entries = appMenuRegistry.getSortedItems().map((appMenuItem) =>
+      convertAppMenuItemToTopNavItem({
+        appMenuItem,
+        services,
+      })
+    );
 
     if (services.uiSettings.get(ENABLE_ESQL)) {
       /**
