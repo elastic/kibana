@@ -1787,6 +1787,21 @@
       },
       {
         "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.DEPRECATED_ALERTING_CONSUMERS",
+        "type": "Array",
+        "tags": [],
+        "label": "DEPRECATED_ALERTING_CONSUMERS",
+        "description": [],
+        "signature": [
+          "\"observability\"[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
         "id": "def-common.ECS_VERSION",
         "type": "string",
         "tags": [],

@@ -160,6 +160,7 @@ export const configSchema = schema.object({
   ),
   usage: schema.object({
     url: schema.string({ defaultValue: DEFAULT_USAGE_API_URL }),
+    enabled: schema.maybe(schema.boolean({ defaultValue: true })),
     ca: schema.maybe(
       schema.object({
         path: schema.string(),
