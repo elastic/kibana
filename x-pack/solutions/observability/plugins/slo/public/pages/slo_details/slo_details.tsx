@@ -15,6 +15,7 @@ import { useIsMutating } from '@tanstack/react-query';
 import dedent from 'dedent';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { usePageReady } from '@kbn/ebt-tools';
 import { LoadingState } from '../../components/loading_state';
 import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
@@ -34,7 +35,6 @@ import { useSelectedTab } from './hooks/use_selected_tab';
 import { useSloDetailsTabs } from './hooks/use_slo_details_tabs';
 import type { SloDetailsPathParams } from './types';
 import { ActionModalProvider } from '../../context/action_modal';
-import { useSloPageReady } from '../../hooks/use_slo_page_ready';
 
 export function SloDetailsPage() {
   const {
@@ -105,9 +105,9 @@ export function SloDetailsPage() {
     }
   }, [hasRightLicense, permissions, navigateToUrl, basePath]);
 
-  useSloPageReady({
+  usePageReady({
     isReady: !isLoading && slo !== undefined,
-    isLoading: isRefetching,
+    isRefreshing: isRefetching,
   });
 
   useBreadcrumbs(getBreadcrumbs(basePath, slo), { serverless });

@@ -11,7 +11,7 @@ import { useIsMutating } from '@tanstack/react-query';
 import dedent from 'dedent';
 import { groupBy as _groupBy, mapValues } from 'lodash';
 import React, { useEffect } from 'react';
-import { useSloPageReady } from '../../../hooks/use_slo_page_ready';
+import { usePageReady } from '@kbn/ebt-tools';
 import { useFetchSloList } from '../../../hooks/use_fetch_slo_list';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useUrlSearchState } from '../hooks/use_url_search_state';
@@ -79,9 +79,9 @@ export function SloList() {
     });
   }, [sloList, observabilityAIAssistant]);
 
-  useSloPageReady({
+  usePageReady({
     isReady: !isLoading && sloList !== undefined,
-    isLoading,
+    isRefreshing: isLoading,
   });
 
   return (

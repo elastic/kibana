@@ -35,6 +35,7 @@ import dedent from 'dedent';
 import { AlertFieldsTable } from '@kbn/alerts-ui-shared/src/alert_fields_table';
 import { css } from '@emotion/react';
 import { omit } from 'lodash';
+import { usePageReady } from '@kbn/ebt-tools';
 import { RelatedAlerts } from './components/related_alerts/related_alerts';
 import { AlertDetailsSource } from './types';
 import { SourceBar } from './components';
@@ -59,7 +60,6 @@ import { RelatedDashboards } from './components/related_dashboards';
 import { getAlertTitle } from '../../utils/format_alert_title';
 import { AlertSubtitle } from './components/alert_subtitle';
 import { useRelatedDashboards } from './hooks/use_related_dashboards';
-import { useAlertPageReady } from './hooks/use_alert_page_ready';
 
 interface AlertDetailsPathParams {
   alertId: string;
@@ -199,8 +199,8 @@ export function AlertDetails() {
     setAlertStatus(ALERT_STATUS_UNTRACKED);
   }, []);
 
-  useAlertPageReady({
-    isLoading,
+  usePageReady({
+    isRefreshing: isLoading,
     isReady: !isLoading && !!alertDetail && activeTabId === 'overview',
   });
 

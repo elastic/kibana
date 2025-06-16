@@ -20,12 +20,14 @@ export const useSyntheticsPageReady = () => {
 
   usePageReady({
     isReady: loaded,
-    isInitialLoadReported,
+    customInitialLoadReported: {
+      value: isInitialLoadReported,
+      onInitialLoadReported: () => {
+        dispatch(initialLoadReported());
+      },
+    },
     // This will collect the metric even when we are periodically refreshing the data in the background
     // and not only when the user decides to refresh the data, the action is the same
     isRefreshing: loaded && isLoadingOverviewStatus,
-    onInitialLoadReported: () => {
-      dispatch(initialLoadReported());
-    },
   });
 };
