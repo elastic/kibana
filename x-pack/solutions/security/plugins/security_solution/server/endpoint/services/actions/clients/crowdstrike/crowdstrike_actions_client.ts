@@ -38,7 +38,6 @@ import type {
   ResponseActionRunScriptParameters,
 } from '../../../../../../common/endpoint/types';
 import type {
-  CrowdStrikeRunScriptActionRequestBody,
   IsolationRouteRequestBody,
   RunScriptActionRequestBody,
   UnisolationRouteRequestBody,
@@ -441,7 +440,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
   > {
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
-      CrowdStrikeRunScriptActionRequestBody['parameters']
+      RunScriptActionRequestBody['parameters']
     > = {
       ...actionRequest,
       ...this.getMethodOptions(options),

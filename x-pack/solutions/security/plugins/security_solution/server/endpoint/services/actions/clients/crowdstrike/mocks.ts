@@ -23,7 +23,7 @@ import { responseActionsClientMock } from '../mocks';
 import type { NormalizedExternalConnectorClient } from '../../..';
 import { applyEsClientSearchMock } from '../../../../mocks/utils.mock';
 import { CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../../common/endpoint/service/response_actions/crowdstrike';
-import type { CrowdStrikeRunScriptActionRequestBody } from '../../../../../../common/api/endpoint';
+import type { RunScriptActionRequestBody } from '../../../../../../common/api/endpoint';
 
 export interface CrowdstrikeActionsClientOptionsMock extends ResponseActionsClientOptionsMock {
   connectorActions: NormalizedExternalConnectorClient;
@@ -133,9 +133,9 @@ const createEventSearchResponseMock = (): CrowdstrikeEventSearchResponseMock => 
 });
 
 const createCrowdstrikeRunScriptOptionsMock = (
-  overrides: Partial<CrowdStrikeRunScriptActionRequestBody> = {}
-): CrowdStrikeRunScriptActionRequestBody => {
-  const options: CrowdStrikeRunScriptActionRequestBody = {
+  overrides: Partial<RunScriptActionRequestBody> = {}
+): RunScriptActionRequestBody => {
+  const options: RunScriptActionRequestBody = {
     endpoint_ids: ['1-2-3'],
     comment: 'test comment',
     agent_type: 'crowdstrike',
