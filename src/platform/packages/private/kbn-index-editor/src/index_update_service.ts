@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BulkResponse, BulkResponseItem } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  BulkRequest,
+  BulkResponse,
+  BulkResponseItem,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { HttpStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -187,27 +191,32 @@ export class IndexUpdateService {
           debounceTime(BUFFER_TIMEOUT_MS),
           filter((updates) => updates.length > 0),
           switchMap((updates) => {
+            const body = JSON.stringify({
+              operations: (
+                updates.map((update) => {
+                  if (update.id) {
+                    return [
+                      {
+                        update: { _id: update.id },
+                      },
+                      {
+                        doc: update.value,
+                      },
+                    ];
+                  }
+                  return [
+                    {
+                      index: {},
+                    },
+                    update.value,
+                  ];
+                }) as BulkRequest['operations']
+              ).flat(),
+            });
+
             return from(
-              // TODO create an API endpoint for bulk updates
-              this.http.post<BulkResponse>(`/api/console/proxy`, {
-                query: {
-                  path: `/${this.indexName}/_bulk`,
-                  method: 'POST',
-                },
-                body:
-                  updates
-                    .map((update) => {
-                      if (update.id) {
-                        return `{"update": {"_id": "${update.id}"}}\n${JSON.stringify({
-                          doc: update.value,
-                        })}`;
-                      }
-                      return `{"index": {}}\n${JSON.stringify(update.value)}`;
-                    })
-                    .join('\n') + '\n', // NDJSON format requires a newline at the end
-                headers: {
-                  'Content-Type': 'application/x-ndjson',
-                },
+              this.http.post<BulkResponse>(`/internal/esql/lookup_index/${this.indexName}/update`, {
+                body,
               })
             ).pipe(
               withLatestFrom(this._rows$, this.dataView$),
