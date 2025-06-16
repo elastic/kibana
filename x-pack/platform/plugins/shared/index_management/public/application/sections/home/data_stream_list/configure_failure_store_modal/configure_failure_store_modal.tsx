@@ -125,7 +125,7 @@ export const ConfigureFailureStoreModal: React.FunctionComponent<Props> = ({
         <EuiModalBody>
           <FormattedMessage
             id="xpack.idxMgmt.dataStreams.configureFailureStoreModal.modalDescriptionText"
-            defaultMessage="A failure store is a secondary set of indices inside a data stream, dedicated to storing failed documents. {docLink}."
+            defaultMessage="A failure store is a secondary index within a data stream, used to store failed documents. {docLink}."
             values={{
               docLink: (
                 <EuiLink
