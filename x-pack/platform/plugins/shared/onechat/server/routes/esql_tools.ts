@@ -10,6 +10,11 @@ import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { EsqlToolCreateRequest } from '../../common/tools';
 import { apiPrivileges } from '../../common/features';
+import { v4 as uuidv4 } from 'uuid';
+
+
+const TECHNICAL_PREVIEW_WARNING =
+  'Elastic ESQL Tool API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.';
 
 export function registerESQLToolsRoutes({
   router,
@@ -23,6 +28,13 @@ export function registerESQLToolsRoutes({
       path: '/api/chat/tools/esql/{id}',
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+      },
+      options: {
+        tags: ['esql'],
+        description: TECHNICAL_PREVIEW_WARNING,
+        availability: {
+          stability: 'experimental',
+        },
       },
       validate: {
         params: schema.object({
@@ -53,6 +65,13 @@ export function registerESQLToolsRoutes({
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
+      options: {
+        tags: ['esql'],
+        description: TECHNICAL_PREVIEW_WARNING,
+        availability: {
+          stability: 'experimental',
+        },
+      },
       validate: false,
     },
     wrapHandler(async (ctx, request, response) => {
@@ -79,9 +98,16 @@ export function registerESQLToolsRoutes({
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
+      options: {
+        tags: ['esql'],
+        description: TECHNICAL_PREVIEW_WARNING,
+        availability: {
+          stability: 'experimental',
+        },
+      },
       validate: {
         body: schema.object({
-          id: schema.string(),
+          name: schema.string(),
           description: schema.string(),
           query: schema.string(),
           params: schema.recordOf(
@@ -101,11 +127,13 @@ export function registerESQLToolsRoutes({
       try {
         const { esql: esqlToolService } = getInternalServices();
         const client = await esqlToolService.getScopedClient({ request });
+        const toolid = uuidv4();
 
         const now = new Date();
 
         const tool: EsqlToolCreateRequest = {
-          id: request.body.id || 'esql',
+          id: toolid,
+          name: request.body.name,
           description: request.body.description || 'Tool for executing ESQL queries',
           query: request.body.query,
           params: request.body.params || {},
@@ -117,11 +145,11 @@ export function registerESQLToolsRoutes({
           updated_at: now.toISOString(),
         };
 
-        await client.create(tool);
+        const createResponse = await client.create(tool);
 
         return response.ok({
           body: {
-            tool: { ...request.body },
+            tool: createResponse,
           },
         });
       } catch (error) {
@@ -135,6 +163,13 @@ export function registerESQLToolsRoutes({
       path: '/api/chat/tools/esql/{id}',
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+      },
+      options: {
+        tags: ['esql'],
+        description: TECHNICAL_PREVIEW_WARNING,
+        availability: {
+          stability: 'experimental',
+        },
       },
       validate: {
         params: schema.object({
@@ -169,14 +204,17 @@ export function registerESQLToolsRoutes({
 
         const toolId = request.params.id;
 
+        const { description, query, params, meta } = request.body
+
         const updates: Partial<EsqlToolCreateRequest> = {
-          ...(request.body.description && { description: request.body.description }),
-          ...(request.body.query && { query: request.body.query }),
-          ...(request.body.params && { params: request.body.params }),
-          ...(request.body.meta && {
+          id: request.body.id || toolId,
+          description: description || undefined,
+          query: query || undefined,
+          params: params || undefined,
+          ...(meta?.tags && {
             meta: {
-              ...(request.body.meta.tags && { tags: request.body.meta.tags }),
-              ...(request.body.meta.providerId && { providerId: request.body.meta.providerId }),
+              tags: meta.tags,
+              providerId: esqlToolProviderId
             },
           }),
         };
@@ -199,6 +237,13 @@ export function registerESQLToolsRoutes({
       path: '/api/chat/tools/esql/{id}',
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+      },
+      options: {
+        tags: ['esql'],
+        description: TECHNICAL_PREVIEW_WARNING,
+        availability: {
+          stability: 'experimental',
+        },
       },
       validate: {
         params: schema.object({
@@ -225,3 +270,5 @@ export function registerESQLToolsRoutes({
     })
   );
 }
+
+

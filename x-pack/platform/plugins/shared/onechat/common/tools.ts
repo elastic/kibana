@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { EsqlTool } from '@kbn/onechat-server';
+import { EsqlToolDefinition } from '@kbn/onechat-server';
 
-export type EsqlToolCreateRequest = Omit<EsqlTool, 'id' | 'schema' | 'handler'> & {
+export type EsqlToolApiObj = Omit<EsqlToolDefinition, 'id'> & {
   id: string;
   created_at: string;
   updated_at: string;
 };
+
+export type EsqlToolCreateRequest = EsqlToolApiObj
+export type EsqlToolCreateResponse = EsqlToolApiObj

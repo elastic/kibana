@@ -26,7 +26,7 @@ export interface StructuredToolIdentifier {
 export const serializedPartsSeparator = '::';
 
 /**
- * The singleton sourceId used for all builtIn tools.
+ * The singleton providerId used for all builtIn tools.
  */
 export const builtinToolProviderId = 'builtIn';
 /**

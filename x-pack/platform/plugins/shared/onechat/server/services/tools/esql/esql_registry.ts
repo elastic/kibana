@@ -11,7 +11,7 @@ import { esqlToolProviderId } from '@kbn/onechat-common';
 import { EsqlToolClient, createClient } from './client';
 import { createStorage } from './storage';
 import { RegisteredToolProviderWithId } from '../types';
-import { esqlToolCreater } from './utils/execute_esql_query';
+import { esqlToolCreator } from './utils/execute_esql_query';
 
 export interface EsqlToolRegistry extends RegisteredToolProviderWithId {
   getScopedClient(options: { request: KibanaRequest }): Promise<EsqlToolClient>;
@@ -49,7 +49,7 @@ export class EsqlToolRegistryImpl implements EsqlToolRegistry {
     try {
       const document = await client.get(toolId);
       const tool = document;
-      const executableTool = esqlToolCreater(tool);
+      const executableTool = esqlToolCreator(tool);
 
       return executableTool as EsqlTool;
     } catch (error) {
@@ -67,7 +67,7 @@ export class EsqlToolRegistryImpl implements EsqlToolRegistry {
     const registeredTools: RegisteredTool[] = [];
 
     for (const tool of esqlTools) {
-      const executableTool = esqlToolCreater(tool);
+      const executableTool = esqlToolCreator(tool);
       registeredTools.push(executableTool);
     }
     return registeredTools;

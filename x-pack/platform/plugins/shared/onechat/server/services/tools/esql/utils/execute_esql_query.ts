@@ -7,7 +7,7 @@
 
 import { EsqlTool } from '@kbn/onechat-server';
 import { z } from '@kbn/zod';
-import { EsqlToolCreateRequest } from '../../../../../common/tools';
+import { EsqlToolCreateResponse } from '../../../../../common/tools';
 
 export const esqlSchema = z.object({
   params: z
@@ -16,9 +16,10 @@ export const esqlSchema = z.object({
     .describe('Params needed to execute the query - must match defined tool parameter keys'),
 });
 
-export const esqlToolCreater = (tool: EsqlToolCreateRequest): EsqlTool => {
+export const esqlToolCreator = (tool: EsqlToolCreateResponse): EsqlTool => {
   const executableTool: EsqlTool = {
     id: tool.id,
+    name: tool.name,
     description: tool.description,
     query: tool.query,
     params: tool.params,

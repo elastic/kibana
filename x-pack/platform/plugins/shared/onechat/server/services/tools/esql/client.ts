@@ -7,15 +7,15 @@
 
 import { esqlToolProviderId } from '@kbn/onechat-common';
 import { logger } from 'elastic-apm-node';
-import { EsqlToolCreateRequest } from '../../../../common/tools';
+import { EsqlToolCreateRequest, EsqlToolCreateResponse } from '../../../../common/tools';
 import { esqlToolIndexName } from './storage';
 import { EsqlToolStorage } from './storage';
 
 export interface EsqlToolClient {
-  get(toolId: string): Promise<EsqlToolCreateRequest>;
-  list(): Promise<EsqlToolCreateRequest[]>;
-  create(esqlTool: EsqlToolCreateRequest): void;
-  update(toolId: string, updates: Partial<EsqlToolCreateRequest>): Promise<EsqlToolCreateRequest>;
+  get(toolId: string): Promise<EsqlToolCreateResponse>;
+  list(): Promise<EsqlToolCreateResponse[]>;
+  create(esqlTool: EsqlToolCreateResponse): Promise<EsqlToolCreateResponse>;
+  update(toolId: string, updates: Partial<EsqlToolCreateRequest>): Promise<EsqlToolCreateResponse>;
   delete(toolId: string): Promise<boolean>;
 }
 
@@ -31,10 +31,10 @@ class EsqlToolClientImpl {
     this.storage = storage;
   }
 
-  async get(id: string): Promise<EsqlToolCreateRequest> {
+  async get(id: string): Promise<EsqlToolCreateResponse> {
     try {
       const document = await this.storage.getClient().get({ id });
-      const tool = document._source as EsqlToolCreateRequest;
+      const tool = document._source as EsqlToolCreateResponse;
 
       return tool;
     } catch (error) {
@@ -43,7 +43,7 @@ class EsqlToolClientImpl {
     }
   }
 
-  async list(): Promise<EsqlToolCreateRequest[]> {
+  async list(): Promise<EsqlToolCreateResponse[]> {
     try {
       const document = await this.storage.getClient().search({
         index: esqlToolIndexName,
@@ -54,7 +54,7 @@ class EsqlToolClientImpl {
         track_total_hits: true,
       });
 
-      return document.hits.hits.map((hit) => hit._source as EsqlToolCreateRequest);
+      return document.hits.hits.map((hit) => hit._source as EsqlToolCreateResponse);
     } catch (error) {
       logger.error(`Error fetching all ESQL tools: ${error}`);
       throw error;
@@ -75,10 +75,12 @@ class EsqlToolClientImpl {
         },
       };
 
-      await this.storage.getClient().index({
+     await this.storage.getClient().index({
         id: tool.id,
         document,
       });
+
+    return document as EsqlToolCreateResponse;
     } catch (error) {
       logger.info(`Error creating ESQL tool with ID ${tool.id}: ${error}`);
       throw error;
@@ -87,14 +89,15 @@ class EsqlToolClientImpl {
   async update(
     id: string,
     updates: Partial<EsqlToolCreateRequest>
-  ): Promise<EsqlToolCreateRequest> {
+  ): Promise<EsqlToolCreateResponse> {
     try {
       const now = new Date();
       const document = await this.storage.getClient().get({ id });
-      const tool = document._source as EsqlToolCreateRequest;
+      const tool = document._source as EsqlToolCreateResponse;
 
       const updatedTool = {
         id: updates.id ?? tool.id,
+        name: updates.name ?? tool.name,
         description: updates.description ?? tool.description,
         query: updates.query ?? tool.query,
         params: updates.params ?? tool.params,

@@ -16,6 +16,7 @@ const storageSettings = {
   schema: {
     properties: {
       id: types.keyword({}),
+      name: types.text({}),
       description: types.text({}),
       query: types.text({}),
       params: types.object({
@@ -36,6 +37,7 @@ const storageSettings = {
 
 export interface EsqlToolProperties {
   id: string;
+  name: string;
   description: string;
   query: string;
   params: Record<
