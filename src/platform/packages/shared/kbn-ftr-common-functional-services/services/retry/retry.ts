@@ -12,7 +12,7 @@ import { retryForSuccess } from './retry_for_success';
 import { retryForTruthy } from './retry_for_truthy';
 
 export interface TryWithRetriesOptions {
-  // The initial delay before the first retry attempt
+  // The initial delay before the first attempt
   initialDelay?: number;
   // The number of retry attempts
   retryCount: number;
