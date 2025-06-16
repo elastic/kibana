@@ -23,6 +23,9 @@ export const SEARCH_AI_LAKE_PACKAGES = [
  * install in the Serverless Security SearchAILake tier (AI4DSOC effort).
  */
 export const SEARCH_AI_LAKE_ALLOWED_INSTALL_PACKAGES = [
+  'elastic_agent',
   'elastic_connectors',
+  'fleet_server',
   'security_detection_engine',
+  'system',
 ];
