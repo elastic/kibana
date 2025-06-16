@@ -31,7 +31,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { SearchQueryRulesQueryRule } from '../../../types';
 import { QueryRuleFlyoutBody, QueryRuleFlyoutPanel } from '../styles';
 import { QueryRuleMetadataEditor } from './query_rule_metadata_editor';
-import { useQueryRuleFlyoutState } from './use_query_ruleset_flyout_state';
+import { useQueryRuleFlyoutState } from './use_query_rule_flyout_state';
 import { QueryRuleFlyoutHeader } from './query_rule_flyout_header';
 import { QueryRuleTypeSelector } from './document_selector/rule_type_selector';
 import { ExcludePinDocumentButton } from './pin_exclude_document_button';

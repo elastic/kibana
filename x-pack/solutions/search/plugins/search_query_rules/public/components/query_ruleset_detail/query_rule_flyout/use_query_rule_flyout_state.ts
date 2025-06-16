@@ -21,7 +21,7 @@ export const createEmptyRuleset = (
   rules: [],
 });
 
-interface UseQueryRuleFlyoutStateProps {
+export interface UseQueryRuleFlyoutStateProps {
   createMode: boolean;
   rulesetId: string;
   ruleId: string;
@@ -75,8 +75,10 @@ export const useQueryRuleFlyoutState = ({
   const [isAlways, setIsAlways] = useState<boolean>(
     (ruleFromRuleset?.criteria && isCriteriaAlways(ruleFromRuleset?.criteria)) ?? false
   );
-  const isIdRule = Boolean(actionFields.length === 0 && actionIdsFields?.length);
-  const isDocRule = Boolean(actionFields.length > 0);
+  const isDocRule = Boolean(
+    !actionIdsFields || actionFields.length > 0 || !!(actionIdsFields?.length === 0)
+  );
+  const isIdRule = Boolean(!isDocRule && actionFields.length === 0 && actionIdsFields?.length);
 
   useEffect(() => {
     if (ruleFromRuleset) {
