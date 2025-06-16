@@ -8,9 +8,9 @@
 import { useSelector } from '@xstate5/react';
 import { DataSourceActorRef, DataSourceActorSnapshot } from './data_source_state_machine';
 
-export const useDataSourceSelector = <T>(
+export function useDataSourceSelector<T>(
   actorRef: DataSourceActorRef,
   selector: (snapshot: DataSourceActorSnapshot) => T
-): T => {
+): T {
   return useSelector(actorRef, selector);
-};
+}

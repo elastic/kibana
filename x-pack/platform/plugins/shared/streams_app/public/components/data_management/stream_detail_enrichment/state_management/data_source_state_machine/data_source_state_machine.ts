@@ -66,6 +66,7 @@ export const dataSourceMachine = setup({
   guards: {
     isEnabled: ({ context }) => context.dataSource.enabled,
     isDeletable: ({ context }) => context.dataSource.type !== 'random-samples', // We don't allow deleting the random-sample source to always have a data source available
+    isValidData: (_, params: { data?: SampleDocument[] }) => Array.isArray(params.data),
     shouldCollectData: ({ context, event }) => {
       assertEvent(event, 'dataSource.change');
       /**
@@ -152,7 +153,10 @@ export const dataSourceMachine = setup({
               streamName: context.streamName,
             }),
             onSnapshot: {
-              guard: ({ event }) => Array.isArray(event.snapshot.context),
+              guard: {
+                type: 'isValidData',
+                params: ({ event }) => ({ data: event.snapshot.context }),
+              },
               target: 'idle',
               actions: [
                 {

@@ -6,8 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiCallOut, EuiSpacer, EuiFormRow, EuiCode } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiCallOut, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { isSchema } from '@kbn/streams-schema';
 import { customSamplesDataSourceDocumentsSchema } from '../../../../../common/url_schema';
