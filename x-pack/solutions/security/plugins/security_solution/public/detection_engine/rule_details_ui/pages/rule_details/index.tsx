@@ -102,7 +102,6 @@ import {
   focusUtilityBarAction,
   onTimelineTabKeyPressed,
   resetKeyboardFocus,
-  showGlobalFilters,
 } from '../../../../timelines/components/timeline/helpers';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
@@ -228,9 +227,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
 
-  const graphEventId = useShallowEqualSelector(
-    (state) => (getTable(state, TableId.alertsOnRuleDetailsPage) ?? tableDefaults).graphEventId
-  );
   const updatedAt = useShallowEqualSelector(
     (state) => (getTable(state, TableId.alertsOnRuleDetailsPage) ?? tableDefaults).updated
   );
@@ -638,7 +634,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       )}
       <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
         <EuiWindowEvent event="resize" handler={noop} />
-        <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
+        <FiltersGlobal>
           <SiemSearchBar
             id={InputsModelId.global}
             pollForSignalIndex={pollForSignalIndex}

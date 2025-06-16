@@ -56,14 +56,12 @@ import { getPosition } from './helpers';
 import {
   collectAllAggFields,
   collectAllColumnIdentifiers,
-  getEnrichClauses,
-  getMatchField,
-  getPolicyName,
   visitByOption,
   visitRenameClauses,
 } from './walkers';
 import { createTimeseriesCommand } from './factories/timeseries';
 import { createRerankCommand } from './factories/rerank';
+import { createEnrichCommand } from './factories/enrich';
 
 export class ESQLAstBuilderListener implements ESQLParserListener {
   private ast: ESQLAst = [];
@@ -287,9 +285,9 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitEnrichCommand(ctx: EnrichCommandContext) {
-    const command = createCommand('enrich', ctx);
+    const command = createEnrichCommand(ctx);
+
     this.ast.push(command);
-    command.args.push(...getPolicyName(ctx), ...getMatchField(ctx), ...getEnrichClauses(ctx));
   }
 
   /**

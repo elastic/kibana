@@ -3,6 +3,7 @@
 
 product: Kibana
 collection: Alerting and action settings in Kibana
+id: alert-action-settings-kb
 page_description: |
   Alerting and actions are enabled by default in {{kib}}, but require you to configure the following:
 
@@ -16,8 +17,7 @@ groups:
   - group: General settings
     id: general-alert-action-settings
     # description: |
-    #  - ""
-    # example: example-group-name.asciidoc
+    # example: |
     settings:
 
       - setting: xpack.encryptedSavedObjects.encryptionKey
@@ -36,7 +36,7 @@ groups:
         # tip: ""
         # warning: ""
         # important: ""
-        datatype: "string"
+        datatype: string
         # default:
         # options:
         #   - option:
@@ -50,8 +50,7 @@ groups:
   - group: Action settings
     id: action-settings
     # description: |
-    #  - ""
-    # example: example-group-name.asciidoc
+    # example: |
     settings:
 
       - setting: xpack.actions.allowedHosts
@@ -273,6 +272,50 @@ groups:
         # important: ""
         datatype: string
         # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+      
+      - setting: xpack.actions.email.services.ses.host 
+        id: action-config-email-services-ses-host
+        description: |
+          The SMTP endpoint for an Amazon Simple Email Service (SES) service provider that can be used by email connectors.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        warning: "This setting alone is insufficient for overriding system defaults for the SES SMTP endpoint. You must also configure the `xpack.actions.email.services.ses.port` setting"
+        # important: ""
+        datatype: string
+        default: "email-smtp.us-east-1.amazonaws.com"
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
+      - setting: xpack.actions.email.services.ses.port
+        id: action-config-email-services-ses-port
+        description: |
+          The port number for an Amazon Simple Email Service (SES) service provider that can be used by email connectors.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: 465
         # options:
         #   - option:
         #     description: ""

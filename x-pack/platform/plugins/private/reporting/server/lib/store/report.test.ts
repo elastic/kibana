@@ -21,6 +21,7 @@ describe('Class Report', () => {
         version: '7.14.0',
         browserTimezone: 'UTC',
       },
+      space_id: 'a_space',
       meta: { objectType: 'test' },
       timeout: 30000,
     });
@@ -36,6 +37,7 @@ describe('Class Report', () => {
       started_at: undefined,
       status: 'pending',
       timeout: 30000,
+      space_id: 'a_space',
     });
     expect(report.toReportTaskJSON()).toMatchObject({
       attempts: 0,
@@ -55,6 +57,7 @@ describe('Class Report', () => {
       meta: { objectType: 'test' },
       status: 'pending',
       timeout: 30000,
+      space_id: 'a_space',
     });
 
     expect(report._id).toBeDefined();

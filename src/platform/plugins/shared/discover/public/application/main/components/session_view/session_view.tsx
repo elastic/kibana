@@ -49,6 +49,7 @@ import { BrandedLoadingIndicator } from './branded_loading_indicator';
 import { RedirectWhenSavedObjectNotFound } from './redirect_not_found';
 import { DiscoverMainApp } from './main_app';
 import { useAsyncFunction } from '../../hooks/use_async_function';
+import { ScopedProfilesManagerProvider } from '../../../../context_awareness';
 
 export interface DiscoverSessionViewProps {
   customizationContext: DiscoverCustomizationContext;
@@ -134,6 +135,10 @@ export const DiscoverSessionView = ({
     }
   );
   const initializationState = useInternalStateSelector((state) => state.initializationState);
+  const scopedProfilesManager = useCurrentTabRuntimeState(
+    runtimeStateManager,
+    (tab) => tab.scopedProfilesManager$
+  );
   const currentDataView = useCurrentTabRuntimeState(
     runtimeStateManager,
     (tab) => tab.currentDataView$
@@ -209,7 +214,12 @@ export const DiscoverSessionView = ({
     );
   }
 
-  if (!currentStateContainer || !currentCustomizationService || !currentDataView) {
+  if (
+    !currentStateContainer ||
+    !currentCustomizationService ||
+    !scopedProfilesManager ||
+    !currentDataView
+  ) {
     return <BrandedLoadingIndicator />;
   }
 
@@ -217,7 +227,9 @@ export const DiscoverSessionView = ({
     <DiscoverCustomizationProvider value={currentCustomizationService}>
       <DiscoverMainProvider value={currentStateContainer}>
         <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
-          <DiscoverMainApp stateContainer={currentStateContainer} />
+          <ScopedProfilesManagerProvider scopedProfilesManager={scopedProfilesManager}>
+            <DiscoverMainApp stateContainer={currentStateContainer} />
+          </ScopedProfilesManagerProvider>
         </RuntimeStateProvider>
       </DiscoverMainProvider>
     </DiscoverCustomizationProvider>

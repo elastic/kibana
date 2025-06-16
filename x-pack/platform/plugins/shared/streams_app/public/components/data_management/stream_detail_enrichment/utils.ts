@@ -24,6 +24,7 @@ import {
   ProcessorFormState,
   WithUIAttributes,
   DateFormState,
+  ManualIngestPipelineFormState,
 } from './types';
 import { ALWAYS_CONDITION } from '../../../util/condition';
 import { configDrivenProcessors } from './processors/config_driven';
@@ -118,6 +119,13 @@ const defaultGrokProcessorFormState: (
   if: ALWAYS_CONDITION,
 });
 
+const defaultManualIngestPipelineProcessorFormState = (): ManualIngestPipelineFormState => ({
+  type: 'manual_ingest_pipeline',
+  processors: [],
+  ignore_failure: true,
+  if: ALWAYS_CONDITION,
+});
+
 const configDrivenDefaultFormStates = mapValues(
   configDrivenProcessors,
   (config) => () => config.defaultFormState
@@ -132,6 +140,7 @@ const defaultProcessorFormStateByType: Record<
   date: defaultDateProcessorFormState,
   dissect: defaultDissectProcessorFormState,
   grok: defaultGrokProcessorFormState,
+  manual_ingest_pipeline: defaultManualIngestPipelineProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
 
@@ -170,6 +179,15 @@ export const getFormStateFrom = (
     return structuredClone({
       ...dissect,
       type: 'dissect',
+    });
+  }
+
+  if (isManualIngestPipelineJsonProcessor(processor)) {
+    const { manual_ingest_pipeline } = processor;
+
+    return structuredClone({
+      ...manual_ingest_pipeline,
+      type: 'manual_ingest_pipeline',
     });
   }
 
@@ -236,6 +254,20 @@ export const convertFormStateToProcessor = (
     };
   }
 
+  if (formState.type === 'manual_ingest_pipeline') {
+    const { processors, ignore_failure } = formState;
+
+    return {
+      processorDefinition: {
+        manual_ingest_pipeline: {
+          if: formState.if,
+          processors,
+          ignore_failure,
+        },
+      },
+    };
+  }
+
   if (formState.type === 'date') {
     const { field, formats, locale, ignore_failure, target_field, timezone, output_format } =
       formState;
@@ -278,6 +310,8 @@ const createProcessorGuardByType =
 
 export const isDateProcessor = createProcessorGuardByType('date');
 export const isDissectProcessor = createProcessorGuardByType('dissect');
+export const isManualIngestPipelineJsonProcessor =
+  createProcessorGuardByType('manual_ingest_pipeline');
 export const isGrokProcessor = createProcessorGuardByType('grok');
 
 const createId = htmlIdGenerator();
