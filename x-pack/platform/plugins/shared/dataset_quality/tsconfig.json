@@ -57,7 +57,8 @@
     "@kbn/task-manager-plugin",
     "@kbn/field-utils",
     "@kbn/logging",
-    "@kbn/ui-theme"
+    "@kbn/ui-theme",
+    "@kbn/charts-theme"
   ],
   "exclude": [
     "target/**/*"
