@@ -29,6 +29,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import type { ConnectorSelectorProps } from '@kbn/security-solution-connectors';
 import { ConnectorSelector } from '@kbn/security-solution-connectors';
+import type { ReactNode } from 'react-markdown';
 import { useAIConnectors } from '../../../../../common/hooks/use_ai_connectors';
 import { getConnectorDescription } from '../../../../../common/utils/connectors/get_connector_description';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -112,6 +113,19 @@ export const StartRuleMigrationModal: FC<StartRuleMigrationModalProps> = React.m
       [startMigrationWithSettings, selectedConnectorId, enablePrebuiltRulesMatching, closeModal]
     );
 
+    const errors = useMemo(() => {
+      const allErrors: ReactNode[] = [];
+      if (!selectedConnectorId) {
+        allErrors.push(
+          <FormattedMessage
+            id="xpack.securitySolution.siemMigrations.startMigrationModal.connectorRequiredError"
+            defaultMessage="An AI connector is required to start the translation."
+          />
+        );
+      }
+      return allErrors;
+    }, [selectedConnectorId]);
+
     return (
       <EuiOutsideClickDetector onOutsideClick={closeModal}>
         <EuiModal onClose={closeModal} data-test-subj={DATA_TEST_SUBJ_PREFIX}>
@@ -132,9 +146,11 @@ export const StartRuleMigrationModal: FC<StartRuleMigrationModalProps> = React.m
               component="form"
               onSubmit={onStartMigrationWithSettings}
               data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-Form`}
+              isInvalid={!selectedConnectorId}
+              error={errors}
             >
               <EuiFormRow
-                label={i18n.REPROCESS_RULES_DIALOG_AI_CONNECTOR_LABEL}
+                label={i18n.START_RULE_MIGRATION_MODAL_AI_CONNECTOR_LABEL}
                 helpText={
                   <FormattedMessage
                     id="xpack.securitySolution.siemMigrations.reprocessFailedRulesDialog.connectorHelpText"
@@ -143,13 +159,14 @@ export const StartRuleMigrationModal: FC<StartRuleMigrationModalProps> = React.m
                       link: (
                         /* eslint-disable-next-line @elastic/eui/href-or-on-click */
                         <EuiLink href={setupAIConnectorLink} onClick={onClickSetupAIConnector}>
-                          {i18n.REPROCESS_RULES_DIALOG_SETUP_NEW_AI_CONNECTOR_HELP_TEXT}
+                          {i18n.START_RULE_MIGRATION_MODAL_SETUP_NEW_AI_CONNECTOR_HELP_TEXT}
                         </EuiLink>
                       ),
                     }}
                   />
                 }
                 isInvalid={!selectedConnectorId}
+                aria-required={true}
               >
                 <ConnectorSelector
                   connectors={connectorOptions}
@@ -163,7 +180,7 @@ export const StartRuleMigrationModal: FC<StartRuleMigrationModalProps> = React.m
               <EuiFormRow>
                 <EuiSwitch
                   data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-PrebuiltRulesMatchingSwitch`}
-                  label={i18n.REPROCESS_RULES_DIALOG_PREBUILT_RULES_LABEL}
+                  label={i18n.START_RULE_MIGRATION_MODAL_PREBUILT_RULES_LABEL}
                   checked={enablePrebuiltRulesMatching}
                   onChange={(e) => setEnablePrebuiltRuleMatching(e.target.checked)}
                 />
@@ -175,7 +192,7 @@ export const StartRuleMigrationModal: FC<StartRuleMigrationModalProps> = React.m
                     onClick={closeModal}
                     data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-Cancel`}
                   >
-                    {i18n.REPROCESS_RULES_DIALOG_CANCEL}
+                    {i18n.START_RULE_MIGRATION_MODAL_CANCEL}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -185,7 +202,7 @@ export const StartRuleMigrationModal: FC<StartRuleMigrationModalProps> = React.m
                     color="primary"
                     fill
                   >
-                    {i18n.REPROCESS_RULES_DIALOG_TRANSLATE}
+                    {i18n.START_RULE_MIGRATION_MODAL_TRANSLATE}
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>

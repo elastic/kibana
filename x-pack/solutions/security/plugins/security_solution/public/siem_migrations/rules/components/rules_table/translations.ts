@@ -84,36 +84,36 @@ export const REPROCESS_RULES_DIALOG_DESCRIPTION = i18n.translate(
   }
 );
 
-export const REPROCESS_RULES_DIALOG_AI_CONNECTOR_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.reprocessRulesDialog.aiConnectorLabel',
+export const START_RULE_MIGRATION_MODAL_AI_CONNECTOR_LABEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.startRuleMigrationModal.aiConnectorLabel',
   {
     defaultMessage: 'AI connector',
   }
 );
 
-export const REPROCESS_RULES_DIALOG_SETUP_NEW_AI_CONNECTOR_HELP_TEXT = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.reprocessRulesDialog.setupNewAiConnectorHelpText',
+export const START_RULE_MIGRATION_MODAL_SETUP_NEW_AI_CONNECTOR_HELP_TEXT = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.startRuleMigrationModal.setupNewAiConnectorHelpText',
   {
     defaultMessage: 'Configure AI Provider',
   }
 );
 
-export const REPROCESS_RULES_DIALOG_PREBUILT_RULES_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.reprocessRulesDialog.prebuiltRulesLabel',
+export const START_RULE_MIGRATION_MODAL_PREBUILT_RULES_LABEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.startRuleMigrationModal.prebuiltRulesLabel',
   {
     defaultMessage: 'Match to Elastic prebuilt rules',
   }
 );
 
-export const REPROCESS_RULES_DIALOG_TRANSLATE = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.reprocessRulesDialog.translate',
+export const START_RULE_MIGRATION_MODAL_TRANSLATE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.startRuleMigrationModal.translate',
   {
     defaultMessage: 'Translate',
   }
 );
 
-export const REPROCESS_RULES_DIALOG_CANCEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.reprocessRulesDialog.cancel',
+export const START_RULE_MIGRATION_MODAL_CANCEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.startRuleMigrationModal.cancel',
   {
     defaultMessage: 'Cancel',
   }
