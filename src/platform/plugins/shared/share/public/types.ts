@@ -250,11 +250,15 @@ export interface SharingData {
   };
 }
 
-interface ShareRegistryInternalApi {
-  registerShareIntegration<I extends ShareIntegration>(shareObject: string, arg: I): void;
-  registerShareIntegration<I extends ShareIntegration>(arg: I): void;
+export type ShareIntegrationMapKey = `integration-${string}`;
+export interface ShareRegistryInternalApi {
+  registerShareIntegration<I extends ShareIntegration>(
+    shareObject: string,
+    key: ShareIntegrationMapKey,
+    getShareActionIntent: () => Promise<I>
+  ): void;
 
-  resolveShareItemsForShareContext(args: ShareContext): ShareConfigs[];
+  resolveShareItemsForShareContext(args: ShareContext): Promise<ShareConfigs[]>;
 }
 
 export abstract class ShareRegistryPublicApi {

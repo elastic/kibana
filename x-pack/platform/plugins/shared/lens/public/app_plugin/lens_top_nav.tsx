@@ -482,12 +482,29 @@ export const LensTopNavMenu = ({
     isOnTextBasedMode,
   ]);
 
+  const [hasShareIntegration, setHasShareIntegration] = useState(false);
+
   useEffect(() => {
+    let canceled = false;
+    if (!share) return;
+    const checkShareIntegration = async () => {
+      if (canceled) {
+        return;
+      }
+      const integrations = await share.availableIntegrations('lens', 'export');
+      if (canceled) return;
+
+      setHasShareIntegration(integrations.length > 0);
+    };
+
+    checkShareIntegration();
     return () => {
+      canceled = true;
       // Make sure to close the editors when unmounting
       closeFieldEditor.current?.();
       closeDataViewEditor.current?.();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const { AggregateQueryTopNavMenu } = navigation.ui;
@@ -783,7 +800,7 @@ export const LensTopNavMenu = ({
         inspect: { visible: true, execute: () => lensInspector.inspect({ title }) },
         export: {
           // Only show the export button if the current user meets the requirements for at least one registered export integration
-          visible: Boolean(share?.availableIntegrations('lens', 'export')?.length),
+          visible: hasShareIntegration,
           enabled: showShareMenu,
           tooltip: () => {
             if (!showShareMenu) {
@@ -916,7 +933,7 @@ export const LensTopNavMenu = ({
     return [...(additionalMenuEntries || []), ...baseMenuEntries];
   }, [
     initialContext,
-    initialInput,
+    initialInput?.savedObjectId,
     isLinkedToOriginatingApp,
     initialContextIsEmbedded,
     activeData,
@@ -926,15 +943,12 @@ export const LensTopNavMenu = ({
     savingToLibraryPermitted,
     savingToDashboardPermitted,
     contextOriginatingApp,
+    hasShareIntegration,
     layerMetaInfo,
     additionalMenuEntries,
-    lensInspector,
-    title,
     share,
     visualization,
     visualizationMap,
-    shortUrlService,
-    data,
     filters,
     query,
     activeDatasourceId,
@@ -942,9 +956,13 @@ export const LensTopNavMenu = ({
     datasourceMap,
     currentDoc,
     adHocDataViews,
+    data,
     isCurrentStateDirty,
     dataViews.indexPatterns,
+    title,
     defaultLensTitle,
+    shortUrlService,
+    lensInspector,
     onAppLeave,
     runSave,
     setIsSaveModalVisible,

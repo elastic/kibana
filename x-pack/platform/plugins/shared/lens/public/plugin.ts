@@ -131,7 +131,6 @@ import { setupExpressions } from './expressions';
 import { OpenInDiscoverDrilldown } from './trigger_actions/open_in_discover_drilldown';
 import type { ChartInfoApi } from './chart_info_api';
 import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator/locator';
-import { downloadCsvLensShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
 import type { LensDocument } from './persistence';
 import type { LensSavedObjectAttributes } from '../common/content_management';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
@@ -427,19 +426,25 @@ export class LensPlugin {
 
       share.registerShareIntegration<ExportShare>(
         'lens',
-        downloadCsvLensShareProvider({
-          uiSettings: core.uiSettings,
-          formatFactoryFn: () => startServices().plugins.fieldFormats.deserialize,
-          atLeastGold: () => {
-            let isGold = false;
-            startServices()
-              .plugins.licensing?.license$.pipe()
-              .subscribe((license) => {
-                isGold = license.hasAtLeast('gold');
-              });
-            return isGold;
-          },
-        })
+        'integration-export-csvDownloadLens',
+        async () => {
+          const { downloadCsvLensShareProvider } = await import(
+            './app_plugin/csv_download_provider/csv_download_provider'
+          );
+          return downloadCsvLensShareProvider({
+            uiSettings: core.uiSettings,
+            formatFactoryFn: () => startServices().plugins.fieldFormats.deserialize,
+            atLeastGold: () => {
+              let isGold = false;
+              startServices()
+                .plugins.licensing?.license$.pipe()
+                .subscribe((license) => {
+                  isGold = license.hasAtLeast('gold');
+                });
+              return isGold;
+            },
+          });
+        }
       );
     }
 
