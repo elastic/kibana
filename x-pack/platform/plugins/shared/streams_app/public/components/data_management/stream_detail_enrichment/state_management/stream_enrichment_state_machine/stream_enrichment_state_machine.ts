@@ -15,6 +15,7 @@ import {
   and,
   ActorRefFrom,
   raise,
+  cancel,
 } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { isRootStreamDefinition, Streams } from '@kbn/streams-schema';
@@ -195,10 +196,14 @@ export const streamEnrichmentMachine = setup({
         processors: getStagedProcessors(context),
       })
     ),
-    sendDataSourcesSamplesToSimulator: sendTo('simulator', ({ context }) => ({
-      type: 'simulation.receive_samples',
-      samples: getDataSourcesSamples(context),
-    })),
+    sendDataSourcesSamplesToSimulator: sendTo(
+      'simulator',
+      ({ context }) => ({
+        type: 'simulation.receive_samples',
+        samples: getDataSourcesSamples(context),
+      }),
+      { delay: 800, id: 'send-samples-to-simulator' }
+    ),
     sendResetEventToSimulator: sendTo('simulator', { type: 'simulation.reset' }),
     updateGrokCollectionCustomPatterns: assign(({ context }, params: { id: string }) => {
       const processorRefContext = context.processorsRefs
@@ -370,7 +375,10 @@ export const streamEnrichmentMachine = setup({
               actions: raise({ type: 'url.sync' }),
             },
             'dataSource.dataChange': {
-              actions: [{ type: 'sendDataSourcesSamplesToSimulator' }],
+              actions: [
+                cancel('send-samples-to-simulator'), // Debounce samples sent to simulator on multiple data sources retrieval
+                { type: 'sendDataSourcesSamplesToSimulator' },
+              ],
             },
           },
           states: {
