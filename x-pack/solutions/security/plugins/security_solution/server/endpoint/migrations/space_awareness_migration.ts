@@ -19,6 +19,7 @@ import type {
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { GLOBAL_ARTIFACT_TAG } from '../../../common/endpoint/service/artifacts';
 import { ensureActionRequestsIndexIsConfigured } from '../services';
 import { CROWDSTRIKE_HOST_INDEX_PATTERN } from '../../../common/endpoint/service/response_actions/crowdstrike';
 import { SENTINEL_ONE_AGENT_INDEX_PATTERN } from '../../../common/endpoint/service/response_actions/sentinel_one';
@@ -36,6 +37,7 @@ import { REFERENCE_DATA_SAVED_OBJECT_TYPE } from '../lib/reference_data';
 import {
   buildSpaceOwnerIdTag,
   hasArtifactOwnerSpaceId,
+  hasGlobalOrPerPolicyTag,
 } from '../../../common/endpoint/service/artifacts/utils';
 import { catchAndWrapError, wrapErrorIfNeeded } from '../utils';
 import { QueueProcessor } from '../utils/queue_processor';
@@ -212,6 +214,7 @@ const migrateArtifactsToSpaceAware = async (
       listId: listIds,
       namespaceType: listIds.map(() => 'agnostic'),
       filter: listIds.map(
+        // Find all artifacts that do NOT have a space owner id tag
         () => `NOT exception-list-agnostic.attributes.tags:"${buildSpaceOwnerIdTag('*')}"`
       ),
       perPage: undefined,
@@ -229,7 +232,7 @@ const migrateArtifactsToSpaceAware = async (
 
         for (const artifact of data) {
           if (!hasArtifactOwnerSpaceId(artifact)) {
-            updateProcessor.addToQueue({
+            const artifactUpdate: UpdateExceptionListItemOptions & { listId: string } = {
               _version: undefined,
               comments: artifact.comments,
               description: artifact.description,
@@ -244,7 +247,15 @@ const migrateArtifactsToSpaceAware = async (
               osTypes: artifact.os_types,
               type: artifact.type,
               tags: [...(artifact.tags ?? []), buildSpaceOwnerIdTag(DEFAULT_SPACE_ID)],
-            });
+            };
+
+            // Ensure that Endpoint Exceptions all have the `global` tag if no assignment tag is currently assigned to the artifact
+            if (artifact.list_id === ENDPOINT_LIST_ID && !hasGlobalOrPerPolicyTag(artifact)) {
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              artifactUpdate.tags!.push(GLOBAL_ARTIFACT_TAG);
+            }
+
+            updateProcessor.addToQueue(artifactUpdate);
           }
         }
       },
