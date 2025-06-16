@@ -36,7 +36,7 @@ export const API_KEY_ID_HELP_TEXT = i18n.translate(
   'xpack.stackConnectors.components.xsoar.apiKeyIDFieldHelpText',
   {
     defaultMessage:
-      'For the cloud instance, the API Key ID is required, that is your serial number of the API Key.',
+      'Enter the API key ID (the unique serial number for your API key) to authenticate with your XSOAR cloud instance.',
   }
 );
 

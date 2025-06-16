@@ -4,10 +4,10 @@ mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/xsoar-action-type.html
 ---
 
-# XSOAR connector and action [xsoar-action-type]
+# {{xsoar}} connector and action [xsoar-action-type]
 
 
-XSOAR connector uses the [XSOAR REST API](https://cortex-panw.stoplight.io/docs/cortex-xsoar-8/m0qlgh9inh4vk-create-or-update-an-incident) to create Cortex XSOAR incidents.
+{{xsoar}} connector uses the [{{xsoar}} REST API](https://cortex-panw.stoplight.io/docs/cortex-xsoar-8/m0qlgh9inh4vk-create-or-update-an-incident) to create Cortex {{xsoar}} incidents.
 
 
 ## Create connectors in {{kib}} [define-xsoar-ui]
@@ -20,23 +20,23 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as 
 
 ### Connector configuration [xsoar-connector-configuration]
 
-XSOAR connectors have the following configuration properties:
+{{xsoar}} connectors have the following configuration properties:
 
 Name
 :   The name of the connector.
 
 URL
-:   The XSOAR instance URL.
+:   The {{xsoar}} instance URL.
 
 API key
-:   The XSOAR API key for authentication.
+:   The {{xsoar}} API key for authentication.
 
     ::::{note}
-    If you do not have an API key, refer to [Create a new API key](https://cortex-panw.stoplight.io/docs/cortex-xsoar-8/t09y7hrb5d14m-create-a-new-api-key) to make one for your XSOAR instance.
+    If you do not have an API key, refer to [Create a new API key](https://cortex-panw.stoplight.io/docs/cortex-xsoar-8/t09y7hrb5d14m-create-a-new-api-key) to make one for your {{xsoar}} instance.
     ::::
 
 API key id
-:   The XSOAR API key ID for authentication. (Mandatory for cloud instance users.)
+:   The {{xsoar}} API key ID for authentication. (Mandatory for cloud instance users.)
 
 
 ## Test connectors [xsoar-action-configuration]
@@ -46,7 +46,7 @@ You can test connectors as you’re creating or editing the connector in {{kib}}
 % TO DO: Use `:class: screenshot`
 ![XSOAR params test](../images/xsoar-params-test.png)
 
-XSOAR actions have the following configuration properties.
+{{xsoar}} actions have the following configuration properties.
 
 Name
 :   The incident name.
