@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { FC } from 'react';
 import { EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -15,32 +15,49 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 export interface Props {
   row: DataTableRecord;
   columnId: string;
-  isDetails?: boolean;
+  isDetails: boolean;
+  defaultRowHeight?: number;
 }
 
-export const PatternCellRenderer: FC<Props> = ({ row, columnId, isDetails }) => {
+export const PatternCellRenderer: FC<Props> = ({ row, columnId, isDetails, defaultRowHeight }) => {
   const { euiTheme } = useEuiTheme();
 
-  const pattern = String(row.flattened[columnId]);
+  const pattern = useMemo(() => String(row.flattened[columnId]), [columnId, row.flattened]);
 
-  const keywordStyle = {
-    marginRight: euiTheme.size.xs,
-    marginBottom: '6px', // find a suitable eui variable for this
-    display: 'inline-block',
-    padding: `${euiTheme.size.xxs} ${euiTheme.size.s}`,
-    backgroundColor: euiTheme.colors.lightestShade,
-    borderRadius: euiTheme.border.radius.small,
-    color: euiTheme.colors.textPrimary,
-  };
+  const keywordStyle = useMemo(
+    () => ({
+      marginRight: euiTheme.size.xs,
+      marginBottom: '6px', // find a suitable eui variable for this
+      display: 'inline-block',
+      padding: `${euiTheme.size.xxs} ${euiTheme.size.s}`,
+      backgroundColor: euiTheme.colors.lightestShade,
+      borderRadius: euiTheme.border.radius.small,
+      color: euiTheme.colors.textPrimary,
+    }),
+    [euiTheme]
+  );
 
-  const keywords = extractGenericKeywords(pattern);
-  const formattedTokens = keywords.map((keyword, index) => {
-    return (
-      <div key={index} css={keywordStyle}>
-        <code>{keyword}</code>
-      </div>
-    );
-  });
+  const keywords = useMemo(() => extractGenericKeywords(pattern), [pattern]);
+
+  const formattedTokens = useMemo(
+    () =>
+      keywords.map((keyword, index) => {
+        return (
+          <span key={index} css={keywordStyle}>
+            <code>{keyword}</code>
+          </span>
+        );
+      }),
+    [keywordStyle, keywords]
+  );
+
+  // the keywords are slightly larger than the default text height,
+  // so they need to be adjusted to fit within the row height while
+  // not truncating the bottom of the text
+  const rowHeight = useMemo(
+    () => (defaultRowHeight ? Math.floor(defaultRowHeight / 1.5) : 2),
+    [defaultRowHeight]
+  );
 
   if (isDetails) {
     return (
@@ -63,7 +80,19 @@ export const PatternCellRenderer: FC<Props> = ({ row, columnId, isDetails }) => 
     );
   }
 
-  return <>{formattedTokens}</>;
+  return (
+    <div
+      css={{
+        display: '-webkit-box',
+        WebkitBoxOrient: 'vertical',
+        WebkitLineClamp: rowHeight,
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+      }}
+    >
+      {formattedTokens}
+    </div>
+  );
 };
 
 /**
@@ -94,4 +123,22 @@ export function extractGenericKeywords(regexString: string) {
   // '.+?' as a literal string to split by.
   const keywords = cleanedString.split(/\.\+\?/);
   return keywords.map((keyword) => keyword.trim()).filter((keyword) => keyword.length > 0);
+}
+
+export function getPatternCellRenderer({
+  row,
+  columnId,
+  isDetails,
+  defaultRowHeight,
+}: Props & {
+  defaultRowHeight?: number;
+}) {
+  return (
+    <PatternCellRenderer
+      row={row}
+      columnId={columnId}
+      isDetails={isDetails}
+      defaultRowHeight={defaultRowHeight}
+    />
+  );
 }

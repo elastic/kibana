@@ -10,10 +10,11 @@
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getCategorizeColumns } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
+import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
-import { PatternCellRenderer, extractGenericKeywords } from './pattern_cell_renderer';
+import { extractGenericKeywords, getPatternCellRenderer } from './pattern_cell_renderer';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 
 export const createPatternDataSourceProfileProvider = (
@@ -27,16 +28,18 @@ export const createPatternDataSourceProfileProvider = (
     getCellRenderers:
       (prev, { context }) =>
       (params) => {
+        const { rowHeight } = params;
         const { patternColumns } = context;
         if (!patternColumns || patternColumns.length === 0) {
           return {
             ...prev(params),
           };
         }
-        const patternRenderers = context.patternColumns.reduce(
+        const patternRenderers = patternColumns.reduce(
           (acc, column) =>
             Object.assign(acc, {
-              [column]: PatternCellRenderer,
+              [column]: (props: DataGridCellValueElementProps) =>
+                getPatternCellRenderer({ ...props, defaultRowHeight: rowHeight }),
             }),
           {}
         );
