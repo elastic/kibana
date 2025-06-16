@@ -337,10 +337,8 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
               {exportDerivatives.map((exportDerivative) => {
                 return (
                   <EuiFlexItem key={exportDerivative.id}>
-                    {React.cloneElement(exportDerivative.config.label, {
-                      onClick: () => {
-                        openFlyout(exportDerivative);
-                      },
+                    {exportDerivative.config.label({
+                      openFlyout: openFlyout.bind(null, exportDerivative),
                     })}
                   </EuiFlexItem>
                 );
@@ -375,12 +373,9 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
               onCloseFlyout={flyoutOnCloseHandler}
             />
           ) : (
-            React.createElement(
-              (selectedMenuItem as ExportShareDerivativesConfig)?.config.flyoutContent,
-              {
-                closeFlyout: flyoutOnCloseHandler,
-              }
-            )
+            (selectedMenuItem as ExportShareDerivativesConfig)?.config.flyoutContent({
+              closeFlyout: flyoutOnCloseHandler,
+            })
           )}
         </EuiFlyout>
       )}

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentType, ReactNode, ReactElement } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import { EuiContextMenuPanelDescriptor, type EuiCodeProps, type EuiIconProps } from '@elastic/eui';
 import { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
@@ -173,7 +173,7 @@ export interface ExportShare
  */
 export interface ExportShareDerivatives
   extends ShareIntegration<{
-    label: ReactElement;
+    label: React.FC<{ openFlyout: () => void }>;
     toolTipContent?: ReactNode;
     flyoutContent: React.FC<{ closeFlyout: () => void }>;
   }> {
