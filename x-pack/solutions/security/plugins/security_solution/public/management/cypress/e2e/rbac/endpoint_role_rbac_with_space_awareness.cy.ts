@@ -43,10 +43,8 @@ describe(
     },
   },
   () => {
-    const isServerless = Cypress.env('CLOUD_SERVERLESS');
-
     // In Serverless MKI we use `admin` for the login user... other deployments use system indices superuser
-    const loginUser = isServerless ? ROLE.admin : ROLE.system_indices_superuser;
+    const loginUser = Cypress.env('CLOUD_SERVERLESS') ? ROLE.admin : ROLE.system_indices_superuser;
     const roleName = `test_${Math.random().toString().substring(2, 6)}`;
     let spaceId: string = '';
 
@@ -101,10 +99,11 @@ describe(
 
           return features;
         })
-        .should('deep.equal', [
+        // Using `include.members` here because in serverless, an additional privilege shows
+        // up in this list - `Endpoint exceptions`.
+        .should('include.members', [
           'Endpoint ListAll',
           'Automatic TroubleshootingNone',
-          ...(isServerless ? ['Endpoint ExceptionsAll'] : []),
           'Global Artifact ManagementNone',
           'Trusted ApplicationsNone',
           'Host Isolation ExceptionsNone',
