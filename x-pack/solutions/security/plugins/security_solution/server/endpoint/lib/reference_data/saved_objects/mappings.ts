@@ -28,7 +28,6 @@ export const referenceDataSavedObjectType: SavedObjectsType = {
       id: { type: 'keyword' },
       type: { type: 'keyword' },
       owner: { type: 'keyword' },
-      metadata: { type: 'object' },
     },
   },
   modelVersions: {
