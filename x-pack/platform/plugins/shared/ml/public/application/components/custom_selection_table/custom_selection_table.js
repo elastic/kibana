@@ -281,6 +281,10 @@ export function CustomSelectionTable({
                   }
                   id={`${item[tableItemId]}-checkbox`}
                   data-test-subj={`${item[tableItemId]}-checkbox`}
+                  aria-label={i18n.translate('xpack.ml.jobSelector.customTable.checkboxAriaLabel', {
+                    defaultMessage: 'Select job {itemId}',
+                    values: { itemId: item[tableItemId] },
+                  })}
                   checked={isItemSelected(item[tableItemId])}
                   onChange={() => toggleItem(item[tableItemId])}
                 />
@@ -297,7 +301,6 @@ export function CustomSelectionTable({
                       values: { itemId: item[tableItemId] },
                     }
                   )}
-                  // label="I am a radio button"
                   onChange={() => toggleItem(item[tableItemId])}
                   disabled={radioDisabledCheck !== undefined ? radioDisabledCheck(item) : undefined}
                 />
