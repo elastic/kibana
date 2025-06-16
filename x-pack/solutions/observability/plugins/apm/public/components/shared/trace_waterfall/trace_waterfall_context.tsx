@@ -66,7 +66,7 @@ export function TraceWaterfallContextProvider({
         duration,
         rootItem,
         traceWaterfall,
-        margin: { left: Math.max(100, left), right },
+        margin: { left: showAccordion ? Math.max(100, left) : left, right },
         traceWaterfallMap,
         showAccordion,
         onClick,
