@@ -58,7 +58,6 @@
     "@kbn/core-execution-context-common",
     "@kbn/logging",
     "@kbn/core-execution-context-server",
-    "@kbn/std",
   ],
   "exclude": [
     "target/**/*",
