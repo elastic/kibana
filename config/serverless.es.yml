@@ -92,11 +92,11 @@ xpack.ml.nlp:
         max: 2
         static: 2
       medium:
-        min: 1
+        min: 0
         max: 32
         static: 32
       high:
-        min: 1
+        min: 0
         max: 512
         static: 512
 xpack.ml.compatibleModuleType: 'search'
