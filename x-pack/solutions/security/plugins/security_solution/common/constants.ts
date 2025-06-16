@@ -538,3 +538,8 @@ export const AI_FOR_SOC_INTEGRATIONS = [
   'sentinel_one',
   'crowdstrike',
 ];
+
+/*
+ * The tag to mark promotion rules that are related to the AI for SOC integrations
+ */
+export const PROMOTION_RULE_TAG = 'Promotion';
