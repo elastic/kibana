@@ -1774,7 +1774,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect.objectContaining({
               warnings: expect.arrayContaining([
                 expect.stringContaining(
-                  'The ES|QL query failed to run successfully due to unavailable shards'
+                  'The ES|QL event query was only executed on the available shards. The query failed to run successfully on the following shards'
                 ),
               ]),
             }),
