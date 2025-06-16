@@ -9,6 +9,7 @@ import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { appCategories, appIds } from '@kbn/management-cards-navigation';
 import { map, of } from 'rxjs';
+import { OBSERVABILITY_ANOMALIES_AND_CATEGORIES_ID } from '@kbn/observability-shared-plugin/common';
 import { createNavigationTree } from './navigation_tree';
 import {
   ServerlessObservabilityPublicSetup,
@@ -41,9 +42,15 @@ export class ServerlessObservabilityPlugin
     setupDeps: ServerlessObservabilityPublicStartDependencies
   ): ServerlessObservabilityPublicStart {
     const { serverless, management, security } = setupDeps;
+    const isAnomaliesCategoriesAvailable = core.pricing.isFeatureAvailable(
+      OBSERVABILITY_ANOMALIES_AND_CATEGORIES_ID
+    );
     const navigationTree$ = (setupDeps.streams?.status$ || of({ status: 'disabled' })).pipe(
       map(({ status }) => {
-        return createNavigationTree({ streamsAvailable: status === 'enabled' });
+        return createNavigationTree({
+          streamsAvailable: status === 'enabled',
+          isAnomaliesCategoriesAvailable,
+        });
       })
     );
     serverless.setProjectHome('/app/observability/landing');
