@@ -60,29 +60,17 @@ const HeaderComponent: React.FC<Props> = ({
   const [didCancel, setDidCancel] = useState(false);
   const { inferenceEnabled } = useAssistantContext();
 
-
   const [isEISCostTourDisabled, setIsEISCostTourDisabled] = useState<boolean>(
-      !connectorsAreConfigured ||
-      !inferenceEnabled ||
-      showFlyout
+    !connectorsAreConfigured || !inferenceEnabled || showFlyout
   );
 
   useEffect(() => {
-    if (
-      !connectorsAreConfigured ||
-      !inferenceEnabled ||
-      showFlyout
-    ) {
+    if (!connectorsAreConfigured || !inferenceEnabled || showFlyout) {
       setIsEISCostTourDisabled(true);
     } else {
       setIsEISCostTourDisabled(false);
     }
-  }, [
-    connectorsAreConfigured,
-    inferenceEnabled,
-    isEISCostTourDisabled,
-    showFlyout,
-  ]);
+  }, [connectorsAreConfigured, inferenceEnabled, isEISCostTourDisabled, showFlyout]);
 
   const handleCancel = useCallback(() => {
     setDidCancel(true);
@@ -133,9 +121,7 @@ const HeaderComponent: React.FC<Props> = ({
             isDisabled={isEISCostTourDisabled}
             selectedConnectorId={connectorId}
             zIndex={999} // Should lower than the flyout
-            storageKey={
-              NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM_USAGE_ATTACK_DISCOVERY
-            }
+            storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM_USAGE_ATTACK_DISCOVERY}
           >
             <ConnectorSelectorInline
               onConnectorSelected={noop}

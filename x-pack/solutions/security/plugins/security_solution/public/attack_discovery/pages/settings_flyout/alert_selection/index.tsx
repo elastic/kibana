@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import { AssistantSpaceIdProvider, ConnectorSelectorInline } from '@kbn/elastic-assistant';
-import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
-import { EuiForm, EuiFormRow, EuiTab, EuiTabs, EuiText, EuiSpacer, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { ConnectorSelectorInline } from '@kbn/elastic-assistant';
+import {
+  EuiFormRow,
+  EuiTab,
+  EuiTabs,
+  EuiText,
+  EuiSpacer,
+  EuiFlexItem,
+  EuiFlexGroup,
+} from '@elastic/eui';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 import React, { useMemo, useState } from 'react';
@@ -100,31 +107,30 @@ const AlertSelectionComponent: React.FC<Props> = ({
         <EuiSpacer size="m" />
       </EuiFlexItem>
 
-          <EuiSpacer size="m" />
+      <EuiSpacer size="m" />
 
-          <ElasticLLMCostAwarenessTour
-            isDisabled={false}
-            wrapper={false}
+      <ElasticLLMCostAwarenessTour
+        isDisabled={false}
+        wrapper={false}
+        selectedConnectorId={connectorId}
+        storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM_USAGE_ATTACK_DISCOVERY_FLYOUT}
+      >
+        <EuiFormRow
+          label={i18n.CONNECTOR}
+          css={css`
+            flex-grow: 1;
+          `}
+        >
+          <ConnectorSelectorInline
+            fullWidth={true}
+            onConnectorSelected={noop}
+            onConnectorIdSelected={onConnectorIdSelected}
             selectedConnectorId={connectorId}
-            storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM_USAGE_ATTACK_DISCOVERY_FLYOUT}
-          >
-            <EuiFormRow
-              label={i18n.CONNECTOR}
-              css={css`
-                flex-grow: 1;
-              `}
-            >
-              <ConnectorSelectorInline
-                fullWidth={true}
-                onConnectorSelected={noop}
-                onConnectorIdSelected={onConnectorIdSelected}
-                selectedConnectorId={connectorId}
-                stats={attackDiscoveryAlertsEnabled ? undefined : stats}
-              />
-            </EuiFormRow>
-          </ElasticLLMCostAwarenessTour>
-          <EuiSpacer size="m" />
-
+            stats={attackDiscoveryAlertsEnabled ? undefined : stats}
+          />
+        </EuiFormRow>
+      </ElasticLLMCostAwarenessTour>
+      <EuiSpacer size="m" />
 
       <EuiFormRow label={i18n.CUSTOM_QUERY}>
         <AlertSelectionQuery
