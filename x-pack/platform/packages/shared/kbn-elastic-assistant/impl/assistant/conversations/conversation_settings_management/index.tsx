@@ -44,14 +44,13 @@ import {
 import { AssistantSettingsBottomBar } from '../../settings/assistant_settings_bottom_bar';
 import { Toolbar } from './tool_bar_component';
 import { ConversationTableItem } from './types';
+import { useConversationSelection } from './use_conversation_selection';
 
 interface Props {
   connectors: AIConnector[] | undefined;
   defaultConnector?: AIConnector;
   isDisabled?: boolean;
 }
-
-const EMPTY_CONVERSATIONS_ARRAY: ConversationTableItem[] = [];
 
 const ConversationSettingsManagementComponent: React.FC<Props> = ({
   connectors,
@@ -69,7 +68,28 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   const { data: allPrompts, refetch: refetchPrompts } = useFetchPrompts();
   const [totalItemCount, setTotalItemCount] = useState(5);
 
-  const [deletedConversations, setDeletedConversations] = useState(EMPTY_CONVERSATIONS_ARRAY);
+  const {
+    selectionState: {
+      isDeleteAll,
+      isExcludedMode,
+      deletedConversations,
+      totalSelectedConversations,
+      excludedIds,
+    },
+    selectionActions: {
+      handleUnselectAll,
+      handleSelectAll,
+      handlePageUnchecked,
+      handlePageChecked,
+      handleRowUnChecked,
+      handleRowChecked,
+      setDeletedConversations,
+      setExcludedIds,
+      setIsDeleteAll,
+      setIsExcludedMode,
+      setTotalSelectedConversations,
+    },
+  } = useConversationSelection();
 
   const { onTableChange, pagination, sorting } = useSessionPagination<Conversation, false>({
     nameSpace,
@@ -125,10 +145,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   } = useConversationsUpdater(conversations, conversationsLoaded);
 
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
-  const [isDeleteAll, setIsDeleteAll] = useState(false);
-  const [isExcludedMode, setIsExcludedMode] = useState(false);
-  const [excludedIds, setExcludedIds] = useState<string[]>([]);
-  const [totalSelectedConversations, setTotalSelectedConversations] = useState(0);
+
   const handleSave = useCallback(
     async (param?: { callback?: () => void; bulkActions?: ConversationsBulkActions }) => {
       const { bulkActions, callback } = param ?? {};
@@ -153,7 +170,18 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
         resetConversationsSettings();
       }
     },
-    [excludedIds, isDeleteAll, resetConversationsSettings, saveConversationsSettings, toasts]
+    [
+      excludedIds,
+      isDeleteAll,
+      resetConversationsSettings,
+      saveConversationsSettings,
+      setDeletedConversations,
+      setExcludedIds,
+      setIsDeleteAll,
+      setIsExcludedMode,
+      setTotalSelectedConversations,
+      toasts,
+    ]
   );
 
   const setAssistantStreamingEnabled = useCallback(
@@ -205,7 +233,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
       closeEditFlyout();
       openConfirmModal();
     },
-    [closeEditFlyout, onConversationDeleted, openConfirmModal]
+    [closeEditFlyout, onConversationDeleted, openConfirmModal, setDeletedConversations]
   );
 
   const onBulkDeleteActionClicked = useCallback(() => {
@@ -238,7 +266,15 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     setExcludedIds([]);
     closeConfirmModal();
     onCancelClick();
-  }, [closeConfirmModal, onCancelClick]);
+  }, [
+    closeConfirmModal,
+    onCancelClick,
+    setDeletedConversations,
+    setExcludedIds,
+    setIsDeleteAll,
+    setIsExcludedMode,
+    setTotalSelectedConversations,
+  ]);
 
   const { getConversationsList, getColumns } = useConversationsTable();
 
@@ -255,87 +291,6 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     [conversationOptions]
   );
 
-  const handleRowChecked = useCallback(
-    (selectedItem: ConversationTableItem) => {
-      if (isExcludedMode) {
-        const newExcludedIds = excludedIds.filter((item) => item !== selectedItem.id);
-        setExcludedIds(newExcludedIds);
-      } else {
-        const newDeletedConversations = [...deletedConversations, selectedItem];
-        setDeletedConversations(newDeletedConversations);
-        if (newDeletedConversations.length === totalItemCount) {
-          setIsDeleteAll(true);
-        }
-      }
-      setTotalSelectedConversations((prev) => prev + 1);
-    },
-    [deletedConversations, excludedIds, isExcludedMode, totalItemCount]
-  );
-
-  const handleRowUnChecked = useCallback(
-    (selectedItem: ConversationTableItem) => {
-      if (isExcludedMode) {
-        setExcludedIds((prev) => [...prev, selectedItem.id]);
-      } else {
-        setDeletedConversations((prev) => prev.filter((item) => item.id !== selectedItem.id));
-      }
-      setIsDeleteAll(false);
-      setTotalSelectedConversations((prev) => (prev || totalItemCount) - 1);
-    },
-    [isExcludedMode, totalItemCount]
-  );
-
-  const handlePageChecked = useCallback(() => {
-    if (isExcludedMode) {
-      const newExcludedIds = excludedIds.filter((item) => !conversationOptionsIds.includes(item));
-      setExcludedIds(newExcludedIds);
-    } else {
-      const newDeletedConversations = [...deletedConversations, ...conversationOptions];
-      setDeletedConversations(newDeletedConversations);
-      if (newDeletedConversations.length === totalItemCount) {
-        setIsDeleteAll(true);
-      }
-    }
-    setTotalSelectedConversations((prev) => prev + conversationOptionsIds.length);
-  }, [
-    conversationOptions,
-    conversationOptionsIds,
-    deletedConversations,
-    excludedIds,
-    isExcludedMode,
-    totalItemCount,
-  ]);
-
-  const handlePageUnchecked = useCallback(() => {
-    if (isExcludedMode) {
-      setExcludedIds((prev) => [...prev, ...conversationOptionsIds]);
-    } else {
-      setDeletedConversations(
-        deletedConversations.filter((item) => !conversationOptionsIds.includes(item.id))
-      );
-    }
-    setTotalSelectedConversations(
-      (prev) => (prev || totalItemCount) - conversationOptionsIds.length
-    );
-
-    setIsDeleteAll(false);
-  }, [conversationOptionsIds, deletedConversations, isExcludedMode, totalItemCount]);
-
-  const handleSelectAll = useCallback(() => {
-    setIsDeleteAll(true);
-    setIsExcludedMode(true);
-    setTotalSelectedConversations(totalItemCount);
-    setExcludedIds([]);
-  }, [totalItemCount]);
-
-  const handleUnselectAll = useCallback(() => {
-    setIsDeleteAll(false);
-    setIsExcludedMode(false);
-    setDeletedConversations([]);
-    setTotalSelectedConversations(0);
-    setExcludedIds([]);
-  }, []);
-
   const onSaveCancelled = useCallback(() => {
     closeEditFlyout();
     onCancelClick();
@@ -350,6 +305,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   const columns = useMemo(
     () =>
       getColumns({
+        conversationOptions,
         conversationOptionsIds,
         deletedConversationsIds,
         excludedIds,
@@ -363,8 +319,10 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
         isExcludedMode,
         onDeleteActionClicked,
         onEditActionClicked,
+        totalItemCount,
       }),
     [
+      conversationOptions,
       conversationOptionsIds,
       deletedConversations.length,
       deletedConversationsIds,
@@ -378,6 +336,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
       isExcludedMode,
       onDeleteActionClicked,
       onEditActionClicked,
+      totalItemCount,
     ]
   );
 

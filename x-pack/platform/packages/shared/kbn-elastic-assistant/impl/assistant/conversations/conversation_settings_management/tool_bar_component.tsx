@@ -6,11 +6,11 @@
  */
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import * as i18n from './translations';
 export interface Props {
   onConversationsBulkDeleted: () => void;
-  handleSelectAll: () => void;
+  handleSelectAll: (totalItemCount: number) => void;
   handleUnselectAll: () => void;
   totalConversations: number;
   totalSelected: number;
@@ -25,11 +25,14 @@ const ToolbarComponent: React.FC<Props> = ({
   totalSelected,
   isDeleteAll,
 }) => {
+  const isAnySelected = totalSelected > 0 || isDeleteAll;
+  const onSelectAllClicked = useCallback(() => {
+    handleSelectAll(totalConversations);
+  }, [handleSelectAll, totalConversations]);
+
   if (totalConversations === 0) {
     return null;
   }
-
-  const isAnySelected = totalSelected > 0 || isDeleteAll;
 
   return (
     <EuiFlexGroup alignItems="center" data-test-subj="toolbar" gutterSize="none">
@@ -38,7 +41,7 @@ const ToolbarComponent: React.FC<Props> = ({
           <EuiButtonEmpty
             data-test-subj="selectAllConversations"
             iconType="pagesSelect"
-            onClick={handleSelectAll}
+            onClick={onSelectAllClicked}
             size="xs"
           >
             {i18n.SELECT_ALL_CONVERSATIONS(totalConversations)}

@@ -19,7 +19,13 @@ import { getConversationApiConfig } from '../../use_conversation/helpers';
 import * as i18n from './translations';
 import { useInlineActions } from '../../common/components/assistant_settings_management/inline_actions';
 import { InputCheckbox, PageSelectionCheckbox } from './table_selection_checkbox';
-import { ConversationTableItem } from './types';
+import {
+  ConversationTableItem,
+  HandlePageChecked,
+  HandlePageUnchecked,
+  HandleRowChecked,
+  HandleRowUnChecked,
+} from './types';
 
 const emptyConversations = {};
 
@@ -35,6 +41,7 @@ export const useConversationsTable = () => {
   const getActions = useInlineActions<ConversationTableItem>();
   const getColumns = useCallback(
     ({
+      conversationOptions,
       conversationOptionsIds,
       deletedConversationsIds,
       excludedIds,
@@ -48,20 +55,23 @@ export const useConversationsTable = () => {
       isExcludedMode,
       onDeleteActionClicked,
       onEditActionClicked,
+      totalItemCount,
     }: {
+      conversationOptions: ConversationTableItem[];
       conversationOptionsIds: string[];
       deletedConversationsIds: string[];
       excludedIds: string[];
-      handlePageChecked: () => void;
-      handlePageUnchecked: () => void;
-      handleRowChecked: (conversation: ConversationTableItem) => void;
-      handleRowUnChecked: (conversation: ConversationTableItem) => void;
+      handlePageChecked: HandlePageChecked;
+      handlePageUnchecked: HandlePageUnchecked;
+      handleRowChecked: HandleRowChecked;
+      handleRowUnChecked: HandleRowUnChecked;
       isDeleteAll: boolean;
       isDeleteEnabled: (conversation: ConversationTableItem) => boolean;
       isEditEnabled: (conversation: ConversationTableItem) => boolean;
       isExcludedMode: boolean;
       onDeleteActionClicked: (conversation: ConversationTableItem) => void;
       onEditActionClicked: (conversation: ConversationTableItem) => void;
+      totalItemCount: number;
     }): Array<EuiBasicTableColumn<ConversationTableItem>> => {
       return [
         {
@@ -69,12 +79,13 @@ export const useConversationsTable = () => {
           name: (
             <PageSelectionCheckbox
               isDeleteAll={isDeleteAll}
-              conversationOptionsIds={conversationOptionsIds}
+              conversationOptions={conversationOptions}
               deletedConversationsIds={deletedConversationsIds}
               excludedIds={excludedIds}
               isExcludedMode={isExcludedMode}
               handlePageChecked={handlePageChecked}
               handlePageUnchecked={handlePageUnchecked}
+              totalItemCount={totalItemCount}
             />
           ),
           render: (conversation: ConversationTableItem) => (
@@ -86,6 +97,7 @@ export const useConversationsTable = () => {
               handleRowChecked={handleRowChecked}
               handleRowUnChecked={handleRowUnChecked}
               isDeleteAll={isDeleteAll}
+              totalItemCount={totalItemCount}
             />
           ),
           width: '70px',

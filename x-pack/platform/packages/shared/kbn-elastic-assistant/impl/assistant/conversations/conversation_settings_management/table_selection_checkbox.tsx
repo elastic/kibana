@@ -4,27 +4,39 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { EuiCheckbox } from '@elastic/eui';
-import { ConversationTableItem } from './types';
+import {
+  ConversationTableItem,
+  HandlePageChecked,
+  HandlePageUnchecked,
+  HandleRowChecked,
+  HandleRowUnChecked,
+} from './types';
 
 export const PageSelectionCheckbox = ({
-  conversationOptionsIds,
+  conversationOptions,
   deletedConversationsIds,
   excludedIds,
   handlePageChecked,
   handlePageUnchecked,
   isDeleteAll,
   isExcludedMode,
+  totalItemCount,
 }: {
-  conversationOptionsIds: string[];
+  conversationOptions: ConversationTableItem[];
   deletedConversationsIds: string[];
   excludedIds: string[];
-  handlePageChecked: () => void;
-  handlePageUnchecked: () => void;
+  handlePageChecked: HandlePageChecked;
+  handlePageUnchecked: HandlePageUnchecked;
   isDeleteAll: boolean;
   isExcludedMode: boolean;
+  totalItemCount: number;
 }) => {
+  const conversationOptionsIds = useMemo(
+    () => conversationOptions.map((item) => item.id),
+    [conversationOptions]
+  );
   const [pageSelectionChecked, setPageSelectionChecked] = useState(
     (!isExcludedMode &&
       (isDeleteAll ||
@@ -53,10 +65,10 @@ export const PageSelectionCheckbox = ({
       onChange={(e) => {
         if (e.target.checked) {
           setPageSelectionChecked(true);
-          handlePageChecked();
+          handlePageChecked({ conversationOptions, totalItemCount });
         } else {
           setPageSelectionChecked(false);
-          handlePageUnchecked();
+          handlePageUnchecked({ conversationOptionsIds, totalItemCount });
         }
       }}
     />
@@ -71,14 +83,16 @@ export const InputCheckbox = ({
   handleRowChecked,
   handleRowUnChecked,
   isDeleteAll,
+  totalItemCount,
 }: {
   conversation: ConversationTableItem;
   deletedConversationsIds: string[];
   excludedIds: string[];
   isExcludedMode: boolean;
-  handleRowChecked: (conversation: ConversationTableItem) => void;
-  handleRowUnChecked: (conversation: ConversationTableItem) => void;
+  handleRowChecked: HandleRowChecked;
+  handleRowUnChecked: HandleRowUnChecked;
   isDeleteAll: boolean;
+  totalItemCount: number;
 }) => {
   const [checked, setChecked] = useState(
     (!isExcludedMode && (isDeleteAll || deletedConversationsIds.includes(conversation.id))) ||
@@ -100,10 +114,10 @@ export const InputCheckbox = ({
       onChange={(e) => {
         if (e.target.checked) {
           setChecked(true);
-          handleRowChecked(conversation);
+          handleRowChecked({ selectedItem: conversation, totalItemCount });
         } else {
           setChecked(false);
-          handleRowUnChecked(conversation);
+          handleRowUnChecked({ selectedItem: conversation, totalItemCount });
         }
       }}
     />
