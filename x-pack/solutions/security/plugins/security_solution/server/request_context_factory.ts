@@ -276,7 +276,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           soClient: coreContext.savedObjects.client,
         });
       }),
-      getPrivilegedAccessDetectionClient: memoize(() => {
+      getPadPackageInstallationClient: memoize(() => {
         return new PadPackageInstallationClient({
           clusterClient: coreContext.elasticsearch.client,
           soClient: coreContext.savedObjects.client,

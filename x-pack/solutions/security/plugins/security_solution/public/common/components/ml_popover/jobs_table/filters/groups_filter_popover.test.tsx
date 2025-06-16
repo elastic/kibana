@@ -39,6 +39,12 @@ describe('GroupsFilterPopover', () => {
     const mockOnSelectedGroupsChanged = jest.fn();
     const wrapper = mount(
       <GroupsFilterPopoverComponent
+        defaultFilters={{
+          filterQuery: '',
+          showCustomJobs: false,
+          showElasticJobs: false,
+          selectedGroups: [],
+        }}
         securityJobs={securityJobs}
         onSelectedGroupsChanged={mockOnSelectedGroupsChanged}
       />

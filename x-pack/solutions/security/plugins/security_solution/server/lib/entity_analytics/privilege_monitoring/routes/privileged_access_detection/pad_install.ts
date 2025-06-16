@@ -45,7 +45,7 @@ export const padInstallRoute = (
 
         try {
           const clientResponse = await secSol
-            .getPrivilegedAccessDetectionClient()
+            .getPadPackageInstallationClient()
             .installPrivilegedAccessDetectionPackage();
           return response.ok({
             body: {

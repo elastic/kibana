@@ -44,7 +44,7 @@ export const padGetStatusRoute = (
         const secSol = await context.securitySolution;
 
         try {
-          const clientResponse = await secSol.getPrivilegedAccessDetectionClient().getStatus();
+          const clientResponse = await secSol.getPadPackageInstallationClient().getStatus();
           return response.ok({
             body: {
               ...clientResponse,
