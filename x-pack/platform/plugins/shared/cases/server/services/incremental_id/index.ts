@@ -105,11 +105,6 @@ export class CasesIncrementalIdService {
         return 0;
       }
 
-      // TODO: should we really throw here?
-      // There might be gaps because of deleted cases.
-      // if (mostRecentIncrementalId !== casesResponse.total) {
-      //   throw new Error('Mismatch between incremental id and case count');
-      // }
       return mostRecentIncrementalId;
     } catch (error) {
       this.logger.error(error);
