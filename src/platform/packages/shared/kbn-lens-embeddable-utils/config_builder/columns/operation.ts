@@ -9,8 +9,8 @@
 
 import type { FieldBasedIndexPatternColumn, FormulaPublicApi, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { LensOperation } from '../operation_types';
-import { FormattedIndexPatternColumn } from '@kbn/lens-plugin/public/datasources/form_based/operations/definitions/column_types';
+import { LensDifferencesOperation, LensOperation } from '../operation_types';
+import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '@kbn/lens-plugin/public/datasources/form_based/operations/definitions/column_types';
 
 export function getOperationColumn(
   id: string,
@@ -32,10 +32,34 @@ export function getOperationColumn(
     params: {
       format: config.format,
       value: 'value' in config ? config.value : undefined,
+      sortField: 'sortField' in config ? config.sortField : undefined,
     } as any,
     isStaticValue: Boolean('value' in config && config.value),
     isBucketed: false,
   } as FieldBasedIndexPatternColumn & FormattedIndexPatternColumn;
+
+  if (config.type === 'differences') {
+    layer.columns[`${id}_referenced`] = {
+      dataType: 'number',
+      operationType: config.referenceOperationType,
+      sourceField: 'field' in config ? config.field : undefined,
+      label: config.label || '',
+      timeScale: config.timeScale,
+      scale: config.scale || 'ratio',
+      filter: config.filter ? { query: config.filter } : undefined,
+      customLabel: Boolean(config.label),
+      params: {
+        format: config.format,
+        value: 'value' in config ? config.value : undefined,
+        sortField: 'sortField' in config ? config.sortField : undefined,
+      } as any,
+      isStaticValue: Boolean('value' in config && config.value),
+      isBucketed: false,
+    };
+    layer.columns[id].references = [`${id}_referenced`];
+    layer.columnOrder.push(`${id}_referenced`);
+  }
+
   layer.columnOrder.push(id);
 
   return layer;
@@ -52,7 +76,10 @@ export function fromOperationColumn(
 
   const { label, params } = column as FormattedIndexPatternColumn;
 
-  return {
+ 
+
+
+  const operation: LensOperation = {
     type: column.operationType as any,
     field: column.sourceField,
     label,
@@ -61,5 +88,20 @@ export function fromOperationColumn(
     filter: column.filter?.query as string,
     format: params?.format,
     value: params?.value,
+    sortField: params?.sortField,
+
   };
+
+  if (column.operationType === 'differences') {
+    const referencedColumnId = (column as unknown as ReferenceBasedIndexPatternColumn).references?.[0];
+    if (!referencedColumnId) {
+      throw new Error(`Referenced column for differences operation not found for column ${columnId}`);
+    }
+    const referencedColumn = layer.columns[referencedColumnId] as FieldBasedIndexPatternColumn;
+    (operation as LensDifferencesOperation).referenceOperationType = referencedColumn.operationType as any;
+    operation.field = referencedColumn.sourceField;
+  }
+
+  return operation;
+
 }

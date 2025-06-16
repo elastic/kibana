@@ -40,7 +40,7 @@ import {
 import { FormattedIndexPatternColumn } from '@kbn/lens-plugin/public/datasources/form_based/operations/definitions/column_types';
 import { LensOperation } from './operation_types';
 import { getFormulaColumn } from './columns';
-import { fromOperationColumn, getOperationColumn } from './columns/operation';
+import { getOperationColumn, fromOperationColumn } from './columns/operation';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)

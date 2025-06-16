@@ -32,4 +32,16 @@ export interface LensExtraOperation extends LensBaseOperation {
     param: string;
 }
 
-export type LensOperation = LensFieldOperation | LensExtraOperation | LensSimpleOperation | LensStaticValueOperation;
+export interface LensLastvalueOperation extends LensBaseOperation {
+    type: 'last_value';
+    field: string;
+    sortField?: string;
+}
+
+export interface LensDifferencesOperation extends LensBaseOperation {
+    type: 'differences';
+    field: string;
+    referenceOperationType: 'avg' | 'max' | 'min' | 'sum' | 'median' | 'stddev' | 'variance' | 'cardinality';
+}
+
+export type LensOperation = LensFieldOperation | LensExtraOperation | LensSimpleOperation | LensStaticValueOperation | LensLastvalueOperation | LensDifferencesOperation;
