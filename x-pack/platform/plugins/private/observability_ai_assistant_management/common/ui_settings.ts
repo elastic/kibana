@@ -25,7 +25,7 @@ const regexRuleSchema = schema.allOf([
   schema.object({
     type: schema.literal('regex'),
     pattern: schema.string(),
-    entityClass: schema.maybe(schema.string()),
+    entityClass: schema.string(),
   }),
 ]);
 
@@ -125,7 +125,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
           'List of anonymization rules.\n' +
           '- id: unique string identifier\n' +
           '- type: "ner" or "regex"\n' +
-          '- entityClass: (NER rules only) one of PER, ORG, LOC\n' +
+          '- entityClass: PER, ORG, LOC\n' +
           '- pattern: (regex rules only) the regular‑expression string to match\n' +
           '- enabled: boolean flag to turn the rule on or off\n' +
           '- description: optional human‑readable description\n',
