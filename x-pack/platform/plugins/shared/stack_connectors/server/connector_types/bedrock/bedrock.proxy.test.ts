@@ -5,109 +5,90 @@
  * 2.0.
  */
 
-import { DEFAULT_BEDROCK_URL, DEFAULT_TIMEOUT_MS } from '../../../common/bedrock/constants';
+import { DEFAULT_BEDROCK_URL } from '../../../common/bedrock/constants';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { BedrockConnector } from './bedrock';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { RunActionResponseSchema } from '../../../common/bedrock/schema';
 
 const logger = loggingSystemMock.createLogger();
 
-// Mock an instance of the Bedrock class
-// with overridden flag for purpose of jest test
-// jest.mock('@aws-sdk/client-bedrock-runtime', () => {
-//   const UnmodifiedBedrockClient = jest.requireActual(
-//     '@aws-sdk/client-bedrock-runtime'
-//   ).BedrockRuntimeClient;
-//
-//   return {
-//     __esModule: true,
-//     default: jest.fn().mockImplementation((config) => {
-//       return new UnmodifiedBedrockClient({
-//         ...config,
-//         dangerouslyAllowBrowser: true,
-//       });
-//     }),
-//   };
-// });
 describe('Bedrock with proxy config', () => {
-  let mockProxiedRequest: jest.Mock;
-  let connectorUsageCollector: ConnectorUsageCollector;
-  const mockDefaults = {
-    timeout: DEFAULT_TIMEOUT_MS,
-    url: DEFAULT_BEDROCK_URL,
-    method: 'post',
-    responseSchema: RunActionResponseSchema,
-  };
-
-  const mockResponse = {
-    headers: {},
-    data: {
-      content: [{ type: 'text', text: 'hello world' }],
-      stop_reason: 'stop_sequence',
-      usage: {
-        input_tokens: 25,
-        output_tokens: 88,
-      },
-    },
-  };
-
   const configurationUtilities = actionsConfigMock.create();
   const PROXY_HOST = 'proxy.custom.elastic.co';
-  const PROXY_URL = `http://${PROXY_HOST}`;
+  const PROXY_URL_HTTP = `http://${PROXY_HOST}:99`;
+  const PROXY_URL_HTTPS = `https://${PROXY_HOST}:99`;
 
-  configurationUtilities.getProxySettings.mockReturnValue({
-    proxyUrl: PROXY_URL,
-    proxySSLSettings: {
-      verificationMode: 'none',
-    },
-    proxyBypassHosts: undefined,
-    proxyOnlyHosts: undefined,
-  });
-
-  const connector = new BedrockConnector({
-    configurationUtilities,
-    connector: { id: '1', type: '.bedrock' },
-    config: {
-      apiUrl: DEFAULT_BEDROCK_URL,
-      defaultModel: 'claude',
-    },
-    secrets: { accessKey: '123', secret: '567' },
-    logger,
-    services: actionsMock.createServices(),
-  });
-
-  const sampleBedrockBody = {
-    messages: [
-      {
-        role: 'user',
-        content: 'Hello world',
-      },
-    ],
-  };
-
+  let connector: BedrockConnector;
   beforeEach(() => {
-    connectorUsageCollector = new ConnectorUsageCollector({
-      logger,
-      connectorId: 'test-connector-id',
-    });
-    mockProxiedRequest = jest.fn().mockResolvedValue(mockResponse);
-    // @ts-ignore
-    connector.request = mockProxiedRequest;
     jest.clearAllMocks();
+    configurationUtilities.getProxySettings.mockReturnValue({
+      proxyUrl: PROXY_URL_HTTP,
+      proxySSLSettings: {
+        verificationMode: 'none',
+      },
+      proxyBypassHosts: undefined,
+      proxyOnlyHosts: undefined,
+    });
+
+    connector = new BedrockConnector({
+      configurationUtilities,
+      connector: { id: '1', type: '.bedrock' },
+      config: {
+        apiUrl: DEFAULT_BEDROCK_URL,
+        defaultModel: 'claude',
+      },
+      secrets: { accessKey: '123', secret: '567' },
+      logger,
+      services: actionsMock.createServices(),
+    });
   });
 
-  it('verifies that the Bedrock client is initialized with the custom proxy HTTP agent', () => {
-    // @ts-ignore .bedrock is private
+  it('verifies that the Bedrock client is initialized with the custom proxy HTTP agent', async () => {
+    // @ts-ignore .bedrockClient is private
     const bedrockClient = connector.bedrockClient;
 
     // Verify the client was initialized with the custom agent configuration
     expect(bedrockClient).toBeDefined();
-    expect(bedrockClient.config.httpOptions).toBeDefined();
-    expect(bedrockClient.config.httpOptions.agent).toBeDefined();
-    expect(bedrockClient.config.httpOptions.agent.proxy.host).toBe(PROXY_HOST);
-    expect(bedrockClient.config.httpOptions.agent.proxy.port).toBe(80);
+    expect(bedrockClient.config.requestHandler).toBeDefined();
+    // @ts-ignore configProvider is private, but we need it to access the agent
+    const config = await bedrockClient.config.requestHandler.configProvider;
+    expect(config.httpAgent.proxy.host).toBe(PROXY_HOST);
+    expect(config.httpAgent.proxy.port).toBe(99);
+    expect(config.httpsAgent.proxy).not.toBeDefined();
+  });
+
+  it('verifies that the Bedrock client is initialized with the custom proxy HTTPS agent', async () => {
+    configurationUtilities.getProxySettings.mockReturnValue({
+      proxyUrl: PROXY_URL_HTTPS,
+      proxySSLSettings: {
+        verificationMode: 'none',
+      },
+      proxyBypassHosts: undefined,
+      proxyOnlyHosts: undefined,
+    });
+
+    connector = new BedrockConnector({
+      configurationUtilities,
+      connector: { id: '1', type: '.bedrock' },
+      config: {
+        apiUrl: DEFAULT_BEDROCK_URL,
+        defaultModel: 'claude',
+      },
+      secrets: { accessKey: '123', secret: '567' },
+      logger,
+      services: actionsMock.createServices(),
+    });
+    // @ts-ignore .bedrockClient is private
+    const bedrockClient = connector.bedrockClient;
+
+    // Verify the client was initialized with the custom agent configuration
+    expect(bedrockClient).toBeDefined();
+    expect(bedrockClient.config.requestHandler).toBeDefined();
+    // @ts-ignore configProvider is private, but we need it to access the agent
+    const config = await bedrockClient.config.requestHandler.configProvider;
+    expect(config.httpsAgent.proxy.host).toBe(PROXY_HOST);
+    expect(config.httpsAgent.proxy.port).toBe(99);
+    expect(config.httpAgent.proxy).not.toBeDefined();
   });
 });
