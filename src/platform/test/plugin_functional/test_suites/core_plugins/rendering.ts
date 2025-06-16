@@ -350,6 +350,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.snapshot_restore.slm_ui.enabled (boolean?)',
         'xpack.snapshot_restore.ui.enabled (boolean?)',
         'xpack.stack_connectors.enableExperimental (array?)',
+        'xpack.streams.experimental.significantEventsEnabled (boolean?)',
         'xpack.trigger_actions_ui.enableExperimental (array?)',
         'xpack.trigger_actions_ui.enableGeoTrackingThresholdAlert (boolean?)',
         'xpack.trigger_actions_ui.rules.enabled (boolean?)',

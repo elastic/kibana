@@ -49,6 +49,8 @@ export { type RoutingDefinition, routingDefinitionListSchema } from './src/model
 export { type ContentPack, contentPackSchema } from './src/content';
 
 export { isRootStreamDefinition } from './src/helpers/is_root';
+export { getIndexPatternsForStream } from './src/helpers/hierarchy_helpers';
+
 export {
   keepFields,
   namespacePrefixes,
@@ -91,7 +93,13 @@ export {
 
 export { getConditionFields } from './src/helpers/get_condition_fields';
 
-export { type StreamQuery, upsertStreamQueryRequestSchema, streamQuerySchema } from './src/queries';
+export {
+  type StreamQuery,
+  type StreamQueryKql,
+  upsertStreamQueryRequestSchema,
+  streamQueryKqlSchema,
+  streamQuerySchema,
+} from './src/queries';
 
 export { findInheritedLifecycle, findInheritingStreams } from './src/helpers/lifecycle';
 
@@ -134,6 +142,7 @@ export {
 export type {
   SignificantEventsResponse,
   SignificantEventsGetResponse,
+  SignificantEventsPreviewResponse,
 } from './src/api/significant_events';
 
 export { conditionToQueryDsl } from './src/helpers/condition_to_query_dsl';
