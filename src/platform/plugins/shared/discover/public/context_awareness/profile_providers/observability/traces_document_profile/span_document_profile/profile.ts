@@ -9,11 +9,11 @@
 
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { DATASTREAM_TYPE_FIELD, getFieldValue, PROCESSOR_EVENT_FIELD } from '@kbn/discover-utils';
+import { TRACES_PRODUCT_FEATURE_ID } from '../../../../../../common/constants';
 import type { DocumentProfileProvider } from '../../../../profiles';
-import { DocumentType } from '../../../../profiles';
+import { DocumentType, SolutionType } from '../../../../profiles';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
 import { createGetDocViewer } from './accessors';
-import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
 
 const OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID = 'observability-traces-span-document-profile';
 
@@ -22,11 +22,12 @@ export const createObservabilityTracesSpanDocumentProfileProvider = ({
 }: ProfileProviderServices): DocumentProfileProvider => ({
   isExperimental: true,
   profileId: OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID,
+  restrictedToProductFeature: TRACES_PRODUCT_FEATURE_ID,
   profile: {
     getDocViewer: createGetDocViewer(tracesContextService.getAllTracesIndexPattern()),
   },
   resolve: ({ record, rootContext }) => {
-    const isObservabilitySolutionView = rootContext.profileId === OBSERVABILITY_ROOT_PROFILE_ID;
+    const isObservabilitySolutionView = rootContext.solutionType === SolutionType.Observability;
 
     if (!isObservabilitySolutionView) {
       return { isMatch: false };
