@@ -10,7 +10,7 @@ import { getDevToolsOptions } from '@kbn/xstate-utils';
 import equal from 'fast-deep-equal';
 import { distinctUntilChanged, from, map } from 'rxjs';
 import { interpret } from 'xstate';
-import { DATASET_QUALITY_COMPLETE_ID } from '../../../common/constants';
+import { DATASET_QUALITY_ALL_SIGNALS_ID } from '../../../common/constants';
 import { DataStreamsStatsServiceStart } from '../../services/data_streams_stats';
 import {
   createDatasetQualityControllerStateMachine,
@@ -42,7 +42,7 @@ export const createDatasetQualityControllerFactory =
       toasts: core.notifications.toasts,
       dataStreamStatsClient,
       isCompleteDatasetQualityAvailable: core.pricing.isFeatureAvailable(
-        DATASET_QUALITY_COMPLETE_ID
+        DATASET_QUALITY_ALL_SIGNALS_ID
       ),
     });
 

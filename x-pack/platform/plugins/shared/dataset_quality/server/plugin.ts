@@ -17,7 +17,7 @@ import {
   DatasetQualityPluginStart,
   DatasetQualityPluginStartDependencies,
 } from './types';
-import { DATASET_QUALITY_COMPLETE_ID } from '../common/constants';
+import { DATASET_QUALITY_ALL_SIGNALS_ID } from '../common/constants';
 
 export class DatasetQualityServerPlugin
   implements
@@ -42,8 +42,9 @@ export class DatasetQualityServerPlugin
   ) {
     core.pricing.registerProductFeatures([
       {
-        id: DATASET_QUALITY_COMPLETE_ID,
-        description: 'Dataset Quality Complete - Enables all signals for the dataset quality page.',
+        id: DATASET_QUALITY_ALL_SIGNALS_ID,
+        description:
+          'Dataset Quality All Signals - Enables all signals for the dataset quality page.',
         products: [{ name: 'observability', tier: 'complete' }],
       },
     ]);
