@@ -11,6 +11,7 @@ import expect from '@kbn/expect';
 import { ReportManager, METRIC_TYPE, UiCounterMetricType, Report } from '@kbn/analytics';
 import { UsageCountersSavedObject } from '@kbn/usage-collection-plugin/server';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import { sleep } from '@kbn/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const APP_NAME = 'myApp';
@@ -91,8 +92,8 @@ export default function ({ getService }: FtrProviderContext) {
       const { report } = reportManager.assignReports([counterEvent]);
 
       await sendReport(report);
-
       // Wait for the report to be query-able in ES since sending report uses (refresh = false)
+      await sleep(3000);
       await retry.tryWithRetries(
         'reported events to be stored into ES',
         async () => {
@@ -121,8 +122,8 @@ export default function ({ getService }: FtrProviderContext) {
       ]);
 
       await sendReport(report);
-
       // Wait for the report to be query-able in ES since sending report uses (refresh = false)
+      await sleep(3000);
       await retry.tryWithRetries(
         'reported events to be stored into ES',
         async () => {
@@ -152,7 +153,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(secondEventWithCountTypeEvents[0].attributes.count).to.eql(1);
           return true;
         },
-        { retryCount: 5, retryDelay: 1500, initialDelay: 3000 }
+        { retryCount: 5, retryDelay: 1500 }
       );
     });
   });
