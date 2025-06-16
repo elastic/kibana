@@ -34,7 +34,7 @@ export interface FullScreenWaterfallProps {
   rangeTo: string;
   dataView: DocViewRenderProps['dataView'];
   tracesIndexPattern: string;
-  onCloseFullScreen: () => void;
+  onExitFullScreen: () => void;
 }
 
 export const FullScreenWaterfall = ({
@@ -43,7 +43,7 @@ export const FullScreenWaterfall = ({
   rangeTo,
   dataView,
   tracesIndexPattern,
-  onCloseFullScreen,
+  onExitFullScreen,
 }: FullScreenWaterfallProps) => {
   const { transaction } = useRootTransactionContext();
   const [spanId, setSpanId] = useState<string | null>(null);
@@ -130,7 +130,7 @@ export const FullScreenWaterfall = ({
               </EuiFlexItem>
               <EuiFlexItem grow={1} css={{ alignItems: 'end' }}>
                 <ExitFullScreenButton
-                  onExitFullScreen={onCloseFullScreen}
+                  onExitFullScreen={onExitFullScreen}
                   dataTestSubj="unifiedDocViewerObservabilityTracesFullScreenWaterfallExitFullScreenButton"
                   ariaLabel={i18n.translate(
                     'unifiedDocViewer.observability.traces.fullScreenWaterfall.exitFullScreen.button',
