@@ -122,6 +122,7 @@ const FormRow: React.FC<FormRowProps> = ({
   defaultValue,
   euiFieldProps = {},
   type,
+  requireTld,
 }) => {
   const dataTestSub = `${id}-input`;
   const UseField = getComponentByType(type);
@@ -132,7 +133,14 @@ const FormRow: React.FC<FormRowProps> = ({
           {!isPasswordField ? (
             <UseField
               path={id}
-              config={getFieldConfig({ label, isUrlField, defaultValue, type, isRequired })}
+              config={getFieldConfig({
+                label,
+                isUrlField,
+                defaultValue,
+                type,
+                isRequired,
+                requireTld,
+              })}
               helpText={helpText}
               componentProps={{
                 euiFieldProps: {
