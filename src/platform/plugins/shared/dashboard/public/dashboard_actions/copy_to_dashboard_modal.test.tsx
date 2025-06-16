@@ -80,7 +80,7 @@ describe('CopyToDashboardModal', () => {
       );
     });
 
-    test('should disable when parent is new dashboard', async () => {
+    test('should be disabled when parent is new dashboard', async () => {
       const newDashboardApi = {
         ...api,
         parentApi: {
