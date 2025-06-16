@@ -10,7 +10,6 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import {
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFocusTrap,
@@ -27,6 +26,7 @@ import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { SpanFlyout } from './span_flyout';
 import { useRootTransactionContext } from '../../doc_viewer_transaction_overview/hooks/use_root_transaction';
 import { useDataSourcesContext } from '../../hooks/use_data_sources';
+import { ExitFullScreenButton } from './exit_full_screen_button';
 
 export interface FullScreenWaterfallProps {
   traceId: string;
@@ -129,18 +129,15 @@ export const FullScreenWaterfall = ({
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={1} css={{ alignItems: 'end' }}>
-                <EuiButtonIcon
-                  data-test-subj="unifiedDocViewerObservabilityTracesFullScreenWaterfallExitFullScreenButton"
-                  display="base"
-                  iconSize="m"
-                  iconType="fullScreenExit"
-                  aria-label={i18n.translate(
+                <ExitFullScreenButton
+                  onExitFullScreen={onCloseFullScreen}
+                  dataTestSubj="unifiedDocViewerObservabilityTracesFullScreenWaterfallExitFullScreenButton"
+                  ariaLabel={i18n.translate(
                     'unifiedDocViewer.observability.traces.fullScreenWaterfall.exitFullScreen.button',
                     {
                       defaultMessage: 'Exit full screen waterfall',
                     }
                   )}
-                  onClick={onCloseFullScreen}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
