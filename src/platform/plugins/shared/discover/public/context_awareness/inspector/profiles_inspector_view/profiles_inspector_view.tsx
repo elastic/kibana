@@ -22,7 +22,7 @@ export function ProfilesInspectorView({ profilesAdapter }: { profilesAdapter: Pr
       <RootProfileSection rootProfile={profilesAdapter.getRootProfile()} />
       <DataSourceProfileSection dataSourceProfile={profilesAdapter.getDataSourceProfile()} />
       <DocumentsProfilesSection
-        openDocDetails={profilesAdapter.openDocDetails}
+        onViewRecordDetails={profilesAdapter.openDocDetails}
         documentsProfiles={profilesAdapter.getDocumentsProfiles()}
       />
     </div>

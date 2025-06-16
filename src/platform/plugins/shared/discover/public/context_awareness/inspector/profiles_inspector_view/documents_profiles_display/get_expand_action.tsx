@@ -14,16 +14,19 @@ export function getExpandAction<T extends object>({
   description,
   isExpanded,
   onClick,
+  ...props
 }: {
   name: string;
   description: string;
   isExpanded: (value: T) => boolean;
   onClick: (valute: T | undefined) => void;
+  'data-test-subj': string;
 }): DefaultItemAction<T> {
   return {
     name,
     description,
     type: 'icon',
+    'data-test-subj': props['data-test-subj'],
     icon: (value: T) => (isExpanded(value) ? 'arrowDown' : 'arrowRight'),
     onClick: (value: T) => onClick(isExpanded(value) ? undefined : value),
   };

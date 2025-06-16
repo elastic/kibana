@@ -9,7 +9,7 @@
 
 import { recordHasContext } from './record_has_context';
 import { getDataTableRecordMock } from '@kbn/discover-utils/src/__mocks__';
-import { getDataTableRecordWithContextMock } from './__mocks__/data_table_record_with_context';
+import { getDataTableRecordWithContextMock } from '../__mocks__/data_table_record_with_context';
 
 describe('recordHasContext', () => {
   it('should return false when record is undefined', () => {

@@ -15,7 +15,7 @@ import type { DataTableRecordWithContext } from '../../../profiles_manager';
 import { DocumentJsonDisplay } from './document_json_display';
 import { getExpandAction } from './get_expand_action';
 
-export const DocumentProfileDisplay = ({
+export const DocumentProfileTable = ({
   profileId,
   records,
   onViewRecordDetails,
@@ -40,7 +40,7 @@ export const DocumentProfileDisplay = ({
       )}
       items={records}
       itemId="id"
-      pagination={true}
+      pagination
       columns={[
         {
           name: i18n.translate('discover.inspector.profilesInspectorView.documentProfileIdColumn', {
@@ -78,6 +78,7 @@ export const DocumentProfileDisplay = ({
                   defaultMessage: 'View record details',
                 }
               ),
+              'data-test-subj': 'documentProfileTableInspectAction',
               icon: 'inspect',
               type: 'icon',
               onClick: (record) => {
@@ -94,6 +95,7 @@ export const DocumentProfileDisplay = ({
                   defaultMessage: 'Expand to view the document JSON',
                 }
               ),
+              'data-test-subj': 'documentProfileTableExpandAction',
               isExpanded: (value) => expandedRecord?.id === value.id,
               onClick: (value) => setExpandedRecord(value),
             }),

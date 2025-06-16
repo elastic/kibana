@@ -8,7 +8,7 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { DataTableRecordWithContext } from './profiles_manager';
+import type { DataTableRecordWithContext } from './scoped_profiles_manager';
 
 export const recordHasContext = (
   record: DataTableRecord | undefined
