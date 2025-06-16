@@ -37,8 +37,10 @@ const mockStartMigration = jest.fn();
 
 const mockMigrationStateWithError = {
   status: SiemMigrationTaskStatus.READY,
-  last_error:
-    'Failed to populate ELSER indices. Make sure the ELSER model is deployed and running at Machine Learning > Trained Models. Error: Exception when running inference id [.elser-2-elasticsearch] on field [elser_embedding]',
+  last_execution: {
+    error:
+      'Failed to populate ELSER indices. Make sure the ELSER model is deployed and running at Machine Learning > Trained Models. Error: Exception when running inference id [.elser-2-elasticsearch] on field [elser_embedding]',
+  },
   id: 'c44d2c7d-0de1-4231-8b82-0dcfd67a9fe3',
   rules: { total: 6, pending: 6, processing: 0, completed: 0, failed: 0 },
   created_at: '2025-05-27T12:12:17.563Z',
