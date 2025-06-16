@@ -757,7 +757,7 @@ export const ESQLEditor = memo(function ESQLEditor({
             >
               <EuiButton
                 color={queryRunButtonProperties.color as EuiButtonColor}
-                onClick={onQuerySubmit}
+                onClick={handleQuerySubmit}
                 iconType={queryRunButtonProperties.iconType}
                 size="s"
                 isLoading={isLoading && !allowQueryCancellation}

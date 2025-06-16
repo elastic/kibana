@@ -57,7 +57,10 @@ export const useEditorQuerySync = ({
         ...query,
         isLoading,
       };
-      if (query.edited !== fixedQuery && (editorIsInline || isLoadingTs > query.editedTs)) {
+      if (
+        query.edited !== fixedQuery &&
+        (editorIsInline || (isLoadingTs && isLoadingTs > query.editedTs))
+      ) {
         nextQuery.edited = fixedQuery;
         nextQuery.submitted = fixedQuery;
       } else {
