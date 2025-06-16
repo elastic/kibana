@@ -58,7 +58,7 @@ export const useEditorQuerySync = ({
       const isLoadingTsNewer =
         isLoadingTs &&
         (!query.editedTs || isLoadingTs > query.editedTs) &&
-        (!query.isSubmittedTs || isLoading > query.isSubmittedTs);
+        (!query.isSubmittedTs || isLoadingTs > query.isSubmittedTs);
 
       const nextQuery = { ...query };
       if (isLoadingTsNewer) {

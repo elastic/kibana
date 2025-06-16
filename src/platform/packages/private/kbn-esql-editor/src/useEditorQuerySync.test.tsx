@@ -97,7 +97,7 @@ describe('useEditorQuerySync', () => {
     const onTextLangQuerySubmit = jest.fn();
     const abortController = new AbortController();
 
-    const { result, rerender } = renderHook(() =>
+    const { result } = renderHook(() =>
       useEditorQuerySync({
         ...defaultProps,
         isLoading: false,
@@ -146,7 +146,6 @@ describe('useEditorQuerySync', () => {
 
     // Assert: the current abort controller should be aborted
     expect(abortSpy).toHaveBeenCalled();
-
   });
 
   it('should not overwrite editor content when loading state changes, but should overwrite on subsequent query changes', () => {
