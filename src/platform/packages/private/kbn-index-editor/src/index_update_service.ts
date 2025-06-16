@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { BulkResponse, BulkResponseItem } from '@elastic/elasticsearch/lib/api/types';
 import type { HttpStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -44,7 +45,10 @@ interface DocUpdate {
   value: Record<string, any>;
 }
 
-type Action = { type: 'add'; payload: DocUpdate } | { type: 'undo' };
+type Action =
+  | { type: 'add'; payload: DocUpdate }
+  | { type: 'undo' }
+  | { type: 'saved'; payload: any };
 
 export type PendingSave = Map<DocUpdate['id'], DocUpdate['value']>;
 
@@ -56,8 +60,6 @@ export class IndexUpdateService {
   private indexName: string | null = null;
 
   private indexName$ = new Subject<string | null>();
-
-  private readonly scheduledUpdates$ = new BehaviorSubject<DocUpdate[]>([]);
 
   private readonly undoChangeSubject$ = new Subject<number>();
 
@@ -76,6 +78,10 @@ export class IndexUpdateService {
         return [...acc, action.payload];
       } else if (action.type === 'undo') {
         return acc.slice(0, -1); // remove last
+      } else if (action.type === 'saved') {
+        // Clear the buffer after save
+        // TODO check for update response
+        return [];
       } else {
         return acc;
       }
@@ -139,6 +145,7 @@ export class IndexUpdateService {
   }
 
   private listenForUpdates() {
+    // Queue for bulk updates
     this._subscription.add(
       this.bufferState$
         .pipe(
@@ -147,7 +154,7 @@ export class IndexUpdateService {
           switchMap((updates) => {
             return from(
               // TODO create an API endpoint for bulk updates
-              this.http.post(`/api/console/proxy`, {
+              this.http.post<BulkResponse>(`/api/console/proxy`, {
                 query: {
                   path: `/${this.indexName}/_bulk`,
                   method: 'POST',
@@ -167,12 +174,50 @@ export class IndexUpdateService {
                   'Content-Type': 'application/x-ndjson',
                 },
               })
+            ).pipe(
+              withLatestFrom(this._rows$, this.dataView$),
+              map(([response, rows, dataView]) => {
+                return { updates, response, rows, dataView };
+              })
             );
           })
         )
         .subscribe({
-          next: (response) => {
+          next: ({ updates, response, rows, dataView }) => {
             console.log('API response:', response);
+            // Clear the buffer after successful update
+            this.actions$.next({ type: 'saved', payload: response });
+
+            // TODO do we need to re-fetch docs using _mget, in order to retrieve a full doc update?
+
+            const mappedResponse = response.items.reduce((acc, item, index) => {
+              // Updates that were successful
+              const updateItem = Object.values(item)[0] as BulkResponseItem;
+              const updateValue = updates[index].value;
+              if (updateItem.status === 200 && updateItem._id) {
+                const docId = updateItem._id;
+                const e = acc.get(docId) ?? {};
+                acc.set(docId, { ...e, ...updateValue });
+              }
+              return acc;
+            }, new Map<string, any>());
+
+            this._rows$.next(
+              rows.map((row) => {
+                const docId = row.raw._id;
+                const mergedSource = { ...row.raw._source, ...(mappedResponse.get(docId!) ?? {}) };
+
+                return buildDataTableRecord(
+                  {
+                    ...row.raw,
+                    _source: mergedSource,
+                  },
+                  dataView
+                );
+              })
+            );
+
+            // TODO handle index docs
           },
           error: (err) => {
             // TODO handle API errors
@@ -181,6 +226,7 @@ export class IndexUpdateService {
         })
     );
 
+    // Fetch ES docs
     this._subscription.add(
       combineLatest([
         this.dataView$,
@@ -258,7 +304,6 @@ export class IndexUpdateService {
 
   public destroy() {
     this._subscription.unsubscribe();
-    this.scheduledUpdates$.complete();
     this.undoChangeSubject$.complete();
   }
 }

@@ -22,10 +22,12 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
   EuiPopover,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { type DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { isNil } from 'lodash';
 import type { PendingSave } from '../index_update_service';
 
 interface EditCellValueProps {
@@ -57,7 +59,9 @@ export const getCellValueRenderer =
 
     let cellValue;
 
-    if (pendingSaveValue) {
+    const isSaving = !isNil(pendingSaveValue);
+
+    if (isSaving) {
       // If there is a pending save, use the value from the pending save
       cellValue = pendingSaveValue;
     } else if (row.flattened) {
@@ -99,19 +103,29 @@ export const getCellValueRenderer =
         </div>
       );
     }
+
     return (
-      <span
-        tabIndex={0}
-        style={{
-          cursor: 'pointer',
-        }}
-        onClick={() => onEditStart({ row: rowIndex, col: columnId })}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') onEditStart({ row: rowIndex, col: columnId });
-        }}
-      >
-        {cellValue}
-      </span>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <span
+            tabIndex={0}
+            style={{
+              cursor: 'pointer',
+            }}
+            onClick={() => onEditStart({ row: rowIndex, col: columnId })}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') onEditStart({ row: rowIndex, col: columnId });
+            }}
+          >
+            {cellValue}
+          </span>
+        </EuiFlexItem>
+        {isSaving ? (
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="s" />
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
     );
   };
 
