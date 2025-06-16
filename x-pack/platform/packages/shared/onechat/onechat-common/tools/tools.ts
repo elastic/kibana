@@ -30,7 +30,7 @@ export const serializedPartsSeparator = '::';
  */
 export const builtinToolProviderId = 'builtIn';
 /**
- * The singleton sourceId used for all Esql tools.
+ * The singleton providerId used for all Esql tools.
  */
 export const esqlToolProviderId = 'esql';
 /**
