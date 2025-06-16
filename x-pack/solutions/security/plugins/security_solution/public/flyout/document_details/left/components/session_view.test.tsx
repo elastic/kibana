@@ -88,8 +88,7 @@ describe('<SessionView />', () => {
       loading: false,
       indicesExist: true,
       selectedPatterns: ['index'],
-      indexPattern: { fields: [], title: '' },
-      sourcererDataView: undefined,
+      sourcererDataView: {},
     });
   });
   it('renders session view correctly', () => {

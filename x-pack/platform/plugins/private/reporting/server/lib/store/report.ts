@@ -35,6 +35,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
   public readonly created_at: ReportSource['created_at'];
   public readonly created_by: ReportSource['created_by'];
   public readonly payload: ReportSource['payload'];
+  public readonly space_id: ReportSource['space_id'];
 
   public readonly meta: ReportSource['meta'];
 
@@ -81,6 +82,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
     this.payload = opts.payload;
     this.kibana_id = opts.kibana_id;
     this.kibana_name = opts.kibana_name;
+    this.space_id = opts.space_id;
     this.jobtype = opts.jobtype;
     this.max_attempts = opts.max_attempts;
     this.attempts = opts.attempts || 0;
@@ -137,6 +139,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
       started_at: this.started_at,
       completed_at: this.completed_at,
       process_expiration: this.process_expiration,
+      space_id: this.space_id,
       output: this.output || null,
       metrics: this.metrics,
     };
@@ -184,6 +187,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
       queue_time_ms: this.queue_time_ms?.[0],
       execution_time_ms: this.execution_time_ms?.[0],
       migration_version: this.migration_version,
+      space_id: this.space_id,
       payload: omit(this.payload, 'headers'),
       output: omit(this.output, 'content'),
       metrics: this.metrics,

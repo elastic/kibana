@@ -8,10 +8,14 @@ exports[`Fleet - getTemplateInputs should work for input package 1`] = `
     streams:
       # Custom log file: Custom log file
       - id: logfile-log.logs
+        data_stream:
+          type: logs
+          elasticsearch:
+            dynamic_dataset: true
+            dynamic_namespace: true
+          # dataset: <DATA_STREAM.DATASET>
+          #  # Dataset name: Set the name for your dataset. Changing the dataset will send the data to a different index. You can't use \`-\` in the name of a dataset and only valid characters for [Elasticsearch index names](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html).
         ignore_older: 72h
-        # data_stream:
-        #  dataset: <DATA_STREAM.DATASET>
-        #    # Dataset name: Set the name for your dataset. Changing the dataset will send the data to a different index. You can't use \`-\` in the name of a dataset and only valid characters for [Elasticsearch index names](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html).
         # paths:
         #  - <PATHS> # Log file path: Path to log files to be collected
         # exclude_files:

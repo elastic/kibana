@@ -139,6 +139,7 @@ export const DashboardViewport = ({
         data-title={dashboardTitle}
         data-description={description}
         data-shared-items-count={visiblePanelCount}
+        data-test-subj={'dshDashboardViewport'}
       >
         {panelCount === 0 && sectionCount === 0 ? (
           <DashboardEmptyScreen />

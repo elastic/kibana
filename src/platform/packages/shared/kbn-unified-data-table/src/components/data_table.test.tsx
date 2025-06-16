@@ -760,9 +760,13 @@ describe('UnifiedDataTable', () => {
         expect(
           findTestSubject(component, 'exampleRowControl-visBarVerticalStacked').exists()
         ).toBeTruthy();
-        expect(
-          findTestSubject(component, 'unifiedDataTable_additionalRowControl_menuControl').exists()
-        ).toBeTruthy();
+
+        // The other actions are within the popover
+        findTestSubject(component, 'unifiedDataTable_additionalRowControl_actionsMenu')
+          .first()
+          .simulate('click');
+        expect(findTestSubject(component, 'exampleRowControl-heart').exists()).toBeTruthy();
+        expect(findTestSubject(component, 'exampleRowControl-inspect').exists()).toBeTruthy();
       },
       EXTENDED_JEST_TIMEOUT
     );

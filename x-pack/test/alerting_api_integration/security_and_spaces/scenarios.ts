@@ -226,13 +226,13 @@ export const Users: User[] = [
   StackAlertsOnly,
 ];
 
-const Space1: Space = {
+export const Space1: Space = {
   id: 'space1',
   name: 'Space 1',
   disabledFeatures: [],
 };
 
-const Space2: Space = {
+export const Space2: Space = {
   id: 'space2',
   name: 'Space 2',
   disabledFeatures: [],
@@ -276,7 +276,7 @@ export const SuperuserAtSpace1: SuperuserAtSpace1 = {
 interface GlobalReadAtSpace1 extends Scenario {
   id: 'global_read at space1';
 }
-const GlobalReadAtSpace1: GlobalReadAtSpace1 = {
+export const GlobalReadAtSpace1: GlobalReadAtSpace1 = {
   id: 'global_read at space1',
   user: GlobalRead,
   space: Space1,

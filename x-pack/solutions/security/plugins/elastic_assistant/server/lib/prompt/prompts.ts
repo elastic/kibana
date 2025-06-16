@@ -149,3 +149,54 @@ export const DEFAULT_CHAT_TITLE = `You are a helpful assistant for Elastic Secur
 MESSAGE: I am having trouble with the Elastic Security app.
 TITLE: Troubleshooting Elastic Security app issues
 `;
+
+export const DEFEND_INSIGHTS = {
+  INCOMPATIBLE_ANTIVIRUS: {
+    DEFAULT:
+      'You are an Elastic Security user tasked with analyzing file events from Elastic Security to identify antivirus processes. Only focus on detecting antivirus processes. Ignore processes that belong to Elastic Agent or Elastic Defend, that are not antivirus processes, or are typical processes built into the operating system. Accuracy is of the utmost importance, try to minimize false positives. Group the processes by the antivirus program, keeping track of the agent.id and _id associated to each of the individual events as endpointId and eventId respectively. If there are no events, ignore the group field. Escape backslashes to respect JSON validation. New lines must always be escaped with double backslashes, i.e. \\\\n to ensure valid JSON. Only return JSON output, as described above. Do not add any additional text to describe your output.',
+    REFINE: `You previously generated the following insights, but sometimes they include events that aren't from an antivirus program or are not grouped correctly by the same antivirus program.
+
+Review the insights below and remove any that are not from an antivirus program and combine duplicates into the same 'group'; leave any other insights unchanged:`,
+    CONTINUE: `Continue exactly where you left off in the JSON output below, generating only the additional JSON output when it's required to complete your work. The additional JSON output MUST ALWAYS follow these rules:
+1) it MUST conform to the schema above, because it will be checked against the JSON schema
+2) it MUST escape all JSON special characters (i.e. backslashes, double quotes, newlines, tabs, carriage returns, backspaces, and form feeds), because it will be parsed as JSON
+3) it MUST NOT repeat any the previous output, because that would prevent partial results from being combined
+4) it MUST NOT restart from the beginning, because that would prevent partial results from being combined
+5) it MUST NOT be prefixed or suffixed with additional text outside of the JSON, because that would prevent it from being combined and parsed as JSON:
+`,
+    GROUP: 'The program which is triggering the events',
+    EVENTS: 'The events that the insight is based on',
+    EVENTS_ID: 'The event ID',
+    EVENTS_ENDPOINT_ID: 'The endpoint ID',
+    EVENTS_VALUE: 'The process.executable value of the event',
+  },
+};
+
+export const ALERT_SUMMARY_500 = `Evaluate the cyber security alert from the context above. Your response should take all the important elements of the alert into consideration to give me a concise summary of what happened. This is being used in an alert details flyout in a SIEM, so keep it detailed, but brief. Limit your response to 500 characters. Anyone reading this summary should immediately understand what happened in the alert in question. Only reply with the summary, and nothing else.
+
+Using another 200 characters, add a second paragraph with a bulleted list of recommended actions a cyber security analyst should take here. Don't invent random, potentially harmful recommended actions.`;
+
+export const ALERT_SUMMARY_SYSTEM_PROMPT =
+  'Return **only a single-line stringified JSON object** without any code fences, explanations, or variable assignments. Do **not** wrap the output in triple backticks or any Markdown code block. \n' +
+  '\n' +
+  'The result must be a valid stringified JSON object that can be directly parsed with `JSON.parse()` in JavaScript.\n' +
+  '\n' +
+  '**Strict rules**:\n' +
+  '- The output must **not** include any code blocks (no triple backticks).\n' +
+  '- The output must be **a string**, ready to be passed directly into `JSON.parse()`.\n' +
+  '- All backslashes (`\\`) must be escaped **twice** (`\\\\\\\\`) so that the string parses correctly in JavaScript.\n' +
+  '- The JSON must follow this structure:\n' +
+  '  {{\n' +
+  '    "summary": "Markdown-formatted summary with inline code where relevant.",\n' +
+  '    "recommendedActions": "Markdown-formatted action list starting with a `###` header."\n' +
+  '  }}\n' +
+  '- The summary text should just be text. It does not need any titles or leading items in bold.\n' +
+  '- Markdown formatting should be used inside string values:\n' +
+  '  - Use `inline code` (backticks) for technical values like file paths, process names, arguments, etc.\n' +
+  '  - Use `**bold**` for emphasis.\n' +
+  '  - Use `-` for bullet points.\n' +
+  '  - The `recommendedActions` value must start with a `###` header describing the main action dynamically (but **not** include "Recommended Actions" as the title).\n' +
+  '- **Do not** include any extra explanation or text. Only return the stringified JSON object.\n' +
+  '\n' +
+  'The response should look like this:\n' +
+  '{{"summary":"Markdown-formatted summary text.","recommendedActions":"Markdown-formatted action list starting with a ### header."}}';

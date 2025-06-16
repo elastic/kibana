@@ -8,12 +8,14 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { TooltipWrapper } from '@kbn/visualization-utils';
+import { PointVisibilityOptions } from '@kbn/expression-xy-plugin/public';
 import { BarOrientationSettings } from '../../../../shared_components/bar_orientation';
 import { ToolbarDivider } from '../../../../shared_components/toolbar_divider';
 import { ToolbarPopover } from '../../../../shared_components';
 import { MissingValuesOptions } from './missing_values_option';
 import { LineCurveOption } from './line_curve_option';
 import { FillOpacityOption } from './fill_opacity_option';
+import { PointVisibilityOption } from './point_visibility_option';
 import { XYState } from '../../types';
 import {
   flipSeriesType,
@@ -87,7 +89,7 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
 
   const hasAnyBarSetting = !!barSeriesLayers.length;
   const hasAreaSettings = hasAreaSeries(dataLayers);
-  const shouldDisplayDividerHr = !!(hasAnyBarSetting && hasAreaSettings);
+  const shouldDisplayDividerHr = !!(hasAnyBarSetting && isHasNonBarSeries);
 
   return (
     <TooltipWrapper tooltipContent={valueLabelsDisabledReason} condition={isDisabled}>
@@ -141,6 +143,18 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
             <ToolbarDivider />
           </>
         ) : null}
+
+        <PointVisibilityOption
+          enabled={isHasNonBarSeries}
+          selectedPointVisibility={state?.pointVisibility ?? PointVisibilityOptions.AUTO}
+          onChange={(newValue) => {
+            setState({
+              ...state,
+              pointVisibility: newValue,
+            });
+          }}
+        />
+
         <LineCurveOption
           enabled={isCurveTypeEnabled}
           value={state?.curveType}

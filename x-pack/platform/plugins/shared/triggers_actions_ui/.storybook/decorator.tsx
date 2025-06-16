@@ -71,6 +71,7 @@ export const StorybookContextDecorator: FC<PropsWithChildren<StorybookContextDec
       ruleKqlBar: true,
       isMustacheAutocompleteOn: false,
       showMustacheAutocompleteSwitch: false,
+      alertDeletionSettingsEnabled: true,
     },
   });
 

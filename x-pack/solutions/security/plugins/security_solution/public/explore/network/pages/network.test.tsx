@@ -227,6 +227,7 @@ describe('Network page - rendering', () => {
       selectedPatterns: [],
       indicesExist: true,
       indexPattern: { fields: [], title: 'title' },
+      sourcererDataView: {},
     });
     const myStore = createMockStore();
     render(

@@ -87,7 +87,7 @@ const SourcererPopover = React.memo<SourcererPopoverProps>(
     if (!showSourcerer) {
       return null;
     } else if (scopeId === SourcererScopeName.analyzer) {
-      return <>{children}</>;
+      return <div data-test-subj="analyzer-sourcerer">{children}</div>;
     } else {
       return (
         <EuiPopover
@@ -152,8 +152,8 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const { indicesExist, loading, sourcererDataView } = useSourcererDataView(scopeId);
 
   const activePatterns = useMemo(
-    () => (sourcererDataView?.title || '')?.split(',').filter(Boolean) as string[],
-    [sourcererDataView?.title]
+    () => (sourcererDataView.title || '')?.split(',').filter(Boolean) as string[],
+    [sourcererDataView.title]
   );
 
   const [missingPatterns, setMissingPatterns] = useState<string[]>(

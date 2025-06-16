@@ -17,7 +17,6 @@ import type {
   ESQLAstQueryExpression,
   ESQLColumn,
   ESQLCommand,
-  ESQLCommandMode,
   ESQLCommandOption,
   ESQLFunction,
   ESQLIdentifier,
@@ -40,7 +39,6 @@ type Node = ESQLAstNode | ESQLAstNode[];
 export interface WalkerOptions {
   visitCommand?: (node: ESQLCommand) => void;
   visitCommandOption?: (node: ESQLCommandOption) => void;
-  visitCommandMode?: (node: ESQLCommandMode) => void;
   /** @todo Rename to `visitExpression`. */
   visitSingleAstItem?: (node: ESQLAstExpression) => void;
   visitQuery?: (node: ESQLAstQueryExpression) => void;
@@ -325,11 +323,6 @@ export class Walker {
     }
   }
 
-  public walkMode(node: ESQLCommandMode): void {
-    const { options } = this;
-    (options.visitCommandMode ?? options.visitAny)?.(node);
-  }
-
   public walkListLiteral(node: ESQLList): void {
     const { options } = this;
     (options.visitListLiteral ?? options.visitAny)?.(node);
@@ -428,10 +421,6 @@ export class Walker {
       }
       case 'option': {
         this.walkOption(node);
-        break;
-      }
-      case 'mode': {
-        this.walkMode(node);
         break;
       }
       case 'source': {

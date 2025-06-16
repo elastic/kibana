@@ -72,6 +72,10 @@ export interface DataViewPickerProps {
    * Makes the picker disabled by disabling the popover trigger
    */
   isDisabled?: boolean;
+  /**
+   * Optional callback when data view picker is closed
+   */
+  onClosePopover?: () => void;
 }
 
 export const DataViewPicker = ({
@@ -84,6 +88,7 @@ export const DataViewPicker = ({
   onEditDataView,
   onAddField,
   onDataViewCreated,
+  onClosePopover,
   trigger,
   selectableProps,
   onCreateDefaultAdHocDataView,
@@ -97,6 +102,7 @@ export const DataViewPicker = ({
       onEditDataView={onEditDataView}
       onAddField={onAddField}
       onDataViewCreated={onDataViewCreated}
+      onClosePopover={onClosePopover}
       onCreateDefaultAdHocDataView={onCreateDefaultAdHocDataView}
       trigger={trigger}
       adHocDataViews={adHocDataViews}

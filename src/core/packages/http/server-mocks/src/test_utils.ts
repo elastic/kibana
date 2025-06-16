@@ -97,6 +97,14 @@ export const createConfigService = ({
         report_to: [],
       });
     }
+    if (path === 'pricing') {
+      return new BehaviorSubject({
+        tiers: {
+          enabled: true,
+          products: [],
+        },
+      });
+    }
     throw new Error(`Unexpected config path: ${path}`);
   });
   return configService;

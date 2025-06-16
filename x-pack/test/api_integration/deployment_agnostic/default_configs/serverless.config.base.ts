@@ -102,7 +102,7 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
           port: dockerRegistryPort,
           args: dockerArgs,
           waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 2 * 1000, // 2 minutes
+          waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
         },
       }),
       esTestCluster: {
@@ -133,6 +133,9 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
           '--xpack.uptime.service.manifestUrl=mockDevUrl',
           `--xpack.actions.preconfigured=${getPreConfiguredActions(tlsWebhookServers)}`,
           '--xpack.alerting.rules.minimumScheduleInterval.value="1s"',
+          ...(dockerRegistryPort
+            ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
+            : []),
         ],
       },
       testFiles: options.testFiles,

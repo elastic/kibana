@@ -16,7 +16,7 @@ export const kibana7BehindText = new KbnColorFnPalette({
   id: KbnPalette.Kibana7BehindText,
   type: 'categorical',
   name: i18n.translate('palettes.kibana7BehindText.name', {
-    defaultMessage: 'Kibana 7 (behind text)',
+    defaultMessage: 'Kibana 7.0 (behind text)',
   }),
   standalone: true,
   colorCount: 10,

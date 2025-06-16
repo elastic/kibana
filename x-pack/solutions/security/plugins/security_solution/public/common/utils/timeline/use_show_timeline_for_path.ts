@@ -15,6 +15,7 @@ import { hasAccessToSecuritySolution } from '../../../helpers_access';
 
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useSourcererDataView } from '../../../sourcerer/containers';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 const useHiddenTimelineRoutes = () => {
   const normalizedLinks = useNormalizedAppLinks();
@@ -36,11 +37,18 @@ export const useShowTimelineForGivenPath = () => {
   const userHasSecuritySolutionVisible = hasAccessToSecuritySolution(capabilities);
 
   const { indicesExist, dataViewId } = useSourcererDataView(SourcererScopeName.timeline);
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const hiddenTimelineRoutes = useHiddenTimelineRoutes();
 
   const isTimelineAllowed = useMemo(() => {
+    // NOTE: with new Data View Picker, data view is always defined
+    if (newDataViewPickerEnabled) {
+      return userHasSecuritySolutionVisible;
+    }
+
     return userHasSecuritySolutionVisible && (indicesExist || dataViewId === null);
-  }, [userHasSecuritySolutionVisible, indicesExist, dataViewId]);
+  }, [newDataViewPickerEnabled, userHasSecuritySolutionVisible, indicesExist, dataViewId]);
 
   const getIsTimelineVisible = useCallback(
     (pathname: string) => {

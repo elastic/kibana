@@ -17,6 +17,7 @@ export const relatedDashboardSchema = z.object({
   }),
   relevantPanelCount: z.number(),
   relevantPanels: z.array(relevantPanelSchema),
+  score: z.number(),
 });
 
 export type RelatedDashboard = z.output<typeof relatedDashboardSchema>;

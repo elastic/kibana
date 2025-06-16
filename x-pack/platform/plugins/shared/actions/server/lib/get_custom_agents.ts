@@ -15,6 +15,9 @@ import type { ActionsConfigurationUtilities } from '../actions_config';
 import { getNodeSSLOptions, getSSLSettingsFromConfig } from './get_node_ssl_options';
 import type { SSLSettings } from '../types';
 
+/**
+ * Create http and https proxy agents with custom proxy /hosts/SSL settings from configurationUtilities
+ */
 interface GetCustomAgentsResponse {
   httpAgent: HttpAgent | undefined;
   httpsAgent: HttpsAgent | undefined;

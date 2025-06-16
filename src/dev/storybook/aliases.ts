@@ -62,6 +62,7 @@ export const storybookAliases = {
   // Skipped, please check and fix https://github.com/elastic/kibana/issues/207227
   // security_solution: 'x-pack/solutions/security/plugins/security_solution/.storybook',
   // security_solution_packages: 'x-pack/solutions/security/packages/storybook/config',
+  ['response-ops']: 'src/platform/packages/shared/response-ops/.storybook',
   serverless: 'src/platform/packages/shared/serverless/storybook/config',
   shared_ux: 'src/platform/packages/private/shared-ux/storybook/config',
   threat_intelligence: 'x-pack/solutions/security/plugins/threat_intelligence/.storybook',

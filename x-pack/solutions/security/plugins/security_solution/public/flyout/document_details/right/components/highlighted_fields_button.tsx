@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useCallback } from 'react';
 import type { FC } from 'react';
-import { EuiButtonEmpty, EuiToolTip, EuiLoadingSpinner } from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
+import { EuiButtonEmpty, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHighlightedFieldsPrivilege } from '../../shared/hooks/use_highlighted_fields_privilege';
@@ -14,9 +14,9 @@ import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_f
 import { useRuleDetails } from '../../../rule_details/hooks/use_rule_details';
 import { HighlightedFieldsModal } from './highlighted_fields_modal';
 import {
+  HIGHLIGHTED_FIELDS_EDIT_BUTTON_LOADING_TEST_ID,
   HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID,
   HIGHLIGHTED_FIELDS_EDIT_BUTTON_TOOLTIP_TEST_ID,
-  HIGHLIGHTED_FIELDS_EDIT_BUTTON_LOADING_TEST_ID,
 } from './test_ids';
 
 interface EditHighlightedFieldsButtonProps {

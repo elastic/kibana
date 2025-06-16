@@ -97,6 +97,10 @@ export interface ChatCompletionTokenCount {
    * Total token count
    */
   total: number;
+  /**
+   * Cached prompt tokens
+   */
+  cached?: number;
 }
 
 /**

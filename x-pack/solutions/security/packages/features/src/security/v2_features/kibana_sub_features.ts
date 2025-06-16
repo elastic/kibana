@@ -703,7 +703,7 @@ const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
  */
 export const getSecurityV2BaseKibanaSubFeatureIds = (
   { experimentalFeatures }: SecurityFeatureParams // currently un-used, but left here as a convenience for possible future use
-): SecuritySubFeatureId[] => [SecuritySubFeatureId.hostIsolation];
+): SecuritySubFeatureId[] => [];
 
 /**
  * Defines all the Security Assistant subFeatures available.

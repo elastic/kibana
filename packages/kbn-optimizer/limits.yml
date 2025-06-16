@@ -20,7 +20,7 @@ pageLoadAssetSize:
   cloudSecurityPosture: 19109
   console: 46091
   contentManagement: 16254
-  controls: 12000
+  controls: 13000
   core: 564663
   crossClusterReplication: 65408
   customIntegrations: 22034
@@ -155,7 +155,7 @@ pageLoadAssetSize:
   serverlessSearch: 72995
   sessionView: 77750
   share: 88160
-  slo: 45000
+  slo: 73878
   snapshotRestore: 79032
   spaces: 57868
   stackAlerts: 58316
@@ -176,7 +176,7 @@ pageLoadAssetSize:
   unifiedHistogram: 19928
   unifiedSearch: 23000
   upgradeAssistant: 81241
-  uptime: 60000
+  uptime: 84992
   urlDrilldown: 30063
   urlForwarding: 32579
   usageCollection: 39762

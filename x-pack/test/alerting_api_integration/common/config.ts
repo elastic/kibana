@@ -37,6 +37,7 @@ interface CreateTestConfigOptions {
   maxScheduledPerMinute?: number;
   experimentalFeatures?: ExperimentalConfigKeys;
   disabledRuleTypes?: string[];
+  enabledRuleTypes?: string[];
 }
 
 // test.not-enabled is specifically not enabled
@@ -300,6 +301,11 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ? []
         : [`--xpack.alerting.disabledRuleTypes=${JSON.stringify(options.disabledRuleTypes)}`];
 
+    const enabledRuleTypesSetting =
+      options.enabledRuleTypes == null
+        ? []
+        : [`--xpack.alerting.enabledRuleTypes=${JSON.stringify(options.enabledRuleTypes)}`];
+
     return {
       testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       testFiles: testFiles ? testFiles : [require.resolve(`../${name}/tests/`)],
@@ -351,6 +357,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...emailSettings,
           ...maxScheduledPerMinuteSettings,
           ...disabledRuleTypesSetting,
+          ...enabledRuleTypesSetting,
           '--xpack.eventLog.logEntries=true',
           '--xpack.task_manager.ephemeral_tasks.enabled=false',
           `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify([
