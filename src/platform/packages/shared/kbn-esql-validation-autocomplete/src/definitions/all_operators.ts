@@ -10,12 +10,13 @@
 import { i18n } from '@kbn/i18n';
 import {
   type FunctionDefinition,
+  FunctionDefinitionTypes,
   type FunctionParameterType,
   type FunctionReturnType,
-  FunctionDefinitionTypes,
   Location,
 } from './types';
 import { operatorFunctionDefinitions } from './generated/operators';
+
 type MathFunctionSignature = [FunctionParameterType, FunctionParameterType, FunctionReturnType];
 
 // https://www.elastic.co/guide/en/elasticsearch/reference/master/esql-functions-operators.html#_less_than
@@ -275,6 +276,7 @@ const otherDefinitions: FunctionDefinition[] = [
       Location.ENRICH,
       Location.ENRICH_WITH,
       Location.DISSECT,
+      Location.COMPLETION,
     ],
     signatures: [
       {
