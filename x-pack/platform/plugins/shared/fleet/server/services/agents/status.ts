@@ -68,7 +68,7 @@ export async function getAgentStatusForAgentPolicy(
     if (spaceId === DEFAULT_SPACE_ID) {
       clauses.push(
         toElasticsearchQuery(
-          fromKueryExpression(`namespaces:"${DEFAULT_SPACE_ID}" or not namespaces:*`)
+          fromKueryExpression(`(namespaces:"${DEFAULT_SPACE_ID}" or not namespaces:*)`)
         )
       );
     } else {

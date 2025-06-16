@@ -37,6 +37,6 @@ export async function agentsKueryNamespaceFilter(namespace?: string) {
     return;
   }
   return namespace === DEFAULT_NAMESPACE_STRING
-    ? `namespaces:(${DEFAULT_NAMESPACE_STRING}) or not namespaces:*`
+    ? `(namespaces:(${DEFAULT_NAMESPACE_STRING}) or not namespaces:*)`
     : `namespaces:(${namespace})`;
 }

@@ -59,7 +59,7 @@ export async function listEnrollmentApiKeys(
     if (useSpaceAwareness && spaceId) {
       if (spaceId === DEFAULT_SPACE_ID) {
         // TODO use constant
-        filters.push(`namespaces:"${DEFAULT_SPACE_ID}" or not namespaces:*`);
+        filters.push(`(namespaces:"${DEFAULT_SPACE_ID}" or not namespaces:*)`);
       } else {
         filters.push(`namespaces:"${spaceId}"`);
       }

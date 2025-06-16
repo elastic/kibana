@@ -814,7 +814,7 @@ async function _getSpaceAwarenessFilter(spaceId: string | undefined) {
     return [];
   }
   if (spaceId === DEFAULT_SPACE_ID) {
-    return [`namespaces:"${DEFAULT_SPACE_ID}" or not namespaces:*`];
+    return [`(namespaces:"${DEFAULT_SPACE_ID}" or not namespaces:*)`];
   } else {
     return [`namespaces:"${spaceId}"`];
   }
