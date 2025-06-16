@@ -40,6 +40,7 @@ interface Props {
   onNodeClick?: (item: IWaterfallSpanOrTransaction, flyoutDetailTab: string) => void;
   displayLimit?: number;
   isEmbeddable?: boolean;
+  scrollElement?: Element;
 }
 
 function getWaterfallMaxLevel(waterfall: IWaterfall) {
@@ -79,6 +80,7 @@ export function Waterfall({
   onNodeClick,
   displayLimit,
   isEmbeddable,
+  scrollElement,
 }: Props) {
   const theme = useTheme();
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
@@ -122,8 +124,11 @@ export function Waterfall({
       <div
         css={css`
           display: flex;
-          position: sticky;
-          top: var(--euiFixedHeadersOffset, 0);
+          ${isEmbeddable
+            ? 'position: relative;'
+            : `
+            position: sticky;
+            top: var(--euiFixedHeadersOffset, 0);`}
           z-index: ${theme.eui.euiZLevel2};
           background-color: ${theme.eui.euiColorEmptyShade};
           border-bottom: 1px solid ${theme.eui.euiColorMediumShade};
@@ -153,7 +158,7 @@ export function Waterfall({
           }}
         />
         <TimelineAxisContainer
-          marks={[...agentMarks, ...errorMarks]}
+          marks={[...agentMarks, ...(isEmbeddable ? [] : errorMarks)]}
           xMax={duration}
           margins={timelineMargins}
         />
@@ -179,6 +184,7 @@ export function Waterfall({
             }
             displayLimit={displayLimit}
             isEmbeddable={isEmbeddable}
+            scrollElement={scrollElement}
           />
         )}
       </WaterfallItemsContainer>
