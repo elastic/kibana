@@ -39,12 +39,12 @@ export const isIndexPatternsBulkEditAction = (editAction: BulkActionEditType) =>
  * @returns {boolean}
  */
 const isAlertSuppressionBulkEditAction = (editAction: BulkActionEditType) => {
-  const indexPatternsActions: BulkActionEditType[] = [
+  const bulkActions: BulkActionEditType[] = [
     BulkActionEditTypeEnum.set_alert_suppression_for_threshold,
     BulkActionEditTypeEnum.delete_alert_suppression,
     BulkActionEditTypeEnum.set_alert_suppression,
   ];
-  return indexPatternsActions.includes(editAction);
+  return bulkActions.includes(editAction);
 };
 
 /**
