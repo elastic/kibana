@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function SvlSearchHomePageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const retry = getService('retry');
 
   return {
     async expectToBeOnHomepage() {
@@ -47,11 +48,30 @@ export function SvlSearchHomePageProvider({ getService }: FtrProviderContext) {
       await testSubjects.existOrFail('connectionDetailsEsUrl');
       await testSubjects.existOrFail('connectionDetailsCloudIdSwitch');
     },
-    async expectAPIKeyTabIsAvailable() {
-      await testSubjects.existOrFail('connectionDetailsTabBtn-apiKeys');
-      await testSubjects.click('connectionDetailsTabBtn-apiKeys');
-      await testSubjects.existOrFail('connectionDetailsApiKeyNameInput');
-      await testSubjects.existOrFail('connectionDetailsApiKeySubmitBtn');
+    async clickManageApiKeysLink() {
+      await testSubjects.existOrFail('manageApiKeysButton');
+      await testSubjects.click('manageApiKeysButton');
+    },
+    async expectToBeOnManageApiKeysPage() {
+      expect(await browser.getCurrentUrl()).contain('/app/management/security/api_keys');
+    },
+    async expectToBeOnUploadDataPage() {
+      expect(await browser.getCurrentUrl()).contain('tutorial_directory/fileDataViz');
+    },
+    async expectToBeOnCustomerEngineerPage() {
+      expect(await browser.getCurrentUrl()).contain('contact/ce-help');
+    },
+    async expectToBeOnCreateIndexPage() {
+      expect(await browser.getCurrentUrl()).contain('app/elasticsearch/indices/create');
+    },
+    async expectToBeOnObservabilityPage() {
+      expect(await browser.getCurrentUrl()).contain('app/integrations/browse/observability');
+    },
+    async expectToBeOnSpacesCreatePage() {
+      expect(await browser.getCurrentUrl()).contain('app/management/kibana/spaces/create');
+    },
+    async expectToBeOnSpacesCreatePage() {
+      expect(await browser.getCurrentUrl()).contain('app/management/kibana/spaces/create');
     },
     async createApiKeyInFlyout(keyName: string) {
       await testSubjects.existOrFail('connectionDetailsApiKeyNameInput');

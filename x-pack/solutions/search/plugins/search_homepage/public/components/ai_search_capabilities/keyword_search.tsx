@@ -132,7 +132,6 @@ export const KeywordSearch: React.FC = () => {
                   <EuiButton
                     iconType="plusInCircle"
                     href={http.basePath.prepend(CREATE_INDEX)}
-                    target="_blank"
                     size="s"
                     data-test-subj="createKeywordIndexButton"
                   >

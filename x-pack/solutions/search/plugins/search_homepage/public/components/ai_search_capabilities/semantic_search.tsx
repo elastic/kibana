@@ -134,7 +134,6 @@ export const SemanticSearch: React.FC = () => {
                   <EuiButton
                     iconType="plusInCircle"
                     href={http.basePath.prepend(CREATE_INDEX)}
-                    target="_blank"
                     data-test-subj="createSemanticOptimizedIndexButton"
                   >
                     {i18n.translate(

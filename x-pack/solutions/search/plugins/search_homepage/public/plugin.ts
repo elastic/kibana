@@ -18,7 +18,7 @@ import { PLUGIN_ID } from '../common';
 import { SearchHomepage } from './embeddable';
 import { isHomepageEnabled } from './feature_flags';
 import { docLinks } from '../common/doc_links';
-import { QueryClient, MutationCache, QueryCache } from '@tanstack/react-query';
+import { QueryClient, QueryCache } from '@tanstack/react-query';
 import {
   SearchHomepageConfigType,
   SearchHomepagePluginSetup,
@@ -70,7 +70,6 @@ export class SearchHomepagePlugin
       },
     };
     if (!this.config.ui?.enabled) return result;
-    if (!isHomepageEnabled(core.uiSettings)) return result;
 
     core.application.register({
       ...result.app,

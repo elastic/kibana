@@ -23,7 +23,7 @@ const CREATE_OBSERVABILITY_SPACE = '/app/management/kibana/spaces/create';
 export const Observability: React.FC = () => {
   const { http } = useKibana().services;
   return (
-    <EuiFlexGroup gutterSize="m">
+    <EuiFlexGroup gutterSize="m" data-test-subj="observabilitySection">
       <EuiFlexItem grow={false}>
         <EuiIcon type="logoObservability" size="xl" />
       </EuiFlexItem>
@@ -67,7 +67,6 @@ export const Observability: React.FC = () => {
                   <EuiFlexItem grow={false}>
                     <EuiLink
                       href={http.basePath.prepend(EXPLORE_LOGSTASH_AND_BEATS)}
-                      target="_blank"
                       data-test-subj="exploreLogstashAndBeatsLink"
                     >
                       {i18n.translate('xpack.searchHomepage.observability.exploreLogstashBeats', {
@@ -94,7 +93,6 @@ export const Observability: React.FC = () => {
                   <EuiFlexItem grow={false}>
                     <EuiLink
                       href={http.basePath.prepend(CREATE_OBSERVABILITY_SPACE)}
-                      target="_blank"
                       data-test-subj="createObservabilityProjectLink"
                     >
                       {i18n.translate('xpack.searchHomepage.observability.observabilitySpaceLink', {

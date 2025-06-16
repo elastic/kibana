@@ -60,7 +60,7 @@ export const Security: React.FC = () => (
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiLink target="_blank" data-test-subj="setupSiemLink">
+                  <EuiLink data-test-subj="setupSiemLink">
                     {i18n.translate('xpack.searchHomepage.security.setupSiem', {
                       defaultMessage: 'Setup your SIEM',
                     })}
@@ -80,7 +80,7 @@ export const Security: React.FC = () => (
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiLink target="_blank" data-test-subj="cloudSecurityPostureManagementLink">
+                  <EuiLink data-test-subj="cloudSecurityPostureManagementLink">
                     {i18n.translate(
                       'xpack.searchHomepage.security.cloudSecurityPostureManagementLink',
                       {

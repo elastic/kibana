@@ -132,7 +132,6 @@ export const VectorSearch: React.FC = () => {
                     iconType="plusInCircle"
                     size="s"
                     href={http.basePath.prepend(CREATE_INDEX)}
-                    target="_blank"
                     data-test-subj="createVectorIndexButton"
                   >
                     {i18n.translate(

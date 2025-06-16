@@ -118,7 +118,6 @@ export const ConnectToElasticsearch = () => {
                       <EuiFlexItem grow={false}>
                         <EuiButton
                           href={http.basePath.prepend(CREATE_API_KEY)}
-                          target="_blank"
                           iconType="key"
                           data-test-subj="createApiKeyButton"
                         >
@@ -134,7 +133,6 @@ export const ConnectToElasticsearch = () => {
                         <EuiButtonEmpty
                           iconType="gear"
                           href={http.basePath.prepend(MANAGEMENT_API_KEYS)}
-                          target="_blank"
                           data-test-subj="manageApiKeysButton"
                         >
                           Manage API keys

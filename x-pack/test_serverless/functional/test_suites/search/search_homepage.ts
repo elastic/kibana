@@ -7,7 +7,6 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { RoleCredentials } from '../../../shared/services';
-
 import { testHasEmbeddedConsole } from './embedded_console';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -16,27 +15,27 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'svlCommonNavigation',
     'svlSearchHomePage',
     'embeddedConsole',
+    'common',
   ]);
   const svlUserManager = getService('svlUserManager');
-  const uiSettings = getService('uiSettings');
   let roleAuthc: RoleCredentials;
 
-  const HOMEPAGE_FF_UI_SETTING = 'searchHomepage:homepageEnabled';
+  const testSubjects = getService('testSubjects');
+
   describe('Search Homepage', function () {
     this.tags('skipMKI');
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      // Enable Homepage Feature Flag
-      await uiSettings.setUiSetting(roleAuthc, HOMEPAGE_FF_UI_SETTING, true);
 
       await pageObjects.svlCommonPage.loginAsViewer();
     });
 
+    beforeEach(async () => {
+      await pageObjects.common.navigateToApp('elasticsearch/home');
+    });
+
     after(async () => {
       if (!roleAuthc) return;
-
-      // Disable Homepage Feature Flag
-      await uiSettings.deleteUISetting(roleAuthc, HOMEPAGE_FF_UI_SETTING);
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
@@ -59,34 +58,72 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testHasEmbeddedConsole(pageObjects);
     });
 
-    it('has console quickstart link on page', async () => {
-      await pageObjects.svlSearchHomePage.expectConsoleLinkExists();
-      await pageObjects.embeddedConsole.expectEmbeddedConsoleToBeClosed();
-      await pageObjects.svlSearchHomePage.clickConsoleLink();
-      await pageObjects.embeddedConsole.expectEmbeddedConsoleToBeOpen();
-      await pageObjects.embeddedConsole.clickEmbeddedConsoleControlBar();
-      await pageObjects.embeddedConsole.expectEmbeddedConsoleToBeClosed();
+    describe('Elasticsearch endpoint and API Keys', function () {
+      it('renders Elasticsearch endpoint with copy functionality', async () => {
+        await testSubjects.existOrFail('copyEndpointButton');
+        await testSubjects.existOrFail('endpointValueField');
+      });
+
+      it('renders API keys buttons and active badge correctly', async () => {
+        await testSubjects.existOrFail('createApiKeyButton');
+        await testSubjects.existOrFail('manageApiKeysButton');
+        await testSubjects.existOrFail('activeApiKeysBadge');
+      });
+      it('opens API keys management page on clicking Manage API Keys', async () => {
+        await pageObjects.svlSearchHomePage.clickManageApiKeysLink();
+        await pageObjects.svlSearchHomePage.expectToBeOnManageApiKeysPage();
+      });
     });
 
-    it('has endpoints link and flyout', async () => {
-      await pageObjects.svlSearchHomePage.expectEndpointsLinkExists();
-      await pageObjects.svlSearchHomePage.clickEndpointsLink();
-      await pageObjects.svlSearchHomePage.expectConnectionDetailsFlyoutToBeOpen();
-      await pageObjects.svlSearchHomePage.expectEndpointsTabIsAvailable();
-      await pageObjects.svlSearchHomePage.closeConnectionDetailsFlyout();
+    describe('Connect To Elasticsearch Side Panel', function () {
+      it('renders the "Upload a file" card with copy link', async () => {
+        await testSubjects.existOrFail('uploadFileButton');
+        await testSubjects.click('uploadFileButton');
+        await pageObjects.svlSearchHomePage.expectToBeOnUploadDataPage();
+      });
+
+      it('renders the "Sample dataset" card with proper link', async () => {
+        await testSubjects.existOrFail('sampleDatasetButton');
+      });
+
+      it('renders the Customer Engineer Request Form link', async () => {
+        await testSubjects.existOrFail('customerEngineerRequestFormLink');
+        await testSubjects.click('customerEngineerRequestFormLink');
+        await pageObjects.svlSearchHomePage.expectToBeOnCustomerEngineerPage();
+      });
     });
 
-    it('can create an API key', async () => {
-      await pageObjects.svlSearchHomePage.expectEndpointsLinkExists();
-      await pageObjects.svlSearchHomePage.clickEndpointsLink();
-      await pageObjects.svlSearchHomePage.expectConnectionDetailsFlyoutToBeOpen();
-      await pageObjects.svlSearchHomePage.expectAPIKeyTabIsAvailable();
-      await pageObjects.svlSearchHomePage.createApiKeyInFlyout('ftr-test-key');
-      await pageObjects.svlSearchHomePage.closeConnectionDetailsFlyout();
+    describe('AI search capabilities', function () {
+      it('renders Semantic Search content', async () => {
+        await testSubjects.existOrFail('aiSearchCapabilities-item-semantic');
+        await testSubjects.existOrFail('createSemanticOptimizedIndexButton');
+        await testSubjects.click('createSemanticOptimizedIndexButton');
+        await pageObjects.svlSearchHomePage.expectToBeOnCreateIndexPage();
+      });
+
+      it('renders Keyword Search content', async () => {
+        await testSubjects.scrollIntoView('aiSearchCapabilities-item-keyword');
+        await testSubjects.existOrFail('aiSearchCapabilities-item-keyword');
+        await testSubjects.click('aiSearchCapabilities-item-keyword');
+        await testSubjects.existOrFail('createKeywordIndexButton');
+        await testSubjects.click('createKeywordIndexButton');
+        await pageObjects.svlSearchHomePage.expectToBeOnCreateIndexPage();
+      });
     });
 
-    it('shows the AI assistant', async () => {
-      await pageObjects.svlSearchHomePage.expectAIAssistantToExist();
+    describe('Threat detection', function () {
+      it('renders Observability content', async () => {
+        await testSubjects.existOrFail('observabilitySection');
+        await testSubjects.existOrFail('exploreLogstashAndBeatsLink');
+        await testSubjects.click('exploreLogstashAndBeatsLink');
+        await pageObjects.svlSearchHomePage.expectToBeOnObservabilityPage();
+      });
+
+      it('renders performace monitoring content', async () => {
+        await testSubjects.existOrFail('createObservabilityProjectLink');
+        await testSubjects.click('createObservabilityProjectLink');
+        await pageObjects.svlSearchHomePage.expectToBeOnSpacesCreatePage();
+      });
     });
   });
 }
