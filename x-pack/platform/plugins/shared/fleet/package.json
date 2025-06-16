@@ -5,11 +5,11 @@
   "private": true,
   "license": "Elastic License 2.0",
   "scripts": {
-    "cypress_space_awareness": "NODE_OPTIONS=--openssl-legacy-provider node ../../../../solutions/security/plugins/security_solution/scripts/start_cypress_parallel --config-file ../../platform/plugins/shared/fleet/cypress.config.space_awareness.ts --ftr-config-file ../../../../../x-pack/test/fleet_cypress/cli_config.space_awareness",
+    "cypress_space_awareness": "node ../../../../../x-pack/solutions/security/plugins/security_solution/scripts/start_cypress_parallel --config-file ../../../x-pack/platform/plugins/shared/fleet/cypress.config.space_awareness.ts --ftr-config-file ../../../../../x-pack/test/fleet_cypress/cli_config.space_awareness",
     "cypress_space_awareness:open": "yarn cypress_space_awareness open",
     "cypress_space_awareness:run": "yarn cypress_space_awareness run",
     "cypress_space_awareness:run:reporter": "yarn cypress_space_awareness run --reporter ../../../../../node_modules/cypress-multi-reporters --reporter-options configFile=cypress/reporter_config.json",
-    "cypress": "NODE_OPTIONS=--openssl-legacy-provider node ../../../../solutions/security/plugins/security_solution/scripts/start_cypress_parallel --config-file ../../platform/plugins/shared/fleet/cypress.config.ts --ftr-config-file ../../../../../x-pack/test/fleet_cypress/cli_config",
+    "cypress": "node ../../../../../x-pack/solutions/security/plugins/security_solution/scripts/start_cypress_parallel --config-file ../../../x-pack/platform/plugins/shared/fleet/cypress.config.ts --ftr-config-file ../../../../../x-pack/test/fleet_cypress/cli_config",
     "cypress:open": "yarn cypress open",
     "cypress:run": "yarn cypress run",
     "cypress:run:reporter": "yarn cypress run --reporter ../../../../../node_modules/cypress-multi-reporters --reporter-options configFile=cypress/reporter_config.json",

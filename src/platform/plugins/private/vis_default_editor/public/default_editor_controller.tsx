@@ -42,7 +42,7 @@ class DefaultEditorController implements IEditorController {
                   alignItems: 'center',
                 }}
               >
-                <EuiLoadingChart size="xl" mono />
+                <EuiLoadingChart size="xl" />
               </div>
             }
           >

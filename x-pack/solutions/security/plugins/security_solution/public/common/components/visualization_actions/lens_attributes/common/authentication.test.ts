@@ -10,7 +10,11 @@ import { wrapper } from '../../mocks';
 
 import { useLensAttributes } from '../../use_lens_attributes';
 
-import { authenticationLensAttributes } from './authentication';
+import { getAuthenticationLensAttributes } from './authentication';
+
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('generated-uuid'),
+}));
 
 jest.mock('../../../../../sourcerer/containers', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({
@@ -31,12 +35,12 @@ jest.mock('../../../../utils/route/use_route_spy', () => ({
   ]),
 }));
 
-describe('authenticationLensAttributes', () => {
+describe('getAuthenticationLensAttributes', () => {
   it('should render', () => {
     const { result } = renderHook(
       () =>
         useLensAttributes({
-          lensAttributes: authenticationLensAttributes,
+          getLensAttributes: getAuthenticationLensAttributes,
           stackByField: 'event.dataset',
         }),
       { wrapper }

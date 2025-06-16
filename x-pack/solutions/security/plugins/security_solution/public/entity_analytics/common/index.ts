@@ -6,4 +6,13 @@
  */
 
 export { userHasRiskEngineReadPermissions } from './user_has_risk_engine_read_permissions';
-export * from './utils';
+export type { SnakeToCamelCase } from './utils';
+export {
+  RISK_SCORE_RANGES,
+  SEVERITY_UI_SORT_ORDER,
+  RISK_SEVERITY_COLOUR,
+  UserRiskScoreQueryId,
+  HostRiskScoreQueryId,
+  formatRiskScore,
+  FIRST_RECORD_PAGINATION,
+} from './utils';

@@ -3,9 +3,186 @@
   "client": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "streamsApp",
+        "id": "def-public.StreamsApplicationProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "StreamsApplicationProps",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/streams_app/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "streamsApp",
+            "id": "def-public.StreamsApplicationProps.appMountParameters",
+            "type": "Object",
+            "tags": [],
+            "label": "appMountParameters",
+            "description": [],
+            "signature": [
+              "AppMountParameters",
+              "<unknown>"
+            ],
+            "path": "x-pack/platform/plugins/shared/streams_app/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "streamsApp",
+            "id": "def-public.StreamsApplicationProps.PageTemplate",
+            "type": "Function",
+            "tags": [],
+            "label": "PageTemplate",
+            "description": [],
+            "signature": [
+              "React.FunctionComponent<{ children?: React.ReactNode; }>"
+            ],
+            "path": "x-pack/platform/plugins/shared/streams_app/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "streamsApp",
+                "id": "def-public.StreamsApplicationProps.PageTemplate.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "P"
+                ],
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "streamsApp",
+                "id": "def-public.StreamsApplicationProps.PageTemplate.$2",
+                "type": "Any",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "streamsApp",
+        "id": "def-public.StreamsAppLocatorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "StreamsAppLocatorParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "streamsApp",
+            "scope": "public",
+            "docId": "kibStreamsAppPluginApi",
+            "section": "def-public.StreamsAppLocatorParams",
+            "text": "StreamsAppLocatorParams"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
+        "path": "x-pack/platform/plugins/shared/streams_app/public/app_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "streamsApp",
+            "id": "def-public.StreamsAppLocatorParams.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nOptionally set stream ID, if not given it will link to the listing page."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/streams_app/public/app_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "streamsApp",
+        "id": "def-public.StreamsApplicationComponentType",
+        "type": "Type",
+        "tags": [],
+        "label": "StreamsApplicationComponentType",
+        "description": [],
+        "signature": [
+          "React.FunctionComponent<",
+          {
+            "pluginId": "streamsApp",
+            "scope": "public",
+            "docId": "kibStreamsAppPluginApi",
+            "section": "def-public.StreamsApplicationProps",
+            "text": "StreamsApplicationProps"
+          },
+          ">"
+        ],
+        "path": "x-pack/platform/plugins/shared/streams_app/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "streamsApp",
+            "id": "def-public.StreamsApplicationComponentType.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "streamsApp",
+            "id": "def-public.StreamsApplicationComponentType.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "objects": [],
     "setup": {
       "parentPluginId": "streamsApp",
@@ -14,7 +191,7 @@
       "tags": [],
       "label": "StreamsAppPublicSetup",
       "description": [],
-      "path": "x-pack/solutions/observability/plugins/streams_app/public/types.ts",
+      "path": "x-pack/platform/plugins/shared/streams_app/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -28,10 +205,34 @@
       "tags": [],
       "label": "StreamsAppPublicStart",
       "description": [],
-      "path": "x-pack/solutions/observability/plugins/streams_app/public/types.ts",
+      "path": "x-pack/platform/plugins/shared/streams_app/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "streamsApp",
+          "id": "def-public.StreamsAppPublicStart.createStreamsApplicationComponent",
+          "type": "Function",
+          "tags": [],
+          "label": "createStreamsApplicationComponent",
+          "description": [],
+          "signature": [
+            "() => ",
+            {
+              "pluginId": "streamsApp",
+              "scope": "public",
+              "docId": "kibStreamsAppPluginApi",
+              "section": "def-public.StreamsApplicationComponentType",
+              "text": "StreamsApplicationComponentType"
+            }
+          ],
+          "path": "x-pack/platform/plugins/shared/streams_app/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -50,7 +251,7 @@
       "tags": [],
       "label": "StreamsAppServerSetup",
       "description": [],
-      "path": "x-pack/solutions/observability/plugins/streams_app/server/types.ts",
+      "path": "x-pack/platform/plugins/shared/streams_app/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -64,7 +265,7 @@
       "tags": [],
       "label": "StreamsAppServerStart",
       "description": [],
-      "path": "x-pack/solutions/observability/plugins/streams_app/server/types.ts",
+      "path": "x-pack/platform/plugins/shared/streams_app/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -83,7 +284,7 @@
         "tags": [],
         "label": "EntityTypeDefinition",
         "description": [],
-        "path": "x-pack/solutions/observability/plugins/streams_app/common/index.ts",
+        "path": "x-pack/platform/plugins/shared/streams_app/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -94,7 +295,7 @@
             "tags": [],
             "label": "displayName",
             "description": [],
-            "path": "x-pack/solutions/observability/plugins/streams_app/common/index.ts",
+            "path": "x-pack/platform/plugins/shared/streams_app/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -112,41 +313,17 @@
         "label": "Entity",
         "description": [],
         "signature": [
-          "EntityBase & { type: \"stream\"; properties: { name: string; stream: { ingest: { routing: { name: string; condition?: ",
+          "EntityBase & { type: \"stream\"; properties: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
+            "section": "def-common.Streams",
+            "text": "Streams"
           },
-          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; }; } | { dissect: { field: string; pattern: string; }; }; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; } | { name: string; stream: { ingest: { routing: { name: string; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; }; } | { dissect: { field: string; pattern: string; }; }; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[]; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }; }"
+          ".all.Definition; }"
         ],
-        "path": "x-pack/solutions/observability/plugins/streams_app/common/index.ts",
+        "path": "x-pack/platform/plugins/shared/streams_app/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -159,41 +336,17 @@
         "label": "StreamEntity",
         "description": [],
         "signature": [
-          "EntityBase & { type: \"stream\"; properties: { name: string; stream: { ingest: { routing: { name: string; condition?: ",
+          "EntityBase & { type: \"stream\"; properties: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
+            "section": "def-common.Streams",
+            "text": "Streams"
           },
-          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; }; } | { dissect: { field: string; pattern: string; }; }; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[]; wired: { fields: Record<string, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }>; }; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; } | { name: string; stream: { ingest: { routing: { name: string; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[]; processing: { config: { grok: { field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; }; } | { dissect: { field: string; pattern: string; }; }; condition?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          "; }[]; }; }; dashboards?: string[] | undefined; elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }; }"
+          ".all.Definition; }"
         ],
-        "path": "x-pack/solutions/observability/plugins/streams_app/common/index.ts",
+        "path": "x-pack/platform/plugins/shared/streams_app/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

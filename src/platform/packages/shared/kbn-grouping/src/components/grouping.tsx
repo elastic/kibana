@@ -13,7 +13,10 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiTablePagination,
+  useEuiTheme,
+  useEuiFontSize,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { Filter } from '@kbn/es-query';
 import React, { useMemo, useState } from 'react';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
@@ -22,7 +25,7 @@ import { createGroupFilter, getNullGroupFilter } from '../containers/query/helpe
 import { GroupPanel } from './accordion_panel';
 import { GroupStats } from './accordion_panel/group_stats';
 import { EmptyGroupingComponent } from './empty_results_panel';
-import { countCss, groupingContainerCss, groupingContainerCssLevel } from './styles';
+import { groupingContainerCss, groupingContainerCssLevel } from './styles';
 import { GROUPS_UNIT, NULL_GROUP } from './translations';
 import type { ParsedGroupingAggregation, GroupPanelRenderer, GetGroupStats } from './types';
 import { GroupingBucket, OnGroupToggle } from './types';
@@ -54,6 +57,11 @@ export interface GroupingProps<T> {
   ) => void;
   unit?: (n: number) => string;
   groupsUnit?: (n: number, parentSelectedGroup: string, hasNullGroup: boolean) => string;
+  // determines if the field size should be ignored when creating a filter
+  // usefull in combination with shouldFlattenMultiValueField param in GroupingQueryArgs
+  // because if the field is a multi-value field, and we emit each value separatly the size of the field will be ignored
+  // when filtering by it
+  multiValueFields?: string[];
 }
 
 const GroupingComponent = <T,>({
@@ -77,7 +85,18 @@ const GroupingComponent = <T,>({
   tracker,
   unit = defaultUnit,
   groupsUnit = GROUPS_UNIT,
+  multiValueFields,
 }: GroupingProps<T>) => {
+  const { euiTheme } = useEuiTheme();
+  const xsFontSize = useEuiFontSize('xs').fontSize;
+  const countCss = css`
+    font-size: ${xsFontSize};
+    font-weight: ${euiTheme.font.weight.semiBold};
+    border-right: ${euiTheme.border.thin};
+    margin-right: 16px;
+    padding-right: 16px;
+  `;
+
   const [trigger, setTrigger] = useState<Record<string, { state: 'open' | 'closed' | undefined }>>(
     {}
   );
@@ -89,13 +108,15 @@ const GroupingComponent = <T,>({
 
   const groupCount = useMemo(() => data?.groupsCount?.value ?? 0, [data?.groupsCount?.value]);
   const groupCountText = useMemo(() => {
-    const hasNullGroup =
+    const hasNullGroupInCurrentPage =
       data?.groupByFields?.buckets?.some(
         (groupBucket: GroupingBucket<T>) => groupBucket.isNullGroup
       ) || false;
 
-    return `${groupsUnit(groupCount, selectedGroup, hasNullGroup)}`;
-  }, [data?.groupByFields?.buckets, groupCount, groupsUnit, selectedGroup]);
+    const hasNullGroup = Boolean(data?.nullGroupItems?.doc_count);
+
+    return `${groupsUnit(groupCount, selectedGroup, hasNullGroupInCurrentPage || hasNullGroup)}`;
+  }, [data?.groupByFields?.buckets, data?.nullGroupItems, groupCount, groupsUnit, selectedGroup]);
 
   const groupPanels = useMemo(
     () =>
@@ -121,7 +142,8 @@ const GroupingComponent = <T,>({
                       ? getNullGroupFilter(selectedGroup)
                       : createGroupFilter(
                           selectedGroup,
-                          Array.isArray(groupBucket.key) ? groupBucket.key : [groupBucket.key]
+                          Array.isArray(groupBucket.key) ? groupBucket.key : [groupBucket.key],
+                          multiValueFields
                         )
                   }
                   groupNumber={groupNumber}
@@ -157,6 +179,7 @@ const GroupingComponent = <T,>({
               }
               selectedGroup={selectedGroup}
               groupingLevel={groupingLevel}
+              multiValueFields={multiValueFields}
             />
             {groupingLevel > 0 ? null : <EuiSpacer size="s" />}
           </span>
@@ -177,6 +200,7 @@ const GroupingComponent = <T,>({
       tracker,
       trigger,
       unit,
+      multiValueFields,
     ]
   );
 
@@ -219,7 +243,9 @@ const GroupingComponent = <T,>({
         </EuiFlexGroup>
       )}
       <div
-        css={groupingLevel > 0 ? groupingContainerCssLevel : groupingContainerCss}
+        css={
+          groupingLevel > 0 ? groupingContainerCssLevel(euiTheme) : groupingContainerCss(euiTheme)
+        }
         className="eui-xScroll"
       >
         {isLoading ? (

@@ -14,7 +14,7 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { SLOS_BASE_PATH, SLO_SETTINGS_PATH } from '../../../common/locators/paths';
 
 export function HeaderMenu(): React.ReactElement | null {
-  const { http, theme } = useKibana().services;
+  const { http, theme, docLinks } = useKibana().services;
 
   const { appMountParameters, isServerless } = usePluginContext();
   return (
@@ -24,34 +24,33 @@ export function HeaderMenu(): React.ReactElement | null {
     >
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem>
-          <EuiHeaderLinks>
+          <EuiHeaderLinks gutterSize="xs">
             <EuiHeaderLink
               color="primary"
-              href={http.basePath.prepend('/app/observabilityOnboarding')}
-              iconType="indexOpen"
+              href={http.basePath.prepend('/app/observability/annotations')}
             >
-              {i18n.translate('xpack.slo.headerMenu.addData', {
-                defaultMessage: 'Add data',
+              {i18n.translate('xpack.slo.home.annotations', {
+                defaultMessage: 'Annotations',
+              })}
+            </EuiHeaderLink>
+            <EuiHeaderLink color="primary" href={docLinks.links.observability.slo} target="_blank">
+              {i18n.translate('xpack.slo.headerMenu.documentation', {
+                defaultMessage: 'SLO documentation',
               })}
             </EuiHeaderLink>
             {!isServerless && (
               <EuiHeaderLink
                 color="primary"
                 href={http.basePath.prepend(`${SLOS_BASE_PATH}${SLO_SETTINGS_PATH}`)}
-                iconType="gear"
               >
                 {i18n.translate('xpack.slo.headerMenu.settings', {
                   defaultMessage: 'Settings',
                 })}
               </EuiHeaderLink>
             )}
-            <EuiHeaderLink
-              color="primary"
-              href={http.basePath.prepend('/app/observability/annotations')}
-              iconType="brush"
-            >
-              {i18n.translate('xpack.slo.home.annotations', {
-                defaultMessage: 'Annotations',
+            <EuiHeaderLink color="primary" href={http.basePath.prepend('/app/slos/management')}>
+              {i18n.translate('xpack.slo.home.manage', {
+                defaultMessage: 'Manage SLOs',
               })}
             </EuiHeaderLink>
           </EuiHeaderLinks>

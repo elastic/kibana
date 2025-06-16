@@ -10,7 +10,10 @@ import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { Filter } from '@kbn/es-query';
 import type { AnomalyResults } from '../../../machine_learning';
-import { getAnomalies } from '../../../machine_learning';
+import { getAnomalies, buildAnomalyQuery } from '../../../machine_learning';
+import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
+import { logSearchRequest } from '../utils/logged_requests';
+import * as i18n from '../translations';
 
 export const findMlSignals = async ({
   ml,
@@ -22,6 +25,7 @@ export const findMlSignals = async ({
   to,
   maxSignals,
   exceptionFilter,
+  isLoggedRequestsEnabled,
 }: {
   ml: MlPluginSetup;
   request: KibanaRequest;
@@ -32,7 +36,10 @@ export const findMlSignals = async ({
   to: string;
   maxSignals: number;
   exceptionFilter: Filter | undefined;
-}): Promise<AnomalyResults> => {
+  isLoggedRequestsEnabled: boolean;
+}): Promise<{ anomalyResults: AnomalyResults; loggedRequests?: RulePreviewLoggedRequest[] }> => {
+  const loggedRequests: RulePreviewLoggedRequest[] = [];
+
   const { mlAnomalySearch } = ml.mlSystemProvider(request, savedObjectsClient);
   const params = {
     jobIds,
@@ -42,5 +49,18 @@ export const findMlSignals = async ({
     maxRecords: maxSignals,
     exceptionFilter,
   };
-  return getAnomalies(params, mlAnomalySearch);
+
+  const anomalyResults = await getAnomalies(params, mlAnomalySearch);
+
+  if (isLoggedRequestsEnabled) {
+    const searchQuery = buildAnomalyQuery(params);
+    searchQuery.index = '.ml-anomalies-*';
+    loggedRequests.push({
+      request: logSearchRequest(searchQuery),
+      description: i18n.ML_SEARCH_ANOMALIES_DESCRIPTION,
+      duration: anomalyResults.took,
+      request_type: 'findAnomalies',
+    });
+  }
+  return { anomalyResults, ...(isLoggedRequestsEnabled ? { loggedRequests } : {}) };
 };

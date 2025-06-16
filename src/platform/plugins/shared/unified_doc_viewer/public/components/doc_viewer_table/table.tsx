@@ -25,6 +25,7 @@ import {
   useResizeObserver,
   EuiSwitch,
   EuiSwitchEvent,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -129,9 +130,10 @@ export const DocViewerTable = ({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
+  const { euiTheme } = useEuiTheme();
   const isEsqlMode = Array.isArray(textBasedHits);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
-  const { fieldFormats, storage, uiSettings } = getUnifiedDocViewerServices();
+  const { fieldFormats, storage, uiSettings, toasts } = getUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
 
@@ -328,8 +330,8 @@ export const DocViewerTable = ({
     [rows, isEsqlMode, filter, onToggleColumn]
   );
   const fieldValueCellActions = useMemo(
-    () => getFieldValueCellActions({ rows, isEsqlMode, onFilter: filter }),
-    [rows, isEsqlMode, filter]
+    () => getFieldValueCellActions({ rows, isEsqlMode, toasts, onFilter: filter }),
+    [rows, isEsqlMode, toasts, filter]
   );
 
   useWindowSize(); // trigger re-render on window resize to recalculate the grid container height
@@ -356,7 +358,7 @@ export const DocViewerTable = ({
           defaultMessage: 'Value',
         }),
         actions: false,
-        visibleCellActions: 2,
+        visibleCellActions: 3,
         cellActions: fieldValueCellActions,
       },
     ],
@@ -462,19 +464,21 @@ export const DocViewerTable = ({
           alignItems="center"
           gutterSize="m"
         >
-          <EuiFlexItem grow={false}>
-            <EuiSwitch
-              label={i18n.translate('unifiedDocViewer.showOnlySelectedFields.switchLabel', {
-                defaultMessage: 'Selected only',
-                description: 'Switch label to show only selected fields in the table',
-              })}
-              checked={showOnlySelectedFields ?? false}
-              disabled={isShowOnlySelectedFieldsDisabled}
-              onChange={onShowOnlySelectedFieldsChange}
-              compressed
-              data-test-subj="unifiedDocViewerShowOnlySelectedFieldsSwitch"
-            />
-          </EuiFlexItem>
+          {filter && (
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                label={i18n.translate('unifiedDocViewer.showOnlySelectedFields.switchLabel', {
+                  defaultMessage: 'Selected only',
+                  description: 'Switch label to show only selected fields in the table',
+                })}
+                checked={showOnlySelectedFields ?? false}
+                disabled={isShowOnlySelectedFieldsDisabled}
+                onChange={onShowOnlySelectedFieldsChange}
+                compressed
+                data-test-subj="unifiedDocViewerShowOnlySelectedFieldsSwitch"
+              />
+            </EuiFlexItem>
+          )}
           {isEsqlMode && (
             <EuiFlexItem grow={false}>
               <EuiSwitch
@@ -511,6 +515,12 @@ export const DocViewerTable = ({
           css={css`
             min-block-size: 0;
             display: block;
+            .euiDataGridRow {
+              &:hover {
+                // we keep using a deprecated shade until proper token is available
+                background-color: ${euiTheme.colors.lightestShade};
+              }
+            }
           `}
         >
           <EuiDataGrid

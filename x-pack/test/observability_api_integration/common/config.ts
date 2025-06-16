@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { Config, FtrConfigProviderContext, kbnTestConfig } from '@kbn/test';
 import { format, UrlObject } from 'url';
 import { LogsSynthtraceEsClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
@@ -65,6 +66,7 @@ export function createTestConfig(settings: Settings) {
     const customTestServices = getCustomApiTestServices(xPackAPITestsConfig);
 
     return {
+      testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       testFiles,
       servers: xPackAPITestsConfig.get('servers'),
       services: {

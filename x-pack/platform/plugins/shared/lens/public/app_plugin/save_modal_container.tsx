@@ -163,7 +163,9 @@ export function SaveModalContainer({
     return <EuiLoadingSpinner />;
   }
 
-  const savingToLibraryPermitted = Boolean(isSaveable && application.capabilities.visualize.save);
+  const savingToLibraryPermitted = Boolean(
+    isSaveable && application.capabilities.visualize_v2.save
+  );
 
   return (
     <SaveModal

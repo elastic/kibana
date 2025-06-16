@@ -8,8 +8,8 @@
  */
 
 import { parse } from '@kbn/esql-ast';
-import { getBracketsToClose, getExpressionType, shouldBeQuotedSource } from './helpers';
-import { SupportedDataType } from '../definitions/types';
+import { getExpressionType, shouldBeQuotedSource } from './helpers';
+import { SupportedDataType, FunctionDefinitionTypes, Location } from '../definitions/types';
 import { setTestFunctions } from './test_functions';
 
 describe('shouldBeQuotedSource', () => {
@@ -83,16 +83,17 @@ describe('getExpressionType', () => {
         expression: 'NULL',
         expectedType: 'null',
       },
-      // TODO — consider whether we need to be worried about
-      // differentiating between time_duration, and date_period
-      // instead of just using time_literal
       {
         expression: '1 second',
-        expectedType: 'time_literal',
+        expectedType: 'time_duration',
       },
       {
         expression: '1 day',
-        expectedType: 'time_literal',
+        expectedType: 'time_duration',
+      },
+      {
+        expression: '?value',
+        expectedType: 'param',
       },
     ];
     test.each(cases)('detects a literal of type $expectedType', ({ expression, expectedType }) => {
@@ -135,8 +136,8 @@ describe('getExpressionType', () => {
     );
   });
 
-  describe('fields and variables', () => {
-    it('detects the type of fields and variables which exist', () => {
+  describe('fields and userDefinedColumns', () => {
+    it('detects the type of fields and userDefinedColumns which exist', () => {
       expect(
         getExpressionType(
           getASTForExpression('fieldName'),
@@ -155,14 +156,14 @@ describe('getExpressionType', () => {
 
       expect(
         getExpressionType(
-          getASTForExpression('var0'),
+          getASTForExpression('col0'),
           new Map(),
           new Map([
             [
-              'var0',
+              'col0',
               [
                 {
-                  name: 'var0',
+                  name: 'col0',
                   type: 'long',
                   location: { min: 0, max: 0 },
                 },
@@ -173,10 +174,14 @@ describe('getExpressionType', () => {
       ).toBe('long');
     });
 
-    it('handles fields and variables which do not exist', () => {
+    it('handles fields and userDefinedColumns which do not exist', () => {
       expect(getExpressionType(getASTForExpression('fieldName'), new Map(), new Map())).toBe(
         'unknown'
       );
+    });
+
+    it('handles fields defined by a named param', () => {
+      expect(getExpressionType(getASTForExpression('??field'), new Map(), new Map())).toBe('param');
     });
   });
 
@@ -184,10 +189,10 @@ describe('getExpressionType', () => {
     beforeAll(() => {
       setTestFunctions([
         {
-          type: 'eval',
+          type: FunctionDefinitionTypes.SCALAR,
           name: 'test',
           description: 'Test function',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             { params: [{ name: 'arg', type: 'keyword' }], returnType: 'keyword' },
             { params: [{ name: 'arg', type: 'double' }], returnType: 'double' },
@@ -201,17 +206,17 @@ describe('getExpressionType', () => {
           ],
         },
         {
-          type: 'eval',
+          type: FunctionDefinitionTypes.SCALAR,
           name: 'returns_keyword',
           description: 'Test function',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [{ params: [], returnType: 'keyword' }],
         },
         {
-          type: 'eval',
+          type: FunctionDefinitionTypes.SCALAR,
           name: 'accepts_dates',
           description: 'Test function',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [
@@ -297,10 +302,10 @@ describe('getExpressionType', () => {
     it('accounts for the "any" parameter type', () => {
       setTestFunctions([
         {
-          type: 'eval',
+          type: FunctionDefinitionTypes.SCALAR,
           name: 'test',
           description: 'Test function',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [{ params: [{ name: 'arg', type: 'any' }], returnType: 'keyword' }],
         },
       ]);
@@ -339,18 +344,5 @@ describe('getExpressionType', () => {
         expect(getExpressionType(ast)).toBe(expectedType);
       }
     );
-  });
-});
-
-describe('getBracketsToClose', () => {
-  it('returns the number of brackets to close', () => {
-    expect(getBracketsToClose('foo(bar(baz')).toEqual([')', ')']);
-    expect(getBracketsToClose('foo(bar[baz')).toEqual([']', ')']);
-    expect(getBracketsToClose('foo(bar[baz"bap')).toEqual(['"', ']', ')']);
-    expect(
-      getBracketsToClose(
-        'from a | eval case(integerField < 0, "negative", integerField > 0, "positive", '
-      )
-    ).toEqual([')']);
   });
 });

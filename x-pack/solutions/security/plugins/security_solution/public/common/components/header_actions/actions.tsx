@@ -9,12 +9,9 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-import { TimelineTabs, TableId } from '@kbn/securitysolution-data-table';
-import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../common/constants';
 import {
-  selectNotesByDocumentId,
-  selectDocumentNotesBySavedObjectId,
+  makeSelectDocumentNotesBySavedObjectId,
+  makeSelectNotesByDocumentId,
 } from '../../../notes/store/notes.slice';
 import type { State } from '../../store';
 import { selectTimelineById } from '../../../timelines/store/selectors';
@@ -23,7 +20,7 @@ import {
   getEventType,
   getPinOnClick,
 } from '../../../timelines/components/timeline/body/helpers';
-import { getScopedActions, isTimelineScope } from '../../../helpers';
+import { isTimelineScope } from '../../../helpers';
 import { useIsInvestigateInResolverActionEnabled } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { timelineActions } from '../../../timelines/store';
 import type { ActionProps, OnPinEvent } from '../../../../common/types';
@@ -34,9 +31,7 @@ import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { timelineDefaults } from '../../../timelines/store/defaults';
 import { useStartTransaction } from '../../lib/apm/use_start_transaction';
 import { useLicense } from '../../hooks/use_license';
-import { useGlobalFullScreen, useTimelineFullScreen } from '../../containers/use_full_screen';
 import { ALERTS_ACTIONS } from '../../lib/apm/user_actions';
-import { setActiveTabTimeline } from '../../../timelines/store/actions';
 import { EventsTdContent } from '../../../timelines/components/timeline/styles';
 import { AlertContextMenu } from '../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
 import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
@@ -73,6 +68,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
   refetch,
   toggleShowNotes,
   disablePinAction = true,
+  disableTimelineAction = false,
 }) => {
   const dispatch = useDispatch();
 
@@ -112,10 +108,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
     );
   }, [ecsData, eventType]);
 
-  const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
-    ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING
-  );
-
   const { navigateToAnalyzer } = useNavigateToAnalyzer({
     isFlyoutOpen: false,
     eventId,
@@ -130,41 +122,10 @@ const ActionsComponent: React.FC<ActionProps> = ({
     scopeId: timelineId,
   });
 
-  const { setGlobalFullScreen } = useGlobalFullScreen();
-  const { setTimelineFullScreen } = useTimelineFullScreen();
   const handleClick = useCallback(() => {
     startTransaction({ name: ALERTS_ACTIONS.OPEN_ANALYZER });
-
-    if (visualizationInFlyoutEnabled) {
-      navigateToAnalyzer();
-    } else {
-      const scopedActions = getScopedActions(timelineId);
-
-      const dataGridIsFullScreen = document.querySelector('.euiDataGrid--fullScreen');
-      if (scopedActions) {
-        dispatch(scopedActions.updateGraphEventId({ id: timelineId, graphEventId: ecsData._id }));
-      }
-      if (timelineId === TimelineId.active) {
-        if (dataGridIsFullScreen) {
-          setTimelineFullScreen(true);
-        }
-        dispatch(setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.graph }));
-      } else {
-        if (dataGridIsFullScreen) {
-          setGlobalFullScreen(true);
-        }
-      }
-    }
-  }, [
-    startTransaction,
-    timelineId,
-    dispatch,
-    ecsData._id,
-    setTimelineFullScreen,
-    setGlobalFullScreen,
-    visualizationInFlyoutEnabled,
-    navigateToAnalyzer,
-  ]);
+    navigateToAnalyzer();
+  }, [startTransaction, navigateToAnalyzer]);
 
   const sessionViewConfig = useMemo(() => {
     const { process, _id, _index, timestamp, kibana } = ecsData;
@@ -192,46 +153,9 @@ const ActionsComponent: React.FC<ActionProps> = ({
   }, [ecsData, eventType]);
 
   const openSessionView = useCallback(() => {
-    const dataGridIsFullScreen = document.querySelector('.euiDataGrid--fullScreen');
     startTransaction({ name: ALERTS_ACTIONS.OPEN_SESSION_VIEW });
-
-    if (
-      visualizationInFlyoutEnabled &&
-      sessionViewConfig !== null &&
-      timelineId !== TableId.kubernetesPageSessions
-    ) {
-      navigateToSessionView();
-    } else {
-      const scopedActions = getScopedActions(timelineId);
-
-      if (timelineId === TimelineId.active) {
-        if (dataGridIsFullScreen) {
-          setTimelineFullScreen(true);
-        }
-        if (sessionViewConfig !== null) {
-          dispatch(setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.session }));
-        }
-      } else {
-        if (dataGridIsFullScreen) {
-          setGlobalFullScreen(true);
-        }
-      }
-      if (sessionViewConfig !== null) {
-        if (scopedActions) {
-          dispatch(scopedActions.updateSessionViewConfig({ id: timelineId, sessionViewConfig }));
-        }
-      }
-    }
-  }, [
-    startTransaction,
-    timelineId,
-    sessionViewConfig,
-    setTimelineFullScreen,
-    dispatch,
-    setGlobalFullScreen,
-    visualizationInFlyoutEnabled,
-    navigateToSessionView,
-  ]);
+    navigateToSessionView();
+  }, [navigateToSessionView, startTransaction]);
 
   const { activeStep, isTourShown, incrementStep } = useTourContext();
 
@@ -258,14 +182,15 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
     'securitySolutionNotesDisabled'
   );
-
+  const selectNotesByDocumentId = useMemo(() => makeSelectNotesByDocumentId(), []);
   /* only applicable for new event based notes */
   const documentBasedNotes = useSelector((state: State) => selectNotesByDocumentId(state, eventId));
+  const selectDocumentNotesBySavedObjectId = useMemo(
+    () => makeSelectDocumentNotesBySavedObjectId(),
+    []
+  );
   const documentBasedNotesInTimeline = useSelector((state: State) =>
-    selectDocumentNotesBySavedObjectId(state, {
-      documentId: eventId,
-      savedObjectId: savedObjectId ?? '',
-    })
+    selectDocumentNotesBySavedObjectId(state, eventId, savedObjectId ?? '')
   );
 
   /* note ids associated with the document AND attached to the current timeline, used for pinning */
@@ -291,27 +216,17 @@ const ActionsComponent: React.FC<ActionProps> = ({
 
   // we hide the analyzer icon if the data is not available for the resolver
   // or if we are on the cases alerts table and the the visualization in flyout advanced setting is disabled
-  const ecsHasDataForAnalyzer = useIsInvestigateInResolverActionEnabled(ecsData);
-  const showAnalyzerIcon = useMemo(() => {
-    return (
-      ecsHasDataForAnalyzer &&
-      (timelineId !== TableId.alertsOnCasePage ||
-        (timelineId === TableId.alertsOnCasePage && visualizationInFlyoutEnabled))
-    );
-  }, [ecsHasDataForAnalyzer, timelineId, visualizationInFlyoutEnabled]);
+  const showAnalyzerIcon = useIsInvestigateInResolverActionEnabled(ecsData);
 
   // we hide the session view icon if the session view is not available
   // or if we are on the cases alerts table and the the visualization in flyout advanced setting is disabled
   // or if the user is not on an enterprise license or on the kubernetes page
   const isEnterprisePlus = useLicense().isEnterprise();
-  const showSessionViewIcon = useMemo(() => {
-    return (
-      sessionViewConfig !== null &&
-      (isEnterprisePlus || timelineId === TableId.kubernetesPageSessions) &&
-      (timelineId !== TableId.alertsOnCasePage ||
-        (timelineId === TableId.alertsOnCasePage && visualizationInFlyoutEnabled))
-    );
-  }, [sessionViewConfig, isEnterprisePlus, timelineId, visualizationInFlyoutEnabled]);
+  const showSessionViewIcon = useMemo(
+    () => sessionViewConfig !== null && isEnterprisePlus,
+
+    [isEnterprisePlus, sessionViewConfig]
+  );
 
   return (
     <ActionsContainer data-test-subj="actions-container">
@@ -332,6 +247,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
                     iconType="expand"
                     onClick={onExpandEvent}
                     size="s"
+                    color="text"
                   />
                 </EuiToolTip>
               </EventsTdContent>
@@ -339,7 +255,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
           </GuidedOnboardingTourStep>
         )}
         <>
-          {timelineId !== TimelineId.active && (
+          {!disableTimelineAction && timelineId !== TimelineId.active && (
             <InvestigateInTimelineAction
               ariaLabel={i18n.SEND_ALERT_TO_TIMELINE_FOR_ROW({ ariaRowindex, columnValues })}
               key="investigate-in-timeline"
@@ -396,6 +312,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
                   iconType="analyzeEvent"
                   onClick={handleClick}
                   size="s"
+                  color="text"
                 />
               </EuiToolTip>
             </EventsTdContent>
@@ -411,6 +328,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
                   iconType="sessionViewer"
                   onClick={openSessionView}
                   size="s"
+                  color="text"
                 />
               </EuiToolTip>
             </EventsTdContent>

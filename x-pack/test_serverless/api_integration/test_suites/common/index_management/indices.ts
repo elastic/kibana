@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
+import { SupertestWithRoleScopeType } from '../../../services';
 import { RoleCredentials } from '../../../../shared/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -124,6 +124,7 @@ export default function ({ getService }: FtrProviderContext) {
           .put(`${INTERNAL_API_BASE_PATH}/indices/create`)
           .send({
             indexName: createIndexName,
+            indexMode: 'standard',
           })
           .expect(200);
 
@@ -148,6 +149,7 @@ export default function ({ getService }: FtrProviderContext) {
           .put(`${INTERNAL_API_BASE_PATH}/indices/create`)
           .send({
             indexName: createIndexName,
+            indexMode: 'standard',
           })
           .expect(400);
       });

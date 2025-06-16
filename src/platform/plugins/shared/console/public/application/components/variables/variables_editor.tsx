@@ -22,9 +22,12 @@ import {
   EuiCode,
   useGeneratedHtmlId,
   EuiConfirmModal,
+  EuiToolTip,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 
+import { NotificationsStart } from '@kbn/core/public';
+import { useServicesContext } from '../../contexts';
 import { VariableEditorForm } from './variables_editor_form';
 import * as utils from './utils';
 import { type DevToolsVariable } from './types';
@@ -34,12 +37,42 @@ export interface Props {
   variables: [];
 }
 
+const sendToBrowserClipboard = async (text: string) => {
+  if (window.navigator?.clipboard) {
+    await window.navigator.clipboard.writeText(text);
+    return;
+  }
+  throw new Error('Could not copy to clipboard!');
+};
+
+const copyToClipboard = async (text: string, notifications: Pick<NotificationsStart, 'toasts'>) => {
+  try {
+    await sendToBrowserClipboard(text);
+
+    notifications.toasts.addSuccess({
+      title: i18n.translate('console.variabllesPage.copyToClipboardSuccess', {
+        defaultMessage: 'Variable name copied to clipboard',
+      }),
+    });
+  } catch (e) {
+    notifications.toasts.addError(e, {
+      title: i18n.translate('console.variabllesPage.copyToClipboardFailed', {
+        defaultMessage: 'Could not copy variable name to clipboard',
+      }),
+    });
+  }
+};
+
 export const VariablesEditor = (props: Props) => {
   const isMounted = useRef(false);
   const [isAddingVariable, setIsAddingVariable] = useState(false);
   const [deleteModalForVariable, setDeleteModalForVariable] = useState<string | null>(null);
   const [variables, setVariables] = useState<DevToolsVariable[]>(props.variables);
   const deleteModalTitleId = useGeneratedHtmlId();
+
+  const {
+    services: { notifications },
+  } = useServicesContext();
 
   // Use a ref to persist the BehaviorSubject across renders
   const itemIdToExpandedRowMap$ = useRef(new BehaviorSubject<Record<string, React.ReactNode>>({}));
@@ -130,6 +163,34 @@ export const VariablesEditor = (props: Props) => {
       }),
       'data-test-subj': 'variableValueCell',
       render: (value: string) => <EuiCode>{value}</EuiCode>,
+    },
+    {
+      field: 'id',
+      name: '',
+      width: '40px',
+      render: (id: string, variable: DevToolsVariable) => {
+        return (
+          <EuiToolTip
+            content={i18n.translate('console.variablesPage.copyVariableToClipboardTooltip', {
+              defaultMessage: 'Copy variable name to clipboard',
+            })}
+          >
+            <EuiButtonIcon
+              iconType="copy"
+              aria-label={i18n.translate(
+                'console.variablesPage.variablesTable.columns.copyNameButton',
+                {
+                  defaultMessage: 'Copy {variable} to clipboard',
+                  values: { variable: variable.name },
+                }
+              )}
+              color="primary"
+              onClick={() => copyToClipboard(`\$\{${variable.name}\}`, notifications)}
+              data-test-subj={`variableCopyButton-${variable.name}`}
+            />
+          </EuiToolTip>
+        );
+      },
     },
     {
       field: 'id',

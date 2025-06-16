@@ -49,28 +49,28 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           deepLinkId: 'observabilityOnboarding',
         });
 
-        // open apm (Application) panel using the link button (not the button icon)
-        await solutionNavigation.sidenav.openPanel('apm', { button: 'link' });
+        // open apm (Application) panel
+        await solutionNavigation.sidenav.openPanel('apm');
         {
           const isOpen = await solutionNavigation.sidenav.isPanelOpen('apm');
           expect(isOpen).to.be(true);
         }
 
-        await solutionNavigation.sidenav.closePanel('apm', { button: 'link' });
+        await solutionNavigation.sidenav.closePanel('apm');
         {
           const isOpen = await solutionNavigation.sidenav.isPanelOpen('apm');
           expect(isOpen).to.be(false);
         }
 
         // open Infrastructure panel and navigate to some link inside the panel
-        await solutionNavigation.sidenav.openPanel('metrics', { button: 'link' });
+        await solutionNavigation.sidenav.openPanel('metrics');
         {
           const isOpen = await solutionNavigation.sidenav.isPanelOpen('metrics');
           expect(isOpen).to.be(true);
         }
         await solutionNavigation.sidenav.clickPanelLink('metrics:inventory');
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          text: 'Infrastructure inventory',
+          text: 'Infrastructure Inventory',
         });
 
         {
@@ -79,9 +79,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         }
 
         // navigate to a different section
-        await solutionNavigation.sidenav.openSection('project_settings_project_nav');
-        await solutionNavigation.sidenav.clickLink({ deepLinkId: 'management' });
-        await solutionNavigation.sidenav.expectLinkActive({ deepLinkId: 'management' });
+        await solutionNavigation.sidenav.openSection(
+          'observability_project_nav_footer.project_settings_project_nav'
+        );
+        await solutionNavigation.sidenav.clickLink({ navId: 'stack_management' });
+        await solutionNavigation.sidenav.expectLinkActive({ navId: 'stack_management' });
+        await solutionNavigation.sidenav.clickPanelLink('management:tags');
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Stack Management' });
 
         // navigate back to the home page using header logo

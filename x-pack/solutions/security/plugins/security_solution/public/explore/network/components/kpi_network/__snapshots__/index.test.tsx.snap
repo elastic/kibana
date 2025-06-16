@@ -1,13 +1,508 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
-<NetworkKpiComponent
-  filterQuery=""
-  from="2019-06-15T06:00:00.000Z"
-  indexNames={Array []}
-  setQuery={[MockFunction]}
-  skip={true}
-  to="2019-06-18T06:00:00.000Z"
-  updateDateRange={[MockFunction]}
-/>
+<div
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
+>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-grow-1"
+  >
+    <div
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
+    >
+      <div
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
+      >
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
+        >
+          <div
+            class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+            data-test-subj="networkEvents"
+          >
+            <div
+              class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
+            >
+              <div
+                class="euiFlexGroup ee8xehw3 emotion-euiFlexGroup-responsive-none-flexStart-stretch-row-FlexGroup"
+              >
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
+                >
+                  <div
+                    class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-stretch-row"
+                  >
+                    <div
+                      class="euiFlexItem emotion-euiFlexItem-growZero"
+                    >
+                      <button
+                        aria-label="Open"
+                        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
+                        data-test-subj="query-toggle-stat"
+                        title="Open"
+                        type="button"
+                      >
+                        <span
+                          aria-hidden="true"
+                          class="euiButtonIcon__icon"
+                          color="inherit"
+                          data-euiicon-type="arrowDown"
+                        />
+                      </button>
+                    </div>
+                    <div
+                      class="euiFlexItem emotion-euiFlexItem-grow-1"
+                    >
+                      <h6
+                        class="euiTitle css-19qbcji-StyledTitle-euiTitle-xxxs ee8xehw0"
+                      >
+                        Network events
+                      </h6>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="euiFlexGroup metricEmbeddable emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
+              >
+                <div
+                  class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+                >
+                  <div
+                    class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
+                  >
+                    <div
+                      class="euiFlexItem emotion-euiFlexItem-grow-1"
+                    >
+                      <div
+                        data-test-subj="stat-title"
+                      >
+                        <div
+                          data-test-subj="mock-lens-embeddable"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
+      >
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
+        >
+          <div
+            class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+            data-test-subj="dnsQueries"
+          >
+            <div
+              class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
+            >
+              <div
+                class="euiFlexGroup ee8xehw3 emotion-euiFlexGroup-responsive-none-flexStart-stretch-row-FlexGroup"
+              >
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
+                >
+                  <div
+                    class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-stretch-row"
+                  >
+                    <div
+                      class="euiFlexItem emotion-euiFlexItem-growZero"
+                    >
+                      <button
+                        aria-label="Open"
+                        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
+                        data-test-subj="query-toggle-stat"
+                        title="Open"
+                        type="button"
+                      >
+                        <span
+                          aria-hidden="true"
+                          class="euiButtonIcon__icon"
+                          color="inherit"
+                          data-euiicon-type="arrowDown"
+                        />
+                      </button>
+                    </div>
+                    <div
+                      class="euiFlexItem emotion-euiFlexItem-grow-1"
+                    >
+                      <h6
+                        class="euiTitle css-19qbcji-StyledTitle-euiTitle-xxxs ee8xehw0"
+                      >
+                        DNS queries
+                      </h6>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="euiFlexGroup metricEmbeddable emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
+              >
+                <div
+                  class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+                >
+                  <div
+                    class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
+                  >
+                    <div
+                      class="euiFlexItem emotion-euiFlexItem-grow-1"
+                    >
+                      <div
+                        data-test-subj="stat-title"
+                      >
+                        <div
+                          data-test-subj="mock-lens-embeddable"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+    />
+    <div
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
+    >
+      <div
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
+      >
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
+        >
+          <div
+            class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+            data-test-subj="uniqueFlowId"
+          >
+            <div
+              class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
+            >
+              <div
+                class="euiFlexGroup ee8xehw3 emotion-euiFlexGroup-responsive-none-flexStart-stretch-row-FlexGroup"
+              >
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
+                >
+                  <div
+                    class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-stretch-row"
+                  >
+                    <div
+                      class="euiFlexItem emotion-euiFlexItem-growZero"
+                    >
+                      <button
+                        aria-label="Open"
+                        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
+                        data-test-subj="query-toggle-stat"
+                        title="Open"
+                        type="button"
+                      >
+                        <span
+                          aria-hidden="true"
+                          class="euiButtonIcon__icon"
+                          color="inherit"
+                          data-euiicon-type="arrowDown"
+                        />
+                      </button>
+                    </div>
+                    <div
+                      class="euiFlexItem emotion-euiFlexItem-grow-1"
+                    >
+                      <h6
+                        class="euiTitle css-19qbcji-StyledTitle-euiTitle-xxxs ee8xehw0"
+                      >
+                        Unique flow IDs
+                      </h6>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="euiFlexGroup metricEmbeddable emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
+              >
+                <div
+                  class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+                >
+                  <div
+                    class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
+                  >
+                    <div
+                      class="euiFlexItem emotion-euiFlexItem-grow-1"
+                    >
+                      <div
+                        data-test-subj="stat-title"
+                      >
+                        <div
+                          data-test-subj="mock-lens-embeddable"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
+      >
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
+        >
+          <div
+            class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+            data-test-subj="tlsHandshakes"
+          >
+            <div
+              class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
+            >
+              <div
+                class="euiFlexGroup ee8xehw3 emotion-euiFlexGroup-responsive-none-flexStart-stretch-row-FlexGroup"
+              >
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
+                >
+                  <div
+                    class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-stretch-row"
+                  >
+                    <div
+                      class="euiFlexItem emotion-euiFlexItem-growZero"
+                    >
+                      <button
+                        aria-label="Open"
+                        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
+                        data-test-subj="query-toggle-stat"
+                        title="Open"
+                        type="button"
+                      >
+                        <span
+                          aria-hidden="true"
+                          class="euiButtonIcon__icon"
+                          color="inherit"
+                          data-euiicon-type="arrowDown"
+                        />
+                      </button>
+                    </div>
+                    <div
+                      class="euiFlexItem emotion-euiFlexItem-grow-1"
+                    >
+                      <h6
+                        class="euiTitle css-19qbcji-StyledTitle-euiTitle-xxxs ee8xehw0"
+                      >
+                        TLS handshakes
+                      </h6>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="euiFlexGroup metricEmbeddable emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
+              >
+                <div
+                  class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+                >
+                  <div
+                    class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
+                  >
+                    <div
+                      class="euiFlexItem emotion-euiFlexItem-grow-1"
+                    >
+                      <div
+                        data-test-subj="stat-title"
+                      >
+                        <div
+                          data-test-subj="mock-lens-embeddable"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-grow-1"
+  >
+    <div
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
+    >
+      <div
+        class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+        data-test-subj="uniqueIps"
+      >
+        <div
+          class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
+        >
+          <div
+            class="euiFlexGroup ee8xehw3 emotion-euiFlexGroup-responsive-none-flexStart-stretch-row-FlexGroup"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-grow-1"
+            >
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-stretch-row"
+              >
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <button
+                    aria-label="Open"
+                    class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
+                    data-test-subj="query-toggle-stat"
+                    title="Open"
+                    type="button"
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      color="inherit"
+                      data-euiicon-type="arrowDown"
+                    />
+                  </button>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
+                >
+                  <h6
+                    class="euiTitle css-19qbcji-StyledTitle-euiTitle-xxxs ee8xehw0"
+                  >
+                    Unique private IPs
+                  </h6>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup metricEmbeddable emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
+          >
+            <div
+              class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+            >
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
+              >
+                <div
+                  class="euiFlexItem ee8xehw2 emotion-euiFlexItem-growZero-FlexItem"
+                >
+                  <span
+                    color="#EE72A6"
+                    data-euiicon-type="visMapCoordinate"
+                    data-test-subj="stat-icon"
+                  />
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
+                >
+                  <div
+                    data-test-subj="stat-title"
+                  >
+                    <div
+                      data-test-subj="mock-lens-embeddable"
+                    />
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+                >
+                  <p
+                    class="euiTitle ee8xehw1 emotion-euiTitle-m-StatValue"
+                    data-test-subj="stat-title"
+                  >
+                    source
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+            >
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
+              >
+                <div
+                  class="euiFlexItem ee8xehw2 emotion-euiFlexItem-growZero-FlexItem"
+                >
+                  <span
+                    color="#61A2FF"
+                    data-euiicon-type="visMapCoordinate"
+                    data-test-subj="stat-icon"
+                  />
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
+                >
+                  <div
+                    data-test-subj="stat-title"
+                  >
+                    <div
+                      data-test-subj="mock-lens-embeddable"
+                    />
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+                >
+                  <p
+                    class="euiTitle ee8xehw1 emotion-euiTitle-m-StatValue"
+                    data-test-subj="stat-title"
+                  >
+                    destination
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <hr
+            class="euiHorizontalRule emotion-euiHorizontalRule-full-l"
+          />
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
+          >
+            <div
+              class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+            >
+              <div
+                data-test-subj="mock-lens-embeddable"
+              />
+            </div>
+            <div
+              class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+            >
+              <div
+                data-test-subj="mock-lens-embeddable"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 `;

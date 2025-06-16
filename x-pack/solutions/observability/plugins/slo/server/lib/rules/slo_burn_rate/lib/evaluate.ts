@@ -7,9 +7,10 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
+import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { Duration, SLODefinition, toDurationUnit } from '../../../../domain/models';
 import { BurnRateRuleParams } from '../types';
-import { SLO_DESTINATION_INDEX_PATTERN } from '../../../../../common/constants';
+import { SLI_DESTINATION_INDEX_PATTERN } from '../../../../../common/constants';
 import {
   buildQuery,
   EvaluationAfterKey,
@@ -26,8 +27,15 @@ export interface EvaluationWindowStats {
   total: { value: number };
 }
 
+export interface TopHitsAggResults {
+  slo: {
+    groupings: Record<string, unknown>;
+  };
+}
+
 export interface EvaluationBucket {
   key: EvaluationAfterKey;
+  groupings: SearchResponse<TopHitsAggResults>;
   doc_count: number;
   WINDOW_0_SHORT?: EvaluationWindowStats;
   WINDOW_1_SHORT?: EvaluationWindowStats;
@@ -72,7 +80,7 @@ async function queryAllResults(
 ): Promise<EvaluationBucket[]> {
   const queryAndAggs = buildQuery(startedAt, slo, params, lastAfterKey);
   const results = await esClient.search<undefined, EvalutionAggResults>({
-    index: SLO_DESTINATION_INDEX_PATTERN,
+    index: SLI_DESTINATION_INDEX_PATTERN,
     ...queryAndAggs,
   });
 
@@ -117,6 +125,7 @@ function transformBucketToResults(buckets: EvaluationBucket[], params: BurnRateR
         if (isShortWindowTriggering && isLongWindowTriggering) {
           return {
             instanceId: bucket.key.instanceId,
+            groupings: transformGroupings(bucket.groupings),
             shouldAlert: true,
             longWindowBurnRate: get(
               bucket,
@@ -143,4 +152,13 @@ function transformBucketToResults(buckets: EvaluationBucket[], params: BurnRateR
     }
     throw new Error(`Evaluation query for ${bucket.key.instanceId} failed.`);
   });
+}
+
+function transformGroupings(
+  groupings: SearchResponse<TopHitsAggResults>
+): Record<string, unknown> | undefined {
+  if (groupings && groupings.hits && groupings.hits.hits && groupings.hits.hits.length > 0) {
+    const topHit = groupings.hits.hits[0];
+    return topHit._source?.slo?.groupings;
+  }
 }

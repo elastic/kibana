@@ -80,6 +80,7 @@ export class AIAssistantManagementPlugin
         defaultMessage: 'AI Assistants',
       }),
       order: 1,
+      keywords: ['ai'],
       mount: async (mountParams) => {
         const { mountManagementSection } = await import('./management_section/mount_section');
 

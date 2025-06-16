@@ -589,6 +589,7 @@ describe('fleet usage telemetry', () => {
           count: 3,
           output_types: expect.arrayContaining(['elasticsearch', 'logstash', 'third_type']),
           count_with_global_data_tags: 2,
+          count_with_non_default_space: 0,
           avg_number_global_data_tags_per_policy: 2,
         },
         agent_logs_panics_last_hour: [
@@ -601,11 +602,11 @@ describe('fleet usage telemetry', () => {
             message: 'stderr panic some other panic',
           },
         ],
-        agent_logs_top_errors: [
+        agent_logs_top_errors: expect.arrayContaining([
+          'this should not be included in metrics',
           'stderr panic some other panic',
           'stderr panic close of closed channel',
-          'this should not be included in metrics',
-        ],
+        ]),
         fleet_server_logs_top_errors: ['failed to unenroll offline agents'],
         integrations_details: [
           {

@@ -15,7 +15,7 @@
       "_recovery",
       "{index}/_recovery"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-recovery.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-recovery",
     "availability": {
       "stack": true,
       "serverless": false

@@ -23,6 +23,7 @@
     "@kbn/zod",
     "@kbn/sse-utils-server",
     "@kbn/sse-utils",
+    "@kbn/zod-helpers",
   ],
   "exclude": [
     "target/**/*",

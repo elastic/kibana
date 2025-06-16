@@ -10,15 +10,17 @@ import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import {
   type ObservabilityOnboardingLocatorParams,
   OBSERVABILITY_ONBOARDING_LOCATOR,
 } from '@kbn/deeplinks-observability';
+import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { isDevMode } from '@kbn/xstate-utils';
-import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
+import { safeDecode } from '@kbn/rison';
+import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
+import { LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { LazyAlertDropdownWrapper } from '../../alerting/log_threshold';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
@@ -34,12 +36,6 @@ const LogEntryRatePage = dynamic(() =>
   import('./log_entry_rate').then((mod) => ({ default: mod.LogEntryRatePage }))
 );
 
-const StateMachinePlayground = dynamic(() =>
-  import('../../observability_logs/xstate_helpers').then((mod) => ({
-    default: mod.StateMachinePlayground,
-  }))
-);
-
 export const LogsPageContent: React.FunctionComponent = () => {
   const { application, share } = useKibana<{ share: SharePublicStart }>().services;
 
@@ -47,18 +43,13 @@ export const LogsPageContent: React.FunctionComponent = () => {
   const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
     OBSERVABILITY_ONBOARDING_LOCATOR
   );
+
+  const managementLocator = share?.url.locators.get(MANAGEMENT_APP_LOCATOR);
+
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
 
-  const enableDeveloperRoutes = isDevMode();
-
   useReadOnlyBadge(!uiCapabilities?.logs?.save);
-
   const routes = getLogsAppRoutes();
-
-  const settingsLinkProps = useLinkProps({
-    app: 'logs',
-    pathname: 'settings',
-  });
 
   return (
     <>
@@ -69,14 +60,10 @@ export const LogsPageContent: React.FunctionComponent = () => {
           <EuiFlexGroup responsive={false} gutterSize="s">
             <EuiFlexItem>
               <EuiHeaderLinks gutterSize="xs">
-                <EuiHeaderLink color={'text'} {...settingsLinkProps}>
-                  {settingsTabTitle}
-                </EuiHeaderLink>
                 <LazyAlertDropdownWrapper />
                 <EuiHeaderLink
-                  href={onboardingLocator?.useUrl({ category: 'logs' })}
+                  href={onboardingLocator?.useUrl({ category: 'host' })}
                   color="primary"
-                  iconType="indexOpen"
                 >
                   {ADD_DATA_LABEL}
                 </EuiHeaderLink>
@@ -90,21 +77,44 @@ export const LogsPageContent: React.FunctionComponent = () => {
         <Route
           path="/stream"
           exact
-          render={() => {
-            share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID)?.navigate({});
+          render={(props) => {
+            const searchParams = new URLSearchParams(props.location.search);
+            const logFilterEncoded = searchParams.get('logFilter');
+            let locatorParams: LogsLocatorParams = {};
 
+            if (logFilterEncoded) {
+              const logFilter = safeDecode(logFilterEncoded) as LogsLocatorParams;
+
+              locatorParams = {
+                timeRange: logFilter?.timeRange,
+                query: logFilter?.query,
+                filters: logFilter?.filters,
+              };
+            }
+
+            share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID)?.navigate(locatorParams);
             return null;
           }}
         />
         <Route path={routes.logsAnomalies.path} component={LogEntryRatePage} />
         <Route path={routes.logsCategories.path} component={LogEntryCategoriesPage} />
-        {enableDeveloperRoutes && (
-          <Route path={'/state-machine-playground'} component={StateMachinePlayground} />
-        )}
         <RedirectWithQueryParams from={'/analysis'} to={routes.logsAnomalies.path} exact />
         <RedirectWithQueryParams from={'/log-rate'} to={routes.logsAnomalies.path} exact />
         <RedirectWithQueryParams from={'/'} to={routes.logsAnomalies.path} exact />
+        {/* Legacy renders and redirects */}
 
+        <Route
+          path="/settings"
+          exact
+          render={() => {
+            managementLocator?.navigate({
+              sectionId: 'kibana',
+              appId: 'settings?query=observability%3AlogSources',
+            });
+
+            return null;
+          }}
+        />
         <Route render={() => <NotFoundPage title={pageTitle} />} />
       </Routes>
     </>
@@ -113,10 +123,6 @@ export const LogsPageContent: React.FunctionComponent = () => {
 
 const pageTitle = i18n.translate('xpack.infra.header.logsTitle', {
   defaultMessage: 'Logs',
-});
-
-const settingsTabTitle = i18n.translate('xpack.infra.logs.index.settingsTabTitle', {
-  defaultMessage: 'Settings',
 });
 
 const feedbackLinkUrl = 'https://discuss.elastic.co/c/logs';

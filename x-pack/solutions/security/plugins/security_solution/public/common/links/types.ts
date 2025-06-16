@@ -5,43 +5,16 @@
  * 2.0.
  */
 
-import type { Capabilities } from '@kbn/core/types';
-import type { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 import type { IconType } from '@elastic/eui';
 import type {
   NavigationLink as GenericNavigationLink,
-  LinkCategory as GenericLinkCategory,
   LinkCategories as GenericLinkCategories,
-  ExternalPageName,
   SecurityPageName,
 } from '@kbn/security-solution-navigation';
-import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { AppDeepLinkLocations } from '@kbn/core-application-browser';
-import type { Observable } from 'rxjs';
-import type { SolutionSideNavItem as ClassicSolutionSideNavItem } from '@kbn/security-solution-side-nav';
-import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { RequiredCapabilities } from '../lib/capabilities';
-
-export type SecurityNavLink = GenericNavigationLink<SecurityPageName>;
-
-export type SolutionPageName = SecurityPageName | ExternalPageName;
-export type SolutionNavLink = GenericNavigationLink<SolutionPageName>;
-export type SolutionNavLinks$ = Observable<SolutionNavLink[]>;
-export type SolutionLinkCategory = GenericLinkCategory<SolutionPageName>;
-
-export type SolutionSideNavItem = ClassicSolutionSideNavItem<SolutionPageName>;
-
-/**
- * Permissions related parameters needed for the links to be filtered
- */
-export interface LinksPermissions {
-  capabilities: Capabilities;
-  experimentalFeatures: Readonly<ExperimentalFeatures>;
-  uiSettingsClient: IUiSettingsClient;
-  upselling: UpsellingService;
-  license?: ILicense;
-}
 
 export interface LinkItem {
   /**
@@ -149,9 +122,15 @@ export interface LinkItem {
    */
   title: string;
   /**
-   * Reserved for links management, this property is set automatically
+   * Flag indicating the link is not authorized for the current user due to RBAC permissions.
+   * This property is set automatically by the application links updater.
    * */
   unauthorized?: boolean;
+  /**
+   * Flag indicating the link is not available for the current product license/subscription.
+   * This property is set automatically by the application links updater.
+   * */
+  unavailable?: boolean;
   /**
    * Locations where the link is visible in the UI
    */
@@ -171,6 +150,4 @@ export type LinkInfo = Omit<LinkItem, 'links'>;
 export type NormalizedLink = LinkInfo & { parentId?: SecurityPageName };
 export type NormalizedLinks = Partial<Record<SecurityPageName, NormalizedLink>>;
 
-export type NavigationLink = GenericNavigationLink<SolutionPageName>;
-export type LinkCategory = GenericLinkCategory<SolutionPageName>;
-export type LinkCategories = GenericLinkCategories<SolutionPageName>;
+export type NavigationLink = GenericNavigationLink<SecurityPageName>;

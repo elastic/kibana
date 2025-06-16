@@ -59,7 +59,7 @@ import type { ArchiveIterator } from '../../../../common/types';
 
 import { airGappedUtils } from '../airgapped';
 
-import { fetchUrl, getResponse, getResponseStream } from './requests';
+import { fetchUrl, getResponse, getResponseStreamWithSize } from './requests';
 import { getRegistryUrl } from './registry_url';
 
 export const splitPkgKey = split;
@@ -123,6 +123,10 @@ async function _fetchFindLatestPackage(
         const searchResults: RegistryPackage[] = JSON.parse(res);
 
         const latestPackageFromRegistry = searchResults[0] ?? null;
+
+        if (bundledPackage && !latestPackageFromRegistry) {
+          return bundledPackage;
+        }
 
         if (
           bundledPackage &&
@@ -276,11 +280,19 @@ function setSpecVersion(url: URL) {
   const specMax = appContextService.getConfig()?.internal?.registry?.spec?.max;
 
   if (specMin) {
-    url.searchParams.set('spec.min', specMin);
+    url.searchParams.set('spec.min', formatSpecVersion(specMin));
   }
   if (specMax) {
-    url.searchParams.set('spec.max', specMax);
+    url.searchParams.set('spec.max', formatSpecVersion(specMax));
   }
+}
+
+function formatSpecVersion(version: string): string {
+  // Version can be coerced from number when obtained through flags, in these cases X.0 versions are coerced to X.
+  if (version.indexOf('.') > 0) {
+    return version;
+  }
+  return version + '.0';
 }
 
 function setCapabilities(url: URL) {
@@ -364,11 +376,11 @@ export async function getPackage(
   verificationResult?: PackageVerificationResult;
 }> {
   const logger = appContextService.getLogger();
-  const verifyPackage = appContextService.getExperimentalFeatures().packageVerification;
   let packageInfo: ArchivePackage | undefined = getPackageInfo({ name, version });
-  let verificationResult: PackageVerificationResult | undefined = verifyPackage
-    ? getVerificationResult({ name, version })
-    : undefined;
+  let verificationResult: PackageVerificationResult | undefined = getVerificationResult({
+    name,
+    version,
+  });
   try {
     const {
       archiveBuffer,
@@ -378,7 +390,7 @@ export async function getPackage(
       fetchArchiveBuffer({
         pkgName: name,
         pkgVersion: version,
-        shouldVerify: verifyPackage,
+        shouldVerify: true,
         ignoreUnverified: options?.ignoreUnverified,
       })
     );
@@ -495,7 +507,9 @@ export async function fetchArchiveBuffer({
   const registryUrl = getRegistryUrl();
   const archiveUrl = `${registryUrl}${archivePath}`;
   try {
-    const archiveBuffer = await getResponseStream(archiveUrl).then(streamToBuffer);
+    const archiveBuffer = await getResponseStreamWithSize(archiveUrl).then(({ stream, size }) =>
+      streamToBuffer(stream, size)
+    );
     if (!archiveBuffer) {
       logger.warn(`Archive Buffer not found`);
       throw new ArchiveNotFoundError('Archive Buffer not found');

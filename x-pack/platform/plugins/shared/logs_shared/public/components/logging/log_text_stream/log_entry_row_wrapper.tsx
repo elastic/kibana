@@ -5,28 +5,32 @@
  * 2.0.
  */
 
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
+import { withAttrs } from '../../../utils/theme_utils/with_attrs';
 import { TextScale } from '../../../../common/log_text_scale';
-import { highlightedContentStyle, hoveredContentStyle, monospaceTextStyle } from './text_styles';
+import { highlightedContentStyle, hoveredContentStyle, useMonospaceTextStyle } from './text_styles';
 
-export const LogEntryRowWrapper = euiStyled.div.attrs(() => ({
-  role: 'row',
-}))<LogEntryRowWrapperProps>`
+export const LogEntryRowWrapper = withAttrs(
+  styled.div<LogEntryRowWrapperProps>`
     align-items: stretch;
-    color: ${(props) => props.theme.eui.euiTextColor};
+    color: ${(props) => props.theme.euiTheme.colors.textParagraph};
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
     justify-content: flex-start;
     overflow: hidden;
-  
-    ${(props) => monospaceTextStyle(props.scale)};
-    ${(props) => (props.isHighlighted ? highlightedContentStyle : '')}
-  
+
+    ${(props) => useMonospaceTextStyle(props.scale, props.theme.euiTheme)};
+    ${(props) => (props.isHighlighted ? highlightedContentStyle(props.theme.euiTheme) : '')}
+
     &:hover {
-      ${hoveredContentStyle}
+      ${(props) => hoveredContentStyle(props.theme.euiTheme)}
     }
-  `;
+  `,
+  () => ({
+    role: 'row',
+  })
+);
 
 export interface LogEntryRowWrapperProps {
   scale: TextScale;

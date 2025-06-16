@@ -87,7 +87,7 @@ const getSingleAgentConfigurationRoute = createApmServerRoute({
     });
 
     if (!exactConfig) {
-      logger.info(`Config was not found for ${service.name}/${service.environment}`);
+      logger.debug(`Config was not found for ${service.name}/${service.environment}`);
 
       throw Boom.notFound();
     }
@@ -125,12 +125,12 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
       apmEventClient,
     });
     if (!exactConfig) {
-      logger.info(`Config was not found for ${service.name}/${service.environment}`);
+      logger.debug(`Config was not found for ${service.name}/${service.environment}`);
 
       throw Boom.notFound();
     }
 
-    logger.info(`Deleting config ${service.name}/${service.environment} (${exactConfig.id})`);
+    logger.debug(`Deleting config ${service.name}/${service.environment} (${exactConfig.id})`);
 
     const deleteConfigurationResult = await deleteConfiguration({
       configurationId: exactConfig.id!,
@@ -145,7 +145,7 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
         apmIndices,
         telemetryUsageCounter,
       });
-      logger.info(
+      logger.debug(
         `Updated Fleet integration policy for APM to remove the deleted agent configuration.`
       );
     }
@@ -191,7 +191,7 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
       );
     }
 
-    logger.info(
+    logger.debug(
       `${exactConfig ? 'Updating' : 'Creating'} config ${body.service.name}/${
         body.service.environment
       }`
@@ -211,7 +211,7 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
         internalESClient,
         telemetryUsageCounter,
       });
-      logger.info(`Saved latest agent settings to Fleet integration policy for APM.`);
+      logger.debug(`Saved latest agent settings to Fleet integration policy for APM.`);
     }
   },
 });

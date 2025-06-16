@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { searchConnectorsMock } from '@kbn/search-connectors-plugin/public/plugin.mock';
+import { searchConnectorsMock } from '@kbn/content-connectors-plugin/public/plugin.mock';
 
 import React from 'react';
 
@@ -28,10 +28,8 @@ import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 
-import { AppSearch } from './app_search';
 import { EnterpriseSearchOverview } from './enterprise_search_overview';
 import { KibanaLogic } from './shared/kibana';
-import { WorkplaceSearch } from './workplace_search';
 
 import { renderApp, renderHeaderActions } from '.';
 
@@ -41,6 +39,7 @@ describe('renderApp', () => {
     params: coreMock.createAppMountParameters(),
     plugins: {
       charts: chartPluginMock.createStartContract(),
+      contentConnectors: searchConnectorsMock.createStart(),
       data: dataPluginMock.createStartContract(),
       guidedOnboarding: guidedOnboardingMock.createStart(),
       indexManagement: {
@@ -49,7 +48,6 @@ describe('renderApp', () => {
       lens: lensPluginMock.createStartContract(),
       licensing: licensingMock.createStart(),
       navigation: navigationPluginMock.createStartContract(),
-      searchConnectors: searchConnectorsMock.createStart(),
       security: securityMock.createStart(),
       share: sharePluginMock.createStartContract(),
       ml: mlPluginMock.createStartContract(),
@@ -104,20 +102,6 @@ describe('renderApp', () => {
         mount(EnterpriseSearchOverview);
       });
       expect(mockContainer.querySelector('.kbnPageTemplate')).not.toBeNull();
-    });
-
-    it('renders AppSearch', () => {
-      act(() => {
-        mount(AppSearch);
-      });
-      expect(mockContainer.querySelector('.setupGuide')).not.toBeNull();
-    });
-
-    it('renders WorkplaceSearch', () => {
-      act(() => {
-        mount(WorkplaceSearch);
-      });
-      expect(mockContainer.querySelector('.setupGuide')).not.toBeNull();
     });
   });
 

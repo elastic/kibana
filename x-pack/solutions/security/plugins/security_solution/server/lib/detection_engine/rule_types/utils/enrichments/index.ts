@@ -11,70 +11,52 @@ import { createUserRiskEnrichments } from './enrichment_by_type/user_risk';
 
 import {
   createHostAssetCriticalityEnrichments,
+  createServiceAssetCriticalityEnrichments,
   createUserAssetCriticalityEnrichments,
 } from './enrichment_by_type/asset_criticality';
 import { getAssetCriticalityIndex } from '../../../../../../common/entity_analytics/asset_criticality';
-import type {
-  EnrichEventsFunction,
-  EventsMapByEnrichments,
-  CreateEnrichEventsFunction,
-} from './types';
+import type { EnrichEvents, EventsMapByEnrichments } from './types';
 import { applyEnrichmentsToEvents } from './utils/transforms';
 import { isIndexExist } from './utils/is_index_exist';
-import { getHostRiskIndex, getUserRiskIndex } from '../../../../../../common/search_strategy';
+import { getRiskIndex } from '../../../../../../common/search_strategy';
+import { createServiceRiskEnrichments } from './enrichment_by_type/service_risk';
 
-export const enrichEvents: EnrichEventsFunction = async ({
-  services,
-  logger,
-  events,
-  spaceId,
-  experimentalFeatures,
-}) => {
+export const enrichEvents: EnrichEvents = async ({ services, logger, events, spaceId }) => {
   try {
     const enrichments: Array<Promise<EventsMapByEnrichments>> = [];
 
     logger.debug('Alert enrichments started');
-    const isNewRiskScoreModuleAvailable = experimentalFeatures?.riskScoringRoutesEnabled ?? false;
 
-    let isNewRiskScoreModuleInstalled = false;
-    if (isNewRiskScoreModuleAvailable) {
-      isNewRiskScoreModuleInstalled = await isIndexExist({
-        services,
-        index: getHostRiskIndex(spaceId, true, true),
-      });
-    }
+    const isRiskScoreIndexExist = await isIndexExist({
+      services,
+      index: getRiskIndex(spaceId, true),
+    });
 
-    const [isHostRiskScoreIndexExist, isUserRiskScoreIndexExist] = await Promise.all([
-      isIndexExist({
-        services,
-        index: getHostRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled),
-      }),
-      isIndexExist({
-        services,
-        index: getUserRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled),
-      }),
-    ]);
-
-    if (isHostRiskScoreIndexExist) {
+    if (isRiskScoreIndexExist) {
       enrichments.push(
         createHostRiskEnrichments({
           services,
           logger,
           events,
           spaceId,
-          isNewRiskScoreModuleInstalled,
         })
       );
-    }
 
-    if (isUserRiskScoreIndexExist) {
       enrichments.push(
         createUserRiskEnrichments({
           services,
           logger,
           events,
           spaceId,
-          isNewRiskScoreModuleInstalled,
+        })
+      );
+
+      enrichments.push(
+        createServiceRiskEnrichments({
+          services,
+          logger,
+          events,
+          spaceId,
         })
       );
     }
@@ -100,6 +82,14 @@ export const enrichEvents: EnrichEventsFunction = async ({
           spaceId,
         })
       );
+      enrichments.push(
+        createServiceAssetCriticalityEnrichments({
+          services,
+          logger,
+          events,
+          spaceId,
+        })
+      );
     }
 
     const allEnrichmentsResults = await Promise.allSettled(enrichments);
@@ -118,14 +108,3 @@ export const enrichEvents: EnrichEventsFunction = async ({
     return events;
   }
 };
-
-export const createEnrichEventsFunction: CreateEnrichEventsFunction =
-  ({ services, logger }) =>
-  (events, { spaceId }: { spaceId: string }, experimentalFeatures) =>
-    enrichEvents({
-      events,
-      services,
-      logger,
-      spaceId,
-      experimentalFeatures,
-    });

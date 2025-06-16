@@ -4,18 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  ApmSynthtraceEsClient,
-  OtelSynthtraceEsClient,
-  createLogger,
-  LogLevel,
-} from '@kbn/apm-synthtrace';
+import { ApmSynthtraceEsClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
 import { createEsClientForTesting } from '@kbn/test';
 // eslint-disable-next-line @kbn/imports/no_unresolvable_imports
 import { initPlugin } from '@frsource/cypress-plugin-visual-regression-diff/plugins';
-import del from 'del';
-import { some } from 'lodash';
 import { Readable } from 'stream';
+import type { ApmSynthtracePipelines } from '@kbn/apm-synthtrace-client';
 
 export function setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) {
   const logger = createLogger(LogLevel.info);
@@ -33,20 +27,6 @@ export function setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.Plugin
     version: config.env.APM_PACKAGE_VERSION,
   });
 
-  const synthtraceOtelEsClient = new OtelSynthtraceEsClient({
-    client,
-    logger,
-    refreshAfterIndex: true,
-  });
-
-  synthtraceEsClient.pipeline(
-    synthtraceEsClient.getDefaultPipeline({ includeSerialization: false })
-  );
-
-  synthtraceOtelEsClient.pipeline(
-    synthtraceOtelEsClient.getDefaultPipeline({ includeSerialization: false })
-  );
-
   initPlugin(on, config);
 
   on('task', {
@@ -57,34 +37,23 @@ export function setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.Plugin
       return null;
     },
 
-    async 'synthtrace:index'(events: Array<Record<string, any>>) {
-      await synthtraceEsClient.index(Readable.from(events));
+    async 'synthtrace:index'({
+      events,
+      pipeline,
+    }: {
+      events: Array<Record<string, any>>;
+      pipeline: ApmSynthtracePipelines;
+    }) {
+      await synthtraceEsClient.index(
+        Readable.from(events),
+        synthtraceEsClient.resolvePipelineType(pipeline, { includeSerialization: false })
+      );
       return null;
     },
     async 'synthtrace:clean'() {
       await synthtraceEsClient.clean();
       return null;
     },
-    async 'synthtraceOtel:index'(events: Array<Record<string, any>>) {
-      await synthtraceOtelEsClient.index(Readable.from(events));
-      return null;
-    },
-    async 'synthtraceOtel:clean'() {
-      await synthtraceOtelEsClient.clean();
-      return null;
-    },
-  });
-
-  on('after:spec', (spec, results) => {
-    // Delete videos that have no failures or retries
-    if (results && results.video) {
-      const failures = some(results.tests, (test) => {
-        return some(test.attempts, { state: 'failed' });
-      });
-      if (!failures) {
-        del(results.video);
-      }
-    }
   });
 
   on('before:browser:launch', (browser, launchOptions) => {

@@ -8,7 +8,6 @@ import { schema } from '@kbn/config-schema';
 
 import type { FleetAuthz } from '../../../common';
 import { API_VERSIONS } from '../../../common/constants';
-import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 import { getRouteRequiredAuthz, type FleetAuthzRouter } from '../../services/security';
 
 import { AGENT_API_ROUTES } from '../../constants';
@@ -17,6 +16,7 @@ import {
   GetTagsRequestSchema,
   GetOneAgentRequestSchema,
   UpdateAgentRequestSchema,
+  MigrateSingleAgentRequestSchema,
   DeleteAgentRequestSchema,
   PostAgentUnenrollRequestSchema,
   PostBulkAgentUnenrollRequestSchema,
@@ -35,6 +35,7 @@ import {
   PostRetrieveAgentsByActionsRequestSchema,
   DeleteAgentUploadFileRequestSchema,
   GetTagsResponseSchema,
+  MigrateSingleAgentResponseSchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import type { FleetConfigType } from '../..';
@@ -89,6 +90,7 @@ import {
   bulkRequestDiagnosticsHandler,
   requestDiagnosticsHandler,
 } from './request_diagnostics_handler';
+import { migrateSingleAgentHandler } from './migrate_handlers';
 
 export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
   // Get one
@@ -124,6 +126,38 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       getAgentHandler
     );
 
+  // Migrate
+  router.versioned
+    .post({
+      path: AGENT_API_ROUTES.MIGRATE_PATTERN,
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+        },
+      },
+      summary: `Migrate a single agent`,
+      description: `Migrate a single agent to another cluster.`,
+      options: {
+        tags: ['oas-tag:Elastic Agents'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: MigrateSingleAgentRequestSchema,
+          response: {
+            200: {
+              body: () => MigrateSingleAgentResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      migrateSingleAgentHandler
+    );
   // Update
   router.versioned
     .put({
@@ -601,6 +635,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     );
   // Get agent status for policy
   router.versioned
+    // @ts-ignore  https://github.com/elastic/kibana/issues/203170
     .get({
       path: AGENT_API_ROUTES.STATUS_PATTERN,
       // TODO move to kibana authz https://github.com/elastic/kibana/issues/203170
@@ -854,36 +889,32 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       getAvailableVersionsHandler
     );
 
-  const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
-
   // route used by export CSV feature on the UI to generate report
-  if (experimentalFeatures.enableExportCSV) {
-    router.versioned
-      .get({
-        path: '/internal/fleet/agents/status_runtime_field',
-        access: 'internal',
-        security: {
-          authz: {
-            requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.READ],
-          },
+  router.versioned
+    .get({
+      path: '/internal/fleet/agents/status_runtime_field',
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.READ],
         },
-      })
-      .addVersion(
-        {
-          version: API_VERSIONS.internal.v1,
-          validate: {
-            request: {},
-            response: {
-              200: {
-                body: () => schema.string(),
-              },
-              400: {
-                body: genericErrorResponse,
-              },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: {},
+          response: {
+            200: {
+              body: () => schema.string(),
+            },
+            400: {
+              body: genericErrorResponse,
             },
           },
         },
-        getAgentStatusRuntimeFieldHandler
-      );
-  }
+      },
+      getAgentStatusRuntimeFieldHandler
+    );
 };

@@ -11,231 +11,25 @@ import { readdirSync, readFileSync } from 'fs';
 import { writeFile } from 'fs/promises';
 import { join } from 'path';
 import _ from 'lodash';
-import type { RecursivePartial } from '@kbn/utility-types';
-import { FunctionDefinition } from '../src/definitions/types';
+import {
+  FunctionDefinition,
+  FunctionDefinitionTypes,
+  FunctionParameterType,
+  Location,
+} from '../src/definitions/types';
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../src/shared/constants';
-const aliasTable: Record<string, string[]> = {
-  to_version: ['to_ver'],
-  to_unsigned_long: ['to_ul', 'to_ulong'],
-  to_boolean: ['to_bool'],
-  to_string: ['to_str'],
-  to_datetime: ['to_dt'],
-  to_double: ['to_dbl'],
-  to_integer: ['to_int'],
-};
-const aliases = new Set(Object.values(aliasTable).flat());
-
-const scalarSupportedCommandsAndOptions = {
-  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
-};
-
-const aggregationSupportedCommandsAndOptions = {
-  supportedCommands: ['stats', 'inlinestats', 'metrics'],
-};
-
-// coalesce can be removed when a test is added for version type
-// (https://github.com/elastic/elasticsearch/pull/109032#issuecomment-2150033350)
-const excludedFunctions = new Set(['bucket', 'case']);
-
-const extraFunctions: FunctionDefinition[] = [
-  {
-    type: 'eval',
-    name: 'case',
-    description:
-      'Accepts pairs of conditions and values. The function returns the value that belongs to the first condition that evaluates to `true`. If the number of arguments is odd, the last argument is the default value which is returned when no condition matches.',
-    ...scalarSupportedCommandsAndOptions,
-    signatures: [
-      {
-        params: [
-          { name: 'condition', type: 'boolean' },
-          { name: 'value', type: 'any' },
-        ],
-        minParams: 2,
-        returnType: 'unknown',
-      },
-    ],
-    examples: [
-      `from index | eval type = case(languages <= 1, "monolingual", languages <= 2, "bilingual", "polyglot")`,
-    ],
-  },
-];
-
-const validateLogFunctions = `(fnDef: ESQLFunction) => {
-  const messages = [];
-  // do not really care here about the base and field
-  // just need to check both values are not negative
-  for (const arg of fnDef.args) {
-    if (isLiteralItem(arg) && Number(arg.value) < 0) {
-      messages.push({
-        type: 'warning' as const,
-        code: 'logOfNegativeValue',
-        text: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.divide.warning.logOfNegativeValue',
-          {
-            defaultMessage: 'Log of a negative number results in null: {value}',
-            values: {
-              value: arg.value,
-            },
-          }
-        ),
-        location: arg.location,
-      });
-    }
-  }
-  return messages;
-}`;
-
-const dateDiffSuggestions = [
-  'year',
-  'quarter',
-  'month',
-  'week',
-  'day',
-  'hour',
-  'minute',
-  'second',
-  'millisecond',
-  'microsecond',
-  'nanosecond',
-];
-
-const dateDiffOptions = [
-  'year',
-  'years',
-  'yy',
-  'yyyy',
-  'quarter',
-  'quarters',
-  'qq',
-  'q',
-  'month',
-  'months',
-  'mm',
-  'm',
-  'dayofyear',
-  'dy',
-  'y',
-  'day',
-  'days',
-  'dd',
-  'd',
-  'week',
-  'weeks',
-  'wk',
-  'ww',
-  'weekday',
-  'weekdays',
-  'dw',
-  'hour',
-  'hours',
-  'hh',
-  'minute',
-  'minutes',
-  'mi',
-  'n',
-  'second',
-  'seconds',
-  'ss',
-  's',
-  'millisecond',
-  'milliseconds',
-  'ms',
-  'microsecond',
-  'microseconds',
-  'mcs',
-  'nanosecond',
-  'nanoseconds',
-  'ns',
-];
-
-const dateExtractOptions = [
-  'ALIGNED_DAY_OF_WEEK_IN_MONTH',
-  'ALIGNED_DAY_OF_WEEK_IN_YEAR',
-  'ALIGNED_WEEK_OF_MONTH',
-  'ALIGNED_WEEK_OF_YEAR',
-  'AMPM_OF_DAY',
-  'CLOCK_HOUR_OF_AMPM',
-  'CLOCK_HOUR_OF_DAY',
-  'DAY_OF_MONTH',
-  'DAY_OF_WEEK',
-  'DAY_OF_YEAR',
-  'EPOCH_DAY',
-  'ERA',
-  'HOUR_OF_AMPM',
-  'HOUR_OF_DAY',
-  'INSTANT_SECONDS',
-  'MICRO_OF_DAY',
-  'MICRO_OF_SECOND',
-  'MILLI_OF_DAY',
-  'MILLI_OF_SECOND',
-  'MINUTE_OF_DAY',
-  'MINUTE_OF_HOUR',
-  'MONTH_OF_YEAR',
-  'NANO_OF_DAY',
-  'NANO_OF_SECOND',
-  'OFFSET_SECONDS',
-  'PROLEPTIC_MONTH',
-  'SECOND_OF_DAY',
-  'SECOND_OF_MINUTE',
-  'YEAR',
-  'YEAR_OF_ERA',
-];
-
-/**
- * Enrichments for function definitions
- *
- * This is the place to put information that is not provided by Elasticsearch
- * and, hence, won't be present in the JSON file.
- */
-const functionEnrichments: Record<string, RecursivePartial<FunctionDefinition>> = {
-  log10: {
-    validate: validateLogFunctions,
-  },
-  log: {
-    validate: validateLogFunctions,
-  },
-  date_diff: {
-    signatures: [
-      {
-        params: [{ acceptedValues: dateDiffOptions, literalSuggestions: dateDiffSuggestions }],
-      },
-    ],
-  },
-  date_extract: {
-    signatures: [
-      {
-        params: [{ acceptedValues: dateExtractOptions }],
-      },
-    ],
-  },
-  date_trunc: {
-    signatures: [
-      {
-        // override the first param to be of type time_literal
-        params: [{ type: 'time_literal' }],
-      },
-    ],
-  },
-  mv_sort: {
-    signatures: new Array(10).fill({
-      params: [{}, { acceptedValues: ['asc', 'desc'] }],
-    }),
-  },
-  percentile: {
-    signatures: new Array(9).fill({
-      params: [{}, { constantOnly: true }],
-    }),
-  },
-  top: {
-    signatures: new Array(6).fill({
-      params: [{}, { constantOnly: true }, { constantOnly: true, acceptedValues: ['asc', 'desc'] }],
-    }),
-  },
-  count: {
-    signatures: [{ params: [{ supportsWildcard: true }] }],
-  },
-};
+import { mathValidators } from './validators';
+import {
+  aliasTable,
+  aliases,
+  defaultScalarFunctionLocations,
+  defaultAggFunctionLocations,
+  MATH_OPERATORS,
+  COMPARISON_OPERATORS,
+  mathOperatorsExtraSignatures,
+  comparisonOperatorSignatures,
+} from './constants';
+import { extraFunctions, functionEnrichments, excludedFunctions } from './functions';
 
 const convertDateTime = (s: string) => (s === 'datetime' ? 'date' : s);
 
@@ -246,25 +40,20 @@ const convertDateTime = (s: string) => (s === 'datetime' ? 'date' : s);
  * @returns
  */
 function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): FunctionDefinition {
-  let supportedCommandsAndOptions: Pick<
-    FunctionDefinition,
-    'supportedCommands' | 'supportedOptions'
-  > =
-    ESFunctionDefinition.type === 'eval'
-      ? scalarSupportedCommandsAndOptions
-      : aggregationSupportedCommandsAndOptions;
+  let locationsAvailable =
+    ESFunctionDefinition.type === FunctionDefinitionTypes.SCALAR
+      ? defaultScalarFunctionLocations
+      : defaultAggFunctionLocations;
 
   // MATCH and QSRT has limited supported for where commands only
   if (FULL_TEXT_SEARCH_FUNCTIONS.includes(ESFunctionDefinition.name)) {
-    supportedCommandsAndOptions = {
-      supportedCommands: ['where'],
-      supportedOptions: [],
-    };
+    locationsAvailable = [Location.WHERE, Location.STATS_WHERE];
   }
   const ret = {
     type: ESFunctionDefinition.type,
     name: ESFunctionDefinition.name,
-    ...supportedCommandsAndOptions,
+    operator: ESFunctionDefinition.operator,
+    locationsAvailable,
     description: ESFunctionDefinition.description,
     alias: aliasTable[ESFunctionDefinition.name],
     ignoreAsSuggestion: ESFunctionDefinition.snapshot_only,
@@ -276,9 +65,11 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
           ...param,
           type: convertDateTime(param.type),
           description: undefined,
-          ...(idx === 0 && FULL_TEXT_SEARCH_FUNCTIONS.includes(ESFunctionDefinition.name)
+          ...(FULL_TEXT_SEARCH_FUNCTIONS.includes(ESFunctionDefinition.name)
             ? // Default to false. If set to true, this parameter does not accept a function or literal, only fields.
-              { fieldsOnly: true }
+              param.name === 'field'
+              ? { fieldsOnly: true }
+              : { constantOnly: true }
             : {}),
         })),
         returnType: convertDateTime(signature.returnType),
@@ -298,10 +89,154 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
 
   return ret as FunctionDefinition;
 }
+/**
+ * Elasticsearch doc exports name as 'lhs' or 'rhs' instead of 'left' or 'right'
+ * @param str
+ * @returns
+ */
+const replaceParamName = (str: string) => {
+  switch (str) {
+    case 'lhs':
+      return 'left';
+    case 'rhs':
+      return 'right';
+
+    // @todo: For in function where Kibana doesn't interpret field and inlist
+    case 'field':
+      return 'left';
+    case 'inlist':
+      return 'right';
+    default:
+      return str;
+  }
+};
+
+const enrichGrouping = (
+  groupingFunctionDefinitions: FunctionDefinition[]
+): FunctionDefinition[] => {
+  return groupingFunctionDefinitions.map((op) => {
+    const newOp = {
+      ...op,
+      locationsAvailable: [...op.locationsAvailable, Location.STATS_BY],
+    };
+    if (newOp.name === 'bucket') {
+      const updatedSignatures = newOp.signatures.map((signature) => {
+        const newSignature = { ...signature };
+        if (newSignature.params && newSignature.params.length > 1) {
+          const indicesToMakeConstantOnly = [1, 2, 3];
+
+          newSignature.params = newSignature.params.map((param, index) => {
+            const newParam = { ...param };
+            if (indicesToMakeConstantOnly.includes(index)) {
+              newParam.constantOnly = true;
+            }
+            return newParam;
+          });
+        }
+        return newSignature;
+      });
+      newOp.signatures = updatedSignatures;
+    }
+    return newOp;
+  });
+};
+
+const enrichOperators = (
+  operatorsFunctionDefinitions: FunctionDefinition[]
+): FunctionDefinition[] => {
+  // @ts-expect-error Stringified version of the validator function
+  return operatorsFunctionDefinitions.map((op) => {
+    const isMathOperator = MATH_OPERATORS.includes(op.name);
+    const isComparisonOperator = COMPARISON_OPERATORS.includes(op.name);
+
+    // IS NULL | IS NOT NULL
+    const arePredicates =
+      op.operator?.toLowerCase() === 'is null' || op.operator?.toLowerCase() === 'is not null';
+
+    const isInOperator = op.name === 'in' || op.name === 'not_in';
+    const isLikeOperator = /like/i.test(op.name);
+    const isNotOperator =
+      op.name?.toLowerCase()?.startsWith('not_') && (isInOperator || isLikeOperator);
+
+    let signatures = op.signatures.map((s) => ({
+      ...s,
+      // Elasticsearch docs uses lhs and rhs instead of left and right that Kibana code uses
+      params: s.params.map((param) => ({ ...param, name: replaceParamName(param.name) })),
+    }));
+
+    let locationsAvailable = op.locationsAvailable;
+
+    if (isComparisonOperator) {
+      locationsAvailable = _.uniq([
+        ...op.locationsAvailable,
+        Location.EVAL,
+        Location.WHERE,
+        Location.ROW,
+        Location.SORT,
+        Location.STATS_WHERE,
+        Location.STATS_BY,
+        Location.COMPLETION,
+      ]);
+      // Adding comparison operator signatures for ip and version types
+      signatures.push(...comparisonOperatorSignatures);
+    }
+    if (isMathOperator) {
+      locationsAvailable = _.uniq([
+        ...op.locationsAvailable,
+        Location.EVAL,
+        Location.WHERE,
+        Location.ROW,
+        Location.SORT,
+        Location.STATS,
+        Location.STATS_WHERE,
+        Location.STATS_BY,
+        Location.COMPLETION,
+      ]);
+
+      // taking care the `...EVAL col = @timestamp + 1 year` cases
+      if (op.name === 'add' || op.name === 'sub') {
+        signatures.push(...mathOperatorsExtraSignatures);
+      }
+    }
+    if (isInOperator || isLikeOperator || isNotOperator || arePredicates) {
+      locationsAvailable = [
+        Location.EVAL,
+        Location.WHERE,
+        Location.SORT,
+        Location.ROW,
+        Location.STATS_WHERE,
+        Location.COMPLETION,
+      ];
+    }
+    if (isInOperator) {
+      // Override the signatures to be array types instead of singular
+      // i.e. right: 'keyword' -> right: 'keyword[]'
+      // so that in would open up ($0)
+      signatures = signatures.map((s) => ({
+        ...s,
+        params: s.params.map((p, idx) => ({
+          ...p,
+          type: `${p.type}${idx === 1 ? '[]' : ''}` as FunctionParameterType,
+        })),
+      }));
+    }
+
+    return {
+      ...op,
+      signatures,
+      // Elasticsearch docs does not include the full supported commands for math operators
+      // so we are overriding to add proper support
+      locationsAvailable,
+      type: FunctionDefinitionTypes.OPERATOR,
+      validate: mathValidators[op.name],
+      ...(isNotOperator ? { ignoreAsSuggestion: true } : {}),
+    };
+  });
+};
 
 function printGeneratedFunctionsFile(
   functionDefinitions: FunctionDefinition[],
-  functionsType: 'aggregation' | 'scalar'
+  functionsType: FunctionDefinitionTypes
 ) {
   /**
    * Deals with asciidoc internal cross-references in the function descriptions
@@ -343,22 +278,39 @@ function printGeneratedFunctionsFile(
     functionDefinition: FunctionDefinition,
     functionNames: string[]
   ) => {
-    const { type, name, description, alias, signatures } = functionDefinition;
+    const { type, name, description, alias, signatures, operator, customParametersSnippet } =
+      functionDefinition;
+
+    let functionName = operator?.toLowerCase() ?? name.toLowerCase();
+    if (functionName.includes('not') && functionName !== 'is not null') {
+      functionName = name;
+    }
+    if (name.toLowerCase() === 'match') {
+      functionName = 'match';
+    }
+
+    // Map locationsAvailable to enum names
+    const locationsAvailable = functionDefinition.locationsAvailable.map(
+      (location) => `Location.${location.toUpperCase()}`
+    );
 
     return `// Do not edit this manually... generated by scripts/generate_function_definitions.ts
     const ${getDefinitionName(name)}: FunctionDefinition = {
-    type: '${type}',
-    name: '${name}',
+    type: FunctionDefinitionTypes.${type.toUpperCase()},
+    name: '${functionName}',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.${name}', { defaultMessage: ${JSON.stringify(
       removeAsciiDocInternalCrossReferences(removeInlineAsciiDocLinks(description), functionNames)
-    )} }),${functionDefinition.ignoreAsSuggestion ? 'ignoreAsSuggestion: true,\n' : ''}
+    )} }),${functionDefinition.ignoreAsSuggestion ? 'ignoreAsSuggestion: true,' : ''}
     preview: ${functionDefinition.preview || 'false'},
     alias: ${alias ? `['${alias.join("', '")}']` : 'undefined'},
     signatures: ${JSON.stringify(signatures, null, 2)},
-    supportedCommands: ${JSON.stringify(functionDefinition.supportedCommands)},
-    supportedOptions: ${JSON.stringify(functionDefinition.supportedOptions)},
+    locationsAvailable: [${locationsAvailable.join(', ')}],
     validate: ${functionDefinition.validate || 'undefined'},
-    examples: ${JSON.stringify(functionDefinition.examples || [])},
+    examples: ${JSON.stringify(functionDefinition.examples || [])},${
+      customParametersSnippet
+        ? `\ncustomParametersSnippet: ${JSON.stringify(customParametersSnippet)},`
+        : ''
+    }
 }`;
   };
 
@@ -382,13 +334,19 @@ function printGeneratedFunctionsFile(
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FunctionDefinition } from '../types';
+import { type FunctionDefinition, FunctionDefinitionTypes, Location } from '../types';
 ${
-  functionsType === 'scalar'
+  functionsType === FunctionDefinitionTypes.SCALAR
     ? `import type { ESQLFunction } from '@kbn/esql-ast';
 import { isLiteralItem } from '../../shared/helpers';`
     : ''
 }
+${
+  functionsType === FunctionDefinitionTypes.OPERATOR
+    ? `import { isNumericType } from '../../shared/esql_types';`
+    : ''
+}
+
 
 
 `;
@@ -418,7 +376,12 @@ import { isLiteralItem } from '../../shared/helpers';`
 
   const ESFunctionDefinitionsDirectory = join(
     pathToElasticsearch,
-    'docs/reference/esql/functions/kibana/definition'
+    '/docs/reference/query-languages/esql/kibana/definition/functions'
+  );
+
+  const ESOperatorsDefinitionsDirectory = join(
+    pathToElasticsearch,
+    '/docs/reference/query-languages/esql/kibana/definition/operators'
   );
 
   // read all ES function definitions (the directory is full of JSON files) and create an array of definitions
@@ -426,19 +389,72 @@ import { isLiteralItem } from '../../shared/helpers';`
     JSON.parse(readFileSync(`${ESFunctionDefinitionsDirectory}/${file}`, 'utf-8'))
   );
 
+  const ESFOperatorDefinitions = readdirSync(ESOperatorsDefinitionsDirectory).map((file) =>
+    JSON.parse(readFileSync(`${ESOperatorsDefinitionsDirectory}/${file}`, 'utf-8'))
+  );
+
+  const allFunctionDefinitions = ESFunctionDefinitions.concat(ESFOperatorDefinitions);
+
+  const functionNames = allFunctionDefinitions.map((def) => def.name.toUpperCase());
+  await writeFile(
+    join(__dirname, '../src/definitions/generated/function_names.ts'),
+    `/**
+ * __AUTOGENERATED FILE. DO NOT EDIT THIS FILE DIRECTLY.__
+ *
+ * @note This file is generated by the \`generate_function_definitions.ts\`
+ * script. Do not edit it manually.
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ */
+
+export const esqlFunctionNames = ${JSON.stringify(functionNames, null, 2)};
+`
+  );
+
   const scalarFunctionDefinitions: FunctionDefinition[] = [];
   const aggFunctionDefinitions: FunctionDefinition[] = [];
-  for (const ESDefinition of ESFunctionDefinitions) {
+  const operatorDefinitions: FunctionDefinition[] = [];
+  const groupingFunctionDefinitions: FunctionDefinition[] = [];
+
+  for (const ESDefinition of allFunctionDefinitions) {
     if (aliases.has(ESDefinition.name) || excludedFunctions.has(ESDefinition.name)) {
       continue;
     }
 
     const functionDefinition = getFunctionDefinition(ESDefinition);
+    const isLikeOperator = functionDefinition.name.toLowerCase().includes('like');
+    const arePredicates = functionDefinition.name.toLowerCase().includes('predicates');
+    if (arePredicates) {
+      continue;
+    }
 
-    if (functionDefinition.type === 'eval') {
+    if (functionDefinition.name.toLowerCase() === 'match') {
+      scalarFunctionDefinitions.push({
+        ...functionDefinition,
+        type: FunctionDefinitionTypes.SCALAR,
+      });
+      continue;
+    }
+
+    if (functionDefinition.type === FunctionDefinitionTypes.OPERATOR || isLikeOperator) {
+      operatorDefinitions.push(functionDefinition);
+    }
+    if (functionDefinition.type === FunctionDefinitionTypes.SCALAR && !isLikeOperator) {
       scalarFunctionDefinitions.push(functionDefinition);
-    } else if (functionDefinition.type === 'agg') {
+    } else if (functionDefinition.type === FunctionDefinitionTypes.AGG) {
       aggFunctionDefinitions.push(functionDefinition);
+    } else if (functionDefinition.type === FunctionDefinitionTypes.GROUPING) {
+      groupingFunctionDefinitions.push(functionDefinition);
     }
   }
 
@@ -446,10 +462,24 @@ import { isLiteralItem } from '../../shared/helpers';`
 
   await writeFile(
     join(__dirname, '../src/definitions/generated/scalar_functions.ts'),
-    printGeneratedFunctionsFile(scalarFunctionDefinitions, 'scalar')
+    printGeneratedFunctionsFile(scalarFunctionDefinitions, FunctionDefinitionTypes.SCALAR)
   );
   await writeFile(
     join(__dirname, '../src/definitions/generated/aggregation_functions.ts'),
-    printGeneratedFunctionsFile(aggFunctionDefinitions, 'aggregation')
+    printGeneratedFunctionsFile(aggFunctionDefinitions, FunctionDefinitionTypes.AGG)
+  );
+  await writeFile(
+    join(__dirname, '../src/definitions/generated/operators.ts'),
+    printGeneratedFunctionsFile(
+      enrichOperators(operatorDefinitions),
+      FunctionDefinitionTypes.OPERATOR
+    )
+  );
+  await writeFile(
+    join(__dirname, '../src/definitions/generated/grouping_functions.ts'),
+    printGeneratedFunctionsFile(
+      enrichGrouping(groupingFunctionDefinitions),
+      FunctionDefinitionTypes.GROUPING
+    )
   );
 })();

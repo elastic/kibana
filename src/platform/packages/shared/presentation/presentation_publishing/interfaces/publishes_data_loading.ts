@@ -10,11 +10,11 @@
 import { PublishingSubject } from '../publishing_subject';
 
 export interface PublishesDataLoading {
-  dataLoading: PublishingSubject<boolean | undefined>;
+  dataLoading$: PublishingSubject<boolean | undefined>;
 }
 
 export const apiPublishesDataLoading = (
   unknownApi: null | unknown
 ): unknownApi is PublishesDataLoading => {
-  return Boolean(unknownApi && (unknownApi as PublishesDataLoading)?.dataLoading !== undefined);
+  return Boolean(unknownApi && (unknownApi as PublishesDataLoading)?.dataLoading$ !== undefined);
 };

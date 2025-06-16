@@ -29,11 +29,14 @@ const regexUnquotedIdPattern = /^([a-z\*_\@]{1})[a-z0-9_\*]*$/i;
  */
 export const LeafPrinter = {
   source: (node: ESQLSource): string => {
-    const { index, name, cluster } = node;
-    let text = index || name || '';
+    const { index, name, prefix, selector } = node;
+    let text = (index ? LeafPrinter.string(index) : name) || '';
 
-    if (cluster) {
-      text = `${cluster}:${text}`;
+    if (prefix) {
+      text = `${LeafPrinter.string(prefix)}:${text}`;
+    }
+    if (selector) {
+      text = `${text}::${LeafPrinter.string(selector)}`;
     }
 
     return text;
@@ -82,8 +85,13 @@ export const LeafPrinter = {
     return formatted;
   },
 
-  string: (node: ESQLStringLiteral) => {
+  string: (node: Pick<ESQLStringLiteral, 'valueUnquoted' | 'unquoted'>) => {
     const str = node.valueUnquoted;
+
+    if (node.unquoted === true) {
+      return str;
+    }
+
     const strFormatted =
       '"' +
       str
@@ -127,12 +135,14 @@ export const LeafPrinter = {
   },
 
   param: (node: ESQLParamLiteral) => {
+    const paramKind = node.paramKind || '?';
+
     switch (node.paramType) {
       case 'named':
       case 'positional':
-        return '?' + node.value;
+        return paramKind + node.value;
       default:
-        return '?';
+        return paramKind;
     }
   },
 
@@ -169,8 +179,11 @@ export const LeafPrinter = {
     return text;
   },
 
-  print: (node: ESQLProperNode): string => {
+  print: (node: ESQLProperNode | ESQLAstComment): string => {
     switch (node.type) {
+      case 'source': {
+        return LeafPrinter.source(node);
+      }
       case 'identifier': {
         return LeafPrinter.identifier(node);
       }
@@ -182,6 +195,9 @@ export const LeafPrinter = {
       }
       case 'timeInterval': {
         return LeafPrinter.timeInterval(node);
+      }
+      case 'comment': {
+        return LeafPrinter.comment(node);
       }
     }
     return '';

@@ -94,6 +94,7 @@ export const useRecentlyViewedMonitors = () => {
     }
     // FIXME: Dario thinks there is a better way to do this but
     // he's getting tired and maybe the Synthetics folks can fix it
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [monitorQueryId]);
 
   return useMemo(

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
-import { useVisualizationResponse } from './use_visualization_response';
 import { renderHook } from '@testing-library/react';
 import React from 'react';
-import { parseVisualizationData } from './utils';
+
+import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
+import { useVisualizationResponse } from './use_visualization_response';
+import { useVisualizationResponseMock } from './use_visualization_response.mock';
 
 describe('useVisualizationResponse', () => {
+  const mockedOkResponse = useVisualizationResponseMock.buildOkResponse();
   const mockState = {
     ...mockGlobalState,
     inputs: {
@@ -28,10 +30,11 @@ describe('useVisualizationResponse', () => {
               ],
             },
             isInspected: false,
-            loading: false,
+            loading: mockedOkResponse.loading,
             selectedInspectIndex: 0,
-            searchSessionId: undefined,
+            searchSessionId: mockedOkResponse.searchSessionId,
             refetch: jest.fn(),
+            tables: mockedOkResponse.tables,
           },
         ],
       },
@@ -49,8 +52,6 @@ describe('useVisualizationResponse', () => {
         <TestProviders store={mockStore}>{children}</TestProviders>
       ),
     });
-    expect(result.current.responses).toEqual(
-      parseVisualizationData(mockState.inputs.global.queries[0].inspect.response)
-    );
+    expect(result.current).toEqual(mockedOkResponse);
   });
 });

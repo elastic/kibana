@@ -13,7 +13,11 @@ import type {
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
 } from '@kbn/core-saved-objects-api-server';
-import type { SavedObjectMigration, SavedObjectMigrationFn } from '@kbn/core-saved-objects-server';
+import type {
+  SavedObjectMigration,
+  SavedObjectMigrationFn,
+  SavedObject,
+} from '@kbn/core-saved-objects-server';
 
 export const DEFAULT_NAMESPACE_STRING = 'default';
 export const ALL_NAMESPACES_STRING = '*';
@@ -108,5 +112,38 @@ export class SavedObjectsUtils {
     migration: SavedObjectMigration<InputAttributes, MigratedAttributes>
   ): SavedObjectMigrationFn<InputAttributes, MigratedAttributes> {
     return isFunction(migration) ? migration : migration.transform;
+  }
+
+  public static getName(
+    nameAttribute: string,
+    savedObject?: Pick<SavedObject<unknown>, 'attributes'> | null
+  ): string | undefined {
+    if (!savedObject) {
+      return undefined;
+    }
+
+    const attributes = savedObject?.attributes as {
+      name?: string;
+      title?: string;
+      // needed to allow index signature below
+      [key: string]: string | undefined;
+    };
+
+    const fallbackTitle = attributes?.name || attributes?.title;
+
+    if (nameAttribute !== 'unknown') {
+      return attributes?.[nameAttribute] || fallbackTitle;
+    }
+
+    return fallbackTitle;
+  }
+
+  public static getIncludedNameFields(type: string, nameAttribute: string) {
+    const sourceIncludes =
+      nameAttribute !== 'unknown'
+        ? [`${type}.${nameAttribute}`]
+        : [`${type}.name`, `${type}.title`];
+
+    return sourceIncludes;
   }
 }

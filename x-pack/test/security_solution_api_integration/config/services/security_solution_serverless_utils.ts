@@ -12,7 +12,8 @@ import { RoleCredentials } from '@kbn/test-suites-serverless/shared/services';
 import type { SendOptions } from '@kbn/ftr-common-functional-services';
 import type { SendOptions as SecureSearchSendOptions } from '@kbn/test-suites-serverless/shared/services/search_secure';
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import type { SecuritySolutionUtilsInterface } from './types';
+import type { SecuritySolutionUtilsInterface, User } from './types';
+import { roles } from '../privileges/roles';
 
 export function SecuritySolutionServerlessUtils({
   getService,
@@ -70,6 +71,32 @@ export function SecuritySolutionServerlessUtils({
      * Only one API key for each role can be active at a time.
      */
     createSuperTest,
+
+    createSuperTestWithUser: async (user: User) => {
+      if (user.roles.length > 1) {
+        throw new Error(
+          `This test service only supports authentication for users with a single role. Error for ${
+            user.username
+          } with roles ${user.roles.join(',')}.`
+        );
+      }
+      const userRoleName = user.roles[0];
+      const roleDefinition = roles.find((role) => role.name === userRoleName);
+      if (!roleDefinition) {
+        throw new Error(`Could not find a role definition for ${userRoleName}`);
+      }
+      await svlUserManager.setCustomRole(roleDefinition.privileges);
+      const roleAuthc = await svlUserManager.createM2mApiKeyWithCustomRoleScope();
+      const superTest = supertest
+        .agent(kbnUrl)
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader);
+      return superTest;
+    },
+
+    cleanUpCustomRole: async () => {
+      await svlUserManager.deleteCustomRole();
+    },
 
     createSearch: async (role = 'admin') => {
       const apiKeyHeader = rolesCredentials.get(role)?.apiKeyHeader;

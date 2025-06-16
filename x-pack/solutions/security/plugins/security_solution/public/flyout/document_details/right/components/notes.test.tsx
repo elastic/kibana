@@ -50,7 +50,7 @@ describe('<Notes />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useUserPrivileges as jest.Mock).mockReturnValue({
-      kibanaSecuritySolutionsPrivileges: { crud: true },
+      notesPrivileges: { crud: true, read: true },
     });
     (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
       navigateToLeftPanel: mockNavigateToLeftPanel,
@@ -230,7 +230,7 @@ describe('<Notes />', () => {
   it('should show a - when in rule creation workflow', () => {
     const contextValue = {
       ...mockContextValue,
-      isPreview: true,
+      isRulePreview: true,
     };
 
     const { getByText, queryByTestId } = render(
@@ -280,7 +280,7 @@ describe('<Notes />', () => {
 
   it('should show View note button if user does not have the correct privileges but notes have already been created', () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
-      kibanaSecuritySolutionsPrivileges: { crud: false },
+      notesPrivileges: { crud: false, read: true },
     });
 
     const contextValue = {
@@ -313,7 +313,7 @@ describe('<Notes />', () => {
 
   it('should show a - if user does not have the correct privileges and no notes have been created', () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
-      kibanaSecuritySolutionsPrivileges: { crud: false },
+      notesPrivileges: { read: true, crud: false },
     });
 
     const { getByText, queryByTestId } = render(

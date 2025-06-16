@@ -10,7 +10,12 @@ import { wrapper } from '../../mocks';
 
 import { useLensAttributes } from '../../use_lens_attributes';
 
-import { kpiUserAuthenticationsBarLensAttributes } from './kpi_user_authentications_bar';
+import { getKpiUserAuthenticationsBarLensAttributes } from './kpi_user_authentications_bar';
+
+jest.mock('uuid', () => ({
+  ...jest.requireActual('uuid'),
+  v4: jest.fn().mockReturnValue('generated-uuid'),
+}));
 
 jest.mock('../../../../../sourcerer/containers', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({
@@ -31,12 +36,12 @@ jest.mock('../../../../utils/route/use_route_spy', () => ({
   ]),
 }));
 
-describe('kpiUserAuthenticationsBarLensAttributes', () => {
+describe('getKpiUserAuthenticationsBarLensAttributes', () => {
   it('should render', () => {
     const { result } = renderHook(
       () =>
         useLensAttributes({
-          lensAttributes: kpiUserAuthenticationsBarLensAttributes,
+          getLensAttributes: getKpiUserAuthenticationsBarLensAttributes,
           stackByField: 'event.dataset',
         }),
       { wrapper }

@@ -84,7 +84,7 @@ Object {
           "language": "lucene",
           "query": "",
         },
-        "visualization": Object {},
+        "visualization": "testVis initial state",
       },
       "title": "",
       "type": "lens",

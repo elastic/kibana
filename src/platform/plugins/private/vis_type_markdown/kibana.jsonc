@@ -12,7 +12,10 @@
     "browser": true,
     "server": true,
     "requiredPlugins": [
+      "data",
+      "embeddable",
       "expressions",
+      "uiActions",
       "visualizations"
     ],
     "requiredBundles": [

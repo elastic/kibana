@@ -7,17 +7,15 @@
 
 import {
   EuiButton,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiPageTemplate,
-  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 
 import { GithubLink } from '@kbn/search-api-panels';
 import { SelfManagedConnectorsEmptyPrompt } from './connectors/self_managed_connectors_empty_prompt';
@@ -29,9 +27,6 @@ import { useKibanaServices } from '../hooks/use_kibana';
 import { ConnectorsTable } from './connectors/connectors_table';
 import { ConnectorPrivilegesCallout } from './connectors/connector_config/connector_privileges_callout';
 import { useAssetBasePath } from '../hooks/use_asset_base_path';
-import { BASE_CONNECTORS_PATH, ELASTIC_MANAGED_CONNECTOR_PATH } from '../constants';
-
-const CALLOUT_KEY = 'search.connectors.ElasticManaged.ComingSoon.feedbackCallout';
 
 export const ConnectorsOverview = () => {
   const { data, isLoading: connectorsLoading } = useConnectors();
@@ -42,14 +37,7 @@ export const ConnectorsOverview = () => {
     [consolePlugin]
   );
   const canManageConnectors = !data || data.canManageConnectors;
-  const {
-    application: { navigateToUrl },
-  } = useKibanaServices();
-  const [showCallOut, setShowCallOut] = useState(sessionStorage.getItem(CALLOUT_KEY) !== 'hidden');
-  const onDismiss = () => {
-    setShowCallOut(false);
-    sessionStorage.setItem(CALLOUT_KEY, 'hidden');
-  };
+
   const assetBasePath = useAssetBasePath();
 
   return (
@@ -116,39 +104,7 @@ export const ConnectorsOverview = () => {
       <EuiPageTemplate.Section restrictWidth color="subdued">
         <ConnectorPrivilegesCallout />
         {connectorsLoading || (data?.connectors || []).length > 0 ? (
-          <>
-            {showCallOut && (
-              <>
-                <EuiCallOut
-                  size="m"
-                  title="Coming soon Elastic managed connectors."
-                  iconType="pin"
-                  onDismiss={onDismiss}
-                >
-                  <p>
-                    {i18n.translate(
-                      'xpack.serverlessSearch.connectorsOverview.calloutDescription',
-                      {
-                        defaultMessage:
-                          "We're actively developing Elastic managed connectors, that won't require any self-managed infrastructure. You'll be able to handle all configuration in the UI. This will simplify syncing your data into a serverless Elasticsearch project.",
-                      }
-                    )}
-                  </p>
-                  <EuiButton
-                    data-test-subj="serverlessSearchConnectorsOverviewLinkButtonButton"
-                    color="primary"
-                    onClick={() =>
-                      navigateToUrl(`${BASE_CONNECTORS_PATH}/${ELASTIC_MANAGED_CONNECTOR_PATH}`)
-                    }
-                  >
-                    {LEARN_MORE_LABEL}
-                  </EuiButton>
-                </EuiCallOut>
-                <EuiSpacer size="m" />
-              </>
-            )}
-            <ConnectorsTable />
-          </>
+          <ConnectorsTable />
         ) : (
           <SelfManagedConnectorsEmptyPrompt />
         )}

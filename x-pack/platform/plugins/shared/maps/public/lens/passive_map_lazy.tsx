@@ -10,7 +10,7 @@ import { dynamic } from '@kbn/shared-ux-utility';
 import type { Props } from './passive_map';
 
 const Component = dynamic(async () => {
-  const { PassiveMap } = await import('./passive_map');
+  const { PassiveMap } = await import('../react_embeddable/embeddable_module');
   return {
     default: PassiveMap,
   };

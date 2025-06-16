@@ -13,7 +13,7 @@ import {
   ElasticsearchAssetType,
   type PackageInstallContext,
 } from '../../../../../common/types/models';
-import type { EsAssetReference } from '../../../../../common/types/models';
+import type { AssetsMap, EsAssetReference } from '../../../../../common/types/models';
 
 import { retryTransientEsErrors } from '../retry';
 
@@ -34,9 +34,19 @@ export const installMlModel = async (
   const mlModelPath = packageInstallContext.paths.find((path) => isMlModel(path));
 
   if (mlModelPath !== undefined) {
-    const content = getAssetFromAssetsMap(packageInstallContext.assetsMap, mlModelPath).toString(
-      'utf-8'
+    const mlModelAssetsMap: AssetsMap = new Map();
+    await packageInstallContext.archiveIterator.traverseEntries(
+      async (entry) => {
+        if (!entry.buffer) {
+          return;
+        }
+
+        mlModelAssetsMap.set(entry.path, entry.buffer);
+      },
+      (path) => path === mlModelPath
     );
+
+    const content = getAssetFromAssetsMap(mlModelAssetsMap, mlModelPath).toString('utf-8');
     const pathParts = mlModelPath.split('/');
     const modelId = pathParts[pathParts.length - 1].replace('.json', '');
 
@@ -86,8 +96,7 @@ async function handleMlModelInstall({
           {
             model_id: mlModel.installationName,
             defer_definition_decompression: true,
-            timeout: '45s',
-            // @ts-expect-error expects an object not a string
+            querystring: { timeout: '45s' },
             body: mlModel.content,
           },
           {

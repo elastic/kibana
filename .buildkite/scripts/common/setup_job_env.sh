@@ -140,6 +140,14 @@ EOF
   fi
 }
 
+# Set up Security GenAI keys
+{
+  if [[ "${FTR_SECURITY_GEN_AI:-}" =~ ^(1|true)$ ]]; then
+    echo "FTR_SECURITY_GEN_AI was set - exposing LLM connectors"
+    export KIBANA_SECURITY_GEN_AI_CONFIG="$(vault_get security-gen-ai config)"
+  fi
+}
+
 # Set up GCS Service Account for CDN
 {
   GCS_SA_CDN_KEY="$(vault_get gcs-sa-cdn-prod key)"
@@ -165,6 +173,17 @@ EOF
 
   TEST_FAILURES_ES_PASSWORD=$(vault_get failed_tests_reporter_es password)
   export TEST_FAILURES_ES_PASSWORD
+}
+
+# Scout reporter settings
+{
+  export SCOUT_REPORTER_ENABLED="${SCOUT_REPORTER_ENABLED:-false}"
+
+  SCOUT_REPORTER_ES_URL="$(vault_get scout/reporter/cluster-credentials es-url)"
+  export SCOUT_REPORTER_ES_URL
+
+  SCOUT_REPORTER_ES_API_KEY="$(vault_get scout/reporter/cluster-credentials es-api-key)"
+  export SCOUT_REPORTER_ES_API_KEY
 }
 
 # Setup Bazel Remote/Local Cache Credentials

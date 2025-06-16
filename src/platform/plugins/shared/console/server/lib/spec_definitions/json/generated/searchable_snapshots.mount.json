@@ -21,7 +21,7 @@
     "patterns": [
       "_snapshot/{repository}/{snapshot}/_mount"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/searchable-snapshots-api-mount-snapshot.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-searchable-snapshots-mount",
     "availability": {
       "stack": true,
       "serverless": false

@@ -11,11 +11,17 @@ import type {
   EuiDataGridControlColumn,
   EuiDataGridSorting,
 } from '@elastic/eui';
-import { EuiButtonIcon, EuiDataGrid, EuiScreenReaderOnly } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiDataGrid,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiScreenReaderOnly,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import type { TopNFunctions } from '@kbn/profiling-utils';
-import { getCalleeFunction, TopNFunctionSortField } from '@kbn/profiling-utils';
+import { TopNFunctionSortField, getCalleeFunction } from '@kbn/profiling-utils';
 import { last, orderBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import type { GridOnScrollProps } from 'react-window';
@@ -23,6 +29,7 @@ import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_est
 import { CPULabelWithHint } from '../cpu_label_with_hint';
 import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
 import { LabelWithHint } from '../label_with_hint';
+import { SearchFunctionsInput } from '../search_functions_input';
 import { FunctionRow } from './function_row';
 import type { IFunctionRow } from './utils';
 import { convertRowToFrame, getFunctionsRows, getTotalCount } from './utils';
@@ -45,6 +52,8 @@ interface Props {
   onChangeSort: (sorting: EuiDataGridSorting['columns'][0]) => void;
   dataTestSubj?: string;
   isEmbedded?: boolean;
+  searchFunctionName: string;
+  onSearchFunctionNameChange: (functionName: string) => void;
 }
 
 export const TopNFunctionsGrid = ({
@@ -65,6 +74,8 @@ export const TopNFunctionsGrid = ({
   onChangeSort,
   dataTestSubj = 'topNFunctionsGrid',
   isEmbedded = false,
+  searchFunctionName,
+  onSearchFunctionNameChange,
 }: Props) => {
   const [selectedRow, setSelectedRow] = useState<IFunctionRow | undefined>();
   const trackProfilingEvent = useUiTracker({ app: 'profiling' });
@@ -87,12 +98,14 @@ export const TopNFunctionsGrid = ({
       topNFunctions,
       totalSeconds,
       calculateImpactEstimates,
+      functionNameSearchQuery: searchFunctionName,
     });
   }, [
     baselineScaleFactor,
     calculateImpactEstimates,
     comparisonScaleFactor,
     comparisonTopNFunctions,
+    searchFunctionName,
     topNFunctions,
     totalSeconds,
   ]);
@@ -288,55 +301,59 @@ export const TopNFunctionsGrid = ({
         />
       );
     }
+
     return null;
   }
 
   return (
-    <>
-      <EuiDataGrid
-        data-test-subj={dataTestSubj}
-        aria-label={i18n.translate(
-          'xpack.profiling.topNFunctionsGrid.euiDataGrid.topNFunctionsLabel',
-          { defaultMessage: 'TopN functions' }
-        )}
-        columns={columns}
-        columnVisibility={{ visibleColumns, setVisibleColumns }}
-        rowCount={sortedRows.length}
-        renderCellValue={RenderCellValue}
-        sorting={{ columns: [{ id: sortField, direction: sortDirection }], onSort }}
-        leadingControlColumns={leadingControlColumns}
-        pagination={{
-          pageIndex,
-          pageSize: 100,
-          // Left it empty on purpose as it is a required property on the pagination
-          onChangeItemsPerPage: () => {},
-          onChangePage,
-          pageSizeOptions: [],
-        }}
-        rowHeightsOptions={{ defaultHeight: 'auto' }}
-        toolbarVisibility={{
-          showColumnSelector: false,
-          showKeyboardShortcuts: !isDifferentialView,
-          showDisplaySelector: !isDifferentialView,
-          showFullScreenSelector: showFullScreenSelector && !isDifferentialView,
-          showSortSelector: false,
-        }}
-        virtualizationOptions={{
-          onScroll,
-        }}
-      />
-      {selectedRow && (
-        <FrameInformationTooltip
-          compressed
-          onClose={() => {
-            setSelectedRow(undefined);
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <SearchFunctionsInput onChange={onSearchFunctionNameChange} value={searchFunctionName} />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiDataGrid
+          data-test-subj={dataTestSubj}
+          aria-label={i18n.translate(
+            'xpack.profiling.topNFunctionsGrid.euiDataGrid.topNFunctionsLabel',
+            { defaultMessage: 'TopN functions' }
+          )}
+          columns={columns}
+          columnVisibility={{ visibleColumns, setVisibleColumns }}
+          rowCount={sortedRows.length}
+          renderCellValue={RenderCellValue}
+          sorting={{ columns: [{ id: sortField, direction: sortDirection }], onSort }}
+          leadingControlColumns={leadingControlColumns}
+          pagination={{
+            pageIndex,
+            pageSize: 100,
+            // Left it empty on purpose as it is a required property on the pagination
+            onChangeItemsPerPage: () => {},
+            onChangePage,
+            pageSizeOptions: [],
           }}
-          frame={convertRowToFrame(selectedRow)}
-          totalSeconds={totalSeconds}
-          totalSamples={totalCount}
-          showSymbolsStatus={!isEmbedded}
+          rowHeightsOptions={{ defaultHeight: 'auto' }}
+          toolbarVisibility={{
+            showColumnSelector: false,
+            showKeyboardShortcuts: !isDifferentialView,
+            showDisplaySelector: !isDifferentialView,
+            showFullScreenSelector: showFullScreenSelector && !isDifferentialView,
+            showSortSelector: false,
+          }}
+          virtualizationOptions={{ onScroll }}
         />
-      )}
-    </>
+        {selectedRow && (
+          <FrameInformationTooltip
+            compressed
+            onClose={() => {
+              setSelectedRow(undefined);
+            }}
+            frame={convertRowToFrame(selectedRow)}
+            totalSeconds={totalSeconds}
+            totalSamples={totalCount}
+            showSymbolsStatus={!isEmbedded}
+          />
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

@@ -8,6 +8,7 @@
       "flat_settings": "__flag__",
       "local": "__flag__",
       "master_timeout": [
+        "30s",
         "-1",
         "0"
       ]
@@ -18,7 +19,7 @@
     "patterns": [
       "_template/{name}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-template-exists-v1.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-exists-template",
     "availability": {
       "stack": true,
       "serverless": false

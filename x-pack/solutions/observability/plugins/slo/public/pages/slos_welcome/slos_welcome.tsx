@@ -32,6 +32,7 @@ export function SlosWelcomePage() {
   const {
     application: { navigateToUrl },
     http: { basePath },
+    docLinks,
   } = useKibana().services;
 
   const { ObservabilityPageTemplate } = usePluginContext();
@@ -179,7 +180,7 @@ export function SlosWelcomePage() {
             &nbsp;
             <EuiLink
               data-test-subj="o11ySloListWelcomePromptReadTheDocsLink"
-              href="https://www.elastic.co/guide/en/observability/current/slo.html"
+              href={docLinks.links.observability.slo}
               target="_blank"
             >
               {i18n.translate('xpack.slo.sloList.welcomePrompt.learnMoreLink', {

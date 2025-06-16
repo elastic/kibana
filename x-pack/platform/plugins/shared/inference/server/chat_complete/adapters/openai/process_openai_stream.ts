@@ -12,19 +12,24 @@ import {
   ChatCompletionTokenCountEvent,
   createInferenceInternalError,
 } from '@kbn/inference-common';
-import { createTokenLimitReachedError } from '../../errors';
 import { tokenCountFromOpenAI, chunkFromOpenAI } from './from_openai';
+import { convertStreamError, type ErrorLine } from './stream_errors';
+import { createTokenLimitReachedError } from '../../../../common/chat_complete/errors';
 
 export function processOpenAIStream() {
   return (source: Observable<string>) => {
     return source.pipe(
       filter((line) => !!line && line !== '[DONE]'),
-      map(
-        (line) => JSON.parse(line) as OpenAI.ChatCompletionChunk | { error: { message: string } }
-      ),
+      map((line) => {
+        try {
+          return JSON.parse(line) as OpenAI.ChatCompletionChunk | ErrorLine;
+        } catch (e) {
+          throw createInferenceInternalError(`Failed to parse line "${line}": ${e.message}`);
+        }
+      }),
       tap((line) => {
         if ('error' in line) {
-          throw createInferenceInternalError(line.error.message);
+          throw convertStreamError(line);
         }
         if (
           'choices' in line &&

@@ -7,7 +7,7 @@
 
 export const ADD_COMMENT_INPUT = '[data-test-subj="add-comment"] textarea';
 
-export const BACK_TO_CASES_BTN = '[data-test-subj="backToCases"]';
+export const BACK_TO_CASES_BTN = 'a[title="Cases"]';
 
 export const DESCRIPTION_INPUT = '[data-test-subj="caseDescription"] textarea';
 

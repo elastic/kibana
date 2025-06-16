@@ -27,7 +27,7 @@ export const alertsFilterQuerySchema = schema.object({
   dsl: schema.maybe(schema.string()),
 });
 
-const rRuleSchema = schema.object({
+export const rRuleSchema = schema.object({
   dtstart: schema.string(),
   tzid: schema.string(),
   freq: schema.maybe(
@@ -55,15 +55,17 @@ const rRuleSchema = schema.object({
       schema.literal('SU'),
     ])
   ),
-  byweekday: schema.maybe(schema.arrayOf(schema.oneOf([schema.string(), schema.number()]))),
-  bymonth: schema.maybe(schema.number()),
-  bysetpos: schema.maybe(schema.number()),
-  bymonthday: schema.maybe(schema.number()),
-  byyearday: schema.maybe(schema.number()),
-  byweekno: schema.maybe(schema.number()),
-  byhour: schema.maybe(schema.number()),
-  byminute: schema.maybe(schema.number()),
-  bysecond: schema.maybe(schema.number()),
+  byweekday: schema.maybe(
+    schema.nullable(schema.arrayOf(schema.oneOf([schema.string(), schema.number()])))
+  ),
+  bymonth: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))),
+  bysetpos: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))),
+  bymonthday: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))),
+  byyearday: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))),
+  byweekno: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))),
+  byhour: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))),
+  byminute: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))),
+  bysecond: schema.maybe(schema.nullable(schema.arrayOf(schema.number()))),
 });
 
 const rawMaintenanceWindowEventsSchema = schema.object({

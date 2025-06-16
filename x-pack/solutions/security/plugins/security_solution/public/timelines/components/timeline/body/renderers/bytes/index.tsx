@@ -6,8 +6,6 @@
  */
 
 import React from 'react';
-
-import { DefaultDraggable } from '../../../../../../common/components/draggables';
 import { PreferenceFormattedBytes } from '../../../../../../common/components/formatted_bytes';
 
 export const BYTES_FORMAT = 'bytes';
@@ -17,33 +15,7 @@ export const BYTES_FORMAT = 'bytes';
  * duration of time, (e.g. `event.duration`)
  */
 export const Bytes = React.memo<{
-  contextId: string;
-  eventId: string;
-  fieldName: string;
-  fieldType: string;
-  isAggregatable: boolean;
-  isDraggable: boolean;
   value?: string | null;
-  scopeId?: string;
-}>(({ contextId, eventId, fieldName, fieldType, isAggregatable, isDraggable, value, scopeId }) =>
-  isDraggable ? (
-    <DefaultDraggable
-      id={`bytes-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
-      fieldType={fieldType}
-      isAggregatable={isAggregatable}
-      isDraggable={isDraggable}
-      // @ts-expect-error
-      name={name}
-      field={fieldName}
-      tooltipContent={null}
-      value={value}
-      scopeId={scopeId}
-    >
-      <PreferenceFormattedBytes value={`${value}`} />
-    </DefaultDraggable>
-  ) : (
-    <PreferenceFormattedBytes value={`${value}`} />
-  )
-);
+}>(({ value }) => <PreferenceFormattedBytes value={`${value}`} />);
 
 Bytes.displayName = 'Bytes';

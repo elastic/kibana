@@ -529,7 +529,7 @@
               "section": "def-public.OnSaveProps",
               "text": "OnSaveProps"
             },
-            ", \"newTitle\" | \"isTitleDuplicateConfirmed\" | \"onTitleDuplicate\">) => Promise<void>"
+            ", \"isTitleDuplicateConfirmed\" | \"newTitle\" | \"onTitleDuplicate\">) => Promise<void>"
           ],
           "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
           "deprecated": false,
@@ -551,7 +551,7 @@
                   "section": "def-public.OnSaveProps",
                   "text": "OnSaveProps"
                 },
-                ", \"newTitle\" | \"isTitleDuplicateConfirmed\" | \"onTitleDuplicate\">"
+                ", \"isTitleDuplicateConfirmed\" | \"newTitle\" | \"onTitleDuplicate\">"
               ],
               "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
               "deprecated": false,

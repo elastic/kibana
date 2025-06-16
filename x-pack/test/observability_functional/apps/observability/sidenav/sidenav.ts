@@ -9,9 +9,14 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { common, solutionNavigation } = getPageObjects(['common', 'solutionNavigation']);
+  const { common, solutionNavigation, header } = getPageObjects([
+    'common',
+    'solutionNavigation',
+    'header',
+  ]);
   const spaces = getService('spaces');
   const browser = getService('browser');
+  const testSubjects = getService('testSubjects');
 
   describe('o11y sidenav', () => {
     let cleanUp: () => Promise<unknown>;
@@ -24,6 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // Create a space with the observability solution and navigate to its home page
       ({ cleanUp, space: spaceCreated } = await spaces.create({ solution: 'oblt' }));
       await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
+      await header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
@@ -37,7 +43,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'AI Assistant' });
 
         // check Other Tools section
-        await solutionNavigation.sidenav.openPanel('otherTools', { button: 'link' });
+        await solutionNavigation.sidenav.openPanel('otherTools');
         {
           const isOpen = await solutionNavigation.sidenav.isPanelOpen('otherTools');
           expect(isOpen).to.be(true);
@@ -56,16 +62,31 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         // check Machine Learning section
-        await solutionNavigation.sidenav.openPanel('machine_learning-landing', { button: 'link' });
+        await solutionNavigation.sidenav.openPanel('machine_learning-landing');
         {
           const isOpen = await solutionNavigation.sidenav.isPanelOpen('machine_learning-landing');
           expect(isOpen).to.be(true);
         }
 
-        await solutionNavigation.sidenav.clickPanelLink('ml:suppliedConfigurations');
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          text: 'Supplied configurations',
+        await solutionNavigation.sidenav.expectLinkExists({
+          panelNavLinkId: 'ml:anomalyExplorer',
         });
+        await solutionNavigation.sidenav.expectLinkExists({
+          panelNavLinkId: 'ml:singleMetricViewer',
+        });
+
+        // Supplied configurations is under Management -> Anomaly Detection Jobs -> Click button mlSuppliedConfigurationsButton
+        await solutionNavigation.sidenav.openSection(
+          'observability_project_nav_footer.project_settings_project_nav'
+        );
+        await solutionNavigation.sidenav.clickLink({ navId: 'stack_management' });
+        await solutionNavigation.sidenav.expectLinkActive({ navId: 'stack_management' });
+        await solutionNavigation.sidenav.clickPanelLink('management:anomaly_detection');
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+          text: 'Anomaly Detection Jobs',
+        });
+        await testSubjects.click('mlSuppliedConfigurationsButton');
+        await testSubjects.existOrFail('mlPageSuppliedConfigurations');
       });
     });
   });

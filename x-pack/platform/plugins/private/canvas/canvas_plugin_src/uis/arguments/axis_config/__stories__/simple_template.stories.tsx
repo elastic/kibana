@@ -6,8 +6,8 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
+import type { Meta } from '@storybook/react';
 
 import { SimpleTemplate } from '../simple_template';
 
@@ -31,16 +31,21 @@ class Interactive extends React.Component<{}, typeof defaultValues> {
   }
 }
 
-storiesOf('arguments/AxisConfig', module)
-  .addDecorator((story) => (
-    <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
-  ))
-  .add('simple', () => <Interactive />);
+export default {
+  title: 'arguments/AxisConfig',
 
-storiesOf('arguments/AxisConfig/components', module)
-  .addDecorator((story) => (
-    <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
-  ))
-  .add('simple template', () => (
-    <SimpleTemplate onValueChange={action('onValueChange')} argValue={false} />
-  ));
+  decorators: [
+    (story) => <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>,
+  ],
+} as Meta;
+
+export const Simple = {
+  render: () => <Interactive />,
+  name: 'simple',
+};
+
+export const _SimpleTemplate = {
+  render: () => <SimpleTemplate onValueChange={action('onValueChange')} argValue={false} />,
+
+  name: 'simple template',
+};

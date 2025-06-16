@@ -151,9 +151,9 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
   };
 
   addNewCustomUrl = () => {
-    const { dashboard } = this.context.services;
+    const { dashboard, share } = this.context.services;
 
-    buildCustomUrlFromSettings(dashboard, this.state.editorSettings as CustomUrlSettings)
+    buildCustomUrlFromSettings(dashboard, share, this.state.editorSettings as CustomUrlSettings)
       .then((customUrl) => {
         const customUrls = [...this.state.customUrls, customUrl];
         this.props.setCustomUrls(customUrls);
@@ -179,6 +179,7 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
       data: { dataViews },
       dashboard,
       mlServices: { mlApi },
+      share,
     } = this.context.services;
     const dataViewId = this.state?.editorSettings?.kibanaSettings?.discoverIndexPatternId;
     const job = this.props.job;
@@ -191,33 +192,34 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
       })
       .then((dataView) => {
         const timefieldName = dataView?.timeFieldName ?? null;
-        buildCustomUrlFromSettings(dashboard, this.state.editorSettings as CustomUrlSettings).then(
-          (customUrl) => {
-            getTestUrl(
-              mlApi,
-              job,
-              customUrl,
-              timefieldName,
-              this.props.currentTimeFilter,
-              this.props.isPartialDFAJob
-            )
-              .then((testUrl) => {
-                openCustomUrlWindow(testUrl, customUrl, basePath.get());
-              })
-              .catch((error) => {
-                this.toastNotificationService!.displayErrorToast(
-                  error,
-                  i18n.translate(
-                    'xpack.ml.jobsList.editJobFlyout.customUrls.getTestUrlErrorNotificationMessage',
-                    {
-                      defaultMessage:
-                        'An error occurred obtaining the URL to test the configuration',
-                    }
-                  )
-                );
-              });
-          }
-        );
+        buildCustomUrlFromSettings(
+          dashboard,
+          share,
+          this.state.editorSettings as CustomUrlSettings
+        ).then((customUrl) => {
+          getTestUrl(
+            mlApi,
+            job,
+            customUrl,
+            timefieldName,
+            this.props.currentTimeFilter,
+            this.props.isPartialDFAJob
+          )
+            .then((testUrl) => {
+              openCustomUrlWindow(testUrl, customUrl, basePath.get());
+            })
+            .catch((error) => {
+              this.toastNotificationService!.displayErrorToast(
+                error,
+                i18n.translate(
+                  'xpack.ml.jobsList.editJobFlyout.customUrls.getTestUrlErrorNotificationMessage',
+                  {
+                    defaultMessage: 'An error occurred obtaining the URL to test the configuration',
+                  }
+                )
+              );
+            });
+        });
       })
       .catch((error) => {
         this.toastNotificationService!.displayErrorToast(

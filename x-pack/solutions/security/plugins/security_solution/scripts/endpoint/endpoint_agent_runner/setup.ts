@@ -28,6 +28,7 @@ export const setupAll = async (options: StartRuntimeServicesOptions) => {
   await startFleetServerIfNecessary({
     kbnClient,
     logger: log,
+    version: options.version,
   });
 
   await enrollEndpointHost();

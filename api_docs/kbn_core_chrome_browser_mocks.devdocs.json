@@ -14,7 +14,7 @@
         "tags": [],
         "label": "chromeServiceMock",
         "description": [],
-        "path": "packages/core/chrome/core-chrome-browser-mocks/src/chrome_service.mock.ts",
+        "path": "src/core/packages/chrome/browser-mocks/src/chrome_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,7 +28,7 @@
             "signature": [
               "() => jest.Mocked<ChromeServiceContract>"
             ],
-            "path": "packages/core/chrome/core-chrome-browser-mocks/src/chrome_service.mock.ts",
+            "path": "src/core/packages/chrome/browser-mocks/src/chrome_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -54,7 +54,7 @@
               "InternalChromeStart",
               ">"
             ],
-            "path": "packages/core/chrome/core-chrome-browser-mocks/src/chrome_service.mock.ts",
+            "path": "src/core/packages/chrome/browser-mocks/src/chrome_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

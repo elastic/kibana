@@ -118,7 +118,6 @@ export class EndpointMetadataService {
   async findHostMetadataForFleetAgents(fleetAgentIds: string[]): Promise<HostMetadata[]> {
     const query = getESQueryHostMetadataByFleetAgentIds(fleetAgentIds);
 
-    // @ts-expect-error `size` not defined as top level property when using `typesWithBodyKey`
     query.size = fleetAgentIds.length;
 
     const searchResult = await this.esClient

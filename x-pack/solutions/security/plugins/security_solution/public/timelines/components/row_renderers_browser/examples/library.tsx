@@ -22,7 +22,6 @@ const LibraryExampleComponent: React.FC = () => {
     <>
       {libraryRowRenderer.renderRow({
         data: demoEndpointLibraryLoadEvent,
-        isDraggable: false,
         scopeId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
       })}
     </>

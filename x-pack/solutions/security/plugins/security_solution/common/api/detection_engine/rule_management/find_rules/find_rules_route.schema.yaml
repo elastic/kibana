@@ -22,7 +22,18 @@ paths:
               type: string
         - name: 'filter'
           in: query
-          description: Search query
+          description: |
+            Search query
+
+            Filters the returned results according to the value of the specified field, using the alert.attributes.<field name>:<field value> syntax, where <field name> can be:
+            - name
+            - enabled
+            - tags
+            - createdBy
+            - interval
+            - updatedBy
+            > info
+            > Even though the JSON rule object uses created_by and updated_by fields, you must use createdBy and updatedBy fields in the filter.
           required: false
           schema:
             type: string
@@ -54,10 +65,28 @@ paths:
             type: integer
             minimum: 0
             default: 20
-
+        - name: gaps_range_start
+          in: query
+          description: Gaps range start
+          required: false
+          schema:
+            type: string
+        - name: gaps_range_end
+          in: query
+          description: Gaps range end
+          required: false
+          schema:
+            type: string
+      x-codeSamples:
+        - lang: cURL
+          source: |
+            curl -X GET "localhost:5601/api/detection_engine/rules/_find?page=1&per_page=5&sort_field=enabled&sort_order=asc&filter=alert.attributes.name:windows" -H 'kbn-xsrf: true'
       responses:
         '200':
-          description: Successful response
+          description: |
+            Successful response
+            > info
+            > These fields are under development and their usage or schema may change: execution_summary.
           content:
             application/json:
               schema:
@@ -78,6 +107,73 @@ paths:
                   - perPage
                   - total
                   - data
+              examples:
+                example1:
+                  value:
+                    page: 1
+                    perPage: 5
+                    total: 4
+                    data:
+                      - created_at: '2020-02-02T10:05:19.613Z'
+                        updated_at: '2020-02-02T10:05:19.830Z'
+                        created_by: 'elastic'
+                        description: 'Identifies a PowerShell process launched by either cscript.exe or wscript.exe. Observing Windows scripting processes executing a PowerShell script, may be indicative of malicious activity.'
+                        enabled: false
+                        false_positives: []
+                        from: 'now-6m'
+                        id: '89761517-fdb0-4223-b67b-7621acc48f9e'
+                        immutable: true
+                        index:
+                          - 'winlogbeat-*'
+                        interval: '5m'
+                        rule_id: 'f545ff26-3c94-4fd0-bd33-3c7f95a3a0fc'
+                        language: 'kuery'
+                        max_signals: 33
+                        risk_score: 21
+                        name: 'Windows Script Executing PowerShell'
+                        query: 'event.action:"Process Create (rule: ProcessCreate)" and process.parent.name:("wscript.exe" or "cscript.exe") and process.name:"powershell.exe"'
+                        references: []
+                        severity: 'low'
+                        updated_by: 'elastic'
+                        tags:
+                          - 'Elastic'
+                          - 'Windows'
+                        to: 'now'
+                        related_integrations:
+                          - package: 'o365'
+                            version: '^2.3.2'
+                        required_fields:
+                          - name: 'event.action'
+                            type: 'keyword'
+                            ecs: true
+                          - name: 'process.name'
+                            type: 'keyword'
+                            ecs: true
+                          - name: 'process.parent.name'
+                            type: 'keyword'
+                            ecs: true
+                        setup: ''
+                        type: 'query'
+                        threat:
+                          - framework: 'MITRE ATT&CK'
+                            tactic:
+                              id: 'TA0002'
+                              name: 'Execution'
+                              reference: 'https://attack.mitre.org/tactics/TA0002/'
+                            technique:
+                              - id: 'T1193'
+                                name: 'Spearphishing Attachment'
+                                reference: 'https://attack.mitre.org/techniques/T1193/'
+                        execution_summary:
+                          last_execution:
+                            date: '2022-03-23T16:06:12.787Z'
+                            status: 'partial failure'
+                            status_order: 20
+                            message: 'This rule attempted to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, but no matching index was found.'
+                            metrics:
+                              total_search_duration_ms: 135
+                              total_indexing_duration_ms: 15
+                              execution_gap_duration_s: 0
 
 components:
   schemas:

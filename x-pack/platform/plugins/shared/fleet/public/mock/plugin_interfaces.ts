@@ -30,6 +30,7 @@ export const createStartMock = (extensionsStorage: UIExtensionsStorage = {}): Mo
         addFleetServers: true,
       },
       integrations: {
+        all: true,
         readPackageInfo: true,
         readInstalledPackages: true,
         installPackages: true,

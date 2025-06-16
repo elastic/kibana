@@ -8,13 +8,13 @@
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
-  SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME,
-  SLO_COMPONENT_TEMPLATE_SETTINGS_NAME,
-  SLO_INDEX_TEMPLATE_NAME,
+  SLI_COMPONENT_TEMPLATE_MAPPINGS_NAME,
+  SLI_COMPONENT_TEMPLATE_SETTINGS_NAME,
+  SLI_INDEX_TEMPLATE_NAME,
   SLO_RESOURCES_VERSION,
-  SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME,
-  SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME,
-  SLO_SUMMARY_INDEX_TEMPLATE_NAME,
+  SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME,
+  SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME,
+  SUMMARY_INDEX_TEMPLATE_NAME,
 } from '../../common/constants';
 import { DefaultResourceInstaller } from './resource_installer';
 
@@ -24,7 +24,7 @@ describe('resourceInstaller', () => {
     mockClusterClient.cluster.getComponentTemplate.mockResponse({
       component_templates: [
         {
-          name: SLO_INDEX_TEMPLATE_NAME,
+          name: SLI_INDEX_TEMPLATE_NAME,
           component_template: {
             _meta: {
               version: 2,
@@ -39,10 +39,10 @@ describe('resourceInstaller', () => {
     mockClusterClient.indices.getIndexTemplate.mockResponse({
       index_templates: [
         {
-          name: SLO_INDEX_TEMPLATE_NAME,
+          name: SLI_INDEX_TEMPLATE_NAME,
           index_template: {
-            index_patterns: SLO_INDEX_TEMPLATE_NAME,
-            composed_of: [SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME],
+            index_patterns: SLI_INDEX_TEMPLATE_NAME,
+            composed_of: [SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME],
             _meta: {
               version: 2,
             },
@@ -58,28 +58,28 @@ describe('resourceInstaller', () => {
     expect(mockClusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
     expect(mockClusterClient.cluster.putComponentTemplate).toHaveBeenNthCalledWith(
       1,
-      expect.objectContaining({ name: SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME })
+      expect.objectContaining({ name: SLI_COMPONENT_TEMPLATE_MAPPINGS_NAME })
     );
     expect(mockClusterClient.cluster.putComponentTemplate).toHaveBeenNthCalledWith(
       2,
-      expect.objectContaining({ name: SLO_COMPONENT_TEMPLATE_SETTINGS_NAME })
+      expect.objectContaining({ name: SLI_COMPONENT_TEMPLATE_SETTINGS_NAME })
     );
     expect(mockClusterClient.cluster.putComponentTemplate).toHaveBeenNthCalledWith(
       3,
-      expect.objectContaining({ name: SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME })
+      expect.objectContaining({ name: SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME })
     );
     expect(mockClusterClient.cluster.putComponentTemplate).toHaveBeenNthCalledWith(
       4,
-      expect.objectContaining({ name: SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME })
+      expect.objectContaining({ name: SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME })
     );
     expect(mockClusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(2);
     expect(mockClusterClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
       1,
-      expect.objectContaining({ name: SLO_INDEX_TEMPLATE_NAME })
+      expect.objectContaining({ name: SLI_INDEX_TEMPLATE_NAME })
     );
     expect(mockClusterClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
       2,
-      expect.objectContaining({ name: SLO_SUMMARY_INDEX_TEMPLATE_NAME })
+      expect.objectContaining({ name: SUMMARY_INDEX_TEMPLATE_NAME })
     );
   });
 
@@ -88,7 +88,7 @@ describe('resourceInstaller', () => {
     mockClusterClient.cluster.getComponentTemplate.mockResponse({
       component_templates: [
         {
-          name: SLO_INDEX_TEMPLATE_NAME,
+          name: SLI_INDEX_TEMPLATE_NAME,
           component_template: {
             _meta: {
               version: SLO_RESOURCES_VERSION,
@@ -103,10 +103,10 @@ describe('resourceInstaller', () => {
     mockClusterClient.indices.getIndexTemplate.mockResponse({
       index_templates: [
         {
-          name: SLO_INDEX_TEMPLATE_NAME,
+          name: SLI_INDEX_TEMPLATE_NAME,
           index_template: {
-            index_patterns: SLO_INDEX_TEMPLATE_NAME,
-            composed_of: [SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME],
+            index_patterns: SLI_INDEX_TEMPLATE_NAME,
+            composed_of: [SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME],
             _meta: {
               version: SLO_RESOURCES_VERSION,
             },

@@ -8,8 +8,10 @@
  */
 
 import { EuiErrorBoundary, EuiFlexGroup, EuiPanel, htmlIdGenerator } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { PanelLoader } from '@kbn/panel-loader';
 import {
+  PublishesTitle,
   apiHasParentApi,
   apiPublishesViewMode,
   useBatchedOptionalPublishingSubjects,
@@ -18,8 +20,9 @@ import classNames from 'classnames';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { PresentationPanelHeader } from './panel_header/presentation_panel_header';
 import { PresentationPanelHoverActions } from './panel_header/presentation_panel_hover_actions';
-import { PresentationPanelError } from './presentation_panel_error';
+import { PresentationPanelErrorInternal } from './presentation_panel_error_internal';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './types';
+import { usePanelErrorCss } from './use_panel_error_css';
 
 export const PresentationPanelInternal = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
@@ -40,15 +43,16 @@ export const PresentationPanelInternal = <
 
   setDragHandles,
 }: PresentationPanelInternalProps<ApiType, ComponentPropsType>) => {
+  const panelErrorCss = usePanelErrorCss();
   const [api, setApi] = useState<ApiType | null>(null);
   const headerId = useMemo(() => htmlIdGenerator()(), []);
 
   const dragHandles = useRef<{ [dragHandleKey: string]: HTMLElement | null }>({});
 
-  const viewModeSubject = (() => {
-    if (apiPublishesViewMode(api)) return api.viewMode;
-    if (apiHasParentApi(api) && apiPublishesViewMode(api.parentApi)) return api.parentApi.viewMode;
-  })();
+  const viewModeSubject = useMemo(() => {
+    if (apiPublishesViewMode(api)) return api.viewMode$;
+    if (apiHasParentApi(api) && apiPublishesViewMode(api.parentApi)) return api.parentApi.viewMode$;
+  }, [api]);
 
   const [
     dataLoading,
@@ -61,20 +65,20 @@ export const PresentationPanelInternal = <
     rawViewMode,
     parentHidePanelTitle,
   ] = useBatchedOptionalPublishingSubjects(
-    api?.dataLoading,
-    api?.blockingError,
-    api?.panelTitle,
-    api?.hidePanelTitle,
-    api?.panelDescription,
-    api?.defaultPanelTitle,
-    api?.defaultPanelDescription,
+    api?.dataLoading$,
+    api?.blockingError$,
+    api?.title$,
+    api?.hideTitle$,
+    api?.description$,
+    api?.defaultTitle$,
+    api?.defaultDescription$,
     viewModeSubject,
-    api?.parentApi?.hidePanelTitle
+    (api?.parentApi as Partial<PublishesTitle>)?.hideTitle$
   );
   const viewMode = rawViewMode ?? 'view';
 
   const [initialLoadComplete, setInitialLoadComplete] = useState(!dataLoading);
-  if (!initialLoadComplete && (dataLoading === false || (api && !api.dataLoading))) {
+  if (!initialLoadComplete && (dataLoading === false || (api && !api.dataLoading$))) {
     setInitialLoadComplete(true);
   }
 
@@ -125,6 +129,7 @@ export const PresentationPanelInternal = <
         aria-labelledby={headerId}
         data-test-subj="embeddablePanel"
         {...contentAttrs}
+        css={styles.embPanel}
       >
         {!hideHeader && api && (
           <PresentationPanelHeader
@@ -143,15 +148,19 @@ export const PresentationPanelInternal = <
         {blockingError && api && (
           <EuiFlexGroup
             alignItems="center"
-            className="eui-fullHeight embPanel__error"
+            css={panelErrorCss}
+            className="eui-fullHeight"
             data-test-subj="embeddableError"
             justifyContent="center"
           >
-            <PresentationPanelError api={api} error={blockingError} />
+            <PresentationPanelErrorInternal api={api} error={blockingError} />
           </EuiFlexGroup>
         )}
         {!initialLoadComplete && <PanelLoader />}
-        <div className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}>
+        <div
+          className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}
+          css={styles.embPanelContent}
+        >
           <EuiErrorBoundary>
             <Component
               {...(componentProps as React.ComponentProps<typeof Component>)}
@@ -164,4 +173,32 @@ export const PresentationPanelInternal = <
       </EuiPanel>
     </PresentationPanelHoverActions>
   );
+};
+
+/**
+ * if there is no reliance on EUI theme, then it is more performant to store styles as minimizable objects
+ * outside of the React component so that it is not parsed on every render
+ */
+const styles = {
+  embPanel: css({
+    zIndex: 'auto',
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    position: 'relative',
+    overflow: 'hidden',
+  }),
+  embPanelContent: css({
+    '&.embPanel__content': {
+      display: 'flex',
+      flex: '1 1 100%',
+      zIndex: 1,
+      minHeight: 0, // Absolute must for Firefox to scroll contents
+      overflow: 'hidden',
+    },
+    '&.embPanel__content--hidden, &[data-error]': {
+      display: 'none',
+    },
+  }),
 };

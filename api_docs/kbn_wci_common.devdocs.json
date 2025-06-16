@@ -1,0 +1,812 @@
+{
+  "id": "@kbn/wci-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/wci-common",
+        "id": "def-common.buildToolName",
+        "type": "Function",
+        "tags": [],
+        "label": "buildToolName",
+        "description": [
+          "\nGenerates a unique tool name based on the integrationId and base tool name.\nThis is used by the orchestration layer to generate \"uuids\" for each integration/tool tuples."
+        ],
+        "signature": [
+          "({ integrationId, toolName }: ",
+          {
+            "pluginId": "@kbn/wci-common",
+            "scope": "common",
+            "docId": "kibKbnWciCommonPluginApi",
+            "section": "def-common.ToolNameAndIntegrationId",
+            "text": "ToolNameAndIntegrationId"
+          },
+          ") => string"
+        ],
+        "path": "x-pack/solutions/chat/packages/wci-common/src/integration_tools.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.buildToolName.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ integrationId, toolName }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/wci-common",
+                "scope": "common",
+                "docId": "kibKbnWciCommonPluginApi",
+                "section": "def-common.ToolNameAndIntegrationId",
+                "text": "ToolNameAndIntegrationId"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/integration_tools.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wci-common",
+        "id": "def-common.contentRefBuilder",
+        "type": "Function",
+        "tags": [],
+        "label": "contentRefBuilder",
+        "description": [],
+        "signature": [
+          "({ sourceId, sourceType }: { sourceType: ",
+          {
+            "pluginId": "@kbn/wci-common",
+            "scope": "common",
+            "docId": "kibKbnWciCommonPluginApi",
+            "section": "def-common.ContentRefSourceType",
+            "text": "ContentRefSourceType"
+          },
+          "; sourceId: string; }) => (contentId: string) => ",
+          {
+            "pluginId": "@kbn/wci-common",
+            "scope": "common",
+            "docId": "kibKbnWciCommonPluginApi",
+            "section": "def-common.ContentRef",
+            "text": "ContentRef"
+          }
+        ],
+        "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.contentRefBuilder.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ sourceId, sourceType }",
+            "description": [],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/wci-common",
+                "id": "def-common.contentRefBuilder.$1.sourceType",
+                "type": "string",
+                "tags": [],
+                "label": "sourceType",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/wci-common",
+                    "scope": "common",
+                    "docId": "kibKbnWciCommonPluginApi",
+                    "section": "def-common.ContentRefSourceType",
+                    "text": "ContentRefSourceType"
+                  }
+                ],
+                "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/wci-common",
+                "id": "def-common.contentRefBuilder.$1.sourceId",
+                "type": "string",
+                "tags": [],
+                "label": "sourceId",
+                "description": [],
+                "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wci-common",
+        "id": "def-common.parseContentRef",
+        "type": "Function",
+        "tags": [],
+        "label": "parseContentRef",
+        "description": [
+          "\nParses a serialized ref back."
+        ],
+        "signature": [
+          "(serializedRef: string) => ",
+          {
+            "pluginId": "@kbn/wci-common",
+            "scope": "common",
+            "docId": "kibKbnWciCommonPluginApi",
+            "section": "def-common.ContentRef",
+            "text": "ContentRef"
+          }
+        ],
+        "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.parseContentRef.$1",
+            "type": "string",
+            "tags": [],
+            "label": "serializedRef",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wci-common",
+        "id": "def-common.parseToolName",
+        "type": "Function",
+        "tags": [],
+        "label": "parseToolName",
+        "description": [],
+        "signature": [
+          "(fullToolName: string) => ",
+          {
+            "pluginId": "@kbn/wci-common",
+            "scope": "common",
+            "docId": "kibKbnWciCommonPluginApi",
+            "section": "def-common.ToolNameAndIntegrationId",
+            "text": "ToolNameAndIntegrationId"
+          }
+        ],
+        "path": "x-pack/solutions/chat/packages/wci-common/src/integration_tools.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.parseToolName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "fullToolName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/integration_tools.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wci-common",
+        "id": "def-common.serializeContentRef",
+        "type": "Function",
+        "tags": [],
+        "label": "serializeContentRef",
+        "description": [
+          "\nSerialize a {@link ContentRef} to a string representation."
+        ],
+        "signature": [
+          "(ref: ",
+          {
+            "pluginId": "@kbn/wci-common",
+            "scope": "common",
+            "docId": "kibKbnWciCommonPluginApi",
+            "section": "def-common.ContentRef",
+            "text": "ContentRef"
+          },
+          ") => string"
+        ],
+        "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.serializeContentRef.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "ref",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/wci-common",
+                "scope": "common",
+                "docId": "kibKbnWciCommonPluginApi",
+                "section": "def-common.ContentRef",
+                "text": "ContentRef"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/wci-common",
+        "id": "def-common.ContentRef",
+        "type": "Interface",
+        "tags": [],
+        "label": "ContentRef",
+        "description": [
+          "\nRepresents a reference to a content"
+        ],
+        "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.ContentRef.sourceType",
+            "type": "string",
+            "tags": [],
+            "label": "sourceType",
+            "description": [
+              "\nType of the source"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/wci-common",
+                "scope": "common",
+                "docId": "kibKbnWciCommonPluginApi",
+                "section": "def-common.ContentRefSourceType",
+                "text": "ContentRefSourceType"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.ContentRef.sourceId",
+            "type": "string",
+            "tags": [],
+            "label": "sourceId",
+            "description": [
+              "\nId of the source"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.ContentRef.contentId",
+            "type": "string",
+            "tags": [],
+            "label": "contentId",
+            "description": [
+              "\nUnique ID this content (for this sourceId)."
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wci-common",
+        "id": "def-common.IndexSourceDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "IndexSourceDefinition",
+        "description": [
+          "\nRepresents a definition for an index source.\n\nThe definition contains all what's necessary for the system to build\nthe MCP tool that will then be used by the LLM to query the data."
+        ],
+        "path": "x-pack/solutions/chat/packages/wci-common/src/index_source.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.IndexSourceDefinition.index",
+            "type": "string",
+            "tags": [],
+            "label": "index",
+            "description": [
+              "\nID of the index that is going to be used for this index source"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/index_source.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.IndexSourceDefinition.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "\nA short description of what the index contains"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/index_source.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.IndexSourceDefinition.queryFields",
+            "type": "Array",
+            "tags": [],
+            "label": "queryFields",
+            "description": [
+              "\nList of fields that will be used for fulltext search."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/wci-common",
+                "scope": "common",
+                "docId": "kibKbnWciCommonPluginApi",
+                "section": "def-common.IndexSourceQueryFields",
+                "text": "IndexSourceQueryFields"
+              },
+              "[]"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/index_source.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.IndexSourceDefinition.filterFields",
+            "type": "Array",
+            "tags": [],
+            "label": "filterFields",
+            "description": [
+              "\nList of possible filters when querying for the data"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/wci-common",
+                "scope": "common",
+                "docId": "kibKbnWciCommonPluginApi",
+                "section": "def-common.IndexSourceFilter",
+                "text": "IndexSourceFilter"
+              },
+              "[]"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/index_source.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.IndexSourceDefinition.contentFields",
+            "type": "Array",
+            "tags": [],
+            "label": "contentFields",
+            "description": [
+              "\nList of fields that will be returned as content by the tool"
+            ],
+            "signature": [
+              "IndexSourceContentFields",
+              "[]"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/index_source.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wci-common",
+        "id": "def-common.IndexSourceFilter",
+        "type": "Interface",
+        "tags": [],
+        "label": "IndexSourceFilter",
+        "description": [],
+        "path": "x-pack/solutions/chat/packages/wci-common/src/index_source.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.IndexSourceFilter.field",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [
+              "\nThe name / path to the field\nE.g. `content` or `reference.id`"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/index_source.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.IndexSourceFilter.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nThe type of field. Should be the same type as defined in the mappings"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/index_source.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.IndexSourceFilter.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "\nA human-readable description for this filter."
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/index_source.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.IndexSourceFilter.asEnum",
+            "type": "boolean",
+            "tags": [],
+            "label": "asEnum",
+            "description": [
+              "\nIf true, the field's top values will be fetched at query time,\nand added to the description. The parameter will also be restricted\nto only allow those values"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/index_source.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wci-common",
+        "id": "def-common.IndexSourceQueryFields",
+        "type": "Interface",
+        "tags": [],
+        "label": "IndexSourceQueryFields",
+        "description": [
+          "\nRepresents a field that will be used for full-text search."
+        ],
+        "path": "x-pack/solutions/chat/packages/wci-common/src/index_source.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.IndexSourceQueryFields.field",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [
+              "\nThe name / path to the field\nE.g. `content` or `reference.id`"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/index_source.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.IndexSourceQueryFields.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nThe type of field. Should be the same type as defined in the mappings"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/index_source.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wci-common",
+        "id": "def-common.Integration",
+        "type": "Interface",
+        "tags": [],
+        "label": "Integration",
+        "description": [],
+        "path": "x-pack/solutions/chat/packages/wci-common/src/integrations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.Integration.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/integrations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.Integration.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/integrations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.Integration.type",
+            "type": "Enum",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/wci-common",
+                "scope": "common",
+                "docId": "kibKbnWciCommonPluginApi",
+                "section": "def-common.IntegrationType",
+                "text": "IntegrationType"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/integrations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.Integration.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/integrations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.Integration.configuration",
+            "type": "Object",
+            "tags": [],
+            "label": "configuration",
+            "description": [],
+            "signature": [
+              "{ [x: string]: any; }"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/integrations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.Integration.createdAt",
+            "type": "string",
+            "tags": [],
+            "label": "createdAt",
+            "description": [],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/integrations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.Integration.updatedAt",
+            "type": "string",
+            "tags": [],
+            "label": "updatedAt",
+            "description": [],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/integrations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.Integration.createdBy",
+            "type": "string",
+            "tags": [],
+            "label": "createdBy",
+            "description": [],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/integrations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wci-common",
+        "id": "def-common.ToolCall",
+        "type": "Interface",
+        "tags": [],
+        "label": "ToolCall",
+        "description": [
+          "\nRepresents a tool call that was requested by the assistant"
+        ],
+        "path": "x-pack/solutions/chat/packages/wci-common/src/tool_calls.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.ToolCall.toolCallId",
+            "type": "string",
+            "tags": [],
+            "label": "toolCallId",
+            "description": [
+              "\nThe id the of tool call"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/tool_calls.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.ToolCall.toolName",
+            "type": "string",
+            "tags": [],
+            "label": "toolName",
+            "description": [
+              "\nThe complete tool name (containing the integrationId)"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/tool_calls.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.ToolCall.args",
+            "type": "Object",
+            "tags": [],
+            "label": "args",
+            "description": [
+              "\nArguments that were used to call the tool"
+            ],
+            "signature": [
+              "{ [x: string]: any; }"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/tool_calls.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wci-common",
+        "id": "def-common.ToolNameAndIntegrationId",
+        "type": "Interface",
+        "tags": [],
+        "label": "ToolNameAndIntegrationId",
+        "description": [],
+        "path": "x-pack/solutions/chat/packages/wci-common/src/integration_tools.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.ToolNameAndIntegrationId.integrationId",
+            "type": "string",
+            "tags": [],
+            "label": "integrationId",
+            "description": [],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/integration_tools.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.ToolNameAndIntegrationId.toolName",
+            "type": "string",
+            "tags": [],
+            "label": "toolName",
+            "description": [],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/integration_tools.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/wci-common",
+        "id": "def-common.IntegrationType",
+        "type": "Enum",
+        "tags": [],
+        "label": "IntegrationType",
+        "description": [],
+        "path": "x-pack/solutions/chat/packages/wci-common/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/wci-common",
+        "id": "def-common.ContentRefSourceType",
+        "type": "string",
+        "tags": [],
+        "label": "ContentRefSourceType",
+        "description": [],
+        "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wci-common",
+        "id": "def-common.IntegrationConfiguration",
+        "type": "Type",
+        "tags": [],
+        "label": "IntegrationConfiguration",
+        "description": [],
+        "signature": [
+          "{ [x: string]: any; }"
+        ],
+        "path": "x-pack/solutions/chat/packages/wci-common/src/integrations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

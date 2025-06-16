@@ -19,13 +19,12 @@ import type { Document } from '@langchain/core/documents';
 import { Moment } from 'moment';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import moment from 'moment/moment';
-import { uniq } from 'lodash/fp';
 
-import {
-  ATTACK_DISCOVERY_ERROR_EVENT,
-  ATTACK_DISCOVERY_SUCCESS_EVENT,
-} from '../../../lib/telemetry/event_based_telemetry';
 import { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
+import {
+  reportAttackDiscoveryGenerationFailure,
+  reportAttackDiscoveryGenerationSuccess,
+} from './telemetry';
 
 export const attackDiscoveryStatus: { [k: string]: AttackDiscoveryStatus } = {
   canceled: 'canceled',
@@ -132,30 +131,38 @@ export const updateAttackDiscoveries = async ({
   anonymizedAlerts,
   apiConfig,
   attackDiscoveries,
-  attackDiscoveryId,
+  executionUuid,
   authenticatedUser,
   dataClient,
+  hasFilter,
+  end,
   latestReplacements,
   logger,
   size,
+  start,
   startTime,
   telemetry,
 }: {
   anonymizedAlerts: Document[];
   apiConfig: ApiConfig;
   attackDiscoveries: AttackDiscovery[] | null;
-  attackDiscoveryId: string;
+  executionUuid: string;
   authenticatedUser: AuthenticatedUser;
   dataClient: AttackDiscoveryDataClient;
+  end?: string;
+  hasFilter: boolean;
   latestReplacements: Replacements;
   logger: Logger;
   size: number;
+  // start of attack discovery time range
+  start?: string;
+  // start time of attack discovery
   startTime: Moment;
   telemetry: AnalyticsServiceSetup;
 }) => {
   try {
     const currentAd = await dataClient.getAttackDiscovery({
-      id: attackDiscoveryId,
+      id: executionUuid,
       authenticatedUser,
     });
     if (currentAd === null || currentAd?.status === 'canceled') {
@@ -176,7 +183,7 @@ export const updateAttackDiscoveries = async ({
               date: new Date().toISOString(),
             }),
           }),
-      id: attackDiscoveryId,
+      id: executionUuid,
       replacements: latestReplacements,
       backingIndex: currentAd.backingIndex,
     };
@@ -185,29 +192,25 @@ export const updateAttackDiscoveries = async ({
       attackDiscoveryUpdateProps: updateProps,
       authenticatedUser,
     });
-    telemetry.reportEvent(ATTACK_DISCOVERY_SUCCESS_EVENT.eventType, {
-      actionTypeId: apiConfig.actionTypeId,
-      alertsContextCount: updateProps.alertsContextCount,
-      alertsCount:
-        uniq(
-          updateProps.attackDiscoveries?.flatMap(
-            (attackDiscovery: AttackDiscovery) => attackDiscovery.alertIds
-          )
-        ).length ?? 0,
-      configuredAlertsCount: size,
-      discoveriesGenerated: updateProps.attackDiscoveries?.length ?? 0,
+
+    reportAttackDiscoveryGenerationSuccess({
+      alertsContextCount,
+      apiConfig,
+      attackDiscoveries,
       durationMs,
-      model: apiConfig.model,
-      provider: apiConfig.provider,
+      end,
+      hasFilter,
+      size,
+      start,
+      telemetry,
     });
   } catch (updateErr) {
     logger.error(updateErr);
     const updateError = transformError(updateErr);
-    telemetry.reportEvent(ATTACK_DISCOVERY_ERROR_EVENT.eventType, {
-      actionTypeId: apiConfig.actionTypeId,
+    reportAttackDiscoveryGenerationFailure({
+      apiConfig,
       errorMessage: updateError.message,
-      model: apiConfig.model,
-      provider: apiConfig.provider,
+      telemetry,
     });
   }
 };

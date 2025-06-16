@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { fetchClusterHealth } from './fetch_cluster_health';
 
@@ -74,33 +74,31 @@ describe('fetchClusterHealth', () => {
         'hits.hits._source.elasticsearch.cluster.id',
         'hits.hits._index',
       ],
-      body: {
-        size: 2,
-        sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
-        query: {
-          bool: {
-            filter: [
-              { terms: { cluster_uuid: ['1', '2'] } },
-              {
-                bool: {
-                  should: [
-                    { term: { type: 'cluster_stats' } },
-                    { term: { 'metricset.name': 'cluster_stats' } },
-                    {
-                      term: {
-                        'data_stream.dataset': 'elasticsearch.stack_monitoring.cluster_stats',
-                      },
+      size: 2,
+      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
+      query: {
+        bool: {
+          filter: [
+            { terms: { cluster_uuid: ['1', '2'] } },
+            {
+              bool: {
+                should: [
+                  { term: { type: 'cluster_stats' } },
+                  { term: { 'metricset.name': 'cluster_stats' } },
+                  {
+                    term: {
+                      'data_stream.dataset': 'elasticsearch.stack_monitoring.cluster_stats',
                     },
-                  ],
-                  minimum_should_match: 1,
-                },
+                  },
+                ],
+                minimum_should_match: 1,
               },
-              { range: { timestamp: { gte: 'now-1h' } } },
-            ],
-          },
+            },
+            { range: { timestamp: { gte: 'now-1h' } } },
+          ],
         },
-        collapse: { field: 'cluster_uuid' },
       },
+      collapse: { field: 'cluster_uuid' },
     });
   });
 

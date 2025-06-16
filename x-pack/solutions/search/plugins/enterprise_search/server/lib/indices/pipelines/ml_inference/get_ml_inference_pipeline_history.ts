@@ -8,7 +8,7 @@
 import {
   AggregationsMultiBucketAggregateBase,
   AggregationsStringRareTermsBucketKeys,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 
 import { ElasticsearchClient } from '@kbn/core/server';
 

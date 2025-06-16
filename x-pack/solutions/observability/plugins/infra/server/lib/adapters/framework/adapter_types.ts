@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { Lifecycle } from '@hapi/hapi';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { JsonArray, JsonValue } from '@kbn/utility-types';
-import type { RouteConfig, RouteMethod } from '@kbn/core/server';
+import type { RouteConfig, RouteMethod, RouteSecurity } from '@kbn/core/server';
 import type {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
@@ -204,8 +204,8 @@ export interface InfraFieldDef {
 
 export type InfraRouteConfig<Params, Query, Body, Method extends RouteMethod> = {
   method: RouteMethod;
-} & RouteConfig<Params, Query, Body, Method>;
+} & Omit<RouteConfig<Params, Query, Body, Method>, 'security'> & { security?: RouteSecurity };
 
 export type InfraVersionedRouteConfig<Method extends RouteMethod> = {
   method: RouteMethod;
-} & VersionedRouteConfig<Method>;
+} & Omit<VersionedRouteConfig<Method>, 'security'> & { security?: RouteSecurity };

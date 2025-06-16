@@ -8,21 +8,21 @@
  */
 
 import React from 'react';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import * as RxApi from 'rxjs';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   stubDataView,
   stubDataViewWithoutTimeField,
 } from '@kbn/data-views-plugin/common/data_view.stub';
 import { type Filter } from '@kbn/es-query';
-import { DiscoverNoResults, DiscoverNoResultsProps } from './no_results';
+import type { DiscoverNoResultsProps } from './no_results';
+import { DiscoverNoResults } from './no_results';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
+import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 
 jest.spyOn(RxApi, 'lastValueFrom').mockImplementation(async () => ({
   rawResponse: {
@@ -69,16 +69,14 @@ async function mountAndFindSubjects(
 
   act(() => {
     component = mountWithIntl(
-      <KibanaContextProvider services={services}>
-        <DiscoverMainProvider value={stateContainer}>
-          <DiscoverNoResults
-            stateContainer={stateContainer}
-            isTimeBased={isTimeBased}
-            onDisableFilters={() => {}}
-            {...props}
-          />
-        </DiscoverMainProvider>
-      </KibanaContextProvider>
+      <DiscoverTestProvider services={services} stateContainer={stateContainer}>
+        <DiscoverNoResults
+          stateContainer={stateContainer}
+          isTimeBased={isTimeBased}
+          onDisableFilters={() => {}}
+          {...props}
+        />
+      </DiscoverTestProvider>
     );
   });
 
@@ -314,17 +312,15 @@ describe('DiscoverNoResults', () => {
         expect(services.data.search.search).toHaveBeenLastCalledWith(
           expect.objectContaining({
             params: expect.objectContaining({
-              body: expect.objectContaining({
-                aggs: expect.objectContaining({
-                  earliest_timestamp: expect.objectContaining({
-                    min: expect.objectContaining({
-                      format: 'strict_date_optional_time',
-                    }),
+              aggs: expect.objectContaining({
+                earliest_timestamp: expect.objectContaining({
+                  min: expect.objectContaining({
+                    format: 'strict_date_optional_time',
                   }),
-                  latest_timestamp: expect.objectContaining({
-                    max: expect.objectContaining({
-                      format: 'strict_date_optional_time',
-                    }),
+                }),
+                latest_timestamp: expect.objectContaining({
+                  max: expect.objectContaining({
+                    format: 'strict_date_optional_time',
                   }),
                 }),
               }),

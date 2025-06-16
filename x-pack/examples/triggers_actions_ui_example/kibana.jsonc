@@ -17,7 +17,11 @@
       "charts",
       "dataViews",
       "dataViewEditor",
-      "unifiedSearch"
+      "unifiedSearch",
+      "taskManager",
+      "fieldFormats",
+      "licensing",
+      "fieldsMetadata"
     ],
     "optionalPlugins": ["spaces"]
   }

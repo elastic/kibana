@@ -16,7 +16,7 @@ import type {
 import { Query, SavedQueryName, Filters } from '../../../../rule_definition_section';
 import * as ruleDetailsI18n from '../../../../translations';
 import * as descriptionStepI18n from '../../../../../../../rule_creation_ui/components/description_step/translations';
-import { useGetSavedQuery } from '../../../../../../../../detections/pages/detection_engine/rules/use_get_saved_query';
+import { useGetSavedQuery } from '../../../../../../../common/use_get_saved_query';
 import { getDataSourceProps, getQueryLanguageLabel, isFilters } from '../../../../helpers';
 
 interface SavedQueryProps {

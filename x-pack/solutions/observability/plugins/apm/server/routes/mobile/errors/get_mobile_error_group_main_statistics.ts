@@ -84,46 +84,44 @@ export async function getMobileErrorGroupMainStatistics({
     apm: {
       events: [ProcessorEvent.error],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          must_not: {
-            term: { 'error.type': 'crash' },
-          },
-          filter: [
-            ...termQuery(SERVICE_NAME, serviceName),
-            ...termQuery(TRANSACTION_NAME, transactionName),
-            ...termQuery(TRANSACTION_TYPE, transactionType),
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-          ],
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        must_not: {
+          term: { 'error.type': 'crash' },
         },
+        filter: [
+          ...termQuery(SERVICE_NAME, serviceName),
+          ...termQuery(TRANSACTION_NAME, transactionName),
+          ...termQuery(TRANSACTION_TYPE, transactionType),
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+        ],
       },
-      aggs: {
-        error_groups: {
-          terms: {
-            field: ERROR_GROUP_ID,
-            size: maxNumberOfErrorGroups,
-            order,
-          },
-          aggs: {
-            sample: {
-              top_hits: {
-                size: 1,
-                fields: [...requiredFields, ...optionalFields],
-                _source: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, ERROR_EXC_HANDLED, ERROR_EXC_TYPE],
-                sort: {
-                  [AT_TIMESTAMP]: 'desc',
-                },
+    },
+    aggs: {
+      error_groups: {
+        terms: {
+          field: ERROR_GROUP_ID,
+          size: maxNumberOfErrorGroups,
+          order,
+        },
+        aggs: {
+          sample: {
+            top_hits: {
+              size: 1,
+              fields: [...requiredFields, ...optionalFields],
+              _source: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, ERROR_EXC_HANDLED, ERROR_EXC_TYPE],
+              sort: {
+                [AT_TIMESTAMP]: 'desc',
               },
             },
-            ...(sortByLatestOccurrence
-              ? { [maxTimestampAggKey]: { max: { field: AT_TIMESTAMP } } }
-              : {}),
           },
+          ...(sortByLatestOccurrence
+            ? { [maxTimestampAggKey]: { max: { field: AT_TIMESTAMP } } }
+            : {}),
         },
       },
     },
@@ -143,7 +141,7 @@ export async function getMobileErrorGroupMainStatistics({
         error: {
           ...(event.error ?? {}),
           exception:
-            (errorSource?.error.exception?.length ?? 0) > 1
+            (errorSource?.error.exception?.length ?? 0) > 0
               ? errorSource?.error.exception
               : event?.error.exception && [event.error.exception],
         },

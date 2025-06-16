@@ -11,7 +11,7 @@
         "label": "KibanaSettingsApplication",
         "description": [],
         "signature": [
-          "({ docLinks, i18n, notifications, settings, userProfile, theme, history, sectionRegistry, application, chrome, }: ",
+          "({ docLinks, i18n, notifications, settings, userProfile, theme, history, sectionRegistry, application, chrome, spaces, }: ",
           {
             "pluginId": "@kbn/management-settings-application",
             "scope": "public",
@@ -21,7 +21,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "src/platform/packages/private/kbn-management/settings/application/index.tsx",
+        "path": "src/platform/packages/shared/kbn-management/settings/application/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -30,7 +30,7 @@
             "id": "def-public.KibanaSettingsApplication.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  docLinks,\n  i18n,\n  notifications,\n  settings,\n  userProfile,\n  theme,\n  history,\n  sectionRegistry,\n  application,\n  chrome,\n}",
+            "label": "{\n  docLinks,\n  i18n,\n  notifications,\n  settings,\n  userProfile,\n  theme,\n  history,\n  sectionRegistry,\n  application,\n  chrome,\n  spaces,\n}",
             "description": [],
             "signature": [
               {
@@ -41,7 +41,7 @@
                 "text": "SettingsApplicationKibanaDependencies"
               }
             ],
-            "path": "src/platform/packages/private/kbn-management/settings/application/index.tsx",
+            "path": "src/platform/packages/shared/kbn-management/settings/application/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -62,7 +62,7 @@
         "signature": [
           "() => React.JSX.Element"
         ],
-        "path": "src/platform/packages/private/kbn-management/settings/application/application.tsx",
+        "path": "src/platform/packages/shared/kbn-management/settings/application/application.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -89,7 +89,7 @@
           },
           ">) => React.JSX.Element"
         ],
-        "path": "src/platform/packages/private/kbn-management/settings/application/services.tsx",
+        "path": "src/platform/packages/shared/kbn-management/settings/application/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -111,7 +111,7 @@
               },
               ">"
             ],
-            "path": "src/platform/packages/private/kbn-management/settings/application/services.tsx",
+            "path": "src/platform/packages/shared/kbn-management/settings/application/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -140,7 +140,7 @@
           },
           ">) => React.JSX.Element"
         ],
-        "path": "src/platform/packages/private/kbn-management/settings/application/services.tsx",
+        "path": "src/platform/packages/shared/kbn-management/settings/application/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -162,7 +162,7 @@
               },
               ">"
             ],
-            "path": "src/platform/packages/private/kbn-management/settings/application/services.tsx",
+            "path": "src/platform/packages/shared/kbn-management/settings/application/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -201,7 +201,7 @@
             "text": "FieldInputKibanaDependencies"
           }
         ],
-        "path": "src/platform/packages/private/kbn-management/settings/application/services.tsx",
+        "path": "src/platform/packages/shared/kbn-management/settings/application/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -234,7 +234,7 @@
           " & ",
           "Services"
         ],
-        "path": "src/platform/packages/private/kbn-management/settings/application/services.tsx",
+        "path": "src/platform/packages/shared/kbn-management/settings/application/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export const START_MIGRATION_CARD_TITLE = i18n.translate(
   'xpack.securitySolution.onboarding.startMigration.title',
-  { defaultMessage: 'Translate your existing SIEM Rules to Elastic' }
+  { defaultMessage: 'Migrate your existing Splunk® SIEM rules to Elastic' }
 );
 export const START_MIGRATION_CARD_FOOTER_NOTE = i18n.translate(
   'xpack.securitySolution.onboarding.startMigration.footerNote',
@@ -21,12 +21,13 @@ export const START_MIGRATION_CARD_FOOTER_NOTE = i18n.translate(
 export const START_MIGRATION_CARD_CONNECTOR_MISSING_TEXT = i18n.translate(
   'xpack.securitySolution.onboarding.startMigration.connectorMissingText',
   {
-    defaultMessage: 'Rule migrations require an AI connector to be configured.',
+    defaultMessage:
+      'You need an LLM connector to power SIEM rule migration. Set one up or choose an existing one to get started.',
   }
 );
 export const START_MIGRATION_CARD_CONNECTOR_MISSING_BUTTON = i18n.translate(
   'xpack.securitySolution.onboarding.startMigration.connectorMissingText',
-  { defaultMessage: 'AI provider step' }
+  { defaultMessage: 'Set up AI Connector' }
 );
 
 export const START_MIGRATION_CARD_UPLOAD_TITLE = i18n.translate(

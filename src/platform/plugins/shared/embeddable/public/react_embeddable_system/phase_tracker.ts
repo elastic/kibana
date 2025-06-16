@@ -26,7 +26,7 @@ export class PhaseTracker {
 
   public trackPhaseEvents(uuid: string, api: unknown) {
     const dataLoading$ = apiPublishesDataLoading(api)
-      ? api.dataLoading
+      ? api.dataLoading$
       : new BehaviorSubject(false);
     const rendered$ = apiPublishesRendered(api) ? api.rendered$ : new BehaviorSubject(true);
 

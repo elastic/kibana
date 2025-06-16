@@ -21,8 +21,6 @@ import { createValidateUrl } from '../utils/validate_url';
 import { ImageViewer } from './image_viewer';
 import { ImageViewerContext } from './image_viewer/image_viewer_context';
 
-import './image_embeddable.scss';
-
 interface ImageEmbeddableProps {
   api: ImageEmbeddableApi & {
     setDataLoading: (loading: boolean | undefined) => void;

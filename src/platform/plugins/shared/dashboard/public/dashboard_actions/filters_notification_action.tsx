@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { merge } from 'rxjs';
+import { map, merge } from 'rxjs';
 
 import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
@@ -28,8 +28,7 @@ import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { coreServices } from '../services/kibana_services';
 import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
 import { FiltersNotificationPopover } from './filters_notification_popover';
-
-export const BADGE_FILTERS_NOTIFICATION = 'ACTION_FILTERS_NOTIFICATION';
+import { BADGE_FILTERS_NOTIFICATION } from './constants';
 
 export type FiltersNotificationActionApi = HasUniqueId &
   Partial<PublishesUnifiedSearch> &
@@ -88,14 +87,11 @@ export class FiltersNotificationAction implements Action<EmbeddableApiContext> {
     return apiPublishesPartialUnifiedSearch(embeddable);
   }
 
-  public subscribeToCompatibilityChanges(
-    { embeddable }: EmbeddableApiContext,
-    onChange: (isCompatible: boolean, action: FiltersNotificationAction) => void
-  ) {
+  public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) return;
     return merge(
       ...[embeddable.query$, embeddable.filters$].filter((value) => Boolean(value))
-    ).subscribe(() => onChange(compatibilityCheck(embeddable), this));
+    ).pipe(map(() => undefined));
   }
 
   public execute = async () => {};

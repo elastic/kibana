@@ -16,6 +16,7 @@ import { controlGroupContainerPersistableStateServiceFactory } from './control_g
 import { optionsListPersistableStateServiceFactory } from './options_list/options_list_embeddable_factory';
 import { rangeSliderPersistableStateServiceFactory } from './range_slider/range_slider_embeddable_factory';
 import { timeSliderPersistableStateServiceFactory } from './time_slider/time_slider_embeddable_factory';
+import { esqlStaticControlPersistableStateServiceFactory } from './esql_control/esql_control_factory';
 import { setupOptionsListClusterSettingsRoute } from './options_list/options_list_cluster_settings_route';
 
 interface SetupDeps {
@@ -32,6 +33,7 @@ export class ControlsPlugin implements Plugin<object, object, SetupDeps> {
     embeddable.registerEmbeddableFactory(optionsListPersistableStateServiceFactory());
     embeddable.registerEmbeddableFactory(rangeSliderPersistableStateServiceFactory());
     embeddable.registerEmbeddableFactory(timeSliderPersistableStateServiceFactory());
+    embeddable.registerEmbeddableFactory(esqlStaticControlPersistableStateServiceFactory());
     setupOptionsListClusterSettingsRoute(core);
     setupOptionsListSuggestionsRoute(core, unifiedSearch.autocomplete.getAutocompleteSettings);
     return {};

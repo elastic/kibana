@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import '../index.scss';
 import { i18n } from '@kbn/i18n';
 import SemVer from 'semver/classes/semver';
 import { CoreSetup, CoreStart, ScopedHistory } from '@kbn/core/public';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
+import { IndexManagementAppMountParams } from '@kbn/index-management-shared-types';
 import { UIM_APP_NAME } from '../../common/constants';
 import { PLUGIN } from '../../common/constants/plugin';
 import { AppDependencies } from './app_context';
@@ -88,6 +89,7 @@ export function getIndexManagementDependencies({
       cloud,
       console: startDependencies.console,
       ml: startDependencies.ml,
+      streams: startDependencies.streams,
       licensing: startDependencies.licensing,
     },
     services: {
@@ -128,7 +130,7 @@ export async function mountManagementSection({
 }: {
   coreSetup: CoreSetup<StartDependencies>;
   usageCollection: UsageCollectionSetup;
-  params: ManagementAppMountParams;
+  params: IndexManagementAppMountParams;
   extensionsService: ExtensionsService;
   isFleetEnabled: boolean;
   kibanaVersion: SemVer;

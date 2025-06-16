@@ -19,9 +19,9 @@ import type {
 import type {
   BulkActionType,
   BulkEditActionResponse,
+  BulkActionsDryRunErrCode,
 } from '../../../../../../../common/api/detection_engine/rule_management';
 import { BulkActionTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
-import type { BulkActionsDryRunErrCode } from '../../../../../../../common/constants';
 import type { PromisePoolError } from '../../../../../../utils/promise_pool';
 import type { RuleAlertType } from '../../../../rule_schema';
 import type { DryRunError } from '../../../logic/bulk_actions/dry_run';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
@@ -106,10 +106,8 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
   async function startDatafeed(datafeedId: string, start?: number, end?: number) {
     return mlClient.startDatafeed({
       datafeed_id: datafeedId,
-      body: {
-        start: start !== undefined ? String(start) : undefined,
-        end: end !== undefined ? String(end) : undefined,
-      },
+      start: start !== undefined ? String(start) : undefined,
+      end: end !== undefined ? String(end) : undefined,
     });
   }
 

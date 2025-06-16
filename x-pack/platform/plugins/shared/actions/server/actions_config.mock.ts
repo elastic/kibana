@@ -10,7 +10,7 @@ import {
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   DEFAULT_MICROSOFT_GRAPH_API_URL,
 } from '../common';
-import { ActionsConfigurationUtilities } from './actions_config';
+import type { ActionsConfigurationUtilities } from './actions_config';
 
 const createActionsConfigMock = () => {
   const mocked: jest.Mocked<ActionsConfigurationUtilities> = {
@@ -36,6 +36,7 @@ const createActionsConfigMock = () => {
     getMaxAttempts: jest.fn().mockReturnValue(3),
     enableFooterInEmail: jest.fn().mockReturnValue(true),
     getMaxQueued: jest.fn().mockReturnValue(1000),
+    getAwsSesConfig: jest.fn().mockReturnValue(null),
   };
   return mocked;
 };

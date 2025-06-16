@@ -35,21 +35,41 @@ export const createOrUpdateIndex = async ({
       });
       const indices = Object.keys(response ?? {});
       logger.info(`${options.index} already exist`);
-      if (options.mappings) {
-        await Promise.all(
-          indices.map(async (index) => {
+      const mappingPromises = options.mappings
+        ? indices.map(async (index) => {
             try {
               await retryTransientEsErrors(
-                () => esClient.indices.putMapping({ index, body: options.mappings }),
+                () => esClient.indices.putMapping({ index, ...options.mappings }),
                 { logger }
               );
-              logger.info(`Update mappings for ${index}`);
+              logger.info(`Updated mappings for ${index}`);
             } catch (err) {
               logger.error(`Failed to PUT mapping for index ${index}: ${err.message}`);
             }
           })
-        );
-      }
+        : [];
+
+      const settingPromises = options.settings
+        ? indices.map(async (index) => {
+            try {
+              await retryTransientEsErrors(
+                () =>
+                  esClient.indices.putSettings({
+                    index,
+                    settings: {
+                      ...options.settings,
+                    },
+                  }),
+                { logger }
+              );
+              logger.info(`Updated settings for ${index}`);
+            } catch (err) {
+              logger.error(`Failed to PUT settings for index ${index}: ${err.message}`);
+            }
+          })
+        : [];
+
+      await Promise.all([...mappingPromises, ...settingPromises]);
     } else {
       try {
         await esClient.indices.create(options);

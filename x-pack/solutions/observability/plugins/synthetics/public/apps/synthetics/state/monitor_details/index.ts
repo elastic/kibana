@@ -20,6 +20,7 @@ import {
   setMonitorDetailsLocationAction,
   getMonitorAction,
   setStatusFilter,
+  getMonitorLastErrorRunAction,
 } from './actions';
 
 export interface MonitorDetailsState {
@@ -33,6 +34,10 @@ export interface MonitorDetailsState {
     loading: boolean;
     loaded: boolean;
   };
+  lastErrorRun: {
+    data?: Ping;
+    loading: boolean;
+  };
   syntheticsMonitorLoading: boolean;
   syntheticsMonitor: SyntheticsMonitorWithId | null;
   syntheticsMonitorError?: IHttpSerializedFetchError | null;
@@ -45,6 +50,7 @@ export interface MonitorDetailsState {
 const initialState: MonitorDetailsState = {
   pings: { total: 0, data: [], loading: false },
   lastRun: { loading: false, loaded: false },
+  lastErrorRun: { loading: false },
   syntheticsMonitor: null,
   syntheticsMonitorLoading: false,
   syntheticsMonitorDispatchedAt: 0,
@@ -67,10 +73,25 @@ export const monitorDetailsReducer = createReducer(initialState, (builder) => {
     .addCase(getMonitorLastRunAction.success, (state, action) => {
       state.lastRun.loading = false;
       state.lastRun.loaded = true;
-      state.lastRun.data = action.payload.pings[0];
+      state.lastRun.data = action.payload?.ping;
     })
     .addCase(getMonitorLastRunAction.fail, (state, action) => {
       state.lastRun.loading = false;
+      state.error = action.payload;
+    })
+    .addCase(getMonitorLastErrorRunAction.get, (state, action) => {
+      state.lastErrorRun.loading = true;
+      const configId = state.lastErrorRun?.data?.config_id;
+      if (action.payload.monitorId !== configId) {
+        state.lastErrorRun.data = undefined;
+      }
+    })
+    .addCase(getMonitorLastErrorRunAction.success, (state, action) => {
+      state.lastErrorRun.loading = false;
+      state.lastErrorRun.data = action.payload?.ping;
+    })
+    .addCase(getMonitorLastErrorRunAction.fail, (state, action) => {
+      state.lastErrorRun.loading = false;
       state.error = action.payload;
     })
     .addCase(updateMonitorLastRunAction, (state, action) => {

@@ -7,8 +7,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
-import { cloneDeep } from 'lodash';
-import { InferenceServiceSettings } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { cloneDeep, isEmpty } from 'lodash';
+import { InferenceServiceSettings } from '@elastic/elasticsearch/lib/api/types';
 import { LocalInferenceServiceSettings } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 import {
   ChildFieldName,
@@ -689,7 +689,7 @@ export const getAllFieldTypesFromState = (allFields: Fields): DataType[] => {
 };
 
 export function isSemanticTextField(field: Partial<Field>): field is SemanticTextField {
-  return Boolean(field.inference_id && field.type === 'semantic_text');
+  return field.type === 'semantic_text';
 }
 
 /**
@@ -702,7 +702,7 @@ export function getStateWithCopyToFields(state: State): State {
   // Make sure we don't accidentally modify existing state
   let updatedState = cloneDeep(state);
   for (const field of Object.values(updatedState.fields.byId)) {
-    if (field.source.type === 'semantic_text' && field.source.reference_field) {
+    if (field.source.type === 'semantic_text') {
       // Check fields already added to the list of to-update fields first
       // API will not accept reference_field so removing it now
       const { reference_field: referenceField, ...source } = field.source;
@@ -711,6 +711,14 @@ export function getStateWithCopyToFields(state: State): State {
         throw new Error('Reference field is not a string');
       }
       field.source = source;
+
+      /* 
+        If no reference field is associated, 
+        no further processing is needed, so we can skip to the next one.
+      */
+      if (isEmpty(referenceField)) {
+        continue;
+      }
       const existingTextField =
         getFieldByPathName(updatedState.fields, referenceField) ||
         getFieldByPathName(updatedState.mappingViewFields || { byId: {} }, referenceField);

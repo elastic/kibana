@@ -19,8 +19,8 @@ const useCases = [
     },
     {
       operation: 'sum',
-      operationWithField: 'sum(system.cpu.user.pct)',
-      sourceField: 'system.cpu.user.pct',
+      operationWithField: 'sum("system.cpu.user.pct")',
+      sourceField: '"system.cpu.user.pct"',
     },
   ],
   [
@@ -32,8 +32,8 @@ const useCases = [
     },
     {
       operation: 'max',
-      operationWithField: 'max(system.cpu.user.pct)',
-      sourceField: 'system.cpu.user.pct',
+      operationWithField: 'max("system.cpu.user.pct")',
+      sourceField: '"system.cpu.user.pct"',
     },
   ],
   [
@@ -45,8 +45,8 @@ const useCases = [
     },
     {
       operation: 'min',
-      operationWithField: 'min(system.cpu.user.pct)',
-      sourceField: 'system.cpu.user.pct',
+      operationWithField: 'min("system.cpu.user.pct")',
+      sourceField: '"system.cpu.user.pct"',
     },
   ],
   [
@@ -58,8 +58,8 @@ const useCases = [
     },
     {
       operation: 'average',
-      operationWithField: 'average(system.cpu.user.pct)',
-      sourceField: 'system.cpu.user.pct',
+      operationWithField: 'average("system.cpu.user.pct")',
+      sourceField: '"system.cpu.user.pct"',
     },
   ],
   [
@@ -72,7 +72,7 @@ const useCases = [
     {
       operation: 'count',
       operationWithField: `count(kql='system.cpu.user.pct: *')`,
-      sourceField: '',
+      sourceField: '""',
     },
   ],
   [
@@ -85,7 +85,7 @@ const useCases = [
     {
       operation: 'count',
       operationWithField: `count(kql='container.name:container\\'s name-1')`,
-      sourceField: '',
+      sourceField: '""',
     },
   ],
   [
@@ -98,7 +98,7 @@ const useCases = [
     {
       operation: 'count',
       operationWithField: `count(kql='host.name: host-*')`,
-      sourceField: '',
+      sourceField: '""',
     },
   ],
   [
@@ -110,8 +110,21 @@ const useCases = [
     },
     {
       operation: 'unique_count',
-      operationWithField: 'unique_count(system.cpu.user.pct)',
-      sourceField: 'system.cpu.user.pct',
+      operationWithField: 'unique_count("system.cpu.user.pct")',
+      sourceField: '"system.cpu.user.pct"',
+    },
+  ],
+  [
+    {
+      aggType: Aggregators.CARDINALITY,
+      field: 'field.name/with/slashes',
+      filter: '',
+      name: '',
+    },
+    {
+      operation: 'unique_count',
+      operationWithField: 'unique_count("field.name/with/slashes")',
+      sourceField: '"field.name/with/slashes"',
     },
   ],
   [
@@ -123,8 +136,8 @@ const useCases = [
     },
     {
       operation: 'percentile',
-      operationWithField: 'percentile(system.cpu.user.pct, percentile=95)',
-      sourceField: 'system.cpu.user.pct',
+      operationWithField: 'percentile("system.cpu.user.pct", percentile=95)',
+      sourceField: '"system.cpu.user.pct"',
     },
   ],
   [
@@ -136,8 +149,8 @@ const useCases = [
     },
     {
       operation: 'percentile',
-      operationWithField: 'percentile(system.cpu.user.pct, percentile=99)',
-      sourceField: 'system.cpu.user.pct',
+      operationWithField: 'percentile("system.cpu.user.pct", percentile=99)',
+      sourceField: '"system.cpu.user.pct"',
     },
   ],
   [
@@ -149,8 +162,8 @@ const useCases = [
     },
     {
       operation: 'counter_rate',
-      operationWithField: `counter_rate(max(system.network.in.bytes), kql='')`,
-      sourceField: 'system.network.in.bytes',
+      operationWithField: `counter_rate(max("system.network.in.bytes"), kql='')`,
+      sourceField: '"system.network.in.bytes"',
     },
   ],
   [
@@ -162,8 +175,8 @@ const useCases = [
     },
     {
       operation: 'counter_rate',
-      operationWithField: `counter_rate(max(system.network.in.bytes), kql='host.name : "foo"')`,
-      sourceField: 'system.network.in.bytes',
+      operationWithField: `counter_rate(max("system.network.in.bytes"), kql='host.name : "foo"')`,
+      sourceField: '"system.network.in.bytes"',
     },
   ],
 ];

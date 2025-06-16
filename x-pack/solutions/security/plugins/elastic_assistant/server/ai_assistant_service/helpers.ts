@@ -144,19 +144,27 @@ const ESQL_QUERY_GENERATION_TITLE = i18n.translate(
   }
 );
 
-export const ensureProductDocumentationInstalled = async (
-  productDocManager: ProductDocBaseStartContract['management'],
-  logger: Logger
-) => {
+export const ensureProductDocumentationInstalled = async ({
+  productDocManager,
+  setIsProductDocumentationInProgress,
+  logger,
+}: {
+  productDocManager: ProductDocBaseStartContract['management'];
+  setIsProductDocumentationInProgress: (value: boolean) => void;
+  logger: Logger;
+}) => {
   try {
     const { status } = await productDocManager.getStatus();
     if (status !== 'installed') {
       logger.debug(`Installing product documentation for AIAssistantService`);
+      setIsProductDocumentationInProgress(true);
       try {
-        await productDocManager.install();
+        await productDocManager.install({ wait: true });
         logger.debug(`Successfully installed product documentation for AIAssistantService`);
       } catch (e) {
         logger.warn(`Failed to install product documentation for AIAssistantService: ${e.message}`);
+      } finally {
+        setIsProductDocumentationInProgress(false);
       }
     }
   } catch (e) {

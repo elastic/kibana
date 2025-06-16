@@ -38,7 +38,7 @@ import {
   ReqStatus,
   selectFetchNotesBySavedObjectIdsError,
   selectFetchNotesBySavedObjectIdsStatus,
-  selectSortedNotesBySavedObjectId,
+  makeSelectNotesBySavedObjectId,
 } from '../../../../../notes';
 import type { Note } from '../../../../../../common/api/timeline';
 import { TimelineStatusEnum } from '../../../../../../common/api/timeline';
@@ -83,8 +83,8 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = React.memo(({ t
   const { addError: addErrorToast } = useAppToasts();
   const dispatch = useDispatch();
 
-  const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
-  const canCreateNotes = kibanaSecuritySolutionsPrivileges.crud;
+  const { notesPrivileges } = useUserPrivileges();
+  const canCreateNotes = notesPrivileges.crud;
 
   const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
     'securitySolutionNotesDisabled'
@@ -116,12 +116,10 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = React.memo(({ t
       fetchNotes();
     }
   }, [fetchNotes, isTimelineSaved]);
+  const selectNotesBySavedObjectId = useMemo(() => makeSelectNotesBySavedObjectId(), []);
 
   const notes: Note[] = useSelector((state: State) =>
-    selectSortedNotesBySavedObjectId(state, {
-      savedObjectId: timelineSavedObjectId,
-      sort: { field: 'created', direction: 'asc' },
-    })
+    selectNotesBySavedObjectId(state, timelineSavedObjectId)
   );
   const fetchStatus = useSelector((state: State) => selectFetchNotesBySavedObjectIdsStatus(state));
   const fetchError = useSelector((state: State) => selectFetchNotesBySavedObjectIdsError(state));

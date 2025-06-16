@@ -135,6 +135,24 @@ describe('function call expressions', () => {
   });
 });
 
+describe('map expression', () => {
+  test('comments around map', () => {
+    assertPrint('ROW F(0, /*1*/ {"a": 1} /*2*/)');
+  });
+
+  test('comments around map key', () => {
+    assertPrint('ROW F(0, {/*1*/ "a" /*2*/: 1})');
+  });
+
+  test('comments around map value', () => {
+    assertPrint('ROW F(0, {"a": /*1*/ 1 /*2*/})');
+  });
+
+  test('comments around multiple map fields', () => {
+    assertPrint('ROW F(0, /*1*/ {/*2*/ "a": /*3*/ "b" /*4*/, /*5*/ "c": /*6*/ "d" /*7*/} /*8*/)');
+  });
+});
+
 describe('binary expressions', () => {
   test('around binary expression operands', () => {
     assertPrint('FROM a | STATS /* a */ 1 /* b */ + /* c */ 2 /* d */');
@@ -188,11 +206,25 @@ describe('rename expressions', () => {
 describe('commands', () => {
   describe('JOIN', () => {
     test('around JOIN targets', () => {
-      assertPrint('FROM a | LEFT JOIN /*1*/ a /*2*/ AS /*3*/ b /*4*/ ON c');
+      assertPrint('FROM a | LEFT JOIN /*1*/ a /*2*/ /*3*/ /*4*/');
     });
 
     test('around JOIN conditions', () => {
-      assertPrint('FROM a | LEFT JOIN a AS b ON /*1*/ c /*2*/, /*3*/ d /*4*/');
+      assertPrint('FROM a | LEFT JOIN a /*1*/ /*2*/ /*3*/ /*4*/');
+    });
+  });
+
+  describe('RERANK', () => {
+    test('comments around all elements', () => {
+      assertPrint(
+        'FROM a | /*0*/ RERANK /*1*/ "query" /*2*/ ON /*3*/ field /*4*/ WITH /*5*/ id /*6*/'
+      );
+    });
+
+    test('comments around all elements, two fields', () => {
+      assertPrint(
+        'FROM a | /*0*/ RERANK /*1*/ "query" /*2*/ ON /*3*/ field1 /*4*/, /*5*/ field2 /*6*/ WITH /*7*/ id1 /*8*/'
+      );
     });
   });
 });

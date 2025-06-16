@@ -22,6 +22,7 @@ import type { TransformErrorObjects } from '../../core';
 
 export interface BaseState extends ControlState {
   readonly retryCount: number;
+  readonly skipRetryReset: boolean;
   readonly retryDelay: number;
   readonly logs: MigrationLog[];
   /**
@@ -110,6 +111,7 @@ export interface UpdateIndexMappingsState extends PostInitState {
 export interface UpdateIndexMappingsWaitForTaskState extends PostInitState {
   readonly controlState: 'UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK';
   readonly updateTargetMappingsTaskId: string;
+  readonly additiveMappingChanges: SavedObjectsMappingProperties;
 }
 
 export interface UpdateMappingModelVersionState extends PostInitState {

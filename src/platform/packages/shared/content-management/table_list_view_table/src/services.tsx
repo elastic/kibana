@@ -33,6 +33,7 @@ import {
   FavoritesClientPublic,
   FavoritesContextProvider,
 } from '@kbn/content-management-favorites-public';
+import { MaybeQueryClientProvider } from './query_client';
 
 import { TAG_MANAGEMENT_APP_URL } from './constants';
 import type { Tag } from './types';
@@ -56,8 +57,6 @@ export interface TagListProps {
  * Abstract external services for this component.
  */
 export interface Services {
-  canEditAdvancedSettings: boolean;
-  getListingLimitSettingsUrl: () => string;
   notifyError: NotifyFn;
   currentAppId$: Observable<string | undefined>;
   navigateToUrl: (url: string) => Promise<void> | void;
@@ -136,6 +135,9 @@ export interface TableListViewKibanaDependencies {
     userProfile: {
       bulkGet: UserProfileServiceStart['bulkGet'];
     };
+    rendering: {
+      addContext: (element: React.ReactNode) => React.ReactElement;
+    };
   };
   /**
    * The public API from the savedObjectsTaggingOss plugin.
@@ -203,7 +205,7 @@ export const TableListViewKibanaProvider: FC<
   PropsWithChildren<TableListViewKibanaDependencies>
 > = ({ children, ...services }) => {
   const { core, savedObjectsTagging, FormattedRelative } = services;
-  const { application, http, notifications, ...startServices } = core;
+  const { application, http, notifications, rendering } = core;
 
   const searchQueryParser = useMemo(() => {
     if (savedObjectsTagging) {
@@ -258,50 +260,49 @@ export const TableListViewKibanaProvider: FC<
 
   return (
     <RedirectAppLinksKibanaProvider coreStart={core}>
-      <UserProfilesKibanaProvider core={core}>
-        <ContentEditorKibanaProvider core={core} savedObjectsTagging={savedObjectsTagging}>
-          <ContentInsightsProvider
-            contentInsightsClient={services.contentInsightsClient}
-            isKibanaVersioningEnabled={services.isKibanaVersioningEnabled}
-          >
-            <FavoritesContextProvider
-              favoritesClient={services.favorites}
-              notifyError={(title, text) => {
-                notifications.toasts.addDanger({ title: toMountPoint(title, startServices), text });
-              }}
+      <MaybeQueryClientProvider>
+        <UserProfilesKibanaProvider core={core}>
+          <ContentEditorKibanaProvider core={core} savedObjectsTagging={savedObjectsTagging}>
+            <ContentInsightsProvider
+              contentInsightsClient={services.contentInsightsClient}
+              isKibanaVersioningEnabled={services.isKibanaVersioningEnabled}
             >
-              <TableListViewProvider
-                canEditAdvancedSettings={Boolean(application.capabilities.advancedSettings?.save)}
-                getListingLimitSettingsUrl={() =>
-                  application.getUrlForApp('management', {
-                    path: `/kibana/settings?query=savedObjects:listingLimit`,
-                  })
-                }
+              <FavoritesContextProvider
+                favoritesClient={services.favorites}
                 notifyError={(title, text) => {
                   notifications.toasts.addDanger({
-                    title: toMountPoint(title, startServices),
+                    title: toMountPoint(title, rendering),
                     text,
                   });
                 }}
-                searchQueryParser={searchQueryParser}
-                DateFormatterComp={(props) => <FormattedRelative {...props} />}
-                currentAppId$={application.currentAppId$}
-                navigateToUrl={application.navigateToUrl}
-                isTaggingEnabled={() => Boolean(savedObjectsTagging)}
-                isFavoritesEnabled={async () => services.favorites?.isAvailable() ?? false}
-                getTagList={getTagList}
-                TagList={TagList}
-                itemHasTags={itemHasTags}
-                getTagIdsFromReferences={getTagIdsFromReferences}
-                getTagManagementUrl={() => core.http.basePath.prepend(TAG_MANAGEMENT_APP_URL)}
-                isKibanaVersioningEnabled={services.isKibanaVersioningEnabled ?? false}
               >
-                {children}
-              </TableListViewProvider>
-            </FavoritesContextProvider>
-          </ContentInsightsProvider>
-        </ContentEditorKibanaProvider>
-      </UserProfilesKibanaProvider>
+                <TableListViewProvider
+                  notifyError={(title, text) => {
+                    notifications.toasts.addDanger({
+                      title: toMountPoint(title, rendering),
+                      text,
+                    });
+                  }}
+                  searchQueryParser={searchQueryParser}
+                  DateFormatterComp={(props) => <FormattedRelative {...props} />}
+                  currentAppId$={application.currentAppId$}
+                  navigateToUrl={application.navigateToUrl}
+                  isTaggingEnabled={() => Boolean(savedObjectsTagging)}
+                  isFavoritesEnabled={async () => services.favorites?.isAvailable() ?? false}
+                  getTagList={getTagList}
+                  TagList={TagList}
+                  itemHasTags={itemHasTags}
+                  getTagIdsFromReferences={getTagIdsFromReferences}
+                  getTagManagementUrl={() => http.basePath.prepend(TAG_MANAGEMENT_APP_URL)}
+                  isKibanaVersioningEnabled={services.isKibanaVersioningEnabled ?? false}
+                >
+                  {children}
+                </TableListViewProvider>
+              </FavoritesContextProvider>
+            </ContentInsightsProvider>
+          </ContentEditorKibanaProvider>
+        </UserProfilesKibanaProvider>
+      </MaybeQueryClientProvider>
     </RedirectAppLinksKibanaProvider>
   );
 };

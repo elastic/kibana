@@ -5,77 +5,7 @@
     "index": "semantic_text_fields",
     "source": {
       "@timestamp": "2024-11-01T15:52:16.648Z",
-      "content": {
-        "text": "my favorite color is green",
-        "inference": {
-          "inference_id": "elastic-security-ai-assistant-elser2",
-          "model_settings": {
-            "task_type": "sparse_embedding"
-          },
-          "chunks": [
-            {
-              "text": "my favorite color is green",
-              "embeddings": {
-                "green": 2.8714406,
-                "favorite": 2.5192127,
-                "color": 2.499853,
-                "favourite": 1.7829537,
-                "colors": 1.2280636,
-                "my": 1.1292906,
-                "friend": 0.87358737,
-                "rainbow": 0.8518238,
-                "love": 0.8146304,
-                "choice": 0.7517174,
-                "nature": 0.62242556,
-                "beautiful": 0.6110072,
-                "personality": 0.5559894,
-                "dr": 0.5296162,
-                "your": 0.51745296,
-                "art": 0.45324937,
-                "colour": 0.44607934,
-                "theme": 0.4360909,
-                "mood": 0.43253413,
-                "personal": 0.4201024,
-                "style": 0.39435387,
-                "blue": 0.38090202,
-                "nickname": 0.37952134,
-                "design": 0.37043664,
-                "dream": 0.3620103,
-                "desire": 0.35553402,
-                "best": 0.32577398,
-                "favorites": 0.30795538,
-                "humor": 0.30244058,
-                "popular": 0.2957705,
-                "brand": 0.28912684,
-                "neutral": 0.28545624,
-                "passion": 0.28457505,
-                "i": 0.27936152,
-                "preference": 0.24133624,
-                "inspiration": 0.24008423,
-                "purple": 0.23559056,
-                "culture": 0.23260204,
-                "flower": 0.21190192,
-                "bright": 0.20443156,
-                "beauty": 0.20076275,
-                "aura": 0.19355631,
-                "palette": 0.17414959,
-                "wonder": 0.16287619,
-                "photo": 0.16179858,
-                "orange": 0.14167522,
-                "dress": 0.12800644,
-                "camouflage": 0.061010167,
-                "grass": 0.05907971,
-                "tone": 0.028165601,
-                "painting": 0.026917756,
-                "cartoon": 0.019969255,
-                "always": 0.013872984,
-                "yellow": 0.0113299545,
-                "colorful": 0.0036836881
-              }
-            }
-          ]
-        }
-      },
+      "content": "my favorite color is green",
       "text": "my favorite color is green"
     }
   }
@@ -84,78 +14,13 @@
 {
   "type": "doc",
   "value": {
-    "id": "1",
+    "id": "2",
     "index": "semantic_text_fields",
     "source": {
       "@timestamp": "2024-11-01T15:59:34.610Z",
-      "content": {
-        "text": "my favorite food is pasta",
-        "inference": {
-          "inference_id": "elastic-security-ai-assistant-elser2",
-          "model_settings": {
-            "task_type": "sparse_embedding"
-          },
-          "chunks": [
-            {
-              "text": "my favorite food is pasta",
-              "embeddings": {
-                "pasta": 2.8800304,
-                "favorite": 2.604094,
-                "food": 2.3218846,
-                "favourite": 1.9555497,
-                "foods": 1.8483086,
-                "my": 1.2514912,
-                "italian": 1.1385239,
-                "noodles": 0.9831485,
-                "ravi": 0.8951362,
-                "friend": 0.73949015,
-                "popular": 0.7100698,
-                "rich": 0.6932188,
-                "diet": 0.6634609,
-                "love": 0.64316577,
-                "famous": 0.5988269,
-                "eat": 0.5932935,
-                "your": 0.5730934,
-                "flavor": 0.54839855,
-                "i": 0.54047567,
-                "choice": 0.52978134,
-                "taste": 0.5071018,
-                "personal": 0.49576512,
-                "favorites": 0.3890845,
-                "soup": 0.37032336,
-                "rome": 0.31307018,
-                "list": 0.28725958,
-                "rice": 0.28322402,
-                "dinner": 0.26971146,
-                "familiar": 0.22095734,
-                "vegetable": 0.21891576,
-                "bland": 0.20330611,
-                "obsession": 0.19760907,
-                "latin": 0.19196871,
-                "drink": 0.18664016,
-                "culture": 0.18313695,
-                "shop": 0.18128464,
-                "style": 0.16871399,
-                "greek": 0.16838282,
-                "our": 0.1634054,
-                "is": 0.14557752,
-                "category": 0.12824115,
-                "chef": 0.11436942,
-                "italy": 0.095480226,
-                "family": 0.0816377,
-                "classic": 0.064411946,
-                "best": 0.05733679,
-                "always": 0.054197904,
-                "type": 0.0500416,
-                "lover": 0.037193555,
-                "bread": 0.031606384,
-                "fruit": 0.00062303204
-              }
-            }
-          ]
-        }
-      },
+      "content": "my favorite food is pasta",
       "text": "my favorite food is pasta"
     }
   }
 }
+

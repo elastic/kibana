@@ -14,7 +14,6 @@ import {
   AGENT_NAME,
   AT_TIMESTAMP,
   EVENT_OUTCOME,
-  SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_DURATION,
@@ -74,7 +73,6 @@ export async function getTopDependencySpans({
     TRACE_ID,
     SPAN_NAME,
     SERVICE_NAME,
-    SERVICE_ENVIRONMENT,
     AGENT_NAME,
     SPAN_DURATION,
     EVENT_OUTCOME,
@@ -86,34 +84,32 @@ export async function getTopDependencySpans({
       apm: {
         events: [ProcessorEvent.span],
       },
-      body: {
-        track_total_hits: false,
-        size: MAX_NUM_SPANS,
-        query: {
-          bool: {
-            filter: [
-              ...rangeQuery(start, end),
-              ...environmentQuery(environment),
-              ...kqlQuery(kuery),
-              ...termQuery(SPAN_DESTINATION_SERVICE_RESOURCE, dependencyName),
-              ...termQuery(SPAN_NAME, spanName),
-              ...((sampleRangeFrom ?? 0) >= 0 && (sampleRangeTo ?? 0) > 0
-                ? [
-                    {
-                      range: {
-                        [SPAN_DURATION]: {
-                          gte: sampleRangeFrom,
-                          lte: sampleRangeTo,
-                        },
+      track_total_hits: false,
+      size: MAX_NUM_SPANS,
+      query: {
+        bool: {
+          filter: [
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+            ...termQuery(SPAN_DESTINATION_SERVICE_RESOURCE, dependencyName),
+            ...termQuery(SPAN_NAME, spanName),
+            ...((sampleRangeFrom ?? 0) >= 0 && (sampleRangeTo ?? 0) > 0
+              ? [
+                  {
+                    range: {
+                      [SPAN_DURATION]: {
+                        gte: sampleRangeFrom,
+                        lte: sampleRangeTo,
                       },
                     },
-                  ]
-                : []),
-            ],
-          },
+                  },
+                ]
+              : []),
+          ],
         },
-        fields: topDedsRequiredFields,
       },
+      fields: topDedsRequiredFields,
     })
   ).hits.hits.map((hit) => unflattenKnownApmEventFields(hit.fields, topDedsRequiredFields));
 
@@ -131,18 +127,16 @@ export async function getTopDependencySpans({
       apm: {
         events: [ProcessorEvent.transaction],
       },
-      body: {
-        track_total_hits: false,
-        size: traceIds.length,
-        query: {
-          bool: {
-            filter: [...termsQuery(TRACE_ID, ...traceIds), { exists: { field: TRANSACTION_ID } }],
-          },
+      track_total_hits: false,
+      size: traceIds.length,
+      query: {
+        bool: {
+          filter: [...termsQuery(TRACE_ID, ...traceIds), { exists: { field: TRANSACTION_ID } }],
         },
-        fields: txRequiredFields,
-        sort: {
-          '@timestamp': 'desc',
-        },
+      },
+      fields: txRequiredFields,
+      sort: {
+        '@timestamp': 'desc',
       },
     })
   ).hits.hits.map((hit) => unflattenKnownApmEventFields(hit.fields, txRequiredFields));

@@ -19,22 +19,18 @@ export const checkHasPrivileges = (
   return server.coreStart.elasticsearch.client
     .asScoped(getFakeKibanaRequest({ id: apiKey.id, api_key: apiKey.apiKey }))
     .asCurrentUser.security.hasPrivileges({
-      body: {
-        index,
-        cluster,
-      },
+      index,
+      cluster,
     });
 };
 
 export const checkIndicesReadPrivileges = (syntheticsEsClient: SyntheticsEsClient) => {
   return syntheticsEsClient.baseESClient.security.hasPrivileges({
-    body: {
-      index: [
-        {
-          names: [syntheticsIndex],
-          privileges: ['read'] as SecurityIndexPrivilege[],
-        },
-      ],
-    },
+    index: [
+      {
+        names: [syntheticsIndex],
+        privileges: ['read'] as SecurityIndexPrivilege[],
+      },
+    ],
   });
 };

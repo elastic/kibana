@@ -42,4 +42,7 @@ export const plugin: PluginInitializer<
 > = (initializerContext: PluginInitializerContext) => new SecurityPlugin(initializerContext);
 
 // services needed for rendering React using shared modules
-export type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme' | 'userProfile'>;
+export type StartServices = Pick<
+  CoreStart,
+  'analytics' | 'i18n' | 'theme' | 'userProfile' | 'rendering'
+>;

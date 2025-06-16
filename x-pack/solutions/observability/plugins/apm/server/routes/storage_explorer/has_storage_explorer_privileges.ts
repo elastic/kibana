@@ -39,15 +39,13 @@ export async function hasStorageExplorerPrivileges({
 
   const esClient = (await context.core).elasticsearch.client;
   const { index, cluster } = await esClient.asCurrentUser.security.hasPrivileges({
-    body: {
-      index: [
-        {
-          names,
-          privileges: ['monitor'],
-        },
-      ],
-      cluster: ['monitor'],
-    },
+    index: [
+      {
+        names,
+        privileges: ['monitor'],
+      },
+    ],
+    cluster: ['monitor'],
   });
 
   const hasPrivileges = cluster.monitor && every(index, 'monitor');

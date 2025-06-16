@@ -8,11 +8,12 @@
 import { combineLatest, of } from 'rxjs';
 import { pick, merge } from 'lodash';
 import { map, startWith } from 'rxjs';
-import { JsonObject } from '@kbn/utility-types';
-import { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
-import { CLAIM_STRATEGY_UPDATE_BY_QUERY, TaskManagerConfig } from '../config';
-import { ManagedConfiguration } from '../lib/create_managed_configuration';
+import type { JsonObject } from '@kbn/utility-types';
+import type { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
+import type { TaskManagerConfig } from '../config';
+import { CLAIM_STRATEGY_UPDATE_BY_QUERY } from '../config';
 import { getCapacityInCost, getCapacityInWorkers } from '../task_pool';
+import type { TaskPollingLifecycle } from '../polling_lifecycle';
 
 const CONFIG_FIELDS_TO_EXPOSE = [
   'request_capacity',
@@ -37,27 +38,33 @@ export type ConfigStat = Pick<
 
 export function createConfigurationAggregator(
   config: TaskManagerConfig,
-  managedConfig: ManagedConfiguration
+  startingCapacity: number,
+  taskPollingLifecycle?: TaskPollingLifecycle
 ): AggregatedStatProvider<ConfigStat> {
+  const capacity$ = taskPollingLifecycle
+    ? taskPollingLifecycle.capacityConfiguration$.pipe(
+        startWith(startingCapacity),
+        map<number, CapacityConfig>((capacity) => ({
+          capacity: {
+            config: capacity,
+            as_workers: getCapacityInWorkers(capacity),
+            as_cost: getCapacityInCost(capacity),
+          },
+        }))
+      )
+    : of({
+        capacity: {
+          config: startingCapacity,
+          as_workers: getCapacityInWorkers(startingCapacity),
+          as_cost: getCapacityInCost(startingCapacity),
+        },
+      });
+
   return combineLatest([
     of(pick(config, ...CONFIG_FIELDS_TO_EXPOSE)),
     of({ claim_strategy: config.claim_strategy ?? CLAIM_STRATEGY_UPDATE_BY_QUERY }),
-    managedConfig.pollIntervalConfiguration$.pipe(
-      startWith(config.poll_interval),
-      map<number, Pick<TaskManagerConfig, 'poll_interval'>>((pollInterval) => ({
-        poll_interval: pollInterval,
-      }))
-    ),
-    managedConfig.capacityConfiguration$.pipe(
-      startWith(managedConfig.startingCapacity),
-      map<number, CapacityConfig>((capacity) => ({
-        capacity: {
-          config: capacity,
-          as_workers: getCapacityInWorkers(capacity),
-          as_cost: getCapacityInCost(capacity),
-        },
-      }))
-    ),
+    of({ poll_interval: config.poll_interval }),
+    capacity$,
   ]).pipe(
     map((configurations) => ({
       key: 'configuration',

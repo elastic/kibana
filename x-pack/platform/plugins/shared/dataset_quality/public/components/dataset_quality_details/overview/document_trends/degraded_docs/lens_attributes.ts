@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { GenericIndexPatternColumn, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 
+import { DEGRADED_DOCS_QUERY } from '../../../../../../common/constants';
 import {
   flyoutDegradedDocsPercentageText,
   flyoutDegradedDocsTrendText,
@@ -180,7 +181,7 @@ function getChartColumns(breakdownField?: string): Record<string, GenericIndexPa
       scale: 'ratio',
       sourceField: '___records___',
       filter: {
-        query: '_ignored: *',
+        query: DEGRADED_DOCS_QUERY,
         language: 'kuery',
       },
       params: {
@@ -215,7 +216,7 @@ function getChartColumns(breakdownField?: string): Record<string, GenericIndexPa
             min: 0,
             max: 34,
           },
-          text: "count(kql='_ignored: *') / count()",
+          text: `count(kql='${DEGRADED_DOCS_QUERY}') / count()`,
         },
       },
       references: ['count_ignored', 'count_total'],
@@ -229,7 +230,7 @@ function getChartColumns(breakdownField?: string): Record<string, GenericIndexPa
       references: [DatasetQualityLensColumn.Math],
       isBucketed: false,
       params: {
-        formula: "count(kql='_ignored: *') / count()",
+        formula: `count(kql='${DEGRADED_DOCS_QUERY}') / count()`,
         format: {
           id: 'percent',
           params: {

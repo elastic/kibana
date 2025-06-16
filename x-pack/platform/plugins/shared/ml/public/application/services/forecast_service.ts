@@ -8,7 +8,7 @@
 // Service for carrying out requests to run ML forecasts and to obtain
 // data on forecasts that have been performed.
 import { useMemo } from 'react';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { get, find, each } from 'lodash';
 import { map } from 'rxjs';
 import type { MlApi } from './ml_api_service';
@@ -61,16 +61,13 @@ export function forecastServiceFactory(mlApi: MlApi) {
       mlApi.results
         .anomalySearch(
           {
-            // @ts-expect-error SearchRequest type has not been updated to include size
             size: maxResults,
-            body: {
-              query: {
-                bool: {
-                  filter: filterCriteria,
-                },
+            query: {
+              bool: {
+                filter: filterCriteria,
               },
-              sort: [{ forecast_create_timestamp: { order: 'desc' } }],
             },
+            sort: [{ forecast_create_timestamp: { order: 'desc' } }],
           },
           [job.job_id]
         )
@@ -124,24 +121,21 @@ export function forecastServiceFactory(mlApi: MlApi) {
       mlApi.results
         .anomalySearch(
           {
-            // @ts-expect-error SearchRequest type has not been updated to include size
             size: 0,
-            body: {
-              query: {
-                bool: {
-                  filter: filterCriteria,
+            query: {
+              bool: {
+                filter: filterCriteria,
+              },
+            },
+            aggs: {
+              earliest: {
+                min: {
+                  field: 'timestamp',
                 },
               },
-              aggs: {
-                earliest: {
-                  min: {
-                    field: 'timestamp',
-                  },
-                },
-                latest: {
-                  max: {
-                    field: 'timestamp',
-                  },
+              latest: {
+                max: {
+                  field: 'timestamp',
                 },
               },
             },
@@ -264,36 +258,33 @@ export function forecastServiceFactory(mlApi: MlApi) {
     return mlApi.results
       .anomalySearch$(
         {
-          // @ts-expect-error SearchRequest type has not been updated to include size
           size: 0,
-          body: {
-            query: {
-              bool: {
-                filter: filterCriteria,
-              },
+          query: {
+            bool: {
+              filter: filterCriteria,
             },
-            aggs: {
-              times: {
-                date_histogram: {
-                  field: 'timestamp',
-                  fixed_interval: `${intervalMs}ms`,
-                  min_doc_count: 1,
+          },
+          aggs: {
+            times: {
+              date_histogram: {
+                field: 'timestamp',
+                fixed_interval: `${intervalMs}ms`,
+                min_doc_count: 1,
+              },
+              aggs: {
+                prediction: {
+                  [forecastAggs.avg]: {
+                    field: 'forecast_prediction',
+                  },
                 },
-                aggs: {
-                  prediction: {
-                    [forecastAggs.avg]: {
-                      field: 'forecast_prediction',
-                    },
+                forecastUpper: {
+                  [forecastAggs.max]: {
+                    field: 'forecast_upper',
                   },
-                  forecastUpper: {
-                    [forecastAggs.max]: {
-                      field: 'forecast_upper',
-                    },
-                  },
-                  forecastLower: {
-                    [forecastAggs.min]: {
-                      field: 'forecast_lower',
-                    },
+                },
+                forecastLower: {
+                  [forecastAggs.min]: {
+                    field: 'forecast_lower',
                   },
                 },
               },
@@ -368,13 +359,10 @@ export function forecastServiceFactory(mlApi: MlApi) {
       mlApi.results
         .anomalySearch(
           {
-            // @ts-expect-error SearchRequest type has not been updated to include size
             size: 1,
-            body: {
-              query: {
-                bool: {
-                  filter: filterCriteria,
-                },
+            query: {
+              bool: {
+                filter: filterCriteria,
               },
             },
           },

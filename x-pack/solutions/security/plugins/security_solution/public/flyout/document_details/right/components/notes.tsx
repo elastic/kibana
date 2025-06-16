@@ -40,7 +40,7 @@ import {
   selectNotesByDocumentId,
 } from '../../../../notes/store/notes.slice';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { AlertHeaderBlock } from './alert_header_block';
+import { AlertHeaderBlock } from '../../../shared/components/alert_header_block';
 import { LeftPanelNotesTab } from '../../left';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 
@@ -69,23 +69,25 @@ export const VIEW_NOTES_BUTTON_ARIA_LABEL = i18n.translate(
 export const Notes = memo(() => {
   const { euiTheme } = useEuiTheme();
   const dispatch = useDispatch();
-  const { eventId, isPreview } = useDocumentDetailsContext();
+  const { eventId, isRulePreview } = useDocumentDetailsContext();
   const { addError: addErrorToast } = useAppToasts();
-  const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
+  const { notesPrivileges } = useUserPrivileges();
 
   const { navigateToLeftPanel: openExpandedFlyoutNotesTab, isEnabled: isLinkEnabled } =
     useNavigateToLeftPanel({
       tab: LeftPanelNotesTab,
     });
 
-  const isNotesDisabled = !isLinkEnabled || isPreview;
+  const isNotesDisabled = !isLinkEnabled || isRulePreview;
+  const cannotAddNotes = isNotesDisabled || !notesPrivileges.crud;
+  const cannotReadNotes = isNotesDisabled || !notesPrivileges.read;
 
   useEffect(() => {
-    // only fetch notes if we are not in a preview panel, or not in a rule preview workflow
-    if (!isNotesDisabled) {
+    // fetch notes only if we are not in a preview panel, or not in a rule preview workflow, and if the user has the correct privileges
+    if (!cannotReadNotes) {
       dispatch(fetchNotesByDocumentIds({ documentIds: [eventId] }));
     }
-  }, [dispatch, eventId, isNotesDisabled]);
+  }, [dispatch, eventId, cannotReadNotes]);
 
   const fetchStatus = useSelector((state: State) => selectFetchNotesByDocumentIdsStatus(state));
   const fetchError = useSelector((state: State) => selectFetchNotesByDocumentIdsError(state));
@@ -106,7 +108,7 @@ export const Notes = memo(() => {
       <EuiButtonEmpty
         onClick={openExpandedFlyoutNotesTab}
         size="s"
-        disabled={isNotesDisabled}
+        disabled={cannotReadNotes}
         aria-label={VIEW_NOTES_BUTTON_ARIA_LABEL}
         data-test-subj={NOTES_VIEW_NOTES_BUTTON_TEST_ID}
       >
@@ -117,7 +119,7 @@ export const Notes = memo(() => {
         />
       </EuiButtonEmpty>
     ),
-    [isNotesDisabled, notes.length, openExpandedFlyoutNotesTab]
+    [cannotReadNotes, notes.length, openExpandedFlyoutNotesTab]
   );
   const addNoteButton = useMemo(
     () => (
@@ -125,21 +127,21 @@ export const Notes = memo(() => {
         iconType="plusInCircle"
         onClick={openExpandedFlyoutNotesTab}
         size="s"
-        disabled={isNotesDisabled}
+        disabled={cannotAddNotes}
         aria-label={ADD_NOTE_BUTTON}
         data-test-subj={NOTES_ADD_NOTE_BUTTON_TEST_ID}
       >
         {ADD_NOTE_BUTTON}
       </EuiButtonEmpty>
     ),
-    [isNotesDisabled, openExpandedFlyoutNotesTab]
+    [cannotAddNotes, openExpandedFlyoutNotesTab]
   );
   const addNoteButtonIcon = useMemo(
     () => (
       <EuiButtonIcon
         onClick={openExpandedFlyoutNotesTab}
         iconType="plusInCircle"
-        disabled={isNotesDisabled || !kibanaSecuritySolutionsPrivileges.crud}
+        disabled={cannotAddNotes}
         css={css`
           margin-left: ${euiTheme.size.xs};
         `}
@@ -147,16 +149,12 @@ export const Notes = memo(() => {
         data-test-subj={NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID}
       />
     ),
-    [
-      euiTheme.size.xs,
-      isNotesDisabled,
-      kibanaSecuritySolutionsPrivileges.crud,
-      openExpandedFlyoutNotesTab,
-    ]
+    [euiTheme.size.xs, cannotAddNotes, openExpandedFlyoutNotesTab]
   );
 
   return (
     <AlertHeaderBlock
+      hasBorder
       title={
         <FormattedMessage
           id="xpack.securitySolution.flyout.right.header.notesTitle"
@@ -165,7 +163,7 @@ export const Notes = memo(() => {
       }
       data-test-subj={NOTES_TITLE_TEST_ID}
     >
-      {isPreview ? (
+      {isRulePreview ? (
         getEmptyTagValue()
       ) : (
         <>
@@ -174,14 +172,14 @@ export const Notes = memo(() => {
           ) : (
             <>
               {notes.length === 0 ? (
-                <>{kibanaSecuritySolutionsPrivileges.crud ? addNoteButton : getEmptyTagValue()}</>
+                <>{notesPrivileges.crud ? addNoteButton : getEmptyTagValue()}</>
               ) : (
                 <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
                   <EuiFlexItem data-test-subj={NOTES_COUNT_TEST_ID}>
                     <FormattedCount count={notes.length} />
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    {kibanaSecuritySolutionsPrivileges.crud ? addNoteButtonIcon : viewNotesButton}
+                    {notesPrivileges.crud ? addNoteButtonIcon : viewNotesButton}
                   </EuiFlexItem>
                 </EuiFlexGroup>
               )}

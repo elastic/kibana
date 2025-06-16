@@ -30,6 +30,11 @@
     "@kbn/unified-search-plugin",
     "@kbn/data-view-editor-plugin",
     "@kbn/react-kibana-context-render",
+    "@kbn/response-ops-alerts-table",
+    "@kbn/field-formats-plugin",
+    "@kbn/licensing-plugin",
     "@kbn/response-ops-rule-form",
+    "@kbn/task-manager-plugin",
+    "@kbn/fields-metadata-plugin",
   ]
 }

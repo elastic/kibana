@@ -6,13 +6,9 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 
-import {
-  ASSIGNEES_ADD_BUTTON_TEST_ID,
-  ASSIGNEES_EMPTY_TEST_ID,
-  ASSIGNEES_TITLE_TEST_ID,
-} from './test_ids';
+import { ASSIGNEES_ADD_BUTTON_TEST_ID, ASSIGNEES_EMPTY_TEST_ID } from './test_ids';
 import { Assignees } from './assignees';
 
 import { useGetCurrentUserProfile } from '../../../../common/components/user_profiles/use_get_current_user_profile';
@@ -25,9 +21,9 @@ import { ASSIGNEES_APPLY_BUTTON_TEST_ID } from '../../../../common/components/as
 import { useLicense } from '../../../../common/hooks/use_license';
 import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
 import {
+  USER_AVATAR_ITEM_TEST_ID,
   USERS_AVATARS_COUNT_BADGE_TEST_ID,
   USERS_AVATARS_PANEL_TEST_ID,
-  USER_AVATAR_ITEM_TEST_ID,
 } from '../../../../common/components/user_profiles/test_ids';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
@@ -49,7 +45,7 @@ const renderAssignees = (
   eventId = 'event-1',
   alertAssignees = ['user-id-1'],
   onAssigneesUpdated = jest.fn(),
-  isPreview = false
+  showAssignees = true
 ) => {
   const assignedProfiles = mockUserProfiles.filter((user) => alertAssignees.includes(user.uid));
   (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
@@ -62,7 +58,7 @@ const renderAssignees = (
         eventId={eventId}
         assignedUserIds={alertAssignees}
         onAssigneesUpdated={onAssigneesUpdated}
-        isPreview={isPreview}
+        showAssignees={showAssignees}
       />
     </TestProviders>
   );
@@ -92,7 +88,6 @@ describe('<Assignees />', () => {
   it('should render component', () => {
     const { getByTestId } = renderAssignees();
 
-    expect(getByTestId(ASSIGNEES_TITLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(USERS_AVATARS_PANEL_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID)).not.toBeDisabled();
@@ -132,12 +127,12 @@ describe('<Assignees />', () => {
     const { getByTestId, getByText } = renderAssignees('test-event', assignees);
 
     // Update assignees
-    getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID).click();
-    getByText('User 1').click();
-    getByText('User 3').click();
+    fireEvent.click(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID));
+    fireEvent.click(getByText('User 1'));
+    fireEvent.click(getByText('User 3'));
 
     // Apply assignees
-    getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID).click();
+    fireEvent.click(getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID));
 
     expect(setAlertAssigneesMock).toHaveBeenCalledWith(
       {
@@ -170,13 +165,13 @@ describe('<Assignees />', () => {
     expect(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID)).toBeDisabled();
   });
 
-  it('should render empty tag in preview mode', () => {
+  it('should render empty tag in when showAssignees is false', () => {
     const assignees = ['user-id-1', 'user-id-2'];
     const { getByTestId, queryByTestId } = renderAssignees(
       'test-event',
       assignees,
       jest.fn(),
-      true
+      false
     );
 
     expect(queryByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID)).not.toBeInTheDocument();

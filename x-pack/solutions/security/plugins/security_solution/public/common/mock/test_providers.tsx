@@ -88,7 +88,7 @@ export const TestProvidersComponent = ({
                         <CellActionsProvider
                           getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
                         >
-                          <EuiProvider>
+                          <EuiProvider highContrastMode={false}>
                             <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
                           </EuiProvider>
                         </CellActionsProvider>
@@ -140,7 +140,7 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
                   <UserPrivilegesProvider
                     kibanaCapabilities={
                       {
-                        siem: { show: true, crud: true },
+                        siemV2: { show: true, crud: true },
                         [CASES_FEATURE_ID]: { read_cases: true, crud_cases: false },
                         [ASSISTANT_FEATURE_ID]: { 'ai-assistant': true },
                       } as unknown as Capabilities
@@ -149,7 +149,7 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
                     <CellActionsProvider
                       getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
                     >
-                      <EuiProvider>
+                      <EuiProvider highContrastMode={false}>
                         <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
                       </EuiProvider>
                     </CellActionsProvider>

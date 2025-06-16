@@ -10,12 +10,7 @@ import {
   BulkActionEditTypeEnum,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
 import moment from 'moment';
-import {
-  getCustomQueryRuleParams,
-  getSimpleMlRule,
-  getSimpleRule,
-  installMockPrebuiltRules,
-} from '../../../utils';
+import { getCustomQueryRuleParams, getSimpleMlRule, getSimpleRule } from '../../../utils';
 import {
   createRule,
   createAlertsIndex,
@@ -199,49 +194,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .readRule({ query: { rule_id: ruleId } })
           .expect(200);
         expect(ruleBody.tags).toEqual(tags);
-      });
-
-      it('should validate immutable rule edit', async () => {
-        await installMockPrebuiltRules(supertest, es);
-        const { body: findBody } = await securitySolutionApi
-          .findRules({ query: { per_page: 1, filter: 'alert.attributes.params.immutable: true' } })
-          .expect(200);
-
-        const immutableRule = findBody.data[0];
-
-        const { body } = await securitySolutionApi
-          .performRulesBulkAction({
-            query: { dry_run: true },
-            body: {
-              ids: [immutableRule.id],
-              action: BulkActionTypeEnum.edit,
-              [BulkActionTypeEnum.edit]: [
-                { type: BulkActionEditTypeEnum.set_tags, value: ['reset-tag'] },
-              ],
-            },
-          })
-          .expect(500);
-
-        expect(body.attributes.summary).toEqual({ failed: 1, skipped: 0, succeeded: 0, total: 1 });
-        expect(body.attributes.results).toEqual({
-          updated: [],
-          skipped: [],
-          created: [],
-          deleted: [],
-        });
-
-        expect(body.attributes.errors).toHaveLength(1);
-        expect(body.attributes.errors[0]).toEqual({
-          err_code: 'IMMUTABLE',
-          message: "Elastic rule can't be edited",
-          status_code: 500,
-          rules: [
-            {
-              id: immutableRule.id,
-              name: immutableRule.name,
-            },
-          ],
-        });
       });
 
       describe('validate updating index pattern for machine learning rule', () => {

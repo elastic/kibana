@@ -118,7 +118,7 @@ const extractDiffableCommonFields = (
     version: rule.version,
 
     // Main domain fields
-    name: rule.name.trim(),
+    name: rule.name?.trim(),
     tags: rule.tags ?? [],
     description: rule.description,
     severity: rule.severity,

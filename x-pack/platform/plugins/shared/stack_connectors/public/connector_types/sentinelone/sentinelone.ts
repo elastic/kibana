@@ -35,7 +35,7 @@ export function getConnectorType(): ConnectorTypeModel<
     id: SENTINELONE_CONNECTOR_ID,
     actionTypeTitle: SENTINELONE_TITLE,
     iconClass: lazy(() => import('./logo')),
-    isExperimental: true,
+    isExperimental: false,
     selectMessage: i18n.translate(
       'xpack.stackConnectors.security.sentinelone.config.selectMessageText',
       {
@@ -61,5 +61,6 @@ export function getConnectorType(): ConnectorTypeModel<
     },
     actionConnectorFields: lazy(() => import('./sentinelone_connector')),
     actionParamsFields: lazy(() => import('./sentinelone_params')),
+    subFeature: 'endpointSecurity',
   };
 }

@@ -31,6 +31,7 @@ export type {
   KibanaRouteOptions,
   RouteSecurityGetter,
   InternalRouteSecurity,
+  AnyKibanaRequest,
 } from './request';
 export type { RequestHandlerWrapper, RequestHandler } from './request_handler';
 export type { RequestHandlerContextBase } from './request_handler_context';
@@ -62,6 +63,8 @@ export type {
   AuthcDisabled,
   AuthcEnabled,
   RouteSecurity,
+  AllRequiredCondition,
+  AnyRequiredCondition,
   Privilege,
   PrivilegeSet,
   RouteDeprecationInfo,

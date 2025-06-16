@@ -42,7 +42,8 @@ import {
 } from '../../../screens/search_bar';
 import { TOASTER } from '../../../screens/alerts_detection_rules';
 
-describe('KPI visualizations in Alerts Page', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/192459
+describe.skip('KPI visualizations in Alerts Page', { tags: ['@ess', '@serverless'] }, () => {
   const ruleConfigs = getNewRule();
   beforeEach(() => {
     deleteAlertsAndRules();
@@ -103,8 +104,7 @@ describe('KPI visualizations in Alerts Page', { tags: ['@ess', '@serverless'] },
     });
   });
 
-  // For some reason this suite is failing in CI while I cannot reproduce it locally
-  context.skip('Histogram legend hover actions', () => {
+  context('Histogram legend hover actions', () => {
     it('should should add a filter in to KQL bar', () => {
       selectAlertsHistogram();
       const expectedNumberOfAlerts = 1;
@@ -136,7 +136,7 @@ describe('KPI visualizations in Alerts Page', { tags: ['@ess', '@serverless'] },
       clickAlertsHistogramLegend();
       clickAlertsHistogramLegendAddToTimeline(ruleConfigs.name);
 
-      cy.get(TOASTER).should('have.text', `Added ${ruleConfigs.name} to timeline`);
+      cy.get(TOASTER).should('have.text', `Added ${ruleConfigs.name} to Timeline`);
     });
   });
 });

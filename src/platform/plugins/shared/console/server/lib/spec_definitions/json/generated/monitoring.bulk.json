@@ -20,9 +20,9 @@
       "_monitoring/bulk",
       "_monitoring/{type}/bulk"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/monitor-elasticsearch-cluster.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch",
     "availability": {
-      "stack": true,
+      "stack": false,
       "serverless": false
     }
   }

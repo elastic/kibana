@@ -14,7 +14,7 @@ import {
 } from '@kbn/global-search-plugin/server';
 import { i18n } from '@kbn/i18n';
 
-import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../common/constants';
+import { ENTERPRISE_SEARCH_DATA_PLUGIN } from '../../common/constants';
 
 import { getIndexData } from '../lib/indices/utils/get_index_data';
 
@@ -44,7 +44,7 @@ export function getIndicesSearchResultProvider(
                 defaultMessage: 'Index',
               }),
               url: {
-                path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/search_indices/${indexName}`,
+                path: `${ENTERPRISE_SEARCH_DATA_PLUGIN.URL}/search_indices/${indexName}`,
                 prependBasePath: true,
               },
             };

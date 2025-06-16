@@ -16,6 +16,7 @@ export interface ActionDocument {
   viewInAppUrl: string;
   host?: string;
   group?: string;
+  grouping?: string;
 }
 
 export interface LogsExplorerLocatorParsedParams extends SerializableRecord {

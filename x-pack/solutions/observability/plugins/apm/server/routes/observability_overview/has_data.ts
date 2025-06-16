@@ -6,7 +6,7 @@
  */
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export interface HasDataResponse {
@@ -33,10 +33,8 @@ export async function getHasData({
         events: [ProcessorEvent.transaction, ProcessorEvent.error, ProcessorEvent.metric],
       },
       terminate_after: 1,
-      body: {
-        track_total_hits: 1,
-        size: 0,
-      },
+      track_total_hits: 1,
+      size: 0,
     };
 
     const response = await apmEventClient.search('observability_overview_has_apm_data', params);

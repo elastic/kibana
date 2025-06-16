@@ -5,14 +5,21 @@
  * 2.0.
  */
 
-import { ConnectorUsageCollector, Services } from '@kbn/actions-plugin/server/types';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import type { Services } from '@kbn/actions-plugin/server/types';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { validateConfig, validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { Logger } from '@kbn/core/server';
+import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import type { Logger } from '@kbn/core/server';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import axios from 'axios';
-import { ConnectorTypeConfigType, ConnectorTypeSecretsType, WebhookConnectorType } from './types';
+import type {
+  ConnectorTypeConfigType,
+  ConnectorTypeSecretsType,
+  WebhookConnectorType,
+} from './types';
 
 import { getConnectorType } from '.';
 

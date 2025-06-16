@@ -10,6 +10,7 @@ import type { EuiTextProps } from '@elastic/eui';
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { isAgentTypeInTechPreview } from '../../../../../../common/endpoint/service/response_actions/is_agent_type_in_tech_preview';
 import { useTestIdGenerator } from '../../../../../management/hooks/use_test_id_generator';
 import { AgentTypeVendorLogo } from '../agent_type_vendor_logo';
 import {
@@ -43,7 +44,7 @@ export const AgentTypeIntegration = memo<AgentTypeIntegrationProps>(
     const testId = useTestIdGenerator(dataTestSubj);
 
     const isTechPreview = useMemo(() => {
-      return agentType === 'sentinel_one' || agentType === 'crowdstrike';
+      return isAgentTypeInTechPreview(agentType);
     }, [agentType]);
 
     return (

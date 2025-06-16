@@ -26,17 +26,4 @@ export interface DiscoverCustomizationContext {
    * Display mode in which discover is running
    */
   displayMode: DiscoverDisplayMode;
-  /**
-   * Inline top nav configuration
-   */
-  inlineTopNav: {
-    /**
-     * Whether or not to show the inline top nav
-     */
-    enabled: boolean;
-    /**
-     * Whether or not to show the Logs Explorer tabs
-     */
-    showLogsExplorerTabs: boolean;
-  };
 }

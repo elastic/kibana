@@ -54,23 +54,23 @@ describe('NER output', () => {
 
   describe('getClassColor', () => {
     test('returns the correct color for class PER', () => {
-      expect(getClassColor('PER', true)).toBe('#f1d86f');
+      expect(getClassColor('PER', true)).toBe('#ffe0f5');
     });
 
     test('returns the correct color for class LOC', () => {
-      expect(getClassColor('LOC', true)).toBe('#79aad9');
+      expect(getClassColor('LOC', true)).toBe('#bfffff');
     });
 
     test('returns the correct color for class ORG', () => {
-      expect(getClassColor('ORG', true)).toBe('#6dccb1');
+      expect(getClassColor('ORG', true)).toBe('#45ded9');
     });
 
     test('returns the correct color for class MISC', () => {
-      expect(getClassColor('MISC', true)).toBe('#f5a35c');
+      expect(getClassColor('MISC', true)).toBe('#ffe2db');
     });
 
     test('returns the default color for an unknown class', () => {
-      expect(getClassColor('UNKNOWN', true)).toBe('#f1d86f');
+      expect(getClassColor('UNKNOWN', true)).toBe('#ffe0f5');
     });
   });
 });

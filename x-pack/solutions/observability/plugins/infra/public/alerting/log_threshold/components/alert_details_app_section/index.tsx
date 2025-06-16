@@ -14,7 +14,6 @@ import {
   ALERT_START,
 } from '@kbn/rule-data-utils';
 import moment from 'moment';
-import { useTheme } from '@emotion/react';
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
@@ -39,7 +38,6 @@ const formatThreshold = (threshold: number) => String(threshold);
 
 const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) => {
   const { logsShared } = useKibanaContextForPlugin().services;
-  const theme = useTheme();
   const baseTheme = useElasticChartsTheme();
   const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
@@ -90,11 +88,11 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiFlexGroup>
-            <EuiFlexItem style={{ maxHeight: 120 }} grow={1}>
+            <EuiFlexItem css={{ maxHeight: 120 }} grow={1}>
               <EuiSpacer size="s" />
               <Threshold
                 title={`Threshold breached`}
-                chartProps={{ theme, baseTheme }}
+                chartProps={{ baseTheme }}
                 comparator={ComparatorToi18nSymbolsMap[rule.params.count.comparator]}
                 id={'threshold-ratio-chart'}
                 thresholds={[rule.params.count.value]}
@@ -157,11 +155,11 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
           </EuiFlexGroup>
           <EuiSpacer size="l" />
           <EuiFlexGroup>
-            <EuiFlexItem style={{ maxHeight: 120 }} grow={1}>
+            <EuiFlexItem css={{ maxHeight: 120 }} grow={1}>
               <EuiSpacer size="s" />
               <Threshold
                 title={`Threshold breached`}
-                chartProps={{ theme, baseTheme }}
+                chartProps={{ baseTheme }}
                 comparator={ComparatorToi18nSymbolsMap[rule.params.count.comparator]}
                 id="logCountThreshold"
                 thresholds={[rule.params.count.value]}

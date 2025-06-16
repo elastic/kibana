@@ -1,18 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`arrows ArrowBody renders correctly against snapshot 1`] = `
-.c0 {
-  background-color: #343741;
-  height: 3px;
-  width: 25px;
-}
-
-<ArrowBody
-  height={3}
->
-  <span
-    className="c0"
-    height={3}
-  />
-</ArrowBody>
+<span
+  class="css-1yrmg49-ArrowBody e1do9oav0"
+  height="3"
+/>
 `;

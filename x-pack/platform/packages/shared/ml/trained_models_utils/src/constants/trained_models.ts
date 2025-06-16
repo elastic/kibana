@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 
 export const ELSER_MODEL_ID = '.elser_model_2';
@@ -212,6 +212,7 @@ export const MODEL_STATE = {
   DOWNLOADING: 'downloading',
   DOWNLOADED: 'downloaded',
   NOT_DOWNLOADED: 'notDownloaded',
+  DOWNLOADED_IN_DIFFERENT_SPACE: 'downloadedInDifferentSpace',
 } as const;
 
 export type ModelState = (typeof MODEL_STATE)[keyof typeof MODEL_STATE] | null;
@@ -223,7 +224,7 @@ export interface GetModelDownloadConfigOptions {
 }
 
 export interface LocalInferenceServiceSettings {
-  service: 'elser' | 'elasticsearch';
+  service: 'elasticsearch';
   service_settings: {
     num_allocations: number;
     num_threads: number;

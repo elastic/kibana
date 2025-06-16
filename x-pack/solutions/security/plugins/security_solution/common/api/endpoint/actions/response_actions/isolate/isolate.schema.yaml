@@ -15,16 +15,62 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/IsolateRouteRequestBody'
+              $ref: '../../../model/schema/common.schema.yaml#/components/schemas/BaseActionSchema'
+            examples:
+              single_endpoint:
+                summary: "Isolates a single host with an endpoint_id value of ed518850-681a-4d60-bb98-e22640cae2a8"
+                value:
+                  endpoint_ids:
+                    - "ed518850-681a-4d60-bb98-e22640cae2a8"
+              multiple_endpoints:
+                summary: "Isolates several hosts; includes a comment"
+                value:
+                  endpoint_ids:
+                    - "9972d10e-4b9e-41aa-a534-a85e2a28ea42"
+                    - "bc0e4f0c-3bca-4633-9fee-156c0b505d16"
+                    - "fa89271b-b9d4-43f2-a684-307cffddeb5a"
+                  comment: "Locked down, pending further investigation"
+              with_case_id:
+                summary: "Isolates a single host with a case_id value of 1234"
+                value:
+                  endpoint_ids:
+                    - "1aa1f8fd-0fb0-4fe4-8c30-92068272d3f0"
+                    - "b30a11bf-1395-4707-b508-fbb45ef9793e"
+                  case_ids:
+                    - "4976be38-c134-4554-bd5e-0fd89ce63667"
+                  comment: "Isolating as initial response"
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '../../../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
-
+                $ref: '#/components/schemas/IsolateRouteResponse'
 components:
   schemas:
-    IsolateRouteRequestBody:
-        $ref: '../../../model/schema/common.schema.yaml#/components/schemas/NoParametersRequestSchema'
+    IsolateRouteResponse:
+      type: object
+      properties: { }
+      example:
+        action: "233db9ea-6733-4849-9226-5a7039c7161d"
+        data:
+          id: "233db9ea-6733-4849-9226-5a7039c7161d"
+          agents:
+            - "ed518850-681a-4d60-bb98-e22640cae2a8"
+          command: "suspend-process"
+          agentType: "endpoint"
+          isExpired: false
+          isCompleted: true
+          wasSuccessful: true
+          errors: [ ]
+          startedAt: "2022-07-29T19:08:49.126Z"
+          completedAt: "2022-07-29T19:09:44.961Z"
+          outputs:
+            ed518850-681a-4d60-bb98-e22640cae2a8:
+              type: "json"
+              content:
+                key: "value"
+          createdBy: "myuser"
+          comment: "suspend the process"
+          parameters:
+            entity_id: "abc123"

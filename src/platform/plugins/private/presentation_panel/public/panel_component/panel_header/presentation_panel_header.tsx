@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiScreenReaderOnly } from '@elastic/eui';
+import { transparentize, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { ViewMode } from '@kbn/presentation-publishing';
-import classNames from 'classnames';
-import React, { useCallback } from 'react';
-import { getAriaLabelForTitle } from '../presentation_panel_strings';
+import React, { useCallback, useMemo } from 'react';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 import { PresentationPanelTitle } from './presentation_panel_title';
 import { usePresentationPanelHeaderActions } from './use_presentation_panel_header_actions';
@@ -40,6 +39,8 @@ export const PresentationPanelHeader = <
   showBadges = true,
   showNotifications = true,
 }: PresentationPanelHeaderProps<ApiType>) => {
+  const { euiTheme } = useEuiTheme();
+
   const { notificationElements, badgeElements } = usePresentationPanelHeaderActions<ApiType>(
     showNotifications,
     showBadges,
@@ -55,43 +56,61 @@ export const PresentationPanelHeader = <
     [setDragHandle]
   );
 
+  const { captionStyles, headerStyles } = useMemo(() => {
+    return {
+      captionStyles: css`
+        .dshLayout--editing &:hover {
+          cursor: move;
+          background-color: ${transparentize(euiTheme.colors.warning, 0.2)};
+        }
+      `,
+      headerStyles: css`
+        height: ${euiTheme.size.l};
+        overflow: hidden;
+        line-height: ${euiTheme.size.l};
+        padding: 0px ${euiTheme.size.s};
+
+        display: flex;
+        flex-wrap: nowrap;
+        column-gap: ${euiTheme.size.s};
+        align-items: center;
+        // all direct children now share the available parent width equally, ensuring consistent layout regardless of their content length
+        > * {
+          min-width: 0;
+          flex: 1 !important;
+          max-width: fit-content !important;
+        }
+      `,
+    };
+  }, [euiTheme.colors.warning, euiTheme.size]);
+
   const showPanelBar =
     (!hideTitle && panelTitle) || badgeElements.length > 0 || notificationElements.length > 0;
 
   if (!showPanelBar) return null;
 
-  const ariaLabel = getAriaLabelForTitle(showPanelBar ? panelTitle : undefined);
-  const ariaLabelElement = (
-    <EuiScreenReaderOnly>
-      <span id={headerId}>{ariaLabel}</span>
-    </EuiScreenReaderOnly>
-  );
-
-  const headerClasses = classNames('embPanel__header', {
-    'embPanel--dragHandle': viewMode === 'edit',
-    'embPanel__header--floater': !showPanelBar,
-  });
-
-  const titleClasses = classNames('embPanel__title', {
-    'embPanel--dragHandle': viewMode === 'edit',
-  });
-
   return (
     <figcaption
-      className={headerClasses}
       data-test-subj={`embeddablePanelHeading-${(panelTitle || '').replace(/\s/g, '')}`}
+      className={'embPanel__header'}
+      css={captionStyles}
     >
-      <h2 ref={memoizedSetDragHandle} data-test-subj="dashboardPanelTitle" className={titleClasses}>
-        {ariaLabelElement}
+      <div
+        className="embPanel__title"
+        ref={memoizedSetDragHandle}
+        data-test-subj="dashboardPanelTitle"
+        css={headerStyles}
+      >
         <PresentationPanelTitle
           api={api}
+          headerId={headerId}
           viewMode={viewMode}
           hideTitle={hideTitle}
           panelTitle={panelTitle}
           panelDescription={panelDescription}
         />
         {showBadges && badgeElements}
-      </h2>
+      </div>
       {showNotifications && notificationElements}
     </figcaption>
   );

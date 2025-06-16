@@ -1,9 +1,9 @@
 openapi: 3.0.0
 info:
   title: KnowledgeBase API endpoints
-  version: '1'
+  version: '2023-10-31'
 paths:
-  /internal/elastic_assistant/knowledge_base/{resource}:
+  /api/security_ai_assistant/knowledge_base/{resource}:
     post:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
@@ -18,19 +18,22 @@ paths:
           description: The KnowledgeBase `resource` value.
           schema:
             type: string
+          example: "kb12345"
         - name: modelId
           in: query
-          description: Optional ELSER modelId to use when setting up the Knowledge Base
+          description: ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.
           required: false
           schema:
             type: string
+          example: "elser-model-001"
         - name: ignoreSecurityLabs
           in: query
-          description: Indicates whether we should or should not install Security Labs docs when setting up the Knowledge Base
+          description: Indicates whether we should or should not install Security Labs docs when setting up the Knowledge Base. Defaults to `false`.
           required: false
           schema:
             type: boolean
             default: false
+          example: true
       responses:
         200:
           description: Indicates a successful call.
@@ -47,10 +50,16 @@ paths:
                 properties:
                   statusCode:
                     type: number
+                    description: The HTTP status code of the error.
+                    example: 400
                   error:
                     type: string
+                    description: A short description of the error.
+                    example: "Bad Request"
                   message:
                     type: string
+                    description: A detailed error message.
+                    example: "Invalid resource ID provided."
     get:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
@@ -65,6 +74,7 @@ paths:
           description: The KnowledgeBase `resource` value.
           schema:
             type: string
+          example: "kb12345"
       responses:
         200:
           description: Indicates a successful call.
@@ -75,18 +85,28 @@ paths:
                 properties:
                   elser_exists:
                     type: boolean
-                  index_exists:
-                    type: boolean
+                    description: Indicates if the ELSER model exists for the KnowledgeBase.
+                    example: true
                   is_setup_available:
                     type: boolean
+                    description: Indicates if the setup process is available for the KnowledgeBase.
+                    example: true
                   is_setup_in_progress:
                     type: boolean
-                  pipeline_exists:
-                    type: boolean
+                    description: Indicates if the setup process is currently in progress.
+                    example: false
                   security_labs_exists:
                     type: boolean
+                    description: Indicates if Security Labs documentation exists in the KnowledgeBase.
+                    example: true
                   user_data_exists:
                     type: boolean
+                    description: Indicates if user data exists in the KnowledgeBase.
+                    example: false
+                  product_documentation_status:
+                    type: string
+                    description: The status of the product documentation in the KnowledgeBase.
+                    example: "complete"
         400:
           description: Generic Error
           content:
@@ -96,10 +116,16 @@ paths:
                 properties:
                   statusCode:
                     type: number
+                    description: The HTTP status code of the error.
+                    example: 400
                   error:
                     type: string
+                    description: A short description of the error.
+                    example: "Bad Request"
                   message:
                     type: string
+                    description: A detailed error message.
+                    example: "Invalid resource ID provided."
 
 components:
   schemas:
@@ -110,3 +136,4 @@ components:
         success:
           type: boolean
           description: Identify the success of the method execution.
+          example: true

@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
-import { DashboardListingTable, LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
+import { DashboardListingTable } from '@kbn/dashboard-plugin/public';
 import { LandingLinksImageCards } from '@kbn/security-solution-navigation/landing_links';
 import { useContractComponents } from '../../../common/hooks/use_contract_component';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
@@ -87,7 +87,7 @@ export const DashboardsLandingPage = () => {
   const { links = [] } = useRootNavLink(SecurityPageName.dashboards) ?? {};
   const urlState = useGlobalQueryString();
   const { show: canReadDashboard, createNew: canCreateDashboard } =
-    useCapabilities<DashboardCapabilities>(LEGACY_DASHBOARD_APP_ID);
+    useCapabilities<DashboardCapabilities>('dashboard_v2');
   const { navigateTo } = useNavigateTo();
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
   const getSecuritySolutionDashboardUrl = useCallback(

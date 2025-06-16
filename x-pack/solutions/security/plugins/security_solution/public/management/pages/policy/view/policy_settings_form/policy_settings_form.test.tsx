@@ -27,13 +27,6 @@ import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 
 jest.mock('../../../../../common/hooks/use_license');
 
-const mockAllowShowingEventMergingBannerConstantGetter = jest.fn();
-jest.mock('./constants', () => ({
-  get ALLOW_SHOWING_EVENT_MERGING_BANNER() {
-    return mockAllowShowingEventMergingBannerConstantGetter();
-  },
-}));
-
 describe('Endpoint Policy Settings Form', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test');
 
@@ -42,9 +35,10 @@ describe('Endpoint Policy Settings Form', () => {
   let renderResult: ReturnType<typeof render>;
   let upsellingService: UpsellingService;
   let storageMock: IStorageWrapper;
+  let mockedContext: AppContextTestRender;
 
   beforeEach(() => {
-    const mockedContext = createAppRootMockRenderer();
+    mockedContext = createAppRootMockRenderer();
 
     upsellingService = mockedContext.startServices.upselling;
     storageMock = mockedContext.startServices.storage;
@@ -57,41 +51,41 @@ describe('Endpoint Policy Settings Form', () => {
       'data-test-subj': 'test',
     };
 
-    mockAllowShowingEventMergingBannerConstantGetter.mockReturnValue(false);
+    mockedContext.setExperimentalFlag({ eventCollectionDataReductionBannerEnabled: false });
 
     render = () => (renderResult = mockedContext.render(<PolicySettingsForm {...formProps} />));
   });
 
   describe('event merging banner', () => {
     beforeEach(() => {
-      mockAllowShowingEventMergingBannerConstantGetter.mockReturnValue(true);
+      mockedContext.setExperimentalFlag({ eventCollectionDataReductionBannerEnabled: true });
     });
 
     it('should hide the banner if its not allowed to be displayed', () => {
-      mockAllowShowingEventMergingBannerConstantGetter.mockReturnValue(false);
+      mockedContext.setExperimentalFlag({ eventCollectionDataReductionBannerEnabled: false });
 
       render();
 
       expect(renderResult.queryByTestId('eventMergingCallout')).not.toBeInTheDocument();
     });
-    it('should show the event merging banner for 8.16 if it has never been dismissed', () => {
+    it('should show the event merging banner if it has never been dismissed', () => {
       render();
 
       expect(renderResult.getByTestId('eventMergingCallout')).toBeInTheDocument();
     });
 
-    it('should show the event merging banner for 8.16 if `securitySolution.showEventMergingBanner` is `true`', () => {
+    it('should show the event merging banner if `securitySolution.showEventMergingBanner` is `true`', () => {
       storageMock.set('securitySolution.showEventMergingBanner', true);
       render();
 
       expect(renderResult.getByTestId('eventMergingCallout')).toBeInTheDocument();
     });
 
-    it('should hide the event merging banner when user dismisses it', () => {
+    it('should hide the event merging banner when user dismisses it', async () => {
       render();
       expect(renderResult.getByTestId('eventMergingCallout')).toBeInTheDocument();
 
-      renderResult.getByTestId('euiDismissCalloutButton').click();
+      await userEvent.click(renderResult.getByTestId('euiDismissCalloutButton'));
 
       expect(renderResult.queryByTestId('eventMergingCallout')).not.toBeInTheDocument();
     });

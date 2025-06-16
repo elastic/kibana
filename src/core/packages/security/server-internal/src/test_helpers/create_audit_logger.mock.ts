@@ -16,6 +16,7 @@ export const createAuditLoggerMock = {
     return {
       log: jest.fn(),
       enabled: true,
+      includeSavedObjectNames: false,
     };
   },
 };

@@ -65,8 +65,7 @@ describe('preflightCheckForCreate', () => {
         docs: results.map(({ found, disabled }, i) => {
           return found
             ? {
-                // @ts-expect-error
-                _id: params!.body!.docs![i]._id as string, // needed for mockRawDocExistsInNamespaces mock implementation and existingDocument assertions
+                _id: params!.docs![i]._id, // needed for mockRawDocExistsInNamespaces mock implementation and existingDocument assertions
                 _index: 'doesnt-matter',
                 _source: {
                   ...(disabled !== undefined && { [LEGACY_URL_ALIAS_TYPE]: { disabled } }),
@@ -86,7 +85,7 @@ describe('preflightCheckForCreate', () => {
   /** Asserts that mget is called for the given raw object IDs */
   function expectMgetArgs(...rawObjectIds: string[]) {
     const docs = rawObjectIds.map((_id) => expect.objectContaining({ _id }));
-    expect(client.mget).toHaveBeenCalledWith({ body: { docs } }, expect.anything());
+    expect(client.mget).toHaveBeenCalledWith({ docs }, expect.anything());
   }
 
   /** Asserts that findLegacyUrlAliases is called for the given objects */

@@ -10,10 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FindSLOResponse } from '@kbn/slo-schema';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import {
-  DEFAULT_SLO_PAGE_SIZE,
-  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-} from '../../common/constants';
+import { DEFAULT_SLO_PAGE_SIZE, SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import { SearchState } from '../pages/slos/hooks/use_url_search_state';
 import { useKibana } from './use_kibana';
 import { sloKeys } from './query_key_factory';
@@ -63,7 +60,7 @@ export function useFetchSloList({
   const queryClient = useQueryClient();
 
   const { dataView } = useCreateDataView({
-    indexPatternString: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+    indexPatternString: SUMMARY_DESTINATION_INDEX_PATTERN,
   });
 
   const filters = useMemo(() => {

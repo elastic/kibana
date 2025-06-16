@@ -14,6 +14,7 @@ import { calculateRiskScoresMock } from './calculate_risk_scores.mock';
 
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { mockGlobalState } from '../../../../public/common/mock';
+import { EntityType } from '../../../../common/search_strategy';
 
 describe('calculateRiskScores()', () => {
   let params: Parameters<typeof calculateRiskScores>[0];
@@ -80,7 +81,7 @@ describe('calculateRiskScores()', () => {
       });
 
       it('creates an aggregation per specified identifierType', async () => {
-        params = { ...params, identifierType: 'host' };
+        params = { ...params, identifierType: EntityType.host };
         await calculateRiskScores(params);
         const [[call]] = (esClient.search as jest.Mock).mock.calls;
         expect(call).toEqual(
@@ -200,31 +201,7 @@ describe('calculateRiskScores()', () => {
       expect(response).toHaveProperty('scores');
       expect(response.scores.host).toHaveLength(2);
       expect(response.scores.user).toHaveLength(2);
-      expect(response.scores.service).toHaveLength(0);
-    });
-
-    it('calculates risk score for service when the experimental flag is enabled', async () => {
-      const response = await calculateRiskScores({
-        ...params,
-        experimentalFeatures: {
-          ...mockGlobalState.app.enableExperimental,
-          serviceEntityStoreEnabled: true,
-        },
-      });
-
       expect(response.scores.service).toHaveLength(2);
-    });
-
-    it('does NOT calculates risk score for service when the experimental flag is disabled', async () => {
-      const response = await calculateRiskScores({
-        ...params,
-        experimentalFeatures: {
-          ...mockGlobalState.app.enableExperimental,
-          serviceEntityStoreEnabled: false,
-        },
-      });
-
-      expect(response.scores.service).toHaveLength(0);
     });
 
     it('returns scores in the expected format', async () => {

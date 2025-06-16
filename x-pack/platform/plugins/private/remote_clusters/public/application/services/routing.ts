@@ -8,7 +8,7 @@
 import { ScopedHistory } from '@kbn/core/public';
 
 /**
- * This file based on guidance from https://github.com/elastic/eui/blob/master/wiki/react-router.md
+ * This file based on guidance from https://github.com/elastic/eui/blob/main/wiki/consuming-eui/react-router.md
  */
 
 let _userHasLeftApp = false;

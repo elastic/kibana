@@ -75,7 +75,7 @@
   height: $euiSizeL;
   background-color: $euiFormBackgroundColor;
   border-radius: $euiSizeXS;
-  box-shadow: 0 0 $euiSizeXS $euiSizeXS transparentize($euiShadowColor, .9);
+  box-shadow: 0 0 $euiSizeXS * .5 $euiSizeXS * .5 $euiColorLightShade;
   padding-top: $euiSize * .1;
   overflow-y: auto;
 }
@@ -121,10 +121,10 @@
   content: '';
   position: absolute;
   top: 0;
-  bottom: -$euiSize * .3;
-  left: -$euiSize * 3;
+  bottom: -$euiSize * .1;
+  left: -$euiSize * .5;
   right: 0;
-  background: transparentize($euiColorPrimary, .9);
+  background: transparentize($euiColorPrimary, .95);
   border: $euiBorderThin;
   border-color: $euiColorPrimary;
   pointer-events: none; /* Ensures the pseudo-element doesn't block interactions */
@@ -148,11 +148,11 @@
 }
 
 .monaco__status_code_line--primary {
-  background-color: transparentize($euiColorVis1, .9);
+  background-color: transparentize($euiColorPrimary, .9);
 }
 
 .monaco__status_code_line_number--primary {
-  background-color: transparentize($euiColorVis1, .5);
+  background-color: transparentize($euiColorPrimary, .5);
 }
 
 .monaco__status_code_line--success {

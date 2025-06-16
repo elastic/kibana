@@ -20,7 +20,7 @@ export interface DataBounds {
   fallback?: boolean;
 }
 
-export interface PaletteOutput<T = { [key: string]: unknown }> {
+export interface PaletteOutput<T = Record<string, unknown>> {
   type: 'palette' | 'system_palette';
   name: string;
   params?: T;
@@ -87,6 +87,10 @@ export interface PaletteDefinition<T = unknown> {
    * User facing title (should be i18n-ized)
    */
   title: string;
+  /**
+   * User facing tag (should be i18n-ized)
+   */
+  tag?: string;
   /**
    * Flag indicating whether users should be able to pick this palette manually.
    */

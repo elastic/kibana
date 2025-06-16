@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { createBulkExecutionEnqueuerFunction } from './create_execute_function';
@@ -16,6 +16,7 @@ import {
   asSavedObjectExecutionSource,
 } from './lib/action_execution_source';
 import { actionsConfigMock } from './actions_config.mock';
+import { TaskPriority } from '@kbn/task-manager-plugin/server';
 
 const mockTaskManager = taskManagerMock.createStart();
 const savedObjectsClient = savedObjectsClientMock.create();
@@ -1170,6 +1171,212 @@ describe('bulkExecute()', () => {
         ],
       }
     `);
+    expect(mockTaskManager.bulkSchedule).toHaveBeenCalledTimes(1);
+    expect(mockTaskManager.bulkSchedule.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "params": Object {
+              "actionTaskParamsId": "234",
+              "spaceId": "default",
+            },
+            "scope": Array [
+              "actions",
+            ],
+            "state": Object {},
+            "taskType": "actions:mock-action",
+          },
+        ],
+      ]
+    `);
+  });
+
+  test('uses priority if specified', async () => {
+    mockTaskManager.aggregate.mockResolvedValue({
+      took: 1,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      hits: { total: { value: 2, relation: 'eq' }, max_score: null, hits: [] },
+      aggregations: {},
+    });
+    mockActionsConfig.getMaxQueued.mockReturnValueOnce(3);
+    const executeFn = createBulkExecutionEnqueuerFunction({
+      taskManager: mockTaskManager,
+      actionTypeRegistry: actionTypeRegistryMock.create(),
+      isESOCanEncrypt: true,
+      inMemoryConnectors: [],
+      configurationUtilities: mockActionsConfig,
+      logger: mockLogger,
+    });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        { id: '123', type: 'action', attributes: { actionTypeId: 'mock-action' }, references: [] },
+      ],
+    });
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({
+      saved_objects: [
+        { id: '234', type: 'action_task_params', attributes: { actionId: '123' }, references: [] },
+      ],
+    });
+    expect(
+      await executeFn(savedObjectsClient, [
+        {
+          id: '123',
+          params: { baz: false },
+          spaceId: 'default',
+          executionId: '123abc',
+          apiKey: null,
+          source: asHttpRequestExecutionSource(request),
+          actionTypeId: 'mock-action',
+          priority: TaskPriority.Low,
+        },
+        {
+          id: '123',
+          params: { baz: false },
+          spaceId: 'default',
+          executionId: '456xyz',
+          apiKey: null,
+          source: asHttpRequestExecutionSource(request),
+          actionTypeId: 'mock-action',
+        },
+      ])
+    ).toMatchInlineSnapshot(`
+      Object {
+        "errors": true,
+        "items": Array [
+          Object {
+            "actionTypeId": "mock-action",
+            "id": "123",
+            "response": "success",
+            "uuid": undefined,
+          },
+          Object {
+            "actionTypeId": "mock-action",
+            "id": "123",
+            "response": "queuedActionsLimitError",
+            "uuid": undefined,
+          },
+        ],
+      }
+    `);
+    expect(mockTaskManager.bulkSchedule).toHaveBeenCalledTimes(1);
+    expect(mockTaskManager.bulkSchedule.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "params": Object {
+              "actionTaskParamsId": "234",
+              "spaceId": "default",
+            },
+            "priority": 1,
+            "scope": Array [
+              "actions",
+            ],
+            "state": Object {},
+            "taskType": "actions:mock-action",
+          },
+        ],
+      ]
+    `);
+  });
+
+  test('uses apiKeyId if specified', async () => {
+    mockTaskManager.aggregate.mockResolvedValue({
+      took: 1,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      hits: { total: { value: 2, relation: 'eq' }, max_score: null, hits: [] },
+      aggregations: {},
+    });
+    mockActionsConfig.getMaxQueued.mockReturnValueOnce(3);
+    const executeFn = createBulkExecutionEnqueuerFunction({
+      taskManager: mockTaskManager,
+      actionTypeRegistry: actionTypeRegistryMock.create(),
+      isESOCanEncrypt: true,
+      inMemoryConnectors: [],
+      configurationUtilities: mockActionsConfig,
+      logger: mockLogger,
+    });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        { id: '123', type: 'action', attributes: { actionTypeId: 'mock-action' }, references: [] },
+      ],
+    });
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({
+      saved_objects: [
+        { id: '234', type: 'action_task_params', attributes: { actionId: '123' }, references: [] },
+      ],
+    });
+    expect(
+      await executeFn(savedObjectsClient, [
+        {
+          id: '123',
+          params: { baz: false },
+          spaceId: 'default',
+          executionId: '123abc',
+          apiKey: null,
+          source: asHttpRequestExecutionSource(request),
+          actionTypeId: 'mock-action',
+          apiKeyId: '235qgbdbqet',
+        },
+        {
+          id: '123',
+          params: { baz: false },
+          spaceId: 'default',
+          executionId: '456xyz',
+          apiKey: null,
+          source: asHttpRequestExecutionSource(request),
+          actionTypeId: 'mock-action',
+          apiKeyId: '235qgbdbqet',
+        },
+      ])
+    ).toMatchInlineSnapshot(`
+      Object {
+        "errors": true,
+        "items": Array [
+          Object {
+            "actionTypeId": "mock-action",
+            "id": "123",
+            "response": "success",
+            "uuid": undefined,
+          },
+          Object {
+            "actionTypeId": "mock-action",
+            "id": "123",
+            "response": "queuedActionsLimitError",
+            "uuid": undefined,
+          },
+        ],
+      }
+    `);
+
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      [
+        {
+          attributes: {
+            actionId: '123',
+            apiKey: null,
+            apiKeyId: '235qgbdbqet',
+            consumer: undefined,
+            executionId: '123abc',
+            params: {
+              baz: false,
+            },
+            relatedSavedObjects: undefined,
+            source: 'HTTP_REQUEST',
+          },
+          references: [
+            {
+              id: '123',
+              name: 'actionRef',
+              type: 'action',
+            },
+          ],
+          type: 'action_task_params',
+        },
+      ],
+      { refresh: false }
+    );
     expect(mockTaskManager.bulkSchedule).toHaveBeenCalledTimes(1);
     expect(mockTaskManager.bulkSchedule.mock.calls[0]).toMatchInlineSnapshot(`
       Array [

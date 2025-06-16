@@ -13,12 +13,13 @@ import {
   ResizableLayoutDirection,
   ResizableLayoutMode,
 } from '@kbn/resizable-layout';
-import React, { ReactNode, useState } from 'react';
+import React, { useState, type ReactNode } from 'react';
+import { css } from '@emotion/react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject } from 'rxjs';
-import { SidebarToggleState } from '../../../types';
+import type { BehaviorSubject } from 'rxjs';
+import type { SidebarToggleState } from '../../../types';
 
 export const SIDEBAR_WIDTH_KEY = 'discover:sidebarWidth';
 
@@ -62,7 +63,8 @@ export const DiscoverResizableLayout = ({
       <InPortal node={sidebarPanelNode}>{sidebarPanel}</InPortal>
       <InPortal node={mainPanelNode}>{mainPanel}</InPortal>
       <ResizableLayout
-        className="dscPageBody__contents"
+        className="dscPageBody__contents" // class is used in other styles
+        css={dscPageBodyContentsCss}
         mode={layoutMode}
         direction={layoutDirection}
         container={container}
@@ -77,3 +79,8 @@ export const DiscoverResizableLayout = ({
     </>
   );
 };
+
+const dscPageBodyContentsCss = css`
+  overflow: hidden;
+  height: 100%;
+`;

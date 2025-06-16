@@ -38,6 +38,7 @@ export async function stepSaveSystemObject(context: InstallContext) {
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
     id: pkgName,
+    name: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 
@@ -73,7 +74,11 @@ export async function stepSaveSystemObject(context: InstallContext) {
       logger.debug(
         `Package install - Package is flagged with keep_policies_up_to_date, upgrading its associated package policies ${policyIdsToUpgrade}`
       );
-      await packagePolicyService.upgrade(savedObjectsClient, esClient, policyIdsToUpgrade.items);
+      await packagePolicyService.bulkUpgrade(
+        savedObjectsClient,
+        esClient,
+        policyIdsToUpgrade.items
+      );
     });
   }
   logger.debug(

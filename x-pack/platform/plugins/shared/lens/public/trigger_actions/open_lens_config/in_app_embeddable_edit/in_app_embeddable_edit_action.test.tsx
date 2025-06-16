@@ -35,7 +35,11 @@ describe('inapp editing of Lens embeddable', () => {
       references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
     } as TypedLensSerializedState['attributes'];
     it('is incompatible for ESQL charts and if ui setting for ES|QL is off', async () => {
-      const inAppEditAction = new EditLensEmbeddableAction(mockStartDependencies, core);
+      const inAppEditAction = new EditLensEmbeddableAction(core, {
+        ...mockStartDependencies,
+        visualizationMap: {},
+        datasourceMap: {},
+      });
       const context = {
         attributes,
         lensEvent: {
@@ -60,7 +64,11 @@ describe('inapp editing of Lens embeddable', () => {
           },
         },
       } as CoreStart;
-      const inAppEditAction = new EditLensEmbeddableAction(mockStartDependencies, updatedCore);
+      const inAppEditAction = new EditLensEmbeddableAction(updatedCore, {
+        ...mockStartDependencies,
+        visualizationMap: {},
+        datasourceMap: {},
+      });
       const context = {
         attributes,
         lensEvent: {
@@ -76,7 +84,11 @@ describe('inapp editing of Lens embeddable', () => {
     });
 
     it('is compatible for dataview charts', async () => {
-      const inAppEditAction = new EditLensEmbeddableAction(mockStartDependencies, core);
+      const inAppEditAction = new EditLensEmbeddableAction(core, {
+        ...mockStartDependencies,
+        visualizationMap: {},
+        datasourceMap: {},
+      });
       const newAttributes = {
         ...attributes,
         state: {

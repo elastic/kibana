@@ -1,0 +1,9 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/storage-adapter",
+  "owner": [
+    "@elastic/observability-ui"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

@@ -21,6 +21,7 @@ import { Logger } from '@kbn/logging';
 import { BaseChatModelParams } from '@langchain/core/language_models/chat_models';
 import { get } from 'lodash/fp';
 import { Readable } from 'stream';
+import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import {
   convertBaseMessagesToContent,
   convertResponseBadFinishReasonToErrorMsg,
@@ -36,6 +37,7 @@ export interface CustomChatModelInput extends BaseChatModelParams {
   signal?: AbortSignal;
   model?: string;
   maxTokens?: number;
+  telemetryMetadata?: TelemetryMetadata;
 }
 
 export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
@@ -43,6 +45,7 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
   #connectorId: string;
   #temperature: number;
   #model?: string;
+  telemetryMetadata?: TelemetryMetadata;
 
   constructor({ actionsClient, connectorId, ...props }: CustomChatModelInput) {
     super({
@@ -50,6 +53,7 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
       apiKey: 'asda',
       maxOutputTokens: props.maxTokens ?? 2048,
     });
+    this.telemetryMetadata = props.telemetryMetadata;
     // LangChain needs model to be defined for logging purposes
     this.model = props.model ?? this.model;
     // If model is not specified by consumer, the connector will defin eit so do not pass
@@ -71,6 +75,7 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
           params: {
             subAction: 'invokeAIRaw',
             subActionParams: {
+              telemetryMetadata: this.telemetryMetadata,
               model: this.#model,
               messages: request.contents,
               tools: request.tools,
@@ -159,6 +164,7 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
             }, []),
             temperature: this.#temperature,
             tools: request.tools,
+            telemetryMetadata: this.telemetryMetadata,
           },
         },
       };

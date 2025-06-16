@@ -12,10 +12,13 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./avg_pct_fired'));
     loadTestFile(require.resolve('./avg_pct_no_data'));
     loadTestFile(require.resolve('./avg_ticks_fired'));
+    loadTestFile(require.resolve('./cardinality_runtime_field_fired'));
     loadTestFile(require.resolve('./custom_eq_avg_bytes_fired'));
     loadTestFile(require.resolve('./documents_count_fired'));
     loadTestFile(require.resolve('./group_by_fired'));
     loadTestFile(require.resolve('./p99_pct_fired'));
     loadTestFile(require.resolve('./rate_bytes_fired'));
+    // moved to feature flag config until custom roles in serverless are supported
+    // loadTestFile(require.resolve('./consumers_and_privileges'));
   });
 }

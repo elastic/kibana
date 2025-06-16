@@ -25,11 +25,14 @@ paths:
               type: object
               properties:
                 migration_ids:
+                  description: Array of `migration_id`s to finalize.
                   type: array
                   items:
                     type: string
                   minItems: 1
               required: [migration_ids]
+              example:
+                migration_ids: ['924f7c50-505f-11eb-ae0a-3fa2e626a51d']
       responses:
         200:
           description: Successful response
@@ -39,6 +42,17 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/MigrationFinalizationResult'
+              examples:
+                success:
+                  value:
+                    migrations:
+                      - id: 924f7c50-505f-11eb-ae0a-3fa2e626a51d
+                        completed: true
+                        destinationIndex: '.siem-signals-default-000002-r000016'
+                        status: success
+                        sourceIndex: '.siem-signals-default-000002'
+                        version: 16
+                        updated: '2021-01-06T22:05:56.859Z'
         400:
           description: Invalid input data response
           content:

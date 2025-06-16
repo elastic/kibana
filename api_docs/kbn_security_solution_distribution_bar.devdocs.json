@@ -23,7 +23,7 @@
           },
           ">"
         ],
-        "path": "x-pack/solutions/security/packages/distribution_bar/src/distribution_bar.tsx",
+        "path": "x-pack/solutions/security/packages/distribution-bar/src/distribution_bar.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -70,7 +70,7 @@
         "description": [
           "DistributionBar component props"
         ],
-        "path": "x-pack/solutions/security/packages/distribution_bar/src/distribution_bar.tsx",
+        "path": "x-pack/solutions/security/packages/distribution-bar/src/distribution_bar.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -86,7 +86,7 @@
             "signature": [
               "{ key: string; count: number; color: string; label?: React.ReactNode; isCurrentFilter?: boolean | undefined; filter?: (() => void) | undefined; reset?: ((event: React.MouseEvent<SVGElement, MouseEvent>) => void) | undefined; }[]"
             ],
-            "path": "x-pack/solutions/security/packages/distribution_bar/src/distribution_bar.tsx",
+            "path": "x-pack/solutions/security/packages/distribution-bar/src/distribution_bar.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -102,7 +102,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/solutions/security/packages/distribution_bar/src/distribution_bar.tsx",
+            "path": "x-pack/solutions/security/packages/distribution-bar/src/distribution_bar.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -118,7 +118,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/security/packages/distribution_bar/src/distribution_bar.tsx",
+            "path": "x-pack/solutions/security/packages/distribution-bar/src/distribution_bar.tsx",
             "deprecated": false,
             "trackAdoption": false
           }

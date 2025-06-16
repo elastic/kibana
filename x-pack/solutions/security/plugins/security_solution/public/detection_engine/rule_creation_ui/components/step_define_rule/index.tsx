@@ -29,11 +29,8 @@ import type { SetRuleQuery } from '../../../../detections/containers/detection_e
 import { useRuleFromTimeline } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { filterRuleFieldsForType, getStepDataDataSource } from '../../pages/rule_creation/helpers';
-import type {
-  DefineStepRule,
-  RuleStepProps,
-} from '../../../../detections/pages/detection_engine/rules/types';
-import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
+import type { DefineStepRule, RuleStepProps } from '../../../common/types';
+import { DataSourceType } from '../../../common/types';
 import { StepRuleDescription } from '../description_step';
 import type { QueryBarFieldProps } from '../query_bar_field';
 import { QueryBarField } from '../query_bar_field';
@@ -59,7 +56,6 @@ import {
   isThresholdRule as getIsThresholdRule,
   isQueryRule,
   isEsqlRule,
-  isEqlSequenceQuery,
   isSuppressionRuleInGA,
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryEdit } from '../../../rule_creation/components/eql_query_edit';
@@ -93,6 +89,7 @@ import { usePersistentNewTermsState } from './use_persistent_new_terms_state';
 import { usePersistentAlertSuppressionState } from './use_persistent_alert_suppression_state';
 import { usePersistentThresholdState } from './use_persistent_threshold_state';
 import { usePersistentQuery } from './use_persistent_query';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { usePersistentMachineLearningState } from './use_persistent_machine_learning_state';
 import { usePersistentThreatMatchState } from './use_persistent_threat_match_state';
 
@@ -101,6 +98,7 @@ const CommonUseField = getUseField({ component: Field });
 const StyledVisibleContainer = styled.div<{ isVisible: boolean }>`
   display: ${(props) => (props.isVisible ? 'block' : 'none')};
 `;
+
 export interface StepDefineRuleProps extends RuleStepProps {
   indicesConfig: string[];
   defaultSavedQuery?: SavedQuery;
@@ -191,6 +189,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const isThresholdRule = getIsThresholdRule(ruleType);
   const alertSuppressionUpsellingMessage = useUpsellingMessage('alert_suppression_rule_form');
   const { getFields, reset, setFieldValue } = form;
+  const {
+    timelinePrivileges: { read: canAttachTimelineTemplates },
+  } = useUserPrivileges();
 
   // Callback for when user toggles between Data Views and Index Patterns
   const onChangeDataSource = useCallback(
@@ -308,9 +309,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
    * purpose and so are treated as if the field is always selected.  */
   const areSuppressionFieldsSelected = isThresholdRule || Boolean(alertSuppressionFields?.length);
 
-  const { isSuppressionEnabled: isAlertSuppressionEnabled } = useAlertSuppression(
-    isEqlSequenceQuery(queryBar?.query?.query as string)
-  );
+  const { isSuppressionEnabled: isAlertSuppressionEnabled } = useAlertSuppression(ruleType);
 
   /** If we don't have ML field information, users can't meaningfully interact with suppression fields */
   const areSuppressionFieldsDisabledByMlFields =
@@ -501,6 +500,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             onSavedQueryError: handleSavedQueryError,
             defaultSavedQuery,
             onOpenTimeline,
+            bubbleSubmitEvent: true,
           } as QueryBarFieldProps
         }
       />
@@ -700,7 +700,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             component={PickTimeline}
             componentProps={{
               idAria: 'detectionEngineStepDefineRuleTimeline',
-              isDisabled: isLoading,
+              isDisabled: isLoading || !canAttachTimelineTemplates,
               dataTestSubj: 'detectionEngineStepDefineRuleTimeline',
             }}
           />

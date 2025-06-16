@@ -119,6 +119,7 @@ export class ExistingFailedTestIssues {
         const resp = await Axios.request<FindFailedTestIssuesResponse>({
           method: 'POST',
           baseURL: BASE_URL,
+          allowAbsoluteUrls: false,
           url: '/v1/find_failed_test_issues',
           data: {
             failures: failures.map((f) => ({

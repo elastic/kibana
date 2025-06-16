@@ -6,12 +6,11 @@
  */
 
 // eslint-disable-next-line max-classes-per-file
-import {
+import type {
   CreateConcreteWriteIndexOpts,
   ConcreteIndexInfo,
-  updateIndexMappings,
-  setConcreteWriteIndex,
 } from './create_concrete_write_index';
+import { updateIndexMappings, setConcreteWriteIndex } from './create_concrete_write_index';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 
 export interface DataStreamAdapter {
@@ -208,11 +207,9 @@ async function createAliasStream(opts: CreateConcreteWriteIndexOpts): Promise<vo
         () =>
           esClient.indices.create({
             index: indexPatterns.name,
-            body: {
-              aliases: {
-                [indexPatterns.alias]: {
-                  is_write_index: true,
-                },
+            aliases: {
+              [indexPatterns.alias]: {
+                is_write_index: true,
               },
             },
           }),

@@ -24,6 +24,9 @@ const configSchema = schema.object({
 type SearchNotebooksSchema = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<SearchNotebooksSchema> = {
+  deprecations: ({ renameFromRoot }) => [
+    renameFromRoot('xpack.search.notebooks', 'xpack.searchNotebooks', { level: 'critical' }),
+  ],
   schema: configSchema,
 };
 

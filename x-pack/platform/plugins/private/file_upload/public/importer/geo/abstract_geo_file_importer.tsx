@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { ReactNode } from 'react';
-import { Feature } from 'geojson';
+import type { ReactNode } from 'react';
+import type { Feature } from 'geojson';
 import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
-import { GeoFileImporter, GeoFilePreview } from './types';
-import { CreateDocsResponse, ImportResults } from '../types';
-import { callImportRoute, Importer, IMPORT_RETRIES, MAX_CHUNK_CHAR_COUNT } from '../importer';
-import { MB } from '../../../common/constants';
+import { MB } from '@kbn/file-upload-common/src/constants';
+import type { GeoFileImporter, GeoFilePreview } from './types';
+import type { CreateDocsResponse, ImportResults } from '../types';
+import { Importer, IMPORT_RETRIES, MAX_CHUNK_CHAR_COUNT } from '../importer';
 import type { ImportDoc, ImportFailure, ImportResponse } from '../../../common/types';
 import { geoJsonCleanAndValidate } from './geojson_clean_and_validate';
 import { createChunks } from './create_chunks';
+import { callImportRoute } from '../routes';
 
 const BLOCK_SIZE_MB = 5 * MB;
 
@@ -80,16 +81,15 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
   }
 
   public async import(
-    id: string,
     index: string,
-    pipelineId: string | undefined,
+    pipelineId: string,
     setImportProgress: (progress: number) => void
   ): Promise<ImportResults> {
-    if (!id || !index) {
+    if (!index) {
       return {
         success: false,
-        error: i18n.translate('xpack.fileUpload.import.noIdOrIndexSuppliedErrorMessage', {
-          defaultMessage: 'no ID or index supplied',
+        error: i18n.translate('xpack.fileUpload.import.noIndexSuppliedErrorMessage', {
+          defaultMessage: 'No index supplied',
         }),
       };
     }
@@ -134,7 +134,6 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
       this._blockSizeInBytes = 0;
 
       importBlockPromise = this._importBlock(
-        id,
         index,
         pipelineId,
         chunks,
@@ -167,9 +166,8 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
   }
 
   private async _importBlock(
-    id: string,
     index: string,
-    pipelineId: string | undefined,
+    pipelineId: string,
     chunks: ImportDoc[][],
     blockSizeInBytes: number,
     setImportProgress: (progress: number) => void
@@ -184,24 +182,15 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
         success: false,
         failures: [],
         docCount: 0,
-        id: '',
         index: '',
         pipelineId: '',
       };
       while (resp.success === false && retries > 0) {
         try {
           resp = await callImportRoute({
-            id,
             index,
+            ingestPipelineId: pipelineId,
             data: chunks[i],
-            settings: {},
-            mappings: {},
-            ingestPipeline:
-              pipelineId !== undefined
-                ? {
-                    id: pipelineId,
-                  }
-                : undefined,
           });
 
           if (!this._isActive) {

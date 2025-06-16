@@ -18,14 +18,6 @@ import { PipelinesList } from '../../../public/application/sections/pipelines_li
 import { WithAppDependencies } from './setup_environment';
 import { getListPath, ROUTES } from '../../../public/application/services/navigation';
 
-const testBedConfig: AsyncTestBedConfig = {
-  memoryRouter: {
-    initialEntries: [getListPath()],
-    componentRoutePath: ROUTES.list,
-  },
-  doMountAsync: true,
-};
-
 export type PipelineListTestBed = TestBed<PipelineListTestSubjects> & {
   actions: ReturnType<typeof createActions>;
 };
@@ -88,7 +80,18 @@ const createActions = (testBed: TestBed) => {
   };
 };
 
-export const setup = async (httpSetup: HttpSetup): Promise<PipelineListTestBed> => {
+export const setup = async (
+  httpSetup: HttpSetup,
+  queryParams: string = ''
+): Promise<PipelineListTestBed> => {
+  const testBedConfig: AsyncTestBedConfig = {
+    memoryRouter: {
+      initialEntries: [`${getListPath()}${queryParams}`],
+      componentRoutePath: ROUTES.list,
+    },
+    doMountAsync: true,
+  };
+
   const initTestBed = registerTestBed(WithAppDependencies(PipelinesList, httpSetup), testBedConfig);
   const testBed = await initTestBed();
 
@@ -111,4 +114,11 @@ export type PipelineListTestSubjects =
   | 'sectionLoading'
   | 'pipelineLoadError'
   | 'jsonCodeBlock'
-  | 'reloadButton';
+  | 'reloadButton'
+  | 'pipelineErrorFlyout'
+  | 'pipelineErrorFlyout.title'
+  | 'pipelineError'
+  | 'pipelineError.cause'
+  | 'missingCustomPipeline'
+  | 'missingCustomPipeline.cause'
+  | 'createCustomPipeline';

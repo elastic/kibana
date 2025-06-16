@@ -162,8 +162,6 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
       />
     );
   } else {
-    const policySchedules = policies.map((policy: SlmPolicy) => policy.schedule);
-    const hasDuplicateSchedules = policySchedules.length > new Set(policySchedules).size;
     const hasRetention = Boolean(policies.find((policy: SlmPolicy) => policy.retention));
     const isSlmRunning = slmStatus?.operation_mode === SLM_STATE.RUNNING;
 
@@ -197,27 +195,6 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
                     </EuiLink>
                   ),
                 }}
-              />
-            </EuiCallOut>
-            <EuiSpacer />
-          </Fragment>
-        ) : null}
-
-        {hasDuplicateSchedules ? (
-          <Fragment>
-            <EuiCallOut
-              title={
-                <FormattedMessage
-                  id="xpack.snapshotRestore.policyScheduleWarningTitle"
-                  defaultMessage="Two or more policies have the same schedule"
-                />
-              }
-              color="warning"
-              iconType="warning"
-            >
-              <FormattedMessage
-                id="xpack.snapshotRestore.policyScheduleWarningDescription"
-                defaultMessage="Only one snapshot can be taken at a time. To avoid snapshot failures, edit the policies to run on different schedules, or delete redundant policies."
               />
             </EuiCallOut>
             <EuiSpacer />

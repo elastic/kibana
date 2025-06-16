@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import './space_card.scss';
-
-import { EuiCard, EuiLoadingSpinner, EuiTextColor } from '@elastic/eui';
+import { EuiCard, EuiLoadingSpinner, EuiTextColor, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { lazy, Suspense } from 'react';
 
 import type { Space } from '../../../common';
@@ -25,10 +24,18 @@ interface Props {
 }
 export const SpaceCard = (props: Props) => {
   const { serverBasePath, space } = props;
+  const { euiTheme } = useEuiTheme();
 
   return (
     <EuiCard
-      className="spaceCard"
+      css={css`
+        width: calc(${euiTheme.size.l} * 10) !important;
+        min-height: calc(${euiTheme.size.base} * 12.5); /* 200px */
+
+        .euiCard__content {
+          overflow: hidden;
+        }
+      `}
       data-test-subj={`space-card-${space.id}`}
       icon={renderSpaceAvatar(space)}
       title={space.name}

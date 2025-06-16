@@ -15,6 +15,7 @@ import {
   getIndexFilters,
   sourceOrDestinationIpExistsFilter,
   getNetworkDetailsPageFilter,
+  getESQLGlobalFilters,
 } from './utils';
 
 import { filterFromSearchBar, queryFromSearchBar, wrapper } from './mocks';
@@ -24,12 +25,26 @@ import { useRouteSpy } from '../../utils/route/use_route_spy';
 import { SecurityPageName } from '../../../app/types';
 import type { Query } from '@kbn/es-query';
 import { getEventsHistogramLensAttributes } from './lens_attributes/common/events';
+import type { EuiThemeComputed } from '@elastic/eui';
+
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('generated-uuid'),
+}));
 
 jest.mock('../../../sourcerer/containers');
 jest.mock('../../utils/route/use_route_spy', () => ({
   useRouteSpy: jest.fn(),
 }));
 
+jest.mock('../../hooks/use_global_filter_query', () => ({
+  useGlobalFilterQuery: () => () => ({
+    filterQuery: undefined,
+  }),
+}));
+
+const params = {
+  euiTheme: {} as EuiThemeComputed,
+};
 describe('useLensAttributes', () => {
   beforeEach(() => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
@@ -71,7 +86,7 @@ describe('useLensAttributes', () => {
     );
 
     expect(result?.current?.state.filters).toEqual([
-      ...getExternalAlertLensAttributes().state.filters,
+      ...getExternalAlertLensAttributes(params).state.filters,
       ...getDetailsPageFilter('hosts', 'mockHost'),
       ...fieldNameExistsFilter('hosts'),
       ...getIndexFilters(['auditbeat-*']),
@@ -97,7 +112,7 @@ describe('useLensAttributes', () => {
     );
 
     expect(result?.current?.state.filters).toEqual([
-      ...getExternalAlertLensAttributes().state.filters,
+      ...getExternalAlertLensAttributes(params).state.filters,
       ...getNetworkDetailsPageFilter('192.168.1.1'),
       ...sourceOrDestinationIpExistsFilter,
       ...getIndexFilters(['auditbeat-*']),
@@ -123,7 +138,7 @@ describe('useLensAttributes', () => {
     );
 
     expect(result?.current?.state.filters).toEqual([
-      ...getExternalAlertLensAttributes().state.filters,
+      ...getExternalAlertLensAttributes(params).state.filters,
       ...getDetailsPageFilter('user', 'elastic'),
       ...getIndexFilters(['auditbeat-*']),
       ...filterFromSearchBar,
@@ -151,8 +166,37 @@ describe('useLensAttributes', () => {
     expect((result?.current?.state.query as Query).query).toEqual('');
 
     expect(result?.current?.state.filters).toEqual([
-      ...getExternalAlertLensAttributes().state.filters,
+      ...getExternalAlertLensAttributes(params).state.filters,
       ...getIndexFilters(['auditbeat-*']),
+    ]);
+  });
+
+  it('should apply esql query and filter', () => {
+    const esql = 'SELECT * FROM test-*';
+    (useRouteSpy as jest.Mock).mockReturnValue([
+      {
+        detailName: undefined,
+        pageName: SecurityPageName.entityAnalytics,
+        tabName: undefined,
+      },
+    ]);
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          getLensAttributes: getExternalAlertLensAttributes,
+          stackByField: 'event.dataset',
+          applyGlobalQueriesAndFilters: true,
+          esql,
+        }),
+      { wrapper }
+    );
+
+    expect(result?.current?.state.query as Query).toEqual({ esql });
+
+    expect(result?.current?.state.filters).toEqual([
+      ...getExternalAlertLensAttributes(params).state.filters,
+      ...getIndexFilters(['auditbeat-*']),
+      ...getESQLGlobalFilters(undefined),
     ]);
   });
 
@@ -175,7 +219,7 @@ describe('useLensAttributes', () => {
     );
 
     expect(result?.current?.state.filters).toEqual([
-      ...getExternalAlertLensAttributes().state.filters,
+      ...getExternalAlertLensAttributes(params).state.filters,
       ...getIndexFilters(['auditbeat-*']),
       ...filterFromSearchBar,
     ]);
@@ -200,7 +244,7 @@ describe('useLensAttributes', () => {
       {
         type: 'index-pattern',
         id: 'security-solution-default',
-        name: 'indexpattern-datasource-layer-a3c54471-615f-4ff9-9fda-69b5b2ea3eef',
+        name: 'indexpattern-datasource-layer-layer-id-generated-uuid',
       },
       {
         type: 'index-pattern',

@@ -6,13 +6,12 @@
  */
 
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
-import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
+import type { IEvent } from '@kbn/event-log-plugin/server';
+import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
+import type { ContextOpts, Context, RuleContext, SavedObjects } from './alerting_event_logger';
 import {
   AlertingEventLogger,
-  ContextOpts,
-  Context,
-  RuleContext,
   initializeExecuteRecord,
   createExecuteTimeoutRecord,
   createAlertRecord,
@@ -20,21 +19,22 @@ import {
   updateEvent,
   executionType,
   initializeExecuteBackfillRecord,
-  SavedObjects,
   updateEventWithRuleData,
+  createGapRecord,
 } from './alerting_event_logger';
-import { UntypedNormalizedRuleType } from '../../rule_type_registry';
+import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import {
   RecoveredActionGroup,
   RuleExecutionStatusErrorReasons,
   RuleExecutionStatusWarningReasons,
 } from '../../types';
-import { RuleRunMetrics } from '../rule_run_metrics_store';
+import type { RuleRunMetrics } from '../rule_run_metrics_store';
 import { EVENT_LOG_ACTIONS } from '../../plugin';
 import { TaskRunnerTimerSpan } from '../../task_runner/task_runner_timer';
 import { schema } from '@kbn/config-schema';
 import { RULE_SAVED_OBJECT_TYPE } from '../..';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import type { GapBase } from '../rule_gaps/types';
 
 const mockNow = '2020-01-01T02:00:00.000Z';
 const eventLogger = eventLoggerMock.create();
@@ -50,6 +50,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   executor: jest.fn(),
   category: 'test',
   producer: 'alerts',
+  solution: 'stack',
   ruleTaskTimeout: '1m',
   validate: {
     params: schema.any(),
@@ -1457,6 +1458,89 @@ describe('AlertingEventLogger', () => {
       expect(alertingEventLogger.getEvent()!.message).toBe('first failure message');
     });
   });
+
+  describe('reportGap()', () => {
+    test('should throw error if alertingEventLogger has not been initialized', () => {
+      expect(() =>
+        alertingEventLogger.reportGap({
+          gap: { gte: '', lte: '' },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`"AlertingEventLogger not initialized"`);
+    });
+
+    test('should report gap event', () => {
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
+      const range = {
+        gte: '2022-05-05T15:59:54.480Z',
+        lte: '2022-05-05T16:59:54.480Z',
+      };
+      alertingEventLogger.reportGap({ gap: range });
+
+      const gap: GapBase = {
+        status: 'unfilled' as const,
+        range,
+        filled_intervals: [],
+        unfilled_intervals: [range],
+        in_progress_intervals: [],
+        total_gap_duration_ms: 3600000,
+        filled_duration_ms: 0,
+        unfilled_duration_ms: 3600000,
+        in_progress_duration_ms: 0,
+      };
+
+      const event = createGapRecord(ruleContext, ruleData, [alertSO], gap);
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(event);
+    });
+  });
+
+  describe('updateGaps', () => {
+    const mockInternalFields = {
+      _id: 'test-id',
+      _index: 'test-index',
+      _seq_no: 1,
+      _primary_term: 1,
+    };
+
+    const mockGap = {
+      status: 'filled' as const,
+      range: {
+        gte: '2022-05-05T15:59:54.480Z',
+        lte: '2022-05-05T16:59:54.480Z',
+      },
+      filled_intervals: [
+        {
+          gte: '2022-05-05T15:59:54.480Z',
+          lte: '2022-05-05T16:59:54.480Z',
+        },
+      ],
+      unfilled_intervals: [],
+      in_progress_intervals: [],
+      total_gap_duration_ms: 3600000,
+      filled_duration_ms: 3600000,
+      unfilled_duration_ms: 0,
+      in_progress_duration_ms: 0,
+    };
+
+    test('should call eventLogger.updateEvents with correct parameters', async () => {
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
+      await alertingEventLogger.updateGaps([{ internalFields: mockInternalFields, gap: mockGap }]);
+
+      expect(eventLogger.updateEvents).toHaveBeenCalledWith([
+        {
+          event: {
+            kibana: {
+              alert: {
+                rule: {
+                  gap: mockGap,
+                },
+              },
+            },
+          },
+          internalFields: mockInternalFields,
+        },
+      ]);
+    });
+  });
 });
 
 describe('helper functions', () => {
@@ -2063,6 +2147,59 @@ describe('helper functions', () => {
           ],
         },
       });
+    });
+  });
+
+  describe('createGapRecord', () => {
+    test('should populate expected fields in event log record', () => {
+      const record = createGapRecord(ruleContextWithScheduleDelay, ruleDataWithName, [alertSO], {
+        status: 'unfilled',
+        range: {
+          gte: '2022-05-05T15:59:54.480Z',
+          lte: '2022-05-05T16:59:54.480Z',
+        },
+      });
+
+      // these fields should be explicitly set
+      expect(record.event?.action).toEqual('gap');
+      expect(record.event?.kind).toEqual('alert');
+      expect(record.event?.category).toEqual([ruleDataWithName.type?.producer]);
+
+      expect(record.kibana?.alert?.rule?.gap?.status).toEqual('unfilled');
+      expect(record.kibana?.alert?.rule?.gap?.range?.gte).toEqual('2022-05-05T15:59:54.480Z');
+      expect(record.kibana?.alert?.rule?.gap?.range?.lte).toEqual('2022-05-05T16:59:54.480Z');
+
+      expect(record.kibana?.alert?.rule?.rule_type_id).toEqual(ruleDataWithName.type?.id);
+      expect(record.kibana?.alert?.rule?.consumer).toEqual(ruleDataWithName.consumer);
+      expect(record.kibana?.alert?.rule?.execution?.uuid).toEqual(
+        ruleContextWithScheduleDelay.executionId
+      );
+
+      expect(record.kibana?.saved_objects).toEqual([
+        {
+          id: ruleContextWithScheduleDelay.savedObjectId,
+          type: ruleContextWithScheduleDelay.savedObjectType,
+          type_id: ruleDataWithName.type?.id,
+          rel: SAVED_OBJECT_REL_PRIMARY,
+        },
+      ]);
+      expect(record.kibana?.space_ids).toEqual([ruleContextWithScheduleDelay.spaceId]);
+      expect(record?.rule?.id).toEqual(ruleDataWithName.id);
+      expect(record?.rule?.license).toEqual(ruleDataWithName.type?.minimumLicenseRequired);
+      expect(record?.rule?.category).toEqual(ruleDataWithName.type?.id);
+      expect(record?.rule?.ruleset).toEqual(ruleDataWithName.type?.producer);
+      expect(record?.rule?.name).toEqual(ruleDataWithName.name);
+
+      // these fields should not be set by this function
+      expect(record.kibana?.alert?.rule?.gap?.filled_intervals).toEqual(undefined);
+      expect(record['@timestamp']).toBeUndefined();
+      expect(record.event?.provider).toBeUndefined();
+      expect(record.event?.outcome).toBeUndefined();
+      expect(record.kibana?.alert?.rule?.execution?.metrics).toBeUndefined();
+      expect(record.kibana?.server_uuid).toBeUndefined();
+      expect(record.kibana?.task).toBeUndefined();
+      expect(record.kibana?.version).toBeUndefined();
+      expect(record?.ecs).toBeUndefined();
     });
   });
 });

@@ -4,8 +4,8 @@ properties:
   name:
     type: string
     example: node
-    description: Name
+    description: The name of the service.
   environment:
     type: string
     example: prod
-    description: Environment
+    description: The environment of the service.

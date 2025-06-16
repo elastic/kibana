@@ -6,7 +6,8 @@
  */
 
 import { parseAddressList } from 'email-addresses';
-import { ValidatedEmail, InvalidEmailReason } from './types';
+import type { ValidatedEmail } from './types';
+import { InvalidEmailReason } from './types';
 import { hasMustacheTemplate } from './mustache_template';
 
 /** Options that can be used when validating email addresses */

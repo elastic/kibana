@@ -19,26 +19,27 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
+import { capitalize } from 'lodash/fp';
+import type { EntityType } from '../../../../common/entity_analytics/types';
+import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import { ONE_WEEK_IN_HOURS } from '../../../flyout/entity_details/shared/constants';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
-import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
 import type { RiskScoreState } from '../../api/hooks/use_risk_score';
 import { getRiskScoreSummaryAttributes } from '../../lens_attributes/risk_score_summary';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
 
 import {
   columnsArray,
   getEntityData,
   getItems,
-  isUserRiskData,
   LAST_30_DAYS,
   LENS_VISUALIZATION_HEIGHT,
   LENS_VISUALIZATION_MIN_WIDTH,
@@ -46,8 +47,9 @@ import {
 } from './common';
 import { EntityEventTypes } from '../../../common/lib/telemetry';
 
-export interface RiskSummaryProps<T extends RiskScoreEntity> {
+export interface RiskSummaryProps<T extends EntityType> {
   riskScoreData: RiskScoreState<T>;
+  entityType: T;
   recalculatingScore: boolean;
   queryId: string;
   openDetailsPanel: (path: EntityDetailsPath) => void;
@@ -55,8 +57,9 @@ export interface RiskSummaryProps<T extends RiskScoreEntity> {
   isPreviewMode?: boolean;
 }
 
-const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
+const FlyoutRiskSummaryComponent = <T extends EntityType>({
   riskScoreData,
+  entityType,
   recalculatingScore,
   queryId,
   openDetailsPanel,
@@ -66,34 +69,31 @@ const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
   const { telemetry } = useKibana().services;
   const { data } = riskScoreData;
   const riskData = data && data.length > 0 ? data[0] : undefined;
-  const entityData = getEntityData(riskData);
+  const entityData = getEntityData<T>(entityType, riskData);
   const { euiTheme } = useEuiTheme();
-
+  const spaceId = useSpaceId();
   const lensAttributes = useMemo(() => {
     const entityName = entityData?.name ?? '';
-    const fieldName = isUserRiskData(riskData) ? 'user.name' : 'host.name';
+    const fieldName = EntityTypeToIdentifierField[entityType];
 
     return getRiskScoreSummaryAttributes({
       severity: entityData?.risk?.calculated_level,
       query: `${fieldName}: ${entityName}`,
-      spaceId: 'default',
-      riskEntity: isUserRiskData(riskData) ? RiskScoreEntity.user : RiskScoreEntity.host,
+      spaceId,
+      riskEntity: entityType,
     });
-  }, [entityData?.name, entityData?.risk?.calculated_level, riskData]);
-
+  }, [entityData?.name, entityData?.risk?.calculated_level, entityType, spaceId]);
   const xsFontSize = useEuiFontSize('xxs').fontSize;
   const rows = useMemo(() => getItems(entityData), [entityData]);
 
   const onToggle = useCallback(
     (isOpen: boolean) => {
-      const entity = isUserRiskData(riskData) ? 'user' : 'host';
-
       telemetry.reportEvent(EntityEventTypes.ToggleRiskSummaryClicked, {
-        entity,
+        entity: entityType,
         action: isOpen ? 'show' : 'hide',
       });
     },
-    [riskData, telemetry]
+    [entityType, telemetry]
   );
 
   const casesAttachmentMetadata = useMemo(
@@ -105,12 +105,12 @@ const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
             'Risk score for {entityType, select, user {user} other {host}} {entityName}',
           values: {
             entityName: entityData?.name,
-            entityType: isUserRiskData(riskData) ? 'user' : 'host',
+            entityType,
           },
         }
       ),
     }),
-    [entityData?.name, riskData]
+    [entityData?.name, entityType]
   );
 
   const riskDataTimestamp = riskData?.['@timestamp'];
@@ -137,7 +137,7 @@ const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
             <FormattedMessage
               id="xpack.securitySolution.flyout.entityDetails.title"
               defaultMessage="{entity} risk summary"
-              values={{ entity: isUserRiskData(riskData) ? 'User' : 'Host' }}
+              values={{ entity: capitalize(entityType) }}
             />
           </h3>
         </EuiTitle>
@@ -246,7 +246,7 @@ const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
                   css={css`
                     position: absolute;
                     right: 0;
-                    top: -${euiThemeVars.euiSize};
+                    top: -${euiTheme.size.base};
                   `}
                 >
                   <InspectButton
@@ -277,5 +277,7 @@ const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
   );
 };
 
-export const FlyoutRiskSummary = React.memo(FlyoutRiskSummaryComponent);
+export const FlyoutRiskSummary = React.memo(
+  FlyoutRiskSummaryComponent
+) as typeof FlyoutRiskSummaryComponent & { displayName: string }; // This is needed to male React.memo work with generic
 FlyoutRiskSummary.displayName = 'RiskSummary';

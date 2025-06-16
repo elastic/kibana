@@ -6,7 +6,7 @@
  */
 
 import {
-  ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+  API_VERSIONS,
   CreateKnowledgeBaseRequestParams,
   CreateKnowledgeBaseResponse,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
@@ -19,7 +19,7 @@ import { ElasticAssistantPluginRouter } from '../../types';
 
 // Since we're awaiting on ELSER setup, this could take a bit (especially if ML needs to autoscale)
 // Consider just returning if attempt was successful, and switch to client polling
-const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
+const ROUTE_HANDLER_TIMEOUT = 20 * 60 * 1000; // 20 * 60 seconds = 20 minutes
 
 /**
  * Load Knowledge Base index, pipeline, and resources (collection of documents)
@@ -28,7 +28,7 @@ const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
 export const postKnowledgeBaseRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
     .post({
-      access: 'internal',
+      access: 'public',
       path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
       security: {
         authz: {
@@ -43,7 +43,7 @@ export const postKnowledgeBaseRoute = (router: ElasticAssistantPluginRouter) => 
     })
     .addVersion(
       {
-        version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             params: buildRouteValidationWithZod(CreateKnowledgeBaseRequestParams),
@@ -55,21 +55,16 @@ export const postKnowledgeBaseRoute = (router: ElasticAssistantPluginRouter) => 
         const resp = buildResponse(response);
         const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
         const assistantContext = ctx.elasticAssistant;
-        const core = ctx.core;
-        const soClient = core.savedObjects.getClient();
         const ignoreSecurityLabs = request.query.ignoreSecurityLabs;
 
         try {
           const knowledgeBaseDataClient =
-            await assistantContext.getAIAssistantKnowledgeBaseDataClient({
-              modelIdOverride: request.query.modelId,
-            });
+            await assistantContext.getAIAssistantKnowledgeBaseDataClient();
           if (!knowledgeBaseDataClient) {
             return response.custom({ body: { success: false }, statusCode: 500 });
           }
 
           await knowledgeBaseDataClient.setupKnowledgeBase({
-            soClient,
             ignoreSecurityLabs,
           });
 

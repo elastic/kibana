@@ -14,7 +14,7 @@ import { esDeprecationsMockResponse, MOCK_SNAPSHOT_ID, MOCK_JOB_ID } from './moc
 
 describe('Machine learning deprecation flyout', () => {
   let testBed: ElasticsearchTestBed;
-  const mlDeprecation = esDeprecationsMockResponse.deprecations[0];
+  const mlDeprecation = esDeprecationsMockResponse.migrationsDeprecations[0];
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   beforeEach(async () => {

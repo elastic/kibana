@@ -32,10 +32,8 @@ export const deleteAllAlerts = async (
         .send();
       await es.deleteByQuery({
         index,
-        body: {
-          query: {
-            match_all: {},
-          },
+        query: {
+          match_all: {},
         },
         refresh: true,
       });

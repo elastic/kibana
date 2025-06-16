@@ -8,6 +8,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { KibanaResponseFactory } from '@kbn/core/server';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -19,11 +20,9 @@ import {
   ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../common/endpoint/constants';
-import { EndpointAppContextService } from '../../endpoint_app_context_services';
+import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
   createMockEndpointAppContext,
-  createMockEndpointAppContextServiceSetupContract,
-  createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
   getRegisteredVersionedRouteMock,
 } from '../../mocks';
@@ -52,29 +51,21 @@ describe('Endpoint Pending Action Summary API', () => {
   ) => void;
 
   const setupRouteHandler = (): void => {
-    const esClientMock = elasticsearchServiceMock.createScopedClusterClient();
     const routerMock = httpServiceMock.createRouter();
+    const endpointContextMock = createMockEndpointAppContext();
+    const esClientMock = elasticsearchServiceMock.createScopedClusterClient();
+
+    esClientMock.asInternalUser =
+      endpointContextMock.service.getInternalEsClient() as ElasticsearchClientMock;
 
     endpointActionGenerator = new EndpointActionGenerator('seed');
-    endpointAppContextService = new EndpointAppContextService();
-    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
-      .fn()
-      .mockReturnValue({
-        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
-      });
+    endpointAppContextService = endpointContextMock.service;
 
-    endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
-    endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
-
-    const endpointContextMock = createMockEndpointAppContext();
-
-    registerActionStatusRoutes(routerMock, {
-      ...endpointContextMock,
-      service: endpointAppContextService,
-      experimentalFeatures: {
-        ...endpointContextMock.experimentalFeatures,
-      },
+    (endpointAppContextService.getEndpointMetadataService as jest.Mock).mockReturnValue({
+      findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
     });
+
+    registerActionStatusRoutes(routerMock, endpointContextMock);
 
     getPendingStatus = async (reqParams?: any): Promise<jest.Mocked<KibanaResponseFactory>> => {
       const req = httpServerMock.createKibanaRequest(reqParams);
@@ -86,7 +77,9 @@ describe('Endpoint Pending Action Summary API', () => {
         '2023-10-31'
       );
       await routeHandler(
-        createRouteHandlerContext(esClientMock, savedObjectsClientMock.create()),
+        createRouteHandlerContext(esClientMock, savedObjectsClientMock.create(), {
+          endpointAppServices: endpointContextMock.service,
+        }),
         req,
         mockResponse
       );
@@ -99,7 +92,6 @@ describe('Endpoint Pending Action Summary API', () => {
       endpointResponses: LogsEndpointActionResponse[]
     ) => {
       esClientMock.asInternalUser.search.mockResponseImplementation((req = {}) => {
-        // @ts-expect-error size not defined as top level property when using typesWithBodyKey
         const size = req.size ? req.size : 10;
         const items: any[] = [];
         let index = Array.isArray(req.index) ? req.index.join() : req.index;

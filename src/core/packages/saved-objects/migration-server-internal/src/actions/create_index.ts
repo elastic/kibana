@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Either from 'fp-ts/lib/Either';
-import * as TaskEither from 'fp-ts/lib/TaskEither';
-import { pipe } from 'fp-ts/lib/function';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import * as Either from 'fp-ts/Either';
+import * as TaskEither from 'fp-ts/TaskEither';
+import { pipe } from 'fp-ts/function';
+import type { estypes } from '@elastic/elasticsearch';
 import type {
   ElasticsearchClient,
   ElasticsearchCapabilities,

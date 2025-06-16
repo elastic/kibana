@@ -13,6 +13,8 @@ import { TaskContext } from '../task_context';
 export async function buildBazelPackages({ log, dist }: TaskContext) {
   log.info('run bazel and build required artifacts for the optimizer');
 
+  const args = [];
+  if (dist) args.push('--define=dist=true');
   try {
     await runBazel(
       [
@@ -21,7 +23,7 @@ export async function buildBazelPackages({ log, dist }: TaskContext) {
         '//src/platform/packages/private/kbn-ui-shared-deps-src:shared_built_assets',
         '//src/platform/packages/shared/kbn-monaco:target_workers',
         '--show_result=1',
-      ].concat(dist ? [`--define=dist=true`] : []),
+      ].concat(args),
       {
         logPrefix: ' │     ',
         quiet: true,

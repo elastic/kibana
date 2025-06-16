@@ -46,7 +46,6 @@ import {
   MedianIndexPatternColumn,
 } from './operations';
 import { createMockedFullReference } from './operations/mocks';
-import { cloneDeep } from 'lodash';
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
 import { createMockFramePublicAPI } from '../../mocks';
@@ -591,6 +590,9 @@ describe('IndexPattern Data Source', () => {
               "arguments": Object {
                 "idMap": Array [
                   "{\\"col-0-0\\":[{\\"label\\":\\"Count of records\\",\\"dataType\\":\\"number\\",\\"isBucketed\\":false,\\"sourceField\\":\\"___records___\\",\\"operationType\\":\\"count\\",\\"id\\":\\"col1\\"}],\\"col-1-1\\":[{\\"label\\":\\"timestampLabel\\",\\"dataType\\":\\"date\\",\\"isBucketed\\":true,\\"operationType\\":\\"date_histogram\\",\\"sourceField\\":\\"timestamp\\",\\"params\\":{\\"interval\\":\\"1d\\"},\\"id\\":\\"col2\\"}]}",
+                ],
+                "isTextBased": Array [
+                  false,
                 ],
               },
               "function": "lens_map_to_columns",
@@ -2170,6 +2172,7 @@ describe('IndexPattern Data Source', () => {
           scale: undefined,
           sortingHint: undefined,
           interval: undefined,
+          hasArraySupport: false,
         } as OperationDescriptor);
       });
 
@@ -4223,7 +4226,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should be false if datasource states differ', () => {
-      const differentPersistableState = cloneDeep(persistableState);
+      const differentPersistableState = structuredClone(persistableState);
       differentPersistableState.layers[layerId].columnOrder = ['something else'];
 
       expect(

@@ -9,8 +9,6 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-import styled from 'styled-components';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { RangeFilterParams } from '@kbn/es-query';
 import type { ClickTriggerEvent, MultiClickTriggerEvent } from '@kbn/charts-plugin/public';
@@ -19,6 +17,7 @@ import type {
   TypedLensByValueInput,
   XYState,
 } from '@kbn/lens-plugin/public';
+import { css } from '@emotion/react';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { useKibana } from '../../lib/kibana';
 import { useLensAttributes } from './use_lens_attributes';
@@ -35,20 +34,20 @@ import { useInspect } from '../inspect/use_inspect';
 
 const DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL'];
 
-const LensComponentWrapper = styled.div<{
-  $height?: number;
-  width?: string | number;
-}>`
-  height: ${({ $height }) => ($height ? `${$height}px` : 'auto')};
-  width: ${({ width }) => width ?? 'auto'};
-
-  .expExpressionRenderer__expression {
-    padding: 2px 0 0 0 !important;
-  }
-  .legacyMtrVis__container {
-    padding: 0;
-  }
-`;
+const getStyles = (width?: string | number, height?: number) => {
+  return {
+    lensComponentWrapper: css({
+      height: height ? `${height}px` : 'auto',
+      width: width ?? 'auto',
+      '.expExpressionRenderer__expression': {
+        padding: '2px 0 0 0 !important',
+      },
+      '.legacyMtrVis__container': {
+        padding: 0,
+      },
+    }),
+  };
+};
 
 const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   applyGlobalQueriesAndFilters = true,
@@ -70,8 +69,14 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   withActions = DEFAULT_ACTIONS,
   disableOnClickFilter = false,
   casesAttachmentMetadata,
+  esql,
 }) => {
-  const style = useMemo(
+  const styles = useMemo(
+    () => getStyles(wrapperWidth, wrapperHeight),
+    [wrapperWidth, wrapperHeight]
+  );
+
+  const lensComponentStyle = useMemo(
     () => ({
       height: wrapperHeight ?? '100%',
       minWidth: '100px',
@@ -79,6 +84,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     }),
     [wrapperHeight, wrapperWidth]
   );
+
   const {
     lens,
     data: {
@@ -86,7 +92,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     },
   } = useKibana().services;
   const dispatch = useDispatch();
-  const { searchSessionId } = useVisualizationResponse({ visualizationId: id });
+  const { loading, searchSessionId, tables } = useVisualizationResponse({ visualizationId: id });
   const attributes = useLensAttributes({
     applyGlobalQueriesAndFilters,
     applyPageAndTabsFilters,
@@ -96,6 +102,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     scopeId,
     stackByField,
     title: '',
+    esql,
   });
   const preferredSeriesType = (attributes?.state?.visualization as XYState)?.preferredSeriesType;
 
@@ -109,7 +116,6 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     [enableLegendActions]
   );
   const { setInspectData } = useEmbeddableInspect(onLoad);
-  const { responses, loading } = useVisualizationResponse({ visualizationId: id });
 
   const {
     additionalRequests,
@@ -123,7 +129,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   } = useInspect({
     inputId: inputsModelId,
     isDisabled: loading,
-    multiple: responses != null && responses.length > 1,
+    multiple: tables != null && Object.keys(tables.tables).length > 1,
     queryId: id,
   });
 
@@ -203,7 +209,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     return null;
   }
 
-  if (!attributes || (responses != null && responses.length === 0)) {
+  if (!attributes) {
     return (
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
@@ -240,7 +246,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   return (
     <>
       {attributes && searchSessionId && (
-        <LensComponentWrapper $height={wrapperHeight} width={wrapperWidth}>
+        <div css={styles.lensComponentWrapper}>
           <LensComponent
             attributes={attributes}
             disabledActions={DISABLED_ACTIONS}
@@ -252,14 +258,14 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
             overrides={overrides}
             searchSessionId={searchSessionId}
             showInspector={false}
-            style={style}
+            style={lensComponentStyle}
             syncCursor={false}
             syncTooltips={false}
             timeRange={timerange}
-            viewMode={ViewMode.VIEW}
+            viewMode={'view'}
             withDefaultActions={false}
           />
-        </LensComponentWrapper>
+        </div>
       )}
       {isShowingModal && request != null && response != null && (
         <ModalInspectQuery

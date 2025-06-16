@@ -9,6 +9,10 @@ import type { CoreStart } from '@kbn/core/public';
 import type { EMSSettings } from '@kbn/maps-ems-plugin/common/ems_settings';
 import { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
 import { BehaviorSubject } from 'rxjs';
+import {
+  EMS_DARKMAP_BOREALIS_ID,
+  EMS_ROADMAP_BOREALIS_DESATURATED_ID,
+} from '@kbn/maps-ems-plugin/common';
 import type { MapsConfigType } from '../server/config';
 import type { MapsPluginStartDependencies } from './plugin';
 
@@ -72,8 +76,8 @@ export const getTimeFilter = () => pluginsStart.data.query.timefilter.timefilter
 export const getToasts = () => coreStart.notifications.toasts;
 export const getCoreChrome = () => coreStart.chrome;
 export const getDevToolsCapabilities = () => coreStart.application.capabilities.dev_tools;
-export const getMapsCapabilities = () => coreStart.application.capabilities.maps;
-export const getVisualizeCapabilities = () => coreStart.application.capabilities.visualize;
+export const getMapsCapabilities = () => coreStart.application.capabilities.maps_v2;
+export const getVisualizeCapabilities = () => coreStart.application.capabilities.visualize_v2;
 export const getDocLinks = () => coreStart.docLinks;
 export const getCoreOverlays = () => coreStart.overlays;
 export const getCharts = () => pluginsStart.charts;
@@ -116,6 +120,17 @@ export const getEMSSettings: () => EMSSettings = () => {
   return emsSettings;
 };
 
-export const getEmsTileLayerId = () => mapsEms.config.emsTileLayerId;
+export const getEmsTileLayerId = () => {
+  // To be updated unce Borealis is the only theme available
+  if (coreStart.theme.getTheme().name !== 'borealis') {
+    return mapsEms.config.emsTileLayerId;
+  } else {
+    return {
+      ...mapsEms.config.emsTileLayerId,
+      dark: EMS_DARKMAP_BOREALIS_ID,
+      desaturated: EMS_ROADMAP_BOREALIS_DESATURATED_ID,
+    };
+  }
+};
 
 export const getShareService = () => pluginsStart.share;

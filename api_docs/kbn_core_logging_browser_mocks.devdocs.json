@@ -14,7 +14,7 @@
         "tags": [],
         "label": "loggingSystemMock",
         "description": [],
-        "path": "packages/core/logging/core-logging-browser-mocks/src/logging_system.mock.ts",
+        "path": "src/core/packages/logging/browser-mocks/src/logging_system.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -30,7 +30,7 @@
               "IBrowserLoggingSystem",
               ">"
             ],
-            "path": "packages/core/logging/core-logging-browser-mocks/src/logging_system.mock.ts",
+            "path": "src/core/packages/logging/browser-mocks/src/logging_system.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -53,7 +53,7 @@
                 "text": "MockedLogger"
               }
             ],
-            "path": "packages/core/logging/core-logging-browser-mocks/src/logging_system.mock.ts",
+            "path": "src/core/packages/logging/browser-mocks/src/logging_system.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

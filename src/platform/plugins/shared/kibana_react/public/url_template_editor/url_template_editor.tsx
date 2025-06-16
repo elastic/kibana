@@ -10,8 +10,7 @@
 import { css } from '@emotion/react';
 import * as React from 'react';
 import { useEuiTheme } from '@elastic/eui';
-import { monaco } from '@kbn/monaco';
-import { CodeEditor, HandlebarsLang, type CodeEditorProps } from '@kbn/code-editor';
+import { monaco, CodeEditor, HANDLEBARS_LANG_ID, type CodeEditorProps } from '@kbn/code-editor';
 
 export interface UrlTemplateEditorVariable {
   label: string;
@@ -70,7 +69,7 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
       return;
     }
 
-    const { dispose } = monaco.languages.registerCompletionItemProvider(HandlebarsLang, {
+    const { dispose } = monaco.languages.registerCompletionItemProvider(HANDLEBARS_LANG_ID, {
       triggerCharacters: ['{', '/', '?', '&', '='],
       provideCompletionItems(model, position, context, token) {
         const { lineNumber } = position;
@@ -135,7 +134,7 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
   return (
     <div data-test-subj="url-template-editor-container" css={editorStyle} onKeyDown={handleKeyDown}>
       <Editor
-        languageId={HandlebarsLang}
+        languageId={HANDLEBARS_LANG_ID}
         height={height}
         fitToContent={fitToContent}
         value={value}

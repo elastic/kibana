@@ -1,12 +1,18 @@
 {
   "security.bulk_update_api_keys": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "POST"
     ],
     "patterns": [
       "_security/api_key/_bulk_update"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-bulk-update-api-keys.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-bulk-update-api-keys",
     "availability": {
       "stack": true,
       "serverless": false

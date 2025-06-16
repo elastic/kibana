@@ -49,7 +49,7 @@ If the state your plugin is storing can be provided by other plugins (your plugi
 Any plugin that stores any persistable state as part of their saved object should make sure that its saved object migration
 and reference extraction and injection methods correctly use the matching `PersistableStateService` implementation for the state they are storing.
 
-Take a look at [example saved object](https://github.com/elastic/kibana/blob/main/examples/embeddable_examples/server/searchable_list_saved_object.ts#L32) which stores an embeddable state. Note how the `migrations`, `extractReferences` and `injectReferences` are defined.
+Take a look at [example saved object](https://github.com/elastic/kibana/blob/8.9/examples/embeddable_examples/server/searchable_list_saved_object.ts#L32) which stores an embeddable state. Note how the `migrations`, `extractReferences` and `injectReferences` are defined.
 
 ## Storing persistable state as part of URL
 
@@ -71,7 +71,7 @@ To support persisting your state in saved objects owned by another plugin, the <
   text="Learn how to define Saved Object references"
 />
 
-[See example embeddable providing extract/inject functions](https://github.com/elastic/kibana/blob/main/examples/embeddable_examples/public/migrations/migrations_embeddable_factory.ts)
+[See example embeddable providing extract/inject functions](https://github.com/elastic/kibana/blob/8.9/examples/embeddable_examples/public/migrations/migrations_embeddable_factory.ts)
 
 ### Migrations and Backward compatibility
 
@@ -79,9 +79,9 @@ As your plugin evolves, you may need to change your state in a breaking way. If 
 
 <DocLink id="kibDevTutorialSavedObject" section="migrations" text="How to write a migration" />.
 
-[See an example saved object storing embeddable state implementing saved object migration function](https://github.com/elastic/kibana/blob/main/examples/embeddable_examples/server/searchable_list_saved_object.ts)
+[See an example saved object storing embeddable state implementing saved object migration function](https://github.com/elastic/kibana/blob/8.9/examples/embeddable_examples/server/searchable_list_saved_object.ts)
 
-[See example embeddable providing migration functions](https://github.com/elastic/kibana/blob/main/examples/embeddable_examples/public/migrations/migrations_embeddable_factory.ts)
+[See example embeddable providing migration functions](https://github.com/elastic/kibana/blob/8.9/examples/embeddable_examples/public/migrations/migrations_embeddable_factory.ts)
 
 ## Telemetry
 

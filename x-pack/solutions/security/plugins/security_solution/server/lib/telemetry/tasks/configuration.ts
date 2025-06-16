@@ -112,6 +112,12 @@ export function createTelemetryConfigurationTaskConfig() {
           telemetryConfiguration.indices_metadata_config = configArtifact.indices_metadata_config;
         }
 
+        if (configArtifact.ingest_pipelines_stats_config) {
+          log.l('Updating ingest pipelines stats configuration');
+          telemetryConfiguration.ingest_pipelines_stats_config =
+            configArtifact.ingest_pipelines_stats_config;
+        }
+
         await taskMetricsService.end(trace);
 
         log.l('Updated TelemetryConfiguration', { configuration: telemetryConfiguration });

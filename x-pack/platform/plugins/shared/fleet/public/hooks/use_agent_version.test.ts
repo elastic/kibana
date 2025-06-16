@@ -14,9 +14,7 @@ import { sendGetAgentsAvailableVersions } from './use_request';
 jest.mock('./use_kibana_version');
 jest.mock('./use_request');
 
-// FLAKY: https://github.com/elastic/kibana/issues/201392
-// FLAKY: https://github.com/elastic/kibana/issues/201759
-describe.skip('useAgentVersion', () => {
+describe('useAgentVersion', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -53,7 +51,7 @@ describe.skip('useAgentVersion', () => {
     await waitFor(() => expect(result.current).toEqual('8.8.2'));
   });
 
-  it('should return the latest availeble agent version if a version that matches Kibana version is not released', async () => {
+  it('should return the latest available agent version if a version that matches Kibana version is not released', async () => {
     const mockKibanaVersion = '8.11.0';
     const mockAvailableVersions = ['8.8.0', '8.7.0', '8.9.2', '7.16.0'];
 
@@ -85,7 +83,7 @@ describe.skip('useAgentVersion', () => {
     await waitFor(() => expect(result.current).toEqual('8.8.2'));
   });
 
-  it('should return the latest availeble agent version if a snapshot version', async () => {
+  it('should return the latest available agent version if a snapshot version', async () => {
     const mockKibanaVersion = '8.10.0-SNAPSHOT';
     const mockAvailableVersions = ['8.8.0', '8.7.0', '8.9.2', '7.16.0'];
 
@@ -150,5 +148,30 @@ describe.skip('useAgentVersion', () => {
     expect(sendGetAgentsAvailableVersions).toHaveBeenCalled();
 
     await waitFor(() => expect(result.current).toEqual('8.11.1+build123456789'));
+  });
+
+  it('should prefer build suffix if available the latest availeble agent version if has build suffix', async () => {
+    const mockKibanaVersion = '8.11.0';
+    const mockAvailableVersions = [
+      '8.12.0',
+      '8.11.1+build202407291657',
+      '8.11.1+build202408291657',
+      '8.11.1',
+      '8.8.0',
+      '8.7.0',
+      '8.9.2',
+      '7.16.0',
+    ];
+
+    (useKibanaVersion as jest.Mock).mockReturnValue(mockKibanaVersion);
+    (sendGetAgentsAvailableVersions as jest.Mock).mockResolvedValue({
+      data: { items: mockAvailableVersions },
+    });
+
+    const { result } = renderHook(() => useAgentVersion());
+
+    expect(sendGetAgentsAvailableVersions).toHaveBeenCalled();
+
+    await waitFor(() => expect(result.current).toEqual('8.11.1+build202408291657'));
   });
 });

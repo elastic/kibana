@@ -7,52 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonEmpty, EuiContextMenu } from '@elastic/eui';
+import { EuiContextMenu } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 
-export const countCss = css`
-  font-size: ${euiThemeVars.euiFontSizeXS};
-  font-weight: ${euiThemeVars.euiFontWeightSemiBold};
-  border-right: ${euiThemeVars.euiBorderThin};
-  margin-right: 16px;
-  padding-right: 16px;
-`;
-
-export const statsContainerCss = css`
-  font-size: ${euiThemeVars.euiFontSizeXS};
-  font-weight: ${euiThemeVars.euiFontWeightSemiBold};
-  .smallDot {
-    width: 3px !important;
-    display: inline-block;
-  }
-  .euiBadge__text {
-    text-align: center;
-    width: 100%;
-  }
-`;
-
-export const groupingContainerCss = css`
+export const groupingContainerCss = (euiTheme: EuiThemeComputed<{}>) => css`
   .groupingAccordionForm .euiAccordion__childWrapper .euiAccordion__children {
     margin-left: 8px;
     margin-right: 8px;
-    border-left: ${euiThemeVars.euiBorderThin};
-    border-right: ${euiThemeVars.euiBorderThin};
-    border-bottom: ${euiThemeVars.euiBorderThin};
+    border-left: ${euiTheme.border.thin};
+    border-right: ${euiTheme.border.thin};
+    border-bottom: ${euiTheme.border.thin};
     border-radius: 0 0 6px 6px;
   }
   .groupingAccordionForm .euiAccordion__triggerWrapper {
-    border-bottom: ${euiThemeVars.euiBorderThin};
-    border-left: ${euiThemeVars.euiBorderThin};
-    border-right: ${euiThemeVars.euiBorderThin};
+    border-bottom: ${euiTheme.border.thin};
+    border-left: ${euiTheme.border.thin};
+    border-right: ${euiTheme.border.thin};
     border-radius: 6px;
     min-height: 78px;
     padding-left: 16px;
     padding-right: 16px;
   }
   .groupingAccordionForm {
-    border-top: ${euiThemeVars.euiBorderThin};
+    border-top: ${euiTheme.border.thin};
     border-bottom: none;
     border-radius: 6px;
     min-width: 1090px;
@@ -65,17 +44,17 @@ export const groupingContainerCss = css`
   }
 `;
 
-export const groupingContainerCssLevel = css`
+export const groupingContainerCssLevel = (euiTheme: EuiThemeComputed<{}>) => css`
   .groupingAccordionFormLevel .euiAccordion__childWrapper .euiAccordion__children {
     margin-left: 8px;
     margin-right: 8px;
     border-left: none;
     border-right: none;
-    border-bottom: ${euiThemeVars.euiBorderThin};
+    border-bottom: ${euiTheme.border.thin};
     border-radius: 0;
   }
   .groupingAccordionFormLevel .euiAccordion__triggerWrapper {
-    border-bottom: ${euiThemeVars.euiBorderThin};
+    border-bottom: ${euiTheme.border.thin};
     border-left: none;
     border-right: none;
     min-height: 78px;
@@ -97,27 +76,16 @@ export const groupingContainerCssLevel = css`
   }
 `;
 
-export const StyledContextMenu = euiStyled(EuiContextMenu)`
+export const StyledContextMenu = euiStyled(EuiContextMenu)<{ border: EuiThemeComputed['border'] }>`
   width: 250px;
   & .euiContextMenuItem__text {
     overflow: hidden;
     text-overflow: ellipsis;
   }
   .euiContextMenuItem {
-    border-bottom: ${euiThemeVars.euiBorderThin};
+    border-bottom: ${(props) => props.border.thin};
   }
   .euiContextMenuItem:last-child {
     border: none;
-  }
-`;
-
-export const StyledEuiButtonEmpty = euiStyled(EuiButtonEmpty)`
-  font-weight: 'normal';
-
-  .euiButtonEmpty__text {
-    max-width: 300px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 `;

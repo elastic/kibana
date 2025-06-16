@@ -6,7 +6,7 @@
  */
 
 import { PropsOf } from '@elastic/eui';
-import { Meta, Story } from '@storybook/react/types-6-0';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import { decorateWithGlobalStorybookThemeProviders } from '../test_utils/use_global_storybook_theme';
 import { DataSearchProgress } from './data_search_progress';
@@ -24,27 +24,34 @@ export default {
 
 type DataSearchProgressProps = PropsOf<typeof DataSearchProgress>;
 
-const DataSearchProgressTemplate: Story<DataSearchProgressProps> = (args) => (
+const DataSearchProgressTemplate: StoryFn<DataSearchProgressProps> = (args) => (
   <DataSearchProgress {...args} />
 );
 
-export const UndeterminedProgress = DataSearchProgressTemplate.bind({});
-
-export const DeterminedProgress = DataSearchProgressTemplate.bind({});
-
-DeterminedProgress.args = {
-  label: 'Searching',
-  maxValue: 10,
-  value: 3,
+export const UndeterminedProgress = {
+  render: DataSearchProgressTemplate,
 };
 
-export const CancelableDeterminedProgress = DataSearchProgressTemplate.bind({});
+export const DeterminedProgress = {
+  render: DataSearchProgressTemplate,
 
-CancelableDeterminedProgress.args = {
-  label: 'Searching',
-  maxValue: 10,
-  value: 3,
+  args: {
+    label: 'Searching',
+    maxValue: 10,
+    value: 3,
+  },
 };
-CancelableDeterminedProgress.argTypes = {
-  onCancel: { action: 'canceled' },
+
+export const CancelableDeterminedProgress = {
+  render: DataSearchProgressTemplate,
+
+  args: {
+    label: 'Searching',
+    maxValue: 10,
+    value: 3,
+  },
+
+  argTypes: {
+    onCancel: { action: 'canceled' },
+  },
 };

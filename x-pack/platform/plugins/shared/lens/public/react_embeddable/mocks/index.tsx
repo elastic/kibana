@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, Subject, of } from 'rxjs';
 import deepMerge from 'deepmerge';
 import React from 'react';
 import { faker } from '@faker-js/faker';
 import { Query, Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
-import { PhaseEvent, ViewMode } from '@kbn/presentation-publishing';
-import { DataView } from '@kbn/data-views-plugin/common';
+import { initializeTitleManager, PhaseEvent, ViewMode } from '@kbn/presentation-publishing';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
 import { visualizationsPluginMock } from '@kbn/visualizations-plugin/public/mocks';
@@ -19,7 +19,9 @@ import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { ReactExpressionRendererProps } from '@kbn/expressions-plugin/public';
-import { ReactEmbeddableDynamicActionsApi } from '@kbn/embeddable-enhanced-plugin/public/plugin';
+import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
+import { ESQLControlVariable } from '@kbn/esql-types';
+import { EmbeddableDynamicActionsManager } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import { DOC_TYPE } from '../../../common/constants';
 import { createEmptyLensState } from '../helper';
 import {
@@ -30,99 +32,99 @@ import {
   LensRendererProps,
   LensRuntimeState,
   LensSerializedState,
-  VisualizationContext,
 } from '../types';
 import { createMockDatasource, createMockVisualization, makeDefaultServices } from '../../mocks';
 import { Datasource, DatasourceMap, Visualization, VisualizationMap } from '../../types';
 import { initializeInternalApi } from '../initializers/initialize_internal_api';
 
-const LensApiMock: LensApi = {
-  // Static props
-  type: DOC_TYPE,
-  uuid: faker.string.uuid(),
-  // Shared Embeddable Observables
-  panelTitle: new BehaviorSubject<string | undefined>(faker.lorem.words()),
-  hidePanelTitle: new BehaviorSubject<boolean | undefined>(false),
-  filters$: new BehaviorSubject<Filter[] | undefined>([]),
-  query$: new BehaviorSubject<Query | AggregateQuery | undefined>({
-    query: 'test',
-    language: 'kuery',
-  }),
-  timeRange$: new BehaviorSubject<TimeRange | undefined>({ from: 'now-15m', to: 'now' }),
-  dataLoading: new BehaviorSubject<boolean | undefined>(false),
-  // Methods
-  getSavedVis: jest.fn(),
-  getFullAttributes: jest.fn(),
-  canViewUnderlyingData$: new BehaviorSubject<boolean>(false),
-  loadViewUnderlyingData: jest.fn(),
-  getViewUnderlyingDataArgs: jest.fn(() => ({
-    dataViewSpec: { id: 'index-pattern-id' },
-    timeRange: { from: 'now-7d', to: 'now' },
-    filters: [],
-    query: undefined,
-    columns: [],
-  })),
-  isTextBasedLanguage: jest.fn(() => true),
-  getTextBasedLanguage: jest.fn(),
-  getInspectorAdapters: jest.fn(() => ({})),
-  inspect: jest.fn(),
-  closeInspector: jest.fn(async () => {}),
-  supportedTriggers: jest.fn(() => []),
-  canLinkToLibrary: jest.fn(async () => false),
-  canUnlinkFromLibrary: jest.fn(async () => false),
-  unlinkFromLibrary: jest.fn(),
-  checkForDuplicateTitle: jest.fn(),
-  /** New embeddable api inherited methods */
-  resetUnsavedChanges: jest.fn(),
-  serializeState: jest.fn(),
-  snapshotRuntimeState: jest.fn(),
-  saveToLibrary: jest.fn(async () => 'saved-id'),
-  getByValueRuntimeSnapshot: jest.fn(),
-  onEdit: jest.fn(),
-  isEditingEnabled: jest.fn(() => true),
-  getTypeDisplayName: jest.fn(() => 'Lens'),
-  setPanelTitle: jest.fn(),
-  setHidePanelTitle: jest.fn(),
-  phase$: new BehaviorSubject<PhaseEvent | undefined>({
-    id: faker.string.uuid(),
-    status: 'rendered',
-    timeToEvent: 1000,
-  }),
-  unsavedChanges: new BehaviorSubject<object | undefined>(undefined),
-  dataViews: new BehaviorSubject<DataView[] | undefined>(undefined),
-  libraryId$: new BehaviorSubject<string | undefined>(undefined),
-  savedObjectId: new BehaviorSubject<string | undefined>(undefined),
-  adapters$: new BehaviorSubject<Adapters>({}),
-  updateAttributes: jest.fn(),
-  updateSavedObjectId: jest.fn(),
-  updateOverrides: jest.fn(),
-  getByReferenceState: jest.fn(),
-  getByValueState: jest.fn(),
-  getTriggerCompatibleActions: jest.fn(),
-  blockingError: new BehaviorSubject<Error | undefined>(undefined),
-  panelDescription: new BehaviorSubject<string | undefined>(undefined),
-  setPanelDescription: jest.fn(),
-  viewMode: new BehaviorSubject<ViewMode>('view'),
-  disabledActionIds: new BehaviorSubject<string[] | undefined>(undefined),
-  setDisabledActionIds: jest.fn(),
-  rendered$: new BehaviorSubject<boolean>(false),
-  searchSessionId$: new BehaviorSubject<string | undefined>(undefined),
-};
-
-const LensSerializedStateMock: LensSerializedState = createEmptyLensState(
-  'lnsXY',
-  faker.lorem.words(),
-  faker.lorem.text(),
-  { query: 'test', language: 'kuery' }
-);
-
-export function getLensAttributesMock(attributes?: Partial<LensRuntimeState['attributes']>) {
-  return deepMerge(LensSerializedStateMock.attributes!, attributes ?? {});
+function getDefaultLensApiMock() {
+  const LensApiMock: LensApi = {
+    // Static props
+    type: DOC_TYPE,
+    uuid: faker.string.uuid(),
+    // Shared Embeddable Observables
+    title$: new BehaviorSubject<string | undefined>(faker.lorem.words()),
+    hideTitle$: new BehaviorSubject<boolean | undefined>(false),
+    filters$: new BehaviorSubject<Filter[] | undefined>([]),
+    query$: new BehaviorSubject<Query | AggregateQuery | undefined>({
+      query: 'test',
+      language: 'kuery',
+    }),
+    timeRange$: new BehaviorSubject<TimeRange | undefined>({ from: 'now-15m', to: 'now' }),
+    dataLoading$: new BehaviorSubject<boolean | undefined>(false),
+    // Methods
+    getSavedVis: jest.fn(),
+    getFullAttributes: jest.fn(),
+    canViewUnderlyingData$: new BehaviorSubject<boolean>(false),
+    loadViewUnderlyingData: jest.fn(),
+    getViewUnderlyingDataArgs: jest.fn(() => ({
+      dataViewSpec: { id: 'index-pattern-id' },
+      timeRange: { from: 'now-7d', to: 'now' },
+      filters: [],
+      query: undefined,
+      columns: [],
+    })),
+    isTextBasedLanguage: jest.fn(() => true),
+    getTextBasedLanguage: jest.fn(),
+    getInspectorAdapters: jest.fn(() => ({})),
+    inspect: jest.fn(),
+    closeInspector: jest.fn(async () => {}),
+    supportedTriggers: jest.fn(() => []),
+    canLinkToLibrary: jest.fn(async () => false),
+    canUnlinkFromLibrary: jest.fn(async () => false),
+    checkForDuplicateTitle: jest.fn(),
+    /** New embeddable api inherited methods */
+    serializeState: jest.fn(),
+    saveToLibrary: jest.fn(async () => 'saved-id'),
+    onEdit: jest.fn(),
+    isEditingEnabled: jest.fn(() => true),
+    getTypeDisplayName: jest.fn(() => 'Lens'),
+    setTitle: jest.fn(),
+    setHideTitle: jest.fn(),
+    mountInlineFlyout: jest.fn(),
+    phase$: new BehaviorSubject<PhaseEvent | undefined>({
+      id: faker.string.uuid(),
+      status: 'rendered',
+      timeToEvent: 1000,
+    }),
+    dataViews$: new BehaviorSubject<DataView[] | undefined>(undefined),
+    savedObjectId$: new BehaviorSubject<string | undefined>(undefined),
+    adapters$: new BehaviorSubject<Adapters>({}),
+    updateAttributes: jest.fn(),
+    updateSavedObjectId: jest.fn(),
+    updateOverrides: jest.fn(),
+    getSerializedStateByReference: jest.fn(),
+    getSerializedStateByValue: jest.fn(),
+    getTriggerCompatibleActions: jest.fn(),
+    blockingError$: new BehaviorSubject<Error | undefined>(undefined),
+    description$: new BehaviorSubject<string | undefined>(undefined),
+    setDescription: jest.fn(),
+    viewMode$: new BehaviorSubject<ViewMode>('view'),
+    disabledActionIds$: new BehaviorSubject<string[] | undefined>(undefined),
+    setDisabledActionIds: jest.fn(),
+    rendered$: new BehaviorSubject<boolean>(false),
+    searchSessionId$: new BehaviorSubject<string | undefined>(undefined),
+  };
+  return LensApiMock;
 }
 
-export function getLensApiMock(overrides: Partial<LensApi> = {}) {
+function getDefaultLensSerializedStateMock() {
+  const LensSerializedStateMock: LensSerializedState = createEmptyLensState(
+    'lnsXY',
+    faker.lorem.words(),
+    faker.lorem.text(),
+    { query: 'test', language: 'kuery' }
+  );
+  return LensSerializedStateMock;
+}
+
+export function getLensAttributesMock(attributes?: Partial<LensRuntimeState['attributes']>) {
+  return deepMerge(getDefaultLensSerializedStateMock().attributes!, attributes ?? {});
+}
+
+export function getLensApiMock(overrides: Partial<LensApi> = {}): LensApi {
   return {
-    ...LensApiMock,
+    ...getDefaultLensApiMock(),
     ...overrides,
   };
 }
@@ -130,7 +132,7 @@ export function getLensApiMock(overrides: Partial<LensApi> = {}) {
 export function getLensSerializedStateMock(overrides: Partial<LensSerializedState> = {}) {
   return {
     savedObjectId: faker.string.uuid(),
-    ...LensSerializedStateMock,
+    ...getDefaultLensSerializedStateMock(),
     ...overrides,
   };
 }
@@ -139,15 +141,15 @@ export function getLensRuntimeStateMock(
   overrides: Partial<LensRuntimeState> = {}
 ): LensRuntimeState {
   return {
-    ...(LensSerializedStateMock as LensRuntimeState),
+    ...(getDefaultLensSerializedStateMock() as LensRuntimeState),
     ...overrides,
   };
 }
 
 export function getLensComponentProps(overrides: Partial<LensRendererProps> = {}) {
   return {
-    ...LensSerializedStateMock,
-    ...LensApiMock,
+    ...getDefaultLensSerializedStateMock(),
+    ...getDefaultLensApiMock(),
     ...overrides,
   };
 }
@@ -190,20 +192,25 @@ export function makeEmbeddableServices(
       getTrigger: jest.fn().mockImplementation(() => ({ exec: jest.fn() })),
     },
     embeddableEnhanced: {
-      initializeReactEmbeddableDynamicActions: jest.fn(
+      initializeEmbeddableDynamicActions: jest.fn(
         () =>
           ({
-            dynamicActionsApi: {
+            api: {
               enhancements: { dynamicActions: {} },
               setDynamicActions: jest.fn(),
               dynamicActionsState$: {},
+            } as unknown as EmbeddableDynamicActionsManager['api'],
+            anyStateChange$: of(undefined),
+            comparators: {
+              enhancements: jest.fn(),
             },
-            dynamicActionsComparator: jest.fn(),
-            serializeDynamicActions: jest.fn(),
+            getLatestState: jest.fn(),
+            reinitializeState: jest.fn(),
             startDynamicActions: jest.fn(),
-          } as unknown as ReactEmbeddableDynamicActionsApi)
+          } as EmbeddableDynamicActionsManager)
       ),
     },
+    fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
   };
 }
 
@@ -274,35 +281,29 @@ export function getValidExpressionParams(
   };
 }
 
-const LensInternalApiMock = initializeInternalApi(
-  getLensRuntimeStateMock(),
-  {},
-  makeEmbeddableServices()
-);
+function getInternalApiWithFunctionWrappers() {
+  const mockRuntimeState = getLensRuntimeStateMock();
+  const newApi = initializeInternalApi(
+    mockRuntimeState,
+    {},
+    initializeTitleManager(mockRuntimeState),
+    makeEmbeddableServices()
+  );
+  const fns: Array<keyof LensInternalApi> = (
+    Object.keys(newApi) as Array<keyof LensInternalApi>
+  ).filter((key) => typeof newApi[key] === 'function');
+  for (const fn of fns) {
+    const originalFn = newApi[fn];
+    // @ts-expect-error
+    newApi[fn] = jest.fn(originalFn);
+  }
+  return newApi;
+}
 
 export function getLensInternalApiMock(overrides: Partial<LensInternalApi> = {}): LensInternalApi {
   return {
-    ...LensInternalApiMock,
+    ...getInternalApiWithFunctionWrappers(),
     ...overrides,
-  };
-}
-
-export function getVisualizationContextHelperMock(
-  attributesOverrides?: Partial<LensRuntimeState['attributes']>,
-  contextOverrides?: Omit<Partial<VisualizationContext>, 'doc'>
-) {
-  return {
-    getVisualizationContext: jest.fn(() => ({
-      activeAttributes: getLensAttributesMock(attributesOverrides),
-      mergedSearchContext: {},
-      indexPatterns: {},
-      indexPatternRefs: [],
-      activeVisualizationState: undefined,
-      activeDatasourceState: undefined,
-      activeData: undefined,
-      ...contextOverrides,
-    })),
-    updateVisualizationContext: jest.fn(),
   };
 }
 
@@ -318,5 +319,12 @@ export function createUnifiedSearchApi(
     filters$: new BehaviorSubject<Filter[] | undefined>(filters),
     query$: new BehaviorSubject<Query | AggregateQuery | undefined>(query),
     timeRange$: new BehaviorSubject<TimeRange | undefined>(timeRange),
+  };
+}
+
+export function createParentApiMock(overrides: object = {}) {
+  return {
+    esqlVariables$: new BehaviorSubject<ESQLControlVariable[]>([]),
+    ...overrides,
   };
 }

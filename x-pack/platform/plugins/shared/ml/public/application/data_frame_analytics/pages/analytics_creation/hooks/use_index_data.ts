@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { EuiDataGridColumn } from '@elastic/eui';
 
 import type { CoreSetup } from '@kbn/core/public';
@@ -26,7 +27,7 @@ import {
   getFieldType,
   getDataGridSchemaFromKibanaFieldType,
   getDataGridSchemaFromESFieldType,
-  getFieldsFromKibanaDataView,
+  getPopulatedFieldsFromKibanaDataView,
   showDataGridColumnChartErrorMessageToast,
   useDataGrid,
   useRenderCellValue,
@@ -34,7 +35,7 @@ import {
   INDEX_STATUS,
 } from '@kbn/ml-data-grid';
 
-import { useMlApi } from '../../../../contexts/kibana';
+import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
 import { DataLoader } from '../../../../datavisualizer/index_based/data_loader';
 
 type IndexSearchResponse = estypes.SearchResponse;
@@ -81,56 +82,16 @@ export const useIndexData = (
   toastNotifications: CoreSetup['notifications']['toasts'],
   runtimeMappings?: RuntimeMappings
 ): UseIndexDataReturnType => {
+  const isMounted = useMountedState();
+  const {
+    services: {
+      data: { dataViews: dataViewsService },
+    },
+  } = useMlKibana();
   const mlApi = useMlApi();
-  // Fetch 500 random documents to determine populated fields.
-  // This is a workaround to avoid passing potentially thousands of unpopulated fields
-  // (for example, as part of filebeat/metricbeat/ECS based indices)
-  // to the data grid component which would significantly slow down the page.
   const [dataViewFields, setDataViewFields] = useState<string[]>();
   const [timeRangeMs, setTimeRangeMs] = useState<TimeRangeMs | undefined>();
-
-  useEffect(() => {
-    async function fetchDataGridSampleDocuments() {
-      setErrorMessage('');
-      setStatus(INDEX_STATUS.LOADING);
-
-      const esSearchRequest = {
-        index: dataView.title,
-        body: {
-          fields: ['*'],
-          _source: false,
-          query: {
-            function_score: {
-              query: { match_all: {} },
-              random_score: {},
-            },
-          },
-          size: 500,
-        },
-      };
-
-      try {
-        const resp: IndexSearchResponse = await mlApi.esSearch(esSearchRequest);
-        const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
-
-        // Get all field names for each returned doc and flatten it
-        // to a list of unique field names used across all docs.
-        const allDataViewFields = getFieldsFromKibanaDataView(dataView);
-        const populatedFields = [...new Set(docs.map(Object.keys).flat(1))]
-          .filter((d) => allDataViewFields.includes(d))
-          .sort();
-
-        setStatus(INDEX_STATUS.LOADED);
-        setDataViewFields(populatedFields);
-      } catch (e) {
-        setErrorMessage(extractErrorMessage(e));
-        setStatus(INDEX_STATUS.ERROR);
-      }
-    }
-
-    fetchDataGridSampleDocuments();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const abortController = useRef(new AbortController());
 
   // To be used for data grid column selection
   // and will be applied to doc and chart queries.
@@ -138,6 +99,48 @@ export const useIndexData = (
     () => getCombinedRuntimeMappings(dataView, runtimeMappings),
     [dataView, runtimeMappings]
   );
+
+  useEffect(() => {
+    async function fetchPopulatedFields() {
+      if (abortController.current) {
+        abortController.current.abort();
+        abortController.current = new AbortController();
+      }
+
+      setErrorMessage('');
+      setStatus(INDEX_STATUS.LOADING);
+
+      try {
+        const nonEmptyFields = await dataViewsService.getFieldsForIndexPattern(dataView, {
+          includeEmptyFields: false,
+          // dummy filter, if no filter was provided the function would return all fields.
+          indexFilter: {
+            bool: { must: { match_all: {} } },
+          },
+          runtimeMappings: combinedRuntimeMappings,
+          abortSignal: abortController.current.signal,
+        });
+
+        const populatedFields = nonEmptyFields.map((field) => field.name);
+
+        if (isMounted()) {
+          setDataViewFields(getPopulatedFieldsFromKibanaDataView(dataView, populatedFields));
+        }
+      } catch (e) {
+        if (e?.name !== 'AbortError') {
+          setErrorMessage(extractErrorMessage(e));
+          setStatus(INDEX_STATUS.ERROR);
+        }
+      }
+    }
+
+    fetchPopulatedFields();
+
+    return () => {
+      abortController.current.abort();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Available data grid columns, will be a combination of index pattern and runtime fields.
   const [columns, setColumns] = useState<MLEuiDataGridColumn[]>([]);

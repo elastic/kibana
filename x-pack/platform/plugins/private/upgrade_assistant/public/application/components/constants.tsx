@@ -36,6 +36,12 @@ export const DEPRECATION_TYPE_MAP: Record<EnrichedDeprecationInfo['type'], strin
   data_streams: i18n.translate('xpack.upgradeAssistant.esDeprecations.dataStreamsTypeLabel', {
     defaultMessage: 'Data Stream',
   }),
+  ilm_policies: i18n.translate('xpack.upgradeAssistant.esDeprecations.ilmPoliciesTypeLabel', {
+    defaultMessage: 'ILM Policy',
+  }),
+  templates: i18n.translate('xpack.upgradeAssistant.esDeprecations.templatesTypeLabel', {
+    defaultMessage: 'Component Template',
+  }),
 };
 
 export const PAGINATION_CONFIG = {

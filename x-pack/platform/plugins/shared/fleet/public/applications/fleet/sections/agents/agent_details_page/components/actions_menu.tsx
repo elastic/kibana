@@ -23,7 +23,6 @@ import {
 import { useAgentRefresh } from '../hooks';
 import { isAgentUpgradeable, policyHasFleetServer } from '../../../../services';
 import { AgentRequestDiagnosticsModal } from '../../components/agent_request_diagnostics_modal';
-import { ExperimentalFeaturesService } from '../../../../services';
 
 import { AgentDetailsJsonFlyout } from './agent_details_json_flyout';
 
@@ -53,7 +52,6 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
   );
 
   const hasFleetServer = agentPolicy && policyHasFleetServer(agentPolicy);
-  const { diagnosticFileUploadEnabled } = ExperimentalFeaturesService.get();
 
   const onClose = useMemo(() => {
     if (onCancelReassign) {
@@ -81,7 +79,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             icon="refresh"
-            disabled={!isAgentUpgradeable(agent)}
+            disabled={!isAgentUpgradeable(agent) || agentPolicy?.supports_agentless === true}
             onClick={() => {
               setIsUpgradeModalOpen(true);
             }}
@@ -126,7 +124,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
         defaultMessage="View agent JSON"
       />
     </EuiContextMenuItem>,
-    ...(authz.fleet.readAgents && diagnosticFileUploadEnabled
+    ...(authz.fleet.readAgents
       ? [
           <EuiContextMenuItem
             icon="download"
@@ -148,7 +146,9 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
       ? [
           <EuiContextMenuItem
             icon="trash"
-            disabled={!hasFleetAllPrivileges || !agent.active}
+            disabled={
+              !hasFleetAllPrivileges || !agent.active || agentPolicy?.supports_agentless === true
+            }
             onClick={() => {
               setIsUnenrollModalOpen(true);
             }}

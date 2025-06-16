@@ -9,8 +9,10 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import type { IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { DEFAULT_DOCS_PER_PAGE } from '@kbn/search-index-documents/types';
+import { fetchSearchResults } from '@kbn/search-index-documents/lib';
 
-import { POST_CREATE_INDEX_ROUTE } from '../../common/routes';
+import { POST_CREATE_INDEX_ROUTE, SEARCH_DOCUMENTS_ROUTE } from '../../common/routes';
 import { CreateIndexRequest } from '../../common/types';
 import { createIndex } from '../lib/indices';
 
@@ -18,6 +20,12 @@ export function registerIndicesRoutes(router: IRouter, logger: Logger) {
   router.post(
     {
       path: POST_CREATE_INDEX_ROUTE,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: schema.object({
           indexName: schema.string(),
@@ -60,6 +68,60 @@ export function registerIndicesRoutes(router: IRouter, logger: Logger) {
           },
         });
       }
+    }
+  );
+
+  router.post(
+    {
+      path: SEARCH_DOCUMENTS_ROUTE,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
+      validate: {
+        body: schema.object({
+          searchQuery: schema.string({
+            defaultValue: '',
+          }),
+          trackTotalHits: schema.boolean({ defaultValue: false }),
+        }),
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+        query: schema.object({
+          page: schema.number({ defaultValue: 0, min: 0 }),
+          size: schema.number({
+            defaultValue: DEFAULT_DOCS_PER_PAGE,
+            min: 0,
+          }),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const client = (await context.core).elasticsearch.client.asCurrentUser;
+      const indexName = decodeURIComponent(request.params.indexName);
+      const searchQuery = request.body.searchQuery;
+      const { page = 0, size = DEFAULT_DOCS_PER_PAGE } = request.query;
+      const from = page * size;
+      const trackTotalHits = request.body.trackTotalHits;
+
+      const searchResults = await fetchSearchResults(
+        client,
+        indexName,
+        searchQuery,
+        from,
+        size,
+        trackTotalHits
+      );
+
+      return response.ok({
+        body: {
+          results: searchResults,
+        },
+        headers: { 'content-type': 'application/json' },
+      });
     }
   );
 }

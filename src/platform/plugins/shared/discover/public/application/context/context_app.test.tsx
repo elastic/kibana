@@ -10,77 +10,30 @@
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { mockTopNavMenu } from './__mocks__/top_nav_menu';
 import { ContextAppContent } from './context_app_content';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { ContextApp } from './context_app';
-import { DiscoverServices } from '../../build_services';
-import { dataViewsMock } from '../../__mocks__/data_views';
+import { ContextApp, type ContextAppProps } from './context_app';
 import { act } from 'react-dom/test-utils';
 import { uiSettingsMock } from '../../__mocks__/ui_settings';
-import { themeServiceMock } from '@kbn/core/public/mocks';
-import { LocalStorageMock } from '../../__mocks__/local_storage_mock';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { HistoryLocationState } from '../../build_services';
-import { createSearchSessionMock } from '../../__mocks__/search_session';
 import { createDiscoverServicesMock } from '../../__mocks__/services';
+import { DiscoverTestProvider } from '../../__mocks__/test_provider';
+import type { NavigationPublicStart } from '@kbn/navigation-plugin/public/types';
 
-const mockFilterManager = createFilterManagerMock();
 const mockNavigationPlugin = {
   ui: { TopNavMenu: mockTopNavMenu, AggregateQueryTopNavMenu: mockTopNavMenu },
-};
-const discoverServices = createDiscoverServicesMock();
+} as unknown as NavigationPublicStart;
+const services = createDiscoverServicesMock();
+const addFiltersMock = jest.spyOn(services.filterManager, 'addFilters');
+const updateSavedObjectMock = jest.spyOn(services.dataViews, 'updateSavedObject');
+
+services.navigation = mockNavigationPlugin;
+services.uiSettings = uiSettingsMock;
 
 describe('ContextApp test', () => {
-  const { history } = createSearchSessionMock();
-  const services = {
-    data: discoverServices.data,
-    capabilities: {
-      discover: {
-        save: true,
-      },
-      indexPatterns: {
-        save: true,
-      },
-    },
-    dataViews: dataViewsMock,
-    toastNotifications: { addDanger: () => {} },
-    navigation: mockNavigationPlugin,
-    core: {
-      ...discoverServices.core,
-      executionContext: {
-        set: jest.fn(),
-      },
-      notifications: { toasts: [] },
-      theme: { theme$: themeServiceMock.createStartContract().theme$ },
-    },
-    history,
-    fieldFormats: {
-      getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),
-      getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
-    },
-    filterManager: mockFilterManager,
-    uiSettings: uiSettingsMock,
-    storage: new LocalStorageMock({}),
-    chrome: { setBreadcrumbs: jest.fn() },
-    locator: {
-      useUrl: jest.fn(() => ''),
-      navigate: jest.fn(),
-      getUrl: jest.fn(() => Promise.resolve('mock-url')),
-    },
-    contextLocator: { getRedirectUrl: jest.fn(() => '') },
-    singleDocLocator: { getRedirectUrl: jest.fn(() => '') },
-    profilesManager: discoverServices.profilesManager,
-    ebtManager: discoverServices.ebtManager,
-    timefilter: discoverServices.timefilter,
-    uiActions: discoverServices.uiActions,
-  } as unknown as DiscoverServices;
-
-  const defaultProps = {
+  const defaultProps: ContextAppProps = {
     dataView: dataViewMock,
     anchorId: 'mocked_anchor_id',
-    locationState: {} as HistoryLocationState,
   };
 
   const topNavProps = {
@@ -88,7 +41,6 @@ describe('ContextApp test', () => {
     showSearchBar: true,
     showQueryInput: false,
     showFilterBar: true,
-    saveQueryMenuVisibility: 'hidden' as const,
     showDatePicker: false,
     indexPatterns: [dataViewMock],
     useDefaultBehaviors: true,
@@ -96,9 +48,9 @@ describe('ContextApp test', () => {
 
   const mountComponent = () => {
     return mountWithIntl(
-      <KibanaContextProvider services={services}>
+      <DiscoverTestProvider services={services}>
         <ContextApp {...defaultProps} />
-      </KibanaContextProvider>
+      </DiscoverTestProvider>
     );
   };
 
@@ -123,15 +75,15 @@ describe('ContextApp test', () => {
       );
     });
 
-    expect(mockFilterManager.addFilters.mock.calls.length).toBe(1);
-    expect(mockFilterManager.addFilters.mock.calls[0][0]).toEqual([
+    expect(addFiltersMock.mock.calls.length).toBe(1);
+    expect(addFiltersMock.mock.calls[0][0]).toEqual([
       {
         $state: { store: 'appState' },
         meta: { alias: null, disabled: false, index: 'the-data-view-id', negate: false },
         query: { match_phrase: { message: '2021-06-08T07:52:19.000Z' } },
       },
     ]);
-    expect(dataViewsMock.updateSavedObject.mock.calls.length).toBe(1);
-    expect(dataViewsMock.updateSavedObject.mock.calls[0]).toEqual([dataViewMock, 0, true]);
+    expect(updateSavedObjectMock.mock.calls.length).toBe(1);
+    expect(updateSavedObjectMock.mock.calls[0]).toEqual([dataViewMock, 0, true]);
   });
 });

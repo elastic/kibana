@@ -18,6 +18,7 @@ import { mlApiProvider } from '../services/ml_api_service';
 import { mlUsageCollectionProvider } from '../services/usage_collection';
 import { mlJobServiceFactory } from '../services/job_service';
 import { indexServiceFactory } from './index_service';
+import { TrainedModelsService } from '../model_management/trained_models_service';
 
 /**
  * Provides global services available across the entire ML app.
@@ -30,6 +31,7 @@ export function getMlGlobalServices(
   const httpService = new HttpService(coreStart.http);
   const mlApi = mlApiProvider(httpService);
   const mlJobService = mlJobServiceFactory(mlApi);
+  const trainedModelsService = new TrainedModelsService(mlApi.trainedModels);
   // Note on the following services:
   // - `mlIndexUtils` is just instantiated here to be passed on to `mlFieldFormatService`,
   //   but it's not being made available as part of global services. Since it's just
@@ -49,5 +51,6 @@ export function getMlGlobalServices(
     mlUsageCollection: mlUsageCollectionProvider(usageCollection),
     mlCapabilities: new MlCapabilitiesService(mlApi),
     mlLicense: new MlLicense(),
+    trainedModelsService,
   };
 }

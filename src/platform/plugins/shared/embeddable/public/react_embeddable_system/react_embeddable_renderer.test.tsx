@@ -14,31 +14,25 @@ import { render, waitFor, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { registerReactEmbeddableFactory } from './react_embeddable_registry';
-import { ReactEmbeddableRenderer } from './react_embeddable_renderer';
-import { ReactEmbeddableFactory } from './types';
+import { EmbeddableRenderer } from './react_embeddable_renderer';
+import { EmbeddableFactory } from './types';
 
-const testEmbeddableFactory: ReactEmbeddableFactory<{ name: string; bork: string }> = {
+const testEmbeddableFactory: EmbeddableFactory<{ name: string; bork: string }> = {
   type: 'test',
-  deserializeState: jest.fn().mockImplementation((state) => state.rawState),
-  buildEmbeddable: async (state, registerApi) => {
-    const api = registerApi(
-      {
-        serializeState: () => ({
-          rawState: {
-            name: state.name,
-            bork: state.bork,
-          },
-        }),
-      },
-      {
-        name: [new BehaviorSubject<string>(state.name), () => {}],
-        bork: [new BehaviorSubject<string>(state.bork), () => {}],
-      }
-    );
+  buildEmbeddable: async ({ initialState, finalizeApi }) => {
+    const api = finalizeApi({
+      serializeState: () => ({
+        rawState: {
+          name: initialState.rawState.name,
+          bork: initialState.rawState.bork,
+        },
+      }),
+    });
     return {
       Component: () => (
         <div data-test-subj="superTestEmbeddable">
-          SUPER TEST COMPONENT, name: {state.name} bork: {state.bork}
+          SUPER TEST COMPONENT, name: {initialState.rawState.name} bork:{' '}
+          {initialState.rawState.bork}
         </div>
       ),
       api,
@@ -46,7 +40,7 @@ const testEmbeddableFactory: ReactEmbeddableFactory<{ name: string; bork: string
   },
 };
 
-describe('react embeddable renderer', () => {
+describe('embeddable renderer', () => {
   const getTestEmbeddableFactory = async () => {
     return testEmbeddableFactory;
   };
@@ -56,30 +50,10 @@ describe('react embeddable renderer', () => {
     setupPresentationPanelServices();
   });
 
-  it('deserializes unsaved state provided by the parent', async () => {
-    render(
-      <ReactEmbeddableRenderer
-        type={'test'}
-        getParentApi={() => ({
-          getSerializedStateForChild: () => ({
-            rawState: {
-              bork: 'blorp?',
-            },
-          }),
-        })}
-      />
-    );
-    await waitFor(() => {
-      expect(testEmbeddableFactory.deserializeState).toHaveBeenCalledWith({
-        rawState: { bork: 'blorp?' },
-      });
-    });
-  });
-
   it('builds the embeddable', async () => {
     const buildEmbeddableSpy = jest.spyOn(testEmbeddableFactory, 'buildEmbeddable');
     render(
-      <ReactEmbeddableRenderer
+      <EmbeddableRenderer
         type={'test'}
         getParentApi={() => ({
           getSerializedStateForChild: () => ({
@@ -91,21 +65,19 @@ describe('react embeddable renderer', () => {
       />
     );
     await waitFor(() => {
-      expect(buildEmbeddableSpy).toHaveBeenCalledWith(
-        { bork: 'blorp?' },
-        expect.any(Function),
-        expect.any(String),
-        expect.any(Object),
-        expect.any(Function),
-        { bork: 'blorp?' }
-      );
+      expect(buildEmbeddableSpy).toHaveBeenCalledWith({
+        initialState: { rawState: { bork: 'blorp?' } },
+        parentApi: expect.any(Object),
+        uuid: expect.any(String),
+        finalizeApi: expect.any(Function),
+      });
     });
   });
 
   it('builds the embeddable, providing an id', async () => {
     const buildEmbeddableSpy = jest.spyOn(testEmbeddableFactory, 'buildEmbeddable');
     render(
-      <ReactEmbeddableRenderer
+      <EmbeddableRenderer
         type={'test'}
         maybeId={'12345'}
         getParentApi={() => ({
@@ -118,14 +90,12 @@ describe('react embeddable renderer', () => {
       />
     );
     await waitFor(() => {
-      expect(buildEmbeddableSpy).toHaveBeenCalledWith(
-        { bork: 'blorp?' },
-        expect.any(Function),
-        '12345',
-        expect.any(Object),
-        expect.any(Function),
-        { bork: 'blorp?' }
-      );
+      expect(buildEmbeddableSpy).toHaveBeenCalledWith({
+        initialState: { rawState: { bork: 'blorp?' } },
+        parentApi: expect.any(Object),
+        uuid: '12345',
+        finalizeApi: expect.any(Function),
+      });
     });
   });
 
@@ -139,22 +109,20 @@ describe('react embeddable renderer', () => {
         },
       }),
     };
-    render(<ReactEmbeddableRenderer type={'test'} getParentApi={() => parentApi} />);
+    render(<EmbeddableRenderer type={'test'} getParentApi={() => parentApi} />);
     await waitFor(() => {
-      expect(buildEmbeddableSpy).toHaveBeenCalledWith(
-        { bork: 'blorp?' },
-        expect.any(Function),
-        expect.any(String),
+      expect(buildEmbeddableSpy).toHaveBeenCalledWith({
+        initialState: { rawState: { bork: 'blorp?' } },
         parentApi,
-        expect.any(Function),
-        { bork: 'blorp?' }
-      );
+        uuid: expect.any(String),
+        finalizeApi: expect.any(Function),
+      });
     });
   });
 
   it('renders the given component once it resolves', async () => {
     render(
-      <ReactEmbeddableRenderer
+      <EmbeddableRenderer
         type={'test'}
         getParentApi={() => ({
           getSerializedStateForChild: () => ({
@@ -173,7 +141,7 @@ describe('react embeddable renderer', () => {
   it('publishes the API into the provided callback', async () => {
     const onApiAvailable = jest.fn();
     render(
-      <ReactEmbeddableRenderer
+      <EmbeddableRenderer
         type={'test'}
         maybeId={'12345'}
         onApiAvailable={onApiAvailable}
@@ -189,10 +157,7 @@ describe('react embeddable renderer', () => {
         type: 'test',
         uuid: '12345',
         parentApi: expect.any(Object),
-        unsavedChanges: expect.any(Object),
         serializeState: expect.any(Function),
-        resetUnsavedChanges: expect.any(Function),
-        snapshotRuntimeState: expect.any(Function),
         phase$: expect.any(Object),
         hasLockedHoverActions$: expect.any(Object),
         lockHoverActions: expect.any(Function),
@@ -203,7 +168,7 @@ describe('react embeddable renderer', () => {
   it('initializes a new ID when one is not given', async () => {
     const onApiAvailable = jest.fn();
     render(
-      <ReactEmbeddableRenderer
+      <EmbeddableRenderer
         type={'test'}
         onApiAvailable={onApiAvailable}
         getParentApi={() => ({
@@ -220,25 +185,24 @@ describe('react embeddable renderer', () => {
     );
   });
 
-  it('catches error when thrown in deserialize', async () => {
+  it('catches error when thrown in buildEmbeddable', async () => {
     const buildEmbeddable = jest.fn();
-    const errorInInitializeFactory: ReactEmbeddableFactory<{ name: string; bork: string }> = {
+    const errorInInitializeFactory: EmbeddableFactory<{ name: string; bork: string }> = {
       ...testEmbeddableFactory,
-      type: 'errorInDeserialize',
-      buildEmbeddable,
-      deserializeState: (state) => {
-        throw new Error('error in deserialize');
+      type: 'errorInBuildEmbeddable',
+      buildEmbeddable: () => {
+        throw new Error('error in buildEmbeddable');
       },
     };
-    registerReactEmbeddableFactory('errorInDeserialize', () =>
+    registerReactEmbeddableFactory('errorInBuildEmbeddable', () =>
       Promise.resolve(errorInInitializeFactory)
     );
     setupPresentationPanelServices();
 
     const onApiAvailable = jest.fn();
     const embeddable = render(
-      <ReactEmbeddableRenderer
-        type={'errorInDeserialize'}
+      <EmbeddableRenderer
+        type={'errorInBuildEmbeddable'}
         maybeId={'12345'}
         onApiAvailable={onApiAvailable}
         getParentApi={() => ({
@@ -253,14 +217,14 @@ describe('react embeddable renderer', () => {
     expect(onApiAvailable).not.toBeCalled();
     expect(buildEmbeddable).not.toBeCalled();
     expect(embeddable.getByTestId('errorMessageMarkdown')).toHaveTextContent(
-      'error in deserialize'
+      'error in buildEmbeddable'
     );
   });
 });
 
 describe('reactEmbeddable phase events', () => {
   it('publishes rendered phase immediately when dataLoading is not defined', async () => {
-    const immediateLoadEmbeddableFactory: ReactEmbeddableFactory<{ name: string; bork: string }> = {
+    const immediateLoadEmbeddableFactory: EmbeddableFactory<{ name: string; bork: string }> = {
       ...testEmbeddableFactory,
       type: 'immediateLoad',
     };
@@ -271,7 +235,7 @@ describe('reactEmbeddable phase events', () => {
 
     const renderedEvent = jest.fn();
     render(
-      <ReactEmbeddableRenderer
+      <EmbeddableRenderer
         type={'test'}
         maybeId={'12345'}
         onApiAvailable={(api) => {
@@ -292,33 +256,28 @@ describe('reactEmbeddable phase events', () => {
   });
 
   it('publishes rendered phase event when dataLoading is complete', async () => {
-    const dataLoadingEmbeddableFactory: ReactEmbeddableFactory<{ name: string; bork: string }> = {
+    const dataLoadingEmbeddableFactory: EmbeddableFactory<{ name: string; bork: string }> = {
       ...testEmbeddableFactory,
       type: 'loadClicker',
-      buildEmbeddable: async (state, registerApi) => {
-        const dataLoading = new BehaviorSubject<boolean | undefined>(true);
-        const api = registerApi(
-          {
-            serializeState: () => ({
-              rawState: {
-                name: state.name,
-                bork: state.bork,
-              },
-            }),
-            dataLoading,
-          },
-          {
-            name: [new BehaviorSubject<string>(state.name), () => {}],
-            bork: [new BehaviorSubject<string>(state.bork), () => {}],
-          }
-        );
+      buildEmbeddable: async ({ initialState, finalizeApi }) => {
+        const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+        const api = finalizeApi({
+          serializeState: () => ({
+            rawState: {
+              name: initialState.rawState.name,
+              bork: initialState.rawState.bork,
+            },
+          }),
+          dataLoading$,
+        });
         return {
           Component: () => (
             <>
               <div data-test-subj="superTestEmbeddable">
-                SUPER TEST COMPONENT, name: {state.name} bork: {state.bork}
+                SUPER TEST COMPONENT, name: {initialState.rawState.name} bork:{' '}
+                {initialState.rawState.bork}
               </div>
-              <button data-test-subj="clickToStopLoading" onClick={() => dataLoading.next(false)}>
+              <button data-test-subj="clickToStopLoading" onClick={() => dataLoading$.next(false)}>
                 Done loading
               </button>
             </>
@@ -334,7 +293,7 @@ describe('reactEmbeddable phase events', () => {
 
     const phaseFn = jest.fn();
     render(
-      <ReactEmbeddableRenderer
+      <EmbeddableRenderer
         type={'loadClicker'}
         maybeId={'12345'}
         onApiAvailable={(api) => {

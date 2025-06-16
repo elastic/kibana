@@ -28,46 +28,48 @@ export default {
 
 const mock = new RedirectAppLinksStorybookMock();
 
-export const RedirectAppLinks = () => {
-  return (
-    <EuiFlexGroup direction="column">
-      <EuiFlexItem>
-        <Component {...mock.getProps()}>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="storybookButton"
-                iconType="plusInCircle"
-                href="/some-test-url"
-              >
-                Button with URL
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="storybookButton"
-                iconType="plusInCircle"
-                onClick={action('onClick')}
-              >
-                Button without URL
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </Component>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <div>
-          <EuiButton
-            data-test-subj="storybookButton"
-            iconType="plusInCircle"
-            href="/?path=/story/redirect-app-links--component"
-          >
-            Button outside RedirectAppLinks
-          </EuiButton>
-        </div>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
+export const RedirectAppLinks = {
+  render: () => {
+    return (
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem>
+          <Component {...mock.getProps()}>
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  data-test-subj="storybookButton"
+                  iconType="plusInCircle"
+                  href="/some-test-url"
+                >
+                  Button with URL
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  data-test-subj="storybookButton"
+                  iconType="plusInCircle"
+                  onClick={action('onClick')}
+                >
+                  Button without URL
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </Component>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <div>
+            <EuiButton
+              data-test-subj="storybookButton"
+              iconType="plusInCircle"
+              href="/?path=/story/redirect-app-links--component"
+            >
+              Button outside RedirectAppLinks
+            </EuiButton>
+          </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  },
 
-RedirectAppLinks.argTypes = mock.getArgumentTypes();
+  argTypes: mock.getArgumentTypes(),
+};

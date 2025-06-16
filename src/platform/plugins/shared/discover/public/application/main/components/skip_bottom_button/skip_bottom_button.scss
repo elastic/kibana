@@ -1,8 +1,0 @@
-.dscSkipButton {
-  z-index: $euiZLevel1;
-  transition: none !important;
-  &:focus {
-    animation: none !important;
-    position: absolute;
-  }
-}

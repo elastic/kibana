@@ -80,7 +80,7 @@ const getEntitiesAggregationData = async ({
       }
     >({
       index,
-      body: bodyRequest,
+      ...bodyRequest,
     });
 
     return {

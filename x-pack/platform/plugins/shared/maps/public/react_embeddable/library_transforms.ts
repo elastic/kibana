@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { SerializedPanelState } from '@kbn/presentation-containers';
-import { HasLibraryTransforms } from '@kbn/presentation-publishing';
+import { HasLibraryTransforms, SerializedPanelState } from '@kbn/presentation-publishing';
 import { getCore, getCoreOverlays } from '../kibana_services';
 import type { MapAttributes } from '../../common/content_management';
 import { SavedMap } from '../routes/map_page';
@@ -33,10 +32,10 @@ export function getByValueState(state: MapSerializedState | undefined, attribute
 export function initializeLibraryTransforms(
   savedMap: SavedMap,
   serializeState: () => SerializedPanelState<MapSerializedState>
-): HasLibraryTransforms<MapSerializedState> {
+): HasLibraryTransforms<MapSerializedState, MapSerializedState> {
   return {
     canLinkToLibrary: async () => {
-      const { maps } = getCore().application.capabilities;
+      const { maps_v2: maps } = getCore().application.capabilities;
       return maps.save && savedMap.getSavedObjectId() === undefined;
     },
     saveToLibrary: async (title: string) => {
@@ -52,8 +51,10 @@ export function initializeLibraryTransforms(
       });
       return savedObjectId;
     },
-    getByReferenceState: (libraryId: string) => {
-      return getByReferenceState(serializeState().rawState, libraryId);
+    getSerializedStateByReference: (libraryId: string) => {
+      const { rawState: initialRawState, references } = serializeState();
+      const rawState = getByReferenceState(initialRawState, libraryId);
+      return { rawState, references };
     },
     checkForDuplicateTitle: async (
       newTitle: string,
@@ -77,8 +78,10 @@ export function initializeLibraryTransforms(
     canUnlinkFromLibrary: async () => {
       return savedMap.getSavedObjectId() !== undefined;
     },
-    getByValueState: () => {
-      return getByValueState(serializeState().rawState, savedMap.getAttributes());
+    getSerializedStateByValue: () => {
+      const { rawState: initialRawState, references } = serializeState();
+      const rawState = getByValueState(initialRawState, savedMap.getAttributes());
+      return { rawState, references };
     },
   };
 }

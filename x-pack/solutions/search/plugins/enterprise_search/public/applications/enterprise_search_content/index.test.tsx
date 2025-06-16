@@ -8,26 +8,17 @@
 import { DEFAULT_INITIAL_APP_DATA } from '../../../common/__mocks__';
 import { setMockValues } from '../__mocks__/kea_logic';
 import '../__mocks__/shallow_useeffect.mock';
-import '../__mocks__/enterprise_search_url.mock';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
-
-import { SetupGuide } from '../enterprise_search_overview/components/setup_guide';
 
 import { SearchIndicesRouter } from './components/search_indices';
 
 import { EnterpriseSearchContent, EnterpriseSearchContentConfigured } from '.';
 
 describe('EnterpriseSearchContent', () => {
-  it('always renders the Setup Guide', () => {
-    const wrapper = shallow(<EnterpriseSearchContent />);
-
-    expect(wrapper.find(SetupGuide)).toHaveLength(1);
-  });
-
-  it('renders EnterpriseSearchContentConfigured when config.host is set & available', () => {
+  it('renders EnterpriseSearchContentConfigured', () => {
     setMockValues({
       config: { host: 'some.url' },
       errorConnectingMessage: '',

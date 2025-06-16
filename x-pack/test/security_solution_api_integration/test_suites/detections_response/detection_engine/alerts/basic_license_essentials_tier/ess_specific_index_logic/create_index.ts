@@ -82,6 +82,43 @@ export default ({ getService }: FtrProviderContext) => {
           );
         });
       });
+
+      describe('with reIndexed from 7.xto 8.x .siem-signals index', () => {
+        beforeEach(async () => {
+          await esArchiver.load(
+            'x-pack/test/functional/es_archives/signals/reindexed_v8_siem_signals'
+          );
+        });
+
+        afterEach(async () => {
+          await esArchiver.unload(
+            'x-pack/test/functional/es_archives/signals/reindexed_v8_siem_signals'
+          );
+          await es.indices.delete({
+            index: '.reindexed-v8-siem-signals-default-000002',
+            ignore_unavailable: true,
+          });
+        });
+
+        it('should report that alerts index is outdated', async () => {
+          const { body } = await supertest.get(DETECTION_ENGINE_INDEX_URL).send().expect(200);
+          expect(body).to.eql({
+            index_mapping_outdated: true,
+            name: `${DEFAULT_ALERTS_INDEX}-default`,
+          });
+        });
+
+        it('should update index mappings', async () => {
+          await supertest
+            .post(DETECTION_ENGINE_INDEX_URL)
+            .set('kbn-xsrf', 'true')
+            .send()
+            .expect({ acknowledged: true });
+
+          const { body: indexStatusBody } = await supertest.get(DETECTION_ENGINE_INDEX_URL).send();
+          expect(indexStatusBody.index_mapping_outdated).to.be(false);
+        });
+      });
     });
   });
 };

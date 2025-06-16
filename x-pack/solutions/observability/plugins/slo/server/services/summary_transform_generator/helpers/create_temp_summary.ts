@@ -31,7 +31,7 @@ export interface EsSummaryDocument {
     };
     name: string | null;
   };
-  // common fields
+  // SLO definition
   slo: {
     // >= 8.14: Add indicator.params on the temporary summary as well as real summary through summary pipeline
     indicator: { type: IndicatorTypes } | Indicator;
@@ -48,6 +48,8 @@ export interface EsSummaryDocument {
     tags: string[];
     createdAt?: string; // >= 8.14
     updatedAt?: string; // >= 8.14
+    createdBy?: string; // >= 8.18
+    updatedBy?: string; // >= 8.18
   };
   goodEvents: number;
   totalEvents: number;
@@ -132,6 +134,9 @@ export function createTempSummaryDocument(
       tags: slo.tags,
       createdAt: slo.createdAt.toISOString(), // added in 8.14, i.e. might be undefined
       updatedAt: slo.updatedAt.toISOString(), // added in 8.14, i.e. might be undefined
+      // Added in 8.18
+      createdBy: slo.createdBy ?? '',
+      updatedBy: slo.updatedBy ?? '',
     },
     goodEvents: 0,
     totalEvents: 0,

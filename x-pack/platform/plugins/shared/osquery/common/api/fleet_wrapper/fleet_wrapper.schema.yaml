@@ -37,7 +37,7 @@ paths:
           in: path
           required: true
           schema:
-            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Id'
+            type: string
       responses:
         '200':
           description: OK
@@ -75,7 +75,7 @@ paths:
           in: path
           required: true
           schema:
-            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Id'
+            type: string
       responses:
         '200':
           description: OK

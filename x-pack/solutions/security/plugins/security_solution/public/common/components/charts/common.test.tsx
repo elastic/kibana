@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
-import { renderHook } from '@testing-library/react';
+import { useEuiTheme } from '@elastic/eui';
+import { screen, render, renderHook } from '@testing-library/react';
 
-import { useDarkMode } from '../../lib/kibana';
 import type { ChartSeriesData } from './common';
 import {
   checkIfAllValuesAreZero,
@@ -19,19 +18,25 @@ import {
   WrappedByAutoSizer,
   useThemes,
 } from './common';
-import { LEGACY_LIGHT_THEME, LEGACY_DARK_THEME } from '@elastic/charts';
+import { LIGHT_THEME, DARK_THEME } from '@elastic/charts';
 
-jest.mock('../../lib/kibana');
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  return {
+    ...actual,
+    useEuiTheme: jest.fn(),
+  };
+});
 
 describe('WrappedByAutoSizer', () => {
   it('should render correct default height', () => {
-    const wrapper = shallow(<WrappedByAutoSizer />);
-    expect(wrapper).toHaveStyleRule('height', defaultChartHeight);
+    render(<WrappedByAutoSizer data-test-subj="test" />);
+    expect(screen.getByTestId('test')).toHaveStyleRule('height', defaultChartHeight);
   });
 
   it('should render correct given height', () => {
-    const wrapper = shallow(<WrappedByAutoSizer height="100px" />);
-    expect(wrapper).toHaveStyleRule('height', '100px');
+    render(<WrappedByAutoSizer data-test-subj="test" height="100px" />);
+    expect(screen.getByTestId('test')).toHaveStyleRule('height', '100px');
   });
 });
 
@@ -163,23 +168,33 @@ describe('checkIfAllValuesAreZero', () => {
 
   describe('useThemes', () => {
     it('should return custom spacing theme', () => {
+      (useEuiTheme as jest.Mock).mockReturnValue({
+        euiTheme: { themeName: 'borealis' },
+        colorMode: 'LIGHT',
+      });
       const { result } = renderHook(() => useThemes());
 
       expect(result.current.theme.chartMargins).toMatchObject({ top: 4, bottom: 0 });
     });
 
     it('should return light baseTheme when isDarkMode false', () => {
-      (useDarkMode as jest.Mock).mockImplementation(() => false);
+      (useEuiTheme as jest.Mock).mockReturnValue({
+        euiTheme: { themeName: 'borealis' },
+        colorMode: 'LIGHT',
+      });
       const { result } = renderHook(() => useThemes());
 
-      expect(result.current.baseTheme).toBe(LEGACY_LIGHT_THEME);
+      expect(result.current.baseTheme).toBe(LIGHT_THEME);
     });
 
     it('should return dark baseTheme when isDarkMode true', () => {
-      (useDarkMode as jest.Mock).mockImplementation(() => true);
+      (useEuiTheme as jest.Mock).mockReturnValue({
+        euiTheme: { themeName: 'borealis' },
+        colorMode: 'DARK',
+      });
       const { result } = renderHook(() => useThemes());
 
-      expect(result.current.baseTheme).toBe(LEGACY_DARK_THEME);
+      expect(result.current.baseTheme).toBe(DARK_THEME);
     });
   });
 });

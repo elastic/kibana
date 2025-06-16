@@ -1,0 +1,26 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/inference-langchain",
+    "@kbn/wc-framework-types-common",
+    "@kbn/logging",
+    "@kbn/utility-types",
+    "@kbn/zod",
+    "@kbn/core",
+  ]
+}

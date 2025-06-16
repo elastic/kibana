@@ -8,23 +8,49 @@ import React, { ComponentType } from 'react';
 import { action } from '@storybook/addon-actions';
 import { createKibanaReactContext, type KibanaServices } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { of } from 'rxjs';
+import {
+  WEB_STORAGE_CLEAR_ACTION,
+  WEB_STORAGE_GET_ITEM_ACTION,
+  WEB_STORAGE_KEY_ACTION,
+  WEB_STORAGE_REMOVE_ITEM_ACTION,
+  WEB_STORAGE_SET_ITEM_ACTION,
+  STORAGE_SET_ACTION,
+  STORAGE_REMOVE_ACTION,
+  STORAGE_CLEAR_ACTION,
+  NOTIFICATIONS_SHOW_ACTION,
+  NOTIFICATIONS_SUCCESS_ACTION,
+  NOTIFICATIONS_WARNING_ACTION,
+  NOTIFICATIONS_DANGER_ACTION,
+  NOTIFICATIONS_ADD_ERROR_ACTION,
+  NOTIFICATIONS_ADD_SUCCESS_ACTION,
+  NOTIFICATIONS_ADD_WARNING_ACTION,
+  NOTIFICATIONS_REMOVE_ACTION,
+  EDIT_DATA_VIEW_ACTION,
+} from '../constants';
 
 const createMockWebStorage = () => ({
-  clear: action('clear'),
-  getItem: action('getItem'),
-  key: action('key'),
-  removeItem: action('removeItem'),
-  setItem: action('setItem'),
+  clear: action(WEB_STORAGE_CLEAR_ACTION),
+  getItem: action(WEB_STORAGE_GET_ITEM_ACTION),
+  key: action(WEB_STORAGE_KEY_ACTION),
+  removeItem: action(WEB_STORAGE_REMOVE_ITEM_ACTION),
+  setItem: action(WEB_STORAGE_SET_ITEM_ACTION),
   length: 0,
 });
 
 const createMockStorage = () => ({
   storage: createMockWebStorage(),
-  set: action('set'),
-  remove: action('remove'),
-  clear: action('clear'),
-  get: () => true,
+  set: action(STORAGE_SET_ACTION),
+  remove: action(STORAGE_REMOVE_ACTION),
+  clear: action(STORAGE_CLEAR_ACTION),
+  get: (name: string) => {
+    if (name === 'typeahead:test-kuery') {
+      return [];
+    }
+
+    return true;
+  },
 });
 
 const uiSettings: Record<string, unknown> = {
@@ -91,6 +117,15 @@ const uiSettings: Record<string, unknown> = {
 };
 
 const services: Partial<KibanaServices> = {
+  appName: 'test',
+  application: applicationServiceMock.createStartContract(),
+  unifiedSearch: {
+    autocomplete: {
+      getQuerySuggestions: () => [],
+      getAutocompleteSettings: () => {},
+      hasQuerySuggestions: () => false,
+    },
+  },
   uiSettings: {
     // @ts-ignore
     get: (key: string) => uiSettings[key],
@@ -101,23 +136,24 @@ const services: Partial<KibanaServices> = {
   settings: { client: { get: () => {} } },
   notifications: {
     toasts: {
-      show: action('notifications:show'),
-      success: action('notifications:success'),
-      warning: action('notifications:warning'),
-      danger: action('notifications:danger'),
+      show: action(NOTIFICATIONS_SHOW_ACTION),
+      success: action(NOTIFICATIONS_SUCCESS_ACTION),
+      warning: action(NOTIFICATIONS_WARNING_ACTION),
+      danger: action(NOTIFICATIONS_DANGER_ACTION),
       // @ts-ignore
-      addError: action('notifications:addError'),
+      addError: action(NOTIFICATIONS_ADD_ERROR_ACTION),
       // @ts-ignore
-      addSuccess: action('notifications:addSuccess'),
+      addSuccess: action(NOTIFICATIONS_ADD_SUCCESS_ACTION),
       // @ts-ignore
-      addWarning: action('notifications:addWarning'),
-      remove: action('notifications:remove'),
+      addWarning: action(NOTIFICATIONS_ADD_WARNING_ACTION),
+      remove: action(NOTIFICATIONS_REMOVE_ACTION),
     },
   },
   storage: createMockStorage(),
   data: {
     query: {
       savedQueries: {
+        getSavedQueryCount: () => 0,
         findSavedQueries: () =>
           Promise.resolve({
             queries: [],
@@ -134,7 +170,7 @@ const services: Partial<KibanaServices> = {
   },
   dataViewEditor: {
     userPermissions: {
-      editDataView: action('editDataView'),
+      editDataView: action(EDIT_DATA_VIEW_ACTION),
     },
   },
 };

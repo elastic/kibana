@@ -14,6 +14,7 @@ import type {
   RuleAction,
   RuleSystemAction,
   RuleActionParam,
+  AlertsFilter,
 } from '@kbn/alerting-types';
 
 export type {
@@ -45,6 +46,7 @@ export type {
   AlertsHealth,
   AlertingFrameworkHealth,
   ResolvedSanitizedRule,
+  Artifacts,
 } from '@kbn/alerting-types';
 
 export {
@@ -69,7 +71,10 @@ export const RuleLastRunOutcomeOrderMap: Record<RuleLastRunOutcomes, number> = {
 
 export type RuleAlertingOutcome = 'failure' | 'success' | 'unknown' | 'warning';
 
-export type RuleActionAlertsFilterProperty = AlertsFilterTimeframe | RuleActionParam;
+export type RuleActionAlertsFilterProperty =
+  | AlertsFilterTimeframe
+  | RuleActionParam
+  | AlertsFilter['query'];
 
 export type RuleActionKey = keyof RuleAction;
 export type RuleSystemActionKey = keyof RuleSystemAction;
@@ -106,4 +111,8 @@ export interface RuleMonitoringLastRunMetrics extends SavedObjectAttributes {
   total_alerts_detected?: number | null;
   total_alerts_created?: number | null;
   gap_duration_s?: number | null;
+  gap_range?: {
+    lte: string;
+    gte: string;
+  } | null;
 }

@@ -13,6 +13,7 @@ export interface ResponseError {
   statusCode: number;
   message: string | Error;
   attributes?: Record<string, any>;
+  error?: string | Error;
 }
 
 // Register helpers to mock HTTP Requests
@@ -59,7 +60,7 @@ const registerHttpRequestMockHelpers = (
     pipelineName: string,
     response?: object,
     error?: ResponseError
-  ) => mockResponse('GET', `${API_BASE_PATH}/${pipelineName}`, response, error);
+  ) => mockResponse('GET', `${API_BASE_PATH}/${encodeURIComponent(pipelineName)}`, response, error);
 
   const setDeletePipelineResponse = (
     pipelineName: string,

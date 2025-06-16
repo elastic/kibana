@@ -38,6 +38,9 @@
     "@kbn/core-usage-data-server-internal",
     "@kbn/core-usage-data-server-mocks",
     "@kbn/core-http-router-server-internal",
+    "@kbn/core-logging-server-internal",
+    "@kbn/core-doc-links-server",
+    "@kbn/core-doc-links-server-mocks",
   ],
   "exclude": [
     "target/**/*",

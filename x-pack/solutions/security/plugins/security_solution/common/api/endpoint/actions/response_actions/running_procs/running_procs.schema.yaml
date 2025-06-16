@@ -22,10 +22,37 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../../../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
+                $ref: '#/components/schemas/GetProcessesRouteResponse'
 
 components:
   schemas:
     GetProcessesRouteRequestBody:
+      example:
+        endpoint_ids:
+          - "ed518850-681a-4d60-bb98-e22640cae2a8"
       allOf:
-        - $ref: '../../../model/schema/common.schema.yaml#/components/schemas/NoParametersRequestSchema'
+        - $ref: '../../../model/schema/common.schema.yaml#/components/schemas/BaseActionSchema'
+    GetProcessesRouteResponse:
+      type: object
+      properties: { }
+      example:
+        data:
+          id: "233db9ea-6733-4849-9226-5a7039c7161d"
+          agents:
+            - "ed518850-681a-4d60-bb98-e22640cae2a8"
+          command: "running-processes"
+          agentType: "endpoint"
+          isExpired: false
+          isCompleted: true
+          wasSuccessful: true
+          errors: [ ]
+          startedAt: "2022-07-29T19:08:49.126Z"
+          completedAt: "2022-07-29T19:09:44.961Z"
+          outputs:
+            ed518850-681a-4d60-bb98-e22640cae2a8:
+              type: "json"
+              content:
+                key: "value"
+          createdBy: "myuser"
+          comment: ""
+          parameters: { }

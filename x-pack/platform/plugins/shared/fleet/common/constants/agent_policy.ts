@@ -28,7 +28,6 @@ export const AGENT_POLICY_DEFAULT_MONITORING_DATASETS = [
   'elastic_agent.auditbeat',
   'elastic_agent.heartbeat',
   'elastic_agent.cloudbeat',
-  'elastic_agent.cloud_defend',
   'elastic_agent.pf_host_agent',
   'elastic_agent.pf_elastic_collector',
   'elastic_agent.pf_elastic_symbolizer',

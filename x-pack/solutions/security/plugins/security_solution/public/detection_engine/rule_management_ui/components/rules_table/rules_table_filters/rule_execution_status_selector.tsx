@@ -6,13 +6,14 @@
  */
 
 import React, { useState } from 'react';
+import { css } from '@emotion/react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
-import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
+import * as i18n from '../../../../common/translations';
 import type { RuleExecutionStatus } from '../../../../../../common/api/detection_engine';
 import { RuleExecutionStatusEnum } from '../../../../../../common/api/detection_engine';
-import { getCapitalizedStatusText } from '../../../../../detections/components/rules/rule_execution_status/utils';
-import { RuleStatusBadge } from '../../../../../detections/components/rules/rule_execution_status/rule_status_badge';
+import { getCapitalizedStatusText } from '../../../../common/components/rule_execution_status/utils';
+import { RuleStatusBadge } from '../../../../common/components/rule_execution_status';
 
 interface OptionData {
   status: RuleExecutionStatus;
@@ -96,7 +97,7 @@ const RuleExecutionStatusSelectorComponent = ({
       repositionOnScroll
     >
       <EuiSelectable
-        aria-label={i18n.RULE_EXECTION_STATUS_FILTER}
+        aria-label={i18n.RULE_EXECUTION_STATUS_FILTER}
         options={selectableOptions}
         onChange={handleSelectableOptionsChange}
         singleSelection
@@ -107,7 +108,7 @@ const RuleExecutionStatusSelectorComponent = ({
           const status = (option as EuiSelectableOption<OptionData>).status;
           return (
             <div
-              css={`
+              css={css`
                 margin-top: 4px; // aligns the badge within the option
               `}
               data-test-subj="executionStatusFilterOption"
@@ -120,7 +121,7 @@ const RuleExecutionStatusSelectorComponent = ({
       >
         {(list) => (
           <div
-            css={`
+            css={css`
               width: 200px;
             `}
           >

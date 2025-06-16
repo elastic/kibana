@@ -10,6 +10,7 @@ IS_TEST_EXECUTION_STEP="$(buildkite-agent meta-data get "${BUILDKITE_JOB_ID}_is_
 
 if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   echo "--- Upload Artifacts"
+  buildkite-agent artifact upload '.scout/reports/scout-playwright-test-failures-*/**/*'
   buildkite-agent artifact upload 'target/junit/**/*'
   buildkite-agent artifact upload 'target/kibana-coverage/jest/**/*'
   buildkite-agent artifact upload 'target/kibana-coverage/functional/**/*'
@@ -24,7 +25,10 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   buildkite-agent artifact upload 'test/**/screenshots/diff/*.png'
   buildkite-agent artifact upload 'test/**/screenshots/failure/*.png'
   buildkite-agent artifact upload 'test/**/screenshots/session/*.png'
-  buildkite-agent artifact upload 'test/functional/failure_debug/html/*.html'
+  buildkite-agent artifact upload 'src/platform/test/**/screenshots/diff/*.png'
+  buildkite-agent artifact upload 'src/platform/test/**/screenshots/failure/*.png'
+  buildkite-agent artifact upload 'src/platform/test/**/screenshots/session/*.png'
+  buildkite-agent artifact upload 'src/platform/test/functional/failure_debug/html/*.html'
   buildkite-agent artifact upload 'x-pack/test/**/screenshots/diff/*.png'
   buildkite-agent artifact upload 'x-pack/test/**/screenshots/failure/*.png'
   buildkite-agent artifact upload 'x-pack/test/**/screenshots/session/*.png'
@@ -51,6 +55,10 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   if [[ -d 'target/test_failures' ]]; then
     buildkite-agent artifact upload 'target/test_failures/**/*'
     ts-node .buildkite/scripts/lifecycle/annotate_test_failures.ts
+  fi
+
+  if [[ -d 'target/agent_diagnostics' ]]; then
+    buildkite-agent artifact upload 'target/agent_diagnostics/**/*'
   fi
 
 fi

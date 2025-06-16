@@ -6,38 +6,93 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
+import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 
+const INGEST_PIPELINE_PREFIX = 'testing-ingest-pipeline';
 const DS_PREFIX = 'testing-datastream';
 const ILM_PREFIX = 'testing-ilm';
 
-export const randomDatastream = async (es: Client, policyName?: string): Promise<string> => {
+export const indexRandomData = async (es: Client, dsName: string, ingestPipeline: string) => {
+  await es.index({
+    index: dsName,
+    pipeline: ingestPipeline,
+    document: {
+      '@timestamp': new Date(),
+      key: `value-${Date.now()}`,
+    },
+  });
+};
+
+export const randomDatastream = async (
+  es: Client,
+  opts: { policyName?: string; defaultPipeline?: string; finalPipeline?: string } = {}
+): Promise<string> => {
   const name = `${DS_PREFIX}-${Date.now()}`;
 
-  let settings = {};
-
-  if (policyName) {
-    settings = {
-      ...settings,
-      'index.lifecycle.name': policyName,
-    };
-  }
-
-  const indexTemplateBody = {
+  const indexTemplateBody: IndicesPutIndexTemplateRequest = {
+    name: DS_PREFIX,
     index_patterns: [`${DS_PREFIX}-*`],
     data_stream: {},
     template: {
-      settings,
+      settings: {
+        index: {
+          mode: 'standard',
+          mapping: {
+            source: {
+              mode: 'stored',
+            },
+          },
+        },
+      },
     },
   };
 
-  await es.indices.putIndexTemplate({
-    name: DS_PREFIX,
-    body: indexTemplateBody,
-  });
+  if (opts.policyName && indexTemplateBody.template?.settings !== undefined) {
+    indexTemplateBody.template.settings.index = {
+      ...indexTemplateBody.template.settings.index,
+      lifecycle: {
+        name: opts.policyName,
+      },
+    };
+  }
+
+  if (opts.defaultPipeline && indexTemplateBody.template?.settings !== undefined) {
+    indexTemplateBody.template.settings.index = {
+      ...indexTemplateBody.template.settings.index,
+      default_pipeline: opts.defaultPipeline,
+    };
+  }
+
+  if (opts.finalPipeline && indexTemplateBody.template?.settings !== undefined) {
+    indexTemplateBody.template.settings.index = {
+      ...indexTemplateBody.template.settings.index,
+      final_pipeline: opts.finalPipeline,
+    };
+  }
+
+  await es.indices.putIndexTemplate(indexTemplateBody);
 
   await es.indices.createDataStream({ name });
 
   return name;
+};
+
+export const randomIngestPipeline = async (es: Client): Promise<string> => {
+  const id = `${INGEST_PIPELINE_PREFIX}-${Date.now()}`;
+
+  await es.ingest.putPipeline({
+    id,
+    processors: [
+      {
+        set: {
+          field: `message-${performance.now()}`,
+          value: `changed-${Date.now()}`,
+        },
+      },
+    ],
+  });
+
+  return id;
 };
 
 export const randomIlmPolicy = async (es: Client): Promise<string> => {
@@ -99,6 +154,10 @@ export const ensureBackingIndices = async (dsName: string, count: number, es: Cl
 
 export const cleanupDatastreams = async (es: Client) => {
   await es.indices.deleteDataStream({ name: `${DS_PREFIX}*` });
+};
+
+export const cleanupIngestPipelines = async (es: Client) => {
+  es.ingest.deletePipeline({ id: `${INGEST_PIPELINE_PREFIX}*` });
 };
 
 export const cleanupPolicies = async (es: Client) => {

@@ -8,11 +8,13 @@ import { useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import datemath from '@kbn/datemath';
 import { useKibana } from '../../common/lib/kibana';
+import type {
+  LoadExecutionLogAggregationsProps,
+  LoadGlobalExecutionLogAggregationsProps,
+} from '../lib/rule_api/load_execution_log_aggregations';
 import {
   loadExecutionLogAggregations,
   loadGlobalExecutionLogAggregations,
-  LoadExecutionLogAggregationsProps,
-  LoadGlobalExecutionLogAggregationsProps,
 } from '../lib/rule_api/load_execution_log_aggregations';
 
 const getParsedDate = (date: string) => {
@@ -61,7 +63,7 @@ export function useLoadRuleEventLogs(props: UseLoadRuleEventLogsProps) {
     retry: 0,
     refetchOnWindowFocus: false,
   });
-  const hasExceedLogs = useMemo(() => error && error.body.statusCode === 413, [error]);
+  const hasExceedLogs = useMemo(() => error && error.body?.statusCode === 413, [error]);
   return useMemo(
     () => ({
       data,

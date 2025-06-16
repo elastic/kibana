@@ -71,8 +71,8 @@ export const runSaveToLibrary = async (
         });
         resolve({
           ...newState,
-          defaultPanelTitle: newTitle,
-          defaultPanelDescription: newDescription,
+          defaultTitle: newTitle,
+          defaultDescription: newDescription,
           savedObjectId: id,
         });
         return { id };

@@ -11,30 +11,28 @@ import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { throttle } from 'lodash';
-import { EuiIconTip, EuiResizeObserver } from '@elastic/eui';
+import { EuiIconTip, EuiResizeObserver, UseEuiTheme } from '@elastic/eui';
 import { IconChartTagcloud } from '@kbn/chart-icons';
 import {
   Chart,
   Settings,
   Wordcloud,
   RenderChangeListener,
-  LEGACY_LIGHT_THEME,
   ElementClickListener,
   WordCloudElementEvent,
 } from '@elastic/charts';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
-import { PaletteRegistry, PaletteOutput, getColorFactory } from '@kbn/coloring';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
+import { PaletteRegistry, PaletteOutput, getColorFactory, ColorHandlingFn } from '@kbn/coloring';
 import { IInterpreterRenderHandlers, DatatableRow } from '@kbn/expressions-plugin/public';
 import { getColorCategories, getOverridesFor } from '@kbn/chart-expressions-common';
 import type { AllowedSettingsOverrides, AllowedChartOverrides } from '@kbn/charts-plugin/common';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { isMultiFieldKey } from '@kbn/data-plugin/common';
 import { KbnPalettes, useKbnPalettes } from '@kbn/palettes';
+import { css } from '@emotion/react';
 import { getFormatService } from '../format_service';
 import { TagcloudRendererConfig } from '../../common/types';
 import { ScaleOptions, Orientation } from '../../common/constants';
-
-import './tag_cloud.scss';
 
 const MAX_TAG_COUNT = 200;
 
@@ -101,6 +99,7 @@ export const TagCloudChart = ({
 }: TagCloudChartProps) => {
   const [warning, setWarning] = useState(false);
   const palettes = useKbnPalettes();
+  const chartBaseTheme = useElasticChartsTheme();
   const { bucket, metric, scale, palette, showLabel, orientation, colorMapping } = visParams;
 
   const bucketFormatter = useMemo(() => {
@@ -129,9 +128,11 @@ export const TagCloudChart = ({
     );
 
     return visData.rows.map((row) => {
-      const tag = tagColumn === undefined ? 'all' : row[tagColumn];
+      const { value: tagValue, tag } =
+        tagColumn === undefined
+          ? { value: undefined, tag: 'all' }
+          : { value: row[tagColumn], tag: row[tagColumn] };
 
-      const category = isMultiFieldKey(tag) ? tag.keys.map(String) : `${tag}`;
       return {
         text: bucketFormatter ? bucketFormatter.convert(tag, 'text') : tag,
         weight:
@@ -139,7 +140,7 @@ export const TagCloudChart = ({
             ? 1
             : calculateWeight(row[metricColumn], minValue, maxValue, 0, 1) || 0,
         color: colorFromMappingFn
-          ? colorFromMappingFn(category)
+          ? colorFromMappingFn(tagValue)
           : getColor(palettesRegistry, palette, tag, values, syncColors) || 'rgba(0,0,0,0)',
       };
     });
@@ -237,11 +238,10 @@ export const TagCloudChart = ({
   return (
     <EuiResizeObserver onResize={updateChart}>
       {(resizeRef) => (
-        <div className="tgcChart__wrapper" ref={resizeRef} data-test-subj="tagCloudVisualization">
+        <div css={tgcChartCss.wrapper} ref={resizeRef} data-test-subj="tagCloudVisualization">
           <Chart size="100%" {...getOverridesFor(overrides, 'chart')}>
             <Settings
-              // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-              baseTheme={LEGACY_LIGHT_THEME}
+              baseTheme={chartBaseTheme}
               onElementClick={handleWordClick}
               onRenderChange={onRenderChange}
               ariaLabel={visParams.ariaLabel}
@@ -269,12 +269,12 @@ export const TagCloudChart = ({
             />
           </Chart>
           {label && showLabel && (
-            <div className="tgcChart__label" data-test-subj="tagCloudLabel">
+            <div css={tgcChartCss.label} data-test-subj="tagCloudLabel">
               {label}
             </div>
           )}
           {!visParams.isPreview && warning && (
-            <div className="tgcChart__warning">
+            <div css={tgcChartCss.warning}>
               <EuiIconTip
                 type="warning"
                 color="warning"
@@ -288,7 +288,7 @@ export const TagCloudChart = ({
             </div>
           )}
           {!visParams.isPreview && tagCloudData.length > MAX_TAG_COUNT && (
-            <div className="tgcChart__warning">
+            <div css={tgcChartCss.warning}>
               <EuiIconTip
                 type="warning"
                 color="warning"
@@ -320,7 +320,7 @@ function getColorFromMappingFactory(
   palettes: KbnPalettes,
   isDarkMode: boolean,
   colorMapping?: string
-): undefined | ((category: string | string[]) => string) {
+): undefined | ColorHandlingFn {
   if (!colorMapping) {
     // return undefined, we will use the legacy color mapping instead
     return undefined;
@@ -330,3 +330,26 @@ function getColorFromMappingFactory(
     categories: getColorCategories(rows, tagColumn),
   });
 }
+
+const tgcChartCss = {
+  wrapper: css({
+    flex: '1 1 0',
+    display: 'flex',
+    flexDirection: 'column',
+    // it is used for rendering at `Canvas`.
+    height: '100%',
+    '& text': {
+      cursor: 'pointer',
+    },
+  }),
+  label: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: '100%',
+      textAlign: 'center',
+      fontWeight: euiTheme.font.weight.bold,
+    }),
+  warning: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: euiTheme.size.base,
+    }),
+};

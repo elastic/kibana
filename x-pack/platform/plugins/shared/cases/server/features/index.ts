@@ -8,8 +8,10 @@
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { getV1 } from './v1';
 import { getV2 } from './v2';
+import { getV3 } from './v3';
 
 export const getCasesKibanaFeatures = (): {
   v1: KibanaFeatureConfig;
   v2: KibanaFeatureConfig;
-} => ({ v1: getV1(), v2: getV2() });
+  v3: KibanaFeatureConfig;
+} => ({ v1: getV1(), v2: getV2(), v3: getV3() });

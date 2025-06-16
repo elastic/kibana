@@ -7,4 +7,5 @@
 
 // TODO: https://github.com/elastic/kibana/issues/110897
 
-export * from './drilldowns';
+export type { DashboardDrilldownConfig } from './drilldowns';
+export { createExtract, createInject, EMBEDDABLE_TO_DASHBOARD_DRILLDOWN } from './drilldowns';

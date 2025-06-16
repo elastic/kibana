@@ -13,5 +13,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...functionalConfig.getAll(),
     testFiles: [require.resolve('.')],
+    esTestCluster: {
+      ...functionalConfig.get('esTestCluster'),
+    },
   };
 }

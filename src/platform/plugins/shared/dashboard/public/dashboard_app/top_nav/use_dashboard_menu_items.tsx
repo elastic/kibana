@@ -13,10 +13,9 @@ import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import useMountedState from 'react-use/lib/useMountedState';
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { UI_SETTINGS } from '../../../common';
+import { UI_SETTINGS } from '../../../common/constants';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
-import { CHANGE_CHECK_DEBOUNCE } from '../../dashboard_constants';
-import { openSettingsFlyout } from '../../dashboard_container/embeddable/api';
+import { openSettingsFlyout } from '../../dashboard_renderer/settings/open_settings_flyout';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { SaveDashboardReturn } from '../../services/dashboard_content_management_service/types';
@@ -44,11 +43,11 @@ export const useDashboardMenuItems = ({
 
   const [dashboardTitle, hasOverlays, hasUnsavedChanges, lastSavedId, viewMode] =
     useBatchedPublishingSubjects(
-      dashboardApi.panelTitle,
+      dashboardApi.title$,
       dashboardApi.hasOverlays$,
       dashboardApi.hasUnsavedChanges$,
-      dashboardApi.savedObjectId,
-      dashboardApi.viewMode
+      dashboardApi.savedObjectId$,
+      dashboardApi.viewMode$
     );
   const disableTopNav = isSaveInProgress || hasOverlays;
 
@@ -56,16 +55,16 @@ export const useDashboardMenuItems = ({
    * Show the Dashboard app's share menu
    */
   const showShare = useCallback(
-    (anchorElement: HTMLElement) => {
+    (anchorElement: HTMLElement, asExport?: boolean) => {
       ShowShareModal({
+        asExport,
         dashboardTitle,
         anchorElement,
         savedObjectId: lastSavedId,
         isDirty: Boolean(hasUnsavedChanges),
-        getPanelsState: () => dashboardApi.panels$.value,
       });
     },
-    [dashboardTitle, hasUnsavedChanges, lastSavedId, dashboardApi]
+    [dashboardTitle, hasUnsavedChanges, lastSavedId]
   );
 
   /**
@@ -73,9 +72,7 @@ export const useDashboardMenuItems = ({
    */
   const quickSaveDashboard = useCallback(() => {
     setIsSaveInProgress(true);
-    dashboardApi
-      .runQuickSave()
-      .then(() => setTimeout(() => setIsSaveInProgress(false), CHANGE_CHECK_DEBOUNCE));
+    dashboardApi.runQuickSave().then(() => setTimeout(() => setIsSaveInProgress(false), 100));
   }, [dashboardApi]);
 
   /**
@@ -193,9 +190,21 @@ export const useDashboardMenuItems = ({
       share: {
         ...topNavStrings.share,
         id: 'share',
+        iconType: 'share',
+        iconOnly: true,
         testId: 'shareTopNavButton',
         disableButton: disableTopNav,
         run: showShare,
+      } as TopNavMenuData,
+
+      export: {
+        ...topNavStrings.export,
+        id: 'export',
+        iconType: 'download',
+        iconOnly: true,
+        testId: 'exportTopNavButton',
+        disableButton: disableTopNav,
+        run: (anchorElement) => showShare(anchorElement, true),
       } as TopNavMenuData,
 
       settings: {
@@ -250,11 +259,21 @@ export const useDashboardMenuItems = ({
    */
   const isLabsEnabled = useMemo(() => coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI), []);
 
+  const hasExportIntegration = Boolean(
+    shareService?.availableIntegrations('dashboard', 'export')?.length
+  );
+
   const viewModeTopNavConfig = useMemo(() => {
     const { showWriteControls } = getDashboardCapabilities();
 
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
-    const shareMenuItem = shareService ? [menuItems.share] : [];
+    const shareMenuItem = shareService
+      ? ([
+          // Only show the export button if the current user meets the requirements for at least one registered export integration
+          hasExportIntegration ? menuItems.export : null,
+          menuItems.share,
+        ].filter(Boolean) as TopNavMenuData[])
+      : [];
     const duplicateMenuItem = showWriteControls ? [menuItems.interactiveSave] : [];
     const editMenuItem = showWriteControls && !dashboardApi.isManaged ? [menuItems.edit] : [];
     const mayberesetChangesMenuItem = showResetChange ? [resetChangesMenuItem] : [];
@@ -262,16 +281,35 @@ export const useDashboardMenuItems = ({
     return [
       ...labsMenuItem,
       menuItems.fullScreen,
-      ...shareMenuItem,
       ...duplicateMenuItem,
       ...mayberesetChangesMenuItem,
+      ...shareMenuItem,
       ...editMenuItem,
     ];
-  }, [isLabsEnabled, menuItems, dashboardApi.isManaged, showResetChange, resetChangesMenuItem]);
+  }, [
+    isLabsEnabled,
+    menuItems.labs,
+    menuItems.export,
+    menuItems.share,
+    menuItems.interactiveSave,
+    menuItems.edit,
+    menuItems.fullScreen,
+    hasExportIntegration,
+    dashboardApi.isManaged,
+    showResetChange,
+    resetChangesMenuItem,
+  ]);
 
   const editModeTopNavConfig = useMemo(() => {
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
-    const shareMenuItem = shareService ? [menuItems.share] : [];
+    const shareMenuItem = shareService
+      ? ([
+          // Only show the export button if the current user meets the requirements for at least one registered export integration
+          hasExportIntegration ? menuItems.export : null,
+          menuItems.share,
+        ].filter(Boolean) as TopNavMenuData[])
+      : [];
+
     const editModeItems: TopNavMenuData[] = [];
 
     if (lastSavedId) {
@@ -285,8 +323,27 @@ export const useDashboardMenuItems = ({
     } else {
       editModeItems.push(menuItems.switchToViewMode, menuItems.interactiveSave);
     }
-    return [...labsMenuItem, menuItems.settings, ...shareMenuItem, ...editModeItems];
-  }, [isLabsEnabled, menuItems, lastSavedId, showResetChange, resetChangesMenuItem]);
+
+    const editModeTopNavConfigItems = [...labsMenuItem, menuItems.settings, ...editModeItems];
+
+    // insert share menu item before the last item in edit mode
+    editModeTopNavConfigItems.splice(-1, 0, ...shareMenuItem);
+
+    return editModeTopNavConfigItems;
+  }, [
+    isLabsEnabled,
+    menuItems.labs,
+    menuItems.export,
+    menuItems.share,
+    menuItems.settings,
+    menuItems.interactiveSave,
+    menuItems.switchToViewMode,
+    menuItems.quickSave,
+    hasExportIntegration,
+    lastSavedId,
+    showResetChange,
+    resetChangesMenuItem,
+  ]);
 
   return { viewModeTopNavConfig, editModeTopNavConfig };
 };

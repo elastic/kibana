@@ -49,29 +49,14 @@ Object {
           "filter": Array [
             Object {
               "bool": Object {
-                "minimum_should_match": 1,
-                "should": Array [
-                  Object {
-                    "match_phrase": Object {
-                      "my.field": "value",
-                    },
-                  },
-                ],
-              },
-            },
-            Object {
-              "bool": Object {
-                "minimum_should_match": 1,
-                "should": Array [
+                "filter": Array [
                   Object {
                     "bool": Object {
                       "minimum_should_match": 1,
                       "should": Array [
                         Object {
-                          "range": Object {
-                            "foo": Object {
-                              "gte": "12",
-                            },
+                          "match_phrase": Object {
+                            "my.field": "value",
                           },
                         },
                       ],
@@ -82,10 +67,31 @@ Object {
                       "minimum_should_match": 1,
                       "should": Array [
                         Object {
-                          "range": Object {
-                            "bar": Object {
-                              "lte": "100",
-                            },
+                          "bool": Object {
+                            "minimum_should_match": 1,
+                            "should": Array [
+                              Object {
+                                "range": Object {
+                                  "foo": Object {
+                                    "gte": "12",
+                                  },
+                                },
+                              },
+                            ],
+                          },
+                        },
+                        Object {
+                          "bool": Object {
+                            "minimum_should_match": 1,
+                            "should": Array [
+                              Object {
+                                "range": Object {
+                                  "bar": Object {
+                                    "lte": "100",
+                                  },
+                                },
+                              },
+                            ],
                           },
                         },
                       ],
@@ -95,6 +101,9 @@ Object {
               },
             },
           ],
+          "must": Array [],
+          "must_not": Array [],
+          "should": Array [],
         },
       },
     ],
@@ -336,12 +345,12 @@ Object {
   "_meta": Object {
     "managed": true,
     "managed_by": "observability",
-    "version": 3.3,
+    "version": 3.5,
   },
   "defer_validation": true,
   "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
   "dest": Object {
-    "index": ".slo-observability.sli-v3.3",
+    "index": ".slo-observability.sli-v3.5",
     "pipeline": ".slo-observability.sli.pipeline-irrelevant-1",
   },
   "frequency": "1m",
@@ -471,12 +480,12 @@ Object {
   "_meta": Object {
     "managed": true,
     "managed_by": "observability",
-    "version": 3.3,
+    "version": 3.5,
   },
   "defer_validation": true,
   "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
   "dest": Object {
-    "index": ".slo-observability.sli-v3.3",
+    "index": ".slo-observability.sli-v3.5",
     "pipeline": ".slo-observability.sli.pipeline-irrelevant-1",
   },
   "frequency": "1m",
@@ -606,12 +615,12 @@ Object {
   "_meta": Object {
     "managed": true,
     "managed_by": "observability",
-    "version": 3.3,
+    "version": 3.5,
   },
   "defer_validation": true,
   "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
   "dest": Object {
-    "index": ".slo-observability.sli-v3.3",
+    "index": ".slo-observability.sli-v3.5",
     "pipeline": ".slo-observability.sli.pipeline-irrelevant-1",
   },
   "frequency": "1m",

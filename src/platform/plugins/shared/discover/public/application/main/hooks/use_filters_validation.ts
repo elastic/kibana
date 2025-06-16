@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IToasts, ToastsStart } from '@kbn/core/public';
-import { FilterManager } from '@kbn/data-plugin/public';
+import type { IToasts, ToastsStart } from '@kbn/core/public';
+import type { FilterManager } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { useEffect } from 'react';
 import { debounceTime } from 'rxjs';
 

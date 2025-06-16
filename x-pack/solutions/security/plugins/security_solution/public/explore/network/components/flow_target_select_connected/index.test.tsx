@@ -5,30 +5,39 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
+import { render } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
 import { TestProviders } from '../../../../common/mock';
 import { FlowTargetSelectConnectedComponent } from '.';
 import { FlowTarget } from '../../../../../common/search_strategy';
+import { FlowTargetSelect } from '../flow_controls/flow_target_select';
+
+jest.mock('../flow_controls/flow_target_select', () => ({
+  ...jest.requireActual('../flow_controls/flow_target_select'),
+  FlowTargetSelect: jest.fn(() => <div data-test-subj="flow-target-select-mock" />),
+}));
+
+const FlowTargetSelectMocked = FlowTargetSelect as jest.MockedFunction<typeof FlowTargetSelect>;
 
 describe('Flow Target Select Connected', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   test('renders correctly against snapshot flowTarget source', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <MemoryRouter>
           <FlowTargetSelectConnectedComponent flowTarget={FlowTarget.source} />
         </MemoryRouter>
       </TestProviders>
     );
-    expect(wrapper.find('Memo(FlowTargetSelectComponent)').prop('selectedTarget')).toEqual(
-      FlowTarget.source
-    );
+    expect(FlowTargetSelectMocked.mock.calls[0][0].selectedTarget).toEqual(FlowTarget.source);
   });
 
   test('renders correctly against snapshot flowTarget destination', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <MemoryRouter>
           <FlowTargetSelectConnectedComponent flowTarget={FlowTarget.destination} />
@@ -36,8 +45,6 @@ describe('Flow Target Select Connected', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('Memo(FlowTargetSelectComponent)').prop('selectedTarget')).toEqual(
-      FlowTarget.destination
-    );
+    expect(FlowTargetSelectMocked.mock.calls[0][0].selectedTarget).toEqual(FlowTarget.destination);
   });
 });

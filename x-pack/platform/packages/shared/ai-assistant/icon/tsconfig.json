@@ -18,6 +18,6 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/shared-ux-utility",
+    "@kbn/i18n",
   ]
 }

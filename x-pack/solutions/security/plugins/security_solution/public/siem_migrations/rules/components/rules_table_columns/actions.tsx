@@ -6,26 +6,25 @@
  */
 
 import React from 'react';
-import { EuiLink } from '@elastic/eui';
+import { EuiHorizontalRule, EuiLink, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import {
   RuleTranslationResult,
   SiemMigrationStatus,
 } from '../../../../../common/siem_migrations/constants';
 import { getRuleDetailsUrl } from '../../../../common/components/link_to';
-import { useKibana } from '../../../../common/lib/kibana';
-import { APP_UI_ID, SecurityPageName } from '../../../../../common';
-import {
-  RuleMigrationStatusEnum,
-  type RuleMigration,
-} from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { SecurityPageName } from '../../../../../common';
+import { type RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 import { type TableColumn } from './constants';
+import { TableHeader } from './header';
 
 interface ActionNameProps {
   disableActions?: boolean;
-  migrationRule: RuleMigration;
-  openMigrationRuleDetails: (migrationRule: RuleMigration) => void;
-  installMigrationRule: (migrationRule: RuleMigration, enable?: boolean) => void;
+  migrationRule: RuleMigrationRule;
+  openMigrationRuleDetails: (migrationRule: RuleMigrationRule) => void;
+  installMigrationRule: (migrationRule: RuleMigrationRule, enable?: boolean) => void;
 }
 
 const ActionName = ({
@@ -34,33 +33,25 @@ const ActionName = ({
   openMigrationRuleDetails,
   installMigrationRule,
 }: ActionNameProps) => {
-  const { navigateToApp } = useKibana().services.application;
+  // Failed
+  if (migrationRule.status === SiemMigrationStatus.FAILED) {
+    return null;
+  }
+
+  // Installed
   if (migrationRule.elastic_rule?.id) {
-    const ruleId = migrationRule.elastic_rule.id;
     return (
-      <EuiLink
-        disabled={disableActions}
-        onClick={() => {
-          navigateToApp(APP_UI_ID, {
-            deepLinkId: SecurityPageName.rules,
-            path: getRuleDetailsUrl(ruleId),
-          });
-        }}
+      <SecuritySolutionLinkAnchor
+        deepLinkId={SecurityPageName.rules}
+        path={getRuleDetailsUrl(migrationRule.elastic_rule.id)}
         data-test-subj="viewRule"
       >
         {i18n.ACTIONS_VIEW_LABEL}
-      </EuiLink>
+      </SecuritySolutionLinkAnchor>
     );
   }
 
-  if (migrationRule.status === SiemMigrationStatus.FAILED) {
-    return (
-      <EuiLink disabled={disableActions} onClick={() => {}} data-test-subj="restartRule">
-        {i18n.ACTIONS_RESTART_LABEL}
-      </EuiLink>
-    );
-  }
-
+  // Installable
   if (migrationRule.translation_result === RuleTranslationResult.FULL) {
     return (
       <EuiLink
@@ -75,6 +66,7 @@ const ActionName = ({
     );
   }
 
+  // Partially translated or untranslated
   return (
     <EuiLink
       disabled={disableActions}
@@ -90,8 +82,8 @@ const ActionName = ({
 
 interface CreateActionsColumnProps {
   disableActions?: boolean;
-  openMigrationRuleDetails: (migrationRule: RuleMigration) => void;
-  installMigrationRule: (migrationRule: RuleMigration, enable?: boolean) => void;
+  openMigrationRuleDetails: (migrationRule: RuleMigrationRule) => void;
+  installMigrationRule: (migrationRule: RuleMigrationRule, enable?: boolean) => void;
 }
 
 export const createActionsColumn = ({
@@ -101,9 +93,36 @@ export const createActionsColumn = ({
 }: CreateActionsColumnProps): TableColumn => {
   return {
     field: 'elastic_rule',
-    name: i18n.COLUMN_ACTIONS,
-    render: (_, rule: RuleMigration) => {
-      return rule.status === RuleMigrationStatusEnum.failed ? null : (
+    name: (
+      <TableHeader
+        title={i18n.COLUMN_ACTIONS}
+        tooltipContent={
+          <FormattedMessage
+            id="xpack.securitySolution.siemMigrations.rules.tableColumn.actionsTooltip"
+            defaultMessage="{title}
+            {view} - go to rule installed in the Detection rule (SIEM) page. {lineBreak}
+            {install} - add rule to your Detection rule (SEIM) without enabling. {lineBreak}
+            {edit} - Open detail view when a rule has not been fully translated."
+            values={{
+              lineBreak: <br />,
+              title: (
+                <EuiText size="s">
+                  <p>
+                    <b>{i18n.COLUMN_ACTIONS}</b>
+                    <EuiHorizontalRule margin="s" />
+                  </p>
+                </EuiText>
+              ),
+              view: <b>{i18n.ACTIONS_VIEW_LABEL}</b>,
+              install: <b>{i18n.ACTIONS_INSTALL_LABEL}</b>,
+              edit: <b>{i18n.ACTIONS_EDIT_LABEL}</b>,
+            }}
+          />
+        }
+      />
+    ),
+    render: (_, rule: RuleMigrationRule) => {
+      return (
         <ActionName
           disableActions={disableActions}
           migrationRule={rule}

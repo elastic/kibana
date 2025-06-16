@@ -106,45 +106,41 @@ export async function getTopDependencyOperations({
     apm: {
       events: [getProcessorEventForServiceDestinationStatistics(searchServiceDestinationMetrics)],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...rangeQuery(startWithOffset, endWithOffset),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            ...termQuery(SPAN_DESTINATION_SERVICE_RESOURCE, dependencyName),
-            ...getDocumentTypeFilterForServiceDestinationStatistics(
-              searchServiceDestinationMetrics
-            ),
-          ],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...rangeQuery(startWithOffset, endWithOffset),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+          ...termQuery(SPAN_DESTINATION_SERVICE_RESOURCE, dependencyName),
+          ...getDocumentTypeFilterForServiceDestinationStatistics(searchServiceDestinationMetrics),
+        ],
       },
-      aggs: {
-        operationName: {
-          terms: {
-            field: SPAN_NAME,
-            size: MAX_NUM_OPERATIONS,
-          },
-          aggs: {
-            over_time: {
-              date_histogram: {
-                field: '@timestamp',
-                fixed_interval: intervalString,
-                min_doc_count: 0,
-                extended_bounds: {
-                  min: startWithOffset,
-                  max: endWithOffset,
-                },
+    },
+    aggs: {
+      operationName: {
+        terms: {
+          field: SPAN_NAME,
+          size: MAX_NUM_OPERATIONS,
+        },
+        aggs: {
+          over_time: {
+            date_histogram: {
+              field: '@timestamp',
+              fixed_interval: intervalString,
+              min_doc_count: 0,
+              extended_bounds: {
+                min: startWithOffset,
+                max: endWithOffset,
               },
-              aggs,
             },
-            ...aggs,
-            total_time: {
-              sum: { field },
-            },
+            aggs,
+          },
+          ...aggs,
+          total_time: {
+            sum: { field },
           },
         },
       },

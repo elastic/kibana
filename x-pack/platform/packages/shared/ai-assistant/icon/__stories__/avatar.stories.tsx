@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 
 import { AssistantAvatar as Component } from '../avatar';
 
@@ -29,6 +29,6 @@ export default {
       defaultValue: 'Elastic Assistant',
     },
   },
-} as ComponentMeta<typeof Component>;
+} as Meta<typeof Component>;
 
-export const Avatar: ComponentStory<typeof Component> = (args) => <Component {...args} />;
+export const Avatar: StoryFn<typeof Component> = (args) => <Component {...args} />;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState } from 'react';
+import React, { memo, useState, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -21,13 +21,16 @@ import {
   EuiCallOut,
   EuiSpacer,
   EuiSelect,
+  type EuiComboBoxOptionOption,
+  EuiIconTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
-
 import styled from 'styled-components';
 
+import { NamespaceComboBox } from '../../../../../../../components/namespace_combo_box';
 import type { PackageInfo, NewPackagePolicy, RegistryVarsEntry } from '../../../../../types';
 import { Loading } from '../../../../../components';
-import { useStartServices } from '../../../../../hooks';
+import { useGetEpmDatastreams, useStartServices } from '../../../../../hooks';
 
 import { isAdvancedVar } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
@@ -88,7 +91,47 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       isLoading: isOutputsLoading,
       canUseOutputPerIntegration,
       allowedOutputs,
-    } = useOutputs(packageInfo.name);
+    } = useOutputs(packagePolicy, packageInfo.name);
+
+    const { data: epmDatastreamsRes } = useGetEpmDatastreams();
+
+    const datastreamsOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(
+      () =>
+        epmDatastreamsRes?.items?.map((item) => ({
+          label: item.name,
+          value: item.name,
+        })) ?? [],
+      [epmDatastreamsRes]
+    );
+
+    const selectedDatastreamOptions = useMemo<EuiComboBoxOptionOption[]>(
+      () =>
+        packagePolicy?.additional_datastreams_permissions?.map((item) => ({
+          label: item,
+          value: item,
+        })) ?? [],
+      [packagePolicy?.additional_datastreams_permissions]
+    );
+
+    // Reset output if switching to agentless and the current
+    // selected output is not allowed
+    useEffect(() => {
+      if (packagePolicy.supports_agentless && packagePolicy.output_id) {
+        const currentOutput = allowedOutputs.find((o) => o.id === packagePolicy.output_id);
+        if (!currentOutput) {
+          updatePackagePolicy({
+            output_id: null,
+          });
+        }
+      }
+    }, [
+      packagePolicy.supports_agentless,
+      packagePolicy.output_id,
+      allowedOutputs,
+      updatePackagePolicy,
+    ]);
+
+    const advancedOptionsTitleId = useGeneratedHtmlId();
 
     // Managed policy
     const isManaged = packagePolicy.is_managed;
@@ -229,11 +272,14 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                       iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
                       onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
                       flush="left"
+                      aria-expanded={isShowingAdvanced}
                     >
-                      <FormattedMessage
-                        id="xpack.fleet.createPackagePolicy.stepConfigure.advancedOptionsToggleLinkText"
-                        defaultMessage="Advanced options"
-                      />
+                      <span id={advancedOptionsTitleId}>
+                        <FormattedMessage
+                          id="xpack.fleet.createPackagePolicy.stepConfigure.advancedOptionsToggleLinkText"
+                          defaultMessage="Advanced options"
+                        />
+                      </span>
                     </EuiButtonEmpty>
                   </EuiFlexItem>
                   {!isShowingAdvanced && !!validationResults.namespace ? (
@@ -254,66 +300,28 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
             {/* Advanced options content */}
             {isShowingAdvanced ? (
               <EuiFlexItem>
-                <EuiFlexGroup direction="column" gutterSize="m">
+                <EuiFlexGroup
+                  direction="column"
+                  gutterSize="m"
+                  role="group"
+                  aria-labelledby={advancedOptionsTitleId}
+                >
                   {/* Namespace  */}
                   <EuiFlexItem>
-                    <EuiFormRow
-                      isInvalid={!!validationResults.namespace}
-                      error={validationResults.namespace}
-                      label={
-                        <FormattedMessage
-                          id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceInputLabel"
-                          defaultMessage="Namespace"
-                        />
-                      }
-                      helpText={
-                        isEditPage && packageInfo.type === 'input' ? (
-                          <FormattedMessage
-                            id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyInputOnlyEditNamespaceHelpLabel"
-                            defaultMessage="The namespace cannot be changed for this integration. Create a new integration policy to use a different namespace."
-                          />
-                        ) : (
-                          <FormattedMessage
-                            id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLabel"
-                            defaultMessage="Change the default namespace inherited from the parent agent policy. This setting changes the name of the integration's data stream. {learnMore}."
-                            values={{
-                              learnMore: (
-                                <EuiLink
-                                  href={docLinks.links.fleet.datastreamsNamingScheme}
-                                  target="_blank"
-                                >
-                                  {i18n.translate(
-                                    'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLearnMoreLabel',
-                                    { defaultMessage: 'Learn more' }
-                                  )}
-                                </EuiLink>
-                              ),
-                            }}
-                          />
-                        )
-                      }
-                    >
-                      <EuiComboBox
-                        data-test-subj="packagePolicyNamespaceInput"
-                        noSuggestions
-                        placeholder={namespacePlaceholder}
-                        isDisabled={isEditPage && packageInfo.type === 'input'}
-                        singleSelection={true}
-                        selectedOptions={
-                          packagePolicy.namespace ? [{ label: packagePolicy.namespace }] : []
-                        }
-                        onCreateOption={(newNamespace: string) => {
-                          updatePackagePolicy({
-                            namespace: newNamespace,
-                          });
-                        }}
-                        onChange={(newNamespaces: Array<{ label: string }>) => {
-                          updatePackagePolicy({
-                            namespace: newNamespaces.length ? newNamespaces[0].label : '',
-                          });
-                        }}
-                      />
-                    </EuiFormRow>
+                    <NamespaceComboBox
+                      namespace={packagePolicy.namespace || ''}
+                      placeholder={namespacePlaceholder}
+                      isEditPage={isEditPage}
+                      packageType={packageInfo.type}
+                      validationError={validationResults.namespace}
+                      docLinks={docLinks}
+                      onNamespaceChange={(newNamespace: string) => {
+                        updatePackagePolicy({
+                          namespace: newNamespace,
+                        });
+                      }}
+                      data-test-subj="packagePolicyNamespaceInput"
+                    />
                   </EuiFlexItem>
 
                   {/* Output */}
@@ -384,6 +392,55 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                       }
                     >
                       <div />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiFormRow
+                      isInvalid={validationResults?.additional_datastreams_permissions !== null}
+                      error={validationResults?.additional_datastreams_permissions ?? []}
+                      label={
+                        <FormattedMessage
+                          id="xpack.fleet.createPackagePolicy.stepConfigure.additionalPermissionsLabel"
+                          defaultMessage="Add a reroute processor permission {tooltip}"
+                          values={{
+                            tooltip: (
+                              <EuiIconTip
+                                content={
+                                  <FormattedMessage
+                                    id="xpack.fleet.createPackagePolicy.stepConfigure.additionalPermissionsToolTip"
+                                    defaultMessage="Use the reroute processor to redirect data flows to another target index or data stream."
+                                  />
+                                }
+                                position="right"
+                              />
+                            ),
+                          }}
+                        />
+                      }
+                    >
+                      <EuiComboBox
+                        selectedOptions={selectedDatastreamOptions}
+                        options={datastreamsOptions}
+                        onChange={(val) => {
+                          updatePackagePolicy({
+                            additional_datastreams_permissions: val.map((v) => v.label),
+                          });
+                        }}
+                        onCreateOption={(option) => {
+                          const additionalPermissions =
+                            packagePolicy.additional_datastreams_permissions ?? [];
+
+                          updatePackagePolicy({
+                            additional_datastreams_permissions: [...additionalPermissions, option],
+                          });
+                        }}
+                        placeholder={i18n.translate(
+                          'xpack.fleet.createPackagePolicy.stepConfigure.additionalPermissionsPlaceholder',
+                          {
+                            defaultMessage: 'Add a permission',
+                          }
+                        )}
+                      />
                     </EuiFormRow>
                   </EuiFlexItem>
                   {/* Advanced vars */}

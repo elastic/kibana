@@ -7,42 +7,50 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
+import { DEFAULT_CONTROLS } from '@kbn/alerts-ui-shared/src/alert_filter_controls/constants';
+import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import type { BoolQuery } from '@kbn/es-query';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-import { useKibana } from '../../utils/kibana_react';
-import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useFetchRule } from '../../hooks/use_fetch_rule';
-import { useFetchRuleTypes } from '../../hooks/use_fetch_rule_types';
-import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
-import { PageTitleContent } from './components/page_title_content';
-import { DeleteConfirmationModal } from './components/delete_confirmation_modal';
-import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
-import { NoRuleFoundPanel } from './components/no_rule_found_panel';
-import { HeaderActions } from './components/header_actions';
-import { RuleDetailsTabs } from './components/rule_details_tabs';
-import { getHealthColor } from './helpers/get_health_color';
-import { isRuleEditable } from './helpers/is_rule_editable';
+import { ALERT_STATUS } from '@kbn/rule-data-utils';
 import { ruleDetailsLocatorID } from '../../../common';
 import {
   ALERT_STATUS_ALL,
   OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
   observabilityAlertFeatureIds,
 } from '../../../common/constants';
+import { paths, relativePaths } from '../../../common/locators/paths';
+import type { AlertStatus } from '../../../common/typings';
+import { RuleDetailsLocatorParams } from '../../locators/rule_details';
+import { getControlIndex } from '../../utils/alert_controls/get_control_index';
+import { updateSelectedOptions } from '../../utils/alert_controls/update_selected_options';
+import { setStatusOnControlConfigs } from '../../utils/alert_controls/set_status_on_control_configs';
+import { useKibana } from '../../utils/kibana_react';
+import { usePluginContext } from '../../hooks/use_plugin_context';
+import { useFetchRule } from '../../hooks/use_fetch_rule';
+import { useFetchRuleTypes } from '../../hooks/use_fetch_rule_types';
+import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
+import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
+import {
+  defaultTimeRange,
+  getDefaultAlertSummaryTimeRange,
+} from '../../utils/alert_summary_widget';
+import { PageTitleContent } from './components/page_title_content';
+import { DeleteConfirmationModal } from './components/delete_confirmation_modal';
+import { NoRuleFoundPanel } from './components/no_rule_found_panel';
+import { HeaderActions } from './components/header_actions';
+import { RuleDetailsTabs } from './components/rule_details_tabs';
+import { getHealthColor } from './helpers/get_health_color';
+import { isRuleEditable } from './helpers/is_rule_editable';
+import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import {
   RULE_DETAILS_EXECUTION_TAB,
   RULE_DETAILS_ALERTS_TAB,
   RULE_DETAILS_TAB_URL_STORAGE_KEY,
 } from './constants';
-import { paths } from '../../../common/locators/paths';
-import {
-  defaultTimeRange,
-  getDefaultAlertSummaryTimeRange,
-} from '../../utils/alert_summary_widget';
-import type { AlertStatus } from '../../../common/typings';
-import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 
 export type TabId = typeof RULE_DETAILS_ALERTS_TAB | typeof RULE_DETAILS_EXECUTION_TAB;
 
@@ -50,8 +58,9 @@ interface RuleDetailsPathParams {
   ruleId: string;
 }
 export function RuleDetailsPage() {
+  const { services } = useKibana();
   const {
-    application: { capabilities, navigateToUrl },
+    application: { capabilities, navigateToUrl, navigateToApp },
     http: { basePath },
     share: {
       url: { locators },
@@ -60,12 +69,11 @@ export function RuleDetailsPage() {
       actionTypeRegistry,
       ruleTypeRegistry,
       getAlertSummaryWidget: AlertSummaryWidget,
-      getEditRuleFlyout: EditRuleFlyout,
       getRuleDefinition: RuleDefinition,
       getRuleStatusPanel: RuleStatusPanel,
     },
     serverless,
-  } = useKibana().services;
+  } = services;
   const { ObservabilityPageTemplate } = usePluginContext();
 
   const { ruleId } = useParams<RuleDetailsPathParams>();
@@ -98,6 +106,7 @@ export function RuleDetailsPage() {
     { serverless }
   );
 
+  const [controlApi, setControlApi] = useState<FilterGroupHandler | undefined>();
   const [activeTabId, setActiveTabId] = useState<TabId>(() => {
     const searchParams = new URLSearchParams(search);
     const urlTabId = searchParams.get(RULE_DETAILS_TAB_URL_STORAGE_KEY);
@@ -127,7 +136,7 @@ export function RuleDetailsPage() {
   const handleSetTabId = async (tabId: TabId) => {
     setActiveTabId(tabId);
 
-    await locators.get(ruleDetailsLocatorID)?.navigate(
+    await locators.get<RuleDetailsLocatorParams>(ruleDetailsLocatorID)?.navigate(
       {
         ruleId,
         tabId,
@@ -140,13 +149,19 @@ export function RuleDetailsPage() {
 
   const handleAlertSummaryWidgetClick = async (status: AlertStatus = ALERT_STATUS_ALL) => {
     setAlertSummaryWidgetTimeRange(getDefaultAlertSummaryTimeRange());
+    const searchParams = new URLSearchParams(search);
+    let controlConfigs: any = searchParams.get('controlConfigs') ?? DEFAULT_CONTROLS;
 
-    await locators.get(ruleDetailsLocatorID)?.navigate(
+    const statusControlIndex = getControlIndex(ALERT_STATUS, controlConfigs);
+    controlConfigs = setStatusOnControlConfigs(status, controlConfigs);
+    updateSelectedOptions(status, statusControlIndex, controlApi);
+
+    await locators.get<RuleDetailsLocatorParams>(ruleDetailsLocatorID)?.navigate(
       {
+        controlConfigs,
         rangeFrom: defaultTimeRange.from,
         rangeTo: defaultTimeRange.to,
         ruleId,
-        status,
         tabId: RULE_DETAILS_ALERTS_TAB,
       },
       {
@@ -160,7 +175,15 @@ export function RuleDetailsPage() {
   };
 
   const handleEditRule = () => {
-    setEditRuleFlyoutVisible(true);
+    if (rule) {
+      navigateToApp('observability', {
+        path: relativePaths.observability.editRule(rule.id),
+        state: {
+          returnApp: 'observability',
+          returnPath: relativePaths.observability.ruleDetails(rule.id),
+        },
+      });
+    }
   };
 
   const handleCloseRuleFlyout = () => {
@@ -205,19 +228,22 @@ export function RuleDetailsPage() {
         },
         children: <PageTitleContent rule={rule} />,
         bottomBorder: false,
-        rightSideItems: [
-          <HeaderActions
-            isLoading={isLoading || isRuleDeleting}
-            isRuleEditable={isEditable}
-            onEditRule={handleEditRule}
-            onDeleteRule={handleDeleteRule}
-          />,
-        ],
+        rightSideItems: ruleId
+          ? [
+              <HeaderActions
+                ruleId={ruleId}
+                isLoading={isLoading || isRuleDeleting}
+                isRuleEditable={isEditable}
+                onEditRule={handleEditRule}
+                onDeleteRule={handleDeleteRule}
+              />,
+            ]
+          : [],
       }}
     >
       <HeaderMenu />
-      <EuiFlexGroup wrap gutterSize="m">
-        <EuiFlexItem style={{ minWidth: 350 }}>
+      <EuiFlexGroup wrap gutterSize="m" data-test-subj={`ruleType_${rule.ruleTypeId}`}>
+        <EuiFlexItem css={{ minWidth: 350 }}>
           <RuleStatusPanel
             rule={rule}
             isEditable={isEditable}
@@ -227,7 +253,7 @@ export function RuleDetailsPage() {
           />
         </EuiFlexItem>
 
-        <EuiFlexItem style={{ minWidth: 350 }}>
+        <EuiFlexItem css={{ minWidth: 350 }}>
           <AlertSummaryWidget
             ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
             consumers={observabilityAlertFeatureIds}
@@ -245,6 +271,7 @@ export function RuleDetailsPage() {
           actionTypeRegistry={actionTypeRegistry}
           rule={rule}
           ruleTypeRegistry={ruleTypeRegistry}
+          navigateToEditRuleForm={handleEditRule}
           onEditRule={async () => {
             refetch();
           }}
@@ -264,13 +291,17 @@ export function RuleDetailsPage() {
         activeTabId={activeTabId}
         onEsQueryChange={setEsQuery}
         onSetTabId={handleSetTabId}
+        onControlApiAvailable={setControlApi}
+        controlApi={controlApi}
       />
 
       {isEditRuleFlyoutVisible && (
-        <EditRuleFlyout
-          initialRule={rule}
-          onClose={handleCloseRuleFlyout}
-          onSave={async () => {
+        <RuleFormFlyout
+          plugins={{ ...services, actionTypeRegistry, ruleTypeRegistry }}
+          id={rule.id}
+          onCancel={handleCloseRuleFlyout}
+          onSubmit={() => {
+            handleCloseRuleFlyout();
             refetch();
           }}
         />

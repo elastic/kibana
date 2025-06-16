@@ -6,14 +6,20 @@
  */
 
 import { adHocRunStatus } from '../../../../common/constants';
-import { RuleDomain } from '../../rule/types';
-import { ScheduleBackfillParam } from '../methods/schedule/types';
+import type { RuleDomain } from '../../rule/types';
+import type { ScheduleBackfillParam } from '../methods/schedule/types';
 import { transformBackfillParamToAdHocRun } from './transform_backfill_param_to_ad_hoc_run';
 
 function getMockData(overwrites: Record<string, unknown> = {}): ScheduleBackfillParam {
   return {
     ruleId: '1',
-    start: '2023-11-16T08:00:00.000Z',
+    ranges: [
+      {
+        start: '2023-11-16T08:00:00.000Z',
+        end: '2023-11-16T20:00:00.000Z',
+      },
+    ],
+    runActions: true,
     ...overwrites,
   };
 }
@@ -62,19 +68,19 @@ describe('transformBackfillParamToAdHocRun', () => {
     jest.resetAllMocks();
   });
 
-  test('should transform backfill param with start', () => {
-    expect(transformBackfillParamToAdHocRun(getMockData(), getMockRule(), 'default')).toEqual({
+  test('should transform backfill param with start and end', () => {
+    expect(transformBackfillParamToAdHocRun(getMockData(), getMockRule(), [], 'default')).toEqual({
       apiKeyId: '123',
       apiKeyToUse: 'MTIzOmFiYw==',
       createdAt: '2024-01-30T00:00:00.000Z',
       duration: '12h',
       enabled: true,
-      // injects end parameter
       end: '2023-11-16T20:00:00.000Z',
       rule: {
         name: 'my rule name',
         tags: ['foo'],
         alertTypeId: 'myType',
+        actions: [],
         params: {},
         apiKeyOwner: 'user',
         apiKeyCreatedByUser: false,
@@ -102,24 +108,25 @@ describe('transformBackfillParamToAdHocRun', () => {
     });
   });
 
-  test('should transform backfill param with start and end', () => {
+  test('should transform backfill param with rule actions', () => {
+    const actions = [
+      { uuid: '123abc', group: 'default', actionRef: 'action_0', actionTypeId: 'test', params: {} },
+    ];
     expect(
-      transformBackfillParamToAdHocRun(
-        getMockData({ end: '2023-11-17T08:00:00.000Z' }),
-        getMockRule(),
-        'default'
-      )
+      transformBackfillParamToAdHocRun(getMockData(), getMockRule(), actions, 'default')
     ).toEqual({
       apiKeyId: '123',
       apiKeyToUse: 'MTIzOmFiYw==',
       createdAt: '2024-01-30T00:00:00.000Z',
       duration: '12h',
       enabled: true,
-      end: '2023-11-17T08:00:00.000Z',
+      // injects end parameter
+      end: '2023-11-16T20:00:00.000Z',
       rule: {
         name: 'my rule name',
         tags: ['foo'],
         alertTypeId: 'myType',
+        actions,
         params: {},
         apiKeyOwner: 'user',
         apiKeyCreatedByUser: false,
@@ -143,8 +150,54 @@ describe('transformBackfillParamToAdHocRun', () => {
           interval: '12h',
           status: adHocRunStatus.PENDING,
         },
+      ],
+    });
+  });
+
+  test('should omit rule actions when runActions=false', () => {
+    const actions = [
+      { uuid: '123abc', group: 'default', actionRef: 'action_0', actionTypeId: 'test', params: {} },
+    ];
+    expect(
+      transformBackfillParamToAdHocRun(
+        getMockData({ runActions: false }),
+        getMockRule(),
+        actions,
+        'default'
+      )
+    ).toEqual({
+      apiKeyId: '123',
+      apiKeyToUse: 'MTIzOmFiYw==',
+      createdAt: '2024-01-30T00:00:00.000Z',
+      duration: '12h',
+      enabled: true,
+      // injects end parameter
+      end: '2023-11-16T20:00:00.000Z',
+      rule: {
+        name: 'my rule name',
+        tags: ['foo'],
+        alertTypeId: 'myType',
+        actions: [],
+        params: {},
+        apiKeyOwner: 'user',
+        apiKeyCreatedByUser: false,
+        consumer: 'myApp',
+        enabled: true,
+        schedule: {
+          interval: '12h',
+        },
+        createdBy: 'user',
+        updatedBy: 'user',
+        createdAt: '2019-02-12T21:01:22.479Z',
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        revision: 0,
+      },
+      spaceId: 'default',
+      start: '2023-11-16T08:00:00.000Z',
+      status: adHocRunStatus.PENDING,
+      schedule: [
         {
-          runAt: '2023-11-17T08:00:00.000Z',
+          runAt: '2023-11-16T20:00:00.000Z',
           interval: '12h',
           status: adHocRunStatus.PENDING,
         },

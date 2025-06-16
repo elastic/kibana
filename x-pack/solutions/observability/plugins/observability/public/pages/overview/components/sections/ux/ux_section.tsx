@@ -11,6 +11,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AllSeries } from '@kbn/exploratory-view-plugin/public';
 import { SERVICE_NAME, TRANSACTION_DURATION } from '@kbn/observability-shared-plugin/common';
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
+import { EuiSpacer } from '@elastic/eui';
 import { UX_APP } from '../../../../../context/constants';
 import { ObservabilityPublicPluginsStart } from '../../../../..';
 import { SectionContainer } from '../section_container';
@@ -65,6 +66,7 @@ export function UXSection({ bucketSize }: Props) {
     },
     // `forceUpdate` and `lastUpdated` should trigger a reload
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       bucketSize,
       relativeStart,
@@ -107,10 +109,11 @@ export function UXSection({ bucketSize }: Props) {
         />
       </div>
 
+      <EuiSpacer size="xl" />
       <CoreVitals
         data={coreWebVitals}
         loading={isLoading}
-        displayServiceName={true}
+        displayServiceName
         serviceName={serviceName}
       />
     </SectionContainer>

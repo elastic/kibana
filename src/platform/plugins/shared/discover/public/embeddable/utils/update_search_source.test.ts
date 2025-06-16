@@ -13,8 +13,8 @@ import {
   dataViewMock,
   shallowMockedFields,
 } from '@kbn/discover-utils/src/__mocks__';
-import { RangeFilter } from '@kbn/es-query';
-import { FetchContext } from '@kbn/presentation-publishing';
+import type { RangeFilter } from '@kbn/es-query';
+import type { FetchContext } from '@kbn/presentation-publishing';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { updateSearchSource } from './update_search_source';

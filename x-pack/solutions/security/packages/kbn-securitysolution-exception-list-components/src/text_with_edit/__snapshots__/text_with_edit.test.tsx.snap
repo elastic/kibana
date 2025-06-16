@@ -2,40 +2,42 @@
 
 exports[`TextWithEdit should not render the edit icon when isReadonly is true 1`] = `
 <div>
-  <div
-    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+  <span
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row-textWithEditContainerCss"
   >
-    <div
+    <span
       class="euiFlexItem emotion-euiFlexItem-grow-10"
     >
       <span
+        class="css-0"
         data-test-subj="TextWithEditTestText"
       >
         Test
       </span>
-    </div>
-    <div
+    </span>
+    <span
       class="euiFlexItem emotion-euiFlexItem-growZero"
     />
-  </div>
+  </span>
 </div>
 `;
 
 exports[`TextWithEdit should render the edit icon  when isReadonly is false 1`] = `
 <div>
-  <div
-    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+  <span
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row-textWithEditContainerCss"
   >
-    <div
+    <span
       class="euiFlexItem emotion-euiFlexItem-grow-10"
     >
       <span
+        class="css-0"
         data-test-subj="TextWithEditTestText"
       >
         Test
       </span>
-    </div>
-    <div
+    </span>
+    <span
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <button
@@ -51,7 +53,7 @@ exports[`TextWithEdit should render the edit icon  when isReadonly is false 1`] 
           data-euiicon-type="pencil"
         />
       </button>
-    </div>
-  </div>
+    </span>
+  </span>
 </div>
 `;

@@ -8,9 +8,8 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
 import { PushCallouts } from './push_callouts';
+import { renderWithTestingProviders } from '../../common/mock';
 
 const onEditClick = jest.fn();
 
@@ -21,16 +20,14 @@ const defaultProps = {
   onEditClick,
 };
 
+// Failing: See https://github.com/elastic/kibana/issues/206367
 describe('PushCallouts ', () => {
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
   });
 
   it('renders', async () => {
-    appMockRender.render(<PushCallouts {...defaultProps} />);
+    renderWithTestingProviders(<PushCallouts {...defaultProps} />);
 
     expect(await screen.findByText('My title')).toBeInTheDocument();
     expect(await screen.findByText('My desc')).toBeInTheDocument();

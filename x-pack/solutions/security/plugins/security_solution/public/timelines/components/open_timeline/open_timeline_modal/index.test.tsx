@@ -14,6 +14,7 @@ import { mockOpenTimelineQueryResults } from '../../../../common/mock/timeline_r
 import { useGetAllTimeline, getAllTimeline } from '../../../containers/all';
 import { useTimelineStatus } from '../use_timeline_status';
 import { OpenTimelineModal } from '.';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 jest.mock('../../../../common/lib/kibana', () => {
   const actual = jest.requireActual('../../../../common/lib/kibana');
@@ -34,11 +35,11 @@ jest.mock('../../../containers/all', () => {
   };
 });
 jest.mock('../use_timeline_types', () => ({
-  useTimelineTypes: jest.fn().mockReturnValue({
+  useTimelineTypes: jest.fn(() => ({
     timelineType: 'default',
     timelineTabs: <div />,
     timelineFilters: <div />,
-  }),
+  })),
 }));
 
 jest.mock('../use_timeline_status', () => ({
@@ -52,6 +53,8 @@ jest.mock(
     ({ children }: { children: (dimensions: { width: number; height: number }) => ReactElement }) =>
       children({ width: 100, height: 500 })
 );
+
+jest.mock('../../../../common/components/user_privileges');
 
 describe('OpenTimelineModal', () => {
   const mockInstallPrepackagedTimelines = jest.fn();
@@ -67,6 +70,9 @@ describe('OpenTimelineModal', () => {
       templateTimelineType: null,
       templateTimelineFilter: <div />,
       installPrepackagedTimelines: mockInstallPrepackagedTimelines,
+    });
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      timelinePrivileges: { crud: true },
     });
   });
 

@@ -4,50 +4,51 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  RuleLastRunOutcomes,
-  RuleExecutionStatuses,
-  RuleExecutionStatusErrorReasons,
-} from '@kbn/alerting-plugin/common';
+import type { RuleLastRunOutcomes, RuleExecutionStatuses } from '@kbn/alerting-plugin/common';
+import { RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
+import { type EuiThemeComputed } from '@elastic/eui';
 import { getIsExperimentalFeatureEnabled } from '../get_experimental_features';
-import { Rule } from '../../types';
+import type { Rule } from '../../types';
 
-export const getOutcomeHealthColor = (status: RuleLastRunOutcomes) => {
+export const getOutcomeHealthColor = (status: RuleLastRunOutcomes, euiTheme: EuiThemeComputed) => {
   switch (status) {
     case 'succeeded':
-      return 'success';
+      return euiTheme.colors.success;
     case 'failed':
-      return 'danger';
+      return euiTheme.colors.danger;
     case 'warning':
-      return 'warning';
+      return euiTheme.colors.warning;
     default:
       return 'subdued';
   }
 };
 
-export const getExecutionStatusHealthColor = (status: RuleExecutionStatuses) => {
+export const getExecutionStatusHealthColor = (
+  status: RuleExecutionStatuses,
+  euiTheme: EuiThemeComputed
+) => {
   switch (status) {
     case 'active':
-      return 'success';
+      return euiTheme.colors.success;
     case 'error':
-      return 'danger';
+      return euiTheme.colors.danger;
     case 'ok':
-      return 'primary';
+      return euiTheme.colors.primary;
     case 'pending':
-      return 'accent';
+      return euiTheme.colors.accent;
     case 'warning':
-      return 'warning';
+      return euiTheme.colors.warning;
     default:
       return 'subdued';
   }
 };
 
-export const getRuleHealthColor = (rule: Rule) => {
+export const getRuleHealthColor = (rule: Rule, euiTheme: EuiThemeComputed) => {
   const isRuleUsingExecutionStatus = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');
   if (isRuleUsingExecutionStatus) {
-    return getExecutionStatusHealthColor(rule.executionStatus.status);
+    return getExecutionStatusHealthColor(rule.executionStatus.status, euiTheme);
   }
-  return (rule.lastRun && getOutcomeHealthColor(rule.lastRun.outcome)) || 'subdued';
+  return (rule.lastRun && getOutcomeHealthColor(rule.lastRun.outcome, euiTheme)) || 'subdued';
 };
 
 export const getIsLicenseError = (rule: Rule) => {

@@ -5,55 +5,50 @@
  * 2.0.
  */
 
-import moment, { Moment } from 'moment';
-
-import type {
+import type { Document } from '@langchain/core/documents';
+import {
   AnalyticsServiceSetup,
   AuthenticatedUser,
   KibanaRequest,
   Logger,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
+
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type {
+import {
   ApiConfig,
-  DefendInsight,
+  ContentReferencesStore,
   DefendInsightGenerationInterval,
+  DefendInsights,
   DefendInsightsPostRequestBody,
   DefendInsightsResponse,
   Replacements,
+  DEFEND_INSIGHTS_ID,
+  DefendInsightStatus,
+  DefendInsightType,
 } from '@kbn/elastic-assistant-common';
-import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-
+import moment, { Moment } from 'moment';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import {
-  DEFEND_INSIGHTS_TOOL_ID,
-  DefendInsightStatus,
-  DefendInsightType,
-  DefendInsightsGetRequestQuery,
-} from '@kbn/elastic-assistant-common';
 
-import type { GetRegisteredTools } from '../../services/app_context';
+import type { DefendInsightsGraphState } from '../../lib/langchain/graphs';
+import { CallbackIds, GetRegisteredTools, appContextService } from '../../services/app_context';
 import type { AssistantTool, ElasticAssistantApiRequestHandlerContext } from '../../types';
-
-import { DefendInsightsDataClient } from '../../ai_assistant_data_clients/defend_insights';
+import { getDefendInsightsPrompt } from '../../lib/defend_insights/graphs/default_defend_insights_graph/prompts';
+import { DefendInsightsDataClient } from '../../lib/defend_insights/persistence';
 import {
   DEFEND_INSIGHT_ERROR_EVENT,
   DEFEND_INSIGHT_SUCCESS_EVENT,
 } from '../../lib/telemetry/event_based_telemetry';
-import { getLlmType } from '../utils';
+import { getDefaultDefendInsightsGraph } from '../../lib/defend_insights/graphs/default_defend_insights_graph';
+import { DEFEND_INSIGHTS_GRAPH_RUN_NAME } from '../../lib/defend_insights/graphs/default_defend_insights_graph/constants';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
-
-function getDataFromJSON(defendInsightStringified: string): {
-  eventsContextCount: number;
-  insights: DefendInsight[];
-} {
-  const { eventsContextCount, insights } = JSON.parse(defendInsightStringified);
-  return { eventsContextCount, insights };
-}
+import { getLlmType } from '../utils';
+import { MAX_GENERATION_ATTEMPTS, MAX_HALLUCINATION_FAILURES } from './translations';
 
 function addGenerationInterval(
   generationIntervals: DefendInsightGenerationInterval[],
@@ -92,7 +87,7 @@ export function getAssistantTool(
   pluginName: string
 ): AssistantTool | undefined {
   const assistantTools = getRegisteredTools(pluginName);
-  return assistantTools.find((tool) => tool.id === DEFEND_INSIGHTS_TOOL_ID);
+  return assistantTools.find((tool) => tool.id === DEFEND_INSIGHTS_ID);
 }
 
 export function getAssistantToolParams({
@@ -107,6 +102,7 @@ export function getAssistantToolParams({
   langSmithProject,
   langSmithApiKey,
   logger,
+  contentReferencesStore,
   latestReplacements,
   onNewReplacements,
   request,
@@ -122,6 +118,7 @@ export function getAssistantToolParams({
   langSmithProject?: string;
   langSmithApiKey?: string;
   logger: Logger;
+  contentReferencesStore: ContentReferencesStore | undefined;
   latestReplacements: Replacements;
   onNewReplacements: (newReplacements: Replacements) => void;
   request: KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>;
@@ -133,6 +130,7 @@ export function getAssistantToolParams({
   langChainTimeout: number;
   llm: ActionsClientLlm;
   logger: Logger;
+  contentReferencesStore: ContentReferencesStore | undefined;
   replacements: Replacements;
   onNewReplacements: (newReplacements: Replacements) => void;
   request: KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>;
@@ -158,6 +156,9 @@ export function getAssistantToolParams({
     temperature: 0, // zero temperature because we want structured JSON output
     timeout: connectorTimeout,
     traceOptions,
+    telemetryMetadata: {
+      pluginId: 'security_defend_insights',
+    },
   });
 
   return {
@@ -169,6 +170,7 @@ export function getAssistantToolParams({
     langChainTimeout,
     llm,
     logger,
+    contentReferencesStore,
     onNewReplacements,
     request,
     modelExists: false,
@@ -265,31 +267,44 @@ export async function createDefendInsight(
   };
 }
 
+const extractInsightsForTelemetryReporting = (
+  insightType: DefendInsightType,
+  insights: DefendInsights
+): string[] => {
+  switch (insightType) {
+    case DefendInsightType.Enum.incompatible_antivirus:
+      return insights.map((insight) => insight.group);
+    default:
+      return [];
+  }
+};
+
 export async function updateDefendInsights({
+  anonymizedEvents,
   apiConfig,
   defendInsightId,
+  insights,
   authenticatedUser,
   dataClient,
   latestReplacements,
   logger,
-  rawDefendInsights,
   startTime,
   telemetry,
+  insightType,
 }: {
+  anonymizedEvents: Document[];
   apiConfig: ApiConfig;
   defendInsightId: string;
+  insights: DefendInsights | null;
   authenticatedUser: AuthenticatedUser;
   dataClient: DefendInsightsDataClient;
   latestReplacements: Replacements;
   logger: Logger;
-  rawDefendInsights: string | null;
   startTime: Moment;
   telemetry: AnalyticsServiceSetup;
+  insightType: DefendInsightType;
 }) {
   try {
-    if (rawDefendInsights == null) {
-      throw new Error('tool returned no Defend insights');
-    }
     const currentInsight = await dataClient.getDefendInsight({
       id: defendInsightId,
       authenticatedUser,
@@ -299,12 +314,12 @@ export async function updateDefendInsights({
     }
     const endTime = moment();
     const durationMs = endTime.diff(startTime);
-    const { eventsContextCount, insights } = getDataFromJSON(rawDefendInsights);
+    const eventsContextCount = anonymizedEvents.length;
     const updateProps = {
       eventsContextCount,
-      insights,
+      insights: insights ?? undefined,
       status: DefendInsightStatus.Enum.succeeded,
-      ...(!eventsContextCount || !insights.length
+      ...(!eventsContextCount || !insights
         ? {}
         : {
             generationIntervals: addGenerationInterval(currentInsight.generationIntervals, {
@@ -321,13 +336,19 @@ export async function updateDefendInsights({
       defendInsightUpdateProps: updateProps,
       authenticatedUser,
     });
+
     telemetry.reportEvent(DEFEND_INSIGHT_SUCCESS_EVENT.eventType, {
       actionTypeId: apiConfig.actionTypeId,
       eventsContextCount: updateProps.eventsContextCount,
-      insightsGenerated: updateProps.insights.length,
+      insightsGenerated: updateProps.insights?.length ?? 0,
+      insightsDetails: extractInsightsForTelemetryReporting(
+        insightType,
+        updateProps.insights || []
+      ),
       durationMs,
       model: apiConfig.model,
       provider: apiConfig.provider,
+      insightType,
     });
   } catch (updateErr) {
     logger.error(updateErr);
@@ -342,18 +363,14 @@ export async function updateDefendInsights({
 }
 
 export async function updateDefendInsightsLastViewedAt({
-  params,
+  defendInsights,
   authenticatedUser,
   dataClient,
 }: {
-  params: DefendInsightsGetRequestQuery;
+  defendInsights: DefendInsightsResponse[];
   authenticatedUser: AuthenticatedUser;
   dataClient: DefendInsightsDataClient;
 }): Promise<DefendInsightsResponse[]> {
-  const defendInsights = await dataClient.findDefendInsightsByParams({
-    params,
-    authenticatedUser,
-  });
   if (!defendInsights.length) {
     return [];
   }
@@ -373,15 +390,246 @@ export async function updateDefendInsightsLastViewedAt({
 }
 
 export async function updateDefendInsightLastViewedAt({
-  id,
+  defendInsights,
   authenticatedUser,
   dataClient,
 }: {
-  id: string;
+  defendInsights: DefendInsightsResponse[];
   authenticatedUser: AuthenticatedUser;
   dataClient: DefendInsightsDataClient;
 }): Promise<DefendInsightsResponse | undefined> {
   return (
-    await updateDefendInsightsLastViewedAt({ params: { ids: [id] }, authenticatedUser, dataClient })
+    await updateDefendInsightsLastViewedAt({
+      defendInsights,
+      authenticatedUser,
+      dataClient,
+    })
   )[0];
 }
+
+export const invokeDefendInsightsGraph = async ({
+  insightType,
+  endpointIds,
+  actionsClient,
+  anonymizationFields,
+  apiConfig,
+  connectorTimeout,
+  esClient,
+  langSmithProject,
+  langSmithApiKey,
+  latestReplacements,
+  logger,
+  onNewReplacements,
+  size,
+  start,
+  end,
+  savedObjectsClient,
+}: {
+  insightType: DefendInsightType;
+  endpointIds: string[];
+  actionsClient: PublicMethodsOf<ActionsClient>;
+  anonymizationFields: AnonymizationFieldResponse[];
+  apiConfig: ApiConfig;
+  connectorTimeout: number;
+  esClient: ElasticsearchClient;
+  langSmithProject?: string;
+  langSmithApiKey?: string;
+  latestReplacements: Replacements;
+  logger: Logger;
+  onNewReplacements: (newReplacements: Replacements) => void;
+  size?: number;
+  start?: string;
+  end?: string;
+  savedObjectsClient: SavedObjectsClientContract;
+}): Promise<{
+  anonymizedEvents: Document[];
+  insights: DefendInsights | null;
+}> => {
+  const llmType = getLlmType(apiConfig.actionTypeId);
+  const model = apiConfig.model;
+  const tags = [DEFEND_INSIGHTS_ID, llmType, model].flatMap((tag) => tag ?? []);
+
+  const traceOptions = {
+    projectName: langSmithProject,
+    tracers: [
+      ...getLangSmithTracer({
+        apiKey: langSmithApiKey,
+        projectName: langSmithProject,
+        logger,
+      }),
+    ],
+  };
+
+  const llm = new ActionsClientLlm({
+    actionsClient,
+    connectorId: apiConfig.connectorId,
+    llmType,
+    logger,
+    temperature: 0,
+    timeout: connectorTimeout,
+    traceOptions,
+    telemetryMetadata: {
+      pluginId: 'security_defend_insights',
+    },
+  });
+
+  if (llm == null) {
+    throw new Error('LLM is required for Defend insights');
+  }
+
+  const defendInsightsPrompts = await getDefendInsightsPrompt({
+    type: insightType,
+    actionsClient,
+    connectorId: apiConfig.connectorId,
+    model,
+    provider: llmType,
+    savedObjectsClient,
+  });
+
+  const graph = getDefaultDefendInsightsGraph({
+    insightType,
+    endpointIds,
+    anonymizationFields,
+    esClient,
+    llm,
+    logger,
+    onNewReplacements,
+    prompts: defendInsightsPrompts,
+    replacements: latestReplacements,
+    size,
+    start,
+    end,
+  });
+
+  logger?.debug(() => 'invokeDefendInsightsGraph: invoking the Defend insights graph');
+
+  const result: DefendInsightsGraphState = (await graph.invoke(
+    {},
+    {
+      callbacks: [...(traceOptions?.tracers ?? [])],
+      runName: DEFEND_INSIGHTS_GRAPH_RUN_NAME,
+      tags,
+    }
+  )) as DefendInsightsGraphState;
+  const {
+    insights,
+    anonymizedDocuments: anonymizedEvents,
+    errors,
+    generationAttempts,
+    hallucinationFailures,
+    maxGenerationAttempts,
+    maxHallucinationFailures,
+  } = result;
+
+  throwIfErrorCountsExceeded({
+    errors,
+    generationAttempts,
+    hallucinationFailures,
+    logger,
+    maxGenerationAttempts,
+    maxHallucinationFailures,
+  });
+
+  return { anonymizedEvents, insights };
+};
+
+export const handleGraphError = async ({
+  apiConfig,
+  defendInsightId,
+  authenticatedUser,
+  dataClient,
+  err,
+  latestReplacements,
+  logger,
+  telemetry,
+}: {
+  apiConfig: ApiConfig;
+  defendInsightId: string;
+  authenticatedUser: AuthenticatedUser;
+  dataClient: DefendInsightsDataClient;
+  err: Error;
+  latestReplacements: Replacements;
+  logger: Logger;
+  telemetry: AnalyticsServiceSetup;
+}) => {
+  try {
+    logger.error(err);
+    const error = transformError(err);
+    const currentInsight = await dataClient.getDefendInsight({
+      id: defendInsightId,
+      authenticatedUser,
+    });
+
+    if (currentInsight === null || currentInsight?.status === 'canceled') {
+      return;
+    }
+
+    await dataClient.updateDefendInsight({
+      defendInsightUpdateProps: {
+        insights: [],
+        status: DefendInsightStatus.Enum.failed,
+        id: defendInsightId,
+        replacements: latestReplacements,
+        backingIndex: currentInsight.backingIndex,
+        failureReason: error.message,
+      },
+      authenticatedUser,
+    });
+    telemetry.reportEvent(DEFEND_INSIGHT_ERROR_EVENT.eventType, {
+      actionTypeId: apiConfig.actionTypeId,
+      errorMessage: error.message,
+      model: apiConfig.model,
+      provider: apiConfig.provider,
+    });
+  } catch (updateErr) {
+    const updateError = transformError(updateErr);
+    telemetry.reportEvent(DEFEND_INSIGHT_ERROR_EVENT.eventType, {
+      actionTypeId: apiConfig.actionTypeId,
+      errorMessage: updateError.message,
+      model: apiConfig.model,
+      provider: apiConfig.provider,
+    });
+  }
+};
+
+export const runExternalCallbacks = async (
+  callback: CallbackIds,
+  ...args: [KibanaRequest] | [KibanaRequest, unknown]
+) => {
+  const callbacks = appContextService.getRegisteredCallbacks(callback);
+  await Promise.all(callbacks.map((cb) => Promise.resolve(cb(...args))));
+};
+
+export const throwIfErrorCountsExceeded = ({
+  errors,
+  generationAttempts,
+  hallucinationFailures,
+  logger,
+  maxGenerationAttempts,
+  maxHallucinationFailures,
+}: {
+  errors: string[];
+  generationAttempts: number;
+  hallucinationFailures: number;
+  logger?: Logger;
+  maxGenerationAttempts: number;
+  maxHallucinationFailures: number;
+}): void => {
+  if (hallucinationFailures >= maxHallucinationFailures) {
+    const hallucinationFailuresError = `${MAX_HALLUCINATION_FAILURES(
+      hallucinationFailures
+    )}\n${errors.join(',\n')}`;
+
+    logger?.error(hallucinationFailuresError);
+    throw new Error(hallucinationFailuresError);
+  }
+
+  if (generationAttempts >= maxGenerationAttempts) {
+    const generationAttemptsError = `${MAX_GENERATION_ATTEMPTS(generationAttempts)}\n${errors.join(
+      ',\n'
+    )}`;
+
+    logger?.error(generationAttemptsError);
+    throw new Error(generationAttemptsError);
+  }
+};

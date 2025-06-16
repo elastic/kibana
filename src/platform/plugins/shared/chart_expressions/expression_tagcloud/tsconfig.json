@@ -8,6 +8,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "../../../../../../typings/emotion.d.ts"
   ],
   "kbn_references": [
     { "path": "../tsconfig.json" },
@@ -26,9 +27,11 @@
     "@kbn/analytics",
     "@kbn/chart-expressions-common",
     "@kbn/chart-icons",
-    "@kbn/data-plugin",
     "@kbn/react-kibana-context-render",
     "@kbn/palettes",
+    "@kbn/charts-theme",
+    "@kbn/ebt-tools",
+    "@kbn/react-kibana-context-theme",
   ],
   "exclude": [
     "target/**/*",

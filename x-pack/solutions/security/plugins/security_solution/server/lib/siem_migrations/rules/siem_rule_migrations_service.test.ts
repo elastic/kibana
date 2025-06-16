@@ -17,14 +17,17 @@ import {
 import { Subject } from 'rxjs';
 import {
   MockRuleMigrationsDataService,
-  mockInstall,
+  mockSetup,
   mockCreateClient as mockDataCreateClient,
 } from './data/__mocks__/mocks';
 import { mockCreateClient as mockTaskCreateClient, mockStopAll } from './task/__mocks__/mocks';
 import { waitFor } from '@testing-library/dom';
+import type { SiemRuleMigrationsClientDependencies } from './types';
 
 jest.mock('./data/rule_migrations_data_service');
 jest.mock('./task/rule_migrations_task_service');
+
+const dependencies = {} as SiemRuleMigrationsClientDependencies;
 
 describe('SiemRuleMigrationsService', () => {
   let ruleMigrationsService: SiemRuleMigrationsService;
@@ -42,14 +45,14 @@ describe('SiemRuleMigrationsService', () => {
   });
 
   it('should instantiate the rule migrations data stream adapter', () => {
-    expect(MockRuleMigrationsDataService).toHaveBeenCalledWith(logger, kibanaVersion);
+    expect(MockRuleMigrationsDataService).toHaveBeenCalledWith(logger, kibanaVersion, undefined);
   });
 
   describe('when setup is called', () => {
     it('should set esClusterClient and call dataStreamAdapter.install', () => {
       ruleMigrationsService.setup({ esClusterClient, pluginStop$ });
 
-      expect(mockInstall).toHaveBeenCalledWith({
+      expect(mockSetup).toHaveBeenCalledWith({
         esClient: esClusterClient.asInternalUser,
         pluginStop$,
       });
@@ -57,7 +60,7 @@ describe('SiemRuleMigrationsService', () => {
 
     it('should log error when data installation fails', async () => {
       const error = 'Failed to install';
-      mockInstall.mockRejectedValueOnce(error);
+      mockSetup.mockRejectedValueOnce(error);
       ruleMigrationsService.setup({ esClusterClient, pluginStop$ });
 
       await waitFor(() => {
@@ -74,6 +77,7 @@ describe('SiemRuleMigrationsService', () => {
         spaceId: 'default',
         currentUser,
         request: httpServerMock.createKibanaRequest(),
+        dependencies,
       };
     });
 
@@ -96,6 +100,7 @@ describe('SiemRuleMigrationsService', () => {
           spaceId: createClientParams.spaceId,
           currentUser: createClientParams.currentUser,
           esScopedClient: esClusterClient.asScoped(),
+          dependencies,
         });
       });
 
@@ -104,6 +109,7 @@ describe('SiemRuleMigrationsService', () => {
         expect(mockTaskCreateClient).toHaveBeenCalledWith({
           currentUser: createClientParams.currentUser,
           dataClient: mockDataCreateClient(),
+          dependencies,
         });
       });
 

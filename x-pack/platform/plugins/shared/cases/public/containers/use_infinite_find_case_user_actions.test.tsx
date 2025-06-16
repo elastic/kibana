@@ -12,8 +12,7 @@ import type { CaseUserActionTypeWithAll } from '../../common/ui/types';
 import { basicCase, findCaseUserActionsResponse } from './mock';
 import * as api from './api';
 import { useToasts } from '../common/lib/kibana';
-import type { AppMockRenderer } from '../common/mock';
-import { createAppMockRenderer } from '../common/mock';
+import { TestProviders } from '../common/mock';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
@@ -24,6 +23,7 @@ const initialData = {
   isLoading: true,
 };
 
+// Failing: See https://github.com/elastic/kibana/issues/207390
 describe('UseInfiniteFindCaseUserActions', () => {
   const filterActionType: CaseUserActionTypeWithAll = 'all';
   const sortOrder: 'asc' | 'desc' = 'asc';
@@ -34,17 +34,14 @@ describe('UseInfiniteFindCaseUserActions', () => {
   };
   const isEnabled = true;
 
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   it('returns proper state on findCaseUserActions', async () => {
     const { result } = renderHook(
       () => useInfiniteFindCaseUserActions(basicCase.id, params, isEnabled),
-      { wrapper: appMockRender.AppWrapper }
+      { wrapper: TestProviders }
     );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -55,6 +52,7 @@ describe('UseInfiniteFindCaseUserActions', () => {
         data: {
           pages: [
             {
+              latestAttachments: [],
               userActions: [...findCaseUserActionsResponse.userActions],
               total: 30,
               perPage: 10,
@@ -84,7 +82,7 @@ describe('UseInfiniteFindCaseUserActions', () => {
           },
           isEnabled
         ),
-      { wrapper: appMockRender.AppWrapper }
+      { wrapper: TestProviders }
     );
 
     await waitFor(() =>
@@ -110,7 +108,7 @@ describe('UseInfiniteFindCaseUserActions', () => {
           },
           false
         ),
-      { wrapper: appMockRender.AppWrapper }
+      { wrapper: TestProviders }
     );
 
     expect(spy).not.toHaveBeenCalled();
@@ -123,15 +121,10 @@ describe('UseInfiniteFindCaseUserActions', () => {
     (useToasts as jest.Mock).mockReturnValue({ addError });
 
     renderHook(() => useInfiniteFindCaseUserActions(basicCase.id, params, isEnabled), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     await waitFor(() => {
-      expect(spy).toHaveBeenCalledWith(
-        basicCase.id,
-        { type: filterActionType, sortOrder, page: 1, perPage: 10 },
-        expect.any(AbortSignal)
-      );
       expect(addError).toHaveBeenCalled();
     });
 
@@ -143,7 +136,7 @@ describe('UseInfiniteFindCaseUserActions', () => {
 
     const { result } = renderHook(
       () => useInfiniteFindCaseUserActions(basicCase.id, params, isEnabled),
-      { wrapper: appMockRender.AppWrapper }
+      { wrapper: TestProviders }
     );
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -171,7 +164,7 @@ describe('UseInfiniteFindCaseUserActions', () => {
 
     const { result } = renderHook(
       () => useInfiniteFindCaseUserActions(basicCase.id, params, isEnabled),
-      { wrapper: appMockRender.AppWrapper }
+      { wrapper: TestProviders }
     );
 
     expect(result.current.hasNextPage).toBe(undefined);

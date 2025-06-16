@@ -19,8 +19,9 @@ import { createPath, PageLoader } from '../../router';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import {
   breadcrumbOnClickFactory,
-  DATA_DRIFT_BREADCRUMB,
+  DATA_DRIFT_INDEX_SELECT_BREADCRUMB,
   DATA_VISUALIZER_BREADCRUMB,
+  DATA_DRIFT_BREADCRUMB,
   getBreadcrumbWithUrlForApp,
 } from '../../breadcrumbs';
 import { useRouteResolver } from '../../use_resolver';
@@ -41,8 +42,9 @@ export const dataDriftRouteIndexOrSearchFactory = (
   ),
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB', navigateToPath, basePath),
     {
-      text: DATA_VISUALIZER_BREADCRUMB.text,
+      text: DATA_DRIFT_BREADCRUMB.text,
       ...(navigateToPath
         ? {
             href: `${basePath}/app/ml${DATA_DRIFT_BREADCRUMB.href}`,
@@ -52,7 +54,7 @@ export const dataDriftRouteIndexOrSearchFactory = (
     },
     {
       text: i18n.translate('xpack.ml.trainedModelsBreadcrumbs.dataDriftLabel', {
-        defaultMessage: 'Data Drift',
+        defaultMessage: 'Select Data View',
       }),
     },
   ],
@@ -75,8 +77,11 @@ export const dataDriftRouteIndexPatternFactory = (
       text: DATA_VISUALIZER_BREADCRUMB.text,
       ...(navigateToPath
         ? {
-            href: `${basePath}/app/ml${DATA_DRIFT_BREADCRUMB.href}`,
-            onClick: breadcrumbOnClickFactory(DATA_DRIFT_BREADCRUMB.href, navigateToPath),
+            href: `${basePath}/app/ml${DATA_DRIFT_INDEX_SELECT_BREADCRUMB.href}`,
+            onClick: breadcrumbOnClickFactory(
+              DATA_DRIFT_INDEX_SELECT_BREADCRUMB.href,
+              navigateToPath
+            ),
           }
         : {}),
     },

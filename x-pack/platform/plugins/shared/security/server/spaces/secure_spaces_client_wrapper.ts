@@ -9,7 +9,11 @@ import Boom from '@hapi/boom';
 
 import type { KibanaRequest, SavedObjectsClient } from '@kbn/core/server';
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
-import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
+import type {
+  ISavedObjectsSecurityExtension,
+  ISavedObjectTypeRegistry,
+} from '@kbn/core-saved-objects-server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import type { AuditLogger, AuthorizationServiceSetup } from '@kbn/security-plugin-types-server';
 import type {
   GetAllSpacesOptions,
@@ -50,7 +54,8 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     private readonly authorization: AuthorizationServiceSetup,
     private readonly auditLogger: AuditLogger,
     private readonly errors: SavedObjectsClient['errors'],
-    private readonly securityExtension: ISavedObjectsSecurityExtension | undefined
+    private readonly securityExtension: ISavedObjectsSecurityExtension | undefined,
+    private readonly getTypeRegistry: () => Promise<ISavedObjectTypeRegistry>
   ) {
     this.useRbac = this.authorization.mode.useRbacForRequest(this.request);
   }
@@ -278,8 +283,14 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     if (this.auditLogger.enabled && securityExtension !== undefined) {
       const finder = this.spacesClient.createSavedObjectFinder(id);
       try {
+        const registry = await this.getTypeRegistry();
+
         for await (const response of finder.find()) {
-          this.securityExtension?.auditObjectsForSpaceDeletion(id, response.saved_objects);
+          const auditObjects = response.saved_objects.map((obj) => ({
+            ...obj,
+            name: SavedObjectsUtils.getName(registry.getNameAttribute(obj.type), obj),
+          }));
+          this.securityExtension?.auditObjectsForSpaceDeletion(id, auditObjects);
         }
       } finally {
         await finder.close();

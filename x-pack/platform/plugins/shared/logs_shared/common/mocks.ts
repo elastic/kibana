@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export { createResolvedLogViewMock } from './log_views/resolved_log_view.mock';
+export {
+  createResolvedLogViewMock,
+  createResolvedLogViewLazyMock,
+} from './log_views/resolved_log_view.mock';

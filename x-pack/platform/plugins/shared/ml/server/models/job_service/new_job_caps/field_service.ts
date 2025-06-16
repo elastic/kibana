@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';

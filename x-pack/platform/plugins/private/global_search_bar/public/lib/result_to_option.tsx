@@ -26,6 +26,7 @@ export const resultToOption = (
     type === 'application' ||
     type === 'integration' ||
     type.toLowerCase() === 'enterprise search' ||
+    type.toLowerCase() === 'elasticsearch' ||
     type.toLowerCase() === 'search' ||
     type.toLowerCase() === 'index' ||
     type.toLowerCase() === 'connector';

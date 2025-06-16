@@ -26,11 +26,9 @@ interface SourceViewerProps {
   id: string;
   index: string | undefined;
   dataView: DataView;
-  textBasedHits?: DataTableRecord[];
-  hasLineNumbers: boolean;
+  esqlHit?: DataTableRecord;
   width?: number;
   decreaseAvailableHeightBy?: number;
-  requestState?: ElasticRequestState;
   onRefresh: () => void;
 }
 
@@ -41,9 +39,8 @@ export const DocViewerSource = ({
   id,
   index,
   dataView,
+  esqlHit,
   width,
-  hasLineNumbers,
-  textBasedHits,
   decreaseAvailableHeightBy,
   onRefresh,
 }: SourceViewerProps) => {
@@ -54,7 +51,7 @@ export const DocViewerSource = ({
     id,
     index,
     dataView,
-    textBasedHits,
+    esqlHit,
   });
 
   useEffect(() => {
@@ -132,7 +129,8 @@ export const DocViewerSource = ({
       jsonValue={jsonValue}
       width={width}
       height={editorHeight}
-      hasLineNumbers={hasLineNumbers}
+      hasLineNumbers
+      enableFindAction
       onEditorDidMount={(editorNode: monaco.editor.IStandaloneCodeEditor) => setEditor(editorNode)}
     />
   );

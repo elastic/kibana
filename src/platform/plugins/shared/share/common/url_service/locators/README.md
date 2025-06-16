@@ -8,7 +8,7 @@ so the developer of the app/page has a way to change their url structure without
 breaking users of this system. If users were to generate the URLs on their own, 
 using string concatenation, those links may break often.
 
-Owners: __Kibana App Services team__.
+Owners: __@elastic/appex-sharedux__.
 
 
 ## Producer Usage

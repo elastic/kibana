@@ -18,10 +18,7 @@ export type StartServices = [
   Pick<
     CoreStart,
     // required for modules that render React
-    | 'analytics'
-    | 'i18n'
-    | 'theme'
-    | 'userProfile'
+    | 'rendering'
     // used extensively in Reporting share context menus and modal
     | 'notifications'
   >,
@@ -31,8 +28,6 @@ export type StartServices = [
 
 export interface ExportModalShareOpts {
   apiClient: ReportingAPIClient;
-  license: ILicense;
-  application: ApplicationStart;
   startServices$: Rx.Observable<StartServices>;
 }
 

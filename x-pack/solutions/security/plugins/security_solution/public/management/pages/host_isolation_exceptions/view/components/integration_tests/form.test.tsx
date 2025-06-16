@@ -16,17 +16,11 @@ import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoin
 import { HostIsolationExceptionsList } from '../../host_isolation_exceptions_list';
 import { act, waitFor } from '@testing-library/react';
 import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../../../common/constants';
-import {
-  exceptionsListAllHttpMocks,
-  fleetGetEndpointPackagePolicyListHttpMock,
-} from '../../../../../mocks';
-import {
-  clickOnEffectedPolicy,
-  isEffectedPolicySelected,
-} from '../../../../../components/effected_policy_select/test_utils';
-import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../../../../common/endpoint/service/artifacts';
-import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
+import { allFleetHttpMocks, exceptionsListAllHttpMocks } from '../../../../../mocks';
+import type { HttpFetchOptionsWithPath, IHttpFetchError } from '@kbn/core/public';
 import { testIdPrefix } from '../form';
+import { buildPerPolicyTag } from '../../../../../../../common/endpoint/service/artifacts/utils';
+import { policySelectorMocks } from '../../../../../components/policy_selector/mocks';
 
 jest.mock('../../../../../../common/components/user_privileges');
 
@@ -36,7 +30,7 @@ describe('When on the host isolation exceptions entry form', () => {
   let history: AppContextTestRender['history'];
   let mockedContext: AppContextTestRender;
   let exceptionsApiMock: ReturnType<typeof exceptionsListAllHttpMocks>;
-  let fleetApiMock: ReturnType<typeof fleetGetEndpointPackagePolicyListHttpMock>;
+  let fleetApiMock: ReturnType<typeof allFleetHttpMocks>;
 
   const formRowHasError = (testId: string): boolean => {
     const formRow = renderResult.getByTestId(testId);
@@ -70,13 +64,13 @@ describe('When on the host isolation exceptions entry form', () => {
 
       await waitFor(() => {
         expect(renderResult.getByTestId('hostIsolationExceptions-form')).toBeTruthy();
-        expect(fleetApiMock.responseProvider.endpointPackagePolicyList).toHaveBeenCalled();
       });
+
       return renderResult;
     };
 
     exceptionsApiMock = exceptionsListAllHttpMocks(mockedContext.coreStart.http);
-    fleetApiMock = fleetGetEndpointPackagePolicyListHttpMock(mockedContext.coreStart.http);
+    fleetApiMock = allFleetHttpMocks(mockedContext.coreStart.http);
 
     act(() => {
       history.push(HOST_ISOLATION_EXCEPTIONS_PATH);
@@ -150,40 +144,6 @@ describe('When on the host isolation exceptions entry form', () => {
           .classList.contains('euiButtonGroupButton-isSelected')
       ).toBe(true);
     });
-
-    it('should show policy as selected when user clicks on it', async () => {
-      await userEvent.click(
-        renderResult.getByTestId('hostIsolationExceptions-form-effectedPolicies-perPolicy')
-      );
-      await clickOnEffectedPolicy(renderResult, testIdPrefix);
-
-      await expect(isEffectedPolicySelected(renderResult, testIdPrefix)).resolves.toBe(true);
-    });
-
-    it('should retain the previous policy selection when switching from per-policy to global', async () => {
-      // move to per-policy and select the first
-      await userEvent.click(
-        renderResult.getByTestId('hostIsolationExceptions-form-effectedPolicies-perPolicy')
-      );
-      await clickOnEffectedPolicy(renderResult, testIdPrefix);
-
-      await expect(isEffectedPolicySelected(renderResult, testIdPrefix)).resolves.toBe(true);
-
-      // move back to global
-      await userEvent.click(
-        renderResult.getByTestId('hostIsolationExceptions-form-effectedPolicies-global')
-      );
-
-      expect(
-        renderResult.queryByTestId(`${testIdPrefix}-effectedPolicies-policiesSelectable`)
-      ).toBeFalsy();
-
-      // move back to per-policy
-      await userEvent.click(
-        renderResult.getByTestId('hostIsolationExceptions-form-effectedPolicies-perPolicy')
-      );
-      await expect(isEffectedPolicySelected(renderResult, testIdPrefix)).resolves.toBe(true);
-    });
   });
 
   describe('and editing an existing exception with global policy', () => {
@@ -193,30 +153,31 @@ describe('When on the host isolation exceptions entry form', () => {
       const generateExceptionsFindResponse =
         exceptionsApiMock.responseProvider.exceptionsFind.getMockImplementation()!;
 
-      exceptionsApiMock.responseProvider.exceptionsFind.mockImplementation((options) => {
-        const response: FoundExceptionListItemSchema = generateExceptionsFindResponse(options);
-
-        Object.assign(response.data[0], {
-          name: 'name edit me',
-          description: 'initial description',
-          item_id: '123-321',
-          tags: ['policy:all'],
-          entries: [
-            {
-              field: 'destination.ip',
-              operator: 'included',
-              type: 'match',
-              value: '10.0.0.1',
-            },
-          ],
-        });
-
-        return response;
-      });
-
       existingException = exceptionsApiMock.responseProvider.exceptionsFind({
         query: {},
       } as HttpFetchOptionsWithPath).data[0];
+
+      Object.assign(existingException, {
+        name: 'name edit me',
+        description: 'initial description',
+        item_id: '123-321',
+        tags: ['policy:all'],
+        entries: [
+          {
+            field: 'destination.ip',
+            operator: 'included',
+            type: 'match',
+            value: '10.0.0.1',
+          },
+        ],
+      });
+
+      exceptionsApiMock.responseProvider.exceptionsFind.mockImplementation((options) => {
+        const response: FoundExceptionListItemSchema = generateExceptionsFindResponse(options);
+        response.data[0] = existingException;
+
+        return response;
+      });
 
       exceptionsApiMock.responseProvider.exceptionGetOne.mockImplementation(() => {
         return existingException;
@@ -263,19 +224,26 @@ describe('When on the host isolation exceptions entry form', () => {
     });
 
     it('should show pre-selected policies', async () => {
-      const policyApiResponse = fleetApiMock.responseProvider.endpointPackagePolicyList();
+      const policyApiResponse = fleetApiMock.responseProvider.packagePolicies();
       const policyId1 = policyApiResponse.items[0].id;
-      const policyId2 = policyApiResponse.items[3].id;
+      const policyId2 = policyApiResponse.items[1].id;
 
-      existingException.tags = [
-        `${BY_POLICY_ARTIFACT_TAG_PREFIX}${policyId1}`,
-        `${BY_POLICY_ARTIFACT_TAG_PREFIX}${policyId2}`,
-      ];
+      existingException.tags = [buildPerPolicyTag(policyId1), buildPerPolicyTag(policyId2)];
 
       await render();
+      const policySelector = policySelectorMocks.getTestHelpers(
+        `${testIdPrefix}-effectedPolicies-policiesSelector`,
+        renderResult
+      );
 
-      await expect(isEffectedPolicySelected(renderResult, testIdPrefix, 0)).resolves.toBe(true);
-      await expect(isEffectedPolicySelected(renderResult, testIdPrefix, 3)).resolves.toBe(true);
+      await waitFor(() => {
+        expect(renderResult.getByTestId('hostIsolationExceptionsListPage-flyout'));
+      });
+
+      await policySelector.waitForDataToLoad();
+
+      expect(policySelector.isPolicySelected(policyId1)).toEqual(true);
+      expect(policySelector.isPolicySelected(policyId2)).toEqual(true);
     });
 
     it('should show the policies selector when no policy is selected', async () => {
@@ -283,17 +251,28 @@ describe('When on the host isolation exceptions entry form', () => {
       await render();
 
       expect(
-        renderResult.queryByTestId(`${testIdPrefix}-effectedPolicies-policiesSelectable`)
+        renderResult.queryByTestId(`${testIdPrefix}-effectedPolicies-policiesSelector`)
       ).toBeTruthy();
     });
 
-    it('should show the policies selector when no policy is selected and there are previous tags', async () => {
-      existingException.tags = ['non-a-policy-tag'];
-      await render();
+    // FIXME:PT not sure why this test is not working but I have spent several hours now on it and can't
+    //          figure it out. Skipping for now and will try to come back to it.
+    it.skip('should display form submission errors', async () => {
+      const error = new Error('oh oh - error') as IHttpFetchError;
+      exceptionsApiMock.responseProvider.exceptionUpdate.mockImplementation(() => {
+        throw error;
+      });
 
-      expect(
-        renderResult.queryByTestId(`${testIdPrefix}-effectedPolicies-policiesSelectable`)
-      ).toBeTruthy();
+      const { getByTestId } = await render();
+      await userEvent.click(getByTestId('hostIsolationExceptionsListPage-flyout-submitButton'));
+
+      await waitFor(() => {
+        expect(exceptionsApiMock.responseProvider.exceptionUpdate).toHaveBeenCalled();
+      });
+
+      expect(getByTestId('hostIsolationExceptions-form-submitError').textContent).toMatch(
+        'oh oh - error'
+      );
     });
   });
 });

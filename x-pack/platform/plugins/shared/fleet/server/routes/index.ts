@@ -28,6 +28,7 @@ import { registerRoutes as registerMessageSigningServiceRoutes } from './message
 import { registerRoutes as registerUninstallTokenRoutes } from './uninstall_token';
 import { registerRoutes as registerStandaloneAgentApiKeyRoutes } from './standalone_agent_api_key';
 import { registerRoutes as registerDebugRoutes } from './debug';
+import { registerRoutes as registerRemoteSyncedIntegrations } from './remote_synced_integrations';
 
 export function registerRoutes(fleetAuthzRouter: FleetAuthzRouter, config: FleetConfigType) {
   // Always register app routes for permissions checking
@@ -37,7 +38,7 @@ export function registerRoutes(fleetAuthzRouter: FleetAuthzRouter, config: Fleet
   registerEPMRoutes(fleetAuthzRouter, config);
 
   registerSetupRoutes(fleetAuthzRouter, config);
-  registerAgentPolicyRoutes(fleetAuthzRouter);
+  registerAgentPolicyRoutes(fleetAuthzRouter, config);
   registerPackagePolicyRoutes(fleetAuthzRouter);
   registerOutputRoutes(fleetAuthzRouter);
   registerSettingsRoutes(fleetAuthzRouter, config);
@@ -50,6 +51,7 @@ export function registerRoutes(fleetAuthzRouter: FleetAuthzRouter, config: Fleet
   registerMessageSigningServiceRoutes(fleetAuthzRouter);
   registerUninstallTokenRoutes(fleetAuthzRouter, config);
   registerStandaloneAgentApiKeyRoutes(fleetAuthzRouter);
+  registerRemoteSyncedIntegrations(fleetAuthzRouter);
   registerDebugRoutes(fleetAuthzRouter);
 
   // Conditional config routes

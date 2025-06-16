@@ -5,9 +5,6 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { Moment } from 'moment';
-import { Frequency } from '@kbn/rrule';
-import { monthDayDate } from './helpers/month_day_date';
 
 export const MAINTENANCE_WINDOWS = i18n.translate('xpack.alerting.maintenanceWindows', {
   defaultMessage: 'Maintenance Windows',
@@ -130,20 +127,6 @@ export const CREATE_FORM_REPEAT = i18n.translate(
   }
 );
 
-export const CREATE_FORM_FREQUENCY_DAILY = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.frequency.daily',
-  {
-    defaultMessage: 'Daily',
-  }
-);
-
-export const CREATE_FORM_FREQUENCY_WEEKLY = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.frequency.weekly',
-  {
-    defaultMessage: 'Weekly',
-  }
-);
-
 export const CREATE_FORM_TIMEFRAME_TITLE = i18n.translate(
   'xpack.alerting.maintenanceWindows.createForm.frequency.title',
   {
@@ -158,51 +141,44 @@ export const CREATE_FORM_TIMEFRAME_DESCRIPTION = i18n.translate(
   }
 );
 
-export const CREATE_FORM_CATEGORY_IDS_REQUIRED = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.categoryIds.required',
+export const CREATE_FORM_SOLUTION_SELECTION_TITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.solutionSelection.title',
   {
-    defaultMessage: 'A category is required.',
+    defaultMessage: 'Solution specific maintenance window',
   }
 );
 
-export const CREATE_FORM_CATEGORY_SELECTION_TITLE = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.categoriesSelection.title',
-  {
-    defaultMessage: 'Category specific maintenance window',
-  }
-);
-
-export const CREATE_FORM_CATEGORY_SELECTION_DESCRIPTION = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.categoriesSelection.description',
+export const CREATE_FORM_SOLUTION_SELECTION_DESCRIPTION = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.solutionSelection.description',
   {
     defaultMessage:
-      'Only rules associated with the selected categories are affected by the maintenance window.',
+      'Only rules associated with the selected solution are affected by the maintenance window.',
   }
 );
 
-export const CREATE_FORM_CATEGORIES_SELECTION_CHECKBOX_GROUP_TITLE = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.categorySelection.checkboxGroupTitle',
+export const CREATE_FORM_SOLUTION_SELECTION_CHECKBOX_GROUP_TITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.solutionSelection.checkboxGroupTitle',
   {
-    defaultMessage: 'Select the categories this should affect',
+    defaultMessage: 'Select the solution this should affect',
   }
 );
 
-export const CREATE_FORM_CATEGORY_OBSERVABILITY_RULES = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.categoryIds.observabilityRules',
+export const CREATE_FORM_SOLUTION_OBSERVABILITY_RULES = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.solutionIds.observabilityRules',
   {
     defaultMessage: 'Observability rules',
   }
 );
 
-export const CREATE_FORM_CATEGORY_SECURITY_RULES = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.categoryIds.securityRules',
+export const CREATE_FORM_SOLUTION_SECURITY_RULES = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.solutionIds.securityRules',
   {
     defaultMessage: 'Security rules',
   }
 );
 
-export const CREATE_FORM_CATEGORY_STACK_RULES = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.categoryIds.stackRules',
+export const CREATE_FORM_SOLUTION_STACK_RULES = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.solutionIds.stackRules',
   {
     defaultMessage: 'Stack rules',
   }
@@ -219,7 +195,7 @@ export const CREATE_FORM_SCOPED_QUERY_DESCRIPTION = i18n.translate(
   'xpack.alerting.maintenanceWindows.createForm.scopedQuery.description',
   {
     defaultMessage:
-      'Add filters that refine the scope of the maintenance window. You can select only one category when filters are enabled.',
+      'Add filters that refine the scope of the maintenance window. You can select only one solution when filters are enabled.',
   }
 );
 
@@ -244,258 +220,10 @@ export const CREATE_FORM_SCOPED_QUERY_EMPTY_ERROR_MESSAGE = i18n.translate(
   }
 );
 
-export const CREATE_FORM_FREQUENCY_WEEKLY_ON = (dayOfWeek: string) =>
-  i18n.translate('xpack.alerting.maintenanceWindows.createForm.frequency.weeklyOnWeekday', {
-    defaultMessage: 'Weekly on {dayOfWeek}',
-    values: { dayOfWeek },
-  });
-
-export const CREATE_FORM_FREQUENCY_MONTHLY = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.frequency.monthly',
-  {
-    defaultMessage: 'Monthly',
-  }
-);
-
-export const CREATE_FORM_FREQUENCY_NTH_WEEKDAY = (dayOfWeek: string) => [
-  i18n.translate('xpack.alerting.maintenanceWindows.createForm.frequency.last', {
-    defaultMessage: 'Monthly on the last {dayOfWeek}',
-    values: { dayOfWeek },
-  }),
-  i18n.translate('xpack.alerting.maintenanceWindows.createForm.frequency.first', {
-    defaultMessage: 'Monthly on the first {dayOfWeek}',
-    values: { dayOfWeek },
-  }),
-  i18n.translate('xpack.alerting.maintenanceWindows.createForm.frequency.second', {
-    defaultMessage: 'Monthly on the second {dayOfWeek}',
-    values: { dayOfWeek },
-  }),
-  i18n.translate('xpack.alerting.maintenanceWindows.createForm.frequency.third', {
-    defaultMessage: 'Monthly on the third {dayOfWeek}',
-    values: { dayOfWeek },
-  }),
-  i18n.translate('xpack.alerting.maintenanceWindows.createForm.frequency.fourth', {
-    defaultMessage: 'Monthly on the fourth {dayOfWeek}',
-    values: { dayOfWeek },
-  }),
-];
-
-export const CREATE_FORM_FREQUENCY_YEARLY = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.frequency.yearly',
-  {
-    defaultMessage: 'Yearly',
-  }
-);
-
-export const CREATE_FORM_FREQUENCY_YEARLY_ON = (startDate: Moment) =>
-  i18n.translate('xpack.alerting.maintenanceWindows.createForm.frequency.yearlyOn', {
-    defaultMessage: 'Yearly on {date}',
-    values: {
-      date: monthDayDate(startDate),
-    },
-  });
-
-export const CREATE_FORM_FREQUENCY_CUSTOM = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.frequency.custom',
-  {
-    defaultMessage: 'Custom',
-  }
-);
-
-export const CREATE_FORM_ENDS = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.endsLabel',
-  {
-    defaultMessage: 'End',
-  }
-);
-
-export const CREATE_FORM_ENDS_NEVER = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.ends.never',
-  {
-    defaultMessage: 'Never',
-  }
-);
-
-export const CREATE_FORM_ENDS_ON_DATE = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.ends.onDate',
-  {
-    defaultMessage: 'On date',
-  }
-);
-
-export const CREATE_FORM_ENDS_AFTER_X = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.ends.afterX',
-  {
-    defaultMessage: `After '{x}'`,
-  }
-);
-
-export const CREATE_FORM_COUNT_AFTER = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.count.after',
-  {
-    defaultMessage: 'After',
-  }
-);
-
-export const CREATE_FORM_COUNT_OCCURRENCE = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.count.occurrence',
-  {
-    defaultMessage: 'occurrence',
-  }
-);
-
-export const CREATE_FORM_COUNT_REQUIRED = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.countFieldRequiredError',
-  {
-    defaultMessage: 'A count is required.',
-  }
-);
-
-export const CREATE_FORM_INTERVAL_REQUIRED = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.intervalFieldRequiredError',
-  {
-    defaultMessage: 'An interval is required.',
-  }
-);
-
-export const CREATE_FORM_INTERVAL_EVERY = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.interval.every',
-  {
-    defaultMessage: 'Every',
-  }
-);
-
-export const CREATE_FORM_CUSTOM_FREQUENCY_DAILY = (interval: number) =>
-  i18n.translate('xpack.alerting.maintenanceWindows.createForm.customFrequency.daily', {
-    defaultMessage: '{interval, plural, one {day} other {days}}',
-    values: { interval },
-  });
-
-export const CREATE_FORM_CUSTOM_FREQUENCY_WEEKLY = (interval: number) =>
-  i18n.translate('xpack.alerting.maintenanceWindows.createForm.customFrequency.weekly', {
-    defaultMessage: '{interval, plural, one {week} other {weeks}}',
-    values: { interval },
-  });
-
-export const CREATE_FORM_CUSTOM_FREQUENCY_MONTHLY = (interval: number) =>
-  i18n.translate('xpack.alerting.maintenanceWindows.createForm.customFrequency.monthly', {
-    defaultMessage: '{interval, plural, one {month} other {months}}',
-    values: { interval },
-  });
-
-export const CREATE_FORM_CUSTOM_FREQUENCY_YEARLY = (interval: number) =>
-  i18n.translate('xpack.alerting.maintenanceWindows.createForm.customFrequency.yearly', {
-    defaultMessage: '{interval, plural, one {year} other {years}}',
-    values: { interval },
-  });
-
-export const CREATE_FORM_WEEKDAY_SHORT = (dayOfWeek: string) => [
-  i18n.translate('xpack.alerting.maintenanceWindows.createForm.lastShort', {
-    defaultMessage: 'On the last {dayOfWeek}',
-    values: { dayOfWeek },
-  }),
-  i18n.translate('xpack.alerting.maintenanceWindows.createForm.firstShort', {
-    defaultMessage: 'On the 1st {dayOfWeek}',
-    values: { dayOfWeek },
-  }),
-  i18n.translate('xpack.alerting.maintenanceWindows.createForm.secondShort', {
-    defaultMessage: 'On the 2nd {dayOfWeek}',
-    values: { dayOfWeek },
-  }),
-  i18n.translate('xpack.alerting.maintenanceWindows.createForm.thirdShort', {
-    defaultMessage: 'On the 3rd {dayOfWeek}',
-    values: { dayOfWeek },
-  }),
-  i18n.translate('xpack.alerting.maintenanceWindows.createForm.fourthShort', {
-    defaultMessage: 'On the 4th {dayOfWeek}',
-    values: { dayOfWeek },
-  }),
-];
-
-export const CREATE_FORM_BYWEEKDAY_REQUIRED = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.byweekdayFieldRequiredError',
-  {
-    defaultMessage: 'A week day is required.',
-  }
-);
-
-export const CREATE_FORM_CUSTOM_REPEAT_MONTHLY_ON_DAY = (startDate: Moment) =>
-  i18n.translate('xpack.alerting.maintenanceWindows.createForm.repeatOnMonthlyDay', {
-    defaultMessage: 'On day {dayNumber}',
-    values: { dayNumber: startDate.date() },
-  });
-
 export const CREATE_FORM_RECURRING_SUMMARY_PREFIX = (summary: string) =>
   i18n.translate('xpack.alerting.maintenanceWindows.createForm.recurringSummaryPrefix', {
     defaultMessage: 'Repeats {summary}',
     values: { summary },
-  });
-
-export const CREATE_FORM_FREQUENCY_SUMMARY = (interval: number) => ({
-  [Frequency.DAILY]: i18n.translate('xpack.alerting.maintenanceWindows.createForm.daySummary', {
-    defaultMessage: '{interval, plural, one {day} other {# days}}',
-    values: { interval },
-  }),
-  [Frequency.WEEKLY]: i18n.translate('xpack.alerting.maintenanceWindows.createForm.weekSummary', {
-    defaultMessage: '{interval, plural, one {week} other {# weeks}}',
-    values: { interval },
-  }),
-  [Frequency.MONTHLY]: i18n.translate('xpack.alerting.maintenanceWindows.createForm.monthSummary', {
-    defaultMessage: '{interval, plural, one {month} other {# months}}',
-    values: { interval },
-  }),
-  [Frequency.YEARLY]: i18n.translate('xpack.alerting.maintenanceWindows.createForm.yearSummary', {
-    defaultMessage: '{interval, plural, one {year} other {# years}}',
-    values: { interval },
-  }),
-});
-
-export const CREATE_FORM_UNTIL_DATE_SUMMARY = (date: string) =>
-  i18n.translate('xpack.alerting.maintenanceWindows.createForm.untilDateSummary', {
-    defaultMessage: 'until {date}',
-    values: { date },
-  });
-
-export const CREATE_FORM_OCURRENCES_SUMMARY = (count: number) =>
-  i18n.translate('xpack.alerting.maintenanceWindows.createForm.occurrencesSummary', {
-    defaultMessage: 'for {count, plural, one {# occurrence} other {# occurrences}}',
-    values: { count },
-  });
-
-export const CREATE_FORM_RECURRING_SUMMARY = (
-  frequencySummary: string | null,
-  onSummary: string | null,
-  untilSummary: string | null
-) =>
-  i18n.translate('xpack.alerting.maintenanceWindows.createForm.recurrenceSummary', {
-    defaultMessage: 'every {frequencySummary}{on}{until}',
-    values: {
-      frequencySummary: frequencySummary ? `${frequencySummary} ` : '',
-      on: onSummary ? `${onSummary} ` : '',
-      until: untilSummary ? `${untilSummary}` : '',
-    },
-  });
-
-export const CREATE_FORM_WEEKLY_SUMMARY = (weekdays: string) =>
-  i18n.translate('xpack.alerting.maintenanceWindows.createForm.weeklySummary', {
-    defaultMessage: 'on {weekdays}',
-    values: {
-      weekdays,
-    },
-  });
-
-export const CREATE_FORM_MONTHLY_BY_DAY_SUMMARY = (monthday: number) =>
-  i18n.translate('xpack.alerting.maintenanceWindows.createForm.monthlyByDaySummary', {
-    defaultMessage: 'on day {monthday}',
-    values: {
-      monthday,
-    },
-  });
-
-export const CREATE_FORM_YEARLY_BY_MONTH_SUMMARY = (date: string) =>
-  i18n.translate('xpack.alerting.maintenanceWindows.createForm.yearlyBymonthSummary', {
-    defaultMessage: 'on {date}',
-    values: { date },
   });
 
 export const CANCEL = i18n.translate('xpack.alerting.maintenanceWindows.createForm.cancel', {
@@ -626,9 +354,34 @@ export const CANCEL_AND_ARCHIVE_MODAL_SUBTITLE = i18n.translate(
   }
 );
 
+export const DELETE_MODAL_TITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.deleteModal.title',
+  {
+    defaultMessage: 'Delete maintenance window',
+  }
+);
+
+export const DELETE_MODAL_SUBTITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.deleteModal.subtitle',
+  {
+    defaultMessage: "You won't be able to recover a deleted maintenance window.",
+  }
+);
+
 export const ARCHIVE = i18n.translate('xpack.alerting.maintenanceWindows.archive', {
   defaultMessage: 'Archive',
 });
+
+export const COPY_ID = i18n.translate('xpack.alerting.maintenanceWindows.copyId', {
+  defaultMessage: 'Copy ID',
+});
+
+export const COPY_ID_ACTION_SUCCESS = i18n.translate(
+  'xpack.alerting.maintenanceWindows.copyId.success',
+  {
+    defaultMessage: 'Copied maintenance window ID to clipboard',
+  }
+);
 
 export const ARCHIVE_TITLE = i18n.translate('xpack.alerting.maintenanceWindows.archive.title', {
   defaultMessage: 'Archive maintenance window',
@@ -642,10 +395,32 @@ export const ARCHIVE_SUBTITLE = i18n.translate(
   }
 );
 
+export const SOLUTION_CONFIG_REMOVAL_WARNING_TITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.solutionConfigRemovalWarning.title',
+  {
+    defaultMessage: 'Support for multiple solution categories is removed.',
+  }
+);
+
+export const SOLUTION_CONFIG_REMOVAL_WARNING_SUBTITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.solutionConfigRemovalWarning.subtitle',
+  {
+    defaultMessage:
+      'When you save the changes, the maintenance window will affect rules in all solutions.',
+  }
+);
+
 export const TABLE_ACTION_UNARCHIVE = i18n.translate(
   'xpack.alerting.maintenanceWindows.table.unarchive',
   {
     defaultMessage: 'Unarchive',
+  }
+);
+
+export const TABLE_ACTION_DELETE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.table.delete',
+  {
+    defaultMessage: 'Delete',
   }
 );
 
@@ -725,4 +500,17 @@ export const REFRESH = i18n.translate('xpack.alerting.maintenanceWindows.refresh
 export const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.alerting.maintenanceWindows.searchPlaceholder',
   { defaultMessage: 'Search' }
+);
+
+export const NO_AVAILABLE_SOLUTIONS_WARNING_TITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.noAvailableSolutionsWarning.title',
+  { defaultMessage: 'Limited permissions detected.' }
+);
+
+export const NO_AVAILABLE_SOLUTIONS_WARNING_SUBTITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.noAvailableSolutionsWarning.subtitle',
+  {
+    defaultMessage:
+      "You don't have access to all solution types required for alert filtering. If you save, your alert filter settings will be reset.",
+  }
 );

@@ -25,16 +25,16 @@ export const registerIOEventsRoute = (router: IRouter, logger: Logger) => {
     .get({
       access: 'internal',
       path: IO_EVENTS_ROUTE,
+      security: {
+        authz: {
+          enabled: false,
+          reason: `This route delegates authorization to Elasticsearch and it's not tied to a Kibana privilege.`,
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason: `This route delegates authorization to Elasticsearch and it's not tied to a Kibana privilege.`,
-          },
-        },
         validate: {
           request: {
             query: schema.object({
@@ -60,28 +60,26 @@ export const registerIOEventsRoute = (router: IRouter, logger: Logger) => {
         try {
           const search = await client.search({
             index: [index],
-            body: {
-              query: {
-                bool: {
-                  must: [
-                    { term: { [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId } },
-                    { term: { [EVENT_ACTION]: 'text_output' } },
-                    {
-                      range: {
-                        // optimization to prevent data before this session from being hit.
-                        [TIMESTAMP_PROPERTY]: {
-                          gte: sessionStartTime,
-                        },
+            query: {
+              bool: {
+                must: [
+                  { term: { [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId } },
+                  { term: { [EVENT_ACTION]: 'text_output' } },
+                  {
+                    range: {
+                      // optimization to prevent data before this session from being hit.
+                      [TIMESTAMP_PROPERTY]: {
+                        gte: sessionStartTime,
                       },
                     },
-                  ],
-                },
+                  },
+                ],
               },
-              size: Math.min(pageSize, IO_EVENTS_PER_PAGE),
-              sort: [{ [TIMESTAMP]: 'asc' }],
-              search_after: cursor ? [cursor] : undefined,
-              fields: IO_EVENT_FIELDS,
             },
+            size: Math.min(pageSize, IO_EVENTS_PER_PAGE),
+            sort: [{ [TIMESTAMP]: 'asc' }],
+            search_after: cursor ? [cursor] : undefined,
+            fields: IO_EVENT_FIELDS,
           });
 
           const events = search.hits.hits;
@@ -129,23 +127,21 @@ export const searchProcessWithIOEvents = async (
   try {
     const search = await client.search({
       index: [index],
-      body: {
-        query: {
-          bool: {
-            must: [
-              { term: { [EVENT_ACTION]: 'text_output' } },
-              { term: { [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId } },
-              ...rangeFilter,
-            ],
-          },
+      query: {
+        bool: {
+          must: [
+            { term: { [EVENT_ACTION]: 'text_output' } },
+            { term: { [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId } },
+            ...rangeFilter,
+          ],
         },
-        size: 0,
-        aggs: {
-          custom_agg: {
-            terms: {
-              field: PROCESS_ENTITY_ID_PROPERTY,
-              size: PROCESS_EVENTS_PER_PAGE,
-            },
+      },
+      size: 0,
+      aggs: {
+        custom_agg: {
+          terms: {
+            field: PROCESS_ENTITY_ID_PROPERTY,
+            size: PROCESS_EVENTS_PER_PAGE,
           },
         },
       },

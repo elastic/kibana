@@ -16,6 +16,10 @@ import {
   replaceRequestVariables,
   trackSentRequests,
   getRequestFromEditor,
+  containsComments,
+  collapseTripleQuoteStrings,
+  expandTripleQuoteStrings,
+  TRIPLE_QUOTE_STRINGS_MARKER,
 } from './requests_utils';
 
 describe('requests_utils', () => {
@@ -168,6 +172,7 @@ describe('requests_utils', () => {
   });
 
   describe('getAutoIndentedRequests', () => {
+    const mockAddToastWarning = jest.fn();
     const sampleEditorTextLines = [
       '                                    ', // line 1
       'GET    _search                      ', // line 2
@@ -201,6 +206,14 @@ describe('requests_utils', () => {
       '}                                   ', // line 30
       ' // some comment                    ', // line 31
       '                                    ', // line 32
+      'POST    _query                     ', // line 33
+      '{                                   ', // line 34
+      '  "query":     """', // line 35
+      '    FROM sample_data', // line 36
+      '    | WHERE message LIKE "Connected *"', // line 37
+      '    | SORT @timestamp DESC', // line 38
+      '  """                                 ', // line 39
+      '}                                   ', // line 40
     ];
 
     const TEST_REQUEST_1 = {
@@ -235,13 +248,26 @@ describe('requests_utils', () => {
       endOffset: 36,
     };
 
+    const TEST_REQUEST_5 = {
+      // Offsets are with respect to the sample editor text
+      startLineNumber: 33,
+      endLineNumber: 40,
+      startOffset: 1,
+      endOffset: 36,
+    };
+
+    afterEach(() => {
+      mockAddToastWarning.mockClear();
+    });
+
     it('correctly auto-indents a single request with data', () => {
       const formattedData = getAutoIndentedRequests(
         [TEST_REQUEST_1],
         sampleEditorTextLines
           .slice(TEST_REQUEST_1.startLineNumber - 1, TEST_REQUEST_1.endLineNumber)
           .join('\n'),
-        sampleEditorTextLines.join('\n')
+        sampleEditorTextLines.join('\n'),
+        mockAddToastWarning
       );
       const expectedResultLines = [
         'GET _search',
@@ -253,6 +279,7 @@ describe('requests_utils', () => {
       ];
 
       expect(formattedData).toBe(expectedResultLines.join('\n'));
+      expect(mockAddToastWarning).not.toHaveBeenCalled();
     });
 
     it('correctly auto-indents a single request with no data', () => {
@@ -261,11 +288,13 @@ describe('requests_utils', () => {
         sampleEditorTextLines
           .slice(TEST_REQUEST_2.startLineNumber - 1, TEST_REQUEST_2.endLineNumber)
           .join('\n'),
-        sampleEditorTextLines.join('\n')
+        sampleEditorTextLines.join('\n'),
+        mockAddToastWarning
       );
       const expectedResult = 'GET _all';
 
       expect(formattedData).toBe(expectedResult);
+      expect(mockAddToastWarning).not.toHaveBeenCalled();
     });
 
     it('correctly auto-indents a single request with multiple data', () => {
@@ -274,7 +303,8 @@ describe('requests_utils', () => {
         sampleEditorTextLines
           .slice(TEST_REQUEST_3.startLineNumber - 1, TEST_REQUEST_3.endLineNumber)
           .join('\n'),
-        sampleEditorTextLines.join('\n')
+        sampleEditorTextLines.join('\n'),
+        mockAddToastWarning
       );
       const expectedResultLines = [
         'POST /_bulk',
@@ -292,13 +322,15 @@ describe('requests_utils', () => {
       ];
 
       expect(formattedData).toBe(expectedResultLines.join('\n'));
+      expect(mockAddToastWarning).not.toHaveBeenCalled();
     });
 
     it('auto-indents multiple request with comments in between', () => {
       const formattedData = getAutoIndentedRequests(
         [TEST_REQUEST_1, TEST_REQUEST_2, TEST_REQUEST_3],
         sampleEditorTextLines.slice(1, 23).join('\n'),
-        sampleEditorTextLines.join('\n')
+        sampleEditorTextLines.join('\n'),
+        mockAddToastWarning
       );
       const expectedResultLines = [
         'GET _search',
@@ -329,6 +361,7 @@ describe('requests_utils', () => {
       ];
 
       expect(formattedData).toBe(expectedResultLines.join('\n'));
+      expect(mockAddToastWarning).not.toHaveBeenCalled();
     });
 
     it(`auto-indents method line but doesn't auto-indent data with comments`, () => {
@@ -339,10 +372,41 @@ describe('requests_utils', () => {
       const formattedData = getAutoIndentedRequests(
         [TEST_REQUEST_4],
         `${methodLine}\n${dataText}`,
-        sampleEditorTextLines.join('\n')
+        sampleEditorTextLines.join('\n'),
+        mockAddToastWarning
       );
 
       expect(formattedData).toBe(`GET _search // test comment\n${dataText}`);
+      expect(mockAddToastWarning).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Auto-indentation is currently not supported for requests containing comments. Please remove comments to enable formatting.'
+        )
+      );
+      mockAddToastWarning.mockReset();
+    });
+
+    it('correctly auto-indents a single request that contains triple quotes', () => {
+      const formattedData = getAutoIndentedRequests(
+        [TEST_REQUEST_5],
+        sampleEditorTextLines
+          .slice(TEST_REQUEST_5.startLineNumber - 1, TEST_REQUEST_5.endLineNumber)
+          .join('\n'),
+        sampleEditorTextLines.join('\n'),
+        mockAddToastWarning
+      );
+      const expectedResultLines = [
+        'POST _query',
+        '{',
+        '  "query": """',
+        '    FROM sample_data',
+        '    | WHERE message LIKE "Connected *"',
+        '    | SORT @timestamp DESC',
+        '  """',
+        '}',
+      ];
+
+      expect(formattedData).toBe(expectedResultLines.join('\n'));
+      expect(mockAddToastWarning).not.toHaveBeenCalled();
     });
   });
 
@@ -467,6 +531,122 @@ describe('requests_utils', () => {
         url: '_search',
         data: [inlineData, invalidData],
       });
+    });
+  });
+
+  describe('containsComments', () => {
+    it('should return false for JSON with // and /* inside strings', () => {
+      const requestData = `{
+      "docs": [
+        {
+          "_source": {
+            "trace": {
+              "name": "GET /actuator/health/**"
+            },
+            "transaction": {
+              "outcome": "success"
+            }
+          }
+        },
+        {
+          "_source": {
+            "vulnerability": {
+              "reference": [
+                "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-15778"
+              ]
+            }
+          }
+        }
+      ]
+    }`;
+      expect(containsComments(requestData)).toBe(false);
+    });
+
+    it('should return true for text with actual line comment', () => {
+      const requestData = `{
+      // This is a comment
+      "query": { "match_all": {} }
+    }`;
+      expect(containsComments(requestData)).toBe(true);
+    });
+
+    it('should return true for text with actual block comment', () => {
+      const requestData = `{
+      /* Bulk insert */
+      "index": { "_index": "test" },
+      "field1": "value1"
+    }`;
+      expect(containsComments(requestData)).toBe(true);
+    });
+
+    it('should return false for text without any comments', () => {
+      const requestData = `{
+      "field": "value"
+    }`;
+      expect(containsComments(requestData)).toBe(false);
+    });
+
+    it('should return false for empty string', () => {
+      expect(containsComments('')).toBe(false);
+    });
+
+    it('should correctly handle escaped quotes within strings', () => {
+      const requestData = `{
+      "field": \"value with \\\"escaped quotes\\\"\"
+    }`;
+      expect(containsComments(requestData)).toBe(false);
+    });
+
+    it('should return true if comment is outside of strings', () => {
+      const requestData = `{
+      "field": "value" // comment here
+    }`;
+      expect(containsComments(requestData)).toBe(true);
+    });
+  });
+
+  describe('collapseTripleQuoteStrings and expandTripleQuoteStrings', () => {
+    const input = `{
+  "query1": """FROM sample_data | LIMIT 3""",
+  "query2": """
+    FROM sample_data
+    | WHERE message LIKE "Connected*"
+    | SORT @timestamp DESC
+    """
+}`;
+
+    it('should collapse and re-expand both inline and multi-line triple-quote strings correctly', () => {
+      const { collapsedTripleQuotesData, tripleQuoteStrings } = collapseTripleQuoteStrings(input);
+
+      // Validate that both triple-quoted strings were replaced with the marker
+      expect(collapsedTripleQuotesData).toBe(`{
+  "query1": ${TRIPLE_QUOTE_STRINGS_MARKER},
+  "query2": ${TRIPLE_QUOTE_STRINGS_MARKER}
+}`);
+
+      // Validate extracted strings match expected format
+      expect(tripleQuoteStrings).toEqual([
+        `"""FROM sample_data | LIMIT 3"""`,
+        `"""
+    FROM sample_data
+    | WHERE message LIKE "Connected*"
+    | SORT @timestamp DESC
+    """`,
+      ]);
+
+      // Ensure re-expansion gives the original input back
+      const expanded = expandTripleQuoteStrings(collapsedTripleQuotesData, tripleQuoteStrings);
+      expect(expanded).toBe(input);
+    });
+
+    it('should be idempotent if run multiple times on collapsed data', () => {
+      const firstCollapse = collapseTripleQuoteStrings(input);
+      const secondCollapse = collapseTripleQuoteStrings(firstCollapse.collapsedTripleQuotesData);
+
+      expect(secondCollapse.tripleQuoteStrings).toEqual([]);
+      expect(secondCollapse.collapsedTripleQuotesData).toBe(
+        firstCollapse.collapsedTripleQuotesData
+      );
     });
   });
 });

@@ -61,27 +61,5 @@ describe('Telemetry logic', () => {
         });
       });
     });
-
-    describe('sendAppSearchTelemetry', () => {
-      it('calls sendTelemetry with the product populated', () => {
-        TelemetryLogic.actions.sendAppSearchTelemetry(telemetryEvent);
-
-        expect(TelemetryLogic.actions.sendTelemetry).toHaveBeenCalledWith({
-          ...telemetryEvent,
-          product: 'app_search',
-        });
-      });
-    });
-
-    describe('sendWorkplaceSearchTelemetry', () => {
-      it('calls sendTelemetry with the product populated', () => {
-        TelemetryLogic.actions.sendWorkplaceSearchTelemetry(telemetryEvent);
-
-        expect(TelemetryLogic.actions.sendTelemetry).toHaveBeenCalledWith({
-          ...telemetryEvent,
-          product: 'workplace_search',
-        });
-      });
-    });
   });
 });

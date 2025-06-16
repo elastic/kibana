@@ -12,7 +12,7 @@ import {
   ChatCompletionEventType,
 } from '@kbn/inference-common';
 import { createOutputApi } from './create_output_api';
-import { createToolValidationError } from '../../server/chat_complete/errors';
+import { createToolValidationError } from '../chat_complete/errors';
 
 describe('createOutputApi', () => {
   let chatComplete: jest.Mock;
@@ -33,12 +33,14 @@ describe('createOutputApi', () => {
       connectorId: '.my-connector',
       system: 'system',
       input: 'input message',
+      modelName: 'gpt-4o',
     });
 
     expect(chatComplete).toHaveBeenCalledTimes(1);
     expect(chatComplete).toHaveBeenCalledWith({
       connectorId: '.my-connector',
       functionCalling: 'native',
+      modelName: 'gpt-4o',
       stream: false,
       system: 'system',
       messages: [
@@ -215,6 +217,32 @@ describe('createOutputApi', () => {
     expect(chatComplete).toHaveBeenCalledWith(
       expect.objectContaining({
         abortSignal: abortController.signal,
+      })
+    );
+  });
+
+  it('propagates retry options when provided', async () => {
+    chatComplete.mockResolvedValue(Promise.resolve({ content: 'content', toolCalls: [] }));
+
+    const output = createOutputApi(chatComplete);
+
+    await output({
+      id: 'id',
+      connectorId: '.my-connector',
+      input: 'input message',
+      maxRetries: 42,
+      retryConfiguration: {
+        retryOn: 'all',
+      },
+    });
+
+    expect(chatComplete).toHaveBeenCalledTimes(1);
+    expect(chatComplete).toHaveBeenCalledWith(
+      expect.objectContaining({
+        maxRetries: 42,
+        retryConfiguration: {
+          retryOn: 'all',
+        },
       })
     );
   });

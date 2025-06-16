@@ -1,0 +1,27 @@
+title: Task health response properties
+type: object
+properties:
+  id:
+    type: string
+  last_update:
+    type: string
+  stats:
+    type: object
+    properties:
+      capacity_estimation:
+        type: object
+        description: >
+          This object provides a rough estimate about the sufficiency of its capacity.
+          These are estimates based on historical data and should not be used as predictions.
+      configuration:
+        $ref: 'configuration.yaml'
+      runtime:
+        type: object
+        description: >
+          This object tracks runtime performance of Task Manager, tracking task drift, worker load, and stats broken down by type, including duration and run results.
+      workload:
+        $ref: 'workload.yaml'
+  status:
+    type: string
+  timestamp:
+    type: string

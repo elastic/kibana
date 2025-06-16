@@ -6,10 +6,9 @@
  */
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import React, { useEffect } from 'react';
-import { LensApi } from '../..';
+import React, { useEffect, useMemo } from 'react';
 import { ExpressionWrapper } from '../expression_wrapper';
-import { LensInternalApi } from '../types';
+import { LensInternalApi, LensApi } from '../types';
 import { UserMessages } from '../user_messages/container';
 import { useMessages, useDispatcher } from './hooks';
 import { getViewMode } from '../helper';
@@ -34,22 +33,22 @@ export function LensEmbeddableComponent({
     blockingErrors,
     // has the render completed?
     hasRendered,
-    // has view mode changed?
-    latestViewMode,
   ] = useBatchedPublishingSubjects(
     internalApi.expressionParams$,
     internalApi.renderCount$,
     internalApi.validationMessages$,
     api.rendered$,
-    api.viewMode
+    // listen to view change mode but do not use its actual value
+    // just call the Lens API to know whether it's in edit mode
+    api.viewMode$
   );
-  const canEdit = Boolean(api.isEditingEnabled?.() && getViewMode(latestViewMode) === 'edit');
+  const canEdit = Boolean(api.isEditingEnabled?.() && getViewMode(api) === 'edit');
 
   const [warningOrErrors, infoMessages] = useMessages(internalApi);
 
   // On unmount call all the cleanups
   useEffect(() => {
-    addLog(`Mounting Lens Embeddable component: ${api.defaultPanelTitle?.getValue()}`);
+    addLog(`Mounting Lens Embeddable component: ${api.defaultTitle$?.getValue()}`);
     return onUnmount;
   }, [api, onUnmount]);
 
@@ -57,19 +56,22 @@ export function LensEmbeddableComponent({
   const rootRef = useDispatcher(hasRendered, api);
 
   // Publish the data attributes only if avaialble/visible
-  const title = internalApi.getDisplayOptions()?.noPanelTitle
-    ? undefined
-    : { 'data-title': api.panelTitle?.getValue() ?? api.defaultPanelTitle?.getValue() };
-  const description = api.panelDescription?.getValue()
+  const title = useMemo(
+    () =>
+      internalApi.getDisplayOptions()?.noPanelTitle
+        ? undefined
+        : { 'data-title': api.title$?.getValue() ?? api.defaultTitle$?.getValue() },
+    [api.defaultTitle$, api.title$, internalApi]
+  );
+  const description = api.description$?.getValue()
     ? {
-        'data-description':
-          api.panelDescription?.getValue() ?? api.defaultPanelDescription?.getValue(),
+        'data-description': api.description$?.getValue() ?? api.defaultDescription$?.getValue(),
       }
     : undefined;
 
   return (
     <div
-      style={{ width: '100%', height: '100%' }}
+      css={{ width: '100%', height: '100%', position: 'relative' }}
       data-rendering-count={renderCount + 1}
       data-render-complete={hasRendered}
       {...title}

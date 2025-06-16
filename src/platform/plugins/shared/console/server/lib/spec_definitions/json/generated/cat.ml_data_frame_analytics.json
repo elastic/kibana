@@ -4,6 +4,21 @@
       "format": [
         "text"
       ],
+      "help": "__flag__",
+      "v": "__flag__",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "allow_no_match": "__flag__",
+      "bytes": [
+        "b",
+        "kb",
+        "mb",
+        "gb",
+        "tb",
+        "pb"
+      ],
       "h": [
         "assignment_explanation",
         "create_time",
@@ -21,12 +36,6 @@
         "state",
         "type",
         "version"
-      ],
-      "help": "__flag__",
-      "master_timeout": [
-        "30s",
-        "-1",
-        "0"
       ],
       "s": [
         "assignment_explanation",
@@ -46,23 +55,14 @@
         "type",
         "version"
       ],
-      "v": "__flag__",
-      "error_trace": "__flag__",
-      "filter_path": [],
-      "human": "__flag__",
-      "pretty": "__flag__",
-      "allow_no_match": "__flag__",
-      "bytes": [
-        "b",
-        "kb",
-        "mb",
-        "gb",
-        "tb",
-        "pb"
-      ],
       "time": [
-        "-1",
-        "0"
+        "nanos",
+        "micros",
+        "ms",
+        "s",
+        "m",
+        "h",
+        "d"
       ]
     },
     "methods": [
@@ -72,7 +72,7 @@
       "_cat/ml/data_frame/analytics",
       "_cat/ml/data_frame/analytics/{id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cat-dfanalytics.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-ml-data-frame-analytics",
     "availability": {
       "stack": true,
       "serverless": true

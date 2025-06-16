@@ -6,9 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import styled from '@emotion/styled';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { EuiPanel, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_REASON_BODY_TEST_ID } from './test_ids';
 import { useAlertReasonPanelContext } from './context';
@@ -16,17 +15,11 @@ import { getRowRenderer } from '../../../timelines/components/timeline/body/rend
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { FlyoutError } from '../../shared/components/flyout_error';
 
-const ReasonContainerWrapper = styled.div`
-  overflow-x: auto;
-  padding-block: ${euiThemeVars.euiSizeS};
-`;
-
-const ReasonContainer = styled.div``;
-
 /**
  * Alert reason renderer on a preview panel on top of the right section of expandable flyout
  */
 export const AlertReason: React.FC = () => {
+  const { euiTheme } = useEuiTheme();
   const { dataAsNestedObject, scopeId } = useAlertReasonPanelContext();
 
   const renderer = useMemo(
@@ -40,7 +33,6 @@ export const AlertReason: React.FC = () => {
         ? renderer.renderRow({
             contextId: 'event-details',
             data: dataAsNestedObject,
-            isDraggable: false,
             scopeId,
           })
         : null,
@@ -66,9 +58,14 @@ export const AlertReason: React.FC = () => {
         </h6>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <ReasonContainerWrapper>
-        <ReasonContainer className={'eui-displayInlineBlock'}>{rowRenderer}</ReasonContainer>
-      </ReasonContainerWrapper>
+      <div
+        css={css`
+          overflow-x: auto;
+          padding-block: ${euiTheme.size.s};
+        `}
+      >
+        <div className={'eui-displayInlineBlock'}>{rowRenderer}</div>
+      </div>
     </EuiPanel>
   );
 };

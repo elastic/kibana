@@ -14,10 +14,12 @@ import { CASES_FEATURE_ID } from '../../../../../common/constants';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { useAlertsByStatus } from './use_alerts_by_status';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
+jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../../../common/lib/kibana/kibana_react');
 jest.mock('../../../../common/hooks/use_experimental_features', () => {
-  return { useIsExperimentalFeatureEnabled: jest.fn() };
+  return { useIsExperimentalFeatureEnabled: jest.fn(), useEnableExperimental: () => jest.fn() };
 });
 
 jest.mock('../../../../common/components/visualization_actions/visualization_embeddable');
@@ -63,6 +65,9 @@ describe('AlertsByStatus', () => {
       isLoading: true,
     });
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      timelinePrivileges: { read: true },
+    });
   });
 
   test('render HoverVisibilityContainer', () => {
@@ -106,6 +111,20 @@ describe('AlertsByStatus', () => {
 
     expect(getByText('Alerts by Severity')).toBeInTheDocument();
     expect(getByTestId('view-details-button')).toHaveTextContent('Investigate in Timeline');
+  });
+
+  test('shows correct names when entity filter IS provided AND user does not have timeline privileges', () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      timelinePrivileges: {},
+    });
+    const { getByText, getByTestId } = render(
+      <TestProviders>
+        <AlertsByStatus {...props} entityFilter={{ field: 'name', value: 'val' }} />
+      </TestProviders>
+    );
+
+    expect(getByText('Alerts by Severity')).toBeInTheDocument();
+    expect(getByTestId('view-details-button')).toHaveTextContent('View alerts');
   });
 
   test('render HeaderSection', () => {

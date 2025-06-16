@@ -9,21 +9,21 @@ import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { Direction } from '../../../../common/search_strategy';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
-import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
 import { convertTimelineAsInput } from './timeline_save';
 import type { TimelineModel } from '../model';
-import { createMockStore, kibanaMock } from '../../../common/mock';
+import { createMockStore, kibanaMock, mockGlobalState } from '../../../common/mock';
 import { selectTimelineById } from '../selectors';
 import { copyTimeline, persistTimeline } from '../../containers/api';
 import { refreshTimelines } from './helpers';
 import * as i18n from '../../pages/translations';
 
 import {
-  startTimelineSaving,
   endTimelineSaving,
-  showCallOutUnauthorizedMsg,
   saveTimeline,
   setChanged,
+  showCallOutUnauthorizedMsg,
+  startTimelineSaving,
 } from '../actions';
 
 jest.mock('../actions', () => {
@@ -71,7 +71,14 @@ describe('Timeline save middleware', () => {
     await store.dispatch(saveTimeline({ id: TimelineId.test, saveAsNew: false }));
 
     expect(startTimelineSavingMock).toHaveBeenCalled();
-    expect(persistTimeline as unknown as jest.Mock).toHaveBeenCalled();
+    expect(persistTimeline as unknown as jest.Mock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        timeline: expect.objectContaining({
+          dataViewId: mockGlobalState.sourcerer.sourcererScopes.timeline.selectedDataViewId,
+          indexNames: mockGlobalState.sourcerer.sourcererScopes.timeline.selectedPatterns,
+        }),
+      })
+    );
     expect(refreshTimelines as unknown as jest.Mock).toHaveBeenCalled();
     expect(endTimelineSavingMock).toHaveBeenCalled();
     expect(selectTimelineById(store.getState(), TimelineId.test)).toEqual(
@@ -303,7 +310,6 @@ describe('Timeline save middleware', () => {
         savedObjectId: '11169110-fc22-11e9-8ca9-072f15ce2685',
         selectAll: false,
         selectedEventIds: {},
-        sessionViewConfig: null,
         show: true,
         sort: [
           {

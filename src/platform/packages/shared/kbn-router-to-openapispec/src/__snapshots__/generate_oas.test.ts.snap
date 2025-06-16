@@ -126,6 +126,7 @@ Object {
     "/bar": Object {
       "get": Object {
         "deprecated": true,
+        "description": "[Required authorization] Route required privileges: foo.",
         "operationId": "get-bar",
         "parameters": Array [],
         "requestBody": Object {
@@ -490,6 +491,7 @@ Object {
     "/no-xsrf/{id}/{path}": Object {
       "post": Object {
         "deprecated": true,
+        "description": "[Required authorization] Route required privileges: foo.",
         "operationId": "post-no-xsrf-id-path",
         "parameters": Array [],
         "requestBody": Object {
@@ -702,6 +704,7 @@ Object {
     },
     "/test": Object {
       "get": Object {
+        "description": "[Required authorization] Route required privileges: foo.",
         "operationId": "get-test",
         "parameters": Array [],
         "requestBody": Object {

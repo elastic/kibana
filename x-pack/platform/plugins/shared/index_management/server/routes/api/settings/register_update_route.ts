@@ -37,7 +37,7 @@ export function registerUpdateRoute({ router, lib: { handleEsError } }: RouteDep
         expand_wildcards: 'none' as const,
         reopen: true,
         index: indexName,
-        body: request.body,
+        settings: request.body,
       };
 
       try {

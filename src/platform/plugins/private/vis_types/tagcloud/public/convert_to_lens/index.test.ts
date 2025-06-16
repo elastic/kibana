@@ -12,7 +12,7 @@ jest.mock('uuid', () => ({
 }));
 
 jest.mock('@kbn/visualizations-plugin/public', () => ({
-  convertToLensModule: Promise.resolve({
+  getConvertToLensModule: async () => ({
     getColumnsFromVis: jest.fn(() => {
       return [
         {

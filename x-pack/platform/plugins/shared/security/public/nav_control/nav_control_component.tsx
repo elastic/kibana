@@ -20,7 +20,6 @@ import React, { Fragment, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 
-import type { BuildFlavor } from '@kbn/config/src/types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { UserMenuLink } from '@kbn/security-plugin-types-public';
@@ -71,14 +70,12 @@ interface SecurityNavControlProps {
   editProfileUrl: string;
   logoutUrl: string;
   userMenuLinks$: Observable<UserMenuLink[]>;
-  buildFlavour: BuildFlavor;
 }
 
 export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
   editProfileUrl,
   logoutUrl,
   userMenuLinks$,
-  buildFlavour,
 }) => {
   const userMenuLinks = useObservable(userMenuLinks$, []);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -157,11 +154,6 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
       <FormattedMessage
         id="xpack.security.navControlComponent.loginLinkText"
         defaultMessage="Log in"
-      />
-    ) : buildFlavour === 'serverless' ? (
-      <FormattedMessage
-        id="xpack.security.navControlComponent.closeProjectLinkText"
-        defaultMessage="Close project"
       />
     ) : (
       <FormattedMessage

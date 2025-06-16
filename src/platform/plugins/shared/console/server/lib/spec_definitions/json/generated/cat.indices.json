@@ -4,14 +4,7 @@
       "format": [
         "text"
       ],
-      "h": [],
       "help": "__flag__",
-      "master_timeout": [
-        "30s",
-        "-1",
-        "0"
-      ],
-      "s": [],
       "v": "__flag__",
       "error_trace": "__flag__",
       "filter_path": [],
@@ -47,7 +40,14 @@
         "m",
         "h",
         "d"
-      ]
+      ],
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "h": [],
+      "s": []
     },
     "methods": [
       "GET"
@@ -56,7 +56,7 @@
       "_cat/indices",
       "_cat/indices/{index}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cat-indices.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-indices",
     "availability": {
       "stack": true,
       "serverless": true

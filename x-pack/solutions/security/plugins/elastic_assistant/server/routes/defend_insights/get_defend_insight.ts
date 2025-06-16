@@ -6,20 +6,23 @@
  */
 
 import type { IKibanaResponse } from '@kbn/core/server';
-
 import { IRouter, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import {
+  API_VERSIONS,
   DEFEND_INSIGHTS_BY_ID,
-  DefendInsightGetResponse,
   DefendInsightGetRequestParams,
-  ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+  DefendInsightGetResponse,
 } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { buildResponse } from '../../lib/build_response';
-import { ElasticAssistantRequestHandlerContext } from '../../types';
-import { isDefendInsightsEnabled, updateDefendInsightLastViewedAt } from './helpers';
+import { CallbackIds, ElasticAssistantRequestHandlerContext } from '../../types';
+import {
+  isDefendInsightsEnabled,
+  runExternalCallbacks,
+  updateDefendInsightLastViewedAt,
+} from './helpers';
 
 export const getDefendInsightRoute = (router: IRouter<ElasticAssistantRequestHandlerContext>) => {
   router.versioned
@@ -34,7 +37,7 @@ export const getDefendInsightRoute = (router: IRouter<ElasticAssistantRequestHan
     })
     .addVersion(
       {
-        version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {
             params: buildRouteValidationWithZod(DefendInsightGetRequestParams),
@@ -72,7 +75,7 @@ export const getDefendInsightRoute = (router: IRouter<ElasticAssistantRequestHan
           }
 
           const dataClient = await assistantContext.getDefendInsightsDataClient();
-          const authenticatedUser = assistantContext.getCurrentUser();
+          const authenticatedUser = await assistantContext.getCurrentUser();
           if (authenticatedUser == null) {
             return resp.error({
               body: `Authenticated user not found`,
@@ -86,14 +89,27 @@ export const getDefendInsightRoute = (router: IRouter<ElasticAssistantRequestHan
             });
           }
 
-          const defendInsight = await updateDefendInsightLastViewedAt({
+          const defendInsights = await dataClient.findDefendInsightsByParams({
+            params: { ids: [request.params.id] },
+            authenticatedUser,
+          });
+
+          if (defendInsights.length) {
+            await runExternalCallbacks(
+              CallbackIds.DefendInsightsPostFetch,
+              request,
+              defendInsights[0].endpointIds
+            );
+          }
+
+          const updatedDefendInsight = await updateDefendInsightLastViewedAt({
             dataClient,
-            id: request.params.id,
+            defendInsights,
             authenticatedUser,
           });
 
           return response.ok({
-            body: { data: defendInsight },
+            body: { data: updatedDefendInsight },
           });
         } catch (err) {
           logger.error(err);

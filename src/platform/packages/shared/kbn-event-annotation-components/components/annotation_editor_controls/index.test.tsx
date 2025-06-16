@@ -19,7 +19,8 @@ import type {
 import { QueryInputServices } from '@kbn/visualization-ui-components';
 import moment from 'moment';
 import { act } from 'react-dom/test-utils';
-import { EuiButtonGroup } from '@elastic/eui';
+import { EuiButtonGroup, EuiThemeProvider } from '@elastic/eui';
+import { render, screen } from '@testing-library/react';
 
 jest.mock('@kbn/unified-search-plugin/public', () => ({
   QueryStringInput: () => {
@@ -70,18 +71,27 @@ describe('AnnotationsPanel', () => {
     data: {},
   } as QueryInputServices;
 
-  describe('Dimension Editor', () => {
-    test('shows correct options for line annotations', () => {
-      const component = mount(
+  const mountWithThemeProvider = (
+    propsOverrides: Partial<typeof AnnotationEditorControls> = {}
+  ) => {
+    return mount(
+      <EuiThemeProvider>
         <AnnotationEditorControls
           annotation={customLineStaticAnnotation}
           onAnnotationChange={() => {}}
-          dataView={{} as DataView}
+          dataView={mockDataView}
           getDefaultRangeEnd={() => ''}
           queryInputServices={mockQueryInputServices}
           appName="myApp"
+          {...propsOverrides}
         />
-      );
+      </EuiThemeProvider>
+    );
+  };
+
+  describe('Dimension Editor', () => {
+    test('shows correct options for line annotations', () => {
+      const component = mountWithThemeProvider();
 
       expect(
         component.find('EuiDatePicker[data-test-subj="lns-xyAnnotation-time"]').prop('selected')
@@ -124,16 +134,7 @@ describe('AnnotationsPanel', () => {
         lineWidth: 3,
       };
 
-      const component = mount(
-        <AnnotationEditorControls
-          annotation={rangeAnnotation}
-          onAnnotationChange={() => {}}
-          dataView={{} as DataView}
-          getDefaultRangeEnd={() => ''}
-          queryInputServices={mockQueryInputServices}
-          appName="myApp"
-        />
-      );
+      const component = mountWithThemeProvider({ annotation: rangeAnnotation });
 
       expect(
         component.find('EuiDatePicker[data-test-subj="lns-xyAnnotation-fromTime"]').prop('selected')
@@ -156,21 +157,26 @@ describe('AnnotationsPanel', () => {
       expect(component.find('[data-test-subj="lns-xyAnnotation-fillStyle"]').exists()).toBeTruthy();
     });
 
-    test('calculates correct endTimstamp and transparent color when switching for range annotation and back', async () => {
+    test('calculates correct endTimestamp and transparent color when switching for range annotation and back', async () => {
       const onAnnotationChange = jest.fn();
       const rangeEndTimestamp = new Date().toISOString();
-      const component = mount(
-        <AnnotationEditorControls
-          annotation={customLineStaticAnnotation}
-          onAnnotationChange={onAnnotationChange}
-          dataView={{} as DataView}
-          getDefaultRangeEnd={() => rangeEndTimestamp}
-          queryInputServices={mockQueryInputServices}
-          appName="myApp"
-        />
+
+      const { rerender } = render(
+        <EuiThemeProvider>
+          <AnnotationEditorControls
+            annotation={customLineStaticAnnotation}
+            onAnnotationChange={onAnnotationChange}
+            dataView={mockDataView}
+            getDefaultRangeEnd={() => rangeEndTimestamp}
+            queryInputServices={mockQueryInputServices}
+            appName="myApp"
+          />
+        </EuiThemeProvider>
       );
 
-      component.find('button[data-test-subj="lns-xyAnnotation-rangeSwitch"]').simulate('click');
+      act(() => {
+        screen.getByTestId('lns-xyAnnotation-rangeSwitch').click();
+      });
 
       const expectedRangeAnnotation: RangeEventAnnotationConfig = {
         color: '#FF00001A',
@@ -185,19 +191,30 @@ describe('AnnotationsPanel', () => {
         },
       };
 
-      expect(onAnnotationChange).toBeCalledWith<EventAnnotationConfig[]>(expectedRangeAnnotation);
+      expect(onAnnotationChange).toHaveBeenCalledWith(expectedRangeAnnotation);
+
+      rerender(
+        <EuiThemeProvider>
+          <AnnotationEditorControls
+            annotation={expectedRangeAnnotation}
+            onAnnotationChange={onAnnotationChange}
+            dataView={mockDataView}
+            getDefaultRangeEnd={() => rangeEndTimestamp}
+            queryInputServices={mockQueryInputServices}
+            appName="myApp"
+          />
+        </EuiThemeProvider>
+      );
+
+      expect(screen.getByTestId('lns-xyAnnotation-rangeSwitch').getAttribute('aria-checked')).toBe(
+        'true'
+      );
 
       act(() => {
-        component.setProps({ annotation: expectedRangeAnnotation });
+        screen.getByTestId('lns-xyAnnotation-rangeSwitch').click();
       });
 
-      expect(
-        component.find('EuiSwitch[data-test-subj="lns-xyAnnotation-rangeSwitch"]').prop('checked')
-      ).toEqual(true);
-
-      component.find('button[data-test-subj="lns-xyAnnotation-rangeSwitch"]').simulate('click');
-
-      expect(onAnnotationChange).toBeCalledWith<EventAnnotationConfig[]>({
+      expect(onAnnotationChange).toHaveBeenCalledWith({
         color: '#FF0000',
         id: 'ann1',
         isHidden: undefined,
@@ -227,16 +244,7 @@ describe('AnnotationsPanel', () => {
         filter: { type: 'kibana_query', query: '', language: 'kuery' },
       };
 
-      const component = mount(
-        <AnnotationEditorControls
-          annotation={annotation}
-          onAnnotationChange={() => {}}
-          dataView={mockDataView}
-          getDefaultRangeEnd={() => ''}
-          queryInputServices={mockQueryInputServices}
-          appName="myApp"
-        />
-      );
+      const component = mountWithThemeProvider({ annotation });
 
       expect(
         component.find('[data-test-subj="lnsXY-annotation-query-based-field-picker"]').exists()
@@ -264,16 +272,10 @@ describe('AnnotationsPanel', () => {
     test('should prefill timeField with the default time field when switching to query based annotations', () => {
       const onAnnotationChange = jest.fn();
 
-      const component = mount(
-        <AnnotationEditorControls
-          annotation={customLineStaticAnnotation}
-          onAnnotationChange={onAnnotationChange}
-          dataView={mockDataView}
-          getDefaultRangeEnd={() => ''}
-          queryInputServices={mockQueryInputServices}
-          appName="myApp"
-        />
-      );
+      const component = mountWithThemeProvider({
+        annotation: customLineStaticAnnotation,
+        onAnnotationChange,
+      });
 
       act(() => {
         component
@@ -291,16 +293,10 @@ describe('AnnotationsPanel', () => {
     test('should avoid to retain specific manual configurations when switching to query based annotations', () => {
       const onAnnotationChange = jest.fn();
 
-      const component = mount(
-        <AnnotationEditorControls
-          annotation={customLineStaticAnnotation}
-          onAnnotationChange={onAnnotationChange}
-          dataView={mockDataView}
-          getDefaultRangeEnd={() => ''}
-          queryInputServices={mockQueryInputServices}
-          appName="myApp"
-        />
-      );
+      const component = mountWithThemeProvider({
+        annotation: customLineStaticAnnotation,
+        onAnnotationChange,
+      });
 
       act(() => {
         component
@@ -336,16 +332,7 @@ describe('AnnotationsPanel', () => {
 
       const onAnnotationChange = jest.fn();
 
-      const component = mount(
-        <AnnotationEditorControls
-          annotation={annotation}
-          onAnnotationChange={onAnnotationChange}
-          dataView={mockDataView}
-          getDefaultRangeEnd={() => ''}
-          queryInputServices={mockQueryInputServices}
-          appName="myApp"
-        />
-      );
+      const component = mountWithThemeProvider({ annotation, onAnnotationChange });
 
       act(() => {
         component
@@ -379,16 +366,7 @@ describe('AnnotationsPanel', () => {
 
       const onAnnotationChange = jest.fn();
 
-      const component = mount(
-        <AnnotationEditorControls
-          annotation={annotation}
-          onAnnotationChange={onAnnotationChange}
-          dataView={mockDataView}
-          getDefaultRangeEnd={() => ''}
-          queryInputServices={mockQueryInputServices}
-          appName="myApp"
-        />
-      );
+      const component = mountWithThemeProvider({ annotation, onAnnotationChange });
 
       act(() => {
         component
@@ -412,16 +390,11 @@ describe('AnnotationsPanel', () => {
 
     test('should fallback to the first date field available in the dataView if not time-based', () => {
       const onAnnotationChange = jest.fn();
-      const component = mount(
-        <AnnotationEditorControls
-          annotation={customLineStaticAnnotation}
-          onAnnotationChange={onAnnotationChange}
-          dataView={{ ...mockDataView, timeFieldName: '' } as DataView}
-          getDefaultRangeEnd={() => ''}
-          queryInputServices={mockQueryInputServices}
-          appName="myApp"
-        />
-      );
+      const component = mountWithThemeProvider({
+        annotation: customLineStaticAnnotation,
+        onAnnotationChange,
+        dataView: { ...mockDataView, timeFieldName: '' } as DataView,
+      });
 
       act(() => {
         component

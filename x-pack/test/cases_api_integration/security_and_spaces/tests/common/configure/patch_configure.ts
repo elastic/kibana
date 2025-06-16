@@ -11,9 +11,9 @@ import {
   ConnectorTypes,
   CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
-import { ConfigurationPatchRequest } from '@kbn/cases-plugin/common/types/api';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
+import type { ConfigurationPatchRequest } from '@kbn/cases-plugin/common/types/api';
+import { ObjectRemover as ActionsRemover } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
   removeServerGeneratedPropertiesFromSavedObject,

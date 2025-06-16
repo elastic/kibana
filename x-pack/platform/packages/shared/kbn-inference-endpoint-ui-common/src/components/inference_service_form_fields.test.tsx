@@ -6,7 +6,6 @@
  */
 
 import { InferenceServiceFormFields } from './inference_service_form_fields';
-import { FieldType, InferenceProvider } from '../types/types';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,103 +13,7 @@ import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_l
 import { I18nProvider } from '@kbn/i18n-react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-
-const mockProviders = [
-  {
-    service: 'hugging_face',
-    name: 'Hugging Face',
-    task_types: ['text_embedding', 'sparse_embedding'],
-    configurations: {
-      api_key: {
-        default_value: null,
-        description: `API Key for the provider you're connecting to.`,
-        label: 'API Key',
-        required: true,
-        sensitive: true,
-        updatable: true,
-        type: FieldType.STRING,
-      },
-      'rate_limit.requests_per_minute': {
-        default_value: null,
-        description: 'Minimize the number of rate limit errors.',
-        label: 'Rate Limit',
-        required: false,
-        sensitive: false,
-        updatable: true,
-        type: FieldType.INTEGER,
-      },
-      url: {
-        default_value: 'https://api.openai.com/v1/embeddings',
-        description: 'The URL endpoint to use for the requests.',
-        label: 'URL',
-        required: true,
-        sensitive: false,
-        updatable: true,
-        type: FieldType.STRING,
-      },
-    },
-  },
-  {
-    service: 'cohere',
-    name: 'Cohere',
-    task_types: ['text_embedding', 'rerank', 'completion'],
-    configurations: {
-      api_key: {
-        default_value: null,
-        description: `API Key for the provider you're connecting to.`,
-        label: 'API Key',
-        required: true,
-        sensitive: true,
-        updatable: true,
-        type: FieldType.STRING,
-      },
-      'rate_limit.requests_per_minute': {
-        default_value: null,
-        description: 'Minimize the number of rate limit errors.',
-        label: 'Rate Limit',
-        required: false,
-        sensitive: false,
-        updatable: true,
-        type: FieldType.INTEGER,
-      },
-    },
-  },
-  {
-    service: 'anthropic',
-    name: 'Anthropic',
-    task_types: ['completion'],
-    configurations: {
-      api_key: {
-        default_value: null,
-        description: `API Key for the provider you're connecting to.`,
-        label: 'API Key',
-        required: true,
-        sensitive: true,
-        updatable: true,
-        type: FieldType.STRING,
-      },
-      'rate_limit.requests_per_minute': {
-        default_value: null,
-        description:
-          'By default, the anthropic service sets the number of requests allowed per minute to 50.',
-        label: 'Rate Limit',
-        required: false,
-        sensitive: false,
-        updatable: true,
-        type: FieldType.INTEGER,
-      },
-      model_id: {
-        default_value: null,
-        description: 'The name of the model to use for the inference task.',
-        label: 'Model ID',
-        required: true,
-        sensitive: false,
-        updatable: true,
-        type: FieldType.STRING,
-      },
-    },
-  },
-] as InferenceProvider[];
+import { mockProviders } from '../utils/mock_providers';
 
 jest.mock('../hooks/use_providers', () => ({
   useProviders: jest.fn(() => ({
@@ -151,6 +54,18 @@ describe('Inference Services', () => {
 
     await userEvent.click(screen.getByTestId('provider-select'));
     expect(screen.getByTestId('euiSelectableList')).toBeInTheDocument();
+  });
+
+  it('renders Elastic at top', async () => {
+    render(
+      <MockFormProvider>
+        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} />
+      </MockFormProvider>
+    );
+
+    await userEvent.click(screen.getByTestId('provider-select'));
+    const listItems = screen.getAllByTestId('provider');
+    expect(listItems[0]).toHaveTextContent('Elastic');
   });
 
   it('renders selected provider fields - hugging_face', async () => {

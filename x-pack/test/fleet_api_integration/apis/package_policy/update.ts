@@ -681,6 +681,54 @@ export default function (providerContext: FtrProviderContext) {
         .expect(400);
     });
 
+    it('should return 400 if updating output to non-local ES for an agentless integration', async function () {
+      const { body: outputResponse } = await supertest
+        .post(`/api/fleet/outputs`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'logstash-output',
+          type: 'logstash',
+          hosts: ['test.fr:443'],
+          ssl: {
+            certificate: 'CERTIFICATE',
+            key: 'KEY',
+            certificate_authorities: ['CA1', 'CA2'],
+          },
+        })
+        .expect(200);
+
+      const { body: packagePolicyResponse } = await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'agentless-integration-policy',
+          description: '',
+          namespace: 'default',
+          policy_ids: [],
+          enabled: true,
+          inputs: [],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+          supports_agentless: true,
+        })
+        .expect(200);
+
+      const response = await supertest
+        .put(`/api/fleet/package_policies/${packagePolicyResponse.item.id}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          output_id: outputResponse.item.id,
+        })
+        .expect(400);
+
+      expect(response.body.message).to.eql(
+        'Output type "logstash" is not usable with package "filetest"'
+      );
+    });
+
     describe('Simplified package policy', () => {
       it('should work with valid values', async function () {
         await supertest
@@ -862,6 +910,64 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(400);
       });
+      it('should return 400 for custom packages updated to an agentless deployment', async () => {
+        const testCustomIntegrationName = 'test-custom-integration';
+        await supertest
+          .post('/api/fleet/epm/custom_integrations')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            integrationName: testCustomIntegrationName,
+            force: true,
+            datasets: [{ type: 'logs', name: testCustomIntegrationName }],
+          })
+          .expect(200);
+
+        const createRes = await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'test agentless custom package',
+            description: '',
+            namespace: 'default',
+            policy_ids: [agentPolicyId],
+            enabled: true,
+            inputs: [],
+            package: {
+              name: testCustomIntegrationName,
+              title: 'Test Custom Integration',
+              version: '1.0.0',
+            },
+          });
+
+        expect(createRes.statusCode).equal(200);
+        const customPackagePolicyId = createRes.body.item.id;
+
+        const res = await supertest
+          .put(`/api/fleet/package_policies/${customPackagePolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'test agentless custom package',
+            description: '',
+            namespace: 'default',
+            policy_ids: [agentPolicyId],
+            enabled: true,
+            inputs: [],
+            package: {
+              name: testCustomIntegrationName,
+              title: 'Test Custom Integration',
+              version: '1.0.0',
+            },
+            supports_agentless: true,
+          });
+
+        expect(res.statusCode).equal(400);
+        expect(res.body.message).equal(
+          'Cannot perform that action in Fleet because custom packages are not allowed to be deployed as agentless. Please choose a different deployment mode.'
+        );
+
+        // Associated agent policies that existed before agentless deployment update should NOT be deleted
+        await supertest.get(`/api/fleet/agent_policies/${agentPolicyId}`).expect(200);
+      });
     });
 
     describe('Input Packages', () => {
@@ -945,6 +1051,7 @@ export default function (providerContext: FtrProviderContext) {
           { id: 'logs-somedataset@package', type: 'component_template' },
           { id: 'logs-somedataset@custom', type: 'component_template' },
           { id: 'logs@custom', type: 'component_template' },
+          { id: 'integration_to_input@custom', type: 'component_template' },
         ]);
 
         const dataset3PkgComponentTemplate = await getComponentTemplate('logs-somedataset@package');

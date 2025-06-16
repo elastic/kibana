@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { Client } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { isArray } from 'lodash';
 import { indexTemplates } from '../data_sources';
-import { Config } from '../types';
+import type { Config, IndexTemplateDef } from '../types';
 
 export async function installIndexTemplate(
   config: Config,
   client: Client,
   logger: ToolingLog
 ): Promise<void> {
+  if (config.indexing.slashLogs) {
+    return Promise.resolve();
+  }
   const { dataset } = config.indexing;
   const templates = indexTemplates[dataset];
   const templateNames = templates.map((templateDef) => templateDef.name).join(',');
@@ -24,7 +27,10 @@ export async function installIndexTemplate(
     const componentNames = indexTemplateDef.components.map(({ name }) => name);
     logger.info(`Installing components for ${indexTemplateDef.name} (${componentNames})`);
     for (const component of indexTemplateDef.components) {
-      await client.cluster.putComponentTemplate({ name: component.name, ...component.template });
+      await client.cluster.putComponentTemplate({
+        name: component.name,
+        ...(component.template as Omit<IndexTemplateDef, 'name'>),
+      });
     }
     logger.info(`Installing index template (${indexTemplateDef.name})`);
     // Clone the template and add the base component name

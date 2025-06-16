@@ -14,6 +14,10 @@ import { useLensAttributes } from '../../use_lens_attributes';
 
 import { getDnsTopDomainsLensAttributes } from './dns_top_domains';
 
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('generated-uuid'),
+}));
+
 jest.mock('../../../../../sourcerer/containers', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({
     selectedPatterns: ['auditbeat-mytest-*'],

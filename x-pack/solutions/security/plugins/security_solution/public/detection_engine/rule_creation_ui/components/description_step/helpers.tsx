@@ -7,14 +7,14 @@
 
 import {
   EuiBadge,
-  EuiLoadingSpinner,
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
-  EuiText,
   EuiIcon,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiText,
   EuiToolTip,
-  EuiFlexGrid,
 } from '@elastic/eui';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 
@@ -22,15 +22,15 @@ import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
-import type { ThreatMapping, Type, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ThreatMapping, Threats, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { FilterBadgeGroup } from '@kbn/unified-search-plugin/public';
 import { IntervalAbbrScreenReader } from '../../../../common/components/accessibility';
 import type {
-  RequiredFieldArray,
   AlertSuppressionMissingFieldsStrategy,
+  RequiredFieldArray,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
-import { MATCHES, AND, OR } from '../../../../common/components/threat_match/translations';
+import { AND, MATCHES, OR } from '../../../../common/components/threat_match/translations';
 import type { EqlOptions } from '../../../../../common/search_strategy';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as i18nSeverity from '../severity_mapping/translations';
@@ -39,12 +39,8 @@ import * as i18nRiskScore from '../risk_score_mapping/translations';
 import * as i18n from './translations';
 import type { BuildQueryBarDescription, ListItems } from './types';
 import { SeverityBadge } from '../../../../common/components/severity_badge';
-import type {
-  AboutStepRiskScore,
-  AboutStepSeverity,
-  Duration,
-} from '../../../../detections/pages/detection_engine/rules/types';
-import { AlertSuppressionDurationType } from '../../../../detections/pages/detection_engine/rules/types';
+import type { AboutStepRiskScore, AboutStepSeverity, Duration } from '../../../common/types';
+import { AlertSuppressionDurationType } from '../../../common/types';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { RequiredFieldIcon } from '../../../rule_management/components/rule_details/required_field_icon';
 import { THREAT_QUERY_LANGUAGE_LABEL } from '../../../rule_management/components/rule_details/translations';

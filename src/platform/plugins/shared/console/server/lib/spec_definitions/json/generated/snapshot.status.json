@@ -7,6 +7,7 @@
       "pretty": "__flag__",
       "ignore_unavailable": "__flag__",
       "master_timeout": [
+        "30s",
         "-1",
         "0"
       ]
@@ -19,7 +20,7 @@
       "_snapshot/{repository}/_status",
       "_snapshot/{repository}/{snapshot}/_status"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-snapshots.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-status",
     "availability": {
       "stack": true,
       "serverless": false

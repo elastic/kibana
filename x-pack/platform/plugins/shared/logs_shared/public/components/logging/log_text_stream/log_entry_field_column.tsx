@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
+import styled from '@emotion/styled';
 import { JsonValue } from '@kbn/utility-types';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { LogColumn } from '../../../../common/log_entry';
 import { isFieldColumn, isHighlightFieldColumn } from '../../../utils/log_entry';
 import { FieldValue } from './field_value';
@@ -54,7 +54,7 @@ interface LogEntryColumnContentProps {
   wrapMode: WrapMode;
 }
 
-const FieldColumnContent = euiStyled(LogEntryColumnContent)<LogEntryColumnContentProps>`
+const FieldColumnContent = styled(LogEntryColumnContent)<LogEntryColumnContentProps>`
   text-overflow: ellipsis;
 
   ${(props) =>

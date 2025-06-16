@@ -8,8 +8,8 @@
  */
 
 import pMap from 'p-map';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import intersection from 'lodash/intersection';
+import type { estypes } from '@elastic/elasticsearch';
+import { intersection } from 'lodash';
 
 import type { Logger } from '@kbn/logging';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
@@ -155,7 +155,7 @@ export async function updateObjectsSpaces({
   }));
   const bulkGetResponse = bulkGetDocs.length
     ? await client.mget<SavedObjectsRawDocSource>(
-        { body: { docs: bulkGetDocs } },
+        { docs: bulkGetDocs },
         { ignore: [404], meta: true }
       )
     : undefined;
@@ -261,7 +261,7 @@ export async function updateObjectsSpaces({
 
   const { refresh = DEFAULT_REFRESH_SETTING } = options;
   const bulkOperationResponse = bulkOperationParams.length
-    ? await client.bulk({ refresh, body: bulkOperationParams, require_alias: true })
+    ? await client.bulk({ refresh, operations: bulkOperationParams, require_alias: true })
     : undefined;
 
   // Delete aliases if necessary, ensuring we don't have too many concurrent operations running.

@@ -8,15 +8,15 @@
  */
 
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/common';
+import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { BehaviorSubject } from 'rxjs';
 
 import { discoverServiceMock } from '../../__mocks__/services';
 import { createStartContractMock } from '../../__mocks__/start_contract';
-import { SearchEmbeddableApi } from '../types';
+import type { SearchEmbeddableApi } from '../types';
 import { getDiscoverLocatorParams } from '../utils/get_discover_locator_params';
 import { ViewSavedSearchAction } from './view_saved_search_action';
+import type { SolutionId } from '@kbn/core-chrome-browser';
 
 const applicationMock = createStartContractMock();
 const services = discoverServiceMock;
@@ -27,13 +27,13 @@ const compatibleEmbeddableApi: SearchEmbeddableApi = {
     searchSource: { getField: jest.fn() },
   } as unknown as SavedSearch),
   parentApi: {
-    viewMode: new BehaviorSubject('view'),
+    viewMode$: new BehaviorSubject('view'),
   },
 } as unknown as SearchEmbeddableApi;
 
 jest
   .spyOn(services.core.chrome, 'getActiveSolutionNavId$')
-  .mockReturnValue(new BehaviorSubject('test'));
+  .mockReturnValue(new BehaviorSubject('test' as unknown as SolutionId));
 
 describe('view saved search action', () => {
   it('is compatible when embeddable is of type saved search, in view mode && appropriate permissions are set', async () => {
@@ -54,7 +54,7 @@ describe('view saved search action', () => {
     const action = new ViewSavedSearchAction(applicationMock, services.locator);
     expect(
       await action.isCompatible({
-        embeddable: { ...compatibleEmbeddableApi, viewMode: new BehaviorSubject(ViewMode.EDIT) },
+        embeddable: { ...compatibleEmbeddableApi, viewMode$: new BehaviorSubject('edit') },
       })
     ).toBe(false);
   });

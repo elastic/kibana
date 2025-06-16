@@ -10,6 +10,7 @@ import {
   createIndexMock,
   populateIndexMock,
   loadMappingFileMock,
+  loadManifestFileMock,
   openZipArchiveMock,
   validateArtifactArchiveMock,
   fetchArtifactVersionsMock,
@@ -27,6 +28,7 @@ import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { installClientMock } from '../doc_install_status/service.mock';
 import type { ProductInstallState } from '../../../common/install_status';
 import { PackageInstaller } from './package_installer';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
 const artifactsFolder = '/lost';
 const artifactRepositoryUrl = 'https://repository.com';
@@ -35,6 +37,8 @@ const kibanaVersion = '8.16.3';
 const callOrder = (fn: { mock: { invocationCallOrder: number[] } }): number => {
   return fn.mock.invocationCallOrder[0];
 };
+
+const TEST_FORMAT_VERSION = '2.0.0';
 
 describe('PackageInstaller', () => {
   let logger: MockedLogger;
@@ -55,6 +59,12 @@ describe('PackageInstaller', () => {
       artifactRepositoryUrl,
       kibanaVersion,
     });
+
+    loadManifestFileMock.mockResolvedValue({
+      formatVersion: TEST_FORMAT_VERSION,
+      productName: 'kibana',
+      productVersion: '8.17',
+    });
   });
 
   afterEach(() => {
@@ -62,6 +72,7 @@ describe('PackageInstaller', () => {
     createIndexMock.mockReset();
     populateIndexMock.mockReset();
     loadMappingFileMock.mockReset();
+    loadManifestFileMock.mockReset();
     openZipArchiveMock.mockReset();
     validateArtifactArchiveMock.mockReset();
     fetchArtifactVersionsMock.mockReset();
@@ -99,18 +110,25 @@ describe('PackageInstaller', () => {
       expect(loadMappingFileMock).toHaveBeenCalledTimes(1);
       expect(loadMappingFileMock).toHaveBeenCalledWith(zipArchive);
 
+      expect(loadManifestFileMock).toHaveBeenCalledTimes(1);
+      expect(loadManifestFileMock).toHaveBeenCalledWith(zipArchive);
+
       expect(createIndexMock).toHaveBeenCalledTimes(1);
       expect(createIndexMock).toHaveBeenCalledWith({
+        elserInferenceId: defaultInferenceEndpoints.ELSER,
         indexName,
         mappings,
+        manifestVersion: TEST_FORMAT_VERSION,
         esClient,
         log: logger,
       });
 
       expect(populateIndexMock).toHaveBeenCalledTimes(1);
       expect(populateIndexMock).toHaveBeenCalledWith({
+        elserInferenceId: defaultInferenceEndpoints.ELSER,
         indexName,
         archive: zipArchive,
+        manifestVersion: TEST_FORMAT_VERSION,
         esClient,
         log: logger,
       });
@@ -130,6 +148,7 @@ describe('PackageInstaller', () => {
       expect(callOrder(downloadToDiskMock)).toBeLessThan(callOrder(openZipArchiveMock));
       expect(callOrder(openZipArchiveMock)).toBeLessThan(callOrder(loadMappingFileMock));
       expect(callOrder(loadMappingFileMock)).toBeLessThan(callOrder(createIndexMock));
+      expect(callOrder(loadManifestFileMock)).toBeLessThan(callOrder(createIndexMock));
       expect(callOrder(createIndexMock)).toBeLessThan(callOrder(populateIndexMock));
       expect(callOrder(populateIndexMock)).toBeLessThan(
         callOrder(productDocClient.setInstallationSuccessful)

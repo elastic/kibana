@@ -230,6 +230,40 @@ describe('RouteSecurity validation', () => {
     expect(() => validRouteSecurity(routeSecurity)).not.toThrow();
   });
 
+  it('should pass validation with anyOf defined', () => {
+    const routeSecurity = {
+      authz: {
+        requiredPrivileges: [
+          {
+            allRequired: [
+              { anyOf: ['privilege1', 'privilege2'] },
+              { anyOf: ['privilege3', 'privilege4'] },
+            ],
+          },
+        ],
+      },
+    };
+
+    expect(() => validRouteSecurity(routeSecurity)).not.toThrow();
+  });
+
+  it('should pass validation with allOf defined', () => {
+    const routeSecurity = {
+      authz: {
+        requiredPrivileges: [
+          {
+            anyRequired: [
+              { allOf: ['privilege1', 'privilege2'] },
+              { allOf: ['privilege3', 'privilege4'] },
+            ],
+          },
+        ],
+      },
+    };
+
+    expect(() => validRouteSecurity(routeSecurity)).not.toThrow();
+  });
+
   it('should fail validation when anyRequired and allRequired have the same values', () => {
     const invalidRouteSecurity = {
       authz: {
@@ -363,6 +397,76 @@ describe('RouteSecurity validation', () => {
       })
     ).toThrowErrorMatchingInlineSnapshot(
       `"[authz.requiredPrivileges]: Operator privilege requires at least one additional non-operator privilege to be defined"`
+    );
+  });
+
+  it('should fail validation when anyOf does not satisfy minSize', () => {
+    const invalidRouteSecurity = {
+      authz: {
+        requiredPrivileges: [{ allRequired: [{ anyOf: ['privilege1'] }] }],
+      },
+    };
+
+    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(`
+      "[authz.requiredPrivileges.0]: types that failed validation:
+      - [authz.requiredPrivileges.0.0.allRequired.0]: types that failed validation:
+       - [authz.requiredPrivileges.0.allRequired.0.0]: expected value of type [string] but got [Object]
+       - [authz.requiredPrivileges.0.allRequired.0.1.anyOf]: array size is [1], but cannot be smaller than [2]
+      - [authz.requiredPrivileges.0.1]: expected value of type [string] but got [Object]"
+    `);
+  });
+
+  it('should fail validation when allOf does not satisfy minSize', () => {
+    const invalidRouteSecurity = {
+      authz: {
+        requiredPrivileges: [{ anyRequired: [{ allOf: ['privilege1'] }, 'privilege2'] }],
+      },
+    };
+
+    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(`
+      "[authz.requiredPrivileges.0]: types that failed validation:
+      - [authz.requiredPrivileges.0.0.anyRequired.0]: types that failed validation:
+       - [authz.requiredPrivileges.0.anyRequired.0.0]: expected value of type [string] but got [Object]
+       - [authz.requiredPrivileges.0.anyRequired.0.1.allOf]: array size is [1], but cannot be smaller than [2]
+      - [authz.requiredPrivileges.0.1]: expected value of type [string] but got [Object]"
+    `);
+  });
+
+  it('should fail validation when anyOf has duplicated privileges', () => {
+    const invalidRouteSecurity = {
+      authz: {
+        requiredPrivileges: [
+          {
+            allRequired: [
+              { anyOf: ['privilege1', 'privilege2'] },
+              { anyOf: ['privilege3', 'privilege1'] },
+            ],
+          },
+        ],
+      },
+    };
+
+    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(
+      `"[authz.requiredPrivileges]: allRequired privileges must contain unique values"`
+    );
+  });
+
+  it('should fail validation when allOf has duplicated privileges', () => {
+    const invalidRouteSecurity = {
+      authz: {
+        requiredPrivileges: [
+          {
+            anyRequired: [
+              { allOf: ['privilege1', 'privilege2'] },
+              { allOf: ['privilege3', 'privilege1'] },
+            ],
+          },
+        ],
+      },
+    };
+
+    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(
+      `"[authz.requiredPrivileges]: anyRequired privileges must contain unique values"`
     );
   });
 });

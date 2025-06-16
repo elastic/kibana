@@ -49,7 +49,6 @@ export const getValidationNode = ({ logger }: GetValidationNodeParams): GraphNod
 
 function removePlaceHolders(query: string): string {
   return query
-    .replace(/\[indexPattern\]/g, 'logs-*') // Replace the indexPattern placeholder with logs-*
     .replaceAll(/\[(macro|lookup):.*?\]/g, '') // Removes any macro or lookup placeholders
     .replaceAll(/\n(\s*?\|\s*?\n)*/g, '\n'); // Removes any empty lines with | (pipe) alone after removing the placeholders
 }

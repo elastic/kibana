@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -12,12 +13,12 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
   useIsWithinMaxBreakpoint,
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { ALERT_WORKFLOW_STATUS, ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import { FILTER_OPEN, FILTER_ACKNOWLEDGED, FILTER_CLOSED } from '../../../../../common/types';
@@ -49,11 +50,10 @@ import {
 } from '../translations';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { VIEW_ALERTS } from '../../../pages/translations';
-import { SEVERITY_COLOR } from '../utils';
 import { FormattedCount } from '../../../../common/components/formatted_number';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { ChartLabel } from './chart_label';
 import { Legend } from '../../../../common/components/charts/legend';
-import { emptyDonutColor } from '../../../../common/components/charts/donutchart_empty';
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
@@ -65,6 +65,7 @@ import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 import type { Status } from '../../../../../common/api/detection_engine';
 import { getAlertsByStatusAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_by_status_donut';
+import { getRiskSeverityColors } from '../../../../common/utils/risk_color_palette';
 
 const StyledFlexItem = styled(EuiFlexItem)`
   padding: 0 4px;
@@ -84,12 +85,20 @@ interface AlertsByStatusProps {
   signalIndexName: string | null;
 }
 
-const chartConfigs: Array<{ key: Severity; label: string; color: string }> = [
-  { key: 'critical', label: STATUS_CRITICAL_LABEL, color: SEVERITY_COLOR.critical },
-  { key: 'high', label: STATUS_HIGH_LABEL, color: SEVERITY_COLOR.high },
-  { key: 'medium', label: STATUS_MEDIUM_LABEL, color: SEVERITY_COLOR.medium },
-  { key: 'low', label: STATUS_LOW_LABEL, color: SEVERITY_COLOR.low },
-];
+const getChartConfigs = (euiTheme: EuiThemeComputed) => {
+  const palette = getRiskSeverityColors(euiTheme);
+
+  return [
+    { key: 'critical', label: STATUS_CRITICAL_LABEL, color: palette.critical },
+    { key: 'high', label: STATUS_HIGH_LABEL, color: palette.high },
+    { key: 'medium', label: STATUS_MEDIUM_LABEL, color: palette.medium },
+    { key: 'low', label: STATUS_LOW_LABEL, color: palette.low },
+  ].map((config) => ({
+    ...config,
+    field: ALERT_SEVERITY,
+    value: config.label,
+  }));
+};
 
 const eventKindSignalFilter: EntityFilter = {
   field: 'event.kind',
@@ -106,9 +115,13 @@ export const AlertsByStatus = ({
   signalIndexName,
   entityFilter,
 }: AlertsByStatusProps) => {
+  const { euiTheme } = useEuiTheme();
   const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTION_RESPONSE_ALERTS_BY_STATUS_ID);
   const { openTimelineWithFilters } = useNavigateToTimeline();
   const navigateToAlerts = useNavigateToAlertsPageWithFilters();
+  const {
+    timelinePrivileges: { read: canAccessTimelines },
+  } = useUserPrivileges();
   const { onClick: goToAlerts, href } = useGetSecuritySolutionLinkProps()({
     deepLinkId: SecurityPageName.alerts,
   });
@@ -125,15 +138,16 @@ export const AlertsByStatus = ({
 
   const detailsButtonOptions = useMemo(
     () => ({
-      name: entityFilter ? INVESTIGATE_IN_TIMELINE : VIEW_ALERTS,
-      href: entityFilter ? undefined : href,
-      onClick: entityFilter
-        ? async () => {
-            await openTimelineWithFilters([[entityFilter, eventKindSignalFilter]]);
-          }
-        : goToAlerts,
+      name: canAccessTimelines && entityFilter ? INVESTIGATE_IN_TIMELINE : VIEW_ALERTS,
+      href: canAccessTimelines && entityFilter ? undefined : href,
+      onClick:
+        canAccessTimelines && entityFilter
+          ? async () => {
+              await openTimelineWithFilters([[entityFilter, eventKindSignalFilter]]);
+            }
+          : goToAlerts,
     }),
-    [entityFilter, href, goToAlerts, openTimelineWithFilters]
+    [entityFilter, href, goToAlerts, openTimelineWithFilters, canAccessTimelines]
   );
 
   const {
@@ -149,15 +163,7 @@ export const AlertsByStatus = ({
     to,
     from,
   });
-  const legendItems: LegendItem[] = useMemo(
-    () =>
-      chartConfigs.map((d) => ({
-        color: d.color,
-        field: ALERT_SEVERITY,
-        value: d.label,
-      })),
-    []
-  );
+  const legendItems: LegendItem[] = useMemo(() => getChartConfigs(euiTheme), [euiTheme]);
 
   const navigateToAlertsWithStatus = useCallback(
     (status: Status, level?: string) =>
@@ -189,17 +195,17 @@ export const AlertsByStatus = ({
   );
 
   const navigateToAlertsWithStatusOpen = useCallback(
-    (level?: string) => navigateToAlertsWithStatus(FILTER_OPEN, level),
+    (level?: string) => navigateToAlertsWithStatus(FILTER_OPEN, level?.toLocaleLowerCase()),
     [navigateToAlertsWithStatus]
   );
 
   const navigateToAlertsWithStatusAcknowledged = useCallback(
-    (level?: string) => navigateToAlertsWithStatus(FILTER_ACKNOWLEDGED, level),
+    (level?: string) => navigateToAlertsWithStatus(FILTER_ACKNOWLEDGED, level?.toLocaleLowerCase()),
     [navigateToAlertsWithStatus]
   );
 
   const navigateToAlertsWithStatusClosed = useCallback(
-    (level?: string) => navigateToAlertsWithStatus(FILTER_CLOSED, level),
+    (level?: string) => navigateToAlertsWithStatus(FILTER_CLOSED, level?.toLocaleLowerCase()),
     [navigateToAlertsWithStatus]
   );
 
@@ -214,9 +220,11 @@ export const AlertsByStatus = ({
 
   const totalAlertsCount = isDonutChartEmbeddablesEnabled ? visualizationTotalAlerts : totalAlerts;
 
-  const fillColor: FillColor = useCallback((dataName: string) => {
-    return chartConfigs.find((cfg) => cfg.label === dataName)?.color ?? emptyDonutColor;
-  }, []);
+  const fillColor: FillColor = useCallback(
+    (dataName: string) =>
+      legendItems.find(({ value }) => value === dataName)?.color ?? euiTheme.colors.textSubdued,
+    [euiTheme.colors.textSubdued, legendItems]
+  );
 
   return (
     <>

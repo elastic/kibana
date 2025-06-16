@@ -14,7 +14,6 @@ import { HostWorkingDir } from './host_working_dir';
 interface Props {
   contextId: string;
   eventId: string;
-  isDraggable?: boolean;
   hostName: string | null | undefined;
   hostNameSeparator?: string;
   userDomain: string | null | undefined;
@@ -22,6 +21,7 @@ interface Props {
   userName: string | null | undefined;
   userNameField?: string;
   workingDirectory: string | null | undefined;
+  scopeId: string;
 }
 
 export const UserHostWorkingDir = React.memo<Props>(
@@ -30,12 +30,12 @@ export const UserHostWorkingDir = React.memo<Props>(
     eventId,
     hostName,
     hostNameSeparator = '@',
-    isDraggable,
     userDomain,
     userDomainField = 'user.domain',
     userName,
     userNameField = 'user.name',
     workingDirectory,
+    scopeId,
   }) =>
     userName != null || userDomain != null || hostName != null || workingDirectory != null ? (
       <>
@@ -44,11 +44,11 @@ export const UserHostWorkingDir = React.memo<Props>(
             contextId={contextId}
             eventId={eventId}
             field={userNameField}
-            isDraggable={isDraggable}
             value={userName}
             iconType="user"
             fieldType="keyword"
             isAggregatable={true}
+            scopeId={scopeId}
           />
         </TokensFlexItem>
 
@@ -66,10 +66,10 @@ export const UserHostWorkingDir = React.memo<Props>(
                 contextId={contextId}
                 eventId={eventId}
                 field={userDomainField}
-                isDraggable={isDraggable}
                 value={userDomain}
                 fieldType="keyword"
                 isAggregatable={true}
+                scopeId={scopeId}
               />
             </TokensFlexItem>
           </>
@@ -81,10 +81,10 @@ export const UserHostWorkingDir = React.memo<Props>(
           </TokensFlexItem>
         )}
         <HostWorkingDir
+          scopeId={scopeId}
           contextId={contextId}
           eventId={eventId}
           hostName={hostName}
-          isDraggable={isDraggable}
           workingDirectory={workingDirectory}
         />
       </>

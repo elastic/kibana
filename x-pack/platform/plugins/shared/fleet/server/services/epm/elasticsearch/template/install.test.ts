@@ -10,6 +10,7 @@ import { createAppContextStartContractMock } from '../../../../mocks';
 import { appContextService } from '../../..';
 import { loadDatastreamsFieldsFromYaml } from '../../fields/field';
 import type { PackageInstallContext, RegistryDataStream } from '../../../../../common/types';
+import { createArchiveIteratorFromMap } from '../../archive/archive_iterator';
 
 import { prepareTemplate, prepareToInstallTemplates } from './install';
 
@@ -53,7 +54,11 @@ describe('EPM index template install', () => {
     const templatePriorityDatasetIsPrefixUnset = 200;
     const {
       indexTemplate: { indexTemplate },
-    } = prepareTemplate({ packageInstallContext, dataStream: dataStreamDatasetIsPrefixUnset });
+    } = await prepareTemplate({
+      packageInstallContext,
+      fieldAssetsMap: new Map(),
+      dataStream: dataStreamDatasetIsPrefixUnset,
+    });
     expect(indexTemplate.priority).toBe(templatePriorityDatasetIsPrefixUnset);
     expect(indexTemplate.index_patterns).toEqual([templateIndexPatternDatasetIsPrefixUnset]);
   });
@@ -74,7 +79,11 @@ describe('EPM index template install', () => {
     const templatePriorityDatasetIsPrefixFalse = 200;
     const {
       indexTemplate: { indexTemplate },
-    } = prepareTemplate({ packageInstallContext, dataStream: dataStreamDatasetIsPrefixFalse });
+    } = prepareTemplate({
+      packageInstallContext,
+      fieldAssetsMap: new Map(),
+      dataStream: dataStreamDatasetIsPrefixFalse,
+    });
 
     expect(indexTemplate.priority).toBe(templatePriorityDatasetIsPrefixFalse);
     expect(indexTemplate.index_patterns).toEqual([templateIndexPatternDatasetIsPrefixFalse]);
@@ -96,7 +105,11 @@ describe('EPM index template install', () => {
     const templatePriorityDatasetIsPrefixTrue = 150;
     const {
       indexTemplate: { indexTemplate },
-    } = prepareTemplate({ packageInstallContext, dataStream: dataStreamDatasetIsPrefixTrue });
+    } = prepareTemplate({
+      packageInstallContext,
+      fieldAssetsMap: new Map(),
+      dataStream: dataStreamDatasetIsPrefixTrue,
+    });
 
     expect(indexTemplate.priority).toBe(templatePriorityDatasetIsPrefixTrue);
     expect(indexTemplate.index_patterns).toEqual([templateIndexPatternDatasetIsPrefixTrue]);
@@ -119,6 +132,7 @@ describe('EPM index template install', () => {
 
     const { componentTemplates } = prepareTemplate({
       packageInstallContext,
+      fieldAssetsMap: new Map(),
       dataStream: dataStreamDatasetIsPrefixTrue,
     });
 
@@ -129,7 +143,6 @@ describe('EPM index template install', () => {
     }
 
     expect(packageTemplate.settings?.index?.mapping).toHaveProperty('source');
-    // @ts-expect-error esclient mapping out-of-date
     expect(packageTemplate.settings?.index?.mapping?.source).toEqual({ mode: 'synthetic' });
   });
 
@@ -150,6 +163,7 @@ describe('EPM index template install', () => {
 
     const { componentTemplates } = prepareTemplate({
       packageInstallContext,
+      fieldAssetsMap: new Map(),
       dataStream: dataStreamDatasetIsPrefixTrue,
     });
 
@@ -160,7 +174,6 @@ describe('EPM index template install', () => {
     }
 
     expect(packageTemplate.settings?.index?.mapping).toHaveProperty('source');
-    // @ts-expect-error esclient mapping out-of-date
     expect(packageTemplate.settings?.index?.mapping?.source).toEqual({ mode: 'synthetic' });
   });
 
@@ -182,6 +195,7 @@ describe('EPM index template install', () => {
     const { componentTemplates } = prepareTemplate({
       packageInstallContext,
       dataStream: dataStreamDatasetIsPrefixTrue,
+      fieldAssetsMap: new Map(),
       experimentalDataStreamFeature: {
         data_stream: 'metrics-package.dataset',
         features: {
@@ -220,6 +234,7 @@ describe('EPM index template install', () => {
     const { componentTemplates } = prepareTemplate({
       packageInstallContext,
       dataStream: dataStreamDatasetIsPrefixTrue,
+      fieldAssetsMap: new Map(),
       experimentalDataStreamFeature: {
         data_stream: 'metrics-package.dataset',
         features: {
@@ -257,6 +272,7 @@ describe('EPM index template install', () => {
 
     const { indexTemplate } = prepareTemplate({
       packageInstallContext,
+      fieldAssetsMap: new Map(),
       dataStream: dataStreamDatasetIsPrefixTrue,
     });
 
@@ -288,6 +304,7 @@ describe('EPM index template install', () => {
     const { componentTemplates } = prepareTemplate({
       packageInstallContext,
       dataStream,
+      fieldAssetsMap: new Map(),
     });
 
     const packageTemplate = componentTemplates['logs-package.dataset@package'].template;
@@ -315,6 +332,7 @@ describe('EPM index template install', () => {
     const { componentTemplates } = prepareTemplate({
       packageInstallContext,
       dataStream,
+      fieldAssetsMap: new Map(),
     });
 
     const packageTemplate = componentTemplates['logs-package.dataset@package'].template;
@@ -352,6 +370,7 @@ describe('EPM index template install', () => {
 
     const { componentTemplates } = prepareTemplate({
       packageInstallContext,
+      fieldAssetsMap: new Map(),
       dataStream,
     });
 
@@ -390,6 +409,7 @@ describe('EPM index template install', () => {
 
     const { componentTemplates } = prepareTemplate({
       packageInstallContext,
+      fieldAssetsMap: new Map(),
       dataStream,
     });
 
@@ -430,6 +450,7 @@ describe('EPM index template install', () => {
 
     const { componentTemplates } = prepareTemplate({
       packageInstallContext,
+      fieldAssetsMap: new Map(),
       dataStream,
     });
 
@@ -474,6 +495,7 @@ describe('EPM index template install', () => {
 
     const { componentTemplates } = prepareTemplate({
       packageInstallContext,
+      fieldAssetsMap: new Map(),
       dataStream,
     });
 
@@ -509,6 +531,7 @@ describe('EPM index template install', () => {
 
     const { componentTemplates } = prepareTemplate({
       packageInstallContext,
+      fieldAssetsMap: new Map(),
       dataStream,
     });
 
@@ -517,7 +540,7 @@ describe('EPM index template install', () => {
     expect(packageTemplate).not.toHaveProperty('lifecycle');
   });
 
-  test('test prepareToInstallTemplates does not include stack component templates in tracked assets', () => {
+  test('test prepareToInstallTemplates does not include stack component templates in tracked assets', async () => {
     const dataStreamDatasetIsPrefixUnset = {
       type: 'logs',
       dataset: 'package.dataset',
@@ -528,13 +551,14 @@ describe('EPM index template install', () => {
       ingest_pipeline: 'default',
     } as RegistryDataStream;
 
-    const { assetsToAdd } = prepareToInstallTemplates(
+    const { assetsToAdd } = await prepareToInstallTemplates(
       {
         packageInfo: {
           name: 'package',
           version: '0.0.1',
           data_streams: [dataStreamDatasetIsPrefixUnset],
         },
+        archiveIterator: createArchiveIteratorFromMap(new Map()),
       } as PackageInstallContext,
       [],
       []

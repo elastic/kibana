@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { TimeRange } from '@kbn/es-query';
 import { CreateJob } from './create_job';
 
@@ -44,7 +44,7 @@ export const CreateCategorizationJobFlyout: FC<Props> = ({
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
-          <h3>
+          <h3 id="ml-flyout-layer-title">
             <FormattedMessage
               id="xpack.ml.embeddables.newJobFromPatternAnalysisFlyout.title"
               defaultMessage="Create anomaly detection job"

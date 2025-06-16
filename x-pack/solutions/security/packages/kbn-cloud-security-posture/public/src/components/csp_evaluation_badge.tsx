@@ -6,50 +6,50 @@
  */
 
 import React from 'react';
-import { EuiBadge, type EuiBadgeProps } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { statusColors } from '../constants/component_constants';
+import { MISCONFIGURATION_STATUS } from '@kbn/cloud-security-posture-common';
+import type { MisconfigurationEvaluationStatus } from '@kbn/cloud-security-posture-common';
+import { useGetMisconfigurationStatusColor } from '../hooks/use_get_misconfiguration_status_color';
 
 interface Props {
-  type?: 'passed' | 'failed';
+  type?: MisconfigurationEvaluationStatus;
 }
 
 // 'fail' / 'pass' are same chars length, but not same width size.
 // 46px is used to make sure the badge is always the same width.
 const BADGE_WIDTH = '46px';
 
-const getColor = (type: Props['type']): EuiBadgeProps['color'] => {
-  if (type === 'passed') return statusColors.passed;
-  if (type === 'failed') return statusColors.failed;
-  return 'default';
-};
+export const CspEvaluationBadge = ({ type = MISCONFIGURATION_STATUS.UNKNOWN }: Props) => {
+  const { getMisconfigurationStatusColor } = useGetMisconfigurationStatusColor();
 
-export const CspEvaluationBadge = ({ type }: Props) => (
-  <EuiBadge
-    color={getColor(type)}
-    css={css`
-      width: ${BADGE_WIDTH};
-      display: flex;
-      justify-content: center;
-    `}
-    data-test-subj={`${type}_finding`}
-  >
-    {type === 'failed' ? (
-      <FormattedMessage
-        id="securitySolutionPackages.csp.cspEvaluationBadge.failLabel"
-        defaultMessage="Fail"
-      />
-    ) : type === 'passed' ? (
-      <FormattedMessage
-        id="securitySolutionPackages.csp.cspEvaluationBadge.passLabel"
-        defaultMessage="Pass"
-      />
-    ) : (
-      <FormattedMessage
-        id="securitySolutionPackages.csp.cspEvaluationBadge.naLabel"
-        defaultMessage="N/A"
-      />
-    )}
-  </EuiBadge>
-);
+  return (
+    <EuiBadge
+      color={getMisconfigurationStatusColor(type)}
+      css={css`
+        width: ${BADGE_WIDTH};
+        display: flex;
+        justify-content: center;
+      `}
+      data-test-subj={`${type}_finding`}
+    >
+      {type === MISCONFIGURATION_STATUS.FAILED ? (
+        <FormattedMessage
+          id="securitySolutionPackages.csp.cspEvaluationBadge.failLabel"
+          defaultMessage="Fail"
+        />
+      ) : type === MISCONFIGURATION_STATUS.PASSED ? (
+        <FormattedMessage
+          id="securitySolutionPackages.csp.cspEvaluationBadge.passLabel"
+          defaultMessage="Pass"
+        />
+      ) : (
+        <FormattedMessage
+          id="securitySolutionPackages.csp.cspEvaluationBadge.naLabel"
+          defaultMessage="N/A"
+        />
+      )}
+    </EuiBadge>
+  );
+};

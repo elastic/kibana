@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import type { PackageService } from '@kbn/fleet-plugin/server';
+import type { AuthenticatedUser, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { RuleMigrationsDataIntegrationsClient } from './rule_migrations_data_integrations_client';
 import { RuleMigrationsDataPrebuiltRulesClient } from './rule_migrations_data_prebuilt_rules_client';
 import { RuleMigrationsDataResourcesClient } from './rule_migrations_data_resources_client';
 import { RuleMigrationsDataRulesClient } from './rule_migrations_data_rules_client';
 import { RuleMigrationsDataLookupsClient } from './rule_migrations_data_lookups_client';
-import type { AdapterId } from './rule_migrations_data_service';
-
-export type IndexNameProvider = () => Promise<string>;
-export type IndexNameProviders = Record<AdapterId, IndexNameProvider>;
+import type { IndexNameProviders, SiemRuleMigrationsClientDependencies } from '../types';
+import { RuleMigrationsDataMigrationClient } from './rule_migrations_data_migration_client';
 
 export class RuleMigrationsDataClient {
+  protected logger: Logger;
+  protected esClient: IScopedClusterClient['asInternalUser'];
+
+  public readonly migrations: RuleMigrationsDataMigrationClient;
   public readonly rules: RuleMigrationsDataRulesClient;
   public readonly resources: RuleMigrationsDataResourcesClient;
   public readonly integrations: RuleMigrationsDataIntegrationsClient;
@@ -26,40 +27,87 @@ export class RuleMigrationsDataClient {
 
   constructor(
     indexNameProviders: IndexNameProviders,
-    username: string,
+    currentUser: AuthenticatedUser,
     esScopedClient: IScopedClusterClient,
     logger: Logger,
-    packageService?: PackageService
+    spaceId: string,
+    dependencies: SiemRuleMigrationsClientDependencies
   ) {
+    this.migrations = new RuleMigrationsDataMigrationClient(
+      indexNameProviders.migrations,
+      currentUser,
+      esScopedClient,
+      logger,
+      dependencies
+    );
     this.rules = new RuleMigrationsDataRulesClient(
       indexNameProviders.rules,
-      username,
-      esScopedClient.asInternalUser,
-      logger
+      currentUser,
+      esScopedClient,
+      logger,
+      dependencies
     );
     this.resources = new RuleMigrationsDataResourcesClient(
       indexNameProviders.resources,
-      username,
-      esScopedClient.asInternalUser,
-      logger
+      currentUser,
+      esScopedClient,
+      logger,
+      dependencies
     );
     this.integrations = new RuleMigrationsDataIntegrationsClient(
       indexNameProviders.integrations,
-      username,
-      esScopedClient.asInternalUser,
+      currentUser,
+      esScopedClient,
       logger,
-      packageService
+      dependencies
     );
     this.prebuiltRules = new RuleMigrationsDataPrebuiltRulesClient(
       indexNameProviders.prebuiltrules,
-      username,
-      esScopedClient.asInternalUser,
-      logger
+      currentUser,
+      esScopedClient,
+      logger,
+      dependencies
     );
     this.lookups = new RuleMigrationsDataLookupsClient(
-      username,
-      esScopedClient.asCurrentUser,
-      logger
+      currentUser,
+      esScopedClient,
+      logger,
+      spaceId
     );
+
+    this.logger = logger;
+    this.esClient = esScopedClient.asInternalUser;
+  }
+
+  /**
+   *
+   * Deletes a migration and all its associated rules and resources.
+   *
+   */
+  async deleteMigration(migrationId: string) {
+    const migrationDeleteOperations = await this.migrations.prepareDelete({
+      id: migrationId,
+    });
+
+    const rulesByMigrationIdDeleteOperations = await this.rules.prepareDelete(migrationId);
+
+    const resourcesByMigrationIdDeleteOperations = await this.resources.prepareDelete(migrationId);
+
+    return this.esClient
+      .bulk({
+        refresh: 'wait_for',
+        operations: [
+          ...migrationDeleteOperations,
+          ...rulesByMigrationIdDeleteOperations,
+          ...resourcesByMigrationIdDeleteOperations,
+        ],
+      })
+      .then(() => {
+        this.logger.info(`Deleted migration ${migrationId}`);
+      })
+      .catch((error) => {
+        this.logger.error(`Error deleting migration ${migrationId}: ${error}`);
+        throw error;
+      });
   }
 }

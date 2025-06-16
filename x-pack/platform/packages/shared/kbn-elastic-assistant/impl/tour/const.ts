@@ -7,4 +7,6 @@
 
 export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   KNOWLEDGE_BASE: 'elasticAssistant.knowledgeBase.newFeaturesTour.v8.16',
+  ANONYMIZED_VALUES_AND_CITATIONS:
+    'elasticAssistant.anonymizedValuesAndCitationsTourCompleted.v8.18',
 };

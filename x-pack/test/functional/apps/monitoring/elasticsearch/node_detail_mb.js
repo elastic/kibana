@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }) {
           'x-pack/test/functional/es_archives/monitoring/singlecluster_three_nodes_shard_relocation_mb',
           {
             from: 'Oct 5, 2017 @ 20:31:48.354',
-            to: 'Oct 5, 2017 @ 20:35:12.176',
+            to: 'Oct 5, 2017 @ 20:35:30.176',
             useCreate: true,
           }
         );
@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }) {
 
         expect(await nodeDetail.getSummary()).to.eql({
           transportAddress: 'Transport Address\n127.0.0.1:9300',
-          jvmHeap: 'JVM Heap\n29%',
+          jvmHeap: 'JVM Heap\n41%',
           freeDiskSpace: 'Free Disk Space\n173.9 GB (37.42%)',
           documentCount: 'Documents\n24.8k',
           dataSize: 'Data\n50.4 MB',
@@ -59,20 +59,26 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      it('should show node summary of data node with 4 indices and 4 shards', async () => {
+      it('should show node summary of data node with 5 indices and 5 shards', async () => {
         await nodesList.clickRowByResolver('bwQWH-7IQY-mFPpfoaoFXQ');
 
         expect(await nodeDetail.getSummary()).to.eql({
           transportAddress: 'Transport Address\n127.0.0.1:9302',
-          jvmHeap: 'JVM Heap\n17%',
+          jvmHeap: 'JVM Heap\n28%',
           freeDiskSpace: 'Free Disk Space\n173.9 GB (37.42%)',
-          documentCount: 'Documents\n240',
+          documentCount: 'Documents\n247',
           dataSize: 'Data\n1.4 MB',
-          indicesCount: 'Indices\n4',
-          shardsCount: 'Shards\n4',
+          indicesCount: 'Indices\n5',
+          shardsCount: 'Shards\n5',
           nodeType: 'Type\nNode',
           status: 'Status: Online',
         });
+      });
+
+      it('should show the link to view more node logs', async () => {
+        await nodesList.clickRowByResolver('jUT5KdxfRbORSCWkb5zjmA');
+
+        expect(await nodeDetail.viewLogsLinkIsShowing()).to.be(true);
       });
     });
 

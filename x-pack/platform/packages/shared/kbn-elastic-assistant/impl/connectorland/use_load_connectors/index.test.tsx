@@ -9,7 +9,13 @@ import { waitFor, renderHook } from '@testing-library/react';
 import { useLoadConnectors, Props } from '.';
 import { mockConnectors } from '../../mock/connectors';
 import { TestProviders } from '../../mock/test_providers/test_providers';
-import React, { ReactNode } from 'react';
+import { isInferenceEndpointExists } from '@kbn/inference-endpoint-ui-common';
+
+const mockedIsInferenceEndpointExists = isInferenceEndpointExists as jest.Mock;
+
+jest.mock('@kbn/inference-endpoint-ui-common', () => ({
+  isInferenceEndpointExists: jest.fn(),
+}));
 
 const mockConnectorsAndExtras = [
   ...mockConnectors,
@@ -55,16 +61,10 @@ const toasts = {
 };
 const defaultProps = { http, toasts } as unknown as Props;
 
-const createWrapper = (inferenceEnabled = false) => {
-  // eslint-disable-next-line react/display-name
-  return ({ children }: { children: ReactNode }) => (
-    <TestProviders providerContext={{ inferenceEnabled }}>{children}</TestProviders>
-  );
-};
-
 describe('useLoadConnectors', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedIsInferenceEndpointExists.mockResolvedValue(true);
   });
   it('should call api to load action types', async () => {
     renderHook(() => useLoadConnectors(defaultProps), {
@@ -91,9 +91,12 @@ describe('useLoadConnectors', () => {
   });
 
   it('includes preconfigured .inference results when inferenceEnabled is true', async () => {
-    const { result } = renderHook(() => useLoadConnectors(defaultProps), {
-      wrapper: createWrapper(true),
-    });
+    const { result } = renderHook(
+      () => useLoadConnectors({ ...defaultProps, inferenceEnabled: true }),
+      {
+        wrapper: TestProviders,
+      }
+    );
     await waitFor(() => {
       expect(result.current.data).toStrictEqual(
         mockConnectors

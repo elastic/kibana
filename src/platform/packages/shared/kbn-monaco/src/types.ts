@@ -17,6 +17,8 @@ export interface LangModuleType {
   languageConfiguration?: monaco.languages.LanguageConfiguration;
   foldingRangeProvider?: monaco.languages.FoldingRangeProvider;
   getSuggestionProvider?: Function;
+  onLanguage?: () => void;
+  languageThemeResolver?: (args: UseEuiTheme) => monaco.editor.IStandaloneThemeData;
 }
 
 export interface CompleteLangModuleType extends LangModuleType {
@@ -39,10 +41,9 @@ export interface LanguageProvidersModule<Deps = unknown> {
 }
 
 export interface CustomLangModuleType<Deps = unknown>
-  extends Omit<LangModuleType, 'getSuggestionProvider'>,
+  extends Omit<LangModuleType, 'getSuggestionProvider' | 'onLanguage'>,
     LanguageProvidersModule<Deps> {
-  onLanguage: () => void;
-  languageThemeResolver: (args: UseEuiTheme) => monaco.editor.IStandaloneThemeData;
+  onLanguage: NonNullable<LangModuleType['onLanguage']>;
 }
 
 export interface MonacoEditorError {

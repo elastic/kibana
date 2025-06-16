@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 
 import { css } from '@emotion/css';
-import { euiThemeVars } from '@kbn/ui-theme';
-import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
+import type { ApiConfig, AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import { AIConnector, ConnectorSelector } from '../connector_selector';
 import { Conversation } from '../../..';
 import { useAssistantContext } from '../../assistant_context';
@@ -20,11 +19,12 @@ import { getGenAiConfig } from '../helpers';
 export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
 
 interface Props {
+  fullWidth?: boolean;
   isDisabled?: boolean;
   selectedConnectorId?: string;
   selectedConversation?: Conversation;
   onConnectorIdSelected?: (connectorId: string) => void;
-  onConnectorSelected?: (conversation: Conversation) => void;
+  onConnectorSelected?: (conversation: Conversation, apiConfig?: ApiConfig) => void;
   stats?: AttackDiscoveryStats | null;
 }
 
@@ -44,6 +44,20 @@ const inputContainerClassName = css`
   }
 `;
 
+const fullWidthContainerClassName = css`
+  .euiSuperSelect {
+    max-inline-size: 100% !important;
+  }
+
+  .euiSuperSelectControl {
+    max-inline-size: 100%;
+  }
+
+  .euiFormControlLayout {
+    max-inline-size: 100%;
+  }
+`;
+
 const inputDisplayClassName = css`
   margin-right: 8px;
   overflow: hidden;
@@ -55,6 +69,7 @@ const inputDisplayClassName = css`
  */
 export const ConnectorSelectorInline: React.FC<Props> = React.memo(
   ({
+    fullWidth = false,
     isDisabled = false,
     selectedConnectorId,
     selectedConversation,
@@ -62,6 +77,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
     onConnectorSelected,
     stats = null,
   }) => {
+    const { euiTheme } = useEuiTheme();
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const { assistantAvailability } = useAssistantContext();
     const { setApiConfig } = useConversation();
@@ -81,20 +97,30 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
         setIsOpen(false);
 
         if (selectedConversation != null) {
-          const conversation = await setApiConfig({
-            conversation: selectedConversation,
-            apiConfig: {
+          if (selectedConversation.id === '' && onConnectorSelected != null) {
+            onConnectorSelected(selectedConversation, {
               ...selectedConversation.apiConfig,
-              actionTypeId: connector.actionTypeId,
               connectorId,
-              // With the inline component, prefer config args to handle 'new connector' case
+              actionTypeId: connector.actionTypeId,
               provider: apiProvider,
               model,
-            },
-          });
+            });
+          } else {
+            const conversation = await setApiConfig({
+              conversation: selectedConversation,
+              apiConfig: {
+                ...selectedConversation.apiConfig,
+                actionTypeId: connector.actionTypeId,
+                connectorId,
+                // With the inline component, prefer config args to handle 'new connector' case
+                provider: apiProvider,
+                model,
+              },
+            });
 
-          if (conversation && onConnectorSelected != null) {
-            onConnectorSelected(conversation);
+            if (conversation && onConnectorSelected != null) {
+              onConnectorSelected(conversation);
+            }
           }
         }
 
@@ -108,7 +134,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
     return (
       <EuiFlexGroup
         alignItems="center"
-        className={inputContainerClassName}
+        className={fullWidth ? fullWidthContainerClassName : inputContainerClassName}
         direction="row"
         gutterSize="xs"
         justifyContent={'flexStart'}
@@ -120,7 +146,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
               <EuiText
                 className={inputDisplayClassName}
                 size="s"
-                color={euiThemeVars.euiColorPrimaryText}
+                color={euiTheme.colors.textPrimary}
               >
                 {displayText}
               </EuiText>

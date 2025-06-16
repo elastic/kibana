@@ -11,11 +11,9 @@ import type { EntitiesESClient } from '../../lib/helpers/create_es_client/create
 
 export async function hasEntitiesData(entitiesESClient: EntitiesESClient, logger: Logger) {
   const params = {
-    body: {
-      terminate_after: 1,
-      track_total_hits: true,
-      size: 0,
-    },
+    terminate_after: 1,
+    track_total_hits: true,
+    size: 0,
   };
 
   try {

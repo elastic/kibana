@@ -12,7 +12,7 @@ import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, pagePathGetters } from '../../../../
 const EXCLUDED_PACKAGES = [
   'apm',
   'cloud_security_posture',
-  'cloud_defend',
+  'cloud_asset_inventory',
   'dga',
   'fleet_server',
   'osquery_manager',
@@ -27,9 +27,10 @@ interface GetInstallPkgRouteOptionsParams {
   agentPolicyId?: string;
   pkgkey: string;
   isCloud: boolean;
-  isExperimentalAddIntegrationPageEnabled: boolean;
   isFirstTimeAgentUser: boolean;
   isGuidedOnboardingActive: boolean;
+  isAgentlessIntegration?: boolean;
+  isAgentlessDefault?: boolean;
 }
 
 export type InstallPkgRouteOptions = [
@@ -50,16 +51,17 @@ export const getInstallPkgRouteOptions = ({
   pkgkey,
   isFirstTimeAgentUser,
   isCloud,
-  isExperimentalAddIntegrationPageEnabled,
   isGuidedOnboardingActive,
+  isAgentlessIntegration,
+  isAgentlessDefault,
 }: GetInstallPkgRouteOptionsParams): InstallPkgRouteOptions => {
   const integrationOpts: { integration?: string } = integration ? { integration } : {};
   const packageExemptFromStepsLayout = isPackageExemptFromStepsLayout(pkgkey);
   const useMultiPageLayout =
-    isExperimentalAddIntegrationPageEnabled &&
     isCloud &&
     (isFirstTimeAgentUser || isGuidedOnboardingActive) &&
-    !packageExemptFromStepsLayout;
+    !packageExemptFromStepsLayout &&
+    !isAgentlessDefault;
   const path = pagePathGetters.add_integration_to_policy({
     pkgkey,
     useMultiPageLayout,
@@ -102,7 +104,7 @@ export const getInstallPkgRouteOptions = ({
   }
 
   const state: CreatePackagePolicyRouteState = {
-    onSaveNavigateTo: redirectToPath,
+    onSaveNavigateTo: !isAgentlessIntegration ? redirectToPath : undefined,
     onSaveQueryParams,
     onCancelNavigateTo: [
       INTEGRATIONS_PLUGIN_ID,

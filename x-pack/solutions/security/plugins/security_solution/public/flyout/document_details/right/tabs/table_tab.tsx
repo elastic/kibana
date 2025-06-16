@@ -5,45 +5,82 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState } from 'react';
-import { getOr, sortBy } from 'lodash/fp';
+import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
+import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { css } from '@emotion/react';
-import { type EuiBasicTableColumn, EuiText, EuiInMemoryTable, useEuiFontSize } from '@elastic/eui';
+import { EuiInMemoryTable, useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
-import { getCategory } from '@kbn/triggers-actions-ui-plugin/public';
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { FieldSpec } from '@kbn/data-plugin/common';
-import { TableFieldNameCell } from '../components/table_field_name_cell';
-import { TableFieldValueCell } from '../components/table_field_value_cell';
+import { getCategory } from '@kbn/response-ops-alerts-fields-browser/helpers';
 import { TABLE_TAB_CONTENT_TEST_ID, TABLE_TAB_SEARCH_INPUT_TEST_ID } from './test_ids';
 import { getAllFieldsByName } from '../../../../common/containers/source';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineDefaults } from '../../../../timelines/store/defaults';
 import { timelineSelectors } from '../../../../timelines/store';
-import type { EventFieldsData } from '../../../../common/components/event_details/types';
-import { CellActions } from '../../shared/components/cell_actions';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { isInTableScope, isTimelineScope } from '../../../../helpers';
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
+import { getTableItems } from '../utils/table_tab_utils';
+import { TableTabSettingButton } from '../components/table_tab_setting_button';
+import { useKibana } from '../../../../common/lib/kibana';
+import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
+import { getTableTabColumns } from '../utils/table_tab_columns';
+import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
+import { TableTabTour } from '../components/table_tab_tour';
 
 const COUNT_PER_PAGE_OPTIONS = [25, 50, 100];
 
 const PLACEHOLDER = i18n.translate('xpack.securitySolution.flyout.table.filterPlaceholderLabel', {
   defaultMessage: 'Filter by field or value...',
 });
-export const FIELD = i18n.translate('xpack.securitySolution.flyout.table.fieldCellLabel', {
-  defaultMessage: 'Field',
-});
-const VALUE = i18n.translate('xpack.securitySolution.flyout.table.valueCellLabel', {
-  defaultMessage: 'Value',
-});
+
+const PIN_ACTION_CSS = css`
+  .flyout_table__unPinAction {
+    opacity: 1;
+  }
+  .flyout_table__pinAction {
+    opacity: 0;
+  }
+  &:hover {
+    .flyout_table__pinAction {
+      opacity: 1;
+    }
+  }
+`;
+
+export interface TableTabState {
+  /**
+   * The fields that are pinned
+   */
+  pinnedFields: string[];
+  /**
+   * Whether to show highlighted fields only
+   */
+  showHighlightedFields: boolean;
+  /**
+   * Whether to hide empty fields
+   */
+  hideEmptyFields: boolean;
+  /**
+   * Whether to hide alert fields
+   */
+  hideAlertFields: boolean;
+}
+
+const DEFAULT_TABLE_TAB_STATE: TableTabState = {
+  pinnedFields: [],
+  showHighlightedFields: false,
+  hideEmptyFields: false,
+  hideAlertFields: false,
+};
 
 /**
  * Defines the behavior of the search input that appears above the table of data
  */
-const search = {
+const SEARCH_CONFIG = {
   box: {
     incremental: true,
     placeholder: PLACEHOLDER,
@@ -64,90 +101,61 @@ export const getFieldFromBrowserField = memoizeOne(
   (newArgs, lastArgs) => newArgs[0] === lastArgs[0]
 );
 
-export type ColumnsProvider = (providerOptions: {
-  /**
-   * An object containing fields by type
-   */
-  browserFields: BrowserFields;
-  /**
-   * Id of the document
-   */
-  eventId: string;
-  /**
-   * Maintain backwards compatibility // TODO remove when possible
-   */
-  scopeId: string;
-  /**
-   * Id of the rule
-   */
-  ruleId: string;
-  /**
-   * Whether the preview link is in preview mode
-   */
-  isPreview: boolean;
-  /**
-   * Value of the link field if it exists. Allows to navigate to other pages like host, user, network...
-   */
-  getLinkValue: (field: string) => string | null;
-}) => Array<EuiBasicTableColumn<TimelineEventsDetailsItem>>;
-
-export const getColumns: ColumnsProvider = ({
-  browserFields,
-  eventId,
-  scopeId,
-  getLinkValue,
-  ruleId,
-  isPreview,
-}) => [
-  {
-    field: 'field',
-    name: (
-      <EuiText size="xs">
-        <strong>{FIELD}</strong>
-      </EuiText>
-    ),
-    width: '30%',
-    render: (field, data) => {
-      return <TableFieldNameCell dataType={(data as EventFieldsData).type} field={field} />;
-    },
-  },
-  {
-    field: 'values',
-    name: (
-      <EuiText size="xs">
-        <strong>{VALUE}</strong>
-      </EuiText>
-    ),
-    width: '70%',
-    render: (values, data) => {
-      const fieldFromBrowserField = getFieldFromBrowserField(data.field, browserFields);
-      return (
-        <CellActions field={data.field} value={values} isObjectArray={data.isObjectArray}>
-          <TableFieldValueCell
-            scopeId={scopeId}
-            data={data as EventFieldsData}
-            eventId={eventId}
-            fieldFromBrowserField={fieldFromBrowserField}
-            getLinkValue={getLinkValue}
-            ruleId={ruleId}
-            isPreview={isPreview}
-            values={values}
-          />
-        </CellActions>
-      );
-    },
-  },
-];
-
 /**
  * Table view displayed in the document details expandable flyout right section Table tab
  */
 export const TableTab = memo(() => {
   const smallFontSize = useEuiFontSize('xs').fontSize;
+  const { euiTheme } = useEuiTheme();
+  const {
+    services: { storage },
+  } = useKibana();
 
-  const { browserFields, dataFormattedForFieldBrowser, eventId, scopeId, isPreview } =
-    useDocumentDetailsContext();
-  const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+  const {
+    browserFields,
+    dataFormattedForFieldBrowser,
+    scopeId,
+    isRulePreview,
+    eventId,
+    investigationFields,
+  } = useDocumentDetailsContext();
+  const { ruleId, isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+
+  const highlightedFieldsResult = useHighlightedFields({
+    dataFormattedForFieldBrowser,
+    investigationFields,
+  });
+  const highlightedFields = useMemo(
+    () => Object.keys(highlightedFieldsResult),
+    [highlightedFieldsResult]
+  );
+
+  const [tableTabState, setTableTabState] = useState<TableTabState>(() => {
+    const restoredTableTabState = storage.get(FLYOUT_STORAGE_KEYS.TABLE_TAB_STATE);
+    if (restoredTableTabState != null) {
+      return restoredTableTabState;
+    }
+    return DEFAULT_TABLE_TAB_STATE;
+  });
+
+  useEffect(() => {
+    storage.set(FLYOUT_STORAGE_KEYS.TABLE_TAB_STATE, tableTabState);
+  }, [tableTabState, storage]);
+
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const renderToolsRight = useCallback(
+    () => [
+      <TableTabSettingButton
+        tableTabState={tableTabState}
+        setTableTabState={setTableTabState}
+        isPopoverOpen={isPopoverOpen}
+        setIsPopoverOpen={setIsPopoverOpen}
+        isAlert={isAlert}
+      />,
+    ],
+    [tableTabState, setTableTabState, isPopoverOpen, setIsPopoverOpen, isAlert]
+  );
 
   const [pagination, setPagination] = useState<{ pageIndex: number }>({
     pageIndex: 0,
@@ -155,6 +163,14 @@ export const TableTab = memo(() => {
   const onTableChange = useCallback(({ page: { index } }: { page: { index: number } }) => {
     setPagination({ pageIndex: index });
   }, []);
+
+  const paginationSettings = useMemo(
+    () => ({
+      ...pagination,
+      pageSizeOptions: COUNT_PER_PAGE_OPTIONS,
+    }),
+    [pagination]
+  );
 
   const getScope = useMemo(() => {
     if (isTimelineScope(scopeId)) {
@@ -176,15 +192,33 @@ export const TableTab = memo(() => {
 
   const fieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
 
+  const { pinnedFields } = useMemo(() => tableTabState, [tableTabState]);
+  const onTogglePinned = useCallback(
+    (field: string, action: 'pin' | 'unpin') => {
+      if (action === 'pin') {
+        setTableTabState({
+          ...tableTabState,
+          pinnedFields: [...pinnedFields, field],
+        });
+      } else if (action === 'unpin') {
+        setTableTabState({
+          ...tableTabState,
+          pinnedFields: pinnedFields.filter((f) => f !== field),
+        });
+      }
+    },
+    [pinnedFields, tableTabState, setTableTabState]
+  );
+
   const items = useMemo(
     () =>
-      sortBy(['field'], dataFormattedForFieldBrowser).map((item, i) => ({
-        ...item,
-        ...fieldsByName[item.field],
-        valuesConcatenated: item.values != null ? item.values.join() : '',
-        ariaRowindex: i + 1,
-      })),
-    [dataFormattedForFieldBrowser, fieldsByName]
+      getTableItems({
+        dataFormattedForFieldBrowser,
+        fieldsByName,
+        highlightedFields,
+        tableTabState,
+      }),
+    [dataFormattedForFieldBrowser, highlightedFields, tableTabState, fieldsByName]
   );
 
   const getLinkValue = useCallback(
@@ -207,43 +241,51 @@ export const TableTab = memo(() => {
     ({ field }: TimelineEventsDetailsItem) => ({
       className: 'flyout-table-row-small-font',
       'data-test-subj': `flyout-table-row-${field}`,
+      ...(highlightedFields.includes(field) && {
+        style: { backgroundColor: euiTheme.colors.backgroundBaseWarning },
+      }),
+      css: PIN_ACTION_CSS,
     }),
-    []
+    [highlightedFields, euiTheme.colors]
   );
 
   const columns = useMemo(
     () =>
-      getColumns({
+      getTableTabColumns({
         browserFields,
         eventId,
         scopeId,
         getLinkValue,
         ruleId,
-        isPreview,
+        isRulePreview,
+        onTogglePinned,
       }),
-    [browserFields, eventId, scopeId, getLinkValue, ruleId, isPreview]
+    [browserFields, eventId, scopeId, getLinkValue, ruleId, isRulePreview, onTogglePinned]
   );
 
+  const search = useMemo(() => {
+    return { ...SEARCH_CONFIG, toolsRight: renderToolsRight() };
+  }, [renderToolsRight]);
   return (
-    <EuiInMemoryTable
-      items={items}
-      itemId="field"
-      columns={columns}
-      onTableChange={onTableChange}
-      pagination={{
-        ...pagination,
-        pageSizeOptions: COUNT_PER_PAGE_OPTIONS,
-      }}
-      rowProps={onSetRowProps}
-      search={search}
-      sorting={false}
-      data-test-subj={TABLE_TAB_CONTENT_TEST_ID}
-      css={css`
-        .euiTableRow {
-          font-size: ${smallFontSize};
-        }
-      `}
-    />
+    <>
+      <TableTabTour setIsPopoverOpen={setIsPopoverOpen} />
+      <EuiInMemoryTable
+        items={items}
+        itemId="field"
+        columns={columns}
+        onTableChange={onTableChange}
+        pagination={paginationSettings}
+        rowProps={onSetRowProps}
+        search={search}
+        sorting={false}
+        data-test-subj={TABLE_TAB_CONTENT_TEST_ID}
+        css={css`
+          .euiTableRow {
+            font-size: ${smallFontSize};
+          }
+        `}
+      />
+    </>
   );
 });
 

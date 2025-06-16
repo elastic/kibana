@@ -21,7 +21,7 @@ describe('generic.commands.args', () => {
 
       generic.commands.args.insert(
         command!,
-        Builder.expression.source({ index: 'test', sourceType: 'index' }),
+        Builder.expression.source.node({ index: 'test', sourceType: 'index' }),
         123
       );
 
@@ -37,7 +37,7 @@ describe('generic.commands.args', () => {
 
       generic.commands.args.insert(
         command!,
-        Builder.expression.source({ index: 'test', sourceType: 'index' }),
+        Builder.expression.source.node({ index: 'test', sourceType: 'index' }),
         0
       );
 
@@ -53,7 +53,7 @@ describe('generic.commands.args', () => {
 
       generic.commands.args.insert(
         command!,
-        Builder.expression.source({ index: 'test', sourceType: 'index' }),
+        Builder.expression.source.node({ index: 'test', sourceType: 'index' }),
         1
       );
 
@@ -70,7 +70,7 @@ describe('generic.commands.args', () => {
 
         generic.commands.args.insert(
           command!,
-          Builder.expression.source({ index: 'test', sourceType: 'index' }),
+          Builder.expression.source.node({ index: 'test', sourceType: 'index' }),
           123
         );
 
@@ -86,7 +86,7 @@ describe('generic.commands.args', () => {
 
         generic.commands.args.insert(
           command!,
-          Builder.expression.source({ index: 'test', sourceType: 'index' }),
+          Builder.expression.source.node({ index: 'test', sourceType: 'index' }),
           0
         );
 
@@ -102,7 +102,7 @@ describe('generic.commands.args', () => {
 
         generic.commands.args.insert(
           command!,
-          Builder.expression.source({ index: 'test', sourceType: 'index' }),
+          Builder.expression.source.node({ index: 'test', sourceType: 'index' }),
           1
         );
 
@@ -121,7 +121,7 @@ describe('generic.commands.args', () => {
 
       generic.commands.args.append(
         command!,
-        Builder.expression.source({ index: 'test', sourceType: 'index' })
+        Builder.expression.source.node({ index: 'test', sourceType: 'index' })
       );
 
       const src2 = BasicPrettyPrinter.print(root);

@@ -21,7 +21,7 @@ import {
   EuiLink,
   EuiPopover,
 } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { defaultToEmptyTag } from '../empty_value';
 export interface ReputationLinkSetting {

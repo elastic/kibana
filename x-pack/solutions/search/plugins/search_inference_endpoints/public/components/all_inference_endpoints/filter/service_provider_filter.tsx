@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
-import { SERVICE_PROVIDERS } from '../render_table_columns/render_service_provider/service_provider';
-import type { FilterOptions, ServiceProviderKeys } from '../types';
+import React, { useMemo } from 'react';
+import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import type { FilterOptions } from '../types';
 import { MultiSelectFilter, MultiSelectFilterOption } from './multi_select_filter';
 import * as i18n from './translations';
 
 interface Props {
   optionKeys: ServiceProviderKeys[];
   onChange: (newFilterOptions: Partial<FilterOptions>) => void;
+  uniqueProviders: Set<ServiceProviderKeys>;
 }
 
-const options = Object.entries(SERVICE_PROVIDERS).map(([key, { name }]) => ({
-  key,
-  label: name,
-}));
-
-export const ServiceProviderFilter: React.FC<Props> = ({ optionKeys, onChange }) => {
+export const ServiceProviderFilter: React.FC<Props> = ({
+  optionKeys,
+  onChange,
+  uniqueProviders,
+}) => {
   const filterId: string = 'provider';
   const onSystemFilterChange = (newOptions: MultiSelectFilterOption[]) => {
     onChange({
@@ -31,11 +31,23 @@ export const ServiceProviderFilter: React.FC<Props> = ({ optionKeys, onChange })
     });
   };
 
+  const filteredOptions = useMemo(() => {
+    const options: any = [];
+    uniqueProviders.forEach((provider) => {
+      const { name } = SERVICE_PROVIDERS[provider];
+      options.push({
+        key: provider,
+        label: name,
+      });
+    });
+    return options;
+  }, [uniqueProviders]);
+
   return (
     <MultiSelectFilter
       buttonLabel={i18n.SERVICE_PROVIDER}
       onChange={onSystemFilterChange}
-      options={options}
+      options={filteredOptions}
       renderOption={(option) => option.label}
       selectedOptionKeys={optionKeys}
       dataTestSubj="service-field-endpoints"

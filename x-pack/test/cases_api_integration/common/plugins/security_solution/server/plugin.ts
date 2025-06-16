@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup } from '@kbn/core/server';
+import type { Plugin, CoreSetup } from '@kbn/core/server';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
 export interface FixtureSetupDeps {
@@ -154,6 +154,29 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
                   },
                   cases: {
                     reopenCase: ['securitySolutionFixture'],
+                  },
+                  ui: [],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: 'Assign users',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'cases_assign',
+                  name: 'Assign users to cases',
+                  includeIn: 'all',
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  cases: {
+                    assign: ['securitySolutionFixture'],
                   },
                   ui: [],
                 },

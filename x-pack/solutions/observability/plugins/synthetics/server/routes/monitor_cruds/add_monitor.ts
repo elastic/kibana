@@ -8,7 +8,10 @@ import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { validatePermissions } from './edit_monitor';
-import { InvalidLocationError } from '../../synthetics_service/project_monitor/normalizers/common_fields';
+import {
+  InvalidLocationError,
+  InvalidScheduleError,
+} from '../../synthetics_service/project_monitor/normalizers/common_fields';
 import { AddEditMonitorAPI, CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
@@ -119,17 +122,17 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       addMonitorAPI.setupGettingStarted(newMonitor.id);
 
       return mapSavedObjectToMonitor({ monitor: newMonitor, internal });
-    } catch (getErr) {
-      server.logger.error(getErr);
-      if (getErr instanceof InvalidLocationError) {
-        return response.badRequest({ body: { message: getErr.message } });
+    } catch (error) {
+      if (error instanceof InvalidLocationError || error instanceof InvalidScheduleError) {
+        return response.badRequest({ body: { message: error.message } });
       }
-      if (SavedObjectsErrorHelpers.isForbiddenError(getErr)) {
-        return response.forbidden({ body: getErr });
+      if (SavedObjectsErrorHelpers.isForbiddenError(error)) {
+        return response.forbidden({ body: error });
       }
 
+      server.logger.error('Unable to create synthetics monitor', { error });
       return response.customError({
-        body: { message: getErr.message },
+        body: { message: error.message },
         statusCode: 500,
       });
     }

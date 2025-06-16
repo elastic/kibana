@@ -7,29 +7,27 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
-import capitalize from 'lodash/capitalize';
-import { SEVERITY_UI_SORT_ORDER, RISK_SEVERITY_COLOUR, RISK_SCORE_RANGES } from '../common/utils';
+import { capitalize } from 'lodash';
+
+import { SEVERITY_UI_SORT_ORDER, RISK_SCORE_RANGES, RISK_SEVERITY_COLOUR } from '../common/utils';
+import type { EntityType } from '../../../common/entity_analytics/types';
 import type { RiskSeverity } from '../../../common/search_strategy';
-import { RiskScoreEntity, RiskScoreFields } from '../../../common/search_strategy';
+import { EntityTypeToScoreField, RiskScoreFields } from '../../../common/search_strategy';
 
 interface GetRiskScoreSummaryAttributesProps {
   query?: string;
   spaceId?: string;
   severity?: RiskSeverity;
-  riskEntity: RiskScoreEntity;
+  riskEntity: EntityType;
 }
 
 export const getRiskScoreSummaryAttributes: (
   props: GetRiskScoreSummaryAttributesProps
 ) => LensAttributes = ({ spaceId, query, severity, riskEntity }) => {
-  const layerIds = [uuidv4(), uuidv4()];
-  const internalReferenceId = uuidv4();
-  const columnIds = [uuidv4(), uuidv4(), uuidv4()];
-  const sourceField =
-    riskEntity === RiskScoreEntity.user
-      ? RiskScoreFields.userRiskScore
-      : RiskScoreFields.hostRiskScore;
-
+  const layerIds = [`layer-id1-${uuidv4()}`, `layer-id2-${uuidv4()}`];
+  const internalReferenceId = `internal-reference-id-${uuidv4()}`;
+  const columnIds = [`column-id1-${uuidv4()}`, `column-id2-${uuidv4()}`, `column-id3-${uuidv4()}`];
+  const sourceField = EntityTypeToScoreField[riskEntity];
   return {
     title: 'Risk score summary',
     description: '',

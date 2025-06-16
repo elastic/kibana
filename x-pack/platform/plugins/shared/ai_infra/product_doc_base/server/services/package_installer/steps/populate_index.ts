@@ -11,19 +11,26 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { isArtifactContentFilePath } from '@kbn/product-doc-common';
 import { internalElserInferenceId } from '../../../../common/consts';
 import type { ZipArchive } from '../utils/zip_archive';
+import { isLegacySemanticTextVersion } from '../utils';
 
 export const populateIndex = async ({
   esClient,
   indexName,
+  manifestVersion,
   archive,
   log,
+  elserInferenceId,
 }: {
   esClient: ElasticsearchClient;
   indexName: string;
+  manifestVersion: string;
   archive: ZipArchive;
   log: Logger;
+  elserInferenceId?: string;
 }) => {
   log.debug(`Starting populating index ${indexName}`);
+
+  const legacySemanticText = isLegacySemanticTextVersion(manifestVersion);
 
   const contentEntries = archive.getEntryPaths().filter(isArtifactContentFilePath);
 
@@ -31,7 +38,13 @@ export const populateIndex = async ({
     const entryPath = contentEntries[i];
     log.debug(`Indexing content for entry ${entryPath}`);
     const contentBuffer = await archive.getEntryContent(entryPath);
-    await indexContentFile({ indexName, esClient, contentBuffer });
+    await indexContentFile({
+      indexName,
+      esClient,
+      contentBuffer,
+      legacySemanticText,
+      elserInferenceId,
+    });
   }
 
   log.debug(`Done populating index ${indexName}`);
@@ -41,10 +54,14 @@ const indexContentFile = async ({
   indexName,
   contentBuffer,
   esClient,
+  legacySemanticText,
+  elserInferenceId = internalElserInferenceId,
 }: {
   indexName: string;
   contentBuffer: Buffer;
   esClient: ElasticsearchClient;
+  legacySemanticText: boolean;
+  elserInferenceId?: string;
 }) => {
   const fileContent = contentBuffer.toString('utf-8');
   const lines = fileContent.split('\n');
@@ -55,7 +72,13 @@ const indexContentFile = async ({
     .map((line) => {
       return JSON.parse(line);
     })
-    .map((doc) => rewriteInferenceId(doc, internalElserInferenceId));
+    .map((doc) =>
+      rewriteInferenceId({
+        document: doc,
+        inferenceId: elserInferenceId,
+        legacySemanticText,
+      })
+    );
 
   const operations = documents.reduce((ops, document) => {
     ops!.push(...[{ index: { _index: indexName } }, document]);
@@ -73,9 +96,18 @@ const indexContentFile = async ({
   }
 };
 
-const rewriteInferenceId = (document: Record<string, any>, inferenceId: string) => {
+const rewriteInferenceId = ({
+  document,
+  inferenceId,
+  legacySemanticText,
+}: {
+  document: Record<string, any>;
+  inferenceId: string;
+  legacySemanticText: boolean;
+}) => {
+  const semanticFieldsRoot = legacySemanticText ? document : document._inference_fields;
   // we don't need to handle nested fields, we don't have any and won't.
-  Object.values(document).forEach((field) => {
+  Object.values(semanticFieldsRoot ?? {}).forEach((field: any) => {
     if (field.inference) {
       field.inference.inference_id = inferenceId;
     }

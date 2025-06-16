@@ -11,6 +11,7 @@ import React from 'react';
 import { TestProviders } from '../../../../../../common/mock';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import { Package } from './package';
+import { CellActionsWrapper } from '../../../../../../common/components/drag_and_drop/cell_actions_wrapper';
 
 jest.mock('../../../../../../common/lib/kibana');
 
@@ -22,13 +23,27 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+jest.mock('../../../../../../common/components/drag_and_drop/cell_actions_wrapper', () => {
+  return {
+    CellActionsWrapper: jest.fn(),
+  };
+});
+
+const MockedCellActionsWrapper = jest.fn(({ children }) => {
+  return <div data-test-subj="mock-cell-action-wrapper">{children}</div>;
+});
+
 describe('Package', () => {
+  beforeEach(() => {
+    (CellActionsWrapper as unknown as jest.Mock).mockImplementation(MockedCellActionsWrapper);
+  });
   const mount = useMountAppended();
 
   describe('rendering', () => {
     test('it renders against shallow snapshot', () => {
       const wrapper = shallow(
         <Package
+          scopeId="some_scope"
           contextId="[context-123]"
           eventId="[event-123]"
           packageName="package-name-123"
@@ -42,6 +57,7 @@ describe('Package', () => {
     test('it returns null if all of the package information is null ', () => {
       const wrapper = shallow(
         <Package
+          scopeId="some_scope"
           contextId="[context-123]"
           eventId="[event-123]"
           packageName={null}
@@ -55,6 +71,7 @@ describe('Package', () => {
     test('it returns null if all of the package information is undefined ', () => {
       const wrapper = shallow(
         <Package
+          scopeId="some_scope"
           contextId="[context-123]"
           eventId="[event-123]"
           packageName={undefined}
@@ -70,6 +87,7 @@ describe('Package', () => {
         <TestProviders>
           <div>
             <Package
+              scopeId="some_scope"
               contextId="[context-123]"
               eventId="[event-123]"
               packageName="[package-name-123]"
@@ -87,6 +105,7 @@ describe('Package', () => {
         <TestProviders>
           <div>
             <Package
+              scopeId="some_scope"
               contextId="[context-123]"
               eventId="[event-123]"
               packageName="[package-name-123]"
@@ -104,6 +123,7 @@ describe('Package', () => {
         <TestProviders>
           <div>
             <Package
+              scopeId="some_scope"
               contextId="[context-123]"
               eventId="[event-123]"
               packageName="[package-name-123]"
@@ -115,6 +135,30 @@ describe('Package', () => {
       );
       expect(wrapper.text()).toEqual(
         '[package-name-123][package-version-123][package-summary-123]'
+      );
+    });
+
+    test('should passing correct scopeId to cell actions', () => {
+      mount(
+        <TestProviders>
+          <div>
+            <Package
+              scopeId="some_scope"
+              contextId="[context-123]"
+              eventId="[event-123]"
+              packageName="[package-name-123]"
+              packageSummary="[package-summary-123]"
+              packageVersion="[package-version-123]"
+            />
+          </div>
+        </TestProviders>
+      );
+
+      expect(MockedCellActionsWrapper).toHaveBeenCalledWith(
+        expect.objectContaining({
+          scopeId: 'some_scope',
+        }),
+        {}
       );
     });
   });

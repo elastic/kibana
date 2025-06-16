@@ -73,6 +73,7 @@ export async function sendUpgradeAgentsActions(
     upgradeDurationSeconds?: number;
     startTime?: string;
     batchSize?: number;
+    isAutomatic?: boolean;
   }
 ): Promise<{ actionId: string }> {
   const currentSpaceId = getCurrentNamespace(soClient);
@@ -100,6 +101,7 @@ export async function sendUpgradeAgentsActions(
 
     const res = await getAgentsByKuery(esClient, soClient, {
       kuery,
+      showAgentless: options.showAgentless,
       showInactive: options.showInactive ?? false,
       page: 1,
       perPage: batchSize,
@@ -118,9 +120,28 @@ export async function sendUpgradeAgentsActions(
           spaceId: currentSpaceId,
         },
         { pitId: await openPointInTime(esClient) }
-      ).runActionAsyncWithRetry();
+      ).runActionAsyncTask();
     }
   }
 
   return await upgradeBatch(esClient, givenAgents, outgoingErrors, options, currentSpaceId);
+}
+
+export async function sendAutomaticUpgradeAgentsActions(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  options: {
+    agents: Agent[];
+    version: string;
+    upgradeDurationSeconds?: number;
+  }
+): Promise<{ actionId: string }> {
+  const currentSpaceId = getCurrentNamespace(soClient);
+  return await upgradeBatch(
+    esClient,
+    options.agents,
+    {},
+    { ...options, isAutomatic: true },
+    currentSpaceId
+  );
 }

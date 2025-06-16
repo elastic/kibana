@@ -53,14 +53,34 @@ export function registerInternalDeleteRoute(router: InternalUiSettingsRouter) {
     }
   };
   router.delete(
-    { path: '/internal/kibana/settings/{key}', validate, options: { access: 'internal' } },
+    {
+      path: '/internal/kibana/settings/{key}',
+      validate,
+      options: { access: 'internal' },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the UI Settings Client',
+        },
+      },
+    },
     async (context, request, response) => {
       const uiSettingsClient = (await context.core).uiSettings.client;
       return await deleteFromRequest(uiSettingsClient, context, request, response);
     }
   );
   router.delete(
-    { path: '/internal/kibana/global_settings/{key}', validate, options: { access: 'internal' } },
+    {
+      path: '/internal/kibana/global_settings/{key}',
+      validate,
+      options: { access: 'internal' },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the UI Settings Client',
+        },
+      },
+    },
     async (context, request, response) => {
       const uiSettingsClient = (await context.core).uiSettings.globalClient;
       return await deleteFromRequest(uiSettingsClient, context, request, response);

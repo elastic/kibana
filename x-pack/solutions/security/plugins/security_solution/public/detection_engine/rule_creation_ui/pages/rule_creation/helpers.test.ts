@@ -12,36 +12,35 @@ import type { ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
 import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { Rule } from '../../../rule_management/logic';
 import {
-  getListMock,
   getEndpointListMock,
+  getListMock,
 } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import type {
-  DefineStepRuleJson,
-  ScheduleStepRuleJson,
-  AboutStepRuleJson,
-  ActionsStepRuleJson,
   AboutStepRule,
+  AboutStepRuleJson,
   ActionsStepRule,
-  ScheduleStepRule,
+  ActionsStepRuleJson,
   DefineStepRule,
-} from '../../../../detections/pages/detection_engine/rules/types';
-import { AlertSuppressionDurationType } from '../../../../detections/pages/detection_engine/rules/types';
+  DefineStepRuleJson,
+  ScheduleStepRule,
+  ScheduleStepRuleJson,
+} from '../../../common/types';
+import { AlertSuppressionDurationType } from '../../../common/types';
 import {
-  getTimeTypeValue,
-  formatDefineStepData,
-  formatScheduleStepData,
+  filterEmptyThreats,
+  filterRuleFieldsForType,
   formatAboutStepData,
   formatActionsStepData,
+  formatDefineStepData,
   formatRule,
-  filterRuleFieldsForType,
-  filterEmptyThreats,
+  formatScheduleStepData,
 } from './helpers';
 import {
+  mockAboutStepRule,
+  mockActionsStepRule,
   mockDefineStepRule,
   mockQueryBar,
   mockScheduleStepRule,
-  mockAboutStepRule,
-  mockActionsStepRule,
 } from '../../../rule_management_ui/components/rules_table/__mocks__/mock';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 import type { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -54,56 +53,6 @@ import {
 } from '../../../rule_creation/components/alert_suppression_edit';
 
 describe('helpers', () => {
-  describe('getTimeTypeValue', () => {
-    test('returns timeObj with value 0 if no time value found', () => {
-      const result = getTimeTypeValue('m');
-
-      expect(result).toEqual({ unit: 'm', value: 0 });
-    });
-
-    test('returns timeObj with unit set to default unit value of "ms" if no expected time type found', () => {
-      const result = getTimeTypeValue('5l');
-
-      expect(result).toEqual({ unit: 'ms', value: 5 });
-    });
-
-    test('returns timeObj with unit of s and value 5 when time is 5s ', () => {
-      const result = getTimeTypeValue('5s');
-
-      expect(result).toEqual({ unit: 's', value: 5 });
-    });
-
-    test('returns timeObj with unit of m and value 5 when time is 5m ', () => {
-      const result = getTimeTypeValue('5m');
-
-      expect(result).toEqual({ unit: 'm', value: 5 });
-    });
-
-    test('returns timeObj with unit of h and value 5 when time is 5h ', () => {
-      const result = getTimeTypeValue('5h');
-
-      expect(result).toEqual({ unit: 'h', value: 5 });
-    });
-
-    test('returns timeObj with value of 5 when time is float like 5.6m ', () => {
-      const result = getTimeTypeValue('5m');
-
-      expect(result).toEqual({ unit: 'm', value: 5 });
-    });
-
-    test('returns timeObj with value of 0 and unit of "ms" if random string passed in', () => {
-      const result = getTimeTypeValue('random');
-
-      expect(result).toEqual({ unit: 'ms', value: 0 });
-    });
-
-    test('returns timeObj with unit of d and value 5 when time is 5d ', () => {
-      const result = getTimeTypeValue('5d');
-
-      expect(result).toEqual({ unit: 'd', value: 5 });
-    });
-  });
-
   describe('filterEmptyThreats', () => {
     let mockThreat: Threat;
 
@@ -639,12 +588,9 @@ describe('helpers', () => {
     test('returns formatted object as ScheduleStepRuleJson', () => {
       const result = formatScheduleStepData(mockData);
       const expected: ScheduleStepRuleJson = {
-        from: 'now-660s',
+        from: 'now-11m',
         to: 'now',
         interval: '5m',
-        meta: {
-          from: '6m',
-        },
       };
 
       expect(result).toEqual(expected);
@@ -657,12 +603,9 @@ describe('helpers', () => {
       delete mockStepData.to;
       const result = formatScheduleStepData(mockStepData);
       const expected: ScheduleStepRuleJson = {
-        from: 'now-660s',
+        from: 'now-11m',
         to: 'now',
         interval: '5m',
-        meta: {
-          from: '6m',
-        },
       };
 
       expect(result).toEqual(expected);
@@ -675,51 +618,34 @@ describe('helpers', () => {
       };
       const result = formatScheduleStepData(mockStepData);
       const expected: ScheduleStepRuleJson = {
-        from: 'now-660s',
+        from: 'now-11m',
         to: 'now',
         interval: '5m',
-        meta: {
-          from: '6m',
-        },
       };
 
       expect(result).toEqual(expected);
     });
 
-    test('returns formatted object  if "from" random string', () => {
+    test('returns unchanged data when "from" is a random string', () => {
       const mockStepData: ScheduleStepRule = {
         ...mockData,
         from: 'random',
       };
-      const result = formatScheduleStepData(mockStepData);
-      const expected: ScheduleStepRuleJson = {
-        from: 'now-300s',
-        to: 'now',
-        interval: '5m',
-        meta: {
-          from: 'random',
-        },
-      };
 
-      expect(result).toEqual(expected);
+      const result = formatScheduleStepData(mockStepData);
+
+      expect(result).toMatchObject(mockStepData);
     });
 
-    test('returns formatted object  if "interval" random string', () => {
+    test('returns unchanged data when "interval" is a random string', () => {
       const mockStepData: ScheduleStepRule = {
         ...mockData,
         interval: 'random',
       };
-      const result = formatScheduleStepData(mockStepData);
-      const expected: ScheduleStepRuleJson = {
-        from: 'now-360s',
-        to: 'now',
-        interval: 'random',
-        meta: {
-          from: '6m',
-        },
-      };
 
-      expect(result).toEqual(expected);
+      const result = formatScheduleStepData(mockStepData);
+
+      expect(result).toMatchObject(mockStepData);
     });
   });
 

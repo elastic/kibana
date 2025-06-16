@@ -11,21 +11,30 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { Header } from './header';
-import { ChatFormFields, PlaygroundPageMode } from '../types';
+import { PlaygroundFormFields, PlaygroundPageMode, PlaygroundViewMode } from '../types';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiForm } from '@elastic/eui';
 import { FormProvider, useForm } from 'react-hook-form';
 
+const mockUsePlaygroundParameters = jest.fn();
+
+jest.mock('../hooks/use_source_indices_field', () => ({
+  useSourceIndicesFields: () => ({}),
+}));
+jest.mock('../hooks/use_playground_parameters', () => ({
+  usePlaygroundParameters: () => mockUsePlaygroundParameters(),
+}));
+
 const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
   const methods = useForm({
     values: {
-      [ChatFormFields.indices]: ['index1', 'index2'],
-      [ChatFormFields.queryFields]: { index1: ['field1'], index2: ['field1'] },
-      [ChatFormFields.sourceFields]: {
+      [PlaygroundFormFields.indices]: ['index1', 'index2'],
+      [PlaygroundFormFields.queryFields]: { index1: ['field1'], index2: ['field1'] },
+      [PlaygroundFormFields.sourceFields]: {
         index1: ['field1'],
         index2: ['field1'],
       },
-      [ChatFormFields.elasticsearchQuery]: {
+      [PlaygroundFormFields.elasticsearchQuery]: {
         retriever: {
           rrf: {
             retrievers: [
@@ -39,7 +48,7 @@ const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
   });
   return <FormProvider {...methods}>{children}</FormProvider>;
 };
-const MockChatForm = ({
+const MockPlaygroundForm = ({
   children,
   handleSubmit,
 }: {
@@ -59,16 +68,15 @@ const MockChatForm = ({
 
 describe('Header', () => {
   it('renders correctly', () => {
+    mockUsePlaygroundParameters.mockReturnValue({
+      pageMode: PlaygroundPageMode.chat,
+      viewMode: PlaygroundViewMode.preview,
+    });
     render(
       <IntlProvider locale="en">
-        <MockChatForm handleSubmit={() => {}}>
-          <Header
-            selectedMode={PlaygroundPageMode.chat}
-            onModeChange={() => {}}
-            selectedPageMode={PlaygroundPageMode.chat}
-            onSelectPageModeChange={() => {}}
-          />
-        </MockChatForm>
+        <MockPlaygroundForm handleSubmit={() => {}}>
+          <Header onModeChange={() => {}} onSelectPageModeChange={() => {}} />
+        </MockPlaygroundForm>
       </IntlProvider>
     );
 
@@ -77,16 +85,15 @@ describe('Header', () => {
   });
 
   it('renders correctly with preview mode', () => {
+    mockUsePlaygroundParameters.mockReturnValue({
+      pageMode: PlaygroundPageMode.search,
+      viewMode: PlaygroundViewMode.preview,
+    });
     render(
       <IntlProvider locale="en">
-        <MockChatForm handleSubmit={() => {}}>
-          <Header
-            selectedMode="chat"
-            onModeChange={() => {}}
-            selectedPageMode={PlaygroundPageMode.search}
-            onSelectPageModeChange={() => {}}
-          />
-        </MockChatForm>
+        <MockPlaygroundForm handleSubmit={() => {}}>
+          <Header onModeChange={() => {}} onSelectPageModeChange={() => {}} />
+        </MockPlaygroundForm>
       </IntlProvider>
     );
 

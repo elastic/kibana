@@ -31,7 +31,6 @@ const deploymentAgnosticFunctionalServices = _.pick(functionalServices, [
   'dashboardDrilldownsManage',
   'dashboardExpect',
   'dashboardPanelActions',
-  'dashboardReplacePanel',
   'dashboardSettings',
   'dashboardVisualizations',
   'dataGrid',

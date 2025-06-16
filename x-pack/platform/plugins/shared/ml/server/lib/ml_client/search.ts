@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type {
   TransportResult,
   TransportRequestOptions,

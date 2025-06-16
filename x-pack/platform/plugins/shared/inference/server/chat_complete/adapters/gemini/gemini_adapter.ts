@@ -6,8 +6,7 @@
  */
 
 import * as Gemini from '@google/generative-ai';
-import { from, map, switchMap } from 'rxjs';
-import { Readable } from 'stream';
+import { defer, map } from 'rxjs';
 import {
   Message,
   MessageRole,
@@ -17,30 +16,42 @@ import {
   ToolSchemaType,
 } from '@kbn/inference-common';
 import type { InferenceConnectorAdapter } from '../../types';
+import { handleConnectorResponse } from '../../utils';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
 import { processVertexStream } from './process_vertex_stream';
 import type { GenerateContentResponseChunk, GeminiMessage, GeminiToolConfig } from './types';
 
 export const geminiAdapter: InferenceConnectorAdapter = {
-  chatComplete: ({ executor, system, messages, toolChoice, tools, abortSignal }) => {
-    return from(
-      executor.invoke({
+  chatComplete: ({
+    executor,
+    system,
+    messages,
+    toolChoice,
+    tools,
+    temperature = 0,
+    modelName,
+    abortSignal,
+    metadata,
+  }) => {
+    return defer(() => {
+      return executor.invoke({
         subAction: 'invokeStream',
         subActionParams: {
           messages: messagesToGemini({ messages }),
           systemInstruction: system,
           tools: toolsToGemini(tools),
           toolConfig: toolChoiceToConfig(toolChoice),
-          temperature: 0,
+          temperature,
+          model: modelName,
           signal: abortSignal,
           stopSequences: ['\n\nHuman:'],
+          ...(metadata?.connectorTelemetry
+            ? { telemetryMetadata: metadata.connectorTelemetry }
+            : {}),
         },
-      })
-    ).pipe(
-      switchMap((response) => {
-        const readable = response.data as Readable;
-        return eventSourceStreamIntoObservable(readable);
-      }),
+      });
+    }).pipe(
+      handleConnectorResponse({ processStream: eventSourceStreamIntoObservable }),
       map((line) => {
         return JSON.parse(line) as GenerateContentResponseChunk;
       }),
@@ -83,7 +94,7 @@ function toolsToGemini(tools: ToolOptions['tools']): Gemini.Tool[] {
                 parameters: schema
                   ? toolSchemaToGemini({ schema })
                   : {
-                      type: Gemini.FunctionDeclarationSchemaType.OBJECT,
+                      type: Gemini.SchemaType.OBJECT,
                       properties: {},
                     },
               };
@@ -103,13 +114,13 @@ function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.Function
     switch (def.type) {
       case 'array':
         return {
-          type: Gemini.FunctionDeclarationSchemaType.ARRAY,
+          type: Gemini.SchemaType.ARRAY,
           description: def.description,
           items: convertSchemaType({ def: def.items }) as Gemini.FunctionDeclarationSchema,
         };
       case 'object':
         return {
-          type: Gemini.FunctionDeclarationSchemaType.OBJECT,
+          type: Gemini.SchemaType.OBJECT,
           description: def.description,
           required: def.required as string[],
           properties: def.properties
@@ -125,19 +136,19 @@ function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.Function
         };
       case 'string':
         return {
-          type: Gemini.FunctionDeclarationSchemaType.STRING,
+          type: Gemini.SchemaType.STRING,
           description: def.description,
           enum: def.enum ? (def.enum as string[]) : def.const ? [def.const] : undefined,
         };
       case 'boolean':
         return {
-          type: Gemini.FunctionDeclarationSchemaType.BOOLEAN,
+          type: Gemini.SchemaType.BOOLEAN,
           description: def.description,
           enum: def.enum ? (def.enum as string[]) : def.const ? [def.const] : undefined,
         };
       case 'number':
         return {
-          type: Gemini.FunctionDeclarationSchemaType.NUMBER,
+          type: Gemini.SchemaType.NUMBER,
           description: def.description,
           enum: def.enum ? (def.enum as string[]) : def.const ? [def.const] : undefined,
         };
@@ -145,7 +156,7 @@ function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.Function
   };
 
   return {
-    type: Gemini.FunctionDeclarationSchemaType.OBJECT,
+    type: Gemini.SchemaType.OBJECT,
     required: schema.required as string[],
     properties: Object.entries(schema.properties ?? {}).reduce<
       Record<string, Gemini.FunctionDeclarationSchemaProperty>
@@ -222,7 +233,10 @@ function messageToGeminiMapper() {
             {
               functionResponse: {
                 name: message.toolCallId,
-                response: message.response as object,
+                // gemini expects a structured response shape, making sure we're not sending a string
+                response: (typeof message.response === 'string'
+                  ? { response: message.response }
+                  : (message.response as string)) as object,
               },
             },
           ],

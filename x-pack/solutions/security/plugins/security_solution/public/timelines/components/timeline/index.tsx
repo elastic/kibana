@@ -6,21 +6,23 @@
  */
 
 import { pick } from 'lodash/fp';
-import { EuiProgress } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useRef, createContext } from 'react';
+import { EuiPanel, EuiProgress, EuiText } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { isTab } from '@kbn/timelines-plugin/public';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { timelineActions, timelineSelectors } from '../../store';
 import { timelineDefaults } from '../../store/defaults';
 import type { CellValueElementProps } from './cell_rendering';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { TimelineModalHeader } from '../modal/header';
-import type { TimelineId, RowRenderer } from '../../../../common/types/timeline';
+import type { RowRenderer, TimelineId } from '../../../../common/types/timeline';
 import { TimelineTypeEnum } from '../../../../common/api/timeline';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import type { State } from '../../../common/store';
+import { sourcererSelectors } from '../../../common/store';
 import { EVENTS_COUNT_BUTTON_CLASS_NAME, onTimelineTabKeyPressed } from './helpers';
 import * as i18n from './translations';
 import { TabsContent } from './tabs';
@@ -28,15 +30,10 @@ import { HideShowContainer, TimelineContainer } from './styles';
 import { useTimelineFullScreen } from '../../../common/containers/use_full_screen';
 import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../common/components/exit_full_screen';
 import { useResolveConflict } from '../../../common/hooks/use_resolve_conflict';
-import { sourcererSelectors } from '../../../common/store';
 import { defaultUdtHeaders } from './body/column_headers/default_headers';
-
-const TimelineTemplateBadge = styled.div`
-  background: ${({ theme }) => theme.eui.euiColorVis3_behindText};
-  color: #fff;
-  padding: 10px 15px;
-  font-size: 0.8em;
-`;
+import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
+import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
+import { TimelineContext } from './context';
 
 const TimelineBody = styled.div`
   height: 100%;
@@ -44,7 +41,6 @@ const TimelineBody = styled.div`
   flex-direction: column;
 `;
 
-export const TimelineContext = createContext<{ timelineId: string | null }>({ timelineId: null });
 export interface Props {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
@@ -82,22 +78,18 @@ const StatefulTimelineComponent: React.FC<Props> = ({
   const {
     dataViewId: selectedDataViewIdTimeline,
     indexNames: selectedPatternsTimeline,
-    graphEventId,
     savedObjectId,
     timelineType,
     description,
-    sessionViewConfig,
     initialized,
   } = useDeepEqualSelector((state) =>
     pick(
       [
         'indexNames',
         'dataViewId',
-        'graphEventId',
         'savedObjectId',
         'timelineType',
         'description',
-        'sessionViewConfig',
         'initialized',
         'show',
         'activeTab',
@@ -108,14 +100,29 @@ const StatefulTimelineComponent: React.FC<Props> = ({
 
   const { timelineFullScreen } = useTimelineFullScreen();
 
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
+  const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(SourcererScopeName.timeline);
+
+  const selectedDataViewId = useMemo(
+    () =>
+      newDataViewPickerEnabled ? experimentalDataViewSpec?.id ?? '' : selectedDataViewIdSourcerer,
+    [experimentalDataViewSpec?.id, newDataViewPickerEnabled, selectedDataViewIdSourcerer]
+  );
+
+  const selectedPatterns = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : selectedPatternsSourcerer),
+    [experimentalSelectedPatterns, newDataViewPickerEnabled, selectedPatternsSourcerer]
+  );
+
   useEffect(() => {
     if (!savedObjectId && !initialized) {
       dispatch(
         timelineActions.createTimeline({
           id: timelineId,
           columns: defaultUdtHeaders,
-          dataViewId: selectedDataViewIdSourcerer,
-          indexNames: selectedPatternsSourcerer,
+          dataViewId: selectedDataViewId,
+          indexNames: selectedPatterns,
           show: false,
           excludedRowRendererIds: timelineDefaults.excludedRowRendererIds,
         })
@@ -128,28 +135,28 @@ const StatefulTimelineComponent: React.FC<Props> = ({
     if (
       // timeline not initialized, so this must be initial state and not user change
       !savedObjectId ||
-      selectedDataViewIdSourcerer == null ||
+      selectedDataViewId == null ||
       // initial state will get set on create
       (selectedDataViewIdTimeline === null && selectedPatternsTimeline.length === 0) ||
       // don't update if no change
-      (selectedDataViewIdTimeline === selectedDataViewIdSourcerer &&
-        selectedPatternsTimeline.sort().join() === selectedPatternsSourcerer.sort().join())
+      (selectedDataViewIdTimeline === selectedDataViewId &&
+        selectedPatternsTimeline.sort().join() === selectedPatterns.sort().join())
     ) {
       return;
     }
     dispatch(
       timelineActions.updateDataView({
-        dataViewId: selectedDataViewIdSourcerer,
+        dataViewId: selectedDataViewId,
         id: timelineId,
-        indexNames: selectedPatternsSourcerer,
+        indexNames: selectedPatterns,
       })
     );
   }, [
     dispatch,
     savedObjectId,
-    selectedDataViewIdSourcerer,
+    selectedDataViewId,
     selectedDataViewIdTimeline,
-    selectedPatternsSourcerer,
+    selectedPatterns,
     selectedPatternsTimeline,
     timelineId,
   ]);
@@ -157,7 +164,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
   useEffect(() => {
     onSourcererChange();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDataViewIdSourcerer, selectedPatternsSourcerer]);
+  }, [selectedDataViewId, selectedPatterns]);
 
   const onSkipFocusBeforeEventsTable = useCallback(() => {
     const exitFullScreenButton = containerElement.current?.querySelector<HTMLButtonElement>(
@@ -206,9 +213,11 @@ const StatefulTimelineComponent: React.FC<Props> = ({
         <TimelineSavingProgress timelineId={timelineId} />
         <TimelineBody data-test-subj="timeline-body">
           {timelineType === TimelineTypeEnum.template && (
-            <TimelineTemplateBadge className="timeline-template-badge">
-              {i18n.TIMELINE_TEMPLATE}
-            </TimelineTemplateBadge>
+            <EuiPanel color="accent" grow={false} paddingSize="s">
+              <EuiText size="xs" color="accent">
+                {i18n.TIMELINE_TEMPLATE}
+              </EuiText>
+            </EuiPanel>
           )}
           {resolveConflictComponent}
           <HideShowContainer
@@ -219,8 +228,6 @@ const StatefulTimelineComponent: React.FC<Props> = ({
           </HideShowContainer>
 
           <TabsContent
-            graphEventId={graphEventId}
-            sessionViewConfig={sessionViewConfig}
             renderCellValue={renderCellValue}
             rowRenderers={rowRenderers}
             timelineId={timelineId}

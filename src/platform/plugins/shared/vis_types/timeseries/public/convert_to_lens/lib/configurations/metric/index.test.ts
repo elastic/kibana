@@ -271,7 +271,7 @@ describe('getConfigurationForGauge', () => {
       metricAccessor: undefined,
       palette: undefined,
       maxAccessor: maxColumnId,
-      color: '#FFFFFF',
+      color: '#ffffff',
       showBar: true,
     });
     expect(mockGetPalette).toBeCalledTimes(1);

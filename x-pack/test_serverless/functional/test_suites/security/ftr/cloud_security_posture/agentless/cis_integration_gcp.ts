@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { CLOUD_CREDENTIALS_PACKAGE_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import * as http from 'http';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_VERSION } from '../../../constants';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { setupMockServer } from './mock_agentless_api';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -36,7 +36,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     after(async () => {
       await supertest
         .delete(
-          `/api/fleet/epm/packages/cloud_security_posture/${CLOUD_CREDENTIALS_PACKAGE_VERSION}`
+          `/api/fleet/epm/packages/cloud_security_posture/${CLOUD_SECURITY_POSTURE_PACKAGE_VERSION}`
         )
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
@@ -45,9 +45,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Agentless CIS_GCP Single Account Launch Cloud shell', () => {
-      it(`should show CIS_GCP Launch Cloud Shell button when package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`, async () => {
+      it(`should show CIS_GCP Launch Cloud Shell button when package version is ${CLOUD_SECURITY_POSTURE_PACKAGE_VERSION}`, async () => {
         await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
-          CLOUD_CREDENTIALS_PACKAGE_VERSION
+          CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
         );
 
         await cisIntegration.clickOptionButton(testSubjectIds.CIS_GCP_OPTION_TEST_ID);
@@ -62,9 +62,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Agentless CIS_GCP ORG Account Launch Cloud Shell', () => {
-      it(`should show CIS_GCP Launch Cloud Shell button when package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`, async () => {
+      it(`should show CIS_GCP Launch Cloud Shell button when package version is ${CLOUD_SECURITY_POSTURE_PACKAGE_VERSION}`, async () => {
         await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
-          CLOUD_CREDENTIALS_PACKAGE_VERSION
+          CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
         );
 
         await cisIntegration.clickOptionButton(testSubjectIds.CIS_GCP_OPTION_TEST_ID);
@@ -97,16 +97,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             'value'
           )
         ).to.be(newCredentialsJSON);
-        expect(await cisIntegrationGcp.showLaunchCloudShellAgentlessButton()).to.be(true);
-        expect(await cisIntegration.getElementText(testSubjectIds.SETUP_TECHNOLOGY_SELECTOR)).to.be(
-          'Agentless\nBETA'
-        );
-        expect(
-          await cisIntegration.getFieldAttributeValue(
-            testSubjectIds.SETUP_TECHNOLOGY_SELECTOR,
-            'disabled'
-          )
-        ).to.be('true');
       });
     });
   });

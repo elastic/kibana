@@ -12,15 +12,43 @@ paths:
       summary: Create a model response
       tags:
         - Chat Complete API
+      parameters:
+        - name: content_references_disabled
+          in: query
+          required: false
+          description: If true, the response will not include content references.
+          schema:
+            type: boolean
+            default: false
+          example: false
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/ChatCompleteProps'
+            example:
+              conversationId: "abc123"
+              promptId: "prompt_456"
+              isStream: true
+              responseLanguage: "en"
+              langSmithProject: "security_ai_project"
+              langSmithApiKey: "sk-abc123"
+              connectorId: "conn-001"
+              model: "gpt-4"
+              persist: true
+              messages:
+                - role: "user"
+                  content: "What are some common phishing techniques?"
+                  data:
+                    user_id: "user_789"
+                  fields_to_anonymize:
+                    - "user.name"
+                    - "source.ip"
+
       responses:
         200:
-          description: Indicates a successful call.
+          description: Indicates a successful model response call.
           content:
             application/octet-stream:
               schema:
@@ -35,76 +63,131 @@ paths:
                 properties:
                   statusCode:
                     type: number
+                    description: HTTP status code.
+                    example: 400
                   error:
                     type: string
+                    description: Error type.
+                    example: "Bad Request"
                   message:
                     type: string
+                    description: Human-readable error message.
+                    example: "Invalid request payload."
 
 components:
   schemas:
     RootContext:
       type: string
+      description: The operational context for the assistant.
       enum:
         - security
+      example: "security"
 
     ChatMessageRole:
       type: string
-      description: Message role.
+      description: The role associated with the message in the chat.
       enum:
-        - system
-        - user
-        - assistant
+        - system    # System-injected context or instructions
+        - user      # End-user message
+        - assistant # AI-generated response
+      example: "user"
 
     MessageData:
       type: object
+      description: ECS-style metadata attached to the message.
       additionalProperties: true
+      example:
+        user_id: "abc123"
+        alert_id: "alert-456"
 
     ChatMessage:
       type: object
-      description: AI assistant message.
+      description: A message exchanged within the AI chat conversation.
       required:
         - 'role'
       properties:
         content:
           type: string
-          description: Message content.
+          description: The textual content of the message.
+          example: "What security incidents have been reported today?"
         role:
           $ref: '#/components/schemas/ChatMessageRole'
-          description: Message role.
+          description: The sender role of the message.
         data:
-          description: ECS object to attach to the context of the message.
+          description: Metadata to attach to the context of the message.
           $ref: '#/components/schemas/MessageData'
         fields_to_anonymize:
           type: array
+          description: List of field names within the data object that should be anonymized.
           items:
             type: string
+          example:
+            - "user.name"
+            - "source.ip"
 
     ChatCompleteProps:
       type: object
+      description: The request payload for creating a chat completion.
       properties:
         conversationId:
-          type: string
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          description: Existing conversation ID to continue.
         promptId:
           type: string
+          description: Prompt template identifier.
+          example: "prompt_001"
         isStream:
           type: boolean
+          description: If true, the response will be streamed in chunks.
+          example: true
         responseLanguage:
           type: string
+          description: ISO language code for the assistant's response.
+          example: "en"
         langSmithProject:
           type: string
+          description: LangSmith project name for tracing.
+          example: "security_ai_project"
         langSmithApiKey:
           type: string
+          description: API key for LangSmith integration.
+          example: "sk-abc123"
         connectorId:
           type: string
+          description: Required connector identifier to route the request.
+          example: "conn-001"
         model:
           type: string
+          description: Model ID or name to use for the response.
+          example: "gpt-4"
         persist:
           type: boolean
+          description: Whether to persist the chat and response to storage.
+          example: true
         messages:
           type: array
+          description: List of chat messages exchanged so far.
           items:
-              $ref: '#/components/schemas/ChatMessage'
+            $ref: '#/components/schemas/ChatMessage'
       required:
         - messages
         - persist
         - connectorId
+      example:
+        conversationId: "abc123"
+        promptId: "prompt_456"
+        isStream: true
+        responseLanguage: "en"
+        langSmithProject: "security_ai_project"
+        langSmithApiKey: "sk-abc123"
+        connectorId: "conn-001"
+        model: "gpt-4"
+        persist: true
+        messages:
+          - role: "user"
+            content: "How do I detect ransomware on my endpoints?"
+            data:
+              device_id: "device-567"
+            fields_to_anonymize:
+              - "device.name"
+              - "file.path"

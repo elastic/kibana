@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import {
   PromptCreateProps,
   PromptResponse,
   PromptType,
   PromptUpdateProps,
-} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+} from '@kbn/elastic-assistant-common/impl/schemas';
 import { AuthenticatedUser } from '@kbn/core-security-common';
 import { CreatePromptSchema, EsPromptsSchema, UpdatePromptSchema } from './types';
 

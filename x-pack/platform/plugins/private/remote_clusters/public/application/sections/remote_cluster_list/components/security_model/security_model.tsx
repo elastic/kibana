@@ -9,7 +9,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 
-import { getSecurityModel } from '../../../../../../common/constants';
+import { SECURITY_MODEL, getSecurityModel } from '../../../../../../common/constants';
 import { Cluster } from '../../../../../../common/lib/cluster_serialization';
 
 export function SecurityModel({ securityModel }: { securityModel: Cluster['securityModel'] }) {
@@ -21,7 +21,7 @@ export function SecurityModel({ securityModel }: { securityModel: Cluster['secur
         </EuiText>
       </EuiFlexItem>
 
-      {securityModel !== 'api_key' && (
+      {securityModel !== SECURITY_MODEL.API && (
         <EuiFlexItem grow={false} data-test-subj="authenticationTypeWarning">
           <EuiIconTip
             type="iInCircle"

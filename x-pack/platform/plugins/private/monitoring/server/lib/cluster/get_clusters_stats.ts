@@ -82,21 +82,19 @@ function fetchClusterStats(req: LegacyRequest, clusterUuid?: string, ccs?: strin
       'hits.hits._source.elasticsearch.cluster.stats.state',
       'hits.hits._source.cluster_settings.cluster.metadata.display_name',
     ],
-    body: {
-      query: createQuery({
-        type: dataset,
-        dsDataset: getElasticsearchDataset(dataset),
-        metricset: dataset,
-        start,
-        end,
-        metric,
-        clusterUuid,
-      }),
-      collapse: {
-        field: 'cluster_uuid',
-      },
-      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
+    query: createQuery({
+      type: dataset,
+      dsDataset: getElasticsearchDataset(dataset),
+      metricset: dataset,
+      start,
+      end,
+      metric,
+      clusterUuid,
+    }),
+    collapse: {
+      field: 'cluster_uuid',
     },
+    sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

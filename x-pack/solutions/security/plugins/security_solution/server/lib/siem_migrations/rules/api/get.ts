@@ -7,15 +7,14 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import {
-  GetRuleMigrationRequestParams,
-  GetRuleMigrationRequestQuery,
-  type GetRuleMigrationResponse,
-} from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SIEM_RULE_MIGRATION_PATH } from '../../../../../common/siem_migrations/constants';
+import type { GetRuleMigrationResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import { GetRuleMigrationRequestParams } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import type { RuleMigrationGetOptions } from '../data/rule_migrations_data_rules_client';
+import { SiemMigrationAuditLogger } from './util/audit';
+import { authz } from './util/authz';
 import { withLicense } from './util/with_license';
+import { MIGRATION_ID_NOT_FOUND } from './util/with_existing_migration_id';
 
 export const registerSiemRuleMigrationsGetRoute = (
   router: SecuritySolutionPluginRouter,
@@ -25,7 +24,7 @@ export const registerSiemRuleMigrationsGetRoute = (
     .get({
       path: SIEM_RULE_MIGRATION_PATH,
       access: 'internal',
-      security: { authz: { requiredPrivileges: ['securitySolution'] } },
+      security: { authz },
     })
     .addVersion(
       {
@@ -33,37 +32,38 @@ export const registerSiemRuleMigrationsGetRoute = (
         validate: {
           request: {
             params: buildRouteValidationWithZod(GetRuleMigrationRequestParams),
-            query: buildRouteValidationWithZod(GetRuleMigrationRequestQuery),
           },
         },
       },
       withLicense(async (context, req, res): Promise<IKibanaResponse<GetRuleMigrationResponse>> => {
+        const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
+
         const { migration_id: migrationId } = req.params;
-        const {
-          page,
-          per_page: perPage,
-          sort_field: sortField,
-          sort_direction: sortDirection,
-          search_term: searchTerm,
-          ids,
-        } = req.query;
         try {
           const ctx = await context.resolve(['securitySolution']);
           const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+          await siemMigrationAuditLogger.logGetMigration({ migrationId });
 
-          const options: RuleMigrationGetOptions = {
-            filters: { searchTerm, ids },
-            sort: { sortField, sortDirection },
-            size: perPage,
-            from: page && perPage ? page * perPage : 0,
-          };
+          const storedMigration = await ruleMigrationsClient.data.migrations.get({
+            id: migrationId,
+          });
 
-          const result = await ruleMigrationsClient.data.rules.get(migrationId, options);
+          if (!storedMigration) {
+            return res.notFound({
+              body: MIGRATION_ID_NOT_FOUND(migrationId),
+            });
+          }
 
-          return res.ok({ body: result });
-        } catch (err) {
-          logger.error(err);
-          return res.badRequest({ body: err.message });
+          return res.ok({
+            body: storedMigration,
+          });
+        } catch (error) {
+          logger.error(error);
+          await siemMigrationAuditLogger.logGetMigration({
+            migrationId,
+            error,
+          });
+          return res.badRequest({ body: error.message });
         }
       })
     );

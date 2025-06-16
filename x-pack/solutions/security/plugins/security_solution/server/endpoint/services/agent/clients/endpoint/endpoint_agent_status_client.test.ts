@@ -45,6 +45,7 @@ describe('EndpointAgentStatusClient', () => {
       metadataMocks.endpointMetadataService
     );
     constructorOptions = {
+      spaceId: 'default',
       endpointService: endpointAppContextServiceMock,
       esClient: metadataMocks.esClient,
       soClient,
@@ -81,8 +82,7 @@ describe('EndpointAgentStatusClient', () => {
     );
     expect(getPendingActionsSummaryMock).toHaveBeenCalledWith(
       expect.anything(),
-      expect.anything(),
-      expect.anything(),
+      'default',
       agentIds
     );
   });

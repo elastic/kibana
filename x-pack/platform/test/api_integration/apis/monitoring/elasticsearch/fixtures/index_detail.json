@@ -1,0 +1,476 @@
+{
+  "indexSummary": {
+    "documents": 628,
+    "dataSize": {
+      "primaries": 4601000,
+      "total": 9202023
+    },
+    "unassignedShards": 0,
+    "totalShards": 10,
+    "status": "green"
+  },
+  "metrics": {
+    "index_search_request_rate": [
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": {
+          "min": 1507235508000,
+          "max": 1507235712000
+        },
+        "metric": {
+          "app": "elasticsearch",
+          "field": "index_stats.total.search.query_total",
+          "metricAgg": "max",
+          "label": "Total Shards",
+          "title": "Search Rate",
+          "description": "Number of search requests being executed across primary and replica shards. A single search can run against multiple shards!",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1507235520000, null],
+          [1507235530000, 0],
+          [1507235540000, 0],
+          [1507235550000, 0],
+          [1507235560000, 0],
+          [1507235570000, 0],
+          [1507235580000, 0],
+          [1507235590000, 0],
+          [1507235600000, 0],
+          [1507235610000, 0],
+          [1507235620000, 0],
+          [1507235630000, 0],
+          [1507235640000, 0],
+          [1507235650000, 0],
+          [1507235660000, 0],
+          [1507235670000, 0],
+          [1507235680000, 0],
+          [1507235690000, 0],
+          [1507235700000, 0]
+        ]
+      }
+    ],
+    "index_request_rate": [
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": {
+          "min": 1507235508000,
+          "max": 1507235712000
+        },
+        "metric": {
+          "app": "elasticsearch",
+          "field": "index_stats.total.indexing.index_total",
+          "metricAgg": "max",
+          "label": "Total Shards",
+          "title": "Indexing Rate",
+          "description": "Number of documents being indexed for primary and replica shards.",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1507235520000, null],
+          [1507235530000, 0],
+          [1507235540000, 0],
+          [1507235550000, 0],
+          [1507235560000, 0],
+          [1507235570000, 0],
+          [1507235580000, 0],
+          [1507235590000, 0],
+          [1507235600000, 0],
+          [1507235610000, 0],
+          [1507235620000, 0],
+          [1507235630000, 0],
+          [1507235640000, 0],
+          [1507235650000, 0],
+          [1507235660000, 0],
+          [1507235670000, 0],
+          [1507235680000, 0],
+          [1507235690000, 0],
+          [1507235700000, 0]
+        ]
+      },
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": {
+          "min": 1507235508000,
+          "max": 1507235712000
+        },
+        "metric": {
+          "app": "elasticsearch",
+          "field": "index_stats.primaries.indexing.index_total",
+          "metricAgg": "max",
+          "label": "Primary Shards",
+          "title": "Indexing Rate",
+          "description": "Number of documents being indexed for primary shards.",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1507235520000, null],
+          [1507235530000, 0],
+          [1507235540000, 0],
+          [1507235550000, 0],
+          [1507235560000, 0],
+          [1507235570000, 0],
+          [1507235580000, 0],
+          [1507235590000, 0],
+          [1507235600000, 0],
+          [1507235610000, 0],
+          [1507235620000, 0],
+          [1507235630000, 0],
+          [1507235640000, 0],
+          [1507235650000, 0],
+          [1507235660000, 0],
+          [1507235670000, 0],
+          [1507235680000, 0],
+          [1507235690000, 0],
+          [1507235700000, 0]
+        ]
+      }
+    ],
+    "index_size": [
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": {
+          "min": 1507235508000,
+          "max": 1507235712000
+        },
+        "metric": {
+          "app": "elasticsearch",
+          "field": "index_stats.total.store.size_in_bytes",
+          "metricAgg": "max",
+          "label": "Store",
+          "title": "Disk",
+          "description": "Size of primary and replica shards on disk.",
+          "units": "B",
+          "format": "0,0.0 b",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [1507235520000, 9202023],
+          [1507235530000, 9202023],
+          [1507235540000, 9202023],
+          [1507235550000, 9202023],
+          [1507235560000, 9202023],
+          [1507235570000, 9202023],
+          [1507235580000, 9202023],
+          [1507235590000, 9202023],
+          [1507235600000, 9202023],
+          [1507235610000, 9202023],
+          [1507235620000, 9202023],
+          [1507235630000, 9202023],
+          [1507235640000, 9202023],
+          [1507235650000, 9202023],
+          [1507235660000, 9202023],
+          [1507235670000, 9202023],
+          [1507235680000, 9202023],
+          [1507235690000, 9202023],
+          [1507235700000, 9202023]
+        ]
+      },
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": {
+          "min": 1507235508000,
+          "max": 1507235712000
+        },
+        "metric": {
+          "app": "elasticsearch",
+          "field": "index_stats.primaries.store.size_in_bytes",
+          "metricAgg": "max",
+          "label": "Store (Primaries)",
+          "title": "Disk",
+          "description": "Size of primary shards on disk.",
+          "units": "B",
+          "format": "0,0.0 b",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [1507235520000, 4601000],
+          [1507235530000, 4601000],
+          [1507235540000, 4601000],
+          [1507235550000, 4601000],
+          [1507235560000, 4601000],
+          [1507235570000, 4601000],
+          [1507235580000, 4601000],
+          [1507235590000, 4601000],
+          [1507235600000, 4601000],
+          [1507235610000, 4601000],
+          [1507235620000, 4601000],
+          [1507235630000, 4601000],
+          [1507235640000, 4601000],
+          [1507235650000, 4601000],
+          [1507235660000, 4601000],
+          [1507235670000, 4601000],
+          [1507235680000, 4601000],
+          [1507235690000, 4601000],
+          [1507235700000, 4601000]
+        ]
+      }
+    ],
+    "index_document_count": [
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": {
+          "min": 1507235508000,
+          "max": 1507235712000
+        },
+        "metric": {
+          "app": "elasticsearch",
+          "field": "index_stats.primaries.docs.count",
+          "metricAgg": "max",
+          "label": "Document Count",
+          "description": "Total number of documents, only including primary shards.",
+          "units": "",
+          "format": "0,0.[0]a",
+          "legendFormat": "0,0",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [1507235520000, 628],
+          [1507235530000, 628],
+          [1507235540000, 628],
+          [1507235550000, 628],
+          [1507235560000, 628],
+          [1507235570000, 628],
+          [1507235580000, 628],
+          [1507235590000, 628],
+          [1507235600000, 628],
+          [1507235610000, 628],
+          [1507235620000, 628],
+          [1507235630000, 628],
+          [1507235640000, 628],
+          [1507235650000, 628],
+          [1507235660000, 628],
+          [1507235670000, 628],
+          [1507235680000, 628],
+          [1507235690000, 628],
+          [1507235700000, 628]
+        ]
+      }
+    ],
+    "index_segment_count": [
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": {
+          "min": 1507235508000,
+          "max": 1507235712000
+        },
+        "metric": {
+          "app": "elasticsearch",
+          "field": "index_stats.total.segments.count",
+          "metricAgg": "max",
+          "label": "Total",
+          "title": "Segment Count",
+          "description": "Number of segments for primary and replica shards.",
+          "units": "",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [1507235520000, 60],
+          [1507235530000, 60],
+          [1507235540000, 60],
+          [1507235550000, 60],
+          [1507235560000, 60],
+          [1507235570000, 60],
+          [1507235580000, 60],
+          [1507235590000, 60],
+          [1507235600000, 60],
+          [1507235610000, 60],
+          [1507235620000, 60],
+          [1507235630000, 60],
+          [1507235640000, 60],
+          [1507235650000, 60],
+          [1507235660000, 60],
+          [1507235670000, 60],
+          [1507235680000, 60],
+          [1507235690000, 60],
+          [1507235700000, 60]
+        ]
+      },
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": {
+          "min": 1507235508000,
+          "max": 1507235712000
+        },
+        "metric": {
+          "app": "elasticsearch",
+          "field": "index_stats.primaries.segments.count",
+          "metricAgg": "max",
+          "label": "Primaries",
+          "title": "Segment Count",
+          "description": "Number of segments for primary shards.",
+          "units": "",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [1507235520000, 30],
+          [1507235530000, 30],
+          [1507235540000, 30],
+          [1507235550000, 30],
+          [1507235560000, 30],
+          [1507235570000, 30],
+          [1507235580000, 30],
+          [1507235590000, 30],
+          [1507235600000, 30],
+          [1507235610000, 30],
+          [1507235620000, 30],
+          [1507235630000, 30],
+          [1507235640000, 30],
+          [1507235650000, 30],
+          [1507235660000, 30],
+          [1507235670000, 30],
+          [1507235680000, 30],
+          [1507235690000, 30],
+          [1507235700000, 30]
+        ]
+      }
+    ]
+  },
+  "logs": {
+    "enabled": false,
+    "logs": [],
+    "reason": {
+      "indexPatternExists": true,
+      "indexPatternInTimeRangeExists": false,
+      "typeExistsAtAnyTime": true,
+      "typeExists": false,
+      "usingStructuredLogs": false,
+      "clusterExists": false,
+      "nodeExists": null,
+      "indexExists": false
+    },
+    "limit": 10
+  },
+  "shards": [
+    {
+      "index": "avocado-tweets-2017.10.02",
+      "node": "xcP6ue7eRCieNNitFTT0EA",
+      "primary": false,
+      "relocating_node": null,
+      "shard": 4,
+      "state": "STARTED"
+    },
+    {
+      "index": "avocado-tweets-2017.10.02",
+      "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": true,
+      "relocating_node": null,
+      "shard": 4,
+      "state": "STARTED"
+    },
+    {
+      "index": "avocado-tweets-2017.10.02",
+      "node": "xcP6ue7eRCieNNitFTT0EA",
+      "primary": true,
+      "relocating_node": null,
+      "shard": 1,
+      "state": "STARTED"
+    },
+    {
+      "index": "avocado-tweets-2017.10.02",
+      "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": false,
+      "relocating_node": null,
+      "shard": 1,
+      "state": "STARTED"
+    },
+    {
+      "index": "avocado-tweets-2017.10.02",
+      "node": "xcP6ue7eRCieNNitFTT0EA",
+      "primary": true,
+      "relocating_node": null,
+      "shard": 2,
+      "state": "STARTED"
+    },
+    {
+      "index": "avocado-tweets-2017.10.02",
+      "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": false,
+      "relocating_node": null,
+      "shard": 2,
+      "state": "STARTED"
+    },
+    {
+      "index": "avocado-tweets-2017.10.02",
+      "node": "xcP6ue7eRCieNNitFTT0EA",
+      "primary": false,
+      "relocating_node": null,
+      "shard": 3,
+      "state": "STARTED"
+    },
+    {
+      "index": "avocado-tweets-2017.10.02",
+      "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": true,
+      "relocating_node": null,
+      "shard": 3,
+      "state": "STARTED"
+    },
+    {
+      "index": "avocado-tweets-2017.10.02",
+      "node": "xcP6ue7eRCieNNitFTT0EA",
+      "primary": false,
+      "relocating_node": null,
+      "shard": 0,
+      "state": "STARTED"
+    },
+    {
+      "index": "avocado-tweets-2017.10.02",
+      "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": true,
+      "relocating_node": null,
+      "shard": 0,
+      "state": "STARTED"
+    }
+  ],
+  "shardStats": {
+    "nodes": {
+      "jUT5KdxfRbORSCWkb5zjmA": {
+        "shardCount": 5,
+        "indexCount": 1,
+        "name": "whatever-01",
+        "node_ids": ["jUT5KdxfRbORSCWkb5zjmA"],
+        "type": "master"
+      },
+      "xcP6ue7eRCieNNitFTT0EA": {
+        "shardCount": 5,
+        "indexCount": 1,
+        "name": "whatever-02",
+        "node_ids": ["xcP6ue7eRCieNNitFTT0EA"],
+        "type": "node"
+      }
+    }
+  },
+  "nodes": {
+    "jUT5KdxfRbORSCWkb5zjmA": {
+      "shardCount": 5,
+      "indexCount": 1,
+      "name": "whatever-01",
+      "node_ids": ["jUT5KdxfRbORSCWkb5zjmA"],
+      "type": "master"
+    },
+    "xcP6ue7eRCieNNitFTT0EA": {
+      "shardCount": 5,
+      "indexCount": 1,
+      "name": "whatever-02",
+      "node_ids": ["xcP6ue7eRCieNNitFTT0EA"],
+      "type": "node"
+    }
+  },
+  "stateUuid": "6wwwErXyTfaa4uHBHG5Pbg"
+}

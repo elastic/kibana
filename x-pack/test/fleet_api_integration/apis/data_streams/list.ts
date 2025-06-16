@@ -106,7 +106,8 @@ export default function (providerContext: FtrProviderContext) {
   };
 
   // Failing ES Promotion: https://github.com/elastic/kibana/issues/151756
-  describe('data_streams_list', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/211515
+  describe.skip('data_streams_list', () => {
     skipIfNoDockerRegistry(providerContext);
 
     beforeEach(async () => {

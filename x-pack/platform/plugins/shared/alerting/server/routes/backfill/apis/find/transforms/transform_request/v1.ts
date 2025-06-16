@@ -6,8 +6,8 @@
  */
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { FindBackfillRequestQueryV1 } from '../../../../../../../common/routes/backfill/apis/find';
-import { FindBackfillParams } from '../../../../../../application/backfill/methods/find/types';
+import type { FindBackfillRequestQueryV1 } from '../../../../../../../common/routes/backfill/apis/find';
+import type { FindBackfillParams } from '../../../../../../application/backfill/methods/find/types';
 
 export const transformRequest = ({
   end,

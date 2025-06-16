@@ -3,59 +3,9 @@
 exports[`useComparisonCss should render with basic diff mode and diff decorations 1`] = `
 Object {
   "map": undefined,
-  "name": "1qc86qa",
+  "name": "h7dgtn-useComparisonCss-useComparisonCss",
   "next": undefined,
-  "styles": "
-    .unifiedDataTable__cellValue {
-      white-space: pre-wrap;
-    }
-
-    .unifiedDataTable__comparisonFieldName {
-      font-weight: 600;
-    }
-
-    .unifiedDataTable__comparisonBaseDocCell {
-      background-color: rgba(211,218,230,0.2);
-    }
-
-    
-      .unifiedDataTable__comparisonMatchCell {
-        .unifiedDataTable__cellValue {
-          &,
-          & * {
-            color: #007871 !important;
-          }
-        }
-      }
-
-      .unifiedDataTable__comparisonDiffCell {
-        .unifiedDataTable__cellValue {
-          &,
-          & * {
-            color: #bd271e !important;
-          }
-        }
-      }
-    ;
-
-    .unifiedDataTable__comparisonSegment {
-      position: relative;
-    }
-
-    .unifiedDataTable__comparisonAddedSegment {
-      background-color: #e6f9f7;
-      color: #007871;
-    }
-
-    .unifiedDataTable__comparisonRemovedSegment {
-      background-color: #f8e9e9;
-      color: #bd271e;
-    }
-
-    
-
-    
-  ",
+  "styles": ".unifiedDataTable__cellValue{white-space:pre-wrap;}.unifiedDataTable__comparisonFieldName{font-weight:500;}.unifiedDataTable__comparisonBaseDocCell{background-color:#F6F9FC;}.unifiedDataTable__comparisonMatchCell{.unifiedDataTable__cellValue{&,& *{color:#09724D!important;}}}.unifiedDataTable__comparisonDiffCell{.unifiedDataTable__cellValue{&,& *{color:#A71627!important;}}};label:useComparisonCss;; .unifiedDataTable__comparisonSegment{position:relative;}.unifiedDataTable__comparisonAddedSegment{background-color:#E2F8F0;color:#09724D;}.unifiedDataTable__comparisonRemovedSegment{background-color:#FFE8E5;color:#A71627;} ;;label:useComparisonCss;",
   "toString": [Function],
 }
 `;
@@ -63,59 +13,9 @@ Object {
 exports[`useComparisonCss should render with basic diff mode and no diff decorations 1`] = `
 Object {
   "map": undefined,
-  "name": "1qc86qa",
+  "name": "h7dgtn-useComparisonCss-useComparisonCss",
   "next": undefined,
-  "styles": "
-    .unifiedDataTable__cellValue {
-      white-space: pre-wrap;
-    }
-
-    .unifiedDataTable__comparisonFieldName {
-      font-weight: 600;
-    }
-
-    .unifiedDataTable__comparisonBaseDocCell {
-      background-color: rgba(211,218,230,0.2);
-    }
-
-    
-      .unifiedDataTable__comparisonMatchCell {
-        .unifiedDataTable__cellValue {
-          &,
-          & * {
-            color: #007871 !important;
-          }
-        }
-      }
-
-      .unifiedDataTable__comparisonDiffCell {
-        .unifiedDataTable__cellValue {
-          &,
-          & * {
-            color: #bd271e !important;
-          }
-        }
-      }
-    ;
-
-    .unifiedDataTable__comparisonSegment {
-      position: relative;
-    }
-
-    .unifiedDataTable__comparisonAddedSegment {
-      background-color: #e6f9f7;
-      color: #007871;
-    }
-
-    .unifiedDataTable__comparisonRemovedSegment {
-      background-color: #f8e9e9;
-      color: #bd271e;
-    }
-
-    
-
-    
-  ",
+  "styles": ".unifiedDataTable__cellValue{white-space:pre-wrap;}.unifiedDataTable__comparisonFieldName{font-weight:500;}.unifiedDataTable__comparisonBaseDocCell{background-color:#F6F9FC;}.unifiedDataTable__comparisonMatchCell{.unifiedDataTable__cellValue{&,& *{color:#09724D!important;}}}.unifiedDataTable__comparisonDiffCell{.unifiedDataTable__cellValue{&,& *{color:#A71627!important;}}};label:useComparisonCss;; .unifiedDataTable__comparisonSegment{position:relative;}.unifiedDataTable__comparisonAddedSegment{background-color:#E2F8F0;color:#09724D;}.unifiedDataTable__comparisonRemovedSegment{background-color:#FFE8E5;color:#A71627;} ;;label:useComparisonCss;",
   "toString": [Function],
 }
 `;
@@ -123,49 +23,9 @@ Object {
 exports[`useComparisonCss should render with chars diff mode and diff decorations 1`] = `
 Object {
   "map": undefined,
-  "name": "vd39me",
+  "name": "18ri905-useComparisonCss-useComparisonCss",
   "next": undefined,
-  "styles": "
-    .unifiedDataTable__cellValue {
-      white-space: pre-wrap;
-    }
-
-    .unifiedDataTable__comparisonFieldName {
-      font-weight: 600;
-    }
-
-    .unifiedDataTable__comparisonBaseDocCell {
-      background-color: rgba(211,218,230,0.2);
-    }
-
-    
-
-    .unifiedDataTable__comparisonSegment {
-      position: relative;
-    }
-
-    .unifiedDataTable__comparisonAddedSegment {
-      background-color: #e6f9f7;
-      color: #007871;
-    }
-
-    .unifiedDataTable__comparisonRemovedSegment {
-      background-color: #f8e9e9;
-      color: #bd271e;
-    }
-
-    
-      .unifiedDataTable__comparisonAddedSegment {
-        text-decoration: underline;
-      }
-
-      .unifiedDataTable__comparisonRemovedSegment {
-        text-decoration: line-through;
-      }
-    ;
-
-    
-  ",
+  "styles": ".unifiedDataTable__cellValue{white-space:pre-wrap;}.unifiedDataTable__comparisonFieldName{font-weight:500;}.unifiedDataTable__comparisonBaseDocCell{background-color:#F6F9FC;} .unifiedDataTable__comparisonSegment{position:relative;}.unifiedDataTable__comparisonAddedSegment{background-color:#E2F8F0;color:#09724D;}.unifiedDataTable__comparisonRemovedSegment{background-color:#FFE8E5;color:#A71627;}.unifiedDataTable__comparisonAddedSegment{text-decoration:underline;}.unifiedDataTable__comparisonRemovedSegment{text-decoration:line-through;};label:useComparisonCss;; ;;label:useComparisonCss;",
   "toString": [Function],
 }
 `;
@@ -173,41 +33,9 @@ Object {
 exports[`useComparisonCss should render with chars diff mode and no diff decorations 1`] = `
 Object {
   "map": undefined,
-  "name": "1ylxgdl",
+  "name": "5yaxff-useComparisonCss",
   "next": undefined,
-  "styles": "
-    .unifiedDataTable__cellValue {
-      white-space: pre-wrap;
-    }
-
-    .unifiedDataTable__comparisonFieldName {
-      font-weight: 600;
-    }
-
-    .unifiedDataTable__comparisonBaseDocCell {
-      background-color: rgba(211,218,230,0.2);
-    }
-
-    
-
-    .unifiedDataTable__comparisonSegment {
-      position: relative;
-    }
-
-    .unifiedDataTable__comparisonAddedSegment {
-      background-color: #e6f9f7;
-      color: #007871;
-    }
-
-    .unifiedDataTable__comparisonRemovedSegment {
-      background-color: #f8e9e9;
-      color: #bd271e;
-    }
-
-    
-
-    
-  ",
+  "styles": ".unifiedDataTable__cellValue{white-space:pre-wrap;}.unifiedDataTable__comparisonFieldName{font-weight:500;}.unifiedDataTable__comparisonBaseDocCell{background-color:#F6F9FC;} .unifiedDataTable__comparisonSegment{position:relative;}.unifiedDataTable__comparisonAddedSegment{background-color:#E2F8F0;color:#09724D;}.unifiedDataTable__comparisonRemovedSegment{background-color:#FFE8E5;color:#A71627;} ;;label:useComparisonCss;",
   "toString": [Function],
 }
 `;
@@ -215,77 +43,9 @@ Object {
 exports[`useComparisonCss should render with lines diff mode and diff decorations 1`] = `
 Object {
   "map": undefined,
-  "name": "nlhk3s",
+  "name": "rjjcn9-indicatorCss-indicatorCss-useComparisonCss-useComparisonCss-useComparisonCss",
   "next": undefined,
-  "styles": "
-    .unifiedDataTable__cellValue {
-      white-space: pre-wrap;
-    }
-
-    .unifiedDataTable__comparisonFieldName {
-      font-weight: 600;
-    }
-
-    .unifiedDataTable__comparisonBaseDocCell {
-      background-color: rgba(211,218,230,0.2);
-    }
-
-    
-
-    .unifiedDataTable__comparisonSegment {
-      position: relative;
-    }
-
-    .unifiedDataTable__comparisonAddedSegment {
-      background-color: #e6f9f7;
-      color: #007871;
-    }
-
-    .unifiedDataTable__comparisonRemovedSegment {
-      background-color: #f8e9e9;
-      color: #bd271e;
-    }
-
-    
-
-    
-      .unifiedDataTable__comparisonSegment {
-        padding-left: calc(4px / 2);
-      }
-
-      
-        .unifiedDataTable__comparisonAddedSegment:before {
-          content: '+';
-          
-    position: absolute;
-    width: 8px;
-    height: 100%;
-    margin-left: calc(-8px - calc(4px / 2));
-    text-align: center;
-    line-height: 1;
-    font-weight: 500;
-  ;
-          background-color: #00BFB3;
-          color: #F1F4FA;
-        }
-
-        .unifiedDataTable__comparisonRemovedSegment:before {
-          content: '-';
-          
-    position: absolute;
-    width: 8px;
-    height: 100%;
-    margin-left: calc(-8px - calc(4px / 2));
-    text-align: center;
-    line-height: 1;
-    font-weight: 500;
-  ;
-          background-color: #ce5d56;
-          color: #F1F4FA;
-        }
-      ;
-    ;
-  ",
+  "styles": ".unifiedDataTable__cellValue{white-space:pre-wrap;}.unifiedDataTable__comparisonFieldName{font-weight:500;}.unifiedDataTable__comparisonBaseDocCell{background-color:#F6F9FC;} .unifiedDataTable__comparisonSegment{position:relative;}.unifiedDataTable__comparisonAddedSegment{background-color:#E2F8F0;color:#09724D;}.unifiedDataTable__comparisonRemovedSegment{background-color:#FFE8E5;color:#A71627;} .unifiedDataTable__comparisonSegment{padding-left:calc(4px / 2);}.unifiedDataTable__comparisonAddedSegment:before{content:'+';position:absolute;width:8px;height:100%;margin-left:calc(-8px - calc(4px / 2));text-align:center;line-height:1;font-weight:450;;label:indicatorCss;; background-color:#008A5E;color:#ECF1F9;}.unifiedDataTable__comparisonRemovedSegment:before{content:'-';position:absolute;width:8px;height:100%;margin-left:calc(-8px - calc(4px / 2));text-align:center;line-height:1;font-weight:450;;label:indicatorCss;; background-color:#C61E25;color:#ECF1F9;};label:useComparisonCss;;;;label:useComparisonCss;;;;label:useComparisonCss;",
   "toString": [Function],
 }
 `;
@@ -293,47 +53,9 @@ Object {
 exports[`useComparisonCss should render with lines diff mode and no diff decorations 1`] = `
 Object {
   "map": undefined,
-  "name": "1mthx0u",
+  "name": "1dyja13-useComparisonCss-useComparisonCss",
   "next": undefined,
-  "styles": "
-    .unifiedDataTable__cellValue {
-      white-space: pre-wrap;
-    }
-
-    .unifiedDataTable__comparisonFieldName {
-      font-weight: 600;
-    }
-
-    .unifiedDataTable__comparisonBaseDocCell {
-      background-color: rgba(211,218,230,0.2);
-    }
-
-    
-
-    .unifiedDataTable__comparisonSegment {
-      position: relative;
-    }
-
-    .unifiedDataTable__comparisonAddedSegment {
-      background-color: #e6f9f7;
-      color: #007871;
-    }
-
-    .unifiedDataTable__comparisonRemovedSegment {
-      background-color: #f8e9e9;
-      color: #bd271e;
-    }
-
-    
-
-    
-      .unifiedDataTable__comparisonSegment {
-        padding-left: calc(4px / 2);
-      }
-
-      
-    ;
-  ",
+  "styles": ".unifiedDataTable__cellValue{white-space:pre-wrap;}.unifiedDataTable__comparisonFieldName{font-weight:500;}.unifiedDataTable__comparisonBaseDocCell{background-color:#F6F9FC;} .unifiedDataTable__comparisonSegment{position:relative;}.unifiedDataTable__comparisonAddedSegment{background-color:#E2F8F0;color:#09724D;}.unifiedDataTable__comparisonRemovedSegment{background-color:#FFE8E5;color:#A71627;} .unifiedDataTable__comparisonSegment{padding-left:calc(4px / 2);};;label:useComparisonCss;;;;label:useComparisonCss;",
   "toString": [Function],
 }
 `;
@@ -341,41 +63,9 @@ Object {
 exports[`useComparisonCss should render with no diff mode and no diff decorations 1`] = `
 Object {
   "map": undefined,
-  "name": "1ylxgdl",
+  "name": "5yaxff-useComparisonCss",
   "next": undefined,
-  "styles": "
-    .unifiedDataTable__cellValue {
-      white-space: pre-wrap;
-    }
-
-    .unifiedDataTable__comparisonFieldName {
-      font-weight: 600;
-    }
-
-    .unifiedDataTable__comparisonBaseDocCell {
-      background-color: rgba(211,218,230,0.2);
-    }
-
-    
-
-    .unifiedDataTable__comparisonSegment {
-      position: relative;
-    }
-
-    .unifiedDataTable__comparisonAddedSegment {
-      background-color: #e6f9f7;
-      color: #007871;
-    }
-
-    .unifiedDataTable__comparisonRemovedSegment {
-      background-color: #f8e9e9;
-      color: #bd271e;
-    }
-
-    
-
-    
-  ",
+  "styles": ".unifiedDataTable__cellValue{white-space:pre-wrap;}.unifiedDataTable__comparisonFieldName{font-weight:500;}.unifiedDataTable__comparisonBaseDocCell{background-color:#F6F9FC;} .unifiedDataTable__comparisonSegment{position:relative;}.unifiedDataTable__comparisonAddedSegment{background-color:#E2F8F0;color:#09724D;}.unifiedDataTable__comparisonRemovedSegment{background-color:#FFE8E5;color:#A71627;} ;;label:useComparisonCss;",
   "toString": [Function],
 }
 `;
@@ -383,49 +73,9 @@ Object {
 exports[`useComparisonCss should render with words diff mode and diff decorations 1`] = `
 Object {
   "map": undefined,
-  "name": "vd39me",
+  "name": "18ri905-useComparisonCss-useComparisonCss",
   "next": undefined,
-  "styles": "
-    .unifiedDataTable__cellValue {
-      white-space: pre-wrap;
-    }
-
-    .unifiedDataTable__comparisonFieldName {
-      font-weight: 600;
-    }
-
-    .unifiedDataTable__comparisonBaseDocCell {
-      background-color: rgba(211,218,230,0.2);
-    }
-
-    
-
-    .unifiedDataTable__comparisonSegment {
-      position: relative;
-    }
-
-    .unifiedDataTable__comparisonAddedSegment {
-      background-color: #e6f9f7;
-      color: #007871;
-    }
-
-    .unifiedDataTable__comparisonRemovedSegment {
-      background-color: #f8e9e9;
-      color: #bd271e;
-    }
-
-    
-      .unifiedDataTable__comparisonAddedSegment {
-        text-decoration: underline;
-      }
-
-      .unifiedDataTable__comparisonRemovedSegment {
-        text-decoration: line-through;
-      }
-    ;
-
-    
-  ",
+  "styles": ".unifiedDataTable__cellValue{white-space:pre-wrap;}.unifiedDataTable__comparisonFieldName{font-weight:500;}.unifiedDataTable__comparisonBaseDocCell{background-color:#F6F9FC;} .unifiedDataTable__comparisonSegment{position:relative;}.unifiedDataTable__comparisonAddedSegment{background-color:#E2F8F0;color:#09724D;}.unifiedDataTable__comparisonRemovedSegment{background-color:#FFE8E5;color:#A71627;}.unifiedDataTable__comparisonAddedSegment{text-decoration:underline;}.unifiedDataTable__comparisonRemovedSegment{text-decoration:line-through;};label:useComparisonCss;; ;;label:useComparisonCss;",
   "toString": [Function],
 }
 `;
@@ -433,41 +83,9 @@ Object {
 exports[`useComparisonCss should render with words diff mode and no diff decorations 1`] = `
 Object {
   "map": undefined,
-  "name": "1ylxgdl",
+  "name": "5yaxff-useComparisonCss",
   "next": undefined,
-  "styles": "
-    .unifiedDataTable__cellValue {
-      white-space: pre-wrap;
-    }
-
-    .unifiedDataTable__comparisonFieldName {
-      font-weight: 600;
-    }
-
-    .unifiedDataTable__comparisonBaseDocCell {
-      background-color: rgba(211,218,230,0.2);
-    }
-
-    
-
-    .unifiedDataTable__comparisonSegment {
-      position: relative;
-    }
-
-    .unifiedDataTable__comparisonAddedSegment {
-      background-color: #e6f9f7;
-      color: #007871;
-    }
-
-    .unifiedDataTable__comparisonRemovedSegment {
-      background-color: #f8e9e9;
-      color: #bd271e;
-    }
-
-    
-
-    
-  ",
+  "styles": ".unifiedDataTable__cellValue{white-space:pre-wrap;}.unifiedDataTable__comparisonFieldName{font-weight:500;}.unifiedDataTable__comparisonBaseDocCell{background-color:#F6F9FC;} .unifiedDataTable__comparisonSegment{position:relative;}.unifiedDataTable__comparisonAddedSegment{background-color:#E2F8F0;color:#09724D;}.unifiedDataTable__comparisonRemovedSegment{background-color:#FFE8E5;color:#A71627;} ;;label:useComparisonCss;",
   "toString": [Function],
 }
 `;

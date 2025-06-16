@@ -10,7 +10,11 @@ import { wrapper } from '../../mocks';
 
 import { useLensAttributes } from '../../use_lens_attributes';
 
-import { kpiUniquePrivateIpsBarLensAttributes } from './kpi_unique_private_ips_bar';
+import { getKpiUniquePrivateIpsBarLensAttributes } from './kpi_unique_private_ips_bar';
+
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('generated-uuid'),
+}));
 
 jest.mock('../../../../../sourcerer/containers', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({
@@ -31,12 +35,12 @@ jest.mock('../../../../utils/route/use_route_spy', () => ({
   ]),
 }));
 
-describe('kpiUniquePrivateIpsBarLensAttributes', () => {
+describe('getKpiUniquePrivateIpsBarLensAttributes', () => {
   it('should render', () => {
     const { result } = renderHook(
       () =>
         useLensAttributes({
-          lensAttributes: kpiUniquePrivateIpsBarLensAttributes,
+          getLensAttributes: getKpiUniquePrivateIpsBarLensAttributes,
           stackByField: 'event.dataset',
         }),
       { wrapper }

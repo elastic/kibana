@@ -40,10 +40,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Search Applications product card visible',
           async () => await testSubjects.exists('enterpriseSearchApplicationsProductCard')
         );
-        await retry.waitFor(
-          'Behavioral Analytics product card visible',
-          async () => await testSubjects.exists('enterpriseSearchAnalyticsProductCard')
-        );
         await a11y.testAppSnapshot();
       });
     });
@@ -71,34 +67,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor(
           'setup guide visible',
           async () => await testSubjects.exists('elasticsearchGuide')
-        );
-        await a11y.testAppSnapshot();
-      });
-    });
-
-    describe('App Search', () => {
-      before(async () => {
-        await common.navigateToApp('enterprise_search/app_search');
-      });
-
-      it('loads a setup guide', async function () {
-        await retry.waitFor(
-          'setup guide visible',
-          async () => await testSubjects.exists('setupGuide')
-        );
-        await a11y.testAppSnapshot();
-      });
-    });
-
-    describe('Workplace Search', () => {
-      before(async () => {
-        await common.navigateToApp('enterprise_search/workplace_search');
-      });
-
-      it('loads a setup guide', async function () {
-        await retry.waitFor(
-          'setup guide visible',
-          async () => await testSubjects.exists('setupGuide')
         );
         await a11y.testAppSnapshot();
       });

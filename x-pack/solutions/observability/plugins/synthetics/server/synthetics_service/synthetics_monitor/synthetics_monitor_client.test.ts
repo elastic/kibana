@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { loggerMock } from '@kbn/logging-mocks';
-import { SavedObjectsClientContract, CoreStart } from '@kbn/core/server';
+import { CoreStart } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { SyntheticsMonitorClient } from './synthetics_monitor_client';
 import { SyntheticsService } from '../synthetics_service';
@@ -42,10 +42,6 @@ describe('SyntheticsMonitorClient', () => {
   const mockEsClient = {
     search: jest.fn(),
   };
-  const savedObjectsClientMock = {
-    bulkUpdate: jest.fn(),
-    get: jest.fn(),
-  } as unknown as SavedObjectsClientContract;
 
   const logger = loggerMock.create();
 
@@ -204,11 +200,7 @@ describe('SyntheticsMonitorClient', () => {
     client.privateLocationAPI.deleteMonitors = jest.fn();
     syntheticsService.deleteConfigs = jest.fn();
 
-    await client.deleteMonitors(
-      [monitor as unknown as SyntheticsMonitorWithId],
-      savedObjectsClientMock,
-      'test-space'
-    );
+    await client.deleteMonitors([monitor as unknown as SyntheticsMonitorWithId], 'test-space');
 
     expect(syntheticsService.deleteConfigs).toHaveBeenCalledTimes(1);
     expect(client.privateLocationAPI.deleteMonitors).toHaveBeenCalledTimes(1);

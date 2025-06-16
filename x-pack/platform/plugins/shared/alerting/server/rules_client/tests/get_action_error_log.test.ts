@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { RulesClient, ConstructorOptions } from '../rules_client';
-import { GetActionErrorLogByIdParams } from '../methods/get_action_error_log';
+import type { ConstructorOptions } from '../rules_client';
+import { RulesClient } from '../rules_client';
+import type { GetActionErrorLogByIdParams } from '../methods/get_action_error_log';
 import {
   savedObjectsClientMock,
   loggingSystemMock,
@@ -19,11 +20,11 @@ import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../authorization/alerting_authorization';
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import type { AlertingAuthorization } from '../../authorization/alerting_authorization';
+import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
-import { SavedObject } from '@kbn/core/server';
-import { RawRule } from '../../types';
+import type { SavedObject } from '@kbn/core/server';
+import type { RawRule } from '../../types';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, mockedDateString, setGlobalDate } from './lib';
 import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
@@ -120,6 +121,10 @@ const findResults = {
   total: 5,
   data: [
     {
+      _id: 'test-id-0',
+      _index: 'test',
+      _seq_no: 1,
+      _primary_term: 1,
       '@timestamp': '2022-03-23T17:37:07.106Z',
       event: {
         provider: 'actions',
@@ -169,6 +174,10 @@ const findResults = {
       },
     },
     {
+      _id: 'test-id-1',
+      _index: 'test',
+      _seq_no: 1,
+      _primary_term: 1,
       '@timestamp': '2022-03-23T17:37:07.102Z',
       event: {
         provider: 'actions',
@@ -218,6 +227,10 @@ const findResults = {
       },
     },
     {
+      _id: 'test-id-2',
+      _index: 'test',
+      _seq_no: 1,
+      _primary_term: 1,
       '@timestamp': '2022-03-23T17:37:07.098Z',
       event: {
         provider: 'actions',
@@ -267,6 +280,10 @@ const findResults = {
       },
     },
     {
+      _id: 'test-id-3',
+      _index: 'test',
+      _seq_no: 1,
+      _primary_term: 1,
       '@timestamp': '2022-03-23T17:37:07.096Z',
       event: {
         provider: 'actions',
@@ -316,6 +333,10 @@ const findResults = {
       },
     },
     {
+      _id: 'test-id-4',
+      _index: 'test',
+      _seq_no: 1,
+      _primary_term: 1,
       '@timestamp': '2022-03-23T17:37:07.086Z',
       event: {
         provider: 'actions',

@@ -7,62 +7,86 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { waitFor } from '@testing-library/react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
-import { DiscoverMainRoute, MainRouteProps } from './discover_main_route';
+import type { MainRouteProps } from './discover_main_route';
+import { DiscoverMainRoute } from './discover_main_route';
 import { MemoryRouter } from 'react-router-dom';
-import { DiscoverMainApp } from './discover_main_app';
+import { DiscoverMainApp } from './components/session_view/main_app';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import {
-  createCustomizationService,
-  DiscoverCustomizationService,
-} from '../../customizations/customization_service';
-import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inline';
+import type { DiscoverCustomizationService } from '../../customizations/customization_service';
+import { createCustomizationService } from '../../customizations/customization_service';
 import { mockCustomizationContext } from '../../customizations/__mocks__/customization_context';
+import type { MainHistoryLocationState } from '../../../common';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import type { RootProfileState } from '../../context_awareness';
+import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 
-let mockCustomizationService: DiscoverCustomizationService | undefined;
+let mockCustomizationService: Promise<DiscoverCustomizationService> | undefined;
 
 jest.mock('../../customizations', () => {
   const originalModule = jest.requireActual('../../customizations');
   return {
     ...originalModule,
-    useDiscoverCustomizationService: () => ({
-      customizationService: mockCustomizationService,
-      isInitialized: Boolean(mockCustomizationService),
-    }),
+    useDiscoverCustomizationService: () => () => mockCustomizationService,
   };
 });
 
-jest.mock('./discover_main_app', () => {
+jest.mock('./components/session_view/main_app', () => {
   return {
-    DiscoverMainApp: jest.fn().mockReturnValue(<></>),
+    DiscoverMainApp: jest.fn(() => <></>),
   };
 });
 
-let mockRootProfileLoading = false;
+const defaultRootProfileState: RootProfileState = {
+  rootProfileLoading: false,
+  AppWrapper: ({ children }: { children?: ReactNode }) => <>{children}</>,
+  getDefaultAdHocDataViews: () => [],
+};
+let mockRootProfileState: RootProfileState = defaultRootProfileState;
 
 jest.mock('../../context_awareness', () => {
   const originalModule = jest.requireActual('../../context_awareness');
   return {
     ...originalModule,
-    useRootProfile: () => ({
-      rootProfileLoading: mockRootProfileLoading,
-      AppWrapper: ({ children }: { children: ReactNode }) => <>{children}</>,
-    }),
+    useRootProfile: () => mockRootProfileState,
   };
 });
 
 describe('DiscoverMainRoute', () => {
   beforeEach(() => {
-    mockCustomizationService = createCustomizationService();
-    mockRootProfileLoading = false;
+    mockCustomizationService = Promise.resolve(createCustomizationService());
+    mockRootProfileState = defaultRootProfileState;
   });
 
   test('renders the main app when hasESData=true & hasUserDataView=true ', async () => {
     const component = mountComponent(true, true);
+
+    await waitFor(() => {
+      component.update();
+      expect(component.find(DiscoverMainApp).exists()).toBe(true);
+    });
+  });
+
+  test('renders the main app when ad hoc data views exist', async () => {
+    const defaultAdHocDataViews = [{ id: 'test', title: 'test' }];
+    mockRootProfileState = {
+      ...defaultRootProfileState,
+      getDefaultAdHocDataViews: () => defaultAdHocDataViews,
+    };
+    const component = mountComponent(true, false);
+
+    await waitFor(() => {
+      component.update();
+      expect(component.find(DiscoverMainApp).exists()).toBe(true);
+    });
+  });
+
+  test('renders the main app when a data view spec is passed through location state', async () => {
+    const component = mountComponent(true, false, { dataViewSpec: { id: 'test', title: 'test' } });
 
     await waitFor(() => {
       component.update();
@@ -100,13 +124,16 @@ describe('DiscoverMainRoute', () => {
   });
 
   test('renders LoadingIndicator while customizations are loading', async () => {
-    mockCustomizationService = undefined;
+    let resolveService = (_: DiscoverCustomizationService) => {};
+    mockCustomizationService = new Promise((resolve) => {
+      resolveService = resolve;
+    });
     const component = mountComponent(true, true);
     await waitFor(() => {
       component.update();
       expect(component.find(DiscoverMainApp).exists()).toBe(false);
     });
-    mockCustomizationService = createCustomizationService();
+    resolveService(createCustomizationService());
     await waitFor(() => {
       component.setProps({}).update();
       expect(component.find(DiscoverMainApp).exists()).toBe(true);
@@ -114,29 +141,25 @@ describe('DiscoverMainRoute', () => {
   });
 
   test('renders LoadingIndicator while root profile is loading', async () => {
-    mockRootProfileLoading = true;
+    mockRootProfileState = { rootProfileLoading: true };
     const component = mountComponent(true, true);
     await waitFor(() => {
       component.update();
       expect(component.find(DiscoverMainApp).exists()).toBe(false);
     });
-    mockRootProfileLoading = false;
+    mockRootProfileState = defaultRootProfileState;
     await waitFor(() => {
       component.setProps({}).update();
       expect(component.find(DiscoverMainApp).exists()).toBe(true);
     });
   });
-
-  test('should pass hideNavMenuItems=true to DiscoverTopNavInline while loading', async () => {
-    const component = mountComponent(true, true);
-    expect(component.find(DiscoverTopNavInline).prop('hideNavMenuItems')).toBe(true);
-    await waitFor(() => {
-      expect(component.update().find(DiscoverTopNavInline).prop('hideNavMenuItems')).toBe(false);
-    });
-  });
 });
 
-const mountComponent = (hasESData = true, hasUserDataView = true) => {
+const mountComponent = (
+  hasESData = true,
+  hasUserDataView = true,
+  locationState?: MainHistoryLocationState
+) => {
   const props: MainRouteProps = {
     customizationCallbacks: [],
     customizationContext: mockCustomizationContext,
@@ -144,20 +167,30 @@ const mountComponent = (hasESData = true, hasUserDataView = true) => {
 
   return mountWithIntl(
     <MemoryRouter>
-      <KibanaContextProvider services={getServicesMock(hasESData, hasUserDataView)}>
+      <DiscoverTestProvider services={getServicesMock(hasESData, hasUserDataView, locationState)}>
         <DiscoverMainRoute {...props} />
-      </KibanaContextProvider>
+      </DiscoverTestProvider>
     </MemoryRouter>
   );
 };
 
-function getServicesMock(hasESData = true, hasUserDataView = true) {
+function getServicesMock(
+  hasESData = true,
+  hasUserDataView = true,
+  locationState?: MainHistoryLocationState
+) {
   const dataViewsMock = discoverServiceMock.data.dataViews;
   dataViewsMock.hasData = {
     hasESData: jest.fn(() => Promise.resolve(hasESData)),
     hasUserDataView: jest.fn(() => Promise.resolve(hasUserDataView)),
     hasDataView: jest.fn(() => Promise.resolve(true)),
   };
+  dataViewsMock.create = jest.fn().mockResolvedValue(dataViewMock);
   discoverServiceMock.core.http.get = jest.fn().mockResolvedValue({});
+  discoverServiceMock.getScopedHistory = jest.fn().mockReturnValue({
+    location: {
+      state: locationState,
+    },
+  });
   return discoverServiceMock;
 }

@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import { of } from 'rxjs';
 import { shallow } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -50,9 +49,6 @@ const mockServices = {
   },
   fieldFormats: {
     getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => (value ? value : '-') })),
-  },
-  theme: {
-    theme$: of({ darkMode: false }),
   },
 };
 
@@ -117,6 +113,7 @@ describe('Unified data table cell rendering', function () {
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
+      columnsMeta: undefined,
     });
     const component = shallow(
       <DataTableCellValue
@@ -142,6 +139,7 @@ describe('Unified data table cell rendering', function () {
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
+      columnsMeta: undefined,
     });
     const component = shallow(
       <DataTableCellValue
@@ -155,7 +153,7 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div data-test-subj=\\"dataTableExpandCellActionPopover\\" class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"unifiedDataTable__cellPopoverValue eui-textBreakWord\\"><span>100</span></span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon css-w92548-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
+      `"<div data-test-subj=\\"dataTableExpandCellActionPopover\\" class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"unifiedDataTable__cellPopoverValue eui-textBreakWord\\"><span>100</span></span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon css-6m8561-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
     );
   });
 
@@ -168,6 +166,7 @@ describe('Unified data table cell rendering', function () {
       closePopover: closePopoverMockFn,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
+      columnsMeta: undefined,
     });
     const component = mountWithIntl(
       <DataTableCellValue
@@ -181,7 +180,7 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div data-test-subj=\\"dataTableExpandCellActionPopover\\" class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"unifiedDataTable__cellPopoverValue eui-textBreakWord\\"><span>100</span></span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon css-w92548-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
+      `"<div data-test-subj=\\"dataTableExpandCellActionPopover\\" class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"unifiedDataTable__cellPopoverValue eui-textBreakWord\\"><span>100</span></span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon css-6m8561-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
     );
     findTestSubject(component, 'docTableClosePopover').simulate('click');
     expect(closePopoverMockFn).toHaveBeenCalledTimes(1);
@@ -197,6 +196,7 @@ describe('Unified data table cell rendering', function () {
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
+      columnsMeta: undefined,
     });
     const component = shallow(
       <DataTableCellValue
@@ -233,6 +233,7 @@ describe('Unified data table cell rendering', function () {
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
+      columnsMeta: undefined,
     });
     const component = shallow(
       <DataTableCellValue
@@ -300,6 +301,7 @@ describe('Unified data table cell rendering', function () {
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
       isPlainRecord: true,
+      columnsMeta: undefined,
     });
     const component = shallow(
       <DataTableCellValue
@@ -339,6 +341,7 @@ describe('Unified data table cell rendering', function () {
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
+      columnsMeta: undefined,
     });
     const component = shallow(
       <DataTableCellValue
@@ -378,6 +381,7 @@ describe('Unified data table cell rendering', function () {
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       // this is the number of rendered items
       maxEntries: 1,
+      columnsMeta: undefined,
     });
     const component = shallow(
       <DataTableCellValue
@@ -414,6 +418,7 @@ describe('Unified data table cell rendering', function () {
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
+      columnsMeta: undefined,
     });
     const component = shallow(
       <DataTableCellValue
@@ -490,6 +495,7 @@ describe('Unified data table cell rendering', function () {
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
+      columnsMeta: undefined,
     });
     const component = shallow(
       <DataTableCellValue
@@ -530,6 +536,7 @@ describe('Unified data table cell rendering', function () {
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
+      columnsMeta: undefined,
     });
     const component = shallow(
       <DataTableCellValue
@@ -567,6 +574,7 @@ describe('Unified data table cell rendering', function () {
       closePopover: closePopoverMockFn,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
+      columnsMeta: undefined,
     });
     const component = shallow(
       <DataTableCellValue
@@ -641,6 +649,7 @@ describe('Unified data table cell rendering', function () {
       closePopover: closePopoverMockFn,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
+      columnsMeta: undefined,
     });
     const component = mountWithIntl(
       <KibanaContextProvider services={mockServices}>
@@ -669,6 +678,7 @@ describe('Unified data table cell rendering', function () {
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
+      columnsMeta: undefined,
     });
     const component = shallow(
       <DataTableCellValue
@@ -703,6 +713,7 @@ describe('Unified data table cell rendering', function () {
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
+      columnsMeta: undefined,
     });
     const component = shallow(
       <DataTableCellValue
@@ -728,6 +739,7 @@ describe('Unified data table cell rendering', function () {
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
+      columnsMeta: undefined,
     });
     const component = shallow(
       <DataTableCellValue
@@ -766,6 +778,7 @@ describe('Unified data table cell rendering', function () {
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
+      columnsMeta: undefined,
     });
     const component = shallow(
       <DataTableCellValue
@@ -836,5 +849,123 @@ describe('Unified data table cell rendering', function () {
         </EuiFlexItem>
       </EuiFlexGroup>
     `);
+  });
+
+  it('renders custom ES|QL fields correctly', () => {
+    jest.spyOn(dataViewMock.fields, 'create');
+
+    const rows: EsHitRecord[] = [
+      {
+        _id: '1',
+        _index: 'test',
+        _score: 1,
+        _source: undefined,
+        fields: { bytes: 100, var0: 350, extension: 'gif' },
+      },
+    ];
+    const DataTableCellValue = getRenderCellValueFn({
+      dataView: dataViewMock,
+      rows: rows.map(build),
+      shouldShowFieldHandler: () => true,
+      closePopover: jest.fn(),
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      maxEntries: 100,
+      columnsMeta: {
+        // custom ES|QL var
+        var0: {
+          type: 'number',
+          esType: 'long',
+        },
+        // custom ES|QL override
+        bytes: {
+          type: 'string',
+          esType: 'keyword',
+        },
+      },
+    });
+    const componentWithDataViewField = shallow(
+      <DataTableCellValue
+        rowIndex={0}
+        colIndex={0}
+        columnId="extension"
+        isDetails={false}
+        isExpanded={false}
+        isExpandable={true}
+        setCellProps={jest.fn()}
+      />
+    );
+    expect(componentWithDataViewField).toMatchInlineSnapshot(`
+      <span
+        className="unifiedDataTable__cellValue"
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "gif",
+          }
+        }
+      />
+    `);
+    const componentWithCustomESQLField = shallow(
+      <DataTableCellValue
+        rowIndex={0}
+        colIndex={0}
+        columnId="var0"
+        isDetails={false}
+        isExpanded={false}
+        isExpandable={true}
+        setCellProps={jest.fn()}
+      />
+    );
+    expect(componentWithCustomESQLField).toMatchInlineSnapshot(`
+      <span
+        className="unifiedDataTable__cellValue"
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": 350,
+          }
+        }
+      />
+    `);
+
+    expect(dataViewMock.fields.create).toHaveBeenCalledTimes(1);
+    expect(dataViewMock.fields.create).toHaveBeenCalledWith({
+      name: 'var0',
+      type: 'number',
+      esTypes: ['long'],
+      searchable: true,
+      aggregatable: false,
+      isNull: false,
+    });
+
+    const componentWithCustomESQLFieldOverride = shallow(
+      <DataTableCellValue
+        rowIndex={0}
+        colIndex={0}
+        columnId="bytes"
+        isDetails={false}
+        isExpanded={false}
+        isExpandable={true}
+        setCellProps={jest.fn()}
+      />
+    );
+    expect(componentWithCustomESQLFieldOverride).toMatchInlineSnapshot(`
+      <span
+        className="unifiedDataTable__cellValue"
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": 100,
+          }
+        }
+      />
+    `);
+
+    expect(dataViewMock.fields.create).toHaveBeenCalledTimes(2);
+    expect(dataViewMock.fields.create).toHaveBeenLastCalledWith({
+      name: 'bytes',
+      type: 'string',
+      esTypes: ['keyword'],
+      searchable: true,
+      aggregatable: false,
+      isNull: false,
+    });
   });
 });

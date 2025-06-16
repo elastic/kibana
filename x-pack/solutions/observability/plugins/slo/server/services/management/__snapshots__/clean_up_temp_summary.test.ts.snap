@@ -1,0 +1,96 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CleanUpTempSummary deletes the duplicated temp documents 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "conflicts": "proceed",
+        "index": ".slo-observability.summary-v3.5.temp",
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "bool": Object {
+                  "must": Array [
+                    Object {
+                      "term": Object {
+                        "isTempDoc": true,
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "slo.id": "slo-id-one",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "spaceId": "space-one",
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        "slices": "auto",
+        "wait_for_completion": false,
+      },
+      Object {
+        "signal": AbortSignal {},
+      },
+    ],
+    Array [
+      Object {
+        "conflicts": "proceed",
+        "index": ".slo-observability.summary-v3.5.temp",
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "bool": Object {
+                  "must": Array [
+                    Object {
+                      "term": Object {
+                        "isTempDoc": true,
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "slo.id": "another-temp-id",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "spaceId": "space-two",
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        "slices": "auto",
+        "wait_for_completion": false,
+      },
+      Object {
+        "signal": AbortSignal {},
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;

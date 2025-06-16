@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import * as rt from 'io-ts';
 import {
   LogEntryAfterCursor,
@@ -39,26 +39,24 @@ export const createGetLogEntriesQuery = (
   return {
     index: logEntriesIndex,
     allow_no_indices: true,
-    body: {
-      size,
-      track_scores: false,
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter: [
-            ...(query ? [query] : []),
-            ...(highlightQuery ? [highlightQuery] : []),
-            ...createTimeRangeFilterClauses(startTimestamp, endTimestamp, timestampField),
-          ],
-        },
+    size,
+    track_scores: false,
+    track_total_hits: false,
+    query: {
+      bool: {
+        filter: [
+          ...(query ? [query] : []),
+          ...(highlightQuery ? [highlightQuery] : []),
+          ...createTimeRangeFilterClauses(startTimestamp, endTimestamp, timestampField),
+        ],
       },
-      fields,
-      runtime_mappings: runtimeMappings,
-      _source: false,
-      ...createSortClause(sortDirection, timestampField, tiebreakerField),
-      ...createSearchAfterClause(cursor),
-      ...createHighlightClause(highlightQuery, fields),
     },
+    fields,
+    runtime_mappings: runtimeMappings,
+    _source: false,
+    ...createSortClause(sortDirection, timestampField, tiebreakerField),
+    ...createSearchAfterClause(cursor),
+    ...createHighlightClause(highlightQuery, fields),
   };
 };
 

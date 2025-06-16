@@ -6,25 +6,31 @@
  */
 
 import { isString } from 'lodash';
-import { AdHocRunSO } from '../../../data/ad_hoc_run/types';
+import type { DenormalizedAction } from '../../../rules_client';
+import type { AdHocRunSO } from '../../../data/ad_hoc_run/types';
 import { calculateSchedule } from '../../../backfill_client/lib';
 import { adHocRunStatus } from '../../../../common/constants';
-import { RuleDomain } from '../../rule/types';
-import { ScheduleBackfillParam } from '../methods/schedule/types';
+import type { RuleDomain } from '../../rule/types';
+import type { ScheduleBackfillParam } from '../methods/schedule/types';
 
 export const transformBackfillParamToAdHocRun = (
   param: ScheduleBackfillParam,
   rule: RuleDomain,
+  actions: DenormalizedAction[],
   spaceId: string
 ): AdHocRunSO => {
-  const schedule = calculateSchedule(param.start, rule.schedule.interval, param.end);
+  const schedule = calculateSchedule(rule.schedule.interval, param.ranges);
+  const shouldRunActions = param.runActions !== undefined ? param.runActions : true;
+  const start = param.ranges[0].start;
+  const end = param.ranges[param.ranges.length - 1].end;
+
   return {
     apiKeyId: Buffer.from(rule.apiKey!, 'base64').toString().split(':')[0],
     apiKeyToUse: rule.apiKey!,
     createdAt: new Date().toISOString(),
     duration: rule.schedule.interval,
     enabled: true,
-    end: param.end ? param.end : schedule && schedule.length > 0 ? schedule[0].runAt : undefined,
+    end,
     rule: {
       name: rule.name,
       tags: rule.tags,
@@ -32,6 +38,7 @@ export const transformBackfillParamToAdHocRun = (
       params: rule.params,
       apiKeyOwner: rule.apiKeyOwner,
       apiKeyCreatedByUser: rule.apiKeyCreatedByUser,
+      actions: shouldRunActions ? actions : [],
       consumer: rule.consumer,
       enabled: rule.enabled,
       schedule: rule.schedule,
@@ -42,7 +49,7 @@ export const transformBackfillParamToAdHocRun = (
       revision: rule.revision,
     },
     spaceId,
-    start: param.start,
+    start,
     status: adHocRunStatus.PENDING,
     schedule,
   };

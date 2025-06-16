@@ -45,6 +45,7 @@ export type DynamicPage =
   | 'agent_list'
   | 'agent_details'
   | 'agent_details_logs'
+  | 'agent_details_settings'
   | 'agent_details_diagnostics'
   | 'settings_edit_outputs'
   | 'settings_edit_download_sources'
@@ -68,6 +69,7 @@ export const FLEET_ROUTING_PATHS = {
   agent_details: '/agents/:agentId/:tabId?',
   agent_details_logs: '/agents/:agentId/logs',
   agent_details_diagnostics: '/agents/:agentId/diagnostics',
+  agent_details_settings: '/agents/:agentId/settings',
   policies: '/policies',
   policies_list: '/policies',
   policy_details: '/policies/:policyId/:tabId?',
@@ -155,34 +157,40 @@ export const pagePathGetters: {
     return [INTEGRATIONS_BASE_PATH, `/installed/updates_available${categoryPath}${queryParams}`];
   },
   integration_create: () => [INTEGRATIONS_BASE_PATH, `/create`],
-  integration_details_overview: ({ pkgkey, integration }) => [
-    INTEGRATIONS_BASE_PATH,
-    `/detail/${pkgkey}/overview${integration ? `?integration=${integration}` : ''}`,
-  ],
-  integration_details_policies: ({ pkgkey, integration, addAgentToPolicyId }) => {
-    const qs = stringify({ integration, addAgentToPolicyId });
+  integration_details_overview: ({ pkgkey, integration, returnAppId, returnPath }) => {
+    const qs = stringify({ integration, returnAppId, returnPath });
+    return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/overview${qs ? `?${qs}` : ''}`];
+  },
+  integration_details_policies: ({
+    pkgkey,
+    integration,
+    addAgentToPolicyId,
+    returnAppId,
+    returnPath,
+  }) => {
+    const qs = stringify({ integration, addAgentToPolicyId, returnAppId, returnPath });
     return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/policies${qs ? `?${qs}` : ''}`];
   },
-  integration_details_assets: ({ pkgkey, integration }) => [
-    INTEGRATIONS_BASE_PATH,
-    `/detail/${pkgkey}/assets${integration ? `?integration=${integration}` : ''}`,
-  ],
-  integration_details_settings: ({ pkgkey, integration }) => [
-    INTEGRATIONS_BASE_PATH,
-    `/detail/${pkgkey}/settings${integration ? `?integration=${integration}` : ''}`,
-  ],
-  integration_details_configs: ({ pkgkey, integration }) => [
-    INTEGRATIONS_BASE_PATH,
-    `/detail/${pkgkey}/configs${integration ? `?integration=${integration}` : ''}`,
-  ],
-  integration_details_custom: ({ pkgkey, integration }) => [
-    INTEGRATIONS_BASE_PATH,
-    `/detail/${pkgkey}/custom${integration ? `?integration=${integration}` : ''}`,
-  ],
-  integration_details_api_reference: ({ pkgkey, integration }) => [
-    INTEGRATIONS_BASE_PATH,
-    `/detail/${pkgkey}/api-reference${integration ? `?integration=${integration}` : ''}`,
-  ],
+  integration_details_assets: ({ pkgkey, integration, returnAppId, returnPath }) => {
+    const qs = stringify({ integration, returnAppId, returnPath });
+    return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/assets${qs ? `?${qs}` : ''}`];
+  },
+  integration_details_settings: ({ pkgkey, integration, returnAppId, returnPath }) => {
+    const qs = stringify({ integration, returnAppId, returnPath });
+    return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/settings${qs ? `?${qs}` : ''}`];
+  },
+  integration_details_configs: ({ pkgkey, integration, returnAppId, returnPath }) => {
+    const qs = stringify({ integration, returnAppId, returnPath });
+    return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/configs${qs ? `?${qs}` : ''}`];
+  },
+  integration_details_custom: ({ pkgkey, integration, returnAppId, returnPath }) => {
+    const qs = stringify({ integration, returnAppId, returnPath });
+    return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/custom${qs ? `?${qs}` : ''}`];
+  },
+  integration_details_api_reference: ({ pkgkey, integration, returnAppId, returnPath }) => {
+    const qs = stringify({ integration, returnAppId, returnPath });
+    return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/api-reference${qs ? `?${qs}` : ''}`];
+  },
   integration_policy_edit: ({ packagePolicyId }) => [
     INTEGRATIONS_BASE_PATH,
     `/edit-integration/${packagePolicyId}`,
@@ -230,6 +238,8 @@ export const pagePathGetters: {
         ? `?kuery=${kuery}&showInactive=true`
         : showInactive
         ? '?showInactive=true'
+        : kuery
+        ? `?kuery=${kuery}`
         : ''
     }`,
   ],
@@ -239,6 +249,7 @@ export const pagePathGetters: {
   ],
   agent_details_logs: ({ agentId }) => [FLEET_BASE_PATH, `/agents/${agentId}/logs`],
   agent_details_diagnostics: ({ agentId }) => [FLEET_BASE_PATH, `/agents/${agentId}/diagnostics`],
+  agent_details_settings: ({ agentId }) => [FLEET_BASE_PATH, `/agents/${agentId}/settings`],
   enrollment_tokens: () => [FLEET_BASE_PATH, '/enrollment-tokens'],
   uninstall_tokens: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.uninstall_tokens],
   data_streams: () => [FLEET_BASE_PATH, '/data-streams'],

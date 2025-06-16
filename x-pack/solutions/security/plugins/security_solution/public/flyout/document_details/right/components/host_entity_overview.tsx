@@ -18,6 +18,15 @@ import {
 import { css } from '@emotion/react';
 import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
+import {
+  MISCONFIGURATION_INSIGHT_HOST_ENTITY_OVERVIEW,
+  VULNERABILITIES_INSIGHT_HOST_ENTITY_OVERVIEW,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
+import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
+import { buildHostNamesFilter } from '../../../../../common/search_strategy';
 import { HOST_NAME_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useDocumentDetailsContext } from '../../shared/context';
@@ -26,7 +35,7 @@ import {
   FirstLastSeen,
   FirstLastSeenType,
 } from '../../../../common/components/first_last_seen/first_last_seen';
-import { buildHostNamesFilter, RiskScoreEntity } from '../../../../../common/search_strategy';
+import { EntityIdentifierFields, EntityType } from '../../../../../common/entity_analytics/types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { DescriptionListStyled } from '../../../../common/components/page';
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
@@ -57,8 +66,11 @@ import { PreviewLink } from '../../../shared/components/preview_link';
 import { MisconfigurationsInsight } from '../../shared/components/misconfiguration_insight';
 import { VulnerabilitiesInsight } from '../../shared/components/vulnerabilities_insight';
 import { AlertCountInsight } from '../../shared/components/alert_count_insight';
+import { useNavigateToHostDetails } from '../../../entity_details/host_right/hooks/use_navigate_to_host_details';
+import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
 const HOST_ICON = 'storage';
+const HOST_ENTITY_OVERVIEW_ID = 'host-entity-overview';
 
 export interface HostEntityOverviewProps {
   /**
@@ -81,7 +93,14 @@ export const HOST_PREVIEW_BANNER = {
 export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName }) => {
   const { scopeId } = useDocumentDetailsContext();
   const { from, to } = useGlobalTime();
-  const { selectedPatterns } = useSourcererDataView();
+  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const experimentalSelectedPatterns = useSelectedPatterns();
+
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
 
   const timerange = useMemo(
     () => ({
@@ -102,10 +121,12 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
     loading: isRiskScoreLoading,
   } = useRiskScore({
     filterQuery,
-    riskEntity: RiskScoreEntity.host,
+    riskEntity: EntityType.host,
     skip: hostName == null,
     timerange,
   });
+  const hostRiskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
+  const isRiskScoreExist = !!hostRiskData?.host.risk;
 
   const [isHostDetailsLoading, { hostDetails }] = useHostDetails({
     hostName,
@@ -154,9 +175,8 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
 
-  const [hostRiskLevel] = useMemo(() => {
-    const hostRiskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
-    return [
+  const [hostRiskLevel] = useMemo(
+    () => [
       {
         title: (
           <EuiFlexGroup alignItems="flexEnd" gutterSize="none" responsive={false}>
@@ -176,8 +196,30 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
           </>
         ),
       },
-    ];
-  }, [hostRisk]);
+    ],
+    [hostRiskData]
+  );
+
+  const { hasNonClosedAlerts } = useNonClosedAlerts({
+    field: EntityIdentifierFields.hostName,
+    value: hostName,
+    to,
+    from,
+    queryId: HOST_ENTITY_OVERVIEW_ID,
+  });
+  const { hasMisconfigurationFindings } = useHasMisconfigurations('host.name', hostName);
+  const { hasVulnerabilitiesFindings } = useHasVulnerabilities('host.name', hostName);
+
+  const { openDetailsPanel } = useNavigateToHostDetails({
+    hostName,
+    scopeId,
+    isRiskScoreExist,
+    hasMisconfigurationFindings,
+    hasVulnerabilitiesFindings,
+    hasNonClosedAlerts,
+    isPreviewMode: true, // setting to true to always open a new host flyout
+    contextID: 'HostEntityOverview',
+  });
 
   return (
     <EuiFlexGroup
@@ -246,18 +288,21 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
       <AlertCountInsight
         fieldName={'host.name'}
         name={hostName}
+        openDetailsPanel={openDetailsPanel}
         data-test-subj={ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID}
       />
       <MisconfigurationsInsight
         fieldName={'host.name'}
         name={hostName}
+        openDetailsPanel={openDetailsPanel}
         data-test-subj={ENTITIES_HOST_OVERVIEW_MISCONFIGURATIONS_TEST_ID}
-        telemetrySuffix={'host-entity-overview'}
+        telemetryKey={MISCONFIGURATION_INSIGHT_HOST_ENTITY_OVERVIEW}
       />
       <VulnerabilitiesInsight
         hostName={hostName}
+        openDetailsPanel={openDetailsPanel}
         data-test-subj={ENTITIES_HOST_OVERVIEW_VULNERABILITIES_TEST_ID}
-        telemetrySuffix={'host-entity-overview'}
+        telemetryKey={VULNERABILITIES_INSIGHT_HOST_ENTITY_OVERVIEW}
       />
     </EuiFlexGroup>
   );

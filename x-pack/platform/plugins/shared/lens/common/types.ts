@@ -15,7 +15,7 @@ import { CategoryDisplay, LegendDisplay, NumberDisplay, PieChartTypes } from './
 import { layerTypes } from './layer_types';
 import { CollapseFunction } from './expressions';
 
-export type { OriginalColumn } from './expressions/map_to_columns';
+export type { OriginalColumn } from './expressions/defs/map_to_columns';
 export type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-plugin/common';
 export type { AllowedSettingsOverrides, AllowedChartOverrides } from '@kbn/charts-plugin/common';
 export type { AllowedGaugeOverrides } from '@kbn/expression-gauge-plugin/common';
@@ -82,6 +82,9 @@ export type PieLayerState = SharedPieLayerState & {
 export interface PieVisualizationState {
   shape: $Values<typeof PieChartTypes>;
   layers: PieLayerState[];
+  /**
+   * @deprecated use `layer.colorMapping` config
+   */
   palette?: PaletteOutput;
 }
 
@@ -99,6 +102,5 @@ export interface LegacyMetricState {
 
 export enum RowHeightMode {
   auto = 'auto',
-  single = 'single',
   custom = 'custom',
 }

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ApplicationStart, PublicAppInfo } from '@kbn/core/public';
+import type { ApplicationStart, PublicAppInfo } from '@kbn/core/public';
 import { deepFreeze } from '@kbn/std';
 import { BehaviorSubject, Subject } from 'rxjs';
 
@@ -15,7 +15,7 @@ const capabilities = deepFreeze({
   catalogue: {},
   management: {},
   navLinks: {},
-  discover: {
+  discover_v2: {
     show: true,
     edit: false,
   },

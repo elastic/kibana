@@ -42,9 +42,10 @@ export const createRuleAssetSavedObject = (overrideParams: Partial<PrebuiltRuleA
  * @returns Created rule asset saved object
  */
 export const createRuleAssetSavedObjectOfType = <T extends TypeSpecificCreateProps>(
-  type: T['type']
+  type: T['type'],
+  rewrites?: Partial<PrebuiltRuleAsset>
 ) => ({
-  'security-rule': getPrebuiltRuleMockOfType<T>(type),
+  'security-rule': { ...getPrebuiltRuleMockOfType<T>(type), ...rewrites },
   ...ruleAssetSavedObjectESFields,
 });
 
@@ -52,16 +53,16 @@ export const SAMPLE_PREBUILT_RULES = [
   createRuleAssetSavedObject({
     ...getPrebuiltRuleWithExceptionsMock(),
     rule_id: ELASTIC_SECURITY_RULE_ID,
-    tags: ['test-tag-1'],
+    tags: ['test-tag', 'test-tag-1'],
     enabled: true,
   }),
   createRuleAssetSavedObject({
     rule_id: '000047bb-b27a-47ec-8b62-ef1a5d2c9e19',
-    tags: ['test-tag-2'],
+    tags: ['test-tag', 'test-tag-2'],
   }),
   createRuleAssetSavedObject({
     rule_id: '00140285-b827-4aee-aa09-8113f58a08f3',
-    tags: ['test-tag-3'],
+    tags: ['test-tag', 'test-tag-3'],
   }),
 ];
 
@@ -89,7 +90,7 @@ export const createPrebuiltRuleAssetSavedObjects = async (
 ): Promise<void> => {
   await es.bulk({
     refresh: true,
-    body: rules.flatMap((doc) => [
+    operations: rules.flatMap((doc) => [
       {
         index: {
           _index: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
@@ -114,9 +115,9 @@ export const createHistoricalPrebuiltRuleAssetSavedObjects = async (
   es: Client,
   rules = SAMPLE_PREBUILT_RULES_WITH_HISTORICAL_VERSIONS
 ): Promise<void> => {
-  await es.bulk({
+  const response = await es.bulk({
     refresh: true,
-    body: rules.flatMap((doc) => [
+    operations: rules.flatMap((doc) => [
       {
         index: {
           _index: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
@@ -126,4 +127,10 @@ export const createHistoricalPrebuiltRuleAssetSavedObjects = async (
       doc,
     ]),
   });
+
+  if (response.errors) {
+    throw new Error(
+      `Unable to bulk create rule assets. Response items: ${JSON.stringify(response.items)}`
+    );
+  }
 };

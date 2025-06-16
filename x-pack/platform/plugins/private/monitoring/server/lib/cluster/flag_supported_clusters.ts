@@ -44,23 +44,21 @@ async function findSupportedBasicLicenseCluster(
     size: 1,
     ignore_unavailable: true,
     filter_path: ['hits.hits._source.cluster_uuid', 'hits.hits._source.cluster.id'],
-    body: {
-      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
-      query: {
-        bool: {
-          filter: [
-            {
-              bool: {
-                should: [
-                  { term: { type: 'kibana_stats' } },
-                  { term: { 'data_stream.dataset': getKibanaDataset(dataset) } },
-                ],
-              },
+    sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
+    query: {
+      bool: {
+        filter: [
+          {
+            bool: {
+              should: [
+                { term: { type: 'kibana_stats' } },
+                { term: { 'data_stream.dataset': getKibanaDataset(dataset) } },
+              ],
             },
-            { term: { 'kibana_stats.kibana.uuid': kibanaUuid } },
-            { range: { timestamp: { gte, lte, format: 'epoch_millis' } } },
-          ],
-        },
+          },
+          { term: { 'kibana_stats.kibana.uuid': kibanaUuid } },
+          { range: { timestamp: { gte, lte, format: 'epoch_millis' } } },
+        ],
       },
     },
   })) as ElasticsearchResponse;

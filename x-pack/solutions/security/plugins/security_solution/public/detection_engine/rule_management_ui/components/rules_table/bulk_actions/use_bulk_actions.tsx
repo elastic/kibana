@@ -10,28 +10,30 @@ import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
 import type { Toast } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { euiThemeVars } from '@kbn/ui-theme';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import { ML_RULES_UNAVAILABLE } from './translations';
 import { MAX_MANUAL_RULE_RUN_BULK_SIZE } from '../../../../../../common/constants';
 import type { TimeRange } from '../../../../rule_gaps/types';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { convertRulesFilterToKQL } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
 import { DuplicateOptions } from '../../../../../../common/detection_engine/rule_management/constants';
+import { getGapRange } from '../../../../rule_gaps/api/hooks/utils';
+import { defaultRangeValue } from '../../../../rule_gaps/constants';
 import type {
   BulkActionEditPayload,
   BulkActionEditType,
 } from '../../../../../../common/api/detection_engine/rule_management';
 import {
-  BulkActionTypeEnum,
   BulkActionEditTypeEnum,
+  BulkActionTypeEnum,
 } from '../../../../../../common/api/detection_engine/rule_management';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { BULK_RULE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
 import { canEditRuleWithActions } from '../../../../../common/utils/privileges';
-import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
-import * as detectionI18n from '../../../../../detections/pages/detection_engine/translations';
+import * as i18n from '../../../../common/translations';
 import { useBulkExport } from '../../../../rule_management/logic/bulk_actions/use_bulk_export';
 import { useExecuteBulkAction } from '../../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
 import { useDownloadExportedRules } from '../../../../rule_management/logic/bulk_actions/use_download_exported_rules';
@@ -83,11 +85,24 @@ export const useBulkActions = ({
   const { executeBulkAction } = useExecuteBulkAction();
   const { bulkExport } = useBulkExport();
   const downloadExportedRules = useDownloadExportedRules();
+  const {
+    timelinePrivileges: { crud: canCreateTimelines },
+  } = useUserPrivileges();
 
   const {
     state: { isAllSelected, rules, loadingRuleIds, selectedRuleIds },
     actions: { clearRulesSelection, setIsPreflightInProgress },
   } = rulesTableContext;
+  const globalQuery = useMemo(() => {
+    const gapRange = filterOptions?.showRulesWithGaps
+      ? getGapRange(filterOptions.gapSearchRange ?? defaultRangeValue)
+      : undefined;
+
+    return {
+      query: kql,
+      ...(gapRange && { gapRange }),
+    };
+  }, [kql, filterOptions]);
 
   const getBulkItemsPopoverContent = useCallback(
     (closePopover: () => void): EuiContextMenuPanelDescriptor[] => {
@@ -110,7 +125,7 @@ export const useBulkActions = ({
 
         const mlRuleCount = disabledRules.length - disabledRulesNoML.length;
         if (!hasMlPermissions && mlRuleCount > 0) {
-          toasts.addWarning(detectionI18n.ML_RULES_UNAVAILABLE(mlRuleCount));
+          toasts.addWarning(ML_RULES_UNAVAILABLE(mlRuleCount));
         }
 
         const ruleIds = hasMlPermissions
@@ -119,7 +134,7 @@ export const useBulkActions = ({
 
         await executeBulkAction({
           type: BulkActionTypeEnum.enable,
-          ...(isAllSelected ? { query: kql } : { ids: ruleIds }),
+          ...(isAllSelected ? globalQuery : { ids: ruleIds }),
         });
       };
 
@@ -131,7 +146,7 @@ export const useBulkActions = ({
 
         await executeBulkAction({
           type: BulkActionTypeEnum.disable,
-          ...(isAllSelected ? { query: kql } : { ids: enabledIds }),
+          ...(isAllSelected ? globalQuery : { ids: enabledIds }),
         });
       };
 
@@ -155,7 +170,7 @@ export const useBulkActions = ({
               DuplicateOptions.withExceptionsExcludeExpiredExceptions
             ),
           },
-          ...(isAllSelected ? { query: kql } : { ids: selectedRuleIds }),
+          ...(isAllSelected ? globalQuery : { ids: selectedRuleIds }),
         });
         clearRulesSelection();
       };
@@ -172,7 +187,7 @@ export const useBulkActions = ({
 
         await executeBulkAction({
           type: BulkActionTypeEnum.delete,
-          ...(isAllSelected ? { query: kql } : { ids: selectedRuleIds }),
+          ...(isAllSelected ? globalQuery : { ids: selectedRuleIds }),
         });
       };
 
@@ -180,9 +195,7 @@ export const useBulkActions = ({
         closePopover();
         startTransaction({ name: BULK_RULE_ACTIONS.EXPORT });
 
-        const response = await bulkExport(
-          isAllSelected ? { query: kql } : { ids: selectedRuleIds }
-        );
+        const response = await bulkExport(isAllSelected ? globalQuery : { ids: selectedRuleIds });
 
         // if response null, likely network error happened and export rules haven't been received
         if (!response) {
@@ -212,10 +225,11 @@ export const useBulkActions = ({
 
         const dryRunResult = await executeBulkActionsDryRun({
           type: BulkActionTypeEnum.run,
-          ...(isAllSelected
-            ? { query: convertRulesFilterToKQL(filterOptions) }
-            : { ids: selectedRuleIds }),
-          runPayload: { start_date: new Date().toISOString() },
+          ...(isAllSelected ? globalQuery : { ids: selectedRuleIds }),
+          runPayload: {
+            start_date: new Date(Date.now() - 1000).toISOString(),
+            end_date: new Date().toISOString(),
+          },
         });
 
         setIsPreflightInProgress(false);
@@ -246,7 +260,7 @@ export const useBulkActions = ({
 
         await executeBulkAction({
           type: BulkActionTypeEnum.run,
-          ...(isAllSelected ? { query: kql } : { ids: enabledIds }),
+          ...(isAllSelected ? globalQuery : { ids: enabledIds }),
           runPayload: {
             start_date: modalManualRuleRunConfirmationResult.startDate.toISOString(),
             end_date: modalManualRuleRunConfirmationResult.endDate.toISOString(),
@@ -272,9 +286,7 @@ export const useBulkActions = ({
 
         const dryRunResult = await executeBulkActionsDryRun({
           type: BulkActionTypeEnum.edit,
-          ...(isAllSelected
-            ? { query: convertRulesFilterToKQL(filterOptions) }
-            : { ids: selectedRuleIds }),
+          ...(isAllSelected ? globalQuery : { ids: selectedRuleIds }),
           editPayload: computeDryRunEditPayload(bulkEditActionType),
         });
 
@@ -337,7 +349,9 @@ export const useBulkActions = ({
         await executeBulkAction({
           type: BulkActionTypeEnum.edit,
           ...prepareSearchParams({
-            ...(isAllSelected ? { filterOptions } : { selectedRuleIds }),
+            ...(isAllSelected
+              ? { filterOptions, gapRange: globalQuery.gapRange }
+              : { selectedRuleIds }),
             dryRunResult,
           }),
           editPayload: [editPayload],
@@ -431,7 +445,7 @@ export const useBulkActions = ({
               key: i18n.BULK_ACTION_APPLY_TIMELINE_TEMPLATE,
               name: i18n.BULK_ACTION_APPLY_TIMELINE_TEMPLATE,
               'data-test-subj': 'applyTimelineTemplateBulk',
-              disabled: isEditDisabled,
+              disabled: !canCreateTimelines || isEditDisabled,
               onClick: handleBulkEdit(BulkActionEditTypeEnum.set_timeline),
               toolTipContent: missingActionPrivileges
                 ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
@@ -470,12 +484,10 @@ export const useBulkActions = ({
             },
             {
               key: i18n.BULK_ACTION_DELETE,
-              name: (
-                <EuiTextColor
-                  color={isDeleteDisabled ? euiThemeVars.euiButtonColorDisabledText : 'danger'}
-                >
-                  {i18n.BULK_ACTION_DELETE}
-                </EuiTextColor>
+              name: isDeleteDisabled ? (
+                i18n.BULK_ACTION_DELETE
+              ) : (
+                <EuiTextColor color="danger">{i18n.BULK_ACTION_DELETE}</EuiTextColor>
               ),
               'data-test-subj': 'deleteRuleBulk',
               disabled: isDeleteDisabled,
@@ -580,7 +592,6 @@ export const useBulkActions = ({
       startTransaction,
       hasMlPermissions,
       executeBulkAction,
-      kql,
       toasts,
       showBulkDuplicateConfirmation,
       showManualRuleRunConfirmation,
@@ -595,6 +606,8 @@ export const useBulkActions = ({
       filterOptions,
       completeBulkEditForm,
       startServices,
+      canCreateTimelines,
+      globalQuery,
     ]
   );
 

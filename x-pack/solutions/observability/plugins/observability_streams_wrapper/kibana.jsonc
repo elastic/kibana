@@ -1,0 +1,21 @@
+{
+  "type": "plugin",
+  "id": "@kbn/streams-app-wrapper-plugin",
+  "owner": "@elastic/streams-program-team",
+  "group": "observability",
+  "visibility": "private",
+  "plugin": {
+    "id": "streamsAppWrapper",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "streamsApp",
+      "streams",
+      "observabilityShared",
+      "navigation",
+    ],
+    "requiredBundles": [],
+    "optionalPlugins": [],
+    "extraPublicDirs": []
+  }
+}

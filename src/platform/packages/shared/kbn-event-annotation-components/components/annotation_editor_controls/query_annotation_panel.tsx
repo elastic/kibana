@@ -70,7 +70,6 @@ export const ConfigPanelQueryAnnotation = ({
       <EuiFormRow
         hasChildLabel
         display="rowCompressed"
-        className="lnsRowCompressedMargin"
         fullWidth
         label={i18n.translate('eventAnnotationComponents.xyChart.annotation.queryInput', {
           defaultMessage: 'Annotation query',

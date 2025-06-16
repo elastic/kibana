@@ -11,7 +11,7 @@ import type { EuiTourStepProps } from '@elastic/eui';
 import { EuiButtonEmpty, EuiImage, EuiSpacer, EuiText, EuiTourStep } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { TimelineId } from '../../../../common/types';
 import { timelineDefaults } from '../../../timelines/store/defaults';

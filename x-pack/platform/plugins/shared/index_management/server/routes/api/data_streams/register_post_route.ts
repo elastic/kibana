@@ -59,7 +59,7 @@ export function registerPostOneApplyLatestMappings({
           }
           await client.asCurrentUser.indices.putMapping({
             index: name,
-            body: mappings || {},
+            ...mappings,
             write_index_only: true,
           });
 

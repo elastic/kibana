@@ -73,17 +73,15 @@ export function getClustersState(req: LegacyRequest, clusters: ElasticsearchModi
       'hits.hits._source.cluster_state',
       'hits.hits._source.elasticsearch.cluster.stats.state',
     ],
-    body: {
-      query: {
-        bool: {
-          filter: [{ term: { type: 'cluster_state' } }, { terms: { cluster_uuid: clusterUuids } }],
-        },
+    query: {
+      bool: {
+        filter: [{ term: { type: 'cluster_state' } }, { terms: { cluster_uuid: clusterUuids } }],
       },
-      collapse: {
-        field: 'cluster_uuid',
-      },
-      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
     },
+    collapse: {
+      field: 'cluster_uuid',
+    },
+    sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

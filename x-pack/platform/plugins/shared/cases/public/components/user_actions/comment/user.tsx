@@ -34,7 +34,7 @@ type BuilderArgs = Pick<
   | 'appId'
   | 'euiTheme'
 > & {
-  comment: SnakeToCamelCase<UserCommentAttachment>;
+  attachment: SnakeToCamelCase<UserCommentAttachment>;
   caseId: string;
   outlined: boolean;
   isEdit: boolean;
@@ -48,6 +48,18 @@ const getCommentFooterCss = (euiTheme?: EuiThemeComputed<{}>) => {
   return css`
     border-top: ${euiTheme.border.thin};
     padding: ${euiTheme.size.s};
+  `;
+};
+
+const createCommentActionCss = (euiTheme?: EuiThemeComputed<{}>) => {
+  if (!euiTheme) {
+    return css``;
+  }
+
+  return css`
+    [class*='euiTimelineItemEvent'] {
+      max-width: calc(100% - (${euiTheme.size.xl} + ${euiTheme.size.base}));
+    }
   `;
 };
 
@@ -66,7 +78,7 @@ const hasDraftComment = (
 
 export const createUserAttachmentUserActionBuilder = ({
   appId,
-  comment,
+  attachment,
   userProfiles,
   outlined,
   isEdit,
@@ -81,33 +93,40 @@ export const createUserAttachmentUserActionBuilder = ({
 }: BuilderArgs): ReturnType<UserActionBuilder> => ({
   build: () => [
     {
-      username: <HoverableUsernameResolver user={comment.createdBy} userProfiles={userProfiles} />,
-      'data-test-subj': `comment-create-action-${comment.id}`,
+      username: (
+        <HoverableUsernameResolver user={attachment.createdBy} userProfiles={userProfiles} />
+      ),
+      'data-test-subj': `comment-create-action-${attachment.id}`,
       timestamp: (
-        <UserActionTimestamp createdAt={comment.createdAt} updatedAt={comment.updatedAt} />
+        <UserActionTimestamp createdAt={attachment.createdAt} updatedAt={attachment.updatedAt} />
       ),
       className: classNames('userAction__comment', {
         outlined,
         isEdit,
         draftFooter:
-          !isEdit && !isLoading && hasDraftComment(appId, caseId, comment.id, comment.comment),
+          !isEdit &&
+          !isLoading &&
+          hasDraftComment(appId, caseId, attachment.id, attachment.comment),
       }),
+      css: createCommentActionCss(euiTheme),
       children: (
         <>
           <UserActionMarkdown
-            key={isEdit ? comment.id : undefined}
-            ref={(element) => (commentRefs.current[comment.id] = element)}
-            id={comment.id}
-            content={comment.comment}
+            key={isEdit ? attachment.id : undefined}
+            ref={(element) => (commentRefs.current[attachment.id] = element)}
+            id={attachment.id}
+            content={attachment.comment}
             isEditable={isEdit}
             caseId={caseId}
             onChangeEditable={handleManageMarkdownEditId}
             onSaveContent={handleSaveComment.bind(null, {
-              id: comment.id,
-              version: comment.version,
+              id: attachment.id,
+              version: attachment.version,
             })}
           />
-          {!isEdit && !isLoading && hasDraftComment(appId, caseId, comment.id, comment.comment) ? (
+          {!isEdit &&
+          !isLoading &&
+          hasDraftComment(appId, caseId, attachment.id, attachment.comment) ? (
             <EuiText css={getCommentFooterCss(euiTheme)}>
               <EuiText color="subdued" size="xs" data-test-subj="user-action-comment-unsaved-draft">
                 {i18n.UNSAVED_DRAFT_COMMENT}
@@ -119,16 +138,16 @@ export const createUserAttachmentUserActionBuilder = ({
         </>
       ),
       timelineAvatar: (
-        <HoverableAvatarResolver user={comment.createdBy} userProfiles={userProfiles} />
+        <HoverableAvatarResolver user={attachment.createdBy} userProfiles={userProfiles} />
       ),
       actions: (
-        <UserActionContentToolbar id={comment.id}>
+        <UserActionContentToolbar id={attachment.id}>
           <UserCommentPropertyActions
             isLoading={isLoading}
-            commentContent={comment.comment}
-            onEdit={() => handleManageMarkdownEditId(comment.id)}
-            onDelete={() => handleDeleteComment(comment.id, i18n.DELETE_COMMENT_SUCCESS_TITLE)}
-            onQuote={() => handleManageQuote(comment.comment)}
+            commentContent={attachment.comment}
+            onEdit={() => handleManageMarkdownEditId(attachment.id)}
+            onDelete={() => handleDeleteComment(attachment.id, i18n.DELETE_COMMENT_SUCCESS_TITLE)}
+            onQuote={() => handleManageQuote(attachment.comment)}
           />
         </UserActionContentToolbar>
       ),

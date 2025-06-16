@@ -109,7 +109,7 @@
             "section": "def-common.UserContentCommonSchema",
             "text": "UserContentCommonSchema"
           },
-          ">({ tableCaption, entityName, entityNamePlural, initialFilter: initialQuery, headingId, initialPageSize, listingLimit, urlStateEnabled, customTableColumn, emptyPrompt, rowItemActions, findItems, createItem, editItem, deleteItems, getDetailViewLink, getOnClickTitle, id: listingId, contentEditor, titleColumnName, withoutPageTemplateWrapper, onFetchSuccess, refreshListBouncer, setPageDataTestSubject, createdByEnabled, recentlyAccessed, }: ",
+          ">({ tableCaption, entityName, entityNamePlural, initialFilter: initialQuery, headingId, initialPageSize, urlStateEnabled, customSortingOptions, customTableColumn, emptyPrompt, rowItemActions, findItems, createItem, editItem, deleteItems, getDetailViewLink, getOnClickTitle, id: listingId, contentEditor, titleColumnName, withoutPageTemplateWrapper, onFetchSuccess, refreshListBouncer, setPageDataTestSubject, createdByEnabled, recentlyAccessed, }: ",
           {
             "pluginId": "@kbn/content-management-table-list-view-table",
             "scope": "public",
@@ -152,6 +152,45 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/content-management-table-list-view-table",
+        "id": "def-public.CustomSortingOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "CustomSortingOptions",
+        "description": [],
+        "path": "src/platform/packages/shared/content-management/table_list_view_table/src/components/table_sort_select.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-table-list-view-table",
+            "id": "def-public.CustomSortingOptions.field",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "path": "src/platform/packages/shared/content-management/table_list_view_table/src/components/table_sort_select.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-table-list-view-table",
+            "id": "def-public.CustomSortingOptions.sortingLabels",
+            "type": "Array",
+            "tags": [],
+            "label": "sortingLabels",
+            "description": [],
+            "signature": [
+              "TableColumnSortSelectOption[]"
+            ],
+            "path": "src/platform/packages/shared/content-management/table_list_view_table/src/components/table_sort_select.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-table-list-view-table",
         "id": "def-public.TableListViewKibanaDependencies",
         "type": "Interface",
         "tags": [],
@@ -189,7 +228,7 @@
               "UserProfileBulkGetParams",
               ") => Promise<",
               "UserProfile",
-              "<D>[]>; }; }"
+              "<D>[]>; }; rendering: { addContext: (element: React.ReactNode) => React.ReactElement<any, string | React.JSXElementConstructor<any>>; }; }"
             ],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/services.tsx",
             "deprecated": false,
@@ -394,17 +433,6 @@
           },
           {
             "parentPluginId": "@kbn/content-management-table-list-view-table",
-            "id": "def-public.TableListViewTableProps.listingLimit",
-            "type": "number",
-            "tags": [],
-            "label": "listingLimit",
-            "description": [],
-            "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/content-management-table-list-view-table",
             "id": "def-public.TableListViewTableProps.initialFilter",
             "type": "string",
             "tags": [],
@@ -454,6 +482,27 @@
             "signature": [
               "EuiBasicTableColumn",
               "<T> | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-table-list-view-table",
+            "id": "def-public.TableListViewTableProps.customSortingOptions",
+            "type": "Object",
+            "tags": [],
+            "label": "customSortingOptions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-table-list-view-table",
+                "scope": "public",
+                "docId": "kibKbnContentManagementTableListViewTablePluginApi",
+                "section": "def-public.CustomSortingOptions",
+                "text": "CustomSortingOptions"
+              },
+              " | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/table_list_view_table.tsx",
             "deprecated": false,

@@ -49,7 +49,6 @@ import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import {
   Table,
   ConfirmDeleteModal,
-  ListingLimitWarning,
   ItemDetails,
   UpdatedAtField,
   FORBIDDEN_SEARCH_CHARS,
@@ -61,8 +60,15 @@ import { type SortColumnField, getInitialSorting, saveSorting } from './componen
 import { useTags } from './use_tags';
 import { useInRouterContext, useUrlState } from './use_url_state';
 import type { RowActions, SearchQueryError, TableItemsRowActions } from './types';
-import { sortByRecentlyAccessed } from './components/table_sort_select';
+import { CustomSortingOptions, sortByRecentlyAccessed } from './components/table_sort_select';
 import { ContentEditorActivityRow } from './components/content_editor_activity_row';
+
+const disabledEditAction = {
+  enabled: false,
+  reason: i18n.translate('contentManagement.tableList.managedItemNoEdit', {
+    defaultMessage: 'Elastic manages this item. Clone it to make changes.',
+  }),
+};
 
 interface ContentEditorConfig
   extends Pick<OpenContentEditorParams, 'isReadonly' | 'onSave' | 'customValidators'> {
@@ -74,12 +80,12 @@ export interface TableListViewTableProps<
 > {
   entityName: string;
   entityNamePlural: string;
-  listingLimit: number;
   initialFilter?: string;
   initialPageSize: number;
   emptyPrompt?: JSX.Element;
   /** Add an additional custom column */
   customTableColumn?: EuiBasicTableColumn<T>;
+  customSortingOptions?: CustomSortingOptions;
   urlStateEnabled?: boolean;
   createdByEnabled?: boolean;
   /**
@@ -299,7 +305,7 @@ const urlStateSerializer = (updated: {
 const tableColumnMetadata = {
   title: {
     field: 'attributes.title',
-    name: 'Name, description, tags',
+    name: 'Name',
   },
   updatedAt: {
     field: 'updatedAt',
@@ -318,8 +324,8 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   initialFilter: initialQuery,
   headingId,
   initialPageSize,
-  listingLimit,
   urlStateEnabled = true,
+  customSortingOptions,
   customTableColumn,
   emptyPrompt,
   rowItemActions,
@@ -369,8 +375,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   const initialQueryInitialized = useRef(false);
 
   const {
-    canEditAdvancedSettings,
-    getListingLimitSettingsUrl,
     getTagIdsFromReferences,
     searchQueryParser,
     notifyError,
@@ -421,7 +425,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         pageIndex: 0,
         totalItemCount: 0,
         pageSize: initialPageSize,
-        pageSizeOptions: uniq([10, 20, 50, initialPageSize]).sort(),
+        pageSizeOptions: uniq([10, 20, 50, initialPageSize]).sort((a, b) => Number(a) - Number(b)),
       },
       tableSort: initialSort.tableSort,
       sortColumnChanged: !initialSort.isDefault,
@@ -444,7 +448,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     showDeleteModal,
     isDeletingItems,
     selectedIds,
-    totalItems,
     hasUpdatedAtMetadata,
     hasCreatedByMetadata,
     hasRecentlyAccessedMetadata,
@@ -454,7 +457,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   } = state;
 
   const showFetchError = Boolean(fetchError);
-  const showLimitError = !showFetchError && totalItems > listingLimit;
 
   const fetchItems = useCallback(async () => {
     dispatch({ type: 'onFetchItems' });
@@ -527,24 +529,17 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
 
   const tableItemsRowActions = useMemo(() => {
     return items.reduce<TableItemsRowActions>((acc, item) => {
-      const ret = {
-        ...acc,
-        [item.id]: rowItemActions ? rowItemActions(item) : undefined,
-      };
+      acc[item.id] = rowItemActions ? rowItemActions(item) : undefined;
 
       if (item.managed) {
-        ret[item.id] = {
-          edit: {
-            enabled: false,
-            reason: i18n.translate('contentManagement.tableList.managedItemNoEdit', {
-              defaultMessage: 'Elastic manages this item. Clone it to make changes.',
-            }),
-          },
-          ...ret[item.id],
-        };
+        if (acc[item.id]) {
+          acc[item.id]!.edit = disabledEditAction;
+        } else {
+          acc[item.id] = { edit: disabledEditAction };
+        }
       }
 
-      return ret;
+      return acc;
     }, {});
   }, [items, rowItemActions]);
 
@@ -606,7 +601,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         name:
           titleColumnName ??
           i18n.translate('contentManagement.tableList.mainColumnName', {
-            defaultMessage: 'Name, description, tags',
+            defaultMessage: 'Name',
           }),
         sortable: true,
         render: (field: keyof T, record: T) => {
@@ -696,7 +691,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           ),
           icon: 'pencil',
           type: 'icon',
-          available: (item) => Boolean(tableItemsRowActions[item.id]?.edit?.enabled),
+          available: (item) => tableItemsRowActions[item.id]?.edit?.enabled !== false,
           enabled: (v) => !(v as unknown as { error: string })?.error,
           onClick: editItem,
           'data-test-subj': `edit-action`,
@@ -722,7 +717,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
               defaultMessage: 'View details',
             }
           ),
-          icon: 'iInCircle',
+          icon: 'controlsVertical',
           type: 'icon',
           onClick: inspectItem,
           'data-test-subj': `inspect-action`,
@@ -1178,17 +1173,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
 
   return (
     <>
-      {/* Too many items error */}
-      {showLimitError && (
-        <ListingLimitWarning
-          canEditAdvancedSettings={canEditAdvancedSettings}
-          advancedSettingsLink={getListingLimitSettingsUrl()}
-          entityNamePlural={entityNamePlural}
-          totalItems={totalItems}
-          listingLimit={listingLimit}
-        />
-      )}
-
       {/* Error while fetching items */}
       {showFetchError && renderFetchError()}
 
@@ -1202,6 +1186,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           searchQuery={searchQuery}
           tableColumns={tableColumns}
           hasUpdatedAtMetadata={hasUpdatedAtMetadata}
+          customSortingOptions={customSortingOptions}
           hasRecentlyAccessedMetadata={hasRecentlyAccessedMetadata}
           tableSort={tableSort}
           tableFilter={tableFilter}

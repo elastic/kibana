@@ -22,13 +22,10 @@ paths:
                 properties:
                   assistantModelEvaluation:
                     type: boolean
-                  attackDiscoveryAlertFiltering:
-                    type: boolean
                   defendInsights:
                     type: boolean
                 required:
                   - assistantModelEvaluation
-                  - attackDiscoveryAlertFiltering
                   - defendInsights
         '400':
           description: Generic Error

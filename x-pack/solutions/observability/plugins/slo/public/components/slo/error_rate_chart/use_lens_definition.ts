@@ -12,7 +12,7 @@ import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
-import { SLO_DESTINATION_INDEX_PATTERN } from '../../../../common/constants';
+import { SLI_DESTINATION_INDEX_PATTERN } from '../../../../common/constants';
 import { getLensDefinitionInterval } from './utils';
 
 export interface TimeRange {
@@ -487,8 +487,8 @@ export function useLensDefinition({
         '32ca1ad4-81c0-4daf-b9d1-07118044bdc5': {
           id: '32ca1ad4-81c0-4daf-b9d1-07118044bdc5',
           title: !!slo.remote
-            ? `${slo.remote.remoteName}:${SLO_DESTINATION_INDEX_PATTERN}`
-            : SLO_DESTINATION_INDEX_PATTERN,
+            ? `${slo.remote.remoteName}:${SLI_DESTINATION_INDEX_PATTERN}`
+            : SLI_DESTINATION_INDEX_PATTERN,
           timeFieldName: '@timestamp',
           sourceFilters: [],
           fieldFormats: {},

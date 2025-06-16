@@ -7,7 +7,7 @@
 
 import { firstValueFrom } from 'rxjs';
 
-import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import { uniq, chunk } from 'lodash/fp';
 
@@ -32,7 +32,7 @@ import {
 } from './utils';
 import { getAllowedFieldsForTermQuery } from './get_allowed_fields_for_terms_query';
 
-import { getEventCount, getEventList } from './get_event_count';
+import { MAX_PER_PAGE, getEventCount, getEventList } from './get_event_count';
 import { getMappingFilters } from './get_mapping_filters';
 import { THREAT_PIT_KEEP_ALIVE } from '../../../../../../common/cti/constants';
 import { getMaxSignalsWarning, getSafeSortIds } from '../../utils/utils';
@@ -40,42 +40,31 @@ import { getDataTierFilter } from '../../utils/get_data_tier_filter';
 import { getQueryFields } from '../../utils/get_query_fields';
 
 export const createThreatSignals = async ({
-  alertId,
-  bulkCreate,
-  completeRule,
-  concurrentSearches,
+  sharedParams,
   eventsTelemetry,
-  filters,
-  inputIndex,
-  itemsPerSearch,
-  language,
-  listClient,
-  outputIndex,
-  query,
-  ruleExecutionLogger,
-  savedId,
-  searchAfterSize,
   services,
-  threatFilters,
-  threatIndex,
-  threatIndicatorPath,
-  threatLanguage,
-  threatMapping,
-  threatQuery,
-  tuple,
-  type,
-  wrapHits,
   wrapSuppressedHits,
-  runOpts,
-  runtimeMappings,
-  primaryTimestamp,
-  secondaryTimestamp,
-  exceptionFilter,
-  unprocessedExceptions,
   licensing,
-  experimentalFeatures,
   scheduleNotificationResponseActionsService,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
+  const {
+    inputIndex,
+    primaryTimestamp,
+    secondaryTimestamp,
+    exceptionFilter,
+    completeRule,
+    tuple,
+    ruleExecutionLogger,
+  } = sharedParams;
+  const {
+    alertId,
+    ruleParams: { language, query, threatIndex, threatLanguage, threatMapping, threatQuery },
+  } = completeRule;
+  const itemsPerSearch = completeRule.ruleParams.itemsPerSearch ?? MAX_PER_PAGE;
+  const concurrentSearches = completeRule.ruleParams.concurrentSearches ?? 1;
+  const filters = completeRule.ruleParams.filters ?? [];
+  const threatFilters = completeRule.ruleParams.threatFilters ?? [];
+
   const threatMatchedFields = getMatchedFields(threatMapping);
   const threatFieldsLength = threatMatchedFields.threat.length;
   const allowedFieldsForTermsQuery = await getAllowedFieldsForTermQuery({
@@ -99,7 +88,6 @@ export const createThreatSignals = async ({
     enrichmentTimes: [],
     bulkCreateTimes: [],
     searchAfterTimes: [],
-    lastLookBackDate: null,
     createdSignalsCount: 0,
     suppressedAlertsCount: 0,
     createdSignals: [],
@@ -142,9 +130,6 @@ export const createThreatSignals = async ({
     await services.scopedClusterClient.asCurrentUser.openPointInTime({
       index: threatIndex,
       keep_alive: THREAT_PIT_KEEP_ALIVE,
-      // @ts-expect-error client support this option, but it is not documented and typed yet, but we need this fix in 8.16.2.
-      // once support added we should remove this expected type error
-      // https://github.com/elastic/elasticsearch-specification/issues/3144
       allow_partial_search_results: true,
     })
   ).id;
@@ -291,7 +276,7 @@ export const createThreatSignals = async ({
         // this could happen when event has empty sort field
         // https://github.com/elastic/kibana/issues/174573 (happens to IM rule only since it uses desc order for events search)
         // when negative sort id used in subsequent request it fails, so when negative sort value found we don't do next request
-        const hasNegativeDateSort = sortIds?.some((val) => val < 0);
+        const hasNegativeDateSort = sortIds?.some((val) => Number(val) < 0);
 
         if (hasNegativeDateSort) {
           ruleExecutionLogger.debug(
@@ -326,19 +311,11 @@ export const createThreatSignals = async ({
       totalDocumentCount: eventCount,
       getDocumentList: async ({ searchAfter }) =>
         getEventList({
+          sharedParams,
           services,
-          ruleExecutionLogger,
           filters: allEventFilters,
-          query,
-          language,
-          index: inputIndex,
           searchAfter,
           perPage,
-          tuple,
-          runtimeMappings,
-          primaryTimestamp,
-          secondaryTimestamp,
-          exceptionFilter,
           eventListConfig,
           indexFields: inputIndexFields,
           sortOrder,
@@ -346,47 +323,22 @@ export const createThreatSignals = async ({
 
       createSignal: (slicedChunk) =>
         createEventSignal({
-          alertId,
-          bulkCreate,
-          completeRule,
+          sharedParams,
           currentEventList: slicedChunk,
           currentResult: results,
           eventsTelemetry,
           filters: allEventFilters,
-          inputIndex,
-          language,
-          listClient,
-          outputIndex,
-          query,
           reassignThreatPitId,
-          ruleExecutionLogger,
-          savedId,
-          searchAfterSize,
           services,
           threatFilters: allThreatFilters,
-          threatIndex,
-          threatIndicatorPath,
-          threatLanguage,
-          threatMapping,
           threatPitId,
-          threatQuery,
-          tuple,
-          type,
-          wrapHits,
           wrapSuppressedHits,
-          runtimeMappings,
-          primaryTimestamp,
-          secondaryTimestamp,
-          exceptionFilter,
-          unprocessedExceptions,
           allowedFieldsForTermsQuery,
           threatMatchedFields,
           inputIndexFields,
           threatIndexFields,
-          runOpts,
           sortOrder,
           isAlertSuppressionActive,
-          experimentalFeatures,
         }),
     });
   } else {
@@ -394,65 +346,34 @@ export const createThreatSignals = async ({
       totalDocumentCount: threatListCount,
       getDocumentList: async ({ searchAfter }) =>
         getThreatList({
+          sharedParams,
           esClient: services.scopedClusterClient.asCurrentUser,
           threatFilters: allThreatFilters,
-          query: threatQuery,
-          language: threatLanguage,
-          index: threatIndex,
           searchAfter,
-          ruleExecutionLogger,
           perPage,
           threatListConfig,
           pitId: threatPitId,
           reassignPitId: reassignThreatPitId,
-          runtimeMappings,
-          listClient,
-          exceptionFilter,
           indexFields: threatIndexFields,
         }),
 
       createSignal: (slicedChunk) =>
         createThreatSignal({
-          alertId,
-          bulkCreate,
-          completeRule,
+          sharedParams,
           currentResult: results,
           currentThreatList: slicedChunk,
           eventsTelemetry,
           filters: allEventFilters,
-          inputIndex,
-          language,
-          listClient,
-          outputIndex,
-          query,
-          ruleExecutionLogger,
-          savedId,
-          searchAfterSize,
           services,
-          threatMapping,
-          tuple,
-          type,
-          wrapHits,
           wrapSuppressedHits,
-          runtimeMappings,
-          primaryTimestamp,
-          secondaryTimestamp,
-          exceptionFilter,
-          unprocessedExceptions,
           threatFilters: allThreatFilters,
-          threatIndex,
-          threatIndicatorPath,
-          threatLanguage,
           threatPitId,
-          threatQuery,
           reassignThreatPitId,
           allowedFieldsForTermsQuery,
           inputIndexFields,
           threatIndexFields,
-          runOpts,
           sortOrder,
           isAlertSuppressionActive,
-          experimentalFeatures,
         }),
     });
   }

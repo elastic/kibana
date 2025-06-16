@@ -15,7 +15,7 @@ Array [
     ],
     "annotations": Array [
       Object {
-        "color": "#BD271E",
+        "color": "#C61E25",
         "icon": "alert",
         "id": "custom_threshold_alert_start_annotation",
         "key": Object {

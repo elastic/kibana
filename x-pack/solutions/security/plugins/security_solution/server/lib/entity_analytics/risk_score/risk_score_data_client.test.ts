@@ -45,6 +45,7 @@ const totalFieldsLimit = 1000;
 describe('RiskScoreDataClient', () => {
   let riskScoreDataClient: RiskScoreDataClient;
   let riskScoreDataClientWithNameSpace: RiskScoreDataClient;
+  let riskScoreDataClientWithLongNameSpace: RiskScoreDataClient;
   let mockSavedObjectClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(() => {
@@ -60,6 +61,8 @@ describe('RiskScoreDataClient', () => {
     riskScoreDataClient = new RiskScoreDataClient(options);
     const optionsWithNamespace = { ...options, namespace: 'space-1' };
     riskScoreDataClientWithNameSpace = new RiskScoreDataClient(optionsWithNamespace);
+    const optionsWithLongNamespace = { ...options, namespace: 'a_a-'.repeat(200) };
+    riskScoreDataClientWithLongNameSpace = new RiskScoreDataClient(optionsWithLongNamespace);
   });
 
   afterEach(() => {
@@ -102,6 +105,10 @@ describe('RiskScoreDataClient', () => {
       assertDataStream('space-1');
       assertIndex('space-1');
       assertTransform('space-1');
+
+      // Space with more than 36 characters
+      await riskScoreDataClientWithLongNameSpace.init();
+      assertTransform('a_a-'.repeat(200));
 
       expect(
         (createOrUpdateComponentTemplate as jest.Mock).mock.lastCall[0].template.template
@@ -181,14 +188,12 @@ const assertIndexTemplate = (namespace: string) => {
   expect(createOrUpdateIndexTemplate).toHaveBeenCalledWith({
     logger,
     esClient,
-    template: {
+    template: expect.objectContaining({
       name: `.risk-score.risk-score-${namespace}-index-template`,
-      body: expect.objectContaining({
-        data_stream: { hidden: true },
-        index_patterns: [`risk-score.risk-score-${namespace}`],
-        composed_of: [`.risk-score-mappings-${namespace}`],
-      }),
-    },
+      data_stream: { hidden: true },
+      index_patterns: [`risk-score.risk-score-${namespace}`],
+      composed_of: [`.risk-score-mappings-${namespace}`],
+    }),
   });
 };
 
@@ -210,7 +215,202 @@ const assertIndex = (namespace: string) => {
     esClient,
     options: {
       index: `risk-score.risk-score-latest-${namespace}`,
-      mappings: expect.any(Object),
+      mappings: {
+        dynamic: false,
+        properties: {
+          '@timestamp': {
+            ignore_malformed: false,
+            type: 'date',
+          },
+          event: {
+            properties: {
+              ingested: {
+                type: 'date',
+              },
+            },
+          },
+          host: {
+            properties: {
+              name: {
+                type: 'keyword',
+              },
+              risk: {
+                properties: {
+                  calculated_level: {
+                    type: 'keyword',
+                  },
+                  calculated_score: {
+                    type: 'float',
+                  },
+                  calculated_score_norm: {
+                    type: 'float',
+                  },
+                  category_1_count: {
+                    type: 'long',
+                  },
+                  category_1_score: {
+                    type: 'float',
+                  },
+                  id_field: {
+                    type: 'keyword',
+                  },
+                  id_value: {
+                    type: 'keyword',
+                  },
+                  notes: {
+                    type: 'keyword',
+                  },
+                  inputs: {
+                    properties: {
+                      id: {
+                        type: 'keyword',
+                      },
+                      index: {
+                        type: 'keyword',
+                      },
+                      category: {
+                        type: 'keyword',
+                      },
+                      description: {
+                        type: 'keyword',
+                      },
+                      risk_score: {
+                        type: 'float',
+                      },
+                      timestamp: {
+                        type: 'date',
+                      },
+                    },
+                    type: 'object',
+                  },
+                },
+                type: 'object',
+              },
+            },
+          },
+          service: {
+            properties: {
+              name: {
+                type: 'keyword',
+              },
+              risk: {
+                properties: {
+                  calculated_level: {
+                    type: 'keyword',
+                  },
+                  calculated_score: {
+                    type: 'float',
+                  },
+                  calculated_score_norm: {
+                    type: 'float',
+                  },
+                  category_1_count: {
+                    type: 'long',
+                  },
+                  category_1_score: {
+                    type: 'float',
+                  },
+                  id_field: {
+                    type: 'keyword',
+                  },
+                  id_value: {
+                    type: 'keyword',
+                  },
+                  inputs: {
+                    properties: {
+                      category: {
+                        type: 'keyword',
+                      },
+                      description: {
+                        type: 'keyword',
+                      },
+                      id: {
+                        type: 'keyword',
+                      },
+                      index: {
+                        type: 'keyword',
+                      },
+                      risk_score: {
+                        type: 'float',
+                      },
+                      timestamp: {
+                        type: 'date',
+                      },
+                    },
+                    type: 'object',
+                  },
+                  notes: {
+                    type: 'keyword',
+                  },
+                },
+                type: 'object',
+              },
+            },
+          },
+          user: {
+            properties: {
+              name: {
+                type: 'keyword',
+              },
+              risk: {
+                properties: {
+                  calculated_level: {
+                    type: 'keyword',
+                  },
+                  calculated_score: {
+                    type: 'float',
+                  },
+                  calculated_score_norm: {
+                    type: 'float',
+                  },
+                  category_1_count: {
+                    type: 'long',
+                  },
+                  category_1_score: {
+                    type: 'float',
+                  },
+                  id_field: {
+                    type: 'keyword',
+                  },
+                  id_value: {
+                    type: 'keyword',
+                  },
+                  notes: {
+                    type: 'keyword',
+                  },
+                  inputs: {
+                    properties: {
+                      id: {
+                        type: 'keyword',
+                      },
+                      index: {
+                        type: 'keyword',
+                      },
+                      category: {
+                        type: 'keyword',
+                      },
+                      description: {
+                        type: 'keyword',
+                      },
+                      risk_score: {
+                        type: 'float',
+                      },
+                      timestamp: {
+                        type: 'date',
+                      },
+                    },
+                    type: 'object',
+                  },
+                },
+                type: 'object',
+              },
+            },
+          },
+        },
+      },
+      settings: {
+        'index.default_pipeline': null,
+      },
     },
   });
 };
@@ -250,7 +450,7 @@ const assertTransform = (namespace: string) => {
           field: '@timestamp',
         },
       },
-      transform_id: `risk_score_latest_transform_${namespace}`,
+      transform_id: transforms.getLatestTransformId(namespace),
       settings: {
         unattended: true,
       },
@@ -258,6 +458,7 @@ const assertTransform = (namespace: string) => {
         version: 3,
         managed: true,
         managed_by: 'security-entity-analytics',
+        space_id: namespace,
       },
     },
   });

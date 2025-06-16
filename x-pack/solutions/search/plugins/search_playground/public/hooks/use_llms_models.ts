@@ -6,17 +6,24 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BedrockLogo, OpenAILogo, GeminiLogo } from '@kbn/stack-connectors-plugin/public/common';
-import { ComponentType, useMemo } from 'react';
+import { useMemo } from 'react';
+import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
+import type { PlaygroundConnector, InferenceActionConnector, ActionConnector } from '../types';
 import { LLMs } from '../../common/types';
 import { LLMModel } from '../types';
 import { useLoadConnectors } from './use_load_connectors';
 import { MODELS } from '../../common/models';
 
+const isInferenceActionConnector = (
+  connector: ActionConnector
+): connector is InferenceActionConnector => {
+  return 'config' in connector && 'provider' in connector.config;
+};
+
 const mapLlmToModels: Record<
   LLMs,
   {
-    icon: ComponentType;
+    icon: string | ((connector: PlaygroundConnector) => string);
     getModels: (
       connectorName: string,
       includeName: boolean
@@ -24,7 +31,7 @@ const mapLlmToModels: Record<
   }
 > = {
   [LLMs.openai]: {
-    icon: OpenAILogo,
+    icon: SERVICE_PROVIDERS.openai.icon,
     getModels: (connectorName, includeName) =>
       MODELS.filter(({ provider }) => provider === LLMs.openai).map((model) => ({
         label: `${model.name} ${includeName ? `(${connectorName})` : ''}`,
@@ -33,7 +40,7 @@ const mapLlmToModels: Record<
       })),
   },
   [LLMs.openai_azure]: {
-    icon: OpenAILogo,
+    icon: SERVICE_PROVIDERS.openai.icon,
     getModels: (connectorName) => [
       {
         label: i18n.translate('xpack.searchPlayground.openAIAzureModel', {
@@ -44,7 +51,7 @@ const mapLlmToModels: Record<
     ],
   },
   [LLMs.openai_other]: {
-    icon: OpenAILogo,
+    icon: SERVICE_PROVIDERS.openai.icon,
     getModels: (connectorName) => [
       {
         label: i18n.translate('xpack.searchPlayground.otherOpenAIModel', {
@@ -55,7 +62,7 @@ const mapLlmToModels: Record<
     ],
   },
   [LLMs.bedrock]: {
-    icon: BedrockLogo,
+    icon: SERVICE_PROVIDERS.amazonbedrock.icon,
     getModels: () =>
       MODELS.filter(({ provider }) => provider === LLMs.bedrock).map((model) => ({
         label: model.name,
@@ -64,13 +71,28 @@ const mapLlmToModels: Record<
       })),
   },
   [LLMs.gemini]: {
-    icon: GeminiLogo,
+    icon: SERVICE_PROVIDERS.googlevertexai.icon,
     getModels: () =>
       MODELS.filter(({ provider }) => provider === LLMs.gemini).map((model) => ({
         label: model.name,
         value: model.model,
         promptTokenLimit: model.promptTokenLimit,
       })),
+  },
+  [LLMs.inference]: {
+    icon: (connector) => {
+      return isInferenceActionConnector(connector)
+        ? SERVICE_PROVIDERS[connector.config.provider].icon
+        : '';
+    },
+    getModels: (connectorName) => [
+      {
+        label: i18n.translate('xpack.searchPlayground.inferenceModel', {
+          defaultMessage: '{name}',
+          values: { name: connectorName },
+        }),
+      },
+    ],
   },
 };
 
@@ -82,7 +104,7 @@ export const useLLMsModels = (): LLMModel[] => {
       connectors?.reduce<Partial<Record<LLMs, number>>>(
         (result, connector) => ({
           ...result,
-          [connector.type]: (result[connector.type] || 0) + 1,
+          [connector.type]: (result[connector.type as LLMs] || 0) + 1,
         }),
         {}
       ),
@@ -92,13 +114,14 @@ export const useLLMsModels = (): LLMModel[] => {
   return useMemo(
     () =>
       connectors?.reduce<LLMModel[]>((result, connector) => {
-        const llmParams = mapLlmToModels[connector.type];
+        const connectorType = connector.type as LLMs;
+        const llmParams = mapLlmToModels[connectorType];
 
         if (!llmParams) {
           return result;
         }
 
-        const showConnectorName = Number(mapConnectorTypeToCount?.[connector.type]) > 1;
+        const showConnectorName = Number(mapConnectorTypeToCount?.[connectorType]) > 1;
 
         return [
           ...result,
@@ -111,7 +134,8 @@ export const useLLMsModels = (): LLMModel[] => {
               connectorType: connector.type,
               connectorName: connector.name,
               showConnectorName,
-              icon: llmParams.icon,
+              icon:
+                typeof llmParams.icon === 'function' ? llmParams.icon(connector) : llmParams.icon,
               disabled: !connector,
               connectorId: connector.id,
               promptTokenLimit,

@@ -22,6 +22,7 @@ import {
 
 import { EnrichedDeprecationInfo } from '../../../../../../common/types';
 import { DeprecationFlyoutLearnMoreLink, DeprecationBadge } from '../../../shared';
+import { DEPRECATION_TYPE_MAP } from '../../../constants';
 
 export interface DefaultDeprecationFlyoutProps {
   deprecation: EnrichedDeprecationInfo;
@@ -53,10 +54,12 @@ export const DefaultDeprecationFlyout = ({
 }: DefaultDeprecationFlyoutProps) => {
   const { message, url, details, index } = deprecation;
 
+  const typeName = DEPRECATION_TYPE_MAP[deprecation.type];
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <DeprecationBadge isCritical={deprecation.isCritical} isResolved={false} />
+        <DeprecationBadge level={deprecation.level} isResolved={false} />
         <EuiSpacer size="s" />
         <EuiTitle size="s" data-test-subj="flyoutTitle">
           <h2 id="defaultDeprecationDetailsFlyoutTitle">{message}</h2>
@@ -64,7 +67,9 @@ export const DefaultDeprecationFlyout = ({
         {index && (
           <EuiText data-test-subj="flyoutDescription">
             <p>
-              <EuiTextColor color="subdued">{i18nTexts.getFlyoutDescription(index)}</EuiTextColor>
+              <EuiTextColor color="subdued">
+                {typeName ? `${typeName}: ${index!}` : i18nTexts.getFlyoutDescription(index!)}
+              </EuiTextColor>
             </p>
           </EuiText>
         )}

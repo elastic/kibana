@@ -99,6 +99,7 @@ export const ruleType: RuleType<
   },
   category: 'kibana',
   producer: ALERTING_EXAMPLE_APP_ID,
+  solution: 'stack',
   validate: {
     params: schema.object({
       instances: schema.maybe(schema.number()),

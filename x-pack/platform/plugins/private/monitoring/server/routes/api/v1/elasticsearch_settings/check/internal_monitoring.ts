@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { RequestHandlerContext } from '@kbn/core/server';
 import { prefixIndexPatternWithCcs } from '../../../../../../common/ccs_utils';
 import {
@@ -50,8 +50,8 @@ const checkLatestMonitoringIsLegacy = async (context: RequestHandlerContext, ind
   const client = (await context.core).elasticsearch.client.asCurrentUser;
   const result = await client.search<estypes.SearchResponse<unknown>>({
     index,
-    body: queryBody,
-  } as estypes.SearchRequest);
+    ...queryBody,
+  });
 
   const { aggregations } = result;
   const counts = {
@@ -82,6 +82,12 @@ export function internalMonitoringCheckRoute(server: MonitoringCore, npRoute: Ro
       path: '/api/monitoring/v1/elasticsearch_settings/check/internal_monitoring',
       validate: {
         body: validateBody,
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES cluster client',
+        },
       },
       options: {
         access: 'internal',

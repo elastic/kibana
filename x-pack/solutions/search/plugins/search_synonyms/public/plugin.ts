@@ -15,6 +15,7 @@ import {
 } from './types';
 import { SYNONYMS_UI_FLAG } from '../common/ui_flags';
 import { docLinks } from '../common/doc_links';
+import { PLUGIN_ROUTE_ROOT } from '../common/api_routes';
 
 export class SearchSynonymsPlugin
   implements Plugin<SearchSynonymsPluginSetup, SearchSynonymsPluginStart>
@@ -25,12 +26,12 @@ export class SearchSynonymsPlugin
     core: CoreSetup<AppPluginStartDependencies, SearchSynonymsPluginStart>,
     _: AppPluginSetupDependencies
   ): SearchSynonymsPluginSetup {
-    if (!core.settings.client.get<boolean>(SYNONYMS_UI_FLAG, false)) {
+    if (!core.settings.client.get<boolean>(SYNONYMS_UI_FLAG, true)) {
       return {};
     }
     core.application.register({
       id: PLUGIN_ID,
-      appRoute: '/app/elasticsearch/synonyms',
+      appRoute: PLUGIN_ROUTE_ROOT,
       title: PLUGIN_TITLE,
       deepLinks: [
         {

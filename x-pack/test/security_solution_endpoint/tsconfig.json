@@ -11,7 +11,7 @@
   "include": [
     "**/*",
     "../../../typings/**/*",
-    "../../../packages/kbn-test/types/ftr_globals/**/*"
+    "../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*"
   ],
   "exclude": [
     "target/**/*"
@@ -29,5 +29,6 @@
     "@kbn/test-subj-selector",
     "@kbn/ftr-common-functional-services",
     "@kbn/spaces-plugin",
+    "@kbn/scout-info",
   ]
 }

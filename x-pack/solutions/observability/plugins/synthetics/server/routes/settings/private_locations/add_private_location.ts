@@ -6,13 +6,13 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { v4 as uuidV4 } from 'uuid';
+import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
 import { SyntheticsRestApiRouteFactory } from '../../types';
-import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
-import { privateLocationSavedObjectName } from '../../../../common/saved_objects/private_locations';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { toClientContract, toSavedObjectContract } from './helpers';
 import { PrivateLocation } from '../../../../common/runtime_types';
 
@@ -24,6 +24,11 @@ export const PrivateLocationSchema = schema.object({
     schema.object({
       lat: schema.number(),
       lon: schema.number(),
+    })
+  ),
+  spaces: schema.maybe(
+    schema.arrayOf(schema.string(), {
+      minSize: 1,
     })
   ),
 });
@@ -41,60 +46,43 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
   },
   requiredPrivileges: [PRIVATE_LOCATION_WRITE_API],
   handler: async (routeContext) => {
-    const { response, request, savedObjectsClient, syntheticsMonitorClient, server } = routeContext;
+    const { response, request, server } = routeContext;
     const internalSOClient = server.coreStart.savedObjects.createInternalRepository();
-
     await migrateLegacyPrivateLocations(internalSOClient, server.logger);
 
+    const repo = new PrivateLocationRepository(routeContext);
+
+    const invalidError = await repo.validatePrivateLocation();
+    if (invalidError) {
+      return invalidError;
+    }
+
     const location = request.body as PrivateLocationObject;
+    const newId = uuidV4();
+    const formattedLocation = toSavedObjectContract({ ...location, id: newId });
+    const { spaces } = location;
 
-    const { locations, agentPolicies } = await getPrivateLocationsAndAgentPolicies(
-      savedObjectsClient,
-      syntheticsMonitorClient
-    );
+    try {
+      const result = await repo.createPrivateLocation(formattedLocation, newId);
 
-    if (locations.find((loc) => loc.agentPolicyId === location.agentPolicyId)) {
-      return response.badRequest({
-        body: {
-          message: `Private location with agentPolicyId ${location.agentPolicyId} already exists`,
-        },
-      });
-    }
-
-    // return if name is already taken
-    if (locations.find((loc) => loc.label === location.label)) {
-      return response.badRequest({
-        body: {
-          message: `Private location with label ${location.label} already exists`,
-        },
-      });
-    }
-
-    const formattedLocation = toSavedObjectContract({
-      ...location,
-      id: location.agentPolicyId,
-    });
-
-    const agentPolicy = agentPolicies?.find((policy) => policy.id === location.agentPolicyId);
-    if (!agentPolicy) {
-      return response.badRequest({
-        body: {
-          message: `Agent policy with id ${location.agentPolicyId} does not exist`,
-        },
-      });
-    }
-
-    const soClient = routeContext.server.coreStart.savedObjects.createInternalRepository();
-
-    const result = await soClient.create<PrivateLocationAttributes>(
-      privateLocationSavedObjectName,
-      formattedLocation,
-      {
-        id: location.agentPolicyId,
-        initialNamespaces: ['*'],
+      return toClientContract(result);
+    } catch (error) {
+      if (SavedObjectsErrorHelpers.isForbiddenError(error)) {
+        if (spaces?.includes('*')) {
+          return response.badRequest({
+            body: {
+              message: `You do not have permission to create a location in all spaces.`,
+            },
+          });
+        }
+        return response.customError({
+          statusCode: error.output.statusCode,
+          body: {
+            message: error.message,
+          },
+        });
       }
-    );
-
-    return toClientContract(result.attributes, agentPolicies);
+      throw error;
+    }
   },
 });

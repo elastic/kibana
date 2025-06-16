@@ -8,6 +8,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "../../../../../../typings/emotion.d.ts"
   ],
   "kbn_references": [
     { "path": "../tsconfig.json" },
@@ -37,6 +38,10 @@
     "@kbn/react-kibana-context-render",
     "@kbn/core-rendering-browser",
     "@kbn/palettes",
+    "@kbn/alerts-ui-shared",
+    "@kbn/ui-actions-browser",
+    "@kbn/ebt-tools",
+    "@kbn/react-kibana-context-theme",
   ],
   "exclude": [
     "target/**/*",

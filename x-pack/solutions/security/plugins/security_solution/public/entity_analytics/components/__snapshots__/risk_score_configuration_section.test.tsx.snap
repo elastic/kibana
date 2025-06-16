@@ -13,14 +13,14 @@ exports[`RiskScoreConfigurationSection renders correctly 1`] = `
         onChange={[Function]}
       />
     </div>
-    <Styled(div) />
+    <VerticalSeparator />
     <div>
       <EuiSuperDatePicker
         compressed={false}
         end="now"
         onTimeChange={[Function]}
         showUpdateButton={false}
-        start="now-30m"
+        start="now-30d"
         width="auto"
       />
     </div>

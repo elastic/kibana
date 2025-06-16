@@ -51,17 +51,8 @@ import type { UserProfile } from '@kbn/security-plugin/common';
 import { userProfiles } from '../user_profiles/api.mock';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 
-export const getCase = async (
-  caseId: string,
-  includeComments: boolean = true,
-  signal: AbortSignal
-): Promise<CaseUI> => Promise.resolve(basicCase);
-
-export const resolveCase = async (
-  caseId: string,
-  includeComments: boolean = true,
-  signal: AbortSignal
-): Promise<ResolvedCase> => Promise.resolve(basicResolvedCase);
+export const resolveCase = async (caseId: string, signal: AbortSignal): Promise<ResolvedCase> =>
+  Promise.resolve(basicResolvedCase);
 
 export const getSingleCaseMetrics = async (
   caseId: string,

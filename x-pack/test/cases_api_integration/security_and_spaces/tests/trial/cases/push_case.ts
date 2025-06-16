@@ -7,14 +7,18 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import http from 'http';
+import type http from 'http';
 
 import expect from '@kbn/expect';
-import { CaseStatuses, AttachmentType, User } from '@kbn/cases-plugin/common/types/domain';
-import { RecordingServiceNowSimulator } from '@kbn/actions-simulators-plugin/server/servicenow_simulation';
-import { CaseConnector } from '@kbn/cases-plugin/common/types/domain';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
+import type { User } from '@kbn/cases-plugin/common/types/domain';
+import { CaseStatuses, AttachmentType } from '@kbn/cases-plugin/common/types/domain';
+import type {
+  RecordingServiceNowSimulator,
+  ServiceNowRequest,
+} from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib/actions_simulations_utils';
+import type { CaseConnector } from '@kbn/cases-plugin/common/types/domain';
+import { ObjectRemover as ActionsRemover } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
   postCaseReq,
@@ -216,11 +220,13 @@ export default ({ getService }: FtrProviderContext): void => {
          * If the request contains the work_notes property then
          * it is a create comment request
          */
-        const allCommentRequests = serviceNowServer.allRequestData.filter((request) =>
-          Boolean(request.work_notes)
+        const allCommentRequests = serviceNowServer.allRequestData.filter(
+          (request: ServiceNowRequest) => Boolean(request.work_notes)
         );
 
-        const allWorkNotes = allCommentRequests.map((request) => request.work_notes);
+        const allWorkNotes = allCommentRequests.map(
+          (request: ServiceNowRequest) => request.work_notes
+        );
         const expectedNotes = [
           'This is a cool comment\n\nAdded by elastic.',
           'Isolated host host-name with comment: comment text\n\nAdded by elastic.',
@@ -267,8 +273,8 @@ export default ({ getService }: FtrProviderContext): void => {
          * If the request contains the work_notes property then
          * it is a create comment request
          */
-        const allCommentRequests = serviceNowServer.allRequestData.filter((request) =>
-          Boolean(request.work_notes)
+        const allCommentRequests = serviceNowServer.allRequestData.filter(
+          (request: ServiceNowRequest) => Boolean(request.work_notes)
         );
 
         expect(allCommentRequests.length).be(1);
@@ -836,7 +842,6 @@ export default ({ getService }: FtrProviderContext): void => {
           const theCase = await getCase({
             supertest: supertestWithoutAuth,
             caseId: postedCase.id,
-            includeComments: false,
             auth: { user: superUser, space: 'space1' },
           });
 

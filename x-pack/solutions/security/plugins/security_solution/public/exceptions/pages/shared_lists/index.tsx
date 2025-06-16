@@ -22,14 +22,13 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import styled from '@emotion/styled';
 
 import type { ExceptionListFilter, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 import { EmptyViewerState, ViewerStatus } from '@kbn/securitysolution-exception-list-components';
 
-import styled from 'styled-components';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
 import { useKibana } from '../../../common/lib/kibana';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
@@ -43,7 +42,7 @@ import {
   ListsSearchBar,
 } from '../../components';
 import { useAllExceptionLists } from '../../hooks/use_all_exception_lists';
-import { ReferenceErrorModal } from '../../../detections/components/value_lists_management_flyout/reference_error_modal';
+import { ReferenceErrorModal } from '../../../common/components/reference_error_modal';
 import { patchRule } from '../../../detection_engine/rule_management/api/api';
 
 import { getSearchFilters } from '../../../detection_engine/rule_management_ui/components/rules_table/helpers';
@@ -82,7 +81,7 @@ const SORT_FIELDS: Array<{ field: string; label: string; defaultOrder: 'asc' | '
 ];
 
 const ExceptionsTable = styled(EuiFlexGroup)`
-  padding: ${euiThemeVars.euiSizeL} 0;
+  padding: ${({ theme }) => theme.euiTheme.size.l} 0;
 `;
 
 export const SharedLists = React.memo(() => {
@@ -624,7 +623,7 @@ export const SharedLists = React.memo(() => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem style={{ alignItems: 'flex-end' }}>
+          <EuiFlexItem css={{ alignItems: 'flex-end' }}>
             <EuiFlexGroup alignItems="flexEnd">
               <EuiFlexItem>
                 <EuiPagination

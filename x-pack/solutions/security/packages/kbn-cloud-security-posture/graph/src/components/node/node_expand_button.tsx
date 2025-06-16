@@ -8,6 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import { StyledNodeExpandButton, RoundEuiButtonIcon, ExpandButtonSize } from './styles';
 import type { EntityNodeViewModel, LabelNodeViewModel } from '..';
+import { NODE_EXPAND_BUTTON_TEST_ID } from '../test_ids';
 
 export interface NodeExpandButtonProps {
   x?: string;
@@ -24,10 +25,13 @@ export const NodeExpandButton = ({ x, y, color, onClick }: NodeExpandButtonProps
     setIsToggled(false);
   }, []);
 
-  const onClickHandler = (e: React.MouseEvent<HTMLElement>) => {
-    setIsToggled((currIsToggled) => !currIsToggled);
-    onClick?.(e, unToggleCallback);
-  };
+  const onClickHandler = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      setIsToggled((currIsToggled) => !currIsToggled);
+      onClick?.(e, unToggleCallback);
+    },
+    [onClick, unToggleCallback]
+  );
 
   return (
     <StyledNodeExpandButton x={x} y={y} className={isToggled ? 'toggled' : undefined}>
@@ -37,7 +41,7 @@ export const NodeExpandButton = ({ x, y, color, onClick }: NodeExpandButtonProps
         onClick={onClickHandler}
         iconSize="m"
         aria-label="Open or close node actions"
-        data-test-subj="nodeExpandButton"
+        data-test-subj={NODE_EXPAND_BUTTON_TEST_ID}
       />
     </StyledNodeExpandButton>
   );

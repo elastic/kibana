@@ -16,5 +16,7 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/sse-utils",
+    "@kbn/zod",
   ]
 }

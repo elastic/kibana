@@ -101,7 +101,8 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const auditbeatPath = dataPathBuilder.getPath('auditbeat/hosts');
 
-  describe('@ess @serverless @serverlessQA Query type rules', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/220243
+  describe.skip('@ess @serverless @serverlessQA Query type rules', () => {
     before(async () => {
       await esArchiver.load(auditbeatPath);
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/8.8.0', {
@@ -1482,62 +1483,6 @@ export default ({ getService }: FtrProviderContext) => {
             expect(logEntry.errors.length).toEqual(0);
           }
         });
-
-        describe('with host risk index', () => {
-          before(async () => {
-            await esArchiver.load('x-pack/test/functional/es_archives/entity/host_risk');
-          });
-
-          after(async () => {
-            await esArchiver.unload('x-pack/test/functional/es_archives/entity/host_risk');
-          });
-
-          it('should be enriched with host risk score', async () => {
-            const rule: QueryRuleCreateProps = {
-              ...getRuleForAlertTesting(['suppression-data']),
-              query: `host.name: "host-0"`,
-              alert_suppression: {
-                group_by: ['host.name'],
-                duration: {
-                  value: 30,
-                  unit: 'm',
-                },
-              },
-              from: 'now-1h',
-              interval: '1h',
-            };
-
-            const { previewId } = await previewRule({
-              supertest,
-              rule,
-              timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
-              invocationCount: 1,
-            });
-            const previewAlerts = await getPreviewAlerts({
-              es,
-              previewId,
-              sort: [ALERT_ORIGINAL_TIME],
-            });
-            expect(previewAlerts.length).toEqual(1);
-            expect(previewAlerts[0]._source).toEqual({
-              ...previewAlerts[0]._source,
-              [ALERT_SUPPRESSION_TERMS]: [
-                {
-                  field: 'host.name',
-                  value: 'host-0',
-                },
-              ],
-              [TIMESTAMP]: '2020-10-28T06:30:00.000Z',
-              [ALERT_LAST_DETECTED]: '2020-10-28T06:30:00.000Z',
-              [ALERT_ORIGINAL_TIME]: '2020-10-28T06:00:00.000Z',
-              [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
-              [ALERT_SUPPRESSION_END]: '2020-10-28T06:00:02.000Z',
-              [ALERT_SUPPRESSION_DOCS_COUNT]: 5,
-            });
-            expect(previewAlerts[0]._source?.host?.risk?.calculated_level).toEqual('Low');
-            expect(previewAlerts[0]._source?.host?.risk?.calculated_score_norm).toEqual(1);
-          });
-        });
       });
 
       // when missing_fields_strategy set to "doNotSuppress", each document with missing grouped by field
@@ -2831,6 +2776,77 @@ export default ({ getService }: FtrProviderContext) => {
           expect.objectContaining({ domain: 'aaa.stage.11111111.hello' })
         );
         expect(get(previewAlerts[0]?._source, 'event.dataset')).toEqual('network_traffic.tls');
+      });
+    });
+
+    describe('preview logged requests', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+      });
+
+      after(async () => {
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/ecs_compliant'
+        );
+      });
+
+      const rule: QueryRuleCreateProps = getRuleForAlertTesting(['ecs_compliant']);
+      const ruleWithSuppression: QueryRuleCreateProps = {
+        ...rule,
+        alert_suppression: {
+          group_by: ['agent.name'],
+          duration: {
+            value: 500,
+            unit: 'm',
+          },
+        },
+      };
+
+      it('should not return requests property when not enabled', async () => {
+        const { logs } = await previewRule({
+          supertest,
+          rule,
+        });
+
+        expect(logs[0].requests).toEqual(undefined);
+      });
+      it('should return requests property when enable_logged_requests set to true', async () => {
+        const { logs } = await previewRule({
+          supertest,
+          rule,
+          enableLoggedRequests: true,
+        });
+
+        const requests = logs[0].requests;
+
+        expect(requests).toHaveLength(1);
+        expect(requests![0].description).toBe('Find events');
+        expect(requests![0].request_type).toBe('findDocuments');
+        expect(requests![0].request).toContain('POST /ecs_compliant/_search?allow_no_indices=true');
+      });
+
+      it('should not return requests property when not enabled and suppression configured', async () => {
+        const { logs } = await previewRule({
+          supertest,
+          rule: ruleWithSuppression,
+        });
+
+        expect(logs[0].requests).toEqual(undefined);
+      });
+
+      it('should return requests property when enable_logged_requests set to true and suppression configured', async () => {
+        const { logs } = await previewRule({
+          supertest,
+          rule: ruleWithSuppression,
+          enableLoggedRequests: true,
+        });
+
+        const requests = logs[0].requests;
+
+        expect(requests).toHaveLength(1);
+        expect(requests![0].description).toBe('Find events');
+        expect(requests![0].request_type).toBe('findDocuments');
+        expect(requests![0].request).toContain('POST /ecs_compliant/_search?allow_no_indices=true');
       });
     });
   });

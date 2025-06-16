@@ -8,22 +8,19 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
 import { FormTestComponent } from '../../common/test_utils';
 import { FormFields } from './form_fields';
+import { renderWithTestingProviders } from '../../common/mock';
 
 describe('FormFields ', () => {
-  let appMockRender: AppMockRenderer;
   const onSubmit = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
   });
 
   it('renders correctly', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <FormTestComponent onSubmit={onSubmit}>
         <FormFields />
       </FormTestComponent>

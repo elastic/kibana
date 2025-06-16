@@ -17,7 +17,7 @@ import {
 import type { ResizeTrigger } from '@elastic/eui/src/components/resizable_container/types';
 import { css } from '@emotion/react';
 import { isEqual, round } from 'lodash';
-import type { ReactElement } from 'react';
+import type { ReactNode } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ResizableLayoutDirection } from '../types';
 import { getContainerSize, percentToPixels, pixelsToPercent } from './utils';
@@ -47,8 +47,8 @@ export const PanelsResizable = ({
     fixedPanelSizePct: number;
     flexPanelSizePct: number;
   };
-  fixedPanel: ReactElement;
-  flexPanel: ReactElement;
+  fixedPanel: ReactNode;
+  flexPanel: ReactNode;
   resizeButtonClassName?: string;
   ['data-test-subj']?: string;
   onFixedPanelSizeChange?: (fixedPanelSize: number) => void;

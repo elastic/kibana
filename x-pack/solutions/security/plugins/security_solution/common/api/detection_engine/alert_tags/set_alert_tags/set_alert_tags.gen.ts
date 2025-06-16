@@ -18,6 +18,9 @@ import { z } from '@kbn/zod';
 
 import { AlertIds, AlertTags } from '../../../model/alert.gen';
 
+/**
+ * Object with list of tags to add and remove.
+ */
 export type SetAlertTags = z.infer<typeof SetAlertTags>;
 export const SetAlertTags = z.object({
   tags_to_add: AlertTags,

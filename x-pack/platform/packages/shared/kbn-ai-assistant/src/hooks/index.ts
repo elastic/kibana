@@ -9,3 +9,8 @@ export * from './use_ai_assistant_app_service';
 export * from './use_ai_assistant_chat_service';
 export * from './use_knowledge_base';
 export * from './use_scopes';
+export * from './use_genai_connectors';
+export * from './use_confirm_modal';
+export * from './use_conversations_by_date';
+export * from './use_conversation_context_menu';
+export * from './use_inference_endpoints';

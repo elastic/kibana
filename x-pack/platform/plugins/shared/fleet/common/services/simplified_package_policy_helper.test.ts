@@ -158,5 +158,21 @@ describe('toPackagePolicy', () => {
         },
       ]);
     });
+
+    it('should to pass additional_datastreams_permissions', () => {
+      const res = simplifiedPackagePolicytoNewPackagePolicy(
+        {
+          name: 'nginx-1',
+          namespace: 'default',
+          policy_id: 'policy123',
+          policy_ids: ['policy123'],
+          description: 'Test description',
+          additional_datastreams_permissions: ['logs-test-123'],
+        },
+        nginxPackageInfo as unknown as PackageInfo
+      );
+
+      expect(res.additional_datastreams_permissions).toEqual(['logs-test-123']);
+    });
   });
 });

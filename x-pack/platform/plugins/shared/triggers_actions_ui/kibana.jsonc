@@ -31,14 +31,18 @@
       "expressions",
       "lens",
       "controls",
-      "embeddable"
+      "embeddable",
+      "fieldsMetadata",
+      "uiActions",
+      "contentManagement",
     ],
     "optionalPlugins": [
       "cloud",
       "features",
       "home",
       "spaces",
-      "serverless"
+      "serverless",
+      "share"
     ],
     "requiredBundles": [
       "alerting",

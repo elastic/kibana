@@ -9,7 +9,7 @@ import type { TransportResult } from '@elastic/elasticsearch';
 import type {
   TransformGetTransformStatsResponse,
   TransformGetTransformStatsTransformStats,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import type { CoreSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,

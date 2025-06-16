@@ -35,7 +35,7 @@ export function setupSavedObjects(coreSetup: CoreSetup) {
       getInAppUrl: (obj: { id: string }) => ({
         // TODO link to specific object
         path: `/app/${VISUALIZE_APP_NAME}#/${ANNOTATIONS_LISTING_VIEW_ID}`,
-        uiCapabilitiesPath: 'visualize.show',
+        uiCapabilitiesPath: 'visualize_v2.show',
       }),
     },
     migrations: () => {

@@ -13,6 +13,7 @@ import type { Logger } from '@kbn/logging';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import { once } from 'lodash';
 import type { RelatedSavedObjects } from '@kbn/actions-plugin/server/lib';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { stringify } from '../../../../utils/stringify';
 import { ResponseActionsClientError, ResponseActionsConnectorNotConfiguredError } from '../errors';
 
@@ -24,7 +25,6 @@ export interface NormalizedExternalConnectorClientExecuteOptions<
     subAction: TSubAction;
     subActionParams: TParams;
   };
-  spaceId?: string;
 }
 
 /**
@@ -34,6 +34,27 @@ export interface NormalizedExternalConnectorClientExecuteOptions<
  */
 export class NormalizedExternalConnectorClient {
   private connectorTypeId: string | undefined;
+
+  constructor(
+    protected readonly connectorsClient: ActionsClient | IUnsecuredActionsClient,
+    protected readonly log: Logger,
+    protected readonly options?: {
+      /**
+       * The space ID to be used when the `IUnsecuredActionsClient` is used.
+       * This option is **REQUIRED** when using the `IUnsecuredActionsClient`
+       * correctors client.
+       */
+      spaceId?: string;
+      /** Used by `.execute()` when the `IUnsecuredActionsClient` is passed in */
+      relatedSavedObjects?: RelatedSavedObjects;
+    }
+  ) {
+    if (this.isUnsecuredActionsClient(connectorsClient) && !options?.spaceId) {
+      throw new ResponseActionsClientError(
+        `Initialization of NormalizedExternalConnectorClient with an unsecured connectors client requires an 'options.spaceId' to be defined`
+      );
+    }
+  }
 
   protected readonly getConnectorInstance: () => Promise<ConnectorWithExtraFindData> = once(
     async () => {
@@ -69,15 +90,6 @@ export class NormalizedExternalConnectorClient {
     }
   );
 
-  constructor(
-    protected readonly connectorsClient: ActionsClient | IUnsecuredActionsClient,
-    protected readonly log: Logger,
-    protected readonly options?: {
-      /** Used by `.execute()` when the `IUnsecuredActionsClient` is passed in */
-      relatedSavedObjects?: RelatedSavedObjects;
-    }
-  ) {}
-
   private ensureSetupDone(): void {
     if (!this.connectorTypeId) {
       throw new ResponseActionsClientError(`Instance has not been .setup()!`);
@@ -109,34 +121,61 @@ export class NormalizedExternalConnectorClient {
     TResponse = unknown,
     TParams extends Record<string, any> = Record<string, any>
   >({
-    spaceId = 'default',
     params,
   }: NormalizedExternalConnectorClientExecuteOptions<TParams>): Promise<
     ActionTypeExecutorResult<TResponse>
   > {
     this.ensureSetupDone();
-    const { id: connectorId } = await this.getConnectorInstance();
+    const {
+      id: connectorId,
+      name: connectorName,
+      actionTypeId: connectorTypeId,
+    } = await this.getConnectorInstance();
+
+    const catchAndThrow = (err: Error) => {
+      throw new ResponseActionsClientError(
+        `Attempt to execute [${params.subAction}] with connector [Name: ${connectorName} | Type: ${connectorTypeId} | ID: ${connectorId})] failed with : ${err.message}`,
+        500,
+        err
+      );
+    };
 
     if (this.isUnsecuredActionsClient(this.connectorsClient)) {
-      return this.connectorsClient.execute({
-        requesterId: 'background_task',
-        id: connectorId,
-        spaceId,
-        params,
-        relatedSavedObjects: this.options?.relatedSavedObjects,
-      }) as Promise<ActionTypeExecutorResult<TResponse>>;
+      const spaceId = this.options?.spaceId ?? DEFAULT_SPACE_ID;
+
+      this.log.debug(
+        `Executing  action [${params.subAction}] of connector [${connectorTypeId}] (unsecured) in space [${this.options?.spaceId}]`
+      );
+
+      return this.connectorsClient
+        .execute({
+          requesterId: 'background_task',
+          id: connectorId,
+          spaceId,
+          params,
+          relatedSavedObjects: this.options?.relatedSavedObjects,
+        })
+        .catch(catchAndThrow) as Promise<ActionTypeExecutorResult<TResponse>>;
     }
 
-    return this.connectorsClient.execute({
-      actionId: connectorId,
-      params,
-    }) as Promise<ActionTypeExecutorResult<TResponse>>;
+    this.log.debug(`Executing  action [${params.subAction}] of connector [${connectorTypeId}]`);
+
+    return this.connectorsClient
+      .execute({
+        actionId: connectorId,
+        params,
+      })
+      .catch(catchAndThrow) as Promise<ActionTypeExecutorResult<TResponse>>;
   }
 
-  protected async getAll(spaceId: string = 'default'): ReturnType<ActionsClient['getAll']> {
+  protected async getAll(): ReturnType<ActionsClient['getAll']> {
     this.ensureSetupDone();
     if (this.isUnsecuredActionsClient(this.connectorsClient)) {
-      return this.connectorsClient.getAll(spaceId);
+      if (!this.options?.spaceId) {
+        throw new ResponseActionsClientError('options.spaceId is required');
+      }
+
+      return this.connectorsClient.getAll(this.options.spaceId);
     }
 
     return this.connectorsClient.getAll();

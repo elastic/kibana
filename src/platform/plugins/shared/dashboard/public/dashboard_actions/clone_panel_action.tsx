@@ -17,15 +17,16 @@ import {
   getInheritedViewMode,
   HasParentApi,
   PublishesBlockingError,
+  apiHasSerializableState,
+  HasSerializableState,
   HasUniqueId,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { DASHBOARD_ACTION_GROUP } from '.';
 import { dashboardClonePanelActionStrings } from './_dashboard_actions_strings';
-
-export const ACTION_CLONE_PANEL = 'clonePanel';
+import { ACTION_CLONE_PANEL, DASHBOARD_ACTION_GROUP } from './constants';
 
 export type ClonePanelActionApi = CanAccessViewMode &
+  HasSerializableState &
   HasUniqueId &
   HasParentApi<CanDuplicatePanels> &
   Partial<PublishesBlockingError>;
@@ -33,6 +34,7 @@ export type ClonePanelActionApi = CanAccessViewMode &
 const isApiCompatible = (api: unknown | null): api is ClonePanelActionApi =>
   Boolean(
     apiHasUniqueId(api) &&
+      apiHasSerializableState(api) &&
       apiCanAccessViewMode(api) &&
       apiHasParentApi(api) &&
       apiCanDuplicatePanels(api.parentApi)
@@ -56,7 +58,9 @@ export class ClonePanelAction implements Action<EmbeddableApiContext> {
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) return false;
-    return Boolean(!embeddable.blockingError?.value && getInheritedViewMode(embeddable) === 'edit');
+    return Boolean(
+      !embeddable.blockingError$?.value && getInheritedViewMode(embeddable) === 'edit'
+    );
   }
 
   public async execute({ embeddable }: EmbeddableApiContext) {

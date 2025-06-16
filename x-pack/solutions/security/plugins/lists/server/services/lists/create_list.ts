@@ -75,7 +75,7 @@ export const createList = async ({
   };
 
   const response = await esClient.create({
-    body,
+    document: body,
     id: id ?? uuidv4(),
     index: listIndex,
     refresh: 'wait_for',

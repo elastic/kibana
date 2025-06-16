@@ -5,24 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
-import { ComponentStory } from '@storybook/react';
-
 import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
 import { buildSlo } from '../../../../data/slo/slo';
-import { Overview as Component, Props } from './overview';
+import { Definition as Component, Props } from '../definition/definition';
 
 export default {
   component: Component,
-  title: 'app/SLO/DetailsPage/Overview',
+  title: 'app/SLO/DetailsPage/Definition',
   decorators: [KibanaReactStorybookDecorator],
 };
-
-const Template: ComponentStory<typeof Component> = (props: Props) => <Component {...props} />;
 
 const defaultProps: Props = {
   slo: buildSlo(),
 };
 
-export const Overview = Template.bind({});
-Overview.args = defaultProps;
+export const Overview = {
+  args: defaultProps,
+};

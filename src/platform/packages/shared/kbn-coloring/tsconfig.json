@@ -11,7 +11,9 @@
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    // Emotion theme typing
+    "./emotion.d.ts"
   ],
   "kbn_references": [
     "@kbn/i18n",
@@ -24,6 +26,8 @@
     "@kbn/ui-theme",
     "@kbn/visualization-utils",
     "@kbn/palettes",
+    "@kbn/field-formats-plugin",
+    "@kbn/expressions-plugin",
   ],
   "exclude": [
     "target/**/*",

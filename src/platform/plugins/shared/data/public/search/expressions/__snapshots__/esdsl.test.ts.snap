@@ -4,36 +4,34 @@ exports[`esdsl correctly handles filter, query and timerange on context 1`] = `
 Object {
   "body": Object {
     "params": Object {
-      "body": Object {
-        "_source": false,
-        "query": Object {
-          "bool": Object {
-            "filter": Array [
-              Object {
-                "match_phrase": Object {
-                  "gender": "male",
-                },
+      "_source": false,
+      "index": "kibana_sample_data_logs",
+      "query": Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "match_phrase": Object {
+                "gender": "male",
               },
-            ],
-            "must": Array [
-              Object {
-                "query_string": Object {
-                  "query": "*",
-                  "time_zone": true,
-                },
+            },
+          ],
+          "must": Array [
+            Object {
+              "query_string": Object {
+                "query": "*",
+                "time_zone": true,
               },
-              Object {
-                "term": Object {
-                  "machine.os.keyword": "osx",
-                },
+            },
+            Object {
+              "term": Object {
+                "machine.os.keyword": "osx",
               },
-            ],
-            "must_not": Array [],
-            "should": Array [],
-          },
+            },
+          ],
+          "must_not": Array [],
+          "should": Array [],
         },
       },
-      "index": "kibana_sample_data_logs",
       "size": 4,
     },
   },
@@ -45,23 +43,21 @@ exports[`esdsl correctly handles input adds filters 1`] = `
 Object {
   "body": Object {
     "params": Object {
-      "body": Object {
-        "query": Object {
-          "bool": Object {
-            "filter": Array [
-              Object {
-                "match_phrase": Object {
-                  "gender": "male",
-                },
+      "index": "test",
+      "query": Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "match_phrase": Object {
+                "gender": "male",
               },
-            ],
-            "must": Array [],
-            "must_not": Array [],
-            "should": Array [],
-          },
+            },
+          ],
+          "must": Array [],
+          "must_not": Array [],
+          "should": Array [],
         },
       },
-      "index": "test",
       "size": 0,
     },
   },
@@ -73,30 +69,28 @@ exports[`esdsl correctly handles input adds filters to query with filters 1`] = 
 Object {
   "body": Object {
     "params": Object {
-      "body": Object {
-        "_source": false,
-        "query": Object {
-          "bool": Object {
-            "filter": Array [
-              Object {
-                "match_phrase": Object {
-                  "gender": "male",
-                },
+      "_source": false,
+      "index": "kibana_sample_data_logs",
+      "query": Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "match_phrase": Object {
+                "gender": "male",
               },
-            ],
-            "must": Array [
-              Object {
-                "term": Object {
-                  "machine.os.keyword": "osx",
-                },
+            },
+          ],
+          "must": Array [
+            Object {
+              "term": Object {
+                "machine.os.keyword": "osx",
               },
-            ],
-            "must_not": Array [],
-            "should": Array [],
-          },
+            },
+          ],
+          "must_not": Array [],
+          "should": Array [],
         },
       },
-      "index": "kibana_sample_data_logs",
       "size": 4,
     },
   },
@@ -108,24 +102,22 @@ exports[`esdsl correctly handles input adds query 1`] = `
 Object {
   "body": Object {
     "params": Object {
-      "body": Object {
-        "query": Object {
-          "bool": Object {
-            "filter": Array [],
-            "must": Array [
-              Object {
-                "query_string": Object {
-                  "query": "*",
-                  "time_zone": true,
-                },
+      "index": "test",
+      "query": Object {
+        "bool": Object {
+          "filter": Array [],
+          "must": Array [
+            Object {
+              "query_string": Object {
+                "query": "*",
+                "time_zone": true,
               },
-            ],
-            "must_not": Array [],
-            "should": Array [],
-          },
+            },
+          ],
+          "must_not": Array [],
+          "should": Array [],
         },
       },
-      "index": "test",
       "size": 0,
     },
   },
@@ -137,30 +129,28 @@ exports[`esdsl correctly handles input adds query to a query with filters 1`] = 
 Object {
   "body": Object {
     "params": Object {
-      "body": Object {
-        "_source": false,
-        "query": Object {
-          "bool": Object {
-            "filter": Array [],
-            "must": Array [
-              Object {
-                "query_string": Object {
-                  "query": "*",
-                  "time_zone": true,
-                },
+      "_source": false,
+      "index": "kibana_sample_data_logs",
+      "query": Object {
+        "bool": Object {
+          "filter": Array [],
+          "must": Array [
+            Object {
+              "query_string": Object {
+                "query": "*",
+                "time_zone": true,
               },
-              Object {
-                "term": Object {
-                  "machine.os.keyword": "osx",
-                },
+            },
+            Object {
+              "term": Object {
+                "machine.os.keyword": "osx",
               },
-            ],
-            "must_not": Array [],
-            "should": Array [],
-          },
+            },
+          ],
+          "must_not": Array [],
+          "should": Array [],
         },
       },
-      "index": "kibana_sample_data_logs",
       "size": 4,
     },
   },
@@ -172,17 +162,15 @@ exports[`esdsl correctly handles input ignores timerange 1`] = `
 Object {
   "body": Object {
     "params": Object {
-      "body": Object {
-        "query": Object {
-          "bool": Object {
-            "filter": Array [],
-            "must": Array [],
-            "must_not": Array [],
-            "should": Array [],
-          },
+      "index": "test",
+      "query": Object {
+        "bool": Object {
+          "filter": Array [],
+          "must": Array [],
+          "must_not": Array [],
+          "should": Array [],
         },
       },
-      "index": "test",
       "size": 0,
     },
   },

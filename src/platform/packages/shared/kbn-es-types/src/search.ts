@@ -8,8 +8,7 @@
  */
 
 import type { ValuesType, UnionToIntersection } from 'utility-types';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import * as estypesWithoutBodyKey from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 interface AggregationsAggregationContainer extends Record<string, any> {
   aggs?: any;
@@ -61,7 +60,7 @@ type ValueTypeOfField<T> = T extends Record<string, string | number>
 
 type MaybeArray<T> = T | T[];
 
-type Fields = Required<Required<estypes.SearchRequest>['body']>['fields'];
+type Fields = Required<estypes.SearchRequest>['fields'];
 type DocValueFields = MaybeArray<string | estypes.QueryDslFieldAndFormat>;
 
 export type ChangePointType =
@@ -84,7 +83,7 @@ export type SearchHit<
     ? {
         fields: Partial<Record<ValueTypeOfField<TFields>, unknown[]>>;
       }
-    : { fields?: Record<string, unknown[]> }) &
+    : { fields?: Record<string, unknown[] | undefined> }) &
   (TDocValueFields extends DocValueFields
     ? {
         fields: Partial<Record<ValueTypeOfField<TDocValueFields>, unknown[]>>;
@@ -634,14 +633,10 @@ type WrapAggregationResponse<T> = keyof UnionToIntersection<T> extends never
 
 export type InferSearchResponseOf<
   TDocument = unknown,
-  TSearchRequest extends
-    | estypes.SearchRequest
-    | (estypesWithoutBodyKey.SearchRequest & { body?: never }) = estypes.SearchRequest,
+  TSearchRequest extends estypes.SearchRequest = estypes.SearchRequest,
   TOptions extends { restTotalHitsAsInt?: boolean } = {}
 > = Omit<estypes.SearchResponse<TDocument>, 'aggregations' | 'hits'> &
-  (TSearchRequest['body'] extends TopLevelAggregationRequest
-    ? WrapAggregationResponse<SearchResponseOf<TSearchRequest['body'], TDocument>>
-    : TSearchRequest extends TopLevelAggregationRequest
+  (TSearchRequest extends TopLevelAggregationRequest
     ? WrapAggregationResponse<SearchResponseOf<TSearchRequest, TDocument>>
     : { aggregations?: InvalidAggregationRequest }) & {
     hits: Omit<estypes.SearchResponse<TDocument>['hits'], 'total' | 'hits'> &
@@ -655,16 +650,14 @@ export type InferSearchResponseOf<
               relation: 'eq' | 'gte';
             };
           }) & {
-        hits: HitsOf<
-          TSearchRequest extends estypes.SearchRequest ? TSearchRequest['body'] : TSearchRequest,
-          TDocument
-        >;
+        hits: HitsOf<TSearchRequest, TDocument>;
       };
   };
 
 export interface ESQLColumn {
   name: string;
   type: string;
+  original_types?: string[];
 }
 
 export type ESQLRow = unknown[];
@@ -690,5 +683,7 @@ export interface ESQLSearchParams {
   locale?: string;
   include_ccs_metadata?: boolean;
   dropNullColumns?: boolean;
-  params?: estypesWithoutBodyKey.ScalarValue[] | Array<Record<string, string | undefined>>;
+  params?:
+    | estypes.ScalarValue[]
+    | Array<Record<string, string | number | Record<string, string | number> | undefined>>;
 }

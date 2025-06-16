@@ -7,11 +7,11 @@
 
 import type { EuiDataGridSorting } from '@elastic/eui';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { Meta, Story } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import { orderBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { ENTITY_LAST_SEEN } from '@kbn/observability-shared-plugin/common';
-import { useArgs } from '@storybook/addons';
+import { useArgs } from '@storybook/manager-api';
 import { EntitiesGrid } from '.';
 import { entitiesMock } from './mock/entities_mock';
 
@@ -21,22 +21,7 @@ interface EntityGridStoriesArgs {
 
 const entityTypeOptions = ['host', 'container', 'service'];
 
-const stories: Meta<EntityGridStoriesArgs> = {
-  title: 'app/inventory/entities_grid',
-  component: EntitiesGrid,
-  argTypes: {
-    entityType: {
-      options: entityTypeOptions,
-      name: 'Entity type',
-      control: {
-        type: 'select',
-      },
-    },
-  },
-  args: { entityType: undefined },
-};
-
-export const Grid: Story<EntityGridStoriesArgs> = (args) => {
+export const Grid: StoryFn<EntityGridStoriesArgs> = (args) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [{ entityType }, updateArgs] = useArgs();
   const [sort, setSort] = useState<EuiDataGridSorting['columns'][0]>({
@@ -85,7 +70,7 @@ export const Grid: Story<EntityGridStoriesArgs> = (args) => {
   );
 };
 
-export const EmptyGrid: Story<EntityGridStoriesArgs> = (args) => {
+export const EmptyGridExample: StoryFn<EntityGridStoriesArgs> = () => {
   const [pageIndex, setPageIndex] = useState(0);
   const [sort, setSort] = useState<EuiDataGridSorting['columns'][0]>({
     id: ENTITY_LAST_SEEN,
@@ -104,6 +89,21 @@ export const EmptyGrid: Story<EntityGridStoriesArgs> = (args) => {
       onFilterByType={() => {}}
     />
   );
+};
+
+const stories: Meta<EntityGridStoriesArgs> = {
+  title: 'app/inventory/entities_grid',
+  component: Grid,
+  argTypes: {
+    entityType: {
+      options: entityTypeOptions,
+      name: 'Entity type',
+      control: {
+        type: 'select',
+      },
+    },
+  },
+  args: { entityType: undefined },
 };
 
 export default stories;

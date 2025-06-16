@@ -9,11 +9,14 @@ import { v4 as uuidv4 } from 'uuid';
 import { Logger } from '@kbn/core/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { get } from 'lodash/fp';
-
-import { ChatOpenAI } from '@langchain/openai';
+import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
+import { ChatOpenAI, OpenAIClient } from '@langchain/openai';
 import { Stream } from 'openai/streaming';
 import type OpenAI from 'openai';
 import { PublicMethodsOf } from '@kbn/utility-types';
+
+import { parseChatCompletion } from 'openai/lib/parser';
+import { ChatCompletionCreateParams } from 'openai/resources';
 import { DEFAULT_OPEN_AI_MODEL, DEFAULT_TIMEOUT } from './constants';
 import {
   InferenceChatCompleteParamsSchema,
@@ -36,6 +39,7 @@ export interface ActionsClientChatOpenAIParams {
   temperature?: number;
   signal?: AbortSignal;
   timeout?: number;
+  telemetryMetadata?: TelemetryMetadata;
 }
 
 /**
@@ -65,6 +69,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
   #traceId: string;
   #signal?: AbortSignal;
   #timeout?: number;
+  telemetryMetadata?: TelemetryMetadata;
 
   constructor({
     actionsClient,
@@ -79,6 +84,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     temperature,
     timeout,
     maxTokens,
+    telemetryMetadata,
   }: ActionsClientChatOpenAIParams) {
     super({
       maxRetries,
@@ -86,12 +92,6 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
       streaming,
       // matters only for the LangSmith logs (Metadata > Invocation Params), which are misleading if this is not set
       modelName: model ?? DEFAULT_OPEN_AI_MODEL,
-      // these have to be initialized, but are not actually used since we override the openai client with the actions client
-      azureOpenAIApiKey: 'nothing',
-      azureOpenAIApiDeploymentName: 'nothing',
-      azureOpenAIApiInstanceName: 'nothing',
-      azureOpenAIBasePath: 'nothing',
-      azureOpenAIApiVersion: 'nothing',
       openAIApiKey: '',
     });
     this.#actionsClient = actionsClient;
@@ -109,6 +109,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     // matters only for LangSmith logs (Metadata > Invocation Params)
     // the connector can be passed an undefined temperature through #temperature
     this.temperature = temperature ?? this.temperature;
+    this.telemetryMetadata = telemetryMetadata;
   }
 
   getActionResultData(): string {
@@ -126,6 +127,17 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     return 'base_chat_model';
   }
 
+  async betaParsedCompletionWithRetry(
+    request: OpenAI.ChatCompletionCreateParamsNonStreaming
+  ): Promise<ReturnType<OpenAIClient['beta']['chat']['completions']['parse']>> {
+    return this.completionWithRetry(request).then((response) =>
+      parseChatCompletion(
+        response,
+        this.constructBody(request, this.llmType) as ChatCompletionCreateParams
+      )
+    );
+  }
+
   async completionWithRetry(
     request: OpenAI.ChatCompletionCreateParamsStreaming
   ): Promise<AsyncIterable<OpenAI.ChatCompletionChunk>>;
@@ -133,7 +145,6 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
   async completionWithRetry(
     request: OpenAI.ChatCompletionCreateParamsNonStreaming
   ): Promise<OpenAI.ChatCompletion>;
-
   async completionWithRetry(
     completionRequest:
       | OpenAI.ChatCompletionCreateParamsStreaming
@@ -196,29 +207,8 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     };
     signal?: AbortSignal;
   } {
-    const body = {
-      temperature: this.#temperature,
-      // possible client model override
-      // security sends this from connectors, it is only missing from preconfigured connectors
-      // this should be undefined otherwise so the connector handles the model (stack_connector has access to preconfigured connector model values)
-      model: this.model,
-      n: completionRequest.n,
-      stop: completionRequest.stop,
-      tools: completionRequest.tools,
-      ...(completionRequest.tool_choice ? { tool_choice: completionRequest.tool_choice } : {}),
-      // deprecated, use tools
-      ...(completionRequest.functions ? { functions: completionRequest?.functions } : {}),
-      // ensure we take the messages from the completion request, not the client request
-      messages: completionRequest.messages.map((message) => ({
-        role: message.role,
-        content: message.content ?? '',
-        ...('name' in message ? { name: message?.name } : {}),
-        ...('tool_calls' in message ? { tool_calls: message?.tool_calls } : {}),
-        ...('tool_call_id' in message ? { tool_call_id: message?.tool_call_id } : {}),
-        // deprecated, use tool_calls
-        ...('function_call' in message ? { function_call: message?.function_call } : {}),
-      })),
-    };
+    const body = this.constructBody(completionRequest, llmType);
+
     const subAction =
       llmType === 'inference'
         ? completionRequest.stream
@@ -237,6 +227,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
         : completionRequest.stream
         ? { ...body, timeout: this.#timeout ?? DEFAULT_TIMEOUT }
         : { body: JSON.stringify(body), timeout: this.#timeout ?? DEFAULT_TIMEOUT }),
+      telemetryMetadata: this.telemetryMetadata,
       signal: this.#signal,
     };
     return {
@@ -247,5 +238,41 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
       },
       signal: this.#signal,
     };
+  }
+
+  constructBody(
+    completionRequest:
+      | OpenAI.ChatCompletionCreateParamsNonStreaming
+      | OpenAI.ChatCompletionCreateParamsStreaming,
+    llmType: string
+  ) {
+    const body = {
+      temperature: this.#temperature,
+      // possible client model override
+      // security sends this from connectors, it is only missing from preconfigured connectors
+      // this should be undefined otherwise so the connector handles the model (stack_connector has access to preconfigured connector model values)
+      ...(llmType === 'inference' ? {} : { model: this.model }),
+      n: completionRequest.n,
+      stop: completionRequest.stop,
+      tools: completionRequest.tools,
+      ...(completionRequest.response_format
+        ? { response_format: completionRequest.response_format }
+        : {}),
+      ...(completionRequest.tool_choice ? { tool_choice: completionRequest.tool_choice } : {}),
+      // deprecated, use tools
+      ...(completionRequest.functions ? { functions: completionRequest?.functions } : {}),
+      // ensure we take the messages from the completion request, not the client request
+      messages: completionRequest.messages.map((message) => ({
+        role: message.role,
+        content: message.content ?? '',
+        ...('name' in message ? { name: message?.name } : {}),
+        ...('tool_calls' in message ? { tool_calls: message?.tool_calls } : {}),
+        ...('tool_call_id' in message ? { tool_call_id: message?.tool_call_id } : {}),
+        // deprecated, use tool_calls
+        ...('function_call' in message ? { function_call: message?.function_call } : {}),
+      })),
+    };
+
+    return body;
   }
 }

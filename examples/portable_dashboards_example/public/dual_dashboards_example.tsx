@@ -19,7 +19,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { DashboardApi, DashboardRenderer } from '@kbn/dashboard-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
 export const DualDashboardsExample = () => {
@@ -27,21 +26,21 @@ export const DualDashboardsExample = () => {
   const [secondDashboardApi, setSecondDashboardApi] = useState<DashboardApi | undefined>();
 
   const ButtonControls = ({ dashboardApi }: { dashboardApi: DashboardApi }) => {
-    const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode);
+    const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode$);
 
     return (
       <EuiButtonGroup
         legend="View mode"
         options={[
           {
-            id: ViewMode.VIEW,
+            id: 'view',
             label: 'View mode',
-            value: ViewMode.VIEW,
+            value: 'view',
           },
           {
-            id: ViewMode.EDIT,
+            id: 'edit',
             label: 'Edit mode',
-            value: ViewMode.EDIT,
+            value: 'edit',
           },
         ]}
         idSelected={viewMode}

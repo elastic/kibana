@@ -4,11 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  SavedObject,
+  SavedObjectsClientContract,
+  SavedObjectsFindResult,
+} from '@kbn/core/server';
 
-import { getAlertsIndex } from '../../../../../common/utils/risk_score_modules';
 import type { RiskEngineConfiguration } from '../../types';
 import { riskEngineConfigurationTypeName } from '../saved_object';
+import { getAlertsIndex } from '../../utils/get_alerts_index';
 
 export interface SavedObjectsClientArg {
   savedObjectsClient: SavedObjectsClientContract;
@@ -28,7 +32,7 @@ export const getDefaultRiskEngineConfiguration = ({
   range: { start: 'now-30d', end: 'now' },
   _meta: {
     // Upgrade this property when changing mappings
-    mappingsVersion: 2,
+    mappingsVersion: 4,
   },
 });
 
@@ -111,4 +115,15 @@ export const getConfiguration = async ({
   } catch (e) {
     return null;
   }
+};
+
+export const getAllSpaceConfigurations = async ({
+  savedObjectsClient,
+}: SavedObjectsClientArg): Promise<Array<SavedObjectsFindResult<RiskEngineConfiguration>>> => {
+  const savedObjectsResponse = await savedObjectsClient.find<RiskEngineConfiguration>({
+    type: riskEngineConfigurationTypeName,
+    namespaces: ['*'],
+  });
+
+  return savedObjectsResponse.saved_objects;
 };

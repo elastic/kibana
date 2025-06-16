@@ -11,7 +11,7 @@ import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { getBackfillRoute } from './get_backfill_route';
-import { Backfill } from '../../../../application/backfill/result/types';
+import type { Backfill } from '../../../../application/backfill/result/types';
 import { transformBackfillToBackfillResponseV1 } from '../../transforms';
 
 const rulesClient = rulesClientMock.create();
@@ -35,6 +35,7 @@ describe('getBackfillRoute', () => {
       tags: ['foo'],
       alertTypeId: 'myType',
       params: {},
+      actions: [],
       apiKeyOwner: 'user',
       apiKeyCreatedByUser: false,
       consumer: 'myApp',

@@ -6,6 +6,7 @@ paths:
   /internal/elastic_assistant/knowledge_base/_indices:
     get:
       x-codegen-enabled: true
+      x-internal: true
       x-labels: [ess, serverless]
       operationId: GetKnowledgeBaseIndices
       description: Gets Knowledge Base indices that have fields of a `sematic_text` type.
@@ -19,14 +20,11 @@ paths:
             application/json:
               schema:
                 type: object
-                properties:
-                  indices:
-                    type: array
-                    description: List of indices with at least one field of a `sematic_text` type.
-                    items:
-                      type: string
-                required:
-                  - indices
+                additionalProperties:
+                  type: array
+                  description: List of indices with at least one field of a `sematic_text` type.
+                  items:
+                    type: string
         400:
           description: Generic Error
           content:

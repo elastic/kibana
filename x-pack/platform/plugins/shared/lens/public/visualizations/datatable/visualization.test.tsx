@@ -29,6 +29,7 @@ import {
 } from '../../../common/expressions';
 import { getPaletteDisplayColors } from '../../shared_components/coloring';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { DataGridDensity } from '@kbn/unified-data-table';
 
 jest.mock('../../shared_components/coloring', () => {
   return {
@@ -822,13 +823,6 @@ describe('Datatable Visualization', () => {
       expect(
         getDatatableExpressionArgs({
           ...defaultExpressionTableState,
-          rowHeight: RowHeightMode.single,
-        }).fitRowToContent
-      ).toEqual([false]);
-
-      expect(
-        getDatatableExpressionArgs({
-          ...defaultExpressionTableState,
           rowHeight: RowHeightMode.custom,
         }).fitRowToContent
       ).toEqual([false]);
@@ -849,38 +843,22 @@ describe('Datatable Visualization', () => {
       expect(
         getDatatableExpressionArgs({
           ...defaultExpressionTableState,
-          rowHeight: RowHeightMode.single,
-        }).rowHeightLines
-      ).toEqual([1]);
-
-      // should ignore lines value based on mode
-      expect(
-        getDatatableExpressionArgs({
-          ...defaultExpressionTableState,
-          rowHeight: RowHeightMode.single,
-          rowHeightLines: 5,
-        }).rowHeightLines
-      ).toEqual([1]);
-
-      expect(
-        getDatatableExpressionArgs({
-          ...defaultExpressionTableState,
           rowHeight: RowHeightMode.custom,
           rowHeightLines: 5,
         }).rowHeightLines
       ).toEqual([5]);
 
-      // should fallback to 2 for custom in case it's not set
+      // should fallback to 1 for custom in case it's not set
       expect(
         getDatatableExpressionArgs({
           ...defaultExpressionTableState,
           rowHeight: RowHeightMode.custom,
         }).rowHeightLines
-      ).toEqual([2]);
+      ).toEqual([1]);
     });
 
     it('sets headerRowHeight && headerRowHeightLines correctly', () => {
-      // should fallback to 3 lines in case it's not set
+      // should fallback to 3 line in case it's not set
       expect(
         getDatatableExpressionArgs({ ...defaultExpressionTableState }).headerRowHeightLines
       ).toEqual([3]);
@@ -889,13 +867,6 @@ describe('Datatable Visualization', () => {
       expect(
         getDatatableExpressionArgs({ ...defaultExpressionTableState }).headerRowHeight
       ).toEqual([RowHeightMode.custom]);
-
-      expect(
-        getDatatableExpressionArgs({
-          ...defaultExpressionTableState,
-          headerRowHeight: RowHeightMode.single,
-        }).headerRowHeightLines
-      ).toEqual([1]);
 
       expect(
         getDatatableExpressionArgs({
@@ -953,6 +924,25 @@ describe('Datatable Visualization', () => {
           alignment: [],
         })
       );
+    });
+
+    it('sets density based on state', () => {
+      expect(getDatatableExpressionArgs({ ...defaultExpressionTableState }).density).toEqual([
+        DataGridDensity.NORMAL,
+      ]);
+
+      for (const DENSITY of [
+        DataGridDensity.COMPACT,
+        DataGridDensity.NORMAL,
+        DataGridDensity.EXPANDED,
+      ]) {
+        expect(
+          getDatatableExpressionArgs({
+            ...defaultExpressionTableState,
+            density: DENSITY,
+          }).density
+        ).toEqual([DENSITY]);
+      }
     });
 
     describe('palette/colorMapping/colorMode', () => {

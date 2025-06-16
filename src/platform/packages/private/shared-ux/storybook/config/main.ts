@@ -16,7 +16,4 @@ module.exports = {
     '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
     '../../../../shared/kbn-shared-svg/**/*.stories.+(tsx|mdx)',
   ],
-  reactOptions: {
-    strictMode: true,
-  },
 };

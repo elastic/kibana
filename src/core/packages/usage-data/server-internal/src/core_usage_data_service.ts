@@ -16,7 +16,7 @@ import type {
   AggregationsMultiBucketAggregateBase,
   AggregationsSingleBucketAggregateBase,
   SearchTotalHits,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { LoggingConfigType } from '@kbn/core-logging-server-internal';
 import type { Logger } from '@kbn/logging';
@@ -182,26 +182,24 @@ export class CoreUsageDataService
       { aliases: UsageDataAggs }
     >({
       index: MAIN_SAVED_OBJECT_INDEX, // depends on the .kibana split (assuming 'legacy-url-alias' is stored in '.kibana')
-      body: {
-        track_total_hits: true,
-        query: { match: { type: LEGACY_URL_ALIAS_TYPE } },
-        aggs: {
-          aliases: {
+      track_total_hits: true,
+      query: { match: { type: LEGACY_URL_ALIAS_TYPE } },
+      aggs: {
+        aliases: {
+          filters: {
             filters: {
-              filters: {
-                disabled: { term: { [`${LEGACY_URL_ALIAS_TYPE}.disabled`]: true } },
-                active: {
-                  bool: {
-                    must_not: { term: { [`${LEGACY_URL_ALIAS_TYPE}.disabled`]: true } },
-                    must: { range: { [`${LEGACY_URL_ALIAS_TYPE}.resolveCounter`]: { gte: 1 } } },
-                  },
+              disabled: { term: { [`${LEGACY_URL_ALIAS_TYPE}.disabled`]: true } },
+              active: {
+                bool: {
+                  must_not: { term: { [`${LEGACY_URL_ALIAS_TYPE}.disabled`]: true } },
+                  must: { range: { [`${LEGACY_URL_ALIAS_TYPE}.resolveCounter`]: { gte: 1 } } },
                 },
               },
             },
           },
         },
-        size: 0,
       },
+      size: 0,
     });
 
     const { hits, aggregations } = resp;
@@ -280,6 +278,7 @@ export class CoreUsageDataService
           rewriteBasePath: http.rewriteBasePath,
           keepaliveTimeout: http.keepaliveTimeout,
           socketTimeout: http.socketTimeout,
+          protocol: http.protocol,
           compression: {
             enabled: http.compression.enabled,
             referrerWhitelistConfigured: isConfigured.array(http.compression.referrerWhitelist),

@@ -8,10 +8,17 @@
 /* eslint-disable react/jsx-no-literals */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import type { FC } from 'react';
-import { EuiIcon, EuiPageHeader, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiIcon,
+  EuiPageHeader,
+  EuiText,
+  useEuiFontSize,
+  useEuiTheme,
+} from '@elastic/eui';
 import * as i18n from '../translations';
-import { textCss, descriptionContainerCss, backTextCss } from './list_header.styles';
 import { MenuItems } from './menu_items';
 import { TextWithEdit } from '../text_with_edit';
 import { EditModal } from './edit_modal';
@@ -42,6 +49,7 @@ export interface BackOptions {
   dataTestSubj?: string;
   onNavigate: (path: string) => void;
 }
+
 const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
   name,
   description,
@@ -63,10 +71,26 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
     description,
     onEditListDetails,
   });
+
+  const { euiTheme } = useEuiTheme();
+  const subduedTextStyles = css`
+    font-size: ${useEuiFontSize('s').fontSize};
+    color: ${euiTheme.colors.textSubdued};
+    margin-left: ${euiTheme.size.xs};
+  `;
+  const breadCrumbTextStyles = css`
+    font-size: ${useEuiFontSize('xs').fontSize};
+  `;
+  const descriptionContainerStyles = css`
+    // negates the static EuiSpacer when using Title + Description in PageHeader
+    margin-top: -${euiTheme.size.m};
+    margin-bottom: ${euiTheme.size.s};
+  `;
+
   return (
     <div>
       <EuiPageHeader
-        bottomBorder
+        bottomBorder="extended"
         paddingSize="none"
         pageTitle={
           <TextWithEdit
@@ -79,19 +103,28 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
         responsive
         data-test-subj={`${dataTestSubj || ''}PageHeader`}
         description={
-          <div css={descriptionContainerCss}>
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="s"
+            css={descriptionContainerStyles}
+            component="span"
+          >
             <TextWithEdit
               dataTestSubj={`${dataTestSubj || ''}Description`}
-              textCss={textCss}
+              textCss={subduedTextStyles}
               isReadonly={isReadonly || !canUserEditList}
               text={listDetails.description || i18n.EXCEPTION_LIST_HEADER_DESCRIPTION}
               onEdit={onEdit}
             />
-            <div css={textWithEditContainerCss} data-test-subj={`${dataTestSubj || ''}ListID`}>
-              <EuiText css={textCss}>{i18n.EXCEPTION_LIST_HEADER_LIST_ID}:</EuiText>
-              <EuiText css={textCss}>{listId}</EuiText>
-            </div>
-          </div>
+            <span css={textWithEditContainerCss} data-test-subj={`${dataTestSubj || ''}ListID`}>
+              <EuiText css={subduedTextStyles} component="span">
+                {i18n.EXCEPTION_LIST_HEADER_LIST_ID}:
+              </EuiText>
+              <EuiText css={subduedTextStyles} component="span">
+                {listId}
+              </EuiText>
+            </span>
+          </EuiFlexGroup>
         }
         rightSideItems={[
           <MenuItems
@@ -109,7 +142,7 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
         breadcrumbs={[
           {
             text: (
-              <div data-test-subj={`${dataTestSubj || ''}Breadcrumb`} css={backTextCss}>
+              <div data-test-subj={`${dataTestSubj || ''}Breadcrumb`} css={breadCrumbTextStyles}>
                 <EuiIcon size="s" type="arrowLeft" />
                 {i18n.EXCEPTION_LIST_HEADER_BREADCRUMB}
               </div>

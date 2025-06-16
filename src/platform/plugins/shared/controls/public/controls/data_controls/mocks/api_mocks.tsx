@@ -7,53 +7,51 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 import { DataViewField } from '@kbn/data-views-plugin/common';
 
-import { PublishingSubject } from '@kbn/presentation-publishing';
 import type {
   OptionsListDisplaySettings,
-  OptionsListSearchTechnique,
-  OptionsListSelection,
   OptionsListSortingType,
-  OptionsListSuggestions,
 } from '../../../../common/options_list';
+import { initializeSelectionsManager } from '../options_list_control/selections_manager';
+import { OptionsListComponentApi } from '../options_list_control/types';
+import { initializeTemporayStateManager } from '../options_list_control/temporay_state_manager';
+import { initializeEditorStateManager } from '../options_list_control/editor_state_manager';
 
-export const getOptionsListMocks = () => {
-  const selectedOptions$ = new BehaviorSubject<OptionsListSelection[] | undefined>(undefined);
-  const exclude$ = new BehaviorSubject<boolean | undefined>(undefined);
-  const existsSelected$ = new BehaviorSubject<boolean | undefined>(undefined);
+export const getOptionsListContextMock = () => {
+  const editorStateManager = initializeEditorStateManager({});
+  const selectionsManager = initializeSelectionsManager({});
+  const temporaryStateManager = initializeTemporayStateManager();
+  const field$ = new BehaviorSubject<DataViewField | undefined>({
+    type: 'string',
+  } as DataViewField);
+  const sort$ = new BehaviorSubject<OptionsListSortingType | undefined>(undefined);
   return {
-    api: {
+    componentApi: {
+      ...editorStateManager.api,
+      ...selectionsManager.api,
+      ...temporaryStateManager.api,
       uuid: 'testControl',
-      field$: new BehaviorSubject<DataViewField | undefined>({ type: 'string' } as DataViewField),
-      availableOptions$: new BehaviorSubject<OptionsListSuggestions | undefined>(undefined),
-      invalidSelections$: new BehaviorSubject<Set<OptionsListSelection>>(new Set([])),
-      totalCardinality$: new BehaviorSubject<number | undefined>(undefined),
-      dataLoading: new BehaviorSubject<boolean>(false),
+      field$,
+      fieldName$: new BehaviorSubject<string>('field'),
+      sort$,
+      setSort: (next: OptionsListSortingType | undefined) => {
+        sort$.next(next);
+      },
       parentApi: {
         allowExpensiveQueries$: new BehaviorSubject<boolean>(true),
       },
       fieldFormatter: new BehaviorSubject((value: string | number) => String(value)),
       makeSelection: jest.fn(),
-      setExclude: (next: boolean | undefined) => exclude$.next(next),
-    },
-    stateManager: {
-      searchString: new BehaviorSubject<string>(''),
-      searchStringValid: new BehaviorSubject<boolean>(true),
-      fieldName: new BehaviorSubject<string>('field'),
-      exclude: exclude$ as PublishingSubject<boolean | undefined>,
-      existsSelected: existsSelected$ as PublishingSubject<boolean | undefined>,
-      sort: new BehaviorSubject<OptionsListSortingType | undefined>(undefined),
-      selectedOptions: selectedOptions$ as PublishingSubject<OptionsListSelection[] | undefined>,
-      searchTechnique: new BehaviorSubject<OptionsListSearchTechnique | undefined>(undefined),
-    },
+      loadMoreSubject: new Subject<void>(),
+    } as unknown as OptionsListComponentApi,
     displaySettings: {} as OptionsListDisplaySettings,
-    // setSelectedOptions and setExistsSelected are not exposed via API because
-    // they are not used by components
-    // they are needed in tests however so expose them as top level keys
-    setSelectedOptions: (next: OptionsListSelection[] | undefined) => selectedOptions$.next(next),
-    setExistsSelected: (next: boolean | undefined) => existsSelected$.next(next),
+    testOnlyMethods: {
+      setField: (next: DataViewField | undefined) => {
+        field$.next(next);
+      },
+    },
   };
 };

@@ -8,7 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import React, { FC, PropsWithChildren } from 'react';
 
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
+
+import { useEuiFontSize } from '@elastic/eui';
 import {
   LogEntryColumn,
   LogEntryColumnContent,
@@ -113,7 +115,7 @@ export const LogColumnHeader: FC<
   </LogColumnHeaderWrapper>
 );
 
-const LogColumnHeaderWrapper = euiStyled(LogEntryColumn)`
+const LogColumnHeaderWrapper = styled(LogEntryColumn)`
   align-items: center;
   display: flex;
   flex-direction: row;
@@ -121,11 +123,11 @@ const LogColumnHeaderWrapper = euiStyled(LogEntryColumn)`
   overflow: hidden;
 `;
 
-const LogColumnHeaderContent = euiStyled(LogEntryColumnContent)`
-  color: ${(props) => props.theme.eui.euiTitleColor};
-  font-size: ${(props) => props.theme.eui.euiFontSizeS};
-  font-weight: ${(props) => props.theme.eui.euiFontWeightSemiBold};
-  line-height: ${(props) => props.theme.eui.euiLineHeight};
+const LogColumnHeaderContent = styled(LogEntryColumnContent)`
+  color: ${(props) => props.theme.euiTheme.colors.textParagraph};
+  font-size: ${() => useEuiFontSize('s').fontSize};
+  font-weight: ${(props) => props.theme.euiTheme.font.weight.semiBold};
+  line-height: ${() => useEuiFontSize('s').lineHeight};
   text-overflow: clip;
   white-space: pre;
 `;

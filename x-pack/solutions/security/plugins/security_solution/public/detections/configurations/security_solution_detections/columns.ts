@@ -11,6 +11,8 @@ import {
   ALERT_USER_CRITICALITY,
   ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL,
   ALERT_USER_RISK_SCORE_CALCULATED_LEVEL,
+  ALERT_SERVICE_RISK_SCORE_CALCULATED_LEVEL,
+  ALERT_SERVICE_CRITICALITY,
 } from '../../../../common/field_maps/field_names';
 import type { LicenseService } from '../../../../common/license';
 import type { ColumnHeaderOptions } from '../../../../common/types';
@@ -44,6 +46,12 @@ export const userRiskLevelColumn: ColumnHeaderOptions = {
   columnHeaderType: defaultColumnHeaderType,
   id: ALERT_USER_RISK_SCORE_CALCULATED_LEVEL,
   displayAsText: i18n.ALERTS_HEADERS_USER_RISK_LEVEL,
+};
+
+export const serviceRiskLevelColumn: ColumnHeaderOptions = {
+  columnHeaderType: defaultColumnHeaderType,
+  id: ALERT_SERVICE_RISK_SCORE_CALCULATED_LEVEL,
+  displayAsText: i18n.ALERTS_HEADERS_SERVICE_RISK_LEVEL,
 };
 
 const getBaseColumns = (
@@ -81,6 +89,7 @@ const getBaseColumns = (
     },
     isPlatinumPlus ? hostRiskLevelColumn : null,
     isPlatinumPlus ? userRiskLevelColumn : null,
+    isPlatinumPlus ? serviceRiskLevelColumn : null,
     isPlatinumPlus
       ? {
           columnHeaderType: defaultColumnHeaderType,
@@ -93,6 +102,13 @@ const getBaseColumns = (
           columnHeaderType: defaultColumnHeaderType,
           id: ALERT_USER_CRITICALITY,
           displayAsText: i18n.ALERTS_HEADERS_USER_CRITICALITY,
+        }
+      : null,
+    isPlatinumPlus
+      ? {
+          columnHeaderType: defaultColumnHeaderType,
+          id: ALERT_SERVICE_CRITICALITY,
+          displayAsText: i18n.ALERTS_HEADERS_SERVICE_CRITICALITY,
         }
       : null,
     {
@@ -121,11 +137,10 @@ const getBaseColumns = (
  * columns implements a subset of `EuiDataGrid`'s `EuiDataGridColumn` interface,
  * plus additional TGrid column properties
  */
-export const getColumns = (
-  license?: LicenseService
-): Array<
+export type AlertColumnHeaders = Array<
   Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> & ColumnHeaderOptions
-> => [
+>;
+export const getColumns = (license?: LicenseService): AlertColumnHeaders => [
   {
     columnHeaderType: defaultColumnHeaderType,
     id: '@timestamp',

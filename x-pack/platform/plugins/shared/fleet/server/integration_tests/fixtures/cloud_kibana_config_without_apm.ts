@@ -8,6 +8,14 @@
 export const CLOUD_KIBANA_CONFIG_WITHOUT_APM = {
   xpack: {
     fleet: {
+      internal: {
+        registry: {
+          kibanaVersionCheckEnabled: false,
+          spec: {
+            min: '1.0',
+          },
+        },
+      },
       packages: [
         {
           name: 'fleet_server',

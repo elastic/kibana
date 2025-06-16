@@ -5,12 +5,26 @@
  * 2.0.
  */
 
-import { EuiHorizontalRule, EuiAccordion, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiSpacer,
+  EuiText,
+  EuiBetaBadge,
+  EuiFlexItem,
+  EuiFlexGroup,
+} from '@elastic/eui';
+import { DefendInsightStatusEnum } from '@kbn/elastic-assistant-common';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import moment from 'moment';
+
+import { ActionType } from '../../../../../../../../common/endpoint/types/workflow_insights';
+import {
+  TECHNICAL_PREVIEW_TOOLTIP,
+  TECHNICAL_PREVIEW,
+} from '../../../../../../../common/translations';
 import { useFetchInsights } from '../../../hooks/insights/use_fetch_insights';
 import { useTriggerScan } from '../../../hooks/insights/use_trigger_scan';
-import { useFetchOngoingScans } from '../../../hooks/insights/use_fetch_ongoing_tasks';
+import { useFetchLatestScan } from '../../../hooks/insights/use_fetch_ongoing_tasks';
 import { WorkflowInsightsResults } from './workflow_insights_results';
 import { WorkflowInsightsScanSection } from './workflow_insights_scan';
 import { WORKFLOW_INSIGHTS } from '../../../translations';
@@ -23,9 +37,11 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
   const [isScanButtonDisabled, setIsScanButtonDisabled] = useState(true);
   const [scanCompleted, setIsScanCompleted] = useState(false);
   const [userTriggeredScan, setUserTriggeredScan] = useState(false);
+  const [insightGenerationFailures, setInsightGenerationFailures] = useState(false);
+  const [expectedCount, setExpectedCount] = useState<number | null>(null);
 
-  const disableScanButton = () => {
-    setIsScanButtonDisabled(true);
+  const onInsightGenerationFailure = () => {
+    setInsightGenerationFailures(true);
   };
 
   const [setScanOngoing, setScanCompleted] = [
@@ -33,29 +49,55 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
     () => setIsScanCompleted(true),
   ];
 
-  const { data: insights, refetch: refetchInsights } = useFetchInsights({
+  // refetch is automatically triggered when expectedCount changes
+  const { data: insights, isFetching: isFetchingInsights } = useFetchInsights({
     endpointId,
     onSuccess: setScanCompleted,
+    scanCompleted,
+    expectedCount,
   });
 
   const {
-    data: ongoingScans,
-    isLoading: isLoadingOngoingScans,
-    refetch: refetchOngoingScans,
-  } = useFetchOngoingScans({
+    data: latestScan,
+    isLoading: isLoadingLatestScan,
+    refetch: refetchLatestScan,
+  } = useFetchLatestScan({
     endpointId,
     isPolling: isScanButtonDisabled,
-    onSuccess: refetchInsights,
+    onSuccess: setExpectedCount,
+    onInsightGenerationFailure,
   });
 
-  const { mutate: triggerScan } = useTriggerScan({
-    onSuccess: refetchOngoingScans,
-    onMutate: disableScanButton,
+  const { mutate: triggerScan, isLoading: isPostDefendInsightsLoading } = useTriggerScan({
+    onSuccess: refetchLatestScan,
   });
 
   useEffect(() => {
-    setIsScanButtonDisabled(!!ongoingScans?.length || isLoadingOngoingScans);
-  }, [ongoingScans, isLoadingOngoingScans]);
+    setExpectedCount(null);
+    setIsScanCompleted(false);
+  }, [endpointId, setExpectedCount, setIsScanCompleted]);
+
+  useEffect(() => {
+    const isInsightRunning = latestScan?.status === DefendInsightStatusEnum.running;
+    const hasPendingInsights = expectedCount !== null && insights?.length !== expectedCount;
+    const initialFetchNotStarted = expectedCount === null;
+    setIsScanButtonDisabled(
+      isPostDefendInsightsLoading ||
+        isLoadingLatestScan ||
+        isInsightRunning ||
+        hasPendingInsights ||
+        isFetchingInsights ||
+        initialFetchNotStarted // hold off until we know `expectedCount` (even 0)
+    );
+  }, [
+    endpointId,
+    isPostDefendInsightsLoading,
+    isLoadingLatestScan,
+    latestScan,
+    insights,
+    expectedCount,
+    isFetchingInsights,
+  ]);
 
   const lastResultCaption = useMemo(() => {
     if (!insights?.length) {
@@ -73,15 +115,34 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
     );
   }, [insights]);
 
+  const activeInsights = useMemo(() => {
+    if (isScanButtonDisabled) {
+      return [];
+    }
+    return (insights ?? []).filter((insight) => insight.action.type === ActionType.Refreshed);
+  }, [isScanButtonDisabled, insights]);
+
   const onScanButtonClick = useCallback(
     ({ actionTypeId, connectorId }: { actionTypeId: string; connectorId: string }) => {
+      if (insightGenerationFailures) {
+        setInsightGenerationFailures(false);
+      }
+
       setScanOngoing();
+      setExpectedCount(null);
       if (!userTriggeredScan) {
         setUserTriggeredScan(true);
       }
       triggerScan({ endpointId, actionTypeId, connectorId });
     },
-    [setScanOngoing, userTriggeredScan, triggerScan, endpointId]
+    [
+      insightGenerationFailures,
+      setScanOngoing,
+      userTriggeredScan,
+      triggerScan,
+      endpointId,
+      setExpectedCount,
+    ]
   );
 
   return (
@@ -90,9 +151,23 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
         data-test-subj={'endpointDetailsInsightsWrapper'}
         id={'workflow-insights-wrapper'}
         buttonContent={
-          <EuiText size={'m'}>
-            <h4>{WORKFLOW_INSIGHTS.title}</h4>
-          </EuiText>
+          <EuiFlexGroup gutterSize={'s'}>
+            <EuiFlexItem grow={false}>
+              <EuiText size={'m'}>
+                <h4>{WORKFLOW_INSIGHTS.title}</h4>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge
+                alignment={'middle'}
+                label={TECHNICAL_PREVIEW}
+                tooltipContent={TECHNICAL_PREVIEW_TOOLTIP}
+                size="s"
+                iconType={'beaker'}
+                data-test-subj={'workflow-insights-tech-preview-badge'}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         }
         initialIsOpen
         extraAction={lastResultCaption}
@@ -105,11 +180,15 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
         />
         <EuiSpacer size={'m'} />
         <WorkflowInsightsResults
-          results={insights}
-          scanCompleted={scanCompleted && userTriggeredScan}
+          results={activeInsights}
+          scanCompleted={
+            !isScanButtonDisabled &&
+            !insightGenerationFailures &&
+            scanCompleted &&
+            userTriggeredScan
+          }
           endpointId={endpointId}
         />
-        <EuiHorizontalRule />
       </EuiAccordion>
       <EuiSpacer size="l" />
     </>

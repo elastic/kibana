@@ -10,7 +10,7 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import { loggerMock } from '@kbn/logging-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { times } from 'lodash';
-import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
+import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
 import { getDeleteQueryFilter, SloOrphanSummaryCleanupTask } from './orphan_summary_cleanup_task';
 
 const taskManagerSetup = taskManagerMock.createSetup();
@@ -59,7 +59,7 @@ describe('SloSummaryCleanupTask', () => {
 
     expect(task.fetchSloSummariesIds).toHaveBeenCalled();
     expect(esClient.deleteByQuery).toHaveBeenCalledWith({
-      index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+      index: SUMMARY_DESTINATION_INDEX_PATTERN,
       query: {
         bool: {
           should: [
@@ -69,6 +69,8 @@ describe('SloSummaryCleanupTask', () => {
           ],
         },
       },
+      conflicts: 'proceed',
+      slices: 'auto',
       wait_for_completion: false,
     });
   });
@@ -99,8 +101,10 @@ describe('SloSummaryCleanupTask', () => {
     expect(task.fetchSloSummariesIds).toHaveBeenCalledTimes(1);
     expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
     expect(esClient.deleteByQuery).toHaveBeenNthCalledWith(1, {
+      conflicts: 'proceed',
+      slices: 'auto',
       wait_for_completion: false,
-      index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+      index: SUMMARY_DESTINATION_INDEX_PATTERN,
       query: {
         bool: {
           should: getDeleteQueryFilter([
@@ -158,7 +162,10 @@ describe('SloSummaryCleanupTask', () => {
     expect(esClient.deleteByQuery).toHaveBeenCalledTimes(2);
 
     expect(esClient.deleteByQuery).toHaveBeenNthCalledWith(1, {
-      index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+      index: SUMMARY_DESTINATION_INDEX_PATTERN,
+      conflicts: 'proceed',
+      slices: 'auto',
+      wait_for_completion: false,
       query: {
         bool: {
           should: getDeleteQueryFilter([
@@ -169,12 +176,13 @@ describe('SloSummaryCleanupTask', () => {
           ]),
         },
       },
-      wait_for_completion: false,
     });
 
     expect(esClient.deleteByQuery).toHaveBeenLastCalledWith({
+      index: SUMMARY_DESTINATION_INDEX_PATTERN,
       wait_for_completion: false,
-      index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+      conflicts: 'proceed',
+      slices: 'auto',
       query: {
         bool: {
           should: getDeleteQueryFilter([
@@ -231,8 +239,10 @@ describe('SloSummaryCleanupTask', () => {
     expect(task.fetchSloSummariesIds).toHaveBeenCalledTimes(2);
     expect(esClient.deleteByQuery).toHaveBeenCalledTimes(2);
     expect(esClient.deleteByQuery).toHaveBeenNthCalledWith(1, {
+      conflicts: 'proceed',
+      slices: 'auto',
       wait_for_completion: false,
-      index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+      index: SUMMARY_DESTINATION_INDEX_PATTERN,
       query: {
         bool: {
           should: getDeleteQueryFilter([
@@ -245,8 +255,10 @@ describe('SloSummaryCleanupTask', () => {
       },
     });
     expect(esClient.deleteByQuery).toHaveBeenLastCalledWith({
+      conflicts: 'proceed',
+      slices: 'auto',
       wait_for_completion: false,
-      index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+      index: SUMMARY_DESTINATION_INDEX_PATTERN,
       query: {
         bool: {
           should: getDeleteQueryFilter([
@@ -299,8 +311,10 @@ describe('SloSummaryCleanupTask', () => {
     expect(esClient.deleteByQuery).toHaveBeenCalledTimes(2);
 
     expect(esClient.deleteByQuery).toHaveBeenNthCalledWith(1, {
+      conflicts: 'proceed',
+      slices: 'auto',
       wait_for_completion: false,
-      index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+      index: SUMMARY_DESTINATION_INDEX_PATTERN,
       query: {
         bool: {
           should: getDeleteQueryFilter([

@@ -28,10 +28,9 @@ export function setSerializedGridLayout(state: MockSerializedDashboardState) {
 
 const initialState: MockSerializedDashboardState = {
   panels: logsPanels,
-  rows: [
-    { title: 'Request Sizes', collapsed: false },
-    { title: 'Visitors', collapsed: false },
-    { title: 'Response Codes', collapsed: false },
-    { title: 'Entire Flights Dashboard', collapsed: true },
-  ],
+  sections: {
+    second: { id: 'second', y: 24, title: 'Visitors', collapsed: true },
+    third: { id: 'third', y: 25, title: 'Response Codes', collapsed: false },
+    fourth: { id: 'fourth', y: 26, title: 'Entire Flights Dashboard', collapsed: true },
+  },
 };

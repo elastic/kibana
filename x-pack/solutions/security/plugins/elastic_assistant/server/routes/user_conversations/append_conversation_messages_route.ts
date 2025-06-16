@@ -45,7 +45,7 @@ export const appendConversationMessageRoute = (router: ElasticAssistantPluginRou
         const { id } = request.params;
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
-          const checkResponse = performChecks({
+          const checkResponse = await performChecks({
             context: ctx,
             request,
             response,

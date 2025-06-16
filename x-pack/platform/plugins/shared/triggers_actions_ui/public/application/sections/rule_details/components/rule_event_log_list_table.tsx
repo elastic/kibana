@@ -194,14 +194,19 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   }, [sortingColumns]);
 
   useEffect(() => {
-    setHeaderActions?.([<RulesSettingsLink />, <RulesListDocLink />]);
+    setHeaderActions?.([
+      <RulesSettingsLink
+        alertDeleteCategoryIds={['management', 'observability', 'securitySolution']}
+      />,
+      <RulesListDocLink />,
+    ]);
     return () => setHeaderActions?.();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onError = useCallback<NonNullable<UseLoadRuleEventLogsProps['onError']>>(
     (e) => {
-      if (e.body.statusCode === 413) {
+      if (e.body?.statusCode === 413) {
         return;
       }
       notifications.toasts.addDanger({

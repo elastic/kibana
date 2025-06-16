@@ -86,7 +86,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
           }
         `}
       >
-        <ActionBarStatusItem title={i18n.STATUS} data-test-subj="case-view-status">
+        <ActionBarStatusItem title={i18n.STATUS} dataTestSubj="case-view-status">
           <StatusContextMenu
             currentStatus={caseData.status}
             disabled={isStatusMenuDisabled}
@@ -98,7 +98,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
         {!metricsFeatures.includes(CaseMetricsFeature.LIFESPAN) ? (
           <EuiFlexItem grow={false}>
-            <ActionBarStatusItem title={title} data-test-subj="case-action-bar-status-date">
+            <ActionBarStatusItem title={title} dataTestSubj="case-action-bar-status-date">
               <FormattedRelativePreferenceDate value={date} />
             </ActionBarStatusItem>
           </EuiFlexItem>

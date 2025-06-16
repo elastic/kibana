@@ -39,25 +39,23 @@ export async function fetchClusters(
       'hits.hits._source.cluster_name',
       'hits.hits._source.elasticsearch.cluster.name',
     ],
-    body: {
-      size: 1000,
-      query: {
-        bool: {
-          filter: [
-            createDatasetFilter(
-              'cluster_stats',
-              'cluster_stats',
-              getElasticsearchDataset('cluster_stats')
-            ),
-            {
-              range: rangeFilter,
-            },
-          ],
-        },
+    size: 1000,
+    query: {
+      bool: {
+        filter: [
+          createDatasetFilter(
+            'cluster_stats',
+            'cluster_stats',
+            getElasticsearchDataset('cluster_stats')
+          ),
+          {
+            range: rangeFilter,
+          },
+        ],
       },
-      collapse: {
-        field: 'cluster_uuid',
-      },
+    },
+    collapse: {
+      field: 'cluster_uuid',
     },
   };
 

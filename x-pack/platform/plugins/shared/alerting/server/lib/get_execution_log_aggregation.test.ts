@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { fromKueryExpression } from '@kbn/es-query';
+import type { ExecutionUuidAggResult } from './get_execution_log_aggregation';
 import {
   getNumExecutions,
   getExecutionLogAggregation,
   formatExecutionLogResult,
   formatSortForBucketSort,
   formatSortForTermSort,
-  ExecutionUuidAggResult,
   getExecutionKPIAggregation,
   formatExecutionKPIResult,
+  getExecutionSummaryAggregation,
+  formatExecutionSummaryResult,
 } from './get_execution_log_aggregation';
 
 describe('formatSortForBucketSort', () => {
@@ -2977,5 +2979,72 @@ describe('formatExecutionKPIAggBuckets', () => {
     expect(() => formatExecutionKPIResult(results)).toThrowErrorMatchingInlineSnapshot(
       `"Results are limited to 10,000 documents, refine your search to see others."`
     );
+  });
+});
+
+describe('getExecutionSummaryAggregation', () => {
+  test('should correctly generate the aggregation', () => {
+    expect(getExecutionSummaryAggregation()).toMatchSnapshot();
+  });
+});
+
+describe('formatExecutionSummary', () => {
+  it('should format the latest execution summary correctly', () => {
+    const results = {
+      aggregations: {
+        executionsCount: { doc_count: 18 },
+        latestExecutionOutcome: {
+          doc_count: 18,
+          by_rule_id: {
+            buckets: [
+              {
+                key: '89b2e1a0-1282-4601-97e4-2a3b1a2ef43b',
+                doc_count: 12,
+                latest_execution: {
+                  hits: {
+                    total: { value: 12, relation: 'eq' },
+                    hits: [
+                      {
+                        _source: { event: { outcome: 'success' } },
+                        sort: [1742893715888],
+                      },
+                    ],
+                  },
+                },
+              },
+              {
+                key: 'e1e5eddc-5251-4bb4-8aa4-a76943dd82e1',
+                doc_count: 6,
+                latest_execution: {
+                  hits: {
+                    total: { value: 6, relation: 'eq' },
+                    hits: [
+                      {
+                        _source: { event: { outcome: 'failure' } },
+                        sort: [1742893718878],
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
+        },
+        successfulExecutionsCount: { doc_count: 17 },
+      },
+      hits: {
+        total: { value: 36, relation: 'eq' },
+        hits: [],
+      } as estypes.SearchHitsMetadata<unknown>,
+    };
+
+    expect(formatExecutionSummaryResult(results)).toEqual({
+      executions: { total: 18, success: 17 },
+      latestExecutionSummary: {
+        success: 1,
+        failure: 1,
+        warning: 0,
+      },
+    });
   });
 });

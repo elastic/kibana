@@ -9,17 +9,16 @@
 
 import type { Package } from '../types';
 
+export const HARDCODED_MODULE_PATHS: Record<string, string> = {
+  '@kbn/apm-ftr-e2e': 'x-pack/solutions/observability/plugins/apm/ftr_e2e',
+  '@kbn/core-test-helpers-kbn-server': 'src/core/test-helpers/kbn-server',
+  '@kbn/core-test-helpers-model-versions': 'src/core/test-helpers/model-versions',
+  '@kbn/synthetics-e2e': 'x-pack/solutions/observability/plugins/synthetics/e2e',
+  '@kbn/test-suites-src': 'src/platform/test',
+};
+
 type TransformFunction = (param: string) => string;
 const TRANSFORMS: Record<string, string | TransformFunction> = {
-  'src/platform/packages/shared/chart_expressions/common':
-    'src/platform/packages/shared/chart-expressions-common',
-  'x-pack/solutions/security/packages/security-solution/': 'x-pack/solutions/security/packages/',
-  'x-pack/solutions/observability/plugins/observability_solution/':
-    'x-pack/solutions/observability/plugins/',
-  'x-pack/solutions/observability/packages/observability/observability_utils/observability_':
-    'x-pack/solutions/observability/packages/',
-  'x-pack/solutions/observability/packages/observability/':
-    'x-pack/solutions/observability/packages/',
   'src/core/packages/core/': (path: string) => {
     const relativePath = path.split('src/core/packages/')[1];
     const relativeChunks = relativePath.split('/');
@@ -36,6 +35,7 @@ const TRANSFORMS: Record<string, string | TransformFunction> = {
     }
   },
 };
+
 export const applyTransforms = (module: Package, path: string): string => {
   const transform = Object.entries(TRANSFORMS).find(([what]) => path.includes(what));
   if (!transform) {

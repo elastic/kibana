@@ -65,12 +65,12 @@ The total schema for actions is represented by the `FleetServerAgentAction` type
 ### `.fleet-enrollment-api-keys`
 
 - Cleanup model: Deleteable via Fleet UI/API, deleted when an agent policy is deleted
-- [Source](https://github.com/elastic/kibana/blob/7a35748cb43f2c73623ffda6fa02b91c3cb4c689/x-pack/platform/plugins/shared/fleet/server/services/api_keys/enrollment_api_key.ts#L102)
+- [Source](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/fleet/server/services/api_keys/enrollment_api_key.ts#L102)
 
 ### `.fleet-policies`
 
 - Cleanup model: Deleted when a corresponding agent policy is deleted in the Fleet UI or API
-- [Source](https://github.com/elastic/kibana/blob/976b1b2331371f4a1325f6947d38d1f4de7a7254/x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts#L699-L701)
+- [Source](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts#L699-L701)
 
 ### `.fleet-policies-leader`
 

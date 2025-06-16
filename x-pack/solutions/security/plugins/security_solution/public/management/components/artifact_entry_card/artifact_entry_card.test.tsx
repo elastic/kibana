@@ -6,14 +6,14 @@
  */
 
 import React, { memo } from 'react';
-import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import type { AppContextTestRender, UserPrivilegesMockSetter } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import type {
   ArtifactEntryCardDecoratorProps,
   ArtifactEntryCardProps,
 } from './artifact_entry_card';
 import { ArtifactEntryCard } from './artifact_entry_card';
-import { act, fireEvent, getByTestId } from '@testing-library/react';
+import { act, fireEvent, getByTestId, waitFor } from '@testing-library/react';
 import type { AnyArtifact } from './types';
 import { isTrustedApp } from './utils';
 import { getTrustedAppProviderMock, getExceptionProviderMock } from './test_utils';
@@ -21,6 +21,12 @@ import { OS_LINUX, OS_MAC, OS_WINDOWS } from './components/translations';
 import type { TrustedApp } from '../../../../common/endpoint/types';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
+import { GLOBAL_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts';
+import {
+  buildPerPolicyTag,
+  buildSpaceOwnerIdTag,
+} from '../../../../common/endpoint/service/artifacts/utils';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 jest.mock('../../../common/components/user_privileges');
 const mockUserPrivileges = useUserPrivileges as jest.Mock;
@@ -197,8 +203,9 @@ describe.each([
 
       policies = {
         'policy-1': {
-          children: 'Policy one',
+          children: 'Policy one title',
           'data-test-subj': 'policyMenuItem',
+          href: 'http://some/path/to/policy-1',
         },
       };
     });
@@ -233,7 +240,11 @@ describe.each([
         ).not.toBeNull();
 
         expect(renderResult.getByTestId('policyMenuItem').textContent).toEqual(
-          'Policy oneView details'
+          'Policy one titleView details'
+        );
+
+        expect((renderResult.getByTestId('policyMenuItem') as HTMLAnchorElement).href).toEqual(
+          policies!['policy-1'].href
         );
       });
 
@@ -253,12 +264,12 @@ describe.each([
           renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-popoverPanel')
         ).not.toBeNull();
 
-        expect(renderResult.getByTestId('policyMenuItem').textContent).toEqual('Policy one');
+        expect(renderResult.getByTestId('policyMenuItem').textContent).toEqual('Policy one title');
       });
     });
 
-    it('should display policy ID if no policy menu item found in `policies` prop', async () => {
-      render();
+    it('should display disabled button with policy ID if no policy menu item found in `policies` prop', async () => {
+      render(); // Important: no polices provided to component on input
       await act(async () => {
         await fireEvent.click(
           renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-button')
@@ -269,7 +280,18 @@ describe.each([
         renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-popoverPanel')
       ).not.toBeNull();
 
-      expect(renderResult.getByText('policy-1').textContent).not.toBeNull();
+      expect(
+        renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-item-0-truncateWrapper')
+          .textContent
+      ).toEqual('policy-1');
+
+      expect(
+        (
+          renderResult.getByTestId(
+            'testCard-subHeader-effectScope-popupMenu-item-0'
+          ) as HTMLButtonElement
+        ).disabled
+      ).toBe(true);
     });
 
     it('should pass item to decorator function and display its result', () => {
@@ -284,6 +306,98 @@ describe.each([
 
       expect(renderResult.getByText('mock decorator')).toBeInTheDocument();
       expect(passedItem).toBe(item);
+    });
+  });
+
+  describe('and space awareness is enabled', () => {
+    let authzMock: UserPrivilegesMockSetter;
+    let actions: ArtifactEntryCardProps['actions'];
+
+    beforeEach(() => {
+      actions = [
+        {
+          'data-test-subj': 'test-action',
+          children: 'action one',
+        },
+      ];
+    });
+
+    beforeEach(() => {
+      appTestContext.setExperimentalFlag({ endpointManagementSpaceAwarenessEnabled: true });
+      authzMock = appTestContext.getUserPrivilegesMockSetter(mockUserPrivileges);
+      authzMock.set({ canManageGlobalArtifacts: false });
+      (item as ExceptionListItemSchema).tags = [GLOBAL_ARTIFACT_TAG, buildSpaceOwnerIdTag('foo')];
+    });
+
+    afterEach(() => {
+      authzMock.reset();
+    });
+
+    it('should render menu if feature flag is disabled', () => {
+      appTestContext.setExperimentalFlag({ endpointManagementSpaceAwarenessEnabled: false });
+      render({ actions });
+
+      expect(
+        (renderResult.getByTestId('testCard-header-actions-button') as HTMLButtonElement).disabled
+      ).toBe(false);
+    });
+
+    it('should disable card actions menu for global artifacts when user does not have global artifact privilege', () => {
+      render({ actions });
+
+      expect(
+        (renderResult.getByTestId('testCard-header-actions-button') as HTMLButtonElement).disabled
+      ).toBe(true);
+    });
+
+    it('should enable card actions menu for global artifacts when user has the global artifact privilege', () => {
+      authzMock.set({ canManageGlobalArtifacts: true });
+      render({ actions });
+
+      expect(
+        (renderResult.getByTestId('testCard-header-actions-button') as HTMLButtonElement).disabled
+      ).toBe(false);
+    });
+
+    it('should disable card actions menu for per-policy artifacts not owned by active space', () => {
+      (item as ExceptionListItemSchema).tags = [
+        buildPerPolicyTag('abc'),
+        buildSpaceOwnerIdTag('foo'),
+      ];
+      render({ actions });
+
+      expect(
+        (renderResult.getByTestId('testCard-header-actions-button') as HTMLButtonElement).disabled
+      ).toBe(true);
+    });
+
+    it('should enable card actions menu for per-policy artifacts when active space matches artifact owner space id', async () => {
+      (item as ExceptionListItemSchema).tags = [
+        buildPerPolicyTag('abc'),
+        buildSpaceOwnerIdTag('default'),
+      ];
+      render({ actions });
+
+      await waitFor(() => {
+        expect(
+          (renderResult.getByTestId('testCard-header-actions-button') as HTMLButtonElement).disabled
+        ).toBe(false);
+      });
+    });
+
+    it('should enable card actions menu for per-policy artifacts when not owned by active space but user has global artifact privilege', async () => {
+      authzMock.set({ canManageGlobalArtifacts: true });
+      (item as ExceptionListItemSchema).tags = [
+        buildPerPolicyTag('abc'),
+        buildSpaceOwnerIdTag('foo'),
+      ];
+      render({ actions });
+
+      await waitFor(() => {
+        expect(
+          (renderResult.getByTestId('testCard-header-actions-button') as HTMLButtonElement).disabled
+        ).toBe(false);
+      });
     });
   });
 });

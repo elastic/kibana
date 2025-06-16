@@ -5,6 +5,10 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
+      "create": "__flag__",
+      "cause": [
+        "false"
+      ],
       "master_timeout": [
         "30s",
         "-1",
@@ -18,7 +22,7 @@
     "patterns": [
       "_index_template/_simulate_index/{name}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-simulate-index.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-simulate-index-template",
     "availability": {
       "stack": true,
       "serverless": true

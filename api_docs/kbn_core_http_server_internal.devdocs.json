@@ -467,6 +467,17 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-server.HttpConfig.prototypeHardening",
+            "type": "boolean",
+            "tags": [],
+            "label": "prototypeHardening",
+            "description": [],
+            "path": "src/core/packages/http/server-internal/src/http_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
             "id": "def-server.HttpConfig.externalUrl",
             "type": "Object",
             "tags": [],
@@ -544,6 +555,20 @@
             "tags": [],
             "label": "restrictInternalApis",
             "description": [],
+            "path": "src/core/packages/http/server-internal/src/http_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-server.HttpConfig.rateLimiter",
+            "type": "Object",
+            "tags": [],
+            "label": "rateLimiter",
+            "description": [],
+            "signature": [
+              "{ readonly enabled: boolean; readonly term: \"long\" | \"short\" | \"medium\"; readonly elu: number; }"
+            ],
             "path": "src/core/packages/http/server-internal/src/http_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1367,7 +1392,7 @@
         "label": "HttpConfigType",
         "description": [],
         "signature": [
-          "{ readonly uuid?: string | undefined; readonly basePath?: string | undefined; readonly publicBaseUrl?: string | undefined; readonly name: string; readonly ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; redirectHttpFromPort?: number | undefined; } & { enabled: boolean; keystore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; truststore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; cipherSuites: string[]; supportedProtocols: string[]; clientAuthentication: \"none\" | \"required\" | \"optional\"; }>; readonly host: string; readonly protocol: \"http1\" | \"http2\"; readonly port: number; readonly compression: Readonly<{ referrerWhitelist?: string[] | undefined; } & { enabled: boolean; brotli: Readonly<{} & { enabled: boolean; quality: number; }>; }>; readonly cors: Readonly<{} & { enabled: boolean; allowCredentials: boolean; allowOrigin: string[] | \"*\"[]; }>; readonly http2: Readonly<{} & { allowUnsecure: boolean; }>; readonly versioned: Readonly<{} & { useVersionResolutionStrategyForInternalPaths: string[]; versionResolution: \"none\" | \"oldest\" | \"newest\"; strictClientVersionCheck: boolean; }>; readonly autoListen: boolean; readonly shutdownTimeout: moment.Duration; readonly cdn: Readonly<{ url?: string | null | undefined; } & {}>; readonly oas: Readonly<{} & { enabled: boolean; }>; readonly securityResponseHeaders: Readonly<{ permissionsPolicyReportOnly?: string | null | undefined; } & { referrerPolicy: \"origin\" | \"no-referrer\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"same-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | \"unsafe-url\" | null; strictTransportSecurity: string | null; xContentTypeOptions: \"nosniff\" | null; permissionsPolicy: string | null; disableEmbedding: boolean; crossOriginOpenerPolicy: \"same-origin\" | \"unsafe-none\" | \"same-origin-allow-popups\" | null; }>; readonly customResponseHeaders: Record<string, any>; readonly maxPayload: ",
+          "{ readonly uuid?: string | undefined; readonly basePath?: string | undefined; readonly publicBaseUrl?: string | undefined; readonly name: string; readonly ssl: Readonly<{ key?: string | undefined; certificate?: string | undefined; certificateAuthorities?: string | string[] | undefined; keyPassphrase?: string | undefined; redirectHttpFromPort?: number | undefined; } & { enabled: boolean; keystore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; truststore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; cipherSuites: string[]; supportedProtocols: string[]; clientAuthentication: \"none\" | \"required\" | \"optional\"; }>; readonly host: string; readonly protocol: \"http1\" | \"http2\"; readonly port: number; readonly compression: Readonly<{ referrerWhitelist?: string[] | undefined; } & { enabled: boolean; brotli: Readonly<{} & { enabled: boolean; quality: number; }>; }>; readonly cors: Readonly<{} & { enabled: boolean; allowCredentials: boolean; allowOrigin: string[] | \"*\"[]; }>; readonly prototypeHardening: boolean; readonly http2: Readonly<{} & { allowUnsecure: boolean; }>; readonly versioned: Readonly<{} & { useVersionResolutionStrategyForInternalPaths: string[]; versionResolution: \"none\" | \"oldest\" | \"newest\"; strictClientVersionCheck: boolean; }>; readonly autoListen: boolean; readonly shutdownTimeout: moment.Duration; readonly cdn: Readonly<{ url?: string | null | undefined; } & {}>; readonly oas: Readonly<{} & { enabled: boolean; }>; readonly securityResponseHeaders: Readonly<{ permissionsPolicyReportOnly?: string | null | undefined; } & { referrerPolicy: \"origin\" | \"no-referrer\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"same-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | \"unsafe-url\" | null; strictTransportSecurity: string | null; xContentTypeOptions: \"nosniff\" | null; permissionsPolicy: string | null; disableEmbedding: boolean; crossOriginOpenerPolicy: \"same-origin\" | \"unsafe-none\" | \"same-origin-allow-popups\" | null; }>; readonly customResponseHeaders: Record<string, any>; readonly maxPayload: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -1375,7 +1400,7 @@
             "section": "def-common.ByteSizeValue",
             "text": "ByteSizeValue"
           },
-          "; readonly rewriteBasePath: boolean; readonly keepaliveTimeout: number; readonly socketTimeout: number; readonly payloadTimeout: number; readonly xsrf: Readonly<{} & { disableProtection: boolean; allowlist: string[]; }>; readonly eluMonitor: Readonly<{} & { enabled: boolean; logging: Readonly<{} & { enabled: boolean; threshold: Readonly<{} & { elu: number; ela: number; }>; }>; }>; readonly requestId: Readonly<{} & { allowFromAnyIp: boolean; ipAllowlist: string[]; }>; readonly restrictInternalApis: boolean; }"
+          "; readonly rewriteBasePath: boolean; readonly keepaliveTimeout: number; readonly socketTimeout: number; readonly payloadTimeout: number; readonly xsrf: Readonly<{} & { disableProtection: boolean; allowlist: string[]; }>; readonly eluMonitor: Readonly<{} & { enabled: boolean; logging: Readonly<{} & { enabled: boolean; threshold: Readonly<{} & { elu: number; ela: number; }>; }>; }>; readonly rateLimiter: Readonly<{} & { enabled: boolean; term: \"long\" | \"short\" | \"medium\"; elu: number; }>; readonly requestId: Readonly<{} & { allowFromAnyIp: boolean; ipAllowlist: string[]; }>; readonly restrictInternalApis: boolean; }"
         ],
         "path": "src/core/packages/http/server-internal/src/http_config.ts",
         "deprecated": false,
@@ -1527,7 +1552,7 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<Readonly<{} & { form_action: string[]; }> | undefined>; strict: ",
+              "<Readonly<{} & { form_action: string[]; object_src: string[]; }> | undefined>; strict: ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "common",

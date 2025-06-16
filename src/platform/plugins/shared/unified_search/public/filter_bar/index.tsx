@@ -13,14 +13,20 @@ export type { FilterItemsProps } from './filter_item/filter_items';
 
 const Fallback = () => <div />;
 
-const LazyFilterBar = React.lazy(() => import('./filter_bar'));
+const LazyFilterBar = React.lazy(async () => {
+  const { FilterBar } = await import('../ui_module');
+  return { default: FilterBar };
+});
 export const FilterBar = (props: React.ComponentProps<typeof LazyFilterBar>) => (
   <React.Suspense fallback={<Fallback />}>
     <LazyFilterBar {...props} />
   </React.Suspense>
 );
 
-const LazyFilterItems = React.lazy(() => import('./filter_item/filter_items'));
+const LazyFilterItems = React.lazy(async () => {
+  const { FilterItems } = await import('../ui_module');
+  return { default: FilterItems };
+});
 /**
  * Renders a group of filter pills
  */
@@ -30,7 +36,10 @@ export const FilterItems = (props: React.ComponentProps<typeof LazyFilterItems>)
   </React.Suspense>
 );
 
-const LazyFilterItem = React.lazy(() => import('./filter_item/filter_item'));
+const LazyFilterItem = React.lazy(async () => {
+  const { FilterItem } = await import('../ui_module');
+  return { default: FilterItem };
+});
 /**
  * Renders a single filter pill
  */

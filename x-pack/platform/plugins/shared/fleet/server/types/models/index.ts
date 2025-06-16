@@ -12,3 +12,5 @@ export * from './output';
 export * from './enrollment_api_key';
 export * from './preconfiguration';
 export * from './download_sources';
+export * from './synced_integrations';
+export * from './custom_integrations';

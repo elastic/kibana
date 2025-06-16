@@ -9,10 +9,14 @@
 // and associated HTTP endpoint.
 
 import { i18n } from '@kbn/i18n';
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 import { parseDuration } from '@kbn/alerting-plugin/server';
-import { CoreQueryParamsSchemaProperties, validateCoreQueryBody } from './core_query_types';
+import {
+  CoreQueryParamsSchemaProperties,
+  validateCoreQueryBody,
+} from '@kbn/response-ops-rule-params/index_threshold';
 import {
   MAX_INTERVALS,
   getDateStartAfterDateEndErrorMessage,

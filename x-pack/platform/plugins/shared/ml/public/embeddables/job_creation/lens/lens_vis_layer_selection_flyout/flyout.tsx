@@ -19,7 +19,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { getPanelTitle } from '@kbn/presentation-publishing';
+import { getTitle } from '@kbn/presentation-publishing';
 import type { LensApi } from '@kbn/lens-plugin/public';
 import { Layer } from './layer';
 import type { LayerResult } from '../../../../application/jobs/new_job/job_from_lens';
@@ -55,7 +55,7 @@ export const LensLayerSelectionFlyout: FC<Props> = ({ onClose, embeddable }) => 
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
-          <h3>
+          <h3 id="ml-flyout-layer-title">
             <FormattedMessage
               id="xpack.ml.embeddables.lensLayerFlyout.title"
               defaultMessage="Create anomaly detection job"
@@ -67,7 +67,7 @@ export const LensLayerSelectionFlyout: FC<Props> = ({ onClose, embeddable }) => 
           <FormattedMessage
             id="xpack.ml.embeddables.lensLayerFlyout.secondTitle"
             defaultMessage="Select a compatible layer from the visualization {title} to create an anomaly detection job."
-            values={{ title: getPanelTitle(embeddable) ?? '' }}
+            values={{ title: getTitle(embeddable) ?? '' }}
           />
         </EuiText>
       </EuiFlyoutHeader>

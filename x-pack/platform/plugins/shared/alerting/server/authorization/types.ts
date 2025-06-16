@@ -12,6 +12,7 @@ export enum AlertingAuthorizationEntity {
 
 export enum ReadOperations {
   Get = 'get',
+  BulkGet = 'bulkGet',
   GetRuleState = 'getRuleState',
   GetAlertSummary = 'getAlertSummary',
   GetExecutionLog = 'getExecutionLog',
@@ -21,6 +22,7 @@ export enum ReadOperations {
   GetRuleExecutionKPI = 'getRuleExecutionKPI',
   GetBackfill = 'getBackfill',
   FindBackfill = 'findBackfill',
+  FindGaps = 'findGaps',
 }
 
 export enum WriteOperations {
@@ -43,4 +45,5 @@ export enum WriteOperations {
   RunSoon = 'runSoon',
   ScheduleBackfill = 'scheduleBackfill',
   DeleteBackfill = 'deleteBackfill',
+  FillGaps = 'fillGaps',
 }

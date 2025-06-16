@@ -33,53 +33,51 @@ export async function getProfilingHostsDetailsById({
 }): Promise<Record<string, HostDetails>> {
   const resp = await client.search('get_host_ids_names', {
     index: 'profiling-hosts',
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { terms: { [ProfilingESField.HostID]: hostIds } },
-            {
-              range: {
-                [ProfilingESField.Timestamp]: {
-                  gte: String(timeFrom),
-                  lt: String(timeTo),
-                  format: 'epoch_second',
-                },
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          { terms: { [ProfilingESField.HostID]: hostIds } },
+          {
+            range: {
+              [ProfilingESField.Timestamp]: {
+                gte: String(timeFrom),
+                lt: String(timeTo),
+                format: 'epoch_second',
               },
             },
-            ...kqlQuery(kuery),
-          ],
-        },
-      },
-      aggs: {
-        hostIds: {
-          terms: {
-            field: ProfilingESField.HostID,
           },
-          aggs: {
-            hostNames: {
-              top_metrics: {
-                metrics: { field: 'profiling.host.name' },
-                sort: '_score',
-              },
+          ...kqlQuery(kuery),
+        ],
+      },
+    },
+    aggs: {
+      hostIds: {
+        terms: {
+          field: ProfilingESField.HostID,
+        },
+        aggs: {
+          hostNames: {
+            top_metrics: {
+              metrics: { field: 'profiling.host.name' },
+              sort: '_score',
             },
-            projectIds: {
-              terms: {
-                field: 'profiling.project.id',
-              },
-              aggs: {
-                probabilisticValues: {
-                  terms: {
-                    field: 'profiling.agent.config.probabilistic_threshold',
-                    size: 5,
-                    order: { agentFirstStartDate: 'desc' },
-                  },
-                  aggs: {
-                    agentFirstStartDate: {
-                      min: {
-                        field: 'profiling.agent.start_time',
-                      },
+          },
+          projectIds: {
+            terms: {
+              field: 'profiling.project.id',
+            },
+            aggs: {
+              probabilisticValues: {
+                terms: {
+                  field: 'profiling.agent.config.probabilistic_threshold',
+                  size: 5,
+                  order: { agentFirstStartDate: 'desc' },
+                },
+                aggs: {
+                  agentFirstStartDate: {
+                    min: {
+                      field: 'profiling.agent.start_time',
                     },
                   },
                 },

@@ -10,7 +10,6 @@
 import { createExtract, createInject } from './dashboard_container_references';
 import { createEmbeddablePersistableStateServiceMock } from '@kbn/embeddable-plugin/common/mocks';
 import { ParsedDashboardAttributesWithType } from '../../types';
-import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
 
 const persistableStateService = createEmbeddablePersistableStateServiceMock();
 
@@ -27,6 +26,7 @@ const dashboardWithExtractedPanel: ParsedDashboardAttributesWithType = {
       },
     },
   },
+  sections: {},
 };
 
 const extractedSavedObjectPanelRef = {
@@ -48,6 +48,7 @@ const unextractedDashboardState: ParsedDashboardAttributesWithType = {
       },
     },
   },
+  sections: {},
 };
 
 describe('inject/extract by reference panel', () => {
@@ -83,9 +84,10 @@ const dashboardWithExtractedByValuePanel: ParsedDashboardAttributesWithType = {
       explicitInput: {
         id: 'panel_1',
         extracted_reference: 'ref',
-      } as Partial<SavedObjectEmbeddableInput> & { id: string; extracted_reference: string },
+      },
     },
   },
+  sections: {},
 };
 
 const extractedByValueRef = {
@@ -104,9 +106,10 @@ const unextractedDashboardByValueState: ParsedDashboardAttributesWithType = {
       explicitInput: {
         id: 'panel_1',
         value: 'id',
-      } as Partial<SavedObjectEmbeddableInput> & { id: string; value: string },
+      },
     },
   },
+  sections: {},
 };
 
 describe('inject/extract by value panels', () => {

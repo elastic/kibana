@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AlertInstanceContext } from '@kbn/alerting-plugin/server';
-import { Params } from './rule_type_params';
+import type { AlertInstanceContext } from '@kbn/alerting-plugin/server';
+import type { Params } from '@kbn/response-ops-rule-params/index_threshold';
 
 // rule type context provided to actions
 export interface ActionContext extends BaseActionContext {

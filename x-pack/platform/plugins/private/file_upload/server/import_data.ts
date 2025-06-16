@@ -5,56 +5,87 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import type {
   BulkRequest,
   IndicesCreateRequest,
   IndicesIndexSettings,
   MappingTypeMapping,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { INDEX_META_DATA_CREATED_BY } from '../common/constants';
-import { ImportResponse, ImportFailure, InputData, IngestPipelineWrapper } from '../common/types';
+} from '@elastic/elasticsearch/lib/api/types';
+
+import { INDEX_META_DATA_CREATED_BY } from '@kbn/file-upload-common';
+import { isEqual } from 'lodash';
+import type {
+  ImportResponse,
+  ImportFailure,
+  InputData,
+  IngestPipelineWrapper,
+  InitializeImportResponse,
+} from '../common/types';
 
 export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
-  async function importData(
-    id: string | undefined,
+  async function initializeImport(
     index: string,
     settings: IndicesIndexSettings,
     mappings: MappingTypeMapping,
-    ingestPipeline: IngestPipelineWrapper | undefined,
-    data: InputData
-  ): Promise<ImportResponse> {
+    ingestPipelines: IngestPipelineWrapper[],
+    existingIndex: boolean = false
+  ): Promise<InitializeImportResponse> {
     let createdIndex;
-    let createdPipelineId;
-    const docCount = data.length;
-
+    const createdPipelineIds: Array<string | undefined> = [];
+    const id = generateId();
     try {
-      const pipelineId = ingestPipeline?.id;
-      const pipeline = ingestPipeline?.pipeline;
-
-      if (id === undefined) {
-        // first chunk of data, create the index and id to return
-        id = generateId();
-
+      if (existingIndex) {
+        await updateMappings(index, mappings);
+      } else {
         await createIndex(index, settings, mappings);
-        createdIndex = index;
+      }
+      createdIndex = index;
 
-        // create the pipeline if one has been supplied
-        if (pipelineId !== undefined) {
-          const resp = await createPipeline(pipelineId, pipeline);
+      // create the pipeline if one has been supplied
+      if (ingestPipelines !== undefined) {
+        for (const p of ingestPipelines) {
+          if (p.pipeline === undefined) {
+            createdPipelineIds.push(undefined);
+            continue;
+          }
+          const resp = await createPipeline(p.id, p.pipeline);
+          createdPipelineIds.push(p.id);
           if (resp.acknowledged !== true) {
             throw resp;
           }
         }
-        createdPipelineId = pipelineId;
-      } else {
-        createdIndex = index;
-        createdPipelineId = pipelineId;
       }
 
+      return {
+        success: true,
+        id,
+        index: createdIndex,
+        pipelineIds: createdPipelineIds,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        id: id!,
+        index: createdIndex ?? '',
+        pipelineIds: createdPipelineIds,
+        error: error.body !== undefined ? error.body : error,
+      };
+    }
+  }
+
+  async function importData(
+    index: string,
+    ingestPipelineId: string | undefined,
+    data: InputData
+  ): Promise<ImportResponse> {
+    const docCount = data.length;
+    const pipelineId = ingestPipelineId;
+
+    try {
       let failures: ImportFailure[] = [];
       if (data.length) {
-        const resp = await indexData(index, createdPipelineId, data);
+        const resp = await indexData(index, pipelineId, data);
         if (resp.success === false) {
           if (resp.ingestError) {
             // all docs failed, abort
@@ -69,18 +100,16 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
 
       return {
         success: true,
-        id,
-        index: createdIndex,
-        pipelineId: createdPipelineId,
+        index,
+        pipelineId,
         docCount,
         failures,
       };
     } catch (error) {
       return {
         success: false,
-        id: id!,
-        index: createdIndex,
-        pipelineId: createdPipelineId,
+        index,
+        pipelineId,
         error: error.body !== undefined ? error.body : error,
         docCount,
         ingestError: error.ingestError,
@@ -94,7 +123,7 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
     settings: IndicesIndexSettings,
     mappings: MappingTypeMapping
   ) {
-    const body: IndicesCreateRequest['body'] = {
+    const body: Omit<IndicesCreateRequest, 'index'> = {
       mappings: {
         _meta: {
           created_by: INDEX_META_DATA_CREATED_BY,
@@ -107,7 +136,15 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
       body.settings = settings;
     }
 
-    await asCurrentUser.indices.create({ index, body }, { maxRetries: 0 });
+    await asCurrentUser.indices.create({ index, ...body }, { maxRetries: 0 });
+  }
+
+  async function updateMappings(index: string, mappings: MappingTypeMapping) {
+    const resp = await asCurrentUser.indices.getMapping({ index });
+    const existingMappings = resp[index]?.mappings;
+    if (!isEqual(existingMappings.properties, mappings.properties)) {
+      await asCurrentUser.indices.putMapping({ index, ...mappings });
+    }
   }
 
   async function indexData(index: string, pipelineId: string | undefined, data: InputData) {
@@ -179,6 +216,7 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
   }
 
   return {
+    initializeImport,
     importData,
   };
 }

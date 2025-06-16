@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Rule } from '@kbn/alerting-plugin/common';
-import { GetService } from '../../types';
+import type { Rule } from '@kbn/alerting-plugin/common';
+import type { GetService } from '../../types';
 import { getAlertsTargetIndices } from './get_alerts_target_indices';
 import { BULK_INDEX_DELAY, MAX_POLLS } from '../../constants';
 import { getSpaceUrlPrefix } from '../authentication/spaces';
-import { User } from '../authentication/types';
+import type { User } from '../authentication/types';
 
 export async function waitUntilNextExecution(
   getService: GetService,

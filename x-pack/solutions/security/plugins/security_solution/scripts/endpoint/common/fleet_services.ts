@@ -64,6 +64,8 @@ import type {
   UpdateAgentPolicyRequest,
   UpdateAgentPolicyResponse,
   PostNewAgentActionResponse,
+  InstallPackageResponse,
+  FleetServerAgent,
 } from '@kbn/fleet-plugin/common/types';
 import semver from 'semver';
 import axios from 'axios';
@@ -121,6 +123,7 @@ const getAgentPolicyDataForUpdate = (
     'download_source_id',
     'fleet_server_host_id',
     'global_data_tags',
+    'agentless',
     'has_fleet_server',
     'id',
     'inactivity_timeout',
@@ -143,18 +146,62 @@ const getAgentPolicyDataForUpdate = (
   ]) as UpdateAgentPolicyRequest['body'];
 };
 
-export const checkInFleetAgent = async (
-  esClient: Client,
-  agentId: string,
-  {
-    agentStatus = 'online',
-    log = createToolingLogger(),
-  }: Partial<{
-    /** The agent status to be sent. If set to `random`, then one will be randomly generated */
-    agentStatus: AgentStatus | 'random';
-    log: ToolingLog;
-  }> = {}
-): Promise<estypes.UpdateResponse> => {
+/**
+ * Assigns an existing Fleet agent to a new policy.
+ * NOTE: should only be used on mocked data.
+ */
+export const assignFleetAgentToNewPolicy = async ({
+  esClient,
+  kbnClient,
+  agentId,
+  newAgentPolicyId,
+  logger = createToolingLogger(),
+}: {
+  esClient: Client;
+  kbnClient: KbnClient;
+  agentId: string;
+  newAgentPolicyId: string;
+  logger?: ToolingLog;
+}): Promise<void> => {
+  const agentPolicy = await fetchAgentPolicy(kbnClient, newAgentPolicyId);
+  const update: Partial<FleetServerAgent> = {
+    ...buildFleetAgentCheckInUpdate(),
+    policy_id: newAgentPolicyId,
+    namespaces: agentPolicy.space_ids ?? [],
+  };
+
+  logger.verbose(
+    `update to agent id [${agentId}] showing assignment to new policy ID [${newAgentPolicyId}]:\n${JSON.stringify(
+      update,
+      null,
+      2
+    )}`
+  );
+
+  await esClient
+    .update({
+      index: AGENTS_INDEX,
+      id: agentId,
+      refresh: 'wait_for',
+      retry_on_conflict: 5,
+      doc: update,
+    })
+    .catch(catchAxiosErrorFormatAndThrow);
+};
+
+type FleetAgentCheckInUpdateDoc = Pick<
+  FleetServerAgent,
+  | 'last_checkin_status'
+  | 'last_checkin'
+  | 'active'
+  | 'unenrollment_started_at'
+  | 'unenrolled_at'
+  | 'upgrade_started_at'
+  | 'upgraded_at'
+>;
+const buildFleetAgentCheckInUpdate = (
+  agentStatus: AgentStatus | 'random' = 'online'
+): FleetAgentCheckInUpdateDoc => {
   const fleetAgentStatus =
     agentStatus === 'random' ? fleetGenerator.randomAgentStatus() : agentStatus;
 
@@ -166,7 +213,7 @@ export const checkInFleetAgent = async (
     'unenrolled_at',
     'upgrade_started_at',
     'upgraded_at',
-  ]);
+  ]) as FleetAgentCheckInUpdateDoc;
 
   // WORKAROUND: Endpoint API will exclude metadata for any fleet agent whose status is `inactive`,
   // which means once we update the Fleet agent with that status, the metadata api will no longer
@@ -181,17 +228,44 @@ export const checkInFleetAgent = async (
     }
   });
 
-  log.verbose(`update to fleet agent [${agentId}][${agentStatus} / ${fleetAgentStatus}]: `, update);
+  return update;
+};
 
-  return esClient.update({
-    index: AGENTS_INDEX,
-    id: agentId,
-    refresh: 'wait_for',
-    retry_on_conflict: 5,
-    body: {
+/**
+ * Checks a Fleet agent in by updating the agent record directly in the `.fleet-agent` index.
+ * @param esClient
+ * @param agentId
+ * @param agentStatus
+ * @param log
+ */
+export const checkInFleetAgent = async (
+  esClient: Client,
+  agentId: string,
+  {
+    agentStatus = 'online',
+    log = createToolingLogger(),
+  }: Partial<{
+    /** The agent status to be sent. If set to `random`, then one will be randomly generated */
+    agentStatus: AgentStatus | 'random';
+    log: ToolingLog;
+  }> = {}
+): Promise<estypes.UpdateResponse> => {
+  const update = buildFleetAgentCheckInUpdate(agentStatus);
+
+  log.verbose(
+    `update to fleet agent [${agentId}][${agentStatus} / ${update.last_checkin_status}]: `,
+    update
+  );
+
+  return esClient
+    .update({
+      index: AGENTS_INDEX,
+      id: agentId,
+      refresh: 'wait_for',
+      retry_on_conflict: 5,
       doc: update,
-    },
-  });
+    })
+    .catch(catchAxiosErrorFormatAndThrow);
 };
 
 /**
@@ -881,22 +955,27 @@ interface GetOrCreateDefaultAgentPolicyOptions {
   kbnClient: KbnClient;
   log: ToolingLog;
   policyName?: string;
+  overrides?: Partial<Omit<CreateAgentPolicyRequest['body'], 'name'>>;
 }
 
 /**
  * Creates a default Fleet Agent policy (if it does not yet exist) for testing. If
- * policy already exists, then it will be reused.
+ * policy already exists, then it will be reused. It uses the policy name to find an
+ * existing match.
  * @param kbnClient
  * @param log
  * @param policyName
+ * @param overrides
  */
 export const getOrCreateDefaultAgentPolicy = async ({
   kbnClient,
   log,
   policyName = DEFAULT_AGENT_POLICY_NAME,
+  overrides = {},
 }: GetOrCreateDefaultAgentPolicyOptions): Promise<AgentPolicy> => {
   const existingPolicy = await fetchAgentPolicyList(kbnClient, {
     kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.name: "${policyName}"`,
+    withAgentCount: true,
   });
 
   if (existingPolicy.items[0]) {
@@ -914,8 +993,9 @@ export const getOrCreateDefaultAgentPolicy = async ({
     policy: {
       name: policyName,
       description: `Policy created by security solution tooling: ${__filename}`,
-      namespace: spaceId,
+      namespace: spaceId.replace(/-/g, '_'),
       monitoring_enabled: ['logs', 'metrics'],
+      ...overrides,
     },
   });
 
@@ -963,6 +1043,179 @@ export const fetchPackageInfo = async (
     })
     .then((response) => response.data.item)
     .catch(catchAxiosErrorFormatAndThrow);
+};
+
+interface AddMicrosoftDefenderForEndpointToAgentPolicyOptions {
+  kbnClient: KbnClient;
+  log: ToolingLog;
+  agentPolicyId: string;
+  tenantId: string;
+  clientId: string;
+  clientSecret: string;
+  integrationPolicyName?: string;
+  /** Set to `true` if wanting to add the integration to the agent policy even if that agent policy already has one  */
+  force?: boolean;
+}
+
+export const addMicrosoftDefenderForEndpointIntegrationToAgentPolicy = async ({
+  kbnClient,
+  log,
+  agentPolicyId,
+  tenantId,
+  clientId,
+  clientSecret,
+  integrationPolicyName = `MS Defender for Endpoint policy (${Math.random()
+    .toString()
+    .substring(2, 6)})`,
+  force,
+}: AddMicrosoftDefenderForEndpointToAgentPolicyOptions): Promise<PackagePolicy> => {
+  const msPackageName = 'microsoft_defender_endpoint';
+
+  // If `force` is `false and agent policy already has a MS integration, exit here
+  if (!force) {
+    log.debug(
+      `Checking to see if agent policy [${agentPolicyId}] already includes a Microsoft Defender for Endpoint integration policy`
+    );
+
+    const agentPolicy = await fetchAgentPolicy(kbnClient, agentPolicyId);
+
+    log.verbose(agentPolicy);
+
+    const integrationPolicies = agentPolicy.package_policies ?? [];
+
+    for (const integrationPolicy of integrationPolicies) {
+      if (integrationPolicy.package?.name === msPackageName) {
+        log.debug(
+          `Returning existing Microsoft Defender for Endpoint Integration Policy included in agent policy [${agentPolicyId}]`
+        );
+        return integrationPolicy;
+      }
+    }
+  }
+
+  const {
+    version: packageVersion,
+    name: packageName,
+    title: packageTitle,
+  } = await fetchPackageInfo(kbnClient, msPackageName);
+
+  log.debug(
+    `Creating new Microsoft Defender for Endpoint integration policy [package v${packageVersion}] and adding it to agent policy [${agentPolicyId}]`
+  );
+
+  return createIntegrationPolicy(kbnClient, {
+    name: integrationPolicyName,
+    description: `Created by script: ${__filename}`,
+    policy_ids: [agentPolicyId],
+    enabled: true,
+    inputs: [
+      {
+        type: 'httpjson',
+        policy_template: 'microsoft_defender_endpoint',
+        enabled: true,
+        streams: [
+          {
+            enabled: true,
+            data_stream: {
+              type: 'logs',
+              dataset: 'microsoft_defender_endpoint.log',
+            },
+            vars: {
+              client_id: {
+                type: 'text',
+                value: clientId,
+              },
+              enable_request_tracer: {
+                type: 'bool',
+              },
+              client_secret: {
+                type: 'password',
+                value: clientSecret,
+              },
+              tenant_id: {
+                type: 'text',
+                value: tenantId,
+              },
+              interval: {
+                type: 'text',
+                value: '30s',
+              },
+              scopes: {
+                value: [],
+                type: 'text',
+              },
+              azure_resource: {
+                value: 'https://api.securitycenter.windows.com/',
+                type: 'text',
+              },
+              proxy_url: {
+                type: 'text',
+              },
+              login_url: {
+                value: 'https://login.microsoftonline.com/',
+                type: 'text',
+              },
+              token_url: {
+                value: 'oauth2/token',
+                type: 'text',
+              },
+              request_url: {
+                value: 'https://api.securitycenter.windows.com/api/alerts',
+                type: 'text',
+              },
+              tags: {
+                value: ['microsoft-defender-endpoint', 'forwarded'],
+                type: 'text',
+              },
+              preserve_original_event: {
+                value: false,
+                type: 'bool',
+              },
+              processors: {
+                type: 'yaml',
+              },
+            },
+          },
+        ],
+      },
+      {
+        type: 'logfile',
+        policy_template: 'microsoft_defender_endpoint',
+        enabled: false,
+        streams: [
+          {
+            enabled: false,
+            data_stream: {
+              type: 'logs',
+              dataset: 'microsoft_defender_endpoint.log',
+            },
+            vars: {
+              paths: {
+                value: [],
+                type: 'text',
+              },
+              tags: {
+                value: ['microsoft-defender-endpoint', 'forwarded'],
+                type: 'text',
+              },
+              preserve_original_event: {
+                value: false,
+                type: 'bool',
+              },
+              processors: {
+                type: 'yaml',
+              },
+            },
+          },
+        ],
+      },
+    ],
+    package: {
+      name: packageName,
+      title: packageTitle,
+      version: packageVersion,
+    },
+  });
 };
 
 interface AddSentinelOneIntegrationToAgentPolicyOptions {
@@ -1589,4 +1842,24 @@ export const waitForFleetAgentActionToComplete = async (
     },
     { maxTimeout: 2_000, maxRetryTime: timeout }
   );
+};
+
+/**
+ * Installs an Integration in fleet, which ensures that all of its assets are configured
+ * @param kbnClient
+ * @param integrationName
+ * @param version
+ */
+export const installIntegration = async (
+  kbnClient: KbnClient,
+  integrationName: string,
+  version?: string
+): Promise<InstallPackageResponse> => {
+  return kbnClient
+    .request<InstallPackageResponse>({
+      method: 'POST',
+      path: epmRouteService.getInstallPath(integrationName, version),
+    })
+    .catch(catchAxiosErrorFormatAndThrow)
+    .then((response) => response.data);
 };

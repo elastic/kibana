@@ -7,17 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PublishingSubject } from '../publishing_subject';
+import { MaybePromise } from '@kbn/utility-types';
+import { Observable } from 'rxjs';
 
-export interface PublishesUnsavedChanges<Runtime extends object = object> {
-  unsavedChanges: PublishingSubject<Partial<Runtime> | undefined>;
-  resetUnsavedChanges: () => boolean;
+export interface PublishesUnsavedChanges {
+  hasUnsavedChanges$: Observable<boolean>; // Observable rather than publishingSubject because it should be derived.
+  resetUnsavedChanges: () => MaybePromise<void>;
 }
 
 export const apiPublishesUnsavedChanges = (api: unknown): api is PublishesUnsavedChanges => {
   return Boolean(
     api &&
-      (api as PublishesUnsavedChanges).unsavedChanges &&
+      (api as PublishesUnsavedChanges).hasUnsavedChanges$ &&
       (api as PublishesUnsavedChanges).resetUnsavedChanges
   );
 };

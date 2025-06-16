@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink } from '@elastic/eui';
-import { OnboardingCardContentPanel } from '../../common/card_content_panel';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiPanel } from '@elastic/eui';
 import { CardCallOut } from '../../common/card_callout';
 import * as i18n from './translations';
 
@@ -17,7 +16,7 @@ interface MissingAIConnectorCalloutProps {
 
 export const MissingAIConnectorCallout = React.memo<MissingAIConnectorCalloutProps>(
   ({ onExpandAiConnectorsCard }) => (
-    <OnboardingCardContentPanel paddingSize="none">
+    <EuiPanel color="transparent" hasShadow={false} paddingSize="none">
       <CardCallOut
         color="warning"
         text={i18n.START_MIGRATION_CARD_CONNECTOR_MISSING_TEXT}
@@ -32,7 +31,7 @@ export const MissingAIConnectorCallout = React.memo<MissingAIConnectorCalloutPro
           </EuiLink>
         }
       />
-    </OnboardingCardContentPanel>
+    </EuiPanel>
   )
 );
 MissingAIConnectorCallout.displayName = 'MissingAIConnectorCallout';

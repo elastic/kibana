@@ -33,12 +33,10 @@ describe('createMigration', () => {
 
     expect(esClient.reindex).toHaveBeenCalledWith(
       expect.objectContaining({
-        body: expect.objectContaining({
-          source: {
-            index: 'my-signals-index',
-            size: reindexOptions.size,
-          },
-        }),
+        source: {
+          index: 'my-signals-index',
+          size: reindexOptions.size,
+        },
         requests_per_second: reindexOptions.requests_per_second,
         slices: reindexOptions.slices,
       })

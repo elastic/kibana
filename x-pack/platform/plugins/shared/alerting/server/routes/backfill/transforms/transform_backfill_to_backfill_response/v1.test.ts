@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Backfill } from '../../../../application/backfill/result/types';
+import type { Backfill } from '../../../../application/backfill/result/types';
 import { transformBackfillToBackfillResponse } from './v1';
 
 describe('transformBackfillToBackfillResponse', () => {
@@ -19,6 +19,7 @@ describe('transformBackfillToBackfillResponse', () => {
       tags: ['foo'],
       alertTypeId: 'myType',
       params: {},
+      actions: [],
       apiKeyOwner: 'user',
       apiKeyCreatedByUser: false,
       consumer: 'myApp',
@@ -49,6 +50,7 @@ describe('transformBackfillToBackfillResponse', () => {
           name: 'my rule name',
           tags: ['foo'],
           rule_type_id: 'myType',
+          actions: [],
           params: {},
           api_key_owner: 'user',
           api_key_created_by_user: false,

@@ -10,20 +10,18 @@ import { screen } from '@testing-library/react';
 
 import { connector, swimlaneConnector } from '../mock';
 import FieldsPreview from './case_fields_preview';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
+
+import { renderWithTestingProviders } from '../../../common/mock';
 
 describe('Webhook fields: Preview', () => {
   const fields = { caseId: 'test' };
-  let appMockRenderer: AppMockRenderer;
 
   beforeEach(() => {
-    appMockRenderer = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   it('does not render any fields', () => {
-    appMockRenderer.render(<FieldsPreview connector={connector} fields={fields} />);
+    renderWithTestingProviders(<FieldsPreview connector={connector} fields={fields} />);
     expect(screen.queryByTestId('card-list-item')).not.toBeInTheDocument();
   });
 
@@ -36,7 +34,7 @@ describe('Webhook fields: Preview', () => {
       },
     };
 
-    appMockRenderer.render(<FieldsPreview connector={invalidConnector} fields={fields} />);
+    renderWithTestingProviders(<FieldsPreview connector={invalidConnector} fields={fields} />);
     expect(screen.getByTestId('mapping-warning-callout')).toBeInTheDocument();
   });
 
@@ -49,12 +47,12 @@ describe('Webhook fields: Preview', () => {
       },
     };
 
-    appMockRenderer.render(<FieldsPreview connector={invalidConnector} fields={fields} />);
+    renderWithTestingProviders(<FieldsPreview connector={invalidConnector} fields={fields} />);
     expect(screen.getByTestId('mapping-warning-callout')).toBeInTheDocument();
   });
 
   it('does not shows the warning comment callout when connector is configured properly', () => {
-    appMockRenderer.render(<FieldsPreview connector={swimlaneConnector} fields={fields} />);
+    renderWithTestingProviders(<FieldsPreview connector={swimlaneConnector} fields={fields} />);
     expect(screen.queryByTestId('mapping-warning-callout')).not.toBeInTheDocument();
   });
 });

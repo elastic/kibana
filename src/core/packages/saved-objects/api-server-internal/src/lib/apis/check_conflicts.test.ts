@@ -13,7 +13,7 @@ import {
   mockGetSearchDsl,
 } from '../repository.test.mock';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsRepository } from '../repository';
@@ -100,14 +100,12 @@ describe('#checkConflicts', () => {
     ) => {
       expect(client.mget).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: {
-            docs: objects.map(({ type, id }) =>
-              expect.objectContaining({
-                _index,
-                _id: getId(type, id),
-              })
-            ),
-          },
+          docs: objects.map(({ type, id }) =>
+            expect.objectContaining({
+              _index,
+              _id: getId(type, id),
+            })
+          ),
         }),
         expect.anything()
       );

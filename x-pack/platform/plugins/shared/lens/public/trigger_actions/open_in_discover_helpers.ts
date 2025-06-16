@@ -59,7 +59,10 @@ async function getDiscoverLocationParams({
     throw new Error('Underlying data is not ready');
   }
   const dataView = await dataViews.get(args.dataViewSpec.id!);
-  let filtersToApply = [...(filters || []), ...args.filters];
+  // we don't want to pass the DSL filters when navigating from an ES|SQL embeddable
+  let filtersToApply = embeddable.isTextBasedLanguage()
+    ? []
+    : [...(filters || []), ...args.filters];
   let timeRangeToApply = args.timeRange;
   // if the target data view is time based, attempt to split out a time range from the provided filters
   if (dataView.isTimeBased() && dataView.timeFieldName === timeFieldName) {

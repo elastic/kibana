@@ -27,10 +27,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         withInternalHeaders: true,
         useCookieHeader: true,
       });
-      await esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/metrics_and_apm');
+      await esArchiver.load(
+        'x-pack/test/functional/es_archives/infra/8.0.0/metrics_hosts_processes'
+      );
     });
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/metrics_and_apm');
+      await esArchiver.unload(
+        'x-pack/test/functional/es_archives/infra/8.0.0/metrics_hosts_processes'
+      );
       await supertestWithAdminScope.destroy();
     });
 
@@ -43,8 +47,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               'host.name': 'gke-observability-8--observability-8--bc1afd95-nhhw',
             },
             indexPattern: 'metrics-*,metricbeat-*',
-            to: 1564432800000,
-            command: '/usr/lib/systemd/systemd-journald',
+            to: 1680027660000,
+            command:
+              '/System/Library/CoreServices/NotificationCenter.app/Contents/MacOS/NotificationCenter',
           })
         )
         .expect(200);

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// re-export async parts from a single file to not create separate asyn bundles
+// re-export async parts from a single file to not create separate async bundles
 export { createVegaRequestHandler } from './vega_request_handler';
 export { VegaVisComponent } from './components/vega_vis_component';
+export { VegaParser } from './data_model/vega_parser';
+export { getServiceSettings } from './vega_view/vega_map_view/service_settings/get_service_settings';
+export { VegaView } from './vega_view/vega_view';

@@ -9,8 +9,13 @@ import { TestScheduler } from 'rxjs/testing';
 import { NEVER } from 'rxjs';
 
 import { coreMock } from '@kbn/core/public/mocks';
+import type { CustomIntegrationsSetup } from '@kbn/custom-integrations-plugin/public';
 
-import { createPackageSearchProvider, toSearchResult } from './search_provider';
+import {
+  createCustomIntegrationsSearchProvider,
+  createPackageSearchProvider,
+  toSearchResult,
+} from './search_provider';
 import type { GetPackagesResponse } from './types';
 
 jest.mock('./hooks/use_request/epm', () => {
@@ -664,6 +669,148 @@ describe('Package search provider', () => {
       };
       const { icon } = toSearchResult(pkg, startMock.application, startMock.http.basePath)[0];
       expect(icon).toMatchInlineSnapshot(`"logoElasticsearch"`);
+    });
+  });
+});
+
+describe('Custom Integrations search provider', () => {
+  let customIntegrationsMock: CustomIntegrationsSetup;
+  const customIntegrationsMockData = [
+    {
+      id: 'custom1',
+      title: 'Custom Integration 1',
+      uiInternalPath: '/app/custom1',
+      icons: [{ src: 'icon1.svg' }],
+    },
+    {
+      id: 'custom2',
+      title: 'Custom Integration 2',
+      uiInternalPath: '/app/custom2',
+      icons: [{ src: 'icon2.svg' }],
+    },
+  ];
+
+  beforeEach(() => {
+    customIntegrationsMock = {
+      getReplacementCustomIntegrations: jest.fn(),
+    } as unknown as CustomIntegrationsSetup;
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('#find', () => {
+    test('returns formatted results', () => {
+      getTestScheduler().run(({ expectObservable, hot }) => {
+        (customIntegrationsMock.getReplacementCustomIntegrations as jest.Mock).mockReturnValue(
+          hot('--a|', { a: customIntegrationsMockData })
+        );
+
+        const customIntegrationsSearchProvider =
+          createCustomIntegrationsSearchProvider(customIntegrationsMock);
+
+        expectObservable(
+          customIntegrationsSearchProvider.find(
+            { term: 'custom' },
+            { aborted$: NEVER, maxResults: 100, preference: '' }
+          )
+        ).toBe('--a|', {
+          a: [
+            {
+              id: 'custom1',
+              score: 80,
+              title: 'Custom Integration 1',
+              type: 'integration',
+              url: '/app/custom1',
+              icon: 'icon1.svg',
+            },
+            {
+              id: 'custom2',
+              score: 80,
+              title: 'Custom Integration 2',
+              type: 'integration',
+              url: '/app/custom2',
+              icon: 'icon2.svg',
+            },
+          ],
+        });
+      });
+
+      expect(customIntegrationsMock.getReplacementCustomIntegrations).toHaveBeenCalledTimes(1);
+    });
+
+    test('returns empty array if no term is provided', () => {
+      getTestScheduler().run(({ expectObservable, hot }) => {
+        (customIntegrationsMock.getReplacementCustomIntegrations as jest.Mock).mockReturnValue(
+          hot('--a|', { a: [] })
+        );
+
+        const customIntegrationsSearchProvider =
+          createCustomIntegrationsSearchProvider(customIntegrationsMock);
+
+        expectObservable(
+          customIntegrationsSearchProvider.find(
+            { term: '' },
+            { aborted$: NEVER, maxResults: 100, preference: '' }
+          )
+        ).toBe('(a|)', {
+          a: [],
+        });
+      });
+
+      expect(customIntegrationsMock.getReplacementCustomIntegrations).toHaveBeenCalledTimes(0);
+    });
+
+    test('completes without returning results if aborted', () => {
+      getTestScheduler().run(({ expectObservable, hot }) => {
+        (customIntegrationsMock.getReplacementCustomIntegrations as jest.Mock).mockReturnValue(
+          hot('--a|', { a: customIntegrationsMockData })
+        );
+        const aborted$ = hot('-a', { a: undefined });
+        const customIntegrationsSearchProvider =
+          createCustomIntegrationsSearchProvider(customIntegrationsMock);
+
+        expectObservable(
+          customIntegrationsSearchProvider.find(
+            { term: 'custom' },
+            { aborted$, maxResults: 100, preference: '' }
+          )
+        ).toBe('-|');
+      });
+
+      expect(customIntegrationsMock.getReplacementCustomIntegrations).toHaveBeenCalledTimes(1);
+    });
+
+    test('respects maximum results', () => {
+      getTestScheduler().run(({ hot, expectObservable }) => {
+        (customIntegrationsMock.getReplacementCustomIntegrations as jest.Mock).mockReturnValue(
+          hot('--a|', { a: customIntegrationsMockData })
+        );
+
+        const customIntegrationsSearchProvider =
+          createCustomIntegrationsSearchProvider(customIntegrationsMock);
+
+        expectObservable(
+          customIntegrationsSearchProvider.find(
+            { term: 'custom' },
+            { aborted$: NEVER, maxResults: 1, preference: '' }
+          )
+        ).toBe('--a|', {
+          a: [
+            {
+              id: 'custom1',
+              score: 80,
+              title: 'Custom Integration 1',
+              type: 'integration',
+              url: '/app/custom1',
+              icon: 'icon1.svg',
+            },
+          ],
+        });
+      });
+
+      expect(customIntegrationsMock.getReplacementCustomIntegrations).toHaveBeenCalledTimes(1);
     });
   });
 });

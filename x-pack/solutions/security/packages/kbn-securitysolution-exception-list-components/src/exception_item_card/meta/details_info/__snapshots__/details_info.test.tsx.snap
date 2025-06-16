@@ -10,7 +10,7 @@ exports[`MetaInfoDetails should render lastUpdate as JSX Element 1`] = `
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
-        class="euiText emotion-EuiText"
+        class="euiText emotion-euiText-xs-euiBadgeFontFamily"
       >
         created_by
       </div>
@@ -20,7 +20,7 @@ exports[`MetaInfoDetails should render lastUpdate as JSX Element 1`] = `
       data-test-subj="MetaInfoDetailslastUpdate"
     >
       <span
-        class="euiBadge emotion-EuiInnerText"
+        class="euiBadge emotion-euiBadge-default-euiBadgeFontFamily"
         title="Last update value"
       >
         <span
@@ -40,7 +40,7 @@ exports[`MetaInfoDetails should render lastUpdate as JSX Element 1`] = `
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
-        class="euiText emotion-EuiText"
+        class="euiText emotion-euiText-xs-euiBadgeFontFamily"
       >
         by
       </div>
@@ -56,7 +56,7 @@ exports[`MetaInfoDetails should render lastUpdate as JSX Element 1`] = `
           class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <span
-            class="euiBadge emotion-EuiInnerText"
+            class="euiBadge emotion-euiBadge-hollow-euiBadgeFontFamily"
             title="value"
           >
             <span
@@ -86,7 +86,7 @@ exports[`MetaInfoDetails should render lastUpdate as string 1`] = `
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
-        class="euiText emotion-EuiText"
+        class="euiText emotion-euiText-xs-euiBadgeFontFamily"
       >
         created_by
       </div>
@@ -96,7 +96,7 @@ exports[`MetaInfoDetails should render lastUpdate as string 1`] = `
       data-test-subj="MetaInfoDetailslastUpdate"
     >
       <span
-        class="euiBadge emotion-EuiInnerText"
+        class="euiBadge emotion-euiBadge-default-euiBadgeFontFamily"
         title="last update"
       >
         <span
@@ -114,7 +114,7 @@ exports[`MetaInfoDetails should render lastUpdate as string 1`] = `
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
-        class="euiText emotion-EuiText"
+        class="euiText emotion-euiText-xs-euiBadgeFontFamily"
       >
         by
       </div>
@@ -130,7 +130,7 @@ exports[`MetaInfoDetails should render lastUpdate as string 1`] = `
           class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <span
-            class="euiBadge emotion-EuiInnerText"
+            class="euiBadge emotion-euiBadge-hollow-euiBadgeFontFamily"
             title="value"
           >
             <span

@@ -9,11 +9,12 @@ import { IToasts } from '@kbn/core-notifications-browser';
 import { DatasetQualityDetailsPublicState } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
 import { createPlainError, formatErrors } from '@kbn/io-ts-utils';
 import { IKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
-import * as Either from 'fp-ts/lib/Either';
+import * as Either from 'fp-ts/Either';
 import { DatasetQualityDetailsPublicStateUpdate } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
 import * as rt from 'io-ts';
 import { DATA_QUALITY_URL_STATE_KEY } from '../../../common/url_schema';
 import * as urlSchemaV1 from './url_schema_v1';
+import * as urlSchemaV2 from './url_schema_v2';
 
 export const updateUrlFromDatasetQualityDetailsState = ({
   urlStateStorageContainer,
@@ -26,7 +27,8 @@ export const updateUrlFromDatasetQualityDetailsState = ({
     return;
   }
 
-  const encodedUrlStateValues = urlSchemaV1.stateFromUntrustedUrlRT.encode(
+  // we want to use always the newest schema version
+  const encodedUrlStateValues = urlSchemaV2.stateFromUntrustedUrlRT.encode(
     datasetQualityDetailsState
   );
 
@@ -50,7 +52,7 @@ export const getDatasetQualityDetailsStateFromUrl = ({
     urlStateStorageContainer.get<unknown>(DATA_QUALITY_URL_STATE_KEY) ?? undefined;
 
   const stateValuesE = rt
-    .union([rt.undefined, urlSchemaV1.stateFromUntrustedUrlRT])
+    .union([rt.undefined, urlSchemaV1.stateFromUntrustedUrlRT, urlSchemaV2.stateFromUntrustedUrlRT])
     .decode(urlStateValues);
 
   if (Either.isLeft(stateValuesE)) {

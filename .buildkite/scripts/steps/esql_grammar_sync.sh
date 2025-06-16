@@ -4,10 +4,19 @@ set -euo pipefail
 synchronize_lexer_grammar () {
   license_header="$1"
   source_file="$PARENT_DIR/elasticsearch/x-pack/plugin/esql/src/main/antlr/EsqlBaseLexer.g4"
+  source_lib_dir="$PARENT_DIR/elasticsearch/x-pack/plugin/esql/src/main/antlr/lexer"
   destination_file="./src/platform/packages/shared/kbn-esql-ast/src/antlr/esql_lexer.g4"
+  destination_lib_parent_dir="./src/platform/packages/shared/kbn-esql-ast/src/antlr"
+  destination_lib_dir="$destination_lib_parent_dir/lexer"
 
-  # Copy the file
+
+  # Copy the files
+  echo "Copying base lexer file..."
   cp "$source_file" "$destination_file"
+  echo "Copying lexer lib files..."
+  rm -rf "$destination_lib_dir"
+  cp -r "$source_lib_dir" "$destination_lib_parent_dir"
+
 
   # Insert the license header
   temp_file=$(mktemp)
@@ -26,10 +35,17 @@ synchronize_lexer_grammar () {
 synchronize_parser_grammar () {
   license_header="$1"
   source_file="$PARENT_DIR/elasticsearch/x-pack/plugin/esql/src/main/antlr/EsqlBaseParser.g4"
+  source_lib_dir="$PARENT_DIR/elasticsearch/x-pack/plugin/esql/src/main/antlr/parser"
   destination_file="./src/platform/packages/shared/kbn-esql-ast/src/antlr/esql_parser.g4"
+  destination_lib_parent_dir="./src/platform/packages/shared/kbn-esql-ast/src/antlr"
+  destination_lib_dir="$destination_lib_parent_dir/parser"
 
-  # Copy the file
+  # Copy the files
+  echo "Copying base parser file..."
   cp "$source_file" "$destination_file"
+  echo "Copying parser lib files..."
+  rm -rf "$destination_lib_dir"
+  cp -r "$source_lib_dir" "$destination_lib_parent_dir"
 
   # Insert the license header
   temp_file=$(mktemp)
@@ -104,7 +120,7 @@ main () {
   .buildkite/scripts/bootstrap.sh
 
   # Build ANTLR stuff
-  cd ./src/platform/packages/shared/kbn-esql-ast/src
+  cd ./src/platform/packages/shared/kbn-esql-ast
   yarn build:antlr4:esql
 
   # Make a commit
@@ -112,7 +128,7 @@ main () {
 
   git checkout -b "$BRANCH_NAME"
 
-  git add antlr/*
+  git add src/antlr/*
   git commit -m "Update ES|QL grammars"
 
   report_main_step "Changes committed. Creating pull request."

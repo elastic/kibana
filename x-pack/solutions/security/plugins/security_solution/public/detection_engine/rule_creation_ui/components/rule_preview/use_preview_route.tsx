@@ -15,7 +15,7 @@ import type {
   DefineStepRule,
   ScheduleStepRule,
   TimeframePreviewOptions,
-} from '../../../../detections/pages/detection_engine/rules/types';
+} from '../../../common/types';
 import { useKibana } from '../../../../common/lib/kibana';
 
 interface PreviewRouteParams {

@@ -63,33 +63,33 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should only render management entries controllable via Kibana privileges', async () => {
         await PageObjects.common.navigateToApp('management');
         const sections = await managementMenu.getSections();
-        expect(sections).to.have.length(3);
-        expect(sections[0]).to.eql({ sectionId: 'data', sectionLinks: ['data_quality'] });
-        expect(sections[1]).to.eql({
-          sectionId: 'insightsAndAlerting',
-          sectionLinks: [
-            'triggersActionsAlerts',
-            'triggersActions',
-            'cases',
-            'triggersActionsConnectors',
-            'reporting',
-            'jobsListLink',
-            'maintenanceWindows',
-          ],
-        });
-        expect(sections[2]).to.eql({
-          sectionId: 'kibana',
-          sectionLinks: [
-            'dataViews',
-            'filesManagement',
-            'objects',
-            'aiAssistantManagementSelection',
-            'tags',
-            'search_sessions',
-            'spaces',
-            'settings',
-          ],
-        });
+        expect(sections).to.have.length(4);
+
+        // Order of the sections in Stack Management might change in the future
+        // so we need to find the sections by their id
+        const dataSection = sections.find((section) => section.sectionId === 'data');
+        expect(dataSection?.sectionLinks).to.eql(['data_quality', 'content_connectors']);
+        const insightsAndAlertingSection = sections.find(
+          (section) => section.sectionId === 'insightsAndAlerting'
+        );
+        expect(insightsAndAlertingSection?.sectionLinks).to.eql([
+          'triggersActionsAlerts',
+          'triggersActions',
+          'cases',
+          'triggersActionsConnectors',
+          'reporting',
+          'maintenanceWindows',
+        ]);
+        const kibanaSection = sections.find((section) => section.sectionId === 'kibana');
+        expect(kibanaSection?.sectionLinks).to.eql([
+          'dataViews',
+          'filesManagement',
+          'objects',
+          'aiAssistantManagementSelection',
+          'tags',
+          'spaces',
+          'settings',
+        ]);
       });
     });
   });

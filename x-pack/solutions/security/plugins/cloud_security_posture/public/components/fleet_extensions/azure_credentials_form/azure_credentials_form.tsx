@@ -32,7 +32,12 @@ import {
 } from './get_azure_credentials_form_options';
 import { AzureCredentialsType } from '../../../../common/types_old';
 import { useAzureCredentialsForm } from './hooks';
-import { findVariableDef, getPosturePolicy, NewPackagePolicyPostureInput } from '../utils';
+import {
+  fieldIsInvalid,
+  findVariableDef,
+  getPosturePolicy,
+  NewPackagePolicyPostureInput,
+} from '../utils';
 import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
 import { CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS } from '../../test_subjects';
 import { AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ } from '../../test_subjects';
@@ -114,6 +119,7 @@ export interface AzureCredentialsFormProps {
   onChange: any;
   setIsValid: (isValid: boolean) => void;
   disabled: boolean;
+  hasInvalidRequiredVars: boolean;
 }
 
 export const ARM_TEMPLATE_EXTERNAL_DOC_URL =
@@ -272,71 +278,85 @@ export const AzureInputVarFields = ({
   fields,
   packageInfo,
   onChange,
+  hasInvalidRequiredVars,
 }: {
   fields: Array<AzureOptions[keyof AzureOptions]['fields'][number] & { value: string; id: string }>;
   packageInfo: PackageInfo;
   onChange: (key: string, value: string) => void;
+  hasInvalidRequiredVars: boolean;
 }) => {
   return (
     <div>
-      {fields.map((field, index) => (
-        <div key={index}>
-          {field.type === 'password' && field.isSecret === true && (
-            <>
-              <EuiSpacer size="m" />
-              <div
-                css={css`
-                  width: 100%;
-                  .euiFormControlLayout,
-                  .euiFormControlLayout__childrenWrapper,
-                  .euiFormRow,
-                  input {
-                    max-width: 100%;
+      {fields.map((field, index) => {
+        const invalid = fieldIsInvalid(field.value, hasInvalidRequiredVars);
+        const invalidError = i18n.translate('xpack.csp.cspmIntegration.integration.fieldRequired', {
+          defaultMessage: '{field} is required',
+          values: {
+            field: field.label,
+          },
+        });
+        return (
+          <div key={index}>
+            {field.type === 'password' && field.isSecret === true && (
+              <>
+                <EuiSpacer size="m" />
+                <div
+                  css={css`
                     width: 100%;
-                  }
-                `}
-              >
-                <Suspense fallback={<EuiLoadingSpinner size="l" />}>
-                  <LazyPackagePolicyInputVarField
-                    varDef={{
-                      ...findVariableDef(packageInfo, field.id)!,
-                      required: true,
-                      type: 'password',
-                    }}
-                    value={field.value || ''}
-                    onChange={(value) => {
-                      onChange(field.id, value);
-                    }}
-                    errors={[]}
-                    forceShowErrors={false}
-                    isEditPage={true}
-                  />
-                </Suspense>
-              </div>
-            </>
-          )}
-          {field.type === 'text' && (
-            <>
-              <EuiFormRow
-                key={field.id}
-                label={field.label}
-                fullWidth
-                hasChildLabel={true}
-                id={field.id}
-              >
-                <EuiFieldText
-                  id={field.id}
+                    .euiFormControlLayout,
+                    .euiFormControlLayout__childrenWrapper,
+                    .euiFormRow,
+                    input {
+                      max-width: 100%;
+                      width: 100%;
+                    }
+                  `}
+                >
+                  <Suspense fallback={<EuiLoadingSpinner size="l" />}>
+                    <LazyPackagePolicyInputVarField
+                      varDef={{
+                        ...findVariableDef(packageInfo, field.id)!,
+                        required: true,
+                        type: 'password',
+                      }}
+                      value={field.value || ''}
+                      onChange={(value) => {
+                        onChange(field.id, value);
+                      }}
+                      errors={invalid ? [invalidError] : []}
+                      forceShowErrors={invalid}
+                      isEditPage={true}
+                    />
+                  </Suspense>
+                </div>
+              </>
+            )}
+            {field.type === 'text' && (
+              <>
+                <EuiFormRow
+                  key={field.id}
+                  label={field.label}
                   fullWidth
-                  value={field.value || ''}
-                  onChange={(event) => onChange(field.id, event.target.value)}
-                  data-test-subj={field.testSubj}
-                />
-              </EuiFormRow>
-              <EuiSpacer size="s" />
-            </>
-          )}
-        </div>
-      ))}
+                  hasChildLabel={true}
+                  id={field.id}
+                  isInvalid={invalid}
+                  error={invalid ? invalidError : undefined}
+                >
+                  <EuiFieldText
+                    id={field.id}
+                    fullWidth
+                    value={field.value || ''}
+                    onChange={(event) => onChange(field.id, event.target.value)}
+                    data-test-subj={field.testSubj}
+                    isInvalid={invalid}
+                  />
+                </EuiFormRow>
+                <EuiSpacer size="s" />
+              </>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 };
@@ -349,6 +369,7 @@ export const AzureCredentialsForm = ({
   onChange,
   setIsValid,
   disabled,
+  hasInvalidRequiredVars,
 }: AzureCredentialsFormProps) => {
   const {
     group,
@@ -447,6 +468,7 @@ export const AzureCredentialsForm = ({
             onChange={(key, value) => {
               updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }));
             }}
+            hasInvalidRequiredVars={hasInvalidRequiredVars}
           />
           <EuiSpacer size="m" />
           {group.info}

@@ -10,7 +10,6 @@
 import React from 'react';
 
 import { EuiModal } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { ApplicationStart, DocLinksStart, IUiSettingsClient } from '@kbn/core/public';
@@ -80,19 +79,15 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
       return null;
     }
 
-    const visNewVisDialogAriaLabel = i18n.translate(
-      'visualizations.newVisWizard.helpTextAriaLabel',
-      {
-        defaultMessage:
-          'Start creating your visualization by selecting a type for that visualization. Hit escape to close this modal. Hit Tab key to go further.',
-      }
-    );
-
     const WizardComponent = this.state.isMainDialogShown ? GroupSelection : AggBasedSelection;
 
     const selectionModal =
       this.state.showSearchVisModal && this.state.visType ? (
-        <EuiModal onClose={this.onCloseModal} className="visNewVisSearchDialog">
+        <EuiModal
+          onClose={this.onCloseModal}
+          className="visNewVisSearchDialog"
+          aria-labelledby="vis-wizard-modal-title"
+        >
           <SearchSelection
             contentClient={this.props.contentClient}
             uiSettings={this.props.uiSettings}
@@ -105,7 +100,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
         <EuiModal
           onClose={this.onCloseModal}
           className={this.state.isMainDialogShown ? 'visNewVisDialog' : 'visNewVisDialog--aggbased'}
-          aria-label={visNewVisDialogAriaLabel}
+          aria-labelledby="vis-wizard-modal-title"
         >
           <WizardComponent
             onVisTypeSelected={this.onVisTypeSelected}

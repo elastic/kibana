@@ -26,7 +26,7 @@ import {
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
-import type { MlJobState } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MlJobState } from '@elastic/elasticsearch/lib/api/types';
 import { CASES_TOAST_MESSAGES_TITLES } from '../../../../cases/constants';
 import type { CombinedJobWithStats } from '../../../../../server/shared';
 import type { JobId } from '../../../../../common/types/anomaly_detection_jobs/job';
@@ -114,7 +114,7 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
 
   const globalTimeRange = useTimeRangeUpdates(true);
 
-  const canEditDashboards = capabilities.dashboard?.createNew ?? false;
+  const canEditDashboards = capabilities.dashboard_v2?.createNew ?? false;
 
   const closePopoverOnAction = useCallback(
     (actionCallback: Function) => {
@@ -193,7 +193,7 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
       };
 
       const state = {
-        input: embeddableInput,
+        serializedState: { rawState: embeddableInput, references: [] },
         type: ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
       };
 

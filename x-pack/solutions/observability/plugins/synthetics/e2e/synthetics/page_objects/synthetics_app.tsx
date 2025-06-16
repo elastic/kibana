@@ -110,9 +110,13 @@ export function syntheticsAppPageProvider({
     },
 
     async navigateToAddMonitor() {
-      await page.goto(addMonitor, {
-        waitUntil: 'networkidle',
-      });
+      if (await page.isVisible('[data-test-subj="syntheticsAddMonitorBtn"]')) {
+        await page.click('[data-test-subj="syntheticsAddMonitorBtn"]');
+      } else {
+        await page.goto(addMonitor, {
+          waitUntil: 'networkidle',
+        });
+      }
     },
 
     async ensureIsOnMonitorConfigPage() {
@@ -217,16 +221,17 @@ export function syntheticsAppPageProvider({
       }
     },
 
-    async findEditMonitorConfiguration(
-      monitorConfig: Array<[string, string]>,
-      monitorType: FormMonitorType
-    ) {
+    async findEditMonitorConfiguration(monitorConfig: Array<[string, string]>) {
       await page.click('text="Advanced options"');
 
       for (let i = 0; i < monitorConfig.length; i++) {
         const [selector, expected] = monitorConfig[i];
-        const actual = await page.inputValue(selector);
-        expect(actual).toEqual(expected);
+        if (selector.includes('codeEditorContainer')) {
+          expect(page.locator(selector)).toHaveText(expected);
+        } else {
+          const actual = await page.inputValue(selector);
+          expect(actual).toEqual(expected);
+        }
       }
     },
 

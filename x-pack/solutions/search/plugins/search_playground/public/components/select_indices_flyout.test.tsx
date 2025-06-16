@@ -47,7 +47,7 @@ describe('SelectIndicesFlyout', () => {
     });
 
     mockedUseQueryIndices.mockReturnValue({
-      indices: ['index1', 'index2', 'index3'],
+      indices: ['index1', 'index2', 'index3', 'filteredIndex1', 'filteredIndex2'],
       isLoading: false,
       isFetched: true,
     });
@@ -107,5 +107,30 @@ describe('SelectIndicesFlyout', () => {
 
     const saveButton = getByTestId('saveButton');
     expect(saveButton).toBeDisabled();
+  });
+
+  it('updates selectedTempIndices correctly with previous values', async () => {
+    const { getByTestId, getByPlaceholderText } = render(
+      <SelectIndicesFlyout onClose={onCloseMock} />,
+      {
+        wrapper: Wrapper,
+      }
+    );
+
+    // Simulate typing into the search input field
+    const searchInput = getByPlaceholderText('Search');
+    fireEvent.change(searchInput, { target: { value: 'filteredIndex' } });
+
+    fireEvent.click(getByTestId('sourceIndex-3'));
+    fireEvent.click(getByTestId('saveButton'));
+
+    await waitFor(() => {
+      expect(mockedUseSourceIndicesFields().setIndices).toHaveBeenCalledWith([
+        'index1',
+        'index2',
+        'filteredIndex1',
+      ]);
+      expect(onCloseMock).toHaveBeenCalled();
+    });
   });
 });

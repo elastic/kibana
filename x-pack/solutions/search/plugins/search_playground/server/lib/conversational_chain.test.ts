@@ -12,6 +12,7 @@ import { FakeListChatModel, FakeStreamingLLM } from '@langchain/core/utils/testi
 import { createAssist as Assist } from '../utils/assist';
 import { ConversationalChain, contextLimitCheck } from './conversational_chain';
 import { ChatMessage, MessageRole } from '../types';
+import { ContextModelLimitError } from '../../common';
 
 describe('conversational chain', () => {
   beforeEach(() => {
@@ -38,7 +39,7 @@ describe('conversational chain', () => {
     expectedTokens?: any;
     expectedErrorMessage?: string;
     expectedSearchRequest?: any;
-    contentField?: Record<string, string>;
+    contentField?: Record<string, string | string[]>;
     isChatModel?: boolean;
     docs?: any;
     expectedHasClipped?: boolean;
@@ -59,6 +60,7 @@ describe('conversational chain', () => {
               _index: 'website',
               _id: '1',
               _source: {
+                page_title: 'value1',
                 body_content: 'value2',
                 metadata: {
                   source: 'value3',
@@ -167,15 +169,15 @@ describe('conversational chain', () => {
       expectedDocs: [
         {
           documents: [
-            { metadata: { _id: '1', _index: 'index' }, pageContent: 'value' },
-            { metadata: { _id: '1', _index: 'website' }, pageContent: 'value2' },
+            { metadata: { _id: '1', _index: 'index' }, pageContent: 'field: value' },
+            { metadata: { _id: '1', _index: 'website' }, pageContent: 'body_content: value2' },
           ],
           type: 'retrieved_docs',
         },
       ],
       expectedTokens: [
-        { type: 'context_token_count', count: 15 },
-        { type: 'prompt_token_count', count: 28 },
+        { type: 'context_token_count', count: 20 },
+        { type: 'prompt_token_count', count: 33 },
       ],
       expectedSearchRequest: [
         {
@@ -201,15 +203,15 @@ describe('conversational chain', () => {
       expectedDocs: [
         {
           documents: [
-            { metadata: { _id: '1', _index: 'index' }, pageContent: 'value' },
-            { metadata: { _id: '1', _index: 'website' }, pageContent: 'value3' },
+            { metadata: { _id: '1', _index: 'index' }, pageContent: 'field: value' },
+            { metadata: { _id: '1', _index: 'website' }, pageContent: 'metadata.source: value3' },
           ],
           type: 'retrieved_docs',
         },
       ],
       expectedTokens: [
-        { type: 'context_token_count', count: 15 },
-        { type: 'prompt_token_count', count: 28 },
+        { type: 'context_token_count', count: 20 },
+        { type: 'prompt_token_count', count: 33 },
       ],
       expectedSearchRequest: [
         {
@@ -237,30 +239,18 @@ describe('conversational chain', () => {
         {
           _index: 'index',
           _id: '1',
-          inner_hits: {
-            'index.field': {
-              hits: {
-                hits: [
-                  {
-                    _source: {
-                      text: 'value',
-                    },
-                  },
-                ],
-              },
-            },
-          },
+          highlight: { field: ['value'] },
         },
       ],
       expectedDocs: [
         {
-          documents: [{ metadata: { _id: '1', _index: 'index' }, pageContent: 'value' }],
+          documents: [{ metadata: { _id: '1', _index: 'index' }, pageContent: 'field: value' }],
           type: 'retrieved_docs',
         },
       ],
       expectedTokens: [
-        { type: 'context_token_count', count: 7 },
-        { type: 'prompt_token_count', count: 20 },
+        { type: 'context_token_count', count: 9 },
+        { type: 'prompt_token_count', count: 22 },
       ],
       expectedSearchRequest: [
         {
@@ -270,6 +260,44 @@ describe('conversational chain', () => {
         },
       ],
       contentField: { index: 'field' },
+    });
+  }, 10000);
+
+  it('should be able to create a conversational chain with multiple context fields', async () => {
+    await createTestChain({
+      responses: ['the final answer'],
+      chat: [
+        {
+          id: '1',
+          role: MessageRole.user,
+          content: 'what is the work from home policy?',
+        },
+      ],
+      contentField: { index: 'field', website: ['page_title', 'body_content'] },
+      expectedFinalAnswer: 'the final answer',
+      expectedDocs: [
+        {
+          documents: [
+            { metadata: { _id: '1', _index: 'index' }, pageContent: 'field: value' },
+            {
+              metadata: { _id: '1', _index: 'website' },
+              pageContent: 'page_title: value1\nbody_content: value2',
+            },
+          ],
+          type: 'retrieved_docs',
+        },
+      ],
+      expectedTokens: [
+        { type: 'context_token_count', count: 26 },
+        { type: 'prompt_token_count', count: 39 },
+      ],
+      expectedSearchRequest: [
+        {
+          method: 'POST',
+          path: '/index,website/_search',
+          body: { query: { match: { field: 'what is the work from home policy?' } }, size: 3 },
+        },
+      ],
     });
   }, 10000);
 
@@ -297,15 +325,15 @@ describe('conversational chain', () => {
       expectedDocs: [
         {
           documents: [
-            { metadata: { _id: '1', _index: 'index' }, pageContent: 'value' },
-            { metadata: { _id: '1', _index: 'website' }, pageContent: 'value2' },
+            { metadata: { _id: '1', _index: 'index' }, pageContent: 'field: value' },
+            { metadata: { _id: '1', _index: 'website' }, pageContent: 'body_content: value2' },
           ],
           type: 'retrieved_docs',
         },
       ],
       expectedTokens: [
-        { type: 'context_token_count', count: 15 },
-        { type: 'prompt_token_count', count: 39 },
+        { type: 'context_token_count', count: 20 },
+        { type: 'prompt_token_count', count: 44 },
       ],
       expectedSearchRequest: [
         {
@@ -336,15 +364,15 @@ describe('conversational chain', () => {
       expectedDocs: [
         {
           documents: [
-            { metadata: { _id: '1', _index: 'index' }, pageContent: 'value' },
-            { metadata: { _id: '1', _index: 'website' }, pageContent: 'value2' },
+            { metadata: { _id: '1', _index: 'index' }, pageContent: 'field: value' },
+            { metadata: { _id: '1', _index: 'website' }, pageContent: 'body_content: value2' },
           ],
           type: 'retrieved_docs',
         },
       ],
       expectedTokens: [
-        { type: 'context_token_count', count: 15 },
-        { type: 'prompt_token_count', count: 28 },
+        { type: 'context_token_count', count: 20 },
+        { type: 'prompt_token_count', count: 33 },
       ],
       expectedSearchRequest: [
         {
@@ -380,15 +408,15 @@ describe('conversational chain', () => {
       expectedDocs: [
         {
           documents: [
-            { metadata: { _id: '1', _index: 'index' }, pageContent: 'value' },
-            { metadata: { _id: '1', _index: 'website' }, pageContent: 'value2' },
+            { metadata: { _id: '1', _index: 'index' }, pageContent: 'field: value' },
+            { metadata: { _id: '1', _index: 'website' }, pageContent: 'body_content: value2' },
           ],
           type: 'retrieved_docs',
         },
       ],
       expectedTokens: [
-        { type: 'context_token_count', count: 15 },
-        { type: 'prompt_token_count', count: 39 },
+        { type: 'context_token_count', count: 20 },
+        { type: 'prompt_token_count', count: 44 },
       ],
       expectedSearchRequest: [
         {
@@ -424,15 +452,15 @@ describe('conversational chain', () => {
       expectedDocs: [
         {
           documents: [
-            { metadata: { _id: '1', _index: 'index' }, pageContent: 'value' },
-            { metadata: { _id: '1', _index: 'website' }, pageContent: 'value2' },
+            { metadata: { _id: '1', _index: 'index' }, pageContent: 'field: value' },
+            { metadata: { _id: '1', _index: 'website' }, pageContent: 'body_content: value2' },
           ],
           type: 'retrieved_docs',
         },
       ],
       expectedTokens: [
-        { type: 'context_token_count', count: 15 },
-        { type: 'prompt_token_count', count: 49 },
+        { type: 'context_token_count', count: 20 },
+        { type: 'prompt_token_count', count: 54 },
       ],
       expectedSearchRequest: [
         {
@@ -487,7 +515,8 @@ describe('conversational chain', () => {
             { metadata: { _id: '1', _index: 'index' }, pageContent: '' },
             {
               metadata: { _id: '1', _index: 'website' },
-              pageContent: Array.from({ length: 1000 }, (_, i) => `${i}value\n `).join(' '),
+              pageContent:
+                'body_content: ' + Array.from({ length: 1000 }, (_, i) => `${i}value\n `).join(' '),
             },
           ],
           type: 'retrieved_docs',
@@ -504,7 +533,7 @@ describe('conversational chain', () => {
       modelLimit: 100,
       expectedHasClipped: true,
       isChatModel: false,
-      expectedErrorMessage: 'Context exceeds the model limit',
+      expectedErrorMessage: ContextModelLimitError,
     });
   }, 10000);
 
@@ -546,7 +575,7 @@ describe('conversational chain', () => {
         chat_history: 'This is a test chat history.',
       };
       await expect(contextLimitCheck(33, prompt)(input)).rejects.toMatchInlineSnapshot(
-        `[ContextLimitError: Context exceeds the model limit]`
+        `[ContextLimitError: ${ContextModelLimitError}]`
       );
     });
   });

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { defaultConfig, mergeWebpackFinal } from '@kbn/storybook';
+import { defaultConfig, StorybookConfig } from '@kbn/storybook';
 import type { Configuration } from 'webpack';
+import { merge as webpackMerge } from 'webpack-merge';
 // eslint-disable-next-line import/no-nodejs-modules
 import { resolve } from 'path';
 
@@ -18,19 +19,20 @@ const graphWebpack: Configuration = {
         '../src/components/mock/use_fetch_graph_data.mock.ts'
       ),
     },
-  },
-  node: {
-    fs: 'empty',
-    stream: false,
-    os: false,
+    fallback: {
+      fs: false,
+      stream: false,
+      os: false,
+    },
   },
 };
 
-module.exports = {
+const sbConfig: StorybookConfig = {
   ...defaultConfig,
-  stories: ['../**/*.stories.+(tsx|mdx)'],
-  reactOptions: {
-    strictMode: true,
+  webpackFinal(config, options) {
+    return webpackMerge(defaultConfig.webpackFinal?.(config, options) ?? {}, graphWebpack);
   },
-  ...mergeWebpackFinal(graphWebpack),
 };
+
+// eslint-disable-next-line import/no-default-export
+export default sbConfig;

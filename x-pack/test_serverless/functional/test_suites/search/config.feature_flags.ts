@@ -9,7 +9,7 @@ import { createTestConfig } from '../../config.base';
 
 /**
  * Make sure to create a MKI deployment with custom Kibana image, that includes feature flags arguments
- * This tests most likely will fail on default MKI project
+ * These tests most likely will fail on default MKI project
  */
 export default createTestConfig({
   serverlessProject: 'es',
@@ -20,6 +20,7 @@ export default createTestConfig({
   // add feature flags
   kbnServerArgs: [
     `--xpack.cloud.id=ES3_FTR_TESTS:ZmFrZS1kb21haW4uY2xkLmVsc3RjLmNvJGZha2Vwcm9qZWN0aWQuZXMkZmFrZXByb2plY3RpZC5rYg==`,
+    `--uiSettings.overrides.searchPlayground:searchModeEnabled=true`,
   ],
   // load tests in the index file
   testFiles: [require.resolve('./index.feature_flags.ts')],

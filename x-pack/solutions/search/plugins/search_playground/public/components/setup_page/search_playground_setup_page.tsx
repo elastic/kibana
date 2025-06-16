@@ -19,6 +19,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useQueryIndices } from '../../hooks/use_query_indices';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { AnalyticsEvents } from '../../analytics/constants';
+import { PlaygroundBodySection } from '../playground_body_section';
 import { AddDataSources } from './add_data_sources';
 
 export const SearchPlaygroundSetupPage: React.FC = () => {
@@ -30,46 +31,53 @@ export const SearchPlaygroundSetupPage: React.FC = () => {
   }, [usageTracker]);
 
   return (
-    <EuiEmptyPrompt
-      iconType="indexOpen"
-      data-test-subj="setupPage"
-      title={
-        <h2>
-          <FormattedMessage
-            id="xpack.searchPlayground.setupPage.queryBuilder.title"
-            defaultMessage="Add data to query"
-          />
-        </h2>
-      }
-      actions={
-        <EuiFlexGroup justifyContent="center">
-          {isIndicesLoading ? (
-            <EuiLoadingSpinner />
-          ) : (
-            <EuiFlexItem grow={false}>
-              <AddDataSources />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      }
-      footer={
-        <>
-          <EuiTitle size="xxs">
-            <span>
-              <FormattedMessage
-                id="xpack.searchPlayground.setupPage.learnMore"
-                defaultMessage="Want to learn more?"
-              />
-            </span>
-          </EuiTitle>{' '}
-          <EuiLink href="todo" target="_blank" external>
+    <PlaygroundBodySection>
+      <EuiEmptyPrompt
+        iconType="indexOpen"
+        data-test-subj="setupPage"
+        title={
+          <h2>
             <FormattedMessage
-              id="xpack.searchPlayground.setupPage.documentationLink"
-              defaultMessage="Read documentation"
+              id="xpack.searchPlayground.setupPage.queryBuilder.title"
+              defaultMessage="Add data to query"
             />
-          </EuiLink>
-        </>
-      }
-    />
+          </h2>
+        }
+        actions={
+          <EuiFlexGroup justifyContent="center">
+            {isIndicesLoading ? (
+              <EuiLoadingSpinner />
+            ) : (
+              <EuiFlexItem grow={false}>
+                <AddDataSources />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        }
+        footer={
+          <>
+            <EuiTitle size="xxs">
+              <span>
+                <FormattedMessage
+                  id="xpack.searchPlayground.setupPage.learnMore"
+                  defaultMessage="Want to learn more?"
+                />
+              </span>
+            </EuiTitle>{' '}
+            <EuiLink
+              href="todo"
+              target="_blank"
+              data-test-subj="search-playground-setup-documentationLink"
+              external
+            >
+              <FormattedMessage
+                id="xpack.searchPlayground.setupPage.documentationLink"
+                defaultMessage="Read documentation"
+              />
+            </EuiLink>
+          </>
+        }
+      />
+    </PlaygroundBodySection>
   );
 };

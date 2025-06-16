@@ -18,7 +18,7 @@
           "IntegrationsServiceSetupDeps",
           ") => Promise<void>; setup: () => Promise<void>; stop: () => Promise<void>; }"
         ],
-        "path": "packages/core/integrations/core-integrations-browser-mocks/src/integrations_service.mock.ts",
+        "path": "src/core/packages/integrations/browser-mocks/src/integrations_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -34,15 +34,9 @@
           "{ start: jest.MockInstance<Promise<void>, [",
           "IntegrationsServiceSetupDeps",
           "], unknown>; setup: jest.MockInstance<Promise<void>, [], unknown>; stop: jest.MockInstance<Promise<void>, [], unknown>; } & ",
-          {
-            "pluginId": "@kbn/core-integrations-browser-mocks",
-            "scope": "public",
-            "docId": "kibKbnCoreIntegrationsBrowserMocksPluginApi",
-            "section": "def-public.IntegrationsServiceContract",
-            "text": "IntegrationsServiceContract"
-          }
+          "IntegrationsServiceContract"
         ],
-        "path": "packages/core/integrations/core-integrations-browser-mocks/src/integrations_service.mock.ts",
+        "path": "src/core/packages/integrations/browser-mocks/src/integrations_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -56,7 +50,7 @@
         "tags": [],
         "label": "integrationsServiceMock",
         "description": [],
-        "path": "packages/core/integrations/core-integrations-browser-mocks/src/integrations_service.mock.ts",
+        "path": "src/core/packages/integrations/browser-mocks/src/integrations_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -69,15 +63,9 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-integrations-browser-mocks",
-                "scope": "public",
-                "docId": "kibKbnCoreIntegrationsBrowserMocksPluginApi",
-                "section": "def-public.IntegrationsServiceMock",
-                "text": "IntegrationsServiceMock"
-              }
+              "IntegrationsServiceMock"
             ],
-            "path": "packages/core/integrations/core-integrations-browser-mocks/src/integrations_service.mock.ts",
+            "path": "src/core/packages/integrations/browser-mocks/src/integrations_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

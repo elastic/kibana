@@ -26,7 +26,7 @@ export class ReportingPageObject extends FtrService {
   private readonly security = this.ctx.getService('security');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
-  private readonly share = this.ctx.getPageObject('share');
+  private readonly exports = this.ctx.getPageObject('exports');
   private readonly timePicker = this.ctx.getPageObject('timePicker');
 
   async forceSharedItemsContainerSize({ width }: { width: number }) {
@@ -50,10 +50,12 @@ export class ReportingPageObject extends FtrService {
 
       return url;
     } catch (err) {
-      const errorTextEl = await this.find.byCssSelector('[data-test-errorText]');
-      const errorText = await errorTextEl.getAttribute('data-test-errorText');
-      const newError = new Error(`Test report failed: ${errorText}: ${err}`);
-      throw newError;
+      let errorText = 'Unknown error';
+      if (await this.find.existsByCssSelector('[data-test-errorText]')) {
+        const errorTextEl = await this.find.byCssSelector('[data-test-errorText]');
+        errorText = (await errorTextEl.getAttribute('data-test-errorText')) ?? errorText;
+      }
+      throw new Error(`Test report failed: ${errorText}: ${err}`, { cause: err });
     }
   }
 
@@ -101,9 +103,13 @@ export class ReportingPageObject extends FtrService {
     await this.testSubjects.waitForDeleted(menuPanel);
   }
 
-  async openExportTab() {
-    this.log.debug('open export modal');
-    await this.share.clickTab('Export');
+  async openExportPopover() {
+    this.log.debug('open export popover');
+    await this.exports.clickExportTopNavButton();
+  }
+
+  async selectExportItem(label: string) {
+    await this.exports.clickPopoverItem(label);
   }
 
   async getQueueReportError() {
@@ -222,5 +228,9 @@ export class ReportingPageObject extends FtrService {
     const fullPath = path.resolve(baselineFolder, `${fileName}.${reportExt}`);
     this.log.debug(`baselineReportPath (${fullPath})`);
     return fullPath;
+  }
+
+  async copyReportingPOSTURLValueToClipboard() {
+    await this.exports.copyExportAssetText();
   }
 }

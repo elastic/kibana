@@ -11,11 +11,11 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { AttackDiscoveryDataClient } from '../../../../../lib/attack_discovery/persistence';
 import { attackDiscoveryStatus } from '../../../helpers/helpers';
-import { ATTACK_DISCOVERY_ERROR_EVENT } from '../../../../../lib/telemetry/event_based_telemetry';
+import { reportAttackDiscoveryGenerationFailure } from '../../../helpers/telemetry';
 
 export const handleGraphError = async ({
   apiConfig,
-  attackDiscoveryId,
+  executionUuid,
   authenticatedUser,
   dataClient,
   err,
@@ -24,7 +24,7 @@ export const handleGraphError = async ({
   telemetry,
 }: {
   apiConfig: ApiConfig;
-  attackDiscoveryId: string;
+  executionUuid: string;
   authenticatedUser: AuthenticatedUser;
   dataClient: AttackDiscoveryDataClient;
   err: Error;
@@ -36,7 +36,7 @@ export const handleGraphError = async ({
     logger.error(err);
     const error = transformError(err);
     const currentAd = await dataClient.getAttackDiscovery({
-      id: attackDiscoveryId,
+      id: executionUuid,
       authenticatedUser,
     });
 
@@ -48,26 +48,24 @@ export const handleGraphError = async ({
       attackDiscoveryUpdateProps: {
         attackDiscoveries: [],
         status: attackDiscoveryStatus.failed,
-        id: attackDiscoveryId,
+        id: executionUuid,
         replacements: latestReplacements,
         backingIndex: currentAd.backingIndex,
         failureReason: error.message,
       },
       authenticatedUser,
     });
-    telemetry.reportEvent(ATTACK_DISCOVERY_ERROR_EVENT.eventType, {
-      actionTypeId: apiConfig.actionTypeId,
+    reportAttackDiscoveryGenerationFailure({
+      apiConfig,
       errorMessage: error.message,
-      model: apiConfig.model,
-      provider: apiConfig.provider,
+      telemetry,
     });
   } catch (updateErr) {
     const updateError = transformError(updateErr);
-    telemetry.reportEvent(ATTACK_DISCOVERY_ERROR_EVENT.eventType, {
-      actionTypeId: apiConfig.actionTypeId,
+    reportAttackDiscoveryGenerationFailure({
+      apiConfig,
       errorMessage: updateError.message,
-      model: apiConfig.model,
-      provider: apiConfig.provider,
+      telemetry,
     });
   }
 };

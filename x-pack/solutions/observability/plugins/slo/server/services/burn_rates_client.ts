@@ -10,16 +10,16 @@ import {
   AggregationsDateRangeAggregate,
   AggregationsSumAggregate,
   AggregationsValueCountAggregate,
-  MsearchMultisearchBody,
+  SearchSearchRequestBody,
   QueryDslQueryContainer,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
   ALL_VALUE,
   occurrencesBudgetingMethodSchema,
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
-import { SLO_DESTINATION_INDEX_PATTERN } from '../../common/constants';
+import { SLI_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import { DateRange, Duration, SLODefinition } from '../domain/models';
 import { computeBurnRate, computeSLI } from '../domain/services';
 import { getDelayInSecondsFromSLO } from '../domain/services/get_delay_in_seconds_from_slo';
@@ -65,8 +65,8 @@ export class DefaultBurnRatesClient implements BurnRatesClient {
     );
 
     const index = remoteName
-      ? `${remoteName}:${SLO_DESTINATION_INDEX_PATTERN}`
-      : SLO_DESTINATION_INDEX_PATTERN;
+      ? `${remoteName}:${SLI_DESTINATION_INDEX_PATTERN}`
+      : SLI_DESTINATION_INDEX_PATTERN;
 
     const result = await this.esClient.search<unknown, EsAggregations>({
       ...commonQuery(slo, instanceId, longestDateRange),
@@ -92,7 +92,7 @@ function commonQuery(
   slo: SLODefinition,
   instanceId: string,
   dateRange: DateRange
-): Pick<MsearchMultisearchBody, 'size' | 'query'> {
+): Pick<SearchSearchRequestBody, 'size' | 'query'> {
   const filter: QueryDslQueryContainer[] = [
     { term: { 'slo.id': slo.id } },
     { term: { 'slo.revision': slo.revision } },

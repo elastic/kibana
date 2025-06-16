@@ -5,31 +5,26 @@
  * 2.0.
  */
 
-import { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import {
   createUICapabilities as createCasesUICapabilities,
   getApiTags as getCasesApiTags,
 } from '@kbn/cases-plugin/common';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
-import {
-  CoreSetup,
-  CoreStart,
-  DEFAULT_APP_CATEGORIES,
-  Logger,
-  Plugin,
-  PluginInitializerContext,
-} from '@kbn/core/server';
+import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
-import { i18n } from '@kbn/i18n';
-import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import {
+  RuleRegistryPluginSetupContract,
+  RuleRegistryPluginStartContract,
+} from '@kbn/rule-registry-plugin/server';
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
-import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { ObservabilityConfig } from '.';
 import { observabilityFeatureId } from '../common';
 import {
@@ -48,9 +43,9 @@ import { registerRoutes } from './routes/register_routes';
 import { threshold } from './saved_objects/threshold';
 import { AlertDetailsContextualInsightsService } from './services';
 import { uiSettings } from './ui_settings';
-import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../common/constants';
 import { getCasesFeature } from './features/cases_v1';
 import { getCasesFeatureV2 } from './features/cases_v2';
+import { getCasesFeatureV3 } from './features/cases_v3';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
@@ -63,21 +58,16 @@ interface PluginSetup {
   spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
   cloud?: CloudSetup;
+  contentManagement: ContentManagementServerSetup;
 }
 
 interface PluginStart {
   alerting: AlertingServerStart;
   spaces?: SpacesPluginStart;
   dataViews: DataViewsServerPluginStart;
+  ruleRegistry: RuleRegistryPluginStartContract;
+  dashboard: DashboardPluginStart;
 }
-
-const alertingFeatures = OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES.map(
-  (ruleTypeId) => ({
-    ruleTypeId,
-    consumers: [observabilityFeatureId, ALERTING_FEATURE_ID],
-  })
-);
-
 export class ObservabilityPlugin
   implements Plugin<ObservabilityPluginSetup, void, PluginSetup, PluginStart>
 {
@@ -103,6 +93,7 @@ export class ObservabilityPlugin
 
     plugins.features.registerKibanaFeature(getCasesFeature(casesCapabilities, casesApiTags));
     plugins.features.registerKibanaFeature(getCasesFeatureV2(casesCapabilities, casesApiTags));
+    plugins.features.registerKibanaFeature(getCasesFeatureV3(casesCapabilities, casesApiTags));
 
     let annotationsApiPromise: Promise<AnnotationsAPI> | undefined;
 
@@ -117,59 +108,6 @@ export class ObservabilityPlugin
         const logger = this.initContext.logger.get('annotations');
         logger.warn(err);
         throw err;
-      });
-    }
-
-    if (config.createO11yGenericFeatureId) {
-      plugins.features.registerKibanaFeature({
-        id: observabilityFeatureId,
-        name: i18n.translate('xpack.observability.nameFeatureTitle', {
-          defaultMessage: 'Observability',
-        }),
-        order: 1000,
-        category: DEFAULT_APP_CATEGORIES.observability,
-        scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
-        app: [observabilityFeatureId],
-        catalogue: [observabilityFeatureId],
-        alerting: alertingFeatures,
-        privileges: {
-          all: {
-            app: [observabilityFeatureId],
-            catalogue: [observabilityFeatureId],
-            api: ['rac'],
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            alerting: {
-              rule: {
-                all: alertingFeatures,
-              },
-              alert: {
-                all: alertingFeatures,
-              },
-            },
-            ui: ['read', 'write'],
-          },
-          read: {
-            app: [observabilityFeatureId],
-            catalogue: [observabilityFeatureId],
-            api: ['rac'],
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            alerting: {
-              rule: {
-                read: alertingFeatures,
-              },
-              alert: {
-                read: alertingFeatures,
-              },
-            },
-            ui: ['read'],
-          },
-        },
       });
     }
 
@@ -190,6 +128,8 @@ export class ObservabilityPlugin
             ...plugins,
             core,
           },
+          dashboard: pluginStart.dashboard,
+          ruleRegistry: pluginStart.ruleRegistry,
           dataViews: pluginStart.dataViews,
           spaces: pluginStart.spaces,
           ruleDataService,
@@ -200,6 +140,7 @@ export class ObservabilityPlugin
         },
         logger: this.logger,
         repository: getObservabilityServerRouteRepository(config),
+        isDev: this.initContext.env.mode.dev,
       });
     });
     /**

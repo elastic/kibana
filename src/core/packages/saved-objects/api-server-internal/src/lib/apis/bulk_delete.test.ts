@@ -18,7 +18,7 @@ import {
 } from '../repository.test.mock';
 
 import type { Payload } from '@hapi/boom';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type {
   SavedObjectsBulkDeleteObject,
@@ -31,6 +31,8 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import { kibanaMigratorMock } from '../../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
+import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
 
 import {
   NAMESPACE_AGNOSTIC_TYPE,
@@ -64,6 +66,7 @@ describe('#bulkDelete', () => {
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
   let serializer: jest.Mocked<SavedObjectsSerializer>;
+  let securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>;
 
   const registry = createRegistry();
   const documentMigrator = createDocumentMigrator(registry);
@@ -76,6 +79,7 @@ describe('#bulkDelete', () => {
     migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
     migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
     logger = loggerMock.create();
+    securityExtension = savedObjectsExtensionsMock.createSecurityExtension();
 
     // create a mock serializer "shim" so we can track function calls, but use the real serializer's implementation
     serializer = createSpySerializer(registry);
@@ -93,6 +97,9 @@ describe('#bulkDelete', () => {
       serializer,
       allowedTypes,
       logger,
+      extensions: {
+        securityExtension,
+      },
     });
 
     mockGetCurrentTime.mockReturnValue(mockTimestamp);
@@ -131,9 +138,9 @@ describe('#bulkDelete', () => {
         overrides?: Record<string, unknown>;
       }
     ) => {
-      const body = [];
+      const operations = [];
       for (const { type, id } of objects) {
-        body.push({
+        operations.push({
           [method]: {
             _index,
             _id: getId(type, id),
@@ -143,7 +150,7 @@ describe('#bulkDelete', () => {
       }
 
       expect(client.bulk).toHaveBeenCalledWith(
-        expect.objectContaining({ body }),
+        expect.objectContaining({ operations }),
         expect.anything()
       );
     };
@@ -202,9 +209,9 @@ describe('#bulkDelete', () => {
         overrides?: Record<string, unknown>;
       }
     ) => {
-      const body = [];
+      const operations = [];
       for (const { type, id } of objects) {
-        body.push({
+        operations.push({
           [method]: {
             _index,
             _id: getId(type, id),
@@ -213,7 +220,7 @@ describe('#bulkDelete', () => {
         });
       }
       expect(client.bulk).toHaveBeenCalledWith(
-        expect.objectContaining({ body }),
+        expect.objectContaining({ operations }),
         expect.anything()
       );
     };
@@ -266,7 +273,7 @@ describe('#bulkDelete', () => {
           expect.objectContaining({ _id: `${MULTI_NAMESPACE_ISOLATED_TYPE}:${obj2.id}` }),
         ];
         expect(client.mget).toHaveBeenCalledWith(
-          expect.objectContaining({ body: { docs } }),
+          expect.objectContaining({ docs }),
           expect.anything()
         );
       });
@@ -500,7 +507,7 @@ describe('#bulkDelete', () => {
         await bulkDeleteMultiNamespaceError(
           [obj1, notFoundObj, obj2],
           { namespace },
-          {} as estypes.MgetResponse,
+          { docs: [] } as estypes.MgetResponse,
           {
             statusCode: 404,
           }
@@ -592,8 +599,55 @@ describe('#bulkDelete', () => {
         await bulkDeleteMultiNamespaceError(
           [obj1, notFoundObj, obj2],
           { namespace },
-          {} as estypes.MgetResponse,
+          { docs: [] } as estypes.MgetResponse,
           { statusCode: 404 }
+        );
+      });
+    });
+
+    describe('security', () => {
+      it('correctly passes params to securityExtension.authorizeBulkDelete', async () => {
+        const testObject1 = { id: 'test_object_1', type: MULTI_NAMESPACE_TYPE };
+        const testObject2 = { id: 'test_object_2', type: MULTI_NAMESPACE_ISOLATED_TYPE };
+
+        const internalOptions = {
+          mockMGetResponseObjects: [
+            {
+              ...testObject1,
+              initialNamespaces: [namespace, 'bar-namespace'],
+            },
+            {
+              ...testObject2,
+              initialNamespaces: [namespace, 'bar-namespace'],
+            },
+          ],
+        };
+
+        await bulkDeleteSuccess(
+          client,
+          repository,
+          registry,
+          [testObject1, testObject2],
+          {
+            namespace,
+            force: true,
+          },
+          internalOptions
+        );
+
+        expect(securityExtension.authorizeBulkDelete).toHaveBeenCalledWith(
+          expect.objectContaining({
+            objects: expect.arrayContaining([
+              expect.objectContaining({
+                id: 'test_object_1',
+                name: 'Testing',
+              }),
+              expect.objectContaining({
+                id: 'test_object_2',
+                name: 'Testing',
+              }),
+            ]),
+          })
         );
       });
     });

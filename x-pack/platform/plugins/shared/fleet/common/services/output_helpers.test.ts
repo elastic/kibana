@@ -8,13 +8,13 @@
 import { load } from 'js-yaml';
 
 import {
-  getAllowedOutputTypeForPolicy,
+  getAllowedOutputTypesForAgentPolicy,
   outputYmlIncludesReservedPerformanceKey,
 } from './output_helpers';
 
-describe('getAllowedOutputTypeForPolicy', () => {
+describe('getAllowedOutputTypesForAgentPolicy', () => {
   it('should return all available output type for an agent policy without APM and Fleet Server', () => {
-    const res = getAllowedOutputTypeForPolicy({
+    const res = getAllowedOutputTypesForAgentPolicy({
       package_policies: [
         {
           package: { name: 'nginx' },
@@ -22,12 +22,15 @@ describe('getAllowedOutputTypeForPolicy', () => {
       ],
     } as any);
 
+    expect(res).toHaveLength(4);
     expect(res).toContain('elasticsearch');
     expect(res).toContain('logstash');
+    expect(res).toContain('kafka');
+    expect(res).toContain('remote_elasticsearch');
   });
 
   it('should return only elasticsearch for an agent policy with APM', () => {
-    const res = getAllowedOutputTypeForPolicy({
+    const res = getAllowedOutputTypesForAgentPolicy({
       package_policies: [
         {
           package: { name: 'apm' },
@@ -39,13 +42,47 @@ describe('getAllowedOutputTypeForPolicy', () => {
   });
 
   it('should return only elasticsearch for an agent policy with Fleet Server', () => {
-    const res = getAllowedOutputTypeForPolicy({
+    const res = getAllowedOutputTypesForAgentPolicy({
       package_policies: [
         {
           package: { name: 'fleet_server' },
         },
       ],
     } as any);
+
+    expect(res).toEqual(['elasticsearch']);
+  });
+
+  it('should return only elasticsearch for an agent policy with Fleet Server not yet installed', () => {
+    const res = getAllowedOutputTypesForAgentPolicy({
+      has_fleet_server: true,
+    } as any);
+
+    expect(res).toEqual(['elasticsearch']);
+  });
+
+  it('should return only elasticsearch for an agentless agent policy', () => {
+    const res = getAllowedOutputTypesForAgentPolicy({ supports_agentless: true } as any);
+
+    expect(res).toEqual(['elasticsearch']);
+  });
+});
+
+describe('getAllowedOutputTypesForPackagePolicy', () => {
+  it('should return all available output type for a package policy without agentless support', () => {
+    const res = getAllowedOutputTypesForAgentPolicy({
+      package_policies: [
+        {
+          package: { name: 'nginx' },
+        },
+      ],
+    } as any);
+
+    expect(res).toHaveLength(4);
+  });
+
+  it('should return only elasticsearch for a package policy with agentless support', () => {
+    const res = getAllowedOutputTypesForAgentPolicy({ supports_agentless: true } as any);
 
     expect(res).toEqual(['elasticsearch']);
   });

@@ -37,10 +37,10 @@ const PageWrapper: FC<PageProps> = ({ location }) => {
           timefilter: { timefilter: timeFilter },
         },
       },
-      dashboard: dashboardService,
       uiSettings: kibanaConfig,
       mlServices: { mlApi },
       lens,
+      share,
     },
   } = useMlKibana();
 
@@ -53,7 +53,7 @@ const PageWrapper: FC<PageProps> = ({ location }) => {
           mlApi,
           timeFilter,
           kibanaConfig,
-          dashboardService,
+          share,
         },
         vis,
         from,

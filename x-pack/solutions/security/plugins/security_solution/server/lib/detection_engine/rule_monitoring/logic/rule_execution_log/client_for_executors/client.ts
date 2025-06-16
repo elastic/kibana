@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import agent from 'elastic-apm-node';
 import type { Logger } from '@kbn/core/server';
 import { sum } from 'lodash';
 import type { Duration } from 'moment';
@@ -19,7 +20,7 @@ import type {
   LogLevel,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
-  logLevelFromExecutionStatus,
+  consoleLogLevelFromExecutionStatus,
   LogLevelSetting,
   logLevelToNumber,
   RuleExecutionStatusEnum,
@@ -39,6 +40,7 @@ import type {
 } from './client_interface';
 import type { RuleExecutionMetrics } from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
 import { LogLevelEnum } from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
+import { SECURITY_RULE_STATUS } from '../../../../rule_types/utils/apm_field_names';
 
 export const createRuleExecutionLogClientForExecutors = (
   settings: RuleExecutionSettings,
@@ -83,6 +85,8 @@ export const createRuleExecutionLogClientForExecutors = (
       await withSecuritySpan('IRuleExecutionLogForExecutors.logStatusChange', async () => {
         const correlationIds = baseCorrelationIds.withStatus(args.newStatus);
         const logMeta = correlationIds.getLogMeta();
+
+        agent.addLabels({ [SECURITY_RULE_STATUS]: args.newStatus });
 
         try {
           const normalizedArgs = normalizeStatusChangeArgs(args);
@@ -159,7 +163,7 @@ export const createRuleExecutionLogClientForExecutors = (
   const writeStatusChangeToConsole = (args: NormalizedStatusChangeArgs, logMeta: ExtMeta): void => {
     const messageParts: string[] = [`Changing rule status to "${args.newStatus}"`, args.message];
     const logMessage = messageParts.filter(Boolean).join('. ');
-    const logLevel = logLevelFromExecutionStatus(args.newStatus);
+    const logLevel = consoleLogLevelFromExecutionStatus(args.newStatus, args.userError);
     writeMessageToConsole(logMessage, logLevel, logMeta);
   };
 
@@ -174,6 +178,7 @@ export const createRuleExecutionLogClientForExecutors = (
       total_search_duration_ms: totalSearchDurationMs,
       total_indexing_duration_ms: totalIndexingDurationMs,
       execution_gap_duration_s: executionGapDurationS,
+      gap_range: gapRange,
     } = metrics ?? {};
 
     if (totalSearchDurationMs) {
@@ -186,6 +191,10 @@ export const createRuleExecutionLogClientForExecutors = (
 
     if (executionGapDurationS) {
       ruleMonitoringService.setLastRunMetricsGapDurationS(executionGapDurationS);
+    }
+
+    if (gapRange) {
+      ruleMonitoringService.setLastRunMetricsGapRange(gapRange);
     }
 
     if (newStatus === RuleExecutionStatusEnum.failed) {
@@ -254,6 +263,8 @@ const normalizeStatusChangeArgs = (args: StatusChangeArgs): NormalizedStatusChan
           total_indexing_duration_ms: normalizeDurations(metrics.indexingDurations),
           total_enrichment_duration_ms: normalizeDurations(metrics.enrichmentDurations),
           execution_gap_duration_s: normalizeGap(metrics.executionGap),
+          gap_range: metrics.gapRange ?? undefined,
+          frozen_indices_queried_count: metrics.frozenIndicesQueriedCount,
         }
       : undefined,
     userError,

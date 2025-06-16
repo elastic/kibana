@@ -5,10 +5,9 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { DASHBOARDS_PATH, SecurityPageName, SERVER_APP_ID } from '../../common/constants';
+import { DASHBOARDS_PATH, SecurityPageName, SECURITY_FEATURE_ID } from '../../common/constants';
 import { DASHBOARDS } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
-import { links as kubernetesLinks } from '../kubernetes/links';
 import { cspDashboardLink, vulnerabilityDashboardLink } from '../cloud_security_posture/links';
 import {
   ecsDataQualityDashboardLinks,
@@ -21,7 +20,6 @@ import { IconDashboards } from '../common/icons/dashboards';
 const subLinks: LinkItem[] = [
   overviewLinks,
   detectionResponseLinks,
-  kubernetesLinks,
   cspDashboardLink,
   vulnerabilityDashboardLink,
   entityAnalyticsLinks,
@@ -33,7 +31,7 @@ export const dashboardsLinks: LinkItem = {
   title: DASHBOARDS,
   path: DASHBOARDS_PATH,
   globalNavPosition: 1,
-  capabilities: [`${SERVER_APP_ID}.show`],
+  capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SECURITY_FEATURE_ID}.detections`]],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.dashboards', {
       defaultMessage: 'Dashboards',

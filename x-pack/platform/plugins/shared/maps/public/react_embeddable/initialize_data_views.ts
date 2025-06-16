@@ -42,7 +42,7 @@ export function initializeDataViews(store: MapStore) {
   const syncLayerTokens: Record<string, symbol> = {};
 
   return {
-    dataViews: dataViews$,
+    dataViews$,
     setLayerList(layerList: LayerDescriptor[]) {
       store.dispatch<any>(replaceLayerList(layerList));
       updateDataViews();

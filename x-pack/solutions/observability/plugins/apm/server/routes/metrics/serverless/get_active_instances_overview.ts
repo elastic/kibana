@@ -71,50 +71,48 @@ export async function getServerlessActiveInstancesOverview({
     apm: {
       events: [ProcessorEvent.metric],
     },
-    body: {
-      track_total_hits: 1,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...termQuery(METRICSET_NAME, 'app'),
-            { term: { [SERVICE_NAME]: serviceName } },
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            ...termQuery(FAAS_ID, serverlessId),
-          ],
-        },
+    track_total_hits: 1,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...termQuery(METRICSET_NAME, 'app'),
+          { term: { [SERVICE_NAME]: serviceName } },
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+          ...termQuery(FAAS_ID, serverlessId),
+        ],
       },
-      aggs: {
-        activeInstances: {
-          terms: { field: SERVICE_NODE_NAME },
-          aggs: {
-            serverlessFunctions: {
-              terms: { field: FAAS_ID },
-              aggs: {
-                ...{
-                  ...aggs,
-                  maxTotalMemory: {
-                    max: { field: METRIC_SYSTEM_TOTAL_MEMORY },
-                  },
-                  avgTotalMemory: {
-                    avg: { field: METRIC_SYSTEM_TOTAL_MEMORY },
-                  },
-                  avgFreeMemory: { avg: { field: METRIC_SYSTEM_FREE_MEMORY } },
+    },
+    aggs: {
+      activeInstances: {
+        terms: { field: SERVICE_NODE_NAME },
+        aggs: {
+          serverlessFunctions: {
+            terms: { field: FAAS_ID },
+            aggs: {
+              ...{
+                ...aggs,
+                maxTotalMemory: {
+                  max: { field: METRIC_SYSTEM_TOTAL_MEMORY },
                 },
-                timeseries: {
-                  date_histogram: {
-                    field: '@timestamp',
-                    fixed_interval: intervalString,
-                    min_doc_count: 0,
-                    extended_bounds: {
-                      min: start,
-                      max: end,
-                    },
-                  },
-                  aggs,
+                avgTotalMemory: {
+                  avg: { field: METRIC_SYSTEM_TOTAL_MEMORY },
                 },
+                avgFreeMemory: { avg: { field: METRIC_SYSTEM_FREE_MEMORY } },
+              },
+              timeseries: {
+                date_histogram: {
+                  field: '@timestamp',
+                  fixed_interval: intervalString,
+                  min_doc_count: 0,
+                  extended_bounds: {
+                    min: start,
+                    max: end,
+                  },
+                },
+                aggs,
               },
             },
           },

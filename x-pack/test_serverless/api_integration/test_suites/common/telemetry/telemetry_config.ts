@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { expect as externalExpect } from 'expect';
-import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
+import { SupertestWithRoleScopeType } from '../../../services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function telemetryConfigTest({ getService }: FtrProviderContext) {

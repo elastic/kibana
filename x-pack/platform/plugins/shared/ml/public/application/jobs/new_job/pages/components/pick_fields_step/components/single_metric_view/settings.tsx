@@ -10,14 +10,13 @@ import React, { Fragment, useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 
-import { useNavigateToPath } from '../../../../../../../contexts/kibana';
-
 import { convertToMultiMetricJob } from '../../../../../common/job_creator/util/general';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 
 import { BucketSpan } from '../bucket_span';
 import { SparseDataSwitch } from '../sparse_data';
+import { useNavigateToManagementMlLink } from '../../../../../../../contexts/kibana/use_create_url';
 
 interface Props {
   setIsValid: (proceed: boolean) => void;
@@ -25,10 +24,10 @@ interface Props {
 
 export const SingleMetricSettings: FC<Props> = ({ setIsValid }) => {
   const { jobCreator } = useContext(JobCreatorContext);
-  const navigateToPath = useNavigateToPath();
+  const navigateToMlManagement = useNavigateToManagementMlLink('anomaly_detection');
 
   const convertToMultiMetric = () => {
-    convertToMultiMetricJob(jobCreator, navigateToPath);
+    convertToMultiMetricJob(jobCreator, navigateToMlManagement);
   };
 
   return (

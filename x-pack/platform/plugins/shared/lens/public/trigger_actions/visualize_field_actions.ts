@@ -21,7 +21,7 @@ export const visualizeFieldAction = (application: ApplicationStart) =>
       i18n.translate('xpack.lens.discover.visualizeFieldLegend', {
         defaultMessage: 'Visualize field',
       }),
-    isCompatible: async () => !!application.capabilities.visualize.show,
+    isCompatible: async () => !!application.capabilities.visualize_v2.show,
     execute: async (context: VisualizeFieldContext) => {
       application.navigateToApp('lens', {
         state: { type: ACTION_VISUALIZE_LENS_FIELD, payload: context },

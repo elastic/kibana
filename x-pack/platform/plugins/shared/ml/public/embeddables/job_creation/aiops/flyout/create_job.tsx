@@ -23,7 +23,7 @@ import {
 
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { redirectToADJobWizards } from '../../../../application/jobs/new_job/job_from_pattern_analysis/utils';
 import { createFieldOptions } from '../../../../application/jobs/new_job/common/job_creator/util/general';
 import { NewJobCapsService } from '../../../../application/services/new_job_capabilities/new_job_capabilities_service';
@@ -48,7 +48,6 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
       data,
       share,
       uiSettings,
-      dashboardService,
       mlServices: { mlApi },
     },
   } = useMlFromLensKibanaContext();
@@ -88,11 +87,11 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
         data.dataViews,
         uiSettings,
         data.query.timefilter.timefilter,
-        dashboardService,
+        share,
         data,
         mlApi
       ),
-    [dashboardService, data, mlApi, uiSettings]
+    [share, data, mlApi, uiSettings]
   );
 
   function createADJobInWizard() {

@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObject, SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
-import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import { SavedObject } from '@kbn/core/server';
 import { SyntheticsServerSetup } from '../../types';
-import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { normalizeSecrets } from '../utils';
 import {
   PrivateConfig,
@@ -162,11 +160,7 @@ export class SyntheticsMonitorClient {
 
     return { failedPolicyUpdates, publicSyncErrors };
   }
-  async deleteMonitors(
-    monitors: SyntheticsMonitorWithId[],
-    savedObjectsClient: SavedObjectsClientContract,
-    spaceId: string
-  ) {
+  async deleteMonitors(monitors: SyntheticsMonitorWithId[], spaceId: string) {
     const privateDeletePromise = this.privateLocationAPI.deleteMonitors(monitors, spaceId);
 
     const publicDeletePromise = this.syntheticsService.deleteConfigs(
@@ -179,7 +173,6 @@ export class SyntheticsMonitorClient {
 
   async testNowConfigs(
     monitor: { monitor: MonitorFields; id: string; testRunId: string },
-    savedObjectsClient: SavedObjectsClientContract,
     allPrivateLocations: PrivateLocationAttributes[],
     spaceId: string,
     runOnce?: true
@@ -268,122 +261,6 @@ export class SyntheticsMonitorClient {
     const publicLocations = locations.filter((loc) => loc.isServiceManaged);
 
     return { privateLocations, publicLocations };
-  }
-
-  async syncGlobalParams({
-    spaceId,
-    allPrivateLocations,
-    encryptedSavedObjects,
-  }: {
-    spaceId: string;
-    allPrivateLocations: PrivateLocationAttributes[];
-    encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
-  }) {
-    const privateConfigs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }> =
-      [];
-    const publicConfigs: ConfigData[] = [];
-
-    const { allConfigs: monitors, paramsBySpace } = await this.getAllMonitorConfigs({
-      encryptedSavedObjects,
-      spaceId,
-    });
-
-    for (const monitor of monitors) {
-      const { publicLocations, privateLocations } = this.parseLocations(monitor);
-      if (publicLocations.length > 0) {
-        publicConfigs.push({ spaceId, monitor, configId: monitor.config_id, params: {} });
-      }
-
-      if (privateLocations.length > 0) {
-        privateConfigs.push({ config: monitor, globalParams: paramsBySpace[monitor.namespace] });
-      }
-    }
-    if (privateConfigs.length > 0) {
-      await this.privateLocationAPI.editMonitors(privateConfigs, allPrivateLocations, spaceId);
-    }
-
-    if (publicConfigs.length > 0) {
-      return await this.syntheticsService.editConfig(publicConfigs, false);
-    }
-  }
-
-  async getAllMonitorConfigs({
-    spaceId,
-    encryptedSavedObjects,
-  }: {
-    spaceId: string;
-    encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
-  }) {
-    const paramsBySpacePromise = this.syntheticsService.getSyntheticsParams({ spaceId });
-
-    const monitorsPromise = this.getAllMonitors({ encryptedSavedObjects, spaceId });
-
-    const [paramsBySpace, monitors] = await Promise.all([paramsBySpacePromise, monitorsPromise]);
-
-    return {
-      allConfigs: this.mixParamsWithMonitors(spaceId, monitors, paramsBySpace),
-      paramsBySpace,
-    };
-  }
-
-  async getAllMonitors({
-    spaceId,
-    encryptedSavedObjects,
-  }: {
-    spaceId: string;
-    encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
-  }) {
-    const encryptedClient = encryptedSavedObjects.getClient();
-
-    const monitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>> = [];
-
-    const finder =
-      await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
-        {
-          type: syntheticsMonitorType,
-          perPage: 1000,
-          namespaces: [spaceId],
-        }
-      );
-
-    for await (const response of finder.find()) {
-      response.saved_objects.forEach((monitor) => {
-        monitors.push(monitor);
-      });
-    }
-
-    finder.close().catch(() => {});
-
-    return monitors;
-  }
-
-  mixParamsWithMonitors(
-    spaceId: string,
-    monitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>>,
-    paramsBySpace: Record<string, Record<string, string>>
-  ) {
-    const heartbeatConfigs: HeartbeatConfig[] = [];
-
-    for (const monitor of monitors) {
-      const normalizedMonitor = normalizeSecrets(monitor).attributes as MonitorFields;
-      const { str: paramsString } = mixParamsWithGlobalParams(
-        paramsBySpace[spaceId],
-        normalizedMonitor
-      );
-
-      heartbeatConfigs.push(
-        formatHeartbeatRequest(
-          {
-            spaceId,
-            monitor: normalizedMonitor,
-            configId: monitor.id,
-          },
-          paramsString
-        )
-      );
-    }
-
-    return heartbeatConfigs;
   }
 
   async formatConfigWithParams(

@@ -10,16 +10,16 @@ import { getCategoryColor } from './topn';
 describe('topn', () => {
   describe('getCategoryColor', () => {
     const categories = [
-      { category: 'elasticsearch', expectedColor: '#D6BF57' },
-      { category: 'metricbeat', expectedColor: '#B9A888' },
-      { category: 'auditbeat', expectedColor: '#E7664C' },
-      { category: 'dockerd', expectedColor: '#B9A888' },
-      { category: 'Other', expectedColor: '#CA8EAE' },
-      { category: 'node', expectedColor: '#D36086' },
-      { category: 'filebeat', expectedColor: '#54B399' },
-      { category: 'containerd', expectedColor: '#DA8B45' },
-      { category: 'C2 CompilerThre', expectedColor: '#6092C0' },
-      { category: '[metrics]>worke', expectedColor: '#D6BF57' },
+      { category: 'elasticsearch', expectedColor: '#FFC7DB' },
+      { category: 'metricbeat', expectedColor: '#F6726A' },
+      { category: 'auditbeat', expectedColor: '#FCD883' },
+      { category: 'dockerd', expectedColor: '#F6726A' },
+      { category: 'Other', expectedColor: '#EE72A6' },
+      { category: 'node', expectedColor: '#61A2FF' },
+      { category: 'filebeat', expectedColor: '#16C5C0' },
+      { category: 'containerd', expectedColor: '#FFC9C2' },
+      { category: 'C2 CompilerThre', expectedColor: '#A6EDEA' },
+      { category: '[metrics]>worke', expectedColor: '#FFC7DB' },
     ];
     const colors = euiPaletteColorBlind({
       rotations: Math.ceil(categories.length / 10),

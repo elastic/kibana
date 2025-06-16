@@ -6,20 +6,18 @@
  */
 
 import React from 'react';
-import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { useKibana } from '../../common/lib/kibana';
-import { SecurityPageName } from '../../../common/constants';
-import { SpyRoute } from '../../common/utils/route/spy_routes';
+import { AssetInventoryOnboarding } from '../components/onboarding/asset_inventory_onboarding';
+import { AllAssets } from './all_assets';
 
-export const AssetInventoryContainer = React.memo(() => {
-  const { assetInventory } = useKibana().services;
-
+const AssetInventoryPage = () => {
   return (
-    <SecuritySolutionPageWrapper noPadding>
-      {assetInventory.getAssetInventoryPage({})}
-      <SpyRoute pageName={SecurityPageName.assetInventory} />
-    </SecuritySolutionPageWrapper>
+    <AssetInventoryOnboarding>
+      <AllAssets />
+    </AssetInventoryOnboarding>
   );
-});
+};
 
-AssetInventoryContainer.displayName = 'AssetInventoryContainer';
+AssetInventoryPage.displayName = 'AssetInventoryPage';
+
+// eslint-disable-next-line import/no-default-export
+export default AssetInventoryPage;

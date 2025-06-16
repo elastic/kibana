@@ -11,6 +11,7 @@ import {
   Axis,
   Chart,
   niceTimeFormatByDay,
+  ScaleType,
   Settings,
   timeFormatter,
   Tooltip,
@@ -32,7 +33,8 @@ import { FormattedDate, FormattedTime } from '@kbn/i18n-react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { statusColors } from '@kbn/cloud-security-posture';
+import { MISCONFIGURATION_STATUS } from '@kbn/cloud-security-posture-common';
+import { useGetMisconfigurationStatusColor } from '@kbn/cloud-security-posture';
 import { DASHBOARD_COMPLIANCE_SCORE_CHART } from '../test_subjects';
 import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
 import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
@@ -109,31 +111,35 @@ const CompactPercentageLabels = ({
 }: {
   onEvalCounterClick: (evaluation: Evaluation) => void;
   stats: { totalPassed: number; totalFailed: number };
-}) => (
-  <>
-    <CounterLink
-      text="passed"
-      count={stats.totalPassed}
-      color={statusColors.passed}
-      onClick={() => onEvalCounterClick(RULE_PASSED)}
-      tooltipContent={i18n.translate(
-        'xpack.csp.complianceScoreChart.counterLink.passedFindingsTooltip',
-        { defaultMessage: 'Passed findings' }
-      )}
-    />
-    <EuiText size="s">&nbsp;-&nbsp;</EuiText>
-    <CounterLink
-      text="failed"
-      count={stats.totalFailed}
-      color={statusColors.failed}
-      onClick={() => onEvalCounterClick(RULE_FAILED)}
-      tooltipContent={i18n.translate(
-        'xpack.csp.complianceScoreChart.counterButtonLink.failedFindingsTooltip',
-        { defaultMessage: 'Failed findings' }
-      )}
-    />
-  </>
-);
+}) => {
+  const { getMisconfigurationStatusColor } = useGetMisconfigurationStatusColor();
+
+  return (
+    <>
+      <CounterLink
+        text="passed"
+        count={stats.totalPassed}
+        color={getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.PASSED)}
+        onClick={() => onEvalCounterClick(RULE_PASSED)}
+        tooltipContent={i18n.translate(
+          'xpack.csp.complianceScoreChart.counterLink.passedFindingsTooltip',
+          { defaultMessage: 'Passed findings' }
+        )}
+      />
+      <EuiText size="s">&nbsp;-&nbsp;</EuiText>
+      <CounterLink
+        text="failed"
+        count={stats.totalFailed}
+        color={getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.FAILED)}
+        onClick={() => onEvalCounterClick(RULE_FAILED)}
+        tooltipContent={i18n.translate(
+          'xpack.csp.complianceScoreChart.counterButtonLink.failedFindingsTooltip',
+          { defaultMessage: 'Failed findings' }
+        )}
+      />
+    </>
+  );
+};
 
 const PercentageLabels = ({
   onEvalCounterClick,
@@ -143,14 +149,16 @@ const PercentageLabels = ({
   stats: { totalPassed: number; totalFailed: number };
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { getMisconfigurationStatusColor } = useGetMisconfigurationStatusColor();
   const borderLeftStyles = { borderLeft: euiTheme.border.thin, paddingLeft: euiTheme.size.m };
+
   return (
     <EuiFlexGroup gutterSize="l" justifyContent="spaceBetween">
       <EuiFlexItem grow={false} style={borderLeftStyles}>
         <CounterButtonLink
           text="Passed Findings"
           count={stats.totalPassed}
-          color={statusColors.passed}
+          color={getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.PASSED)}
           data-test-subj="dashboard-summary-passed-findings"
           onClick={() => onEvalCounterClick(RULE_PASSED)}
         />
@@ -159,7 +167,7 @@ const PercentageLabels = ({
         <CounterButtonLink
           text="Failed Findings"
           count={stats.totalFailed}
-          color={statusColors.failed}
+          color={getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.FAILED)}
           data-test-subj="dashboard-summary-failed-findings"
           onClick={() => onEvalCounterClick(RULE_FAILED)}
         />
@@ -224,7 +232,8 @@ const ComplianceTrendChart = ({ trend }: { trend: PostureTrend[] }) => {
         // EuiChart is using this id in the tooltip label
         id="Posture Score"
         data={epochTimeTrend}
-        xScaleType="time"
+        // Defaults to multi layer time axis as of Elastic Charts v70
+        xScaleType={ScaleType.Time}
         xAccessor={'timestamp'}
         yAccessors={['postureScore']}
       />

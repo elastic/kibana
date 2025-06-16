@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { tryCatch, fold } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/pipeable';
+import { tryCatch, fold } from 'fp-ts/Either';
 
 import { DEPRECATION_WARNING_UPPER_LIMIT } from '../../../common/constants';
-import { ReindexStep } from '../../../common/types';
+import { ReindexStep, DataStreamMigrationStatus } from '../../../common/types';
 
 export const validateRegExpString = (s: string) =>
   pipe(
@@ -78,21 +78,56 @@ export const getReindexProgressLabel = (
       percentsComplete = hasExistingAliases ? 85 : 90;
       break;
     }
-    case ReindexStep.aliasCreated: {
+    case ReindexStep.indexSettingsRestored: {
       // step 4 completed
+      percentsComplete = hasExistingAliases ? 87 : 92;
+      break;
+    }
+    case ReindexStep.aliasCreated: {
+      // step 5 completed
       percentsComplete = hasExistingAliases ? 90 : 95;
       break;
     }
     case ReindexStep.originalIndexDeleted: {
-      // step 5 completed
+      // step 6 completed
       percentsComplete = hasExistingAliases ? 95 : 100;
       break;
     }
     case ReindexStep.existingAliasesUpdated: {
-      // step 6 completed, 100% progress
+      // step 7 completed, 100% progress
       percentsComplete = 100;
       break;
     }
   }
+  return `${percentsComplete}%`;
+};
+
+export const getDataStreamReindexProgress = (
+  status: DataStreamMigrationStatus,
+  taskPercComplete: number | null
+): number => {
+  switch (status) {
+    case DataStreamMigrationStatus.notStarted:
+      return 0;
+
+    case DataStreamMigrationStatus.fetchFailed:
+    case DataStreamMigrationStatus.failed:
+    case DataStreamMigrationStatus.cancelled:
+    case DataStreamMigrationStatus.inProgress: {
+      return taskPercComplete !== null ? Math.round(taskPercComplete * 100) : 0;
+    }
+    case DataStreamMigrationStatus.completed: {
+      return 100;
+    }
+  }
+
+  return 0;
+};
+
+export const getDataStreamReindexProgressLabel = (
+  status: DataStreamMigrationStatus,
+  taskPercComplete: number | null
+): string => {
+  const percentsComplete = getDataStreamReindexProgress(status, taskPercComplete);
   return `${percentsComplete}%`;
 };

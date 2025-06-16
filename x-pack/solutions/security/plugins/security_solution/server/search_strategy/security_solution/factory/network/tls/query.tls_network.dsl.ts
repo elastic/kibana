@@ -76,17 +76,15 @@ export const buildNetworkTlsQuery = ({
     index: defaultIndex,
     ignore_unavailable: true,
     track_total_hits: false,
-    body: {
-      aggs: {
-        ...getAggs(querySize, sort),
-      },
-      query: {
-        bool: {
-          filter,
-        },
-      },
-      size: 0,
+    aggs: {
+      ...getAggs(querySize, sort),
     },
+    query: {
+      bool: {
+        filter,
+      },
+    },
+    size: 0,
   };
 
   return dslQuery;

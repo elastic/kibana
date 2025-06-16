@@ -7,38 +7,18 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { css } from '@emotion/react';
-import { AlertConsumers } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
-import React, { useMemo } from 'react';
+import React from 'react';
 import * as uuid from 'uuid';
 
-import { ALERTS_TABLE_REGISTRY_CONFIG_IDS } from '../../../../../common/constants';
-import { useKibana } from '../../../../common/lib/kibana';
+import { TableId } from '@kbn/securitysolution-data-table';
+import { DetectionEngineAlertsTable } from '../../../../detections/components/alerts_table';
 
 interface Props {
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   size: number;
 }
 
-const configId = ALERTS_TABLE_REGISTRY_CONFIG_IDS.RULE_DETAILS; // show the same row-actions as in the case view
-
 const AlertsPreviewComponent: React.FC<Props> = ({ query, size }) => {
-  const { triggersActionsUi } = useKibana().services;
-
-  const alertStateProps = useMemo(
-    () => ({
-      alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
-      configurationId: configId,
-      consumers: [AlertConsumers.SIEM],
-      id: `attack-discovery-alerts-preview-${uuid.v4()}`,
-      initialPageSize: size,
-      query,
-      ruleTypeIds: SECURITY_SOLUTION_RULE_TYPE_IDS,
-      showAlertStatusWithFlapping: false,
-    }),
-    [query, size, triggersActionsUi.alertsTableConfigurationRegistry]
-  );
-
   return (
     <div
       css={css`
@@ -46,7 +26,14 @@ const AlertsPreviewComponent: React.FC<Props> = ({ query, size }) => {
       `}
       data-test-subj="alertsPreview"
     >
-      {triggersActionsUi.getAlertsStateTable(alertStateProps)}
+      <DetectionEngineAlertsTable
+        // Show the same row-actions as in the case view
+        tableType={TableId.alertsOnRuleDetailsPage}
+        id={`attack-discovery-alerts-preview-${uuid.v4()}`}
+        showAlertStatusWithFlapping={false}
+        query={query}
+        initialPageSize={size}
+      />
     </div>
   );
 };

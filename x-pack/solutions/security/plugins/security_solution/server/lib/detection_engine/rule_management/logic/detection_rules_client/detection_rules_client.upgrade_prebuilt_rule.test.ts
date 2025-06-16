@@ -23,6 +23,8 @@ import { throwAuthzError } from '../../../../machine_learning/validation';
 import { createDetectionRulesClient } from './detection_rules_client';
 import type { IDetectionRulesClient } from './detection_rules_client_interface';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+import { createProductFeaturesServiceMock } from '../../../../product_features_service/mocks';
 
 jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
@@ -48,7 +50,8 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
       rulesClient,
       mlAuthz,
       savedObjectsClient,
-      isRuleCustomizationEnabled: true,
+      license: licenseMock.createLicenseMock(),
+      productFeaturesService: createProductFeaturesServiceMock(),
     });
   });
 
@@ -110,7 +113,6 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
     installedRule.rule_id = 'rule-id';
 
     beforeEach(() => {
-      jest.resetAllMocks();
       rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams()));
       (getRuleByRuleId as jest.Mock).mockResolvedValue(installedRule);
     });
@@ -166,6 +168,23 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
     };
     // Installed version is "eql"
     const installedRule = getRulesEqlSchemaMock();
+    installedRule.actions = [
+      {
+        group: 'default',
+        id: 'test_id',
+        action_type_id: '.index',
+        params: {},
+      },
+    ];
+    installedRule.exceptions_list = [
+      {
+        id: 'exception_list',
+        list_id: 'some-id',
+        namespace_type: 'single',
+        type: 'detection',
+      },
+    ];
+
     beforeEach(() => {
       (getRuleByRuleId as jest.Mock).mockResolvedValue(installedRule);
     });
@@ -179,9 +198,73 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
           data: expect.objectContaining({
             name: ruleAsset.name,
             tags: ruleAsset.tags,
+            // actions are kept from original rule
+            actions: [
+              expect.objectContaining({
+                actionTypeId: '.index',
+                group: 'default',
+                id: 'test_id',
+                params: {},
+              }),
+            ],
             params: expect.objectContaining({
               index: ruleAsset.index,
               description: ruleAsset.description,
+              exceptionsList: [
+                {
+                  id: 'exception_list',
+                  list_id: 'some-id',
+                  namespace_type: 'single',
+                  type: 'detection',
+                },
+              ],
+            }),
+          }),
+          id: installedRule.id,
+        })
+      );
+    });
+
+    it('merges exceptions lists for existing rule and new rule asset', async () => {
+      rulesClient.update.mockResolvedValue(getRuleMock(getEqlRuleParams()));
+      ruleAsset.exceptions_list = [
+        {
+          id: 'exception_list',
+          list_id: 'some-id',
+          namespace_type: 'single',
+          type: 'detection',
+        },
+        {
+          id: 'second_exception_list',
+          list_id: 'some-other-id',
+          namespace_type: 'single',
+          type: 'detection',
+        },
+      ];
+
+      await detectionRulesClient.upgradePrebuiltRule({ ruleAsset });
+      expect(rulesClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            name: ruleAsset.name,
+            tags: ruleAsset.tags,
+            params: expect.objectContaining({
+              index: ruleAsset.index,
+              description: ruleAsset.description,
+              exceptionsList: [
+                {
+                  id: 'second_exception_list',
+                  list_id: 'some-other-id',
+                  namespace_type: 'single',
+                  type: 'detection',
+                },
+                {
+                  id: 'exception_list',
+                  list_id: 'some-id',
+                  namespace_type: 'single',
+                  type: 'detection',
+                },
+              ],
             }),
           }),
           id: installedRule.id,

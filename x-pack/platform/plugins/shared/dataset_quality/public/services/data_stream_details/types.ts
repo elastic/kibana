@@ -15,6 +15,8 @@ import {
   GetDataStreamDegradedFieldsParams,
   DegradedFieldResponse,
   GetDataStreamDegradedFieldValuesPathParams,
+  GetDataStreamFailedDocsDetailsParams,
+  GetDataStreamFailedDocsErrorsParams,
 } from '../../../common/data_streams_stats';
 import {
   AnalyzeDegradedFieldsParams,
@@ -27,6 +29,8 @@ import {
   DataStreamRolloverResponse,
   DegradedFieldAnalysis,
   DegradedFieldValues,
+  FailedDocsDetails,
+  FailedDocsErrorsResponse,
   UpdateFieldLimitResponse,
 } from '../../../common/api_types';
 
@@ -43,6 +47,10 @@ export interface DataStreamDetailsServiceStartDeps {
 export interface IDataStreamDetailsClient {
   getDataStreamSettings(params: GetDataStreamSettingsParams): Promise<DataStreamSettings>;
   getDataStreamDetails(params: GetDataStreamDetailsParams): Promise<DataStreamDetails>;
+  getFailedDocsDetails(params: GetDataStreamFailedDocsDetailsParams): Promise<FailedDocsDetails>;
+  getFailedDocsErrors(
+    params: GetDataStreamFailedDocsErrorsParams
+  ): Promise<FailedDocsErrorsResponse>;
   getDataStreamDegradedFields(
     params: GetDataStreamDegradedFieldsParams
   ): Promise<DegradedFieldResponse>;

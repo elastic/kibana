@@ -110,17 +110,7 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
             </EuiTableRowCell>
             <EuiTableRowCell>
               <div
-                css={
-                  Object {
-                    "map": undefined,
-                    "name": "b37u90",
-                    "next": undefined,
-                    "styles": "
-  width: 7vw;
-",
-                    "toString": [Function],
-                  }
-                }
+                css="unknown styles"
               >
                 <Sparkline
                   options={
@@ -168,17 +158,7 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
             </EuiTableRowCell>
             <EuiTableRowCell>
               <div
-                css={
-                  Object {
-                    "map": undefined,
-                    "name": "b37u90",
-                    "next": undefined,
-                    "styles": "
-  width: 7vw;
-",
-                    "toString": [Function],
-                  }
-                }
+                css="unknown styles"
               >
                 <Sparkline
                   options={
@@ -226,17 +206,7 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
             </EuiTableRowCell>
             <EuiTableRowCell>
               <div
-                css={
-                  Object {
-                    "map": undefined,
-                    "name": "b37u90",
-                    "next": undefined,
-                    "styles": "
-  width: 7vw;
-",
-                    "toString": [Function],
-                  }
-                }
+                css="unknown styles"
               >
                 <Sparkline
                   options={
@@ -284,17 +254,7 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
             </EuiTableRowCell>
             <EuiTableRowCell>
               <div
-                css={
-                  Object {
-                    "map": undefined,
-                    "name": "b37u90",
-                    "next": undefined,
-                    "styles": "
-  width: 7vw;
-",
-                    "toString": [Function],
-                  }
-                }
+                css="unknown styles"
               >
                 <Sparkline
                   options={
@@ -391,17 +351,7 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
             </EuiTableRowCell>
             <EuiTableRowCell>
               <div
-                css={
-                  Object {
-                    "map": undefined,
-                    "name": "b37u90",
-                    "next": undefined,
-                    "styles": "
-  width: 7vw;
-",
-                    "toString": [Function],
-                  }
-                }
+                css="unknown styles"
               >
                 <Sparkline
                   options={
@@ -449,17 +399,7 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
             </EuiTableRowCell>
             <EuiTableRowCell>
               <div
-                css={
-                  Object {
-                    "map": undefined,
-                    "name": "b37u90",
-                    "next": undefined,
-                    "styles": "
-  width: 7vw;
-",
-                    "toString": [Function],
-                  }
-                }
+                css="unknown styles"
               >
                 <Sparkline
                   options={
@@ -507,17 +447,7 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
             </EuiTableRowCell>
             <EuiTableRowCell>
               <div
-                css={
-                  Object {
-                    "map": undefined,
-                    "name": "b37u90",
-                    "next": undefined,
-                    "styles": "
-  width: 7vw;
-",
-                    "toString": [Function],
-                  }
-                }
+                css="unknown styles"
               >
                 <Sparkline
                   options={
@@ -565,17 +495,7 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
             </EuiTableRowCell>
             <EuiTableRowCell>
               <div
-                css={
-                  Object {
-                    "map": undefined,
-                    "name": "b37u90",
-                    "next": undefined,
-                    "styles": "
-  width: 7vw;
-",
-                    "toString": [Function],
-                  }
-                }
+                css="unknown styles"
               >
                 <Sparkline
                   options={

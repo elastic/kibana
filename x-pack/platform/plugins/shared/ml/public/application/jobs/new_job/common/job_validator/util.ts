@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { i18n } from '@kbn/i18n';
 import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '@kbn/ml-validators';

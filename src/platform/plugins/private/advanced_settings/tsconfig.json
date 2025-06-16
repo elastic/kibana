@@ -16,9 +16,9 @@
     "@kbn/config-schema",
     "@kbn/core-plugins-server",
     "@kbn/management-settings-section-registry",
-    "@kbn/react-kibana-context-render",
     "@kbn/shared-ux-utility",
     "@kbn/management-settings-application",
+    "@kbn/spaces-plugin",
   ],
   "exclude": [
     "target/**/*",

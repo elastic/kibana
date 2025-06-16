@@ -5,24 +5,25 @@
  * 2.0.
  */
 
-import { AlertingPlugin, AlertingServerSetup } from './plugin';
+import type { AlertingServerSetup } from './plugin';
+import { AlertingPlugin } from './plugin';
 import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { coreMock, statusServiceMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { eventLogServiceMock } from '@kbn/event-log-plugin/server/event_log_service.mock';
-import { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { KibanaFeature } from '@kbn/features-plugin/server';
-import { AlertingConfig } from './config';
-import { RuleType } from './types';
+import type { AlertingConfig } from './config';
+import type { RuleType } from './types';
 import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { dataPluginMock as autocompletePluginMock } from '@kbn/unified-search-plugin/server/mocks';
 import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
-import {
+import type {
   DataViewsServerPluginStart,
   PluginSetup as DataPluginSetup,
 } from '@kbn/data-plugin/server';
@@ -36,7 +37,7 @@ const mockAlertService = alertsServiceMock.create();
 jest.mock('./alerts_service/alerts_service', () => ({
   AlertsService: jest.fn().mockImplementation(() => mockAlertService),
 }));
-import { SharePluginStart } from '@kbn/share-plugin/server';
+import type { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { generateAlertingConfig } from './test_utils';
 
@@ -49,6 +50,7 @@ const sampleRuleType: RuleType<never, never, {}, never, never, 'default', 'recov
   defaultActionGroupId: 'default',
   category: 'test',
   producer: 'test',
+  solution: 'stack',
   async executor() {
     return { state: {} };
   },
@@ -185,6 +187,7 @@ describe('Alerting Plugin', () => {
               setup.registerType({
                 ...sampleRuleType,
 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 minimumLicenseRequired: 'foo' as any,
               })
             ).toThrowErrorMatchingInlineSnapshot(`"\\"foo\\" is not a valid license type"`);
@@ -238,9 +241,150 @@ describe('Alerting Plugin', () => {
               ...sampleRuleType,
               minimumLicenseRequired: 'basic',
               cancelAlertsOnRuleTimeout: false,
+              autoRecoverAlerts: false,
             } as RuleType<never, never, {}, never, never, 'default', never, {}>;
             setup.registerType(ruleType);
             expect(ruleType.cancelAlertsOnRuleTimeout).toBe(false);
+          });
+        });
+
+        describe('disabledRuleTypes', () => {
+          it('should not register type if type is in disabled config', async () => {
+            const context = coreMock.createPluginInitializerContext<AlertingConfig>(
+              generateAlertingConfig({ disabledRuleTypes: ['test'] })
+            );
+            plugin = new AlertingPlugin(context);
+            const setup = plugin.setup(setupMocks, {
+              ...mockPlugins,
+              encryptedSavedObjects: {
+                ...encryptedSavedObjectsMock.createSetup(),
+                canEncrypt: true,
+              },
+            });
+            await waitForSetupComplete(setupMocks);
+
+            setup.registerType(sampleRuleType);
+
+            // @ts-expect-error: private properties cannot be accessed
+            expect(plugin.ruleTypeRegistry.has('test')).toEqual(false);
+            expect(context.logger.get().info).toHaveBeenCalledWith(
+              `rule type \"test\" disabled by configuration`
+            );
+            expect(context.logger.get().warn).not.toHaveBeenCalled();
+          });
+
+          it('should not register type if type is in disabled and enabled config', async () => {
+            const context = coreMock.createPluginInitializerContext<AlertingConfig>(
+              generateAlertingConfig({ disabledRuleTypes: ['test'], enabledRuleTypes: ['test'] })
+            );
+            plugin = new AlertingPlugin(context);
+            const setup = plugin.setup(setupMocks, {
+              ...mockPlugins,
+              encryptedSavedObjects: {
+                ...encryptedSavedObjectsMock.createSetup(),
+                canEncrypt: true,
+              },
+            });
+            await waitForSetupComplete(setupMocks);
+
+            setup.registerType(sampleRuleType);
+
+            // @ts-expect-error: private properties cannot be accessed
+            expect(plugin.ruleTypeRegistry.has('test')).toEqual(false);
+            expect(context.logger.get().info).toHaveBeenCalledWith(
+              `rule type \"test\" disabled by configuration`
+            );
+            expect(context.logger.get().warn).toHaveBeenCalledWith(
+              `rule type \"test\" is both disabled and enabled allow-list. rule type will be disabled.`
+            );
+          });
+        });
+
+        describe('enabledRuleTypes', () => {
+          it('should log warning if enabledRuleTypes is empty array', async () => {
+            const context = coreMock.createPluginInitializerContext<AlertingConfig>(
+              generateAlertingConfig({ enabledRuleTypes: [] })
+            );
+            plugin = new AlertingPlugin(context);
+            const setup = plugin.setup(setupMocks, {
+              ...mockPlugins,
+              encryptedSavedObjects: {
+                ...encryptedSavedObjectsMock.createSetup(),
+                canEncrypt: true,
+              },
+            });
+            await waitForSetupComplete(setupMocks);
+
+            setup.registerType(sampleRuleType);
+
+            // @ts-expect-error: private properties cannot be accessed
+            expect(plugin.ruleTypeRegistry.getAllTypes()).toEqual([]);
+            expect(context.logger.get().warn).toHaveBeenCalledWith(
+              `xpack.alerting.enabledRuleTypes is empty. No rule types will be enabled in the configuration.`
+            );
+          });
+
+          it('should not register type if type is not in enabled config', async () => {
+            const context = coreMock.createPluginInitializerContext<AlertingConfig>(
+              generateAlertingConfig({ enabledRuleTypes: ['not-test'] })
+            );
+            plugin = new AlertingPlugin(context);
+            const setup = plugin.setup(setupMocks, {
+              ...mockPlugins,
+              encryptedSavedObjects: {
+                ...encryptedSavedObjectsMock.createSetup(),
+                canEncrypt: true,
+              },
+            });
+            await waitForSetupComplete(setupMocks);
+
+            setup.registerType(sampleRuleType);
+
+            // @ts-expect-error: private properties cannot be accessed
+            expect(plugin.ruleTypeRegistry.has('test')).toEqual(false);
+            expect(context.logger.get().info).toHaveBeenCalledWith(
+              `rule type \"test\" is not enabled in configuration`
+            );
+          });
+
+          it('should register type if type is in enabled config', async () => {
+            const context = coreMock.createPluginInitializerContext<AlertingConfig>(
+              generateAlertingConfig({ enabledRuleTypes: ['test'] })
+            );
+            plugin = new AlertingPlugin(context);
+            const setup = plugin.setup(setupMocks, {
+              ...mockPlugins,
+              encryptedSavedObjects: {
+                ...encryptedSavedObjectsMock.createSetup(),
+                canEncrypt: true,
+              },
+            });
+            await waitForSetupComplete(setupMocks);
+
+            setup.registerType(sampleRuleType);
+
+            // @ts-expect-error: private properties cannot be accessed
+            expect(plugin.ruleTypeRegistry.has('test')).toEqual(true);
+          });
+
+          it('should register type if enabled config is not set', async () => {
+            const context = coreMock.createPluginInitializerContext<AlertingConfig>(
+              generateAlertingConfig()
+            );
+            plugin = new AlertingPlugin(context);
+            const setup = plugin.setup(setupMocks, {
+              ...mockPlugins,
+              encryptedSavedObjects: {
+                ...encryptedSavedObjectsMock.createSetup(),
+                canEncrypt: true,
+              },
+            });
+            await waitForSetupComplete(setupMocks);
+
+            setup.registerType(sampleRuleType);
+
+            // @ts-expect-error: private properties cannot be accessed
+            expect(plugin.ruleTypeRegistry.has('test')).toEqual(true);
           });
         });
 

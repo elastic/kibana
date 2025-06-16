@@ -40,10 +40,8 @@ export function fetchProvider(getIndexForType: (type: string) => Promise<string>
     const response = await esClient.search<ESResponse>(
       {
         index,
-        body: {
-          query: { term: { type: { value: 'sample-data-telemetry' } } },
-          _source: { includes: ['sample-data-telemetry', 'type', 'updated_at'] },
-        },
+        query: { term: { type: { value: 'sample-data-telemetry' } } },
+        _source: { includes: ['sample-data-telemetry', 'type', 'updated_at'] },
         filter_path: 'hits.hits._id,hits.hits._source',
       },
       {

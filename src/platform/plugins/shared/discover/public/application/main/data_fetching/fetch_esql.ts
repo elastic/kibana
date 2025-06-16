@@ -10,7 +10,7 @@
 import { pluck } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { Query, AggregateQuery, Filter, TimeRange } from '@kbn/es-query';
+import type { Query, AggregateQuery, Filter, TimeRange } from '@kbn/es-query';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -18,8 +18,9 @@ import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { RecordsFetchResponse } from '../../types';
-import type { ProfilesManager } from '../../../context_awareness';
+import type { ScopedProfilesManager } from '../../../context_awareness';
 
 interface EsqlErrorResponse {
   error: {
@@ -32,39 +33,34 @@ export function fetchEsql({
   query,
   inputQuery,
   filters,
-  inputTimeRange,
+  timeRange,
   dataView,
   abortSignal,
   inspectorAdapters,
   data,
   expressions,
-  profilesManager,
+  scopedProfilesManager,
 }: {
   query: Query | AggregateQuery;
   inputQuery?: Query;
   filters?: Filter[];
-  inputTimeRange?: TimeRange;
+  timeRange?: TimeRange;
   dataView: DataView;
   abortSignal?: AbortSignal;
   inspectorAdapters: Adapters;
   data: DataPublicPluginStart;
   expressions: ExpressionsStart;
-  profilesManager: ProfilesManager;
+  scopedProfilesManager: ScopedProfilesManager;
 }): Promise<RecordsFetchResponse> {
-  const timeRange = inputTimeRange ?? data.query.timefilter.timefilter.getTime();
-  return textBasedQueryStateToAstWithValidation({
-    filters,
+  const props = getTextBasedQueryStateToAstProps({
     query,
-    time: timeRange,
-    timeFieldName: dataView.timeFieldName,
     inputQuery,
-    titleForInspector: i18n.translate('discover.inspectorEsqlRequestTitle', {
-      defaultMessage: 'Table',
-    }),
-    descriptionForInspector: i18n.translate('discover.inspectorEsqlRequestDescription', {
-      defaultMessage: 'This request queries Elasticsearch to fetch results for the table.',
-    }),
-  })
+    filters,
+    timeRange,
+    dataView,
+    data,
+  });
+  return textBasedQueryStateToAstWithValidation(props)
     .then((ast) => {
       if (ast) {
         const contract = expressions.execute(ast, null, {
@@ -92,7 +88,7 @@ export function fetchEsql({
                 flattened: row,
               };
 
-              return profilesManager.resolveDocumentProfile({ record });
+              return scopedProfilesManager.resolveDocumentProfile({ record });
             });
           }
         });
@@ -100,8 +96,17 @@ export function fetchEsql({
           if (error) {
             throw new Error(error);
           } else {
+            const adapter = inspectorAdapters.requests;
+            const interceptedWarnings: SearchResponseWarning[] = [];
+            if (adapter) {
+              data.search.showWarnings(adapter, (warning) => {
+                interceptedWarnings.push(warning);
+                return true; // suppress the default behaviour
+              });
+            }
             return {
               records: finalData || [],
+              interceptedWarnings,
               esqlQueryColumns,
               esqlHeaderWarning,
             };
@@ -110,6 +115,7 @@ export function fetchEsql({
       }
       return {
         records: [],
+        interceptedWarnings: [],
         esqlQueryColumns: [],
         esqlHeaderWarning: undefined,
       };
@@ -117,4 +123,33 @@ export function fetchEsql({
     .catch((err) => {
       throw new Error(err.message);
     });
+}
+export function getTextBasedQueryStateToAstProps({
+  query,
+  inputQuery,
+  filters,
+  timeRange,
+  dataView,
+  data,
+}: {
+  query: Query | AggregateQuery;
+  inputQuery?: Query;
+  filters?: Filter[];
+  timeRange?: TimeRange;
+  dataView: DataView;
+  data: DataPublicPluginStart;
+}) {
+  return {
+    filters,
+    query,
+    time: timeRange ?? data.query.timefilter.timefilter.getAbsoluteTime(),
+    timeFieldName: dataView.timeFieldName,
+    inputQuery,
+    titleForInspector: i18n.translate('discover.inspectorEsqlRequestTitle', {
+      defaultMessage: 'Table',
+    }),
+    descriptionForInspector: i18n.translate('discover.inspectorEsqlRequestDescription', {
+      defaultMessage: 'This request queries Elasticsearch to fetch results for the table.',
+    }),
+  };
 }

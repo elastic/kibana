@@ -13,14 +13,23 @@ Object {
       },
       Object {
         "bool": Object {
-          "minimum_should_match": 1,
-          "should": Array [
+          "filter": Array [
             Object {
-              "match_phrase": Object {
-                "test.category": "test",
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match_phrase": Object {
+                      "test.category": "test",
+                    },
+                  },
+                ],
               },
             },
           ],
+          "must": Array [],
+          "must_not": Array [],
+          "should": Array [],
         },
       },
     ],
@@ -33,12 +42,12 @@ Object {
   "_meta": Object {
     "managed": true,
     "managed_by": "observability",
-    "version": 3.3,
+    "version": 3.5,
   },
   "defer_validation": true,
   "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
   "dest": Object {
-    "index": ".slo-observability.sli-v3.3",
+    "index": ".slo-observability.sli-v3.5",
     "pipeline": ".slo-observability.sli.pipeline-irrelevant-1",
   },
   "frequency": "1m",
@@ -54,28 +63,46 @@ Object {
         },
         "filter": Object {
           "bool": Object {
-            "minimum_should_match": 1,
-            "should": Array [
+            "filter": Array [
               Object {
-                "match_phrase": Object {
-                  "test.category": "test",
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "match_phrase": Object {
+                        "test.category": "test",
+                      },
+                    },
+                  ],
                 },
               },
             ],
+            "must": Array [],
+            "must_not": Array [],
+            "should": Array [],
           },
         },
       },
       "_B": Object {
         "filter": Object {
           "bool": Object {
-            "minimum_should_match": 1,
-            "should": Array [
+            "filter": Array [
               Object {
-                "match_phrase": Object {
-                  "test.category": "test",
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "match_phrase": Object {
+                        "test.category": "test",
+                      },
+                    },
+                  ],
                 },
               },
             ],
+            "must": Array [],
+            "must_not": Array [],
+            "should": Array [],
           },
         },
       },
@@ -194,14 +221,23 @@ Object {
           },
           Object {
             "bool": Object {
-              "minimum_should_match": 1,
-              "should": Array [
+              "filter": Array [
                 Object {
-                  "match_phrase": Object {
-                    "test.category": "test",
+                  "bool": Object {
+                    "minimum_should_match": 1,
+                    "should": Array [
+                      Object {
+                        "match_phrase": Object {
+                          "test.category": "test",
+                        },
+                      },
+                    ],
                   },
                 },
               ],
+              "must": Array [],
+              "must_not": Array [],
+              "should": Array [],
             },
           },
         ],
@@ -224,12 +260,12 @@ Object {
   "_meta": Object {
     "managed": true,
     "managed_by": "observability",
-    "version": 3.3,
+    "version": 3.5,
   },
   "defer_validation": true,
   "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
   "dest": Object {
-    "index": ".slo-observability.sli-v3.3",
+    "index": ".slo-observability.sli-v3.5",
     "pipeline": ".slo-observability.sli.pipeline-irrelevant-1",
   },
   "frequency": "1m",
@@ -245,28 +281,46 @@ Object {
         },
         "filter": Object {
           "bool": Object {
-            "minimum_should_match": 1,
-            "should": Array [
+            "filter": Array [
               Object {
-                "match_phrase": Object {
-                  "test.category": "test",
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "match_phrase": Object {
+                        "test.category": "test",
+                      },
+                    },
+                  ],
                 },
               },
             ],
+            "must": Array [],
+            "must_not": Array [],
+            "should": Array [],
           },
         },
       },
       "_B": Object {
         "filter": Object {
           "bool": Object {
-            "minimum_should_match": 1,
-            "should": Array [
+            "filter": Array [
               Object {
-                "match_phrase": Object {
-                  "test.category": "test",
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "match_phrase": Object {
+                        "test.category": "test",
+                      },
+                    },
+                  ],
                 },
               },
             ],
+            "must": Array [],
+            "must_not": Array [],
+            "should": Array [],
           },
         },
       },
@@ -385,14 +439,23 @@ Object {
           },
           Object {
             "bool": Object {
-              "minimum_should_match": 1,
-              "should": Array [
+              "filter": Array [
                 Object {
-                  "match_phrase": Object {
-                    "test.category": "test",
+                  "bool": Object {
+                    "minimum_should_match": 1,
+                    "should": Array [
+                      Object {
+                        "match_phrase": Object {
+                          "test.category": "test",
+                        },
+                      },
+                    ],
                   },
                 },
               ],
+              "must": Array [],
+              "must_not": Array [],
+              "should": Array [],
             },
           },
         ],

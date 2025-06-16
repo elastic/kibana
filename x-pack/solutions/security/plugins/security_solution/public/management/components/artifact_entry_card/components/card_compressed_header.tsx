@@ -9,7 +9,7 @@ import type { ReactNode } from 'react';
 import React, { memo, useCallback } from 'react';
 import type { CommonProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { CardExpandButton } from './card_expand_button';
 import { TextValueDisplay } from './text_value_display';
 import { EffectScope } from './effect_scope';
@@ -80,8 +80,8 @@ CardCompressedHeader.displayName = 'CardCompressedHeader';
 const ButtonIconPlaceHolder = styled.div`
   display: inline-block;
   // Sizes below should match that of the Eui's Button Icon, so that it holds the same space.
-  width: ${({ theme }) => theme.eui.euiSizeL};
-  height: ${({ theme }) => theme.eui.euiSizeL};
+  width: ${({ theme }) => theme.euiTheme.size.l};
+  height: ${({ theme }) => theme.euiTheme.size.l};
 `;
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`

@@ -73,7 +73,6 @@ export const StatefulRowRenderer = React.memo(
     const row = useMemo(() => {
       const result = rowRenderer?.renderRow({
         data: event.ecs,
-        isDraggable: false,
         scopeId: timelineId,
       });
       return result;

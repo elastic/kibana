@@ -41,11 +41,13 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/stack-connectors-plugin",
     "@kbn/actions-plugin",
-    "@kbn/management-cards-navigation",
     "@kbn/discover-plugin",
     "@kbn/logging",
-    "@kbn/integration-assistant-plugin",
+    "@kbn/automatic-import-plugin",
     "@kbn/cloud-security-posture-common",
-    "@kbn/dev-utils"
+    "@kbn/dev-utils",
+    "@kbn/inference-common",
+    "@kbn/ai-assistant-icon",
+    "@kbn/core-application-browser",
   ]
 }

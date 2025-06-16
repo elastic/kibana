@@ -14,7 +14,44 @@ export const loadEndpointDetailsFlyout = (endpointId: string) =>
 
 export const workflowInsightsSelectors = {
   insightsComponentExists: () => cy.getByTestSubj('endpointDetailsInsightsWrapper').should('exist'),
+  addConnectorButtonExists: () => cy.getByTestSubj('addNewConnectorButton').should('exist'),
+  chooseConnectorButtonExistsWithLabel: (label: string) =>
+    cy.getByTestSubj('connector-selector').contains(label),
+  selectConnector: (connectorId?: string) => {
+    cy.getByTestSubj('connector-selector').click();
+    if (connectorId) return cy.getByTestSubj(connectorId).click();
+  },
+  selectScanButton: () => cy.getByTestSubj('workflowInsightsScanButton'),
+  scanButtonShouldBe: (state: 'enabled' | 'disabled') =>
+    workflowInsightsSelectors.selectScanButton().should(`be.${state}`),
+  clickScanButton: () => workflowInsightsSelectors.selectScanButton().click(),
+  insightsResultExists: (index = 0) =>
+    cy.getByTestSubj(`workflowInsightsResult-${index}`).should('exist'),
+  nInsightResultsExist: (n: number) => {
+    for (let i = 0; i < n; i++) {
+      cy.getByTestSubj(`workflowInsightsResult-${i}`).should('exist');
+    }
+    cy.getByTestSubj(`workflowInsightsResult-${n}`).should('not.exist');
+  },
+  clickInsightsResultRemediationButton: (index = 0) =>
+    cy.getByTestSubj(`workflowInsightsResult-${index}-remediation`).click(),
+  insightsEmptyResultsCalloutDoesNotExist: () =>
+    cy.getByTestSubj('workflowInsightsEmptyResultsCallout').should('not.exist'),
+  clickTrustedAppFormSubmissionButton: () =>
+    cy.getByTestSubj('trustedAppsListPage-flyout-submitButton').click(),
   insightsComponentDoesntExist: () =>
     cy.getByTestSubj('endpointDetailsInsightsWrapper').should('not.exist'),
-  addConnectorButtonExists: () => cy.getByTestSubj('addNewConnectorButton').should('exist'),
+  validateErrorToastContent: (content: string) =>
+    cy
+      .getByTestSubj('globalToastList')
+      .within(() => cy.getByTestSubj('euiToastBody').contains(content)),
+  surveySectionExists: () => {
+    cy.getByTestSubj('workflowInsightsSurveySection').should('exist');
+    cy.getByTestSubj('workflowInsightsSurveySection').within(() => {
+      cy.getByTestSubj('workflowInsightsSurveyLink').should('exist');
+    });
+  },
+  surveySectionDoesNotExist: () => {
+    cy.getByTestSubj('workflowInsightsSurveySection').should('not.exist');
+  },
 };

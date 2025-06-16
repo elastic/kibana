@@ -11,9 +11,14 @@ export const getKibanaUpgradeStatus = async (deprecationsClient: DeprecationsCli
   const kibanaDeprecations: DomainDeprecationDetails[] =
     await deprecationsClient.getAllDeprecations();
 
-  const totalCriticalDeprecations = kibanaDeprecations.filter((d) => d.level === 'critical').length;
+  const totalCriticalDeprecations = kibanaDeprecations.filter(
+    (d) => d.deprecationType !== 'api' && d.level === 'critical'
+  ).length;
+
+  const apiDeprecations = kibanaDeprecations.filter((d) => d.deprecationType === 'api');
 
   return {
     totalCriticalDeprecations,
+    apiDeprecations,
   };
 };

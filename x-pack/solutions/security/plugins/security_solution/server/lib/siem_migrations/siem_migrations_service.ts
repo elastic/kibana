@@ -21,11 +21,15 @@ export class SiemMigrationsService {
 
   constructor(private config: ConfigType, logger: LoggerFactory, kibanaVersion: string) {
     this.pluginStop$ = new ReplaySubject(1);
-    this.rules = new SiemRuleMigrationsService(logger, kibanaVersion);
+    this.rules = new SiemRuleMigrationsService(
+      logger,
+      kibanaVersion,
+      config.siemRuleMigrations?.elserInferenceId
+    );
   }
 
   setup(params: SiemMigrationsSetupParams) {
-    if (this.config.experimentalFeatures.siemMigrationsEnabled) {
+    if (!this.config.experimentalFeatures.siemMigrationsDisabled) {
       this.rules.setup({ ...params, pluginStop$: this.pluginStop$ });
     }
   }

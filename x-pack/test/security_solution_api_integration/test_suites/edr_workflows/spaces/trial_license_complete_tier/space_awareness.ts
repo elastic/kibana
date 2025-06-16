@@ -37,15 +37,23 @@ export default function ({ getService }: FtrProviderContext) {
         ensureSpaceIdExists(kbnServer, 'space_b', { log }),
       ]);
 
+      log.info(`Loading endpoint data into space_a`);
+
       dataSpaceA = await endpointTestresources.loadEndpointData({
         spaceId: 'space_a',
         generatorSeed: Math.random().toString(32),
       });
 
+      log.info(`Done with loading of endpoint data into space_a
+
+Loading endpoint data into space_b`);
+
       dataSpaceB = await endpointTestresources.loadEndpointData({
         spaceId: 'space_b',
         generatorSeed: Math.random().toString(32),
       });
+
+      log.info(`Done with loading of endpoint data into space_b`);
 
       log.verbose(
         `mocked data loaded:\nSPACE A:\n${JSON.stringify(

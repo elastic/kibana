@@ -13,21 +13,21 @@ import { TokensFlexItem } from '../helpers';
 interface Props {
   contextId: string;
   eventId: string;
-  isDraggable?: boolean;
   sshSignature: string | null | undefined;
   sshMethod: string | null | undefined;
+  scopeId: string;
 }
 
 export const AuthSsh = React.memo<Props>(
-  ({ contextId, eventId, isDraggable, sshSignature, sshMethod }) => (
+  ({ contextId, eventId, sshSignature, sshMethod, scopeId }) => (
     <>
       {sshSignature != null && (
         <TokensFlexItem grow={false} component="span">
           <DraggableBadge
+            scopeId={scopeId}
             contextId={contextId}
             eventId={eventId}
             field="system.audit.package.name"
-            isDraggable={isDraggable}
             value={sshSignature}
             iconType="document"
             isAggregatable={true}
@@ -38,10 +38,10 @@ export const AuthSsh = React.memo<Props>(
       {sshMethod != null && (
         <TokensFlexItem grow={false} component="span">
           <DraggableBadge
+            scopeId={scopeId}
             contextId={contextId}
             eventId={eventId}
             field="system.audit.package.version"
-            isDraggable={isDraggable}
             value={sshMethod}
             iconType="document"
             isAggregatable={true}

@@ -8,6 +8,42 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
+function getBaseUrl(spaceId?: string) {
+  return spaceId ? `/s/${spaceId}` : '';
+}
+
+export async function pollResult(
+  supertestAgent: any,
+  actionId: string,
+  nbAgentsAck: number,
+  verifyActionResult: Function,
+  spaceId?: string
+) {
+  await new Promise((resolve, reject) => {
+    let attempts = 0;
+    const intervalId = setInterval(async () => {
+      if (attempts > 4) {
+        clearInterval(intervalId);
+        reject(new Error('action timed out'));
+      }
+      ++attempts;
+      const {
+        body: { items: actionStatuses },
+      } = await supertestAgent
+        .get(`${getBaseUrl(spaceId)}/api/fleet/agents/action_status`)
+        .set('kbn-xsrf', 'xxx');
+      const action = actionStatuses.find((a: any) => a.actionId === actionId);
+      if (action && action.nbAgentsAck === nbAgentsAck) {
+        clearInterval(intervalId);
+        await verifyActionResult();
+        resolve({});
+      }
+    }, 3000);
+  }).catch((e) => {
+    throw e;
+  });
+}
+
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const esArchiver = getService('esArchiver');
@@ -66,34 +102,6 @@ export default function (providerContext: FtrProviderContext) {
         expect(agent2data.body.item.tags).to.eql(['existingTag']);
       });
 
-      async function pollResult(
-        actionId: string,
-        nbAgentsAck: number,
-        verifyActionResult: Function
-      ) {
-        await new Promise((resolve, reject) => {
-          let attempts = 0;
-          const intervalId = setInterval(async () => {
-            if (attempts > 4) {
-              clearInterval(intervalId);
-              reject(new Error('action timed out'));
-            }
-            ++attempts;
-            const {
-              body: { items: actionStatuses },
-            } = await supertest.get(`/api/fleet/agents/action_status`).set('kbn-xsrf', 'xxx');
-            const action = actionStatuses.find((a: any) => a.actionId === actionId);
-            if (action && action.nbAgentsAck === nbAgentsAck) {
-              clearInterval(intervalId);
-              await verifyActionResult();
-              resolve({});
-            }
-          }, 1000);
-        }).catch((e) => {
-          throw e;
-        });
-      }
-
       it('should bulk update tags of multiple agents by kuery - add', async () => {
         const { body: actionBody } = await supertest
           .post(`/api/fleet/agents/bulk_update_agent_tags`)
@@ -114,7 +122,7 @@ export default function (providerContext: FtrProviderContext) {
           expect(body.total).to.eql(4);
         };
 
-        await pollResult(actionId, 4, verifyActionResult);
+        await pollResult(supertest, actionId, 4, verifyActionResult);
       });
 
       it('should bulk update tags of multiple agents by kuery - remove', async () => {
@@ -137,7 +145,7 @@ export default function (providerContext: FtrProviderContext) {
           expect(body.total).to.eql(0);
         };
 
-        await pollResult(actionId, 2, verifyActionResult);
+        await pollResult(supertest, actionId, 2, verifyActionResult);
       });
 
       it('should return 200 also if the kuery is valid', async () => {

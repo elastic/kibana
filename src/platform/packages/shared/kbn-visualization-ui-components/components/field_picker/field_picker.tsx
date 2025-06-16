@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './field_picker.scss';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import classNames from 'classnames';
 import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiComboBoxProps, useEuiTheme } from '@elastic/eui';
 import { FieldIcon } from '@kbn/field-utils/src/components/field_icon';
 import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
 import type { FieldOptionValue, FieldOption } from './types';
@@ -43,6 +41,7 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>(
     ...rest
   } = props;
 
+  const { euiTheme } = useEuiTheme();
   const [selectedOption, setSelectedOption] = React.useState(activeField);
 
   let maxLabelLength = 0;
@@ -63,10 +62,10 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>(
                 className="eui-alignMiddle"
               />
             ) : null,
-            className: classNames({
-              'lnFieldPicker__option--incompatible': !fieldOption.compatible,
-              'lnFieldPicker__option--nonExistant': !fieldOptionExists,
-            }),
+            css: {
+              color: !fieldOption.compatible ? euiTheme.colors.lightShade : undefined,
+              backgroundColor: !fieldOptionExists ? euiTheme.colors.lightestShade : undefined,
+            },
           };
         }),
       };
@@ -77,10 +76,10 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>(
       prepend: otherAttr.value.dataType ? (
         <FieldIcon type={otherAttr.value.dataType} fill="none" className="eui-alignMiddle" />
       ) : null,
-      className: classNames({
-        'lnFieldPicker__option--incompatible': !compatible,
-        'lnFieldPicker__option--nonExistant': !exists,
-      }),
+      css: {
+        color: !compatible ? euiTheme.colors.lightShade : undefined,
+        backgroundColor: !exists ? euiTheme.colors.lightestShade : undefined,
+      },
     };
   });
 

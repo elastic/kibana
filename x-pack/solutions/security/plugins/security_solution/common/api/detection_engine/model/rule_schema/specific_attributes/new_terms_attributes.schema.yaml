@@ -10,7 +10,11 @@ components:
       type: array
       items:
         type: string
+      description: Fields to monitor for new values.
       minItems: 1
       maxItems: 3
     HistoryWindowStart:
-      $ref: '../../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      type: string
+      format: nonempty
+      minLength: 1
+      description: Start date to use when checking if a term has been seen before. Supports relative dates – for example, now-30d will search the last 30 days of data when checking if a term is new. We do not recommend using absolute dates, which can cause issues with rule performance due to querying increasing amounts of data over time.

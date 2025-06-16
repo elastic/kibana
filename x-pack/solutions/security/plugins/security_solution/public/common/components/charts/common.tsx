@@ -17,12 +17,12 @@ import type {
   BarSeriesStyle,
   Theme,
 } from '@elastic/charts';
-import { LEGACY_DARK_THEME, LEGACY_LIGHT_THEME, Position } from '@elastic/charts';
+import { Position } from '@elastic/charts';
 import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
-import { useDarkMode } from '../../lib/kibana';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 
 export const defaultChartHeight = '100%';
 export const defaultChartWidth = '100%';
@@ -112,9 +112,7 @@ const theme: PartialTheme = {
   },
 };
 export const useThemes = (): { baseTheme: Theme; theme: PartialTheme } => {
-  const isDarkMode = useDarkMode();
-  // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-  const baseTheme = isDarkMode ? LEGACY_DARK_THEME : LEGACY_LIGHT_THEME;
+  const baseTheme = useElasticChartsTheme();
   return {
     baseTheme,
     theme,

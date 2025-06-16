@@ -26,6 +26,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const log = getService('log');
   const retry = getService('retry');
+  const browser = getService('browser');
+
+  const loadAlertsPage = () =>
+    pageObjects.common.navigateToUrl('management', 'insightsAndAlerting/triggersActionsAlerts', {
+      shouldUseHashForSubUrl: false,
+    });
 
   describe('Stack alerts page', function () {
     describe('Loads the page with limited privileges', () => {
@@ -39,27 +45,26 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('Loads the page', async () => {
-        await pageObjects.common.navigateToUrl(
-          'management',
-          'insightsAndAlerting/triggersActionsAlerts',
-          {
-            shouldUseHashForSubUrl: false,
-          }
-        );
+        await loadAlertsPage();
         const headingText = await pageObjects.triggersActionsUI.getSectionHeadingText();
         expect(headingText).to.be('Alerts');
+      });
+
+      it('Loads the page with a pre-saved filters configuration', async () => {
+        await pageObjects.common.navigateToUrl('management');
+        await browser.setLocalStorageItem(
+          'alertsSearchBar.default.filterControls',
+          `{"initialChildControlState":{"0":{"type":"optionsListControl","order":0,"hideExclude":true,"hideSort":true,"placeholder":"","width":"small","grow":true,"dataViewId":"unified-alerts-dv","title":"Status","fieldName":"kibana.alert.status","selectedOptions":["active"],"hideActionBar":true,"persist":true,"hideExists":true},"1":{"type":"optionsListControl","order":1,"hideExclude":true,"hideSort":true,"placeholder":"","width":"small","grow":true,"dataViewId":"unified-alerts-dv","title":"Rule","fieldName":"kibana.alert.rule.name","hideExists":true},"2":{"type":"optionsListControl","order":2,"hideExclude":true,"hideSort":true,"placeholder":"","width":"small","grow":true,"dataViewId":"unified-alerts-dv","title":"Group","fieldName":"kibana.alert.group.value"},"3":{"type":"optionsListControl","order":3,"hideExclude":true,"hideSort":true,"placeholder":"","width":"small","grow":true,"dataViewId":"unified-alerts-dv","title":"Tags","fieldName":"tags"}},"labelPosition":"oneLine","chainingSystem":"HIERARCHICAL","autoApplySelections":true,"ignoreParentSettings":{"ignoreValidations":true},"editorConfig":{"hideWidthSettings":true,"hideDataViewSelector":true,"hideAdditionalSettings":true}}`
+        );
+        await loadAlertsPage();
+        const filtersBar = await pageObjects.triggersActionsUI.getFilterGroupWrapper();
+        expect(filtersBar).to.not.be(null);
       });
 
       describe('feature filters', function () {
         this.tags('skipFIPS');
         it('Shows only allowed feature filters', async () => {
-          await pageObjects.common.navigateToUrl(
-            'management',
-            'insightsAndAlerting/triggersActionsAlerts',
-            {
-              shouldUseHashForSubUrl: false,
-            }
-          );
+          await loadAlertsPage();
 
           await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -90,13 +95,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('Loads the page but shows missing permission prompt', async () => {
-        await pageObjects.common.navigateToUrl(
-          'management',
-          'insightsAndAlerting/triggersActionsAlerts',
-          {
-            shouldUseHashForSubUrl: false,
-          }
-        );
+        await loadAlertsPage();
         const exists = await testSubjects.exists('noPermissionPrompt');
         expect(exists).to.be(true);
       });
@@ -105,13 +104,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('Loads the page', () => {
       beforeEach(async () => {
         await security.testUser.restoreDefaults();
-        await pageObjects.common.navigateToUrl(
-          'management',
-          'insightsAndAlerting/triggersActionsAlerts',
-          {
-            shouldUseHashForSubUrl: false,
-          }
-        );
+        await loadAlertsPage();
       });
 
       after(async () => {

@@ -62,18 +62,16 @@ export function getKibanaInfo(
       'hits.hits._source.service.id',
       'hits.hits._source.service.version',
     ],
-    body: {
-      query: createQuery({
-        type,
-        dsDataset: getKibanaDataset(dataset),
-        metricset: dataset,
-        clusterUuid,
-        uuid: kibanaUuid,
-        metric: KibanaMetric.getMetricFields(),
-      }),
-      collapse: { field: 'kibana_stats.kibana.uuid' },
-      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
-    },
+    query: createQuery({
+      type,
+      dsDataset: getKibanaDataset(dataset),
+      metricset: dataset,
+      clusterUuid,
+      uuid: kibanaUuid,
+      metric: KibanaMetric.getMetricFields(),
+    }),
+    collapse: { field: 'kibana_stats.kibana.uuid' },
+    sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

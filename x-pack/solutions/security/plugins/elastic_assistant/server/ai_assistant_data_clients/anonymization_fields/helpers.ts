@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import {
   AnonymizationFieldCreateProps,
   AnonymizationFieldResponse,
   AnonymizationFieldUpdateProps,
-} from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+} from '@kbn/elastic-assistant-common/impl/schemas';
 import { AuthenticatedUser } from '@kbn/core-security-common';
 import {
   CreateAnonymizationFieldSchema,

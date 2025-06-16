@@ -127,11 +127,11 @@ export async function bulkInsert(
   data: unknown[],
   ids: string[] = []
 ): Promise<void> {
-  const bulk = data.flatMap((d, i) => {
+  const operations = data.flatMap((d, i) => {
     const _id = ids[i] ?? uuidGen();
     return [{ create: { _index: index, _id } }, d];
   });
-  await esClient.bulk({ body: bulk, refresh: 'wait_for' }).catch(() => {});
+  await esClient.bulk({ operations, refresh: 'wait_for' }).catch(() => {});
 }
 
 export function updateTimestamps(data: object[]): object[] {

@@ -7,71 +7,113 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { omit } from 'lodash';
-import { combineLatest, map } from 'rxjs';
+import fastIsEqual from 'fast-deep-equal';
+import { combineLatest, combineLatestWith, debounceTime, map, merge, of } from 'rxjs';
 
 import {
+  apiHasLastSavedChildState,
   childrenUnsavedChanges$,
   initializeUnsavedChanges,
   type PresentationContainer,
 } from '@kbn/presentation-containers';
 import {
   apiPublishesUnsavedChanges,
-  type PublishesUnsavedChanges,
-  type StateComparators,
+  PublishingSubject,
+  SerializedPanelState,
 } from '@kbn/presentation-publishing';
 
-import type { ControlGroupRuntimeState, ControlPanelsState } from '../../common';
+import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
+import type { ControlGroupSerializedState, ControlPanelsState } from '../../common';
 import { apiPublishesAsyncFilters } from '../controls/data_controls/publishes_async_filters';
 import { getControlsInOrder, type ControlsInOrder } from './init_controls_manager';
+import { deserializeControlGroup } from './utils/serialization_utils';
+import { ControlGroupEditorState } from './types';
+import { defaultEditorState, editorStateComparators } from './initialize_editor_state_manager';
 
-export type ControlGroupComparatorState = Pick<
-  ControlGroupRuntimeState,
-  'autoApplySelections' | 'chainingSystem' | 'ignoreParentSettings' | 'labelPosition'
-> & {
-  controlsInOrder: ControlsInOrder;
-};
+export function initializeControlGroupUnsavedChanges({
+  applySelections,
+  children$,
+  controlGroupId,
+  editorStateManager,
+  layout$,
+  parentApi,
+  resetControlsUnsavedChanges,
+  serializeControlGroupState,
+}: {
+  applySelections: () => void;
+  children$: PresentationContainer['children$'];
+  controlGroupId: string;
+  editorStateManager: StateManager<ControlGroupEditorState>;
+  layout$: PublishingSubject<ControlsInOrder>;
+  parentApi: unknown;
+  resetControlsUnsavedChanges: (lastSavedControlsState: ControlPanelsState) => void;
+  serializeControlGroupState: () => SerializedPanelState<ControlGroupSerializedState>;
+}) {
+  function getLastSavedControlsState() {
+    if (!apiHasLastSavedChildState<ControlGroupSerializedState>(parentApi)) {
+      return {};
+    }
+    const lastSavedControlGroupState = parentApi.getLastSavedStateForChild(controlGroupId);
+    return lastSavedControlGroupState
+      ? deserializeControlGroup(lastSavedControlGroupState).initialChildControlState
+      : {};
+  }
 
-export function initializeControlGroupUnsavedChanges(
-  applySelections: () => void,
-  children$: PresentationContainer['children$'],
-  comparators: StateComparators<ControlGroupComparatorState>,
-  snapshotControlsRuntimeState: () => ControlPanelsState,
-  resetControlsUnsavedChanges: () => void,
-  parentApi: unknown,
-  lastSavedRuntimeState: ControlGroupRuntimeState
-) {
-  const controlGroupUnsavedChanges = initializeUnsavedChanges<ControlGroupComparatorState>(
-    {
-      autoApplySelections: lastSavedRuntimeState.autoApplySelections,
-      chainingSystem: lastSavedRuntimeState.chainingSystem,
-      controlsInOrder: getControlsInOrder(lastSavedRuntimeState.initialChildControlState),
-      ignoreParentSettings: lastSavedRuntimeState.ignoreParentSettings,
-      labelPosition: lastSavedRuntimeState.labelPosition,
-    },
+  function getLastSavedStateForControl(controlId: string) {
+    const controlState = getLastSavedControlsState()[controlId];
+    return controlState ? { rawState: controlState } : undefined;
+  }
+
+  const lastSavedControlsState$ = apiHasLastSavedChildState<ControlGroupSerializedState>(parentApi)
+    ? parentApi.lastSavedStateForChild$(controlGroupId).pipe(map(() => getLastSavedControlsState()))
+    : of({});
+
+  const controlGroupEditorUnsavedChangesApi = initializeUnsavedChanges<ControlGroupEditorState>({
+    uuid: controlGroupId,
     parentApi,
-    comparators
+    serializeState: serializeControlGroupState,
+    anyStateChange$: merge(editorStateManager.anyStateChange$),
+    getComparators: () => editorStateComparators,
+    defaultState: defaultEditorState,
+    onReset: (lastSaved) => {
+      editorStateManager.reinitializeState(lastSaved?.rawState);
+    },
+  });
+
+  const hasLayoutChanges$ = layout$.pipe(
+    combineLatestWith(
+      lastSavedControlsState$.pipe(map((controlsState) => getControlsInOrder(controlsState)))
+    ),
+    debounceTime(100),
+    map(([, lastSavedLayout]) => {
+      const currentLayout = layout$.value;
+      return !fastIsEqual(currentLayout, lastSavedLayout);
+    })
+  );
+
+  const hasControlChanges$ = childrenUnsavedChanges$(children$).pipe(
+    map((childrenWithChanges) => {
+      return childrenWithChanges.some(({ hasUnsavedChanges }) => hasUnsavedChanges);
+    })
   );
 
   return {
     api: {
-      unsavedChanges: combineLatest([
-        controlGroupUnsavedChanges.api.unsavedChanges,
-        childrenUnsavedChanges$(children$),
+      lastSavedStateForChild$: (controlId: string) =>
+        lastSavedControlsState$.pipe(map(() => getLastSavedStateForControl(controlId))),
+      getLastSavedStateForChild: getLastSavedStateForControl,
+      hasUnsavedChanges$: combineLatest([
+        controlGroupEditorUnsavedChangesApi.hasUnsavedChanges$,
+        hasControlChanges$,
+        hasLayoutChanges$,
       ]).pipe(
-        map(([unsavedControlGroupState, unsavedControlsState]) => {
-          const unsavedChanges: Partial<ControlGroupRuntimeState> = unsavedControlGroupState
-            ? omit(unsavedControlGroupState, 'controlsInOrder')
-            : {};
-          if (unsavedControlsState || unsavedControlGroupState?.controlsInOrder) {
-            unsavedChanges.initialChildControlState = snapshotControlsRuntimeState();
-          }
-          return Object.keys(unsavedChanges).length ? unsavedChanges : undefined;
+        map(([hasUnsavedControlGroupChanges, hasControlChanges, hasLayoutChanges]) => {
+          return hasUnsavedControlGroupChanges || hasControlChanges || hasLayoutChanges;
         })
       ),
-      asyncResetUnsavedChanges: async () => {
-        controlGroupUnsavedChanges.api.resetUnsavedChanges();
-        resetControlsUnsavedChanges();
+      resetUnsavedChanges: async () => {
+        controlGroupEditorUnsavedChangesApi.resetUnsavedChanges();
+        resetControlsUnsavedChanges(getLastSavedControlsState());
 
         const filtersReadyPromises: Array<Promise<void>> = [];
         Object.values(children$.value).forEach((controlApi) => {
@@ -83,12 +125,10 @@ export function initializeControlGroupUnsavedChanges(
 
         await Promise.all(filtersReadyPromises);
 
-        if (!comparators.autoApplySelections[0].value) {
+        if (!editorStateManager.api.autoApplySelections$.value) {
           applySelections();
         }
       },
-    } as Pick<PublishesUnsavedChanges, 'unsavedChanges'> & {
-      asyncResetUnsavedChanges: () => Promise<void>;
     },
   };
 }

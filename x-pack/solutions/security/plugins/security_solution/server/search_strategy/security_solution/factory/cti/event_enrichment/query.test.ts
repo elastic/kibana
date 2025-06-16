@@ -12,7 +12,7 @@ describe('buildEventEnrichmentQuery', () => {
   it('converts each event field/value into a named filter', () => {
     const options = buildEventEnrichmentRequestOptionsMock();
     const query = buildEventEnrichmentQuery(options);
-    expect(query.body?.query?.bool?.should).toEqual(
+    expect(query.query?.bool?.should).toEqual(
       expect.arrayContaining([
         {
           match: {
@@ -31,7 +31,7 @@ describe('buildEventEnrichmentQuery', () => {
   it('filters on indicator events', () => {
     const options = buildEventEnrichmentRequestOptionsMock();
     const query = buildEventEnrichmentQuery(options);
-    expect(query.body?.query?.bool?.filter).toEqual(
+    expect(query.query?.bool?.filter).toEqual(
       expect.arrayContaining([{ term: { 'event.type': 'indicator' } }])
     );
   });
@@ -39,7 +39,7 @@ describe('buildEventEnrichmentQuery', () => {
   it('includes the specified timerange', () => {
     const options = buildEventEnrichmentRequestOptionsMock();
     const query = buildEventEnrichmentQuery(options);
-    expect(query.body?.query?.bool?.filter).toEqual(
+    expect(query.query?.bool?.filter).toEqual(
       expect.arrayContaining([
         {
           range: {
@@ -57,7 +57,7 @@ describe('buildEventEnrichmentQuery', () => {
   it('requests all fields', () => {
     const options = buildEventEnrichmentRequestOptionsMock();
     const query = buildEventEnrichmentQuery(options);
-    expect(query.body?.fields).toEqual([
+    expect(query.fields).toEqual([
       { field: '*', include_unmapped: true },
       {
         field: '@timestamp',
@@ -77,7 +77,7 @@ describe('buildEventEnrichmentQuery', () => {
   it('excludes _source', () => {
     const options = buildEventEnrichmentRequestOptionsMock();
     const query = buildEventEnrichmentQuery(options);
-    expect(query.body?._source).toEqual(false);
+    expect(query._source).toEqual(false);
   });
 
   it('includes specified filters', () => {
@@ -88,6 +88,6 @@ describe('buildEventEnrichmentQuery', () => {
 
     const options = buildEventEnrichmentRequestOptionsMock({ filterQuery });
     const query = buildEventEnrichmentQuery(options);
-    expect(query.body?.query?.bool?.filter).toEqual(expect.arrayContaining([filterQuery]));
+    expect(query.query?.bool?.filter).toEqual(expect.arrayContaining([filterQuery]));
   });
 });

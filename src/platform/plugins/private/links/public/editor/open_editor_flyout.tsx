@@ -60,7 +60,7 @@ export async function openEditorFlyout({
 
   const parentDashboardId =
     parentDashboard && apiPublishesSavedObjectId(parentDashboard)
-      ? parentDashboard.savedObjectId.value
+      ? parentDashboard.savedObjectId$.value
       : undefined;
 
   return new Promise<LinksRuntimeState | undefined>((resolve) => {
@@ -142,7 +142,6 @@ export async function openEditorFlyout({
         ownFocus: true,
         onClose: onCancel,
         outsideClickCloses: false,
-        className: 'linksPanelEditor',
         'data-test-subj': 'links--panelEditor--flyout',
       }
     );

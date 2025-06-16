@@ -37,7 +37,13 @@ export const createFlaskAgentInstructions = (commonOptions: AgentInstructions): 
             })}
           </EuiMarkdownFormat>
           <EuiSpacer />
-          <EuiCodeBlock language="bash" isCopyable={true}>
+          <EuiCodeBlock
+            language="bash"
+            isCopyable={true}
+            copyAriaLabel={i18n.translate('xpack.apm.onboarding.flask.install.copyAriaLabel', {
+              defaultMessage: 'Copy the code to install the APM agent for Flask',
+            })}
+          >
             $ pip install elastic-apm[flask]
           </EuiCodeBlock>
         </>

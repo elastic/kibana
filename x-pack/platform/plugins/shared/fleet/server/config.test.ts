@@ -110,6 +110,13 @@ describe('Config schema', () => {
       });
     }).not.toThrow();
   });
+  it('should allow to specify xpack.fleet.agentless.isDefault flag ', () => {
+    expect(() => {
+      config.schema.validate({
+        agentless: { isDefault: true },
+      });
+    }).not.toThrow();
+  });
   it('should allow to specify a agentless.api.url in xpack.fleet.agentless.api without the tls config  ', () => {
     expect(() => {
       config.schema.validate({
@@ -150,7 +157,7 @@ describe('Config schema', () => {
 
     it('should not add a depreciations when enabling an existing experimental feature', () => {
       const res = applyConfigDeprecations({
-        enableExperimental: ['displayAgentMetrics'],
+        enableExperimental: ['useSpaceAwareness'],
       });
 
       expect(res.messages).toMatchInlineSnapshot(`Array []`);

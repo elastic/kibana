@@ -15,7 +15,7 @@ import { AddTimelineButton } from './add_timeline_button';
 import { timelineActions } from '../../store';
 import { TimelineSaveStatus } from '../save_status';
 import { AddToFavoritesButton } from '../add_to_favorites';
-import { TimelineEventsCountBadge } from '../../../common/hooks/use_timeline_events_count';
+import TimelineQueryTabEventsCount from '../timeline/tabs/query/events_count';
 
 interface TimelineBottomBarProps {
   /**
@@ -63,9 +63,9 @@ export const TimelineBottomBar = React.memo<TimelineBottomBarProps>(
               {title}
             </EuiLink>
           </EuiFlexItem>
-          {!show && ( // this is a hack because TimelineEventsCountBadge is using react-reverse-portal so the component which is used in multiple places cannot be visible in multiple places at the same time
+          {!show && ( // We only want to show this when the timeline modal is closed
             <EuiFlexItem grow={false} data-test-subj="timeline-event-count-badge">
-              <TimelineEventsCountBadge />
+              <TimelineQueryTabEventsCount timelineId={timelineId} />
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>

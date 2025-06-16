@@ -45,6 +45,7 @@ export interface IndicesTestBed extends TestBed<TestSubjects> {
     clickCreateIndexButton: () => Promise<void>;
     clickCreateIndexCancelButton: () => Promise<void>;
     clickCreateIndexSaveButton: () => Promise<void>;
+    selectIndexMode: (indexModeTestSubj: string) => Promise<void>;
   };
   findDataStreamDetailPanel: () => ReactWrapper;
   findDataStreamDetailPanelTitle: () => string;
@@ -186,6 +187,21 @@ export const setup = async (
     component.update();
   };
 
+  const selectIndexMode = async (indexModeTestSubj: string) => {
+    const { find, exists, component } = testBed;
+
+    await act(async () => {
+      find('indexModeField').simulate('click');
+    });
+    component.update();
+
+    expect(exists(indexModeTestSubj)).toBe(true);
+    await act(async () => {
+      find(indexModeTestSubj).simulate('click');
+    });
+    component.update();
+  };
+
   return {
     ...testBed,
     actions: {
@@ -202,6 +218,7 @@ export const setup = async (
       clickCreateIndexButton,
       clickCreateIndexCancelButton,
       clickCreateIndexSaveButton,
+      selectIndexMode,
     },
     findDataStreamDetailPanel,
     findDataStreamDetailPanelTitle,

@@ -28,6 +28,7 @@ export const UptimeDataViewContextProvider: FC<
     }
     // FIXME: Dario thinks there is a better way to do this but
     // he's getting tired and maybe the Uptime folks can fix it
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [heartbeatIndices, indexStatus?.indexExists]);
 
   return <UptimeDataViewContext.Provider value={data!} children={children} />;

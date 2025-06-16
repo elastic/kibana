@@ -6,7 +6,7 @@
  */
 
 import { kqlQuery, rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { ServicesResponse } from '../../../common/service_map/types';
 import { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
@@ -23,40 +23,34 @@ export async function getServiceStats({
   serviceGroupKuery,
   serviceName,
   kuery,
-}: IEnvOptions & { maxNumberOfServices: number }) {
+}: IEnvOptions & { maxNumberOfServices: number }): Promise<ServicesResponse[]> {
   const params = {
     apm: {
-      events: [
-        getProcessorEventForTransactions(searchAggregatedTransactions),
-        ProcessorEvent.metric as const,
-        ProcessorEvent.error as const,
-      ],
+      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...termsQuery(SERVICE_NAME, serviceName),
-            ...kqlQuery(serviceGroupKuery),
-            ...kqlQuery(kuery),
-          ],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...termsQuery(SERVICE_NAME, serviceName),
+          ...kqlQuery(serviceGroupKuery),
+          ...kqlQuery(kuery),
+        ],
       },
-      aggs: {
-        services: {
-          terms: {
-            field: SERVICE_NAME,
-            size: maxNumberOfServices,
-          },
-          aggs: {
-            agent_name: {
-              terms: {
-                field: AGENT_NAME,
-              },
+    },
+    aggs: {
+      services: {
+        terms: {
+          field: SERVICE_NAME,
+          size: maxNumberOfServices,
+        },
+        aggs: {
+          agent_name: {
+            terms: {
+              field: AGENT_NAME,
             },
           },
         },

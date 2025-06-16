@@ -157,7 +157,8 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      describe('upgrade', function () {
+      // FLAKY: https://github.com/elastic/kibana/issues/214862
+      describe.skip('upgrade', function () {
         withTestPackage('package_policy_upgrade', '0.2.0-add-non-required-test-var');
         it('should respond with an error', async function () {
           // upgrade policy to 0.2.0
@@ -1315,6 +1316,7 @@ export default function (providerContext: FtrProviderContext) {
         }
 
         expectedAssets.push({ id: 'logs@custom', type: 'component_template' });
+        expectedAssets.push({ id: 'integration_to_input@custom', type: 'component_template' });
       });
 
       afterEach(async function () {

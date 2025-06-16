@@ -9,7 +9,7 @@ import { concatMap, delay, finalize, Observable, of, scan, timestamp } from 'rxj
 import type { Dispatch, SetStateAction } from 'react';
 import type { PromptObservableState } from './types';
 import { API_ERROR } from '../translations';
-const MIN_DELAY = 35;
+const MIN_DELAY = 10;
 
 interface StreamObservable {
   isError: boolean;

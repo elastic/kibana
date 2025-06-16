@@ -9,13 +9,13 @@
 
 import { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { DataView, DataViewsContract, FieldSpec } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewsContract, FieldSpec } from '@kbn/data-views-plugin/common';
 import { isSiemRuleType } from '@kbn/rule-data-utils';
 import type { ToastsStart, HttpStart } from '@kbn/core/public';
 
-import { DataViewBase } from '@kbn/es-query';
+import type { DataViewBase } from '@kbn/es-query';
 import type { FieldDescriptor } from '@kbn/data-views-plugin/server';
-import { BrowserFields } from '@kbn/alerting-types';
+import type { BrowserFields } from '@kbn/alerting-types';
 import { useVirtualDataViewQuery } from './use_virtual_data_view_query';
 import { useFetchAlertsFieldsQuery } from './use_fetch_alerts_fields_query';
 import { useFetchAlertsIndexNamesQuery } from './use_fetch_alerts_index_names_query';
@@ -87,7 +87,8 @@ const resolveDataView = ({
  *
  * @returns
  * A {@link DataViewBase} object, intentionally not typed as a complete {@link DataView} object
- * since only Security Solution uses an actual in-memory data view (when `featureIds = ['siem']).
+ * since only Security Solution uses an actual in-memory data view (when `ruleTypeIds` only contains
+ * siem rule types).
  * In all other cases the data view is computed from the index names and fields fetched from the
  * alerting APIs.
  */
@@ -109,7 +110,7 @@ export const useAlertsDataView = ({
   } = useFetchAlertsIndexNamesQuery(
     { http, ruleTypeIds },
     {
-      // Don't fetch index names when featureIds includes both Security Solution and other features
+      // Don't fetch index names when ruleTypeIds includes both Security Solution and other features
       enabled: !!ruleTypeIds.length && (isOnlySecurity || !includesSecurity),
     }
   );
@@ -133,7 +134,7 @@ export const useAlertsDataView = ({
       indexNames,
     },
     {
-      // Create data view only when featureIds = ['siem'] and indexNames have been fetched
+      // Create data view only when ruleTypeIds only includes siem rules and indexNames have been fetched
       enabled: isOnlySecurity && !!indexNames?.length,
     }
   );

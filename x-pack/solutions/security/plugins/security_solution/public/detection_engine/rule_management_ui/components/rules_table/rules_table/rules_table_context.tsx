@@ -15,7 +15,9 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { getGapRange } from '../../../../rule_gaps/api/hooks/utils';
 import { useFetchRulesSnoozeSettingsQuery } from '../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings_query';
+import { useGetGapsSummaryByRuleIds } from '../../../../rule_gaps/api/hooks/use_get_gaps_summary_by_rule_id';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
@@ -38,6 +40,7 @@ import {
 } from './rules_table_defaults';
 import { RuleSource } from './rules_table_saved_state';
 import { useRulesTableSavedState } from './use_rules_table_saved_state';
+import { defaultRangeValue } from '../../../../rule_gaps/constants';
 
 interface RulesSnoozeSettings {
   /**
@@ -209,6 +212,8 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     enabled: savedFilter?.enabled,
     ruleExecutionStatus:
       savedFilter?.ruleExecutionStatus ?? DEFAULT_FILTER_OPTIONS.ruleExecutionStatus,
+    gapSearchRange: DEFAULT_FILTER_OPTIONS.gapSearchRange,
+    showRulesWithGaps: false,
   });
 
   const [sortingOptions, setSortingOptions] = useState<SortingOptions>({
@@ -226,6 +231,10 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
   const [page, setPage] = useState(savedPagination?.page ?? DEFAULT_PAGE);
   const [perPage, setPerPage] = useState(savedPagination?.perPage ?? DEFAULT_RULES_PER_PAGE);
   const [selectedRuleIds, setSelectedRuleIds] = useState<string[]>([]);
+  const [gapRangeForSearch, setGapRangeForSearch] = useState<{
+    start: string;
+    end: string;
+  }>();
   const autoRefreshBeforePause = useRef<boolean | null>(null);
 
   const isActionInProgress = loadingRules.ids.length > 0;
@@ -280,6 +289,14 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     }
   }, [selectedRuleIds, isRefreshOn]);
 
+  useEffect(() => {
+    if (filterOptions.showRulesWithGaps) {
+      setGapRangeForSearch(getGapRange(filterOptions.gapSearchRange ?? defaultRangeValue));
+    } else {
+      setGapRangeForSearch(undefined);
+    }
+  }, [filterOptions.showRulesWithGaps, filterOptions.gapSearchRange]);
+
   // Fetch rules
   const {
     data: { rules, total } = { rules: [], total: 0 },
@@ -294,6 +311,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       filterOptions,
       sortingOptions,
       pagination,
+      ...(gapRangeForSearch ? { gapsRange: gapRangeForSearch } : {}),
     },
     {
       // We don't need refreshes on windows focus and reconnects if auto-refresh if off
@@ -316,16 +334,25 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     { enabled: rules.length > 0 }
   );
 
-  const refetchRulesAndSnoozeSettings = useCallback(async () => {
-    const response = await refetch();
-    await refetchSnoozeSettings();
+  const { data: rulesGapInfoByRuleIds, refetch: refetchGapInfo } = useGetGapsSummaryByRuleIds(
+    {
+      ruleIds: rules.map((x) => x.id),
+      gapRange: filterOptions.gapSearchRange ?? defaultRangeValue,
+    },
+    {
+      enabled: rules.length > 0,
+    }
+  );
 
+  const refetchRulesAndRelatedData = useCallback(async () => {
+    const response = await refetch();
+    await Promise.allSettled([refetchSnoozeSettings(), refetchGapInfo()]);
     return response;
-  }, [refetch, refetchSnoozeSettings]);
+  }, [refetch, refetchSnoozeSettings, refetchGapInfo]);
 
   const actions = useMemo(
     () => ({
-      reFetchRules: refetchRulesAndSnoozeSettings,
+      reFetchRules: refetchRulesAndRelatedData,
       setFilterOptions: handleFilterOptionsChange,
       setIsAllSelected,
       setIsRefreshOn,
@@ -339,7 +366,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       clearFilters,
     }),
     [
-      refetchRulesAndSnoozeSettings,
+      refetchRulesAndRelatedData,
       handleFilterOptionsChange,
       setIsAllSelected,
       setIsRefreshOn,
@@ -354,10 +381,20 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     ]
   );
 
+  const enrichedRules = useMemo(() => {
+    return rules.map((rule) => {
+      const gapInfo = rulesGapInfoByRuleIds?.data?.find((x) => x.rule_id === rule.id);
+      return {
+        ...rule,
+        gap_info: gapInfo,
+      };
+    });
+  }, [rules, rulesGapInfoByRuleIds]);
+
   const providerValue = useMemo(() => {
     return {
       state: {
-        rules,
+        rules: enrichedRules,
         rulesSnoozeSettings: {
           data: rulesSnoozeSettingsMap ?? {},
           isLoading: isSnoozeSettingsLoading,
@@ -392,7 +429,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       actions,
     };
   }, [
-    rules,
+    enrichedRules,
     rulesSnoozeSettingsMap,
     isSnoozeSettingsLoading,
     isSnoozeSettingsFetching,

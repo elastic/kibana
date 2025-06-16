@@ -91,8 +91,9 @@ describe('CreateCase case', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('create-case-submit')).toBeInTheDocument();
-      expect(screen.getByTestId('create-case-cancel')).toBeInTheDocument();
     });
+
+    expect(screen.getByTestId('create-case-cancel')).toBeInTheDocument();
   });
 
   it('should open modal on cancel click', async () => {
@@ -141,10 +142,7 @@ describe('CreateCase case', () => {
     );
 
     await user.click(screen.getByTestId('create-case-cancel'));
-
-    await waitFor(() => {
-      expect(screen.queryByTestId('cancel-creation-confirmation-modal')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('cancel-creation-confirmation-modal')).toBeInTheDocument();
 
     await user.click(screen.getByTestId('confirmModalCancelButton'));
 

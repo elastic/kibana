@@ -62,6 +62,7 @@ describe('<FieldEditorFlyoutContent />', () => {
       script: { source: 'emit(true)' },
       customLabel: 'cool demo test field',
       format: { id: 'boolean' },
+      popularity: 1,
     };
 
     const { find } = await setup({ fieldToCreate });
@@ -70,6 +71,7 @@ describe('<FieldEditorFlyoutContent />', () => {
     expect(find('nameField.input').props().value).toBe(fieldToCreate.name);
     expect(find('typeField').props().value).toBe(fieldToCreate.type);
     expect(find('scriptField').props().value).toBe(fieldToCreate.script.source);
+    expect(find('editorFieldCount').props().value).toBe(fieldToCreate.popularity.toString());
   });
 
   test('should accept an "onSave" prop', async () => {
@@ -171,6 +173,26 @@ describe('<FieldEditorFlyoutContent />', () => {
         type: 'date',
         script: { source: 'echo("hello")' },
         format: null,
+      });
+
+      await toggleFormRow('popularity');
+      await fields.updatePopularity('5');
+
+      await waitForUpdates();
+
+      await act(async () => {
+        find('fieldSaveButton').simulate('click');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
+      });
+
+      fieldReturned = onSave.mock.calls[onSave.mock.calls.length - 1][0];
+
+      expect(fieldReturned).toEqual({
+        name: 'someName',
+        type: 'date',
+        script: { source: 'echo("hello")' },
+        format: null,
+        popularity: 5,
       });
     });
 

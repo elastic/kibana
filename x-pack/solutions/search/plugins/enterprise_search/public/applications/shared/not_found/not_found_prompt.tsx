@@ -33,7 +33,7 @@ export const NotFoundPrompt: React.FC<Props> = ({
 
   return (
     <KibanaPageTemplate.EmptyPrompt
-      iconType="logoEnterpriseSearch"
+      iconType="logoElasticsearch"
       title={
         <h1>
           {i18n.translate('xpack.enterpriseSearch.notFound.title', {

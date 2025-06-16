@@ -26,7 +26,6 @@ export const plainColumnRenderer: ColumnRenderer = {
     columnName,
     eventId,
     field,
-    isDraggable = true,
     scopeId,
     truncate,
     values,
@@ -34,10 +33,9 @@ export const plainColumnRenderer: ColumnRenderer = {
   }: {
     asPlainText?: boolean;
     columnName: string;
-    eventId: string;
+    eventId?: string;
     field: ColumnHeaderOptions;
     globalFilters?: Filter[];
-    isDraggable?: boolean;
     scopeId: string;
     truncate?: boolean;
     values: string[] | undefined | null;
@@ -46,46 +44,25 @@ export const plainColumnRenderer: ColumnRenderer = {
     if (!Array.isArray(values) || values.length === 0) {
       return getEmptyTagValue();
     }
-    // Draggable columns should render individual fields to give the user
-    // fine-grained control over the individual values
-    if (isDraggable) {
-      return values.map((value, i) => (
-        <FormattedFieldValue
-          asPlainText={asPlainText}
-          contextId={`plain-column-renderer-formatted-field-value-${scopeId}`}
-          eventId={eventId}
-          fieldFormat={typeof field.format === 'string' ? field.format : field?.format?.id ?? ''}
-          fieldName={columnName}
-          isAggregatable={field.aggregatable ?? false}
-          fieldType={field.type ?? ''}
-          isDraggable={isDraggable}
-          key={`plain-column-renderer-formatted-field-value-${scopeId}-${columnName}-${eventId}-${field.id}-${value}-${i}`}
-          linkValue={head(linkValues)}
-          truncate={truncate}
-          value={value}
-        />
-      ));
-    } else {
-      // In case the column isn't draggable, fields are joined
-      // to give users a faster overview of all values.
-      // (note: the filter-related hover actions still produce individual filters for each value)
-      return (
-        <FormattedFieldValue
-          asPlainText={asPlainText}
-          contextId={`plain-column-renderer-formatted-field-value-${scopeId}`}
-          eventId={eventId}
-          fieldFormat={typeof field.format === 'string' ? field.format : field?.format?.id ?? ''}
-          fieldName={columnName}
-          isAggregatable={field.aggregatable ?? false}
-          fieldType={field.type ?? ''}
-          isDraggable={isDraggable}
-          key={`plain-column-renderer-formatted-field-value-${scopeId}-${columnName}-${eventId}-${field.id}`}
-          linkValue={head(linkValues)}
-          truncate={truncate}
-          value={joinValues(values)}
-        />
-      );
-    }
+
+    // In case the column isn't draggable, fields are joined
+    // to give users a faster overview of all values.
+    // (note: the filter-related hover actions still produce individual filters for each value)
+    return (
+      <FormattedFieldValue
+        asPlainText={asPlainText}
+        contextId={`plain-column-renderer-formatted-field-value-${scopeId}`}
+        eventId={eventId}
+        fieldFormat={typeof field.format === 'string' ? field.format : field?.format?.id ?? ''}
+        fieldName={columnName}
+        isAggregatable={field.aggregatable ?? false}
+        fieldType={field.type ?? ''}
+        key={`plain-column-renderer-formatted-field-value-${scopeId}-${columnName}-${eventId}-${field.id}`}
+        linkValue={head(linkValues)}
+        truncate={truncate}
+        value={joinValues(values)}
+      />
+    );
   },
 };
 

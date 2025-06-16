@@ -8,16 +8,13 @@
 import { i18n } from '@kbn/i18n';
 
 import type {
-  FormSchema,
-  ValidationFunc,
   ERROR_CODE,
+  FormSchema,
   ValidationError,
+  ValidationFunc,
 } from '../../../../shared_imports';
 import { FIELD_TYPES, fieldValidators, VALIDATION_TYPES } from '../../../../shared_imports';
-import type {
-  AboutStepRiskScore,
-  AboutStepRule,
-} from '../../../../detections/pages/detection_engine/rules/types';
+import type { AboutStepRiskScore, AboutStepRule } from '../../../common/types';
 import { OptionalFieldLabel } from '../../../rule_creation/components/optional_field_label';
 import { isUrlInvalid } from '../../../../common/utils/validators';
 import { defaultRiskScoreValidator } from '../../validators/default_risk_score_validator';
@@ -29,12 +26,7 @@ const { emptyField } = fieldValidators;
 export const schema: FormSchema<AboutStepRule> = {
   author: {
     type: FIELD_TYPES.COMBO_BOX,
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldAuthorLabel',
-      {
-        defaultMessage: 'Author',
-      }
-    ),
+    label: I18n.AUTHOR_FIELD_LABEL,
     helpText: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldAuthorHelpText',
       {
@@ -209,12 +201,7 @@ export const schema: FormSchema<AboutStepRule> = {
   },
   license: {
     type: FIELD_TYPES.TEXT,
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldLicenseLabel',
-      {
-        defaultMessage: 'License',
-      }
-    ),
+    label: I18n.LICENSE_FIELD_LABEL,
     helpText: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldLicenseHelpText',
       {

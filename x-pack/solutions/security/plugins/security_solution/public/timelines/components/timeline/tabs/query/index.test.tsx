@@ -248,6 +248,8 @@ describe('query tab with unified timeline', () => {
     );
 
     (useUserPrivileges as jest.Mock).mockReturnValue({
+      notesPrivileges: { crud: true, read: true },
+      timelinePrivileges: { crud: true, read: true },
       kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
       endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
       detectionEnginePrivileges: { loading: false, error: undefined, result: undefined },
@@ -362,14 +364,14 @@ describe('query tab with unified timeline', () => {
           'Rows per page: 1'
         );
 
-        expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'true');
+        expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'page');
         expect(screen.getByTestId('pagination-button-2')).toBeVisible();
         expect(screen.queryByTestId('pagination-button-3')).toBeNull();
 
         fireEvent.click(screen.getByTestId('pagination-button-2'));
 
         await waitFor(() => {
-          expect(screen.getByTestId('pagination-button-2')).toHaveAttribute('aria-current', 'true');
+          expect(screen.getByTestId('pagination-button-2')).toHaveAttribute('aria-current', 'page');
         });
       },
       SPECIAL_TEST_TIMEOUT
@@ -391,7 +393,7 @@ describe('query tab with unified timeline', () => {
         expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
         await waitFor(() => {
-          expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'true');
+          expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'page');
           expect(screen.getByTestId('pagination-button-2')).toBeVisible();
         });
         // Go to last page
@@ -401,7 +403,7 @@ describe('query tab with unified timeline', () => {
         });
         fireEvent.click(screen.getByTestId('dscGridSampleSizeFetchMoreLink'));
         await waitFor(() => {
-          expect(screen.getByTestId('pagination-button-2')).toHaveAttribute('aria-current', 'true');
+          expect(screen.getByTestId('pagination-button-2')).toHaveAttribute('aria-current', 'page');
           expect(screen.getByTestId('pagination-button-5')).toBeVisible();
         });
       },
@@ -425,7 +427,7 @@ describe('query tab with unified timeline', () => {
 
         expect(screen.getByTestId('pagination-button-previous')).toBeVisible();
 
-        expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'true');
+        expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'page');
         expect(fetchNotesSpy).toHaveBeenCalledWith(['1']);
 
         // Page : 2
@@ -436,7 +438,7 @@ describe('query tab with unified timeline', () => {
         fireEvent.click(screen.getByTestId('pagination-button-1'));
 
         await waitFor(() => {
-          expect(screen.getByTestId('pagination-button-1')).toHaveAttribute('aria-current', 'true');
+          expect(screen.getByTestId('pagination-button-1')).toHaveAttribute('aria-current', 'page');
 
           expect(fetchNotesSpy).toHaveBeenNthCalledWith(1, [mockTimelineData[1]._id]);
         });
@@ -448,7 +450,7 @@ describe('query tab with unified timeline', () => {
         fireEvent.click(screen.getByTestId('pagination-button-2'));
 
         await waitFor(() => {
-          expect(screen.getByTestId('pagination-button-2')).toHaveAttribute('aria-current', 'true');
+          expect(screen.getByTestId('pagination-button-2')).toHaveAttribute('aria-current', 'page');
 
           expect(fetchNotesSpy).toHaveBeenNthCalledWith(1, [mockTimelineData[2]._id]);
         });
@@ -473,7 +475,7 @@ describe('query tab with unified timeline', () => {
 
         expect(screen.getByTestId('pagination-button-previous')).toBeVisible();
 
-        expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'true');
+        expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'page');
         expect(screen.getByTestId('tablePaginationPopoverButton')).toHaveTextContent(
           'Rows per page: 1'
         );
@@ -555,8 +557,9 @@ describe('query tab with unified timeline', () => {
         });
 
         const messageColumnIndex =
-          customColumnOrder.findIndex((header) => header.id === 'message') + 3;
-        // 3 is the offset for additional leading columns on left
+          customColumnOrder.findIndex((header) => header.id === 'message') +
+          //  offset for additional leading columns on left
+          3;
 
         expect(container.querySelector('[data-gridcell-column-id="message"]')).toHaveAttribute(
           'data-gridcell-column-index',

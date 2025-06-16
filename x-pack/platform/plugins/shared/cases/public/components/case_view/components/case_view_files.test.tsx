@@ -10,12 +10,11 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import type { CaseUI } from '../../../../common';
-import type { AppMockRenderer } from '../../../common/mock';
 
-import { createAppMockRenderer } from '../../../common/mock';
 import { alertCommentWithIndices, basicCase } from '../../../containers/mock';
 import { useGetCaseFiles } from '../../../containers/use_get_case_files';
 import { CaseViewFiles, DEFAULT_CASE_FILES_FILTERING_OPTIONS } from './case_view_files';
+import { renderWithTestingProviders } from '../../../common/mock';
 
 jest.mock('../../../containers/use_get_case_files');
 
@@ -27,37 +26,30 @@ const caseData: CaseUI = {
 };
 
 describe('Case View Page files tab', () => {
-  let appMockRender: AppMockRenderer;
-
   useGetCaseFilesMock.mockReturnValue({
     data: { files: [], total: 11 },
     isLoading: false,
   });
 
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
-  afterEach(async () => {
-    await appMockRender.clearQueryCache();
-  });
-
   it('should render the utility bar for the files table', async () => {
-    appMockRender.render(<CaseViewFiles caseData={caseData} />);
+    renderWithTestingProviders(<CaseViewFiles caseData={caseData} />);
 
     expect((await screen.findAllByTestId('cases-files-add')).length).toBe(2);
     expect(await screen.findByTestId('cases-files-search')).toBeInTheDocument();
   });
 
   it('should render the files table', async () => {
-    appMockRender.render(<CaseViewFiles caseData={caseData} />);
+    renderWithTestingProviders(<CaseViewFiles caseData={caseData} />);
 
     expect(await screen.findByTestId('cases-files-table')).toBeInTheDocument();
   });
 
   it('clicking table pagination triggers calls to useGetCaseFiles', async () => {
-    appMockRender.render(<CaseViewFiles caseData={caseData} />);
+    renderWithTestingProviders(<CaseViewFiles caseData={caseData} />);
 
     expect(await screen.findByTestId('cases-files-table')).toBeInTheDocument();
 
@@ -75,7 +67,7 @@ describe('Case View Page files tab', () => {
   it('changing perPage value triggers calls to useGetCaseFiles', async () => {
     const targetPagination = 50;
 
-    appMockRender.render(<CaseViewFiles caseData={caseData} />);
+    renderWithTestingProviders(<CaseViewFiles caseData={caseData} />);
 
     expect(await screen.findByTestId('cases-files-table')).toBeInTheDocument();
 
@@ -97,7 +89,7 @@ describe('Case View Page files tab', () => {
   });
 
   it('search by word triggers calls to useGetCaseFiles', async () => {
-    appMockRender.render(<CaseViewFiles caseData={caseData} />);
+    renderWithTestingProviders(<CaseViewFiles caseData={caseData} />);
 
     expect(await screen.findByTestId('cases-files-table')).toBeInTheDocument();
 

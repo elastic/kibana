@@ -2,62 +2,68 @@ openapi: 3.0.0
 info:
   title: Find Prompts API endpoint
   version: '2023-10-31'
+
 paths:
   /api/security_ai_assistant/prompts/_find:
     get:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       operationId: FindPrompts
-      description: Get a list of all prompts.
+      description: Get a list of all prompts based on optional filters, sorting, and pagination.
       summary: Get prompts
       tags:
         - Prompts API
       parameters:
         - name: 'fields'
           in: query
+          description: List of specific fields to include in each returned prompt.
           required: false
           schema:
             type: array
             items:
               type: string
+            example: ['id', 'name', 'content']
         - name: 'filter'
           in: query
-          description: Search query
+          description: Search query string to filter prompts by matching fields.
           required: false
           schema:
             type: string
+            example: 'error handling'
         - name: 'sort_field'
           in: query
-          description: Field to sort by
+          description: Field to sort prompts by.
           required: false
           schema:
             $ref: '#/components/schemas/FindPromptsSortField'
         - name: 'sort_order'
           in: query
-          description: Sort order
+          description: Sort order, either asc or desc.
           required: false
           schema:
             $ref: '../common_attributes.schema.yaml#/components/schemas/SortOrder'
         - name: 'page'
           in: query
-          description: Page number
+          description: Page number for pagination.
           required: false
           schema:
             type: integer
             minimum: 1
             default: 1
+            example: 1
         - name: 'per_page'
           in: query
-          description: Prompts per page
+          description: Number of prompts per page.
           required: false
           schema:
             type: integer
             minimum: 0
             default: 20
+            example: 20
 
       responses:
         200:
-          description: Successful response
+          description: Successful response containing a list of prompts.
           content:
             application/json:
               schema:
@@ -65,12 +71,19 @@ paths:
                 properties:
                   page:
                     type: integer
+                    description: Current page number.
+                    example: 1
                   perPage:
                     type: integer
+                    description: Number of prompts per page.
+                    example: 20
                   total:
                     type: integer
+                    description: Total number of prompts matching the query.
+                    example: 142
                   data:
                     type: array
+                    description: The list of prompts returned based on the search query, sorting, and pagination.
                     items:
                       $ref: './bulk_crud_prompts_route.schema.yaml#/components/schemas/PromptResponse'
                 required:
@@ -78,8 +91,31 @@ paths:
                   - perPage
                   - total
                   - data
+                example:
+                  page: 1
+                  perPage: 20
+                  total: 142
+                  data:
+                    - id: "prompt-123"
+                      timestamp: "2025-04-30T22:30:00Z"
+                      name: "Error Troubleshooting Prompt"
+                      promptType: "standard"
+                      content: "If you encounter an error, check the logs and retry."
+                      categories: ["troubleshooting", "logging"]
+                      color: "#FF5733"
+                      isNewConversationDefault: false
+                      isDefault: true
+                      consumer: "security"
+                      updatedAt: "2025-04-30T22:45:00Z"
+                      updatedBy: "jdoe"
+                      createdAt: "2025-04-20T21:00:00Z"
+                      createdBy: "jdoe"
+                      users:
+                        - username: "jdoe"
+                          full_name: "John Doe"
+                      namespace: "default"
         400:
-          description: Generic Error
+          description: Bad request due to invalid parameters or malformed query.
           content:
             application/json:
               schema:
@@ -87,17 +123,26 @@ paths:
                 properties:
                   statusCode:
                     type: number
+                    description: HTTP status code for the error.
+                    example: 400
                   error:
                     type: string
+                    description: Short error message.
+                    example: "Bad Request"
                   message:
                     type: string
+                    description: Detailed description of the error.
+                    example: "Invalid sort order value provided."
 
 components:
   schemas:
     FindPromptsSortField:
       type: string
+      description: Field by which to sort the prompts.
       enum:
         - 'created_at'
         - 'is_default'
         - 'name'
         - 'updated_at'
+      example: 'created_at'
+

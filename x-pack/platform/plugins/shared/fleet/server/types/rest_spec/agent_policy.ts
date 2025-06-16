@@ -18,6 +18,7 @@ import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, AGENT_POLICY_MAPPINGS } from '..
 import { validateKuery } from '../../routes/utils/filter_utils';
 
 import { BulkRequestBodySchema } from './common';
+import { CreatePackagePolicyRequestSchema } from './package_policy';
 
 export const GetAgentPoliciesRequestSchema = {
   query: schema.object(
@@ -105,6 +106,12 @@ export const GetOneAgentPolicyRequestSchema = {
   }),
 };
 
+export const GetAutoUpgradeAgentsStatusRequestSchema = {
+  params: schema.object({
+    agentPolicyId: schema.string(),
+  }),
+};
+
 export const CreateAgentPolicyRequestSchema = {
   body: NewAgentPolicySchema,
   query: schema.object({
@@ -112,10 +119,21 @@ export const CreateAgentPolicyRequestSchema = {
   }),
 };
 
+export const CreateAgentAndPackagePolicyRequestSchema = {
+  body: CreateAgentPolicyRequestSchema.body.extends({
+    package_policies: schema.arrayOf(CreatePackagePolicyRequestSchema.body),
+  }),
+  query: schema.intersection([
+    CreateAgentPolicyRequestSchema.query,
+    CreatePackagePolicyRequestSchema.query,
+  ]),
+};
+
 export const UpdateAgentPolicyRequestSchema = {
   ...GetOneAgentPolicyRequestSchema,
   body: NewAgentPolicySchema.extends({
     force: schema.maybe(schema.boolean()),
+    bumpRevision: schema.maybe(schema.boolean()),
   }),
 };
 

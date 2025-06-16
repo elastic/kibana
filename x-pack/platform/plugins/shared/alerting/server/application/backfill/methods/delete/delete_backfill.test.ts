@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../..';
-import { AlertingAuthorization } from '../../../../authorization';
+import type { AlertingAuthorization } from '../../../../authorization';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
@@ -21,13 +21,20 @@ import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ConstructorOptions, RulesClient } from '../../../../rules_client';
+import type { ConstructorOptions } from '../../../../rules_client';
+import { RulesClient } from '../../../../rules_client';
 import { adHocRunStatus } from '../../../../../common/constants';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { SavedObject } from '@kbn/core-saved-objects-api-server';
-import { AdHocRunSO } from '../../../../data/ad_hoc_run/types';
+import type { SavedObject } from '@kbn/core-saved-objects-api-server';
+import type { AdHocRunSO } from '../../../../data/ad_hoc_run/types';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { updateGaps } from '../../../../lib/rule_gaps/update/update_gaps';
+import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
+
+jest.mock('../../../../lib/rule_gaps/update/update_gaps', () => ({
+  updateGaps: jest.fn(),
+}));
 
 const kibanaVersion = 'v8.0.0';
 const taskManager = taskManagerMock.createStart();
@@ -85,8 +92,8 @@ const mockAdHocRunSO: SavedObject<AdHocRunSO> = {
       name: fakeRuleName,
       tags: ['foo'],
       alertTypeId: 'myType',
-      // @ts-expect-error
       params: {},
+      actions: [],
       apiKeyOwner: 'user',
       apiKeyCreatedByUser: false,
       consumer: 'myApp',
@@ -159,12 +166,44 @@ describe('deleteBackfill()', () => {
     });
     expect(unsecuredSavedObjectsClient.delete).toHaveBeenLastCalledWith(
       AD_HOC_RUN_SAVED_OBJECT_TYPE,
-      '1'
+      '1',
+      {
+        refresh: 'wait_for',
+      }
     );
     expect(taskManager.removeIfExists).toHaveBeenCalledWith('1');
     expect(logger.error).not.toHaveBeenCalled();
 
     expect(result).toEqual({});
+  });
+
+  test('should call updateGaps with correct parameters when deleting backfill', async () => {
+    const eventLogClient = eventLogClientMock.create();
+    rulesClientParams.getEventLogClient.mockResolvedValue(eventLogClient);
+
+    await rulesClient.deleteBackfill('1');
+
+    const updateGapsCall = (updateGaps as jest.Mock).mock.calls[0][0];
+    expect(updateGapsCall.ruleId).toBe('abc');
+    expect(updateGapsCall.start).toEqual(new Date('2023-10-19T15:07:40.011Z'));
+    expect(updateGapsCall.end).toBeInstanceOf(Date);
+    expect(updateGapsCall.backfillSchedule).toEqual([
+      {
+        interval: '12h',
+        status: adHocRunStatus.PENDING,
+        runAt: '2023-10-20T03:07:40.011Z',
+      },
+      {
+        interval: '12h',
+        status: adHocRunStatus.PENDING,
+        runAt: '2023-10-20T15:07:40.011Z',
+      },
+    ]);
+    expect(updateGapsCall.savedObjectsRepository).toBe(internalSavedObjectsRepository);
+    expect(updateGapsCall.logger).toBe(logger);
+    expect(updateGapsCall.eventLogClient).toBe(eventLogClient);
+    expect(updateGapsCall.shouldRefetchAllBackfills).toBe(true);
+    expect(updateGapsCall.backfillClient).toBe(backfillClient);
   });
 
   describe('error handling', () => {

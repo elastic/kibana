@@ -11,6 +11,7 @@ import React from 'react';
 import { ConfirmDeleteEndpointModal } from '.';
 import * as i18n from './translations';
 import { useScanUsage } from '../../../../../../../hooks/use_scan_usage';
+import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 
 jest.mock('../../../../../../../hooks/use_scan_usage');
 const mockUseScanUsage = useScanUsage as jest.Mock;
@@ -19,7 +20,7 @@ describe('ConfirmDeleteEndpointModal', () => {
   const mockOnCancel = jest.fn();
   const mockOnConfirm = jest.fn();
 
-  const mockProvider = {
+  const mockProvider: InferenceInferenceEndpointInfo = {
     inference_id: 'my-hugging-face',
     service: 'hugging_face',
     service_settings: {
@@ -27,12 +28,7 @@ describe('ConfirmDeleteEndpointModal', () => {
       url: 'https://dummy.huggingface.com',
     },
     task_settings: {},
-  } as any;
-
-  const mockItem = {
-    endpoint: 'my-hugging-face',
-    provider: mockProvider,
-    type: 'text_embedding',
+    task_type: 'text_embedding',
   };
 
   const Wrapper = () => {
@@ -42,7 +38,7 @@ describe('ConfirmDeleteEndpointModal', () => {
         <ConfirmDeleteEndpointModal
           onCancel={mockOnCancel}
           onConfirm={mockOnConfirm}
-          inferenceEndpoint={mockItem}
+          inferenceEndpoint={mockProvider}
         />
       </QueryClientProvider>
     );

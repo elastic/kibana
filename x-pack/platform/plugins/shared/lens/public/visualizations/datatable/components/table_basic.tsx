@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import './table_basic.scss';
 import { ColorMappingInputData, PaletteOutput, getFallbackDataBounds } from '@kbn/coloring';
 import React, {
   useLayoutEffect,
@@ -30,16 +29,17 @@ import {
 import { CustomPaletteState, EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
-import useObservable from 'react-use/lib/useObservable';
-import { getColorCategories } from '@kbn/chart-expressions-common';
-import { getOriginalId, isTransposeId } from '@kbn/transpose-utils';
-import { CoreTheme } from '@kbn/core/public';
-import { getKbnPalettes } from '@kbn/palettes';
+import { getOriginalId } from '@kbn/transpose-utils';
+import { useKbnPalettes } from '@kbn/palettes';
+import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import { getColorCategories, getLegacyColorCategories } from '@kbn/chart-expressions-common';
+import { css } from '@emotion/react';
+import { DATA_GRID_DENSITY_STYLE_MAP } from '@kbn/unified-data-table/src/hooks/use_data_grid_density';
+import { DATA_GRID_STYLE_NORMAL } from '@kbn/unified-data-table/src/constants';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme/hooks';
 import type { LensTableRowContextMenuEvent } from '../../../types';
-import type { FormatFactory } from '../../../../common/types';
 import { RowHeightMode } from '../../../../common/types';
 import { LensGridDirection } from '../../../../common/expressions';
-import { VisualizationContainer } from '../../../visualization_container';
 import { findMinMaxByColumnId, shouldColorByTerms } from '../../../shared_components';
 import type {
   DataContextType,
@@ -59,18 +59,18 @@ import {
   createGridSortingConfig,
   createTransposeColumnFilterHandler,
 } from './table_actions';
-import { getFinalSummaryConfiguration } from '../../../../common/expressions/datatable/summary';
+import { getFinalSummaryConfiguration } from '../../../../common/expressions/impl/datatable/summary';
 import { DEFAULT_HEADER_ROW_HEIGHT, DEFAULT_HEADER_ROW_HEIGHT_LINES } from './constants';
 import {
-  getFieldMetaFromDatatable,
+  getDatatableColumn,
   isNumericField,
-} from '../../../../common/expressions/datatable/utils';
+} from '../../../../common/expressions/impl/datatable/utils';
 import { CellColorFn, getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 import { getColumnAlignment } from '../utils';
 
 export const DataContext = React.createContext<DataContextType>({});
 
-const gridStyle: EuiDataGridStyle = {
+const DATA_GRID_STYLE_DEFAULT: EuiDataGridStyle = {
   border: 'horizontal',
   header: 'shade',
   footer: 'shade',
@@ -83,11 +83,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
 
   const isInteractive = props.interactive;
-  const theme = useObservable<CoreTheme>(props.theme.theme$, {
-    darkMode: false,
-    name: 'amsterdam',
-  });
-  const palettes = getKbnPalettes(theme);
+  const isDarkMode = useKibanaIsDarkMode();
+  const palettes = useKbnPalettes();
 
   const [columnConfig, setColumnConfig] = useState({
     columns: props.args.columns,
@@ -162,7 +159,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   const { getType, dispatchEvent, renderMode, formatFactory, syncColors } = props;
 
-  const formatters: Record<string, ReturnType<FormatFactory>> = useMemo(
+  const formatters: Record<string, IFieldFormat> = useMemo(
     () =>
       firstLocalTable.columns.reduce(
         (map, column) => ({
@@ -402,19 +399,17 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         return cellColorFnMap.get(originalId)!;
       }
 
-      const dataType = getFieldMetaFromDatatable(firstLocalTable, originalId)?.type;
+      const colInfo = getDatatableColumn(firstLocalTable, originalId);
       const isBucketed = bucketedColumns.some((id) => id === columnId);
-      const colorByTerms = shouldColorByTerms(dataType, isBucketed);
+      const colorByTerms = shouldColorByTerms(colInfo?.meta.type, isBucketed);
+      const categoryRows = (untransposedDataRef.current ?? firstLocalTable)?.rows;
 
       const data: ColorMappingInputData = colorByTerms
         ? {
             type: 'categories',
-            categories: getColorCategories(
-              firstLocalTable.rows,
-              originalId,
-              isTransposeId(columnId),
-              [null]
-            ),
+            categories: colorMapping
+              ? getColorCategories(categoryRows, originalId, [null])
+              : getLegacyColorCategories(categoryRows, originalId, [null]),
           }
         : {
             type: 'ranges',
@@ -426,7 +421,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         palettes,
         data,
         colorByTerms,
-        theme.darkMode,
+        isDarkMode,
         syncColors,
         palette,
         colorMapping
@@ -440,14 +435,14 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       formatters,
       columnConfig,
       DataContext,
-      theme.darkMode,
+      isDarkMode,
       getCellColor,
       props.args.fitRowToContent
     );
   }, [
     formatters,
     columnConfig,
-    theme.darkMode,
+    isDarkMode,
     props.args.fitRowToContent,
     props.paletteService,
     palettes,
@@ -509,11 +504,25 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     }
   }, [columnConfig.columns, alignments, props.data, columns]);
 
+  const gridStyle = useMemo<EuiDataGridStyle>(
+    () => ({
+      ...DATA_GRID_STYLE_DEFAULT,
+      ...(props.args.density
+        ? DATA_GRID_DENSITY_STYLE_MAP[props.args.density]
+        : DATA_GRID_STYLE_NORMAL),
+    }),
+    [props.args.density]
+  );
+
   if (isEmpty) {
     return (
-      <VisualizationContainer className="lnsDataTableContainer">
+      <div
+        css={datatableContainerStyles}
+        className="eui-scrollBar"
+        data-test-subj="lnsVisualizationContainer"
+      >
         <EmptyPlaceholder icon={IconChartDatatable} />
-      </VisualizationContainer>
+      </div>
     );
   }
 
@@ -524,7 +533,11 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     });
 
   return (
-    <VisualizationContainer className="lnsDataTableContainer">
+    <div
+      css={datatableContainerStyles}
+      className="eui-scrollBar"
+      data-test-subj="lnsVisualizationContainer"
+    >
       <DataContext.Provider
         value={{
           table: firstLocalTable,
@@ -569,6 +582,28 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           ref={dataGridRef}
         />
       </DataContext.Provider>
-    </VisualizationContainer>
+    </div>
   );
 };
+
+const datatableContainerStyles = css`
+  height: 100%;
+  overflow: auto hidden;
+  user-select: text;
+
+  .lnsTableCell--multiline {
+    white-space: pre-wrap;
+  }
+
+  .lnsTableCell--left {
+    text-align: left;
+  }
+
+  .lnsTableCell--right {
+    text-align: right;
+  }
+
+  .lnsTableCell--center {
+    text-align: center;
+  }
+`;

@@ -18,11 +18,13 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 /** @public static code */
 export { TypesService } from './vis_types/types_service';
-export { VIS_EVENT_TO_TRIGGER } from './embeddable';
+export { VIS_EVENT_TO_TRIGGER } from './embeddable/events';
 export { apiHasVisualizeConfig } from './embeddable/interfaces/has_visualize_config';
-export { COMMON_VISUALIZATION_GROUPING } from './legacy/embeddable/constants';
 export { VisualizationContainer } from './components';
 export { getVisSchemas } from './vis_schemas';
+export { prepareLogTable } from '../common/utils/prepare_log_table';
+export { XYCurveTypes } from '../common/convert_to_lens/constants';
+export { urlFor, getFullPath } from './utils/url_utils';
 
 /** @public types */
 export type { VisualizationsSetup, VisualizationsStart };
@@ -40,7 +42,7 @@ export type { VisualizeEditorInput } from './embeddable/types';
 export type { Vis, SerializedVis, SerializedVisData, VisData } from './vis';
 export type VisualizeEmbeddableContract = PublicContract<VisualizeEmbeddable>;
 export type { SchemaConfig } from '../common/types';
-export { updateOldState } from './legacy/vis_update_state';
+
 export type { VisualizeInput, VisualizeEmbeddable } from './legacy/embeddable';
 export type { HasVisualizeConfig } from './embeddable/interfaces/has_visualize_config';
 export type { PersistedState } from './persisted_state';
@@ -65,7 +67,6 @@ export {
   VISUALIZE_EMBEDDABLE_TYPE,
 } from '../common/constants';
 export type { SavedVisState, VisParams, Dimension } from '../common';
-export { prepareLogTable, XYCurveTypes } from '../common';
 export type { ExpressionValueVisDimension } from '../common/expression_functions/vis_dimension';
 export type {
   ExpressionValueXYDimension,
@@ -73,7 +74,6 @@ export type {
   FakeParams,
   HistogramParams,
 } from '../common/expression_functions/xy_dimension';
-export { urlFor, getFullPath } from './utils/saved_visualize_utils';
 
 export type { IEditorController, EditorRenderProps } from './visualize_app/types';
 
@@ -86,5 +86,7 @@ export {
   ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS,
 } from './triggers';
 
-export const convertToLensModule = import('./convert_to_lens');
+export const getConvertToLensModule = async () => {
+  return await import('./convert_to_lens');
+};
 export { getDataViewByIndexPatternId } from './convert_to_lens/datasource';

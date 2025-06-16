@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Feature } from 'geojson';
+import type { Feature } from 'geojson';
 import { _BrowserFileSystem as BrowserFileSystem, loadInBatches } from '@loaders.gl/core';
 import { DBFLoader, ShapefileLoader } from '@loaders.gl/shapefile';
 import type { ImportFailure } from '../../../../common/types';

@@ -56,9 +56,7 @@ describe('Notes Flyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (NoteCards as unknown as jest.Mock).mockImplementation(
-      jest.fn().mockReturnValue(<div>{`NoteCards`}</div>)
-    );
+    (NoteCards as unknown as jest.Mock).mockImplementation(jest.fn(() => <div>{`NoteCards`}</div>));
   });
 
   it('should respond to visibility prop correctly', () => {

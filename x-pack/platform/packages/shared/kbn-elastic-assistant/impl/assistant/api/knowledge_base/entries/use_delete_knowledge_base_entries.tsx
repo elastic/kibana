@@ -21,7 +21,7 @@ import { useInvalidateKnowledgeBaseEntries } from './use_knowledge_base_entries'
 
 const DELETE_KNOWLEDGE_BASE_ENTRIES_MUTATION_KEY = [
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BULK_ACTION,
-  API_VERSIONS.internal.v1,
+  API_VERSIONS.public.v1,
 ];
 
 export interface UseDeleteKnowledgeEntriesParams {
@@ -61,7 +61,7 @@ export const useDeleteKnowledgeBaseEntries = ({
         ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BULK_ACTION,
         {
           body: JSON.stringify(body),
-          version: API_VERSIONS.internal.v1,
+          version: API_VERSIONS.public.v1,
           signal,
         }
       );

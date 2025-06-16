@@ -7,7 +7,7 @@
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
 import { useKibana } from '../../../../common/lib/kibana';
-import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
+import * as i18n from '../../../common/translations';
 
 export const RulesChangelogLink = React.memo(() => {
   const { docLinks } = useKibana().services;

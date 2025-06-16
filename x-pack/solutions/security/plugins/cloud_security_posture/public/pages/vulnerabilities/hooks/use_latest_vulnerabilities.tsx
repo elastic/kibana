@@ -19,9 +19,9 @@ import { EsHitRecord } from '@kbn/discover-utils/types';
 import {
   MAX_FINDINGS_TO_LOAD,
   CDR_VULNERABILITIES_INDEX_PATTERN,
-  CDR_3RD_PARTY_RETENTION_POLICY,
+  CDR_EXTENDED_VULN_RETENTION_POLICY,
 } from '@kbn/cloud-security-posture-common';
-import { FindingsBaseEsQuery, showErrorToast } from '@kbn/cloud-security-posture';
+import { BaseEsQuery, showErrorToast } from '@kbn/cloud-security-posture';
 import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
 import type { RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
 import {
@@ -38,7 +38,7 @@ type LatestFindingsResponse = IKibanaSearchResponse<
 interface FindingsAggs {
   count: AggregationsMultiBucketAggregateBase<AggregationsStringRareTermsBucketKeys>;
 }
-interface VulnerabilitiesQuery extends FindingsBaseEsQuery {
+interface VulnerabilitiesQuery extends BaseEsQuery {
   sort: string[][];
   enabled: boolean;
   pageSize: number;
@@ -89,7 +89,7 @@ export const getVulnerabilitiesQuery = (
         {
           range: {
             '@timestamp': {
-              gte: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
+              gte: `now-${CDR_EXTENDED_VULN_RETENTION_POLICY}`,
               lte: 'now',
             },
           },

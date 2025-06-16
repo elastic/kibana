@@ -193,7 +193,6 @@ export interface ColumnState {
 
 enum RowHeightMode {
   auto = 'auto',
-  single = 'single',
   custom = 'custom',
 }
 

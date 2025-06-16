@@ -100,6 +100,22 @@
             "path": "src/platform/packages/shared/kbn-i18n/src/core/i18n.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/i18n",
+            "id": "def-common.TranslateArguments.formatters",
+            "type": "Object",
+            "tags": [],
+            "label": "formatters",
+            "description": [
+              "\nCustom formatters to override the default intl formatters"
+            ],
+            "signature": [
+              "MessageFormatters | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-i18n/src/core/i18n.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -304,7 +320,7 @@
             "label": "translate",
             "description": [],
             "signature": [
-              "(id: string, { values, description, defaultMessage, ignoreTag }: ",
+              "(id: string, { values, description, defaultMessage, ignoreTag, formatters }: ",
               {
                 "pluginId": "@kbn/i18n",
                 "scope": "common",

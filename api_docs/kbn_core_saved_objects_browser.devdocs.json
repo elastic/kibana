@@ -51,11 +51,11 @@
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/services.ts"
+            "path": "src/platform/plugins/shared/visualizations/public/services.ts"
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/services.ts"
+            "path": "src/platform/plugins/shared/visualizations/public/services.ts"
           },
           {
             "plugin": "transform",
@@ -78,12 +78,12 @@
             "path": "src/core/server/index.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-browser-mocks",
-            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/browser-mocks/src/saved_objects_service.mock.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-browser-mocks",
-            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/browser-mocks/src/saved_objects_service.mock.ts"
           }
         ],
         "children": [

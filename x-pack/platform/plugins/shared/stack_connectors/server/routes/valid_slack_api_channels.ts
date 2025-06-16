@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
+import type {
   IRouter,
   RequestHandlerContext,
   KibanaRequest,
@@ -14,12 +14,13 @@ import {
   KibanaResponseFactory,
   Logger,
 } from '@kbn/core/server';
-import axios, { AxiosResponse } from 'axios';
+import type { AxiosResponse } from 'axios';
+import axios from 'axios';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { INTERNAL_BASE_STACK_CONNECTORS_API_PATH } from '../../common';
 import { SLACK_URL } from '../../common/slack_api/constants';
-import { ValidChannelResponse } from '../../common/slack_api/types';
+import type { ValidChannelResponse } from '../../common/slack_api/types';
 
 const bodySchema = schema.object({
   authToken: schema.string(),
@@ -60,9 +61,7 @@ export const validSlackApiChannelsRoute = (
 
     const axiosInstance = axios.create();
 
-    const validChannelId = (
-      channelId: string = ''
-    ): Promise<AxiosResponse<ValidChannelResponse>> => {
+    const validChannelId = (channelId = ''): Promise<AxiosResponse<ValidChannelResponse>> => {
       return request<ValidChannelResponse>({
         axios: axiosInstance,
         configurationUtilities,

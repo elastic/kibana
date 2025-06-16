@@ -7,7 +7,7 @@
 
 import { cloneDeep } from 'lodash';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 const DEFAULT_DSL_QUERY: estypes.QueryDslQueryContainer = {
   bool: {

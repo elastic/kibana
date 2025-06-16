@@ -233,8 +233,25 @@ describe('Summary Search Client', () => {
               { term: { spaceId: 'default' } },
               {
                 bool: {
-                  minimum_should_match: 1,
-                  should: [{ range: { summaryUpdatedAt: { gt: 'now-2h' } } }],
+                  filter: [
+                    {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            range: {
+                              summaryUpdatedAt: {
+                                gt: 'now-2h',
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                  must: [],
+                  must_not: [],
+                  should: [],
                 },
               },
             ],

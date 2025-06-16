@@ -13,7 +13,7 @@ import { useLensAttributes } from '../../../use_lens_attributes';
 import { getAlertsByStatusAttributes } from './alerts_by_status_donut';
 
 jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('b9b43606-7ff7-46ae-a47c-85bed80fab9a'),
+  v4: jest.fn().mockReturnValue('generated-uuid'),
 }));
 
 jest.mock('../../../../../../sourcerer/containers', () => ({

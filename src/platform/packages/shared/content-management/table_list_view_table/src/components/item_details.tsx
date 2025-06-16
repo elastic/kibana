@@ -100,7 +100,8 @@ export function ItemDetails<T extends UserContentCommonSchema>({
           <FavoriteButton
             id={item.id}
             css={css`
-              margin-top: -${euiTheme.size.xs}; // trying to nicer align the star with the title
+              margin-top: -${euiTheme.size.m}; // trying to nicer align the star with the title
+              margin-bottom: -${euiTheme.size.s};
               margin-left: ${euiTheme.size.xxs};
             `}
           />

@@ -10,7 +10,7 @@
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import { CollapseFunction, Column } from '@kbn/visualizations-plugin/common';
 import {
-  convertToLensModule,
+  getConvertToLensModule,
   getVisSchemas,
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
@@ -74,7 +74,7 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
     (param) => param.show && visSchemas.metric.some((m) => m.aggId?.split('.')[0] === param.data.id)
   );
 
-  const { getColumnsFromVis, createStaticValueColumn } = await convertToLensModule;
+  const { getColumnsFromVis, createStaticValueColumn } = await getConvertToLensModule();
   const dataLayers = getColumnsFromVis(
     vis,
     timefilter,

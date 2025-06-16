@@ -70,15 +70,13 @@ export function getNodeInfo(
       'hits.hits._source.logstash_stats.timestamp',
       'hits.hits._source.logstash.node.stats.timestamp',
     ],
-    body: {
-      query: {
-        bool: {
-          filter: [clusterFilter, { term: { 'logstash_stats.logstash.uuid': logstashUuid } }],
-        },
+    query: {
+      bool: {
+        filter: [clusterFilter, { term: { 'logstash_stats.logstash.uuid': logstashUuid } }],
       },
-      collapse: { field: 'logstash_stats.logstash.uuid' },
-      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
     },
+    collapse: { field: 'logstash_stats.logstash.uuid' },
+    sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

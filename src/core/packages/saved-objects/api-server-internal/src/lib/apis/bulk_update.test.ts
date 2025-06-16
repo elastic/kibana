@@ -17,7 +17,7 @@ import {
 } from '../repository.test.mock';
 
 import type { Payload } from '@hapi/boom';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type {
   SavedObjectsBulkUpdateObject,
@@ -54,6 +54,8 @@ import {
   createBadRequestErrorPayload,
   expectUpdateResult,
 } from '../../test_helpers/repository.test.common';
+import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
+import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
 
 interface ExpectedErrorResult {
   type: string;
@@ -67,6 +69,7 @@ describe('#bulkUpdate', () => {
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
   let serializer: jest.Mocked<SavedObjectsSerializer>;
+  let securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>;
 
   const registry = createRegistry();
   const documentMigrator = createDocumentMigrator(registry);
@@ -95,6 +98,7 @@ describe('#bulkUpdate', () => {
     migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
     migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
     logger = loggerMock.create();
+    securityExtension = savedObjectsExtensionsMock.createSecurityExtension();
 
     // create a mock serializer "shim" so we can track function calls, but use the real serializer's implementation
     serializer = createSpySerializer(registry);
@@ -112,6 +116,9 @@ describe('#bulkUpdate', () => {
       serializer,
       allowedTypes,
       logger,
+      extensions: {
+        securityExtension,
+      },
     });
 
     mockGetCurrentTime.mockReturnValue(mockTimestamp);
@@ -164,13 +171,13 @@ describe('#bulkUpdate', () => {
         overrides?: Record<string, unknown>;
       }
     ) => {
-      const body = [];
+      const operations = [];
       for (const object of objects) {
-        body.push(getBulkIndexEntry(method, object, _index, getId, overrides));
-        body.push(expect.any(Object));
+        operations.push(getBulkIndexEntry(method, object, _index, getId, overrides));
+        operations.push(expect.any(Object));
       }
       expect(client.bulk).toHaveBeenCalledWith(
-        expect.objectContaining({ body }),
+        expect.objectContaining({ operations }),
         expect.anything()
       );
     };
@@ -214,7 +221,7 @@ describe('#bulkUpdate', () => {
           expect.objectContaining({ _id: `${MULTI_NAMESPACE_ISOLATED_TYPE}:${obj2.id}` }),
         ];
         expect(client.mget).toHaveBeenCalledWith(
-          expect.objectContaining({ body: { docs } }),
+          expect.objectContaining({ docs }),
           expect.anything()
         );
       });
@@ -239,7 +246,7 @@ describe('#bulkUpdate', () => {
         expect(client.bulk).toHaveBeenCalledTimes(1);
         expect(client.bulk).toHaveBeenCalledWith(
           expect.objectContaining({
-            body: [
+            operations: [
               getBulkIndexEntry('index', _obj1),
               expect.objectContaining({
                 [obj1.type]: {
@@ -267,7 +274,7 @@ describe('#bulkUpdate', () => {
         expect(client.bulk).toHaveBeenCalledTimes(1);
         expect(client.bulk).toHaveBeenCalledWith(
           expect.objectContaining({
-            body: [
+            operations: [
               getBulkIndexEntry('index', _obj1),
               expect.objectContaining({
                 [obj1.type]: {
@@ -288,12 +295,12 @@ describe('#bulkUpdate', () => {
 
       it(`defaults to no references`, async () => {
         await bulkUpdateSuccess(client, repository, registry, [obj1, obj2]);
-        const body = [
+        const operations = [
           ...expectObjArgs({ ...obj1, references: [] }),
           ...expectObjArgs({ ...obj2, references: [] }),
         ];
         expect(client.bulk).toHaveBeenCalledWith(
-          expect.objectContaining({ body }),
+          expect.objectContaining({ operations }),
           expect.anything()
         );
       });
@@ -302,12 +309,12 @@ describe('#bulkUpdate', () => {
         const test = async (references: SavedObjectReference[]) => {
           const objects = [obj1, obj2].map((obj) => ({ ...obj, references }));
           await bulkUpdateSuccess(client, repository, registry, objects);
-          const body = [
+          const operations = [
             ...expectObjArgs({ ...obj1, references }),
             ...expectObjArgs({ ...obj2, references }),
           ];
           expect(client.bulk).toHaveBeenCalledWith(
-            expect.objectContaining({ body }),
+            expect.objectContaining({ operations }),
             expect.anything()
           );
           client.bulk.mockClear();
@@ -322,12 +329,12 @@ describe('#bulkUpdate', () => {
         const test = async (references: unknown) => {
           const objects = [obj1, obj2];
           await bulkUpdateSuccess(client, repository, registry, objects);
-          const body = [
+          const operations = [
             ...expectObjArgs({ ...obj1, references: expect.not.arrayContaining([references]) }),
             ...expectObjArgs({ ...obj2, references: expect.not.arrayContaining([references]) }),
           ];
           expect(client.bulk).toHaveBeenCalledWith(
-            expect.objectContaining({ body }),
+            expect.objectContaining({ operations }),
             expect.anything()
           );
           client.bulk.mockClear();
@@ -704,6 +711,27 @@ describe('#bulkUpdate', () => {
             expect.objectContaining({ originId }),
           ],
         });
+      });
+    });
+
+    describe('security', () => {
+      it('correctly passes params to securityExtension.authorizeBulkUpdate', async () => {
+        await bulkUpdateSuccess(client, repository, registry, [obj1, obj2]);
+
+        expect(securityExtension.authorizeBulkUpdate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            objects: expect.arrayContaining([
+              expect.objectContaining({
+                id: '6.0.0-alpha1',
+                name: 'Test One',
+              }),
+              expect.objectContaining({
+                id: 'logstash-*',
+                name: 'Test Two',
+              }),
+            ]),
+          })
+        );
       });
     });
   });

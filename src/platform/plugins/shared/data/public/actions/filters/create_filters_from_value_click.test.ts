@@ -13,9 +13,11 @@ import { setIndexPatterns, setSearchService } from '../../services';
 import {
   createFiltersFromValueClickAction,
   appendFilterToESQLQueryFromValueClickAction,
+  createFilterESQL,
 } from './create_filters_from_value_click';
 import { FieldFormatsGetConfigFn, BytesFormat } from '@kbn/field-formats-plugin/common';
 import { RangeFilter } from '@kbn/es-query';
+import { Datatable } from '@kbn/expressions-plugin/common';
 
 const mockField = {
   name: 'bytes',
@@ -105,6 +107,100 @@ describe('createFiltersFromClickEvent', () => {
       expect(filters.length).toEqual(1);
     });
   });
+
+  describe('createFilterESQL', () => {
+    let table: Datatable;
+
+    beforeEach(() => {
+      table = {
+        type: 'datatable',
+        columns: [
+          {
+            name: 'test',
+            id: '1-1',
+            meta: {
+              type: 'number',
+              sourceParams: {
+                indexPattern: 'logs*',
+                sourceField: 'bytes',
+                operationType: 'sum',
+              },
+            },
+          },
+        ],
+        rows: [
+          {
+            '1-1': '2048',
+          },
+        ],
+      };
+    });
+
+    test('ignores event when sourceField is missing', async () => {
+      table.columns[0].meta.sourceParams = {};
+      const filter = await createFilterESQL(table, 0, 0);
+
+      expect(filter).toEqual([]);
+    });
+
+    test('ignores event when value for rows is not provided', async () => {
+      table.rows[0]['1-1'] = null;
+      const filter = await createFilterESQL(table, 0, 0);
+
+      expect(filter).toEqual([]);
+    });
+
+    test('ignores event when sourceField.indexPattern is missing', async () => {
+      (table.columns[0].meta.sourceParams as any).indexPattern = null;
+      const filter = await createFilterESQL(table, 0, 0);
+
+      expect(filter).toEqual([]);
+    });
+
+    test('handles an event when operation type is a date histogram', async () => {
+      (table.columns[0].meta.sourceParams as any).operationType = 'date_histogram';
+      (table.columns[0].meta.sourceParams as any).sourceField = '@timestamp';
+      (table.columns[0].meta.sourceParams as any).interval = 1000;
+      (table.columns[0].meta as any).type = 'date';
+      table.rows[0]['1-1'] = 1696118400000;
+
+      const filter = await createFilterESQL(table, 0, 0);
+
+      expect(filter).toEqual([
+        {
+          meta: { field: '@timestamp', formattedValue: 1696118400000, index: 'logs*', params: {} },
+          query: {
+            range: {
+              '@timestamp': {
+                format: 'strict_date_optional_time',
+                gte: 1696118400000,
+                lt: 1696118401000,
+              },
+            },
+          },
+        },
+      ]);
+    });
+
+    test('handles an event when operation type is histogram', async () => {
+      (table.columns[0].meta.sourceParams as any).operationType = 'histogram';
+      const filter = await createFilterESQL(table, 0, 0);
+
+      expect(filter).toEqual([
+        {
+          meta: { field: 'bytes', formattedValue: '2048', index: 'logs*', params: {} },
+          query: { range: { bytes: { gte: 2048, lt: 20480 } } },
+        },
+      ]);
+    });
+
+    test('handles an event when operation type is not date histogram', async () => {
+      const filter = await createFilterESQL(table, 0, 0);
+
+      expect(filter.length).toBe(1);
+    });
+  });
+
   describe('appendFilterToESQLQueryFromValueClickAction', () => {
     let dataPoints: Parameters<typeof appendFilterToESQLQueryFromValueClickAction>[0]['data'];
     beforeEach(() => {
@@ -139,6 +235,44 @@ describe('createFiltersFromClickEvent', () => {
       });
 
       expect(queryString).toBeUndefined();
+    });
+
+    test('should support multiple filters', async () => {
+      dataPoints[0].table.columns[0] = {
+        name: 'columnA',
+        id: 'columnA',
+        meta: {
+          type: 'string',
+        },
+      };
+      dataPoints.push({
+        table: {
+          columns: [
+            {
+              name: 'columnB',
+              id: 'columnB',
+              meta: {
+                type: 'string',
+              },
+            },
+          ],
+          rows: [
+            {
+              columnB: '2048',
+            },
+          ],
+        },
+        column: 0,
+        row: 0,
+        value: 'test',
+      });
+      const queryString = await appendFilterToESQLQueryFromValueClickAction({
+        data: dataPoints,
+        query: { esql: 'from meow' },
+      });
+      expect(queryString).toEqual(`from meow
+| WHERE \`columnA\`=="2048"
+AND \`columnB\`=="2048"`);
     });
 
     test('should return null if no aggregate query is present', async () => {

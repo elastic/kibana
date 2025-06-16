@@ -499,6 +499,74 @@
       },
       {
         "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.getPopulatedFieldsFromKibanaDataView",
+        "type": "Function",
+        "tags": [],
+        "label": "getPopulatedFieldsFromKibanaDataView",
+        "description": [
+          "\nRetrieves just the populated fields from a Kibana data view."
+        ],
+        "signature": [
+          "(dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ", populatedFields?: string[] | undefined) => string[]"
+        ],
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.getPopulatedFieldsFromKibanaDataView.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [
+              "- The Kibana data view."
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.getPopulatedFieldsFromKibanaDataView.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "populatedFields",
+            "description": [
+              "- The populated fields.\nreturns {string[]} - The array of populated fields from the data view."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
         "id": "def-common.getProcessedFields",
         "type": "Function",
         "tags": [],
@@ -2443,7 +2511,7 @@
             "section": "def-common.UseDataGridReturnType",
             "text": "UseDataGridReturnType"
           },
-          ", \"status\" | \"ccsWarning\" | \"rowCount\" | \"errorMessage\" | \"baseline\" | \"pagination\" | \"chartsVisible\" | \"chartsButtonVisible\" | \"columnsWithCharts\" | \"invalidSortingColumnns\" | \"noDataMessage\" | \"onChangeItemsPerPage\" | \"onChangePage\" | \"onSort\" | \"setPagination\" | \"setVisibleColumns\" | \"rowCountRelation\" | \"sortingColumns\" | \"tableItems\" | \"toggleChartVisibility\" | \"visibleColumns\" | \"predictionFieldName\" | \"resultsField\">"
+          ", \"status\" | \"ccsWarning\" | \"rowCount\" | \"errorMessage\" | \"baseline\" | \"pagination\" | \"visibleColumns\" | \"chartsVisible\" | \"chartsButtonVisible\" | \"columnsWithCharts\" | \"invalidSortingColumnns\" | \"noDataMessage\" | \"onChangeItemsPerPage\" | \"onChangePage\" | \"onSort\" | \"setPagination\" | \"setVisibleColumns\" | \"rowCountRelation\" | \"sortingColumns\" | \"tableItems\" | \"toggleChartVisibility\" | \"predictionFieldName\" | \"resultsField\">"
         ],
         "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
         "deprecated": false,

@@ -14,6 +14,7 @@ import type {
   ESQLFunction,
   ESQLLocation,
   ESQLMessage,
+  ESQLSource,
 } from '@kbn/esql-ast';
 import { ESQLIdentifier } from '@kbn/esql-ast/src/types';
 import type { ErrorTypes, ErrorValues } from './types';
@@ -142,26 +143,27 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           'kbn-esql-validation-autocomplete.esql.validation.unsupportedColumnTypeForCommand',
           {
             defaultMessage:
-              '{command} only supports {type} {typeCount, plural, one {type} other {types}} values, found [{column}] of type [{givenType}]',
+              '{command} only supports values of type [{type}]. Found [{column}] of type [{givenType}]',
             values: {
               command: out.command,
               type: out.type,
-              typeCount: out.typeCount,
               column: out.column,
               givenType: out.givenType,
             },
           }
         ),
       };
-    case 'unknownOption':
+    case 'unknownDissectKeyword':
       return {
-        message: i18n.translate('kbn-esql-validation-autocomplete.esql.validation.unknownOption', {
-          defaultMessage: 'Invalid option for {command}: [{option}]',
-          values: {
-            command: out.command,
-            option: out.option,
-          },
-        }),
+        message: i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.validation.unknownDissectKeyword',
+          {
+            defaultMessage: 'Expected [APPEND_SEPARATOR] in [DISSECT] but found [{keyword}]',
+            values: {
+              keyword: out.keyword,
+            },
+          }
+        ),
       };
     case 'unsupportedFunctionForCommand':
       return {
@@ -293,21 +295,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
         ),
         type: 'warning',
       };
-    case 'unsupportedSetting':
-      return {
-        message: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.validation.unsupportedSetting',
-          {
-            defaultMessage: 'Unsupported setting [{setting}], expected [{expected}]',
-            values: {
-              setting: out.setting,
-              expected: out.expected,
-            },
-          }
-        ),
-        type: 'error',
-      };
-    case 'unsupportedSettingCommandValue':
+    case 'unsupportedMode':
       return {
         message: i18n.translate(
           'kbn-esql-validation-autocomplete.esql.validation.unsupportedSettingValue',
@@ -385,7 +373,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           'kbn-esql-validation-autocomplete.esql.validation.wrongDissectOptionArgumentType',
           {
             defaultMessage:
-              'Invalid value for DISSECT append_separator: expected a string, but was [{value}]',
+              'Invalid value for DISSECT APPEND_SEPARATOR: expected a string, but was [{value}]',
             values: {
               value: out.value,
             },
@@ -442,6 +430,24 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
             values: { fn: out.fn.toUpperCase() },
           }
         ),
+      };
+    case 'invalidJoinIndex':
+      return {
+        message: i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.validation.invalidJoinIndex',
+          {
+            defaultMessage:
+              '[{identifier}] index is not a valid JOIN index.' +
+              ' Please use a "lookup" mode index JOIN commands.',
+            values: { identifier: out.identifier },
+          }
+        ),
+      };
+    case 'tooManyForks':
+      return {
+        message: i18n.translate('kbn-esql-validation-autocomplete.esql.validation.tooManyForks', {
+          defaultMessage: '[FORK] a query cannot have more than one FORK command.',
+        }),
       };
   }
   return { message: '' };
@@ -508,6 +514,9 @@ export const errors = {
       name: column.name,
     }),
 
+  tooManyForks: (command: ESQLCommand): ESQLMessage =>
+    errors.byId('tooManyForks', command.location, {}),
+
   noAggFunction: (cmd: ESQLCommand, fn: ESQLFunction): ESQLMessage =>
     errors.byId('noAggFunction', fn.location, {
       commandName: cmd.name,
@@ -532,6 +541,11 @@ export const errors = {
   aggInAggFunction: (fn: ESQLFunction): ESQLMessage =>
     errors.byId('aggInAggFunction', fn.location, {
       nestedAgg: fn.name,
+    }),
+
+  invalidJoinIndex: (identifier: ESQLSource): ESQLMessage =>
+    errors.byId('invalidJoinIndex', identifier.location, {
+      identifier: identifier.name,
     }),
 };
 

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './_action_bar.scss';
 import React, { useState, useEffect } from 'react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -18,6 +18,7 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { ActionBarWarning } from './action_bar_warning';
 import { SurrDocType } from '../../services/context';
@@ -121,7 +122,7 @@ export function ActionBar({
                     })
               }
               compressed
-              className="cxtSizePicker"
+              css={cxtSizePickerCss}
               data-test-subj={`${type}CountPicker`}
               disabled={isDisabled}
               min={MIN_CONTEXT_SIZE}
@@ -161,3 +162,14 @@ export function ActionBar({
     </form>
   );
 }
+
+const cxtSizePickerCss = ({ euiTheme }: UseEuiTheme) => css`
+  text-align: center;
+  width: calc(${euiTheme.size.base} * 5);
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    appearance: none; // Hide increment and decrement buttons for type="number" input.
+    margin: 0;
+  }
+`;

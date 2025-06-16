@@ -27,7 +27,6 @@ import { AddContentEmptyPrompt } from '../../../shared/add_content_empty_prompt'
 import { KibanaLogic } from '../../../shared/kibana';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { handlePageChange } from '../../../shared/table_pagination';
-import { NEW_API_PATH } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 // import { CannotConnect } from '../search_index/components/cannot_connect';
@@ -50,8 +49,9 @@ export const SearchIndices: React.FC = () => {
   const [showHiddenIndices, setShowHiddenIndices] = useState(false);
   const [onlyShowSearchOptimizedIndices, setOnlyShowSearchOptimizedIndices] = useState(false);
   const [searchQuery, setSearchValue] = useState('');
-  const { productFeatures } = useValues(KibanaLogic);
+  const { productFeatures, share } = useValues(KibanaLogic);
   const [showDefaultSettingsFlyout, setShowDefaultSettingsFlyout] = useState<boolean>(false);
+  const createIndexUrl = share?.url.locators.get('SEARCH_CREATE_INDEX')?.useUrl({}) ?? '';
 
   useEffect(() => {
     // We don't want to trigger loading for each search query change, so we need this
@@ -100,7 +100,12 @@ export const SearchIndices: React.FC = () => {
                 rightSideItems: isLoading
                   ? []
                   : [
-                      <EuiLinkTo data-test-subj="create-new-index-button" to={NEW_API_PATH}>
+                      <EuiLinkTo
+                        data-test-subj="create-new-index-button"
+                        to={createIndexUrl}
+                        shouldNotCreateHref
+                        shouldNotPrepend
+                      >
                         <EuiButton
                           iconType="plusInCircle"
                           color="primary"

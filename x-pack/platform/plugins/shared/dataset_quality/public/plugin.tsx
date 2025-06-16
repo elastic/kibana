@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { TelemetryService } from './services/telemetry';
 import { createDatasetQuality } from './components/dataset_quality';
 import { createDatasetQualityDetails } from './components/dataset_quality_details';
@@ -25,9 +25,7 @@ export class DatasetQualityPlugin
 {
   private telemetry = new TelemetryService();
 
-  constructor(context: PluginInitializerContext) {}
-
-  public setup(core: CoreSetup, plugins: DatasetQualitySetupDeps) {
+  public setup(core: CoreSetup, _plugins: DatasetQualitySetupDeps) {
     this.telemetry.setup({ analytics: core.analytics });
 
     return {};

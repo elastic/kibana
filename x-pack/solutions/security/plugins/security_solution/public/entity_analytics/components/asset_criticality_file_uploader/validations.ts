@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { ExperimentalFeatures } from '../../../../common';
 import {
   CRITICALITY_CSV_MAX_SIZE_BYTES,
   CRITICALITY_CSV_MAX_SIZE_BYTES_WITH_TOLERANCE,
@@ -19,7 +20,8 @@ export interface RowValidationErrors {
 }
 
 export const validateParsedContent = (
-  data: string[][]
+  data: string[][],
+  experimentalFeatures: ExperimentalFeatures
 ): { valid: string[][]; invalid: string[][]; errors: RowValidationErrors[] } => {
   if (data.length === 0) {
     return { valid: [], invalid: [], errors: [] };

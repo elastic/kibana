@@ -13,9 +13,12 @@ import { ExtraActionsButton } from './extra_actions_button';
 
 describe('ExtraActionsButton', () => {
   it('renders', () => {
-    const { queryByTestId } = render(<ExtraActionsButton onClick={() => {}} showTooltip={false} />);
+    const { queryByTestId, container } = render(
+      <ExtraActionsButton onClick={() => {}} showTooltip={false} />
+    );
 
     expect(queryByTestId('showExtraActionsButton')).toBeInTheDocument();
+    expect(container.querySelector('[data-euiicon-type="boxesHorizontal"]')).toBeInTheDocument();
   });
 
   it('renders tooltip when showTooltip=true is received', () => {
@@ -29,5 +32,19 @@ describe('ExtraActionsButton', () => {
 
     fireEvent.click(getByTestId('showExtraActionsButton'));
     expect(onClick).toHaveBeenCalled();
+  });
+
+  it('renders with correct icon when it is specified in the actionContext', () => {
+    const { queryByTestId, container } = render(
+      <ExtraActionsButton
+        onClick={() => {}}
+        showTooltip={false}
+        extraActionsIconType="boxesVertical"
+        extraActionsColor="text"
+      />
+    );
+
+    expect(queryByTestId('showExtraActionsButton')).toBeInTheDocument();
+    expect(container.querySelector('[data-euiicon-type="boxesVertical"]')).toBeInTheDocument();
   });
 });

@@ -380,4 +380,18 @@ describe('format', () => {
       }, {})
     );
   });
+
+  it('sets the schedule unit to seconds if the number ends with the letter s', () => {
+    formValues.schedule = { number: '10s', unit: 'm' };
+    expect(format(formValues)).toEqual(
+      expect.objectContaining({ schedule: { number: '10', unit: 's' } })
+    );
+  });
+
+  it('changes schedule unit back to minutes when it is changed from seconds to minutes', () => {
+    formValues.schedule = { number: '3', unit: 's' };
+    expect(format(formValues)).toEqual(
+      expect.objectContaining({ schedule: { number: '3', unit: 'm' } })
+    );
+  });
 });

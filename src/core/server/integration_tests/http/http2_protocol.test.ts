@@ -22,6 +22,11 @@ import {
 } from '@kbn/core-http-server-internal';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import type { Logger } from '@kbn/logging';
+import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';
+
+const options = getEnvOptions();
+options.cliArgs.dev = false;
+const env = createTestEnv({ envOptions: options });
 
 const CSP_CONFIG = cspConfig.schema.validate({});
 const EXTERNAL_URL_CONFIG = externalUrlConfig.schema.validate({});
@@ -74,32 +79,44 @@ describe('Http2 - Smoke tests', () => {
       innerServerListener = innerServer.listener;
 
       const router = new Router('', logger, enhanceWithContext, {
-        isDev: false,
+        env,
         versionedRouterOptions: {
           defaultHandlerResolutionStrategy: 'oldest',
         },
       });
 
-      router.post({ path: '/', validate: false }, async (context, req, res) => {
-        return res.ok({
-          body: { protocol: req.protocol, httpVersion: req.httpVersion },
-        });
-      });
-      router.get({ path: '/', validate: false }, async (context, req, res) => {
-        return res.ok({
-          body: { protocol: req.protocol, httpVersion: req.httpVersion },
-        });
-      });
-      router.put({ path: '/', validate: false }, async (context, req, res) => {
-        return res.ok({
-          body: { protocol: req.protocol, httpVersion: req.httpVersion },
-        });
-      });
-      router.delete({ path: '/', validate: false }, async (context, req, res) => {
-        return res.ok({
-          body: { protocol: req.protocol, httpVersion: req.httpVersion },
-        });
-      });
+      router.post(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        async (context, req, res) => {
+          return res.ok({
+            body: { protocol: req.protocol, httpVersion: req.httpVersion },
+          });
+        }
+      );
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        async (context, req, res) => {
+          return res.ok({
+            body: { protocol: req.protocol, httpVersion: req.httpVersion },
+          });
+        }
+      );
+      router.put(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        async (context, req, res) => {
+          return res.ok({
+            body: { protocol: req.protocol, httpVersion: req.httpVersion },
+          });
+        }
+      );
+      router.delete(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        async (context, req, res) => {
+          return res.ok({
+            body: { protocol: req.protocol, httpVersion: req.httpVersion },
+          });
+        }
+      );
 
       registerRouter(router);
 
@@ -177,20 +194,27 @@ describe('Http2 - Smoke tests', () => {
       innerServerListener = innerServer.listener;
 
       const router = new Router('', logger, enhanceWithContext, {
-        isDev: false,
+        env,
         versionedRouterOptions: {
           defaultHandlerResolutionStrategy: 'oldest',
         },
       });
 
-      router.get({ path: '/illegal_headers', validate: false }, async (context, req, res) => {
-        return res.ok({
-          headers: {
-            connection: 'close',
-          },
-          body: { protocol: req.protocol },
-        });
-      });
+      router.get(
+        {
+          path: '/illegal_headers',
+          validate: false,
+          security: { authz: { enabled: false, reason: '' } },
+        },
+        async (context, req, res) => {
+          return res.ok({
+            headers: {
+              connection: 'close',
+            },
+            body: { protocol: req.protocol },
+          });
+        }
+      );
 
       registerRouter(router);
 

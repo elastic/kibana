@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { updateOldState } from '@kbn/visualizations-plugin/public';
+import { updateOldState } from '@kbn/visualizations-plugin/public/legacy/vis_update_state';
 
 /**
  * The reason we add this test is to ensure that `convertNumIdsToStringsForTSVB` of the updateOldState runs correctly

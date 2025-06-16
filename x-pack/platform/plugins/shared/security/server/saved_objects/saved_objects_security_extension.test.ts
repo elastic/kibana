@@ -58,6 +58,7 @@ const obj1 = {
   objectNamespace: 'foo',
   initialNamespaces: ['foo'],
   existingNamespaces: [],
+  name: 'a_object_name',
 };
 const obj2 = {
   type: 'b',
@@ -65,6 +66,7 @@ const obj2 = {
   objectNamespace: undefined,
   initialNamespaces: undefined,
   existingNamespaces: [],
+  name: 'b_object_name',
 };
 const obj3 = {
   type: 'c',
@@ -72,6 +74,7 @@ const obj3 = {
   objectNamespace: undefined,
   initialNamespaces: undefined,
   existingNamespaces: ['bar'],
+  name: 'c_object_name',
 };
 const obj4 = {
   type: 'd',
@@ -79,6 +82,7 @@ const obj4 = {
   objectNamespace: 'y',
   initialNamespaces: ['y'],
   existingNamespaces: ['z'],
+  name: 'd_object_name',
 };
 
 function setupSimpleCheckPrivsMockResolve(
@@ -98,12 +102,14 @@ function setupSimpleCheckPrivsMockResolve(
   } as CheckPrivilegesResponse);
 }
 
-function setup() {
+function setup({ includeSavedObjectNames = true }: { includeSavedObjectNames?: boolean } = {}) {
   const actions = new Actions();
   jest
     .spyOn(actions.savedObject, 'get')
     .mockImplementation((type: string, action: string) => `mock-saved_object:${type}/${action}`);
   const auditLogger = auditLoggerMock.create();
+  // @ts-expect-error
+  auditLogger.includeSavedObjectNames = includeSavedObjectNames;
   const errors = {
     decorateForbiddenError: jest.fn().mockImplementation((err) => err),
     decorateGeneralError: jest.fn().mockImplementation((err) => err),
@@ -1456,6 +1462,39 @@ describe('#create', () => {
           delete_from_spaces: undefined,
           unauthorized_spaces: undefined,
           unauthorized_types: undefined,
+          saved_object: { type: obj1.type, id: obj1.id, name: obj1.name },
+        },
+        message: `User is creating ${obj1.type} [id=${obj1.id}]`,
+      });
+    });
+
+    test(`adds a single audit event without name when includeSavedObjectNames is false`, async () => {
+      const { securityExtension, checkPrivileges, auditLogger } = setup({
+        includeSavedObjectNames: false,
+      });
+      setupSimpleCheckPrivsMockResolve(checkPrivileges, obj1.type, actionString, true);
+
+      await securityExtension.authorizeCreate({
+        namespace,
+        object: obj1,
+      });
+
+      expect(auditHelperSpy).toHaveBeenCalledTimes(1);
+      expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenCalledWith({
+        error: undefined,
+        event: {
+          action: AuditAction.CREATE,
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['creation'],
+        },
+        kibana: {
+          add_to_spaces: undefined,
+          delete_from_spaces: undefined,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
           saved_object: { type: obj1.type, id: obj1.id },
         },
         message: `User is creating ${obj1.type} [id=${obj1.id}]`,
@@ -1505,7 +1544,7 @@ describe('#create', () => {
           delete_from_spaces: undefined,
           unauthorized_spaces: undefined,
           unauthorized_types: undefined,
-          saved_object: { type: obj1.type, id: obj1.id },
+          saved_object: { type: obj1.type, id: obj1.id, name: obj1.name },
         },
         message: `Failed attempt to create ${obj1.type} [id=${obj1.id}]`,
       });
@@ -1739,7 +1778,7 @@ describe('#create', () => {
             delete_from_spaces: undefined,
             unauthorized_spaces: undefined,
             unauthorized_types: undefined,
-            saved_object: { type: obj.type, id: obj.id },
+            saved_object: { type: obj.type, id: obj.id, name: obj.name },
           },
           message: `User is creating ${obj.type} [id=${obj.id}]`,
         });
@@ -1807,7 +1846,7 @@ describe('#create', () => {
             delete_from_spaces: undefined,
             unauthorized_spaces: undefined,
             unauthorized_types: undefined,
-            saved_object: { type: obj.type, id: obj.id },
+            saved_object: { type: obj.type, id: obj.id, name: obj.name },
           },
           message: `Failed attempt to create ${obj.type} [id=${obj.id}]`,
         });
@@ -1944,6 +1983,39 @@ describe('update', () => {
           delete_from_spaces: undefined,
           unauthorized_spaces: undefined,
           unauthorized_types: undefined,
+          saved_object: { type: obj1.type, id: obj1.id, name: obj1.name },
+        },
+        message: `User is updating ${obj1.type} [id=${obj1.id}]`,
+      });
+    });
+
+    test(`adds a single audit event without name when includeSavedObjectNames is false`, async () => {
+      const { securityExtension, checkPrivileges, auditLogger } = setup({
+        includeSavedObjectNames: false,
+      });
+      setupSimpleCheckPrivsMockResolve(checkPrivileges, obj1.type, actionString, true);
+
+      await securityExtension.authorizeUpdate({
+        namespace,
+        object: obj1,
+      });
+
+      expect(auditHelperSpy).toHaveBeenCalledTimes(1);
+      expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenCalledWith({
+        error: undefined,
+        event: {
+          action: AuditAction.UPDATE,
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['change'],
+        },
+        kibana: {
+          add_to_spaces: undefined,
+          delete_from_spaces: undefined,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
           saved_object: { type: obj1.type, id: obj1.id },
         },
         message: `User is updating ${obj1.type} [id=${obj1.id}]`,
@@ -1993,7 +2065,7 @@ describe('update', () => {
           delete_from_spaces: undefined,
           unauthorized_spaces: undefined,
           unauthorized_types: undefined,
-          saved_object: { type: obj1.type, id: obj1.id },
+          saved_object: { type: obj1.type, id: obj1.id, name: obj1.name },
         },
         message: `Failed attempt to update ${obj1.type} [id=${obj1.id}]`,
       });
@@ -2225,7 +2297,7 @@ describe('update', () => {
             delete_from_spaces: undefined,
             unauthorized_spaces: undefined,
             unauthorized_types: undefined,
-            saved_object: { type: obj.type, id: obj.id },
+            saved_object: { type: obj.type, id: obj.id, name: obj.name },
           },
           message: `User is updating ${obj.type} [id=${obj.id}]`,
         });
@@ -2286,7 +2358,7 @@ describe('update', () => {
             delete_from_spaces: undefined,
             unauthorized_spaces: undefined,
             unauthorized_types: undefined,
-            saved_object: { type: obj.type, id: obj.id },
+            saved_object: { type: obj.type, id: obj.id, name: obj.name },
           },
           message: `Failed attempt to update ${obj.type} [id=${obj.id}]`,
         });
@@ -2425,7 +2497,7 @@ describe('delete', () => {
           delete_from_spaces: undefined,
           unauthorized_spaces: undefined,
           unauthorized_types: undefined,
-          saved_object: { type: obj1.type, id: obj1.id },
+          saved_object: { type: obj1.type, id: obj1.id, name: obj1.name },
         },
         message: `User is deleting ${obj1.type} [id=${obj1.id}]`,
       });
@@ -2474,7 +2546,7 @@ describe('delete', () => {
           delete_from_spaces: undefined,
           unauthorized_spaces: undefined,
           unauthorized_types: undefined,
-          saved_object: { type: obj1.type, id: obj1.id },
+          saved_object: { type: obj1.type, id: obj1.id, name: obj1.name },
         },
         message: `Failed attempt to delete ${obj1.type} [id=${obj1.id}]`,
       });
@@ -2702,7 +2774,7 @@ describe('delete', () => {
             delete_from_spaces: undefined,
             unauthorized_spaces: undefined,
             unauthorized_types: undefined,
-            saved_object: { type: obj.type, id: obj.id },
+            saved_object: { type: obj.type, id: obj.id, name: obj.name },
           },
           message: `User is deleting ${obj.type} [id=${obj.id}]`,
         });
@@ -2762,7 +2834,7 @@ describe('delete', () => {
             delete_from_spaces: undefined,
             unauthorized_spaces: undefined,
             unauthorized_types: undefined,
-            saved_object: { type: obj.type, id: obj.id },
+            saved_object: { type: obj.type, id: obj.id, name: obj.name },
           },
           message: `Failed attempt to delete ${obj.type} [id=${obj.id}]`,
         });
@@ -2930,6 +3002,39 @@ describe('get', () => {
           delete_from_spaces: undefined,
           unauthorized_spaces: undefined,
           unauthorized_types: undefined,
+          saved_object: { type: obj1.type, id: obj1.id, name: obj1.name },
+        },
+        message: `User is accessing ${obj1.type} [id=${obj1.id}]`,
+      });
+    });
+
+    test(`adds a single audit event without name when includeSavedObjectNames is false`, async () => {
+      const { securityExtension, checkPrivileges, auditLogger } = setup({
+        includeSavedObjectNames: false,
+      });
+      setupSimpleCheckPrivsMockResolve(checkPrivileges, obj1.type, actionString, true);
+
+      await securityExtension.authorizeGet({
+        namespace,
+        object: obj1,
+      });
+
+      expect(auditHelperSpy).toHaveBeenCalledTimes(1);
+      expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenCalledWith({
+        error: undefined,
+        event: {
+          action: AuditAction.GET,
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['access'],
+        },
+        kibana: {
+          add_to_spaces: undefined,
+          delete_from_spaces: undefined,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
           saved_object: { type: obj1.type, id: obj1.id },
         },
         message: `User is accessing ${obj1.type} [id=${obj1.id}]`,
@@ -2994,7 +3099,7 @@ describe('get', () => {
           delete_from_spaces: undefined,
           unauthorized_spaces: undefined,
           unauthorized_types: undefined,
-          saved_object: { type: obj1.type, id: obj1.id },
+          saved_object: { type: obj1.type, id: obj1.id, name: obj1.name },
         },
         message: `Failed attempt to access ${obj1.type} [id=${obj1.id}]`,
       });
@@ -3007,7 +3112,7 @@ describe('get', () => {
       await expect(
         securityExtension.authorizeGet({
           namespace,
-          object: obj1,
+          object: { ...obj1, name: undefined },
           objectNotFound: true,
         })
       ).rejects.toThrow(`Unable to get ${obj1.type}`);
@@ -3031,7 +3136,7 @@ describe('get', () => {
           delete_from_spaces: undefined,
           unauthorized_spaces: undefined,
           unauthorized_types: undefined,
-          saved_object: { type: obj1.type, id: obj1.id },
+          saved_object: { type: obj1.type, id: obj1.id, name: undefined },
         },
         message: `Failed attempt to access ${obj1.type} [id=${obj1.id}]`,
       });
@@ -3238,7 +3343,7 @@ describe('get', () => {
             delete_from_spaces: undefined,
             unauthorized_spaces: undefined,
             unauthorized_types: undefined,
-            saved_object: { type: obj.type, id: obj.id },
+            saved_object: { type: obj.type, id: obj.id, name: obj.name },
           },
           message: `User has accessed ${obj.type} [id=${obj.id}]`,
         });
@@ -3270,7 +3375,7 @@ describe('get', () => {
           delete_from_spaces: undefined,
           unauthorized_spaces: undefined,
           unauthorized_types: undefined,
-          saved_object: { type: objA.type, id: objA.id },
+          saved_object: { type: objA.type, id: objA.id, name: objA.name },
         },
         message: `User has accessed ${objA.type} [id=${objA.id}]`,
       });
@@ -3331,7 +3436,7 @@ describe('get', () => {
             delete_from_spaces: undefined,
             unauthorized_spaces: undefined,
             unauthorized_types: undefined,
-            saved_object: { type: obj.type, id: obj.id },
+            saved_object: { type: obj.type, id: obj.id, name: obj.name },
           },
           message: `Failed attempt to access ${obj.type} [id=${obj.id}]`,
         });
@@ -3751,7 +3856,7 @@ describe(`#authorizeRemoveReferences`, () => {
         delete_from_spaces: undefined,
         unauthorized_spaces: undefined,
         unauthorized_types: undefined,
-        saved_object: { type: obj1.type, id: obj1.id },
+        saved_object: { type: obj1.type, id: obj1.id, name: obj1.name },
       },
       message: `User is removing references to ${obj1.type} [id=${obj1.id}]`,
     });
@@ -3796,7 +3901,7 @@ describe(`#authorizeRemoveReferences`, () => {
         delete_from_spaces: undefined,
         unauthorized_spaces: undefined,
         unauthorized_types: undefined,
-        saved_object: { type: obj1.type, id: obj1.id },
+        saved_object: { type: obj1.type, id: obj1.id, name: obj1.name },
       },
       message: `Failed attempt to remove references to ${obj1.type} [id=${obj1.id}]`,
     });
@@ -4084,6 +4189,7 @@ describe('#authorizeAndRedactMultiNamespaceReferences', () => {
     spacesWithMatchingAliases: ['space-2', 'space-3', 'space-4'],
     spacesWithMatchingOrigins: undefined,
     type: 'a',
+    name: 'name_a',
   };
   const refObj2 = {
     id: 'id-2',
@@ -4093,6 +4199,7 @@ describe('#authorizeAndRedactMultiNamespaceReferences', () => {
     spacesWithMatchingAliases: undefined,
     spacesWithMatchingOrigins: ['space-1', 'space-3'],
     type: 'b',
+    name: 'name_b',
   };
   const refObj3 = {
     id: 'id-3',
@@ -4102,6 +4209,7 @@ describe('#authorizeAndRedactMultiNamespaceReferences', () => {
     spacesWithMatchingAliases: undefined,
     spacesWithMatchingOrigins: undefined,
     type: 'c',
+    name: 'name_c',
   };
   const objects = [refObj1, refObj2, refObj3];
 
@@ -4238,11 +4346,17 @@ describe('#authorizeAndRedactMultiNamespaceReferences', () => {
     const redactedObjects = [
       {
         ...refObj1,
+        name: undefined,
         spaces: ['space-1', '?'],
         spacesWithMatchingAliases: ['space-2', '?', '?'],
       },
-      { ...refObj2, spaces: ['space-2', '?'], spacesWithMatchingOrigins: ['space-1', '?'] },
-      { ...refObj3, spaces: ['space-1', '?', '?'] },
+      {
+        ...refObj2,
+        name: undefined,
+        spaces: ['space-2', '?'],
+        spacesWithMatchingOrigins: ['space-1', '?'],
+      },
+      { ...refObj3, name: undefined, spaces: ['space-1', '?', '?'] },
     ];
     const expectedActions = new Set([SecurityAction.COLLECT_MULTINAMESPACE_REFERENCES]);
 
@@ -4392,7 +4506,9 @@ describe('#authorizeAndRedactMultiNamespaceReferences', () => {
           auditOptions: { bypass: 'always' },
         });
       }
-      expect(result).toEqual(objects);
+
+      // name should be always redacted
+      expect(result).toEqual(objects.map(({ name, ...obj }) => obj));
     });
 
     test(`returns redacted result when partially authorized`, async () => {
@@ -4436,7 +4552,7 @@ describe('#authorizeAndRedactMultiNamespaceReferences', () => {
             delete_from_spaces: undefined,
             unauthorized_spaces: undefined,
             unauthorized_types: undefined,
-            saved_object: { type: obj.type, id: obj.id },
+            saved_object: { type: obj.type, id: obj.id, name: obj.name },
           },
           message: `User has collected references and spaces of ${obj.type} [id=${obj.id}]`,
         });
@@ -4993,21 +5109,25 @@ describe('#authorizeUpdateSpaces', () => {
     type: 'a',
     id: '1',
     existingNamespaces: ['add_space_1', 'add_space_2'],
+    name: 'a_object_name',
   };
   const multiSpaceObj2 = {
     type: 'b',
     id: '2',
     existingNamespaces: ['*'],
+    name: 'b_object_name',
   };
   const multiSpaceObj3 = {
     type: 'a',
     id: '3',
     existingNamespaces: ['rem_space_2', 'add_space_2'],
+    name: 'a_object_name',
   };
   const multiSpaceObj4 = {
     type: 'b',
     id: '4',
     existingNamespaces: ['foo', 'add_space_1'],
+    name: 'b_object_name',
   };
 
   const objects = [multiSpaceObj1, multiSpaceObj2, multiSpaceObj3, multiSpaceObj4];
@@ -5431,7 +5551,7 @@ describe('#authorizeUpdateSpaces', () => {
           delete_from_spaces: spacesToRemove,
           unauthorized_spaces: undefined,
           unauthorized_types: undefined,
-          saved_object: { type: obj.type, id: obj.id },
+          saved_object: { type: obj.type, id: obj.id, name: obj.name },
         },
         message: `User is updating spaces of ${obj.type} [id=${obj.id}]`,
       });
@@ -5502,7 +5622,7 @@ describe('#authorizeUpdateSpaces', () => {
           delete_from_spaces: spacesToRemove,
           unauthorized_spaces: undefined,
           unauthorized_types: undefined,
-          saved_object: { type: obj.type, id: obj.id },
+          saved_object: { type: obj.type, id: obj.id, name: obj.name },
         },
         message: `Failed attempt to update spaces of ${obj.type} [id=${obj.id}]`,
       });

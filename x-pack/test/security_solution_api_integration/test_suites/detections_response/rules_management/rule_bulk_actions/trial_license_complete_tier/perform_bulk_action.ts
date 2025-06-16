@@ -1489,79 +1489,6 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(updatedRule.version).toBe(rule.version + 1);
       });
 
-      describe('prebuilt rules', () => {
-        const cases = [
-          {
-            type: BulkActionEditTypeEnum.add_tags,
-            value: ['new-tag'],
-          },
-          {
-            type: BulkActionEditTypeEnum.set_tags,
-            value: ['new-tag'],
-          },
-          {
-            type: BulkActionEditTypeEnum.delete_tags,
-            value: ['new-tag'],
-          },
-          {
-            type: BulkActionEditTypeEnum.add_index_patterns,
-            value: ['test-*'],
-          },
-          {
-            type: BulkActionEditTypeEnum.set_index_patterns,
-            value: ['test-*'],
-          },
-          {
-            type: BulkActionEditTypeEnum.delete_index_patterns,
-            value: ['test-*'],
-          },
-          {
-            type: BulkActionEditTypeEnum.set_timeline,
-            value: { timeline_id: 'mock-id', timeline_title: 'mock-title' },
-          },
-          {
-            type: BulkActionEditTypeEnum.set_schedule,
-            value: { interval: '1m', lookback: '1m' },
-          },
-        ];
-        cases.forEach(({ type, value }) => {
-          it(`should return error when trying to apply "${type}" edit action to prebuilt rule`, async () => {
-            await installMockPrebuiltRules(supertest, es);
-            const prebuiltRule = await fetchPrebuiltRule();
-
-            const { body } = await postBulkAction()
-              .send({
-                ids: [prebuiltRule.id],
-                action: BulkActionTypeEnum.edit,
-                [BulkActionTypeEnum.edit]: [
-                  {
-                    type,
-                    value,
-                  },
-                ],
-              })
-              .expect(500);
-
-            expect(body.attributes.summary).toEqual({
-              failed: 1,
-              skipped: 0,
-              succeeded: 0,
-              total: 1,
-            });
-            expect(body.attributes.errors[0]).toEqual({
-              message: "Elastic rule can't be edited",
-              status_code: 500,
-              rules: [
-                {
-                  id: prebuiltRule.id,
-                  name: prebuiltRule.name,
-                },
-              ],
-            });
-          });
-        });
-      });
-
       describe('rule actions', () => {
         const webHookActionMock = {
           group: 'default',
@@ -2071,63 +1998,6 @@ export default ({ getService }: FtrProviderContext): void => {
               expect(prebuiltRule.version).toBe(readRule.version);
             });
           });
-
-          // if rule action is applied together with another edit action, that can't be applied to prebuilt rule (for example: tags action)
-          // bulk edit request should return error
-          it(`should return error if one of edit action is not eligible for prebuilt rule`, async () => {
-            await installMockPrebuiltRules(supertest, es);
-            const prebuiltRule = await fetchPrebuiltRule();
-            const webHookConnector = await createWebHookConnector();
-
-            const { body } = await postBulkAction()
-              .send({
-                ids: [prebuiltRule.id],
-                action: BulkActionTypeEnum.edit,
-                [BulkActionTypeEnum.edit]: [
-                  {
-                    type: BulkActionEditTypeEnum.set_rule_actions,
-                    value: {
-                      throttle: '1h',
-                      actions: [
-                        {
-                          ...webHookActionMock,
-                          id: webHookConnector.id,
-                        },
-                      ],
-                    },
-                  },
-                  {
-                    type: BulkActionEditTypeEnum.set_tags,
-                    value: ['tag-1'],
-                  },
-                ],
-              })
-              .expect(500);
-
-            expect(body.attributes.summary).toEqual({
-              failed: 1,
-              skipped: 0,
-              succeeded: 0,
-              total: 1,
-            });
-            expect(body.attributes.errors[0]).toEqual({
-              message: "Elastic rule can't be edited",
-              status_code: 500,
-              rules: [
-                {
-                  id: prebuiltRule.id,
-                  name: prebuiltRule.name,
-                },
-              ],
-            });
-
-            // Check that the updates were not made
-            const { body: readRule } = await fetchRule(prebuiltRule.rule_id).expect(200);
-
-            expect(readRule.actions).toEqual(prebuiltRule.actions);
-            expect(readRule.tags).toEqual(prebuiltRule.tags);
-            expect(readRule.version).toBe(prebuiltRule.version);
-          });
         });
 
         describe('throttle', () => {
@@ -2522,6 +2392,7 @@ export default ({ getService }: FtrProviderContext): void => {
         );
 
         const startDate = moment().add(1, 'd');
+        const endDate = moment().add(2, 'd');
 
         const { body } = await securitySolutionApi
           .performRulesBulkAction({
@@ -2529,7 +2400,10 @@ export default ({ getService }: FtrProviderContext): void => {
             body: {
               ids: [createdRule1.id, createdRule2.id],
               action: BulkActionTypeEnum.run,
-              [BulkActionTypeEnum.run]: { start_date: startDate.toISOString() },
+              [BulkActionTypeEnum.run]: {
+                start_date: startDate.toISOString(),
+                end_date: endDate.toISOString(),
+              },
             },
           })
           .expect(400);
@@ -3177,6 +3051,35 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(skippedRule.index).toEqual(['index1-*']);
         expect(skippedRule.tags).toEqual(['tag1', 'tag2']);
+      });
+    });
+
+    describe('gaps_range filtering', () => {
+      it('should not affect rules without gaps when using gaps_range filters', async () => {
+        // Create two rules without gaps
+        await createRule(supertest, log, {
+          ...getSimpleRule('rule-without-gaps-1'),
+        });
+        await createRule(supertest, log, {
+          ...getSimpleRule('rule-without-gaps-2'),
+        });
+
+        // Execute bulk action with gaps range filter
+        const { body } = await postBulkAction().send({
+          query: '',
+          action: BulkActionTypeEnum.duplicate,
+          gaps_range_start: '2025-01-01T00:00:00.000Z',
+          gaps_range_end: '2025-01-02T00:00:00.000Z',
+          duplicate: { include_exceptions: false, include_expired_exceptions: false },
+        });
+
+        // Verify the summary shows no rules were processed
+        expect(body.attributes.summary).toEqual({
+          failed: 0,
+          skipped: 0,
+          succeeded: 0,
+          total: 0,
+        });
       });
     });
 

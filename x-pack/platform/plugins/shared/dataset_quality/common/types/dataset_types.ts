@@ -7,6 +7,7 @@
 
 // https://github.com/gcanti/io-ts/blob/master/index.md#union-of-string-literals
 import * as t from 'io-ts';
+import { DATA_SELECTOR, FAILURE_STORE_SELECTOR } from '../constants';
 
 export const dataStreamTypesRt = t.keyof({
   logs: null,
@@ -17,3 +18,10 @@ export const dataStreamTypesRt = t.keyof({
 });
 
 export type DataStreamType = t.TypeOf<typeof dataStreamTypesRt>;
+
+export const dataStreamSelectorsRt = t.keyof({
+  [FAILURE_STORE_SELECTOR]: null,
+  [DATA_SELECTOR]: null,
+});
+
+export type DataStreamSelector = t.TypeOf<typeof dataStreamSelectorsRt>;

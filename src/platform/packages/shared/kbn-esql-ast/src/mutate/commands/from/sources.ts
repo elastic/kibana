@@ -8,14 +8,16 @@
  */
 
 import { Builder } from '../../../builder';
-import { ESQLAstQueryExpression, ESQLSource } from '../../../types';
+import { ESQLAstQueryExpression, ESQLCommand, ESQLSource } from '../../../types';
 import { Visitor } from '../../../visitor';
 import * as generic from '../../generic';
 import * as util from '../../util';
 import type { Predicate } from '../../types';
 
-export const list = (ast: ESQLAstQueryExpression): IterableIterator<ESQLSource> => {
-  return new Visitor()
+export const list = (
+  ast: ESQLAstQueryExpression | ESQLCommand<'from'>
+): IterableIterator<ESQLSource> => {
+  const visitor = new Visitor()
     .on('visitFromCommand', function* (ctx): IterableIterator<ESQLSource> {
       for (const argument of ctx.arguments()) {
         if (argument.type === 'source') {
@@ -28,8 +30,13 @@ export const list = (ast: ESQLAstQueryExpression): IterableIterator<ESQLSource> 
       for (const command of ctx.visitCommands()) {
         yield* command;
       }
-    })
-    .visitQuery(ast);
+    });
+
+  if (ast.type === 'command') {
+    return visitor.visitCommand(ast);
+  } else {
+    return visitor.visitQuery(ast);
+  }
 };
 
 export const findByPredicate = (
@@ -45,10 +52,10 @@ export const find = (
   cluster?: string
 ): ESQLSource | undefined => {
   return findByPredicate(ast, (source) => {
-    if (index !== source.index) {
+    if (index !== source.index?.valueUnquoted) {
       return false;
     }
-    if (typeof cluster === 'string' && cluster !== source.cluster) {
+    if (cluster && typeof cluster === 'string' && cluster !== source.prefix?.valueUnquoted) {
       return false;
     }
 
@@ -84,7 +91,7 @@ export const insert = (
     return;
   }
 
-  const source = Builder.expression.indexSource(indexName, clusterName);
+  const source = Builder.expression.source.index(indexName, clusterName);
 
   if (index === -1) {
     generic.commands.args.append(command, source);

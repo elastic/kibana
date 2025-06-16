@@ -10,7 +10,7 @@ import { maintenanceWindowCategoryIdTypes } from '../../application/maintenance_
 import { getMockMaintenanceWindow } from '../../data/maintenance_window/test_helpers';
 import { maintenanceWindowClientMock } from '../../maintenance_window_client.mock';
 import { MaintenanceWindowStatus } from '../../types';
-import { MaintenanceWindow } from '../../application/maintenance_window/types';
+import type { MaintenanceWindow } from '../../application/maintenance_window/types';
 import { mockedRawRuleSO, mockedRule } from '../fixtures';
 import {
   filterMaintenanceWindows,
@@ -18,9 +18,9 @@ import {
   getMaintenanceWindows,
 } from './get_maintenance_windows';
 import { getFakeKibanaRequest } from '../rule_loader';
-import { TaskRunnerContext } from '../types';
+import type { TaskRunnerContext } from '../types';
 import { FilterStateStore } from '@kbn/es-query';
-import { KibanaRequest } from '@kbn/core-http-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 
 const logger = loggingSystemMock.create().get();
 const mockBasePathService = { set: jest.fn() };
@@ -147,6 +147,66 @@ describe('getMaintenanceWindows', () => {
         ruleId,
       })
     ).toEqual([mockMaintenanceWindows[0], mockMaintenanceWindows[2]]);
+  });
+
+  test('filters to rule type category and category IDs is null', async () => {
+    const mockMaintenanceWindows = [
+      {
+        ...getMockMaintenanceWindow(),
+        eventStartTime: new Date().toISOString(),
+        eventEndTime: new Date().toISOString(),
+        status: MaintenanceWindowStatus.Running,
+        id: 'test-id1',
+        categoryIds: [maintenanceWindowCategoryIdTypes.OBSERVABILITY],
+      },
+      {
+        ...getMockMaintenanceWindow(),
+        eventStartTime: new Date().toISOString(),
+        eventEndTime: new Date().toISOString(),
+        status: MaintenanceWindowStatus.Running,
+        id: 'test-id2',
+        categoryIds: [maintenanceWindowCategoryIdTypes.SECURITY_SOLUTION],
+      },
+      {
+        ...getMockMaintenanceWindow(),
+        eventStartTime: new Date().toISOString(),
+        eventEndTime: new Date().toISOString(),
+        status: MaintenanceWindowStatus.Running,
+        id: 'test-id3',
+        categoryIds: null,
+      },
+    ];
+    maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValue(mockMaintenanceWindows);
+    expect(
+      await getMaintenanceWindows({
+        fakeRequest,
+        getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
+        logger,
+        ruleTypeId,
+        ruleTypeCategory: 'management',
+        ruleId,
+      })
+    ).toEqual([mockMaintenanceWindows[2]]);
+    expect(
+      await getMaintenanceWindows({
+        fakeRequest,
+        getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
+        logger,
+        ruleTypeId,
+        ruleTypeCategory: 'observability',
+        ruleId,
+      })
+    ).toEqual([mockMaintenanceWindows[0], mockMaintenanceWindows[2]]);
+    expect(
+      await getMaintenanceWindows({
+        fakeRequest,
+        getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
+        logger,
+        ruleTypeId,
+        ruleTypeCategory: 'securitySolution',
+        ruleId,
+      })
+    ).toEqual([mockMaintenanceWindows[1], mockMaintenanceWindows[2]]);
   });
 
   test('returns empty array if no active maintenance windows exist', async () => {

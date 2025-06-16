@@ -9,7 +9,7 @@
 
 import React, { useMemo, useState } from 'react';
 
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import {
   EuiCodeBlock,
   EuiFlexGroup,
@@ -22,51 +22,80 @@ import {
 } from '@elastic/eui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { TimeRange } from '@kbn/es-query';
-import { useBatchedOptionalPublishingSubjects } from '@kbn/presentation-publishing';
+import { PublishesDataLoading, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { SearchEmbeddableRenderer } from '../react_embeddables/search/search_embeddable_renderer';
-import { SEARCH_EMBEDDABLE_ID } from '../react_embeddables/search/constants';
+import { SEARCH_EMBEDDABLE_TYPE } from '../react_embeddables/search/constants';
 import type { SearchApi, SearchSerializedState } from '../react_embeddables/search/types';
+
+function DatePicker({
+  dataLoading$,
+  onReload,
+  timeRange,
+  setTimeRange,
+}: {
+  dataLoading$: PublishesDataLoading['dataLoading$'];
+  timeRange: TimeRange;
+  setTimeRange: (timeRange: TimeRange) => void;
+  onReload: () => void;
+}) {
+  const dataLoading = useStateFromPublishingSubject(dataLoading$);
+  return (
+    <EuiSuperDatePicker
+      isLoading={dataLoading ?? false}
+      start={timeRange.from}
+      end={timeRange.to}
+      onTimeChange={({ start, end }: OnTimeChangeProps) => {
+        setTimeRange({
+          from: start,
+          to: end,
+        });
+      }}
+      onRefresh={() => {
+        onReload();
+      }}
+    />
+  );
+}
 
 export const RenderExamples = () => {
   const parentApi = useMemo(() => {
+    const timeRange$ = new BehaviorSubject<TimeRange>({
+      from: 'now-24h',
+      to: 'now',
+    });
+    const reload$ = new Subject<void>();
     return {
-      reload$: new Subject<void>(),
+      reload$,
+      onReload: () => {
+        reload$.next();
+      },
       getSerializedStateForChild: () => ({
         rawState: {
           timeRange: undefined,
         },
       }),
-      timeRange$: new BehaviorSubject<TimeRange>({
-        from: 'now-24h',
-        to: 'now',
-      }),
+      timeRange$,
+      setTimeRange: (timeRange: TimeRange | undefined) => {
+        if (timeRange) timeRange$.next(timeRange);
+      },
     };
     // only run onMount
   }, []);
 
   const [api, setApi] = useState<SearchApi | null>(null);
   const [hidePanelChrome, setHidePanelChrome] = useState<boolean>(false);
-  const [dataLoading, timeRange] = useBatchedOptionalPublishingSubjects(
-    api?.dataLoading,
-    parentApi.timeRange$
-  );
+  const timeRange = useStateFromPublishingSubject(parentApi.timeRange$);
 
   return (
     <div>
-      <EuiSuperDatePicker
-        isLoading={dataLoading ? dataLoading : false}
-        start={timeRange.from}
-        end={timeRange.to}
-        onTimeChange={({ start, end }: OnTimeChangeProps) => {
-          parentApi.timeRange$.next({
-            from: start,
-            to: end,
-          });
-        }}
-        onRefresh={() => {
-          parentApi.reload$.next();
-        }}
-      />
+      {api && (
+        <DatePicker
+          dataLoading$={api.dataLoading$}
+          onReload={parentApi.onReload}
+          setTimeRange={parentApi.setTimeRange}
+          timeRange={timeRange}
+        />
+      )}
 
       <EuiSpacer size="s" />
 
@@ -74,13 +103,13 @@ export const RenderExamples = () => {
         <EuiFlexItem>
           <EuiText>
             <p>
-              Use <strong>ReactEmbeddableRenderer</strong> to render embeddables.
+              Use <strong>EmbeddableRenderer</strong> to render embeddables.
             </p>
           </EuiText>
 
           <EuiCodeBlock language="jsx" fontSize="m" paddingSize="m">
-            {`<ReactEmbeddableRenderer<State, Api>
-  type={SEARCH_EMBEDDABLE_ID}
+            {`<EmbeddableRenderer<State, Api>
+  type={SEARCH_EMBEDDABLE_TYPE}
   getParentApi={() => parentApi}
   onApiAvailable={(newApi) => {
     setApi(newApi);
@@ -99,9 +128,9 @@ export const RenderExamples = () => {
 
           <EuiSpacer size="s" />
 
-          <ReactEmbeddableRenderer<SearchSerializedState, SearchSerializedState, SearchApi>
+          <EmbeddableRenderer<SearchSerializedState, SearchApi>
             key={hidePanelChrome ? 'hideChrome' : 'showChrome'}
-            type={SEARCH_EMBEDDABLE_ID}
+            type={SEARCH_EMBEDDABLE_TYPE}
             getParentApi={() => parentApi}
             onApiAvailable={(newApi) => {
               setApi(newApi);
@@ -112,7 +141,7 @@ export const RenderExamples = () => {
 
         <EuiFlexItem>
           <EuiText>
-            <p>To avoid leaking embeddable details, wrap ReactEmbeddableRenderer in a component.</p>
+            <p>To avoid leaking embeddable details, wrap EmbeddableRenderer in a component.</p>
           </EuiText>
 
           <EuiCodeBlock language="jsx" fontSize="m" paddingSize="m">

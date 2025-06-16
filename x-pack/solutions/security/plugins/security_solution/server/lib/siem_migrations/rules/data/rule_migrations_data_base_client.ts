@@ -11,37 +11,67 @@ import type {
   SearchResponse,
   Duration,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type {
+  AuthenticatedUser,
+  ElasticsearchClient,
+  IScopedClusterClient,
+  Logger,
+} from '@kbn/core/server';
 import assert from 'assert';
-import type { Stored } from '../types';
-import type { IndexNameProvider } from './rule_migrations_data_client';
+import type { IndexNameProvider, SiemRuleMigrationsClientDependencies } from '../types';
+import type { Stored } from '../../types';
 
 const DEFAULT_PIT_KEEP_ALIVE: Duration = '30s' as const;
 
 export class RuleMigrationsDataBaseClient {
+  protected esClient: ElasticsearchClient;
+
   constructor(
     protected getIndexName: IndexNameProvider,
-    protected username: string,
-    protected esClient: ElasticsearchClient,
-    protected logger: Logger
-  ) {}
+    protected currentUser: AuthenticatedUser,
+    protected esScopedClient: IScopedClusterClient,
+    protected logger: Logger,
+    protected dependencies: SiemRuleMigrationsClientDependencies
+  ) {
+    this.esClient = esScopedClient.asInternalUser;
+  }
 
-  protected processResponseHits<T extends object>(
-    response: SearchResponse<T>,
-    override?: Partial<T>
-  ): Array<Stored<T>> {
-    return this.processHits(response.hits.hits, override);
+  protected async getProfileUid() {
+    if (this.currentUser.profile_uid) {
+      return this.currentUser.profile_uid;
+    }
+    const username = this.currentUser.username;
+    try {
+      const users = await this.esScopedClient.asCurrentUser.security.getUser({
+        username,
+        with_profile_uid: true,
+      });
+      return users[username].profile_uid;
+    } catch (error) {
+      this.logger.error(`Error getting profile_uid for user ${username}: ${error}`);
+      return username;
+    }
+  }
+
+  protected processHit<T extends object>(hit: SearchHit<T>, override: Partial<T> = {}): Stored<T> {
+    const { _id, _source } = hit;
+    assert(_id, 'document should have _id');
+    assert(_source, 'document should have _source');
+    return { ..._source, ...override, id: _id };
   }
 
   protected processHits<T extends object>(
     hits: Array<SearchHit<T>> = [],
     override: Partial<T> = {}
   ): Array<Stored<T>> {
-    return hits.map(({ _id, _source }) => {
-      assert(_id, 'document should have _id');
-      assert(_source, 'document should have _source');
-      return { ..._source, ...override, id: _id };
-    });
+    return hits.map((hit) => this.processHit(hit, override));
+  }
+
+  protected processResponseHits<T extends object>(
+    response: SearchResponse<T>,
+    override?: Partial<T>
+  ): Array<Stored<T>> {
+    return this.processHits(response.hits.hits, override);
   }
 
   protected getTotalHits(response: SearchResponse) {

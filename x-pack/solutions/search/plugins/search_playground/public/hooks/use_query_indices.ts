@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { IndexName } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { IndexName } from '@elastic/elasticsearch/lib/api/types';
 import { useKibana } from './use_kibana';
 import { APIRoutes } from '../types';
 
@@ -31,7 +31,7 @@ export const useQueryIndices = (
           query: {
             search_query: query,
             exact,
-            size: 50,
+            size: 100,
           },
         });
 

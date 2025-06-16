@@ -41,8 +41,6 @@ import {
   outputYmlIncludesReservedPerformanceKey,
 } from '../../../../../../../common/services/output_helpers';
 
-import { ExperimentalFeaturesService } from '../../../../../../services';
-
 import { outputType, RESERVED_CONFIG_YML_KEYS } from '../../../../../../../common/constants';
 
 import { MAX_FLYOUT_WIDTH } from '../../../../constants';
@@ -105,9 +103,6 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
     [proxies]
   );
 
-  const { kafkaOutput: isKafkaOutputEnabled, remoteESOutput: isRemoteESOutputEnabled } =
-    ExperimentalFeaturesService.get();
-
   const isRemoteESOutput = inputs.typeInput.value === outputType.RemoteElasticsearch;
   const isESOutput = inputs.typeInput.value === outputType.Elasticsearch;
   const supportsPresets = inputs.typeInput.value
@@ -119,11 +114,11 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
 
   const OUTPUT_TYPE_OPTIONS = [
     { value: outputType.Elasticsearch, text: 'Elasticsearch' },
-    ...(isRemoteESOutputEnabled && isStateful
+    ...(isStateful
       ? [{ value: outputType.RemoteElasticsearch, text: 'Remote Elasticsearch' }]
       : []),
     { value: outputType.Logstash, text: 'Logstash' },
-    ...(isKafkaOutputEnabled ? [{ value: outputType.Kafka, text: 'Kafka' }] : []),
+    { value: outputType.Kafka, text: 'Kafka' },
   ];
 
   const renderLogstashSection = () => {
@@ -138,33 +133,33 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   };
 
   const renderElasticsearchSection = () => {
-    return <OutputFormElasticsearchSection inputs={inputs} />;
+    return (
+      <OutputFormElasticsearchSection
+        inputs={inputs}
+        useSecretsStorage={useSecretsStorage}
+        onToggleSecretStorage={onToggleSecretStorage}
+      />
+    );
   };
 
   const renderRemoteElasticsearchSection = () => {
-    if (isRemoteESOutputEnabled) {
-      return (
-        <OutputFormRemoteEsSection
-          inputs={inputs}
-          useSecretsStorage={useSecretsStorage}
-          onToggleSecretStorage={onToggleSecretStorage}
-        />
-      );
-    }
-    return null;
+    return (
+      <OutputFormRemoteEsSection
+        inputs={inputs}
+        useSecretsStorage={useSecretsStorage}
+        onToggleSecretStorage={onToggleSecretStorage}
+      />
+    );
   };
 
   const renderKafkaSection = () => {
-    if (isKafkaOutputEnabled) {
-      return (
-        <OutputFormKafkaSection
-          inputs={inputs}
-          useSecretsStorage={useSecretsStorage}
-          onToggleSecretStorage={onToggleSecretStorage}
-        />
-      );
-    }
-    return null;
+    return (
+      <OutputFormKafkaSection
+        inputs={inputs}
+        useSecretsStorage={useSecretsStorage}
+        onToggleSecretStorage={onToggleSecretStorage}
+      />
+    );
   };
 
   const renderOutputTypeSection = (type: string) => {

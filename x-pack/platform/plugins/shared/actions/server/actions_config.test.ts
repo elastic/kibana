@@ -6,7 +6,8 @@
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import { ActionsConfig, DEFAULT_USAGE_API_URL } from './config';
+import type { ActionsConfig } from './config';
+import { DEFAULT_USAGE_API_URL } from './config';
 import {
   DEFAULT_MICROSOFT_EXCHANGE_URL,
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
@@ -18,7 +19,7 @@ import {
   EnabledActionTypes,
 } from './actions_config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import moment from 'moment';
@@ -568,5 +569,36 @@ describe('getMaxQueued()', () => {
     const acu = getActionsConfigurationUtilities(defaultActionsConfig);
     const max = acu.getMaxQueued();
     expect(max).toEqual(1000000);
+  });
+});
+
+describe('getAwsSesConfig()', () => {
+  test('returns null when no email config set', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.getAwsSesConfig()).toEqual(null);
+  });
+
+  test('returns null when no email.services config set', () => {
+    const acu = getActionsConfigurationUtilities({ ...defaultActionsConfig, email: {} });
+    expect(acu.getAwsSesConfig()).toEqual(null);
+  });
+
+  test('returns config if set', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      email: {
+        services: {
+          ses: {
+            host: 'https://email.us-east-1.amazonaws.com',
+            port: 1234,
+          },
+        },
+      },
+    });
+    expect(acu.getAwsSesConfig()).toEqual({
+      host: 'https://email.us-east-1.amazonaws.com',
+      port: 1234,
+      secure: true,
+    });
   });
 });

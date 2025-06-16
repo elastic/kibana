@@ -16,6 +16,8 @@ import {
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import { getEntityAnalyticsEntityTypes } from '../../../../common/entity_analytics/utils';
+import type { EntityType } from '../../../../common/search_strategy';
 import type { ExperimentalFeatures } from '../../../../common';
 import type {
   AssetCriticalityRecord,
@@ -27,7 +29,6 @@ import type {
   RiskScoreWeights,
 } from '../../../../common/api/entity_analytics/common';
 import {
-  type IdentifierType,
   getRiskLevel,
   RiskCategories,
   RiskWeightTypes,
@@ -111,7 +112,7 @@ const buildIdentifierTypeAggregation = ({
   scriptedMetricPainless,
 }: {
   afterKeys: AfterKeys;
-  identifierType: IdentifierType;
+  identifierType: EntityType;
   pageSize: number;
   weights?: RiskScoreWeights;
   alertSampleSizePerShard: number;
@@ -201,7 +202,7 @@ const processScores = async ({
 };
 
 export const getGlobalWeightForIdentifierType = (
-  identifierType: IdentifierType,
+  identifierType: EntityType,
   weights?: RiskScoreWeights
 ): number | undefined =>
   weights?.find((weight) => weight.type === RiskWeightTypes.global)?.[identifierType];
@@ -246,11 +247,9 @@ export const calculateRiskScores = async ({
         bool: { must_not: { terms: { [ALERT_WORKFLOW_TAGS]: excludeAlertTags } } },
       });
     }
-    const identifierTypes: IdentifierType[] = identifierType
+    const identifierTypes: EntityType[] = identifierType
       ? [identifierType]
-      : experimentalFeatures.serviceEntityStoreEnabled
-      ? ['host', 'user', 'service']
-      : ['host', 'user'];
+      : getEntityAnalyticsEntityTypes();
 
     const request = {
       size: 0,
@@ -312,9 +311,7 @@ export const calculateRiskScores = async ({
 
     const userBuckets = response.aggregations.user?.buckets ?? [];
     const hostBuckets = response.aggregations.host?.buckets ?? [];
-    const serviceBuckets = experimentalFeatures.serviceEntityStoreEnabled
-      ? response.aggregations.service?.buckets ?? []
-      : [];
+    const serviceBuckets = response.aggregations.service?.buckets ?? [];
 
     const afterKeys = {
       host: response.aggregations.host?.after_key,

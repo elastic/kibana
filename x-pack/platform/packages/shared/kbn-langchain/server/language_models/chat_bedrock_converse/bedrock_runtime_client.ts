@@ -13,17 +13,18 @@ import {
   ConverseStreamCommand,
   ConverseStreamResponse,
 } from '@aws-sdk/client-bedrock-runtime';
+import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import { constructStack } from '@smithy/middleware-stack';
 import { HttpHandlerOptions } from '@smithy/types';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-
 import { prepareMessages } from '../../utils/bedrock';
 
 export interface CustomChatModelInput extends BedrockRuntimeClientConfig {
   actionsClient: PublicMethodsOf<ActionsClient>;
   connectorId: string;
   streaming?: boolean;
+  telemetryMetadata?: TelemetryMetadata;
 }
 
 export class BedrockRuntimeClient extends _BedrockRuntimeClient {
@@ -31,12 +32,14 @@ export class BedrockRuntimeClient extends _BedrockRuntimeClient {
   streaming: boolean;
   actionsClient: PublicMethodsOf<ActionsClient>;
   connectorId: string;
+  telemetryMetadata?: TelemetryMetadata;
 
   constructor({ actionsClient, connectorId, ...fields }: CustomChatModelInput) {
     super(fields ?? {});
     this.streaming = fields.streaming ?? true;
     this.actionsClient = actionsClient;
     this.connectorId = connectorId;
+    this.telemetryMetadata = fields?.telemetryMetadata;
     // eliminate middleware steps that handle auth as Kibana connector handles auth
     this.middlewareStack = constructStack() as _BedrockRuntimeClient['middlewareStack'];
   }
@@ -56,6 +59,7 @@ export class BedrockRuntimeClient extends _BedrockRuntimeClient {
       params: {
         subAction: 'bedrockClientSend',
         subActionParams: {
+          telemetryMetadata: this.telemetryMetadata,
           command,
           signal: options?.abortSignal,
         },

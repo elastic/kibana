@@ -14,25 +14,28 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiSpacer,
-  EuiText,
+  EuiSwitchEvent,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useState, useRef, useEffect } from 'react';
-import type { IShareContext, ShareContextObjectTypeConfig } from '../../context';
+import { TimeTypeSection } from './time_type_section';
+import type { IShareContext } from '../../context';
+import type { LinkShareConfig, LinkShareUIConfig } from '../../../types';
 
 type LinkProps = Pick<
   IShareContext,
   | 'objectType'
   | 'objectId'
   | 'isDirty'
-  | 'urlService'
   | 'shareableUrl'
-  | 'delegatedShareUrlHandler'
   | 'shareableUrlLocatorParams'
   | 'allowShortUrl'
-> & { objectConfig?: ShareContextObjectTypeConfig };
+> &
+  LinkShareConfig['config'] & {
+    objectConfig?: LinkShareUIConfig;
+  };
 
 interface UrlParams {
   [extensionName: string]: {
@@ -45,17 +48,20 @@ export const LinkContent = ({
   objectType,
   objectConfig = {},
   shareableUrl,
-  urlService,
+  shortUrlService,
   shareableUrlLocatorParams,
   allowShortUrl,
-  delegatedShareUrlHandler,
 }: LinkProps) => {
   const [snapshotUrl, setSnapshotUrl] = useState<string>('');
   const [isTextCopied, setTextCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isAbsoluteTime, setIsAbsoluteTime] = useState(true);
   const urlParamsRef = useRef<UrlParams | undefined>(undefined);
   const urlToCopy = useRef<string | undefined>(undefined);
   const copiedTextToolTipCleanupIdRef = useRef<ReturnType<typeof setTimeout>>();
+  const timeRange = shareableUrlLocatorParams?.params?.timeRange;
+
+  const { delegatedShareUrlHandler, draftModeCallOut: DraftModeCallout } = objectConfig;
 
   const getUrlWithUpdatedParams = useCallback((tempUrl: string): string => {
     const urlWithUpdatedParams = urlParamsRef.current
@@ -80,22 +86,23 @@ export const LinkContent = ({
   }, [getUrlWithUpdatedParams, shareableUrl]);
 
   const createShortUrl = useCallback(async () => {
-    const shortUrlService = urlService.shortUrls.get(null);
-
     if (shareableUrlLocatorParams) {
-      const shortUrl = await shortUrlService.createWithLocator(shareableUrlLocatorParams);
+      const shortUrl = await shortUrlService.createWithLocator(
+        shareableUrlLocatorParams,
+        isAbsoluteTime
+      );
       return shortUrl.locator.getUrl(shortUrl.params, { absolute: true });
     } else {
-      return (await shortUrlService.createFromLongUrl(snapshotUrl)).url;
+      return (await shortUrlService.createFromLongUrl(snapshotUrl, isAbsoluteTime)).url;
     }
-  }, [shareableUrlLocatorParams, urlService.shortUrls, snapshotUrl]);
+  }, [shareableUrlLocatorParams, shortUrlService, snapshotUrl, isAbsoluteTime]);
 
   const copyUrlHelper = useCallback(async () => {
     setIsLoading(true);
 
     if (!urlToCopy.current) {
       urlToCopy.current = delegatedShareUrlHandler
-        ? delegatedShareUrlHandler()
+        ? await delegatedShareUrlHandler()
         : allowShortUrl
         ? await createShortUrl()
         : snapshotUrl;
@@ -104,7 +111,7 @@ export const LinkContent = ({
     copyToClipboard(urlToCopy.current);
     setTextCopied(() => {
       if (copiedTextToolTipCleanupIdRef.current) {
-        clearInterval(copiedTextToolTipCleanupIdRef.current);
+        clearTimeout(copiedTextToolTipCleanupIdRef.current);
       }
 
       // set up timer to revert copied state to false after specified duration
@@ -116,18 +123,21 @@ export const LinkContent = ({
     setIsLoading(false);
   }, [snapshotUrl, delegatedShareUrlHandler, allowShortUrl, createShortUrl]);
 
-  const { draftModeCallOut: DraftModeCallout } = objectConfig;
+  const changeTimeType = (e: EuiSwitchEvent) => {
+    setIsAbsoluteTime(e.target.checked);
+    if (urlToCopy?.current && e.target.checked !== isAbsoluteTime) {
+      urlToCopy.current = undefined;
+    }
+  };
 
   return (
     <>
       <EuiForm>
-        <EuiText size="s">
-          <FormattedMessage
-            id="share.link.helpText"
-            defaultMessage="Share a direct link to this {objectType}."
-            values={{ objectType }}
-          />
-        </EuiText>
+        <TimeTypeSection
+          timeRange={timeRange}
+          isAbsoluteTime={isAbsoluteTime}
+          changeTimeType={changeTimeType}
+        />
         {isDirty && DraftModeCallout && (
           <>
             <EuiSpacer size="m" />

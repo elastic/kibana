@@ -1,0 +1,11 @@
+# summary: 
+description: An example of a successful response from `POST /api/apm/agent_keys`, which creates an APM agent API key.
+value: >
+  {
+    "agentKey": {
+      "id": "3DCLmn0B3ZMhLUa7WBG9",
+      "name": "apm-key",
+      "api_key": "PjGloCGOTzaZr8ilUPvkjA",
+      "encoded": "M0RDTG1uMEIzWk1oTFVhN1dCRzk6UGpHbG9DR09UemFacjhpbFVQdmtqQQ=="
+    }
+  }

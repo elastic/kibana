@@ -17,8 +17,8 @@ import {
   cellValueTrigger,
   CELL_VALUE_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
-import { DocumentToExpressionReturnType } from '../../async_services';
-import { LensDocument } from '../../persistence';
+import type { DocumentToExpressionReturnType } from '../../async_services';
+import type { LensDocument } from '../../persistence';
 import {
   GetCompatibleCellValueActions,
   IndexPatternMap,
@@ -149,6 +149,7 @@ export async function getExpressionRendererParams(
     onData = noop,
     logError,
     api,
+    renderMode,
     addUserMessages,
     updateBlockingErrors,
     searchContext,
@@ -199,6 +200,7 @@ export async function getExpressionRendererParams(
       syncTooltips,
       searchSessionId,
       onRender$: onRender,
+      renderMode,
       handleEvent,
       onData$: onData,
       // Remove ES|QL query from it

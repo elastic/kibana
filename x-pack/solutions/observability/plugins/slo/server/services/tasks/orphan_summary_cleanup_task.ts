@@ -15,7 +15,7 @@ import { AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/lib/ap
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { StoredSLODefinition } from '../../domain/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
-import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
+import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
 import { SLOConfig } from '../../types';
 
 export const TASK_TYPE = 'SLO:ORPHAN_SUMMARIES-CLEANUP-TASK';
@@ -75,48 +75,53 @@ export class SloOrphanSummaryCleanupTask {
     });
   }
 
-  runTask = async () => {
-    if (this.soClient && this.esClient) {
-      let searchAfterKey: AggregationsCompositeAggregateKey | undefined;
+  public async runTask() {
+    if (!this.soClient || !this.esClient) {
+      return;
+    }
 
-      do {
-        const { sloSummaryIds, searchAfter } = await this.fetchSloSummariesIds(searchAfterKey);
+    this.abortController = new AbortController();
+    let searchAfterKey: AggregationsCompositeAggregateKey | undefined;
 
-        if (sloSummaryIds.length === 0) {
-          return;
-        }
+    do {
+      const { sloSummaryIds, searchAfter } = await this.fetchSloSummariesIds(searchAfterKey);
 
-        searchAfterKey = searchAfter;
+      if (sloSummaryIds.length === 0) {
+        return;
+      }
 
-        const ids = sloSummaryIds.map(({ id }) => id);
+      searchAfterKey = searchAfter;
 
-        const sloDefinitions = await this.findSloDefinitions(ids);
+      const ids = sloSummaryIds.map(({ id }) => id);
 
-        const sloSummaryIdsToDelete = sloSummaryIds.filter(
-          ({ id, revision }) =>
-            !sloDefinitions.find(
-              (attributes) => attributes.id === id && attributes.revision === revision
-            )
+      const sloDefinitions = await this.findSloDefinitions(ids);
+
+      const sloSummaryIdsToDelete = sloSummaryIds.filter(
+        ({ id, revision }) =>
+          !sloDefinitions.find(
+            (attributes) => attributes.id === id && attributes.revision === revision
+          )
+      );
+
+      if (sloSummaryIdsToDelete.length > 0) {
+        this.logger.debug(
+          `[SLO] Deleting ${sloSummaryIdsToDelete.length} SLO Summary documents from the summary index`
         );
 
-        if (sloSummaryIdsToDelete.length > 0) {
-          this.logger.info(
-            `[SLO] Deleting ${sloSummaryIdsToDelete.length} SLO Summary documents from the summary index`
-          );
-
-          await this.esClient.deleteByQuery({
-            wait_for_completion: false,
-            index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-            query: {
-              bool: {
-                should: getDeleteQueryFilter(sloSummaryIdsToDelete.sort()),
-              },
+        await this.esClient.deleteByQuery({
+          index: SUMMARY_DESTINATION_INDEX_PATTERN,
+          wait_for_completion: false,
+          conflicts: 'proceed',
+          slices: 'auto',
+          query: {
+            bool: {
+              should: getDeleteQueryFilter(sloSummaryIdsToDelete.sort()),
             },
-          });
-        }
-      } while (searchAfterKey);
-    }
-  };
+          },
+        });
+      }
+    } while (searchAfterKey);
+  }
 
   fetchSloSummariesIds = async (
     searchAfter?: AggregationsCompositeAggregateKey
@@ -149,7 +154,7 @@ export class SloOrphanSummaryCleanupTask {
       }
     >({
       size: 0,
-      index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+      index: SUMMARY_DESTINATION_INDEX_PATTERN,
       aggs: {
         slos: {
           composite: {
@@ -227,7 +232,7 @@ export class SloOrphanSummaryCleanupTask {
     this.esClient = esClient;
 
     if (!taskManager) {
-      this.logger.info(
+      this.logger.debug(
         'Missing required service during startup, skipping orphan-slo-summary-cleanup task.'
       );
       return;

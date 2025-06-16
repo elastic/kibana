@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { FtrConfigProviderContext } from '@kbn/test';
 
 interface Settings {
@@ -22,6 +23,7 @@ export function createTestConfig(settings: Settings) {
     );
 
     return {
+      testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       testFiles,
       servers: xPackAPITestsConfig.get('servers'),
       services: xPackAPITestsConfig.get('services'),

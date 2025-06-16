@@ -27,7 +27,7 @@ interface RequestFixtureOptions {
   mime?: string;
   path?: string;
   query?: Record<string, any>;
-  response?: Record<string, any> | Boom.Boom;
+  response?: Record<string, any> | Boom.Boom | null;
   app?: Record<string, any>;
 }
 
@@ -344,5 +344,101 @@ describe('getEcsResponseLog', () => {
         }
       `);
     });
+  });
+
+  test('does not return response in meta object if response is not in the request', () => {
+    const req = createMockHapiRequest({
+      response: null,
+    });
+    const result = getEcsResponseLog(req, logger);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "message": "GET /path",
+        "meta": Object {
+          "client": Object {
+            "ip": undefined,
+          },
+          "http": Object {
+            "request": Object {
+              "headers": Object {
+                "user-agent": "",
+              },
+              "method": "GET",
+              "mime_type": "application/json",
+              "referrer": "localhost:5601/app/home",
+            },
+          },
+          "trace": undefined,
+          "url": Object {
+            "path": "/path",
+            "query": "",
+          },
+          "user_agent": Object {
+            "original": "",
+          },
+        },
+      }
+    `);
+  });
+
+  test('handles invalid response time correctly', () => {
+    const req = createMockHapiRequest({
+      info: {
+        completed: 1610660230000,
+        received: 1610660232000, // completed before received
+      },
+    });
+    const result = getEcsResponseLog(req, logger);
+    expect(result.message).toMatchInlineSnapshot(`"GET /path 200 - 1.2KB"`);
+  });
+
+  test('formats large payload sizes correctly', () => {
+    (getResponsePayloadBytes as jest.Mock).mockReturnValueOnce(1024 * 1024 * 5); // 5 MB
+    const req = createMockHapiRequest();
+    const result = getEcsResponseLog(req, logger);
+    expect(result.message).toMatchInlineSnapshot(`"GET /path 200 - 5.0MB"`);
+  });
+
+  test('handles minimal response object without crashing', () => {
+    const req = createMockHapiRequest({
+      response: { statusCode: 204 },
+    });
+    const result = getEcsResponseLog(req, logger);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "message": "GET /path 204 - 1.2KB",
+        "meta": Object {
+          "client": Object {
+            "ip": undefined,
+          },
+          "http": Object {
+            "request": Object {
+              "headers": Object {
+                "user-agent": "",
+              },
+              "method": "GET",
+              "mime_type": "application/json",
+              "referrer": "localhost:5601/app/home",
+            },
+            "response": Object {
+              "body": Object {
+                "bytes": 1234,
+              },
+              "headers": Object {},
+              "responseTime": undefined,
+              "status_code": 204,
+            },
+          },
+          "trace": undefined,
+          "url": Object {
+            "path": "/path",
+            "query": "",
+          },
+          "user_agent": Object {
+            "original": "",
+          },
+        },
+      }
+    `);
   });
 });

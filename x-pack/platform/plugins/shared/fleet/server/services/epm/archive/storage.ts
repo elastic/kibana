@@ -121,7 +121,11 @@ export async function saveArchiveEntriesFromAssetsMap(opts: {
     })
   );
 
-  const results = await savedObjectsClient.bulkCreate<PackageAsset>(bulkBody, { refresh: false });
+  const results = await savedObjectsClient.bulkCreate<PackageAsset>(bulkBody, {
+    refresh: false,
+    overwrite: true,
+  });
+
   return results;
 }
 

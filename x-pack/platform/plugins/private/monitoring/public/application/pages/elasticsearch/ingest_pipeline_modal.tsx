@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
 import { KibanaSavedObjectType } from '@kbn/fleet-plugin/public';
+import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { MonitoringStartServices } from '../../../types';
 
 const INGEST_PIPELINE_DASHBOARD_ID = 'elasticsearch-metrics-ingest-pipelines';
@@ -35,7 +36,7 @@ export const ingestPipelineTabOnClick = async (services: MonitoringStartServices
     response.data.items.some((item) => item.id === INGEST_PIPELINE_DASHBOARD_ID);
 
   const navigateToDashboard = () =>
-    services.dashboard!.locator!.navigate({
+    services.share.url.locators.get(DASHBOARD_APP_LOCATOR)?.navigate({
       dashboardId: INGEST_PIPELINE_DASHBOARD_ID,
     });
 

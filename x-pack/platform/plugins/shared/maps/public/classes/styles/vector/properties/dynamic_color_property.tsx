@@ -10,7 +10,12 @@ import React from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DynamicStyleProperty, OTHER_CATEGORY_KEY } from './dynamic_style_property';
-import { makeMbClampedNumberExpression, dynamicRound } from '../style_util';
+import {
+  makeMbClampedNumberExpression,
+  dynamicRound,
+  OTHER_CATEGORY_DEFAULT_COLOR,
+  OTHER_CATEGORY_LABEL,
+} from '../style_util';
 import {
   getOrdinalMbColorRampStops,
   getPercentilesMbColorRampStops,
@@ -23,7 +28,6 @@ import {
   VECTOR_STYLES,
 } from '../../../../../common/constants';
 import { isCategoricalStopsInvalid } from '../components/color/color_stops_utils';
-import { OTHER_CATEGORY_LABEL, OTHER_CATEGORY_DEFAULT_COLOR } from '../style_util';
 import { Break, BreakedLegend } from '../components/legend/breaked_legend';
 import { ColorDynamicOptions, OrdinalColorStop } from '../../../../../common/descriptor_types';
 import { LegendProps } from './style_property';

@@ -12,15 +12,16 @@ import {
   EuiHeaderLogo,
   EuiHeaderSection,
   EuiHeaderSectionItem,
-  EuiLoadingSpinner,
-  useEuiTheme,
-  EuiThemeComputed,
   EuiImage,
+  EuiLoadingSpinner,
+  EuiThemeComputed,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import {
   ChromeBreadcrumb,
+  type ChromeBreadcrumbsAppendExtension,
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
   ChromeHelpMenuLink,
@@ -33,7 +34,7 @@ import { MountPoint } from '@kbn/core-mount-utils-browser';
 import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Router } from '@kbn/shared-ux-router';
-import React, { useCallback, type ComponentProps } from 'react';
+import React, { type ComponentProps, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { debounceTime, Observable } from 'rxjs';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
@@ -46,6 +47,7 @@ import { HeaderTopBanner } from '../header/header_top_banner';
 import { ScreenReaderRouteAnnouncements, SkipToMainContent } from '../header/screen_reader_a11y';
 import { AppMenuBar } from './app_menu';
 import { ProjectNavigation } from './navigation';
+import { BreadcrumbsWithExtensionsWrapper } from '../header/breadcrumbs_with_extensions';
 
 const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
   logo: {
@@ -114,6 +116,7 @@ const headerStrings = {
 export interface Props extends Pick<ComponentProps<typeof HeaderHelpMenu>, 'isServerless'> {
   headerBanner$: Observable<ChromeUserBanner | undefined>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
+  breadcrumbsAppendExtensions$: Observable<ChromeBreadcrumbsAppendExtension[]>;
   actionMenu$: Observable<MountPoint | undefined>;
   docLinks: DocLinksStart;
   children: React.ReactNode;
@@ -228,6 +231,7 @@ export const ProjectHeader = ({
   toggleSideNav,
   customBranding$,
   isServerless,
+  breadcrumbsAppendExtensions$,
   ...observables
 }: Props) => {
   const headerActionMenuMounter = useHeaderActionMenuMounter(observables.actionMenu$);
@@ -282,7 +286,11 @@ export const ProjectHeader = ({
                   coreStart={{ application }}
                   css={headerCss.redirectAppLinksContainer}
                 >
-                  <Breadcrumbs breadcrumbs$={observables.breadcrumbs$} />
+                  <BreadcrumbsWithExtensionsWrapper
+                    breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$}
+                  >
+                    <Breadcrumbs breadcrumbs$={observables.breadcrumbs$} />
+                  </BreadcrumbsWithExtensionsWrapper>
                 </RedirectAppLinks>
               </EuiHeaderSectionItem>
             </EuiHeaderSection>

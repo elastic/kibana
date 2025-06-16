@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EsQueryRuleParams, SearchType } from './types';
+import type { EsQueryRuleParams } from './types';
+import { SearchType } from './types';
 import { validateExpression, hasExpressionValidationErrors } from './validation';
 
 describe('expression params validation', () => {
@@ -395,6 +396,21 @@ describe('expression params validation', () => {
     expect(validateExpression(initialParams).errors.threshold0[0]).toBe(
       'Threshold is required to be 0.'
     );
+  });
+
+  test('if esqlQuery groupBy property is top should return proper error message', () => {
+    const initialParams = {
+      size: 100,
+      timeWindowSize: 1,
+      timeWindowUnit: 's',
+      threshold: [0],
+      esqlQuery: { esql: 'test' },
+      searchType: SearchType.esqlQuery,
+      timeField: '@timestamp',
+      groupBy: 'top',
+    } as EsQueryRuleParams<SearchType.esqlQuery>;
+    expect(validateExpression(initialParams).errors.groupBy.length).toBeGreaterThan(0);
+    expect(validateExpression(initialParams).errors.groupBy[0]).toBe('Group by is required.');
   });
 
   test('if sourceFields property is an array but has more than 5 items, should return proper error message', () => {

@@ -158,7 +158,7 @@ The `SearchSource` API is a convenient way to construct and run an Elasticsearch
 One benefit of using the low-level search API, is partial response support, allowing for a better and more responsive user experience.
 
 ```.ts
-    import { isRunningResponse } from '../plugins/data/public';
+    import { isRunningResponse } from '@kbn/data-plugin/public';
 
     const search$ = data.search.search(request)
         .subscribe({

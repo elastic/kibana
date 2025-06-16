@@ -6,6 +6,7 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { errorHandler } from '../error_handler';
 import type { EndpointAgentStatusRequestQueryParams } from '../../../../common/api/endpoint/agent/get_agent_status_route';
 import { EndpointAgentStatusRequestSchema } from '../../../../common/api/endpoint/agent/get_agent_status_route';
@@ -74,7 +75,10 @@ export const getAgentStatusRouteHandler = (
       (agentType === 'sentinel_one' &&
         !endpointContext.experimentalFeatures.responseActionsSentinelOneV1Enabled) ||
       (agentType === 'crowdstrike' &&
-        !endpointContext.experimentalFeatures.responseActionsCrowdstrikeManualHostIsolationEnabled)
+        !endpointContext.experimentalFeatures
+          .responseActionsCrowdstrikeManualHostIsolationEnabled) ||
+      (agentType === 'microsoft_defender_endpoint' &&
+        !endpointContext.experimentalFeatures.responseActionsMSDefenderEndpointEnabled)
     ) {
       return errorHandler(
         logger,
@@ -93,7 +97,7 @@ export const getAgentStatusRouteHandler = (
       const spaceId = endpointContext.service.experimentalFeatures
         .endpointManagementSpaceAwarenessEnabled
         ? securitySolutionPlugin.getSpaceId()
-        : undefined;
+        : DEFAULT_SPACE_ID;
       const soClient = endpointContext.service.savedObjects.createInternalScopedSoClient({
         spaceId,
       });
@@ -101,6 +105,7 @@ export const getAgentStatusRouteHandler = (
       const agentStatusClient = getAgentStatusClient(agentType, {
         esClient,
         soClient,
+        spaceId,
         connectorActionsClient,
         endpointService: endpointContext.service,
       });

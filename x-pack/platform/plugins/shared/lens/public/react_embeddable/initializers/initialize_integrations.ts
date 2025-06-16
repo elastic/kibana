@@ -10,11 +10,26 @@ import {
   getLanguageDisplayName,
   isOfAggregateQueryType,
 } from '@kbn/es-query';
-import { noop } from 'lodash';
-import type { HasSerializableState } from '@kbn/presentation-containers';
-import { emptySerializer, isTextBasedLanguage } from '../helper';
-import type { GetStateType, LensEmbeddableStartServices } from '../types';
+import { omit } from 'lodash';
+import type { HasSerializableState } from '@kbn/presentation-publishing';
+import { SavedObjectReference } from '@kbn/core/types';
+import { isTextBasedLanguage } from '../helper';
+import type { GetStateType, LensEmbeddableStartServices, LensRuntimeState } from '../types';
 import type { IntegrationCallbacks } from '../types';
+
+function cleanupSerializedState({
+  rawState,
+  references,
+}: {
+  rawState: LensRuntimeState;
+  references: SavedObjectReference[];
+}) {
+  const cleanedState = omit(rawState, 'searchSessionId');
+  return {
+    rawState: cleanedState,
+    references,
+  };
+}
 
 export function initializeIntegrations(
   getLatestState: GetStateType,
@@ -29,17 +44,25 @@ export function initializeIntegrations(
     | 'updateOverrides'
     | 'updateDataLoading'
     | 'getTriggerCompatibleActions'
+    | 'mountInlineFlyout'
   > &
     HasSerializableState;
-  cleanup: () => void;
-  serialize: () => {};
-  comparators: {};
 } {
   return {
     api: {
+      /**
+       * This API is used by the dashboard to serialize the panel state to save it into its saved object.
+       * Make sure to remove the attributes when the panel is by reference.
+       */
       serializeState: () => {
         const currentState = getLatestState();
-        return attributeService.extractReferences(currentState);
+        const cleanedState = cleanupSerializedState(
+          attributeService.extractReferences(currentState)
+        );
+        if (cleanedState.rawState.savedObjectId) {
+          return { ...cleanedState, rawState: { ...cleanedState.rawState, attributes: undefined } };
+        }
+        return cleanedState;
       },
       // TODO: workout why we have this duplicated
       getFullAttributes: () => getLatestState().attributes,
@@ -54,8 +77,5 @@ export function initializeIntegrations(
         return getLanguageDisplayName(language).toUpperCase();
       },
     },
-    comparators: {},
-    serialize: emptySerializer,
-    cleanup: noop,
   };
 }

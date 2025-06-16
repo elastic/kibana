@@ -14,7 +14,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EuiButtonIcon } from '@elastic/eui';
-import { FavoritesClient } from '@kbn/content-management-favorites-public';
+import { FavoritesClient, StardustWrapper } from '@kbn/content-management-favorites-public';
 import { FAVORITES_LIMIT as ESQL_STARRED_QUERIES_LIMIT } from '@kbn/content-management-favorites-common';
 import { type QueryHistoryItem, getTrimmedQuery } from '../history_local_storage';
 import { TooltipWrapper } from './tooltip_wrapper';
@@ -68,6 +68,7 @@ export class EsqlStarredQueriesService {
   private client: FavoritesClient<StarredQueryMetadata>;
   private starredQueries: StarredQueryItem[] = [];
   private queryToEdit: string = '';
+  private queryToAdd: string = '';
   private storage: Storage;
   queries$: BehaviorSubject<StarredQueryItem[]>;
   discardModalVisibility$: BehaviorSubject<boolean> = new BehaviorSubject(false);
@@ -203,43 +204,48 @@ export class EsqlStarredQueriesService {
         )}
         condition={!isStarred && this.checkIfStarredQueriesLimitReached()}
       >
-        <EuiButtonIcon
-          title={
-            isStarred
-              ? i18n.translate('esqlEditor.query.querieshistory.removeFavoriteTitle', {
-                  defaultMessage: 'Remove ES|QL query from Starred',
-                })
-              : i18n.translate('esqlEditor.query.querieshistory.addFavoriteTitle', {
-                  defaultMessage: 'Add ES|QL query to Starred',
-                })
-          }
-          className={!isStarred ? 'cm-favorite-button--empty' : ''}
-          aria-label={
-            isStarred
-              ? i18n.translate('esqlEditor.query.querieshistory.removeFavoriteTitle', {
-                  defaultMessage: 'Remove ES|QL query from Starred',
-                })
-              : i18n.translate('esqlEditor.query.querieshistory.addFavoriteTitle', {
-                  defaultMessage: 'Add ES|QL query to Starred',
-                })
-          }
-          iconType={isStarred ? 'starFilled' : 'starEmpty'}
-          disabled={!isStarred && this.checkIfStarredQueriesLimitReached()}
-          onClick={async () => {
-            this.queryToEdit = trimmedQueryString;
-            if (isStarred) {
-              // show the discard modal only if the user has not dismissed it
-              if (!this.storage.get(STARRED_QUERIES_DISCARD_KEY)) {
-                this.discardModalVisibility$.next(true);
-              } else {
-                await this.removeStarredQuery(item.queryString);
-              }
-            } else {
-              await this.addStarredQuery(item);
+        {/* show startdust effect only after starring the query and not on the initial load */}
+        <StardustWrapper active={isStarred && trimmedQueryString === this.queryToAdd}>
+          <EuiButtonIcon
+            title={
+              isStarred
+                ? i18n.translate('esqlEditor.query.querieshistory.removeFavoriteTitle', {
+                    defaultMessage: 'Remove ES|QL query from Starred',
+                  })
+                : i18n.translate('esqlEditor.query.querieshistory.addFavoriteTitle', {
+                    defaultMessage: 'Add ES|QL query to Starred',
+                  })
             }
-          }}
-          data-test-subj="ESQLFavoriteButton"
-        />
+            className={!isStarred ? 'cm-favorite-button--empty' : ''}
+            aria-label={
+              isStarred
+                ? i18n.translate('esqlEditor.query.querieshistory.removeFavoriteTitle', {
+                    defaultMessage: 'Remove ES|QL query from Starred',
+                  })
+                : i18n.translate('esqlEditor.query.querieshistory.addFavoriteTitle', {
+                    defaultMessage: 'Add ES|QL query to Starred',
+                  })
+            }
+            iconType={isStarred ? 'starFilled' : 'starEmpty'}
+            disabled={!isStarred && this.checkIfStarredQueriesLimitReached()}
+            onClick={async () => {
+              this.queryToEdit = trimmedQueryString;
+              if (isStarred) {
+                // show the discard modal only if the user has not dismissed it
+                if (!this.storage.get(STARRED_QUERIES_DISCARD_KEY)) {
+                  this.discardModalVisibility$.next(true);
+                } else {
+                  await this.removeStarredQuery(item.queryString);
+                }
+              } else {
+                this.queryToAdd = trimmedQueryString;
+                await this.addStarredQuery(item);
+                this.queryToAdd = '';
+              }
+            }}
+            data-test-subj="ESQLFavoriteButton"
+          />
+        </StardustWrapper>
       </TooltipWrapper>
     );
   }

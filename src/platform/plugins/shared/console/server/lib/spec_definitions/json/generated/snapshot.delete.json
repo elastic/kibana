@@ -6,6 +6,7 @@
       "human": "__flag__",
       "pretty": "__flag__",
       "master_timeout": [
+        "30s",
         "-1",
         "0"
       ]
@@ -16,7 +17,7 @@
     "patterns": [
       "_snapshot/{repository}/{snapshot}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-snapshots.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-delete",
     "availability": {
       "stack": true,
       "serverless": false

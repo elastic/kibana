@@ -7,20 +7,27 @@
 
 import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
+import { useSelectDataView } from '../../../data_view_manager/hooks/use_select_data_view';
 import { useCreateTimeline } from '../../../timelines/hooks/use_create_timeline';
-import { updateProviders, setFilters } from '../../../timelines/store/actions';
+import { updateProviders, setFilters, applyKqlFilterQuery } from '../../../timelines/store/actions';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import type { DataProvider } from '../../../../common/types';
 import { sourcererSelectors } from '../../store';
-import { sourcererActions } from '../../store/actions';
 import { inputsActions } from '../../store/inputs';
 import { InputsModelId } from '../../store/inputs/constants';
 import type { TimeRange } from '../../store/inputs/model';
 import { TimelineId } from '../../../../common/types/timeline';
 import { TimelineTypeEnum } from '../../../../common/api/timeline';
+import { sourcererActions } from '../../store/actions';
+import { useEnableExperimental } from '../use_experimental_features';
 
 interface InvestigateInTimelineArgs {
+  /**
+   * The query to apply to the timeline.
+   */
+  query?: Query;
+
   /**
    * The data providers to apply to the timeline.
    */
@@ -52,6 +59,7 @@ export const useInvestigateInTimeline = () => {
 
   const signalIndexName = useSelector(sourcererSelectors.signalIndexName);
   const defaultDataView = useSelector(sourcererSelectors.defaultDataView);
+  const { newDataViewPickerEnabled } = useEnableExperimental();
 
   const clearTimelineTemplate = useCreateTimeline({
     timelineId: TimelineId.active,
@@ -63,13 +71,21 @@ export const useInvestigateInTimeline = () => {
     timelineType: TimelineTypeEnum.default,
   });
 
+  const setSelectedDataView = useSelectDataView();
+
   const investigateInTimeline = useCallback(
-    async ({ dataProviders, filters, timeRange, keepDataView }: InvestigateInTimelineArgs) => {
+    async ({
+      query,
+      dataProviders,
+      filters,
+      timeRange,
+      keepDataView,
+    }: InvestigateInTimelineArgs) => {
       const hasTemplateProviders =
         dataProviders && dataProviders.find((provider) => provider.type === 'template');
       const clearTimeline = hasTemplateProviders ? clearTimelineTemplate : clearTimelineDefault;
 
-      if (dataProviders || filters) {
+      if (dataProviders || filters || query) {
         // Reset the current timeline
         if (timeRange) {
           await clearTimeline({
@@ -96,22 +112,52 @@ export const useInvestigateInTimeline = () => {
             })
           );
         }
+        if (query) {
+          dispatch(
+            applyKqlFilterQuery({
+              id: TimelineId.active,
+              filterQuery: {
+                kuery: {
+                  kind: 'kuery',
+                  expression: query.query as string,
+                },
+                serializedQuery: query.query as string,
+              },
+            })
+          );
+        }
         // Only show detection alerts
         // (This is required so the timeline event count matches the prevalence count)
         if (!keepDataView) {
-          dispatch(
-            sourcererActions.setSelectedDataView({
-              id: SourcererScopeName.timeline,
-              selectedDataViewId: defaultDataView.id,
-              selectedPatterns: [signalIndexName || ''],
-            })
-          );
+          if (newDataViewPickerEnabled) {
+            setSelectedDataView({
+              scope: SourcererScopeName.timeline,
+              id: defaultDataView.id,
+              fallbackPatterns: [signalIndexName || ''],
+            });
+          } else {
+            dispatch(
+              sourcererActions.setSelectedDataView({
+                id: SourcererScopeName.timeline,
+                selectedDataViewId: defaultDataView.id,
+                selectedPatterns: [signalIndexName || ''],
+              })
+            );
+          }
         }
         // Unlock the time range from the global time range
         dispatch(inputsActions.removeLinkTo([InputsModelId.timeline, InputsModelId.global]));
       }
     },
-    [clearTimelineTemplate, clearTimelineDefault, dispatch, defaultDataView.id, signalIndexName]
+    [
+      clearTimelineTemplate,
+      clearTimelineDefault,
+      dispatch,
+      newDataViewPickerEnabled,
+      setSelectedDataView,
+      defaultDataView.id,
+      signalIndexName,
+    ]
   );
 
   return { investigateInTimeline };

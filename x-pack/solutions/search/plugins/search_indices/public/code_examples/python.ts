@@ -12,6 +12,8 @@ import {
   CodeSnippetParameters,
   IngestCodeSnippetFunction,
   IngestDataCodeDefinition,
+  SearchCodeDefinition,
+  SearchCodeSnippetFunction,
 } from '../types';
 
 import { CreateIndexLanguageExamples } from './types';
@@ -23,11 +25,11 @@ export const PYTHON_INFO: CodeLanguage = {
   codeBlockLanguage: 'python',
 };
 
-const SERVERLESS_PYTHON_INSTALL_CMD = 'pip install elasticsearch';
+const PYTHON_INSTALL_CMD = 'pip install elasticsearch';
 
-export const PythonServerlessCreateIndexExamples: CreateIndexLanguageExamples = {
+export const PythonCreateIndexExamples: CreateIndexLanguageExamples = {
   default: {
-    installCommand: SERVERLESS_PYTHON_INSTALL_CMD,
+    installCommand: PYTHON_INSTALL_CMD,
     createIndex: ({
       elasticsearchURL,
       apiKey,
@@ -40,11 +42,16 @@ client = Elasticsearch(
 )
 
 client.indices.create(
-  index="${indexName ?? INDEX_PLACEHOLDER}"
+  index="${indexName ?? INDEX_PLACEHOLDER}",
+  mappings={
+        "properties": {
+            "text": {"type": "text"}
+        }
+    }
 )`,
   },
   dense_vector: {
-    installCommand: SERVERLESS_PYTHON_INSTALL_CMD,
+    installCommand: PYTHON_INSTALL_CMD,
     createIndex: ({
       elasticsearchURL,
       apiKey,
@@ -66,8 +73,30 @@ client.indices.create(
     }
 )`,
   },
+  semantic: {
+    installCommand: PYTHON_INSTALL_CMD,
+    createIndex: ({
+      elasticsearchURL,
+      apiKey,
+      indexName,
+    }: CodeSnippetParameters) => `from elasticsearch import Elasticsearch
+
+client = Elasticsearch(
+  "${elasticsearchURL}",
+  api_key="${apiKey ?? API_KEY_PLACEHOLDER}"
+)
+
+client.indices.create(
+  index="${indexName ?? INDEX_PLACEHOLDER}",
+  mappings={
+        "properties": {
+            "text": {"type": "semantic_text"}
+        }
+    }
+)`,
+  },
 };
-const serverlessIngestionCommand: IngestCodeSnippetFunction = ({
+const ingestionCommand: IngestCodeSnippetFunction = ({
   elasticsearchURL,
   apiKey,
   indexName,
@@ -86,7 +115,7 @@ docs = ${JSON.stringify(sampleDocuments, null, 4)}
 bulk_response = helpers.bulk(client, docs, index=index_name)
 print(bulk_response)`;
 
-const serverlessUpdateMappingsCommand: IngestCodeSnippetFunction = ({
+const updateMappingsCommand: IngestCodeSnippetFunction = ({
   elasticsearchURL,
   apiKey,
   indexName,
@@ -106,8 +135,64 @@ mapping_response = client.indices.put_mapping(index=index_name, body=mappings)
 print(mapping_response)
 `;
 
-export const PythonServerlessVectorsIngestDataExample: IngestDataCodeDefinition = {
-  installCommand: SERVERLESS_PYTHON_INSTALL_CMD,
-  ingestCommand: serverlessIngestionCommand,
-  updateMappingsCommand: serverlessUpdateMappingsCommand,
+const semanticIngestCommand: IngestCodeSnippetFunction = ({
+  elasticsearchURL,
+  apiKey,
+  indexName,
+  sampleDocuments,
+}) => `from elasticsearch import Elasticsearch, helpers
+
+client = Elasticsearch(
+    "${elasticsearchURL}",
+    api_key="${apiKey ?? API_KEY_PLACEHOLDER}",
+)
+
+index_name = "${indexName}"
+
+docs = ${JSON.stringify(sampleDocuments, null, 4)}
+
+# Timeout to allow machine learning model loading and semantic ingestion to complete
+ingestion_timeout=300
+
+bulk_response = helpers.bulk(
+    client.options(request_timeout=ingestion_timeout),
+    docs,
+    index=index_name
+)
+print(bulk_response)`;
+
+export const PythonIngestDataExample: IngestDataCodeDefinition = {
+  installCommand: PYTHON_INSTALL_CMD,
+  ingestCommand: ingestionCommand,
+  updateMappingsCommand,
+};
+
+const searchCommand: SearchCodeSnippetFunction = ({
+  elasticsearchURL,
+  apiKey,
+  indexName,
+  queryObject,
+}) => `from elasticsearch import Elasticsearch
+
+client = Elasticsearch(
+    "${elasticsearchURL}",
+    api_key="${apiKey ?? API_KEY_PLACEHOLDER}"
+)
+
+retriever_object = ${JSON.stringify(queryObject.retriever, null, 4)}
+
+search_response = client.search(
+    index="${indexName}",
+    retriever=retriever_object,
+)
+print(search_response['hits']['hits'])
+`;
+
+export const PythonSearchExample: SearchCodeDefinition = {
+  searchCommand,
+};
+
+export const PythonSemanticIngestDataExample: IngestDataCodeDefinition = {
+  ...PythonIngestDataExample,
+  ingestCommand: semanticIngestCommand,
 };

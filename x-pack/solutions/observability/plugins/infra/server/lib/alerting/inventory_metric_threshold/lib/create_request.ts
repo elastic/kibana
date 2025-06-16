@@ -99,18 +99,16 @@ export const createRequest = (
     allow_no_indices: true,
     ignore_unavailable: true,
     index,
-    body: {
-      size: 0,
-      query: { bool: { filter: filters } },
-      aggs: {
-        nodes: {
-          composite,
-          aggs: {
-            ...metricAggregations,
-            ...bucketSelector,
-            ...additionalContextAgg,
-            ...containerContextAgg,
-          },
+    size: 0,
+    query: { bool: { filter: filters } },
+    aggs: {
+      nodes: {
+        composite,
+        aggs: {
+          ...metricAggregations,
+          ...bucketSelector,
+          ...additionalContextAgg,
+          ...containerContextAgg,
         },
       },
     },

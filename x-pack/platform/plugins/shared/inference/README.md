@@ -7,6 +7,27 @@ external LLM APIs. Its goals are:
 - Abstract away differences between different LLM providers like OpenAI, Bedrock and Gemini.
 - Allow us to move gradually to the \_inference endpoint without disrupting engineers.
 
+## Usage with langchain
+
+The inference APIs are meant to be usable directly, and self-sufficient to power any RAG workflow. 
+
+However, we're also exposing a way to use langchain while benefiting from the inference APIs, 
+via the `getChatModel` API exposed from the inference plugin's start contract.
+
+```ts
+const chatModel = await inferenceStart.getChatModel({
+  request,
+  connectorId: myInferenceConnectorId,
+  chatModelOptions: {
+    temperature: 0.2,
+  },
+});
+
+// just use it as another langchain chatModel
+```
+
+Other langchain utilities are exposed from the `@kbn/inference-langchain` package.
+
 ## Architecture and examples
 
 ![architecture-schema](https://github.com/user-attachments/assets/e65a3e47-bce1-4dcf-bbed-4f8ac12a104f)
@@ -31,6 +52,7 @@ The list of inference connector types:
 - `.gen-ai`: OpenAI connector
 - `.bedrock`: Bedrock Claude connector
 - `.gemini`: Vertex Gemini connector
+- `.inference`: Elastic Inference Endpoint connector
 
 ## Usage examples
 
@@ -55,7 +77,7 @@ class MyPlugin {
 
         const inferenceClient = pluginsStart.inference.getClient({ request });
 
-        const chatResponse = inferenceClient.chatComplete({
+        const chatResponse = await inferenceClient.chatComplete({
           connectorId: request.body.connectorId,
           system: `Here is my system message`,
           messages: [
@@ -91,7 +113,7 @@ const inferenceClient = myStartDeps.inference.getClient({
   }
 });
 
-const chatResponse = inferenceClient.chatComplete({
+const chatResponse = await inferenceClient.chatComplete({
   messages: [{ role: MessageRole.User, content: 'Do something' }],
 });
 ```
@@ -113,7 +135,7 @@ In standard mode, the API returns a promise resolving with the full LLM response
 The response will also contain the token count info, if available.
 
 ```ts
-const chatResponse = inferenceClient.chatComplete({
+const chatResponse = await inferenceClient.chatComplete({
   connectorId: 'some-gen-ai-connector',
   system: `Here is my system message`,
   messages: [
@@ -188,7 +210,7 @@ The description and schema of a tool will be converted and sent to the LLM, so i
 to be explicit about what each tool does.
 
 ```ts
-const chatResponse = inferenceClient.chatComplete({
+const chatResponse = await inferenceClient.chatComplete({
   connectorId: 'some-gen-ai-connector',
   system: `Here is my system message`,
   messages: [

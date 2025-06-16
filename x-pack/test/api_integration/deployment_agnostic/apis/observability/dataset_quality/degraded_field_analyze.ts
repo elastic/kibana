@@ -66,10 +66,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('gets limit analysis for a given datastream and degraded field', () => {
       before(async () => {
         synthtraceLogsEsClient = await synthtrace.createLogsSynthtraceEsClient();
-        await synthtraceLogsEsClient.createComponentTemplate(
-          customComponentTemplateName,
-          logsSynthMappings(dataset)
-        );
+        await synthtraceLogsEsClient.createComponentTemplate({
+          name: customComponentTemplateName,
+          mappings: logsSynthMappings(dataset),
+        });
         await esClient.indices.putIndexTemplate({
           name: dataStreamName,
           _meta: {

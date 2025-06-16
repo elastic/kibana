@@ -11,7 +11,7 @@ import { licenseStateMock } from '../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../_mock_handler_arguments';
 import { asHttpRequestExecutionSource } from '../../../lib';
 import { actionsClientMock } from '../../../actions_client/actions_client.mock';
-import { ActionTypeExecutorResult } from '../../../types';
+import type { ActionTypeExecutorResult } from '../../../types';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 
 jest.mock('../../verify_access_and_context', () => ({

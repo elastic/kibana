@@ -1,0 +1,22 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/hapi-mocks",
+    "@kbn/config-schema",
+    "@kbn/core-http-server",
+    "@kbn/core-http-server-utils",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

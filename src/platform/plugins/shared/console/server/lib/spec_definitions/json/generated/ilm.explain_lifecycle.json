@@ -11,11 +11,6 @@
         "30s",
         "-1",
         "0"
-      ],
-      "timeout": [
-        "30s",
-        "-1",
-        "0"
       ]
     },
     "methods": [
@@ -24,7 +19,7 @@
     "patterns": [
       "{index}/_ilm/explain"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ilm-explain-lifecycle.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-explain-lifecycle",
     "availability": {
       "stack": true,
       "serverless": false

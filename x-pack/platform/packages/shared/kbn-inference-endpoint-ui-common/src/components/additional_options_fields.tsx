@@ -109,23 +109,13 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
               return (
                 <EuiFormRow id="taskType" fullWidth isInvalid={isInvalid} error={errorMessage}>
                   {isEdit ? (
-                    <EuiButton
-                      css={{
-                        background: euiTheme.colors.disabled,
-                        color: euiTheme.colors.lightestShade,
-                      }}
-                      data-test-subj="taskTypeSelectDisabled"
-                      isDisabled
-                    >
+                    <EuiButton data-test-subj="taskTypeSelectDisabled" isDisabled>
                       {config.taskType}
                     </EuiButton>
                   ) : taskTypeOptions.length === 1 ? (
                     <EuiButton
-                      css={{
-                        background: euiTheme.colors.darkShade,
-                        color: euiTheme.colors.lightestShade,
-                      }}
                       data-test-subj="taskTypeSelectSingle"
+                      isDisabled
                       onClick={() => onTaskTypeOptionsSelect(config.taskType)}
                     >
                       {config.taskType}
@@ -154,9 +144,6 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
       config.taskType,
       xsFontSize,
       euiTheme.colors.textSubdued,
-      euiTheme.colors.disabled,
-      euiTheme.colors.lightestShade,
-      euiTheme.colors.darkShade,
       isEdit,
       taskTypeOptions,
       onTaskTypeOptionsSelect,
@@ -221,6 +208,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
               direction="column"
               items={optionalProviderFormFields}
               setConfigEntry={onSetProviderConfigEntry}
+              isEdit={isEdit}
             />
             <EuiSpacer size="m" />
           </>
@@ -269,6 +257,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
                 <EuiFieldText
                   data-test-subj="inference-endpoint-input-field"
                   fullWidth
+                  disabled={isEdit}
                   value={config.inferenceId}
                   onChange={(e) => {
                     setFieldValue('config.inferenceId', e.target.value);

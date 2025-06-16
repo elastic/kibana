@@ -55,62 +55,60 @@ export const useNetworkTimings = (checkGroupIdArg?: string, stepIndexArg?: numbe
   const { data } = useReduxEsSearch(
     {
       index: SYNTHETICS_INDEX_PATTERN,
-      body: {
-        size: 0,
-        runtime_mappings: runTimeMappings,
+      size: 0,
+      runtime_mappings: runTimeMappings,
 
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  'synthetics.type': 'journey/network_info',
-                },
+      query: {
+        bool: {
+          filter: [
+            {
+              term: {
+                'synthetics.type': 'journey/network_info',
               },
-              ...useStepFilters(checkGroupId, stepIndex),
-            ],
+            },
+            ...useStepFilters(checkGroupId, stepIndex),
+          ],
+        },
+      },
+      aggs: {
+        dns: {
+          sum: {
+            field: SYNTHETICS_DNS_TIMINGS,
           },
         },
-        aggs: {
-          dns: {
-            sum: {
-              field: SYNTHETICS_DNS_TIMINGS,
-            },
+        tls: {
+          sum: {
+            field: SYNTHETICS_SSL_TIMINGS,
           },
-          tls: {
-            sum: {
-              field: SYNTHETICS_SSL_TIMINGS,
-            },
+        },
+        blocked: {
+          sum: {
+            field: SYNTHETICS_BLOCKED_TIMINGS,
           },
-          blocked: {
-            sum: {
-              field: SYNTHETICS_BLOCKED_TIMINGS,
-            },
+        },
+        connect: {
+          sum: {
+            field: SYNTHETICS_CONNECT_TIMINGS,
           },
-          connect: {
-            sum: {
-              field: SYNTHETICS_CONNECT_TIMINGS,
-            },
+        },
+        receive: {
+          sum: {
+            field: SYNTHETICS_RECEIVE_TIMINGS,
           },
-          receive: {
-            sum: {
-              field: SYNTHETICS_RECEIVE_TIMINGS,
-            },
+        },
+        send: {
+          sum: {
+            field: SYNTHETICS_SEND_TIMINGS,
           },
-          send: {
-            sum: {
-              field: SYNTHETICS_SEND_TIMINGS,
-            },
+        },
+        wait: {
+          sum: {
+            field: SYNTHETICS_WAIT_TIMINGS,
           },
-          wait: {
-            sum: {
-              field: SYNTHETICS_WAIT_TIMINGS,
-            },
-          },
-          total: {
-            sum: {
-              field: SYNTHETICS_TOTAL_TIMINGS,
-            },
+        },
+        total: {
+          sum: {
+            field: SYNTHETICS_TOTAL_TIMINGS,
           },
         },
       },

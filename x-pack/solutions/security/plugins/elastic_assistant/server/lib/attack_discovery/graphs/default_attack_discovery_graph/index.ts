@@ -5,23 +5,27 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { Replacements } from '@kbn/elastic-assistant-common';
-import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import type { ActionsClientLlm } from '@kbn/langchain/server';
-import type { CompiledStateGraph } from '@langchain/langgraph';
 import { END, START, StateGraph } from '@langchain/langgraph';
 
-import { NodeType } from './constants';
-import { getGenerateOrEndEdge } from './edges/generate_or_end';
-import { getGenerateOrRefineOrEndEdge } from './edges/generate_or_refine_or_end';
-import { getRefineOrEndEdge } from './edges/refine_or_end';
-import { getRetrieveAnonymizedAlertsOrGenerateEdge } from './edges/retrieve_anonymized_alerts_or_generate';
-import { getDefaultGraphState } from './state';
-import { getGenerateNode } from './nodes/generate';
-import { getRefineNode } from './nodes/refine';
+import {
+  getGenerateNode,
+  getGenerateOrEndEdge,
+  getGenerateOrRefineOrEndEdge,
+  getRefineNode,
+  getRefineOrEndEdge,
+  getRetrieveAnonymizedDocsOrGenerateEdge,
+} from '../../../langchain/output_chunking';
+import { NodeType } from '../../../langchain/graphs/constants';
+import { getCombinedAttackDiscoveryPrompt } from './prompts/get_combined_attack_discovery_prompt';
+import { responseIsHallucinated } from './helpers/response_is_hallucinated';
 import { getRetrieveAnonymizedAlertsNode } from './nodes/retriever';
-import type { GraphState } from './types';
+import { getAttackDiscoveriesGenerationSchema } from './schemas';
+import { CombinedPrompts } from './prompts';
+import { getDefaultGraphAnnotation } from './state';
 
 export interface GetDefaultAttackDiscoveryGraphParams {
   alertsIndexPattern?: string;
@@ -32,6 +36,7 @@ export interface GetDefaultAttackDiscoveryGraphParams {
   llm: ActionsClientLlm;
   logger?: Logger;
   onNewReplacements?: (replacements: Replacements) => void;
+  prompts: CombinedPrompts;
   replacements?: Replacements;
   size: number;
   start?: string;
@@ -55,16 +60,13 @@ export const getDefaultAttackDiscoveryGraph = ({
   llm,
   logger,
   onNewReplacements,
+  prompts,
   replacements,
   size,
   start,
-}: GetDefaultAttackDiscoveryGraphParams): CompiledStateGraph<
-  GraphState,
-  Partial<GraphState>,
-  'generate' | 'refine' | 'retrieve_anonymized_alerts' | '__start__'
-> => {
+}: GetDefaultAttackDiscoveryGraphParams) => {
   try {
-    const graphState = getDefaultGraphState({ end, filter, start });
+    const graphState = getDefaultGraphAnnotation({ end, filter, prompts, start });
 
     // get nodes:
     const retrieveAnonymizedAlertsNode = getRetrieveAnonymizedAlertsNode({
@@ -77,14 +79,21 @@ export const getDefaultAttackDiscoveryGraph = ({
       size,
     });
 
+    const generationSchema = getAttackDiscoveriesGenerationSchema(prompts);
+
     const generateNode = getGenerateNode({
       llm,
       logger,
+      getCombinedPromptFn: getCombinedAttackDiscoveryPrompt,
+      generationSchema,
+      responseIsHallucinated,
     });
 
     const refineNode = getRefineNode({
       llm,
       logger,
+      generationSchema,
+      responseIsHallucinated,
     });
 
     // get edges:
@@ -94,19 +103,18 @@ export const getDefaultAttackDiscoveryGraph = ({
 
     const refineOrEndEdge = getRefineOrEndEdge(logger);
 
-    const retrieveAnonymizedAlertsOrGenerateEdge =
-      getRetrieveAnonymizedAlertsOrGenerateEdge(logger);
+    const retrieveAnonymizedAlertsOrGenerateEdge = getRetrieveAnonymizedDocsOrGenerateEdge(logger);
 
     // create the graph:
-    const graph = new StateGraph<GraphState>({ channels: graphState })
-      .addNode(NodeType.RETRIEVE_ANONYMIZED_ALERTS_NODE, retrieveAnonymizedAlertsNode)
+    const graph = new StateGraph(graphState)
+      .addNode(NodeType.RETRIEVE_ANONYMIZED_DOCS_NODE, retrieveAnonymizedAlertsNode)
       .addNode(NodeType.GENERATE_NODE, generateNode)
       .addNode(NodeType.REFINE_NODE, refineNode)
       .addConditionalEdges(START, retrieveAnonymizedAlertsOrGenerateEdge, {
         generate: NodeType.GENERATE_NODE,
-        retrieve_anonymized_alerts: NodeType.RETRIEVE_ANONYMIZED_ALERTS_NODE,
+        retrieve_anonymized_docs: NodeType.RETRIEVE_ANONYMIZED_DOCS_NODE,
       })
-      .addConditionalEdges(NodeType.RETRIEVE_ANONYMIZED_ALERTS_NODE, generateOrEndEdge, {
+      .addConditionalEdges(NodeType.RETRIEVE_ANONYMIZED_DOCS_NODE, generateOrEndEdge, {
         end: END,
         generate: NodeType.GENERATE_NODE,
       })

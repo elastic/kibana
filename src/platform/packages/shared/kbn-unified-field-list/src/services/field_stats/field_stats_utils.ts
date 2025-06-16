@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import DateMath from '@kbn/datemath';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { ESSearchResponse } from '@kbn/es-types';
@@ -86,13 +86,11 @@ export function buildSearchParams({
 
   return {
     index: dataViewPattern,
-    body: {
-      query,
-      aggs,
-      fields,
-      runtime_mappings: runtimeMappings,
-      _source: fields?.length ? false : undefined,
-    },
+    query,
+    aggs,
+    fields,
+    runtime_mappings: runtimeMappings,
+    _source: fields?.length ? false : undefined,
     track_total_hits: true,
     size: size ?? 0,
   };
@@ -172,7 +170,7 @@ export async function getNumberSummary(
 
   const summaryResult = (await aggSearchWithBody({
     aggs: searchWithAggs,
-  })) as ESSearchResponse<unknown, { body: { aggs: typeof searchWithAggs } }>;
+  })) as ESSearchResponse<unknown, { aggs: typeof searchWithAggs }>;
 
   const minValue = summaryResult.aggregations!.sample.min_max_summary.min.value;
   const maxValue = summaryResult.aggregations!.sample.min_max_summary.max.value;
@@ -226,8 +224,8 @@ export async function getNumberHistogram(
   const minMaxResult = (await aggSearchWithBody({
     aggs: useTopHits ? searchWithHits : searchWithoutHits,
   })) as
-    | ESSearchResponse<unknown, { body: { aggs: typeof searchWithHits } }>
-    | ESSearchResponse<unknown, { body: { aggs: typeof searchWithoutHits } }>;
+    | ESSearchResponse<unknown, { aggs: typeof searchWithHits }>
+    | ESSearchResponse<unknown, { aggs: typeof searchWithoutHits }>;
 
   const minValue = minMaxResult.aggregations!.sample.min_value.value;
   const maxValue = minMaxResult.aggregations!.sample.max_value.value;
@@ -284,7 +282,7 @@ export async function getNumberHistogram(
   };
   const histogramResult = (await aggSearchWithBody({ aggs: histogramBody })) as ESSearchResponse<
     unknown,
-    { body: { aggs: typeof histogramBody } }
+    { aggs: typeof histogramBody }
   >;
 
   return {
@@ -329,7 +327,7 @@ export async function getStringSamples(
   };
   const topValuesResult = (await aggSearchWithBody({ aggs: topValuesBody })) as ESSearchResponse<
     unknown,
-    { body: { aggs: typeof topValuesBody } }
+    { aggs: typeof topValuesBody }
   >;
 
   const topValues = {
@@ -382,7 +380,7 @@ export async function getDateHistogram(
   };
   const results = (await aggSearchWithBody({ aggs: histogramBody })) as ESSearchResponse<
     unknown,
-    { body: { aggs: typeof histogramBody } }
+    { aggs: typeof histogramBody }
   >;
 
   return {

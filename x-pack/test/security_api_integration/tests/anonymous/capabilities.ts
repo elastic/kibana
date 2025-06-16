@@ -25,7 +25,10 @@ export default function ({ getService }: FtrProviderContext) {
     return Object.fromEntries(
       Object.entries(apiResponse.body).filter(
         ([key]) =>
-          key === 'discover' || key === 'dashboard' || key === 'visualize' || key === 'maps'
+          key === 'discover_v2' ||
+          key === 'dashboard_v2' ||
+          key === 'visualize_v2' ||
+          key === 'maps_v2'
       )
     );
   }
@@ -35,12 +38,12 @@ export default function ({ getService }: FtrProviderContext) {
       await spaces.create({
         id: 'space-a',
         name: 'space-a',
-        disabledFeatures: ['discover', 'visualize'],
+        disabledFeatures: ['discover_v2', 'visualize_v2'],
       });
       await spaces.create({
         id: 'space-b',
         name: 'space-b',
-        disabledFeatures: ['dashboard', 'maps'],
+        disabledFeatures: ['dashboard_v2', 'maps_v2'],
       });
     });
 
@@ -53,105 +56,93 @@ export default function ({ getService }: FtrProviderContext) {
       it('all capabilities should be disabled', async () => {
         expectSnapshot(await getAnonymousCapabilities()).toMatchInline(`
           Object {
-            "dashboard": Object {
+            "dashboard_v2": Object {
               "createNew": false,
               "createShortUrl": false,
               "downloadCsv": false,
               "generateScreenshot": false,
-              "saveQuery": false,
               "show": false,
               "showWriteControls": false,
               "storeSearchSession": false,
             },
-            "discover": Object {
+            "discover_v2": Object {
               "createShortUrl": false,
               "generateCsv": false,
               "save": false,
-              "saveQuery": false,
               "show": false,
               "storeSearchSession": false,
             },
-            "maps": Object {
+            "maps_v2": Object {
               "save": false,
-              "saveQuery": false,
               "show": false,
             },
-            "visualize": Object {
+            "visualize_v2": Object {
               "createShortUrl": false,
               "delete": false,
               "generateScreenshot": false,
               "save": false,
-              "saveQuery": false,
               "show": false,
             },
           }
         `);
         expectSnapshot(await getAnonymousCapabilities('space-a')).toMatchInline(`
           Object {
-            "dashboard": Object {
+            "dashboard_v2": Object {
               "createNew": false,
               "createShortUrl": false,
               "downloadCsv": false,
               "generateScreenshot": false,
-              "saveQuery": false,
               "show": false,
               "showWriteControls": false,
               "storeSearchSession": false,
             },
-            "discover": Object {
+            "discover_v2": Object {
               "createShortUrl": false,
               "generateCsv": false,
               "save": false,
-              "saveQuery": false,
               "show": false,
               "storeSearchSession": false,
             },
-            "maps": Object {
+            "maps_v2": Object {
               "save": false,
-              "saveQuery": false,
               "show": false,
             },
-            "visualize": Object {
+            "visualize_v2": Object {
               "createShortUrl": false,
               "delete": false,
               "generateScreenshot": false,
               "save": false,
-              "saveQuery": false,
               "show": false,
             },
           }
         `);
         expectSnapshot(await getAnonymousCapabilities('space-b')).toMatchInline(`
           Object {
-            "dashboard": Object {
+            "dashboard_v2": Object {
               "createNew": false,
               "createShortUrl": false,
               "downloadCsv": false,
               "generateScreenshot": false,
-              "saveQuery": false,
               "show": false,
               "showWriteControls": false,
               "storeSearchSession": false,
             },
-            "discover": Object {
+            "discover_v2": Object {
               "createShortUrl": false,
               "generateCsv": false,
               "save": false,
-              "saveQuery": false,
               "show": false,
               "storeSearchSession": false,
             },
-            "maps": Object {
+            "maps_v2": Object {
               "save": false,
-              "saveQuery": false,
               "show": false,
             },
-            "visualize": Object {
+            "visualize_v2": Object {
               "createShortUrl": false,
               "delete": false,
               "generateScreenshot": false,
               "save": false,
-              "saveQuery": false,
               "show": false,
             },
           }
@@ -177,105 +168,93 @@ export default function ({ getService }: FtrProviderContext) {
       it('all capabilities should be disabled', async () => {
         expectSnapshot(await getAnonymousCapabilities()).toMatchInline(`
           Object {
-            "dashboard": Object {
+            "dashboard_v2": Object {
               "createNew": false,
               "createShortUrl": false,
               "downloadCsv": false,
               "generateScreenshot": false,
-              "saveQuery": false,
               "show": false,
               "showWriteControls": false,
               "storeSearchSession": false,
             },
-            "discover": Object {
+            "discover_v2": Object {
               "createShortUrl": false,
               "generateCsv": false,
               "save": false,
-              "saveQuery": false,
               "show": false,
               "storeSearchSession": false,
             },
-            "maps": Object {
+            "maps_v2": Object {
               "save": false,
-              "saveQuery": false,
               "show": false,
             },
-            "visualize": Object {
+            "visualize_v2": Object {
               "createShortUrl": false,
               "delete": false,
               "generateScreenshot": false,
               "save": false,
-              "saveQuery": false,
               "show": false,
             },
           }
         `);
         expectSnapshot(await getAnonymousCapabilities('space-a')).toMatchInline(`
           Object {
-            "dashboard": Object {
+            "dashboard_v2": Object {
               "createNew": false,
               "createShortUrl": false,
               "downloadCsv": false,
               "generateScreenshot": false,
-              "saveQuery": false,
               "show": false,
               "showWriteControls": false,
               "storeSearchSession": false,
             },
-            "discover": Object {
+            "discover_v2": Object {
               "createShortUrl": false,
               "generateCsv": false,
               "save": false,
-              "saveQuery": false,
               "show": false,
               "storeSearchSession": false,
             },
-            "maps": Object {
+            "maps_v2": Object {
               "save": false,
-              "saveQuery": false,
               "show": false,
             },
-            "visualize": Object {
+            "visualize_v2": Object {
               "createShortUrl": false,
               "delete": false,
               "generateScreenshot": false,
               "save": false,
-              "saveQuery": false,
               "show": false,
             },
           }
         `);
         expectSnapshot(await getAnonymousCapabilities('space-b')).toMatchInline(`
           Object {
-            "dashboard": Object {
+            "dashboard_v2": Object {
               "createNew": false,
               "createShortUrl": false,
               "downloadCsv": false,
               "generateScreenshot": false,
-              "saveQuery": false,
               "show": false,
               "showWriteControls": false,
               "storeSearchSession": false,
             },
-            "discover": Object {
+            "discover_v2": Object {
               "createShortUrl": false,
               "generateCsv": false,
               "save": false,
-              "saveQuery": false,
               "show": false,
               "storeSearchSession": false,
             },
-            "maps": Object {
+            "maps_v2": Object {
               "save": false,
-              "saveQuery": false,
               "show": false,
             },
-            "visualize": Object {
+            "visualize_v2": Object {
               "createShortUrl": false,
               "delete": false,
               "generateScreenshot": false,
               "save": false,
-              "saveQuery": false,
               "show": false,
             },
           }
@@ -319,35 +298,31 @@ export default function ({ getService }: FtrProviderContext) {
         // Discover, dashboards, visualizations and maps should be available in read-only mode.
         expectSnapshot(await getAnonymousCapabilities()).toMatchInline(`
           Object {
-            "dashboard": Object {
+            "dashboard_v2": Object {
               "createNew": false,
               "createShortUrl": false,
               "downloadCsv": false,
               "generateScreenshot": false,
-              "saveQuery": false,
               "show": true,
               "showWriteControls": false,
               "storeSearchSession": false,
             },
-            "discover": Object {
+            "discover_v2": Object {
               "createShortUrl": false,
               "generateCsv": false,
               "save": false,
-              "saveQuery": false,
               "show": true,
               "storeSearchSession": false,
             },
-            "maps": Object {
+            "maps_v2": Object {
               "save": false,
-              "saveQuery": false,
               "show": true,
             },
-            "visualize": Object {
+            "visualize_v2": Object {
               "createShortUrl": false,
               "delete": false,
               "generateScreenshot": false,
               "save": false,
-              "saveQuery": false,
               "show": true,
             },
           }
@@ -356,35 +331,31 @@ export default function ({ getService }: FtrProviderContext) {
         // Only maps should be available in read-only mode, the rest should be disabled.
         expectSnapshot(await getAnonymousCapabilities('space-a')).toMatchInline(`
           Object {
-            "dashboard": Object {
+            "dashboard_v2": Object {
               "createNew": false,
               "createShortUrl": false,
               "downloadCsv": false,
               "generateScreenshot": false,
-              "saveQuery": false,
               "show": false,
               "showWriteControls": false,
               "storeSearchSession": false,
             },
-            "discover": Object {
+            "discover_v2": Object {
               "createShortUrl": false,
               "generateCsv": false,
               "save": false,
-              "saveQuery": false,
               "show": false,
               "storeSearchSession": false,
             },
-            "maps": Object {
+            "maps_v2": Object {
               "save": false,
-              "saveQuery": false,
               "show": true,
             },
-            "visualize": Object {
+            "visualize_v2": Object {
               "createShortUrl": false,
               "delete": false,
               "generateScreenshot": false,
               "save": false,
-              "saveQuery": false,
               "show": false,
             },
           }
@@ -393,35 +364,31 @@ export default function ({ getService }: FtrProviderContext) {
         // Only visualizations should be available in read-only mode, the rest should be disabled.
         expectSnapshot(await getAnonymousCapabilities('space-b')).toMatchInline(`
           Object {
-            "dashboard": Object {
+            "dashboard_v2": Object {
               "createNew": false,
               "createShortUrl": false,
               "downloadCsv": false,
               "generateScreenshot": false,
-              "saveQuery": false,
               "show": false,
               "showWriteControls": false,
               "storeSearchSession": false,
             },
-            "discover": Object {
+            "discover_v2": Object {
               "createShortUrl": false,
               "generateCsv": false,
               "save": false,
-              "saveQuery": false,
               "show": false,
               "storeSearchSession": false,
             },
-            "maps": Object {
+            "maps_v2": Object {
               "save": false,
-              "saveQuery": false,
               "show": false,
             },
-            "visualize": Object {
+            "visualize_v2": Object {
               "createShortUrl": false,
               "delete": false,
               "generateScreenshot": false,
               "save": false,
-              "saveQuery": false,
               "show": true,
             },
           }
