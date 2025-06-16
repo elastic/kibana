@@ -93,7 +93,7 @@ export const CloudAssetInventoryPolicyTemplateForm =
       isAgentlessEnabled,
       defaultSetupTechnology,
     }) => {
-      const CLOUD_CONNECTOR_VERSION_ENABLED_ESS = '2.0.0-preview01';
+      const CLOUD_CONNECTOR_VERSION_ENABLED_ESS = '0.18.0';
       const { cloud, uiSettings } = useKibana().services;
       const input = getSelectedOption(newPolicy.inputs);
       const { isAgentlessAvailable, setupTechnology, updateSetupTechnology } = useSetupTechnology({

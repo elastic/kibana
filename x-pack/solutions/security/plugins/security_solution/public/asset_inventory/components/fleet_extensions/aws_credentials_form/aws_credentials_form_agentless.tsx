@@ -349,7 +349,7 @@ export const AwsCredentialsFormAgentless = ({
           showCloudConnectors ? (
             <FormattedMessage
               id="xpack.securitySolution.assetInventory.awsIntegration.gettingStarted.setupInfoContentAgentlessCloudConnectors"
-              defaultMessage="Utilize AWS Access Keys or Cloud Connectors to set up and deploy Asset Discovery for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
+              defaultMessage="Utilize AWS Access Keys or Cloud Connectors to set up and deploy Asset Discovery for assessing your AWS environment's assets. Refer to our {gettingStartedLink} guide for details."
               values={{
                 gettingStartedLink: (
                   <EuiLink href={documentationLink} target="_blank">
@@ -364,7 +364,7 @@ export const AwsCredentialsFormAgentless = ({
           ) : (
             <FormattedMessage
               id="xpack.securitySolution.assetInventory.awsIntegration.gettingStarted.setupInfoContentAgentless"
-              defaultMessage="Utilize AWS Access Keys to set up and deploy Asset Discovery for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
+              defaultMessage="Utilize AWS Access Keys to set up and deploy Asset Discovery for assessing your AWS environment's assets. Refer to our {gettingStartedLink} guide for details."
               values={{
                 gettingStartedLink: (
                   <EuiLink href={documentationLink} target="_blank">
