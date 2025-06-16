@@ -51,7 +51,7 @@
       "observabilityAIAssistant",
       "licenseManagement",
       "serverless",
-      "fleet"
+      "observabilityNavigation"
     ],
     "requiredBundles": [
       "unifiedSearch",

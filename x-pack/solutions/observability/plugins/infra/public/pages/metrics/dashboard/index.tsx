@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiErrorBoundary, EuiLoadingSpinner } from '@elastic/eui';
 import { useLocation, useParams } from 'react-router-dom';
@@ -27,12 +27,13 @@ export const Dashboard = () => {
   } = useKibanaContextForPlugin();
 
   const { search } = useLocation();
-  const { entity } = useParams<{ entity: string }>();
+  const { entity, entitySubtype } = useParams<{ entity: string; entitySubtype?: string }>();
 
   const { dashboardId } = useMemo(() => {
     const query = new URLSearchParams(search);
     return {
       dashboardId: query.get('dashboardId') ?? '',
+      entityType: query.get('entityType'),
     };
   }, [search]);
 
@@ -40,8 +41,13 @@ export const Dashboard = () => {
 
   const kubernetesLinkProps = useLinkProps({
     app: 'metrics',
-    pathname: 'kubernetes',
+    pathname: entity,
   });
+
+  const pageTitle = useMemo(
+    () => (entitySubtype ?? entity).replace(/-/g, ' ').replace(/^./, (c) => c.toUpperCase()),
+    [entity, entitySubtype]
+  );
 
   useMetricsBreadcrumbs([
     {
@@ -51,22 +57,9 @@ export const Dashboard = () => {
       ...kubernetesLinkProps,
     },
     {
-      text: entity ?? 'Overview',
+      text: pageTitle,
     },
   ]);
-
-  const [pageDashTitle, setPageTitle] = useState<string | undefined>(
-    i18n.translate('xpack.infra.kubernetes.pageTitle', {
-      defaultMessage: 'Kubernetes Dashboard',
-    })
-  );
-
-  useEffect(() => {
-    if (dashboardData && dashboardData.status === 'success') {
-      const dashboardTitle = dashboardData?.attributes?.title;
-      setPageTitle(dashboardTitle);
-    }
-  }, [dashboardData]);
 
   if (status === FETCH_STATUS.LOADING && !dashboardData) {
     return <EuiLoadingSpinner />;
@@ -77,7 +70,7 @@ export const Dashboard = () => {
       <EuiErrorBoundary>
         <PageTemplate
           pageHeader={{
-            pageTitle: entity ?? pageDashTitle,
+            pageTitle,
             rightSideItems: [<DatePicker />],
           }}
           data-test-subj="infraKubernetesPage"

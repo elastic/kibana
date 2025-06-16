@@ -119,7 +119,8 @@
     "@kbn/core-chrome-browser",
     "@kbn/presentation-containers",
     "@kbn/object-utils",
-    "@kbn/coloring"
+    "@kbn/coloring",
+    "@kbn/observability-navigation-plugin"
   ],
   "exclude": ["target/**/*"]
 }
