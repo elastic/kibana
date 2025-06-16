@@ -132,12 +132,12 @@ export const ManagementSettings = React.memo(() => {
 
   if (conversations) {
     return (
-        <AssistantSettingsManagement
-          selectedConversation={currentConversation}
-          dataViews={dataViews}
-          onTabChange={handleTabChange}
-          currentTab={currentTab}
-        />
+      <AssistantSettingsManagement
+        selectedConversation={currentConversation}
+        dataViews={dataViews}
+        onTabChange={handleTabChange}
+        currentTab={currentTab}
+      />
     );
   }
 

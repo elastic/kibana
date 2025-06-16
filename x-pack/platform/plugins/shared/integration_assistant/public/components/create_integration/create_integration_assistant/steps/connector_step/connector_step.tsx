@@ -48,9 +48,7 @@ const ElasticLLMNewIntegrationMessage = React.memo(() => {
   const {
     docLinks: {
       links: {
-        securitySolution: {
-          llmPerformanceMatrix: LLM_PERFORMANCE_LINK,
-        },
+        securitySolution: { llmPerformanceMatrix: LLM_PERFORMANCE_LINK },
         observability: { elasticManagedLlmUsageCost: ELASTIC_LLM_USAGE_COST_LINK },
       },
     },
