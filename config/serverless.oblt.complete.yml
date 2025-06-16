@@ -76,3 +76,5 @@ xpack.features.overrides:
       read.composedOf:
         - feature: "observability"
           privileges: [ "read" ]
+  ### By default, this feature named as `Metrics`, but should be renamed to `Infrastructure`.
+  infrastructure.name: 'Infrastructure'
