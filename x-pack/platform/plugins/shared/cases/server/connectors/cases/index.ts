@@ -14,10 +14,7 @@ import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_acti
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
-import {
-  ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
-  getAttackDiscoveryMarkdown,
-} from '@kbn/elastic-assistant-common';
+import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import { CasesConnector } from './cases_connector';
 import { DEFAULT_MAX_OPEN_CASES } from './constants';
 import {
@@ -28,7 +25,6 @@ import {
 import { getOwnerFromRuleConsumerProducer } from '../../../common/utils/owner';
 
 import type {
-  CaseAlert,
   CasesConnectorConfig,
   CasesConnectorParams,
   CasesConnectorRuleActionParams,
@@ -36,13 +32,13 @@ import type {
   CasesGroupedAlerts,
 } from './types';
 import {
-  AttackDiscoveryExpandedAlertsSchema,
   CasesConnectorConfigSchema,
   CasesConnectorRuleActionParamsSchema,
   CasesConnectorSecretsSchema,
 } from './schema';
 import type { CasesClient } from '../../client';
 import { constructRequiredKibanaPrivileges } from './utils';
+import { groupAttackDiscoveryAlerts } from './attack_discovery';
 
 interface GetCasesConnectorTypeArgs {
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>;
@@ -94,58 +90,6 @@ export const getCasesConnectorType = ({
   },
 });
 
-const getAttackDiscoveryCaseGroupedAlerts = (alerts: CaseAlert[]): CasesGroupedAlerts[] => {
-  /**
-   * First we should validate that the alerts array schema complies with the attack discovery object.
-   */
-  const attackDiscoveryAlerts = AttackDiscoveryExpandedAlertsSchema.validate(
-    alerts,
-    {},
-    undefined,
-    { stripUnknownKeys: true }
-  );
-
-  /**
-   * For each attack discovery alert we would like to create one separate case.
-   */
-  const groupedAlerts = attackDiscoveryAlerts.map((attackAlert) => {
-    const alertsIndexPattern = attackAlert.kibana.alert.rule.parameters.alertsIndexPattern;
-    const attackDiscoveryId = attackAlert._id;
-    const attackDiscovery = attackAlert.kibana.alert.attack_discovery;
-    const attackDiscoveryTitle = attackDiscovery.title;
-    const alertIds = attackDiscovery.alert_ids;
-
-    /**
-     * Each attack discovery alert references a list of SIEM alerts that led to the attack.
-     * These SIEM alerts will be added to the case.
-     */
-    return {
-      alerts: alertIds.map((siemAlertId) => ({ _id: siemAlertId, _index: alertsIndexPattern })),
-      grouping: { attack_discovery: attackDiscoveryId },
-      comments: [
-        getAttackDiscoveryMarkdown({
-          attackDiscovery: {
-            id: attackDiscoveryId,
-            alertIds,
-            detailsMarkdown: attackDiscovery.details_markdown,
-            entitySummaryMarkdown: attackDiscovery.entity_summary_markdown,
-            mitreAttackTactics: attackDiscovery.mitre_attack_tactics,
-            summaryMarkdown: attackDiscovery.summary_markdown,
-            title: attackDiscoveryTitle,
-          },
-          replacements: attackDiscovery.replacements?.reduce((acc: Record<string, string>, r) => {
-            acc[r.uuid] = r.value;
-            return acc;
-          }, {}),
-        }),
-      ],
-      title: attackDiscoveryTitle,
-    };
-  });
-
-  return groupedAlerts;
-};
-
 export const getCasesConnectorAdapter = ({
   isServerlessSecurity,
 }: {
@@ -161,11 +105,11 @@ export const getCasesConnectorAdapter = ({
        * We handle attack discovery alerts differently than other alerts and group
        * their building block SIEM alerts that led to each attack separately.
        */
-      let referencedAlerts = false;
+      let internallyManagedAlerts = false;
       let groupedAlerts: CasesGroupedAlerts[] | null = null;
       if (rule.alertTypeId === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID) {
-        groupedAlerts = getAttackDiscoveryCaseGroupedAlerts(caseAlerts);
-        referencedAlerts = true;
+        groupedAlerts = groupAttackDiscoveryAlerts(caseAlerts);
+        internallyManagedAlerts = true;
       }
 
       const owner = getOwnerFromRuleConsumerProducer({
@@ -184,7 +128,7 @@ export const getCasesConnectorAdapter = ({
         timeWindow: params.subActionParams.timeWindow,
         maximumCasesToOpen: DEFAULT_MAX_OPEN_CASES,
         templateId: params.subActionParams.templateId,
-        referencedAlerts,
+        internallyManagedAlerts,
       };
 
       return { subAction: 'run', subActionParams };

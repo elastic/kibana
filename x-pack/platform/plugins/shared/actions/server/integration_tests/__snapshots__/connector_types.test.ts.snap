@@ -2818,7 +2818,7 @@ Object {
       ],
       "type": "string",
     },
-    "referencedAlerts": Object {
+    "internallyManagedAlerts": Object {
       "flags": Object {
         "default": false,
         "error": [Function],

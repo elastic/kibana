@@ -1303,7 +1303,7 @@ const getRequest = (params: Partial<CasesConnectorRunParams> = {}) => {
       reopenClosedCases,
       maximumCasesToOpen: 5,
       templateId: null,
-      referencedAlerts: false,
+      internallyManagedAlerts: false,
       ...params,
     },
   };

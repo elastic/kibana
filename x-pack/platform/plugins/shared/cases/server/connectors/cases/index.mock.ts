@@ -88,7 +88,7 @@ export const alertsWithNoGrouping = [
 ];
 
 export const groupedAlerts = null;
-export const referencedAlerts = false;
+export const internallyManagedAlerts = false;
 
 export const groupingBy = ['host.name', 'dest.ip'];
 export const rule = {

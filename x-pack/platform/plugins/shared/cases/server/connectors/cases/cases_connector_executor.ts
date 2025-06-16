@@ -1112,7 +1112,7 @@ export class CasesConnectorExecutor {
       this.getLogMetadata(params, { tags: ['case-connector:attachAlertsToCases'] })
     );
 
-    const { referencedAlerts, rule } = params;
+    const { internallyManagedAlerts, rule } = params;
 
     const [casesUnderAlertLimit, casesOverAlertLimit] = partition(
       Array.from(groupedAlertsWithCases.values()),
@@ -1155,7 +1155,9 @@ export class CasesConnectorExecutor {
             ...commentAttachment,
             {
               type: AttachmentType.alert,
-              rule: referencedAlerts ? { id: null, name: null } : { id: rule.id, name: rule.name },
+              rule: internallyManagedAlerts
+                ? { id: null, name: null }
+                : { id: rule.id, name: rule.name },
               /**
                * Map traverses the array in ascending order.
                * The order is guaranteed to be the same for
