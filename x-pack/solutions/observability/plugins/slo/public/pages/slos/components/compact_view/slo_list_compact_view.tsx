@@ -354,7 +354,9 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       field: 'tags',
       name: 'Tags',
       render: (_, slo: SLOWithSummaryResponse) => (
-        <SloTagsBadge slo={slo} onClick={handleTagClick} />
+        <EuiFlexGroup gutterSize="xs" direction="row" responsive wrap alignItems="center">
+          <SloTagsBadge slo={slo} onClick={handleTagClick} />
+        </EuiFlexGroup>
       ),
     },
     {

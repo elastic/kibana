@@ -56,7 +56,7 @@ export function SloCardItemBadges({ slo, activeAlerts, rules, handleCreateRule }
             <SLOCardItemInstanceBadge slo={slo} />
             <SloRulesBadge rules={rules} onClick={handleCreateRule} isRemote={!!slo.remote} />
             <SloRemoteBadge slo={slo} />
-            <SloTagsBadge slo={slo} gutterSize="xs" onClick={handleTagClick} />
+            <SloTagsBadge slo={slo} onClick={handleTagClick} defaultVisibleTags={1} />
           </>
         )}
       </EuiFlexGroup>

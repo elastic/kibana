@@ -5,49 +5,45 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import { EuiBadge, EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-  EuiFlexGroupGutterSize,
-} from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import React, { useState } from 'react';
 
 interface Props {
   slo: SLOWithSummaryResponse;
-  gutterSize?: EuiFlexGroupGutterSize;
   onClick?: (tag: string) => void;
+  defaultVisibleTags?: number;
 }
 
 const DEFAULT_VISIBLE_TAGS = 3;
 
-export function SloTagsBadge({ slo, gutterSize = 's', onClick }: Props) {
+export function SloTagsBadge({ slo, onClick, defaultVisibleTags = DEFAULT_VISIBLE_TAGS }: Props) {
   const [expanded, setExpanded] = useState(false);
   const tags = slo.tags;
-  const visibleTags = expanded ? tags : tags.slice(0, DEFAULT_VISIBLE_TAGS);
-  const hasMore = tags.length > DEFAULT_VISIBLE_TAGS;
+  const visibleTags = expanded ? tags : tags.slice(0, defaultVisibleTags);
+  const hasMore = tags.length > defaultVisibleTags;
 
   if (!tags.length) return null;
 
   return (
-    <EuiFlexGroup
-      gutterSize={gutterSize}
-      alignItems="center"
-      wrap
-      onMouseDown={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
-    >
+    <>
       {visibleTags.map((tag) => (
-        <EuiFlexItem grow={false} key={tag}>
+        <EuiFlexItem
+          grow={false}
+          key={tag}
+          onMouseDown={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
+        >
           <EuiBadge onClickAriaLabel={`filter with ${tag}`} onClick={() => onClick?.(tag)}>
             {tag}
           </EuiBadge>
         </EuiFlexItem>
       ))}
       {hasMore && (
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem
+          grow={false}
+          onMouseDown={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
+        >
           <EuiButtonEmpty
             size="xs"
             color="text"
@@ -60,11 +56,11 @@ export function SloTagsBadge({ slo, gutterSize = 's', onClick }: Props) {
                 })
               : i18n.translate('xpack.slo.sloTagsBadge.showMore', {
                   defaultMessage: '+{count} more',
-                  values: { count: tags.length - DEFAULT_VISIBLE_TAGS },
+                  values: { count: tags.length - defaultVisibleTags },
                 })}
           </EuiButtonEmpty>
         </EuiFlexItem>
       )}
-    </EuiFlexGroup>
+    </>
   );
 }
