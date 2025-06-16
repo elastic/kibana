@@ -20,6 +20,14 @@ import {
 } from './utils';
 import { getMockPolicyAWS, getMockPolicyK8s, getMockPolicyEKS, getPackageInfoMock } from './mocks';
 
+jest.mock('../../common/experimental_features_service', () => ({
+  ExperimentalFeaturesService: {
+    get: jest.fn().mockReturnValue({
+      cloudSecurityNamespaceSupportEnabled: true,
+    }),
+  },
+}));
+
 describe('getPosturePolicy', () => {
   for (const [name, getPolicy, expectedVars] of [
     ['cloudbeat/cis_aws', getMockPolicyAWS, { 'aws.credentials.type': { value: 'assume_role' } }],
