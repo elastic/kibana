@@ -142,10 +142,11 @@ export default ({ getService }: FtrProviderContext): void => {
         const { userActions } = await findCaseUserActions({ supertest, caseID: postedCase.id });
         const statusUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
         const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
-        const { duration, ...dataWithoutDuration } = data;
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        const { duration, time_to_investigate, time_to_resolve, ...dataWithoutMetrics } = data;
         const { duration: resDuration, ...resWithoutDuration } = postCaseResp();
 
-        expect(dataWithoutDuration).to.eql({
+        expect(dataWithoutMetrics).to.eql({
           ...resWithoutDuration,
           status: CaseStatuses.closed,
           closed_by: defaultUser,
@@ -179,9 +180,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { userActions } = await findCaseUserActions({ supertest, caseID: postedCase.id });
         const statusUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
-        const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        const { time_to_investigate, time_to_resolve, ...dataWithoutMetrics } =
+          removeServerGeneratedPropertiesFromCase(patchedCases[0]);
 
-        expect(data).to.eql({
+        expect(dataWithoutMetrics).to.eql({
           ...postCaseResp(),
           status: CaseStatuses['in-progress'],
           updated_by: defaultUser,
@@ -197,7 +200,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('should reset in_progress_at to null when the case is reopened', async () => {
+      it('should not reset in_progress_at when the case is reopened', async () => {
         const originalCase = await createCase(supertest, postCaseReq);
 
         await delay(1000);
@@ -215,7 +218,9 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        expect(inProgressCase.in_progress_at).to.be.a('string');
+        const previousInProgressAt = inProgressCase.in_progress_at;
+
+        expect(previousInProgressAt).to.be.a('string');
 
         await delay(1000);
 
@@ -232,7 +237,7 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        expect(reopenedCase.in_progress_at).to.be(null);
+        expect(reopenedCase.in_progress_at).to.equal(previousInProgressAt);
       });
 
       it('should patch the severity of a case correctly', async () => {
@@ -634,7 +639,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(timeToResolve).to.be(closedCase.time_to_resolve);
         });
 
-        it('should not change any timing metric when reopening a case', async () => {
+        it('should reset timing metrics when reopening a case', async () => {
           const originalCase = await createCase(supertest, postCaseReq);
 
           await delay(1000);
@@ -682,9 +687,9 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           });
 
-          expect(closedCase.time_to_acknowledge).to.be(reopenedCase.time_to_acknowledge);
-          expect(closedCase.time_to_investigate).to.be(reopenedCase.time_to_investigate);
-          expect(closedCase.time_to_resolve).to.be(reopenedCase.time_to_resolve);
+          expect(reopenedCase.time_to_acknowledge).to.equal(null);
+          expect(reopenedCase.time_to_investigate).to.equal(null);
+          expect(reopenedCase.time_to_resolve).to.equal(null);
         });
       });
 
