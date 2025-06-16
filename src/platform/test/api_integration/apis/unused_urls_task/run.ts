@@ -12,8 +12,15 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const kibanaServer = getService('kibanaServer');
 
   describe('run', () => {
+    beforeEach(async () => {
+      await kibanaServer.importExport.load(
+        'src/platform/test/api_integration/fixtures/unused_urls_task/urls.ndjson'
+      );
+    });
+
     it('can run unused URLs cleanup', async () => {
       const response = await supertest.post('/internal/unused_urls_task/run');
 
