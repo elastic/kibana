@@ -8,24 +8,23 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiText, EuiTitle } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { rollingTimeWindowTypeSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { SLOWithSummaryResponse, rollingTimeWindowTypeSchema } from '@kbn/slo-schema';
 import React from 'react';
-import { TimeBounds } from '../types';
-import { SloTabId } from './slo_details';
 import { useKibana } from '../../../hooks/use_kibana';
 import { ChartData } from '../../../typings/slo';
 import { toDurationAdverbLabel, toDurationLabel } from '../../../utils/slo/labels';
+import { TimeBounds } from '../types';
 import { WideChart } from './wide_chart';
 
 export interface Props {
   data: ChartData[];
   isLoading: boolean;
   slo: SLOWithSummaryResponse;
-  selectedTabId: SloTabId;
+  hideMetadata?: boolean;
   onBrushed?: (timeBounds: TimeBounds) => void;
 }
 
-export function SliChartPanel({ data, isLoading, slo, selectedTabId, onBrushed }: Props) {
+export function SliChartPanel({ data, isLoading, slo, hideMetadata = false, onBrushed }: Props) {
   const { uiSettings } = useKibana().services;
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
 
@@ -45,7 +44,7 @@ export function SliChartPanel({ data, isLoading, slo, selectedTabId, onBrushed }
               </h2>
             </EuiTitle>
           </EuiFlexItem>
-          {selectedTabId !== 'history' && (
+          {!hideMetadata && (
             <EuiFlexItem>
               <EuiText color="subdued" size="s">
                 {rollingTimeWindowTypeSchema.is(slo.timeWindow.type)
@@ -59,7 +58,7 @@ export function SliChartPanel({ data, isLoading, slo, selectedTabId, onBrushed }
           )}
         </EuiFlexGroup>
 
-        {selectedTabId !== 'history' && (
+        {!hideMetadata && (
           <EuiFlexGroup direction="row" gutterSize="l" alignItems="flexStart" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiStat
