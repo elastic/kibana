@@ -13,6 +13,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
 import type { Filter } from '@kbn/es-query';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import {
   BehaviorSubject,
   Observable,
@@ -122,6 +123,37 @@ export class IndexUpdateService {
     skipWhile((indexName) => !indexName),
     switchMap((indexName) => {
       return from(this.getDataView(indexName!));
+    }),
+    shareReplay({ bufferSize: 1, refCount: true })
+  );
+
+  public readonly dataTableColumns$: Observable<DatatableColumn[]> = this.dataView$.pipe(
+    map((dataView) => {
+      return (
+        dataView.fields
+          // Exclude metadata fields. TODO check if this is the right way to do it
+          // @ts-ignore
+          .filter((field) => field.spec.metadata_field !== true && !field.spec.subType)
+          .map((field) => {
+            return {
+              name: field.name,
+              id: field.name,
+              isNull: field.isNull,
+              meta: {
+                type: field.type,
+                params: {
+                  id: field.name,
+                  sourceParams: {
+                    fieldName: field.name,
+                  },
+                },
+                aggregatable: field.aggregatable,
+                searchable: field.searchable,
+                esTypes: field.esTypes,
+              },
+            } as DatatableColumn;
+          })
+      );
     }),
     shareReplay({ bufferSize: 1, refCount: true })
   );
