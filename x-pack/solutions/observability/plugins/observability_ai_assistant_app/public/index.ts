@@ -13,7 +13,6 @@ import type {
   ObservabilityAIAssistantAppPublicSetup,
   ObservabilityAIAssistantAppPublicStart,
 } from './types';
-export { VISUALIZE_QUERY_NAME } from '../common/functions/visualize_esql';
 
 export type { ObservabilityAIAssistantAppPublicSetup, ObservabilityAIAssistantAppPublicStart };
 
