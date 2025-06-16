@@ -104,16 +104,7 @@ describe('Model versions', () => {
       Array [
         Object {
           "addedMappings": Object {
-            "in_progress_at": Object {
-              "type": "date",
-            },
-            "time_to_acknowledge": Object {
-              "type": "unsigned_long",
-            },
-            "time_to_investigate": Object {
-              "type": "unsigned_long",
-            },
-            "time_to_resolve": Object {
+            "incremental_id": Object {
               "type": "unsigned_long",
             },
           },
