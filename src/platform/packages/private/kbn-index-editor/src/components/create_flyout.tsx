@@ -7,19 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { FC } from 'react';
 import React, { Suspense, lazy } from 'react';
-import { takeUntil, distinctUntilChanged, skip } from 'rxjs';
-import { from } from 'rxjs';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-
+import { distinctUntilChanged, from, skip, takeUntil } from 'rxjs';
 import { EuiFlyoutHeader, EuiSkeletonText, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { IndexUpdateService } from '../index_update_service';
 import type { EditLookupIndexContentContext, EditLookupIndexFlyoutDeps } from '../types';
-import { IndexUpdateService } from '../index_update_service';
 
 export function createFlyout(
-  deps: EditLookupIndexFlyoutDeps,
+  deps: EditLookupIndexFlyoutDeps & {
+    indexUpdateService: IndexUpdateService;
+  },
   props: EditLookupIndexContentContext
 ) {
   const {
@@ -29,7 +29,7 @@ export function createFlyout(
     ...startServices
   } = deps.coreStart;
 
-  const indexUpdateService = new IndexUpdateService(http);
+  const indexUpdateService = deps.indexUpdateService;
 
   if (props.indexName) {
     // set initial index name
@@ -55,10 +55,7 @@ export function createFlyout(
   const flyoutSession = overlays.openFlyout(
     toMountPoint(
       <Suspense fallback={<LoadingContents />}>
-        <LazyFlyoutContent
-          deps={{ ...deps, indexUpdateService }}
-          props={{ ...props, onClose: onFlyoutClose, onSave }}
-        />
+        <LazyFlyoutContent deps={deps} props={{ ...props, onClose: onFlyoutClose, onSave }} />
       </Suspense>,
       startServices
     ),

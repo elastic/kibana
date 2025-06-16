@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { Trigger, UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import type { EditLookupIndexContentContext, EditLookupIndexFlyoutDeps } from '../types';
 import { createFlyout } from '../components/create_flyout';
+import { IndexUpdateService } from '../index_update_service';
 
 export const EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID = 'EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID';
 
@@ -36,8 +37,15 @@ export function createEditLookupIndexContentAction(
         defaultMessage: 'Open file upload UI',
       }),
     async execute(context: EditLookupIndexContentContext) {
+      // TODO should be an async import
+      const indexUpdateService = new IndexUpdateService(
+        dependencies.coreStart.http,
+        dependencies.data
+      );
+
+      // TODO index service should be per execution
       try {
-        createFlyout(dependencies, context);
+        createFlyout({ ...dependencies, indexUpdateService }, context);
       } catch (e) {
         return Promise.reject(e);
       }

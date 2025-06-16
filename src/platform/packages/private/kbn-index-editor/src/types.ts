@@ -28,8 +28,6 @@ export interface EditLookupIndexFlyoutDeps {
   data: DataPublicPluginStart;
   uiActions: UiActionsStart;
   fieldFormats: FieldFormatsStart;
-  /** Custom service for indexing documents */
-  indexUpdateService: IndexUpdateService;
 }
 
 /** Extended kibana context */

@@ -8,8 +8,13 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataPublicPluginStart, ISearchSource } from '@kbn/data-plugin/public';
+import { DataTableRecord } from '@kbn/discover-utils';
+import type { Filter } from '@kbn/es-query';
 import {
   BehaviorSubject,
+  combineLatest,
   debounceTime,
   filter,
   from,
@@ -19,13 +24,17 @@ import {
   scan,
   shareReplay,
   Subject,
+  Subscription,
   switchMap,
   takeUntil,
   takeWhile,
+  tap,
   timer,
 } from 'rxjs';
 
 const BUFFER_TIMEOUT_MS = 5000; // 5 seconds
+
+const UNDO_EMIT_MS = 500; // 0.5 seconds
 
 interface DocUpdate {
   id?: string;
@@ -35,17 +44,25 @@ interface DocUpdate {
 type Action = { type: 'add'; payload: DocUpdate } | { type: 'undo' };
 
 export class IndexUpdateService {
-  constructor(private readonly http: HttpStart) {
+  constructor(private readonly http: HttpStart, private readonly data: DataPublicPluginStart) {
     this.listenForUpdates();
   }
 
   private indexName: string | null = null;
+
+  private indexName$ = new Subject<string | null>();
 
   private readonly scheduledUpdates$ = new BehaviorSubject<DocUpdate[]>([]);
 
   private readonly undoChangeSubject$ = new Subject<number>();
 
   private readonly actions$ = new Subject<Action>();
+
+  private searhchSource$: Observable<ISearchSource>;
+
+  private readonly _$rows = new BehaviorSubject<DataTableRecord[]>([]);
+
+  private readonly _subscription = new Subscription();
 
   // Accumulate updates in buffer with undo
   private bufferState$: Observable<DocUpdate[]> = this.actions$.pipe(
@@ -66,8 +83,10 @@ export class IndexUpdateService {
     filter((action) => action.type === 'add' || action.type === 'undo'),
     switchMap((action) =>
       action.type === 'add'
-        ? timer(0, 100).pipe(
-            map((elapsed) => Math.max(BUFFER_TIMEOUT_MS - elapsed * 100, 0)),
+        ? timer(0, UNDO_EMIT_MS).pipe(
+            map((elapsed) => {
+              return Math.max(BUFFER_TIMEOUT_MS - elapsed * UNDO_EMIT_MS, 0);
+            }),
             takeUntil(this.actions$.pipe(filter((a) => a.type === 'undo'))),
             takeWhile((remaining) => remaining > 0, true)
           )
@@ -75,47 +94,113 @@ export class IndexUpdateService {
     )
   );
 
+  /**
+   * Finds an existing data view or creates a new one based on the index name.
+   * Ad-hoc data view should only be created if the index has been saved.
+   */
+  private async getDataView(): Promise<DataView> {
+    if (!this.indexName) {
+      throw new Error('Index name is not set');
+    }
+
+    const dataView: DataView | undefined = (await this.data.dataViews.find(this.indexName, 1))[0];
+
+    if (dataView) {
+      return dataView;
+    }
+
+    return await this.data.dataViews.create({ title: this.indexName, name: this.indexName });
+  }
+
   private listenForUpdates() {
-    this.bufferState$
-      .pipe(
-        debounceTime(BUFFER_TIMEOUT_MS),
-        filter((updates) => updates.length > 0),
-        switchMap((updates) => {
-          // Make your API call here with `updates`
-          return from(
-            // TODO create an API endpoint for bulk updates
-            this.http.post(`/api/console/proxy`, {
-              query: {
-                path: `/${this.indexName}/_bulk`,
-                method: 'POST',
-              },
-              body:
-                updates
-                  .map((update) => {
-                    if (update.id) {
-                      return `{"update": {"_id": "${update.id}"}}\n${JSON.stringify({
-                        doc: update.value,
-                      })}`;
-                    }
-                    return `{"index": {}}\n${JSON.stringify(update.value)}`;
-                  })
-                  .join('\n') + '\n', // NDJSON format requires a newline at the end
-              headers: {
-                'Content-Type': 'application/x-ndjson',
-              },
-            })
-          );
+    this._subscription.add(
+      this.bufferState$
+        .pipe(
+          debounceTime(BUFFER_TIMEOUT_MS),
+          filter((updates) => updates.length > 0),
+          switchMap((updates) => {
+            console.log('🚀 ~ IndexUpdateService ~ switchMap ~ updates:', updates);
+            return from(
+              // TODO create an API endpoint for bulk updates
+              this.http.post(`/api/console/proxy`, {
+                query: {
+                  path: `/${this.indexName}/_bulk`,
+                  method: 'POST',
+                },
+                body:
+                  updates
+                    .map((update) => {
+                      if (update.id) {
+                        return `{"update": {"_id": "${update.id}"}}\n${JSON.stringify({
+                          doc: update.value,
+                        })}`;
+                      }
+                      return `{"index": {}}\n${JSON.stringify(update.value)}`;
+                    })
+                    .join('\n') + '\n', // NDJSON format requires a newline at the end
+                headers: {
+                  'Content-Type': 'application/x-ndjson',
+                },
+              })
+            );
+          })
+        )
+        .subscribe({
+          next: (response) => {
+            console.log('API response:', response);
+          },
+          error: (err) => {
+            // TODO handle API errors
+            console.error('API error:', err);
+          },
         })
-      )
-      .subscribe({
-        next: (response) => {
-          console.log('API response:', response);
-        },
-        error: (err) => {
-          // TODO handle API errors
-          console.error('API error:', err);
-        },
-      });
+    );
+
+    this._subscription.add(
+      combineLatest([
+        this.indexName$.pipe(
+          switchMap((indexName) => {
+            return from(this.getDataView());
+          })
+        ),
+        // Time range updates
+        this.data.query.timefilter.timefilter.getTimeUpdate$(),
+      ])
+        .pipe(
+          switchMap(([dataView, timeRangeEmit]) => {
+            return from(
+              this.data.search.searchSource.create({
+                index: this.indexName!,
+                size: 1000, // Adjust size as needed
+              })
+            ).pipe(
+              tap((searchSource) => {
+                const timeRangeFilter = this.data.query.timefilter.timefilter.createFilter(
+                  dataView,
+                  this.data.query.timefilter.timefilter.getTime()
+                ) as Filter;
+                searchSource.setField('filter', [timeRangeFilter]);
+              })
+            );
+          }),
+          switchMap((searchSource) => {
+            return searchSource.fetch$({
+              disableWarningToasts: true,
+            });
+          })
+        )
+        .subscribe({
+          next: (result) => {
+            console.log('🚀 ~ IndexUpdateService ~ listenForUpdates ~ result:', result);
+          },
+          error: (error) => {
+            if (error.name === 'AbortError') {
+              // return resolve(null);
+            }
+            // setIsFetching(false);
+          },
+        })
+    );
   }
 
   public setIndexName(indexName: string) {
@@ -123,6 +208,7 @@ export class IndexUpdateService {
       // TODO check if index is already created
       throw new Error(`Index with name ${indexName} already exists.`);
     }
+    this.indexName$.next(indexName);
     this.indexName = indexName;
   }
 
@@ -144,6 +230,7 @@ export class IndexUpdateService {
   }
 
   public destroy() {
+    this._subscription.unsubscribe();
     this.scheduledUpdates$.complete();
     this.undoChangeSubject$.complete();
   }

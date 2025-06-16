@@ -11,7 +11,7 @@ import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { useCancellableSearch } from '@kbn/ml-cancellable-search';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { DataTableRecord } from '@kbn/discover-utils';
+import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
@@ -107,8 +107,8 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
           params: {
             index: props.indexName,
           },
-        },
-        { searchStrategy: ESQL_SEARCH_STRATEGY }
+        }
+        // { searchStrategy: ESQL_SEARCH_STRATEGY }
       );
 
       if (!response || !isMounted()) {
@@ -117,6 +117,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
       const { hits, total } = response.rawResponse.hits;
 
       const resultRows: DataTableRecord[] = hits.map((hit: any, idx: number) => {
+        return buildDataTableRecord(hit, dataView);
         return {
           id: String(hit._id),
           raw: hit._source,
@@ -129,16 +130,17 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
     } catch (e) {
       // TODO error handling
     }
-  }, [cancelRequest, isMounted, props.indexName, runRequest]);
+  }, [cancelRequest, isMounted, props.indexName, runRequest, dataView]);
 
   useEffect(
     function fetchIndexInfo() {
+      if (!dataView) return;
       // TODO
       // - check if the user has read/write access to the index
       // - fetch index settings, e.g. if it is open/closed, etc
       fetchRows();
     },
-    [fetchRows]
+    [fetchRows, dataView]
   );
 
   if (!dataView || !dataViewColumns.length || !totalHits) return null;

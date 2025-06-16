@@ -23,7 +23,8 @@ export function registerIndexEditorActions(deps: EditLookupIndexFlyoutDeps) {
   const { uiActions } = deps;
 
   // TODO should be an async import
-  const indexUpdateService = new IndexUpdateService(deps.coreStart.http);
+  // const indexUpdateService = new IndexUpdateService(deps.coreStart.http, deps.data);
+  // console.log('🚀 ~ registerIndexEditorActions ~ indexUpdateService:', indexUpdateService);
 
   // Register index editor triggers and actions
   uiActions.registerTrigger(EDIT_LOOKUP_INDEX_CONTENT_TRIGGER);
@@ -38,26 +39,26 @@ export function registerIndexEditorActions(deps: EditLookupIndexFlyoutDeps) {
         share: deps.share,
         uiActions: deps.uiActions,
         fieldFormats: deps.fieldFormats,
-        indexUpdateService,
+        // indexUpdateService,
       });
     }
   );
 
   // Register additional cell actions
-  uiActions.registerTrigger({ id: INDEX_EDITOR_CELL_ACTION_TRIGGER_ID });
-  uiActions.addTriggerActionAsync(
-    INDEX_EDITOR_CELL_ACTION_TRIGGER_ID,
-    ACTION_EDIT_CELL_VALUE_INDEX,
-    async () => {
-      const { createEditCellValueActionFactory } = await import('../..');
-      const actionFactory = createEditCellValueActionFactory({
-        notifications: deps.coreStart.notifications,
-        indexUpdateService,
-      });
+  // uiActions.registerTrigger({ id: INDEX_EDITOR_CELL_ACTION_TRIGGER_ID });
+  // uiActions.addTriggerActionAsync(
+  //   INDEX_EDITOR_CELL_ACTION_TRIGGER_ID,
+  //   ACTION_EDIT_CELL_VALUE_INDEX,
+  //   async () => {
+  //     const { createEditCellValueActionFactory } = await import('../..');
+  //     const actionFactory = createEditCellValueActionFactory({
+  //       notifications: deps.coreStart.notifications,
+  //       indexUpdateService,
+  //     });
 
-      return actionFactory({
-        notifications: deps.coreStart.notifications,
-      });
-    }
-  );
+  //     return actionFactory({
+  //       notifications: deps.coreStart.notifications,
+  //     });
+  //   }
+  // );
 }
