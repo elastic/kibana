@@ -149,9 +149,9 @@ describe('getCasesConnectorType', () => {
               ],
               "groupedAlerts": null,
               "groupingBy": Array [],
+              "internallyManagedAlerts": false,
               "maximumCasesToOpen": 5,
               "owner": "cases",
-              "internallyManagedAlerts": false,
               "reopenClosedCases": false,
               "rule": Object {
                 "id": "rule-id",
@@ -196,9 +196,9 @@ describe('getCasesConnectorType', () => {
               ],
               "groupedAlerts": null,
               "groupingBy": Array [],
+              "internallyManagedAlerts": false,
               "maximumCasesToOpen": 5,
               "owner": "cases",
-              "internallyManagedAlerts": false,
               "reopenClosedCases": false,
               "rule": Object {
                 "id": "rule-id",
@@ -241,9 +241,9 @@ describe('getCasesConnectorType', () => {
               ],
               "groupedAlerts": null,
               "groupingBy": Array [],
+              "internallyManagedAlerts": false,
               "maximumCasesToOpen": 5,
               "owner": "cases",
-              "internallyManagedAlerts": false,
               "reopenClosedCases": false,
               "rule": Object {
                 "id": "rule-id",

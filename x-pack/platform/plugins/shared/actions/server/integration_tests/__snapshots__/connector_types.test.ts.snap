@@ -2782,6 +2782,14 @@ Object {
       ],
       "type": "array",
     },
+    "internallyManagedAlerts": Object {
+      "flags": Object {
+        "default": false,
+        "error": [Function],
+        "presence": "optional",
+      },
+      "type": "boolean",
+    },
     "maximumCasesToOpen": Object {
       "flags": Object {
         "default": 5,
@@ -2817,14 +2825,6 @@ Object {
         },
       ],
       "type": "string",
-    },
-    "internallyManagedAlerts": Object {
-      "flags": Object {
-        "default": false,
-        "error": [Function],
-        "presence": "optional",
-      },
-      "type": "boolean",
     },
     "reopenClosedCases": Object {
       "flags": Object {

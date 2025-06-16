@@ -31,9 +31,9 @@ describe('CasesConnectorRunParamsSchema', () => {
         "groupingBy": Array [
           "host.name",
         ],
+        "internallyManagedAlerts": false,
         "maximumCasesToOpen": 5,
         "owner": "cases",
-        "internallyManagedAlerts": false,
         "reopenClosedCases": false,
         "rule": Object {
           "id": "rule-id",
