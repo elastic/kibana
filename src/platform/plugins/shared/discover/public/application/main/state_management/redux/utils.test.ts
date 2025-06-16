@@ -20,7 +20,7 @@ const createMockTabState = (id: string, label: string): TabState => ({
 describe('createTabItem', () => {
   it('should create a tab with default label when no tabs exist', () => {
     const result = createTabItem([]);
-    expect(result.label).toBe('Untitled session');
+    expect(result.label).toBe('Untitled');
   });
 
   it('should create a tab with default label when no tabs with default label exist', () => {
@@ -30,35 +30,35 @@ describe('createTabItem', () => {
     ];
 
     const result = createTabItem(tabs);
-    expect(result.label).toBe('Untitled session');
+    expect(result.label).toBe('Untitled');
   });
 
   it('should create a tab with number 2 when one default tab exists', () => {
-    const tabs = [createMockTabState('tab1', 'Untitled session')];
+    const tabs = [createMockTabState('tab1', 'Untitled')];
 
     const result = createTabItem(tabs);
-    expect(result.label).toBe('Untitled session 2');
+    expect(result.label).toBe('Untitled 2');
   });
 
   it('should create a tab with incremented number when multiple default tabs exist', () => {
     const tabs = [
-      createMockTabState('tab1', 'Untitled session'),
-      createMockTabState('tab2', 'Untitled session 2'),
-      createMockTabState('tab3', 'Untitled session 5'),
+      createMockTabState('tab1', 'Untitled'),
+      createMockTabState('tab2', 'Untitled 2'),
+      createMockTabState('tab3', 'Untitled 5'),
     ];
 
     const result = createTabItem(tabs);
-    expect(result.label).toBe('Untitled session 6');
+    expect(result.label).toBe('Untitled 6');
   });
 
   it('should ignore non-matching tab labels', () => {
     const tabs = [
-      createMockTabState('tab1', 'Untitled session'),
-      createMockTabState('tab2', 'Almost Untitled session 2'), // This shouldn't match
-      createMockTabState('tab3', 'Untitled sessionX'), // This shouldn't match
+      createMockTabState('tab1', 'Untitled'),
+      createMockTabState('tab2', 'Almost Untitled 2'), // This shouldn't match
+      createMockTabState('tab3', 'UntitledX'), // This shouldn't match
     ];
 
     const result = createTabItem(tabs);
-    expect(result.label).toBe('Untitled session 2');
+    expect(result.label).toBe('Untitled 2');
   });
 });
