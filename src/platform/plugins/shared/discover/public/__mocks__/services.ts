@@ -193,6 +193,9 @@ export function createDiscoverServicesMock(): DiscoverServices {
           triggersActions: true,
         },
       },
+      indexPatterns: {
+        save: true,
+      },
     },
     fieldFormats: fieldFormatsMock,
     filterManager: dataPlugin.query.filterManager,
