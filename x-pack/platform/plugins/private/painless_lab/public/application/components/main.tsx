@@ -7,7 +7,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { css } from '@emotion/react';
-import { kibanaFullBodyHeightCss, useMemoizedStyles } from '@kbn/core/public';
+import { kibanaFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { formatRequestPayload, formatJson } from '../lib/format';
@@ -53,7 +54,7 @@ export const Main: React.FunctionComponent = () => {
     links,
   } = useAppContext();
 
-  const styles = useMemoizedStyles(mainStyles);
+  const styles = useMemoCss(mainStyles);
   const [isRequestFlyoutOpen, setRequestFlyoutOpen] = useState(false);
   const { inProgress, response, submit } = useSubmitCode(http);
 

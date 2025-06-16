@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { Response } from '../../types';
 import { OutputTab } from './output_tab';
 import { ParametersTab } from './parameters_tab';
@@ -49,7 +49,7 @@ interface Props {
 }
 
 export const OutputPane: FunctionComponent<Props> = ({ isLoading, response }) => {
-  const styles = useMemoizedStyles(componentStyles);
+  const styles = useMemoCss(componentStyles);
   const outputTabLabel = (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>

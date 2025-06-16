@@ -36,6 +36,7 @@
     "@kbn/core-http-browser",
     "@kbn/deeplinks-observability",
     "@kbn/react-kibana-context-theme",
+    "@kbn/css-utils",
   ],
   "exclude": [
     "target/**/*",

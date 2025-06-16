@@ -14,8 +14,8 @@ import {
   AppMountParameters,
   KibanaExecutionContext,
   ScopedHistory,
-  kibanaFullBodyHeightCss,
 } from '@kbn/core/public';
+import { kibanaFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { Adapters } from '@kbn/inspector-plugin/public';
 import { Subscription } from 'rxjs';
 import { type Filter, FilterStateStore, type Query, type TimeRange } from '@kbn/es-query';

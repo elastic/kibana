@@ -17,8 +17,8 @@ import {
   EuiPanel,
   UseEuiTheme,
 } from '@elastic/eui';
-
-import { kibanaFullBodyHeightCss, useMemoizedStyles } from '@kbn/core/public';
+import { kibanaFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { css } from '@emotion/react';
 import {
   SearchProfilerTabs,
@@ -103,7 +103,7 @@ export const App = () => {
     return null;
   };
 
-  const styles = useMemoizedStyles(componentStyles);
+  const styles = useMemoCss(componentStyles);
 
   return (
     <>

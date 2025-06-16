@@ -26,7 +26,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { css } from '@emotion/react';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from '../options_list_strings';
 
@@ -39,7 +39,7 @@ const optionsListPopoverInvalidSelectionsStyles = {
 
 export const OptionsListPopoverInvalidSelections = () => {
   const { componentApi } = useOptionsListContext();
-  const styles = useMemoizedStyles(optionsListPopoverInvalidSelectionsStyles);
+  const styles = useMemoCss(optionsListPopoverInvalidSelectionsStyles);
 
   const [invalidSelections, fieldFormatter] = useBatchedPublishingSubjects(
     componentApi.invalidSelections$,

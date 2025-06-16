@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { isCompressed } from '../../../../control_group/utils/is_compressed';
 import { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
 import { MIN_POPOVER_WIDTH } from '../../../constants';
@@ -121,7 +121,7 @@ export const OptionsListControl = ({
   );
 
   const delimiter = useMemo(() => OptionsListStrings.control.getSeparator(field?.type), [field]);
-  const styles = useMemoizedStyles(optionListControlStyles);
+  const styles = useMemoCss(optionListControlStyles);
 
   const { hasSelections, selectionDisplayNode, selectedOptionsCount } = useMemo(() => {
     return {
