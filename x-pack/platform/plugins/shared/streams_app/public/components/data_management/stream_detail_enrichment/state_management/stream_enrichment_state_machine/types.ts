@@ -8,8 +8,6 @@
 import { CoreStart } from '@kbn/core/public';
 import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { Streams } from '@kbn/streams-schema';
-import { TimeState } from '@kbn/es-query';
-import { BehaviorSubject } from 'rxjs';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { GrokCollection } from '@kbn/grok-ui';
@@ -25,7 +23,6 @@ export interface StreamEnrichmentServiceDependencies {
   streamsRepositoryClient: StreamsRepositoryClient;
   core: CoreStart;
   data: DataPublicPluginStart;
-  timeState$: BehaviorSubject<TimeState>;
   urlStateStorageContainer: IKbnUrlStateStorage;
 }
 

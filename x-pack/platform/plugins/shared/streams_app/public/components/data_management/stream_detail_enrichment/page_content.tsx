@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   DragDropContextProps,
   EuiAccordion,
@@ -25,9 +25,7 @@ import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { BehaviorSubject } from 'rxjs';
 import { useKbnUrlStateStorageFromRouterContext } from '../../../util/kbn_url_state_context';
-import { useTimefilter } from '../../../hooks/use_timefilter';
 import { useKibana } from '../../../hooks/use_kibana';
 import { DraggableProcessorListItem } from './processors_list';
 import { SortableList } from './sortable_list';
@@ -57,25 +55,6 @@ export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentConte
 
   const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
 
-  const timefilterHook = useTimefilter();
-
-  const timeState$ = useMemo(() => {
-    const subject = new BehaviorSubject(timefilterHook.timeState);
-    return subject;
-    // No need to ever recreate this observable, as we subscribe to it in the
-    // useEffect below.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    const subscription = timefilterHook.timeState$.subscribe((value) =>
-      timeState$.next(value.timeState)
-    );
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [timeState$, timefilterHook.timeState$]);
-
   return (
     <StreamEnrichmentContextProvider
       definition={props.definition}
@@ -83,7 +62,6 @@ export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentConte
       core={core}
       data={data}
       streamsRepositoryClient={streamsRepositoryClient}
-      timeState$={timeState$}
       urlStateStorageContainer={urlStateStorageContainer}
     >
       <StreamDetailEnrichmentContentImpl />
