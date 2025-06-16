@@ -51,7 +51,7 @@ export const AIForSOCPanel: React.FC<Partial<AIForSOCDetailsProps>> = memo(() =>
             <HighlightedFields
               dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
               investigationFields={investigationFields}
-              isPreview={false}
+              showCellActions={false}
             />
           </EuiFlexItem>
           {attackDiscoveryAlertsEnabled && (

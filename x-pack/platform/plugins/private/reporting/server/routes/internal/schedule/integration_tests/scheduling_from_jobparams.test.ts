@@ -27,6 +27,7 @@ import {
 import { ReportingRequestHandlerContext } from '../../../../types';
 import { registerScheduleRoutesInternal } from '../schedule_from_jobparams';
 import { FakeRawRequest, KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -51,7 +52,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
 
   const mockLogger = loggingSystemMock.createLogger();
   const mockCoreSetup = coreMock.createSetup();
-
+  const auditLogger = auditLoggerMock.create();
   const mockPdfExportType = new PdfExportType(
     mockCoreSetup,
     mockConfigSchema,
@@ -87,6 +88,9 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
           authc: {
             apiKeys: { areAPIKeysEnabled: () => true },
             getCurrentUser: () => ({ id: '123', roles: ['superuser'], username: 'Tom Riddle' }),
+          },
+          audit: {
+            asScoped: () => auditLogger,
           },
         },
       },
