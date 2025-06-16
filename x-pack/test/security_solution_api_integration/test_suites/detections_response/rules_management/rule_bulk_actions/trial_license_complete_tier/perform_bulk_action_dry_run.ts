@@ -459,7 +459,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('should return error if non threshold rule edited in set_alert_suppression_for_threshold', async () => {
+      it('should return error when attempting to apply set_alert_suppression_for_threshold bulk action to a non-threshold rule', async () => {
         const createdRule = await createRule(
           supertest,
           log,
