@@ -9,11 +9,11 @@
 
 import { createExtract, createInject } from './dashboard_container_references';
 import { createEmbeddablePersistableStateServiceMock } from '@kbn/embeddable-plugin/common/mocks';
-import { ParsedDashboardAttributesWithType } from './types';
+import { ParsedDashboardAttributesWithType810 } from './types';
 
 const persistableStateService = createEmbeddablePersistableStateServiceMock();
 
-const dashboardWithExtractedPanel: ParsedDashboardAttributesWithType = {
+const dashboardWithExtractedPanel: ParsedDashboardAttributesWithType810 = {
   type: 'dashboard',
   panels: {
     panel_1: {
@@ -33,7 +33,7 @@ const extractedSavedObjectPanelRef = {
   id: 'object-id',
 };
 
-const unextractedDashboardState: ParsedDashboardAttributesWithType = {
+const unextractedDashboardState: ParsedDashboardAttributesWithType810 = {
   type: 'dashboard',
   panels: {
     panel_1: {
@@ -55,7 +55,7 @@ describe('inject/extract by reference panel', () => {
     const injected = inject(
       dashboardWithExtractedPanel,
       references
-    ) as ParsedDashboardAttributesWithType;
+    ) as ParsedDashboardAttributesWithType810;
 
     expect(injected).toEqual(unextractedDashboardState);
   });
@@ -70,7 +70,7 @@ describe('inject/extract by reference panel', () => {
   });
 });
 
-const dashboardWithExtractedByValuePanel: ParsedDashboardAttributesWithType = {
+const dashboardWithExtractedByValuePanel: ParsedDashboardAttributesWithType810 = {
   type: 'dashboard',
   panels: {
     panel_1: {
@@ -90,7 +90,7 @@ const extractedByValueRef = {
   type: 'panel_type',
 };
 
-const unextractedDashboardByValueState: ParsedDashboardAttributesWithType = {
+const unextractedDashboardByValueState: ParsedDashboardAttributesWithType810 = {
   type: 'dashboard',
   panels: {
     panel_1: {

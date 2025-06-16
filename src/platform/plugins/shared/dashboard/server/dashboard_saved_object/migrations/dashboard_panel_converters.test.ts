@@ -12,7 +12,7 @@ import {
   convertPanelStateToSavedDashboardPanel,
 } from './dashboard_panel_converters';
 import { SavedDashboardPanel } from '../schema/v2/types';
-import { MigrationsDashboardPanelState } from './types';
+import { DashboardPanelState810 } from './types';
 
 test('convertSavedDashboardPanelToPanelState', () => {
   const savedDashboardPanel: SavedDashboardPanel = {
@@ -73,7 +73,7 @@ test('convertSavedDashboardPanelToPanelState does not include undefined id', () 
 });
 
 test('convertPanelStateToSavedDashboardPanel', () => {
-  const dashboardPanel: MigrationsDashboardPanelState = {
+  const dashboardPanel: DashboardPanelState810 = {
     gridData: {
       x: 0,
       y: 0,
@@ -107,7 +107,7 @@ test('convertPanelStateToSavedDashboardPanel', () => {
 });
 
 test('convertPanelStateToSavedDashboardPanel will not add an undefined id when not needed', () => {
-  const dashboardPanel: MigrationsDashboardPanelState = {
+  const dashboardPanel: DashboardPanelState810 = {
     gridData: {
       x: 0,
       y: 0,
@@ -127,7 +127,7 @@ test('convertPanelStateToSavedDashboardPanel will not add an undefined id when n
 });
 
 test('convertPanelStateToSavedDashboardPanel will not leave title as part of embeddable config', () => {
-  const dashboardPanel: MigrationsDashboardPanelState = {
+  const dashboardPanel: DashboardPanelState810 = {
     gridData: {
       x: 0,
       y: 0,
@@ -148,7 +148,7 @@ test('convertPanelStateToSavedDashboardPanel will not leave title as part of emb
 });
 
 test('convertPanelStateToSavedDashboardPanel retains legacy version info when not passed removeLegacyVersion', () => {
-  const dashboardPanel: MigrationsDashboardPanelState = {
+  const dashboardPanel: DashboardPanelState810 = {
     gridData: {
       x: 0,
       y: 0,
@@ -169,7 +169,7 @@ test('convertPanelStateToSavedDashboardPanel retains legacy version info when no
 });
 
 test('convertPanelStateToSavedDashboardPanel removes legacy version info when passed removeLegacyVersion', () => {
-  const dashboardPanel: MigrationsDashboardPanelState = {
+  const dashboardPanel: DashboardPanelState810 = {
     gridData: {
       x: 0,
       y: 0,

@@ -19,7 +19,7 @@ import {
 } from './dashboard_panel_converters';
 import { DashboardAttributes } from '../schema/v1';
 import { createExtract, createInject } from './dashboard_container_references';
-import { MigrationsDashboardPanelMap } from './types';
+import { DashboardPanelMap810 } from './types';
 import { SavedDashboardPanel } from '../schema/v2';
 
 export interface InjectExtractDeps {
@@ -30,7 +30,7 @@ export interface InjectExtractDeps {
  * A partially parsed version of the Dashboard Attributes used for inject and extract logic for both the Dashboard Container and the Dashboard Saved Object.
  */
 export type ParsedDashboardAttributesWithType = EmbeddableStateWithType & {
-  panels: MigrationsDashboardPanelMap;
+  panels: DashboardPanelMap810;
   type: 'dashboard';
 };
 

@@ -12,11 +12,11 @@ import type { Reference } from '@kbn/content-management-utils';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { GridData } from '../schema/v2';
 
-export interface MigrationsDashboardPanelMap {
-  [key: string]: MigrationsDashboardPanelState;
+export interface DashboardPanelMap810 {
+  [key: string]: DashboardPanelState810;
 }
 
-export interface MigrationsDashboardPanelState<PanelState = object> {
+export interface DashboardPanelState810<PanelState = object> {
   type: string;
   explicitInput: PanelState;
   readonly gridData: GridData;
@@ -37,7 +37,7 @@ export interface MigrationsDashboardPanelState<PanelState = object> {
 /**
  * A partially parsed version of the Dashboard Attributes used for inject and extract logic for both the Dashboard Container and the Dashboard Saved Object.
  */
-export type ParsedDashboardAttributesWithType = EmbeddableStateWithType & {
-  panels: MigrationsDashboardPanelMap;
+export type ParsedDashboardAttributesWithType810 = EmbeddableStateWithType & {
+  panels: DashboardPanelMap810;
   type: 'dashboard';
 };
