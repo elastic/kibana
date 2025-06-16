@@ -39,7 +39,7 @@ describe('registerDeleteUnusedUrlsRoute', () => {
     expect(mockRouter.post).toHaveBeenCalledTimes(1);
     expect(mockRouter.post).toHaveBeenCalledWith(
       expect.objectContaining({
-        path: '/internal/unused_urls_cleanup/run',
+        path: '/internal/unused_urls_task/run',
         security: {
           authz: {
             requiredPrivileges: [ReservedPrivilegesSet.superuser],

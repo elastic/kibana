@@ -27,7 +27,7 @@ export const registerDeleteUnusedUrlsRoute = ({
 }) => {
   router.post(
     {
-      path: '/internal/unused_urls_cleanup/run',
+      path: '/internal/unused_urls_task/run',
       security: {
         authz: {
           requiredPrivileges: [ReservedPrivilegesSet.superuser],
