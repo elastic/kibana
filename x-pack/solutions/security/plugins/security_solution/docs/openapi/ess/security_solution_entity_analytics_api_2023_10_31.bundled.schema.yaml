@@ -556,13 +556,13 @@ paths:
                     type: array
                   mlModuleSetupStatus:
                     enum:
-                      - COMPLETE
-                      - INCOMPLETE
+                      - complete
+                      - incomplete
                     type: string
                   packageInstallationStatus:
                     enum:
-                      - COMPLETE
-                      - INCOMPLETE
+                      - complete
+                      - incomplete
                     type: string
                 required:
                   - packageInstallationStatus
