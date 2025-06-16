@@ -61,7 +61,7 @@ export const createDefaultDataView = async ({
     }
 
     // check for/generate default Security Solution Kibana data view
-    const sourcererDataViews = await createSourcererDataView({
+    const sourcererDataView = await createSourcererDataView({
       body: {
         patternList: [...configPatternList, ...(signal.name != null ? [signal.name] : [])],
       },
@@ -69,11 +69,11 @@ export const createDefaultDataView = async ({
       dataViewId: `${DEFAULT_DATA_VIEW_ID}-${(await spaces?.getActiveSpace())?.id}`,
     });
 
-    if (sourcererDataViews === undefined) {
+    if (sourcererDataView === undefined) {
       throw new Error('');
     }
-    defaultDataView = { ...initDataView, ...sourcererDataViews.defaultDataView };
-    kibanaDataViews = sourcererDataViews.kibanaDataViews.map((dataView: KibanaDataView) => ({
+    defaultDataView = { ...initDataView, ...sourcererDataView.defaultDataView };
+    kibanaDataViews = sourcererDataView.kibanaDataViews.map((dataView: KibanaDataView) => ({
       ...initDataView,
       ...dataView,
     }));

@@ -10,7 +10,11 @@ import { createSlice } from '@reduxjs/toolkit';
 import type { DataViewSpec, DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewManagerScopeName } from '../constants';
 import { SLICE_PREFIX } from '../constants';
-import type { ScopedDataViewSelectionState, SharedDataViewSelectionState } from './types';
+import type {
+  ScopedDataViewSelectionState,
+  SharedDataViewSelectionState,
+  SignalIndexMetadata,
+} from './types';
 import { selectDataViewAsync, type SelectDataViewAsyncPayload } from './actions';
 
 export const initialScopeState: ScopedDataViewSelectionState = {
@@ -22,7 +26,7 @@ export const initialSharedState: SharedDataViewSelectionState = {
   dataViews: [],
   adhocDataViews: [],
   status: 'pristine',
-  signalIndexName: '',
+  signalIndex: null,
   defaultDataViewId: null,
 };
 
@@ -34,8 +38,8 @@ export const sharedDataViewManagerSlice = createSlice({
       state.dataViews = action.payload;
       state.status = 'ready';
     },
-    setSignalIndexName: (state, action: PayloadAction<string>) => {
-      state.signalIndexName = action.payload;
+    setSignalIndex: (state, action: PayloadAction<SignalIndexMetadata>) => {
+      state.signalIndex = action.payload;
     },
     setDefaultDataViewId: (state, action: PayloadAction<string>) => {
       state.defaultDataViewId = action.payload;

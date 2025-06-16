@@ -18,9 +18,9 @@ import { createDataViewSelectedListener } from '../redux/listeners/data_view_sel
 import { createInitListener } from '../redux/listeners/init_listener';
 import { useEnableExperimental } from '../../common/hooks/use_experimental_features';
 import { sharedDataViewManagerSlice } from '../redux/slices';
-import { useUserInfo } from '../../detections/components/user_info';
 import { type SelectDataViewAsyncPayload } from '../redux/actions';
 import { DataViewManagerScopeName } from '../constants';
+import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 
 type OriginalListener = Parameters<typeof originalAddListener>[0];
 
@@ -43,13 +43,22 @@ export const useInitDataViewManager = () => {
   const services = useKibana().services;
   const { newDataViewPickerEnabled } = useEnableExperimental();
 
-  const { loading: loadingSignalIndex, signalIndexName } = useUserInfo();
+  const {
+    signalIndexName,
+    loading: loadingSignalIndex,
+    signalIndexMappingOutdated,
+  } = useSignalIndex();
 
   const onSignalIndexUpdated = useCallback(() => {
     if (!loadingSignalIndex && signalIndexName != null) {
-      dispatch(sharedDataViewManagerSlice.actions.setSignalIndexName(signalIndexName));
+      dispatch(
+        sharedDataViewManagerSlice.actions.setSignalIndex({
+          name: signalIndexName,
+          isOutdated: !!signalIndexMappingOutdated,
+        })
+      );
     }
-  }, [dispatch, loadingSignalIndex, signalIndexName]);
+  }, [dispatch, loadingSignalIndex, signalIndexMappingOutdated, signalIndexName]);
 
   useEffect(() => {
     // TODO: (new data view picker) remove this in cleanup phase https://github.com/elastic/security-team/issues/12665
