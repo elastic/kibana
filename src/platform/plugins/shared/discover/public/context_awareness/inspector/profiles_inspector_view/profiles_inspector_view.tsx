@@ -18,7 +18,10 @@ export function ProfilesInspectorView({ profilesAdapter }: { profilesAdapter: Pr
   const { euiTheme } = useEuiTheme();
 
   return (
-    <div css={{ display: 'flex', flexDirection: 'column', gap: euiTheme.size.s }}>
+    <div
+      data-test-subj="profilesInspectorView"
+      css={{ display: 'flex', flexDirection: 'column', gap: euiTheme.size.s }}
+    >
       <RootProfileSection rootProfile={profilesAdapter.getRootProfile()} />
       <DataSourceProfileSection dataSourceProfile={profilesAdapter.getDataSourceProfile()} />
       <DocumentsProfilesSection
