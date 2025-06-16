@@ -15,8 +15,8 @@ import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useFetchDashboardById } from './hooks/use_fetch_dashboard_by_id';
 import { DatePicker } from './components/date_picker/date_picker';
 import { DatePickerProvider } from './hooks/use_date_picker';
-import { RenderDashboard } from './components/dashboard/render_dashboard';
 import { KubernetesTimeRangeMetadataProvider } from './hooks/use_kubernetes_timerange_metadata';
+import { PageContent } from './components/page_content/page_content';
 
 export const Dashboard = () => {
   const {
@@ -77,7 +77,7 @@ export const Dashboard = () => {
           data-test-subj="infraKubernetesPage"
         >
           <KubernetesTimeRangeMetadataProvider>
-            <RenderDashboard dashboardId={dashboardId} />
+            <PageContent dashboardId={dashboardId} hasMultipleDashboards={entity === 'overview'} />
           </KubernetesTimeRangeMetadataProvider>
         </PageTemplate>
       </EuiErrorBoundary>

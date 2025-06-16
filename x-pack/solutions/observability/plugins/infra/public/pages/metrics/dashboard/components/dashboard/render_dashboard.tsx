@@ -14,7 +14,6 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { DashboardState } from '@kbn/dashboard-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
-import { useTimeRangeMetadataContext } from '../../../../../hooks/use_timerange_metadata';
 
 export const RenderDashboard = ({ dashboardId }: { dashboardId: string }) => {
   const {
@@ -22,7 +21,6 @@ export const RenderDashboard = ({ dashboardId }: { dashboardId: string }) => {
   } = useKibanaContextForPlugin();
 
   const { dateRange } = useDatePickerContext();
-  const { data } = useTimeRangeMetadataContext();
   const { from, to } = dateRange;
   const getCreationOptions = useCallback((): Promise<DashboardCreationOptions> => {
     const getInitialInput = (): Partial<DashboardState> => ({
@@ -42,11 +40,6 @@ export const RenderDashboard = ({ dashboardId }: { dashboardId: string }) => {
     },
     [dashboardId]
   );
-
-  // TODO loading state and error handling
-  // move to a separate component
-  // console.log('schemas', data?.schemas);
-  // schema logic switcher otel, metricbeat, otel + metricbeat, none
 
   const locator = useMemo(() => {
     const baseLocator = share.url.locators.get(KUBERNETES_DASHBOARD_LOCATOR_ID);
