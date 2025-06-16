@@ -48,6 +48,42 @@ export function DocumentsColumn({
   const chartBaseTheme = useElasticChartsTheme();
   const { euiTheme } = useEuiTheme();
 
+  const LoadingState: React.FC = React.useCallback(
+    () => (
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="flexEnd"
+        gutterSize="m"
+        className={css`
+          height: ${euiTheme.size.xl};
+          white-space: nowrap;
+          padding-right: ${euiTheme.size.xl};
+        `}
+      >
+        <EuiFlexGroup>
+          <EuiFlexItem
+            className={css`
+              text-align: center;
+            `}
+          >
+            -
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+            className={css`
+              display: flex;
+              padding-right: ${euiTheme.size.xl};
+              justify-content: center;
+            `}
+          >
+            <EuiLoadingChart size="m" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexGroup>
+    ),
+    [euiTheme]
+  );
+
   const { timeState } = useTimefilter();
 
   const minInterval = Math.floor((timeState.end - timeState.start) / numDataPoints);
@@ -81,9 +117,13 @@ export function DocumentsColumn({
     [histogramQueryFetch]
   );
 
-  const docCount = allTimeseries.reduce(
-    (acc, series) => acc + series.data.reduce((acc2, item) => acc2 + (item.doc_count || 0), 0),
-    0
+  const docCount = React.useMemo(
+    () =>
+      allTimeseries.reduce(
+        (acc, series) => acc + series.data.reduce((acc2, item) => acc2 + (item.doc_count || 0), 0),
+        0
+      ),
+    [allTimeseries]
   );
 
   const hasData = docCount > 0;
@@ -100,46 +140,7 @@ export function DocumentsColumn({
       `}
     >
       {histogramQueryFetch.loading ? (
-        <EuiFlexGroup
-          alignItems="center"
-          justifyContent="flexEnd"
-          gutterSize="m"
-          className={css`
-            height: ${euiTheme.size.xl};
-            white-space: nowrap;
-          `}
-        >
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="flexEnd"
-            gutterSize="m"
-            className={css`
-              height: ${euiTheme.size.xl};
-              white-space: nowrap;
-              padding-right: ${euiTheme.size.xl};
-            `}
-          >
-            <EuiFlexGroup>
-              <EuiFlexItem
-                className={css`
-                  text-align: center;
-                `}
-              >
-                -
-              </EuiFlexItem>
-              <EuiFlexItem
-                grow={false}
-                className={css`
-                  display: flex;
-                  padding-right: ${euiTheme.size.xl};
-                  justify-content: center;
-                `}
-              >
-                <EuiLoadingChart size="m" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexGroup>
-        </EuiFlexGroup>
+        <LoadingState />
       ) : (
         <>
           <EuiFlexItem

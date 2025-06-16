@@ -19,7 +19,7 @@ import { useKibana } from '../../hooks/use_kibana';
 
 export function ClassicStreamBadge() {
   return (
-    <EuiBadge>
+    <EuiBadge color="hollow">
       {i18n.translate('xpack.streams.entityDetailViewWithoutParams.unmanagedBadgeLabel', {
         defaultMessage: 'Classic',
       })}

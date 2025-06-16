@@ -7,14 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGroup,
-  EuiBetaBadge,
-  EuiText,
-  EuiLink,
-  EuiPageHeader,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiBetaBadge, EuiLink, EuiPageHeader, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
   OBSERVABILITY_ONBOARDING_LOCATOR,
@@ -86,23 +79,30 @@ export function StreamListView() {
             />
           </EuiFlexGroup>
         }
-        description={
-          <EuiText color="subdued" size="s">
-            {i18n.translate('xpack.streams.streamsListView.pageHeaderDescription', {
-              defaultMessage:
-                'Use Streams to organize and process your data into clear structured flows, and simplify routing, field extraction, and retention management.',
-            })}{' '}
-            <EuiLink
-              target="_blank"
-              href="https://www.elastic.co/docs/solutions/observability/logs/streams/streams"
-            >
-              {i18n.translate('xpack.streams.streamsListView.pageHeaderDocsLink', {
-                defaultMessage: 'See docs',
-              })}
-            </EuiLink>
-          </EuiText>
-        }
-      />
+      >
+        <p
+          css={css`
+            margin: 0 0 ${euiTheme.size.s} 0;
+            font-size: ${euiTheme.font.scale.s};
+            color: ${euiTheme.colors.textSubdued};
+            line-height: ${euiTheme.size.l};
+          `}
+        >
+          {i18n.translate('xpack.streams.streamsListView.pageHeaderDescription', {
+            defaultMessage:
+              'Use Streams to organize and process your data into clear structured flows, and simplify routing, field extraction, and retention management.',
+          })}{' '}
+          <EuiLink
+            target="_blank"
+            href="https://www.elastic.co/docs/solutions/observability/logs/streams/streams"
+          >
+            {i18n.translate('xpack.streams.streamsListView.pageHeaderDocsLink', {
+              defaultMessage: 'See docs',
+            })}
+          </EuiLink>
+        </p>
+      </EuiPageHeader>
+
       <StreamsAppPageTemplate.Body grow>
         {!streamsListFetch.loading && !streamsListFetch.value?.length ? (
           <StreamsListEmptyState onAddData={handleAddData} />
