@@ -401,13 +401,13 @@ describe('autocomplete', () => {
     );
 
     // RENAME field
-    testSuggestions(
-      'FROM index1 | RENAME f/',
-      getFieldNamesByType('any').map((name) => `${name} `)
-    );
+    testSuggestions('FROM index1 | RENAME f/', [
+      'col0 = ',
+      ...getFieldNamesByType('any').map((name) => `${name} `),
+    ]);
 
     // RENAME field AS
-    testSuggestions('FROM index1 | RENAME field A/', ['AS ']);
+    testSuggestions('FROM index1 | RENAME field A/', ['AS ', '= ']);
 
     // STATS argument
     testSuggestions('FROM index1 | STATS f/', [

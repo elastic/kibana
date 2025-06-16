@@ -13,30 +13,16 @@ describe('autocomplete.suggest', () => {
   describe('RENAME', () => {
     it('suggests fields', async () => {
       const { assertSuggestions } = await setup();
-      await assertSuggestions(
-        'from a | rename /',
-        getFieldNamesByType('any').map((field) => field + ' ')
-      );
-      await assertSuggestions(
-        'from a | rename fie/',
-        getFieldNamesByType('any').map((field) => field + ' ')
-      );
-      await assertSuggestions(
-        'from a | rename field AS foo, /',
-        getFieldNamesByType('any').map((field) => field + ' ')
-      );
-      await assertSuggestions(
-        'from a | rename field = foo, /',
-        getFieldNamesByType('any').map((field) => field + ' ')
-      );
-      await assertSuggestions(
-        'from a | rename field AS foo, fie/',
-        getFieldNamesByType('any').map((field) => field + ' ')
-      );
-      await assertSuggestions(
-        'from a | rename field = foo, fie/',
-        getFieldNamesByType('any').map((field) => field + ' ')
-      );
+      const expectedSuggestions = [
+        'col0 = ',
+        ...getFieldNamesByType('any').map((field) => field + ' '),
+      ];
+      await assertSuggestions('from a | rename /', expectedSuggestions);
+      await assertSuggestions('from a | rename fie/', expectedSuggestions);
+      await assertSuggestions('from a | rename field AS foo, /', expectedSuggestions);
+      await assertSuggestions('from a | rename field = foo, /', expectedSuggestions);
+      await assertSuggestions('from a | rename field AS foo, fie/', expectedSuggestions);
+      await assertSuggestions('from a | rename field = foo, fie/', expectedSuggestions);
     });
 
     it('suggests AS and = after field', async () => {
