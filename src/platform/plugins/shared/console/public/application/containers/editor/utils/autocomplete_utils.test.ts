@@ -27,7 +27,6 @@ import {
   getUrlPathCompletionItems,
   shouldTriggerSuggestions,
   getInsertText,
-  isInsideTripleQuotes,
 } from './autocomplete_utils';
 
 describe('autocomplete_utils', () => {
