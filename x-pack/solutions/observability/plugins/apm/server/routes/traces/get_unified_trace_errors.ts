@@ -60,7 +60,7 @@ function getUnprocessedOtelErrors({
       size: 1000,
       query: {
         bool: {
-          filter: [],
+        
           must: [
             {
               bool: {
