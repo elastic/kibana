@@ -8,7 +8,8 @@
  */
 
 import { urlField } from '.';
-import type { ValidationFuncArg } from '../../hook_form_lib';
+import type { ValidationError } from '../../hook_form_lib';
+import { ERROR_CODE } from './types';
 
 describe('urlField', () => {
   const message = 'test error message';
@@ -18,7 +19,20 @@ describe('urlField', () => {
 
   const validator = (value: any, requireTld?: boolean) => {
     const validate = urlField(message, { requireTld });
-    return validate({ value }) as ValidationFuncArg<any, any>;
+    return validate({
+      value,
+      path: 'url',
+      form: {
+        getFormData: () => ({}),
+        getFields: () => ({} as any),
+      },
+      formData: {},
+      errors: [],
+      customData: {
+        provider: async () => undefined,
+        value: undefined,
+      },
+    }) as ValidationError<ERROR_CODE> | undefined;
   };
 
   test('should return error if value is not a string', () => {
