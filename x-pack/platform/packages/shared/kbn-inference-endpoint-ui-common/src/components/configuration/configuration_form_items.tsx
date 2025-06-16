@@ -19,8 +19,9 @@ import {
 
 import { ConfigEntryView } from '../../types/types';
 import { ConfigurationField } from './configuration_field';
+import { AdaptiveAllocationsTitle } from './adaptive_allocations_title';
 import * as LABELS from '../../translations';
-import { HelpTextCallout } from './helptext_callout';
+import { MAX_NUMBER_OF_ALLOCATIONS } from '../../constants';
 
 interface ConfigurationFormItemsProps {
   isLoading: boolean;
@@ -81,36 +82,34 @@ export const ConfigurationFormItems: React.FC<ConfigurationFormItemsProps> = ({
         ) : undefined;
 
         return (
-          <>
-            <HelpTextCallout field={key} />
-            <EuiFlexItem key={key}>
-              <EuiFormRow
-                label={rowLabel}
-                fullWidth
-                helpText={helpText}
-                error={validationErrors}
-                isInvalid={!isValid}
-                labelAppend={optionalLabel}
-                data-test-subj={`configuration-formrow-${key}`}
-              >
-                <ConfigurationField
-                  configEntry={configEntry}
-                  isLoading={isLoading}
-                  setConfigValue={(value) => {
-                    setConfigEntry(key, value);
-                  }}
-                  isEdit={isEdit}
-                  isPreconfigured={isPreconfigured}
-                />
-              </EuiFormRow>
-              {sensitive ? (
-                <>
-                  <EuiSpacer size="s" />
-                  <EuiCallOut size="s" color="warning" title={LABELS.RE_ENTER_SECRETS(label)} />
-                </>
-              ) : null}
-            </EuiFlexItem>
-          </>
+          <EuiFlexItem key={key}>
+            {key === MAX_NUMBER_OF_ALLOCATIONS ? <AdaptiveAllocationsTitle /> : null}
+            <EuiFormRow
+              label={rowLabel}
+              fullWidth
+              helpText={helpText}
+              error={validationErrors}
+              isInvalid={!isValid}
+              labelAppend={optionalLabel}
+              data-test-subj={`configuration-formrow-${key}`}
+            >
+              <ConfigurationField
+                configEntry={configEntry}
+                isLoading={isLoading}
+                setConfigValue={(value) => {
+                  setConfigEntry(key, value);
+                }}
+                isEdit={isEdit}
+                isPreconfigured={isPreconfigured}
+              />
+            </EuiFormRow>
+            {sensitive ? (
+              <>
+                <EuiSpacer size="s" />
+                <EuiCallOut size="s" color="warning" title={LABELS.RE_ENTER_SECRETS(label)} />
+              </>
+            ) : null}
+          </EuiFlexItem>
         );
       })}
     </EuiFlexGroup>

@@ -41,16 +41,19 @@ type InternalOverrideFieldsType = {
   };
 };
 
+export const MAX_NUMBER_OF_ALLOCATIONS = 'max_number_of_allocations';
+
 // This is a temporaray solution to handle the internal overrides for field configurations that have not been updated in the services endpoint
 export const INTERNAL_OVERRIDE_FIELDS: InternalOverrideFieldsType = {
   [ServiceProviderKeys.elasticsearch]: {
     hidden: ['num_allocations', 'num_threads'],
     additional: [
       {
-        max_number_of_allocations: {
+        [MAX_NUMBER_OF_ALLOCATIONS]: {
           default_value: null,
-          description: 'Maximum number of allocations for the inference endpoint.',
-          label: 'Max Allocations',
+          description:
+            'Maximum scaling limit available to the endpoint. Max allocations will determine the maximum number of VCUs that the endpoint can scale up to.',
+          label: 'Max scaling limit (allocations)',
           required: false,
           sensitive: false,
           supported_task_types: ['text_embedding', 'sparse_embedding', 'rerank'],

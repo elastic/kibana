@@ -191,11 +191,3 @@ export const ADAPTIVE_ALLOCATIONS_TITLE = i18n.translate(
     defaultMessage: 'Adaptive allocations enabled',
   }
 );
-
-export const ADAPTIVE_ALLOCATIONS_MESSAGE = i18n.translate(
-  'xpack.inferenceEndpointUICommon.components.adaptiveAllocationsHelpMessage',
-  {
-    defaultMessage:
-      'The number of allocations scales automatically, based on load. Resources scale up when the load increases and scale down when it decreases. When automatically scaled down to zero due to inactivity, there is no cost for the duration of inactivity. Subsequent inference calls may return errors temporarily, until the auto-scaler makes resources available again, to optimize for cost. You can optionally set the maximum number of allocations. Autoscaling will occur dynamically between zero and maximum available or the user set maximum.',
-  }
-);
