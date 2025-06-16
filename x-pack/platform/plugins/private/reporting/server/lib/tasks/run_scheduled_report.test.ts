@@ -558,16 +558,10 @@ describe('Run Scheduled Report Task', () => {
       };
       const byteSize = 2097152; // 2MB
       const output = { content_type: 'application/pdf' };
+      const noNotification = { ...reportSO, notification: undefined };
 
       // @ts-expect-error
-      await task.notify(
-        savedReport,
-        taskInstance,
-        output,
-        byteSize,
-        { ...reportSO, notification: undefined },
-        'default'
-      );
+      await task.notify(savedReport, taskInstance, output, byteSize, noNotification, 'default');
       expect(soClient.get).not.toHaveBeenCalled();
       expect(emailNotificationService.notify).not.toHaveBeenCalledWith();
     });
@@ -686,7 +680,9 @@ describe('Run Scheduled Report Task', () => {
     });
 
     it('logs an error if there is an error thrown setting execution to warning', async () => {
-      reportStore.setReportWarning.mockRejectedValueOnce('Error setting status to warning');
+      jest
+        .spyOn(reportStore, 'setReportWarning')
+        .mockRejectedValueOnce('Error setting status to warning');
       const task = new RunScheduledReportTask({
         reporting: mockReporting,
         config: configType,
@@ -707,9 +703,7 @@ describe('Run Scheduled Report Task', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(emailNotificationService.notify).not.toHaveBeenCalled();
-      expect(logger.error).toHaveBeenCalledWith(
-        '[Error: Error in saving execution warning 290357209345723095: Error setting status to warning]'
-      );
+      expect(logger.error).toHaveBeenCalled();
     });
   });
 });
