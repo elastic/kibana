@@ -10,6 +10,7 @@ import { SubActionConnector } from '@kbn/actions-plugin/server';
 import aws from 'aws4';
 import { BedrockRuntimeClient } from '@aws-sdk/client-bedrock-runtime';
 import type { SmithyMessageDecoderStream } from '@smithy/eventstream-codec';
+import { NodeHttpHandler } from '@smithy/node-http-handler';
 import type { AxiosError, Method } from 'axios';
 import type { IncomingMessage } from 'http';
 import { PassThrough } from 'stream';
@@ -94,9 +95,7 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
         accessKeyId: this.secrets.accessKey,
         secretAccessKey: this.secrets.secret,
       },
-      httpOptions: {
-        agent: isHttps ? httpsAgent : httpAgent,
-      },
+      requestHandler: new NodeHttpHandler(isHttps ? { httpsAgent } : { httpAgent }),
     });
     this.registerSubActions();
   }
