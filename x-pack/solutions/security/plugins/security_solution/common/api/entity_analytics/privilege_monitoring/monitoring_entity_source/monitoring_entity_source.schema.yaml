@@ -1,0 +1,145 @@
+openapi: 3.0.0
+info:
+  title: Monitoring Entity Source Schema
+  description: Schema for managing entity source configurations in the monitoring system.
+  version: "1"
+
+paths:
+  /api/entity_analytics/monitoring/entity_source:
+    post:
+      operationId: createEntitySource
+      summary: Create a new entity source configuration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MonitoringEntitySourceDescriptor"
+      responses:
+        "200":
+          description: Entity source created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MonitoringEntitySourceResponse"
+
+  /api/entity_analytics/monitoring/entity_source/{id}:
+    get:
+      operationId: getEntitySource
+      summary: Get an entity source configuration by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Entity source details retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MonitoringEntitySourceResponse"
+
+    put:
+      operationId: updateEntitySource
+      summary: Update an entity source configuration
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MonitoringEntitySourceDescriptor"
+      responses:
+        "200":
+          description: Entity source updated successfully
+
+    delete:
+      operationId: deleteEntitySource
+      summary: Delete an entity source configuration
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Entity source deleted successfully
+
+components:
+  schemas:
+    MonitoringEntitySourceDescriptor:
+      type: object
+      required: [type, name]
+      properties:
+        type:
+          type: string
+        name:
+          type: string
+        managed:
+          type: boolean
+        indexPattern:
+          type: string
+        enabled:
+          type: boolean
+        error:
+          type: string
+        integrationName:
+          type: string
+        matchers:
+          type: array
+          items:
+            type: object
+            required:
+            - fields
+            - values
+            properties:
+              fields:
+                type: array
+                items:
+                  type: string                  
+              values:
+                type: array
+                items:
+                  type: string                
+        filter:
+          type: object
+
+    MonitoringEntitySourceResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        indexPattern:
+          type: string
+        integrationName:
+          type: string
+        enabled:
+          type: boolean
+        matchers:
+          type: array
+          items:
+            type: object
+            required:
+            - fields
+            - values
+            properties:
+              fields:
+                type: array
+                items:
+                  type: string                
+              values:
+                type: array
+                items:
+                  type: string

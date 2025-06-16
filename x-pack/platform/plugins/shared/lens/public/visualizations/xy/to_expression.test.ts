@@ -27,7 +27,6 @@ describe('#toExpression', () => {
     paletteService: chartPluginMock.createPaletteRegistry(),
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     kibanaTheme: themeServiceMock.createStartContract(),
-    useLegacyTimeAxis: false,
     eventAnnotationService: eventAnnotationServiceMock,
     core: coreMock.createStart(),
     storage: {} as IStorageWrapper,

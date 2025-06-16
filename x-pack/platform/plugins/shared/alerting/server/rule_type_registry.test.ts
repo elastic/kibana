@@ -19,6 +19,7 @@ import { alertsServiceMock } from './alerts_service/alerts_service.mock';
 import { schema } from '@kbn/config-schema';
 import type { RecoveredActionGroupId } from '../common';
 import type { AlertingConfig } from './config';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 
 const logger = loggingSystemMock.create().get();
 let mockedLicenseState: jest.Mocked<ILicenseState>;
@@ -1089,6 +1090,91 @@ describe('Create Lifecycle', () => {
       });
       const result = registry.getAllTypes();
       expect(result).toEqual(['test']);
+    });
+  });
+
+  describe('getAllTypesForCategory()', () => {
+    test('should return empty when nothing is registered', () => {
+      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+      expect(
+        registry.getAllTypesForCategories([
+          DEFAULT_APP_CATEGORIES.management.id,
+          DEFAULT_APP_CATEGORIES.observability.id,
+          DEFAULT_APP_CATEGORIES.security.id,
+        ])
+      ).toEqual([]);
+    });
+
+    test('should return list of registered type ids for a category', () => {
+      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+      registry.register({
+        id: 'test',
+        name: 'Test',
+        actionGroups: [
+          {
+            id: 'testActionGroup',
+            name: 'Test Action Group',
+          },
+        ],
+        defaultActionGroupId: 'testActionGroup',
+        doesSetRecoveryContext: false,
+        isExportable: true,
+        ruleTaskTimeout: '20m',
+        minimumLicenseRequired: 'basic',
+        executor: jest.fn(),
+        category: 'test',
+        producer: 'alerts',
+        solution: 'stack',
+        validate: {
+          params: schema.any(),
+        },
+      });
+      registry.register({
+        id: 'test2',
+        name: 'Test',
+        actionGroups: [
+          {
+            id: 'testActionGroup',
+            name: 'Test Action Group',
+          },
+        ],
+        defaultActionGroupId: 'testActionGroup',
+        doesSetRecoveryContext: false,
+        isExportable: true,
+        ruleTaskTimeout: '20m',
+        minimumLicenseRequired: 'basic',
+        executor: jest.fn(),
+        category: 'test2',
+        producer: 'alerts',
+        solution: 'stack',
+        validate: {
+          params: schema.any(),
+        },
+      });
+      registry.register({
+        id: 'test3',
+        name: 'Test',
+        actionGroups: [
+          {
+            id: 'testActionGroup',
+            name: 'Test Action Group',
+          },
+        ],
+        defaultActionGroupId: 'testActionGroup',
+        doesSetRecoveryContext: false,
+        isExportable: true,
+        ruleTaskTimeout: '20m',
+        minimumLicenseRequired: 'basic',
+        executor: jest.fn(),
+        category: 'test3',
+        producer: 'alerts',
+        solution: 'stack',
+        validate: {
+          params: schema.any(),
+        },
+      });
+      const result = registry.getAllTypesForCategories(['test', 'test2']);
+      expect(result).toEqual(['test', 'test2']);
     });
   });
 
