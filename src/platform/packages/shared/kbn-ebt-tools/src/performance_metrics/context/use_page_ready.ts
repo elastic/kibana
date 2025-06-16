@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
+import usePrevious from 'react-use/lib/usePrevious';
 import type { CustomMetrics, Meta } from './performance_context';
 import { usePerformanceContext } from '../../..';
 
@@ -18,16 +19,6 @@ interface UsePageReadyProps {
   isRefreshing: boolean;
   customInitialLoadReported?: { value: boolean; onInitialLoadReported: () => void };
 }
-
-// Generic hook to store the previous value of a variable
-const usePrevious = <T>(value: T): T | undefined => {
-  const ref = useRef<T>();
-  useEffect(() => {
-    ref.current = value;
-  }, [value]);
-
-  return ref.current;
-};
 
 export const usePageReady = ({
   customInitialLoadReported,
