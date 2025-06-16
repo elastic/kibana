@@ -23,4 +23,4 @@ export const STREAMS_UI_PRIVILEGES = {
   show: 'show',
 } as const;
 
-export const OBSERVABILITY_ENABLE_STREAMS_UI = 'observability:enabledStreamsUI';
+export const OBSERVABILITY_ENABLE_STREAMS_UI = 'observability:enableStreamsUI';
