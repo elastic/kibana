@@ -24,6 +24,18 @@ export function SloTagsBadge({ slo, onClick, defaultVisibleTags = DEFAULT_VISIBL
   const visibleTags = expanded ? tags : tags.slice(0, defaultVisibleTags);
   const hasMore = tags.length > defaultVisibleTags;
 
+  const getClickProps = (tag: string) => {
+    return onClick !== undefined
+      ? {
+          onClickAriaLabel: i18n.translate('xpack.slo.sloTagsBadge.ariaLabel', {
+            defaultMessage: 'Filter with {tag}',
+            values: { tag },
+          }),
+          onClick: () => onClick(tag),
+        }
+      : {};
+  };
+
   if (!tags.length) return null;
 
   return (
@@ -34,9 +46,7 @@ export function SloTagsBadge({ slo, onClick, defaultVisibleTags = DEFAULT_VISIBL
           key={tag}
           onMouseDown={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
         >
-          <EuiBadge onClickAriaLabel={`filter with ${tag}`} onClick={() => onClick?.(tag)}>
-            {tag}
-          </EuiBadge>
+          <EuiBadge {...getClickProps(tag)}>{tag}</EuiBadge>
         </EuiFlexItem>
       ))}
       {hasMore && (
