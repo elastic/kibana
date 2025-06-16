@@ -240,7 +240,6 @@ describe('Migrate handlers', () => {
 
       expect(AgentService.getAgentPolicyForAgents).toHaveBeenCalledWith(
         mockSavedObjectsClient,
-        mockElasticsearchClient,
         mockAgents
       );
 
