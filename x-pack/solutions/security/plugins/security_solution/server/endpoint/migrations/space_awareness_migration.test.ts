@@ -17,7 +17,10 @@ import { ExceptionsListItemGenerator } from '../../../common/endpoint/data_gener
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { REFERENCE_DATA_SAVED_OBJECT_TYPE } from '../lib/reference_data';
 import { GLOBAL_ARTIFACT_TAG } from '../../../common/endpoint/service/artifacts';
-import { buildSpaceOwnerIdTag } from '../../../common/endpoint/service/artifacts/utils';
+import {
+  buildPerPolicyTag,
+  buildSpaceOwnerIdTag,
+} from '../../../common/endpoint/service/artifacts/utils';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
 import { applyEsClientSearchMock } from '../mocks/utils.mock';
@@ -28,6 +31,8 @@ import { FleetAgentGenerator } from '../../../common/endpoint/data_generators/fl
 import { FleetPackagePolicyGenerator } from '../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import type { LogsEndpointAction, PolicyData } from '../../../common/endpoint/types';
 import type { Agent } from '@kbn/fleet-plugin/common';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 
 describe('Space awareness migration', () => {
   let endpointServiceMock: ReturnType<typeof createMockEndpointAppContextService>;
@@ -95,6 +100,7 @@ describe('Space awareness migration', () => {
 
   describe('for Artifacts', () => {
     let artifactMigrationState: MigrationStateReferenceData;
+    let findExceptionsResultData: ExceptionListItemSchema[];
 
     beforeEach(() => {
       artifactMigrationState = migrationsState[ARTIFACTS_MIGRATION_REF_DATA_ID];
@@ -105,6 +111,10 @@ describe('Space awareness migration', () => {
       const exceptionsClient = endpointServiceMock.getExceptionListsClient();
       (endpointServiceMock.getExceptionListsClient as jest.Mock).mockClear();
 
+      findExceptionsResultData = [
+        exceptionsGenerator.generateTrustedApp({ tags: [GLOBAL_ARTIFACT_TAG] }),
+      ];
+
       (exceptionsClient.findExceptionListsItemPointInTimeFinder as jest.Mock).mockImplementation(
         async (options) => {
           const executeFunctionOnStream = options.executeFunctionOnStream;
@@ -114,7 +124,7 @@ describe('Space awareness migration', () => {
               page: 1,
               total: 2,
               per_page: 10,
-              data: [exceptionsGenerator.generateTrustedApp({ tags: [GLOBAL_ARTIFACT_TAG] })],
+              data: findExceptionsResultData,
             });
           });
         }
@@ -163,14 +173,34 @@ describe('Space awareness migration', () => {
     });
 
     it('should update artifacts with `ownerSpaceId` tag', async () => {
+      findExceptionsResultData[0].tags = [buildPerPolicyTag('foo')];
+
       await expect(
         migrateEndpointDataToSupportSpaces(endpointServiceMock)
       ).resolves.toBeUndefined();
+
       expect(
         endpointServiceMock.getExceptionListsClient().updateExceptionListItem
       ).toHaveBeenCalledWith(
         expect.objectContaining({
-          tags: [GLOBAL_ARTIFACT_TAG, buildSpaceOwnerIdTag(DEFAULT_SPACE_ID)],
+          tags: [buildPerPolicyTag('foo'), buildSpaceOwnerIdTag(DEFAULT_SPACE_ID)],
+        })
+      );
+    });
+
+    it('should add the global artifact tag to endpoint exceptions', async () => {
+      findExceptionsResultData[0].list_id = ENDPOINT_LIST_ID;
+      findExceptionsResultData[0].tags = [];
+
+      await expect(
+        migrateEndpointDataToSupportSpaces(endpointServiceMock)
+      ).resolves.toBeUndefined();
+
+      expect(
+        endpointServiceMock.getExceptionListsClient().updateExceptionListItem
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tags: [buildSpaceOwnerIdTag(DEFAULT_SPACE_ID), GLOBAL_ARTIFACT_TAG],
         })
       );
     });
