@@ -414,7 +414,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     // skips serverless MKI due to feature flag
     describe('@skipInServerlessMKI alert suppression', () => {
-      it('should return error if threshold rule edited in set_alert_suppression', async () => {
+      it('should return error when attempting to apply set_alert_suppression bulk action to a threshold rule', async () => {
         const createdRule = await createRule(
           supertest,
           log,
@@ -459,7 +459,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('should return error if non threshold rule edited in set_alert_suppression_for_threshold', async () => {
+      it('should return error when attempting to apply set_alert_suppression_for_threshold bulk action to a non-threshold rule', async () => {
         const createdRule = await createRule(
           supertest,
           log,
