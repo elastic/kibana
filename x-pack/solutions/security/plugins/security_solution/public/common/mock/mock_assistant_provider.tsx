@@ -13,8 +13,8 @@ import { AssistantProvider } from '@kbn/elastic-assistant';
 import type { UserProfileService } from '@kbn/core/public';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
-import { BASE_SECURITY_CONVERSATIONS } from '../../assistant/content/conversations';
 import { docLinksServiceMock } from '@kbn/core/public/mocks';
+import { BASE_SECURITY_CONVERSATIONS } from '../../assistant/content/conversations';
 
 interface Props {
   assistantAvailability?: AssistantAvailability;

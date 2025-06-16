@@ -10,12 +10,10 @@ import type { FilterManager } from '@kbn/data-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 import React, { useMemo, useState } from 'react';
 
-
 import { AlertSelectionQuery } from './alert_selection_query';
 import { AlertSelectionRange } from './alert_selection_range';
 import { getTabs } from './helpers/get_tabs';
 import * as i18n from './translations';
-
 
 interface Props {
   alertsPreviewStackBy0: string;
@@ -50,7 +48,6 @@ const AlertSelectionComponent: React.FC<Props> = ({
   setStart,
   start,
 }) => {
-
   const tabs = useMemo(
     () =>
       getTabs({

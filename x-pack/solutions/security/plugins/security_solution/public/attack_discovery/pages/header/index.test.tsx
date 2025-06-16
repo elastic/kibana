@@ -16,7 +16,6 @@ import { useSpaceId } from '../../../common/hooks/use_space_id';
 
 jest.mock('../../../assistant/use_assistant_availability');
 
-
 const defaultProps = {
   stats: null,
   connectorId: 'testConnectorId',
