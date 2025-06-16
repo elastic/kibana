@@ -56,7 +56,8 @@
     "@kbn/core-security-server",
     "@kbn/ml-trained-models-utils",
     "@kbn/lock-manager",
-    "@kbn/inference-tracing"
+    "@kbn/inference-tracing",
+    "@kbn/serverless-observability-settings"
   ],
   "exclude": [
     "target/**/*"
