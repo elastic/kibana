@@ -46,6 +46,8 @@ interface DocUpdate {
 
 type Action = { type: 'add'; payload: DocUpdate } | { type: 'undo' };
 
+export type PendingSave = Map<DocUpdate['id'], DocUpdate['value']>;
+
 export class IndexUpdateService {
   constructor(private readonly http: HttpStart, private readonly data: DataPublicPluginStart) {
     this.listenForUpdates();
@@ -61,8 +63,9 @@ export class IndexUpdateService {
 
   private readonly actions$ = new Subject<Action>();
 
-  private readonly _$rows = new BehaviorSubject<DataTableRecord[]>([]);
-  public readonly $rows: Observable<DataTableRecord[]> = this._$rows.asObservable();
+  /** ES Documents */
+  private readonly _rows$ = new BehaviorSubject<DataTableRecord[]>([]);
+  public readonly rows$: Observable<DataTableRecord[]> = this._rows$.asObservable();
 
   private readonly _subscription = new Subscription();
 
@@ -78,6 +81,19 @@ export class IndexUpdateService {
       }
     }, []),
     shareReplay(1) // keep latest buffer for retries
+  );
+
+  /** Docs that are currently being saved */
+  public readonly savingDocs$: Observable<PendingSave> = this.bufferState$.pipe(
+    map((updates) => {
+      return updates.reduce((acc, update) => {
+        if (update.id) {
+          acc.set(update.id, update.value);
+        }
+        return acc;
+      }, new Map() as PendingSave);
+    }),
+    shareReplay({ bufferSize: 1, refCount: true })
   );
 
   // Observable to track the number of milliseconds left to allow undo of the last change
@@ -96,7 +112,7 @@ export class IndexUpdateService {
     )
   );
 
-  private readonly _$dataView: Observable<DataView> = this.indexName$.pipe(
+  public readonly dataView$: Observable<DataView> = this.indexName$.pipe(
     skipWhile((indexName) => !indexName),
     switchMap((indexName) => {
       return from(this.getDataView(indexName!));
@@ -167,7 +183,7 @@ export class IndexUpdateService {
 
     this._subscription.add(
       combineLatest([
-        this._$dataView,
+        this.dataView$,
         // Time range updates
         this.data.query.timefilter.timefilter.getTimeUpdate$().pipe(startWith(null)),
       ])
@@ -195,7 +211,7 @@ export class IndexUpdateService {
               disableWarningToasts: true,
             });
           }),
-          withLatestFrom(this._$dataView)
+          withLatestFrom(this.dataView$)
         )
         .subscribe({
           next: ([response, dataView]) => {
@@ -205,7 +221,7 @@ export class IndexUpdateService {
               return buildDataTableRecord(hit, dataView);
             });
 
-            this._$rows.next(resultRows);
+            this._rows$.next(resultRows);
           },
           error: (error) => {
             // setIsFetching(false);

@@ -26,6 +26,7 @@ import {
   type SortOrder,
 } from '@kbn/unified-data-table';
 import React, { useCallback, useMemo, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { KibanaContextExtra } from '../types';
 import { RowViewer } from './row_viewer_lazy';
 import { getCellValueRenderer } from './value_input_control';
@@ -62,6 +63,8 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   } = useKibana<KibanaContextExtra>();
 
   const { rows } = props;
+
+  const savingDocs = useObservable(indexUpdateService.savingDocs$);
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
   const [activeColumns, setActiveColumns] = useState<string[]>(
@@ -196,8 +199,8 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   );
 
   const CellValueRenderer = useMemo(() => {
-    return getCellValueRenderer(rows, editingCell, setEditingCell, onValueChange);
-  }, [rows, editingCell, setEditingCell, onValueChange]);
+    return getCellValueRenderer(rows, editingCell, savingDocs, setEditingCell, onValueChange);
+  }, [rows, editingCell, setEditingCell, onValueChange, savingDocs]);
 
   const externalCustomRenderers: CustomCellRenderer = useMemo(() => {
     return activeColumns.reduce((acc, columnId) => {

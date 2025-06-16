@@ -26,6 +26,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { type DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { PendingSave } from '../index_update_service';
 
 interface EditCellValueProps {
   value: any;
@@ -44,13 +45,26 @@ export const getCellValueRenderer =
   (
     rows: DataTableRecord[],
     editingCell: { row: number | null; col: string | null },
+    savingDocs: PendingSave | undefined,
     onEditStart: (update: { row: number | null; col: number | null }) => void,
     onValueChange: OnCellValueChange
   ): FunctionComponent<DataGridCellValueElementProps> =>
   ({ rowIndex, columnId }) => {
     const row = rows[rowIndex];
     const docId = row.raw._id;
-    const cellValue = row.flattened[columnId];
+
+    const pendingSaveValue = savingDocs?.get(docId)?.[columnId];
+
+    let cellValue;
+
+    if (pendingSaveValue) {
+      // If there is a pending save, use the value from the pending save
+      cellValue = pendingSaveValue;
+    } else if (row.flattened) {
+      // Otherwise, use the value from the row
+      cellValue = row.flattened[columnId];
+    }
+
     if (cellValue == null) {
       return null;
     }

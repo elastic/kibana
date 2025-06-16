@@ -9,13 +9,11 @@
 
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import type { FC } from 'react';
-import React, { lazy, useEffect, useMemo, useState } from 'react';
-import useMountedState from 'react-use/lib/useMountedState';
+import React, { lazy, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { EditLookupIndexContentContext, FlyoutDeps } from '../types';
 import { FlyoutFooter } from './flyout_footer';
@@ -36,32 +34,12 @@ interface IndexInfo {
 const docsCount = 10_000;
 
 export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
-  const isMounted = useMountedState();
-
-  const [columns, setColumns] = useState<DatatableColumn[]>([]);
-  const [dataView, setDataView] = useState<DataView>();
-
   // Index
   const [indexInfo, setIndexInfo] = useState<IndexInfo>();
 
   const { coreStart, ...restDeps } = deps;
 
-  useEffect(
-    function resolveDataView() {
-      deps.data.dataViews
-        .create({
-          title: props.indexName,
-          name: props.indexName,
-          // timeFieldName,
-        })
-        .then((dv) => {
-          if (isMounted()) {
-            setDataView(dv);
-          }
-        });
-    },
-    [deps.data.dataViews, isMounted, props.indexName]
-  );
+  const dataView = useObservable(deps.indexUpdateService.dataView$);
 
   const dataViewColumns = useMemo<DatatableColumn[]>(() => {
     if (!dataView) return [];
@@ -95,7 +73,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
 
   const totalHits = 10;
 
-  const rows = useObservable(deps.indexUpdateService.$rows, []);
+  const rows = useObservable(deps.indexUpdateService.rows$, []);
 
   if (!dataView || !dataViewColumns.length) return null;
 
