@@ -20,7 +20,7 @@ import { ALERTS_URL } from '../../urls/navigation';
 import { visit } from '../../tasks/navigation';
 
 export const CDR_MOCK_THIRD_PARTY_INDEX_PATTERN =
-  'security_solution-mockintegration.misconfiguration_latest';
+  'logs-cloud_security_posture.findings_latest-default';
 
 const CSP_INSIGHT_MISCONFIGURATION_TITLE = getDataTestSubjectSelector(
   'securitySolutionFlyoutInsightsMisconfigurationsTitleLink'
