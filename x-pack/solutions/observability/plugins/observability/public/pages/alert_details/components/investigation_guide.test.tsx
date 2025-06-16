@@ -39,7 +39,7 @@ describe('InvestigationGuide', () => {
 
   it('provides an empty state that will open the rule form flyout', async () => {
     const mockRule = { id: 'mock' };
-    const { getByRole } = render(
+    const { getByRole, getByText } = render(
       <InvestigationGuide
         onUpdate={() => {}}
         refetch={() => {}}
@@ -54,6 +54,8 @@ describe('InvestigationGuide', () => {
 
     // verify that clicking the add guide button opens the flyout
     await act(() => fireEvent.click(addGuideButton));
+
+    expect(getByText('Mock Flyout')).toBeInTheDocument();
   });
 
   it('renders the investigation guide when one is provided', async () => {
