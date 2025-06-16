@@ -8,6 +8,8 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { Subscription } from 'rxjs';
+import type { ILicense, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { ShareMenuManager, ShareMenuManagerStart } from './services';
 import { ShareRegistry, ShareMenuRegistrySetup } from './services';
 import { UrlService } from '../common/url_service';
@@ -55,6 +57,11 @@ export type SharePublicStart = ShareMenuManagerStart & {
    * the locator, then using the locator to navigate.
    */
   navigate(options: RedirectOptions): void;
+
+  /**
+   * method to get all available integrations
+   */
+  availableIntegrations: ShareRegistry['availableIntegrations'];
 };
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -77,6 +84,7 @@ export class SharePlugin
   private redirectManager?: RedirectManager;
   private url?: BrowserUrlService;
   private anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
+  private licenseSubscription?: Subscription;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
@@ -134,12 +142,23 @@ export class SharePlugin
     };
   }
 
-  public start(core: CoreStart): SharePublicStart {
+  public start(
+    core: CoreStart,
+    { licensing }: { licensing?: LicensingPluginStart }
+  ): SharePublicStart {
     const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
 
-    const { resolveShareItemsForShareContext } = this.shareRegistry.start({
+    let license: ILicense | undefined;
+
+    this.licenseSubscription = licensing?.license$?.subscribe((_license) => {
+      license = _license;
+    });
+
+    const { resolveShareItemsForShareContext, availableIntegrations } = this.shareRegistry.start({
       urlService: this.url!,
       anonymousAccessServiceProvider: () => this.anonymousAccessServiceProvider!(),
+      capabilities: core.application.capabilities,
+      getLicense: () => license,
     });
 
     const sharingContextMenuStart = this.shareContextMenu.start({
@@ -152,6 +171,11 @@ export class SharePlugin
       ...sharingContextMenuStart,
       url: this.url!,
       navigate: (options: RedirectOptions) => this.redirectManager!.navigate(options),
+      availableIntegrations,
     };
+  }
+
+  public stop() {
+    this.licenseSubscription?.unsubscribe();
   }
 }

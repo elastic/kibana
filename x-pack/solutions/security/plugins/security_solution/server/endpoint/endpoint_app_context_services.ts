@@ -283,14 +283,19 @@ export class EndpointAppContextService {
   /**
    * SpaceId should be defined if wanting go get back an inernal client that is scoped to a given space id
    * @param spaceId
+   * @param unscoped
    */
-  public getInternalFleetServices(spaceId?: string): EndpointInternalFleetServicesInterface {
+  public getInternalFleetServices(
+    spaceId?: string,
+    unscoped: boolean = false
+  ): EndpointInternalFleetServicesInterface {
     if (this.fleetServicesFactory === null) {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
     return this.fleetServicesFactory.asInternalUser(
-      this.experimentalFeatures.endpointManagementSpaceAwarenessEnabled ? spaceId : undefined
+      this.experimentalFeatures.endpointManagementSpaceAwarenessEnabled ? spaceId : undefined,
+      unscoped
     );
   }
 

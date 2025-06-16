@@ -45,6 +45,9 @@ export interface FleetConfigType {
       fleetAppToken?: string;
       elasticsearchAppToken?: string;
     };
+    customIntegrations?: {
+      enabled?: boolean;
+    };
   };
   spaceSettings?: Array<{
     space_id: string;

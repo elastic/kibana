@@ -27,6 +27,13 @@ test('can create a RERANK command', () => {
   );
 });
 
+test('can create a SAMPLE command', () => {
+  const node = cmd`SAMPLE 0.23 123`;
+  const text = node.toString();
+
+  expect(text).toBe('SAMPLE 0.23 123');
+});
+
 test('can create a complex STATS command', () => {
   const node = cmd`STATS count_last_hour = SUM(count_last_hour), total_visits = SUM(total_visits), bytes_transform = SUM(bytes_transform), bytes_transform_last_hour = SUM(bytes_transform_last_hour) BY extension.keyword`;
   const text = BasicPrettyPrinter.command(node);

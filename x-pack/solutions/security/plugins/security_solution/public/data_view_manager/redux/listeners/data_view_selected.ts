@@ -12,8 +12,10 @@ import type { RootState } from '../reducer';
 import { scopes } from '../reducer';
 import { selectDataViewAsync } from '../actions';
 import { sharedDataViewManagerSlice } from '../slices';
+import type { DataViewManagerScopeName } from '../../constants';
 
 export const createDataViewSelectedListener = (dependencies: {
+  scope: DataViewManagerScopeName;
   dataViews: DataViewsServicePublic;
 }) => {
   return {
@@ -22,6 +24,13 @@ export const createDataViewSelectedListener = (dependencies: {
       action: ReturnType<typeof selectDataViewAsync>,
       listenerApi: ListenerEffectAPI<RootState, Dispatch<AnyAction>>
     ) => {
+      if (dependencies.scope !== action.payload.scope) {
+        return;
+      }
+
+      // Cancel effects running for the current scope to prevent race conditions
+      listenerApi.cancelActiveListeners();
+
       let dataViewByIdError: unknown;
       let adhocDataViewCreationError: unknown;
       let dataViewById: DataViewLazy | null = null;
@@ -89,19 +98,23 @@ export const createDataViewSelectedListener = (dependencies: {
 
       const resolvedIdToUse = cachedDataViewSpec?.id || dataViewById?.id || adHocDataView?.id;
 
-      action.payload.scope.forEach((scope) => {
-        const currentScopeActions = scopes[scope].actions;
-        if (resolvedIdToUse && resolvedIdToUse) {
-          listenerApi.dispatch(currentScopeActions.setSelectedDataView(resolvedIdToUse));
-        } else if (dataViewByIdError || adhocDataViewCreationError) {
-          const err = dataViewByIdError || adhocDataViewCreationError;
-          listenerApi.dispatch(
-            currentScopeActions.dataViewSelectionError(
-              `An error occured when setting data view: ${err}`
-            )
-          );
+      const currentScopeActions = scopes[action.payload.scope].actions;
+      if (resolvedIdToUse) {
+        // NOTE: this skips data view selection if an override selection
+        // has been dispatched
+        if (listenerApi.signal.aborted) {
+          return;
         }
-      });
+
+        listenerApi.dispatch(currentScopeActions.setSelectedDataView(resolvedIdToUse));
+      } else if (dataViewByIdError || adhocDataViewCreationError) {
+        const err = dataViewByIdError || adhocDataViewCreationError;
+        listenerApi.dispatch(
+          currentScopeActions.dataViewSelectionError(
+            `An error occured when setting data view: ${err}`
+          )
+        );
+      }
     },
   };
 };

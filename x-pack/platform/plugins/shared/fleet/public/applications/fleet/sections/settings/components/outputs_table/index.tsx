@@ -11,7 +11,7 @@ import { EuiBasicTable, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIconTip } f
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { licenseService, useAuthz, useLink } from '../../../../hooks';
+import { licenseService, useAuthz, useLink, useStartServices } from '../../../../hooks';
 import type { Output } from '../../../../types';
 
 import { OutputHealth } from '../edit_output_flyout/output_health';
@@ -57,7 +57,9 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
   const authz = useAuthz();
   const { getHref } = useLink();
   const { enableSyncIntegrationsOnRemote } = ExperimentalFeaturesService.get();
-  const enableSyncIntegrations = enableSyncIntegrationsOnRemote && licenseService.isEnterprise();
+  const { cloud } = useStartServices();
+  const enableSyncIntegrations =
+    enableSyncIntegrationsOnRemote && licenseService.isEnterprise() && !cloud?.isServerlessEnabled;
 
   const columns = useMemo((): Array<EuiBasicTableColumn<Output>> => {
     return [

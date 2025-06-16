@@ -56,6 +56,26 @@
             "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-analytics-server",
+            "id": "def-server.AnalyticsClientInitContext.getTraceContext",
+            "type": "Function",
+            "tags": [],
+            "label": "getTraceContext",
+            "description": [
+              "\nA function to get trace.id"
+            ],
+            "signature": [
+              "(() => ",
+              "TraceContext",
+              " | undefined) | undefined"
+            ],
+            "path": "node_modules/@elastic/ebt/client/src/analytics_client/types.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -198,6 +218,23 @@
             ],
             "signature": [
               "EventContext"
+            ],
+            "path": "node_modules/@elastic/ebt/client/src/events/types.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-analytics-server",
+            "id": "def-server.Event.trace",
+            "type": "Object",
+            "tags": [],
+            "label": "trace",
+            "description": [
+              "\nThe trace context."
+            ],
+            "signature": [
+              "TraceContext",
+              " | undefined"
             ],
             "path": "node_modules/@elastic/ebt/client/src/events/types.d.ts",
             "deprecated": false,
@@ -872,6 +909,18 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_score/tasks/risk_scoring_task.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_score/tasks/risk_scoring_task.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_score/tasks/risk_scoring_task.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/tasks/field_retention_enrichment/field_retention_enrichment_task.ts"
               },
               {
@@ -885,18 +934,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_store_data_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_score/tasks/risk_scoring_task.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_score/tasks/risk_scoring_task.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_score/tasks/risk_scoring_task.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -2069,12 +2106,12 @@
                 "path": "src/core/packages/analytics/server-internal/src/analytics_service.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/platform/plugins/shared/cloud/common/register_cloud_deployment_id_analytics_context.ts"
-              },
-              {
                 "plugin": "licensing",
                 "path": "x-pack/platform/plugins/shared/licensing/common/register_analytics_context_provider.ts"
+              },
+              {
+                "plugin": "cloud",
+                "path": "x-pack/platform/plugins/shared/cloud/common/register_cloud_deployment_id_analytics_context.ts"
               },
               {
                 "plugin": "telemetry",
