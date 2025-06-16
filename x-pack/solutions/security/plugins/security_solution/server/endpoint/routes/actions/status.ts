@@ -72,9 +72,11 @@ export const actionStatusRequestHandler = function (
         ? [...new Set(req.query.agent_ids)]
         : [req.query.agent_ids];
 
-      await endpointContext.service
-        .getInternalFleetServices(spaceId)
-        .ensureInCurrentSpace({ agentIds: agentIDs });
+      if (endpointContext.service.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
+        await endpointContext.service
+          .getInternalFleetServices(spaceId)
+          .ensureInCurrentSpace({ agentIds: agentIDs });
+      }
 
       const response = await getPendingActionsSummary(endpointContext.service, spaceId, agentIDs);
 
