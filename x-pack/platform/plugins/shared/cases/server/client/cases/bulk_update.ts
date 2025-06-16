@@ -658,10 +658,12 @@ const createPatchCasesPayload = ({
             closedAt: updatedDt,
             createdAt: originalCase.attributes.created_at,
           }),
-          ...getInProgressInfoForUpdate({
-            status: trimmedCaseAttributes.status,
-            updatedAt: updatedDt,
-          }),
+          ...(originalCase.attributes.in_progress_at == null
+            ? getInProgressInfoForUpdate({
+                status: trimmedCaseAttributes.status,
+                updatedAt: updatedDt,
+              })
+            : {}),
           ...getTimingMetricsForUpdate({
             status: trimmedCaseAttributes.status,
             updatedAt: updatedDt,

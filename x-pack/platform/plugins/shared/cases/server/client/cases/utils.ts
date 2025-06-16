@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { uniqBy, isEmpty } from 'lodash';
+import { isEmpty, uniqBy } from 'lodash';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -24,7 +24,7 @@ import type {
   ExternalService,
   User,
 } from '../../../common/types/domain';
-import { CaseStatuses, UserActionTypes, AttachmentType } from '../../../common/types/domain';
+import { AttachmentType, CaseStatuses, UserActionTypes } from '../../../common/types/domain';
 import type {
   CasePostRequest,
   CaseRequestCustomFields,
@@ -410,12 +410,6 @@ export const getInProgressInfoForUpdate = ({
       in_progress_at: updatedAt,
     };
   }
-
-  if (status && status === CaseStatuses.open) {
-    return {
-      in_progress_at: null,
-    };
-  }
 };
 
 const checkInProgressCaseDates = (createdAtMillis: number, updatedAtMillis: number) =>
@@ -425,14 +419,19 @@ const checkClosedCaseDates = (
   createdAtMillis: number,
   updatedAtMillis: number,
   inProgressAtMillis: number | null
-): inProgressAtMillis is number =>
-  !isNaN(createdAtMillis) &&
-  !isNaN(updatedAtMillis) &&
-  inProgressAtMillis != null &&
-  !isNaN(inProgressAtMillis) &&
-  updatedAtMillis >= createdAtMillis &&
-  inProgressAtMillis >= createdAtMillis &&
-  updatedAtMillis >= inProgressAtMillis;
+) => {
+  if (isNaN(createdAtMillis) || isNaN(updatedAtMillis)) {
+    return updatedAtMillis >= createdAtMillis;
+  }
+  if (inProgressAtMillis != null) {
+    return (
+      !isNaN(inProgressAtMillis) &&
+      inProgressAtMillis >= createdAtMillis &&
+      updatedAtMillis >= inProgressAtMillis
+    );
+  }
+  return true;
+};
 
 export const getTimingMetricsForUpdate = ({
   status,
@@ -451,17 +450,12 @@ export const getTimingMetricsForUpdate = ({
   timeToInvestigate?: number | null;
   timeToResolve?: number | null;
 }):
-  | Partial<
-      Pick<
-        CaseAttributes,
-        'time_to_acknowledge' | 'time_to_investigate' | 'time_to_resolve' | 'in_progress_at'
-      >
-    >
+  | Partial<Pick<CaseAttributes, 'time_to_acknowledge' | 'time_to_investigate' | 'time_to_resolve'>>
   | undefined => {
   try {
     const createdAtMillis = new Date(createdAt).getTime();
     const updatedAtMillis = new Date(updatedAt).getTime();
-    const inProgressAtMillis = inProgressAt ? new Date(inProgressAt).getTime() : null;
+    let inProgressAtMillis = inProgressAt ? new Date(inProgressAt).getTime() : null;
 
     if (status && status === CaseStatuses['in-progress'] && !timeToAcknowledge) {
       if (
@@ -471,6 +465,8 @@ export const getTimingMetricsForUpdate = ({
       ) {
         return {
           time_to_acknowledge: Math.floor((updatedAtMillis - createdAtMillis) / 1000),
+          time_to_investigate: null,
+          time_to_resolve: null,
         };
       }
     }
@@ -480,7 +476,15 @@ export const getTimingMetricsForUpdate = ({
         updatedAt != null &&
         checkClosedCaseDates(createdAtMillis, updatedAtMillis, inProgressAtMillis)
       ) {
+        if (inProgressAtMillis == null) {
+          // When a case transitions directly from 'open' to 'closed', set inProgressAt to
+          // updatedAtMillis to reflect the implicit start of progress
+          inProgressAtMillis = updatedAtMillis;
+        }
         return {
+          ...(!timeToAcknowledge
+            ? { time_to_acknowledge: Math.floor((inProgressAtMillis - createdAtMillis) / 1000) }
+            : {}),
           ...(!timeToInvestigate
             ? { time_to_investigate: Math.floor((updatedAtMillis - inProgressAtMillis) / 1000) }
             : {}),
@@ -489,6 +493,14 @@ export const getTimingMetricsForUpdate = ({
             : {}),
         };
       }
+    }
+    if (status && status === CaseStatuses.open) {
+      // Reset all metrics when the status is re-opened
+      return {
+        time_to_acknowledge: null,
+        time_to_investigate: null,
+        time_to_resolve: null,
+      };
     }
   } catch (err) {
     // Silence date errors

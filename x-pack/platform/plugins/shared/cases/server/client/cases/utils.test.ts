@@ -1086,14 +1086,14 @@ describe('utils', () => {
       });
     });
 
-    it('returns the correct in_progress_at info when the case is reopened', async () => {
-      expect(getInProgressInfoForUpdate({ status: CaseStatuses.open, updatedAt: date })).toEqual({
-        in_progress_at: null,
-      });
+    it('should not reset in_progress_at when the case is reopened', async () => {
+      expect(
+        getInProgressInfoForUpdate({ status: CaseStatuses.open, updatedAt: date })
+      ).toBeUndefined();
     });
 
     it('returns undefined if the status is not provided', async () => {
-      expect(getInProgressInfoForUpdate({ updatedAt: date })).toBe(undefined);
+      expect(getInProgressInfoForUpdate({ updatedAt: date })).toBeUndefined();
     });
   });
 
@@ -1111,6 +1111,8 @@ describe('utils', () => {
         })
       ).toEqual({
         time_to_acknowledge: 20,
+        time_to_investigate: null,
+        time_to_resolve: null,
       });
     });
 
@@ -1126,16 +1128,31 @@ describe('utils', () => {
       ).toBeUndefined();
     });
 
-    it('should return the correct time_to_investigate and time_to_resolve when the case closes', () => {
+    it('should return the correct time_to_investigate and time_to_resolve when the case transitions from in-progress to closed', () => {
       expect(
         getTimingMetricsForUpdate({
           status: CaseStatuses.closed,
           createdAt,
           inProgressAt,
           updatedAt,
+          timeToAcknowledge: 5,
         })
       ).toEqual({
         time_to_investigate: 10,
+        time_to_resolve: 20,
+      });
+    });
+
+    it('should return the correct time_to_acknowledge, time_to_investigate and time_to_resolve when the case transitions from open to closed', () => {
+      expect(
+        getTimingMetricsForUpdate({
+          status: CaseStatuses.closed,
+          createdAt,
+          updatedAt,
+        })
+      ).toEqual({
+        time_to_acknowledge: 20,
+        time_to_investigate: 0,
         time_to_resolve: 20,
       });
     });
@@ -1213,6 +1230,7 @@ describe('utils', () => {
           updatedAt: '2022-04-11T16:00:00.056Z',
         })
       ).toEqual({
+        time_to_acknowledge: 119,
         time_to_investigate: 120,
         time_to_resolve: 239,
       });
@@ -1227,6 +1245,7 @@ describe('utils', () => {
           updatedAt: '2022-04-11T15:56:00.287Z',
         })
       ).toEqual({
+        time_to_acknowledge: 0,
         time_to_investigate: 0,
         time_to_resolve: 0,
       });
