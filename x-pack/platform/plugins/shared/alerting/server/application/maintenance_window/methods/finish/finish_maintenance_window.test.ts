@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment-timezone';
-import { Frequency } from '@kbn/rrule';
+import { Frequency } from 'rrule-es';
 import { finishMaintenanceWindow } from './finish_maintenance_window';
 import {
   savedObjectsClientMock,

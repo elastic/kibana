@@ -8,7 +8,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { Frequency } from '@kbn/rrule';
+import { Frequency } from 'rrule-es';
 import moment from 'moment';
 import { css } from '@emotion/react';
 import {

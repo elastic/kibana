@@ -10,7 +10,7 @@
 import React, { PropsWithChildren } from 'react';
 import { fireEvent, render, within, screen } from '@testing-library/react';
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { Frequency } from '@kbn/rrule';
+import { Frequency } from 'rrule-es';
 import type { RecurringSchedule } from '../types';
 import { getRecurringScheduleFormSchema } from '../schemas/recurring_schedule_form_schema';
 import { CustomRecurringSchedule } from './custom_recurring_schedule';

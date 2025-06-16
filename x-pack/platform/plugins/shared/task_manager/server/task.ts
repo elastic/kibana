@@ -11,7 +11,7 @@ import type { ObjectType, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { isNumber } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { Frequency, Weekday } from '@kbn/rrule';
+import type { Frequency, Weekday } from 'rrule-es';
 import { isErr, tryAsResult } from './lib/result_type';
 import type { Interval } from './lib/intervals';
 import { isInterval, parseIntervalAsMillisecond } from './lib/intervals';

@@ -4643,6 +4643,25 @@
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
+    },
+     {
+      "groupName": "rrule-es",
+      "matchDepNames": [
+        "rrule-es"
+      ],
+      "reviewers": [
+        "team:response-ops"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:skip",
+        "Team:ResponseOps",
+        "Feature:Alerting"
+      ],
+      "enabled": true
     }
   ],
   "customManagers": [

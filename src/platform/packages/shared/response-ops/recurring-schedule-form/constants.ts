@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Frequency } from '@kbn/rrule';
+import { Frequency } from 'rrule-es';
 import { invert, mapValues } from 'lodash';
 import moment from 'moment';
 import {

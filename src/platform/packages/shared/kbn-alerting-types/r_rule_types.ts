@@ -11,7 +11,8 @@ import type { WeekdayStr, Options } from '@kbn/rrule';
 
 export type RRuleParams = Partial<RRuleRecord> & Pick<RRuleRecord, 'dtstart' | 'tzid'>;
 
-// An iCal RRULE  to define a recurrence schedule, see https://github.com/jakubroztocil/rrule for the spec
+// An iCal RRULE  to define a recurrence schedule, see https://github.com/elastic/rrule-es for the spec
+// TODO This type is still using a deprecated spec based on python-dateutils and https://github.com/jakubroztocil/rrule
 export type RRuleRecord = Omit<Options, 'dtstart' | 'byweekday' | 'wkst' | 'until'> & {
   dtstart: string;
   byweekday?: Array<WeekdayStr | string | number> | null;

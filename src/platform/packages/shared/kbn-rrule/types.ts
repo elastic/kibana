@@ -29,6 +29,7 @@ export enum Weekday {
   SU = 7,
 }
 
+/** @deprecated Weekdays should be specified with the Weekday enum from rrule-es */
 export type WeekdayStr = 'MO' | 'TU' | 'WE' | 'TH' | 'FR' | 'SA' | 'SU';
 
 export interface IterOptions {
@@ -44,6 +45,7 @@ export interface IterOptions {
   bysecond?: number[] | null;
 }
 
+/** @deprecated Base RRule schemas on Params from rrule-es */
 export type Options = Omit<IterOptions, 'refDT'> & {
   dtstart: Date;
   freq?: Frequency;

@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment-timezone';
-import { Frequency } from '@kbn/rrule';
+import { Frequency } from 'rrule-es';
 import { generateMaintenanceWindowEvents } from './generate_maintenance_window_events';
 
 describe('generateMaintenanceWindowEvents', () => {

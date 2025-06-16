@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Moment } from 'moment';
-import { Frequency } from '@kbn/rrule';
+import { Frequency } from 'rrule-es';
 import { monthDayDate } from './utils/month_day_date';
 
 export const RECURRING_SCHEDULE_FORM_TIMEZONE = i18n.translate(

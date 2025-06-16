@@ -23,7 +23,7 @@ export type {
   IntervalSchedule,
 } from './task';
 
-export { Frequency, Weekday } from '@kbn/rrule';
+export { Frequency, Weekday } from 'rrule-es';
 
 export { TaskStatus, TaskPriority, TaskCost } from './task';
 

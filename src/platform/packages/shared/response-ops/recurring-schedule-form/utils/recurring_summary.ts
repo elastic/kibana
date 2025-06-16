@@ -9,7 +9,7 @@
 
 import type { Moment } from 'moment';
 import moment from 'moment';
-import { Frequency } from '@kbn/rrule';
+import { Frequency } from 'rrule-es';
 import { ISO_WEEKDAYS_TO_RRULE, RRULE_WEEKDAYS_TO_ISO_WEEKDAYS } from '../constants';
 import { monthDayDate } from './month_day_date';
 import { getNthByWeekday } from './get_nth_by_weekday';

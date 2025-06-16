@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment-timezone';
-import { Frequency } from '@kbn/rrule';
+import { Frequency } from 'rrule-es';
 import { updateMaintenanceWindow } from './update_maintenance_window';
 import type { UpdateMaintenanceWindowParams } from './types';
 import {

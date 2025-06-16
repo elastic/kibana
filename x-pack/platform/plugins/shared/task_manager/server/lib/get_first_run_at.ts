@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { RRule } from '@kbn/rrule';
+import { RRule } from 'rrule-es';
 import type { Logger } from '@kbn/core/server';
+import { migrateRRuleParams } from '@kbn/rrule';
 import type { RruleSchedule, TaskInstance } from '../task';
 
 export function getFirstRunAt({
@@ -25,9 +26,9 @@ export function getFirstRunAt({
   if (taskInstance.schedule?.rrule && rruleHasFixedTime(taskInstance.schedule.rrule)) {
     try {
       const rrule = new RRule({
-        ...taskInstance.schedule.rrule,
-        bysecond: [0],
-        dtstart: now,
+        ...migrateRRuleParams(taskInstance.schedule.rrule),
+        bySecond: [0],
+        dtStart: now,
       });
       return rrule.after(now)?.toISOString() || nowString;
     } catch (e) {

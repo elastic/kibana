@@ -8,7 +8,7 @@
 import moment from 'moment';
 import type { MaintenanceWindow } from '../../../../common';
 
-import { Frequency } from '@kbn/rrule';
+import { Frequency } from 'rrule-es';
 import { convertFromMaintenanceWindowToForm } from './convert_from_maintenance_window_to_form';
 
 describe('convertFromMaintenanceWindowToForm', () => {

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Frequency, WeekdayStr, Options } from '@kbn/rrule';
+import type { Frequency } from 'rrule-es';
+import type { WeekdayStr, Options } from '@kbn/rrule';
 
 export type RecurrenceFrequency = Extract<
   Frequency,

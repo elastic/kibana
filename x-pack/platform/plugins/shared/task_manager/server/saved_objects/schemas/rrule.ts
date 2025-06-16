@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Frequency } from '@kbn/rrule';
+import { Frequency } from 'rrule-es';
 import moment from 'moment-timezone';
 
 function validateTimezone(timezone: string) {

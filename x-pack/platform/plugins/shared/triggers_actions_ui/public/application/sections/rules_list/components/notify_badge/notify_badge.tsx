@@ -21,7 +21,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { RRuleParams } from '@kbn/alerting-types';
 import { Weekday } from '@kbn/rrule/types';
-import { RRule } from '@kbn/rrule';
+import { RRule } from 'rrule-es';
+import { migrateRRuleParams } from '@kbn/rrule';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { RuleSnoozeSettings, SnoozeSchedule } from '../../../../../types';
 import { i18nAbbrMonthDayDate, i18nMonthDayDate } from '../../../../lib/i18n_month_day_date';
@@ -500,13 +501,13 @@ const getSnoozeScheduleIds = (snooze: NonNullable<RuleSnoozeSettings['snoozeSche
 const isValidateRRule = (rRule: RRuleParams): boolean => {
   const { dtstart, until, wkst, byweekday, ...rest } = rRule;
 
-  const rRuleOptions = {
+  const rRuleOptions = migrateRRuleParams({
     ...rest,
     dtstart: new Date(rRule.dtstart),
     until: until ? new Date(until) : null,
     wkst: wkst ? Weekday[wkst] : null,
     byweekday: byweekday ?? null,
-  };
+  });
 
-  return RRule.isValid(rRuleOptions);
+  return !RRule.validate(rRuleOptions).length;
 };

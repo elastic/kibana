@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment-timezone';
-import { Frequency } from '@kbn/rrule';
+import { Frequency } from 'rrule-es';
 import type { RRuleRequestV1 } from '../../../r_rule';
 import type { ScheduleRequest } from '../../types/v1';
 import { DEFAULT_TIMEZONE, DURATION_REGEX, INTERVAL_FREQUENCY_REGEXP } from '../../constants';

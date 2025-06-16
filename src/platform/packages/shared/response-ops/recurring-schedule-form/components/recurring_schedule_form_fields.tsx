@@ -10,7 +10,7 @@
 import React, { memo, useMemo, useState } from 'react';
 import type { Moment } from 'moment';
 import moment from 'moment';
-import { Frequency } from '@kbn/rrule';
+import { Frequency } from 'rrule-es';
 import {
   FIELD_TYPES,
   useFormData,

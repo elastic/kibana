@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { Frequency } from '@kbn/rrule';
+import { Frequency } from 'rrule-es';
 import { has } from 'lodash';
 import { getInitialByWeekday } from '@kbn/response-ops-recurring-schedule-form/utils/get_initial_by_weekday';
 import type {

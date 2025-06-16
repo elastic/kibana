@@ -7,7 +7,8 @@
 
 import _ from 'lodash';
 import moment from 'moment-timezone';
-import { RRule, Weekday } from '@kbn/rrule';
+import { RRule, Weekday } from 'rrule-es';
+import { migrateRRuleParams } from '@kbn/rrule';
 import type { RRuleParams, DateRange } from '../../../../common';
 import type { MaintenanceWindow } from '../types';
 
@@ -27,17 +28,20 @@ export const generateMaintenanceWindowEvents = ({
   const startDate = new Date(dtstart);
   const endDate = new Date(expirationDate);
 
-  const rRuleOptions = {
+  const rRuleOptions = migrateRRuleParams({
     ...rest,
     dtstart: startDate,
     until: until ? new Date(until) : null,
     wkst: wkst ? Weekday[wkst] : null,
     byweekday: byweekday ?? null,
-  };
+  });
 
   try {
-    const recurrenceRule = new RRule(rRuleOptions);
-    const occurrenceDates = recurrenceRule.between(startDate, endDate);
+    // Maintenance window start date sometimes does not match the maintenance window schedule, e.g. if today is Friday and the
+    // user creates a schedule to run on Saturday and Sunday. Use RRule.strict to make sure we exclude the start date if it
+    // does not match the schedule
+    const recurrenceRule = RRule.strict(rRuleOptions);
+    const occurrenceDates = recurrenceRule.between(startDate, endDate, { inclusive: true });
 
     return occurrenceDates.map((date) => {
       return {
