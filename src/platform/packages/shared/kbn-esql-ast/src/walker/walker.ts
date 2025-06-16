@@ -536,7 +536,10 @@ export class Walker {
     this.walkExpression(node.value, node);
   }
 
-  public walkFunction(node: types.ESQLFunction, parent: types.ESQLProperNode | undefined): void {
+  public walkFunction(
+    node: types.ESQLFunction,
+    parent: types.ESQLProperNode | undefined = undefined
+  ): void {
     const { options } = this;
     (options.visitFunction ?? options.visitAny)?.(node, parent, this);
 
