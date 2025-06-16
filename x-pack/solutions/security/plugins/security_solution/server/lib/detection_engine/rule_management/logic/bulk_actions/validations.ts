@@ -191,6 +191,6 @@ export const dryRunValidateBulkEditRule = async ({
           ),
         "Rule type doesn't support this action. Use 'set_alert_suppression' action instead."
       ),
-    BulkActionsDryRunErrCodeEnum.UNSUPPORTED_RULE_IN_THRESHOLD_SUPPRESSION
+    BulkActionsDryRunErrCodeEnum.UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLD
   );
 };

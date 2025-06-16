@@ -118,7 +118,7 @@ describe('Component BulkEditRuleErrorsList', () => {
       "2 threshold rules can't be edited.",
     ],
     [
-      BulkActionsDryRunErrCodeEnum.UNSUPPORTED_RULE_IN_THRESHOLD_SUPPRESSION,
+      BulkActionsDryRunErrCodeEnum.UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLD,
       "2 rules can't be edited.",
     ],
   ])('should render correct message for "%s" errorCode', (errorCode, value) => {

@@ -93,7 +93,7 @@ describe('prepareSearchParams', () => {
       },
     ],
     [
-      BulkActionsDryRunErrCodeEnum.UNSUPPORTED_RULE_IN_THRESHOLD_SUPPRESSION,
+      BulkActionsDryRunErrCodeEnum.UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLD,
       {
         filter: '',
         tags: [],

@@ -100,7 +100,7 @@ const BulkEditRuleErrorItem = ({
           />
         </li>
       );
-    case BulkActionsDryRunErrCodeEnum.UNSUPPORTED_RULE_IN_THRESHOLD_SUPPRESSION:
+    case BulkActionsDryRunErrCodeEnum.UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLD:
       return (
         <li key={message}>
           <FormattedMessage

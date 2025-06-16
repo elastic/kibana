@@ -493,7 +493,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(body.attributes.errors).toHaveLength(1);
         expect(body.attributes.errors[0]).toEqual({
-          err_code: 'UNSUPPORTED_RULE_IN_THRESHOLD_SUPPRESSION',
+          err_code: 'UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLD',
           message:
             "Rule type doesn't support this action. Use 'set_alert_suppression' action instead.",
           rules: [

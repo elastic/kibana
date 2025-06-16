@@ -66,7 +66,7 @@ export const prepareSearchParams = ({
           excludeRuleTypes: [...(modifiedFilterOptions.excludeRuleTypes ?? []), 'threshold'],
         };
         break;
-      case BulkActionsDryRunErrCodeEnum.UNSUPPORTED_RULE_IN_THRESHOLD_SUPPRESSION:
+      case BulkActionsDryRunErrCodeEnum.UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLD:
         modifiedFilterOptions = {
           ...modifiedFilterOptions,
           includeRuleTypes: [...(modifiedFilterOptions.includeRuleTypes ?? []), 'threshold'],

@@ -59,7 +59,7 @@ export const BulkActionsDryRunErrCode = z.enum([
   'MANUAL_RULE_RUN_FEATURE',
   'MANUAL_RULE_RUN_DISABLED_RULE',
   'THRESHOLD_RULE_TYPE_IN_SUPPRESSION',
-  'UNSUPPORTED_RULE_IN_THRESHOLD_SUPPRESSION',
+  'UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLDHOLD',
 ]);
 export type BulkActionsDryRunErrCodeEnum = typeof BulkActionsDryRunErrCode.enum;
 export const BulkActionsDryRunErrCodeEnum = BulkActionsDryRunErrCode.enum;
