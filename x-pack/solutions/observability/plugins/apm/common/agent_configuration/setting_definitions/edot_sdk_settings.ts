@@ -67,9 +67,9 @@ export const edotSDKSettings: RawSettingDefinition[] = [
       { text: 'off', value: 'off' },
     ],
     includeAgents: [
-	'opentelemetry/java/elastic',
-	'opentelemetry/nodejs/elastic',
-	'opentelemetry/python/elastic',
+      'opentelemetry/java/elastic',
+      'opentelemetry/nodejs/elastic',
+      'opentelemetry/python/elastic',
     ],
   },
   {
