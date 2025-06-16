@@ -569,6 +569,48 @@
         },
         {
           "parentPluginId": "esql",
+          "id": "def-public.EsqlPluginStart.getInferenceEndpointsAutocomplete",
+          "type": "Function",
+          "tags": [],
+          "label": "getInferenceEndpointsAutocomplete",
+          "description": [],
+          "signature": [
+            "((taskType: ",
+            "InferenceTaskType",
+            ") => Promise<",
+            {
+              "pluginId": "@kbn/esql-types",
+              "scope": "common",
+              "docId": "kibKbnEsqlTypesPluginApi",
+              "section": "def-common.InferenceEndpointsAutocompleteResult",
+              "text": "InferenceEndpointsAutocompleteResult"
+            },
+            ">) | undefined"
+          ],
+          "path": "src/platform/plugins/shared/esql/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "esql",
+              "id": "def-public.EsqlPluginStart.getInferenceEndpointsAutocomplete.$1",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "taskType",
+              "description": [],
+              "signature": [
+                "InferenceTaskType"
+              ],
+              "path": "src/platform/plugins/shared/esql/public/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "esql",
           "id": "def-public.EsqlPluginStart.variablesService",
           "type": "Object",
           "tags": [],
@@ -592,7 +634,39 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [],
+    "setup": {
+      "parentPluginId": "esql",
+      "id": "def-server.EsqlServerPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "EsqlServerPluginSetup",
+      "description": [],
+      "path": "src/platform/plugins/shared/esql/server/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "esql",
+          "id": "def-server.EsqlServerPluginSetup.getExtensionsRegistry",
+          "type": "Function",
+          "tags": [],
+          "label": "getExtensionsRegistry",
+          "description": [],
+          "signature": [
+            "() => ",
+            "ESQLExtensionsRegistry"
+          ],
+          "path": "src/platform/plugins/shared/esql/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
   },
   "common": {
     "classes": [],

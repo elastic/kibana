@@ -38,6 +38,7 @@
     "@kbn/core-security-server-mocks",
     "@kbn/core-user-profile-server-mocks",
     "@kbn/core-feature-flags-server-mocks",
+    "@kbn/core-pricing-server-mocks",
   ],
   "exclude": [
     "target/**/*",

@@ -50,7 +50,7 @@ export const getShareAppMenuItem = ({
       isEsqlMode
     );
 
-    const { locator, notifications } = services;
+    const { locator } = services;
     const appState = stateContainer.appState.getState();
     const { timefilter } = services.data.query.timefilter;
     const timeRange = timefilter.getTime();
@@ -136,17 +136,7 @@ export const getShareAppMenuItem = ({
       },
       sharingData: {
         isTextBased: isEsqlMode,
-        locatorParams: [
-          {
-            id: locator.id,
-            params: isEsqlMode
-              ? {
-                  ...params,
-                  timeRange: timefilter.getAbsoluteTime(), // Will be used when generating CSV on server. See `filtersFromLocator`.
-                }
-              : params,
-          },
-        ],
+        locatorParams: [{ id: locator.id, params }],
         ...searchSourceSharingData,
         // CSV reports can be generated without a saved search so we provide a fallback title
         title:
@@ -159,7 +149,6 @@ export const getShareAppMenuItem = ({
       onClose: () => {
         anchorElement?.focus();
       },
-      toasts: notifications.toasts,
     });
   };
 

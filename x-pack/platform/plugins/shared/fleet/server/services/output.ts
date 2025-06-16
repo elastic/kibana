@@ -83,7 +83,10 @@ import {
 } from './secrets';
 import { findAgentlessPolicies } from './outputs/helpers';
 import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpers';
-import { canEnableSyncIntegrations } from './setup/fleet_synced_integrations';
+import {
+  canEnableSyncIntegrations,
+  createOrUpdateFleetSyncedIntegrationsIndex,
+} from './setup/fleet_synced_integrations';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
 
@@ -368,15 +371,18 @@ async function updateAgentPoliciesDataOutputId(
   }
 }
 
-function validateRemoteSyncIntegrationsCanBeEnabled(output: Partial<NewOutput>) {
-  if (
-    output.type === outputType.RemoteElasticsearch &&
-    (output.sync_integrations === true || output.sync_uninstalled_integrations === true) &&
-    !canEnableSyncIntegrations()
-  ) {
+async function remoteSyncIntegrationsCheck(
+  esClient: ElasticsearchClient,
+  output: Partial<NewOutput>
+) {
+  const syncIntegrationsEnabled =
+    output.type === outputType.RemoteElasticsearch && output.sync_integrations === true;
+  if (syncIntegrationsEnabled && !canEnableSyncIntegrations()) {
     throw new OutputUnauthorizedError(
       'Remote sync integrations require at least an Enterprise license.'
     );
+  } else if (syncIntegrationsEnabled) {
+    await createOrUpdateFleetSyncedIntegrationsIndex(esClient);
   }
 }
 
@@ -692,7 +698,7 @@ class OutputService {
       }
     }
 
-    validateRemoteSyncIntegrationsCanBeEnabled(output);
+    await remoteSyncIntegrationsCheck(esClient, output);
 
     const id = options?.id ? outputIdToUuid(options.id) : SavedObjectsUtils.generateId();
 
@@ -1118,7 +1124,7 @@ class OutputService {
         updateData.shipper = null;
       }
     }
-    validateRemoteSyncIntegrationsCanBeEnabled(data);
+    await remoteSyncIntegrationsCheck(esClient, data);
 
     // Store secret values if enabled; if not, store plain text values
     if (await isOutputSecretStorageEnabled(esClient, soClient)) {

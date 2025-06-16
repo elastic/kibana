@@ -25,11 +25,11 @@ export function RulePage() {
     application,
     notifications,
     charts,
+    serverless,
     settings,
     data,
     dataViews,
     unifiedSearch,
-    serverless,
     actionTypeRegistry,
     ruleTypeRegistry,
     chrome,
@@ -60,11 +60,24 @@ export function RulePage() {
           defaultMessage: 'Rules',
         }),
       },
-      {
-        text: i18n.translate('xpack.observability.breadcrumbs.createLinkText', {
-          defaultMessage: 'Create',
-        }),
-      },
+      ...(ruleTypeId
+        ? [
+            {
+              text: i18n.translate('xpack.observability.breadcrumbs.createLinkText', {
+                defaultMessage: 'Create',
+              }),
+            },
+          ]
+        : []),
+      ...(id
+        ? [
+            {
+              text: i18n.translate('xpack.observability.breadcrumbs.editLinkText', {
+                defaultMessage: 'Edit',
+              }),
+            },
+          ]
+        : []),
     ],
     { serverless }
   );
@@ -92,7 +105,6 @@ export function RulePage() {
         ruleTypeId={ruleTypeId}
         validConsumers={observabilityRuleCreationValidConsumers}
         multiConsumerSelection={AlertConsumers.LOGS}
-        isServerless={!!serverless}
         onCancel={() => {
           if (returnApp && returnPath) {
             application.navigateToApp(returnApp, { path: returnPath });

@@ -85,6 +85,7 @@ export function SloSparkline({ chart, data, id, isLoading, size, state }: Props)
           point: { visible: 'never' },
         }}
         xAccessor={'key'}
+        // Defaults to multi layer time axis as of Elastic Charts v70
         xScaleType={ScaleType.Time}
         yAccessors={['value']}
         yScaleType={ScaleType.Linear}

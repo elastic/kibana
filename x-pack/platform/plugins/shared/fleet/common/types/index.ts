@@ -41,6 +41,9 @@ export interface FleetConfigType {
         ca?: string;
       };
     };
+    customIntegrations?: {
+      enabled?: boolean;
+    };
   };
   spaceSettings?: Array<{
     space_id: string;
