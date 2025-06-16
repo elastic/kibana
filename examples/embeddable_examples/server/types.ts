@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  CommonEmbeddableStartContract,
-  EmbeddableStateWithType,
-  EmbeddablePersistableStateService,
-  EmbeddableRegistryDefinition,
-  EmbeddableContentManagementDefinition,
-  VersionableEmbeddableObject,
-} from './types';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/server';
+
+export type { SavedBookAttributes } from './book/saved_object/schema/v1';
+
+export interface SetupDeps {
+  embeddable: EmbeddableSetup;
+}
+
+export interface StartDeps {
+  embeddable: EmbeddableStart;
+}

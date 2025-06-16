@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  CommonEmbeddableStartContract,
-  EmbeddableStateWithType,
-  EmbeddablePersistableStateService,
-  EmbeddableRegistryDefinition,
-  EmbeddableContentManagementDefinition,
-  VersionableEmbeddableObject,
-} from './types';
+import { schema } from '@kbn/config-schema';
+
+export const savedBookAttributesSchema = schema.object({
+  bookTitle: schema.string(),
+  authorName: schema.string(),
+  numberOfPages: schema.number(),
+  bookSynopsis: schema.maybe(schema.string()),
+});

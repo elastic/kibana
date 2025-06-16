@@ -29,6 +29,7 @@ import { SAVED_BOOK_ID } from './react_embeddables/saved_book/constants';
 import { registerCreateSavedBookAction } from './react_embeddables/saved_book/create_saved_book_action';
 import { registerAddSearchPanelAction } from './react_embeddables/search/register_add_search_panel_action';
 import { registerSearchEmbeddable } from './react_embeddables/search/register_search_embeddable';
+import { bookCmDefinitions } from '../common/book/content_management/cm_services';
 
 export interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
@@ -88,6 +89,8 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
       embeddable,
       new Promise((resolve) => startServicesPromise.then(([_, startDeps]) => resolve(startDeps)))
     );
+
+    embeddable.registerEmbeddableContentManagementDefinition(bookCmDefinitions);
   }
 
   public start(core: CoreStart, deps: StartDeps) {

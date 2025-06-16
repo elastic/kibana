@@ -13,6 +13,10 @@ import type {
   PersistableState,
   PersistableStateDefinition,
 } from '@kbn/kibana-utils-plugin/common';
+import type { ObjectTransform } from '@kbn/object-versioning';
+import type { MaybePromise } from '@kbn/utility-types';
+import type { Type } from '@kbn/config-schema';
+import type { SavedObjectReference } from '@kbn/core/server';
 
 export type EmbeddableStateWithType = {
   enhancements?: SerializableRecord;
@@ -26,6 +30,49 @@ export interface EmbeddableRegistryDefinition<
 }
 
 export type EmbeddablePersistableStateService = PersistableStateService<EmbeddableStateWithType>;
+
+export type SavedObjectAttributesWithReferences<SavedObjectAttributes> = {
+  attributes: SavedObjectAttributes;
+  references?: SavedObjectReference[];
+};
+
+export type ItemAttributesWithReferences<ItemAttributes> = {
+  attributes: ItemAttributes;
+  references?: SavedObjectReference[];
+};
+
+export type VersionableEmbeddableObject<
+  SOAttributes = unknown,
+  ItemAttributes = unknown,
+  PrevItemAttributes = void,
+  NextItemAttributes = void
+> = {
+  up?: ObjectTransform<
+    ItemAttributesWithReferences<ItemAttributes>,
+    ItemAttributesWithReferences<NextItemAttributes>
+  >;
+  down?: ObjectTransform<
+    ItemAttributesWithReferences<ItemAttributes>,
+    ItemAttributesWithReferences<PrevItemAttributes>
+  >;
+  itemSchema?: Type<ItemAttributes>;
+  savedObjectToItem?: (
+    savedObject: SavedObjectAttributesWithReferences<SOAttributes>
+  ) => MaybePromise<ItemAttributesWithReferences<ItemAttributes>>;
+  itemToSavedObject?: (
+    item: ItemAttributesWithReferences<ItemAttributes>
+  ) => MaybePromise<SavedObjectAttributesWithReferences<SOAttributes>>;
+};
+
+export type EmbeddableContentManagementDefinition = {
+  id: string;
+  versions: Record<number, VersionableEmbeddableObject<any, any, any>>;
+  latestVersion: number;
+};
+
+export type EmbeddableContentManagementService = {
+  getEmbeddableMigrationDefinition: (id: string) => EmbeddableContentManagementDefinition;
+};
 
 export interface CommonEmbeddableStartContract {
   getEmbeddableFactory?: (

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { PageState } from '../types';
 
 const SAVED_STATE_SESSION_STORAGE_KEY =
@@ -24,11 +25,53 @@ export const lastSavedStateSessionStorage = {
   clear: () => {
     sessionStorage.removeItem(SAVED_STATE_SESSION_STORAGE_KEY);
   },
-  load: (): PageState => {
+  load: (embeddable: EmbeddableStart): PageState => {
     const savedState = sessionStorage.getItem(SAVED_STATE_SESSION_STORAGE_KEY);
-    return savedState ? JSON.parse(savedState) : { ...DEFAULT_STATE };
+    const { timeRange, panels } = savedState
+      ? (JSON.parse(savedState) as PageState)
+      : { ...DEFAULT_STATE };
+    const transformedPanels = panels.map((panel) => {
+      // Transform the panel state if necessary, e.g., to ensure compatibility with the latest version
+      const embeddableCmDefinitions = embeddable.getEmbeddableContentManagementDefinition(
+        panel.type
+      );
+      const { savedObjectToItem } =
+        embeddableCmDefinitions?.versions[embeddableCmDefinitions.latestVersion] ?? {};
+      if (!savedObjectToItem) return panel;
+      const newState = savedObjectToItem({
+        attributes: panel.serializedState?.rawState,
+        references: panel.serializedState?.references,
+      });
+      return {
+        ...panel,
+        serializedState: {
+          rawState: newState,
+        },
+      };
+    });
+    return { timeRange, panels: transformedPanels };
   },
-  save: (state: PageState) => {
+  save: (state: PageState, embeddable: EmbeddableStart) => {
+    const transformedPanels = state.panels.map((panel) => {
+      // Transform the panel state if necessary, e.g., to ensure compatibility with the latest version
+      const embeddableCmDefinitions = embeddable.getEmbeddableContentManagementDefinition(
+        panel.type
+      );
+      const { itemToSavedObject } =
+        embeddableCmDefinitions?.versions[embeddableCmDefinitions.latestVersion] ?? {};
+      if (!itemToSavedObject) return panel;
+      const savedState = itemToSavedObject({
+        attributes: panel.serializedState?.rawState,
+        references: panel.serializedState?.references,
+      });
+      return {
+        ...panel,
+        serializedState: {
+          rawState: savedState,
+        },
+      };
+    });
+    state.panels = transformedPanels;
     sessionStorage.setItem(SAVED_STATE_SESSION_STORAGE_KEY, JSON.stringify(state));
   },
 };
