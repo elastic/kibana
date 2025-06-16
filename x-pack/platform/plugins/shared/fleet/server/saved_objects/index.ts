@@ -1074,7 +1074,7 @@ export const getSavedObjectTypes = (
               },
             },
           },
-          latest_version: { type: 'boolean' },
+          previous_version: { type: 'keyword' },
         },
       },
       modelVersions: {
@@ -1112,9 +1112,7 @@ export const getSavedObjectTypes = (
           changes: [
             {
               type: 'mappings_addition',
-              addedMappings: {
-                latest_version: { type: 'boolean' },
-              },
+              addedMappings: {}, // Empty to add dynamic:false
             },
           ],
         },
@@ -1122,7 +1120,9 @@ export const getSavedObjectTypes = (
           changes: [
             {
               type: 'mappings_addition',
-              addedMappings: {}, // Empty to add dynamic:false
+              addedMappings: {
+                previous_version: { type: 'keyword' },
+              },
             },
           ],
         },

@@ -1249,15 +1249,15 @@
         "enabled": false,
         "type": "object"
       },
-      "latest_version": {
-        "type": "boolean"
-      },
       "name": {
         "type": "keyword"
       },
       "package_assets": {
         "dynamic": false,
         "properties": {}
+      },
+      "previous_version": {
+        "type": "keyword"
       },
       "verification_key_id": {
         "type": "keyword"

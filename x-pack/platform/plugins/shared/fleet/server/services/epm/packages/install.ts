@@ -1114,11 +1114,16 @@ export async function restartInstallation(options: {
 }) {
   const { savedObjectsClient, pkgVersion, pkgName, installSource, verificationResult } = options;
 
+  const currentInstallation = await savedObjectsClient.get<Installation>(
+    PACKAGES_SAVED_OBJECT_TYPE,
+    pkgName
+  );
   let savedObjectUpdate: Partial<Installation> = {
     install_version: pkgVersion,
     install_status: 'installing',
     install_started_at: new Date().toISOString(),
     install_source: installSource,
+    previous_version: currentInstallation.attributes.version,
   };
 
   if (verificationResult) {
@@ -1135,40 +1140,6 @@ export async function restartInstallation(options: {
     name: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
-
-  if (appContextService.getExperimentalFeatures().enablePackageRollback) {
-    const currentInstallation = await savedObjectsClient.get<Installation>(
-      PACKAGES_SAVED_OBJECT_TYPE,
-      pkgName
-    );
-    const previousVersionSO = {
-      ...currentInstallation,
-      id: `${pkgName}:prev`,
-      attributes: {
-        ...currentInstallation.attributes,
-        latest_version: false,
-      },
-    };
-    try {
-      await savedObjectsClient.update<Installation>(
-        PACKAGES_SAVED_OBJECT_TYPE,
-        `${pkgName}:prev`,
-        previousVersionSO.attributes
-      );
-    } catch (e) {
-      if (e.output.statusCode === 404) {
-        await savedObjectsClient.create<Installation>(
-          PACKAGES_SAVED_OBJECT_TYPE,
-          previousVersionSO.attributes,
-          {
-            id: `${pkgName}:prev`,
-          }
-        );
-      } else {
-        throw e;
-      }
-    }
-  }
 
   await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, savedObjectUpdate);
 }
@@ -1210,7 +1181,6 @@ export async function createInstallation(options: {
     install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
     keep_policies_up_to_date: defaultKeepPoliciesUpToDate,
     verification_status: 'unknown',
-    latest_version: true,
   };
 
   if (verificationResult) {

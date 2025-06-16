@@ -368,9 +368,9 @@
     "keep_policies_up_to_date",
     "latest_executed_state",
     "latest_install_failed_attempts",
-    "latest_version",
     "name",
     "package_assets",
+    "previous_version",
     "verification_key_id",
     "verification_status",
     "version"
