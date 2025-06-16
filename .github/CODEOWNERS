@@ -2807,6 +2807,7 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /x-pack/test/functional/apps/advanced_settings @elastic/appex-sharedux
 /src/platform/test/functional/services/monaco_editor.ts @elastic/appex-sharedux
 /x-pack/test/functional/fixtures/kbn_archiver/global_search @elastic/appex-sharedux
+/src/platform/test/api_integration/fixtures/unused_urls_task @elastic/appex-sharedux
 /x-pack/test/plugin_functional/test_suites/global_search @elastic/appex-sharedux
 /src/platform/test/plugin_functional/test_suites/shared_ux @elastic/appex-sharedux
 /src/platform/test/plugin_functional/plugins/kbn_sample_panel_action @elastic/appex-sharedux
