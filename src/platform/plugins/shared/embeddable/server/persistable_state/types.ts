@@ -7,29 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
-import type {
-  PersistableStateService,
-  PersistableState,
-  PersistableStateDefinition,
-} from '@kbn/kibana-utils-plugin/common';
+import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
+import { SerializableRecord } from '@kbn/utility-types';
 
 export type EmbeddableStateWithType = {
   enhancements?: SerializableRecord;
   type: string;
 };
 
-export interface EmbeddableRegistryDefinition<
-  P extends EmbeddableStateWithType = EmbeddableStateWithType
-> extends PersistableStateDefinition<P> {
-  id: string;
-}
-
 export type EmbeddablePersistableStateService = PersistableStateService<EmbeddableStateWithType>;
-
-export interface CommonEmbeddableStartContract {
-  getEmbeddableFactory?: (
-    embeddableFactoryId: string
-  ) => PersistableState & { isContainerType: boolean };
-  getEnhancement: (enhancementId: string) => PersistableState;
-}
