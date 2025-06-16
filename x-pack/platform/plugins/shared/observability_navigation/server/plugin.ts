@@ -22,6 +22,7 @@ import {
 } from './types';
 import { observabilityNavigationRouteRepository } from './routes';
 import { ObservabilityNavigationRouteHandlerResources } from './routes/types';
+import { navigationOverrides, createNavigationOverrides } from './saved_objects';
 
 export class ObservabilityNavigationPlugin
   implements
@@ -44,6 +45,10 @@ export class ObservabilityNavigationPlugin
     core: CoreSetup<ObservabilityNavigationPluginStartDependencies>,
     plugins: ObservabilityNavigationPluginSetupDependencies
   ) {
+    core.savedObjects.registerType(navigationOverrides);
+
+    createNavigationOverrides(core);
+
     const routeHandlerPlugins = mapValues(plugins, (value, key) => {
       return {
         setup: value,

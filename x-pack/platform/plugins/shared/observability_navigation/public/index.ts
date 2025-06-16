@@ -7,16 +7,13 @@
 
 import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import { Plugin } from './plugin';
-import {
-  ObservabilityNavigationPluginSetup,
-  ObservabilityNavigationPluginStart,
-  ObservabilityNavigationItems,
-} from './types';
+import { ObservabilityNavigationPluginSetup, ObservabilityNavigationPluginStart } from './types';
+import { ObservabilityDynamicNavigation } from '../common/types';
 
 export type {
   ObservabilityNavigationPluginSetup,
   ObservabilityNavigationPluginStart,
-  ObservabilityNavigationItems,
+  ObservabilityDynamicNavigation,
 };
 
 export const plugin: PluginInitializer<

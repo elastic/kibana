@@ -8,15 +8,13 @@
 import type { Plugin as PluginClass } from '@kbn/core/public';
 import { Observable } from 'rxjs';
 import type { FleetStartContract } from '@kbn/fleet-plugin/server/plugin';
-import { SideNav } from '../common/types';
-
-export type ObservabilityNavigationItems = SideNav | undefined;
+import { ObservabilityDynamicNavigation } from '../common/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityNavigationPluginSetup {}
 
 export interface ObservabilityNavigationPluginStart {
-  sideNav$: Observable<ObservabilityNavigationItems>;
+  sideNav$: Observable<ObservabilityDynamicNavigation[]>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import type { AppDeepLinkId, NavigationTreeDefinition, RenderAs } from '@kbn/core-chrome-browser';
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
 import { combineLatest, map, of } from 'rxjs';
-import { ObservabilityNavigationItems } from '@kbn/observability-navigation-plugin/public';
+import { ObservabilityDynamicNavigation } from '@kbn/observability-navigation-plugin/public';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 
 const title = i18n.translate(
@@ -24,18 +24,8 @@ function createNavTree({
   observabilityNav,
 }: {
   streamsAvailable?: boolean;
-  observabilityNav?: ObservabilityNavigationItems;
+  observabilityNav?: ObservabilityDynamicNavigation[];
 }) {
-  const k8sSubItems =
-    observabilityNav?.kubernetes.map(({ title: dashboardTitle, dashboardId }) => {
-      return {
-        link: (dashboardId.startsWith('kubernetes')
-          ? `metrics:${dashboardId}`
-          : `metrics:kubernetes_${dashboardId}`) as AppDeepLinkId,
-        title: dashboardTitle,
-      };
-    }) ?? [];
-
   const navTree: NavigationTreeDefinition = {
     body: [
       {
@@ -200,22 +190,19 @@ function createNavTree({
                       }
                     ),
                   },
-                  ...(k8sSubItems.length > 0
-                    ? [
-                        {
-                          id: 'kubernetes',
+                  ...(observabilityNav ?? []).map((nav) => ({
+                    ...(nav.subItems && nav.subItems.length > 0
+                      ? {
                           renderAs: 'accordion' as RenderAs,
                           defaultIsCollapsed: false,
-                          title: i18n.translate(
-                            'xpack.observability.obltNav.infrastructure.kubernetes',
-                            {
-                              defaultMessage: 'Kubernetes',
-                            }
-                          ),
-                          children: k8sSubItems,
-                        },
-                      ]
-                    : []),
+                          children: nav.subItems.map((item) => ({
+                            link: `metrics:dynamic_${item.id}` as AppDeepLinkId,
+                            title: item.title,
+                          })),
+                        }
+                      : { link: `metrics:dynamic_${nav.id}` as AppDeepLinkId }),
+                    title: nav.title,
+                  })),
                 ],
               },
               {

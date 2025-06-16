@@ -7,7 +7,7 @@
 
 import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import { Logger } from '@kbn/logging';
-import { Observable, from, shareReplay } from 'rxjs';
+import { Observable, from, shareReplay, startWith } from 'rxjs';
 import { once } from 'lodash';
 
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
@@ -17,9 +17,9 @@ import {
   ObservabilityNavigationPluginSetup,
   ObservabilityNavigationPluginStartDependencies,
   ObservabilityNavigationPluginStart,
-  ObservabilityNavigationItems,
 } from './types';
 import { ObservabilityNavigationRepositoryClient } from './api';
+import { ObservabilityDynamicNavigation } from '../common/types';
 
 export class Plugin implements ObservabilityNavigationPluginClass {
   public logger: Logger;
@@ -52,7 +52,7 @@ const createObservabilityNavigationItemsObservable = once(
   (
     repositoryClient: ObservabilityNavigationRepositoryClient,
     logger: Logger
-  ): Observable<ObservabilityNavigationItems> => {
+  ): Observable<ObservabilityDynamicNavigation[]> => {
     return from(
       repositoryClient
         .fetch('GET /internal/observability_navigation', {
@@ -65,9 +65,9 @@ const createObservabilityNavigationItemsObservable = once(
           },
           (error) => {
             logger.error(error);
-            return undefined;
+            return [];
           }
         )
-    ).pipe(shareReplay(1));
+    ).pipe(startWith([]), shareReplay(1));
   }
 );

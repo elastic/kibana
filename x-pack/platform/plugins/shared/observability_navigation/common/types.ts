@@ -5,9 +5,17 @@
  * 2.0.
  */
 
-export interface SideNavItem {
+interface NavigationItemBase {
+  id: string;
   title: string;
-  entity?: string;
+  entityType?: string;
+  dashboardId?: string;
+}
+
+export interface DynamicNavigationItem extends NavigationItemBase {
   dashboardId: string;
 }
-export type SideNav = Record<string, SideNavItem[]>;
+
+export interface ObservabilityDynamicNavigation extends NavigationItemBase {
+  subItems?: DynamicNavigationItem[];
+}

@@ -35,7 +35,8 @@ import {
 } from '@kbn/observability-shared-plugin/common';
 import type { NavigationEntry } from '@kbn/observability-shared-plugin/public';
 import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability/constants';
-import type { ObservabilityNavigationItems } from '@kbn/observability-navigation-plugin/public';
+import type { ObservabilityDynamicNavigation } from '@kbn/observability-navigation-plugin/public';
+import type { DynamicNavigationItem } from '@kbn/observability-navigation-plugin/common/types';
 import type { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
@@ -180,34 +181,18 @@ export class Plugin implements InfraClientPluginClass {
                         app: 'metrics',
                         path: '/hosts',
                       },
-                      ...(navigation?.kubernetes
-                        ? [
-                            {
-                              label: 'Kubernetes',
-                              app: 'metrics',
-                              path: '/kubernetes',
-                              deepLinks: navigation.kubernetes.map(
-                                ({ dashboardId, title, entity }) => {
-                                  const url = new URL(
-                                    entity
-                                      ? `/kubernetes/${entity.replace(/\./g, '-')}`
-                                      : `/kubernetes/overview`,
-                                    window.location.origin
-                                  );
-
-                                  url.searchParams.set('dashboardId', dashboardId);
-
-                                  const path = `${url.pathname}${url.search}`;
-                                  return {
-                                    id: dashboardId,
-                                    title: entity ?? 'Overview',
-                                    path,
-                                  };
-                                }
-                              ),
-                            },
-                          ]
-                        : []),
+                      ...(navigation?.map((nav) => ({
+                        label: getDynamicNavigationTitle(nav.title),
+                        app: 'metrics',
+                        path: getDynamicNavigationPath(nav),
+                        deepLinks: nav.subItems?.map((subNav) => {
+                          return {
+                            id: subNav.id,
+                            title: getDynamicNavigationTitle(subNav.title),
+                            path: getDynamicNavigationPath(subNav, nav.title),
+                          };
+                        }),
+                      })) ?? []),
                     ],
                   },
                 ]
@@ -264,7 +249,7 @@ export class Plugin implements InfraClientPluginClass {
       navigation,
     }: {
       metricsExplorerEnabled: boolean;
-      navigation?: ObservabilityNavigationItems;
+      navigation?: ObservabilityDynamicNavigation[];
     }): AppDeepLink[] => {
       const visibleIn: AppDeepLinkLocations[] = ['globalSearch'];
 
@@ -294,31 +279,20 @@ export class Plugin implements InfraClientPluginClass {
               },
             ]
           : []),
-        ...(navigation?.kubernetes
-          ? [
-              {
-                id: 'kubernetes',
-                title: 'Kubernetes',
-                path: '/kubernetes',
-                // visibleIn,
-                deepLinks: navigation?.kubernetes.map(({ dashboardId, title, entity }) => {
-                  const url = new URL(
-                    entity ? `/kubernetes/${entity.replace(/\./g, '-')}` : `/kubernetes/overview`,
-                    window.location.origin
-                  );
-
-                  url.searchParams.set('dashboardId', dashboardId);
-
-                  const path = `${url.pathname}${url.search}`;
-                  return {
-                    id: dashboardId,
-                    title: entity ?? 'Overview',
-                    path,
-                  };
-                }),
-              },
-            ]
-          : []),
+        ...(navigation ?? []).map((nav) => {
+          return {
+            id: `dynamic_${nav.id}`,
+            title: getDynamicNavigationTitle(nav.title),
+            path: getDynamicNavigationPath(nav),
+            deepLinks: (nav.subItems ?? []).map((subNav) => {
+              return {
+                id: `dynamic_${subNav.id}`,
+                title: getDynamicNavigationTitle(subNav.title),
+                path: getDynamicNavigationPath(subNav, nav.id),
+              };
+            }),
+          };
+        }),
         {
           id: 'settings',
           title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {
@@ -441,6 +415,31 @@ const getLogsExplorerAccessible$ = (application: CoreStart['application']) => {
     ),
     distinctUntilChanged()
   );
+};
+
+const getDynamicNavigationTitle = (title: string) => {
+  return title
+    .replace(/-/g, ' ')
+    .toLowerCase()
+    .replace(/^\w/, (c) => c.toUpperCase());
+};
+const getDynamicNavigationPath = (
+  nav: DynamicNavigationItem | ObservabilityDynamicNavigation,
+  parentTitle?: string
+) => {
+  const url = new URL(
+    `/entity/${
+      parentTitle ? `${getDynamicNavigationTitle(parentTitle)}/` : ''
+    }${getDynamicNavigationTitle(nav.title)}`,
+    window.location.origin
+  );
+  if (nav.dashboardId) {
+    url.searchParams.set('dashboardId', nav.dashboardId);
+  }
+  if (nav.entityType) {
+    url.searchParams.set('entityType', nav.entityType);
+  }
+  return `${url.pathname}${url.search}`;
 };
 
 const createNavEntryFromRoute = ({ path, title }: LogsRoute): NavigationEntry => ({
