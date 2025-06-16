@@ -317,7 +317,13 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
                   enableDocumentViewer: true,
                   enableFilters: false,
                 }}
-                columns={['@timestamp', 'message']}
+                columns={[
+                  '@timestamp',
+                  'event.dataset',
+                  'component.id',
+                  'message',
+                  'error.message',
+                ]}
               />
             ) : null}
           </EuiPanel>
