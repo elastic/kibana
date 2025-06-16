@@ -123,7 +123,7 @@ describe('extractReferences', () => {
       references: [],
     };
     expect(() => extractReferences(doc, deps)).toThrowErrorMatchingInlineSnapshot(
-      `"\\"type\\" attribute is missing from panel \\"undefined\\""`
+      `"\\"type\\" attribute is missing from panel \\"0\\""`
     );
   });
 
