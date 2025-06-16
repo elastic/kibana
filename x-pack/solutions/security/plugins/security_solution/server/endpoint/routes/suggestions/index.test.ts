@@ -40,7 +40,7 @@ import {
   SUGGESTIONS_INTERNAL_ROUTE,
 } from '../../../../common/endpoint/constants';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
-import { combineIndexWithNamespaces } from '../../../utils/index_name_parser';
+import { buildIndexNameWithNamespace } from '../../../../common/endpoint/utils/index_name_utilities';
 
 jest.mock('@kbn/unified-search-plugin/server/autocomplete/terms_enum', () => {
   return {
@@ -48,12 +48,12 @@ jest.mock('@kbn/unified-search-plugin/server/autocomplete/terms_enum', () => {
   };
 });
 
-jest.mock('../../../utils/index_name_parser', () => ({
-  combineIndexWithNamespaces: jest.fn(),
+jest.mock('../../../../common/endpoint/utils/index_name_utilities', () => ({
+  buildIndexNameWithNamespace: jest.fn(),
 }));
 
 const termsEnumSuggestionsMock = termsEnumSuggestions as jest.Mock;
-const combineIndexWithNamespacesMock = combineIndexWithNamespaces as jest.Mock;
+const buildIndexNameWithNamespaceMock = buildIndexNameWithNamespace as jest.Mock;
 
 interface CallRouteInterface {
   params: TypeOf<typeof EndpointSuggestionsSchema.params>;
@@ -91,7 +91,7 @@ describe('when calling the Suggestions route handler', () => {
 
     // Reset mocks
     termsEnumSuggestionsMock.mockClear().mockResolvedValue({});
-    combineIndexWithNamespacesMock.mockClear();
+    buildIndexNameWithNamespaceMock.mockClear();
   });
 
   describe('having right privileges', () => {
@@ -145,7 +145,7 @@ describe('when calling the Suggestions route handler', () => {
         );
 
         expect(mockResponse.ok).toHaveBeenCalled();
-        expect(combineIndexWithNamespacesMock).not.toHaveBeenCalled();
+        expect(buildIndexNameWithNamespaceMock).not.toHaveBeenCalled();
       });
     });
 
@@ -163,7 +163,7 @@ describe('when calling the Suggestions route handler', () => {
 
       it('should use space-aware index pattern successfully', async () => {
         const spaceId = 'custom-space';
-        const mockIntegrationNamespaces = ['custom-namespace'];
+        const mockIntegrationNamespaces = { endpoint: ['custom-namespace'] };
         const mockIndexPattern = 'logs-endpoint.events-custom-namespace';
 
         applyActionsEsSearchMock(mockScopedEsClient.asInternalUser);
@@ -183,8 +183,7 @@ describe('when calling the Suggestions route handler', () => {
           .fn()
           .mockReturnValue(mockFleetServices);
 
-        // Mock the combineIndexWithNamespaces function
-        combineIndexWithNamespacesMock.mockReturnValue(mockIndexPattern);
+        buildIndexNameWithNamespaceMock.mockReturnValue(mockIndexPattern);
 
         const fieldName = 'process.id';
         const mockRequest = httpServerMock.createKibanaRequest<
@@ -206,10 +205,9 @@ describe('when calling the Suggestions route handler', () => {
         expect((await mockContext.securitySolution).getSpaceId as jest.Mock).toHaveBeenCalled();
         expect(mockEndpointContext.service.getInternalFleetServices).toHaveBeenCalledWith(spaceId);
         expect(mockFleetServices.getIntegrationNamespaces).toHaveBeenCalledWith(['endpoint']);
-        expect(combineIndexWithNamespacesMock).toHaveBeenCalledWith(
+        expect(buildIndexNameWithNamespaceMock).toHaveBeenCalledWith(
           eventsIndexPattern,
-          mockIntegrationNamespaces,
-          'endpoint'
+          'custom-namespace'
         );
         expect(termsEnumSuggestionsMock).toHaveBeenNthCalledWith(
           1,
@@ -229,7 +227,7 @@ describe('when calling the Suggestions route handler', () => {
 
       it('should return bad request when space-aware index pattern retrieval fails', async () => {
         const spaceId = 'custom-space';
-        const mockIntegrationNamespaces = ['custom-namespace'];
+        const mockIntegrationNamespaces = { endpoint: ['custom-namespace'] };
 
         applyActionsEsSearchMock(mockScopedEsClient.asInternalUser);
 
@@ -248,8 +246,7 @@ describe('when calling the Suggestions route handler', () => {
           .fn()
           .mockReturnValue(mockFleetServices);
 
-        // Mock the combineIndexWithNamespaces function to return null (indicating failure)
-        combineIndexWithNamespacesMock.mockReturnValue(null);
+        buildIndexNameWithNamespaceMock.mockReturnValue(null);
 
         const mockRequest = httpServerMock.createKibanaRequest<
           TypeOf<typeof EndpointSuggestionsSchema.params>,
@@ -270,10 +267,9 @@ describe('when calling the Suggestions route handler', () => {
         expect((await mockContext.securitySolution).getSpaceId as jest.Mock).toHaveBeenCalled();
         expect(mockEndpointContext.service.getInternalFleetServices).toHaveBeenCalledWith(spaceId);
         expect(mockFleetServices.getIntegrationNamespaces).toHaveBeenCalledWith(['endpoint']);
-        expect(combineIndexWithNamespacesMock).toHaveBeenCalledWith(
+        expect(buildIndexNameWithNamespaceMock).toHaveBeenCalledWith(
           eventsIndexPattern,
-          mockIntegrationNamespaces,
-          'endpoint'
+          'custom-namespace'
         );
 
         expect(mockResponse.badRequest).toHaveBeenCalledWith({
@@ -284,7 +280,7 @@ describe('when calling the Suggestions route handler', () => {
 
       it('should handle errors during space-aware processing gracefully', async () => {
         const spaceId = 'custom-space';
-        const mockIntegrationNamespaces = ['custom-namespace'];
+        const mockIntegrationNamespaces = { endpoint: ['custom-namespace'] };
         const mockIndexPattern = 'logs-endpoint.events-custom-namespace';
 
         applyActionsEsSearchMock(mockScopedEsClient.asInternalUser);
@@ -304,8 +300,7 @@ describe('when calling the Suggestions route handler', () => {
           .fn()
           .mockReturnValue(mockFleetServices);
 
-        // Mock the combineIndexWithNamespaces function successfully
-        combineIndexWithNamespacesMock.mockReturnValue(mockIndexPattern);
+        buildIndexNameWithNamespaceMock.mockReturnValue(mockIndexPattern);
 
         // Mock termsEnumSuggestions to throw an error (this is inside the try-catch block)
         termsEnumSuggestionsMock.mockRejectedValue(new Error('Search service error'));
@@ -330,10 +325,9 @@ describe('when calling the Suggestions route handler', () => {
 
         expect(mockEndpointContext.service.getInternalFleetServices).toHaveBeenCalledWith(spaceId);
         expect(mockFleetServices.getIntegrationNamespaces).toHaveBeenCalledWith(['endpoint']);
-        expect(combineIndexWithNamespacesMock).toHaveBeenCalledWith(
+        expect(buildIndexNameWithNamespaceMock).toHaveBeenCalledWith(
           eventsIndexPattern,
-          mockIntegrationNamespaces,
-          'endpoint'
+          'custom-namespace'
         );
         expect(termsEnumSuggestionsMock).toHaveBeenCalledWith(
           expect.any(Object),

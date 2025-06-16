@@ -27,7 +27,7 @@ import {
 } from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import { errorHandler } from '../error_handler';
-import { combineIndexWithNamespaces } from '../../../utils/index_name_parser';
+import { buildIndexNameWithNamespace } from '../../../../common/endpoint/utils/index_name_utilities';
 
 export const getLogger = (endpointAppContext: EndpointAppContext): Logger => {
   return endpointAppContext.logFactory.get('suggestions');
@@ -91,13 +91,22 @@ export const getEndpointSuggestionsRequestHandler = (
           .getInternalFleetServices(spaceId)
           .getIntegrationNamespaces(['endpoint']);
 
-        const indexPattern = combineIndexWithNamespaces(
-          eventsIndexPattern,
-          integrationNamespaces,
-          'endpoint'
-        );
+        const namespaces = integrationNamespaces.endpoint;
 
-        if (indexPattern) {
+        if (namespaces && namespaces.length > 0) {
+          const indexPatterns = namespaces.map((namespace) => {
+            return buildIndexNameWithNamespace(eventsIndexPattern, namespace);
+          });
+
+          // Check if any pattern building failed
+          if (indexPatterns.some((pattern) => !pattern)) {
+            logger.error('Failed to retrieve current space index patterns');
+            return response.badRequest({
+              body: 'Failed to retrieve current space index patterns',
+            });
+          }
+
+          const indexPattern = indexPatterns.join(',');
           logger.debug(`Index pattern to be used: ${indexPattern}`);
           index = indexPattern;
         } else {

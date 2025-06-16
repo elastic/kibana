@@ -17,13 +17,13 @@ import { getEndpointAuthzInitialStateMock } from '../../../common/endpoint/servi
 import { eventsIndexPattern, METADATA_UNITED_INDEX } from '../../../common/endpoint/constants';
 import { EndpointAuthorizationError } from '../../endpoint/errors';
 import type { IndexFieldsStrategyRequestByIndices } from '@kbn/timelines-plugin/common/search_strategy';
-import { combineIndexWithNamespaces } from '../../utils/index_name_parser';
+import { buildIndexNameWithNamespace } from '../../../common/endpoint/utils/index_name_utilities';
 
-jest.mock('../../utils/index_name_parser', () => ({
-  combineIndexWithNamespaces: jest.fn(),
+jest.mock('../../../common/endpoint/utils/index_name_utilities', () => ({
+  buildIndexNameWithNamespace: jest.fn(),
 }));
 
-const combineIndexWithNamespacesMock = combineIndexWithNamespaces as jest.Mock;
+const buildIndexNameWithNamespaceMock = buildIndexNameWithNamespace as jest.Mock;
 
 describe('Endpoint fields', () => {
   const getFieldsForWildcardMock = jest.fn();
@@ -85,7 +85,7 @@ describe('Endpoint fields', () => {
     getFieldsForWildcardMock.mockClear();
     esClientSearchMock.mockClear();
     esClientFieldCapsMock.mockClear();
-    combineIndexWithNamespacesMock.mockClear();
+    buildIndexNameWithNamespaceMock.mockClear();
 
     // Reset all mocks on endpointAppContextService
     (endpointAppContextService.getActiveSpace as jest.Mock).mockClear();
@@ -120,7 +120,7 @@ describe('Endpoint fields', () => {
         );
         expect(response.indexFields).toHaveLength(0);
         expect(response.indicesExist).toEqual(indices);
-        expect(combineIndexWithNamespacesMock).not.toHaveBeenCalled();
+        expect(buildIndexNameWithNamespaceMock).not.toHaveBeenCalled();
       });
 
       it('should check index exists for endpoints list', async () => {
@@ -139,7 +139,7 @@ describe('Endpoint fields', () => {
         );
         expect(response.indexFields).toHaveLength(0);
         expect(response.indicesExist).toEqual(indices);
-        expect(combineIndexWithNamespacesMock).not.toHaveBeenCalled();
+        expect(buildIndexNameWithNamespaceMock).not.toHaveBeenCalled();
       });
     });
 
@@ -154,7 +154,7 @@ describe('Endpoint fields', () => {
 
       it('should use space-aware index pattern successfully for event filters', async () => {
         const spaceId = 'custom-space';
-        const mockIntegrationNamespaces = ['custom-namespace'];
+        const mockIntegrationNamespaces = { endpoint: ['custom-namespace'] };
         const mockIndexPattern = 'logs-endpoint.events-custom-namespace';
         const indices = [eventsIndexPattern];
         const request = {
@@ -173,8 +173,7 @@ describe('Endpoint fields', () => {
           mockFleetServices
         );
 
-        // Mock combineIndexWithNamespaces
-        combineIndexWithNamespacesMock.mockReturnValue(mockIndexPattern);
+        buildIndexNameWithNamespaceMock.mockReturnValue(mockIndexPattern);
 
         const response = await requestEndpointFieldsSearch(
           endpointAppContextService,
@@ -189,16 +188,15 @@ describe('Endpoint fields', () => {
         expect(endpointAppContextService.getActiveSpace).toHaveBeenCalledWith(deps.request);
         expect(endpointAppContextService.getInternalFleetServices).toHaveBeenCalledWith(spaceId);
         expect(mockFleetServices.getIntegrationNamespaces).toHaveBeenCalledWith(['endpoint']);
-        expect(combineIndexWithNamespacesMock).toHaveBeenCalledWith(
+        expect(buildIndexNameWithNamespaceMock).toHaveBeenCalledWith(
           eventsIndexPattern,
-          mockIntegrationNamespaces,
-          'endpoint'
+          'custom-namespace'
         );
       });
 
       it('should handle when space-aware index pattern retrieval returns null', async () => {
         const spaceId = 'custom-space';
-        const mockIntegrationNamespaces = ['custom-namespace'];
+        const mockIntegrationNamespaces = { endpoint: ['custom-namespace'] };
         const indices = [eventsIndexPattern];
         const request = {
           indices,
@@ -216,8 +214,7 @@ describe('Endpoint fields', () => {
           mockFleetServices
         );
 
-        // Mock combineIndexWithNamespaces to return null (indicating failure)
-        combineIndexWithNamespacesMock.mockReturnValue(null);
+        buildIndexNameWithNamespaceMock.mockReturnValue(null);
 
         // Since null will cause validation errors downstream, we expect an error to be thrown
         await expect(
@@ -232,10 +229,9 @@ describe('Endpoint fields', () => {
 
         expect(endpointAppContextService.getActiveSpace).toHaveBeenCalledWith(deps.request);
         expect(endpointAppContextService.getInternalFleetServices).toHaveBeenCalledWith(spaceId);
-        expect(combineIndexWithNamespacesMock).toHaveBeenCalledWith(
+        expect(buildIndexNameWithNamespaceMock).toHaveBeenCalledWith(
           eventsIndexPattern,
-          mockIntegrationNamespaces,
-          'endpoint'
+          'custom-namespace'
         );
       });
 
@@ -257,7 +253,7 @@ describe('Endpoint fields', () => {
         expect(response.indexFields).toHaveLength(0);
         expect(response.indicesExist).toEqual(indices);
         expect(endpointAppContextService.getActiveSpace).not.toHaveBeenCalled();
-        expect(combineIndexWithNamespacesMock).not.toHaveBeenCalled();
+        expect(buildIndexNameWithNamespaceMock).not.toHaveBeenCalled();
       });
     });
 
