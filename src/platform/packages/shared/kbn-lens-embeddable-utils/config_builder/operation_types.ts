@@ -1,4 +1,4 @@
-import { ValueFormatConfig } from "./types";
+import { ValueFormatConfig, LensColorConfig } from "./types";
 
 export interface LensBaseOperation {
     type: string;
@@ -8,10 +8,16 @@ export interface LensBaseOperation {
     label?: string;
     format?: ValueFormatConfig;
     scale?: 'ordinal' | 'interval' | 'ratio' | 'nominal';
+    color?: LensColorConfig;
 }
 
 export interface LensSimpleOperation extends LensBaseOperation {
     type: 'count';
+}
+
+export interface LensStaticValueOperation extends LensBaseOperation {
+    type: 'static_value';
+    value: string | number;
 }
 
 export interface LensFieldOperation extends LensBaseOperation {
@@ -26,4 +32,4 @@ export interface LensExtraOperation extends LensBaseOperation {
     param: string;
 }
 
-export type LensOperation = LensFieldOperation | LensExtraOperation | LensSimpleOperation;
+export type LensOperation = LensFieldOperation | LensExtraOperation | LensSimpleOperation | LensStaticValueOperation;

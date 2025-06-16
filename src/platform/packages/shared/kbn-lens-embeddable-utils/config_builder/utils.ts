@@ -38,6 +38,9 @@ import {
   LensLayerQueryConfig,
 } from './types';
 import { FormattedIndexPatternColumn } from '@kbn/lens-plugin/public/datasources/form_based/operations/definitions/column_types';
+import { LensOperation } from './operation_types';
+import { getFormulaColumn } from './columns';
+import { fromOperationColumn, getOperationColumn } from './columns/operation';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -57,25 +60,16 @@ export const getDefaultReferences = (
   ];
 };
 
-export function mapToFormula(layer: LensBaseLayer): FormulaValueConfig {
-  const { label, decimals, format, compactValues: compact, normalizeByUnit, value } = layer;
+export function getLayer(ACCESSOR: string, layer: LensBaseLayer, dataView: DataView, formulaAPI?: FormulaPublicApi, baseLayer?: PersistedIndexPatternLayer, prop: string = 'value'): PersistedIndexPatternLayer {
+  if (!layer || !(prop in layer)) {
+    throw new Error(`Layer or property ${prop} is not defined`);
+  }
+  const value = layer[prop] as LensLayerQuery;
+  if (value && typeof value === 'object' && !('formula' in value)) {
+    return getOperationColumn(ACCESSOR, value as LensOperation, dataView, formulaAPI, baseLayer);
+  }
 
-  const formulaFormat: FormulaValueConfig['format'] | undefined = format
-    ? {
-        id: format,
-        params: {
-          decimals: decimals ?? 2,
-          ...(!!compact ? { compact } : undefined),
-        },
-      }
-    : undefined;
-
-  return {
-    formula: typeof(value) === 'string' ? value : value?.query,
-    label,
-    timeScale: normalizeByUnit,
-    format: formulaFormat,
-  };
+  return getFormulaColumn(ACCESSOR, value as FormulaValueConfig, dataView, formulaAPI, baseLayer);
 }
 
 export function buildReferences(dataviews: Record<string, DataView>) {
@@ -343,9 +337,9 @@ export const buildQuery = (
   let formula: string | undefined;
   if ('operationType' in column && column.operationType && column.operationType !== 'formula') {
     // convert to formula
-    formula = formulaAPI!.generateFormula(column, layer, '', undefined);
-  } else if ('formula' in column && column.formula) {
-    formula = column.formula as string;
+    return fromOperationColumn(layer, accessor);
+  } else if (column.operationType === 'formula') {
+    formula = (column as any).params.formula as string;
   }
 
   const params: Partial<LensLayerQueryConfig> = {}
@@ -361,12 +355,14 @@ export const buildQuery = (
     params.format = (column as FormattedIndexPatternColumn).params?.format;
   }
 
-  if (Object.keys(params).length > 0) {
+  if (Object.keys(params).length === 0) {
     return formula;
   }
 
-  return {
-    query: formula || '',
-    ...params,
-  };
+  if (formula) {
+    return {
+      query: formula || '',
+      ...params,
+    };
+  }
 }

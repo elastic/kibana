@@ -59,6 +59,9 @@ export interface LensLayerQueryConfig {
   scale?: 'ordinal' | 'interval' | 'ratio' | 'nominal';
   format?: ValueFormatConfig;
   label?: string;
+  filter?: string;
+  color?: string | LensColorConfig;
+
 }
 
 export type LensLayerQuery = string | LensLayerQueryConfig | LensOperation;
@@ -88,15 +91,8 @@ export interface LensColorConfig {
 }
 
 export interface LensBaseLayer {
-  label?: string;
-  filter?: string;
-  format?: 'bits' | 'bytes' | 'currency' | 'duration' | 'number' | 'percent' | 'string';
-  decimals?: number;
-  normalizeByUnit?: 's' | 'm' | 'h' | 'd';
-  compactValues?: boolean;
   randomSampling?: number;
   useGlobalFilter?: boolean;
-  seriesColor?: string | LensColorConfig;
   value: LensLayerQuery;
 }
 

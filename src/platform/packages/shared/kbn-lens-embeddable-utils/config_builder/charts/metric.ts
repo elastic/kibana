@@ -16,7 +16,7 @@ import type {
   PersistedIndexPatternLayer,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { BuildDependencies, DEFAULT_LAYER_ID, LensAttributes, LensMetricConfig } from '../types';
+import { BuildDependencies, DEFAULT_LAYER_ID, LensAttributes, LensLayerQueryConfig, LensMetricConfig } from '../types';
 import {
   addLayerColumn,
   addLayerFormulaColumns,
@@ -24,12 +24,11 @@ import {
   buildQuery,
   buildReferences,
   getAdhocDataviews,
-  mapToFormula,
+  getLayer,
 } from '../utils';
 import {
   fromBreakdownColumn,
   getBreakdownColumn,
-  getFormulaColumn,
   getHistogramColumn,
   getValueColumn,
 } from '../columns';
@@ -49,7 +48,7 @@ function buildVisualizationState(config: LensMetricConfig): MetricVisualizationS
     layerId: DEFAULT_LAYER_ID,
     layerType: 'data',
     metricAccessor: ACCESSOR,
-    color: typeof(layer.seriesColor) === 'string' ? layer.seriesColor : layer.seriesColor?.color,
+    color: typeof(layer.value) !== 'string' ? (typeof(layer.value.color) === 'string' ? layer.value.color : layer.value.color?.color) : undefined,
     subtitle: layer.subtitle,
     showBar: typeof(layer.trendLine) === 'object' && layer.trendLine?.type === 'bar',
     icon: layer.icon,
@@ -132,12 +131,6 @@ function reverseBuildVisualizationState(
   
   const props: Partial<LensMetricConfig> = {};
 
-  
-
-  if (visualization.color) {
-    props.seriesColor = visualization.color;
-  }
-
   if (visualization.secondaryTrend) {
     // just static color is supported for now
     // visualization.secondaryTrend.type
@@ -175,7 +168,6 @@ function reverseBuildVisualizationState(
     title: '',
     dataset,
     value: query!,
-    seriesColor: visualization.color,
     subtitle: visualization.subtitle,
     breakdown,
     querySecondaryMetric,
@@ -191,18 +183,8 @@ function buildFormulaLayer(
   formulaAPI?: FormulaPublicApi
 ): FormBasedPersistedState['layers'] {
   const baseLayer: PersistedIndexPatternLayer = {
-    columnOrder: [ACCESSOR, HISTOGRAM_COLUMN_NAME],
-    columns: {
-      [HISTOGRAM_COLUMN_NAME]: getHistogramColumn({
-        options: {
-          sourceField: dataView.timeFieldName,
-          params: {
-            interval: 'auto',
-            includeEmptyRows: true,
-          },
-        },
-      }),
-    },
+    columnOrder: [],
+    columns: {},
     sampling: layer.randomSampling || 1,
     ignoreGlobalFilters: layer.useGlobalFilter === false,
   };
@@ -212,15 +194,15 @@ function buildFormulaLayer(
     layer_0_trendline?: PersistedIndexPatternLayer;
   } = {
     [DEFAULT_LAYER_ID]: {
-      ...getFormulaColumn(ACCESSOR, mapToFormula(layer), dataView, formulaAPI),
+      ...getLayer(ACCESSOR, layer, dataView, formulaAPI, baseLayer),
     },
     ...(layer.trendLine
       ? {
           [TRENDLINE_LAYER_ID]: {
             linkToLayers: [DEFAULT_LAYER_ID],
-            ...getFormulaColumn(
+            ...getLayer(
               `${ACCESSOR}_trendline`,
-              mapToFormula(layer),
+              layer,
               dataView,
               formulaAPI,
               baseLayer
@@ -248,11 +230,13 @@ function buildFormulaLayer(
 
   if (layer.querySecondaryMetric) {
     const columnName = getAccessorName('secondary');
-    const formulaColumn = getFormulaColumn(
+    const formulaColumn = getLayer(
       columnName,
-      { formula: typeof(layer.querySecondaryMetric) === 'string' ? layer.querySecondaryMetric : layer.querySecondaryMetric.query },
+      layer,
       dataView,
-      formulaAPI
+      formulaAPI,
+      undefined,
+      'querySecondaryMetric'
     );
 
     addLayerFormulaColumns(defaultLayer, formulaColumn);
@@ -263,11 +247,13 @@ function buildFormulaLayer(
 
   if (layer.queryMaxValue) {
     const columnName = getAccessorName('max');
-    const formulaColumn = getFormulaColumn(
+    const formulaColumn = getLayer(
       columnName,
-      { formula: typeof(layer.queryMaxValue) === 'string' ? layer.queryMaxValue : layer.queryMaxValue.query },
+      layer,
       dataView,
-      formulaAPI
+      formulaAPI,
+      undefined,
+      'queryMaxValue'
     );
 
     addLayerFormulaColumns(defaultLayer, formulaColumn);
@@ -283,16 +269,17 @@ function getValueColumns(layer: LensMetricConfig) {
   if (layer.breakdown && typeof layer.breakdown !== 'string') {
     throw new Error('breakdown must be a field name when not using index source');
   }
+
   return [
     ...(layer.breakdown
       ? [getValueColumn(getAccessorName('breakdown'), layer.breakdown as string)]
       : []),
-    getValueColumn(ACCESSOR, typeof(layer.value) === 'string' ? layer.value : layer.value.query, 'number'),
+    getValueColumn(ACCESSOR, typeof(layer.value) === 'string' ? layer.value : (layer.value as LensLayerQueryConfig).query, 'number'),
     ...(layer.queryMaxValue
-      ? [getValueColumn(getAccessorName('max'), typeof(layer.queryMaxValue) === 'string' ? layer.queryMaxValue : layer.queryMaxValue.query, 'number')]
+      ? [getValueColumn(getAccessorName('max'), typeof(layer.queryMaxValue) === 'string' ? layer.queryMaxValue : (layer.queryMaxValue as LensLayerQueryConfig).query, 'number')]
       : []),
     ...(layer.querySecondaryMetric
-      ? [getValueColumn(getAccessorName('secondary'), typeof(layer.querySecondaryMetric) === 'string' ? layer.querySecondaryMetric : layer.querySecondaryMetric.query)]
+      ? [getValueColumn(getAccessorName('secondary'), typeof(layer.querySecondaryMetric) === 'string' ? layer.querySecondaryMetric : (layer.querySecondaryMetric as LensLayerQueryConfig).query)]
       : []),
   ];
 }
