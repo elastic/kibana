@@ -203,7 +203,7 @@ export class CasePlugin
 
     if (plugins.taskManager) {
       scheduleCasesTelemetryTask(plugins.taskManager, this.logger);
-      if (this.caseConfig.analytics.index.enabled) {
+      if (this.caseConfig.analytics.index?.enabled) {
         scheduleCasesAnalyticsSyncTasks({ taskManager: plugins.taskManager, logger: this.logger });
         createCasesAnalyticsIndexes({
           esClient: core.elasticsearch.client.asInternalUser,
