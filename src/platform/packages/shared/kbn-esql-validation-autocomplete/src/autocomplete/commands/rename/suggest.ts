@@ -8,6 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { TRIGGER_SUGGESTION_COMMAND } from '../../factories';
 import { CommandSuggestParams } from '../../../definitions/types';
 
 import type { SuggestionRawDefinition } from '../../types';
@@ -18,10 +19,10 @@ export async function suggest({
   innerText,
 }: CommandSuggestParams<'rename'>): Promise<SuggestionRawDefinition[]> {
   if (/(?:rename|,)\s+\S+\s+a?$/i.test(innerText)) {
-    return [asCompletionItem];
+    return [asCompletionItem, assignCompletionItem];
   }
 
-  if (/rename(?:\s+\S+\s+as\s+\S+\s*,)*\s+\S+\s+as\s+[^\s,]+\s+$/i.test(innerText)) {
+  if (/rename(?:\s+\S+\s+(as|=)\s+\S+\s*,)*\s+\S+\s+(as|=)\s+[^\s,]+\s+$/i.test(innerText)) {
     return [pipeCompleteItem, { ...commaCompleteItem, text: ', ' }];
   }
 
@@ -40,4 +41,15 @@ const asCompletionItem: SuggestionRawDefinition = {
   label: 'AS',
   sortText: '1',
   text: 'AS ',
+};
+
+const assignCompletionItem: SuggestionRawDefinition = {
+  detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.assignDoc', {
+    defaultMessage: '=',
+  }),
+  kind: 'Reference',
+  label: '=',
+  sortText: '2',
+  text: '= ',
+  command: TRIGGER_SUGGESTION_COMMAND,
 };

@@ -26,23 +26,40 @@ describe('autocomplete.suggest', () => {
         getFieldNamesByType('any').map((field) => field + ' ')
       );
       await assertSuggestions(
+        'from a | rename field = foo, /',
+        getFieldNamesByType('any').map((field) => field + ' ')
+      );
+      await assertSuggestions(
         'from a | rename field AS foo, fie/',
+        getFieldNamesByType('any').map((field) => field + ' ')
+      );
+      await assertSuggestions(
+        'from a | rename field = foo, fie/',
         getFieldNamesByType('any').map((field) => field + ' ')
       );
     });
 
-    it('suggests AS after field', async () => {
+    it('suggests AS and = after field', async () => {
       const { assertSuggestions } = await setup();
-      await assertSuggestions('from a | rename field /', ['AS ']);
-      await assertSuggestions('from a | rename field A/', ['AS ']);
-      await assertSuggestions('from a | rename field AS foo, field2 /', ['AS ']);
-      await assertSuggestions('from a | rename field as foo , field2 /', ['AS ']);
-      await assertSuggestions('from a | rename field AS foo, field2 A/', ['AS ']);
+      await assertSuggestions('from a | rename field /', ['AS ', '= ']);
+      await assertSuggestions('from a | rename field A/', ['AS ', '= ']);
+      await assertSuggestions('from a | rename field AS foo, field2 /', ['AS ', '= ']);
+      await assertSuggestions('from a | rename field as foo , field2 /', ['AS ', '= ']);
+      await assertSuggestions('from a | rename field AS foo, field2 A/', ['AS ', '= ']);
     });
 
     it('suggests nothing after AS', async () => {
       const { assertSuggestions } = await setup();
       await assertSuggestions('from a | rename field AS /', []);
+    });
+
+    it('suggests fields after =', async () => {
+      const { assertSuggestions } = await setup();
+
+      await assertSuggestions(
+        'from a | rename field = /',
+        getFieldNamesByType('any').map((field) => field + ' ')
+      );
     });
 
     it('suggests pipe and comma after complete expression', async () => {
