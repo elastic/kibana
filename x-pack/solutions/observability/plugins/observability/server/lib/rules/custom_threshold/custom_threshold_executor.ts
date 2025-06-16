@@ -281,7 +281,10 @@ export const createCustomThresholdExecutor = ({
 
         const indexedStartedAt = start ?? startedAt.toISOString();
         scheduledActionsCount++;
-
+        const dataViewIdTitle =
+          typeof params.searchConfiguration?.index === 'string'
+            ? params.searchConfiguration?.index
+            : params.searchConfiguration?.index?.title;
         alertsClient.setAlertData({
           id: `${group}`,
           context: {
@@ -300,7 +303,7 @@ export const createCustomThresholdExecutor = ({
               return formatAlertResult(evaluation).currentValue;
             }),
             viewInAppUrl: getViewInAppUrl({
-              dataViewId: params.searchConfiguration?.index?.title ?? dataViewId,
+              dataViewId: dataViewIdTitle ?? dataViewId,
               groups,
               logsLocator,
               metrics: alertResults.length === 1 ? alertResults[0][group].metrics : [],
