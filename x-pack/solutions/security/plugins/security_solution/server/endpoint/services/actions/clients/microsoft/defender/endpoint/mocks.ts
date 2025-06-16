@@ -25,7 +25,7 @@ import { MICROSOFT_DEFENDER_ENDPOINT_LOG_INDEX_PATTERN } from '../../../../../..
 import { MicrosoftDefenderDataGenerator } from '../../../../../../../../common/endpoint/data_generators/microsoft_defender_data_generator';
 import { responseActionsClientMock, type ResponseActionsClientOptionsMock } from '../../../mocks';
 import type { NormalizedExternalConnectorClient } from '../../../../..';
-import type { MSDefenderRunScriptActionRequestBody } from '../../../../../../../../common/api/endpoint';
+import type { RunScriptActionRequestBody } from '../../../../../../../../common/api/endpoint';
 
 export interface MicrosoftDefenderActionsClientOptionsMock
   extends ResponseActionsClientOptionsMock {
@@ -259,9 +259,9 @@ const createMicrosoftGetLibraryFilesApiResponseMock =
   };
 
 const createMicrosoftRunScriptOptionsMock = (
-  overrides: Partial<MSDefenderRunScriptActionRequestBody> = {}
-): MSDefenderRunScriptActionRequestBody => {
-  const options: MSDefenderRunScriptActionRequestBody = {
+  overrides: Partial<RunScriptActionRequestBody> = {}
+): RunScriptActionRequestBody => {
+  const options: RunScriptActionRequestBody = {
     endpoint_ids: ['1-2-3'],
     comment: 'test comment',
     agent_type: 'microsoft_defender_endpoint',

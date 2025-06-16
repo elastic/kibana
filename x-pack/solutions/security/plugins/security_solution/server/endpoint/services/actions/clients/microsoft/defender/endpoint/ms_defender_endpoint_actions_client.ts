@@ -29,7 +29,6 @@ import { buildIndexNameWithNamespace } from '../../../../../../../../common/endp
 import { MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../../../../common/endpoint/service/response_actions/microsoft_defender';
 import type {
   IsolationRouteRequestBody,
-  MSDefenderRunScriptActionRequestBody,
   RunScriptActionRequestBody,
   UnisolationRouteRequestBody,
 } from '../../../../../../../../common/api/endpoint';
@@ -506,7 +505,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
   > {
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
-      MSDefenderRunScriptActionRequestBody['parameters'],
+      RunScriptActionRequestBody['parameters'],
       {},
       MicrosoftDefenderEndpointActionRequestCommonMeta
     > = {
@@ -595,7 +594,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
           case 'isolate':
           case 'unisolate':
             addResponsesToQueueIfAny(
-              await this.checkPendingIsolateReleaseRunScriptActions(
+              await this.checkPendingActions(
                 typePendingActions as Array<
                   ResponseActionsClientPendingAction<
                     undefined,
@@ -607,7 +606,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
             );
           case 'runscript':
             addResponsesToQueueIfAny(
-              await this.checkPendingIsolateReleaseRunScriptActions(
+              await this.checkPendingActions(
                 typePendingActions as Array<
                   ResponseActionsClientPendingAction<
                     undefined,
@@ -623,7 +622,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     }
   }
 
-  private async checkPendingIsolateReleaseRunScriptActions(
+  private async checkPendingActions(
     actionRequests: Array<
       ResponseActionsClientPendingAction<
         undefined,
@@ -809,7 +808,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
       this.options.endpointService.experimentalFeatures;
     if (command === 'runscript' && !microsoftDefenderEndpointRunScriptEnabled) {
       throw new ResponseActionsClientError(
-        `File downloads are not supported for ${this.agentType} agent type. Feature disabled`,
+        `File downloads are not supported for ${this.agentType} agent type. Feature disabled.`,
         400
       );
     }
@@ -867,7 +866,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
       this.options.endpointService.experimentalFeatures;
     if (command === 'runscript' && !microsoftDefenderEndpointRunScriptEnabled) {
       throw new ResponseActionsClientError(
-        `File downloads are not supported for ${this.agentType} agent type. Feature disabled`,
+        `File downloads are not supported for ${this.agentType} agent type. Feature disabled.`,
         400
       );
     }
@@ -936,7 +935,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
 
     if (!agentResponse) {
       throw new ResponseActionAgentResponseEsDocNotFound(
-        `Action ID [${actionId}] for agent ID [${actionId}] is still pending`,
+        `Action ID [${actionId}] for agent ID [${agentId}] is still pending`,
         404
       );
     }

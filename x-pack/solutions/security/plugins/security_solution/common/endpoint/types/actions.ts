@@ -13,8 +13,7 @@ import type {
   ActionStatusRequestSchema,
   KillProcessRequestBody,
   SuspendProcessRequestBody,
-  MSDefenderRunScriptActionRequestBody,
-  CrowdStrikeRunScriptActionRequestBody,
+  RunScriptActionRequestBody,
 } from '../../api/endpoint';
 
 import type {
@@ -252,9 +251,7 @@ export interface ResponseActionScanParameters {
   path: string;
 }
 
-export type ResponseActionRunScriptParameters =
-  | MSDefenderRunScriptActionRequestBody['parameters']
-  | CrowdStrikeRunScriptActionRequestBody['parameters'];
+export type ResponseActionRunScriptParameters = RunScriptActionRequestBody['parameters'];
 
 export type EndpointActionDataParameterTypes =
   | undefined

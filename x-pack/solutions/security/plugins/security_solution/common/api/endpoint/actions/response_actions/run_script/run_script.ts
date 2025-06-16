@@ -21,82 +21,70 @@ const NonEmptyString = schema.string({
 export const RunScriptActionRequestSchema = {
   body: schema.object({
     ...restBaseSchema,
-    parameters: schema.any(),
-  }),
-};
-
-export const CrowdStrikeRunScriptActionRequestSchema = {
-  body: schema.object({
-    ...restBaseSchema,
-    parameters: schema.object(
-      {
-        /**
-         * The script to run
-         */
-        raw: schema.maybe(NonEmptyString),
-        /**
-         * The path to the script on the host to run
-         */
-        hostPath: schema.maybe(NonEmptyString),
-        /**
-         * The path to the script in the cloud to run
-         */
-        cloudFile: schema.maybe(NonEmptyString),
-        /**
-         * The command line to run
-         */
-        commandLine: schema.maybe(NonEmptyString),
-        /**
-         * The max timeout value before the command is killed. Number represents milliseconds
-         */
-        timeout: schema.maybe(schema.number({ min: 1 })),
-      },
-      {
-        validate: (params) => {
-          if (!params.raw && !params.hostPath && !params.cloudFile) {
-            return 'At least one of Raw, HostPath, or CloudFile must be provided';
+    parameters: schema.oneOf([
+      // CrowdStrike schema
+      schema.conditional(
+        schema.siblingRef('agent_type'),
+        'crowdstrike',
+        schema.object(
+          {
+            /**
+             * The script to run
+             */
+            raw: schema.maybe(NonEmptyString),
+            /**
+             * The path to the script on the host to run
+             */
+            hostPath: schema.maybe(NonEmptyString),
+            /**
+             * The path to the script in the cloud to run
+             */
+            cloudFile: schema.maybe(NonEmptyString),
+            /**
+             * The command line to run
+             */
+            commandLine: schema.maybe(NonEmptyString),
+            /**
+             * The max timeout value before the command is killed. Number represents milliseconds
+             */
+            timeout: schema.maybe(schema.number({ min: 1 })),
+          },
+          {
+            validate: (params) => {
+              if (!params.raw && !params.hostPath && !params.cloudFile) {
+                return 'At least one of Raw, HostPath, or CloudFile must be provided';
+              }
+            },
           }
-        },
-      }
-    ),
-  }),
-};
-export const MSDefenderEndpointRunScriptActionRequestSchema = {
-  body: schema.object({
-    ...restBaseSchema,
-    parameters: schema.object(
-      {
-        /**
-         * The path to the script in the cloud to run
-         */
-        scriptName: schema.string({
-          minLength: 1,
-        }),
-
-        args: schema.maybe(schema.string({ minLength: 1 })),
-      },
-      {
-        validate: (params) => {
-          if (!params.scriptName) {
-            return 'ScriptName must be provided';
+        ),
+        schema.never()
+      ),
+      // Microsoft Defender Endpoint schema
+      schema.conditional(
+        schema.siblingRef('agent_type'),
+        'microsoft_defender_endpoint',
+        schema.object(
+          {
+            /**
+             * The path to the script in the cloud to run
+             */
+            scriptName: schema.string({
+              minLength: 1,
+            }),
+            args: schema.maybe(schema.string({ minLength: 1 })),
+          },
+          {
+            validate: (params) => {
+              if (!params.scriptName) {
+                return 'ScriptName must be provided';
+              }
+            },
           }
-        },
-      }
-    ),
+        ),
+        schema.never()
+      ),
+    ]),
   }),
 };
 
-export type MSDefenderRunScriptActionRequestBody = TypeOf<
-  typeof MSDefenderEndpointRunScriptActionRequestSchema.body
->;
-export type CrowdStrikeRunScriptActionRequestBody = TypeOf<
-  typeof CrowdStrikeRunScriptActionRequestSchema.body
->;
-
-type BaseRunScriptActionRequest = TypeOf<typeof RunScriptActionRequestSchema.body>;
-
-export type RunScriptActionRequestBody = Omit<BaseRunScriptActionRequest, 'parameters'> & {
-  parameters:
-    | MSDefenderRunScriptActionRequestBody['parameters']
-    | CrowdStrikeRunScriptActionRequestBody['parameters'];
-};
+export type RunScriptActionRequestBody = TypeOf<typeof RunScriptActionRequestSchema.body>;
