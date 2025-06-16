@@ -86,7 +86,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [showAgentActivityTour, setShowAgentActivityTour] = useState({ isOpen: false });
 
   // migrateAgentState
-  const [agentToMigrate, setAgentToMigrate] = useState<Agent | undefined>(undefined);
+  const [agentsToMigrate, setAgentsToMigrate] = useState<Agent[] | undefined>(undefined);
   const [migrateFlyoutOpen, setMigrateFlyoutOpen] = useState(false);
 
   const {
@@ -179,8 +179,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setSortOrder(sort!.direction);
   };
 
-  const openMigrateFlyout = (agent: Agent) => {
-    setAgentToMigrate(agent);
+  const openMigrateFlyout = (agents: Agent[]) => {
+    setAgentsToMigrate(agents);
     setMigrateFlyoutOpen(true);
   };
 
@@ -206,7 +206,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         }}
         onGetUninstallCommandClick={() => setAgentToGetUninstallCommand(agent)}
         onRequestDiagnosticsClick={() => setAgentToRequestDiagnostics(agent)}
-        onMigrateAgentClick={() => openMigrateFlyout(agent)}
+        onMigrateAgentClick={() => openMigrateFlyout([agent])}
       />
     );
   };
@@ -410,13 +410,13 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       {migrateFlyoutOpen && (
         <EuiPortal>
           <AgentMigrateFlyout
-            agents={[agentToMigrate]}
+            agents={agentsToMigrate ?? []}
             onClose={() => {
-              setAgentToMigrate(undefined);
+              setAgentsToMigrate(undefined);
               setMigrateFlyoutOpen(false);
             }}
             onSave={() => {
-              setAgentToMigrate(undefined);
+              setAgentsToMigrate(undefined);
               setMigrateFlyoutOpen(false);
               refreshAgents();
             }}
@@ -475,6 +475,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         latestAgentActionErrors={latestAgentActionErrors.length}
         sortField={sortField}
         sortOrder={sortOrder}
+        onBulkMigrateClicked={(agents: Agent[]) => openMigrateFlyout(agents)}
       />
       <EuiSpacer size="m" />
       {/* Agent total, bulk actions and status bar */}

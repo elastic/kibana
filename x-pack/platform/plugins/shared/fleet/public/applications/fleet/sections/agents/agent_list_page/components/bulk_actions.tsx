@@ -49,6 +49,7 @@ export interface Props {
   agentPolicies: AgentPolicy[];
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
+  onBulkMigrateClicked: (agents: Agent[]) => void;
 }
 
 export const AgentBulkActions: React.FunctionComponent<Props> = ({
@@ -63,6 +64,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   agentPolicies,
   sortField,
   sortOrder,
+  onBulkMigrateClicked,
 }) => {
   const licenseService = useLicense();
   const authz = useAuthz();
@@ -122,6 +124,24 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
       onClick: (event: any) => {
         setTagsPopoverButton((event.target as Element).closest('button')!);
         setIsTagAddVisible(!isTagAddVisible);
+      },
+    },
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.agentBulkActions.bulkMigrateAgents"
+          data-test-subj="agentBulkActionsBulkMigrate"
+          defaultMessage="Migrate {agentCount, plural, one {# agent} other {# agents}}"
+          values={{
+            agentCount,
+          }}
+        />
+      ),
+      icon: <EuiIcon type="cluster" size="m" />,
+      disabled: !authz.fleet.allAgents,
+      onClick: (event: any) => {
+        setIsMenuOpen(false);
+        onBulkMigrateClicked(selectedAgents);
       },
     },
     {

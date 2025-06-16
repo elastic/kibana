@@ -31,16 +31,23 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import type { MigrateSingleAgentRequest } from '../../../../../../../../common/types';
+import type {
+  MigrateSingleAgentRequest,
+  BulkMigrateAgentsRequest,
+} from '../../../../../../../../common/types';
 
 import type { Agent } from '../../../../../types';
 
-import { useMigrateSingleAgent, useStartServices } from '../../../../../hooks';
+import {
+  useMigrateSingleAgent,
+  useBulkMigrateAgents,
+  useStartServices,
+} from '../../../../../hooks';
 
 import { HeadersInput } from './headers_input';
 
 interface Props {
-  agents: Array<Agent | undefined>;
+  agents: Agent[];
   onClose: () => void;
   onSave: () => void;
 }
@@ -48,10 +55,14 @@ interface Props {
 export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose, onSave }) => {
   const { notifications } = useStartServices();
   const migrateAgent = useMigrateSingleAgent;
+  const migrateAgents = useBulkMigrateAgents;
   const [formValid, setFormValid] = React.useState(false);
   const [validClusterURL, setValidClusterURL] = React.useState(false);
-  const [formContent, setFormContent] = React.useState<MigrateSingleAgentRequest['body']>({
-    id: agents[0]?.id!,
+  const [formContent, setFormContent] = React.useState<
+    MigrateSingleAgentRequest['body'] | BulkMigrateAgentsRequest['body']
+  >({
+    id: null,
+    agents: null,
     uri: '',
     enrollment_token: '',
     settings: {},
@@ -68,7 +79,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose, onSave })
 
     const validateClusterURL = () => {
       if (formContent.uri) {
-        // check that the uri matches a valid URI schema using zod
+        // check that the uri matches a valid URI schema using URL constructor
         try {
           new URL(formContent.uri);
           setValidClusterURL(true);
@@ -86,7 +97,11 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose, onSave })
 
   const submitForm = () => {
     try {
-      migrateAgent(formContent);
+      if (agents.length === 1) {
+        migrateAgent({ ...formContent, id: agents[0].id });
+      } else {
+        migrateAgents({ ...formContent, agents: agents.map((agent) => agent.id) });
+      }
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.fleet.agentList.migrateAgentFlyout.successNotificationTitle', {
           defaultMessage: 'Agent migration initiated',
@@ -497,26 +512,29 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose, onSave })
                             }
                           />
                         </EuiFlexItem>
-                        <EuiFlexItem>
-                          <EuiSwitch
-                            label={
-                              <FormattedMessage
-                                id="xpack.fleet.agentList.migrateAgentFlyout.replaceTokenLabel"
-                                defaultMessage="Replace Token"
-                              />
-                            }
-                            checked={formContent.settings?.replace_token ?? false}
-                            onChange={(e) =>
-                              setFormContent({
-                                ...formContent,
-                                settings: {
-                                  ...formContent.settings,
-                                  replace_token: e.target.checked,
-                                },
-                              })
-                            }
-                          />
-                        </EuiFlexItem>
+                        {/* Replace token shouldnt be an option when bulk migrating */}
+                        {agents.length === 1 && (
+                          <EuiFlexItem>
+                            <EuiSwitch
+                              label={
+                                <FormattedMessage
+                                  id="xpack.fleet.agentList.migrateAgentFlyout.replaceTokenLabel"
+                                  defaultMessage="Replace Token"
+                                />
+                              }
+                              checked={formContent.settings?.replace_token ?? false}
+                              onChange={(e) =>
+                                setFormContent({
+                                  ...formContent,
+                                  settings: {
+                                    ...formContent.settings,
+                                    replace_token: e.target.checked,
+                                  },
+                                })
+                              }
+                            />
+                          </EuiFlexItem>
+                        )}
                       </EuiFlexGroup>
                     </EuiFormRow>
                   </EuiAccordion>
