@@ -314,6 +314,7 @@ export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) 
     packageInfo.source?.license,
     packageInfo.owner.type,
     packageInfo.version,
+    config?.hideDashboards,
     toggleLicenseModal,
     toggleNoticeModal,
     toggleChangelogModal,
