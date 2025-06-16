@@ -13,7 +13,10 @@ import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
 import { SavedObjectReference, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 
-import { createExtract, createInject } from './dashboard_container_references';
+import {
+  createExtract,
+  createInject,
+} from './migrate_extract_panel_references/dashboard_container_references';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { createDashboardSavedObjectTypeMigrations } from './dashboard_saved_object_migrations';
 import { DashboardDoc730ToLatest } from './migrate_to_730/types';

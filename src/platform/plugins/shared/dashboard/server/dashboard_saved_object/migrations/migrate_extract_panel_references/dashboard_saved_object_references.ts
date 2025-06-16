@@ -16,11 +16,11 @@ import {
 import {
   convertPanelMapToSavedPanels,
   convertSavedPanelsToPanelMap,
-} from './dashboard_panel_converters';
-import { DashboardAttributes } from '../schema/v1';
+} from '../dashboard_panel_converters';
+import { DashboardAttributes } from '../../schema/v1';
 import { createExtract, createInject } from './dashboard_container_references';
-import { DashboardPanelMap810 } from './types';
-import { SavedDashboardPanel } from '../schema/v2';
+import { DashboardPanelMap810 } from '../types';
+import { SavedDashboardPanel } from '../../schema/v2';
 
 export interface InjectExtractDeps {
   embeddablePersistableStateService: EmbeddablePersistableStateService;

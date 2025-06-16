@@ -15,7 +15,7 @@ import { SavedDashboardPanel } from '../schema/v2';
 import {
   getReferencesForPanelId,
   prefixReferencesFromPanel,
-} from './dashboard_container_references';
+} from './migrate_extract_panel_references/dashboard_container_references';
 import { DashboardPanelMap810, DashboardPanelState810 } from './types';
 
 export function convertSavedDashboardPanelToPanelState<PanelState extends object>(

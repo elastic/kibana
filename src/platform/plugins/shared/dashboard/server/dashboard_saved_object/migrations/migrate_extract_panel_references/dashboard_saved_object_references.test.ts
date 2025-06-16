@@ -15,7 +15,7 @@ import {
 
 import { createExtract, createInject } from './dashboard_container_references';
 import { createEmbeddablePersistableStateServiceMock } from '@kbn/embeddable-plugin/common/mocks';
-import { DashboardAttributes } from '../schema/v2';
+import { DashboardAttributes } from '../../schema/v2';
 
 const embeddablePersistableStateServiceMock = createEmbeddablePersistableStateServiceMock();
 const dashboardInject = createInject(embeddablePersistableStateServiceMock);

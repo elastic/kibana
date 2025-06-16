@@ -12,7 +12,7 @@ import {
   EmbeddablePersistableStateService,
   EmbeddableStateWithType,
 } from '@kbn/embeddable-plugin/common';
-import { ParsedDashboardAttributesWithType810 } from './types';
+import { ParsedDashboardAttributesWithType810 } from '../types';
 
 export const getReferencesForPanelId = (id: string, references: Reference[]): Reference[] => {
   const prefix = `${id}:`;
