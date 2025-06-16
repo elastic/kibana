@@ -9,7 +9,7 @@ import type { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import { action } from '@storybook/addon-actions';
 import { TraceWaterfall } from '.';
-import { traceOtelSample } from './mock/trace_otel_sample';
+import { traceUnprocessedOtelSample } from './mock/trace_unprocessed_otel_sample';
 import { traceSample } from './mock/trace_sample';
 import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
@@ -146,7 +146,7 @@ export const Example: StoryFn<{}> = () => {
   );
 };
 export const HiddenAccordionExample: StoryFn<{}> = () => {
-  const traceItems = traceOtelSample.map(
+  const traceItems = traceUnprocessedOtelSample.map(
     (item) =>
       ({
         id: item._source.span_id,
@@ -168,7 +168,7 @@ export const HiddenAccordionExample: StoryFn<{}> = () => {
   );
 };
 export const OpenTelemetryExample: StoryFn<{}> = () => {
-  const traceItems = traceOtelSample.map(
+  const traceItems = traceUnprocessedOtelSample.map(
     (item) =>
       ({
         id: item._source.span_id,

@@ -140,7 +140,7 @@ const focusedTraceRoute = createApmServerRoute({
     const { traceId, docId } = params.path;
     const { start, end } = params.query;
 
-    const [traceItems, traceSummaryCount] = await Promise.all([
+    const [traceItems, traceSummaryCount, unifiedErrors] = await Promise.all([
       getUnifiedTraceItems({
         apmEventClient,
         traceId,
@@ -150,10 +150,10 @@ const focusedTraceRoute = createApmServerRoute({
         config,
       }),
       getTraceSummaryCount({ apmEventClient, start, end, traceId }),
+      getUnifiedTraceErrors({ apmEventClient, traceId, start, end }),
     ]);
 
     const focusedTraceItems = buildFocusedTraceItems({ traceItems, docId });
-    const unifiedErrors = await getUnifiedTraceErrors({ apmEventClient, traceId, start, end });
 
     return {
       traceItems: focusedTraceItems,

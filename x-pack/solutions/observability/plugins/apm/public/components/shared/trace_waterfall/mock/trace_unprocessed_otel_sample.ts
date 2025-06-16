@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const traceOtelSample = [
+export const traceUnprocessedOtelSample = [
   {
     _index: '.ds-traces-generic.otel-default-2025.05.21-000001',
     _id: 'AZb0Lhl-A0VBFcVxuxV1',
