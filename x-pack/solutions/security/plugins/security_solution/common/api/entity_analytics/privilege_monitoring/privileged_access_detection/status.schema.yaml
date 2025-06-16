@@ -24,10 +24,10 @@ paths:
                 properties:
                   packageInstallationStatus:
                     type: string
-                    enum: [COMPLETE, INCOMPLETE]
+                    enum: [complete, incomplete]
                   mlModuleSetupStatus:
                     type: string
-                    enum: [COMPLETE, INCOMPLETE]
+                    enum: [complete, incomplete]
                   jobs:
                     type: array
                     items:
