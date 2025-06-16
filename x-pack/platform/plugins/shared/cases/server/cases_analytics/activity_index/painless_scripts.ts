@@ -12,35 +12,6 @@ export const CAI_ACTIVITY_INDEX_SCRIPT_ID = `cai_activity_script_${CAI_ACTIVITY_
 export const CAI_ACTIVITY_INDEX_SCRIPT: StoredScript = {
   lang: 'painless',
   source: `
-    String statusDecoder(def x) {
-      if (x == 0) {
-        return "open";
-      }
-      if (x == 10) {
-        return "in-progress";
-      }
-      if (x == 20) {
-        return "closed";
-      }
-      return "";
-    }
-
-    String severityDecoder(def x) {
-      if (x == 0) {
-        return "low"
-      }
-      if (x == 10) {
-        return "medium"
-      }
-      if (x == 20) {
-        return "high"
-      }
-      if (x == 30) {
-        return "critical"
-      }
-      return ""
-    }
-
     def source = [:];
     source.putAll(ctx._source);
     ctx._source.clear();
@@ -61,22 +32,22 @@ export const CAI_ACTIVITY_INDEX_SCRIPT: StoredScript = {
         ctx._source.created_by.email = source["cases-user-actions"].created_by.email;
     }
 
-    if (source["cases-user-actions"].type != "create_case" && source["cases-user-actions"].payload != null) {
+    if (source["cases-user-actions"].payload != null) {
       ctx._source.payload = new HashMap();
 
-      if (source["cases-user-actions"].payload.severity != null) {
+      if (source["cases-user-actions"].type == "severity" && source["cases-user-actions"].payload.severity != null) {
         ctx._source.payload.severity = source["cases-user-actions"].payload.severity;
       }
 
-      if (source["cases-user-actions"].payload.category != null) {
+      if (source["cases-user-actions"].type == "category" && source["cases-user-actions"].payload.category != null) {
         ctx._source.payload.category = source["cases-user-actions"].payload.category;
       }
 
-      if (source["cases-user-actions"].payload.status != null) {
+      if (source["cases-user-actions"].type == "status" && source["cases-user-actions"].payload.status != null) {
         ctx._source.payload.status = source["cases-user-actions"].payload.status;
       }
 
-      if (source["cases-user-actions"].payload.tags != null) {
+      if (source["cases-user-actions"].type == "tags" && source["cases-user-actions"].payload.tags != null) {
         ctx._source.payload.tags = source["cases-user-actions"].payload.tags;
       }
     }

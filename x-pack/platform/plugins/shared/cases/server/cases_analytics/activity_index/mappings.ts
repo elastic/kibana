@@ -17,7 +17,7 @@ export const CAI_ACTIVITY_INDEX_MAPPINGS: MappingTypeMapping = {
       type: 'keyword',
     },
     action: {
-      type: 'text',
+      type: 'keyword',
     },
     type: {
       type: 'keyword',
