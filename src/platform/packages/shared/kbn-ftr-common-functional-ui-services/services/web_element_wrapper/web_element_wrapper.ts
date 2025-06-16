@@ -39,7 +39,6 @@ export class WebElementWrapper {
   private By = By;
   private Keys = Key;
   public isChromium: boolean;
-  find: any;
 
   public static create(
     webElement: WebElement | WebElementWrapper,

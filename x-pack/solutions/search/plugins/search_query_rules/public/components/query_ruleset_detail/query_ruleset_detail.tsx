@@ -336,7 +336,7 @@ export const QueryRulesetDetail: React.FC = () => {
                     id={splitButtonPopoverActionsId}
                     button={
                       <EuiButtonIcon
-                        data-test-subj="searchQueryRulesQueryRulesetDetailButton"
+                        data-test-subj="searchQueryRulesQueryRulesetActionsButton"
                         size="m"
                         iconType="boxesVertical"
                         aria-label="More"

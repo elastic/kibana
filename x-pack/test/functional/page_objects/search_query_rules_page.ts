@@ -35,11 +35,34 @@ export function SearchQueryRulesPageProvider({ getService }: FtrProviderContext)
         await testSubjects.click(this.TEST_IDS.CREATE_QUERY_RULES_SET_MODAL_CREATE_BUTTON);
       },
     },
+    QueryRulesDeleteRulesetModal: {
+      TEST_IDS: {
+        DELETE_QUERY_RULES_RULESET_MODAL_DELETE_BUTTON:
+          'searchRulesetDeleteRulesetModalDeleteButton',
+        DELETE_QUERY_RULES_RULESET_MODAL_ACKNOWLEDGE_BUTTON: 'confirmDeleteRulesetCheckbox',
+        DELETE_QUERY_RULES_RULESET_MODAL_CANCEL_BUTTON:
+          'searchRulesetDeleteRulesetModalCancelButton',
+      },
+      async clickDeleteButton() {
+        await testSubjects.click(this.TEST_IDS.DELETE_QUERY_RULES_RULESET_MODAL_DELETE_BUTTON);
+      },
+      async clickAcknowledgeButton() {
+        await testSubjects.click(this.TEST_IDS.DELETE_QUERY_RULES_RULESET_MODAL_ACKNOWLEDGE_BUTTON);
+      },
+      async clickCancelButton() {
+        await testSubjects.click(this.TEST_IDS.DELETE_QUERY_RULES_RULESET_MODAL_CANCEL_BUTTON);
+      },
+      async clickConfirmDeleteModal() {
+        await testSubjects.click('confirmModalConfirmButton');
+      },
+    },
     QueryRulesDetailPage: {
       TEST_IDS: {
         RULESET_DETAILS_PAGE_BACK_BUTTON: 'queryRulesetDetailBackButton',
         RULESET_DETAILS_PAGE_SAVE_BUTTON: 'queryRulesetDetailHeaderSaveButton',
         RULESET_DETAILS_PAGE_HEADER: 'queryRulesetDetailHeader',
+        RULESET_DETAILS_PAGE_ACTIONS_BUTTON: 'searchQueryRulesQueryRulesetActionsButton',
+        RULESET_DETAILS_PAGE_DELETE_BUTTON: 'queryRulesetDetailDeleteButton',
       },
       async expectQueryRulesDetailPageNavigated(name: string) {
         const h1Element = await find.byCssSelector(
@@ -56,17 +79,78 @@ export function SearchQueryRulesPageProvider({ getService }: FtrProviderContext)
       async expectQueryRulesDetailPageSaveButtonToExist() {
         await testSubjects.existOrFail(this.TEST_IDS.RULESET_DETAILS_PAGE_SAVE_BUTTON);
       },
+      async clickQueryRulesDetailPageActionsButton() {
+        await testSubjects.click(this.TEST_IDS.RULESET_DETAILS_PAGE_ACTIONS_BUTTON);
+      },
+      async clickQueryRulesDetailPageDeleteButton() {
+        await testSubjects.click(this.TEST_IDS.RULESET_DETAILS_PAGE_DELETE_BUTTON);
+      },
     },
     QueryRulesManagementPage: {
       TEST_IDS: {
+        QUERY_RULES_RULESETS_TABLE: 'queryRulesSetTable',
+        QUERY_RULES_ITEM_NAME: 'queryRuleSetName',
+        QUERY_RULES_ITEM_RULE_COUNT: 'queryRuleSetItemRuleCount',
+        QUERY_RULES_ITEM_ACTIONS_DELETE_BUTTON: 'queryRulesSetDeleteButton',
         CREATE_RULESET_BUTTON: 'queryRulesOverviewCreateButton',
-        QUERY_RULES_SET_TABLE: 'queryRulesSetTable',
+        PAGINATION_NEXT_BUTTON: 'pagination-button-next',
+        PAGINATION_PREVIOUS_BUTTON: 'pagination-button-previous',
       },
       async clickCreateQueryRulesRulesetButton() {
         await testSubjects.click(this.TEST_IDS.CREATE_RULESET_BUTTON);
       },
       async expectQueryRulesTableToExist() {
-        await testSubjects.existOrFail(this.TEST_IDS.QUERY_RULES_SET_TABLE);
+        await testSubjects.existOrFail(this.TEST_IDS.QUERY_RULES_RULESETS_TABLE);
+      },
+      async getQueryRulesRulesetsList() {
+        const table = await testSubjects.find(this.TEST_IDS.QUERY_RULES_RULESETS_TABLE);
+        const allRows = await table
+          .findByTagName('tbody')
+          .then((tbody) => tbody.findAllByTagName('tr'));
+
+        return Promise.all(
+          allRows.map(async (row) => {
+            const $ = await row.parseDomContent();
+            return {
+              name: $.findTestSubject(this.TEST_IDS.QUERY_RULES_ITEM_NAME).text().trim(),
+              ruleCount: Number(
+                $.findTestSubject(this.TEST_IDS.QUERY_RULES_ITEM_RULE_COUNT).text()
+              ),
+            };
+          })
+        );
+      },
+      async clickRuleset(name: string) {
+        // find rulesets with name and click on it
+        const table = await testSubjects.findAll(this.TEST_IDS.QUERY_RULES_ITEM_NAME);
+        for (const item of table) {
+          const text = await item.getVisibleText();
+          if (text === name) {
+            await item.click();
+            return;
+          }
+        }
+        throw new Error(`Ruleset with name "${name}" not found`);
+      },
+      async clickDeleteRulesetRow(index: number) {
+        const table = await testSubjects.find(this.TEST_IDS.QUERY_RULES_RULESETS_TABLE);
+        const allRows = await table
+          .findByTagName('tbody')
+          .then((tbody) => tbody.findAllByTagName('tr'));
+        const deleteButton = await allRows[index].findByTestSubject(
+          this.TEST_IDS.QUERY_RULES_ITEM_ACTIONS_DELETE_BUTTON
+        );
+        await deleteButton.click();
+      },
+      async expectQueryRulesListPageComponentsToExist() {
+        await testSubjects.existOrFail(this.TEST_IDS.QUERY_RULES_RULESETS_TABLE);
+        await testSubjects.existOrFail(this.TEST_IDS.QUERY_RULES_ITEM_RULE_COUNT);
+      },
+      async clickPaginationNext() {
+        await testSubjects.click(this.TEST_IDS.PAGINATION_NEXT_BUTTON);
+      },
+      async clickPaginationPrevious() {
+        await testSubjects.click(this.TEST_IDS.PAGINATION_PREVIOUS_BUTTON);
       },
     },
   };

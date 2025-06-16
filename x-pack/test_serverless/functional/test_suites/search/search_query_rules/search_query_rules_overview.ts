@@ -19,6 +19,47 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const es = getService('es');
   const kibanaServer = getService('kibanaServer');
 
+  // Helper function to create a test ruleset via ES API
+  const createTestRuleset = async (rulesetId: string) => {
+    await es.transport.request({
+      path: `_query_rules/${rulesetId}`,
+      method: 'PUT',
+      body: {
+        rules: [
+          {
+            rule_id: 'rule1',
+            type: 'pinned',
+            criteria: [
+              {
+                type: 'fuzzy',
+                metadata: 'query_string',
+                values: ['puggles', 'pugs'],
+              },
+              {
+                type: 'exact',
+                metadata: 'user_country',
+                values: ['us'],
+              },
+            ],
+            actions: {
+              docs: [
+                {
+                  _index: 'my-index-000001',
+                  _id: 'id1',
+                },
+                {
+                  _index: 'my-index-000002',
+                  _id: 'id2',
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+    await pageObjects.searchQueryRules.QueryRulesManagementPage.expectQueryRulesTableToExist();
+  };
+
   describe('Serverless Query Rules Overview', function () {
     before(async () => {
       await kibanaServer.uiSettings.update({ 'queryRules:queryRulesEnabled': 'true' });
@@ -52,47 +93,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
     describe('Adding a new ruleset in a non-empty deployment', () => {
-      it('is rulesets management page loaded successfully', async () => {
-        await es.transport.request({
-          path: '_query_rules/my-test-ruleset',
-          method: 'PUT',
-          body: {
-            rules: [
-              {
-                rule_id: 'rule1',
-                type: 'pinned',
-                criteria: [
-                  {
-                    type: 'fuzzy',
-                    metadata: 'query_string',
-                    values: ['puggles', 'pugs'],
-                  },
-                  {
-                    type: 'exact',
-                    metadata: 'user_country',
-                    values: ['us'],
-                  },
-                ],
-                actions: {
-                  docs: [
-                    {
-                      _index: 'my-index-000001',
-                      _id: 'id1',
-                    },
-                    {
-                      _index: 'my-index-000002',
-                      _id: 'id2',
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        });
-        await pageObjects.searchQueryRules.QueryRulesManagementPage.expectQueryRulesTableToExist();
+      it('is rulesets management page loaded with existing ruleset successfully', async () => {
+        createTestRuleset('my-test-ruleset');
       });
 
-      it('should be able to create a new ruleset on top of an exidsting one', async () => {
+      it('should be able to create a new ruleset on top of an existing one', async () => {
         await pageObjects.searchQueryRules.QueryRulesManagementPage.clickCreateQueryRulesRulesetButton();
         await pageObjects.searchQueryRules.QueryRulesCreateRulesetModal.setQueryRulesSetName(
           'my-test-ruleset-2'
@@ -112,6 +117,26 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           path: '_query_rules/my-test-ruleset-2',
           method: 'DELETE',
         });
+      });
+    });
+    describe('Deleting a query ruleset', () => {
+      it('is rulesets management page loaded with existing ruleset successfully - pass 1', async () => {
+        createTestRuleset('my-test-ruleset');
+      });
+      it('should be able to delete an existing ruleset from the ruleset details page', async () => {
+        await pageObjects.searchQueryRules.QueryRulesManagementPage.clickRuleset('my-test-ruleset');
+        await pageObjects.searchQueryRules.QueryRulesDetailPage.clickQueryRulesDetailPageActionsButton();
+        await pageObjects.searchQueryRules.QueryRulesDetailPage.clickQueryRulesDetailPageDeleteButton();
+        await pageObjects.searchQueryRules.QueryRulesDeleteRulesetModal.clickAcknowledgeButton();
+        await pageObjects.searchQueryRules.QueryRulesDeleteRulesetModal.clickConfirmDeleteModal();
+      });
+      it('is rulesets management page loaded with existing ruleset successfully - pass 2', async () => {
+        createTestRuleset('my-test-ruleset');
+      });
+      it('should be able to delete an existing ruleset from the ruleset management page', async () => {
+        await pageObjects.searchQueryRules.QueryRulesManagementPage.clickDeleteRulesetRow(0);
+        await pageObjects.searchQueryRules.QueryRulesDeleteRulesetModal.clickAcknowledgeButton();
+        await pageObjects.searchQueryRules.QueryRulesDeleteRulesetModal.clickConfirmDeleteModal();
       });
     });
   });
