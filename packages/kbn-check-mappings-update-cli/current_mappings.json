@@ -3225,9 +3225,6 @@
       "id": {
         "type": "keyword"
       },
-      "metadata": {
-        "type": "object"
-      },
       "owner": {
         "type": "keyword"
       },
