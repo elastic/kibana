@@ -15,6 +15,7 @@ import type { ProfileProviderServices } from '../../profile_provider_services';
 import { createGetDocViewer } from './accessors';
 import type { LogOverviewContext } from '../logs_data_source_profile/profile';
 import { isLogsDataSourceContext } from '../logs_data_source_profile/profile';
+import { RESOLUTION_MISMATCH } from '../../../profile_service';
 
 export type LogDocumentProfileProvider = DocumentProfileProvider<{
   logOverviewContext$: BehaviorSubject<LogOverviewContext | undefined>;
@@ -29,13 +30,13 @@ export const createObservabilityLogDocumentProfileProvider = (
   },
   resolve: ({ record, rootContext, dataSourceContext }) => {
     if (rootContext.solutionType !== SolutionType.Observability) {
-      return { isMatch: false };
+      return RESOLUTION_MISMATCH;
     }
 
     const isLogRecord = getIsLogRecord(record, services.logsContextService.isLogsIndexPattern);
 
     if (!isLogRecord) {
-      return { isMatch: false };
+      return RESOLUTION_MISMATCH;
     }
 
     return {

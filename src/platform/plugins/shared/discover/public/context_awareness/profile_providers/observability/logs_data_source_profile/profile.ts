@@ -19,7 +19,7 @@ import {
   getPaginationConfig,
 } from './accessors';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
-import type { ContextWithProfileId } from '../../../profile_service';
+import { RESOLUTION_MISMATCH, type ContextWithProfileId } from '../../../profile_service';
 
 export type LogOverViewAccordionExpandedValue = 'stacktrace' | 'quality_issues' | undefined;
 
@@ -54,13 +54,13 @@ export const createLogsDataSourceProfileProvider = (
   },
   resolve: (params) => {
     if (params.rootContext.solutionType !== SolutionType.Observability) {
-      return { isMatch: false };
+      return RESOLUTION_MISMATCH;
     }
 
     const indexPattern = extractIndexPatternFrom(params);
 
     if (!services.logsContextService.isLogsIndexPattern(indexPattern)) {
-      return { isMatch: false };
+      return RESOLUTION_MISMATCH;
     }
 
     return {

@@ -8,6 +8,7 @@
  */
 
 import { TRACES_PRODUCT_FEATURE_ID } from '../../../../../common/constants';
+import { RESOLUTION_MISMATCH } from '../../../profile_service';
 import {
   SolutionType,
   DataSourceCategory,
@@ -54,6 +55,6 @@ export const createTracesDataSourceProfileProvider = ({
       };
     }
 
-    return { isMatch: false };
+    return RESOLUTION_MISMATCH;
   },
 });

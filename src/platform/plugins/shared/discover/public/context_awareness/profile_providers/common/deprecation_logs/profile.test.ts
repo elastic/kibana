@@ -12,7 +12,7 @@ import { createDataViewDataSource } from '../../../../../common/data_sources';
 import type { RootContext } from '../../../profiles';
 import { DataSourceCategory, SolutionType } from '../../../profiles';
 import { createDeprecationLogsDataSourceProfileProvider } from './profile';
-import type { ContextWithProfileId } from '../../../profile_service';
+import { RESOLUTION_MISMATCH, type ContextWithProfileId } from '../../../profile_service';
 import { DEPRECATION_LOGS_PROFILE_ID } from './consts';
 
 describe('deprecationLogsProfileProvider', () => {
@@ -31,9 +31,6 @@ describe('deprecationLogsProfileProvider', () => {
     context: {
       category: DataSourceCategory.Logs,
     },
-  };
-  const RESOLUTION_MISMATCH = {
-    isMatch: false,
   };
 
   it('should match data view sources with an allowed index pattern', () => {

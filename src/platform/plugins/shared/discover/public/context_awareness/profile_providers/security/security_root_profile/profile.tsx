@@ -16,6 +16,7 @@ import type { ProfileProviderServices } from '../../profile_provider_services';
 import type { SecurityProfileProviderFactory } from '../types';
 import { createCellRendererAccessor } from '../accessors/get_cell_renderer_accessor';
 import { createAppWrapperAccessor } from '../accessors/create_app_wrapper_accessor';
+import { RESOLUTION_MISMATCH } from '../../../profile_service';
 
 interface SecurityRootProfileContext {
   appWrapper?: FunctionComponent<PropsWithChildren<{}>>;
@@ -58,9 +59,7 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
     },
     resolve: async (params) => {
       if (params.solutionNavId !== SolutionType.Security) {
-        return {
-          isMatch: false,
-        };
+        return RESOLUTION_MISMATCH;
       }
 
       const getAppWrapper = await createAppWrapperAccessor(appWrapperFeature);

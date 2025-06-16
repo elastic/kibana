@@ -14,6 +14,7 @@ import type { DocumentProfileProvider } from '../../../../profiles';
 import { DocumentType, SolutionType } from '../../../../profiles';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
 import { createGetDocViewer } from './accessors';
+import { RESOLUTION_MISMATCH } from '../../../../profile_service';
 
 const OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID = 'observability-traces-span-document-profile';
 
@@ -30,7 +31,7 @@ export const createObservabilityTracesSpanDocumentProfileProvider = ({
     const isObservabilitySolutionView = rootContext.solutionType === SolutionType.Observability;
 
     if (!isObservabilitySolutionView) {
-      return { isMatch: false };
+      return RESOLUTION_MISMATCH;
     }
 
     const isSpanRecord = getIsSpanRecord({
@@ -38,7 +39,7 @@ export const createObservabilityTracesSpanDocumentProfileProvider = ({
     });
 
     if (!isSpanRecord) {
-      return { isMatch: false };
+      return RESOLUTION_MISMATCH;
     }
 
     return {

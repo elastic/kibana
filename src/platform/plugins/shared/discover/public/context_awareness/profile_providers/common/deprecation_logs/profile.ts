@@ -11,6 +11,7 @@ import { DataSourceCategory } from '../../../profiles';
 import { type DataSourceProfileProvider } from '../../../profiles';
 import { DEPRECATION_LOGS_PATTERN_PREFIX, DEPRECATION_LOGS_PROFILE_ID } from './consts';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
+import { RESOLUTION_MISMATCH } from '../../../profile_service';
 
 export const createDeprecationLogsDataSourceProfileProvider =
   (): DataSourceProfileProvider<{}> => ({
@@ -30,7 +31,7 @@ export const createDeprecationLogsDataSourceProfileProvider =
       const indexPattern = extractIndexPatternFrom(params);
 
       if (!checkAllIndicesInPatternAreDeprecationLogs(indexPattern)) {
-        return { isMatch: false };
+        return RESOLUTION_MISMATCH;
       }
 
       return {
