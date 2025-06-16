@@ -11,7 +11,6 @@ import { useEffect, useState, Dispatch, SetStateAction, useCallback, useMemo } f
 import { AggregateQuery } from '@kbn/es-query'; // Added import
 import { fixESQLQueryWithVariables } from '@kbn/esql-utils';
 import { type ESQLControlVariable } from '@kbn/esql-types';
-import { isEqual } from 'lodash';
 
 export interface UseEditorQuerySyncArgs {
   isLoading: boolean;
@@ -38,59 +37,44 @@ export const useEditorQuerySync = ({
   setNewAbortController,
   onTextLangQueryChange,
 }: UseEditorQuerySyncArgs) => {
-  const fixedQueryObj = useMemo(
-    () => ({
-      changed: Date.now(),
-      query: fixESQLQueryWithVariables(initialQueryEsql, esqlVariables),
-    }),
+  const fixedQuery = useMemo(
+    () => fixESQLQueryWithVariables(initialQueryEsql, esqlVariables),
     [initialQueryEsql, esqlVariables]
   );
-  const isLoadingObj = useMemo(
-    () => ({
-      changed: Date.now(),
-      isLoading,
-    }),
-    [isLoading]
-  );
-  const { query: fixedQuery } = fixedQueryObj;
+
   const [query, setQuery] = useState({
+    external: fixedQuery,
     edited: fixedQuery ?? '',
-    editedTs: Date.now(),
     submitted: fixedQuery ?? '',
     isLoading,
-    isLoadingChanged: isLoadingObj.changed,
+    isLoadingExternal: isLoading,
   });
 
   useEffect(() => {
     if (isEditorMounted) {
-      const nextQuery = { ...query };
+      setQuery((prevState) => {
+        const externalQueryChanged = fixedQuery !== prevState.external;
+        const externalIsLoadingChanged = isLoading !== prevState.isLoadingExternal;
+        const queryChanged = fixedQuery !== prevState.edited;
 
-      if (
-        query.edited !== fixedQuery &&
-        (editorIsInline || fixedQueryObj.changed >= query.editedTs)
-      ) {
-        nextQuery.edited = fixedQuery;
-        nextQuery.editedTs = fixedQueryObj.changed;
-      }
-      if (isLoadingObj.changed >= query.isLoadingChanged) {
-        nextQuery.isLoading = isLoading;
-        nextQuery.isLoadingChanged = isLoadingObj.changed;
-      }
-      const applyChange = !isEqual(nextQuery, query);
+        const nextQuery = {
+          ...prevState,
+          external: fixedQuery,
+          isLoadingExternal: isLoading,
+        };
 
-      if (applyChange) {
-        setQuery(nextQuery);
-      }
+        if (externalIsLoadingChanged) {
+          nextQuery.isLoading = isLoading;
+        }
+
+        if (queryChanged && (editorIsInline || (externalQueryChanged && !prevState.isLoading))) {
+          nextQuery.edited = fixedQuery;
+        }
+
+        return nextQuery;
+      });
     }
-  }, [
-    fixedQuery,
-    editorIsInline,
-    isEditorMounted,
-    isLoading,
-    query,
-    fixedQueryObj.changed,
-    isLoadingObj.changed,
-  ]);
+  }, [fixedQuery, editorIsInline, isEditorMounted, isLoading]);
 
   const handleQuerySubmit = useCallback(() => {
     if (query.isLoading && isLoading && allowQueryCancellation) {
@@ -98,7 +82,6 @@ export const useEditorQuerySync = ({
       setQuery((prevState) => ({
         ...prevState,
         isLoading: false,
-        isLoadingChanged: Date.now(),
       }));
     } else {
       const abc = new AbortController();
@@ -107,7 +90,6 @@ export const useEditorQuerySync = ({
         ...prevState,
         submitted: query.edited,
         isLoading: true,
-        isLoadingChanged: Date.now(),
       }));
       onTextLangQuerySubmit({ esql: query.edited } as AggregateQuery, abc);
     }
@@ -127,7 +109,7 @@ export const useEditorQuerySync = ({
         // allows to apply changes to the code when the query is running
         // preventing a race condition in the inline editor mode, when this is not necessary
         // setCode(value);
-        setQuery((prevState) => ({ ...prevState, edited: value, editedTs: Date.now() }));
+        setQuery((prevState) => ({ ...prevState, edited: value }));
       }
       onTextLangQueryChange({ esql: value } as AggregateQuery);
     },

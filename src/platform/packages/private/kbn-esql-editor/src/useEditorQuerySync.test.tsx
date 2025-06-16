@@ -13,7 +13,7 @@ describe('useEditorQuerySync', () => {
   // Default props to be used across tests
   const defaultProps: UseEditorQuerySyncArgs = {
     isLoading: false,
-    initialQueryEsql: 'SELECT * FROM test',
+    initialQueryEsql: 'FROM test',
     editorIsInline: false,
     isEditorMounted: true,
     allowQueryCancellation: false,
@@ -30,8 +30,8 @@ describe('useEditorQuerySync', () => {
   it('should initialize with the provided initialQueryEsql', () => {
     const { result } = renderHook(() => useEditorQuerySync(defaultProps));
 
-    expect(result.current.code).toBe('SELECT * FROM test');
-    expect(result.current.codeWhenSubmitted).toBe('SELECT * FROM test');
+    expect(result.current.code).toBe('FROM test');
+    expect(result.current.codeWhenSubmitted).toBe('FROM test');
     expect(result.current.isQueryLoading).toBe(false);
   });
 
@@ -63,14 +63,14 @@ describe('useEditorQuerySync', () => {
 
     // Act: update the code
     act(() => {
-      result.current.handleQueryUpdate('SELECT * FROM new_table');
+      result.current.handleQueryUpdate('FROM new_table');
     });
 
     // Assert: code should be updated
-    expect(result.current.code).toBe('SELECT * FROM new_table');
+    expect(result.current.code).toBe('FROM new_table');
 
     // Assert: onTextLangQueryChange should be called since editorIsInline is false
-    expect(onTextLangQueryChange).toHaveBeenCalledWith({ esql: 'SELECT * FROM new_table' });
+    expect(onTextLangQueryChange).toHaveBeenCalledWith({ esql: 'FROM new_table' });
   });
 
   it('should not change code but trigger onTextLangQueryChange when editorIsInline is true', () => {
@@ -85,9 +85,9 @@ describe('useEditorQuerySync', () => {
     );
 
     act(() => {
-      result.current.handleQueryUpdate('SELECT * FROM new_table');
+      result.current.handleQueryUpdate('FROM new_table');
     });
-    expect(result.current.code).toBe('SELECT * FROM test'); // Should not change the code in inline mode
+    expect(result.current.code).toBe('FROM test'); // Should not change the code in inline mode
 
     // Assert: onTextLangQueryChange should not be called when editorIsInline is true
     expect(onTextLangQueryChange).toHaveBeenCalled();
@@ -112,13 +112,10 @@ describe('useEditorQuerySync', () => {
     });
 
     // Assert: onTextLangQuerySubmit should be called with the current code
-    expect(onTextLangQuerySubmit).toHaveBeenCalledWith(
-      { esql: 'SELECT * FROM test' },
-      abortController
-    );
+    expect(onTextLangQuerySubmit).toHaveBeenCalledWith({ esql: 'FROM test' }, abortController);
 
     // Assert: codeWhenSubmitted should be updated to the current code
-    expect(result.current.codeWhenSubmitted).toBe('SELECT * FROM test');
+    expect(result.current.codeWhenSubmitted).toBe('FROM test');
 
     // Assert: isQueryLoading should be set to true after submission
     expect(result.current.isQueryLoading).toBe(true);
@@ -149,6 +146,8 @@ describe('useEditorQuerySync', () => {
   });
 
   it('should not overwrite editor content when loading state changes, but should overwrite on subsequent query changes', () => {
+    const abortController = new AbortController();
+    const onTextLangQuerySubmit = jest.fn();
     const { result, rerender } = renderHook((props) => useEditorQuerySync(props), {
       initialProps: {
         ...defaultProps,
@@ -156,6 +155,8 @@ describe('useEditorQuerySync', () => {
         isLoading: true,
         editorIsInline: false,
         isEditorMounted: true,
+        currentAbortController: abortController,
+        onTextLangQuerySubmit,
       },
     });
 
@@ -171,6 +172,7 @@ describe('useEditorQuerySync', () => {
       isLoading: false,
       initialQueryEsql: 'FROM test | LIMIT 10',
       isEditorMounted: true,
+      onTextLangQuerySubmit,
     });
     // The code should still show the user change, not the new query
     expect(result.current.code).toBe('FROM test | LIMIT 100');
@@ -181,6 +183,7 @@ describe('useEditorQuerySync', () => {
       isLoading: false,
       initialQueryEsql: 'FROM test | LIMIT 10',
       isEditorMounted: true,
+      onTextLangQuerySubmit,
     });
     // The code should now be overwritten by the new query
     act(() => {
@@ -194,8 +197,19 @@ describe('useEditorQuerySync', () => {
       isLoading: false,
       initialQueryEsql: 'FROM test | LIMIT 1000',
       isEditorMounted: true,
+      onTextLangQuerySubmit,
     });
 
     expect(result.current.code).toBe('FROM test | LIMIT 1000');
+
+    act(() => {
+      result.current.handleQuerySubmit();
+    });
+
+    // Assert: onTextLangQuerySubmit should be called with the current code
+    expect(onTextLangQuerySubmit).toHaveBeenCalledWith(
+      { esql: 'FROM test | LIMIT 1000' },
+      abortController
+    );
   });
 });
