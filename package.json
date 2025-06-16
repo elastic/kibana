@@ -1890,7 +1890,7 @@
     "oboe": "^2.1.7",
     "openapi-types": "^12.1.3",
     "p-reflect": "2.1.0",
-    "peggy": "^4.2.0",
+    "peggy": "^5.0.3",
     "picomatch": "^4.0.2",
     "pirates": "^4.0.7",
     "piscina": "^3.2.0",
