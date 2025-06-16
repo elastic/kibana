@@ -9,10 +9,10 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
+import type { InstallPrivilegedAccessDetectionPackageResponse } from '../../../../../../common/api/entity_analytics/privilege_monitoring/privileged_access_detection/install.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
 
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
-import { InstallPrivilegedAccessDetectionPackageResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/privilege_monitoring/privileged_access_detection/install.gen';
 
 export const padInstallRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
