@@ -84,10 +84,6 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
       handleRowUnChecked,
       handleRowChecked,
       setDeletedConversations,
-      setExcludedIds,
-      setIsDeleteAll,
-      setIsExcludedMode,
-      setTotalSelectedConversations,
     },
   } = useConversationSelection();
 
@@ -160,11 +156,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
           title: SETTINGS_UPDATED_TOAST_TITLE,
         });
         setHasPendingChanges(false);
-        setIsDeleteAll(false);
-        setIsExcludedMode(false);
-        setDeletedConversations([]);
-        setExcludedIds([]);
-        setTotalSelectedConversations(0);
+        handleUnselectAll();
         callback?.();
       } else {
         resetConversationsSettings();
@@ -172,14 +164,10 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     },
     [
       excludedIds,
+      handleUnselectAll,
       isDeleteAll,
       resetConversationsSettings,
       saveConversationsSettings,
-      setDeletedConversations,
-      setExcludedIds,
-      setIsDeleteAll,
-      setIsExcludedMode,
-      setTotalSelectedConversations,
       toasts,
     ]
   );
@@ -259,22 +247,10 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   ]);
 
   const onDeleteCancelled = useCallback(() => {
-    setIsDeleteAll(false);
-    setIsExcludedMode(false);
-    setDeletedConversations([]);
-    setTotalSelectedConversations(0);
-    setExcludedIds([]);
+    handleUnselectAll();
     closeConfirmModal();
     onCancelClick();
-  }, [
-    closeConfirmModal,
-    onCancelClick,
-    setDeletedConversations,
-    setExcludedIds,
-    setIsDeleteAll,
-    setIsExcludedMode,
-    setTotalSelectedConversations,
-  ]);
+  }, [closeConfirmModal, handleUnselectAll, onCancelClick]);
 
   const { getConversationsList, getColumns } = useConversationsTable();
 
@@ -285,11 +261,6 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     conversations,
     defaultConnector,
   });
-
-  const conversationOptionsIds = useMemo(
-    () => conversationOptions.map((item) => item.id),
-    [conversationOptions]
-  );
 
   const onSaveCancelled = useCallback(() => {
     closeEditFlyout();
@@ -306,7 +277,6 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     () =>
       getColumns({
         conversationOptions,
-        conversationOptionsIds,
         deletedConversationsIds,
         excludedIds,
         handlePageChecked,
@@ -323,7 +293,6 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
       }),
     [
       conversationOptions,
-      conversationOptionsIds,
       deletedConversations.length,
       deletedConversationsIds,
       excludedIds,

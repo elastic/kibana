@@ -50,6 +50,7 @@ export const useConversationSelection = () => {
         setDeletedConversations(newDeletedConversations);
         if (newDeletedConversations.length === totalItemCount) {
           setIsDeleteAll(true);
+          setIsExcludedMode(true);
         }
       }
       setTotalSelectedConversations((prev) => prev + conversationOptionsIds.length);
@@ -67,11 +68,10 @@ export const useConversationSelection = () => {
     }) => {
       if (isExcludedMode) {
         setExcludedIds((prev) => [...prev, ...conversationOptionsIds]);
-      } else {
-        setDeletedConversations(
-          deletedConversations.filter((item) => !conversationOptionsIds.includes(item.id))
-        );
       }
+      setDeletedConversations(
+        deletedConversations.filter((item) => !conversationOptionsIds.includes(item.id))
+      );
       setTotalSelectedConversations(
         (prev) => (prev || totalItemCount) - conversationOptionsIds.length
       );
@@ -97,6 +97,7 @@ export const useConversationSelection = () => {
         setDeletedConversations(newDeletedConversations);
         if (newDeletedConversations.length === totalItemCount) {
           setIsDeleteAll(true);
+          setIsExcludedMode(true);
         }
       }
       setTotalSelectedConversations((prev) => prev + 1);
@@ -114,9 +115,8 @@ export const useConversationSelection = () => {
     }) => {
       if (isExcludedMode) {
         setExcludedIds((prev) => [...prev, selectedItem.id]);
-      } else {
-        setDeletedConversations((prev) => prev.filter((item) => item.id !== selectedItem.id));
       }
+      setDeletedConversations((prev) => prev.filter((item) => item.id !== selectedItem.id));
       setIsDeleteAll(false);
       setTotalSelectedConversations((prev) => (prev || totalItemCount) - 1);
     },

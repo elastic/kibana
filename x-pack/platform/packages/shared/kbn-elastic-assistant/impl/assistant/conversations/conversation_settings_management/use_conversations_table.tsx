@@ -37,12 +37,28 @@ export interface GetConversationsListParams {
   defaultConnector?: AIConnector;
 }
 
+interface GetColumnsParams {
+  conversationOptions: ConversationTableItem[];
+  deletedConversationsIds: string[];
+  excludedIds: string[];
+  handlePageChecked: HandlePageChecked;
+  handlePageUnchecked: HandlePageUnchecked;
+  handleRowChecked: HandleRowChecked;
+  handleRowUnChecked: HandleRowUnChecked;
+  isDeleteAll: boolean;
+  isDeleteEnabled: (conversation: ConversationTableItem) => boolean;
+  isEditEnabled: (conversation: ConversationTableItem) => boolean;
+  isExcludedMode: boolean;
+  onDeleteActionClicked: (conversation: ConversationTableItem) => void;
+  onEditActionClicked: (conversation: ConversationTableItem) => void;
+  totalItemCount: number;
+}
+
 export const useConversationsTable = () => {
   const getActions = useInlineActions<ConversationTableItem>();
   const getColumns = useCallback(
     ({
       conversationOptions,
-      conversationOptionsIds,
       deletedConversationsIds,
       excludedIds,
       handlePageChecked,
@@ -56,23 +72,7 @@ export const useConversationsTable = () => {
       onDeleteActionClicked,
       onEditActionClicked,
       totalItemCount,
-    }: {
-      conversationOptions: ConversationTableItem[];
-      conversationOptionsIds: string[];
-      deletedConversationsIds: string[];
-      excludedIds: string[];
-      handlePageChecked: HandlePageChecked;
-      handlePageUnchecked: HandlePageUnchecked;
-      handleRowChecked: HandleRowChecked;
-      handleRowUnChecked: HandleRowUnChecked;
-      isDeleteAll: boolean;
-      isDeleteEnabled: (conversation: ConversationTableItem) => boolean;
-      isEditEnabled: (conversation: ConversationTableItem) => boolean;
-      isExcludedMode: boolean;
-      onDeleteActionClicked: (conversation: ConversationTableItem) => void;
-      onEditActionClicked: (conversation: ConversationTableItem) => void;
-      totalItemCount: number;
-    }): Array<EuiBasicTableColumn<ConversationTableItem>> => {
+    }: GetColumnsParams): Array<EuiBasicTableColumn<ConversationTableItem>> => {
       return [
         {
           field: '',
