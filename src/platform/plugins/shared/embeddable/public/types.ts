@@ -14,11 +14,11 @@ import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-manag
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
+import { PersistableState } from '@kbn/kibana-utils-plugin/common';
 import type { registerAddFromLibraryType } from './add_from_library/registry';
 import type { registerReactEmbeddableFactory } from './react_embeddable_system';
 import type { EmbeddableStateTransfer } from './state_transfer';
-import type { EmbeddableStateWithType, EmbeddableContentManagementDefinition } from '../common';
+import type { EmbeddableContentManagementDefinition } from '../common';
 import { EnhancementRegistryDefinition } from './enhancements/types';
 import { EmbeddableContentManagementRegistryPublic } from '../common/embeddable_content_management/registry';
 
@@ -77,9 +77,10 @@ export interface EmbeddableSetup {
   registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
 }
 
-export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> & {
+export interface EmbeddableStart {
   getStateTransfer: (storage?: Storage) => EmbeddableStateTransfer;
   getEmbeddableContentManagementDefinition: (
     id: string
   ) => Promise<EmbeddableContentManagementDefinition | undefined>;
-};
+  getEnhancement: (enhancementId: string) => PersistableState;
+}
