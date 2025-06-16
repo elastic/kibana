@@ -154,7 +154,7 @@ const ElasticLLMCostAwarenessTourComponent: React.FC<Props> = ({
       {wrapper ? (
         <div
           style={{
-            paddingLeft: euiTheme.size.m
+            paddingLeft: euiTheme.size.m,
           }}
         >
           {children}
