@@ -242,7 +242,7 @@ export const bulkAlertSuppression = {
     }
   ),
   DURATION_PER_TIME_PERIOD_INPUT: i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppression.perTimePeriodINput',
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppression.perTimePeriodInput',
     {
       defaultMessage: 'Per time period',
     }
