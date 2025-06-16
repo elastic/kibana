@@ -22,6 +22,8 @@ import {
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
+const enabledEmailServices = ['*'];
+
 describe('EmailActionConnectorFields', () => {
   test('all connector fields are rendered', async () => {
     const actionConnector = {
@@ -292,7 +294,7 @@ describe('EmailActionConnectorFields', () => {
         <ConnectorFormTestProvider
           connector={actionConnector}
           onSubmit={onSubmit}
-          connectorServices={{ validateEmailAddresses }}
+          connectorServices={{ validateEmailAddresses, enabledEmailServices: ['*'] }}
         >
           <EmailActionConnectorFields
             readOnly={false}
@@ -356,7 +358,7 @@ describe('EmailActionConnectorFields', () => {
         <ConnectorFormTestProvider
           connector={actionConnector}
           onSubmit={onSubmit}
-          connectorServices={{ validateEmailAddresses }}
+          connectorServices={{ validateEmailAddresses, enabledEmailServices }}
         >
           <EmailActionConnectorFields
             readOnly={false}
@@ -415,7 +417,7 @@ describe('EmailActionConnectorFields', () => {
         <ConnectorFormTestProvider
           connector={actionConnector}
           onSubmit={onSubmit}
-          connectorServices={{ validateEmailAddresses }}
+          connectorServices={{ validateEmailAddresses, enabledEmailServices }}
         >
           <EmailActionConnectorFields
             readOnly={false}
@@ -463,7 +465,7 @@ describe('EmailActionConnectorFields', () => {
         <ConnectorFormTestProvider
           connector={actionConnector}
           onSubmit={onSubmit}
-          connectorServices={{ validateEmailAddresses }}
+          connectorServices={{ validateEmailAddresses, enabledEmailServices }}
         >
           <EmailActionConnectorFields
             readOnly={false}
@@ -509,7 +511,7 @@ describe('EmailActionConnectorFields', () => {
         <ConnectorFormTestProvider
           connector={actionConnector}
           onSubmit={onSubmit}
-          connectorServices={{ validateEmailAddresses }}
+          connectorServices={{ validateEmailAddresses, enabledEmailServices }}
         >
           <EmailActionConnectorFields
             readOnly={false}
@@ -554,7 +556,7 @@ describe('EmailActionConnectorFields', () => {
         <ConnectorFormTestProvider
           connector={actionConnector}
           onSubmit={onSubmit}
-          connectorServices={{ validateEmailAddresses }}
+          connectorServices={{ validateEmailAddresses, enabledEmailServices }}
         >
           <Suspense fallback={null}>
             <EmailActionConnectorFields
@@ -603,7 +605,7 @@ describe('EmailActionConnectorFields', () => {
           <ConnectorFormTestProvider
             connector={actionConnector}
             onSubmit={onSubmit}
-            connectorServices={{ validateEmailAddresses }}
+            connectorServices={{ validateEmailAddresses, enabledEmailServices }}
           >
             <EmailActionConnectorFields
               readOnly={false}
@@ -649,7 +651,7 @@ describe('EmailActionConnectorFields', () => {
         <ConnectorFormTestProvider
           connector={actionConnector}
           onSubmit={onSubmit}
-          connectorServices={{ validateEmailAddresses }}
+          connectorServices={{ validateEmailAddresses, enabledEmailServices }}
         >
           <EmailActionConnectorFields
             readOnly={false}
