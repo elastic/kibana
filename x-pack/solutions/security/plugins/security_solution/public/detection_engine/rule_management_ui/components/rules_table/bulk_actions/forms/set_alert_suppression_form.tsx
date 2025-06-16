@@ -129,7 +129,7 @@ export const SetAlertSuppressionForm = React.memo(function SetAlertSuppressionFo
       </EuiFlexGroup>
       <EuiSpacer size="l" />
 
-      <AlertSuppressionEdit suppressibleFields={suppressibleFields} />
+      <AlertSuppressionEdit suppressibleFields={suppressibleFields} fullWidth />
     </BulkEditFormWrapper>
   );
 });
