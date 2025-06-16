@@ -48,6 +48,7 @@ interface Options<T> {
   description?: string;
   retryDelay?: number;
   retryCount?: number;
+  initialDelay?: number;
 }
 
 export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
@@ -61,7 +62,12 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
     accept = returnTrue,
     retryDelay = 502,
     retryCount,
+    initialDelay,
   } = options;
+
+  if (typeof initialDelay === 'number') {
+    await delay(initialDelay);
+  }
 
   const start = Date.now();
   const criticalWebDriverErrors = ['NoSuchSessionError', 'NoSuchWindowError'];
