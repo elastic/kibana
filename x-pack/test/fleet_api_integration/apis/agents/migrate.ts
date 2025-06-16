@@ -230,7 +230,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agents/bulk_migrate`)
           .set('kbn-xsrf', 'xx')
           .send({
-            agentIds: ['agent1'],
+            agents: ['agent1'],
             uri: 'https://example.com',
             enrollment_token: '1234',
           })
@@ -242,7 +242,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agents/bulk_migrate`)
           .set('kbn-xsrf', 'xx')
           .send({
-            agentIds: ['agent1', 'agent2'],
+            agents: ['agent1', 'agent2'],
             uri: 'https://example.com',
             enrollment_token: '1234',
           })
@@ -254,7 +254,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agents/bulk_migrate`)
           .set('kbn-xsrf', 'xx')
           .send({
-            agentIds: ['agent1', 'agent3'],
+            agents: ['agent1', 'agent3'],
             uri: 'https://example.com',
             enrollment_token: '1234',
           })
@@ -266,7 +266,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agents/bulk_migrate`)
           .set('kbn-xsrf', 'xx')
           .send({
-            agentIds: ['agent100', 'agent400', 'agent1'],
+            agents: ['agent100', 'agent400', 'agent1'],
             uri: 'https://example.com',
             enrollment_token: '1234',
           })

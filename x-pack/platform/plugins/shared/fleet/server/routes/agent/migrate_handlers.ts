@@ -53,15 +53,13 @@ export const bulkMigrateAgentsHandler: FleetRequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const soClient = coreContext.savedObjects.client;
   const options = request.body;
-  // TODO: check that all the agents exist, then get the policy for each agent, pass all that to a service, check in the service that none are protected (if they are, reject), otherwise create the action
-
   // // First validate all agents exist
-  const agents = await AgentService.getByIds(esClient, soClient, request.body.agentIds, {
+  const agents = await AgentService.getByIds(esClient, soClient, request.body.agents, {
     ignoreMissing: false, // throw error if any agents are missing
   });
 
   // then get all the policies for the agents
-  const agentPolicies = await AgentService.getAgentPolicyForAgents(soClient, esClient, agents);
+  const agentPolicies = await AgentService.getAgentPolicyForAgents(soClient, agents);
 
   const body = await AgentService.bulkMigrateAgents(esClient, agents, agentPolicies, {
     ...options,

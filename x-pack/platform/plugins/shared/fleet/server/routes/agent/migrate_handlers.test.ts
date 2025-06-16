@@ -264,11 +264,11 @@ describe('Migrate handlers', () => {
       (AgentService.getAgentPolicyForAgents as jest.Mock).mockResolvedValue(mockAgentPolicies);
       // Change the bulkMigrateAgents mock to be an error
       (AgentService.bulkMigrateAgents as jest.Mock).mockRejectedValue(
-        new FleetUnauthorizedError('Agent is protected and cannot be migrated')
+        new FleetUnauthorizedError('One or more agents are protected agents and cannot be migrated')
       );
       await expect(
         bulkMigrateAgentsHandler(mockContext, mockRequest, mockResponse)
-      ).rejects.toThrow('Agent is protected and cannot be migrated');
+      ).rejects.toThrow('One or more agents are protected agents and cannot be migrated');
     });
 
     it('returns error when agent is a fleet-server agent', async () => {
@@ -276,11 +276,13 @@ describe('Migrate handlers', () => {
       (AgentService.getByIds as jest.Mock).mockResolvedValue(mockAgents);
       // Change the bulkMigrateAgents mock to be an error
       (AgentService.bulkMigrateAgents as jest.Mock).mockRejectedValue(
-        new FleetUnauthorizedError('Agent is protected and cannot be migrated')
+        new FleetUnauthorizedError(
+          'One or more agents are fleet-server agents and cannot be migrated'
+        )
       );
       await expect(
         bulkMigrateAgentsHandler(mockContext, mockRequest, mockResponse)
-      ).rejects.toThrow('Agent is protected and cannot be migrated');
+      ).rejects.toThrow('One or more agents are fleet-server agents and cannot be migrated');
     });
 
     it('returns error when agent is not found', async () => {

@@ -44,11 +44,21 @@ export async function bulkMigrateAgents(
   options: any
 ) {
   // If any agent is protected or has fleet-server as a component, throw an error
-  if (
-    agentPolicies.some((policy) => policy?.is_protected) ||
-    agents.some((agent) => agent.components?.some((c) => c.type === 'fleet-server'))
-  ) {
-    throw new FleetUnauthorizedError(`One or more agents are protected and cannot be migrated`);
+  const protectedAgents = agentPolicies.filter((agentPolicy) => agentPolicy?.is_protected);
+  const fleetServerAgents = agents.filter((agent) =>
+    agent.components?.some((c) => c.type === 'fleet-server')
+  );
+
+  if (protectedAgents.length > 0 || fleetServerAgents.length > 0) {
+    throw new FleetUnauthorizedError(
+      `One or more agents are ${
+        protectedAgents.length > 0 && fleetServerAgents.length > 0
+          ? 'protected and fleet-server'
+          : protectedAgents.length > 0
+          ? 'protected'
+          : 'fleet-server'
+      } agents and cannot be migrated`
+    );
   }
 
   const response = await createAgentAction(esClient, {

@@ -810,12 +810,12 @@ export async function getAgentPolicyForAgent(
 // Get all the policies for a list of agents
 export async function getAgentPolicyForAgents(
   soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
   agents: Agent[]
 ) {
-  const agentIds = agents.map((agent) => agent.id);
-  const agentPolicies = await Promise.all(
-    agentIds.map((agentId) => getAgentPolicyForAgent(soClient, esClient, agentId))
+  const policyIds = new Set(agents.map((agent) => agent.policy_id));
+  const agentPolicies = await agentPolicyService.getByIds(
+    soClient,
+    Array.from(policyIds).filter((id) => id !== undefined) as string[]
   );
   return agentPolicies;
 }

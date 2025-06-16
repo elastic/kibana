@@ -210,7 +210,7 @@ describe('Agent migration', () => {
           [mockedPolicy, mockedPolicy],
           options
         )
-      ).rejects.toThrowError('One or more agents are protected and cannot be migrated');
+      ).rejects.toThrowError('One or more agents are protected agents and cannot be migrated');
     });
   });
 });
