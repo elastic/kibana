@@ -24,7 +24,6 @@ import { ElasticLLMCostAwarenessTour } from '@kbn/elastic-assistant/impl/tour/el
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '@kbn/elastic-assistant/impl/tour/const';
 import { StatusBell } from './status_bell';
 import * as i18n from './translations';
-import { useSpaceId } from '../../../common/hooks/use_space_id';
 interface Props {
   connectorId: string | undefined;
   connectorsAreConfigured: boolean;
@@ -59,19 +58,18 @@ const HeaderComponent: React.FC<Props> = ({
 
   const [didCancel, setDidCancel] = useState(false);
   const { inferenceEnabled } = useAssistantContext();
-  const spaceId = useSpaceId();
 
   const [isEISCostTourDisabled, setIsEISCostTourDisabled] = useState<boolean>(
-    !connectorsAreConfigured || !spaceId || !inferenceEnabled || showFlyout
+    !connectorsAreConfigured || !inferenceEnabled || showFlyout
   );
 
   useEffect(() => {
-    if (!connectorsAreConfigured || !spaceId || !inferenceEnabled || showFlyout) {
+    if (!connectorsAreConfigured || !inferenceEnabled || showFlyout) {
       setIsEISCostTourDisabled(true);
     } else {
       setIsEISCostTourDisabled(false);
     }
-  }, [connectorsAreConfigured, inferenceEnabled, isEISCostTourDisabled, showFlyout, spaceId]);
+  }, [connectorsAreConfigured, inferenceEnabled, isEISCostTourDisabled, showFlyout]);
 
   const handleCancel = useCallback(() => {
     setDidCancel(true);

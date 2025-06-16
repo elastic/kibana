@@ -68,11 +68,10 @@ describe('useTourStorageKey', () => {
       featureKey: NEW_FEATURES_TOUR_STORAGE_KEYS;
       expectedStorageKey: string;
     }) => {
-      const spaceId = 'default';
       const { result } = renderHook(() => useTourStorageKey(featureKey), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
-      expect(result.current).toBe(`${expectedStorageKey}.${spaceId}`);
+      expect(result.current).toBe(`${expectedStorageKey}`);
     }
   );
 });
