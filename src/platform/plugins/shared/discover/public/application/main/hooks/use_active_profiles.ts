@@ -12,11 +12,13 @@ import { useEffect, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DataSourceContext, RootContext } from '../../../context_awareness';
 import type { ContextWithProfileId } from '../../../context_awareness/profile_service';
-import type { DataTableRecordWithContext } from '../../../context_awareness/profiles_manager';
+import {
+  useScopedProfilesManager,
+  type DataTableRecordWithContext,
+} from '../../../context_awareness/profiles_manager';
 import { recordHasContext } from '../../../context_awareness/profiles_manager/record_has_context';
-import { useDiscoverServices } from '../../../hooks/use_discover_services';
-import type { DiscoverStateContainer } from '../state_management/discover_state';
 import { FetchStatus } from '../../types';
+import type { DataDocuments$ } from '../state_management/discover_data_state_container';
 
 export interface Profiles {
   rootContext: ContextWithProfileId<RootContext> | null;
@@ -31,8 +33,8 @@ export interface ProfilesAdapter {
   openDocDetails: (record: DataTableRecord) => void;
 }
 
-export function useActiveProfiles({ stateContainer }: { stateContainer: DiscoverStateContainer }) {
-  const { profilesManager } = useDiscoverServices();
+export function useActiveProfiles({ dataDocuments$ }: { dataDocuments$: DataDocuments$ }) {
+  const scopedProfilesManager = useScopedProfilesManager();
   const [usedProfiles, setUsedProfiles] = useState<Profiles>({
     rootContext: null,
     dataSourceContext: null,
@@ -40,14 +42,14 @@ export function useActiveProfiles({ stateContainer }: { stateContainer: Discover
   });
 
   useEffect(() => {
-    const documentsSubscription = stateContainer.dataState.data$.documents$.pipe(
+    const documentsSubscription = dataDocuments$.pipe(
       distinctUntilChanged((a, b) => a.fetchStatus === b.fetchStatus),
       filter(({ fetchStatus }) => fetchStatus === FetchStatus.COMPLETE),
       map(({ result }) => result ?? [])
     );
 
     const subscription = combineLatest([
-      profilesManager.createScopedProfilesManager().getContexts$(),
+      scopedProfilesManager.getContexts$(),
       documentsSubscription,
     ])
       .pipe(
@@ -55,13 +57,12 @@ export function useActiveProfiles({ stateContainer }: { stateContainer: Discover
           const documentContexts: Record<string, DataTableRecordWithContext[]> = {};
 
           for (const record of documents) {
-            if (recordHasContext(record)) {
-              if (!documentContexts[record.context.profileId]) {
-                documentContexts[record.context.profileId] = [];
-              }
+            if (!recordHasContext(record)) continue;
 
-              documentContexts[record.context.profileId].push(record);
-            }
+            if (!documentContexts[record.context.profileId])
+              documentContexts[record.context.profileId] = [];
+
+            documentContexts[record.context.profileId].push(record);
           }
 
           return {
@@ -76,7 +77,7 @@ export function useActiveProfiles({ stateContainer }: { stateContainer: Discover
     return () => {
       subscription.unsubscribe();
     };
-  }, [profilesManager, stateContainer]);
+  }, [scopedProfilesManager, dataDocuments$]);
 
   function getProfilesAdapter({
     onOpenDocDetails,
