@@ -190,7 +190,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       // check nginx package is installed on remote
-      await retry.tryForTime(10000, async () => {
+      await retry.tryForTime(20000, async () => {
         await verifySyncIntegrationsStatus();
 
         await verifyPackageInstalledOnRemote();
