@@ -378,6 +378,11 @@ export class ReportingCore {
     return (await this.getPluginStartDeps()).store;
   }
 
+  public async getAuditLogger(request: KibanaRequest) {
+    const startDeps = await this.getPluginStartDeps();
+    return startDeps.securityService.audit.asScoped(request);
+  }
+
   public async getLicenseInfo() {
     const { license$ } = (await this.getPluginStartDeps()).licensing;
     const registry = this.getExportTypesRegistry();

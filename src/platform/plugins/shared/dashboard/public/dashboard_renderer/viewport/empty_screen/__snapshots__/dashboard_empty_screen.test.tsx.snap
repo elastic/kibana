@@ -2,10 +2,10 @@
 
 exports[`DashboardEmptyScreen renders correctly with edit mode 1`] = `
 <div
-  class="dshEmptyPromptParent"
+  class="css-1rh19mu-parent"
 >
   <div
-    class="euiPageTemplate dshEmptyPromptPageTemplate emotion-euiPageOuter-row-grow"
+    class="euiPageTemplate emotion-euiPageOuter-row-grow-template"
     data-test-subj="emptyDashboardWidget"
     style="min-block-size: 460px; padding-block-start: var(--euiFixedHeadersOffset, 0);"
   >
@@ -20,7 +20,7 @@ exports[`DashboardEmptyScreen renders correctly with edit mode 1`] = `
           class="emotion-euiPageSection__content-l-center"
         >
           <div
-            class="euiPanel euiPanel--transparent euiEmptyPrompt dshEmptyWidgetContainer emotion-euiPanel-m-transparent-euiEmptyPrompt-vertical"
+            class="euiPanel euiPanel--transparent euiEmptyPrompt emotion-euiPanel-m-transparent-euiEmptyPrompt-vertical-widgetContainer"
           >
             <div
               class="euiEmptyPrompt__main emotion-euiEmptyPrompt__main-vertical-l"
@@ -123,10 +123,10 @@ exports[`DashboardEmptyScreen renders correctly with edit mode 1`] = `
 
 exports[`DashboardEmptyScreen renders correctly with readonly and edit mode 1`] = `
 <div
-  class="dshEmptyPromptParent"
+  class="css-1rh19mu-parent"
 >
   <div
-    class="euiPageTemplate dshEmptyPromptPageTemplate emotion-euiPageOuter-row-grow"
+    class="euiPageTemplate emotion-euiPageOuter-row-grow-template"
     data-test-subj="dashboardEmptyReadOnly"
     style="min-block-size: 460px; padding-block-start: var(--euiFixedHeadersOffset, 0);"
   >
@@ -141,7 +141,7 @@ exports[`DashboardEmptyScreen renders correctly with readonly and edit mode 1`] 
           class="emotion-euiPageSection__content-l-center"
         >
           <div
-            class="euiPanel euiPanel--transparent euiEmptyPrompt dshEmptyWidgetContainer emotion-euiPanel-m-transparent-euiEmptyPrompt-vertical"
+            class="euiPanel euiPanel--transparent euiEmptyPrompt emotion-euiPanel-m-transparent-euiEmptyPrompt-vertical-widgetContainer"
           >
             <div
               class="euiEmptyPrompt__main emotion-euiEmptyPrompt__main-vertical-l"
@@ -193,10 +193,10 @@ exports[`DashboardEmptyScreen renders correctly with readonly and edit mode 1`] 
 
 exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
 <div
-  class="dshEmptyPromptParent"
+  class="css-1rh19mu-parent"
 >
   <div
-    class="euiPageTemplate dshEmptyPromptPageTemplate emotion-euiPageOuter-row-grow"
+    class="euiPageTemplate emotion-euiPageOuter-row-grow-template"
     data-test-subj="dashboardEmptyReadOnly"
     style="min-block-size: 460px; padding-block-start: var(--euiFixedHeadersOffset, 0);"
   >
@@ -211,7 +211,7 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
           class="emotion-euiPageSection__content-l-center"
         >
           <div
-            class="euiPanel euiPanel--transparent euiEmptyPrompt dshEmptyWidgetContainer emotion-euiPanel-m-transparent-euiEmptyPrompt-vertical"
+            class="euiPanel euiPanel--transparent euiEmptyPrompt emotion-euiPanel-m-transparent-euiEmptyPrompt-vertical-widgetContainer"
           >
             <div
               class="euiEmptyPrompt__main emotion-euiEmptyPrompt__main-vertical-l"
@@ -263,10 +263,10 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
 
 exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
 <div
-  class="dshEmptyPromptParent"
+  class="css-1rh19mu-parent"
 >
   <div
-    class="euiPageTemplate dshEmptyPromptPageTemplate emotion-euiPageOuter-row-grow"
+    class="euiPageTemplate emotion-euiPageOuter-row-grow-template"
     data-test-subj="dashboardEmptyReadWrite"
     style="min-block-size: 460px; padding-block-start: var(--euiFixedHeadersOffset, 0);"
   >
@@ -281,7 +281,7 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
           class="emotion-euiPageSection__content-l-center"
         >
           <div
-            class="euiPanel euiPanel--transparent euiEmptyPrompt dshEmptyWidgetContainer emotion-euiPanel-m-transparent-euiEmptyPrompt-vertical"
+            class="euiPanel euiPanel--transparent euiEmptyPrompt emotion-euiPanel-m-transparent-euiEmptyPrompt-vertical-widgetContainer"
           >
             <div
               class="euiEmptyPrompt__main emotion-euiEmptyPrompt__main-vertical-l"
