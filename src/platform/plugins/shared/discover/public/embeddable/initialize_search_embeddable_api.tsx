@@ -29,7 +29,7 @@ import type { DiscoverServices } from '../build_services';
 import { EDITABLE_SAVED_SEARCH_KEYS } from './constants';
 import { getSearchEmbeddableDefaults } from './get_search_embeddable_defaults';
 import type {
-  PublishesSavedSearch,
+  PublishesWritableSavedSearch,
   SearchEmbeddableRuntimeState,
   SearchEmbeddableSerializedAttributes,
   SearchEmbeddableSerializedState,
@@ -73,7 +73,9 @@ export const initializeSearchEmbeddableApi = async (
     discoverServices: DiscoverServices;
   }
 ): Promise<{
-  api: PublishesSavedSearch & PublishesWritableDataViews & Partial<PublishesWritableUnifiedSearch>;
+  api: PublishesWritableSavedSearch &
+    PublishesWritableDataViews &
+    Partial<PublishesWritableUnifiedSearch>;
   stateManager: SearchEmbeddableStateManager;
   anyStateChange$: Observable<void>;
   comparators: StateComparators<SearchEmbeddableSerializedAttributes>;
@@ -170,6 +172,10 @@ export const initializeSearchEmbeddableApi = async (
     searchSource$.next(searchSource);
   };
 
+  const setColumns = (columns: string[] | undefined) => {
+    stateManager.columns.next(columns);
+  };
+
   /** Keep the saved search in sync with any state changes */
   const syncSavedSearch = combineLatest([onAnyStateChange, searchSource$])
     .pipe(
@@ -197,6 +203,7 @@ export const initializeSearchEmbeddableApi = async (
       query$,
       setQuery,
       canEditUnifiedSearch,
+      setColumns,
     },
     stateManager,
     anyStateChange$: onAnyStateChange.pipe(map(() => undefined)),
