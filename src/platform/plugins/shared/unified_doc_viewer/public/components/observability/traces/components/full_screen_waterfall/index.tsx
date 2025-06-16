@@ -21,7 +21,6 @@ import {
 import { SERVICE_NAME_FIELD, SPAN_ID_FIELD, TRANSACTION_ID_FIELD } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { SpanFlyout } from './span_flyout';
 import { useRootTransactionContext } from '../../doc_viewer_transaction_overview/hooks/use_root_transaction';
@@ -61,10 +60,7 @@ export const FullScreenWaterfall = ({
   } = getUnifiedDocViewerServices();
   const { indexes } = useDataSourcesContext();
 
-  const discoverLocator = useMemo(
-    () => locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR'),
-    [locators]
-  );
+  const discoverLocator = useMemo(() => locators.get('DISCOVER_APP_LOCATOR'), [locators]);
 
   const generateRelatedErrorsDiscoverUrl = useCallback(
     (docId: string) => {
