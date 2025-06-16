@@ -22,7 +22,7 @@ import {
   durationToSeconds,
   getDeleteUnusedUrlTaskInstance,
   deleteUnusedUrls,
-  fetchUnusedUrls,
+  fetchUnusedUrlsFromFirstNamespace,
   runDeleteUnusedUrlsTask,
   scheduleUnusedUrlsCleanupTask,
 } from './task';
@@ -134,7 +134,7 @@ describe('unused_urls_task', () => {
         page: 1,
       });
 
-      const result = await fetchUnusedUrls({
+      const result = await fetchUnusedUrlsFromFirstNamespace({
         savedObjectsRepository: mockSavedObjectsRepository,
         urlExpirationDuration,
         maxPageSize,
@@ -181,7 +181,7 @@ describe('unused_urls_task', () => {
         page: 1,
       });
 
-      const result = await fetchUnusedUrls({
+      const result = await fetchUnusedUrlsFromFirstNamespace({
         savedObjectsRepository: mockSavedObjectsRepository,
         urlExpirationDuration,
         maxPageSize,
@@ -215,7 +215,7 @@ describe('unused_urls_task', () => {
         page: 1,
       });
 
-      const result = await fetchUnusedUrls({
+      const result = await fetchUnusedUrlsFromFirstNamespace({
         savedObjectsRepository: mockSavedObjectsRepository,
         urlExpirationDuration,
         maxPageSize,

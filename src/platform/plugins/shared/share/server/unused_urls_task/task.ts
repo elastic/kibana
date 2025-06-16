@@ -12,6 +12,7 @@ import { CoreSetup, ISavedObjectsRepository, SavedObjectsBulkDeleteObject } from
 import { Logger } from '@kbn/logging';
 import { TaskInstanceWithId } from '@kbn/task-manager-plugin/server/task';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { SAVED_OBJECT_TYPE, TASK_ID } from './constants';
 
 export const durationToSeconds = (duration: Duration) => `${duration.asSeconds()}s`;
@@ -54,7 +55,7 @@ export const deleteUnusedUrls = async ({
   }
 };
 
-export const fetchUnusedUrls = async ({
+export const fetchUnusedUrlsFromFirstNamespace = async ({
   savedObjectsRepository,
   urlExpirationDuration,
   maxPageSize,
@@ -78,8 +79,10 @@ export const fetchUnusedUrls = async ({
     fields: ['type'],
   });
 
+  const firstNamespace = SavedObjectsUtils.namespaceIdToString(savedObjects[0]?.namespaces?.[0]);
+
   const savedObjectsByNamespace = savedObjects.filter(
-    (so) => so.namespaces === savedObjects[0].namespaces?.[0] || 'default'
+    (so) => so.namespaces?.length && so.namespaces.includes(firstNamespace)
   );
 
   const unusedUrls = savedObjectsByNamespace.map((so) => ({
@@ -90,7 +93,7 @@ export const fetchUnusedUrls = async ({
   return {
     unusedUrls,
     hasMore: page * perPage < total,
-    namespace: savedObjects[0]?.namespaces?.[0] || 'default',
+    namespace: firstNamespace,
   };
 };
 
@@ -111,7 +114,7 @@ export const runDeleteUnusedUrlsTask = async ({
 
   const savedObjectsRepository = coreStart.savedObjects.createInternalRepository();
 
-  let { unusedUrls, hasMore, namespace } = await fetchUnusedUrls({
+  let { unusedUrls, hasMore, namespace } = await fetchUnusedUrlsFromFirstNamespace({
     savedObjectsRepository,
     urlExpirationDuration,
     maxPageSize,
@@ -126,7 +129,7 @@ export const runDeleteUnusedUrlsTask = async ({
     });
 
     if (hasMore) {
-      const nextPageData = await fetchUnusedUrls({
+      const nextPageData = await fetchUnusedUrlsFromFirstNamespace({
         savedObjectsRepository,
         urlExpirationDuration,
         maxPageSize,

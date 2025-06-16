@@ -29,7 +29,7 @@ export {
   durationToSeconds,
   getDeleteUnusedUrlTaskInstance,
   deleteUnusedUrls,
-  fetchUnusedUrls,
+  fetchUnusedUrlsFromFirstNamespace,
   runDeleteUnusedUrlsTask,
   scheduleUnusedUrlsCleanupTask,
 } from './unused_urls_task';
