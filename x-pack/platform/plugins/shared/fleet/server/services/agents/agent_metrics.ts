@@ -168,7 +168,7 @@ const aggregationQueryBuilder = (agentIds: string[]) => ({
                       cpu_total: 'cpu_derivative[normalized_value]',
                     },
                     script: {
-                      source: `if (params.cpu_total != null && params.cpu_total > 0) {
+                      source: `if (params.cpu_total > 0) {
                       return params.cpu_total / params._interval;
                     } else {
                       return 0;
