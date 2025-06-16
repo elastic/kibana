@@ -7,13 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { htmlIdGenerator } from '@elastic/eui';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { type FieldTypeKnown, getFieldIconType, fieldNameWildcardMatcher } from '@kbn/field-utils';
 import { type FieldListFiltersProps } from '../components/field_list_filters';
-import { type FieldListItem, GetCustomFieldType } from '../types';
+import type {
+  FieldListItem,
+  OnUnifiedFieldListContainerInitialPropsChanged,
+  UnifiedFieldListContainerInitialProps$,
+} from '../types';
+import { GetCustomFieldType } from '../types';
 
 const htmlId = htmlIdGenerator('fieldList');
 
@@ -27,6 +32,8 @@ export interface FieldFiltersParams<T extends FieldListItem> {
   services: {
     core: Pick<CoreStart, 'docLinks'>;
   };
+  unifiedFieldListContainerInitialProps$?: UnifiedFieldListContainerInitialProps$;
+  onUnifiedFieldListContainerInitialPropsChanged?: OnUnifiedFieldListContainerInitialPropsChanged;
 }
 
 /**
@@ -44,6 +51,8 @@ export interface FieldFiltersResult<T extends FieldListItem> {
  * @param getCustomFieldType
  * @param onSupportedFieldFilter
  * @param services
+ * @param unifiedFieldListContainerInitialProps$
+ * @param onUnifiedFieldListContainerInitialPropsChange
  * @public
  */
 export function useFieldFilters<T extends FieldListItem = DataViewField>({
@@ -51,11 +60,26 @@ export function useFieldFilters<T extends FieldListItem = DataViewField>({
   getCustomFieldType,
   onSupportedFieldFilter,
   services,
+  unifiedFieldListContainerInitialProps$,
+  onUnifiedFieldListContainerInitialPropsChanged,
 }: FieldFiltersParams<T>): FieldFiltersResult<T> {
   const [selectedFieldTypes, setSelectedFieldTypes] = useState<FieldTypeKnown[]>([]);
   const [nameFilter, setNameFilter] = useState<string>('');
   const screenReaderDescriptionId = useMemo(() => htmlId(), []);
   const docLinks = services.core.docLinks;
+
+  useEffect(() => {
+    const initialProps = unifiedFieldListContainerInitialProps$?.getValue();
+    if (!initialProps) {
+      return;
+    }
+    if (Array.isArray(initialProps.selectedFieldTypes)) {
+      setSelectedFieldTypes(initialProps.selectedFieldTypes);
+    }
+    if (typeof initialProps.nameFilter === 'string') {
+      setNameFilter(initialProps.nameFilter);
+    }
+  }, [unifiedFieldListContainerInitialProps$]);
 
   return useMemo(() => {
     const fieldSearchHighlight = nameFilter.trim().toLowerCase();
@@ -67,9 +91,19 @@ export function useFieldFilters<T extends FieldListItem = DataViewField>({
         allFields,
         getCustomFieldType,
         onSupportedFieldFilter,
-        onChangeFieldTypes: setSelectedFieldTypes,
+        onChangeFieldTypes: (fieldTypes) => {
+          setSelectedFieldTypes(fieldTypes);
+          onUnifiedFieldListContainerInitialPropsChanged?.({
+            selectedFieldTypes: fieldTypes,
+          });
+        },
         nameFilter,
-        onChangeNameFilter: setNameFilter,
+        onChangeNameFilter: (value) => {
+          setNameFilter(value);
+          onUnifiedFieldListContainerInitialPropsChanged?.({
+            nameFilter: value,
+          });
+        },
         screenReaderDescriptionId,
       },
       onFilterField:
@@ -95,5 +129,6 @@ export function useFieldFilters<T extends FieldListItem = DataViewField>({
     nameFilter,
     setNameFilter,
     screenReaderDescriptionId,
+    onUnifiedFieldListContainerInitialPropsChanged,
   ]);
 }

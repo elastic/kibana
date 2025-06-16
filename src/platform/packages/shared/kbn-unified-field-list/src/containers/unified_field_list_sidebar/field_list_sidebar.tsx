@@ -29,7 +29,11 @@ import { FIELDS_LIMIT_SETTING } from '@kbn/discover-utils';
 import { FieldList } from '../../components/field_list';
 import { FieldListFilters } from '../../components/field_list_filters';
 import { FieldListGrouped, type FieldListGroupedProps } from '../../components/field_list_grouped';
-import { FieldsGroupNames } from '../../types';
+import {
+  FieldsGroupNames,
+  type OnUnifiedFieldListContainerInitialPropsChanged,
+  type UnifiedFieldListContainerInitialProps$,
+} from '../../types';
 import type { ButtonAddFieldVariant, AdditionalFieldGroups } from '../../types';
 import { GroupedFieldsParams, useGroupedFields } from '../../hooks/use_grouped_fields';
 import { UnifiedFieldListItem, type UnifiedFieldListItemProps } from '../unified_field_list_item';
@@ -82,6 +86,9 @@ export type UnifiedFieldListSidebarCustomizableProps = Pick<
    * Prop to pass additional field groups to the field list
    */
   additionalFieldGroups?: AdditionalFieldGroups<DataViewField>;
+
+  unifiedFieldListContainerInitialProps$?: UnifiedFieldListContainerInitialProps$;
+  onUnifiedFieldListContainerInitialPropsChanged?: OnUnifiedFieldListContainerInitialPropsChanged;
 };
 
 interface UnifiedFieldListSidebarInternalProps {
@@ -172,6 +179,8 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   onToggleSidebar,
   additionalFieldGroups,
   additionalFilters,
+  unifiedFieldListContainerInitialProps$,
+  onUnifiedFieldListContainerInitialPropsChanged,
 }) => {
   const { dataViews, core } = services;
 
@@ -236,6 +245,8 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
       onOverrideFieldGroupDetails: stateService.creationOptions.onOverrideFieldGroupDetails,
       getNewFieldsBySpec,
       additionalFieldGroups,
+      unifiedFieldListContainerInitialProps$,
+      onUnifiedFieldListContainerInitialPropsChanged,
     });
 
   useEffect(() => {
