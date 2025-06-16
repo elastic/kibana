@@ -97,7 +97,7 @@ describe('useEditorQuerySync', () => {
     const onTextLangQuerySubmit = jest.fn();
     const abortController = new AbortController();
 
-    const { result } = renderHook(() =>
+    const { result, rerender } = renderHook(() =>
       useEditorQuerySync({
         ...defaultProps,
         isLoading: false,
@@ -117,17 +117,16 @@ describe('useEditorQuerySync', () => {
       abortController
     );
 
-    // Assert: isQueryLoading should be set to true after submission
-    expect(result.current.isQueryLoading).toBe(true);
-
     // Assert: codeWhenSubmitted should be updated to the current code
     expect(result.current.codeWhenSubmitted).toBe('SELECT * FROM test');
+
+    // Assert: isQueryLoading should be set to true after submission
+    expect(result.current.isQueryLoading).toBe(true);
   });
 
   it('should handle query cancellation when loading and allowQueryCancellation is true', () => {
     const onTextLangQuerySubmit = jest.fn();
     const abortController = new AbortController();
-    const setNewAbortController = jest.fn();
     const abortSpy = jest.spyOn(abortController, 'abort');
 
     const { result } = renderHook(() =>
@@ -137,7 +136,6 @@ describe('useEditorQuerySync', () => {
         allowQueryCancellation: true,
         onTextLangQuerySubmit,
         currentAbortController: abortController,
-        setNewAbortController,
       })
     );
 
@@ -149,14 +147,6 @@ describe('useEditorQuerySync', () => {
     // Assert: the current abort controller should be aborted
     expect(abortSpy).toHaveBeenCalled();
 
-    // Assert: a new abort controller should be created
-    expect(setNewAbortController).toHaveBeenCalled();
-
-    // Assert: onTextLangQuerySubmit should be called with the new controller
-    expect(onTextLangQuerySubmit).toHaveBeenCalledWith(
-      { esql: 'SELECT * FROM test' },
-      expect.any(AbortController)
-    );
   });
 
   it('should not overwrite editor content when loading state changes, but should overwrite on subsequent query changes', () => {

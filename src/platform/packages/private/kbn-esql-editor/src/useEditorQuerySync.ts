@@ -46,6 +46,7 @@ export const useEditorQuerySync = ({
     edited: fixedQuery ?? '',
     editedTs: Date.now(),
     submitted: fixedQuery ?? '',
+    isSubmittedTs: isLoading ? Date.now() : undefined,
     isLoading,
     isLoadingTs: isLoading ? Date.now() : undefined,
   });
@@ -53,14 +54,19 @@ export const useEditorQuerySync = ({
   useEffect(() => {
     if (isEditorMounted) {
       const isLoadingTs = isLoading && !query.isLoading ? Date.now() : query.isLoadingTs;
-      const nextQuery = {
-        ...query,
-        isLoading,
-      };
-      if (
-        query.edited !== fixedQuery &&
-        (editorIsInline || (isLoadingTs && isLoadingTs > query.editedTs))
-      ) {
+
+      const isLoadingTsNewer =
+        isLoadingTs &&
+        (!query.editedTs || isLoadingTs > query.editedTs) &&
+        (!query.isSubmittedTs || isLoading > query.isSubmittedTs);
+
+      const nextQuery = { ...query };
+      if (isLoadingTsNewer) {
+        nextQuery.isLoading = isLoading;
+        nextQuery.isLoadingTs = isLoadingTs;
+      }
+
+      if (query.edited !== fixedQuery && (editorIsInline || isLoadingTsNewer)) {
         nextQuery.edited = fixedQuery;
         nextQuery.submitted = fixedQuery;
       } else {
@@ -73,40 +79,40 @@ export const useEditorQuerySync = ({
   }, [fixedQuery, editorIsInline, isEditorMounted, isLoading, query]);
 
   const handleQuerySubmit = useCallback(() => {
-    if (query.isLoading && allowQueryCancellation) {
-      currentAbortController.abort();
-      const newController = new AbortController();
-      setNewAbortController(newController);
-      onTextLangQuerySubmit({ esql: query.edited }, newController); // Removed language property
+    if (query.isLoading && isLoading && allowQueryCancellation) {
+      currentAbortController?.abort();
+      setQuery((prevState) => ({
+        ...prevState,
+        isLoading: false,
+        isLoadingTs: undefined,
+      }));
+    } else {
+      const abc = new AbortController();
+      setNewAbortController(abc);
       setQuery((prevState) => ({
         ...prevState,
         submitted: query.edited,
+        isSubmittedTs: Date.now(),
         isLoading: true,
         isLoadingTs: Date.now(),
       }));
-    } else if (!query.isLoading) {
-      onTextLangQuerySubmit({ esql: query.edited }, currentAbortController); // Removed language property
-      setQuery((prevState) => ({
-        ...prevState,
-        submitted: query.edited,
-        isLoading: true,
-        isLoadingTs: Date.now(),
-      }));
+      onTextLangQuerySubmit({ esql: query.edited } as AggregateQuery, abc);
     }
   }, [
-    allowQueryCancellation,
     currentAbortController,
-    setNewAbortController,
-    onTextLangQuerySubmit,
+    allowQueryCancellation,
+    isLoading,
     query.edited,
     query.isLoading,
+    onTextLangQuerySubmit,
+    setNewAbortController,
   ]);
 
   const handleQueryUpdate = useCallback(
     (value: string) => {
       if (!editorIsInline) {
         // allows to apply changes to the code when the query is running
-        // preventing a race condition in the inline editor mode, when this is not necerray
+        // preventing a race condition in the inline editor mode, when this is not necessary
         // setCode(value);
         setQuery((prevState) => ({ ...prevState, edited: value, editedTs: Date.now() }));
       }
