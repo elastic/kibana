@@ -159,9 +159,6 @@ describe('useEditorQuerySync', () => {
     );
   });
 
-
-
-
   it('should not overwrite editor content when loading state changes, but should overwrite on subsequent query changes', () => {
     const { result, rerender } = renderHook((props) => useEditorQuerySync(props), {
       initialProps: {
