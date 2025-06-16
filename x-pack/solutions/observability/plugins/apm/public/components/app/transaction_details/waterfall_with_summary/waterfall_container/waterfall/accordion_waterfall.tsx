@@ -43,6 +43,7 @@ interface AccordionWaterfallProps {
   maxLevelOpen: number;
   displayLimit?: number;
   isEmbeddable?: boolean;
+  scrollElement?: Element;
 }
 
 type WaterfallProps = Omit<
@@ -94,6 +95,7 @@ export function AccordionWaterfall({
   waterfall,
   isOpen,
   isEmbeddable = false,
+  scrollElement,
   ...props
 }: AccordionWaterfallProps) {
   return (
@@ -104,7 +106,7 @@ export function AccordionWaterfall({
       isOpen={isOpen}
       isEmbeddable={isEmbeddable}
     >
-      <Waterfall {...props} />
+      <Waterfall {...props} scrollElement={scrollElement} />
     </WaterfallContextProvider>
   );
 }
@@ -129,7 +131,7 @@ function Waterfall(props: WaterfallProps) {
   };
 
   return (
-    <WindowScroller onScroll={onScroll}>
+    <WindowScroller onScroll={onScroll} scrollElement={props.scrollElement}>
       {({ registerChild }) => (
         <AutoSizer disableHeight>
           {({ width }) => (

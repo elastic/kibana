@@ -12,18 +12,24 @@ import { useFetchIntegrations } from '../../hooks/alert_summary/use_fetch_integr
 import { LANDING_PAGE_PROMPT_TEST_ID } from '../../components/alert_summary/landing_page/landing_page';
 import { useAddIntegrationsUrl } from '../../../common/hooks/use_add_integrations_url';
 import { DATA_VIEW_LOADING_PROMPT_TEST_ID } from '../../components/alert_summary/wrapper';
-import { useKibana } from '../../../common/lib/kibana';
 import { useFindRulesQuery } from '../../../detection_engine/rule_management/api/hooks/use_find_rules_query';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useCreateDataView } from '../../../common/hooks/use_create_data_view';
+import { TestProviders } from '../../../common/mock';
 
 jest.mock('../../hooks/alert_summary/use_fetch_integrations');
 jest.mock('../../../common/hooks/use_add_integrations_url');
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../detection_engine/rule_management/api/hooks/use_find_rules_query');
+jest.mock('../../../common/hooks/use_experimental_features');
+jest.mock('../../../common/hooks/use_create_data_view');
+jest.mock('../../../data_view_manager/hooks/use_data_view');
 
 describe('<AlertSummaryPage />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     (useFindRulesQuery as jest.Mock).mockReturnValue({
       isLoading: false,
       data: {
@@ -57,20 +63,19 @@ describe('<AlertSummaryPage />', () => {
       onClick: jest.fn(),
     });
 
-    const { getByTestId, queryByTestId } = render(<AlertSummaryPage />);
+    const { getByTestId, queryByTestId } = render(
+      <TestProviders>
+        <AlertSummaryPage />
+      </TestProviders>
+    );
     expect(queryByTestId(LOADING_INTEGRATIONS_TEST_ID)).not.toBeInTheDocument();
     expect(getByTestId(LANDING_PAGE_PROMPT_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render wrapper if packages are installed', async () => {
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        data: {
-          dataViews: {
-            create: jest.fn(),
-          },
-        },
-      },
+    (useCreateDataView as jest.Mock).mockReturnValue({
+      dataView: undefined,
+      loading: false,
     });
     (useFetchIntegrations as jest.Mock).mockReturnValue({
       availablePackages: [],
