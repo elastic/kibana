@@ -148,7 +148,7 @@ export const ReportDiagnostic = ({ apiClient, clientConfig }: Props) => {
             />
           </EuiText>
         </EuiFlyoutHeader>
-        <EuiFlyoutBody banner={outcomeCallout} aria-live="polite">
+        <EuiFlyoutBody banner={<div aria-live="polite">{outcomeCallout}</div>}>
           <EuiTitle size="s">
             <h2>
               <FormattedMessage
