@@ -11,7 +11,7 @@ import expect from '@kbn/expect';
 import { ReportManager, METRIC_TYPE, UiCounterMetricType, Report } from '@kbn/analytics';
 import { UsageCountersSavedObject } from '@kbn/usage-collection-plugin/server';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
-import { sleep } from '@kbn/test';
+import { delay } from '@kbn/test-jest-helpers';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const APP_NAME = 'myApp';
@@ -93,7 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       await sendReport(report);
       // Wait for the report to be query-able in ES since sending report uses (refresh = false)
-      await sleep(3000);
+      await delay(3000);
       await retry.tryWithRetries(
         'reported events to be stored into ES',
         async () => {
@@ -123,7 +123,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       await sendReport(report);
       // Wait for the report to be query-able in ES since sending report uses (refresh = false)
-      await sleep(3000);
+      await delay(3000);
       await retry.tryWithRetries(
         'reported events to be stored into ES',
         async () => {
