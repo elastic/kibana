@@ -2,8 +2,19 @@
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": ["jest", "node"]
+    "types": [
+      "jest",
+      "node",
+      "react",
+      "@kbn/ambient-ui-types",
+    ],
   },
-  "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": ["target/**/*"]
+  "include": [
+    "**/*.ts",
+  ],
+  "kbn_references": [
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
 }

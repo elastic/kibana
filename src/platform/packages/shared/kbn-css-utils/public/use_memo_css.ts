@@ -11,8 +11,6 @@ import { useMemo } from 'react';
 import { CSSInterpolation } from '@emotion/css';
 import { UseEuiTheme, useEuiTheme } from '@elastic/eui';
 
-// This file replaces scss core/public/_mixins.scss
-
 export type EmotionStyles = Record<
   string,
   CSSInterpolation | ((theme: UseEuiTheme) => CSSInterpolation)
