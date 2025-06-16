@@ -351,12 +351,11 @@ function EmbeddableRelatedErrors({
 
   if (errorCount > 0 && getRelatedErrorsHref) {
     return (
-      // TODO error fix TS error
       // eslint-disable-next-line @elastic/eui/href-or-on-click
       <EuiBadge
         color={euiTheme.colors.danger}
         iconType="arrowRight"
-        href={getRelatedErrorsHref(item.id)}
+        href={getRelatedErrorsHref(item.id) as any}
         onClick={(e: React.MouseEvent | React.KeyboardEvent) => {
           e.stopPropagation();
         }}
