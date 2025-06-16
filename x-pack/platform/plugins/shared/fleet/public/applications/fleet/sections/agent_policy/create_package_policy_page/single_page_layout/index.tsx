@@ -285,7 +285,11 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   }, [agentPolicyIds, selectedPolicyTab, isFleetEnabled]);
 
   useEffect(() => {
-    if ((integration || integrationToEnable) && integrationToEnable !== integration) {
+    if (
+      (integration || integrationToEnable) &&
+      integrationToEnable !== integration &&
+      addIntegrationFlyoutProps
+    ) {
       if (formState !== 'LOADING') {
         setFormState('LOADING');
       } else {
@@ -293,7 +297,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       }
       setIntegrationToEnable(integration);
     }
-  }, [integration, integrationToEnable, setFormState, formState]);
+  }, [integration, integrationToEnable, setFormState, formState, addIntegrationFlyoutProps]);
 
   useEffect(() => {
     if (addIntegrationFlyoutProps?.isSubmitted && formState !== 'LOADING') {
