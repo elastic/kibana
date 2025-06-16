@@ -41,7 +41,7 @@ import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_
  * and the SummaryPanel component for data rendering.
  */
 export const CorrelationsOverview: React.FC = () => {
-  const { dataAsNestedObject, eventId, getFieldsData, scopeId, isPreview, isPreviewMode } =
+  const { dataAsNestedObject, eventId, getFieldsData, scopeId, isRulePreview, isPreviewMode } =
     useDocumentDetailsContext();
   const { isTourShown, activeStep } = useTourContext();
 
@@ -63,7 +63,7 @@ export const CorrelationsOverview: React.FC = () => {
     getFieldsData,
     dataAsNestedObject,
     eventId,
-    isPreview,
+    isRulePreview,
   });
   const { show: showSameSourceAlerts, originalEventId } = useShowRelatedAlertsBySameSourceEvent({
     eventId,
