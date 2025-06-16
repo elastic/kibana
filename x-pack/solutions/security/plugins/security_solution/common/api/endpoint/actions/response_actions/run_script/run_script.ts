@@ -18,6 +18,64 @@ const NonEmptyString = schema.string({
     }
   },
 });
+
+// CrowdStrike schemas
+const CrowdStrikeRunScriptActionRequestParamsSchema = schema.object(
+  {
+    /**
+     * The script to run
+     */
+    raw: schema.maybe(NonEmptyString),
+    /**
+     * The path to the script on the host to run
+     */
+    hostPath: schema.maybe(NonEmptyString),
+    /**
+     * The path to the script in the cloud to run
+     */
+    cloudFile: schema.maybe(NonEmptyString),
+    /**
+     * The command line to run
+     */
+    commandLine: schema.maybe(NonEmptyString),
+    /**
+     * The max timeout value before the command is killed. Number represents milliseconds
+     */
+    timeout: schema.maybe(schema.number({ min: 1 })),
+  },
+  {
+    validate: (params) => {
+      if (!params.raw && !params.hostPath && !params.cloudFile) {
+        return 'At least one of Raw, HostPath, or CloudFile must be provided';
+      }
+    },
+  }
+);
+
+export const CrowdStrikeRunScriptActionRequestSchema = {
+  body: schema.object({
+    ...restBaseSchema,
+    parameters: CrowdStrikeRunScriptActionRequestParamsSchema,
+  }),
+};
+
+// Microsoft Defender Endpoint schemas
+const MSDefenderEndpointRunScriptActionRequestParamsSchema = schema.object({
+  /**
+   * The path to the script in the cloud to run
+   */
+  scriptName: NonEmptyString,
+  args: schema.maybe(NonEmptyString),
+});
+
+export const MSDefenderEndpointRunScriptActionRequestSchema = {
+  body: schema.object({
+    ...restBaseSchema,
+    parameters: MSDefenderEndpointRunScriptActionRequestParamsSchema,
+  }),
+};
+
+// Main schema for validation (unchanged for backward compatibility)
 export const RunScriptActionRequestSchema = {
   body: schema.object({
     ...restBaseSchema,
@@ -76,4 +134,18 @@ export const RunScriptActionRequestSchema = {
   }),
 };
 
+// Typed exports
+export type MSDefenderRunScriptActionRequestBody = TypeOf<
+  typeof MSDefenderEndpointRunScriptActionRequestSchema.body
+>;
+export type CrowdStrikeRunScriptActionRequestBody = TypeOf<
+  typeof CrowdStrikeRunScriptActionRequestSchema.body
+>;
+
 export type RunScriptActionRequestBody = TypeOf<typeof RunScriptActionRequestSchema.body>;
+
+// export type RunScriptActionRequestBody = Omit<BaseRunScriptActionRequest, 'parameters'> & {
+//   parameters:
+//   | MSDefenderRunScriptActionRequestBody['parameters']
+//   | CrowdStrikeRunScriptActionRequestBody['parameters'];
+// };
