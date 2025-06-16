@@ -19,8 +19,10 @@ import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { registerRoutes } from '@kbn/server-route-repository';
+import { schema } from '@kbn/config-schema';
 import { StreamsConfig, configSchema, exposeToBrowserConfig } from '../common/config';
 import {
+  OBSERVABILITY_ENABLE_STREAMS_UI,
   STREAMS_API_PRIVILEGES,
   STREAMS_CONSUMER,
   STREAMS_FEATURE_ID,
@@ -63,7 +65,7 @@ export class StreamsPlugin
   public logger: Logger;
   public server?: StreamsServer;
   private isDev: boolean;
-  private telemtryService = new StreamsTelemetryService();
+  private telemetryService = new StreamsTelemetryService();
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
@@ -80,7 +82,7 @@ export class StreamsPlugin
       logger: this.logger,
     } as StreamsServer;
 
-    this.telemtryService.setup(core.analytics);
+    this.telemetryService.setup(core.analytics);
 
     const isSignificantEventsEnabled = this.config.experimental?.significantEventsEnabled === true;
     const alertingFeatures = isSignificantEventsEnabled
@@ -157,7 +159,7 @@ export class StreamsPlugin
       dependencies: {
         assets: assetService,
         server: this.server,
-        telemetry: this.telemtryService.getClient(),
+        telemetry: this.telemetryService.getClient(),
         getScopedClients: async ({
           request,
         }: {
@@ -198,6 +200,27 @@ export class StreamsPlugin
       core,
       logger: this.logger,
       runDevModeChecks: this.isDev,
+    });
+
+    core.uiSettings.register({
+      [OBSERVABILITY_ENABLE_STREAMS_UI]: {
+        category: ['observability'],
+        name: 'Streams',
+        value: false,
+        description: i18n.translate('xpack.streams.enableStreamsUIDescription', {
+          defaultMessage: '{technicalPreviewLabel} Enable the {streamsLink}.',
+          values: {
+            technicalPreviewLabel: `<em>[${i18n.translate('xpack.streams.technicalPreviewLabel', {
+              defaultMessage: 'Technical Preview',
+            })}]</em>`,
+            streamsLink: `<a href="https://www.elastic.co/docs/solutions/observability/logs/streams/streams">Streams UI</href>`,
+          },
+        }),
+        type: 'boolean',
+        schema: schema.boolean(),
+        requiresPageReload: true,
+        solution: 'oblt',
+      },
     });
 
     return {};
