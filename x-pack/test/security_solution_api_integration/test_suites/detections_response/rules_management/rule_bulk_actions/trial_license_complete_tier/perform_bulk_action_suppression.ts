@@ -7,10 +7,6 @@
 
 import expect from 'expect';
 import {
-  DETECTION_ENGINE_RULES_BULK_ACTION,
-  DETECTION_ENGINE_RULES_URL,
-} from '@kbn/security-solution-plugin/common/constants';
-import {
   BulkActionTypeEnum,
   BulkActionEditTypeEnum,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
@@ -23,18 +19,7 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
-
-  const postBulkAction = () =>
-    supertest
-      .post(DETECTION_ENGINE_RULES_BULK_ACTION)
-      .set('kbn-xsrf', 'true')
-      .set('elastic-api-version', '2023-10-31');
-
-  const fetchRule = (ruleId: string) =>
-    supertest
-      .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`)
-      .set('kbn-xsrf', 'true')
-      .set('elastic-api-version', '2023-10-31');
+  const securitySolutionApi = getService('securitySolutionApi');
 
   // skips serverless MKI due to feature flag
   describe('@ess @serverless @skipInServerlessMKI perform_bulk_action suppression', () => {
@@ -67,16 +52,18 @@ export default ({ getService }: FtrProviderContext): void => {
           getCustomQueryRuleParams({ rule_id: ruleId, alert_suppression: existingSuppression })
         );
 
-        const { body: bulkEditResponse } = await postBulkAction()
-          .send({
+        const { body: bulkEditResponse } = await securitySolutionApi
+          .performRulesBulkAction({
             query: '',
-            action: BulkActionTypeEnum.edit,
-            [BulkActionTypeEnum.edit]: [
-              {
-                type: BulkActionEditTypeEnum.set_alert_suppression,
-                value: suppressionToSet,
-              },
-            ],
+            body: {
+              action: BulkActionTypeEnum.edit,
+              [BulkActionTypeEnum.edit]: [
+                {
+                  type: BulkActionEditTypeEnum.set_alert_suppression,
+                  value: suppressionToSet,
+                },
+              ],
+            },
           })
           .expect(200);
 
@@ -93,7 +80,11 @@ export default ({ getService }: FtrProviderContext): void => {
         );
 
         // Check that the updates have been persisted
-        const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+        const { body: updatedRule } = await securitySolutionApi
+          .readRule({
+            query: { rule_id: ruleId },
+          })
+          .expect(200);
 
         expect(updatedRule.alert_suppression).toEqual(resultingSuppression);
       });
@@ -112,16 +103,18 @@ export default ({ getService }: FtrProviderContext): void => {
           createRule(supertest, log, getCustomQueryRuleParams({ rule_id: 'id_2' })),
         ]);
 
-        const { body: bulkEditResponse } = await postBulkAction()
-          .send({
+        const { body: bulkEditResponse } = await securitySolutionApi
+          .performRulesBulkAction({
             query: '',
-            action: BulkActionTypeEnum.edit,
-            [BulkActionTypeEnum.edit]: [
-              {
-                type: BulkActionEditTypeEnum.set_alert_suppression,
-                value: suppressionToSet,
-              },
-            ],
+            body: {
+              action: BulkActionTypeEnum.edit,
+              [BulkActionTypeEnum.edit]: [
+                {
+                  type: BulkActionEditTypeEnum.set_alert_suppression,
+                  value: suppressionToSet,
+                },
+              ],
+            },
           })
           .expect(200);
 
@@ -138,7 +131,11 @@ export default ({ getService }: FtrProviderContext): void => {
         );
 
         // Check that the updates have been persisted
-        const { body: updatedRule } = await fetchRule('id_1').expect(200);
+        const { body: updatedRule } = await securitySolutionApi
+          .readRule({
+            query: { rule_id: 'id_1' },
+          })
+          .expect(200);
 
         expect(updatedRule.alert_suppression).toEqual(resultingSuppression);
       });
@@ -155,16 +152,18 @@ export default ({ getService }: FtrProviderContext): void => {
           alert_suppression: existingSuppression,
         });
 
-        const { body: bulkEditResponse } = await postBulkAction()
-          .send({
+        const { body: bulkEditResponse } = await securitySolutionApi
+          .performRulesBulkAction({
             query: '',
-            action: BulkActionTypeEnum.edit,
-            [BulkActionTypeEnum.edit]: [
-              {
-                type: BulkActionEditTypeEnum.set_alert_suppression,
-                value: suppressionToSet,
-              },
-            ],
+            body: {
+              action: BulkActionTypeEnum.edit,
+              [BulkActionTypeEnum.edit]: [
+                {
+                  type: BulkActionEditTypeEnum.set_alert_suppression,
+                  value: suppressionToSet,
+                },
+              ],
+            },
           })
           .expect(500);
 
@@ -180,7 +179,11 @@ export default ({ getService }: FtrProviderContext): void => {
           "Threshold rule doesn't support this action. Use 'set_alert_suppression_for_threshold' action instead"
         );
         // Check that the updates did not apply to the rule
-        const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+        const { body: updatedRule } = await securitySolutionApi
+          .readRule({
+            query: { rule_id: ruleId },
+          })
+          .expect(200);
 
         expect(updatedRule.alert_suppression).toEqual(existingSuppression);
       });
@@ -195,16 +198,18 @@ export default ({ getService }: FtrProviderContext): void => {
           createRule(supertest, log, getThresholdRuleForAlertTesting(['*'], 'id_2')),
         ]);
 
-        const { body: bulkEditResponse } = await postBulkAction()
-          .send({
+        const { body: bulkEditResponse } = await securitySolutionApi
+          .performRulesBulkAction({
             query: '',
-            action: BulkActionTypeEnum.edit,
-            [BulkActionTypeEnum.edit]: [
-              {
-                type: BulkActionEditTypeEnum.set_alert_suppression,
-                value: suppressionToSet,
-              },
-            ],
+            body: {
+              action: BulkActionTypeEnum.edit,
+              [BulkActionTypeEnum.edit]: [
+                {
+                  type: BulkActionEditTypeEnum.set_alert_suppression,
+                  value: suppressionToSet,
+                },
+              ],
+            },
           })
           .expect(500);
 
@@ -240,15 +245,17 @@ export default ({ getService }: FtrProviderContext): void => {
           }),
         ]);
 
-        const { body: bulkEditResponse } = await postBulkAction()
-          .send({
+        const { body: bulkEditResponse } = await securitySolutionApi
+          .performRulesBulkAction({
             query: '',
-            action: BulkActionTypeEnum.edit,
-            [BulkActionTypeEnum.edit]: [
-              {
-                type: BulkActionEditTypeEnum.delete_alert_suppression,
-              },
-            ],
+            body: {
+              action: BulkActionTypeEnum.edit,
+              [BulkActionTypeEnum.edit]: [
+                {
+                  type: BulkActionEditTypeEnum.delete_alert_suppression,
+                },
+              ],
+            },
           })
           .expect(200);
 
@@ -263,7 +270,14 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(bulkEditResponse.attributes.results.updated[0].alert_suppression).toEqual(undefined);
 
         // Check that the updates have been persisted
-        const updatedRules = await Promise.all([fetchRule('id_1'), await fetchRule('id_2')]);
+        const updatedRules = await Promise.all([
+          securitySolutionApi.readRule({
+            query: { rule_id: 'id_1' },
+          }),
+          await securitySolutionApi.readRule({
+            query: { rule_id: 'id_2' },
+          }),
+        ]);
         expect(updatedRules[0].body.alert_suppression).toEqual(undefined);
         expect(updatedRules[1].body.alert_suppression).toEqual(undefined);
       });
@@ -287,16 +301,18 @@ export default ({ getService }: FtrProviderContext): void => {
           alert_suppression: existingSuppression,
         });
 
-        const { body: bulkEditResponse } = await postBulkAction()
-          .send({
+        const { body: bulkEditResponse } = await securitySolutionApi
+          .performRulesBulkAction({
             query: '',
-            action: BulkActionTypeEnum.edit,
-            [BulkActionTypeEnum.edit]: [
-              {
-                type: BulkActionEditTypeEnum.set_alert_suppression_for_threshold,
-                value: suppressionToSet,
-              },
-            ],
+            body: {
+              action: BulkActionTypeEnum.edit,
+              [BulkActionTypeEnum.edit]: [
+                {
+                  type: BulkActionEditTypeEnum.set_alert_suppression_for_threshold,
+                  value: suppressionToSet,
+                },
+              ],
+            },
           })
           .expect(200);
 
@@ -313,7 +329,11 @@ export default ({ getService }: FtrProviderContext): void => {
         );
 
         // Check that the updates have been persisted
-        const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+        const { body: updatedRule } = await securitySolutionApi
+          .readRule({
+            query: { rule_id: ruleId },
+          })
+          .expect(200);
 
         expect(updatedRule.alert_suppression).toEqual(resultingSuppression);
       });
@@ -329,16 +349,18 @@ export default ({ getService }: FtrProviderContext): void => {
 
         await createRule(supertest, log, getThresholdRuleForAlertTesting(['*'], ruleId));
 
-        const { body: bulkEditResponse } = await postBulkAction()
-          .send({
+        const { body: bulkEditResponse } = await securitySolutionApi
+          .performRulesBulkAction({
             query: '',
-            action: BulkActionTypeEnum.edit,
-            [BulkActionTypeEnum.edit]: [
-              {
-                type: BulkActionEditTypeEnum.set_alert_suppression_for_threshold,
-                value: suppressionToSet,
-              },
-            ],
+            body: {
+              action: BulkActionTypeEnum.edit,
+              [BulkActionTypeEnum.edit]: [
+                {
+                  type: BulkActionEditTypeEnum.set_alert_suppression_for_threshold,
+                  value: suppressionToSet,
+                },
+              ],
+            },
           })
           .expect(200);
 
@@ -355,7 +377,11 @@ export default ({ getService }: FtrProviderContext): void => {
         );
 
         // Check that the updates have been persisted
-        const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+        const { body: updatedRule } = await securitySolutionApi
+          .readRule({
+            query: { rule_id: ruleId },
+          })
+          .expect(200);
 
         expect(updatedRule.alert_suppression).toEqual(resultingSuppression);
       });
@@ -365,16 +391,18 @@ export default ({ getService }: FtrProviderContext): void => {
 
         await createRule(supertest, log, getCustomQueryRuleParams({ rule_id: ruleId }));
 
-        const { body: bulkEditResponse } = await postBulkAction()
-          .send({
+        const { body: bulkEditResponse } = await securitySolutionApi
+          .performRulesBulkAction({
             query: '',
-            action: BulkActionTypeEnum.edit,
-            [BulkActionTypeEnum.edit]: [
-              {
-                type: BulkActionEditTypeEnum.set_alert_suppression_for_threshold,
-                value: { duration: { value: 10, unit: 'm' } },
-              },
-            ],
+            body: {
+              action: BulkActionTypeEnum.edit,
+              [BulkActionTypeEnum.edit]: [
+                {
+                  type: BulkActionEditTypeEnum.set_alert_suppression_for_threshold,
+                  value: { duration: { value: 10, unit: 'm' } },
+                },
+              ],
+            },
           })
           .expect(500);
 
@@ -390,7 +418,11 @@ export default ({ getService }: FtrProviderContext): void => {
           "query rule type doesn't support this action. Use 'set_alert_suppression' action instead."
         );
         // Check that the updates did not apply to the rule
-        const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+        const { body: updatedRule } = await securitySolutionApi
+          .readRule({
+            query: { rule_id: ruleId },
+          })
+          .expect(200);
 
         expect(updatedRule.alert_suppression).toEqual(undefined);
       });
