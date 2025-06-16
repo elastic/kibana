@@ -17,9 +17,10 @@ import {
 
 export interface BookAttributes {
   bookTitle: string;
-  authorName: string;
-  numberOfPages: number;
-  bookSynopsis?: string;
+  author: string;
+  pages: number;
+  synopsis?: string;
+  published?: number;
 }
 
 export interface BookByValueSerializedState {
@@ -27,7 +28,7 @@ export interface BookByValueSerializedState {
 }
 
 export interface BookByReferenceSerializedState {
-  savedBookId: string;
+  savedObjectId: string;
 }
 
 export interface HasSavedBookId {
@@ -40,10 +41,9 @@ export type BookSerializedState = SerializedTitles &
 /**
  * Book runtime state is a flattened version of all possible state keys.
  */
-export interface BookRuntimeState
-  extends BookAttributes,
-    Partial<BookByReferenceSerializedState>,
-    SerializedTitles {}
+export type BookRuntimeState = BookAttributes &
+  Partial<BookByReferenceSerializedState> &
+  SerializedTitles;
 
 export type BookApi = DefaultEmbeddableApi<BookSerializedState> &
   HasEditCapabilities &

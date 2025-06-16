@@ -25,6 +25,7 @@ import {
   apiPublishesDataLoading,
   apiPublishesUnsavedChanges,
 } from '@kbn/presentation-publishing';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { lastSavedStateSessionStorage } from './session_storage/last_saved_state';
 import { unsavedChangesSessionStorage } from './session_storage/unsaved_changes';
 import { PageApi, PageState } from './types';
@@ -39,9 +40,10 @@ function deserializePanels(panels: PageState['panels']) {
   return { layout, childState };
 }
 
-export function getPageApi() {
+export function getPageApi(embeddable: EmbeddableStart) {
   const initialUnsavedState = unsavedChangesSessionStorage.load();
-  const initialState = lastSavedStateSessionStorage.load();
+  const initialState = lastSavedStateSessionStorage.load(embeddable);
+
   const lastSavedState$ = new BehaviorSubject<PageState>(initialState);
   const children$ = new BehaviorSubject<{ [key: string]: unknown }>({});
   const { layout: initialLayout, childState: initialChildState } = deserializePanels(
@@ -54,6 +56,7 @@ export function getPageApi() {
   const timeRange$ = new BehaviorSubject<TimeRange>(
     initialUnsavedState?.timeRange ?? initialState.timeRange
   );
+
   const reload$ = new Subject<void>();
 
   function serializePage() {
@@ -174,7 +177,7 @@ export function getPageApi() {
         // simulate save await
         await new Promise((resolve) => setTimeout(resolve, 1000));
         lastSavedState$.next(serializedPage);
-        lastSavedStateSessionStorage.save(serializedPage);
+        lastSavedStateSessionStorage.save(serializedPage, embeddable);
         unsavedChangesSessionStorage.clear();
       },
       layout$,
