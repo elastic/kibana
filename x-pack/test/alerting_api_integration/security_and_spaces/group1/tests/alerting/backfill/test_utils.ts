@@ -14,6 +14,7 @@ import type { FtrProviderContext, RetryService } from '@kbn/ftr-common-functiona
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server/saved_objects';
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { TaskManagerDoc } from '../../../../../common/lib';
 import { getEventLog } from '../../../../../common/lib';
 import {
@@ -50,7 +51,15 @@ export const testDocTimestamps = [
   moment().utc().startOf('day').subtract(9, 'days').add(41, 'minutes').toISOString(),
 ];
 
-export async function indexTestDocs(es: Client, esTestIndexTool: ESTestIndexTool) {
+export async function indexTestDocs(
+  es: Client,
+  esTestIndexTool: ESTestIndexTool,
+  log?: ToolingLog
+) {
+  if (log) {
+    log.info(`Test doc timestamps: ${JSON.stringify(testDocTimestamps)}`);
+  }
+
   await asyncForEach(testDocTimestamps, async (timestamp: string) => {
     await createEsDocument(es, new Date(timestamp).valueOf(), 1, ES_TEST_INDEX_NAME);
   });

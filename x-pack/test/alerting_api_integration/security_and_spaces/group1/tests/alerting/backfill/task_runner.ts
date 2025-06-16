@@ -84,7 +84,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       const spaceId = SuperuserAtSpace1.space.id;
 
       // Index documents
-      await indexTestDocs(es, esTestIndexTool);
+      await indexTestDocs(es, esTestIndexTool, log);
 
       // Create siem.queryRule
       const response1 = await supertestWithoutAuth
