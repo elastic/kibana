@@ -25,6 +25,7 @@ import type { HostItem } from '../../../../common/search_strategy';
 import { buildHostNamesFilter } from '../../../../common/search_strategy';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
+import { HostPanelFooter } from './footer';
 import { HostPanelContent } from './content';
 import { HostPanelHeader } from './header';
 import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
@@ -34,6 +35,8 @@ import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_
 import { HostPreviewPanelFooter } from '../host_preview/footer';
 import { useNavigateToHostDetails } from './hooks/use_navigate_to_host_details';
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
+import { useKibana } from '../../../common/lib/kibana';
+import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
 
 export interface HostPanelProps extends Record<string, unknown> {
   contextID: string;
@@ -57,6 +60,9 @@ const FIRST_RECORD_PAGINATION = {
 };
 
 export const HostPanel = ({ contextID, scopeId, hostName, isPreviewMode }: HostPanelProps) => {
+  const { uiSettings } = useKibana().services;
+  const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
+
   const { to, from, isInitializing, setQuery, deleteQuery } = useGlobalTime();
   const hostNameFilterQuery = useMemo(
     () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
@@ -162,7 +168,7 @@ export const HostPanel = ({ contextID, scopeId, hostName, isPreviewMode }: HostP
               }
               expandDetails={openDefaultPanel}
               isPreviewMode={isPreviewMode}
-              isPreview={scopeId === TableId.rulePreview}
+              isRulePreview={scopeId === TableId.rulePreview}
             />
             <HostPanelHeader hostName={hostName} observedHost={observedHostWithAnomalies} />
             <HostPanelContent
@@ -180,6 +186,7 @@ export const HostPanel = ({ contextID, scopeId, hostName, isPreviewMode }: HostP
             {isPreviewMode && (
               <HostPreviewPanelFooter hostName={hostName} contextID={contextID} scopeId={scopeId} />
             )}
+            {!isPreviewMode && assetInventoryEnabled && <HostPanelFooter hostName={hostName} />}
           </>
         );
       }}
