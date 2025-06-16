@@ -63,24 +63,13 @@ export const RunScriptActionRequestSchema = {
       schema.conditional(
         schema.siblingRef('agent_type'),
         'microsoft_defender_endpoint',
-        schema.object(
-          {
-            /**
-             * The path to the script in the cloud to run
-             */
-            scriptName: schema.string({
-              minLength: 1,
-            }),
-            args: schema.maybe(schema.string({ minLength: 1 })),
-          },
-          {
-            validate: (params) => {
-              if (!params.scriptName) {
-                return 'ScriptName must be provided';
-              }
-            },
-          }
-        ),
+        schema.object({
+          /**
+           * The path to the script in the cloud to run
+           */
+          scriptName: NonEmptyString,
+          args: schema.maybe(NonEmptyString),
+        }),
         schema.never()
       ),
     ]),
