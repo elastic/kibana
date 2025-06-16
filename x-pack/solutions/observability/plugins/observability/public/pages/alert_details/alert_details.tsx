@@ -133,6 +133,10 @@ export function AlertDetails() {
     await Promise.all([refetchRelatedDashboards(), refetch()]);
   }, [refetch, refetchRelatedDashboards]);
 
+  // used to trigger refetch when rule edit flyout closes
+  const onUpdate = useCallback(() => {
+    refetch();
+  }, [refetch]);
   const [alertStatus, setAlertStatus] = useState<AlertStatus>();
   const { euiTheme } = useEuiTheme();
   const [sources, setSources] = useState<AlertDetailsSource[]>();
@@ -424,6 +428,7 @@ export function AlertDetails() {
               alertIndex={alertDetail?.raw._index}
               alertStatus={alertStatus}
               onUntrackAlert={onUntrackAlert}
+              onUpdate={onUpdate}
             />
           </CasesContext>,
         ],
