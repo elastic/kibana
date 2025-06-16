@@ -44,6 +44,32 @@ interface UseCaseOption {
 }
 
 export const OnboardingFlowForm: FunctionComponent = () => {
+  const {
+    services: {
+      context: { isCloud },
+      pricing,
+    },
+  } = useKibana<ObservabilityOnboardingAppServices>();
+
+  const logsOnboardingEnabled =
+    pricing?.isFeatureAvailable('observability-logs-onboarding') ?? true;
+
+  const applicationUseCaseOption: UseCaseOption = {
+    id: 'application',
+    label: i18n.translate(
+      'xpack.observability_onboarding.experimentalOnboardingFlow.euiCheckableCard.applicationLabel',
+      { defaultMessage: 'Application' }
+    ),
+    description: i18n.translate(
+      'xpack.observability_onboarding.onboardingFlowForm.applicationDescription',
+      {
+        defaultMessage:
+          'Monitor the frontend and backend application that you have developed, set-up synthetic monitors',
+      }
+    ),
+    logos: ['opentelemetry', 'java', 'ruby', 'dotnet'],
+  };
+
   const options: UseCaseOption[] = [
     {
       id: 'host',
@@ -51,13 +77,17 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         'xpack.observability_onboarding.experimentalOnboardingFlow.euiCheckableCard.hostLabel',
         { defaultMessage: 'Host' }
       ),
-      description: i18n.translate(
-        'xpack.observability_onboarding.onboardingFlowForm.hostDescription',
-        {
-          defaultMessage:
-            'Monitor your host and the services running on it, set-up SLO, get alerted, remediate performance issues',
-        }
-      ),
+      description: logsOnboardingEnabled
+        ? i18n.translate('xpack.observability_onboarding.onboardingFlowForm.hostDescription', {
+            defaultMessage:
+              'Monitor your host and the services running on it, set-up SLO, get alerted, remediate performance issues',
+          })
+        : i18n.translate(
+            'xpack.observability_onboarding.logsEssential.onboardingFlowForm.hostDescription',
+            {
+              defaultMessage: 'Monitor logs on your host',
+            }
+          ),
       logos: ['opentelemetry', 'apache', 'mysql'],
     },
     {
@@ -66,30 +96,23 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         'xpack.observability_onboarding.experimentalOnboardingFlow.euiCheckableCard.kubernetesLabel',
         { defaultMessage: 'Kubernetes' }
       ),
-      description: i18n.translate(
-        'xpack.observability_onboarding.onboardingFlowForm.kubernetesDescription',
-        {
-          defaultMessage:
-            'Observe your Kubernetes cluster, and your container workloads using logs, metrics, traces and profiling data',
-        }
-      ),
+      description: logsOnboardingEnabled
+        ? i18n.translate(
+            'xpack.observability_onboarding.onboardingFlowForm.kubernetesDescription',
+            {
+              defaultMessage:
+                'Observe your Kubernetes cluster, and your container workloads using logs, metrics, traces and profiling data',
+            }
+          )
+        : i18n.translate(
+            'xpack.observability_onboarding.logsEssential.onboardingFlowForm.kubernetesDescription',
+            {
+              defaultMessage: 'Collect logs from your Kubernetes cluster and containers.',
+            }
+          ),
       logos: ['kubernetes', 'opentelemetry'],
     },
-    {
-      id: 'application',
-      label: i18n.translate(
-        'xpack.observability_onboarding.experimentalOnboardingFlow.euiCheckableCard.applicationLabel',
-        { defaultMessage: 'Application' }
-      ),
-      description: i18n.translate(
-        'xpack.observability_onboarding.onboardingFlowForm.applicationDescription',
-        {
-          defaultMessage:
-            'Monitor the frontend and backend application that you have developed, set-up synthetic monitors',
-        }
-      ),
-      logos: ['opentelemetry', 'java', 'ruby', 'dotnet'],
-    },
+    ...(logsOnboardingEnabled ? [applicationUseCaseOption] : []),
     {
       id: 'cloud',
       label: i18n.translate(
@@ -106,11 +129,6 @@ export const OnboardingFlowForm: FunctionComponent = () => {
     },
   ];
 
-  const {
-    services: {
-      context: { isCloud },
-    },
-  } = useKibana<ObservabilityOnboardingAppServices>();
   const radioGroupId = useGeneratedHtmlId({ prefix: 'onboardingCategory' });
   const categorySelectorTitleId = useGeneratedHtmlId();
   const packageListTitleId = useGeneratedHtmlId();
@@ -197,7 +215,11 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         </strong>
       </EuiTitle>
       <EuiSpacer />
-      <EuiFlexGrid columns={2} role="group" aria-labelledby={categorySelectorTitleId}>
+      <EuiFlexGrid
+        columns={logsOnboardingEnabled ? 2 : 3}
+        role="group"
+        aria-labelledby={categorySelectorTitleId}
+      >
         {options.map((option) => (
           <EuiFlexItem
             key={option.id}

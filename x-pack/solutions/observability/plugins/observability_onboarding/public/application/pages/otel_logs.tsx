@@ -17,8 +17,12 @@ export const OtelLogsPage = () => {
   const {
     services: {
       context: { isServerless },
+      pricing,
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
+
+  const logsOnboardingEnabled =
+    pricing?.isFeatureAvailable('observability-logs-onboarding') ?? true;
 
   return (
     <PageTemplate
@@ -31,13 +35,23 @@ export const OtelLogsPage = () => {
               defaultMessage: 'OpenTelemetry',
             }
           )}
-          captionCopy={i18n.translate(
-            'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.otel.description',
-            {
-              defaultMessage:
-                'Collect logs and host metrics using the Elastic distribution of the OTel collector.',
-            }
-          )}
+          captionCopy={
+            logsOnboardingEnabled
+              ? i18n.translate(
+                  'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.otel.description',
+                  {
+                    defaultMessage:
+                      'Collect logs and host metrics using the Elastic distribution of the OTel collector.',
+                  }
+                )
+              : i18n.translate(
+                  'xpack.observability_onboarding.logsEssential.experimentalOnboardingFlow.customHeader.otel.description',
+                  {
+                    defaultMessage:
+                      'Collect logs using the Elastic distribution of the OTel collector.',
+                  }
+                )
+          }
           isTechnicalPreview={isServerless}
         />
       }

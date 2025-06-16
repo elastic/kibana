@@ -120,6 +120,15 @@ export class ObservabilityOnboardingPlugin
 
     core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT);
 
+    core.pricing.registerProductFeatures([
+      {
+        id: 'observability-logs-onboarding',
+        description:
+          'Enables flows that onboard logs. This feature available only in the "complete" tier.',
+        products: [{ name: 'observability', tier: 'complete' }],
+      },
+    ]);
+
     return {};
   }
 

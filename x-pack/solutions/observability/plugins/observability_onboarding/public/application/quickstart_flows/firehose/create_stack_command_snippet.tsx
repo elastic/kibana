@@ -16,6 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   FIREHOSE_CLOUDFORMATION_STACK_NAME,
   FIREHOSE_STREAM_NAME,
@@ -23,6 +24,7 @@ import {
 import { CopyToClipboardButton } from '../shared/copy_to_clipboard_button';
 import { DownloadTemplateCallout } from './download_template_callout';
 import { buildCreateStackCommand, buildStackStatusCommand } from './utils';
+import { ObservabilityOnboardingAppServices } from '../../..';
 
 interface Props {
   encodedApiKey: string;
@@ -37,6 +39,12 @@ export function CreateStackCommandSnippet({
   templateUrl,
   isCopyPrimaryAction,
 }: Props) {
+  const {
+    services: { pricing },
+  } = useKibana<ObservabilityOnboardingAppServices>();
+
+  const logsOnboardingEnabled =
+    pricing?.isFeatureAvailable('observability-logs-onboarding') ?? true;
   const stackStatusAccordionId = useGeneratedHtmlId({ prefix: 'stackStatusAccordion' });
   const createStackCommand = buildCreateStackCommand({
     templateUrl,
@@ -49,29 +57,37 @@ export function CreateStackCommandSnippet({
     stackName: FIREHOSE_CLOUDFORMATION_STACK_NAME,
   });
 
+  const awsCLIInstallGuideLink = (
+    <EuiLink
+      data-test-subj="observabilityOnboardingFirehosePanelAwsInstallGuideLink"
+      href="https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html"
+      external
+      target="_blank"
+    >
+      {i18n.translate('xpack.observability_onboarding.firehosePanel.awsCLIInstallGuideLinkLabel', {
+        defaultMessage: 'AWS CLI',
+      })}
+    </EuiLink>
+  );
+
   return (
     <>
       <EuiText>
         <p>
-          <FormattedMessage
-            id="xpack.observability_onboarding.firehosePanel.createFirehoseStreamDescription"
-            defaultMessage="Run the command bellow in your terminal where you have {awsCLIInstallGuideLink} configured. The command will create a CloudFormation stack from our template that includes a Firehose delivery, backup S3 bucket, CloudWatch subscription filter and metrics stream along with required IAM roles."
-            values={{
-              awsCLIInstallGuideLink: (
-                <EuiLink
-                  data-test-subj="observabilityOnboardingFirehosePanelAwsInstallGuideLink"
-                  href="https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html"
-                  external
-                  target="_blank"
-                >
-                  {i18n.translate(
-                    'xpack.observability_onboarding.firehosePanel.awsCLIInstallGuideLinkLabel',
-                    { defaultMessage: 'AWS CLI' }
-                  )}
-                </EuiLink>
-              ),
-            }}
-          />
+          {logsOnboardingEnabled && (
+            <FormattedMessage
+              id="xpack.observability_onboarding.firehosePanel.createFirehoseStreamDescription"
+              defaultMessage="Run the command bellow in your terminal where you have {awsCLIInstallGuideLink} configured. The command will create a CloudFormation stack from our template that includes a Firehose delivery, backup S3 bucket, CloudWatch subscription filter and metrics stream along with required IAM roles."
+              values={{ awsCLIInstallGuideLink }}
+            />
+          )}
+          {!logsOnboardingEnabled && (
+            <FormattedMessage
+              id="xpack.observability_onboarding.logsEssential.firehosePanel.createFirehoseStreamDescription"
+              defaultMessage="Run the command bellow in your terminal where you have {awsCLIInstallGuideLink} configured. The command will create a CloudFormation stack from our template that includes a Firehose delivery, backup S3 bucket and CloudWatch subscription filter along with required IAM roles."
+              values={{ awsCLIInstallGuideLink }}
+            />
+          )}
         </p>
 
         <p>

@@ -55,6 +55,7 @@ export const OtelLogsPanel: React.FC = () => {
       share,
       http,
       context: { isServerless },
+      pricing,
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
 
@@ -80,6 +81,8 @@ export const OtelLogsPanel: React.FC = () => {
     }
   }, [onPageReady, setupData]);
 
+  const logsOnboardingEnabled =
+    pricing?.isFeatureAvailable('observability-logs-onboarding') ?? true;
   const ingestEndpointUrl = isServerless
     ? setupData?.managedOtlpServiceUrl
     : setupData?.elasticsearchUrl;
@@ -283,7 +286,7 @@ rm ./otel.yml && cp ${sampleConfigurationPath} ./otel.yml && mkdir -p ./data/ote
                       />
                     </EuiFlexItem>
                     <EuiFlexItem grow>
-                      <EuiFlexGroup direction="column" gutterSize="xs">
+                      <EuiFlexGroup direction="column" gutterSize="xs" justifyContent="center">
                         {deeplinks?.logs && (
                           <>
                             <EuiFlexItem grow={false}>
@@ -310,7 +313,7 @@ rm ./otel.yml && cp ${sampleConfigurationPath} ./otel.yml && mkdir -p ./data/ote
                           </>
                         )}
                         <EuiSpacer size="s" />
-                        {deeplinks?.metrics && (
+                        {logsOnboardingEnabled && deeplinks?.metrics && (
                           <>
                             <EuiFlexItem grow={false}>
                               <EuiText size="s">

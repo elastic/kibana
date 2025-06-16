@@ -9,12 +9,14 @@ import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   FIREHOSE_CLOUDFORMATION_STACK_NAME,
   FIREHOSE_STREAM_NAME,
 } from '../../../../common/aws_firehose';
 import { DownloadTemplateCallout } from './download_template_callout';
 import { buildCreateStackAWSConsoleURL } from './utils';
+import { ObservabilityOnboardingAppServices } from '../../..';
 
 interface Props {
   encodedApiKey: string;
@@ -29,6 +31,12 @@ export function CreateStackInAWSConsole({
   templateUrl,
   isPrimaryAction,
 }: Props) {
+  const {
+    services: { pricing },
+  } = useKibana<ObservabilityOnboardingAppServices>();
+
+  const logsOnboardingEnabled =
+    pricing?.isFeatureAvailable('observability-logs-onboarding') ?? true;
   const awsConsoleURL = buildCreateStackAWSConsoleURL({
     templateUrl,
     stackName: FIREHOSE_CLOUDFORMATION_STACK_NAME,
@@ -41,10 +49,18 @@ export function CreateStackInAWSConsole({
     <>
       <EuiText>
         <p>
-          <FormattedMessage
-            id="xpack.observability_onboarding.firehosePanel.createFirehoseStreamInAWSConsoleDescription"
-            defaultMessage="Click the button below to create a CloudFormation stack from our template. The stack will include a Firehose delivery stream, backup S3 bucket, CloudWatch subscription filter, metrics stream, and necessary IAM roles. Keep this page open, and return once you've submitted the form in AWS Console"
-          />
+          {logsOnboardingEnabled && (
+            <FormattedMessage
+              id="xpack.observability_onboarding.firehosePanel.createFirehoseStreamInAWSConsoleDescription"
+              defaultMessage="Click the button below to create a CloudFormation stack from our template. The stack will include a Firehose delivery stream, backup S3 bucket, CloudWatch subscription filter, metrics stream, and necessary IAM roles. Keep this page open, and return once you've submitted the form in AWS Console"
+            />
+          )}
+          {!logsOnboardingEnabled && (
+            <FormattedMessage
+              id="xpack.observability_onboarding.logsEssential.firehosePanel.createFirehoseStreamInAWSConsoleDescription"
+              defaultMessage="Click the button below to create a CloudFormation stack from our template. The stack will include a Firehose delivery stream, backup S3 bucket, CloudWatch subscription filter and necessary IAM roles. Keep this page open, and return once you've submitted the form in AWS Console"
+            />
+          )}
         </p>
         <p>
           <DownloadTemplateCallout />

@@ -48,7 +48,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
   const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
   const { onPageReady } = usePerformanceContext();
   const {
-    services: { share },
+    services: { share, pricing },
   } = useKibana<ObservabilityOnboardingContextValue>();
 
   useEffect(() => {
@@ -65,6 +65,8 @@ export const AutoDetectPanel: FunctionComponent = () => {
     return <EmptyPrompt onboardingFlowType="auto-detect" error={error} onRetryClick={refetch} />;
   }
 
+  const logsOnboardingEnabled =
+    pricing?.isFeatureAvailable('observability-logs-onboarding') ?? true;
   const registryIntegrations = installedIntegrations.filter(
     (integration) => integration.installSource === 'registry'
   );
@@ -89,12 +91,19 @@ export const AutoDetectPanel: FunctionComponent = () => {
               <>
                 <EuiText>
                   <p>
-                    {i18n.translate(
-                      'xpack.observability_onboarding.autoDetectPanel.p.wellScanYourHostLabel',
-                      {
-                        defaultMessage: "We'll scan your host for logs and metrics, including:",
-                      }
-                    )}
+                    {logsOnboardingEnabled
+                      ? i18n.translate(
+                          'xpack.observability_onboarding.autoDetectPanel.p.wellScanYourHostLabel',
+                          {
+                            defaultMessage: "We'll scan your host for logs and metrics, including:",
+                          }
+                        )
+                      : i18n.translate(
+                          'xpack.observability_onboarding.logsEssential.autoDetectPanel.p.wellScanYourHostLabel',
+                          {
+                            defaultMessage: "We'll scan your host for logs, including:",
+                          }
+                        )}
                   </p>
                 </EuiText>
                 <EuiSpacer size="s" />
