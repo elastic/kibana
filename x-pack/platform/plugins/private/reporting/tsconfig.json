@@ -57,6 +57,7 @@
     "@kbn/rrule",
     "@kbn/notifications-plugin",
     "@kbn/spaces-utils",
+    "@kbn/logging-mocks",
   ],
   "exclude": [
     "target/**/*",
