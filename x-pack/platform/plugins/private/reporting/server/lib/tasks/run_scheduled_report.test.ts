@@ -8,6 +8,7 @@
 import { Transform } from 'stream';
 import type { estypes } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { MockedLogger } from '@kbn/logging-mocks';
 import { JOB_STATUS, KibanaShuttingDownError } from '@kbn/reporting-common';
 import { ReportDocument } from '@kbn/reporting-common/types';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
@@ -67,7 +68,6 @@ jest.mock('../content_stream', () => ({
 
 jest.mock('../../services/notifications/email_notification_service');
 
-const logger = loggingSystemMock.createLogger();
 const fakeRawRequest: FakeRawRequest = {
   headers: {
     authorization: `ApiKey skdjtq4u543yt3rhewrh`,
@@ -128,6 +128,7 @@ describe('Run Scheduled Report Task', () => {
   let reportStore: ReportingStore;
   const notifications = notificationsMock.createStart();
   let emailNotificationService: EmailNotificationService;
+  let logger: MockedLogger;
 
   const runTaskFn = jest.fn().mockResolvedValue({ content_type: 'application/pdf' });
   beforeAll(async () => {
@@ -151,6 +152,7 @@ describe('Run Scheduled Report Task', () => {
   });
 
   beforeEach(async () => {
+    logger = loggingSystemMock.createLogger();
     soClient.get = jest.fn().mockImplementation(async () => {
       return reportSO;
     });
@@ -541,6 +543,35 @@ describe('Run Scheduled Report Task', () => {
       });
     });
 
+    it('does not send an email notification if the notification is not defined', async () => {
+      const task = new RunScheduledReportTask({
+        reporting: mockReporting,
+        config: configType,
+        logger,
+      });
+      const mockTaskManager = taskManagerMock.createStart();
+      await task.init(mockTaskManager, emailNotificationService);
+      const taskInstance = {
+        id: 'task-id',
+        runAt: new Date('2025-06-04T00:00:00Z'),
+        params: { id: 'report-so-id', jobtype: 'test1' },
+      };
+      const byteSize = 2097152; // 2MB
+      const output = { content_type: 'application/pdf' };
+
+      // @ts-expect-error
+      await task.notify(
+        savedReport,
+        taskInstance,
+        output,
+        byteSize,
+        { ...reportSO, notification: undefined },
+        'default'
+      );
+      expect(soClient.get).not.toHaveBeenCalled();
+      expect(emailNotificationService.notify).not.toHaveBeenCalledWith();
+    });
+
     it('logs a warning and sets the execution to warning when the report is larger than 10MB', async () => {
       const task = new RunScheduledReportTask({
         reporting: mockReporting,
@@ -559,6 +590,8 @@ describe('Run Scheduled Report Task', () => {
 
       // @ts-expect-error
       await task.notify(savedReport, taskInstance, output, byteSize, reportSO, 'default');
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
       expect(emailNotificationService.notify).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(
         'Error sending notification for scheduled report: The report is larger than the 10MB limit.'
@@ -588,6 +621,8 @@ describe('Run Scheduled Report Task', () => {
 
       // @ts-expect-error
       await task.notify(savedReport, taskInstance, output, byteSize, reportSO, 'default');
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
       expect(emailNotificationService.notify).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(
         'Error sending notification for scheduled report: Reporting notification service has not been initialized.'
@@ -620,6 +655,8 @@ describe('Run Scheduled Report Task', () => {
 
       // @ts-expect-error
       await task.notify(savedReport, taskInstance, output, byteSize, reportSO, 'default');
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
       expect(emailNotificationService.notify).toHaveBeenCalledWith({
         contentType: 'application/pdf',
         emailParams: {
@@ -646,6 +683,33 @@ describe('Run Scheduled Report Task', () => {
         output: { content_type: 'application/pdf', size: 2097152 },
         warning: 'Error sending notification for scheduled report: This is a test error!',
       });
+    });
+
+    it('logs an error if there is an error thrown setting execution to warning', async () => {
+      reportStore.setReportWarning.mockRejectedValueOnce('Error setting status to warning');
+      const task = new RunScheduledReportTask({
+        reporting: mockReporting,
+        config: configType,
+        logger,
+      });
+      const mockTaskManager = taskManagerMock.createStart();
+      await task.init(mockTaskManager, emailNotificationService);
+      const taskInstance = {
+        id: 'task-id',
+        runAt: new Date('2025-06-04T00:00:00Z'),
+        params: { id: 'report-so-id', jobtype: 'test1' },
+      };
+      const byteSize = 11534336; // 11MB
+      const output = { content_type: 'application/pdf' };
+
+      // @ts-expect-error
+      await task.notify(savedReport, taskInstance, output, byteSize, reportSO, 'default');
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(emailNotificationService.notify).not.toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith(
+        '[Error: Error in saving execution warning 290357209345723095: Error setting status to warning]'
+      );
     });
   });
 });

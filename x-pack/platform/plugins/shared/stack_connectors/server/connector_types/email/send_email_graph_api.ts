@@ -103,8 +103,8 @@ export async function sendEmailWithAttachments(
   smallAttachmentLimit: number = SMALL_ATTACHMENT_LIMIT,
   attachmentChunkSize: number = ATTACHMENT_CHUNK_SIZE
 ): Promise<AxiosResponse> {
-  const logger = params.logger;
-  logger.debug('[MS Exchange] creating draft email');
+  const logger = params.logger.get('ms-exchange');
+  logger.debug('Creating draft email');
   const emailId = await createDraft(params);
 
   const attachments = params.sendEmailOptions.attachments;
@@ -112,16 +112,16 @@ export async function sendEmailWithAttachments(
     const size = Buffer.byteLength(attachment.content);
     if (size < smallAttachmentLimit) {
       // If attachment is smaller than the limit, add the attachment to the draft email
-      logger.debug('[MS Exchange] attachment is smaller than 2Mb, attaching to draft');
+      logger.debug('Attachment is smaller than 2Mb, attaching to draft');
       await addAttachment(emailId, attachment, params);
     } else {
       // If attachment is larger than the limit,
       // create an upload session and upload attachment in chunks to the draft email
       const buffer = Buffer.from(attachment.content, attachment.encoding as BufferEncoding);
       const bufferSize = buffer.length;
-      logger.debug('[MS Exchange] attachment is larger than 2Mb, creating upload session');
+      logger.debug('Attachment is larger than 2Mb, creating upload session');
       const uploadUrl = await createUploadSession(emailId, attachment.filename, bufferSize, params);
-      logger.debug(`[MS Exchange] uploadUrl: ${uploadUrl}`);
+      logger.debug(`UploadUrl: ${uploadUrl}`);
 
       const chunks = getAttachmentChunks(buffer, bufferSize, attachmentChunkSize);
       let start = 0;
@@ -133,17 +133,17 @@ export async function sendEmailWithAttachments(
           'Content-Length': `${chunk.length}`,
           'Content-Range': `bytes ${start}-${end}/${bufferSize}`,
         };
-        logger.debug(`[MS Exchange] uploading chunk ${count} of ${chunks.length}`);
+        logger.debug(`Uploading chunk ${count} of ${chunks.length}`);
         await uploadAttachmentChunk(uploadUrl, chunk, headers, params);
         start = start + chunk.length;
         count++;
       }
-      logger.debug('[MS Exchange] closing upload session');
+      logger.debug('Closing upload session');
       await closeUploadSession(uploadUrl, params);
     }
   }
 
-  logger.debug('[MS Exchange] sending draft email');
+  logger.debug('Sending draft email');
   return sendDraft(emailId, params);
 }
 
