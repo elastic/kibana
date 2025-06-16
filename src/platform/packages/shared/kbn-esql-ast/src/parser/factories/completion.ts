@@ -33,7 +33,7 @@ export const createCompletionCommand = (
 
     const assignment = createFunction(ctx.ASSIGN().getText(), ctx, undefined, 'binary-expression');
     assignment.args.push(targetField, prompt);
-    // update the location of the assign based on arguments //HD needed?
+    // update the location of the assign based on arguments
     assignment.location = computeLocationExtends(assignment);
 
     command.targetField = targetField;
