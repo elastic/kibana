@@ -44,6 +44,8 @@
     "@kbn/inference-endpoint-ui-common",
     "@kbn/alerts-ui-shared",
     "@kbn/deeplinks-analytics",
+    "@kbn/mcp-connector-common",
+    "@kbn/mcp-connector-server",
   ],
   "exclude": [
     "target/**/*",

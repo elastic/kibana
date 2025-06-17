@@ -32,6 +32,7 @@ export function createPromptApi({ request, actions, logger }: CreateChatComplete
       maxRetries,
       ...rest
     } = options;
+
     return callbackApi(
       {
         connectorId,

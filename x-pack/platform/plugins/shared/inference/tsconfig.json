@@ -40,6 +40,7 @@
     "@kbn/sse-utils-server",
     "@kbn/sse-utils-client",
     "@kbn/zod",
-    "@kbn/inference-tracing"
+    "@kbn/inference-tracing",
+    "@kbn/mcp-connector-common"
   ]
 }
