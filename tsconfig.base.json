@@ -1568,6 +1568,8 @@
       "@kbn/response-ops-rules-apis/*": ["src/platform/packages/shared/response-ops/rules-apis/*"],
       "@kbn/response-stream-plugin": ["examples/response_stream"],
       "@kbn/response-stream-plugin/*": ["examples/response_stream/*"],
+      "@kbn/restorable-state": ["src/platform/packages/shared/kbn-restorable-state"],
+      "@kbn/restorable-state/*": ["src/platform/packages/shared/kbn-restorable-state/*"],
       "@kbn/rison": ["src/platform/packages/shared/kbn-rison"],
       "@kbn/rison/*": ["src/platform/packages/shared/kbn-rison/*"],
       "@kbn/rollup": ["x-pack/platform/packages/private/rollup"],
