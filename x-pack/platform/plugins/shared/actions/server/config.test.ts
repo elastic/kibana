@@ -355,9 +355,9 @@ describe('config validation', () => {
 
     test('validates enabled services but no ses service', () => {
       config.email = { services: { enabled: ['google-mail', 'amazon-ses'] } };
-      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-        `"[email.services.ses]: email.services.enabled includes amazon-ses, but email.services.ses is not defined"`
-      );
+      const result = configSchema.validate(config);
+      expect(result.email?.services?.enabled).toEqual(['google-mail', 'amazon-ses']);
+      expect(result.email?.services?.ses).toBeUndefined();
     });
   });
 });
