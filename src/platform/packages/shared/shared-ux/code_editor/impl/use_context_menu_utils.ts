@@ -30,7 +30,7 @@ const DEFAULT_ACTIONS: ContextMenuAction[] = [
   {
     actionDescriptor: {
       id: CUT_ACTION_ID,
-      label: i18n.translate('console.contextMenuAction.cutActionLabel', {
+      label: i18n.translate('sharedUXPackages.codeEditor.contextMenuAction.cutActionLabel', {
         defaultMessage: 'Cut',
       }),
       // eslint-disable-next-line no-bitwise
@@ -52,7 +52,7 @@ const DEFAULT_ACTIONS: ContextMenuAction[] = [
   {
     actionDescriptor: {
       id: COPY_ACTION_ID,
-      label: i18n.translate('console.contextMenuAction.copyActionLabel', {
+      label: i18n.translate('sharedUXPackages.codeEditor.contextMenuAction.copyActionLabel', {
         defaultMessage: 'Copy',
       }),
       // eslint-disable-next-line no-bitwise
@@ -73,7 +73,7 @@ const DEFAULT_ACTIONS: ContextMenuAction[] = [
   {
     actionDescriptor: {
       id: PASTE_ACTION_ID,
-      label: i18n.translate('console.contextMenuAction.pasteActionLabel', {
+      label: i18n.translate('sharedUXPackages.codeEditor.contextMenuAction.pasteActionLabel', {
         defaultMessage: 'Paste',
       }),
       // eslint-disable-next-line no-bitwise
