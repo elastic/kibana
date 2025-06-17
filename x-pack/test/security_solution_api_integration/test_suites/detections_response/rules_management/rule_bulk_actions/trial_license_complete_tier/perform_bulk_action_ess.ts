@@ -47,9 +47,77 @@ export default ({ getService }: FtrProviderContext): void => {
   const createWebHookConnector = () => createConnector(getWebHookAction());
 
   // Failing: See https://github.com/elastic/kibana/issues/196462
+
   describe.skip('@ess perform_bulk_action - ESS specific logic', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
+    });
+
+    it('should edit rules and migrate associated legacy actions', async () => {
+      const ruleId = 'ruleId';
+      const [connector, rule] = await Promise.all([
+        supertest
+          .post(`/api/actions/connector`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'My action',
+            connector_type_id: '.slack',
+            secrets: {
+              webhookUrl: 'http://localhost:1234',
+            },
+          }),
+
+        createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: ruleId,
+            interval: MINIMUM_RULE_INTERVAL_FOR_LEGACY_ACTION,
+          })
+        ),
+      ]);
+      await createLegacyRuleAction(supertest, rule.id, connector.body.id);
+
+      // check for legacy sidecar action
+      const sidecarActionsResults = await getLegacyActionSO(es);
+      expect(sidecarActionsResults.hits.hits.length).toBe(1);
+      expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).toBe(rule.id);
+
+      const { body } = await securitySolutionApi
+        .performRulesBulkAction({
+          body: {
+            query: '',
+            action: BulkActionTypeEnum.edit,
+            edit: [{ type: 'add_tags', value: ['myTag'] }],
+          },
+          query: {},
+        })
+        .expect(200);
+
+      expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
+
+      // Check that the updates have been persisted
+      const { body: ruleBody } = await securitySolutionApi
+        .readRule({ query: { rule_id: ruleId } })
+        .expect(200);
+
+      // legacy sidecar action should be gone
+      const sidecarActionsPostResults = await getLegacyActionSO(es);
+      expect(sidecarActionsPostResults.hits.hits.length).toBe(0);
+
+      expect(ruleBody.actions).toEqual([
+        {
+          action_type_id: '.slack',
+          group: 'default',
+          id: connector.body.id,
+          params: {
+            message: 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
+          },
+          uuid: expect.any(String),
+          frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
+        },
+      ]);
+      expect(ruleBody.tags).toEqual(['myTag']);
     });
 
     it('should delete rules and any associated legacy actions', async () => {

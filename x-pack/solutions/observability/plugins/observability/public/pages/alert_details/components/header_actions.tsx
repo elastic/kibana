@@ -213,25 +213,25 @@ export function HeaderActions({
             <EuiButtonIcon
               display="empty"
               size="m"
-              iconType="bellSlash"
-              data-test-subj="snooze-rule-button"
-              onClick={handleOpenSnoozeModal}
+              iconType="plus"
+              data-test-subj="add-to-case-button"
+              onClick={handleAddToCase}
               disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
-              aria-label={i18n.translate('xpack.observability.alertDetails.editSnoozeRule', {
-                defaultMessage: 'Snooze the rule',
+              aria-label={i18n.translate('xpack.observability.alertDetails.addToCase', {
+                defaultMessage: 'Add to case',
               })}
             />
           ) : (
             <EuiButton
               fill
-              iconType="bellSlash"
-              onClick={handleOpenSnoozeModal}
+              iconType="plus"
+              onClick={handleAddToCase}
               disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
-              data-test-subj="snooze-rule-button"
+              data-test-subj="add-to-case-button"
             >
               <EuiText size="s">
-                {i18n.translate('xpack.observability.alertDetails.editSnoozeRule', {
-                  defaultMessage: 'Snooze the rule',
+                {i18n.translate('xpack.observability.alertDetails.addToCase', {
+                  defaultMessage: 'Add to case',
                 })}
               </EuiText>
             </EuiButton>
@@ -283,13 +283,14 @@ export function HeaderActions({
                 <EuiButtonEmpty
                   size="s"
                   color="text"
-                  iconType="plus"
-                  onClick={handleAddToCase}
-                  data-test-subj="add-to-case-button"
+                  iconType="bellSlash"
+                  onClick={handleOpenSnoozeModal}
+                  disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
+                  data-test-subj="snooze-rule-button"
                 >
                   <EuiText size="s">
-                    {i18n.translate('xpack.observability.alertDetails.addToCase', {
-                      defaultMessage: 'Add to case',
+                    {i18n.translate('xpack.observability.alertDetails.editSnoozeRule', {
+                      defaultMessage: 'Snooze the rule',
                     })}
                   </EuiText>
                 </EuiButtonEmpty>
