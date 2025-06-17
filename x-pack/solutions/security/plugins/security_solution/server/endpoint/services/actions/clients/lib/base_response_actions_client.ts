@@ -31,6 +31,7 @@ import {
 } from '../../utils/fetch_action_responses';
 import { createEsSearchIterable } from '../../../../utils/create_es_search_iterable';
 import {
+  ensureActionRequestsIndexIsConfigured,
   getActionCompletionInfo,
   getActionRequestExpiration,
   mapResponsesByActionId,
@@ -218,6 +219,28 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   /**
+   * Ensures that the Action Request Index is setup correctly (ex. has required mappings)
+   * @private
+   */
+  private async ensureActionRequestsIndexIsConfigured(): Promise<void> {
+    this.log.debug(`checking index [${ENDPOINT_ACTIONS_INDEX}] is configured as expected`);
+
+    const CACHE_KEY = 'ensureActionRequestsIndexIsConfigured';
+    const cachedResult = this.cache.get<Promise<void>>(CACHE_KEY);
+
+    if (cachedResult) {
+      this.log.debug(`Checking has already been done - returned cached result`);
+      return cachedResult;
+    }
+
+    const resultPromise = ensureActionRequestsIndexIsConfigured(this.options.endpointService);
+
+    this.cache.set(CACHE_KEY, resultPromise);
+
+    return resultPromise;
+  }
+
+  /**
    * Fetches information about the policies for each agent id that the response action is being sent to.
    * Must be implemented by each subclass, since "agentId" for 3rd party EDRs agent IDs will need to
    * to be mapped to elastic agent ids.
@@ -262,7 +285,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     const agents = await fleetServices.agent.getByIds(agentIds).catch(catchAndWrapError);
 
     this.log.debug(
-      () => `Fleet agent records for agent IDs [${agentIds.join(' | ')}]:\n${stringify(agents)}`
+      () => `Fleet agent records for agent IDs [${agentIds.join(' | ')}]:\n${stringify(agents, 2)}`
     );
 
     for (const agent of agents) {
@@ -626,6 +649,10 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         ? { rule: { id: actionRequest.ruleId, name: actionRequest.ruleName } }
         : {}),
     };
+
+    if (isSpacesEnabled) {
+      await this.ensureActionRequestsIndexIsConfigured();
+    }
 
     this.log.debug(() => `creating action request document:\n${stringify(doc)}`);
 
