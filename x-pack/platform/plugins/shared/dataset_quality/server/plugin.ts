@@ -70,7 +70,7 @@ export class DatasetQualityServerPlugin
     this.dataTelemetryService.setup(plugins.taskManager, plugins.usageCollection);
 
     if (plugins.alerting) {
-      registerBuiltInRuleTypes(plugins.alerting);
+      registerBuiltInRuleTypes(plugins.alerting, plugins.share?.url.locators);
     }
 
     return {};

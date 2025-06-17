@@ -5,21 +5,103 @@
  * 2.0.
  */
 
+import {
+  DATA_QUALITY_DETAILS_LOCATOR_ID,
+  DATA_QUALITY_LOCATOR_ID,
+} from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { getHumanReadableComparator } from '@kbn/stack-alerts-plugin/common';
 import type { Comparator } from '@kbn/stack-alerts-plugin/common/comparator_types';
-import { DatasetQualityRuleParams } from './types';
+import { LocatorClient } from '@kbn/share-plugin/common/url_service';
+import moment from 'moment';
+import { TimeRangeConfig } from '../../common/types';
+import { AdditionalContext, DatasetQualityRuleParams } from './types';
 
-const generateTitle = (ruleName: string, group: string, isRecovered = false) =>
-  i18n.translate('xpack.datasetQuality.rule.alertTypeContextTitle', {
-    defaultMessage: `rule ''{name}'' {verb}`,
-    values: {
-      name: ruleName,
-      verb: isRecovered ? 'recovered' : `matched query for group ${group}`,
+export const getPaddedAlertTimeRange = (
+  alertStart: string,
+  alertEnd?: string,
+  lookBackWindow?: {
+    size: number;
+    unit: 's' | 'm' | 'h' | 'd';
+  }
+): TimeRangeConfig => {
+  const alertDuration = moment.duration(moment(alertEnd).diff(moment(alertStart)));
+  const now = moment().toISOString();
+
+  // If alert duration is less than 160 min, we use 20 minute buffer
+  // Otherwise, we use 8 times alert duration
+  const defaultDurationMs =
+    alertDuration.asMinutes() < 160
+      ? moment.duration(20, 'minutes').asMilliseconds()
+      : alertDuration.asMilliseconds() / 8;
+  // To ensure the alert time range at least covers 20 times lookback window,
+  // we compare lookBackDurationMs and defaultDurationMs to use any of those that is longer
+  const lookBackDurationMs =
+    lookBackWindow &&
+    moment.duration(lookBackWindow.size * 20, lookBackWindow.unit).asMilliseconds();
+  const durationMs =
+    lookBackDurationMs && lookBackDurationMs - defaultDurationMs > 0
+      ? lookBackDurationMs
+      : defaultDurationMs;
+
+  const from = moment(alertStart).subtract(durationMs, 'millisecond').toISOString();
+  const to =
+    alertEnd && moment(alertEnd).add(durationMs, 'millisecond').isBefore(now)
+      ? moment(alertEnd).add(durationMs, 'millisecond').toISOString()
+      : now;
+
+  return {
+    from,
+    to,
+    refresh: {
+      pause: true,
+      value: 60000,
+    },
+  };
+};
+
+const getDataQualityViewInAppUrl = ({
+  index,
+  from,
+  to,
+  locatorsClient,
+}: {
+  index: string;
+  from: string;
+  to: string;
+  locatorsClient?: LocatorClient;
+}) => {
+  const timeRange: TimeRangeConfig | undefined = getPaddedAlertTimeRange(from, to);
+  timeRange.to = to ? timeRange.to : 'now';
+
+  // If index is a wildcard or multiple indices, redirect to the data quality overview page
+  if (index.includes('*') || index.includes(',')) {
+    return locatorsClient?.get(DATA_QUALITY_LOCATOR_ID)?.getRedirectUrl({
+      timeRange: {
+        from,
+        to,
+        refresh: {
+          pause: true,
+          value: 60000,
+        },
+      },
+    });
+  }
+
+  return locatorsClient?.get(DATA_QUALITY_DETAILS_LOCATOR_ID)?.getRedirectUrl({
+    dataStream: index,
+    timeRange: {
+      from,
+      to,
+      refresh: {
+        pause: true,
+        value: 60000,
+      },
     },
   });
+};
 
-const generateMessage = (
+const generateReason = (
   value: string,
   group: string,
   timeSize: number,
@@ -28,7 +110,7 @@ const generateMessage = (
   threshold: number[]
 ) =>
   i18n.translate('xpack.datasetQuality.rule.alertTypeContextReasonDescription', {
-    defaultMessage: `Degraded documents percentage is {value} in the last {window} for {group}. Alert when {comparator} {threshold}.`,
+    defaultMessage: `Percentage of degraded documents is {value} in the last {window} for {group}. Alert when {comparator} {threshold}.`,
     values: {
       value,
       window: `${timeSize}${timeUnit}`,
@@ -38,36 +120,25 @@ const generateMessage = (
     },
   });
 
-const generateConditions = (
-  group: string,
-  comparator: Comparator,
-  threshold: number[],
-  isRecovered = false
-) =>
-  i18n.translate('xpack.datasetQuality.rule.alertTypeContextConditionsDescription', {
-    defaultMessage:
-      'Degraded documents percentage for {group} is {negation}{thresholdComparator} {threshold}',
-    values: {
-      group,
-      thresholdComparator: getHumanReadableComparator(comparator),
-      threshold: threshold.join(' and '),
-      negation: isRecovered ? 'NOT ' : '',
-    },
-  });
-
-export const generateContext = (
-  ruleName: string,
-  group: string,
-  date: string,
-  value: string,
-  params: DatasetQualityRuleParams,
-  isRecovered = false
-) => ({
-  title: generateTitle(ruleName, group, isRecovered),
-  date,
+export const generateContext = ({
   group,
+  dateStart,
+  dateEnd,
   value,
-  message: generateMessage(
+  params,
+  grouping,
+  locatorsClient,
+}: {
+  group: string;
+  dateStart: string;
+  dateEnd: string;
+  value: string;
+  params: DatasetQualityRuleParams;
+  grouping?: AdditionalContext;
+  locatorsClient?: LocatorClient;
+}) => ({
+  value,
+  reason: generateReason(
     value,
     group,
     params.timeSize,
@@ -75,10 +146,12 @@ export const generateContext = (
     params.comparator as Comparator,
     params.threshold
   ),
-  conditions: generateConditions(
-    group,
-    params.comparator as Comparator,
-    params.threshold,
-    isRecovered
-  ),
+  grouping,
+  timestamp: dateEnd,
+  viewInAppUrl: getDataQualityViewInAppUrl({
+    index: params.searchConfiguration.index,
+    from: dateStart,
+    to: dateEnd,
+    locatorsClient,
+  }),
 });

@@ -6,8 +6,12 @@
  */
 
 import { AlertingServerSetup } from '@kbn/alerting-plugin/server';
+import { LocatorClient } from '@kbn/share-plugin/common/url_service';
 import { DegradedDocsRuleType } from './degraded_docs/register';
 
-export function registerBuiltInRuleTypes(alertingPlugin: AlertingServerSetup) {
-  alertingPlugin.registerType(DegradedDocsRuleType());
+export function registerBuiltInRuleTypes(
+  alertingPlugin: AlertingServerSetup,
+  locatorsClient?: LocatorClient
+) {
+  alertingPlugin.registerType(DegradedDocsRuleType(locatorsClient));
 }

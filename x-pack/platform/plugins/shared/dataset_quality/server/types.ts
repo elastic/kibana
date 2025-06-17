@@ -8,6 +8,7 @@
 import { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import { CustomRequestHandlerContext } from '@kbn/core/server';
 import type { FleetSetupContract, FleetStartContract } from '@kbn/fleet-plugin/server';
+import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -21,6 +22,7 @@ export interface DatasetQualityPluginSetupDependencies {
   taskManager: TaskManagerSetupContract;
   telemetry: TelemetryPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  share?: SharePluginSetup;
 }
 
 export interface DatasetQualityPluginStartDependencies {

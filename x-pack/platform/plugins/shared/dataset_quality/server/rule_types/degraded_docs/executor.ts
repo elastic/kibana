@@ -10,17 +10,18 @@ import { i18n } from '@kbn/i18n';
 import { ComparatorFns, TimeUnitChar } from '@kbn/response-ops-rule-params/common/utils';
 import {
   ALERT_EVALUATION_THRESHOLD,
-  ALERT_EVALUATION_VALUES,
-  ALERT_REASON,
+  ALERT_EVALUATION_VALUE,
+  ALERT_GROUPING,
   ALERT_KEY_JOINER,
+  ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { Comparator } from '@kbn/stack-alerts-plugin/common/comparator_types';
+import { LocatorClient } from '@kbn/share-plugin/common/url_service';
 import { INDEX, _IGNORED } from '../../../common/es_fields';
 import { generateContext } from '../context';
 import { getDocsStats } from '../get_docs_stats';
 import {
-  ALERT_EVALUATION_CONDITIONS,
-  ALERT_TITLE,
+  AdditionalContext,
   DATASET_QUALITY_DATASTREAM_NAME,
   THRESHOLD_MET_GROUP,
   type DatasetQualityAlert,
@@ -29,7 +30,6 @@ import {
   type DatasetQualityAllowedActionGroups,
   type DatasetQualityRuleParams,
   type DatasetQualityRuleTypeState,
-  AdditionalContext,
 } from '../types';
 
 export const formatDurationFromTimeUnitChar = (time: number, unit: TimeUnitChar): string => {
@@ -48,128 +48,138 @@ export const formatDurationFromTimeUnitChar = (time: number, unit: TimeUnitChar)
   }
 };
 
-export const executor = async (
-  options: RuleExecutorOptions<
-    DatasetQualityRuleParams,
-    DatasetQualityRuleTypeState,
-    DatasetQualityAlertState,
-    DatasetQualityAlertContext,
-    DatasetQualityAllowedActionGroups,
-    DatasetQualityAlert
-  >
-): ReturnType<
-  ExecutorType<
-    DatasetQualityRuleParams,
-    DatasetQualityRuleTypeState,
-    DatasetQualityAlertState,
-    DatasetQualityAlertContext,
-    DatasetQualityAllowedActionGroups
-  >
-> => {
-  const {
-    rule: { name },
-    services,
-    params,
-    logger,
-    getTimeRange,
-  } = options;
-  const { alertsClient, scopedClusterClient } = services;
+export const getRuleExecutor = (locatorsClient?: LocatorClient) =>
+  async function executor(
+    options: RuleExecutorOptions<
+      DatasetQualityRuleParams,
+      DatasetQualityRuleTypeState,
+      DatasetQualityAlertState,
+      DatasetQualityAlertContext,
+      DatasetQualityAllowedActionGroups,
+      DatasetQualityAlert
+    >
+  ): ReturnType<
+    ExecutorType<
+      DatasetQualityRuleParams,
+      DatasetQualityRuleTypeState,
+      DatasetQualityAlertState,
+      DatasetQualityAlertContext,
+      DatasetQualityAllowedActionGroups
+    >
+  > {
+    const { services, params, logger, getTimeRange } = options;
+    const { alertsClient, scopedClusterClient } = services;
 
-  if (!alertsClient) {
-    throw new AlertsClientError();
-  }
-
-  const alertLimit = alertsClient.getAlertLimitValue();
-
-  const { dateStart, dateEnd } = getTimeRange(`${params.timeSize}${params.timeUnit}`);
-  const index = params.searchConfiguration.index;
-
-  const datasetQualityDegradedResults = await getDocsStats({
-    index,
-    dateStart,
-    groupBy: params.groupBy ?? [],
-    query: {
-      must: { exists: { field: _IGNORED } },
-    },
-    scopedClusterClient,
-  });
-
-  const unmetGroupValues: Record<string, string> = {};
-  const compareFn = ComparatorFns.get(params.comparator as Comparator);
-  if (compareFn == null) {
-    throw new Error(
-      i18n.translate('xpack.datasetQuality.rule.invalidComparatorErrorMessage', {
-        defaultMessage: 'invalid thresholdComparator specified: {comparator}',
-        values: {
-          comparator: params.comparator,
-        },
-      })
-    );
-  }
-
-  let generatedAlerts = 0;
-  for (const groupResult of datasetQualityDegradedResults) {
-    const { bucketKey, percentage } = groupResult;
-    const alertId = bucketKey.join(ALERT_KEY_JOINER);
-    const met = compareFn(percentage, params.threshold);
-
-    if (!met) {
-      unmetGroupValues[alertId] = percentage.toFixed(2);
-      continue;
+    if (!alertsClient) {
+      throw new AlertsClientError();
     }
 
-    const groupByFields: AdditionalContext = bucketKey.reduce((acc, field, i) => {
-      const fieldName = (params.groupBy ?? [])[i];
-      return {
-        ...acc,
-        [fieldName === INDEX ? DATASET_QUALITY_DATASTREAM_NAME : fieldName]: field, // _index is reserved for the actual alerts index
-      };
-    }, {});
+    const alertLimit = alertsClient.getAlertLimitValue();
 
-    if (generatedAlerts < alertLimit) {
-      const context = generateContext(name, alertId, dateEnd, percentage.toFixed(2), params);
-      alertsClient.report({
+    const { dateStart, dateEnd } = getTimeRange(`${params.timeSize}${params.timeUnit}`);
+    const index = params.searchConfiguration.index;
+
+    const datasetQualityDegradedResults = await getDocsStats({
+      index,
+      dateStart,
+      groupBy: params.groupBy ?? [],
+      query: {
+        must: { exists: { field: _IGNORED } },
+      },
+      scopedClusterClient,
+    });
+
+    const unmetGroupValues: Record<string, string> = {};
+    const compareFn = ComparatorFns.get(params.comparator as Comparator);
+    if (compareFn == null) {
+      throw new Error(
+        i18n.translate('xpack.datasetQuality.rule.invalidComparatorErrorMessage', {
+          defaultMessage: 'invalid thresholdComparator specified: {comparator}',
+          values: {
+            comparator: params.comparator,
+          },
+        })
+      );
+    }
+
+    let generatedAlerts = 0;
+    for (const groupResult of datasetQualityDegradedResults) {
+      const { bucketKey, percentage } = groupResult;
+      const alertId = bucketKey.join(ALERT_KEY_JOINER);
+      const met = compareFn(percentage, params.threshold);
+
+      if (!met) {
+        unmetGroupValues[alertId] = percentage.toFixed(2);
+        continue;
+      }
+
+      const groupByFields: AdditionalContext = bucketKey.reduce((acc, field, i) => {
+        const fieldName = (params.groupBy ?? [])[i];
+        return {
+          ...acc,
+          [fieldName === INDEX ? DATASET_QUALITY_DATASTREAM_NAME : fieldName]: field, // _index is reserved for the actual alerts index
+        };
+      }, {});
+
+      if (generatedAlerts < alertLimit) {
+        const context = generateContext({
+          group: alertId,
+          dateStart,
+          dateEnd,
+          value: percentage.toFixed(2),
+          params,
+          grouping: groupByFields,
+          locatorsClient,
+        });
+        alertsClient.report({
+          id: alertId,
+          actionGroup: THRESHOLD_MET_GROUP.id,
+          state: {},
+          context,
+          payload: {
+            [ALERT_REASON]: context.reason,
+            [ALERT_EVALUATION_VALUE]: `${context.value}`,
+            [ALERT_EVALUATION_THRESHOLD]:
+              params.threshold?.length === 1 ? params.threshold[0] : null,
+            [ALERT_GROUPING]: groupByFields,
+          },
+        });
+      }
+
+      generatedAlerts++;
+    }
+
+    alertsClient.setAlertLimitReached(generatedAlerts >= alertLimit);
+
+    // Handle recovered alerts context
+    const { getRecoveredAlerts } = alertsClient;
+    for (const recoveredAlert of getRecoveredAlerts()) {
+      const alertId = recoveredAlert.alert.getId();
+      logger.debug(`setting context for recovered alert ${alertId}`);
+
+      const grouping = recoveredAlert.hit?.[ALERT_GROUPING];
+      const percentage = unmetGroupValues[alertId] ?? '0';
+      const recoveryContext = generateContext({
+        group: alertId,
+        dateStart,
+        dateEnd,
+        value: percentage,
+        params,
+        grouping,
+        locatorsClient,
+      });
+
+      alertsClient.setAlertData({
         id: alertId,
-        actionGroup: THRESHOLD_MET_GROUP.id,
-        state: {},
-        context,
+        context: recoveryContext,
         payload: {
-          [ALERT_REASON]: context.message,
-          [ALERT_TITLE]: context.title,
-          [ALERT_EVALUATION_VALUES]: `${context.value}`,
-          [ALERT_EVALUATION_CONDITIONS]: context.conditions,
+          [ALERT_REASON]: recoveryContext.reason,
+          [ALERT_EVALUATION_VALUE]: `${recoveryContext.value}`,
           [ALERT_EVALUATION_THRESHOLD]: params.threshold?.length === 1 ? params.threshold[0] : null,
-          ...groupByFields,
+          [ALERT_GROUPING]: grouping,
         },
       });
     }
 
-    generatedAlerts++;
-  }
-
-  alertsClient.setAlertLimitReached(generatedAlerts >= alertLimit);
-
-  // Handle recovered alerts context
-  const { getRecoveredAlerts } = alertsClient;
-  for (const recoveredAlert of getRecoveredAlerts()) {
-    const alertId = recoveredAlert.alert.getId();
-    logger.debug(`setting context for recovered alert ${alertId}`);
-
-    const percentage = unmetGroupValues[alertId] ?? '0';
-    const recoveryContext = generateContext(name, alertId, dateEnd, percentage, params, true);
-
-    alertsClient.setAlertData({
-      id: alertId,
-      context: recoveryContext,
-      payload: {
-        [ALERT_REASON]: recoveryContext.message,
-        [ALERT_TITLE]: recoveryContext.title,
-        [ALERT_EVALUATION_VALUES]: `${recoveryContext.value}`,
-        [ALERT_EVALUATION_CONDITIONS]: recoveryContext.conditions,
-        [ALERT_EVALUATION_THRESHOLD]: params.threshold?.length === 1 ? params.threshold[0] : null,
-      },
-    });
-  }
-
-  return { state: {} };
-};
+    return { state: {} };
+  };

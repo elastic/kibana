@@ -14,24 +14,16 @@ import { RuleTypeState } from '@kbn/alerting-plugin/server';
 import { StackAlert } from '@kbn/alerts-as-data-utils';
 import { i18n } from '@kbn/i18n';
 import type { DegradedDocsRuleParams } from '@kbn/response-ops-rule-params/degraded_docs';
-import { ALERT_NAMESPACE } from '@kbn/rule-data-utils';
 
 export type DatasetQualityRuleParams = DegradedDocsRuleParams;
 export type DatasetQualityRuleTypeState = RuleTypeState;
 export type DatasetQualityAlertState = AlertState;
 export type DatasetQualityAlertContext = AlertContext;
 export type DatasetQualityAllowedActionGroups = ActionGroupIdsOf<typeof THRESHOLD_MET_GROUP>;
-export type DatasetQualityAlert = Omit<
-  StackAlert,
-  'kibana.alert.evaluation.threshold' | 'kibana.alert.evaluation.value'
-> & {
+export type DatasetQualityAlert = Omit<StackAlert, 'kibana.alert.evaluation.threshold'> & {
   'kibana.alert.evaluation.threshold'?: string | number | null;
-  'kibana.alert.evaluation.values'?: string | number | null;
+  'kibana.alert.grouping'?: Record<string, string>;
 };
-
-export const ALERT_TITLE = `${ALERT_NAMESPACE}.title` as const;
-// kibana.alert.evaluation.conditions - human readable string that shows the conditions set by the user
-export const ALERT_EVALUATION_CONDITIONS = `${ALERT_NAMESPACE}.evaluation.conditions` as const;
 
 export interface AdditionalContext {
   [x: string]: any;

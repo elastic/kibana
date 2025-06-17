@@ -5,32 +5,34 @@
  * 2.0.
  */
 
+import { RuleType } from '@kbn/alerting-plugin/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import {
-  ALERT_EVALUATION_THRESHOLD,
-  ALERT_EVALUATION_VALUE,
-  ALERT_REASON,
-  DEGRADED_DOCS_RULE_TYPE_ID,
-  STACK_ALERTS_FEATURE_ID,
-} from '@kbn/rule-data-utils';
-import { RuleType } from '@kbn/alerting-plugin/server';
 import {
   DegradedDocsRuleParams,
   degradedDocsParamsSchema,
 } from '@kbn/response-ops-rule-params/degraded_docs';
-import { executor } from './executor';
 import {
-  ALERT_EVALUATION_CONDITIONS,
-  ALERT_TITLE,
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+  ALERT_GROUPING,
+  ALERT_REASON,
+  DEGRADED_DOCS_RULE_TYPE_ID,
+  STACK_ALERTS_FEATURE_ID,
+} from '@kbn/rule-data-utils';
+import { LocatorClient } from '@kbn/share-plugin/common/url_service';
+import {
   DATASET_QUALITY_REGISTRATION_CONTEXT,
   DatasetQualityAlert,
   DatasetQualityAlertContext,
   DatasetQualityAllowedActionGroups,
   THRESHOLD_MET_GROUP,
 } from '../types';
+import { getRuleExecutor } from './executor';
 
-export function DegradedDocsRuleType(): RuleType<
+export function DegradedDocsRuleType(
+  locatorsClient?: LocatorClient
+): RuleType<
   DegradedDocsRuleParams,
   never,
   {},
@@ -61,18 +63,18 @@ export function DegradedDocsRuleType(): RuleType<
     producer: STACK_ALERTS_FEATURE_ID,
     minimumLicenseRequired: 'basic',
     isExportable: true,
-    executor,
+    executor: getRuleExecutor(locatorsClient),
     doesSetRecoveryContext: true,
     actionVariables: {
       context: [
         { name: 'reason', description: actionVariableContextReasonLabel },
-        { name: 'title', description: actionVariableContextTitleLabel },
         { name: 'value', description: actionVariableContextValueLabel },
-        { name: 'conditions', description: actionVariableContextConditionsLabel },
+        { name: 'grouping', description: actionVariableContextGroupingLabel },
         {
           name: 'threshold',
           description: actionVariableContextThresholdLabel,
         },
+        { name: 'viewInAppUrl', description: viewInAppUrlActionVariableDescription },
       ],
     },
     alerts: {
@@ -80,15 +82,31 @@ export function DegradedDocsRuleType(): RuleType<
       mappings: {
         fieldMap: {
           [ALERT_REASON]: { type: 'keyword', array: false, required: false },
-          [ALERT_TITLE]: { type: 'keyword', array: false, required: false },
           [ALERT_EVALUATION_VALUE]: { type: 'keyword', array: false, required: false },
-          [ALERT_EVALUATION_CONDITIONS]: { type: 'keyword', array: false, required: false },
           [ALERT_EVALUATION_THRESHOLD]: {
             type: 'scaled_float',
             scaling_factor: 100,
             required: false,
           },
+          [ALERT_GROUPING]: {
+            type: 'object',
+            dynamic: true,
+            array: false,
+            required: false,
+          },
         },
+        dynamicTemplates: [
+          {
+            strings_as_keywords: {
+              path_match: 'kibana.alert.grouping.*',
+              match_mapping_type: 'string',
+              mapping: {
+                type: 'keyword',
+                ignore_above: 1024,
+              },
+            },
+          },
+        ],
       },
       shouldWrite: true,
       useEcs: true,
@@ -110,13 +128,6 @@ const actionVariableContextValueLabel = i18n.translate(
   }
 );
 
-const actionVariableContextTitleLabel = i18n.translate(
-  'xpack.datasetQuality.alerting.actionVariableContextTitleLabel',
-  {
-    defaultMessage: 'A title for the alert.',
-  }
-);
-
 const actionVariableContextThresholdLabel = i18n.translate(
   'xpack.datasetQuality.alerting.actionVariableContextThresholdLabel',
   {
@@ -125,9 +136,16 @@ const actionVariableContextThresholdLabel = i18n.translate(
   }
 );
 
-const actionVariableContextConditionsLabel = i18n.translate(
-  'xpack.datasetQuality.alerting.actionVariableContextConditionsLabel',
+const actionVariableContextGroupingLabel = i18n.translate(
+  'xpack.datasetQuality.alerting.actionVariableContextGrouping',
   {
-    defaultMessage: 'A string that describes the threshold condition.',
+    defaultMessage: 'The object containing groups that are reporting data',
+  }
+);
+
+export const viewInAppUrlActionVariableDescription = i18n.translate(
+  'xpack.datasetQuality.alerting.actionVariableContextViewInAppUrl',
+  {
+    defaultMessage: 'Link to the alert source',
   }
 );
