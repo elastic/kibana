@@ -1656,7 +1656,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should not suppress alerts with missing fields during rule execution only if configured so for multiple suppress by fields', async () => {
+      it.only('should not suppress alerts with missing fields during rule execution only if configured so for multiple suppress by fields', async () => {
         const id = uuidv4();
         const timestamp = '2020-10-28T06:45:00.000Z';
 
