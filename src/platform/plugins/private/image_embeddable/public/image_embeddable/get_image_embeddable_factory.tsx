@@ -40,7 +40,7 @@ export const getImageEmbeddableFactory = ({
       const dynamicActionsManager = embeddableEnhanced?.initializeEmbeddableDynamicActions(
         uuid,
         () => titleManager.api.title$.getValue(),
-        initialState.rawState
+        initialState
       );
       // if it is provided, start the dynamic actions manager
       const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
@@ -50,12 +50,15 @@ export const getImageEmbeddableFactory = ({
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
 
       function serializeState() {
+        const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
+          dynamicActionsManager?.serializeState() ?? {};
         return {
           rawState: {
             ...titleManager.getLatestState(),
-            ...(dynamicActionsManager?.getLatestState() ?? {}),
+            ...dynamicActionsState,
             imageConfig: imageConfig$.getValue(),
           },
+          references: dynamicActionsReferences ?? [],
         };
       }
 
