@@ -146,6 +146,8 @@ export interface LogsEndpointAction<
    *        initializing the Response Actions Client to process pending actions.
    */
   originSpaceId: string;
+  /** Tags assigned to the action */
+  tags: string[];
   agent: {
     id: string | string[];
     /**
