@@ -93,6 +93,48 @@ describe('DeploymentParamsMapper', () => {
             number_of_allocations: 2,
           },
         });
+
+        expect(
+          mapper.mapUiToApiDeploymentParams(modelId, {
+            deploymentId: 'test-deployment',
+            optimized: 'optimizedForSearch',
+            adaptiveResources: true,
+            vCPUUsage: 'medium',
+          })
+        ).toEqual({
+          modelId: 'test-model',
+          deploymentParams: {
+            deployment_id: 'test-deployment',
+            priority: 'normal',
+            threads_per_allocation: 16,
+          },
+          adaptiveAllocationsParams: {
+            enabled: true,
+            max_number_of_allocations: 2,
+            min_number_of_allocations: 0,
+          },
+        });
+
+        expect(
+          mapper.mapUiToApiDeploymentParams(modelId, {
+            deploymentId: 'test-deployment',
+            optimized: 'optimizedForIngest',
+            adaptiveResources: true,
+            vCPUUsage: 'high',
+          })
+        ).toEqual({
+          modelId: 'test-model',
+          deploymentParams: {
+            deployment_id: 'test-deployment',
+            priority: 'normal',
+            threads_per_allocation: 1,
+          },
+          adaptiveAllocationsParams: {
+            enabled: true,
+            max_number_of_allocations: 512,
+            min_number_of_allocations: 0,
+          },
+        });
       });
 
       it('overrides vCPUs levels and enforces adaptive allocations if static support is not configured', () => {
