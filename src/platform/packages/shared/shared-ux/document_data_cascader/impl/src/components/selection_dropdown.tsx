@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState, type ComponentProps } from 'react';
 import {
   EuiButtonEmpty,
   EuiContextMenu,
+  EuiDragDropContext,
+  EuiDraggable,
+  EuiDroppable,
   EuiToken,
   EuiFlexItem,
   EuiFlexGroup,
@@ -18,19 +21,28 @@ import {
   EuiPopover,
   EuiPopoverFooter,
   EuiText,
+  euiDragDropReorder,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDataCascadeState, useDataCascadeDispatch } from '../lib/store';
 
 interface SelectionDropdownProps {
-  onSelectionChange?: (groupByColumn: string) => void;
+  onSelectionChange?: (groupByColumn: string[]) => void;
 }
 
 export function SelectionDropdown({ onSelectionChange }: SelectionDropdownProps) {
   const [isPopoverOpen, setPopover] = useState(false);
   const [availableColumnsIsOpen, setAvailableColumnsIsOpen] = useState(false);
-  const { groupByColumns, currentGroupByColumn } = useDataCascadeState();
+  const { groupByColumns, currentGroupByColumns } = useDataCascadeState();
   const dispatch = useDataCascadeDispatch();
+
+  const persistGroupByColumnSelection = useCallback(
+    (groupByColumn: string[]) => {
+      dispatch({ type: 'SET_GROUP_BY_COLUMN', payload: groupByColumn });
+      onSelectionChange?.(groupByColumn);
+    },
+    [dispatch, onSelectionChange]
+  );
 
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
@@ -41,20 +53,30 @@ export function SelectionDropdown({ onSelectionChange }: SelectionDropdownProps)
   };
 
   const onGroupByColumnSelection = (groupByColumn: string) => {
-    dispatch({ type: 'SET_GROUP_BY_COLUMN', payload: groupByColumn });
-    onSelectionChange?.(groupByColumn);
+    persistGroupByColumnSelection([...currentGroupByColumns, groupByColumn]);
     closePopover();
   };
 
   const clearSelectedGroupByColumn = () => {
-    dispatch({ type: 'EMPTY_GROUP_BY_COLUMN_SELECTION', payload: '' });
+    dispatch({ type: 'RESET_GROUP_BY_COLUMN_SELECTION' });
   };
+
+  const onDragEnd = useCallback<ComponentProps<typeof EuiDragDropContext>['onDragEnd']>(
+    ({ source, destination }) => {
+      if (source && destination) {
+        const items = euiDragDropReorder(currentGroupByColumns, source.index, destination.index);
+
+        persistGroupByColumnSelection(items);
+      }
+    },
+    [currentGroupByColumns, persistGroupByColumnSelection]
+  );
 
   const button = (
     <EuiButtonEmpty iconType={'inspect'} onClick={onButtonClick}>
       {i18n.translate('sharedUXPackages.data_cascade.selection_dropdown.selection_message', {
-        defaultMessage: 'Group By: {groupByColumns} selected',
-        values: { groupByColumns: currentGroupByColumn },
+        defaultMessage: 'Group By: {groupedColumnsCount} groups selected',
+        values: { groupedColumnsCount: currentGroupByColumns.length },
       })}
     </EuiButtonEmpty>
   );
@@ -77,16 +99,33 @@ export function SelectionDropdown({ onSelectionChange }: SelectionDropdownProps)
             items: [
               {
                 renderItem: () => {
-                  return currentGroupByColumn ? (
-                    <EuiListGroup
-                      flush={true}
-                      listItems={[currentGroupByColumn].map((groupColumn) => ({
-                        label: <EuiText>{groupColumn}</EuiText>,
-                        icon: <EuiToken iconType="tokenString" />,
-                        onClick: () => {},
-                        'data-test-subj': `DataCascadeColumnSelectedAnchor-${groupColumn}`,
-                      }))}
-                    />
+                  return currentGroupByColumns.length ? (
+                    <EuiDragDropContext onDragEnd={onDragEnd}>
+                      <EuiDroppable droppableId="data-cascade-grouping">
+                        {currentGroupByColumns.map((groupColumn, idx) => (
+                          <EuiDraggable
+                            draggableId={`data-cascade-grouping-${groupColumn}`}
+                            index={idx}
+                            key={groupColumn}
+                            spacing="m"
+                          >
+                            {(provided) => (
+                              <EuiFlexItem
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                data-test-subj={`DataCascadeColumnSelection-${groupColumn}`}
+                              >
+                                <EuiFlexGroup alignItems="center" gutterSize="s">
+                                  <EuiToken iconType="tokenString" />
+                                  <EuiText size="s">{groupColumn}</EuiText>
+                                </EuiFlexGroup>
+                              </EuiFlexItem>
+                            )}
+                          </EuiDraggable>
+                        ))}
+                      </EuiDroppable>
+                    </EuiDragDropContext>
                   ) : (
                     <EuiText>
                       {i18n.translate(
@@ -100,7 +139,7 @@ export function SelectionDropdown({ onSelectionChange }: SelectionDropdownProps)
               {
                 renderItem: () => {
                   const availableColumnsForSelection = groupByColumns?.filter(
-                    (groupByColumn) => currentGroupByColumn !== groupByColumn
+                    (groupByColumn) => currentGroupByColumns.indexOf(groupByColumn) === -1
                   );
 
                   return (
@@ -143,7 +182,7 @@ export function SelectionDropdown({ onSelectionChange }: SelectionDropdownProps)
                             />
                           </EuiPopover>
                         </EuiFlexItem>
-                        {currentGroupByColumn && (
+                        {Boolean(currentGroupByColumns.length) && (
                           <EuiFlexItem grow={false}>
                             <EuiButtonEmpty
                               onClick={clearSelectedGroupByColumn}

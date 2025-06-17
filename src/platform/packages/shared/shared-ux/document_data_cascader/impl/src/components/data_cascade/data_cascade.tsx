@@ -7,8 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ComponentProps, useCallback, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, useEuiTheme, EuiProgress } from '@elastic/eui';
+import React, { ComponentProps, useCallback, useEffect, useMemo } from 'react';
+import { flushSync } from 'react-dom';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  useEuiTheme,
+  EuiProgress,
+  EuiLoadingChart,
+  type EuiThemeShape,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   useReactTable,
@@ -18,6 +27,7 @@ import {
   flexRender,
   type Row,
   type ExpandedState,
+  type CellContext,
 } from '@tanstack/react-table';
 import { useVirtualizer, type VirtualItem } from '@tanstack/react-virtual';
 import AutoSizer from 'react-virtualized-auto-sizer';
@@ -26,47 +36,131 @@ import {
   DataCascadeProvider,
   useDataCascadeState,
   useDataCascadeDispatch,
-  type DocWithId,
-  type IStoreState,
+  type GroupNode,
+  type LeafNode,
 } from '../../lib';
 
-interface DataCascadeProps<T extends DocWithId> {
+interface CascadeRowProps<T> {
+  populateGroupNodeDataFn: (args: { row: Row<T> }) => Promise<void>;
+  // populateGroupLeafDataFn: (args: { row: Row<T> }) => Promise<void>;
+  rowInstance: Row<T>;
   /**
    * The size of the component, can be 's' (small), 'm' (medium), or 'l' (large). Default is 'm'.
    */
-  size?: 's' | 'm' | 'l';
-  data: T[];
-  onGroupByChange?: (groupBy: string) => void;
-  onGroupByRowExpanded?: (args: { row: Row<T>; state: IStoreState<T> }) => Promise<T[]>;
-  rowHeaderTitleSlot: React.FC<{ row: Row<T> }>;
-  rowHeaderMetaSlots?: (props: { row: Row<T> }) => React.ReactNode[];
-  rowContentSlot: React.FC<{ row: Row<T> }>;
-  tableTitleSlot: React.FC<{ rows: Array<Row<T>> }>;
-}
-
-interface CascadeRowProps<T extends DocWithId> {
-  populateRowDataFn: () => Promise<void>;
-  rowInstance: Row<T>;
+  rowGapSize: keyof Pick<EuiThemeShape['size'], 's' | 'm' | 'l'>;
   virtualizerInstance: ReturnType<typeof useVirtualizer>;
   virtualRow: VirtualItem;
 }
 
-function CascadeRow<T extends DocWithId>({
-  populateRowDataFn,
+interface CascadeRowCellProps<G extends GroupNode, L extends LeafNode>
+  extends CellContext<G, unknown> {
+  populateGroupLeafDataFn: (args: { row: Row<G> }) => Promise<void>;
+  rowHeaderTitleSlot: React.FC<{ row: Row<G> }>;
+  rowHeaderMetaSlots?: (props: { row: Row<G> }) => React.ReactNode[];
+  leafContentSlot: React.FC<{ data: L[] | null }>;
+}
+
+interface OnGroupNodeExpandedArgs<G extends GroupNode> {
+  row: Row<G>;
+  /**
+   * @description The path of the row that was expanded in the group by hierarchy.
+   */
+  nodePath: string[];
+}
+
+interface OnGroupLeafExpandedArgs<G extends GroupNode> {
+  row: Row<G>;
+  /**
+   * @description The path of the row that was expanded in the group by hierarchy.
+   */
+  nodePath: string[];
+  /**
+   * @description KV record of the path values for the row node.
+   */
+  nodePathMap: Record<string, string>;
+}
+
+interface DataCascadeProps<G extends GroupNode, L extends LeafNode>
+  extends Pick<
+    CascadeRowCellProps<G, L>,
+    'rowHeaderTitleSlot' | 'rowHeaderMetaSlots' | 'leafContentSlot'
+  > {
+  data: G[];
+  onGroupByChange: ComponentProps<typeof SelectionDropdown>['onSelectionChange'];
+  /**
+   * @description Callback function that is called when a group by row is expanded.
+   */
+  onGroupNodeExpanded: (args: OnGroupNodeExpandedArgs<G>) => Promise<G[]>;
+  /**
+   * @description Callback function for leaf expansion, which can be used to fetch data for leaf nodes.
+   */
+  onGroupLeafExpanded: (args: OnGroupLeafExpandedArgs<G>) => Promise<L[]>;
+  size?: CascadeRowProps<G>['rowGapSize'];
+  tableTitleSlot: React.FC<{ rows: Array<Row<G>> }>;
+}
+
+/**
+ * @description This function returns the path of the row node in the group by hierarchy.
+ */
+function getCascadeRowNodePath<G extends GroupNode>(currentGroupByColumns: string[], row: Row<G>) {
+  return currentGroupByColumns.slice(0, row.depth + 1);
+}
+
+/**
+ * @description This function returns a record of the path values for the row node.
+ */
+function getCascadeRowNodePathValueRecord<G extends GroupNode>(
+  currentGroupByColumns: string[],
+  row: Row<G>
+) {
+  const nodePath = getCascadeRowNodePath(currentGroupByColumns, row);
+
+  return row.getParentRows().reduce((acc, parentRow) => {
+    // TODO: This assumes that the parentRow.original.group is the value you want to use for the path.
+    // provide means to adjust this logic if user's data structure is different.
+    acc[nodePath[parentRow.depth]] = parentRow.original.group;
+    return acc;
+  }, {} as Record<string, string>);
+}
+
+function getCascadeRowLeafDataCacheKey(
+  nodePath: string[],
+  nodePathMap: Record<string, string>,
+  leafId: string
+) {
+  return nodePath
+    .map((path) => nodePathMap[path])
+    .concat(leafId)
+    .join(':');
+}
+
+function CascadeRow<G extends GroupNode>({
+  populateGroupNodeDataFn,
   rowInstance,
   virtualRow,
   virtualizerInstance,
-}: CascadeRowProps<T>) {
+}: CascadeRowProps<G>) {
   const { euiTheme } = useEuiTheme();
-  const [isPendingRowDataFetch, setRowDataFetch] = React.useState<boolean>(false);
+  const [isPendingRowGroupDataFetch, setRowGroupDataFetch] = React.useState<boolean>(false);
   const cascadeRowRef = React.useRef<HTMLLIElement | null>(null);
 
-  const fetchCascadeRowData = React.useCallback(() => {
-    setRowDataFetch(true);
-    populateRowDataFn().finally(() => {
-      setRowDataFetch(false);
+  const fetchCascadeRowGroupNodeData = React.useCallback(() => {
+    setRowGroupDataFetch(true);
+    populateGroupNodeDataFn({ row: rowInstance }).finally(() => {
+      setRowGroupDataFetch(false);
     });
-  }, [populateRowDataFn]);
+  }, [populateGroupNodeDataFn, rowInstance]);
+
+  const onCascadeRowClick = React.useCallback(
+    (isGroupNode: boolean) => {
+      rowInstance.toggleExpanded();
+      if (isGroupNode) {
+        // Can expand here denotes it still has some nesting, hence we need to fetch the data for the sub-rows
+        fetchCascadeRowGroupNodeData();
+      }
+    },
+    [fetchCascadeRowGroupNodeData, rowInstance]
+  );
 
   return (
     <li
@@ -136,10 +230,7 @@ function CascadeRow<T extends DocWithId>({
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             iconType={rowInstance.getIsExpanded() ? 'arrowDown' : 'arrowRight'}
-            onClick={() => {
-              rowInstance.toggleExpanded();
-              fetchCascadeRowData();
-            }}
+            onClick={onCascadeRowClick.bind(null, rowInstance.getCanExpand())}
             aria-label={i18n.translate('sharedUXPackages.dataCascade.removeRowButtonLabel', {
               defaultMessage: 'expand row',
             })}
@@ -148,7 +239,7 @@ function CascadeRow<T extends DocWithId>({
         </EuiFlexItem>
         <EuiFlexItem>
           <React.Fragment>
-            {isPendingRowDataFetch && (
+            {isPendingRowGroupDataFetch && (
               <EuiProgress
                 size="xs"
                 color="accent"
@@ -171,19 +262,87 @@ function CascadeRow<T extends DocWithId>({
   );
 }
 
-function DataCascadeImpl<T extends DocWithId>({
-  data,
-  onGroupByChange,
-  onGroupByRowExpanded,
+function CascadeRowCell<G extends GroupNode, L extends LeafNode>({
+  row,
+  populateGroupLeafDataFn,
   rowHeaderTitleSlot: RowTitleSlot,
   rowHeaderMetaSlots,
-  rowContentSlot: RowContentSlot,
+  leafContentSlot: LeafContentSlot,
+}: CascadeRowCellProps<G, L>) {
+  const { leafNodes, currentGroupByColumns } = useDataCascadeState<G, L>();
+  const [isPendingRowLeafDataFetch, setRowLeafDataFetch] = React.useState<boolean>(false);
+  const isLeafNode = !row.getCanExpand();
+  const getLeafCacheKey = useCallback(() => {
+    return getCascadeRowLeafDataCacheKey(
+      getCascadeRowNodePath(currentGroupByColumns, row),
+      getCascadeRowNodePathValueRecord(currentGroupByColumns, row),
+      row.id
+    );
+  }, [currentGroupByColumns, row]);
+
+  const leafData = useMemo(() => {
+    return isLeafNode ? leafNodes.get(getLeafCacheKey()) ?? null : null;
+  }, [getLeafCacheKey, isLeafNode, leafNodes]);
+
+  React.useEffect(() => {
+    if (!leafData && isLeafNode && row.getIsExpanded() && !isPendingRowLeafDataFetch) {
+      flushSync(() => setRowLeafDataFetch(true)); // immediately mark as pending to avoid multiple re-renders
+      populateGroupLeafDataFn({ row }).finally(() => {
+        setRowLeafDataFetch(false);
+      });
+    }
+  }, [isLeafNode, isPendingRowLeafDataFetch, leafData, populateGroupLeafDataFn, row]);
+
+  return (
+    <EuiFlexGroup direction="column" css={{ padding: `0 ${8 * row.depth}px` }}>
+      <EuiFlexItem>
+        <EuiFlexGroup direction="row">
+          <EuiFlexItem grow={4}>
+            <RowTitleSlot row={row} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={6}>
+            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+              {rowHeaderMetaSlots?.({ row }).map((metaSlot, index) => (
+                <EuiFlexItem key={index}>{metaSlot}</EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <React.Fragment>
+        {isLeafNode && row.getIsAllParentsExpanded() && row.getIsExpanded() && (
+          <EuiFlexItem grow={10}>
+            {isPendingRowLeafDataFetch ? (
+              <EuiFlexGroup justifyContent="spaceAround">
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingChart size="l" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ) : (
+              <LeafContentSlot data={leafData} />
+            )}
+          </EuiFlexItem>
+        )}
+      </React.Fragment>
+    </EuiFlexGroup>
+  );
+}
+
+function DataCascadeImpl<T extends GroupNode, L extends LeafNode>({
+  data,
+  onGroupByChange,
+  onGroupNodeExpanded,
+  onGroupLeafExpanded,
+  rowHeaderTitleSlot,
+  rowHeaderMetaSlots,
+  leafContentSlot,
+  size = 'm',
   tableTitleSlot: TableTitleSlot,
-}: DataCascadeProps<T>) {
+}: DataCascadeProps<T, L>) {
   // The scrollable element for your list
   const parentRef = React.useRef(null);
   const dispatch = useDataCascadeDispatch();
-  const state = useDataCascadeState<T>();
+  const state = useDataCascadeState<T, L>();
   const columnHelper = createColumnHelper<T>();
   const [expanded, setExpanded] = React.useState<ExpandedState>({});
 
@@ -194,18 +353,21 @@ function DataCascadeImpl<T extends DocWithId>({
     });
   }, [data, dispatch]);
 
-  const fetchSubRowData = useCallback(
+  const fetchGroupNodeData = useCallback(
     ({ row }: { row: Row<T> }) => {
       const dataFetchFn = async () => {
-        const rowData = await onGroupByRowExpanded?.({ row, state });
-        if (!rowData) {
+        const groupNodeData = await onGroupNodeExpanded({
+          row,
+          nodePath: getCascadeRowNodePath(state.currentGroupByColumns, row),
+        });
+        if (!groupNodeData) {
           return;
         }
         dispatch({
-          type: 'UPDATE_ROW_DATA',
+          type: 'UPDATE_ROW_GROUP_NODE_DATA',
           payload: {
             id: row.id,
-            data: rowData,
+            data: groupNodeData,
           },
         });
       };
@@ -214,11 +376,44 @@ function DataCascadeImpl<T extends DocWithId>({
         console.error('Error fetching data for row with ID: %s', row.id, error);
       });
     },
-    [dispatch, onGroupByRowExpanded, state]
+    [dispatch, onGroupNodeExpanded, state.currentGroupByColumns]
+  );
+
+  const fetchGroupLeafData = useCallback(
+    ({ row }: { row: Row<T> }) => {
+      const nodePath = getCascadeRowNodePath(state.currentGroupByColumns, row);
+      const nodePathMap = getCascadeRowNodePathValueRecord(state.currentGroupByColumns, row);
+
+      const dataFetchFn = async () => {
+        const groupLeafData = await onGroupLeafExpanded({
+          row,
+          nodePathMap,
+          nodePath,
+        });
+
+        if (!groupLeafData) {
+          return;
+        }
+
+        dispatch({
+          type: 'UPDATE_ROW_GROUP_LEAF_DATA',
+          payload: {
+            cacheKey: getCascadeRowLeafDataCacheKey(nodePath, nodePathMap, row.id),
+            data: groupLeafData,
+          },
+        });
+      };
+
+      return dataFetchFn().catch((error) => {
+        // eslint-disable-next-line no-console -- added for debugging purposes
+        console.error('Error fetching data for leaf node', error);
+      });
+    },
+    [dispatch, onGroupLeafExpanded, state.currentGroupByColumns]
   );
 
   const table = useReactTable<T>({
-    data: state.data,
+    data: state.groupNodes,
     state: {
       expanded,
     },
@@ -244,36 +439,31 @@ function DataCascadeImpl<T extends DocWithId>({
               </EuiFlexGroup>
             );
           }, props),
-        cell: (props) =>
-          React.createElement(function GroupByCell({ row }) {
-            return (
-              <EuiFlexGroup direction="column" css={{ padding: `0 ${8 * row.depth}px` }}>
-                <EuiFlexItem>
-                  <EuiFlexGroup direction="row">
-                    <EuiFlexItem grow={4}>
-                      <RowTitleSlot row={row} />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={6}>
-                      {rowHeaderMetaSlots?.({ row }).map((metaSlot, index) => (
-                        <React.Fragment key={index}>{metaSlot}</React.Fragment>
-                      ))}
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-                <React.Fragment>
-                  {!row.getCanExpand() &&
-                    row.getIsExpanded() &&
-                    row.getIsAllParentsExpanded() &&
-                    row.depth !== 0 && <RowContentSlot row={row} />}
-                </React.Fragment>
-              </EuiFlexGroup>
-            );
-          }, props),
+        cell: React.memo((props) => {
+          return (
+            <CascadeRowCell<T, L>
+              {...{
+                ...props,
+                rowHeaderTitleSlot,
+                rowHeaderMetaSlots,
+                leafContentSlot,
+                populateGroupLeafDataFn: fetchGroupLeafData,
+              }}
+            />
+          );
+        }),
       }),
     ],
     getCoreRowModel: getCoreRowModel(),
-    getSubRows: (row) => row.children,
     getRowId: (row) => row.id,
+    getRowCanExpand: useCallback(
+      (row: Row<T>) => {
+        // only allow expanding rows up until the depth of the current group by columns
+        return row.depth < state.currentGroupByColumns.length;
+      },
+      [state.currentGroupByColumns.length]
+    ),
+    getSubRows: (row) => row.children,
     getExpandedRowModel: getExpandedRowModel(),
     onExpandedChange: setExpanded,
   });
@@ -304,20 +494,27 @@ function DataCascadeImpl<T extends DocWithId>({
                   }}
                 >
                   {headerColumns.map((header) => {
-                    return flexRender(header.column.columnDef.header, header.getContext());
+                    return (
+                      <React.Fragment key={header.id}>
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                      </React.Fragment>
+                    );
                   })}
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <ul>
                     {rowVirtualizer.getVirtualItems().map(function buildCascadeRows(virtualItem) {
                       const row = rows[virtualItem.index];
-                      return React.createElement(CascadeRow, {
-                        key: virtualItem.index,
-                        populateRowDataFn: fetchSubRowData.bind(null, { row }),
-                        rowInstance: row,
-                        virtualRow: virtualItem,
-                        virtualizerInstance: rowVirtualizer,
-                      });
+                      return (
+                        <CascadeRow<T>
+                          key={virtualItem.key}
+                          populateGroupNodeDataFn={fetchGroupNodeData}
+                          rowInstance={row}
+                          rowGapSize={size}
+                          virtualizerInstance={rowVirtualizer}
+                          virtualRow={virtualItem}
+                        />
+                      );
                     })}
                   </ul>
                 </EuiFlexItem>
@@ -330,13 +527,13 @@ function DataCascadeImpl<T extends DocWithId>({
   );
 }
 
-export function DataCascade<T extends DocWithId>({
+export function DataCascade<N extends GroupNode = GroupNode, L extends LeafNode = LeafNode>({
   query,
   ...props
-}: DataCascadeProps<T> & ComponentProps<typeof DataCascadeProvider>) {
+}: DataCascadeProps<N, L> & ComponentProps<typeof DataCascadeProvider>) {
   return (
     <DataCascadeProvider query={query}>
-      <DataCascadeImpl<T> {...props} />
+      <DataCascadeImpl<N, L> {...props} />
     </DataCascadeProvider>
   );
 }
