@@ -56,7 +56,9 @@ describe('AssetInventoryDataClient', () => {
       jest.clearAllMocks();
       uiSettingsClientMock.get.mockResolvedValue(true);
       (mockSecSolutionContext.getSpaceId as jest.Mock).mockReturnValue('default');
-      (mockSecSolutionContext.core.elasticsearch.client.asInternalUser.count as jest.Mock).mockReset();
+      (
+        mockSecSolutionContext.core.elasticsearch.client.asInternalUser.count as jest.Mock
+      ).mockReset();
     });
 
     it('returns INACTIVE_FEATURE when uisetting is disabled', async () => {
@@ -74,7 +76,9 @@ describe('AssetInventoryDataClient', () => {
       };
 
       // Mock that no generic documents exist
-      (mockSecSolutionContext.core.elasticsearch.client.asInternalUser.count as jest.Mock).mockResolvedValue({
+      (
+        mockSecSolutionContext.core.elasticsearch.client.asInternalUser.count as jest.Mock
+      ).mockResolvedValue({
         count: 0,
       });
 
@@ -93,7 +97,9 @@ describe('AssetInventoryDataClient', () => {
       };
 
       // Mock that generic documents exist
-      (mockSecSolutionContext.core.elasticsearch.client.asInternalUser.count as jest.Mock).mockResolvedValue({
+      (
+        mockSecSolutionContext.core.elasticsearch.client.asInternalUser.count as jest.Mock
+      ).mockResolvedValue({
         count: 5,
       });
 
@@ -102,12 +108,16 @@ describe('AssetInventoryDataClient', () => {
         get: jest.fn().mockRejectedValue({ output: { statusCode: 404 } }),
         createAndSave: jest.fn().mockResolvedValue({ id: 'asset-inventory-default' }),
       };
-      (mockSecSolutionContext.getDataViewsService as jest.Mock).mockReturnValue(mockDataViewService);
+      (mockSecSolutionContext.getDataViewsService as jest.Mock).mockReturnValue(
+        mockDataViewService
+      );
 
       const result = await client.status(mockSecSolutionContext, noPrivileges);
 
       expect(result).toEqual({ status: 'ready' });
-      expect(mockSecSolutionContext.core.elasticsearch.client.asInternalUser.count).toHaveBeenCalledWith({
+      expect(
+        mockSecSolutionContext.core.elasticsearch.client.asInternalUser.count
+      ).toHaveBeenCalledWith({
         index: '.entities.v1.latest.security_generic_default',
       });
       // Verify that installAssetInventoryDataView was called
@@ -125,7 +135,9 @@ describe('AssetInventoryDataClient', () => {
       (mockSecSolutionContext.getSpaceId as jest.Mock).mockReturnValue('custom-space');
 
       // Mock that generic documents exist
-      (mockSecSolutionContext.core.elasticsearch.client.asInternalUser.count as jest.Mock).mockResolvedValue({
+      (
+        mockSecSolutionContext.core.elasticsearch.client.asInternalUser.count as jest.Mock
+      ).mockResolvedValue({
         count: 3,
       });
 
@@ -134,12 +146,16 @@ describe('AssetInventoryDataClient', () => {
         get: jest.fn().mockRejectedValue({ output: { statusCode: 404 } }),
         createAndSave: jest.fn().mockResolvedValue({ id: 'asset-inventory-custom-space' }),
       };
-      (mockSecSolutionContext.getDataViewsService as jest.Mock).mockReturnValue(mockDataViewService);
+      (mockSecSolutionContext.getDataViewsService as jest.Mock).mockReturnValue(
+        mockDataViewService
+      );
 
       const result = await client.status(mockSecSolutionContext, noPrivileges);
 
       expect(result).toEqual({ status: 'ready' });
-      expect(mockSecSolutionContext.core.elasticsearch.client.asInternalUser.count).toHaveBeenCalledWith({
+      expect(
+        mockSecSolutionContext.core.elasticsearch.client.asInternalUser.count
+      ).toHaveBeenCalledWith({
         index: '.entities.v1.latest.security_generic_custom-space',
       });
       // Verify that installAssetInventoryDataView was called with custom space
@@ -154,7 +170,9 @@ describe('AssetInventoryDataClient', () => {
       };
 
       // Mock that generic documents exist
-      (mockSecSolutionContext.core.elasticsearch.client.asInternalUser.count as jest.Mock).mockResolvedValue({
+      (
+        mockSecSolutionContext.core.elasticsearch.client.asInternalUser.count as jest.Mock
+      ).mockResolvedValue({
         count: 5,
       });
 
@@ -163,19 +181,25 @@ describe('AssetInventoryDataClient', () => {
         get: jest.fn().mockRejectedValue({ output: { statusCode: 404 } }),
         createAndSave: jest.fn().mockRejectedValue(new Error('Failed to create data view')),
       };
-      (mockSecSolutionContext.getDataViewsService as jest.Mock).mockReturnValue(mockDataViewService);
+      (mockSecSolutionContext.getDataViewsService as jest.Mock).mockReturnValue(
+        mockDataViewService
+      );
 
       const result = await client.status(mockSecSolutionContext, noPrivileges);
 
       expect(result).toEqual({ status: 'ready' });
-      expect(mockSecSolutionContext.core.elasticsearch.client.asInternalUser.count).toHaveBeenCalledWith({
+      expect(
+        mockSecSolutionContext.core.elasticsearch.client.asInternalUser.count
+      ).toHaveBeenCalledWith({
         index: '.entities.v1.latest.security_generic_default',
       });
       // Verify that installAssetInventoryDataView was attempted but failed
       expect(mockDataViewService.get).toHaveBeenCalledWith('asset-inventory-default', false);
       expect(mockDataViewService.createAndSave).toHaveBeenCalled();
       // Verify error was logged
-      expect(loggerMock.error).toHaveBeenCalledWith('Error installing asset inventory data view: Failed to create data view');
+      expect(loggerMock.error).toHaveBeenCalledWith(
+        'Error installing asset inventory data view: Failed to create data view'
+      );
     });
 
     it('returns INSUFFICIENT_PRIVILEGES when user lacks privileges and hasGenericDocuments throws error', async () => {
@@ -185,9 +209,9 @@ describe('AssetInventoryDataClient', () => {
       };
 
       // Mock Elasticsearch count failure
-      (mockSecSolutionContext.core.elasticsearch.client.asInternalUser.count as jest.Mock).mockRejectedValue(
-        new Error('Index not found')
-      );
+      (
+        mockSecSolutionContext.core.elasticsearch.client.asInternalUser.count as jest.Mock
+      ).mockRejectedValue(new Error('Index not found'));
 
       const result = await client.status(mockSecSolutionContext, noPrivileges);
 
@@ -195,11 +219,15 @@ describe('AssetInventoryDataClient', () => {
         status: 'insufficient_privileges',
         privileges: noPrivileges,
       });
-      expect(mockSecSolutionContext.core.elasticsearch.client.asInternalUser.count).toHaveBeenCalledWith({
+      expect(
+        mockSecSolutionContext.core.elasticsearch.client.asInternalUser.count
+      ).toHaveBeenCalledWith({
         index: '.entities.v1.latest.security_generic_default',
       });
       // Verify error was logged
-      expect(loggerMock.error).toHaveBeenCalledWith('Error checking for generic documents: Index not found');
+      expect(loggerMock.error).toHaveBeenCalledWith(
+        'Error checking for generic documents: Index not found'
+      );
     });
 
     it('returns DISABLED when entity store is not installed', async () => {
@@ -260,7 +288,9 @@ describe('AssetInventoryDataClient', () => {
       const mockDataViewService = {
         get: jest.fn().mockResolvedValue({ id: 'asset-inventory-default' }), // Data view already exists
       };
-      (mockSecSolutionContext.getDataViewsService as jest.Mock).mockReturnValue(mockDataViewService);
+      (mockSecSolutionContext.getDataViewsService as jest.Mock).mockReturnValue(
+        mockDataViewService
+      );
 
       const result = await client.status(mockSecSolutionContext, mockEntityStorePrivileges);
 
