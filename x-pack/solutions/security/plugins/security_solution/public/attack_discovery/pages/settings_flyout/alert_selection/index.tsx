@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiTab, EuiTabs, EuiText, EuiSpacer, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 import React, { useMemo, useState } from 'react';

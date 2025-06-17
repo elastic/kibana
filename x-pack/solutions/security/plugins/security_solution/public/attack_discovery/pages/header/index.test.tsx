@@ -14,6 +14,9 @@ import { TestProviders } from '../../../common/mock';
 import { Header } from '.';
 
 jest.mock('../../../assistant/use_assistant_availability');
+jest.mock('../../../common/hooks/use_space_id', () => ({
+  useSpaceId: jest.fn().mockReturnValue('default'),
+}));
 
 const defaultProps = {
   stats: null,
@@ -27,6 +30,7 @@ const defaultProps = {
   onConnectorIdSelected: jest.fn(),
   openFlyout: jest.fn(),
   setLocalStorageAttackDiscoveryMaxAlerts: jest.fn(),
+  showFlyout: false,
 };
 
 describe('Actions', () => {

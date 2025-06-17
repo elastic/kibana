@@ -26,7 +26,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KnowledgeBaseTour } from '../../../tour/knowledge_base';
 import { AnonymizationSettingsManagement } from '../../../data_anonymization/settings/anonymization_settings_management';
 import { Conversation, useAssistantContext } from '../../../..';
 import * as i18n from '../../assistant_header/translations';
@@ -353,15 +352,13 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
       <>
         <EuiPopover
           button={
-            <KnowledgeBaseTour>
-              <EuiButtonIcon
-                aria-label={AI_ASSISTANT_MENU}
-                isDisabled={isDisabled}
-                iconType="boxesVertical"
-                onClick={onButtonClick}
-                data-test-subj="chat-context-menu"
-              />
-            </KnowledgeBaseTour>
+            <EuiButtonIcon
+              aria-label={AI_ASSISTANT_MENU}
+              isDisabled={isDisabled}
+              iconType="boxesVertical"
+              onClick={onButtonClick}
+              data-test-subj="chat-context-menu"
+            />
           }
           isOpen={isPopoverOpen}
           closePopover={closePopover}
