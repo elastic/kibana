@@ -7,7 +7,6 @@
 
 import Boom from '@hapi/boom';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
-import {} from '@kbn/observability-shared-plugin/common';
 import { logAnalysisResultsV1 } from '../../../../common/http_api';
 import type { InfraBackendLibs } from '../../../lib/infra_types';
 

@@ -45,7 +45,6 @@ export class ServerlessObservabilityPlugin
       map(({ status }) => {
         return createNavigationTree({
           streamsAvailable: status === 'enabled',
-          isAnomaliesCategoriesAvailable,
         });
       })
     );
