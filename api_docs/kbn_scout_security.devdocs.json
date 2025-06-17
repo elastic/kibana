@@ -1402,7 +1402,7 @@
         "signature": [
           "Locator"
         ],
-        "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+        "path": "node_modules/playwright-core/types/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1422,7 +1422,7 @@
               "PageFunctionOn",
               "<E, void, R>, options?: { timeout?: number | undefined; } | undefined): Promise<R>; }"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1439,7 +1439,7 @@
                   "PageFunctionOn",
                   "<E, Arg, R>"
                 ],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1456,7 +1456,7 @@
                 "signature": [
                   "Arg"
                 ],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1468,7 +1468,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1482,7 +1482,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -1507,7 +1507,7 @@
               "PageFunctionOn",
               "<E, void, R>, options?: { timeout?: number | undefined; } | undefined): Promise<R>; }"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1524,7 +1524,7 @@
                   "PageFunctionOn",
                   "<E, void, R>"
                 ],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1536,7 +1536,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1550,7 +1550,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -1579,7 +1579,7 @@
               "SmartHandle",
               "<R>>; }"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1596,7 +1596,7 @@
                   "PageFunctionOn",
                   "<E, Arg, R>"
                 ],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1613,7 +1613,7 @@
                 "signature": [
                   "Arg"
                 ],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1641,7 +1641,7 @@
               "SmartHandle",
               "<R>>; }"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1658,7 +1658,7 @@
                   "PageFunctionOn",
                   "<E, void, R>"
                 ],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1682,7 +1682,7 @@
               "PageFunctionOn",
               "<E[], void, R>): Promise<R>; }"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1699,7 +1699,7 @@
                   "PageFunctionOn",
                   "<E[], Arg, R>"
                 ],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1716,7 +1716,7 @@
                 "signature": [
                   "Arg"
                 ],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1740,7 +1740,7 @@
               "PageFunctionOn",
               "<E[], void, R>): Promise<R>; }"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1757,7 +1757,7 @@
                   "PageFunctionOn",
                   "<E[], void, R>"
                 ],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1779,7 +1779,7 @@
               "ElementHandle",
               "<HTMLElement | SVGElement> | null>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1790,7 +1790,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1804,7 +1804,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -1827,7 +1827,7 @@
               "Locator",
               "[]>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1845,7 +1845,7 @@
             "signature": [
               "() => Promise<string[]>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1863,7 +1863,7 @@
             "signature": [
               "() => Promise<string[]>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1884,7 +1884,7 @@
               ") => ",
               "Locator"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1900,7 +1900,7 @@
                 "signature": [
                   "Locator"
                 ],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1920,7 +1920,7 @@
             "signature": [
               "(options?: { timeout?: number | undefined; } | undefined) => Promise<string>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1931,7 +1931,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1947,7 +1947,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -1968,7 +1968,7 @@
             "signature": [
               "(options?: { timeout?: number | undefined; } | undefined) => Promise<void>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1979,7 +1979,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1995,7 +1995,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -2016,7 +2016,7 @@
             "signature": [
               "(options?: { timeout?: number | undefined; } | undefined) => Promise<{ x: number; y: number; width: number; height: number; } | null>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2027,7 +2027,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -2043,7 +2043,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -2064,7 +2064,7 @@
             "signature": [
               "(options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2075,7 +2075,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -2091,7 +2091,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2109,7 +2109,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": true,
                     "trackAdoption": false,
                     "references": []
@@ -2126,7 +2126,7 @@
                     "signature": [
                       "{ x: number; y: number; } | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2142,7 +2142,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2158,7 +2158,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -2179,7 +2179,7 @@
             "signature": [
               "(options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2190,7 +2190,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -2206,7 +2206,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2224,7 +2224,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": true,
                     "trackAdoption": false,
                     "references": []
@@ -2241,7 +2241,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -2262,7 +2262,7 @@
             "signature": [
               "(options?: { button?: \"right\" | \"left\" | \"middle\" | undefined; clickCount?: number | undefined; delay?: number | undefined; force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2273,7 +2273,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -2289,7 +2289,7 @@
                     "signature": [
                       "\"right\" | \"left\" | \"middle\" | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2305,7 +2305,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2321,7 +2321,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2337,7 +2337,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2353,7 +2353,7 @@
                     "signature": [
                       "(\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2371,7 +2371,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": true,
                     "trackAdoption": false,
                     "references": []
@@ -2388,7 +2388,7 @@
                     "signature": [
                       "{ x: number; y: number; } | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2404,7 +2404,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2420,7 +2420,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -2442,7 +2442,7 @@
               "() => ",
               "FrameLocator"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2460,7 +2460,7 @@
             "signature": [
               "() => Promise<number>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2478,7 +2478,7 @@
             "signature": [
               "(options?: { button?: \"right\" | \"left\" | \"middle\" | undefined; delay?: number | undefined; force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2489,7 +2489,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -2505,7 +2505,7 @@
                     "signature": [
                       "\"right\" | \"left\" | \"middle\" | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2521,7 +2521,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2537,7 +2537,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2553,7 +2553,7 @@
                     "signature": [
                       "(\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2571,7 +2571,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": true,
                     "trackAdoption": false,
                     "references": []
@@ -2588,7 +2588,7 @@
                     "signature": [
                       "{ x: number; y: number; } | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2604,7 +2604,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2620,7 +2620,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -2636,14 +2636,14 @@
             "tags": [],
             "label": "dispatchEvent",
             "description": [
-              "\nProgrammatically dispatch an event on the matching element.\n\n**Usage**\n\n```js\nawait locator.dispatchEvent('click');\n```\n\n**Details**\n\nThe snippet above dispatches the `click` event on the element. Regardless of the visibility state of the element,\n`click` is dispatched. This is equivalent to calling\n[element.click()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).\n\nUnder the hood, it creates an instance of an event based on the given\n[`type`](https://playwright.dev/docs/api/class-locator#locator-dispatch-event-option-type), initializes it with\n[`eventInit`](https://playwright.dev/docs/api/class-locator#locator-dispatch-event-option-event-init) properties\nand dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.\n\nSince [`eventInit`](https://playwright.dev/docs/api/class-locator#locator-dispatch-event-option-event-init) is\nevent-specific, please refer to the events documentation for the lists of initial properties:\n- [DeviceMotionEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent/DeviceMotionEvent)\n- [DeviceOrientationEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent/DeviceOrientationEvent)\n- [DragEvent](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent/DragEvent)\n- [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event/Event)\n- [FocusEvent](https://developer.mozilla.org/en-US/docs/Web/API/FocusEvent/FocusEvent)\n- [KeyboardEvent](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/KeyboardEvent)\n- [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/MouseEvent)\n- [PointerEvent](https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/PointerEvent)\n- [TouchEvent](https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent/TouchEvent)\n- [WheelEvent](https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent/WheelEvent)\n\nYou can also specify [JSHandle](https://playwright.dev/docs/api/class-jshandle) as the property value if you want\nlive objects to be passed into the event:\n\n```js\n// Note you can only create DataTransfer in Chromium and Firefox\nconst dataTransfer = await page.evaluateHandle(() => new DataTransfer());\nawait locator.dispatchEvent('dragstart', { dataTransfer });\n```\n"
+              "\nProgrammatically dispatch an event on the matching element.\n\n**Usage**\n\n```js\nawait locator.dispatchEvent('click');\n```\n\n**Details**\n\nThe snippet above dispatches the `click` event on the element. Regardless of the visibility state of the element,\n`click` is dispatched. This is equivalent to calling\n[element.click()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).\n\nUnder the hood, it creates an instance of an event based on the given\n[`type`](https://playwright.dev/docs/api/class-locator#locator-dispatch-event-option-type), initializes it with\n[`eventInit`](https://playwright.dev/docs/api/class-locator#locator-dispatch-event-option-event-init) properties\nand dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.\n\nSince [`eventInit`](https://playwright.dev/docs/api/class-locator#locator-dispatch-event-option-event-init) is\nevent-specific, please refer to the events documentation for the lists of initial properties:\n- [DeviceMotionEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent/DeviceMotionEvent)\n- [DeviceOrientationEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent/DeviceOrientationEvent)\n- [DragEvent](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent/DragEvent)\n- [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event/Event)\n- [FocusEvent](https://developer.mozilla.org/en-US/docs/Web/API/FocusEvent/FocusEvent)\n- [KeyboardEvent](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/KeyboardEvent)\n- [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/MouseEvent)\n- [PointerEvent](https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/PointerEvent)\n- [TouchEvent](https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent/TouchEvent)\n- [WheelEvent](https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent/WheelEvent)\n\nYou can also specify [JSHandle](https://playwright.dev/docs/api/class-jshandle) as the property value if you want\nlive objects to be passed into the event:\n\n```js\nconst dataTransfer = await page.evaluateHandle(() => new DataTransfer());\nawait locator.dispatchEvent('dragstart', { dataTransfer });\n```\n"
             ],
             "signature": [
               "(type: string, eventInit?: ",
               "EvaluationArgument",
               " | undefined, options?: { timeout?: number | undefined; } | undefined) => Promise<void>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2659,7 +2659,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2677,7 +2677,7 @@
                   "EvaluationArgument",
                   " | undefined"
                 ],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2689,7 +2689,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -2705,7 +2705,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -2728,7 +2728,7 @@
               "Locator",
               ", options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; sourcePosition?: { x: number; y: number; } | undefined; targetPosition?: { x: number; y: number; } | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2744,7 +2744,7 @@
                 "signature": [
                   "Locator"
                 ],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2756,7 +2756,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -2772,7 +2772,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2790,7 +2790,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": true,
                     "trackAdoption": false,
                     "references": []
@@ -2807,7 +2807,7 @@
                     "signature": [
                       "{ x: number; y: number; } | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2823,7 +2823,7 @@
                     "signature": [
                       "{ x: number; y: number; } | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2839,7 +2839,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2855,7 +2855,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -2878,7 +2878,7 @@
               "ElementHandle",
               "<Node>[]>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2896,7 +2896,7 @@
             "signature": [
               "(value: string, options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2912,7 +2912,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2924,7 +2924,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -2940,7 +2940,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2958,7 +2958,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": true,
                     "trackAdoption": false,
                     "references": []
@@ -2975,7 +2975,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -3001,7 +3001,7 @@
               " | undefined; hasNotText?: string | RegExp | undefined; hasText?: string | RegExp | undefined; } | undefined) => ",
               "Locator"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3012,7 +3012,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -3029,7 +3029,7 @@
                       "Locator",
                       " | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -3046,7 +3046,7 @@
                       "Locator",
                       " | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -3062,7 +3062,7 @@
                     "signature": [
                       "string | RegExp | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -3078,7 +3078,7 @@
                     "signature": [
                       "string | RegExp | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -3100,7 +3100,7 @@
               "() => ",
               "Locator"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3118,7 +3118,7 @@
             "signature": [
               "(options?: { timeout?: number | undefined; } | undefined) => Promise<void>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3129,7 +3129,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -3145,7 +3145,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -3167,7 +3167,7 @@
               "(selector: string) => ",
               "FrameLocator"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3183,7 +3183,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3203,7 +3203,7 @@
             "signature": [
               "(name: string, options?: { timeout?: number | undefined; } | undefined) => Promise<string | null>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3219,7 +3219,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3231,7 +3231,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -3247,7 +3247,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -3269,7 +3269,7 @@
               "(text: string | RegExp, options?: { exact?: boolean | undefined; } | undefined) => ",
               "Locator"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3285,7 +3285,7 @@
                 "signature": [
                   "string | RegExp"
                 ],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3297,7 +3297,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -3313,7 +3313,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -3335,7 +3335,7 @@
               "(text: string | RegExp, options?: { exact?: boolean | undefined; } | undefined) => ",
               "Locator"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3351,7 +3351,7 @@
                 "signature": [
                   "string | RegExp"
                 ],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3363,7 +3363,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -3379,7 +3379,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -3401,7 +3401,7 @@
               "(text: string | RegExp, options?: { exact?: boolean | undefined; } | undefined) => ",
               "Locator"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3417,7 +3417,7 @@
                 "signature": [
                   "string | RegExp"
                 ],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3429,7 +3429,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -3445,7 +3445,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -3467,7 +3467,7 @@
               "(role: \"log\" | \"search\" | \"link\" | \"none\" | \"list\" | \"alert\" | \"application\" | \"form\" | \"grid\" | \"group\" | \"status\" | \"code\" | \"main\" | \"article\" | \"blockquote\" | \"button\" | \"caption\" | \"dialog\" | \"figure\" | \"img\" | \"menu\" | \"menuitem\" | \"meter\" | \"option\" | \"strong\" | \"table\" | \"time\" | \"switch\" | \"alertdialog\" | \"banner\" | \"cell\" | \"checkbox\" | \"columnheader\" | \"combobox\" | \"complementary\" | \"contentinfo\" | \"definition\" | \"directory\" | \"document\" | \"feed\" | \"gridcell\" | \"heading\" | \"listbox\" | \"listitem\" | \"marquee\" | \"math\" | \"menubar\" | \"menuitemcheckbox\" | \"menuitemradio\" | \"navigation\" | \"note\" | \"presentation\" | \"progressbar\" | \"radio\" | \"radiogroup\" | \"region\" | \"row\" | \"rowgroup\" | \"rowheader\" | \"scrollbar\" | \"searchbox\" | \"separator\" | \"slider\" | \"spinbutton\" | \"tab\" | \"tablist\" | \"tabpanel\" | \"term\" | \"textbox\" | \"timer\" | \"toolbar\" | \"tooltip\" | \"tree\" | \"treegrid\" | \"treeitem\" | \"deletion\" | \"generic\" | \"emphasis\" | \"insertion\" | \"paragraph\" | \"subscript\" | \"superscript\", options?: { checked?: boolean | undefined; disabled?: boolean | undefined; exact?: boolean | undefined; expanded?: boolean | undefined; includeHidden?: boolean | undefined; level?: number | undefined; name?: string | RegExp | undefined; pressed?: boolean | undefined; selected?: boolean | undefined; } | undefined) => ",
               "Locator"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3483,7 +3483,7 @@
                 "signature": [
                   "\"log\" | \"search\" | \"link\" | \"none\" | \"list\" | \"alert\" | \"application\" | \"form\" | \"grid\" | \"group\" | \"status\" | \"code\" | \"main\" | \"article\" | \"blockquote\" | \"button\" | \"caption\" | \"dialog\" | \"figure\" | \"img\" | \"menu\" | \"menuitem\" | \"meter\" | \"option\" | \"strong\" | \"table\" | \"time\" | \"switch\" | \"alertdialog\" | \"banner\" | \"cell\" | \"checkbox\" | \"columnheader\" | \"combobox\" | \"complementary\" | \"contentinfo\" | \"definition\" | \"directory\" | \"document\" | \"feed\" | \"gridcell\" | \"heading\" | \"listbox\" | \"listitem\" | \"marquee\" | \"math\" | \"menubar\" | \"menuitemcheckbox\" | \"menuitemradio\" | \"navigation\" | \"note\" | \"presentation\" | \"progressbar\" | \"radio\" | \"radiogroup\" | \"region\" | \"row\" | \"rowgroup\" | \"rowheader\" | \"scrollbar\" | \"searchbox\" | \"separator\" | \"slider\" | \"spinbutton\" | \"tab\" | \"tablist\" | \"tabpanel\" | \"term\" | \"textbox\" | \"timer\" | \"toolbar\" | \"tooltip\" | \"tree\" | \"treegrid\" | \"treeitem\" | \"deletion\" | \"generic\" | \"emphasis\" | \"insertion\" | \"paragraph\" | \"subscript\" | \"superscript\""
                 ],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3495,7 +3495,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -3511,7 +3511,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -3527,7 +3527,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -3543,7 +3543,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -3559,7 +3559,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -3575,7 +3575,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -3591,7 +3591,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -3607,7 +3607,7 @@
                     "signature": [
                       "string | RegExp | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -3623,7 +3623,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -3639,7 +3639,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -3661,7 +3661,7 @@
               "(testId: string | RegExp) => ",
               "Locator"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3677,7 +3677,7 @@
                 "signature": [
                   "string | RegExp"
                 ],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3698,7 +3698,7 @@
               "(text: string | RegExp, options?: { exact?: boolean | undefined; } | undefined) => ",
               "Locator"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3714,7 +3714,7 @@
                 "signature": [
                   "string | RegExp"
                 ],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3726,7 +3726,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -3742,7 +3742,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -3764,7 +3764,7 @@
               "(text: string | RegExp, options?: { exact?: boolean | undefined; } | undefined) => ",
               "Locator"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3780,7 +3780,7 @@
                 "signature": [
                   "string | RegExp"
                 ],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3792,7 +3792,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -3808,7 +3808,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -3829,7 +3829,7 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3847,7 +3847,7 @@
             "signature": [
               "(options?: { force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3858,7 +3858,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -3874,7 +3874,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -3890,7 +3890,7 @@
                     "signature": [
                       "(\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -3908,7 +3908,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": true,
                     "trackAdoption": false,
                     "references": []
@@ -3925,7 +3925,7 @@
                     "signature": [
                       "{ x: number; y: number; } | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -3941,7 +3941,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -3957,7 +3957,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -3978,7 +3978,7 @@
             "signature": [
               "(options?: { timeout?: number | undefined; } | undefined) => Promise<string>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3989,7 +3989,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -4005,7 +4005,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -4026,7 +4026,7 @@
             "signature": [
               "(options?: { timeout?: number | undefined; } | undefined) => Promise<string>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4037,7 +4037,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -4053,7 +4053,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -4074,7 +4074,7 @@
             "signature": [
               "(options?: { timeout?: number | undefined; } | undefined) => Promise<string>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4085,7 +4085,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -4101,7 +4101,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -4122,7 +4122,7 @@
             "signature": [
               "(options?: { timeout?: number | undefined; } | undefined) => Promise<boolean>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4133,7 +4133,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -4149,7 +4149,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -4170,7 +4170,7 @@
             "signature": [
               "(options?: { timeout?: number | undefined; } | undefined) => Promise<boolean>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4181,7 +4181,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -4197,7 +4197,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -4213,12 +4213,12 @@
             "tags": [],
             "label": "isEditable",
             "description": [
-              "\nReturns whether the element is [editable](https://playwright.dev/docs/actionability#editable).\n\n**NOTE** If you need to assert that an element is editable, prefer\n[expect(locator).toBeEditable([options])](https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-be-editable)\nto avoid flakiness. See [assertions guide](https://playwright.dev/docs/test-assertions) for more details.\n\n**Usage**\n\n```js\nconst editable = await page.getByRole('textbox').isEditable();\n```\n"
+              "\nReturns whether the element is [editable](https://playwright.dev/docs/actionability#editable). If the target element is not an `<input>`,\n`<textarea>`, `<select>`, `[contenteditable]` and does not have a role allowing `[aria-readonly]`, this method\nthrows an error.\n\n**NOTE** If you need to assert that an element is editable, prefer\n[expect(locator).toBeEditable([options])](https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-be-editable)\nto avoid flakiness. See [assertions guide](https://playwright.dev/docs/test-assertions) for more details.\n\n**Usage**\n\n```js\nconst editable = await page.getByRole('textbox').isEditable();\n```\n"
             ],
             "signature": [
               "(options?: { timeout?: number | undefined; } | undefined) => Promise<boolean>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4229,7 +4229,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -4245,7 +4245,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -4266,7 +4266,7 @@
             "signature": [
               "(options?: { timeout?: number | undefined; } | undefined) => Promise<boolean>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4277,7 +4277,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -4293,7 +4293,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -4314,7 +4314,7 @@
             "signature": [
               "(options?: { timeout?: number | undefined; } | undefined) => Promise<boolean>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4325,7 +4325,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -4341,7 +4341,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": true,
                     "trackAdoption": false,
                     "references": []
@@ -4363,7 +4363,7 @@
             "signature": [
               "(options?: { timeout?: number | undefined; } | undefined) => Promise<boolean>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4374,7 +4374,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -4390,7 +4390,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": true,
                     "trackAdoption": false,
                     "references": []
@@ -4413,7 +4413,7 @@
               "() => ",
               "Locator"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -4438,7 +4438,7 @@
               " | undefined; hasNotText?: string | RegExp | undefined; hasText?: string | RegExp | undefined; } | undefined) => ",
               "Locator"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4455,7 +4455,7 @@
                   "string | ",
                   "Locator"
                 ],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4467,7 +4467,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -4484,7 +4484,7 @@
                       "Locator",
                       " | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -4501,7 +4501,7 @@
                       "Locator",
                       " | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -4517,7 +4517,7 @@
                     "signature": [
                       "string | RegExp | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -4533,7 +4533,7 @@
                     "signature": [
                       "string | RegExp | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -4555,7 +4555,7 @@
               "(index: number) => ",
               "Locator"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4569,7 +4569,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4584,7 +4584,7 @@
             "tags": [],
             "label": "or",
             "description": [
-              "\nCreates a locator matching all elements that match one or both of the two locators.\n\nNote that when both locators match something, the resulting locator will have multiple matches and violate\n[locator strictness](https://playwright.dev/docs/locators#strictness) guidelines.\n\n**Usage**\n\nConsider a scenario where you'd like to click on a \"New email\" button, but sometimes a security settings dialog\nshows up instead. In this case, you can wait for either a \"New email\" button, or a dialog and act accordingly.\n\n```js\nconst newEmail = page.getByRole('button', { name: 'New' });\nconst dialog = page.getByText('Confirm security settings');\nawait expect(newEmail.or(dialog)).toBeVisible();\nif (await dialog.isVisible())\n  await page.getByRole('button', { name: 'Dismiss' }).click();\nawait newEmail.click();\n```\n"
+              "\nCreates a locator matching all elements that match one or both of the two locators.\n\nNote that when both locators match something, the resulting locator will have multiple matches, potentially causing\na [locator strictness](https://playwright.dev/docs/locators#strictness) violation.\n\n**Usage**\n\nConsider a scenario where you'd like to click on a \"New email\" button, but sometimes a security settings dialog\nshows up instead. In this case, you can wait for either a \"New email\" button, or a dialog and act accordingly.\n\n**NOTE** If both \"New email\" button and security dialog appear on screen, the \"or\" locator will match both of them,\npossibly throwing the [\"strict mode violation\" error](https://playwright.dev/docs/locators#strictness). In this case, you can use\n[locator.first()](https://playwright.dev/docs/api/class-locator#locator-first) to only match one of them.\n\n```js\nconst newEmail = page.getByRole('button', { name: 'New' });\nconst dialog = page.getByText('Confirm security settings');\nawait expect(newEmail.or(dialog).first()).toBeVisible();\nif (await dialog.isVisible())\n  await page.getByRole('button', { name: 'Dismiss' }).click();\nawait newEmail.click();\n```\n"
             ],
             "signature": [
               "(locator: ",
@@ -4592,7 +4592,7 @@
               ") => ",
               "Locator"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4608,7 +4608,7 @@
                 "signature": [
                   "Locator"
                 ],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4629,7 +4629,7 @@
               "() => ",
               "Page"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -4647,7 +4647,7 @@
             "signature": [
               "(key: string, options?: { delay?: number | undefined; noWaitAfter?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4663,7 +4663,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4675,7 +4675,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -4691,7 +4691,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -4709,7 +4709,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": true,
                     "trackAdoption": false,
                     "references": []
@@ -4726,7 +4726,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -4747,7 +4747,7 @@
             "signature": [
               "(text: string, options?: { delay?: number | undefined; noWaitAfter?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4763,7 +4763,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4775,7 +4775,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -4791,7 +4791,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -4809,7 +4809,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": true,
                     "trackAdoption": false,
                     "references": []
@@ -4826,7 +4826,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -4849,7 +4849,7 @@
               "LocatorScreenshotOptions",
               " | undefined) => Promise<Buffer>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4864,7 +4864,7 @@
                   "LocatorScreenshotOptions",
                   " | undefined"
                 ],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -4884,7 +4884,7 @@
             "signature": [
               "(options?: { timeout?: number | undefined; } | undefined) => Promise<void>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4895,7 +4895,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -4911,7 +4911,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -4936,7 +4936,7 @@
               "ElementHandle",
               "<Node>[] | readonly { value?: string | undefined; label?: string | undefined; index?: number | undefined; }[] | null, options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<string[]>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4956,7 +4956,7 @@
                   "ElementHandle",
                   "<Node>[] | readonly { value?: string | undefined; label?: string | undefined; index?: number | undefined; }[] | null"
                 ],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -4968,7 +4968,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -4984,7 +4984,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -5002,7 +5002,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": true,
                     "trackAdoption": false,
                     "references": []
@@ -5019,7 +5019,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -5040,7 +5040,7 @@
             "signature": [
               "(options?: { force?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5051,7 +5051,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -5067,7 +5067,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -5083,7 +5083,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -5104,7 +5104,7 @@
             "signature": [
               "(checked: boolean, options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5120,7 +5120,7 @@
                 "signature": [
                   "boolean"
                 ],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5132,7 +5132,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -5148,7 +5148,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -5166,7 +5166,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": true,
                     "trackAdoption": false,
                     "references": []
@@ -5183,7 +5183,7 @@
                     "signature": [
                       "{ x: number; y: number; } | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -5199,7 +5199,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -5215,7 +5215,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -5236,7 +5236,7 @@
             "signature": [
               "(files: string | readonly string[] | { name: string; mimeType: string; buffer: Buffer; } | readonly { name: string; mimeType: string; buffer: Buffer; }[], options?: { noWaitAfter?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5250,7 +5250,7 @@
                 "signature": [
                   "string | readonly string[] | { name: string; mimeType: string; buffer: Buffer; } | readonly { name: string; mimeType: string; buffer: Buffer; }[]"
                 ],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5262,7 +5262,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -5280,7 +5280,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": true,
                     "trackAdoption": false,
                     "references": []
@@ -5297,7 +5297,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -5318,7 +5318,7 @@
             "signature": [
               "(options?: { force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5329,7 +5329,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -5345,7 +5345,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -5361,7 +5361,7 @@
                     "signature": [
                       "(\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -5379,7 +5379,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": true,
                     "trackAdoption": false,
                     "references": []
@@ -5396,7 +5396,7 @@
                     "signature": [
                       "{ x: number; y: number; } | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -5412,7 +5412,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -5428,7 +5428,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -5449,7 +5449,7 @@
             "signature": [
               "(options?: { timeout?: number | undefined; } | undefined) => Promise<string | null>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5460,7 +5460,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -5476,7 +5476,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -5499,10 +5499,23 @@
             "signature": [
               "(text: string, options?: { delay?: number | undefined; noWaitAfter?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": true,
             "trackAdoption": false,
-            "references": [],
+            "references": [
+              {
+                "plugin": "ux",
+                "path": "x-pack/solutions/observability/plugins/ux/e2e/page_objects/date_picker.ts"
+              },
+              {
+                "plugin": "ux",
+                "path": "x-pack/solutions/observability/plugins/ux/e2e/page_objects/date_picker.ts"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/solutions/observability/plugins/synthetics/e2e/synthetics/page_objects/utils.ts"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "@kbn/scout-security",
@@ -5516,7 +5529,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5528,7 +5541,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -5544,7 +5557,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -5562,7 +5575,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": true,
                     "trackAdoption": false,
                     "references": []
@@ -5579,7 +5592,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -5600,7 +5613,7 @@
             "signature": [
               "(options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5611,7 +5624,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -5627,7 +5640,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -5645,7 +5658,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": true,
                     "trackAdoption": false,
                     "references": []
@@ -5662,7 +5675,7 @@
                     "signature": [
                       "{ x: number; y: number; } | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -5678,7 +5691,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -5694,7 +5707,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -5715,7 +5728,7 @@
             "signature": [
               "(options?: { state?: \"hidden\" | \"visible\" | \"detached\" | \"attached\" | undefined; timeout?: number | undefined; } | undefined) => Promise<void>"
             ],
-            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "path": "node_modules/playwright-core/types/types.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5726,7 +5739,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -5742,7 +5755,7 @@
                     "signature": [
                       "\"hidden\" | \"visible\" | \"detached\" | \"attached\" | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -5758,7 +5771,7 @@
                     "signature": [
                       "number | undefined"
                     ],
-                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }

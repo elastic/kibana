@@ -7,7 +7,7 @@
 import { useKibana } from './use_kibana';
 import { useStreamsAppFetch } from './use_streams_app_fetch';
 
-export const useDashboardsFetch = (name?: string) => {
+export const useDashboardsFetch = (name: string) => {
   const {
     services: { telemetryClient },
     dependencies: {
@@ -19,9 +19,6 @@ export const useDashboardsFetch = (name?: string) => {
 
   const dashboardsFetch = useStreamsAppFetch(
     async ({ signal }) => {
-      if (!name) {
-        return Promise.resolve(undefined);
-      }
       const response = await streamsRepositoryClient.fetch(
         'GET /api/streams/{name}/dashboards 2023-10-31',
         {
