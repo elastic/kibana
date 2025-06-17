@@ -22,7 +22,7 @@ export class AiAssistantManagementPlugin implements Plugin<ObservabilityPluginSe
 
   public setup(core: CoreSetup<PluginStart>, plugins: PluginSetup) {
     const { [aiAssistantAnonymizationRules]: anonymizationRules, ...restSettings } = uiSettings;
-    core.uiSettings.register(restSettings);
+    core.uiSettings.register(uiSettings);
     return {};
   }
 

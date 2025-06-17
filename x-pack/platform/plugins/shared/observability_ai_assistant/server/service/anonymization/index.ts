@@ -31,6 +31,7 @@ import { getEntityHash } from './get_entity_hash';
 
 const NER_MODEL_ID = 'elastic__distilbert-base-uncased-finetuned-conll03-english';
 const DEFAULT_MAX_CONCURRENT_REQUESTS = 5;
+
 export interface Dependencies {
   esClient: {
     asCurrentUser: ElasticsearchClient;
@@ -55,8 +56,16 @@ export class AnonymizationService {
     this.rules = anonymizationRules;
   }
 
-  private async detectNamedEntities(chunks: InferenceChunk[]): Promise<DetectedEntity[]> {
-    this.logger.debug(`Detecting named entities in ${chunks.length} text chunks`);
+  private async detectNamedEntitiesForModel({
+    modelId,
+    chunks,
+  }: {
+    modelId: string;
+    chunks: InferenceChunk[];
+  }): Promise<DetectedEntity[]> {
+    this.logger.debug(
+      `Detecting named entities with model ${modelId} in ${chunks.length} text chunks`
+    );
 
     // Maximum number of concurrent requests to the ML model
     const limiter = pLimit(DEFAULT_MAX_CONCURRENT_REQUESTS);
@@ -67,10 +76,6 @@ export class AnonymizationService {
     // Create batches of chunks for the inference request
     const batches = chunk(chunks, BATCH_SIZE);
     this.logger.debug(`Processing ${batches.length} batches of up to ${BATCH_SIZE} chunks each`);
-
-    // Determine which model to use: first enabled NER rule that specifies a modelId, otherwise fallback
-    const modelId =
-      this.rules.find((r) => r.type === 'ner' && r.enabled && r.modelId)?.modelId ?? NER_MODEL_ID;
 
     const tasks = batches.map((batchChunks) =>
       limiter(async () =>
@@ -84,6 +89,7 @@ export class AnonymizationService {
           } catch (error) {
             throw new Error('NER inference failed', { cause: error });
           }
+
           // Process results from all documents in the batch
           const batchResults: DetectedEntity[] = [];
           const inferenceResults = response?.inference_results || [];
@@ -140,9 +146,24 @@ export class AnonymizationService {
     // Only run NER if we have NER rules enabled
     let nerEntities: DetectedEntity[] = [];
     if (nerRules.length > 0) {
-      // Detect entities using NER
       const chunks = chunkText(content);
-      nerEntities = await this.detectNamedEntities(chunks);
+      const acceptedEntitiesByClass = new Map<string, DetectedEntity[]>();
+
+      for (const rule of nerRules) {
+        const modelId = rule.modelId ?? NER_MODEL_ID;
+        const entities = await this.detectNamedEntitiesForModel({ modelId, chunks });
+
+        for (const entity of entities) {
+          // if an earlier rule already produced this entity class, skip
+          if (acceptedEntitiesByClass.has(entity.class_name)) continue;
+
+          const list = acceptedEntitiesByClass.get(entity.class_name) ?? [];
+          list.push(entity);
+          acceptedEntitiesByClass.set(entity.class_name, list);
+        }
+      }
+
+      nerEntities = [...acceptedEntitiesByClass.values()].flat();
     }
 
     // Detect entities using regex patterns
