@@ -10,6 +10,8 @@ import type { RuleMigrationTaskStats } from '../../../common/siem_migrations/mod
 
 export interface RuleMigrationStats extends RuleMigrationTaskStats {
   status: SiemMigrationTaskStatus; // use the native enum instead of the zod enum from the model
+  /** The name of the migration */
+  name: string;
 }
 
 export enum AuthorFilter {

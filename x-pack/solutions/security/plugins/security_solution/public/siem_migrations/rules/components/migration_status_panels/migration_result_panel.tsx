@@ -34,10 +34,7 @@ import {
   convertTranslationResultIntoText,
   useResultVisColors,
 } from '../../utils/translation_results';
-import type {
-  RuleMigrationTranslationStats,
-  RuleMigrationResourceBase,
-} from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationTranslationStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
 import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
 import { SecuritySolutionLinkButton } from '../../../../common/components/links';
@@ -73,8 +70,6 @@ export interface MigrationResultPanelProps {
   onToggleCollapsed: (isCollapsed: boolean) => void;
 }
 
-const EMPTY_MISSING_RESOURCES: RuleMigrationResourceBase[] = [];
-
 export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
   ({ migrationStats, isCollapsed = false, onToggleCollapsed }) => {
     const { data: translationStats, isLoading: isLoadingTranslationStats } =
@@ -88,11 +83,7 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
           <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
             <EuiFlexItem onClick={() => onToggleCollapsed(!isCollapsed)} css={headerStyle}>
               <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="xs">
-                <MigrationName
-                  migrationStats={migrationStats}
-                  isLoading={isLoadingTranslationStats}
-                  missingResources={EMPTY_MISSING_RESOURCES}
-                />
+                <MigrationName migrationStats={migrationStats} />
                 <EuiFlexItem>
                   <PanelText size="s" subdued>
                     <p>

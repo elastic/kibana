@@ -36,12 +36,25 @@ import { RelatedIntegration } from '../../../../api/detection_engine/model/rule_
 import { NonEmptyString } from '../../../../api/model/primitives.gen';
 import { ConnectorId, LangSmithOptions } from '../../common.gen';
 
+export type CreateRuleMigrationRequestBody = z.infer<typeof CreateRuleMigrationRequestBody>;
+export const CreateRuleMigrationRequestBody = z.object({
+  /**
+   * The rule migration name
+   */
+  name: NonEmptyString,
+});
+export type CreateRuleMigrationRequestBodyInput = z.input<typeof CreateRuleMigrationRequestBody>;
+
 export type CreateRuleMigrationResponse = z.infer<typeof CreateRuleMigrationResponse>;
 export const CreateRuleMigrationResponse = z.object({
   /**
    * The migration id created.
    */
   migration_id: NonEmptyString,
+  /**
+   * The rule migration name
+   */
+  name: NonEmptyString,
 });
 
 export type CreateRuleMigrationRulesRequestParams = z.infer<
@@ -308,6 +321,15 @@ export const UpdateRuleMigrationRequestParams = z.object({
 export type UpdateRuleMigrationRequestParamsInput = z.input<
   typeof UpdateRuleMigrationRequestParams
 >;
+
+export type UpdateRuleMigrationRequestBody = z.infer<typeof UpdateRuleMigrationRequestBody>;
+export const UpdateRuleMigrationRequestBody = z.object({
+  /**
+   * The rule migration name
+   */
+  name: NonEmptyString,
+});
+export type UpdateRuleMigrationRequestBodyInput = z.input<typeof UpdateRuleMigrationRequestBody>;
 
 export type UpdateRuleMigrationResponse = z.infer<typeof UpdateRuleMigrationResponse>;
 export const UpdateRuleMigrationResponse = RuleMigration;

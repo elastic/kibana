@@ -44,7 +44,6 @@ const mockMigrationStateWithError = {
   rules: { total: 6, pending: 6, processing: 0, completed: 0, failed: 0 },
   created_at: '2025-05-27T12:12:17.563Z',
   last_updated_at: '2025-05-27T12:12:17.563Z',
-  number: 1,
 };
 
 const mockMigrationStatsAborted = {
@@ -54,7 +53,6 @@ const mockMigrationStatsAborted = {
   rules: { total: 6, pending: 6, processing: 0, completed: 0, failed: 0 },
   created_at: '2025-05-27T12:12:17.563Z',
   last_updated_at: '2025-05-27T12:12:17.563Z',
-  number: 1,
 };
 
 const mockMigrationStatsReady = {
@@ -64,7 +62,6 @@ const mockMigrationStatsReady = {
   rules: { total: 6, pending: 6, processing: 0, completed: 0, failed: 0 },
   created_at: '2025-05-27T12:12:17.563Z',
   last_updated_at: '2025-05-27T12:12:17.563Z',
-  number: 1,
 };
 
 const missingMacro: RuleMigrationResourceBase = {

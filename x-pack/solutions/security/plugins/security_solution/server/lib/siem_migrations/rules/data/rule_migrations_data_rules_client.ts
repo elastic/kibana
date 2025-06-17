@@ -314,6 +314,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
           status: { terms: { field: 'status' } },
           createdAt: { min: { field: '@timestamp' } },
           lastUpdatedAt: { max: { field: 'updated_at' } },
+          name: { terms: { field: 'name' } },
         },
       },
     };
@@ -326,19 +327,18 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
 
     const migrationsAgg = result.aggregations?.migrationIds as AggregationsStringTermsAggregate;
     const buckets = (migrationsAgg?.buckets as AggregationsStringTermsBucket[]) ?? [];
-    return buckets.map((bucket) => {
-      return {
-        id: `${bucket.key}`,
-        rules: {
-          total: bucket.doc_count,
-          ...this.statusAggCounts(bucket.status as AggregationsStringTermsAggregate),
-        },
-        created_at: (bucket.createdAt as AggregationsMinAggregate | undefined)
-          ?.value_as_string as string,
-        last_updated_at: (bucket.lastUpdatedAt as AggregationsMaxAggregate | undefined)
-          ?.value_as_string as string,
-      };
-    });
+    return buckets.map((bucket) => ({
+      id: `${bucket.key}`,
+      rules: {
+        total: bucket.doc_count,
+        ...this.statusAggCounts(bucket.status as AggregationsStringTermsAggregate),
+      },
+      created_at: (bucket.createdAt as AggregationsMinAggregate | undefined)
+        ?.value_as_string as string,
+      last_updated_at: (bucket.lastUpdatedAt as AggregationsMaxAggregate | undefined)
+        ?.value_as_string as string,
+      name: bucket.name as string,
+    }));
   }
 
   /** Retrieves the stats for the integrations of all the migration rules */

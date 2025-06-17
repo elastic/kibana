@@ -37,10 +37,10 @@ export const HeaderButtons: React.FC<HeaderButtonsProps> = React.memo(
   ({ ruleMigrationsStats, selectedMigrationId, onMigrationIdChange }) => {
     const migrationOptions = useMemo(() => {
       const options: Array<EuiComboBoxOptionOption<string>> = ruleMigrationsStats.map(
-        ({ id, number }) => ({
+        ({ id, name }) => ({
           value: id,
-          'data-test-subj': `migrationSelectionOption-${number}`,
-          label: i18n.SIEM_MIGRATIONS_OPTION_LABEL(number),
+          'data-test-subj': `migrationSelectionOption-${name}`,
+          label: i18n.SIEM_MIGRATIONS_OPTION_LABEL(name),
         })
       );
       return options;
@@ -51,8 +51,8 @@ export const HeaderButtons: React.FC<HeaderButtonsProps> = React.memo(
         ? [
             {
               value: selectedMigrationId,
-              'data-test-subj': `migrationSelectionOption-${stats.number}`,
-              label: i18n.SIEM_MIGRATIONS_OPTION_LABEL(stats.number),
+              'data-test-subj': `migrationSelectionOption-${stats.name}`,
+              label: i18n.SIEM_MIGRATIONS_OPTION_LABEL(stats.name),
             },
           ]
         : [];

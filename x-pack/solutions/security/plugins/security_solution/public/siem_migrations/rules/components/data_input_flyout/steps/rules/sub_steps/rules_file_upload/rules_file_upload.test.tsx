@@ -27,6 +27,7 @@ const defaultProps: RulesFileUploadProps = {
   apiError: undefined,
   isLoading: false,
   isCreated: false,
+  migrationName: 'test',
 };
 
 const renderTestComponent = (props: Partial<RulesFileUploadProps> = {}) => {

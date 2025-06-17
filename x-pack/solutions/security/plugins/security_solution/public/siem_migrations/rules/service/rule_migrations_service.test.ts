@@ -127,7 +127,7 @@ describe('SiemRulesMigrationsService', () => {
 
   describe('createRuleMigration', () => {
     it('should throw an error when body is empty', async () => {
-      await expect(service.createRuleMigration([])).rejects.toThrow(i18n.EMPTY_RULES_ERROR);
+      await expect(service.createRuleMigration([], 'test')).rejects.toThrow(i18n.EMPTY_RULES_ERROR);
     });
 
     it('should create migration with a single batch', async () => {
@@ -135,7 +135,7 @@ describe('SiemRulesMigrationsService', () => {
       (createRuleMigration as jest.Mock).mockResolvedValue({ migration_id: 'mig-1' });
       (addRulesToMigration as jest.Mock).mockResolvedValue(undefined);
 
-      const migrationId = await service.createRuleMigration(body);
+      const migrationId = await service.createRuleMigration(body, 'test');
 
       expect(createRuleMigration).toHaveBeenCalledTimes(1);
       expect(createRuleMigration).toHaveBeenCalledWith({});
@@ -149,7 +149,7 @@ describe('SiemRulesMigrationsService', () => {
       (createRuleMigration as jest.Mock).mockResolvedValueOnce({ migration_id: 'mig-1' });
       (addRulesToMigration as jest.Mock).mockResolvedValue(undefined);
 
-      const migrationId = await service.createRuleMigration(body);
+      const migrationId = await service.createRuleMigration(body, 'test');
 
       expect(createRuleMigration).toHaveBeenCalledTimes(1);
       expect(addRulesToMigration).toHaveBeenCalledTimes(2);
@@ -252,8 +252,8 @@ describe('SiemRulesMigrationsService', () => {
       const result = await service.getRuleMigrationsStats();
       expect(getRuleMigrationsStatsAll).toHaveBeenCalled();
       expect(result).toHaveLength(2);
-      expect(result[0].number).toBe(1);
-      expect(result[1].number).toBe(2);
+      expect(result[0].name).toBe('test');
+      expect(result[1].name).toBe('test');
 
       const latestStats = await firstValueFrom(service.getLatestStats$());
       expect(latestStats).toEqual(result);

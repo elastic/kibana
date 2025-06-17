@@ -63,7 +63,7 @@ export const RulesFileUpload = React.memo<RulesFileUploadProps>(
     }, [apiError, fileError]);
 
     const showLoader = isParsing || isLoading;
-    const isDisabled = showLoader || isCreated || migrationName.length === 0;
+    const isDisabled = showLoader || isCreated;
     const isButtonDisabled = isDisabled || rulesToUpload.length === 0;
 
     return (

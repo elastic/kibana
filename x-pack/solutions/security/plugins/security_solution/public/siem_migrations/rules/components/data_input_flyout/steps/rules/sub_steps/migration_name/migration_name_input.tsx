@@ -19,7 +19,6 @@ export interface MigrationNameInputProps {
 export const MigrationNameInput = React.memo<MigrationNameInputProps>(
   ({ migrationName, setMigrationName, subStep, defaultMigrationName }) => {
     const [name, setName] = useState<string>(defaultMigrationName);
-    const [isDirty, setIsDirty] = useState<boolean>(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -30,19 +29,15 @@ export const MigrationNameInput = React.memo<MigrationNameInputProps>(
 
     const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
       setName(e.target.value);
-      setIsDirty(true);
     }, []);
 
     const handleNameSave = useCallback(() => {
       if (name.length > 0) {
         setMigrationName(name);
-        setIsDirty(false);
-      } else {
-        setIsDirty(true);
       }
     }, [name, setMigrationName]);
 
-    const isInvalid = isDirty && name.length === 0;
+    const isInvalid = name.length === 0;
     const errors = useMemo(() => {
       if (isInvalid) {
         return [i18n.MIGRATION_NAME_INPUT_ERROR];

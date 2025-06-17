@@ -45,7 +45,7 @@ export const registerSiemRuleMigrationsCreateRoute = (
             await siemMigrationAuditLogger.logCreateMigration();
             const migrationId = await ruleMigrationsClient.data.migrations.create(req.body.name);
 
-            return res.ok({ body: { migration_id: migrationId } });
+            return res.ok({ body: { migration_id: migrationId, name: req.body.name } });
           } catch (error) {
             logger.error(error);
             await siemMigrationAuditLogger.logCreateMigration({

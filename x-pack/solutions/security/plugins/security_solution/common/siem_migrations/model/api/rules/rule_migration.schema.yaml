@@ -70,18 +70,34 @@ paths:
       description: Creates a new rule migration and returns the corresponding migration_id
       tags:
         - SIEM Rule Migrations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  description: The rule migration name
+                  $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         200:
-          description: The migration was created successfully and migrationId is returned
+          description: The migration was created successfully and migrationId, name is returned
           content:
             application/json:
               schema:
                 type: object
                 required:
                   - migration_id
+                  - name
                 properties:
                     migration_id:
                       description: The migration id created.
+                      $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+                    name:
+                      description: The rule migration name
                       $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
 
   ## Specific rule migration APIs
@@ -101,6 +117,18 @@ paths:
           schema:
             description: The migration id to start
             $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  description: The rule migration name
+                  $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         200:
           description: Indicates rules migrations have been updated correctly.

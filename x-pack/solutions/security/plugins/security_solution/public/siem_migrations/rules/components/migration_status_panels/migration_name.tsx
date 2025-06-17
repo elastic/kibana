@@ -7,19 +7,11 @@
 
 import React, { useState, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiInlineEditText } from '@elastic/eui';
-import * as i18n from './translations';
 import type { MigrationReadyPanelProps } from './migration_ready_panel';
-import type { RuleMigrationResourceBase } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { useUpdateMigrationName } from '../../logic/use_update_migration_name';
-type MigrationNameProps = MigrationReadyPanelProps & {
-  isLoading?: boolean;
-  missingResources?: RuleMigrationResourceBase[];
-};
 
-const MigrationName = React.memo<MigrationNameProps>(({ migrationStats }) => {
-  const [inlineEditValue, setInlineEditValue] = useState<string>(
-    migrationStats.name ?? i18n.RULE_MIGRATION_TITLE(migrationStats.number)
-  );
+const MigrationName = React.memo<MigrationReadyPanelProps>(({ migrationStats }) => {
+  const [inlineEditValue, setInlineEditValue] = useState<string>(migrationStats.name);
 
   const { mutate: updateMigrationName, isLoading: isUpdatingMigrationName } =
     useUpdateMigrationName();

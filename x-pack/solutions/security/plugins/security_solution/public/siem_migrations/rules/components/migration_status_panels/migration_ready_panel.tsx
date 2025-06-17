@@ -24,8 +24,6 @@ export interface MigrationReadyPanelProps {
   migrationStats: RuleMigrationStats;
 }
 
-const EMPTY_MISSING_RESOURCES: RuleMigrationResourceBase[] = [];
-
 export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migrationStats }) => {
   const { openFlyout } = useRuleMigrationDataInputContext();
   const { telemetry } = useKibana().services.siemMigrations.rules;
@@ -54,11 +52,7 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
       <EuiFlexGroup direction="row" gutterSize="m" alignItems="flexEnd">
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="s">
-            <MigrationName
-              migrationStats={migrationStats}
-              isLoading={isLoading}
-              missingResources={EMPTY_MISSING_RESOURCES}
-            />
+            <MigrationName migrationStats={migrationStats} />
             <EuiFlexItem>
               <PanelText data-test-subj="ruleMigrationDescription" size="s" subdued>
                 <span>{i18n.RULE_MIGRATION_READY_DESCRIPTION(migrationStats.rules.total)}</span>

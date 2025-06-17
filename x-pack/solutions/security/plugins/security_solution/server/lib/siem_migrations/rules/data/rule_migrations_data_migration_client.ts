@@ -196,30 +196,14 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
   }
 
   /**
-   * Updates the migration document with the provided parameters.
+   * Updates the migration document with the provided values.
    */
-  async update({
-    id,
-    params,
-  }: {
-    id: string;
-    params: Partial<StoredSiemMigration>;
-  }): Promise<void> {
-    this.logger.info(`Updating migration ${id} with params: ${JSON.stringify(params)}`);
+  async update(id: string, doc: Partial<StoredSiemMigration>): Promise<void> {
     const index = await this.getIndexName();
-
     await this.esClient
-      .update({
-        index,
-        id,
-        refresh: 'wait_for',
-        doc: {
-          ...params,
-        },
-        retry_on_conflict: 1,
-      })
+      .update({ index, id, doc, refresh: 'wait_for', retry_on_conflict: 1 })
       .catch((error) => {
-        this.logger.error(`Error updating migration ${id}: ${error}`);
+        this.logger.error(`Error updating migration: ${error}`);
         throw error;
       });
   }
