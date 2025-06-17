@@ -377,7 +377,10 @@ export function getCalleeSource(frame: StackFrameMetadata): string {
     }
     case FrameSymbolStatus.PARTIALLY_SYMBOLYZED: {
       // If no source line or filename available, display the executable offset
-      return frame.ExeFileName + (frame.AddressOrLine === 0 ? '' :  '+0x' + frame.AddressOrLine.toString(16));
+      return (
+        frame.ExeFileName +
+        (frame.AddressOrLine === 0 ? '' : '+0x' + frame.AddressOrLine.toString(16))
+      );
     }
     case FrameSymbolStatus.SYMBOLIZED: {
       return frame.SourceFilename + (frame.SourceLine !== 0 ? `#${frame.SourceLine}` : '');
