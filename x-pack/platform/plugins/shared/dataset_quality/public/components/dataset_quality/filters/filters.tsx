@@ -72,7 +72,7 @@ export default function Filters() {
         />
         {isDatasetQualityAllSignalsAvailable && (
           <Selector
-            dataTestSubj="datasetQualityFilterType"
+            data-test-subj="datasetQualityFilterType"
             label={typesLabel}
             searchPlaceholder={typesSearchPlaceholder}
             noneMatchingMessage={typesNoneMatching}
