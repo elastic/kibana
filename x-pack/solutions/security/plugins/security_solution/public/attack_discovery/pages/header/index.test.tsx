@@ -15,7 +15,7 @@ import { Header } from '.';
 
 jest.mock('../../../assistant/use_assistant_availability');
 jest.mock('../../../common/hooks/use_space_id', () => ({
-  useSpaceId: jest.fn(),
+  useSpaceId: jest.fn().mockReturnValue('default'),
 }));
 
 const defaultProps = {
