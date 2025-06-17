@@ -305,6 +305,8 @@ export class SecurityPlugin
       authz: this.authorizationSetup,
       savedObjects: core.savedObjects,
       getCurrentUser,
+      getTypeRegistry: () =>
+        core.getStartServices().then(([coreStart]) => coreStart.savedObjects.getTypeRegistry()),
     });
 
     this.registerDeprecations(core, license);

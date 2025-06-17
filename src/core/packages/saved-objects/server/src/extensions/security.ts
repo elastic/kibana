@@ -8,6 +8,7 @@
  */
 
 import {
+  SavedObjectAccessControl,
   SavedObjectReferenceWithContext,
   SavedObjectsFindResult,
   SavedObjectsResolveResponse,
@@ -68,6 +69,8 @@ export interface AuthorizeObject {
   id: string;
   /** The name of the object */
   name?: string;
+
+  accessControl?: SavedObjectAccessControl;
 }
 
 /**

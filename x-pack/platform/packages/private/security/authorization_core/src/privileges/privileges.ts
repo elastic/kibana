@@ -231,6 +231,7 @@ export function privilegesFactory(
             actions.ui.get('enterpriseSearch', 'all'),
             actions.ui.get('globalSettings', 'save'),
             actions.ui.get('globalSettings', 'show'),
+            actions.savedObject.get('dashboard', 'manageOwnership'),
             ...allActions,
           ],
           read: [

@@ -38,6 +38,7 @@ import type {
   CheckAuthorizationResult,
   GetFindRedactTypeMapParams,
   ISavedObjectsSecurityExtension,
+  ISavedObjectTypeRegistry,
   RedactNamespacesParams,
   SavedObject,
   WithAuditName,
@@ -52,6 +53,7 @@ import type {
   CheckSavedObjectsPrivileges,
 } from '@kbn/security-plugin-types-server';
 
+import { AccessControlService } from './access_control_service';
 import { isAuthorizedInAllSpaces } from './authorization_utils';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
 import { savedObjectEvent } from '../audit';
@@ -62,6 +64,7 @@ interface Params {
   errors: SavedObjectsClient['errors'];
   checkPrivileges: CheckSavedObjectsPrivileges;
   getCurrentUser: () => AuthenticatedUser | null;
+  getTypeRegistry: () => Promise<ISavedObjectTypeRegistry>;
 }
 
 /**
@@ -308,17 +311,32 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   private readonly errors: SavedObjectsClient['errors'];
   private readonly checkPrivilegesFunc: CheckSavedObjectsPrivileges;
   private readonly getCurrentUserFunc: () => AuthenticatedUser | null;
+  private readonly getTypeRegistryFunc: () => Promise<ISavedObjectTypeRegistry>;
   private readonly actionMap: Map<
     SecurityAction,
     { authzAction?: string; auditAction?: AuditAction }
   >;
+  private readonly accessControlService: AccessControlService;
 
-  constructor({ actions, auditLogger, errors, checkPrivileges, getCurrentUser }: Params) {
+  constructor({
+    actions,
+    auditLogger,
+    errors,
+    checkPrivileges,
+    getCurrentUser,
+    getTypeRegistry,
+  }: Params) {
     this.actions = actions;
     this.auditLogger = auditLogger;
     this.errors = errors;
     this.checkPrivilegesFunc = checkPrivileges;
     this.getCurrentUserFunc = getCurrentUser;
+    this.getTypeRegistryFunc = getTypeRegistry;
+    this.accessControlService = new AccessControlService({
+      getCurrentUser,
+      getTypeRegistry,
+      checkPrivilegesFunc: checkPrivileges,
+    });
 
     // This comment block is a quick reference for the action map, which maps authorization actions
     // and audit actions to a "security action" as used by the authorization methods.
@@ -776,12 +794,17 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     return this.internalAuthorizeUpdate(params, { forceBulkAction: true });
   }
 
+  private async typeSupportsAccessControl(type: string): Promise<boolean> {
+    return (await this.getTypeRegistryFunc()).supportsAccessControl(type);
+  }
+
   private async internalAuthorizeUpdate<A extends string>(
     params: AuthorizeBulkUpdateParams,
     options?: InternalAuthorizeOptions
   ): Promise<CheckAuthorizationResult<A>> {
     const namespaceString = SavedObjectsUtils.namespaceIdToString(params.namespace);
     const { objects } = params;
+    // const accessControlService = new AccessControlService(getCurrentUser);
 
     const action =
       options?.forceBulkAction || objects.length > 1
