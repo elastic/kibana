@@ -50,7 +50,7 @@ export function InvestigationGuide({ blob, onUpdate, refetch, rule }: Investigat
           <p>
             <FormattedMessage
               id="xpack.observability.alertDetails.investigationGide.emptyPrompt.body"
-              defaultMessage="Add a guide to your alert's rule."
+              defaultMessage="Save time by creating an investigation guide that shares step-by-step guidelines or links to helpful resources for investigating alerts."
             />
           </p>
         }
