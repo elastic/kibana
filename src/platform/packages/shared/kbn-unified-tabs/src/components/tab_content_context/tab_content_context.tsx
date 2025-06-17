@@ -56,9 +56,10 @@ export function useRestorableStateInTabContent<StateT extends Record<string, any
 ): [StateT, (handler: (prevState: StateT) => StateT) => void] {
   const context = useContext(TabContentContext);
   const [state, setState] = useState<StateT>(() => getDefaultState());
+  const restorableStatePerTabContentComponent$ = context?.restorableStatePerTabContentComponent$;
 
   useEffect(() => {
-    const initialState = context.restorableStatePerTabContentComponent$.getValue()?.[namespace];
+    const initialState = restorableStatePerTabContentComponent$?.getValue()?.[namespace];
 
     if (initialState) {
       setState(() => {
@@ -71,20 +72,20 @@ export function useRestorableStateInTabContent<StateT extends Record<string, any
         return nextState;
       });
     }
-  }, [namespace, context.restorableStatePerTabContentComponent$, getDefaultState]);
+  }, [namespace, restorableStatePerTabContentComponent$, getDefaultState]);
 
   const setRestorableState = useCallback(
     (handler: (prevState: StateT) => StateT) => {
       setState((prevState) => {
         const nextState = handler(prevState);
-        context.restorableStatePerTabContentComponent$.next({
-          ...context.restorableStatePerTabContentComponent$.getValue(),
+        restorableStatePerTabContentComponent$?.next({
+          ...restorableStatePerTabContentComponent$.getValue(),
           [namespace]: nextState,
         });
         return nextState;
       });
     },
-    [context.restorableStatePerTabContentComponent$, namespace]
+    [restorableStatePerTabContentComponent$, namespace]
   );
 
   return useMemo(() => [state, setRestorableState], [state, setRestorableState]);
