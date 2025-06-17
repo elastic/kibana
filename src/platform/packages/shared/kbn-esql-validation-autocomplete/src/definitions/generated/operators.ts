@@ -346,7 +346,7 @@ const addDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
-          type: 'time_literal',
+          type: 'time_duration',
         },
         {
           name: 'right',
@@ -363,7 +363,7 @@ const addDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'time_literal',
+          type: 'time_duration',
         },
       ],
       returnType: 'date',
@@ -1022,47 +1022,6 @@ const equalsDefinition: FunctionDefinition = {
         {
           name: 'right',
           type: 'version',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'boolean',
-        },
-        {
-          name: 'right',
-          type: 'boolean',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'boolean',
-        },
-        {
-          name: 'right',
-          type: 'keyword',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'keyword',
-          constantOnly: true,
-        },
-        {
-          name: 'right',
-          type: 'boolean',
         },
       ],
       returnType: 'boolean',
@@ -3139,6 +3098,62 @@ const lessThanOrEqualDefinition: FunctionDefinition = {
       ],
       returnType: 'boolean',
     },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'ip',
+        },
+        {
+          name: 'right',
+          type: 'text',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'text',
+          constantOnly: true,
+        },
+        {
+          name: 'right',
+          type: 'ip',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'version',
+        },
+        {
+          name: 'right',
+          type: 'text',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'text',
+          constantOnly: true,
+        },
+        {
+          name: 'right',
+          type: 'version',
+        },
+      ],
+      returnType: 'boolean',
+    },
   ],
   locationsAvailable: [
     Location.STATS,
@@ -3191,38 +3206,6 @@ const likeDefinition: FunctionDefinition = {
         {
           name: 'pattern',
           type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'str',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'pattern',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'str',
-          type: 'keyword',
-          optional: false,
-        },
-        {
-          name: 'pattern',
-          type: 'text',
           optional: false,
         },
       ],
@@ -5000,47 +4983,6 @@ const notEqualsDefinition: FunctionDefinition = {
       ],
       returnType: 'boolean',
     },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'boolean',
-        },
-        {
-          name: 'right',
-          type: 'boolean',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'boolean',
-        },
-        {
-          name: 'right',
-          type: 'keyword',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'keyword',
-          constantOnly: true,
-        },
-        {
-          name: 'right',
-          type: 'boolean',
-        },
-      ],
-      returnType: 'boolean',
-    },
   ],
   locationsAvailable: [
     Location.STATS,
@@ -5093,38 +5035,6 @@ const rlikeDefinition: FunctionDefinition = {
         {
           name: 'pattern',
           type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'str',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'pattern',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'str',
-          type: 'keyword',
-          optional: false,
-        },
-        {
-          name: 'pattern',
-          type: 'text',
           optional: false,
         },
       ],
@@ -5431,7 +5341,7 @@ const subDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
-          type: 'time_literal',
+          type: 'time_duration',
         },
         {
           name: 'right',
@@ -5448,7 +5358,7 @@ const subDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'time_literal',
+          type: 'time_duration',
         },
       ],
       returnType: 'date',

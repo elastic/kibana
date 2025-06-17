@@ -7,6 +7,11 @@
 
 export { isSupportedConnectorType, isSupportedConnector } from './is_supported_connector';
 export { connectorToInference } from './connector_to_inference';
-export { getConnectorDefaultModel, getConnectorProvider } from './connector_config';
+export {
+  getConnectorDefaultModel,
+  getConnectorProvider,
+  getConnectorFamily,
+  getConnectorPlatform,
+} from './connector_config';
 export { getConnectorModel } from './get_connector_model';
 export { InferenceConnectorType, type InferenceConnector } from './connectors';
