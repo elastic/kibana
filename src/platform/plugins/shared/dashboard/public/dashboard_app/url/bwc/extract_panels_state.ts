@@ -59,16 +59,15 @@ export async function extractPanelsState(
       if (typeof panel === 'object') {
         // < 8.17 panels state stored panelConfig as embeddableConfig
         const panelConfig = panel.panelConfig ?? panel.embeddableConfig;
-        const { type, ...rest } = panel;
+        const { type } = panel;
 
         const embeddableCmDefintions =
           await embeddableService.getEmbeddableContentManagementDefinition(type);
-        if (!embeddableCmDefintions) return panel;
+        if (!embeddableCmDefintions) return { ...panel, panelConfig };
         const { savedObjectToItem } =
           embeddableCmDefintions.versions[embeddableCmDefintions.latestVersion];
         return {
-          ...rest,
-          type,
+          ...panel,
           panelConfig: savedObjectToItem?.(panelConfig as unknown as SavedObject) ?? panelConfig,
         };
       }
