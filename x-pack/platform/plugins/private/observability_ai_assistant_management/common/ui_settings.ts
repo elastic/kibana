@@ -92,6 +92,12 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     value: JSON.stringify(
       [
         {
+          entityClass: 'EMAIL',
+          type: 'regex',
+          pattern: '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}',
+          enabled: false,
+        },
+        {
           id: 'person_ner',
           entityClass: 'PER',
           type: 'ner',
