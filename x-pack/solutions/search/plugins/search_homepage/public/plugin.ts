@@ -5,22 +5,14 @@
  * 2.0.
  */
 
-import {
-  CoreSetup,
-  Plugin,
-  CoreStart,
-  AppMountParameters,
-  PluginInitializerContext,
-} from '@kbn/core/public';
+import { CoreSetup, Plugin, CoreStart, AppMountParameters } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { QueryClient, QueryCache } from '@tanstack/react-query';
 import { PLUGIN_ID } from '../common';
 
 import { SearchHomepage } from './embeddable';
-import { isHomepageEnabled } from './feature_flags';
 import { docLinks } from '../common/doc_links';
 import {
-  SearchHomepageConfigType,
   SearchHomepagePluginSetup,
   SearchHomepagePluginStart,
   SearchHomepageAppPluginStartDependencies,
@@ -38,10 +30,7 @@ const appInfo: SearchHomepageAppInfo = {
 export class SearchHomepagePlugin
   implements Plugin<SearchHomepagePluginSetup, SearchHomepagePluginStart, {}, {}>
 {
-  private readonly config: SearchHomepageConfigType;
-  constructor(initializerContext: PluginInitializerContext) {
-    this.config = initializerContext.config.get<SearchHomepageConfigType>();
-  }
+  constructor() {}
 
   public setup(
     core: CoreSetup<SearchHomepageAppPluginStartDependencies, SearchHomepagePluginStart>
@@ -65,11 +54,7 @@ export class SearchHomepagePlugin
     });
     const result: SearchHomepagePluginSetup = {
       app: appInfo,
-      isHomepageFeatureEnabled() {
-        return isHomepageEnabled(core.uiSettings);
-      },
     };
-    if (!this.config.ui?.enabled) return result;
 
     core.application.register({
       ...result.app,
@@ -93,9 +78,6 @@ export class SearchHomepagePlugin
   public start(core: CoreStart) {
     return {
       app: appInfo,
-      isHomepageFeatureEnabled() {
-        return isHomepageEnabled(core.uiSettings);
-      },
       SearchHomepage,
     };
   }

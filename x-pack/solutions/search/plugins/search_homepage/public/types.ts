@@ -12,12 +12,6 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { App } from './components/stack_app';
 
-export interface SearchHomepageConfigType {
-  ui: {
-    enabled: boolean;
-  };
-}
-
 export interface SearchHomepageAppInfo {
   appRoute: string;
   id: string;
@@ -31,11 +25,6 @@ export interface SearchHomepagePluginSetup {
    * and deep links.
    */
   app: SearchHomepageAppInfo;
-  /**
-   * Checks if the Search Homepage feature flag is currently enabled.
-   * @returns true if Search Homepage feature is enabled
-   */
-  isHomepageFeatureEnabled: () => boolean;
 }
 
 export interface SearchHomepagePluginStart {
@@ -45,11 +34,6 @@ export interface SearchHomepagePluginStart {
    * and deep links.
    */
   app: SearchHomepageAppInfo;
-  /**
-   * Checks if the Search Homepage feature flag is currently enabled.
-   * @returns true if Search Homepage feature is enabled
-   */
-  isHomepageFeatureEnabled: () => boolean;
   /**
    * SearchHomepage shared component, used to render the search homepage in
    * the Stack search plugin

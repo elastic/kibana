@@ -335,7 +335,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.saved_object_tagging.cache_refresh_interval (duration?)',
 
         'xpack.searchAssistant.ui.enabled (boolean?)',
-        'xpack.search.homepage.ui.enabled (boolean?)',
         'xpack.searchInferenceEndpoints.ui.enabled (boolean?)',
         'xpack.searchPlayground.ui.enabled (boolean?)',
         'xpack.security.loginAssistanceMessage (string?)',
