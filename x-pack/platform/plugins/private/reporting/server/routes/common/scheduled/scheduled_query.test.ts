@@ -29,6 +29,7 @@ import {
 import { ReportingCore } from '../../..';
 import { ScheduledReportType } from '../../../types';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { omit } from 'lodash';
 
 const fakeRawRequest = {
   headers: {
@@ -45,11 +46,14 @@ const getMockResponseFactory = () =>
     customError: (err: unknown) => err,
   } as unknown as KibanaResponseFactory);
 
+const payload =
+  '{"browserTimezone":"America/New_York","layout":{"dimensions":{"height":2220,"width":1364},"id":"preserve_layout"},"objectType":"dashboard","title":"[Logs] Web Traffic","version":"9.1.0","locatorParams":[{"id":"DASHBOARD_APP_LOCATOR","params":{"dashboardId":"edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b","preserveSavedFilters":true,"timeRange":{"from":"now-7d/d","to":"now"},"useHash":false,"viewMode":"view"}}],"isDeprecated":false}';
+const jsonPayload = JSON.parse(payload);
 const savedObjects: Array<SavedObject<ScheduledReportType>> = [
   {
     type: 'scheduled_report',
     id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
-    namespaces: ['default'],
+    namespaces: ['a-space'],
     attributes: {
       createdAt: '2025-05-06T21:10:17.137Z',
       createdBy: 'elastic',
@@ -62,8 +66,7 @@ const savedObjects: Array<SavedObject<ScheduledReportType>> = [
       },
       migrationVersion: '9.1.0',
       title: '[Logs] Web Traffic',
-      payload:
-        '{"browserTimezone":"America/New_York","layout":{"dimensions":{"height":2220,"width":1364},"id":"preserve_layout"},"objectType":"dashboard","title":"[Logs] Web Traffic","version":"9.1.0","locatorParams":[{"id":"DASHBOARD_APP_LOCATOR","params":{"dashboardId":"edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b","preserveSavedFilters":true,"timeRange":{"from":"now-7d/d","to":"now"},"useHash":false,"viewMode":"view"}}],"isDeprecated":false}',
+      payload,
       schedule: {
         rrule: {
           freq: 3,
@@ -85,7 +88,7 @@ const savedObjects: Array<SavedObject<ScheduledReportType>> = [
   {
     type: 'scheduled_report',
     id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
-    namespaces: ['default'],
+    namespaces: ['a-space'],
     attributes: {
       createdAt: '2025-05-06T21:12:06.584Z',
       createdBy: 'not-elastic',
@@ -177,6 +180,7 @@ describe('scheduledQueryFactory', () => {
   let mockResponseFactory: ReturnType<typeof getMockResponseFactory>;
 
   beforeEach(async () => {
+    jest.clearAllMocks();
     const schema = createMockConfigSchema();
     core = await createMockReportingCore(schema);
 
@@ -216,6 +220,7 @@ describe('scheduledQueryFactory', () => {
   describe('list', () => {
     it('should pass parameters in the request body', async () => {
       const result = await scheduledQuery.list(
+        mockLogger,
         fakeRawRequest,
         mockResponseFactory,
         { username: 'somebody' },
@@ -290,9 +295,9 @@ describe('scheduledQueryFactory', () => {
             created_by: 'elastic',
             enabled: true,
             jobtype: 'printable_pdf_v2',
-            object_type: 'dashboard',
             last_run: '2025-05-06T12:00:00.500Z',
             next_run: expect.any(String),
+            payload: jsonPayload,
             schedule: {
               rrule: {
                 freq: 3,
@@ -302,6 +307,7 @@ describe('scheduledQueryFactory', () => {
                 tzid: 'UTC',
               },
             },
+            space_id: 'a-space',
             title: '[Logs] Web Traffic',
           },
           {
@@ -310,7 +316,6 @@ describe('scheduledQueryFactory', () => {
             created_by: 'not-elastic',
             enabled: true,
             jobtype: 'PNGV2',
-            object_type: 'dashboard',
             last_run: '2025-05-06T21:12:07.198Z',
             next_run: expect.any(String),
             notification: {
@@ -318,6 +323,8 @@ describe('scheduledQueryFactory', () => {
                 to: ['user@elastic.co'],
               },
             },
+            payload: jsonPayload,
+            space_id: 'a-space',
             title: '[Logs] Web Traffic',
             schedule: {
               rrule: {
@@ -334,6 +341,7 @@ describe('scheduledQueryFactory', () => {
     it('should filter by username when user does not have manage reporting permissions', async () => {
       jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
       await scheduledQuery.list(
+        mockLogger,
         fakeRawRequest,
         mockResponseFactory,
         { username: 'somebody' },
@@ -380,6 +388,7 @@ describe('scheduledQueryFactory', () => {
         saved_objects: [],
       }));
       const result = await scheduledQuery.list(
+        mockLogger,
         fakeRawRequest,
         mockResponseFactory,
         { username: 'somebody' },
@@ -402,7 +411,14 @@ describe('scheduledQueryFactory', () => {
       });
 
       await expect(
-        scheduledQuery.list(fakeRawRequest, mockResponseFactory, { username: 'somebody' }, 1, 10)
+        scheduledQuery.list(
+          mockLogger,
+          fakeRawRequest,
+          mockResponseFactory,
+          { username: 'somebody' },
+          1,
+          10
+        )
       ).rejects.toMatchInlineSnapshot(`
         Object {
           "body": "Error listing scheduled reports: Some error",
@@ -417,6 +433,7 @@ describe('scheduledQueryFactory', () => {
       });
 
       const result = await scheduledQuery.list(
+        mockLogger,
         fakeRawRequest,
         mockResponseFactory,
         { username: 'somebody' },
@@ -435,8 +452,8 @@ describe('scheduledQueryFactory', () => {
             created_by: 'elastic',
             enabled: true,
             jobtype: 'printable_pdf_v2',
-            object_type: 'dashboard',
             next_run: expect.any(String),
+            payload: jsonPayload,
             schedule: {
               rrule: {
                 freq: 3,
@@ -446,6 +463,7 @@ describe('scheduledQueryFactory', () => {
                 tzid: 'UTC',
               },
             },
+            space_id: 'a-space',
             title: '[Logs] Web Traffic',
           },
           {
@@ -454,13 +472,13 @@ describe('scheduledQueryFactory', () => {
             created_by: 'not-elastic',
             enabled: true,
             jobtype: 'PNGV2',
-            object_type: 'dashboard',
             next_run: expect.any(String),
             notification: {
               email: {
                 to: ['user@elastic.co'],
               },
             },
+            payload: jsonPayload,
             title: '[Logs] Web Traffic',
             schedule: {
               rrule: {
@@ -469,9 +487,14 @@ describe('scheduledQueryFactory', () => {
                 tzid: 'UTC',
               },
             },
+            space_id: 'a-space',
           },
         ],
       });
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        `Error getting last run for scheduled reports: Some other error`
+      );
     });
   });
 
@@ -1045,8 +1068,11 @@ describe('scheduledQueryFactory', () => {
 });
 
 describe('transformResponse', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   it('should correctly transform the responses', () => {
-    expect(transformResponse(soResponse, lastRunResponse)).toEqual({
+    expect(transformResponse(mockLogger, soResponse, lastRunResponse)).toEqual({
       page: 1,
       per_page: 10,
       total: 2,
@@ -1057,9 +1083,9 @@ describe('transformResponse', () => {
           created_by: 'elastic',
           enabled: true,
           jobtype: 'printable_pdf_v2',
-          object_type: 'dashboard',
           last_run: '2025-05-06T12:00:00.500Z',
           next_run: expect.any(String),
+          payload: jsonPayload,
           schedule: {
             rrule: {
               freq: 3,
@@ -1069,6 +1095,7 @@ describe('transformResponse', () => {
               tzid: 'UTC',
             },
           },
+          space_id: 'a-space',
           title: '[Logs] Web Traffic',
         },
         {
@@ -1077,7 +1104,6 @@ describe('transformResponse', () => {
           created_by: 'not-elastic',
           enabled: true,
           jobtype: 'PNGV2',
-          object_type: 'dashboard',
           last_run: '2025-05-06T21:12:07.198Z',
           next_run: expect.any(String),
           notification: {
@@ -1085,6 +1111,7 @@ describe('transformResponse', () => {
               to: ['user@elastic.co'],
             },
           },
+          payload: jsonPayload,
           title: '[Logs] Web Traffic',
           schedule: {
             rrule: {
@@ -1093,9 +1120,63 @@ describe('transformResponse', () => {
               tzid: 'UTC',
             },
           },
+          space_id: 'a-space',
         },
       ],
     });
+  });
+
+  it('handles malformed payload', () => {
+    const malformedSo = {
+      ...savedObjects[0],
+      attributes: {
+        ...savedObjects[0].attributes,
+        payload: 'not a valid JSON',
+      },
+      score: 0,
+    };
+    expect(
+      transformResponse(
+        mockLogger,
+        {
+          page: 1,
+          per_page: 10,
+          total: 1,
+          saved_objects: [malformedSo],
+        },
+        lastRunResponse
+      )
+    ).toEqual({
+      page: 1,
+      per_page: 10,
+      total: 1,
+      data: [
+        {
+          id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+          created_at: '2025-05-06T21:10:17.137Z',
+          created_by: 'elastic',
+          enabled: true,
+          jobtype: 'printable_pdf_v2',
+          last_run: '2025-05-06T12:00:00.500Z',
+          next_run: expect.any(String),
+          payload: undefined,
+          schedule: {
+            rrule: {
+              freq: 3,
+              interval: 3,
+              byhour: [12],
+              byminute: [0],
+              tzid: 'UTC',
+            },
+          },
+          space_id: 'a-space',
+          title: '[Logs] Web Traffic',
+        },
+      ],
+    });
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      `Failed to parse payload for scheduled report aa8b6fb3-cf61-4903-bce3-eec9ddc823ca: Unexpected token 'o', \"not a valid JSON\" is not valid JSON`
+    );
   });
 
   it('handles missing last run response', () => {
@@ -1107,7 +1188,7 @@ describe('transformResponse', () => {
       },
     };
 
-    expect(transformResponse(soResponse, thisLastRunResponse)).toEqual({
+    expect(transformResponse(mockLogger, soResponse, thisLastRunResponse)).toEqual({
       page: 1,
       per_page: 10,
       total: 2,
@@ -1118,9 +1199,9 @@ describe('transformResponse', () => {
           created_by: 'elastic',
           enabled: true,
           jobtype: 'printable_pdf_v2',
-          object_type: 'dashboard',
           last_run: undefined,
           next_run: expect.any(String),
+          payload: jsonPayload,
           schedule: {
             rrule: {
               freq: 3,
@@ -1130,6 +1211,7 @@ describe('transformResponse', () => {
               tzid: 'UTC',
             },
           },
+          space_id: 'a-space',
           title: '[Logs] Web Traffic',
         },
         {
@@ -1138,7 +1220,6 @@ describe('transformResponse', () => {
           created_by: 'not-elastic',
           enabled: true,
           jobtype: 'PNGV2',
-          object_type: 'dashboard',
           last_run: '2025-05-06T21:12:07.198Z',
           next_run: expect.any(String),
           notification: {
@@ -1146,6 +1227,7 @@ describe('transformResponse', () => {
               to: ['user@elastic.co'],
             },
           },
+          payload: jsonPayload,
           title: '[Logs] Web Traffic',
           schedule: {
             rrule: {
@@ -1154,13 +1236,27 @@ describe('transformResponse', () => {
               tzid: 'UTC',
             },
           },
+          space_id: 'a-space',
         },
       ],
     });
   });
 
-  it('handles undefined last run response', () => {
-    expect(transformResponse(soResponse)).toEqual({
+  it('handles malformed so with no namespace', () => {
+    const malformedSo1 = { ...savedObjects[0], namespaces: [], score: 0 };
+    const malformedSo2 = { ...omit(savedObjects[1], 'namespaces'), score: 0 };
+    expect(
+      transformResponse(
+        mockLogger,
+        {
+          page: 1,
+          per_page: 10,
+          total: 2,
+          saved_objects: [malformedSo1, malformedSo2],
+        },
+        lastRunResponse
+      )
+    ).toEqual({
       page: 1,
       per_page: 10,
       total: 2,
@@ -1171,9 +1267,9 @@ describe('transformResponse', () => {
           created_by: 'elastic',
           enabled: true,
           jobtype: 'printable_pdf_v2',
-          object_type: 'dashboard',
-          last_run: undefined,
+          last_run: '2025-05-06T12:00:00.500Z',
           next_run: expect.any(String),
+          payload: jsonPayload,
           schedule: {
             rrule: {
               freq: 3,
@@ -1183,6 +1279,7 @@ describe('transformResponse', () => {
               tzid: 'UTC',
             },
           },
+          space_id: 'default',
           title: '[Logs] Web Traffic',
         },
         {
@@ -1191,14 +1288,14 @@ describe('transformResponse', () => {
           created_by: 'not-elastic',
           enabled: true,
           jobtype: 'PNGV2',
-          object_type: 'dashboard',
-          last_run: undefined,
+          last_run: '2025-05-06T21:12:07.198Z',
           next_run: expect.any(String),
           notification: {
             email: {
               to: ['user@elastic.co'],
             },
           },
+          payload: jsonPayload,
           title: '[Logs] Web Traffic',
           schedule: {
             rrule: {
@@ -1207,6 +1304,62 @@ describe('transformResponse', () => {
               tzid: 'UTC',
             },
           },
+          space_id: 'default',
+        },
+      ],
+    });
+  });
+
+  it('handles undefined last run response', () => {
+    expect(transformResponse(mockLogger, soResponse)).toEqual({
+      page: 1,
+      per_page: 10,
+      total: 2,
+      data: [
+        {
+          id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+          created_at: '2025-05-06T21:10:17.137Z',
+          created_by: 'elastic',
+          enabled: true,
+          jobtype: 'printable_pdf_v2',
+          last_run: undefined,
+          next_run: expect.any(String),
+          payload: jsonPayload,
+          schedule: {
+            rrule: {
+              freq: 3,
+              interval: 3,
+              byhour: [12],
+              byminute: [0],
+              tzid: 'UTC',
+            },
+          },
+          space_id: 'a-space',
+          title: '[Logs] Web Traffic',
+        },
+        {
+          id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+          created_at: '2025-05-06T21:12:06.584Z',
+          created_by: 'not-elastic',
+          enabled: true,
+          jobtype: 'PNGV2',
+          last_run: undefined,
+          next_run: expect.any(String),
+          notification: {
+            email: {
+              to: ['user@elastic.co'],
+            },
+          },
+          payload: jsonPayload,
+          title: '[Logs] Web Traffic',
+          schedule: {
+            rrule: {
+              freq: 1,
+              interval: 3,
+              tzid: 'UTC',
+            },
+          },
+          space_id: 'a-space',
         },
       ],
     });

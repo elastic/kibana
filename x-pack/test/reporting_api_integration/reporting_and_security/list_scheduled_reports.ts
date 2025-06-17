@@ -7,8 +7,31 @@
 
 import expect from '@kbn/expect';
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
+import { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import { FtrProviderContext } from '../ftr_provider_context';
 
+const pdfPayload: JobParamsPDFV2 = {
+  browserTimezone: 'UTC',
+  title: 'test PDF allowed',
+  layout: { id: 'preserve_layout' },
+  locatorParams: [{ id: 'canvas', version: '7.14.0', params: {} }],
+  objectType: 'dashboard',
+  version: '7.14.0',
+};
+
+const csvPayload: JobParamsCSV = {
+  browserTimezone: 'UTC',
+  title: 'allowed search',
+  objectType: 'search',
+  searchSource: {
+    version: true,
+    fields: [{ field: '*', include_unmapped: true }],
+    index: '5193f870-d861-11e9-a311-0fa548c5f953',
+  } as unknown as SerializedSearchSourceFields,
+  columns: [],
+  version: '7.13.0',
+};
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
@@ -25,29 +48,11 @@ export default function ({ getService }: FtrProviderContext) {
       const report1 = await reportingAPI.schedulePdf(
         reportingAPI.REPORTING_USER_USERNAME,
         reportingAPI.REPORTING_USER_PASSWORD,
-        {
-          browserTimezone: 'UTC',
-          title: 'test PDF allowed',
-          layout: { id: 'preserve_layout' },
-          locatorParams: [{ id: 'canvas', version: '7.14.0', params: {} }],
-          objectType: 'dashboard',
-          version: '7.14.0',
-        }
+        pdfPayload
       );
 
       const report2 = await reportingAPI.scheduleCsv(
-        {
-          browserTimezone: 'UTC',
-          title: 'allowed search',
-          objectType: 'search',
-          searchSource: {
-            version: true,
-            fields: [{ field: '*', include_unmapped: true }],
-            index: '5193f870-d861-11e9-a311-0fa548c5f953',
-          } as unknown as SerializedSearchSourceFields,
-          columns: [],
-          version: '7.13.0',
-        },
+        csvPayload,
         reportingAPI.REPORTING_USER_USERNAME,
         reportingAPI.REPORTING_USER_PASSWORD
       );
@@ -55,14 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
       const report3 = await reportingAPI.schedulePdf(
         reportingAPI.MANAGE_REPORTING_USER_USERNAME,
         reportingAPI.MANAGE_REPORTING_USER_PASSWORD,
-        {
-          browserTimezone: 'UTC',
-          title: 'test PDF allowed',
-          layout: { id: 'preserve_layout' },
-          locatorParams: [{ id: 'canvas', version: '7.14.0', params: {} }],
-          objectType: 'visualization',
-          version: '7.14.0',
-        }
+        pdfPayload
       );
 
       expect(report1.status).to.eql(200);
@@ -97,6 +95,12 @@ export default function ({ getService }: FtrProviderContext) {
         expect(report.created_by).to.eql(reportingAPI.REPORTING_USER_USERNAME);
         expect([report1Id, report2Id]).to.contain(report.id);
         expect(report.next_run).not.to.be(undefined);
+        expect(report.space_id).to.eql('default');
+        expect(report.schedule).to.have.property('rrule');
+        expect(report.enabled).to.be(true);
+        expect(report.payload).to.have.property('objectType');
+        expect(report.payload).to.have.property('browserTimezone');
+        expect(report.payload).to.have.property('title');
       }
     });
 
@@ -115,6 +119,12 @@ export default function ({ getService }: FtrProviderContext) {
         ]).to.contain(report.created_by);
         expect([report1Id, report2Id, report3Id]).to.contain(report.id);
         expect(report.next_run).not.to.be(undefined);
+        expect(report.space_id).to.eql('default');
+        expect(report.schedule).to.have.property('rrule');
+        expect(report.enabled).to.be(true);
+        expect(report.payload).to.have.property('objectType');
+        expect(report.payload).to.have.property('browserTimezone');
+        expect(report.payload).to.have.property('title');
       }
     });
   });
