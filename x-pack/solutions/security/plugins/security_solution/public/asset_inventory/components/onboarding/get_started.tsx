@@ -64,12 +64,6 @@ export const GetStarted = () => {
                     </EuiFlexItem>
 
                     <EuiFlexItem grow={false}>
-                      {/* <EuiLink onClick={reset}>
-                        <FormattedMessage
-                          id="xpack.securitySolution.assetInventory.error.backToStart"
-                          defaultMessage="Back to Get Started with Inventory"
-                        />
-                      </EuiLink> */}
                       <EuiButtonEmpty onClick={reset} iconType="arrowLeft" iconSide="left">
                         <FormattedMessage
                           id="xpack.securitySolution.assetInventory.error.backToStart"
