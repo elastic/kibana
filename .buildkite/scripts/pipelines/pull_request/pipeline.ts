@@ -16,6 +16,7 @@
         ] */
 
 import fs from 'fs';
+import yaml from 'js-yaml';
 import prConfigs from '../../../pull_requests.json';
 import {
   areChangesSkippable,
@@ -40,6 +41,25 @@ const getPipeline = (filename: string, removeSteps = true) => {
   const str = fs.readFileSync(filename).toString();
   return removeSteps ? str.replace(/^steps:/, '') : str;
 };
+
+// Utility to load and modify YAML
+function getPipelineWithEnv(
+  filename: string,
+  envVars: Record<string, string>,
+  stepLabelMatch: string
+) {
+  const fileContent = fs.readFileSync(filename, 'utf8');
+  const pipelineObj = yaml.load(fileContent) as any;
+
+  // Find the step(s) to inject env vars into
+  for (const step of pipelineObj.steps) {
+    if (step.label && step.label.includes(stepLabelMatch)) {
+      step.env = { ...(step.env || {}), ...envVars };
+    }
+  }
+
+  return yaml.dump(pipelineObj);
+}
 
 (async () => {
   const pipeline: string[] = [];
@@ -473,6 +493,16 @@ const getPipeline = (filename: string, removeSteps = true) => {
     if (GITHUB_PR_LABELS.includes('ci:security-genai-run-evals')) {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/gen_ai_evals.yml')
+      );
+    }
+
+    if (GITHUB_PR_LABELS.includes('ci:security-genai-prompts-run-evals')) {
+      pipeline.push(
+        getPipelineWithEnv(
+          '.buildkite/pipelines/pull_request/security_solution/gen_ai_evals.yml',
+          { IS_PROMPT: 'true' },
+          'Security Solution Gen AI Evaluations'
+        )
       );
     }
 

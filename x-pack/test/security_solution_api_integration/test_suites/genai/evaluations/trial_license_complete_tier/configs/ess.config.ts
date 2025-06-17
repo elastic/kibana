@@ -36,6 +36,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.actions.allowedHosts=["*"]`,
         `--xpack.securitySolution.enableExperimental=["assistantModelEvaluation"]`,
         ...getTinyElserServerArgs(),
+        ...(process.env.IS_PROMPT === 'true'
+          ? ['--xpack.securitySolution.genAiPromptMode=true']
+          : []),
         // Uncomment to enable debug logger to see full eval traces in kibana logs
         // `--logging.loggers=${JSON.stringify([
         //   {
