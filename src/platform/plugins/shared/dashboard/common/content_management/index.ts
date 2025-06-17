@@ -15,5 +15,3 @@ export {
   DEFAULT_PANEL_WIDTH,
   DEFAULT_DASHBOARD_OPTIONS,
 } from './constants';
-
-export type { DashboardContentType } from './types';

@@ -9,7 +9,6 @@
 
 export type {
   DashboardSavedObjectAttributes,
-  GridData,
   SavedDashboardPanel,
   SavedDashboardSection,
 } from './latest';

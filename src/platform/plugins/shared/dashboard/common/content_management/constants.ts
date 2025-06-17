@@ -7,8 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO move to top level constant file
+
+// dashboard api latest version
+// TODO rename to DASHBOARD_API_LATEST_VERSION
 export const LATEST_VERSION = 3;
 
+// dashboard api CONTENT_ID
+// TODO rename to DASHBOARD_API_CONTENT_ID
 export const CONTENT_ID = 'dashboard';
 
 export const DASHBOARD_GRID_COLUMN_COUNT = 48;

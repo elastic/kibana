@@ -8,6 +8,26 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
+import {
+  ContentManagementCrudTypes,
+  SavedObjectCreateOptions,
+  SavedObjectUpdateOptions,
+} from '@kbn/content-management-utils';
 import { dashboardAttributesSchema } from './v1';
 
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../dashboard_saved_object';
+
+export type DashboardSavedObjectContentType = typeof DASHBOARD_SAVED_OBJECT_TYPE;
+
 export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema>;
+
+export type DashboardSavedObjectCrudTypes = ContentManagementCrudTypes<
+  DashboardSavedObjectContentType,
+  DashboardAttributes,
+  Pick<SavedObjectCreateOptions, 'id' | 'references' | 'overwrite'>,
+  Pick<SavedObjectUpdateOptions, 'references'>,
+  {
+    /** Flag to indicate to only search the text on the "title" field */
+    onlyTitle?: boolean;
+  }
+>;

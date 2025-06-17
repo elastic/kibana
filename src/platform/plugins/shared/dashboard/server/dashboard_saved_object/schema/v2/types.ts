@@ -9,10 +9,28 @@
 
 import { Serializable } from '@kbn/utility-types';
 import { TypeOf } from '@kbn/config-schema';
-import { dashboardAttributesSchema, gridDataSchema } from './v2';
+import {
+  ContentManagementCrudTypes,
+  SavedObjectCreateOptions,
+  SavedObjectUpdateOptions,
+} from '@kbn/content-management-utils';
+import { controlGroupInputSchema, dashboardAttributesSchema, gridDataSchema } from './v2';
+import { DashboardSavedObjectContentType } from '../v1/types';
 
 export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema>;
-export type GridData = TypeOf<typeof gridDataSchema>;
+
+export type DashboardSavedObjectControlGroupInput = TypeOf<typeof controlGroupInputSchema>;
+
+export type DashboardSavedObjectCrudTypes = ContentManagementCrudTypes<
+  DashboardSavedObjectContentType,
+  DashboardAttributes,
+  Pick<SavedObjectCreateOptions, 'id' | 'references' | 'overwrite'>,
+  Pick<SavedObjectUpdateOptions, 'references' | 'mergeAttributes'>,
+  {
+    /** Flag to indicate to only search the text on the "title" field */
+    onlyTitle?: boolean;
+  }
+>;
 
 /**
  * A saved dashboard panel parsed directly from the Dashboard Attributes panels JSON
@@ -22,7 +40,7 @@ export interface SavedDashboardPanel {
   id?: string; // the saved object id for by reference panels
   type: string; // the embeddable type
   panelRefName?: string;
-  gridData: GridData;
+  gridData: TypeOf<typeof gridDataSchema>;
   panelIndex: string;
   title?: string;
 
