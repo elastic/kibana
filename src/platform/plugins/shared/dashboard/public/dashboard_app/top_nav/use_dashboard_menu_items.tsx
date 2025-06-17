@@ -62,9 +62,10 @@ export const useDashboardMenuItems = ({
         anchorElement,
         savedObjectId: lastSavedId,
         isDirty: Boolean(hasUnsavedChanges),
+        getSerializedState: dashboardApi.getSerializedState,
       });
     },
-    [dashboardTitle, hasUnsavedChanges, lastSavedId]
+    [dashboardApi, dashboardTitle, hasUnsavedChanges, lastSavedId]
   );
 
   /**

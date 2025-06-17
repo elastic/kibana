@@ -10,10 +10,19 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+  const commonConfig = await readConfigFile(require.resolve('../../../../common/config.js'));
   const functionalConfig = await readConfigFile(require.resolve('../../../config.base.js'));
 
   return {
     ...functionalConfig.getAll(),
     testFiles: [require.resolve('.')],
+    kbnTestServer: {
+      ...commonConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...commonConfig.get('kbnTestServer.serverArgs'),
+        // This is required to allow feature flag overrides in the dashboard_export_json test
+        '--coreApp.allowDynamicConfigOverrides=true',
+      ],
+    },
   };
 }

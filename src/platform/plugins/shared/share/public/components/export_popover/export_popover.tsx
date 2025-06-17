@@ -27,11 +27,21 @@ import {
   EuiToolTip,
   type EuiSwitchEvent,
   EuiSwitch,
+  euiFullHeight,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { ShareMenuProvider, type IShareContext, useShareTabsContext } from '../context';
 import { ExportShareConfig } from '../../types';
+
+const flyoutBodyCss = css`
+  ${euiFullHeight()}
+
+  .euiFlyoutBody__overflowContent {
+    ${euiFullHeight()}
+  }
+`;
 
 export const ExportMenu: FC<{ shareContext: IShareContext }> = ({ shareContext }) => {
   return (
@@ -206,8 +216,8 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
               </h2>
             </EuiTitle>
           </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            <EuiFlexGroup direction="column">
+          <EuiFlyoutBody css={flyoutBodyCss}>
+            <EuiFlexGroup css={{ height: '100%' }} direction="column">
               <Fragment>
                 {selectedMenuItem?.config.renderLayoutOptionSwitch && (
                   <EuiFlexItem>

@@ -20,6 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 
+import type { DashboardApi } from '../../../dashboard_api/types';
 import { DashboardLocatorParams } from '../../../../common';
 import { convertPanelSectionMapsToPanelsArray } from '../../../../common/lib/dashboard_panel_converters';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
@@ -37,6 +38,7 @@ export interface ShowShareModalProps {
   savedObjectId?: string;
   dashboardTitle?: string;
   anchorElement: HTMLElement;
+  getSerializedState?: DashboardApi['getSerializedState'];
 }
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
@@ -53,6 +55,7 @@ export function ShowShareModal({
   anchorElement,
   savedObjectId,
   dashboardTitle,
+  getSerializedState,
 }: ShowShareModalProps) {
   if (!shareService) return;
 
@@ -272,6 +275,7 @@ export function ShowShareModal({
         id: DASHBOARD_APP_LOCATOR,
         params: locatorParams,
       },
+      getSerializedState,
     },
     shareableUrlLocatorParams: {
       locator: shareService.url.locators.get(
