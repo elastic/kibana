@@ -87,7 +87,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
             .set('Transfer-Encoding', 'chunked')
             .set('kbn-xsrf', 'true');
 
-          const result = writeBodyCharAtATime(request, '{"responseDelay":100}', 20);
+          const result = writeBodyCharAtATime(request, '{"foo":"bar"}', 20);
 
           await result.then(
             (res) => {
