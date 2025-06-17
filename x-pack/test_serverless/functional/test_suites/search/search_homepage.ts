@@ -30,7 +30,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await pageObjects.common.navigateToApp('elasticsearch/home');
+      await pageObjects.common.navigateToApp('searchHomepage');
     });
 
     after(async () => {
