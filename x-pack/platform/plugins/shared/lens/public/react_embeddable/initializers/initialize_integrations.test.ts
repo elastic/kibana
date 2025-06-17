@@ -17,7 +17,8 @@ function setupIntegrationsApi(stateOverrides?: Partial<LensRuntimeState>) {
     dataOverrides: { id: 'formBased' },
   });
   const runtimeState = getLensRuntimeStateMock(stateOverrides);
-  const { api } = initializeIntegrations(() => runtimeState, services);
+  const serializeDynamicActions = undefined;
+  const { api } = initializeIntegrations(() => runtimeState, serializeDynamicActions, services);
   return api;
 }
 

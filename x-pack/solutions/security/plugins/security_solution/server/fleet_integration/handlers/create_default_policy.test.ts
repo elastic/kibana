@@ -127,7 +127,11 @@ describe('Create Default Policy tests ', () => {
       };
     };
 
-    const defaultEventsDisabled = () => ({
+    const defaultEventsDisabled = (): {
+      linux: PolicyConfig['linux']['events'];
+      mac: PolicyConfig['mac']['events'];
+      windows: PolicyConfig['windows']['events'];
+    } => ({
       linux: {
         process: false,
         file: false,
@@ -136,11 +140,14 @@ describe('Create Default Policy tests ', () => {
         tty_io: false,
       },
       mac: {
+        dns: false,
         process: false,
         file: false,
         network: false,
+        security: false,
       },
       windows: {
+        credential_access: false,
         process: false,
         file: false,
         network: false,
