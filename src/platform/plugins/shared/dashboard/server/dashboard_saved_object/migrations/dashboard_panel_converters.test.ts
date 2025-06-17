@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedDashboardPanel } from '../schema';
-import type { DashboardPanelState } from '../../../common';
-
 import {
   convertSavedDashboardPanelToPanelState,
   convertPanelStateToSavedDashboardPanel,
-} from './utils';
+} from './dashboard_panel_converters';
+import { SavedDashboardPanel } from '../schema/v2/types';
+import { DashboardPanelState810 } from './types';
 
 test('convertSavedDashboardPanelToPanelState', () => {
   const savedDashboardPanel: SavedDashboardPanel = {
@@ -43,6 +42,7 @@ test('convertSavedDashboardPanelToPanelState', () => {
     },
     explicitInput: {
       something: 'hi!',
+      id: '123',
       savedObjectId: 'savedObjectId',
     },
     type: 'search',
@@ -73,7 +73,7 @@ test('convertSavedDashboardPanelToPanelState does not include undefined id', () 
 });
 
 test('convertPanelStateToSavedDashboardPanel', () => {
-  const dashboardPanel: DashboardPanelState = {
+  const dashboardPanel: DashboardPanelState810 = {
     gridData: {
       x: 0,
       y: 0,
@@ -89,7 +89,7 @@ test('convertPanelStateToSavedDashboardPanel', () => {
     type: 'search',
   };
 
-  expect(convertPanelStateToSavedDashboardPanel('123', dashboardPanel)).toEqual({
+  expect(convertPanelStateToSavedDashboardPanel(dashboardPanel)).toEqual({
     type: 'search',
     embeddableConfig: {
       something: 'hi!',
@@ -107,7 +107,7 @@ test('convertPanelStateToSavedDashboardPanel', () => {
 });
 
 test('convertPanelStateToSavedDashboardPanel will not add an undefined id when not needed', () => {
-  const dashboardPanel: DashboardPanelState = {
+  const dashboardPanel: DashboardPanelState810 = {
     gridData: {
       x: 0,
       y: 0,
@@ -116,17 +116,18 @@ test('convertPanelStateToSavedDashboardPanel will not add an undefined id when n
       i: '123',
     },
     explicitInput: {
+      id: '123',
       something: 'hi!',
     },
     type: 'search',
   };
 
-  const converted = convertPanelStateToSavedDashboardPanel('123', dashboardPanel);
+  const converted = convertPanelStateToSavedDashboardPanel(dashboardPanel);
   expect(Object.hasOwn(converted, 'id')).toBe(false);
 });
 
 test('convertPanelStateToSavedDashboardPanel will not leave title as part of embeddable config', () => {
-  const dashboardPanel: DashboardPanelState = {
+  const dashboardPanel: DashboardPanelState810 = {
     gridData: {
       x: 0,
       y: 0,
@@ -135,18 +136,19 @@ test('convertPanelStateToSavedDashboardPanel will not leave title as part of emb
       i: '123',
     },
     explicitInput: {
+      id: '123',
       title: 'title',
     },
     type: 'search',
   };
 
-  const converted = convertPanelStateToSavedDashboardPanel('123', dashboardPanel);
+  const converted = convertPanelStateToSavedDashboardPanel(dashboardPanel);
   expect(Object.hasOwn(converted.embeddableConfig, 'title')).toBe(false);
   expect(converted.title).toBe('title');
 });
 
-test('convertPanelStateToSavedDashboardPanel retains legacy version info', () => {
-  const dashboardPanel: DashboardPanelState = {
+test('convertPanelStateToSavedDashboardPanel retains legacy version info when not passed removeLegacyVersion', () => {
+  const dashboardPanel: DashboardPanelState810 = {
     gridData: {
       x: 0,
       y: 0,
@@ -155,12 +157,34 @@ test('convertPanelStateToSavedDashboardPanel retains legacy version info', () =>
       i: '123',
     },
     explicitInput: {
+      id: '123',
       title: 'title',
     },
     type: 'search',
     version: '8.10.0',
   };
 
-  const converted = convertPanelStateToSavedDashboardPanel('123', dashboardPanel);
+  const converted = convertPanelStateToSavedDashboardPanel(dashboardPanel);
   expect(converted.version).toBe('8.10.0');
+});
+
+test('convertPanelStateToSavedDashboardPanel removes legacy version info when passed removeLegacyVersion', () => {
+  const dashboardPanel: DashboardPanelState810 = {
+    gridData: {
+      x: 0,
+      y: 0,
+      h: 15,
+      w: 15,
+      i: '123',
+    },
+    explicitInput: {
+      id: '123',
+      title: 'title',
+    },
+    type: 'search',
+    version: '8.10.0',
+  };
+
+  const converted = convertPanelStateToSavedDashboardPanel(dashboardPanel, true);
+  expect(converted.version).not.toBeDefined();
 });
