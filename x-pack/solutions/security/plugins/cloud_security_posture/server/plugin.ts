@@ -180,7 +180,7 @@ export class CspPlugin
             soClient: SavedObjectsClientContract
           ): Promise<PackagePolicy> => {
             if (isCspPackage(packagePolicy.package?.name)) {
-              await this.initialize(core, plugins.taskManager, packagePolicy.package?.version);
+              await this.initialize(core, plugins.taskManager, packagePolicy.package!.version);
               return packagePolicy;
             }
 
