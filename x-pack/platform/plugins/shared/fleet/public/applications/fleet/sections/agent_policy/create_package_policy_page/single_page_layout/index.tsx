@@ -290,14 +290,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       integrationToEnable !== integration &&
       addIntegrationFlyoutProps
     ) {
-      if (formState !== 'LOADING') {
-        setFormState('LOADING');
-      } else {
-        setFormState('INVALID');
-      }
       setIntegrationToEnable(integration);
     }
-  }, [integration, integrationToEnable, setFormState, formState, addIntegrationFlyoutProps]);
+  }, [integration, integrationToEnable, addIntegrationFlyoutProps]);
 
   useEffect(() => {
     if (addIntegrationFlyoutProps?.isSubmitted && formState !== 'LOADING') {
