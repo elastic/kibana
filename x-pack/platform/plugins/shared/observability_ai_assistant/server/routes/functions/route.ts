@@ -67,6 +67,8 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
 
     const availableFunctionNames = functionDefinitions.map((def) => def.name);
 
+    const anonymizationService = client.getAnonymizationService();
+
     return {
       functionDefinitions,
       systemMessage: getSystemMessageFromInstructions({
@@ -74,6 +76,7 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
         kbUserInstructions,
         apiUserInstructions: [],
         availableFunctionNames,
+        anonymizationInstruction: anonymizationService.getAnonymizationInstruction(),
       }),
     };
   },
