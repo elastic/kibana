@@ -8,6 +8,7 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
@@ -27,7 +28,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
@@ -37,6 +37,7 @@ import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_lo
 import { LocationsStatus, useStatusByLocation } from '../../../../hooks/use_status_by_location';
 import {
   getMonitorAction,
+  IHttpSerializedFetchError,
   selectMonitorUpsertStatus,
   selectOverviewState,
   selectServiceLocationsState,
@@ -255,7 +256,16 @@ export function MonitorDetailFlyout(props: Props) {
   const upsertStatus = useSelector(selectMonitorUpsertStatus(configId));
   const monitorObject = useSelector(selectSyntheticsMonitor);
   const isLoading = useSelector(selectSyntheticsMonitorLoading);
-  const error = useSelector(selectSyntheticsMonitorError);
+  let error = useSelector(selectSyntheticsMonitorError);
+  error = {
+    name: 'HttpFetchError',
+    body: {
+      error: 'Resource not found',
+      message: 'The resource you requested could not be found',
+      statusCode: 404,
+    },
+    requestUrl: 'http://localhost:5601',
+  };
 
   const upsertSuccess = upsertStatus?.status === 'success';
 
@@ -287,7 +297,7 @@ export function MonitorDetailFlyout(props: Props) {
       onClose={props.onClose}
       paddingSize="none"
     >
-      {error && !isLoading && <KibanaErrorBoundary>{error?.body?.message}</KibanaErrorBoundary>}
+      {error && !isLoading && <ErrorCallout {...error} />}
       {isLoading && <LoadingState />}
       {monitorObject && (
         <>
@@ -399,6 +409,48 @@ export const MaybeMonitorDetailsFlyout = ({
     />
   ) : null;
 };
+
+export function ErrorCallout(error: IHttpSerializedFetchError<unknown>) {
+  return (
+    <EuiCallOut
+      color="danger"
+      title={i18n.translate('xpack.synthetics.monitorDetail.errorTitle', {
+        defaultMessage: 'Error fetching monitor details',
+      })}
+      iconType="alert"
+    >
+      <p>
+        {i18n.translate('xpack.synthetics.monitorDetailFlyout.fetchError.description', {
+          defaultMessage: 'Unable to fetch monitor details',
+        })}
+      </p>
+      {error.body?.message && (
+        <p>
+          {i18n.translate('xpack.synthetics.monitorDetailFlyout.fetchError.message', {
+            defaultMessage: 'Message: {message}',
+            values: { message: error.body.message },
+          })}
+        </p>
+      )}
+      {error.body?.error && (
+        <p>
+          {i18n.translate('xpack.synthetics.monitorDetailFlyout.fetchError.error', {
+            defaultMessage: 'Error: {error}',
+            values: { error: error.body.error },
+          })}
+        </p>
+      )}
+      {error.body?.statusCode && (
+        <p>
+          {i18n.translate('xpack.synthetics.monitorDetailFlyout.fetchError.statusCode', {
+            defaultMessage: 'Status code: {statusCode}',
+            values: { statusCode: error.body.statusCode },
+          })}
+        </p>
+      )}
+    </EuiCallOut>
+  );
+}
 
 const DURATION_HEADER_TEXT = i18n.translate('xpack.synthetics.monitorList.durationHeaderText', {
   defaultMessage: 'Duration',
