@@ -102,12 +102,19 @@ export const runDeleteUnusedUrlsTask = async ({
   urlExpirationDuration,
   urlLimit,
   logger,
+  isEnabled,
 }: {
   core: CoreSetup;
   urlExpirationDuration: Duration;
   urlLimit: number;
   logger: Logger;
+  isEnabled: boolean;
 }) => {
+  if (!isEnabled) {
+    logger.debug('Unused URLs cleanup task is disabled, skipping execution');
+    return { deletedCount: 0 };
+  }
+
   logger.debug('Unused URLs cleanup started');
 
   const [coreStart] = await core.getStartServices();

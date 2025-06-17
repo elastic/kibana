@@ -55,6 +55,7 @@ export const registerDeleteUnusedUrlsRoute = ({
         urlExpirationDuration,
         urlLimit,
         logger,
+        isEnabled,
       });
 
       return res.ok({

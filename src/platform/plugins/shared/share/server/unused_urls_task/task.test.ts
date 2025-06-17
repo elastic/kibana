@@ -245,6 +245,7 @@ describe('unused_urls_task', () => {
         urlExpirationDuration,
         urlLimit,
         logger: mockLogger,
+        isEnabled: true,
       });
 
       expect(mockSavedObjectsRepository.find).toHaveBeenCalledTimes(1);
@@ -274,6 +275,7 @@ describe('unused_urls_task', () => {
         urlExpirationDuration,
         urlLimit: 100,
         logger: mockLogger,
+        isEnabled: true,
       });
 
       expect(response).toEqual({
@@ -348,6 +350,7 @@ describe('unused_urls_task', () => {
         urlExpirationDuration,
         urlLimit: 2,
         logger: mockLogger,
+        isEnabled: true,
       });
 
       expect(response).toEqual({
@@ -412,8 +415,30 @@ describe('unused_urls_task', () => {
           urlExpirationDuration,
           urlLimit: 100,
           logger: mockLogger,
+          isEnabled: true,
         })
       ).rejects.toThrow('Failed to delete unused URL(s) in namespace "default": bulkDelete failed');
+    });
+
+    it('should skip execution if isEnabled is false', async () => {
+      mockSavedObjectsRepository.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 100,
+        page: 1,
+      });
+
+      const response = await runDeleteUnusedUrlsTask({
+        core: mockCoreSetup,
+        urlExpirationDuration,
+        urlLimit: 100,
+        logger: mockLogger,
+        isEnabled: false,
+      });
+
+      expect(response).toEqual({ deletedCount: 0 });
+      expect(mockSavedObjectsRepository.find).not.toHaveBeenCalled();
+      expect(mockSavedObjectsRepository.bulkDelete).not.toHaveBeenCalled();
     });
   });
 

@@ -82,6 +82,7 @@ describe('registerDeleteUnusedUrlsRoute', () => {
       urlExpirationDuration: mockUrlExpirationDuration,
       urlLimit: mockUrlLimit,
       logger: mockLogger,
+      isEnabled: true,
     });
 
     expect(mockResponseFactory.ok).toHaveBeenCalledTimes(1);

@@ -136,6 +136,7 @@ export class SharePlugin
               urlExpirationDuration: this.config.url_expiration.duration,
               logger: this.logger,
               urlLimit: this.config.url_expiration.url_limit,
+              isEnabled: this.config.url_expiration.enabled,
             });
           },
         }),

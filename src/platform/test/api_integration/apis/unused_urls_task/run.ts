@@ -28,7 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
     });
 
-    it('runs unused URLs cleanup', async () => {
+    it('runs unused URLs cleanup if its enabled', async () => {
       const response1 = await supertest.post('/internal/unused_urls_task/run');
 
       expect(response1.status).to.be(200);
