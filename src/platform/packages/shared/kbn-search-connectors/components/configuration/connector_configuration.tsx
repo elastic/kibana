@@ -21,7 +21,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { isDeepEqual } from 'react-use/lib/util';
+import isDeepEqual from 'fast-deep-equal/react';
 import { sortAndFilterConnectorConfiguration } from '../../utils/connector_configuration_utils';
 import {
   Connector,
