@@ -43,6 +43,7 @@ import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
 } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { getActionDetailsById } from '../../action_details_by_id';
 import { ResponseActionsClientError, ResponseActionsNotSupportedError } from '../errors';
 import {
@@ -51,6 +52,7 @@ import {
 } from '../../../../../../common/endpoint/constants';
 import type {
   CommonResponseActionMethodOptions,
+  CustomScriptsResponse,
   GetFileDownloadMethodResponse,
   ProcessPendingActionsMethodOptions,
   ResponseActionsClient,
@@ -235,17 +237,18 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   /**
    * Fetches Fleet agent information for each of the Fleet agent ids provided on input.
    * @param agentIds
-   * @param integrations
    * @protected
    */
   protected async fetchFleetInfoForAgents(
     /** Fleet Agent IDs */
-    agentIds: string[],
-    /** A list of integration names (value found in `package.name` in an integration policy) */
-    integrations: string[]
+    agentIds: string[]
   ): Promise<LogsEndpointAction['agent']['policy']> {
+    const integrations = [...RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES[this.agentType]];
+
     if (integrations.length === 0) {
-      throw new ResponseActionsClientError(`'integrations' argument can not be empty`);
+      throw new ResponseActionsClientError(
+        `No integration names defined for agent type [${this.agentType}]`
+      );
     }
 
     const spaceId = this.options.spaceId;
@@ -282,7 +285,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       .list(soClient, { perPage: 10_000, kuery })
       .catch(catchAndWrapError);
 
-    this.log.debug(() => `Integration policies found:\n${stringify(integrationPolicies)}`);
+    this.log.debug(() => `Integration policies found ${integrationPolicies.items.length}`);
 
     const agentPolicyToIntegrationPolicyMap: Record<string, PackagePolicy> = {};
 
@@ -789,16 +792,23 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     const esClient = this.options.esClient;
     const query: QueryDslQueryContainer = getUnExpiredActionsEsQuery(this.agentType);
 
-    return createEsSearchIterable<LogsEndpointAction>({
+    return createEsSearchIterable<
+      LogsEndpointAction,
+      Array<ResponseActionsClientPendingAction<TParameters, TOutputContent, TMeta>>
+    >({
       esClient,
       searchRequest: {
         index: ENDPOINT_ACTIONS_INDEX,
         sort: '@timestamp',
         query,
       },
-      resultsMapper: async (data): Promise<ResponseActionsClientPendingAction[]> => {
+      resultsMapper: async (
+        data
+      ): Promise<Array<ResponseActionsClientPendingAction<TParameters, TOutputContent, TMeta>>> => {
         const actionRequests = data.hits.hits.map((hit) => hit._source as LogsEndpointAction);
-        const pendingRequests: ResponseActionsClientPendingAction[] = [];
+        const pendingRequests: Array<
+          ResponseActionsClientPendingAction<TParameters, TOutputContent, TMeta>
+        > = [];
 
         if (actionRequests.length > 0) {
           const actionResults = await fetchActionResponses({
@@ -820,10 +830,14 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
             // If not completed, add action to the pending list and calculate the list of agent IDs
             // whose response we are still waiting on
             if (!actionCompleteInfo.isCompleted) {
-              const pendingActionData: ResponseActionsClientPendingAction = {
+              const pendingActionData = {
                 action: actionRequest,
                 pendingAgentIds: [],
-              };
+              } as unknown as ResponseActionsClientPendingAction<
+                TParameters,
+                TOutputContent,
+                TMeta
+              >;
 
               for (const [agentId, agentIdState] of Object.entries(actionCompleteInfo.agentState)) {
                 if (!agentIdState.isCompleted) {
@@ -967,6 +981,10 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
   > {
     throw new ResponseActionsNotSupportedError('runscript');
+  }
+
+  public async getCustomScripts(): Promise<CustomScriptsResponse> {
+    throw new ResponseActionsNotSupportedError('getCustomScripts');
   }
 
   public async processPendingActions(_: ProcessPendingActionsMethodOptions): Promise<void> {

@@ -139,6 +139,18 @@
       },
       {
         "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.SCOUT_TEST_CONFIG_STATS_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "SCOUT_TEST_CONFIG_STATS_PATH",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-scout-info/src/paths.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
         "id": "def-common.SCOUT_TEST_EVENTS_DATA_STREAM_NAME",
         "type": "string",
         "tags": [],

@@ -272,6 +272,7 @@ export class AnomalyTimelineStateService extends StateService {
         this.getSwimLaneBucketInterval$(),
         this._timeBounds$,
         this._refreshSubject$,
+        this._swimLaneSeverity$,
       ]) as Observable<
         [
           ExplorerJob[],
@@ -282,7 +283,8 @@ export class AnomalyTimelineStateService extends StateService {
           AppStateSelectedCells,
           TimeBucketsInterval,
           TimeRangeBounds,
-          Refresh
+          Refresh,
+          number
         ]
       >
     )
@@ -296,6 +298,9 @@ export class AnomalyTimelineStateService extends StateService {
             swimLaneCardinality,
             selectedCells,
             swimLaneBucketInterval,
+            timeBounds,
+            refresh,
+            swimlaneSeverity,
           ]) => {
             if (!selectedCells?.showTopFieldValues) {
               return of([]);
@@ -319,7 +324,8 @@ export class AnomalyTimelineStateService extends StateService {
                 swimLanePagination.viewByFromPage,
                 swimLaneBucketInterval,
                 selectionInfluencers,
-                influencersFilterQuery
+                influencersFilterQuery,
+                swimlaneSeverity
               )
             );
           }

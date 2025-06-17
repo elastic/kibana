@@ -1,12 +1,31 @@
 {
   "esql.async_query": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "allow_partial_results": "__flag__",
+      "delimiter": "",
+      "drop_null_columns": "__flag__",
+      "format": [
+        "csv",
+        "json",
+        "tsv",
+        "txt",
+        "yaml",
+        "cbor",
+        "smile",
+        "arrow"
+      ]
+    },
     "methods": [
       "POST"
     ],
     "patterns": [
       "_query/async"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/esql-async-query-api.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-esql-async-query",
     "availability": {
       "stack": true,
       "serverless": false

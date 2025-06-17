@@ -7,12 +7,13 @@
 
 import React, { ChangeEvent } from 'react';
 
-import { EuiFormRow, EuiSelect, EuiToolTip } from '@elastic/eui';
+import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getVectorStyleLabel, getDisabledByMessage } from '../get_vector_style_label';
 import { LABEL_POSITIONS, VECTOR_STYLES } from '../../../../../../common/constants';
 import { LabelPositionStylePropertyDescriptor } from '../../../../../../common/descriptor_types';
 import { LabelPositionProperty } from '../../properties/label_position_property';
+import { DisabledToolTip } from '../../disabled_tooltip';
 
 const options = [
   {
@@ -71,8 +72,7 @@ export function LabelPositionEditor({ hasLabel, handlePropertyChange, stylePrope
   return !disabled ? (
     form
   ) : (
-    <EuiToolTip
-      anchorClassName="mapStyleFormDisabledTooltip"
+    <DisabledToolTip
       content={
         !hasLabel
           ? getDisabledByMessage(VECTOR_STYLES.LABEL_TEXT)
@@ -80,6 +80,6 @@ export function LabelPositionEditor({ hasLabel, handlePropertyChange, stylePrope
       }
     >
       {form}
-    </EuiToolTip>
+    </DisabledToolTip>
   );
 }

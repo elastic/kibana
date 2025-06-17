@@ -14,15 +14,20 @@
         "none"
       ],
       "ignore_throttled": "__flag__",
-      "ignore_unavailable": "__flag__"
+      "ignore_unavailable": "__flag__",
+      "timeout": [
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "GET"
     ],
     "patterns": [
+      "_resolve/cluster",
       "_resolve/cluster/{name}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/indices-resolve-cluster-api.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-resolve-cluster",
     "availability": {
       "stack": true,
       "serverless": false

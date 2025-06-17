@@ -1,0 +1,9 @@
+# Observability Complete tier config
+
+## Enabled plugins
+xpack.infra.enabled: true
+xpack.slo.enabled: true
+
+xpack.features.overrides:
+  ### By default, this feature named as `Metrics`, but should be renamed to `Infrastructure`.
+  infrastructure.name: 'Infrastructure'

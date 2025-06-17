@@ -41,10 +41,14 @@ export function getElasticConnectorsServerlessEnabled() {
   const ELASTIC_CONNECTORS_SERVERLESS_PROJECT_TYPES = ['security', 'observability'];
 
   const cloud = appContextService.getCloud();
+
   return (
-    cloud?.isServerlessEnabled &&
-    ELASTIC_CONNECTORS_SERVERLESS_PROJECT_TYPES.includes(
-      appContextService.getCloud()?.serverless.projectType ?? ''
-    )
+    // is cloud and not serverless
+    (cloud?.isCloudEnabled && !cloud?.isServerlessEnabled) ||
+    // is serverless and project type is one of the supported
+    (cloud?.isServerlessEnabled &&
+      ELASTIC_CONNECTORS_SERVERLESS_PROJECT_TYPES.includes(
+        appContextService.getCloud()?.serverless.projectType ?? ''
+      ))
   );
 }

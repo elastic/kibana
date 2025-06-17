@@ -41,7 +41,7 @@ export const AddDocumentsCodeExample = ({
   indexName,
   mappingProperties,
 }: AddDocumentsCodeExampleProps) => {
-  const { application, share, console: consolePlugin } = useKibana().services;
+  const { application, share, console: consolePlugin, cloud } = useKibana().services;
   const elasticsearchUrl = useElasticsearchUrl();
   const usageTracker = useUsageTracker();
   const indexHasMappings = Object.keys(mappingProperties).length > 0;
@@ -73,8 +73,17 @@ export const AddDocumentsCodeExample = ({
       indexHasMappings,
       mappingProperties: codeSampleMappings,
       apiKey: apiKey || undefined,
+      isServerless: cloud?.isServerlessEnabled ?? undefined,
     };
-  }, [indexName, elasticsearchUrl, sampleDocuments, codeSampleMappings, indexHasMappings, apiKey]);
+  }, [
+    indexName,
+    elasticsearchUrl,
+    sampleDocuments,
+    codeSampleMappings,
+    indexHasMappings,
+    apiKey,
+    cloud,
+  ]);
 
   return (
     <EuiPanel

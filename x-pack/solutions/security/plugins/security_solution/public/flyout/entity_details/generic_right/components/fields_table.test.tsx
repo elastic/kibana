@@ -101,4 +101,30 @@ describe('FieldsTable', () => {
     expect(rowText[1]).toContain('field2');
     expect(rowText[2]).toContain('field4.nestedField1');
   });
+
+  it('sets default pinned fields when localStorage is empty', async () => {
+    // Set the default fields without field2
+    const defaultPinnedFields = ['field1', 'field3'];
+
+    renderWithQueryClient(
+      <FieldsTable
+        document={mockDocument}
+        tableStorageKey={'new-test-storage-key'}
+        defaultPinnedFields={defaultPinnedFields}
+      />
+    );
+
+    await waitFor(() => {
+      const rows = screen.getAllByRole('row');
+      const rowText = rows.map((row) => row.textContent);
+
+      expect(rowText[1]).toContain('field1');
+      expect(rowText[2]).toContain('field3');
+    });
+
+    await waitFor(() => {
+      const pinButtons = screen.getAllByLabelText('Pin field');
+      expect(pinButtons.length).toBeGreaterThan(0);
+    });
+  });
 });
