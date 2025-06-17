@@ -23,7 +23,7 @@ const regexRuleSchema = schema.allOf([
   schema.object({
     type: schema.literal('regex'),
     pattern: schema.string(),
-    entityClass: schema.string(),
+    entityClass: schema.maybe(schema.string()),
   }),
 ]);
 
@@ -31,11 +31,6 @@ const nerRuleSchema = schema.allOf([
   baseRuleSchema,
   schema.object({
     type: schema.literal('ner'),
-    entityClass: schema.oneOf([
-      schema.literal('PER'),
-      schema.literal('ORG'),
-      schema.literal('LOC'),
-    ]),
   }),
 ]);
 
@@ -98,20 +93,6 @@ export const uiSettings: Record<string, UiSettingsParams> = {
           enabled: false,
         },
         {
-          id: 'person_ner',
-          entityClass: 'PER',
-          type: 'ner',
-          enabled: false,
-        },
-        {
-          id: 'location_ner',
-          entityClass: 'LOC',
-          type: 'ner',
-          enabled: false,
-        },
-        {
-          id: 'organization_ner',
-          entityClass: 'ORG',
           type: 'ner',
           enabled: false,
         },
@@ -125,8 +106,8 @@ export const uiSettings: Record<string, UiSettingsParams> = {
         defaultMessage:
           'List of anonymization rules.\n' +
           '- type: "ner" or "regex"\n' +
-          '- entityClass: PER, ORG, LOC\n' +
-          '- pattern: (regex rules only) the regular‑expression string to match\n' +
+          '- entityClass: (regex type only) eg: email, url, ip\n' +
+          '- pattern: (regex type only) the regular‑expression string to match\n' +
           '- enabled: boolean flag to turn the rule on or off\n',
       }
     ),
