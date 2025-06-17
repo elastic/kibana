@@ -12,10 +12,10 @@
 import { useMemo } from 'react';
 import { css, keyframes } from '@emotion/react';
 import { COLOR_MODES_STANDARD, UseEuiTheme, euiCanAnimate, useEuiTheme } from '@elastic/eui';
-import bg_top_branded from './styles/core_app/images/bg_top_branded.svg';
-import bg_top_branded_dark from './styles/core_app/images/bg_top_branded_dark.svg';
-import bg_bottom_branded from './styles/core_app/images/bg_bottom_branded.svg';
-import bg_bottom_branded_dark from './styles/core_app/images/bg_bottom_branded_dark.svg';
+import bg_top_branded from './images/bg_top_branded.svg';
+import bg_top_branded_dark from './images/bg_top_branded_dark.svg';
+import bg_bottom_branded from './images/bg_bottom_branded.svg';
+import bg_bottom_branded_dark from './images/bg_bottom_branded_dark.svg';
 
 export const fullScreenGraphicsMixinStyles = ({ euiTheme, colorMode }: UseEuiTheme) => {
   const lightOrDarkTheme = (lightSvg: string, darkSvg: any) => {
@@ -51,8 +51,6 @@ export const fullScreenGraphicsMixinStyles = ({ euiTheme, colorMode }: UseEuiThe
       zIndex: 1,
       width: '400px',
       height: '400px',
-      top: 0,
-      left: 0,
       content: `url(${lightOrDarkTheme(bg_top_branded, bg_top_branded_dark)})`,
       [`@media (max-width: ${euiTheme.breakpoint.l}px)`]: {
         content: 'none',
