@@ -53,9 +53,10 @@ describe('Bedrock with proxy config', () => {
     expect(bedrockClient.config.requestHandler).toBeDefined();
     // @ts-ignore configProvider is private, but we need it to access the agent
     const config = await bedrockClient.config.requestHandler.configProvider;
-    expect(config.httpAgent.proxy.host).toBe(PROXY_HOST);
-    expect(config.httpAgent.proxy.port).toBe(99);
-    expect(config.httpsAgent.proxy).not.toBeDefined();
+    // Since DEFAULT_BEDROCK_URL is https, httpsAgent will be set, see: https://github.com/elastic/kibana/pull/224130#discussion_r2152632806
+    expect(config.httpsAgent.proxy.host).toBe(PROXY_HOST);
+    expect(config.httpsAgent.proxy.port).toBe(99);
+    expect(config.httpAgent.proxy).toBeUndefined();
   });
 
   it('verifies that the Bedrock client is initialized with the custom proxy HTTPS agent', async () => {
