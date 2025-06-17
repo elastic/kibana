@@ -34,6 +34,7 @@ export const createAgentGraph = async ({
     initialQuery: Annotation<string>(), // the search query
     cycleBudget: Annotation<number>(), // budget in number of cycles - TODO
     // internal state
+    remainingCycles: Annotation<number>(),
     actionsQueue: Annotation<ResearchGoal[], ResearchGoal[]>({
       reducer: (state, actions) => {
         return actions ?? state;
@@ -59,6 +60,7 @@ export const createAgentGraph = async ({
     };
     return {
       actionsQueue: [firstAction],
+      remainingCycles: state.cycleBudget,
     };
   };
 
@@ -100,7 +102,7 @@ export const createAgentGraph = async ({
 
     return {
       actionsQueue: queue,
-      backlog: [actionResults],
+      backlog: [...actionResults],
     };
   };
 
@@ -138,21 +140,26 @@ export const createAgentGraph = async ({
       getReflectionPrompt({
         userQuery: state.initialQuery,
         backlog: state.backlog,
+        maxFollowUpQuestions: 3,
+        remainingCycles: state.remainingCycles - 1,
       })
     );
 
     console.log('*** reflection response: ', response);
+    console.log('*** reflection remainingCycles: ', state.remainingCycles);
 
     return {
+      remainingCycles: state.remainingCycles - 1,
       backlog: [...state.backlog, response],
       actionsQueue: [
         ...state.actionsQueue,
-        response.nextQuestions.map<ResearchGoal>((nextQuestion) => ({ question: nextQuestion })),
+        ...response.nextQuestions.map<ResearchGoal>((nextQuestion) => ({ question: nextQuestion })),
       ],
     };
   };
 
   const evaluateReflection = async (state: typeof StateAnnotation.State) => {
+    const remainingCycles = state.remainingCycles;
     const reflectionResult = lastReflectionResult(state.backlog);
     console.log(
       '*** evaluateReflection - state: ',
@@ -160,7 +167,7 @@ export const createAgentGraph = async ({
       reflectionResult.reasoning
     );
 
-    if (reflectionResult.isSufficient) {
+    if (reflectionResult.isSufficient || remainingCycles <= 0) {
       return 'answer';
     }
     return 'process_queue_item';

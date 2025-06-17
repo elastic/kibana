@@ -39,6 +39,12 @@ export interface RunSearchAgentParams {
    */
   instructions: string;
   /**
+   * Budget, in search cycles, to allocate to the researcher.
+   * Defaults to 5.
+   */
+  cycleBudget?: number;
+
+  /**
    * Top level tool provider to use to retrieve internal tools
    */
   toolProvider: ToolProvider;
@@ -48,24 +54,25 @@ export interface RunSearchAgentParams {
   onEvent?: (event: ChatAgentEvent) => void;
 }
 
-export interface RunSearchAgentResponse {
+export interface RunResearcherAgentResponse {
   answer: string;
 }
 
-export type RunChatAgentFn = (
+export type RunResearcherAgentFn = (
   params: RunSearchAgentParams,
   context: RunSearchAgentContext
-) => Promise<RunSearchAgentResponse>;
+) => Promise<RunResearcherAgentResponse>;
 
 const agentGraphName = 'researcher-agent';
+const defaultCycleBudget = 5;
 
 const noopOnEvent = () => {};
 
 /**
  * Create the handler function for the default onechat agent.
  */
-export const runSearchAgent: RunChatAgentFn = async (
-  { instructions, toolProvider, onEvent = noopOnEvent },
+export const runSearchAgent: RunResearcherAgentFn = async (
+  { instructions, cycleBudget = defaultCycleBudget, toolProvider, onEvent = noopOnEvent },
   { logger, request, modelProvider }
 ) => {
   const model = await modelProvider.getDefaultModel();
@@ -93,13 +100,12 @@ export const runSearchAgent: RunChatAgentFn = async (
     logger,
     chatModel: model.chatModel,
     tools: langchainTools,
-    systemPrompt: '',
   });
 
   const eventStream = agentGraph.streamEvents(
     {
       initialQuery: instructions,
-      cycleBudget: 10,
+      cycleBudget,
     },
     {
       version: 'v2',
@@ -107,7 +113,7 @@ export const runSearchAgent: RunChatAgentFn = async (
       metadata: {
         graphName: agentGraphName,
       },
-      recursionLimit: 30,
+      recursionLimit: cycleBudget * 10,
       callbacks: [],
     }
   );

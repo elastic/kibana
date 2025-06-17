@@ -123,9 +123,15 @@ export const getExecutionPrompt = ({
 export const getReflectionPrompt = ({
   userQuery,
   backlog,
+  maxFollowUpQuestions = 3,
+  remainingCycles,
+  cycleBoundaries = { exploration: 3, refinement: 2, finalization: 1 },
 }: {
   userQuery: string;
   backlog: BacklogItem[];
+  remainingCycles: number;
+  maxFollowUpQuestions?: number;
+  cycleBoundaries?: { exploration: number; refinement: number; finalization: number };
 }): BaseMessageLike[] => {
   return [
     [
@@ -138,8 +144,23 @@ export const getReflectionPrompt = ({
       - If necessary, break down complex questions into smaller sub-problems.
       - Your goal is to generate a precise list of actionable questions that will help drive the research forward.
 
+      Cycle Awareness:
+      - The research process is bounded. There is exactly **${remainingCycles} cycles remaining** before a final answer must be produced.
+      - Use the following strategy based on that number:
+        - If ${cycleBoundaries.exploration} or more cycles remain:
+          - You may explore deeper subtopics or decompositions.
+          - Pursue emerging trends, architectural alternatives, or implementation-specific nuances.
+        - If ${cycleBoundaries.refinement} or more cycles remain:
+          - Focus on clarifying known gaps or weak spots in the current summaries.
+          - Prefer precision over breadth.
+        - If ${cycleBoundaries.finalization} or less cycle remains:
+          - There is no time for further exploration.
+          - Surface only essential missing information that would block the final answer.
+          - Avoid speculative or marginal questions.
+
       Guidelines:
       - Only generate questions if the current information is incomplete or insufficient.
+      - Do not generate more than ${maxFollowUpQuestions} actionable questions.
       - Focus on technical depth, implementation details, trade-offs, edge cases, or emerging trends.
       - Each question must be self-contained and ready to be used for search or further investigation.
 
