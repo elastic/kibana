@@ -33,6 +33,7 @@ import type { LogsEndpointAction, PolicyData } from '../../../common/endpoint/ty
 import type { Agent } from '@kbn/fleet-plugin/common';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ALLOWED_ACTION_REQUEST_TAGS } from '../services/actions/constants';
 
 describe('Space awareness migration', () => {
   let endpointServiceMock: ReturnType<typeof createMockEndpointAppContextService>;
@@ -360,6 +361,7 @@ describe('Space awareness migration', () => {
                 ],
               },
               originSpaceId: 'default',
+              tags: [ALLOWED_ACTION_REQUEST_TAGS.integrationPolicyDeleted],
             },
           },
         ],
@@ -390,6 +392,7 @@ describe('Space awareness migration', () => {
                 ],
               },
               originSpaceId: 'default',
+              tags: [ALLOWED_ACTION_REQUEST_TAGS.integrationPolicyDeleted],
             },
           },
         ],

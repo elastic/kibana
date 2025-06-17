@@ -616,6 +616,9 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       // Add the `originSpaceId` property to the document if spaces is enabled
       ...(isSpacesEnabled ? { originSpaceId: this.options.spaceId } : {}),
 
+      // Add `tags` property to the document if spaces is enabled
+      ...(isSpacesEnabled ? { tags: actionRequest.tags ?? [] } : {}),
+
       // Need to suppress this TS error around `agent.policy` not supporting `undefined`.
       // It will be removed once we enable the feature and delete the feature flag checks.
       // @ts-expect-error
@@ -644,7 +647,6 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       user: {
         id: this.options.username,
       },
-      tags: actionRequest.tags ?? [],
       meta: actionRequest.meta,
       ...(errorMsg ? { error: { message: errorMsg } } : {}),
       ...(actionRequest.ruleId && actionRequest.ruleName
