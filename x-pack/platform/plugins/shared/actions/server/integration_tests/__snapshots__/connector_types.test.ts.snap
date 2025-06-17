@@ -39605,6 +39605,12 @@ Object {
       },
       "type": "boolean",
     },
+    "isRuleSeverity": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "type": "boolean",
+    },
     "name": Object {
       "flags": Object {
         "error": [Function],
