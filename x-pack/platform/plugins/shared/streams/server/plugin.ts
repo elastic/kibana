@@ -24,6 +24,7 @@ import {
   STREAMS_API_PRIVILEGES,
   STREAMS_CONSUMER,
   STREAMS_FEATURE_ID,
+  STREAMS_TIERED_FEATURES,
   STREAMS_UI_PRIVILEGES,
 } from '../common/constants';
 import { ContentService } from './lib/content/content_service';
@@ -63,7 +64,7 @@ export class StreamsPlugin
   public logger: Logger;
   public server?: StreamsServer;
   private isDev: boolean;
-  private telemtryService = new StreamsTelemetryService();
+  private telemetryService = new StreamsTelemetryService();
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
@@ -80,7 +81,7 @@ export class StreamsPlugin
       logger: this.logger,
     } as StreamsServer;
 
-    this.telemtryService.setup(core.analytics);
+    this.telemetryService.setup(core.analytics);
 
     const isSignificantEventsEnabled = this.config.experimental?.significantEventsEnabled === true;
     const alertingFeatures = isSignificantEventsEnabled
@@ -152,12 +153,14 @@ export class StreamsPlugin
       },
     });
 
+    core.pricing.registerProductFeatures(STREAMS_TIERED_FEATURES);
+
     registerRoutes({
       repository: streamsRouteRepository,
       dependencies: {
         assets: assetService,
         server: this.server,
-        telemetry: this.telemtryService.getClient(),
+        telemetry: this.telemetryService.getClient(),
         getScopedClients: async ({
           request,
         }: {
