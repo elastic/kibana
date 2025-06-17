@@ -14,3 +14,17 @@ export const APP_TITLE = i18n.translate('xpack.reporting.registerFeature.reporti
 export const APP_DESC = i18n.translate('xpack.reporting.registerFeature.reportingDescription', {
   defaultMessage: 'Manage your reports generated from Discover, Visualize, and Dashboard.',
 });
+
+export const LOADING_REPORTS_DESCRIPTION = i18n.translate(
+  'xpack.reporting.table.loadingReportsDescription',
+  {
+    defaultMessage: 'Loading reports',
+  }
+);
+
+export const NO_CREATED_REPORTS_DESCRIPTION = i18n.translate(
+  'xpack.reporting.table.noCreatedReportsDescription',
+  {
+    defaultMessage: 'No reports have been created',
+  }
+);

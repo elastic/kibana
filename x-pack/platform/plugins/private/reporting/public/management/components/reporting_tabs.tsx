@@ -149,6 +149,9 @@ export const ReportingTabs: React.FunctionComponent<
           config.statefulSettings.enabled
             ? [
                 <MigrateIlmPolicyCallOut toasts={notifications.toasts} />,
+                <EuiFlexItem grow={false}>
+                  <ReportDiagnostic clientConfig={config} apiClient={apiClient} />
+                </EuiFlexItem>,
                 <EuiFlexGroup justifyContent="flexEnd">
                   {capabilities?.management?.data?.index_lifecycle_management && (
                     <EuiFlexItem grow={false}>
@@ -160,11 +163,8 @@ export const ReportingTabs: React.FunctionComponent<
                         )
                       )}
                     </EuiFlexItem>
-                  )}{' '}
+                  )}
                 </EuiFlexGroup>,
-                <EuiFlexItem grow={false}>
-                  <ReportDiagnostic clientConfig={config} apiClient={apiClient} />
-                </EuiFlexItem>,
               ]
             : []
         }

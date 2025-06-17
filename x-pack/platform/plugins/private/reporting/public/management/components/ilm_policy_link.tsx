@@ -22,7 +22,7 @@ interface Props {
 
 const i18nTexts = {
   buttonLabel: i18n.translate('xpack.reporting.listing.reports.ilmPolicyLinkText', {
-    defaultMessage: 'Edit reporting ILM policy',
+    defaultMessage: 'Edit ILM policy',
   }),
 };
 
@@ -30,7 +30,8 @@ export const IlmPolicyLink: FunctionComponent<Props> = ({ locator, navigateToUrl
   return (
     <EuiButtonEmpty
       data-test-subj="ilmPolicyLink"
-      size="xs"
+      size="s"
+      iconType="popout"
       onClick={() => {
         const url = locator.getRedirectUrl({
           page: 'policy_edit',

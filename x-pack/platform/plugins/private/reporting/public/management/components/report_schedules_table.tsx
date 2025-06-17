@@ -20,14 +20,17 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { ScheduledReport } from '@kbn/reporting-common/types';
 import moment from 'moment';
+import { stringify } from 'query-string';
+import { REPORTING_REDIRECT_APP, buildKibanaPath } from '@kbn/reporting-common';
+import { type ListScheduledReportApiJSON } from '../../../server/types';
 import { ListingPropsInternal } from '..';
 import { guessAppIconTypeFromObjectType, getDisplayNameFromObjectType } from '../utils';
 import { useGetScheduledList } from '../hooks/use_get_scheduled_list';
 import { prettyPrintJobType } from '../../../common/job_utils';
 import { ReportScheduleIndicator } from './report_schedule_indicator';
 import { useBulkDisable } from '../hooks/use_bulk_disable';
+import { NO_CREATED_REPORTS_DESCRIPTION } from '../../translations';
 
 interface QueryParams {
   index: number;
@@ -36,6 +39,7 @@ interface QueryParams {
 
 export const ReportSchedulesTable = (props: ListingPropsInternal) => {
   const { http, toasts } = props;
+
   const [queryParams, setQueryParams] = useState<QueryParams>({
     index: 1,
     size: 10,
@@ -48,22 +52,21 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
   const { mutateAsync: bulkDisableScheduledReports } = useBulkDisable({
     http,
     toasts,
-    ...queryParams,
   });
 
-  const tableColumns: Array<EuiBasicTableColumn<ScheduledReport>> = [
+  const tableColumns: Array<EuiBasicTableColumn<ListScheduledReportApiJSON>> = [
     {
-      field: 'objectType',
+      field: 'object_type',
       name: i18n.translate('xpack.reporting.schedules.tableColumns.typeTitle', {
         defaultMessage: 'Type',
       }),
       width: '5%',
-      render: (objectType: string) => (
+      render: (_objectType: string) => (
         <EuiIconTip
           data-test-subj="reportObjectType"
-          type={guessAppIconTypeFromObjectType(objectType)}
+          type={guessAppIconTypeFromObjectType(_objectType)}
           size="s"
-          content={getDisplayNameFromObjectType(objectType)}
+          content={getDisplayNameFromObjectType(_objectType)}
         />
       ),
     },
@@ -73,9 +76,9 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
         defaultMessage: 'Title',
       }),
       width: '20%',
-      render: (title: string, item: ScheduledReport) => (
+      render: (_title: string, item: ListScheduledReportApiJSON) => (
         <EuiLink data-test-subj={`reportTitle`} onClick={() => {}}>
-          {title}
+          {_title}
         </EuiLink>
       ),
       mobileOptions: {
@@ -89,7 +92,7 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
         defaultMessage: 'Status',
       }),
       width: '10%',
-      render: (status: string, item: ScheduledReport) => {
+      render: (_status: string, item: ListScheduledReportApiJSON) => {
         return (
           <EuiHealth
             color={item.enabled ? 'primary' : 'subdued'}
@@ -112,18 +115,18 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
         defaultMessage: 'Schedule',
       }),
       width: '15%',
-      render: (schedule: ScheduledReport['schedule']) => (
-        <ReportScheduleIndicator schedule={schedule} />
+      render: (_schedule: ListScheduledReportApiJSON['schedule']) => (
+        <ReportScheduleIndicator schedule={_schedule} />
       ),
     },
     {
-      field: 'nextRun',
+      field: 'next_run',
       name: i18n.translate('xpack.reporting.schedules.tableColumns.nextScheduleTitle', {
         defaultMessage: 'Next schedule',
       }),
       width: '20%',
-      render: (nextRun: string) => {
-        return moment(nextRun).format('YYYY-MM-DD @ hh:mm A');
+      render: (_nextRun: string) => {
+        return moment(_nextRun).format('YYYY-MM-DD @ hh:mm A');
       },
     },
     {
@@ -132,18 +135,18 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
       name: i18n.translate('xpack.reporting.schedules.tableColumns.fileType', {
         defaultMessage: 'File Type',
       }),
-      render: (jobtype: string) => prettyPrintJobType(jobtype),
+      render: (_jobtype: string) => prettyPrintJobType(_jobtype),
       mobileOptions: {
         show: false,
       },
     },
     {
-      field: 'createdBy',
+      field: 'created_by',
       name: i18n.translate('xpack.reporting.schedules.tableColumns.createdByTitle', {
         defaultMessage: 'Created by',
       }),
       width: '15%',
-      render: (createdBy: string) => {
+      render: (_createdBy: string) => {
         return (
           <EuiFlexGroup
             gutterSize="s"
@@ -152,11 +155,11 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
             responsive={false}
           >
             <EuiFlexItem grow={false}>
-              <EuiAvatar name={createdBy} />
+              <EuiAvatar name={_createdBy} />
             </EuiFlexItem>
             <EuiFlexItem grow={false} className="eui-textTruncate">
               <EuiText size="s" className="eui-textTruncate">
-                {createdBy}
+                {_createdBy}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -177,7 +180,7 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
           description: i18n.translate('xpack.reporting.schedules.table.viewConfig.description', {
             defaultMessage: 'View schedule configuration details',
           }),
-          'data-test-subj': 'reportViewConfig',
+          'data-test-subj': (item) => `reportViewConfig-${item.id}`,
           type: 'icon',
           icon: 'calendar',
           onClick: () => {},
@@ -189,20 +192,22 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
           description: i18n.translate('xpack.reporting.schedules.table.openDashboard.description', {
             defaultMessage: 'Open associated dashboard',
           }),
-          'data-test-subj': 'reportOpenDashboard',
+          'data-test-subj': (item) => `reportOpenDashboard-${item.id}`,
           type: 'icon',
           icon: 'dashboardApp',
-
+          // available: (job) => job.canLinkToKibanaApp,
           onClick: (item) => {
-            // const searchParams = stringify({ id: item.id });
-            // const path = buildKibanaPath({
-            //   basePath: http.basePath.serverBasePath,
-            //   // spaceId: .spaceId,
-            //   appPath: REPORTING_REDIRECT_APP,
-            // });
-            // const href = `${path}?${searchParams}`;
-            // window.open(href, '_blank');
-            // window.focus();
+            const searchParams = stringify({ id: item.id });
+
+            const path = buildKibanaPath({
+              basePath: http.basePath.serverBasePath,
+              // spaceId: job.spaceId,
+              appPath: REPORTING_REDIRECT_APP,
+            });
+
+            const href = `${path}?${searchParams}`;
+            window.open(href, '_blank');
+            window.focus();
           },
         },
         {
@@ -215,7 +220,7 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
               defaultMessage: 'Disable report schedule',
             }
           ),
-          'data-test-subj': 'reportDisableSchedule',
+          'data-test-subj': (item) => `reportDisableSchedule-${item.id}`,
           enabled: (item) => item.enabled,
           type: 'icon',
           icon: 'cross',
@@ -251,7 +256,9 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
           pageSize: queryParams.size,
           totalItemCount: scheduledList?.total ?? 0,
         }}
+        noItemsMessage={NO_CREATED_REPORTS_DESCRIPTION}
         onChange={tableOnChangeCallback}
+        rowProps={() => ({ 'data-test-subj': 'scheduledReportRow' })}
       />
     </Fragment>
   );
