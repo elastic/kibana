@@ -143,7 +143,6 @@ export const AttributesTable: React.FC<AttributesTableProps> = ({
       rowHeightsOptions={{ defaultHeight: 'auto' }}
       inMemory={{ level: 'enhancements' }}
       toolbarVisibility={false}
-      pagination={undefined}
     />
   );
 };
