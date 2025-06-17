@@ -27,7 +27,7 @@ import {
 } from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import { errorHandler } from '../error_handler';
-import { buildIndexNameWithNamespace } from '../../../../common/endpoint/utils/index_name_utilities';
+import { combineIndexWithNamespaces } from '../../../utils/index_name_parser';
 
 export const getLogger = (endpointAppContext: EndpointAppContext): Logger => {
   return endpointAppContext.logFactory.get('suggestions');
@@ -91,14 +91,13 @@ export const getEndpointSuggestionsRequestHandler = (
           .getInternalFleetServices(spaceId)
           .getIntegrationNamespaces(['endpoint']);
 
-        const namespaces = integrationNamespaces.endpoint;
+        const indexPattern = combineIndexWithNamespaces(
+          eventsIndexPattern,
+          integrationNamespaces,
+          'endpoint'
+        );
 
-        if (namespaces && namespaces.length > 0) {
-          const indexPatterns = namespaces.map((namespace) => {
-            return buildIndexNameWithNamespace(eventsIndexPattern, namespace);
-          });
-
-          const indexPattern = indexPatterns.join(',');
+        if (indexPattern) {
           logger.debug(`Index pattern to be used: ${indexPattern}`);
           index = indexPattern;
         } else {
