@@ -12,6 +12,11 @@
     "browser": true,
     "server": true,
     "requiredBundles": ["kibanaUtils"],
-    "optionalPlugins": ["licensing", "taskManager"]
+    "requiredPlugins": [
+      "taskManager"
+    ],
+    "optionalPlugins": [
+      "licensing"
+    ]
   }
 }

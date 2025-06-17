@@ -43,11 +43,11 @@ export interface SharePublicStart {
 }
 
 export interface SharePublicSetupDependencies {
-  taskManager?: TaskManagerSetupContract;
+  taskManager: TaskManagerSetupContract;
 }
 
 export interface SharePublicStartDependencies {
-  taskManager?: TaskManagerStartContract;
+  taskManager: TaskManagerStartContract;
 }
 
 export class SharePlugin
@@ -92,15 +92,14 @@ export class SharePlugin
     registerUrlServiceSavedObjectType(core.savedObjects, this.url);
     registerUrlServiceRoutes(core, core.http.createRouter(), this.url);
 
-    if (this.config.url_expiration.enabled && taskManager) {
-      registerDeleteUnusedUrlsRoute({
-        router: core.http.createRouter(),
-        core,
-        urlExpirationDuration: this.config.url_expiration.duration,
-        urlLimit: this.config.url_expiration.url_limit,
-        logger: this.logger,
-      });
-    }
+    registerDeleteUnusedUrlsRoute({
+      router: core.http.createRouter(),
+      core,
+      urlExpirationDuration: this.config.url_expiration.duration,
+      urlLimit: this.config.url_expiration.url_limit,
+      logger: this.logger,
+      isEnabled: this.config.url_expiration.enabled,
+    });
 
     core.uiSettings.register({
       [CSV_SEPARATOR_SETTING]: {
@@ -125,26 +124,23 @@ export class SharePlugin
       },
     });
 
-    if (this.config.url_expiration.enabled && taskManager) {
-      taskManager.registerTaskDefinitions({
-        [TASK_ID]: {
-          title: 'Unused URLs Cleanup',
-          description: "Deletes unused saved objects of type 'url'",
-          maxAttempts: 5,
-          maxConcurrency: 1,
-          createTaskRunner: () => ({
-            run: async () => {
-              await runDeleteUnusedUrlsTask({
-                core,
-                urlExpirationDuration: this.config.url_expiration.duration,
-                logger: this.logger,
-                urlLimit: this.config.url_expiration.url_limit,
-              });
-            },
-          }),
-        },
-      });
-    }
+    taskManager.registerTaskDefinitions({
+      [TASK_ID]: {
+        title: 'Unused URLs Cleanup',
+        description: "Deletes unused saved objects of type 'url'",
+        maxAttempts: 5,
+        createTaskRunner: () => ({
+          run: async () => {
+            await runDeleteUnusedUrlsTask({
+              core,
+              urlExpirationDuration: this.config.url_expiration.duration,
+              logger: this.logger,
+              urlLimit: this.config.url_expiration.url_limit,
+            });
+          },
+        }),
+      },
+    });
 
     return {
       url: this.url,
@@ -154,12 +150,11 @@ export class SharePlugin
   public start(_core: CoreStart, { taskManager }: SharePublicStartDependencies) {
     this.logger.debug('Starting plugin');
 
-    if (this.config.url_expiration.enabled && taskManager) {
-      void scheduleUnusedUrlsCleanupTask({
-        taskManager,
-        checkInterval: this.config.url_expiration.check_interval,
-      });
-    }
+    void scheduleUnusedUrlsCleanupTask({
+      taskManager,
+      checkInterval: this.config.url_expiration.check_interval,
+      isEnabled: this.config.url_expiration.enabled,
+    });
 
     return {
       url: this.url!,

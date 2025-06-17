@@ -18,12 +18,14 @@ export const registerDeleteUnusedUrlsRoute = ({
   urlExpirationDuration,
   urlLimit,
   logger,
+  isEnabled,
 }: {
   router: IRouter;
   core: CoreSetup;
   urlExpirationDuration: Duration;
   urlLimit: number;
   logger: Logger;
+  isEnabled: boolean;
 }) => {
   router.post(
     {
@@ -40,6 +42,14 @@ export const registerDeleteUnusedUrlsRoute = ({
       validate: {},
     },
     async (_ctx, _req, res) => {
+      if (!isEnabled) {
+        return res.forbidden({
+          body: {
+            message: 'Unused URLs cleanup task is disabled. Enable it in the configuration.',
+          },
+        });
+      }
+
       const { deletedCount } = await runDeleteUnusedUrlsTask({
         core,
         urlExpirationDuration,

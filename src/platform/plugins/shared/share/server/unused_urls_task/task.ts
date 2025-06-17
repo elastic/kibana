@@ -155,11 +155,18 @@ export const runDeleteUnusedUrlsTask = async ({
 export const scheduleUnusedUrlsCleanupTask = async ({
   taskManager,
   checkInterval,
+  isEnabled,
 }: {
   taskManager: TaskManagerStartContract;
   checkInterval: Duration;
+  isEnabled: boolean;
 }) => {
   try {
+    if (!isEnabled) {
+      await taskManager.removeIfExists(TASK_ID);
+      return;
+    }
+
     const taskInstance = getDeleteUnusedUrlTaskInstance(checkInterval);
     await taskManager.ensureScheduled(taskInstance);
   } catch (e) {

@@ -23,6 +23,7 @@ export const registerUrlServiceRoutes = ({
   urlExpirationDuration: Duration;
   urlLimit: number;
   logger: Logger;
+  isEnabled: boolean;
 }) => {
   registerDeleteUnusedUrlsRoute({
     router,
@@ -30,5 +31,6 @@ export const registerUrlServiceRoutes = ({
     urlExpirationDuration,
     urlLimit,
     logger,
+    isEnabled,
   });
 };

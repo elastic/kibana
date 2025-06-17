@@ -425,6 +425,7 @@ describe('unused_urls_task', () => {
       await scheduleUnusedUrlsCleanupTask({
         taskManager: mockTaskManager,
         checkInterval,
+        isEnabled: true,
       });
 
       expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(expectedTaskInstance);
@@ -438,6 +439,7 @@ describe('unused_urls_task', () => {
         scheduleUnusedUrlsCleanupTask({
           taskManager: mockTaskManager,
           checkInterval,
+          isEnabled: true,
         })
       ).rejects.toThrow(errorMessage);
     });
@@ -449,8 +451,22 @@ describe('unused_urls_task', () => {
         scheduleUnusedUrlsCleanupTask({
           taskManager: mockTaskManager,
           checkInterval,
+          isEnabled: true,
         })
       ).rejects.toThrow('Failed to schedule unused URLs cleanup task');
+    });
+
+    it('should remove the task if isEnabled is false and not run it', async () => {
+      mockTaskManager.ensureScheduled.mockClear();
+
+      await scheduleUnusedUrlsCleanupTask({
+        taskManager: mockTaskManager,
+        checkInterval,
+        isEnabled: false,
+      });
+
+      expect(mockTaskManager.ensureScheduled).not.toHaveBeenCalled();
+      expect(mockTaskManager.removeIfExists).toHaveBeenCalledWith(TASK_ID);
     });
   });
 });

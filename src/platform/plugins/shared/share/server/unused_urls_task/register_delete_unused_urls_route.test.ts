@@ -27,6 +27,10 @@ describe('registerDeleteUnusedUrlsRoute', () => {
   const mockLogger = loggingSystemMock.create().get();
   const mockResponseFactory = httpResourcesMock.createResponseFactory();
 
+  beforeEach(() => {
+    mockRouter.post.mockReset();
+  });
+
   it('registers the POST route with correct path and options', () => {
     registerDeleteUnusedUrlsRoute({
       router: mockRouter,
@@ -34,6 +38,7 @@ describe('registerDeleteUnusedUrlsRoute', () => {
       urlExpirationDuration: mockUrlExpirationDuration,
       urlLimit: mockUrlLimit,
       logger: mockLogger,
+      isEnabled: true,
     });
 
     expect(mockRouter.post).toHaveBeenCalledTimes(1);
@@ -62,6 +67,7 @@ describe('registerDeleteUnusedUrlsRoute', () => {
       urlExpirationDuration: mockUrlExpirationDuration,
       urlLimit: mockUrlLimit,
       logger: mockLogger,
+      isEnabled: true,
     });
 
     const routeHandler = mockRouter.post.mock.calls[0][1];
@@ -83,6 +89,30 @@ describe('registerDeleteUnusedUrlsRoute', () => {
       body: {
         message: 'Unused URLs cleanup task has finished.',
         deletedCount: 5,
+      },
+    });
+  });
+
+  it('returns forbidden response if task is disabled', async () => {
+    registerDeleteUnusedUrlsRoute({
+      router: mockRouter,
+      core: mockCoreSetup,
+      urlExpirationDuration: mockUrlExpirationDuration,
+      urlLimit: mockUrlLimit,
+      logger: mockLogger,
+      isEnabled: false,
+    });
+
+    const routeHandler = mockRouter.post.mock.calls[0][1];
+    const mockRequest = {} as KibanaRequest;
+    const mockContext = {} as any;
+
+    await routeHandler(mockContext, mockRequest, mockResponseFactory);
+
+    expect(mockResponseFactory.forbidden).toHaveBeenCalledTimes(1);
+    expect(mockResponseFactory.forbidden).toHaveBeenCalledWith({
+      body: {
+        message: 'Unused URLs cleanup task is disabled. Enable it in the configuration.',
       },
     });
   });
