@@ -11,7 +11,6 @@ import { ContentManagementServerSetup } from '@kbn/content-management-plugin/ser
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
 
-import { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import {
   initializeDashboardTelemetryTask,
   scheduleDashboardTelemetry,
