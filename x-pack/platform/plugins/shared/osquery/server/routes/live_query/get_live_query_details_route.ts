@@ -19,7 +19,6 @@ import { buildRouteValidation } from '../../utils/build_validation/route_validat
 import { API_VERSIONS } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 import { getActionResponses } from './utils';
-import { fetchOsqueryPackagePolicyIds } from '../utils';
 
 import type {
   ActionDetailsRequestOptions,
@@ -31,7 +30,6 @@ import {
   getLiveQueryDetailsRequestQuerySchema,
 } from '../../../common/api';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 
 export const getLiveQueryDetailsRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -67,16 +65,6 @@ export const getLiveQueryDetailsRoute = (
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
         try {
-          const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
-            osqueryContext,
-            request
-          );
-
-          const osqueryPackagePolicyIdsWithinCurrentSpace = await fetchOsqueryPackagePolicyIds(
-            spaceScopedClient,
-            osqueryContext
-          );
-
           const spaceId = osqueryContext?.service?.getActiveSpace
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
             : DEFAULT_SPACE_ID;
@@ -87,7 +75,6 @@ export const getLiveQueryDetailsRoute = (
               {
                 actionId: request.params.id,
                 factoryQueryType: OsqueryQueries.actionDetails,
-                policyIds: osqueryPackagePolicyIdsWithinCurrentSpace,
                 spaceId,
               },
               { abortSignal, strategy: 'osquerySearchStrategy' }

@@ -9,7 +9,6 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { ISearchRequestParams } from '@kbn/search-types';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
-import { getPolicyIdsSubsetScriptFilter } from '../utils';
 
 import { getQueryFilter } from '../../../../../utils/build_query';
 import { ACTIONS_INDEX } from '../../../../../../common/constants';
@@ -21,7 +20,6 @@ export const buildActionsQuery = ({
   sort,
   pagination: { cursorStart, querySize },
   componentTemplateExists,
-  policyIds,
   spaceId,
 }: ActionsRequestOptions): ISearchRequestParams => {
   const {
@@ -30,39 +28,22 @@ export const buildActionsQuery = ({
 
   let extendedFilter = filter;
 
-  if (policyIds.length > 0) {
-    if (spaceId === 'default') {
-      // For default space, include docs where all policy_ids are in policyIds OR where policy_ids does not exist
-      extendedFilter = [
-        {
-          bool: {
-            should: [
-              getPolicyIdsSubsetScriptFilter(policyIds),
-              { bool: { must_not: { exists: { field: 'policy_ids' } } } },
-            ],
-          },
-        },
-        ...filter,
-      ];
-    } else {
-      // For other spaces, only include docs where all policy_ids are in policyIds
-      extendedFilter = [...filter, getPolicyIdsSubsetScriptFilter(policyIds)];
-    }
-  } else {
-    // When no osquery package policies exist in the current space,
-    // return no results to prevent cross-space data leakage.
-    // This is a railsafe check as user dont have access to actions
-    // if there are no osquery package policies in the current space
+  if (spaceId === 'default') {
+    // For default space, include docs where space_id matches 'default' OR where space_id field does not exist
     extendedFilter = [
-      ...filter,
       {
         bool: {
-          must_not: {
-            match_all: {},
-          },
+          should: [
+            { term: { space_id: 'default' } },
+            { bool: { must_not: { exists: { field: 'space_id' } } } },
+          ],
         },
       },
+      ...filter,
     ];
+  } else {
+    // For other spaces, only include docs where space_id matches the current spaceId
+    extendedFilter = [...filter, { term: { space_id: spaceId } }];
   }
 
   return {

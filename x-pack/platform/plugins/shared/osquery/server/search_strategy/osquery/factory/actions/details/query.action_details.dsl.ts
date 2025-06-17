@@ -12,13 +12,10 @@ import { getQueryFilter } from '../../../../../utils/build_query';
 import { ACTIONS_INDEX } from '../../../../../../common/constants';
 import type { ActionDetailsRequestOptions } from '../../../../../../common/search_strategy';
 
-import { getPolicyIdsSubsetScriptFilter } from '../utils';
-
 export const buildActionDetailsQuery = ({
   actionId,
   kuery,
   componentTemplateExists,
-  policyIds,
   spaceId,
 }: ActionDetailsRequestOptions): ISearchRequestParams => {
   const actionIdQuery = `action_id: ${actionId}`;
@@ -33,37 +30,22 @@ export const buildActionDetailsQuery = ({
 
   let extendedFilter = baseFilter;
 
-  if (policyIds.length > 0) {
-    if (spaceId === 'default') {
-      extendedFilter = [
-        {
-          bool: {
-            should: [
-              getPolicyIdsSubsetScriptFilter(policyIds),
-              { bool: { must_not: { exists: { field: 'policy_ids' } } } },
-            ],
-          },
-        },
-        ...baseFilter,
-      ];
-    } else {
-      extendedFilter = [...baseFilter, getPolicyIdsSubsetScriptFilter(policyIds)];
-    }
-  } else {
-    // When no osquery package policies exist in the current space,
-    // return no results to prevent cross-space data leakage.
-    // This is a railsafe check as user dont have access to actions
-    // if there are no osquery package policies in the current space
+  if (spaceId === 'default') {
+    // For default space, include docs where space_id matches 'default' OR where space_id field does not exist
     extendedFilter = [
-      ...baseFilter,
       {
         bool: {
-          must_not: {
-            match_all: {},
-          },
+          should: [
+            { term: { space_id: 'default' } },
+            { bool: { must_not: { exists: { field: 'space_id' } } } },
+          ],
         },
       },
+      ...baseFilter,
     ];
+  } else {
+    // For other spaces, only include docs where space_id matches the current spaceId
+    extendedFilter = [...baseFilter, { term: { space_id: spaceId } }];
   }
 
   const dslQuery = {

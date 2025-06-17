@@ -23,7 +23,7 @@ export const actionsMapping: MappingTypeMapping = {
       type: 'keyword',
       ignore_above: 1024,
     },
-    policy_ids: {
+    space_id: {
       type: 'keyword',
     },
     data: {

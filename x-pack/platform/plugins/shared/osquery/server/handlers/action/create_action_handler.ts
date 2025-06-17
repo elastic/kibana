@@ -10,7 +10,6 @@ import moment from 'moment';
 import { filter, isEmpty, isNumber, map, omit, pick, pickBy, some } from 'lodash';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
-import { extractAgentsPackagePolicyIds } from '../../lib/extract_agents_package_policy_ids';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
 import { createDynamicQueries, replacedQueries } from './create_queries';
 import { parseAgentSelection } from '../../lib/parse_agent_groups';
@@ -72,13 +71,6 @@ export const createActionHandler = async (
     throw new CustomHttpRequestError('No agents found for selection', 400);
   }
 
-  const osqueryPackagePoliciesIds = await extractAgentsPackagePolicyIds(
-    osqueryContext,
-    spaceScopedInternalSavedObjectsClient,
-    selectedAgents,
-    options.space?.id
-  );
-
   let packSO;
 
   if (params.pack_id) {
@@ -109,7 +101,7 @@ export const createActionHandler = async (
     pack_prebuilt: params.pack_id
       ? some(packSO?.references, ['type', 'osquery-pack-asset'])
       : undefined,
-    ...(osqueryPackagePoliciesIds.length ? { policy_ids: osqueryPackagePoliciesIds } : {}),
+    space_id: options.space?.id ?? DEFAULT_SPACE_ID,
     queries: packSO
       ? map(convertSOQueriesToPack(packSO.attributes.queries), (packQuery, packQueryId) => {
           const replacedQuery = replacedQueries(packQuery.query, alertData);
