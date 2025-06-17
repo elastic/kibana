@@ -64,8 +64,7 @@ describe('detectRegexEntities', () => {
     expect(entities[0].entity).toBe('TEST@Example.Com');
     expect(entities[0].class_name).toBe('EMAIL');
 
-    // Confirm normalization by comparing hash to expected
-    const expectedHash = getEntityHash('test@example.com', 'EMAIL', true);
+    const expectedHash = getEntityHash('TEST@Example.Com', 'EMAIL');
     expect(entities[0].hash).toBe(expectedHash);
   });
 
