@@ -45,6 +45,18 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                 link: 'discover',
               },
               {
+                title: 'Chat',
+                renderAs: 'accordion',
+                children: [
+                  {
+                    link: 'onechat:chat',
+                  },
+                  {
+                    link: 'onechat:tools',
+                  },
+                ],
+              },
+              {
                 link: 'dashboards',
                 getIsActive: ({ pathNameSerialized, prepend }) => {
                   return pathNameSerialized.startsWith(prepend('/app/dashboards'));

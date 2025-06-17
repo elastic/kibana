@@ -30,7 +30,8 @@
       "serverless",
       "searchHomepage",
       "share",
-      "visualizations"
+      "visualizations",
+      "onechat",
     ],
     "optionalPlugins": [
       "indexManagement",

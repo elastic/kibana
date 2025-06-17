@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import {
+  DEFAULT_APP_CATEGORIES,
+  type CoreSetup,
+  type CoreStart,
+  type Plugin,
+  type PluginInitializerContext,
+  AppMountParameters,
+} from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import type {
   ConfigSchema,
@@ -21,6 +28,7 @@ import {
   ToolsService,
   OnechatInternalService,
 } from './services';
+import { ONECHAT_APP_ID, ONECHAT_PATH, ONECHAT_TITLE } from '../common/features';
 
 export class OnechatPlugin
   implements
@@ -32,7 +40,6 @@ export class OnechatPlugin
     >
 {
   logger: Logger;
-  // @ts-expect-error unused for now
   private internalServices?: OnechatInternalService;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
@@ -42,6 +49,34 @@ export class OnechatPlugin
     coreSetup: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
     pluginsSetup: OnechatSetupDependencies
   ): OnechatPluginSetup {
+    const getServices = () => {
+      if (!this.internalServices) {
+        throw new Error('getServices called before plugin start');
+      }
+      return this.internalServices;
+    };
+
+    coreSetup.application.register({
+      id: ONECHAT_APP_ID,
+      appRoute: ONECHAT_PATH,
+      category: DEFAULT_APP_CATEGORIES.chat,
+      title: ONECHAT_TITLE,
+      euiIconType: 'logoElasticsearch',
+      visibleIn: ['sideNav', 'globalSearch'],
+      deepLinks: [
+        { id: 'chat', path: '/chat', title: 'Conversations' },
+        { id: 'tools', path: '/tools', title: 'Tools' },
+      ],
+      async mount({ element, history }: AppMountParameters) {
+        const { mountApp } = await import('./application');
+        const [coreStart, startPluginDeps] = await coreSetup.getStartServices();
+
+        coreStart.chrome.docTitle.change(ONECHAT_TITLE);
+        const services = getServices();
+
+        return mountApp({ core: coreStart, services, element, history, plugins: startPluginDeps });
+      },
+    });
     return {};
   }
 

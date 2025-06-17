@@ -1,0 +1,15 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { useBreadcrumb } from '../hooks/use_breadcrumbs';
+import { OnechatTools } from '../components/tools/tools';
+
+export const OnechatStackToolsPage = () => {
+  useBreadcrumb([{ text: 'Analyze' }, { text: 'Chat' }, { text: 'Tools' }]);
+  return <OnechatTools />;
+};
