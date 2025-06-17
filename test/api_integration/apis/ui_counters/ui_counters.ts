@@ -15,8 +15,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 const APP_NAME = 'myApp';
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -94,7 +92,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       await sendReport(report);
       // Wait for the report to be query-able in ES since sending report uses (refresh = false)
-      await delay(3000);
       await retry.tryWithRetries(
         'reported events to be stored into ES',
         async () => {
@@ -106,7 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(countTypeEvents[0].attributes.count).to.eql(1);
           return true;
         },
-        { retryCount: 6, retryDelay: 1500 }
+        { retryCount: 6, retryDelay: 1500, initialDelay: 3000 }
       );
     });
 
@@ -124,7 +121,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       await sendReport(report);
       // Wait for the report to be query-able in ES since sending report uses (refresh = false)
-      await delay(3000);
       await retry.tryWithRetries(
         'reported events to be stored into ES',
         async () => {
@@ -154,7 +150,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(secondEventWithCountTypeEvents[0].attributes.count).to.eql(1);
           return true;
         },
-        { retryCount: 6, retryDelay: 1500 }
+        { retryCount: 6, retryDelay: 1500, initialDelay: 3000 }
       );
     });
   });
