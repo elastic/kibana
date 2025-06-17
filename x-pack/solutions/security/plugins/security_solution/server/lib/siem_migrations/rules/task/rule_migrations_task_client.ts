@@ -140,7 +140,7 @@ export class RuleMigrationsTaskClient {
     }
     const dataStats = await this.data.rules.getStats(migrationId);
     const taskStats = this.getTaskStats(migration, dataStats.rules);
-    return { ...taskStats, ...dataStats };
+    return { ...taskStats, ...dataStats, name: migration.name };
   }
 
   /** Returns the stats of all migrations */

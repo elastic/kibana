@@ -39,7 +39,7 @@ export type AddRuleMigrationRulesInput = Omit<
   RuleMigrationRule,
   '@timestamp' | 'id' | 'status' | 'created_by'
 >;
-export type RuleMigrationDataStats = Omit<RuleMigrationTaskStats, 'status'>;
+export type RuleMigrationDataStats = Omit<RuleMigrationTaskStats, 'name' | 'status'>;
 export type RuleMigrationAllDataStats = RuleMigrationDataStats[];
 
 export interface RuleMigrationGetRulesOptions {
@@ -450,9 +450,6 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
       filter.push(searchConditions.isUntranslatable());
     } else if (filters.untranslatable === false) {
       filter.push(searchConditions.isNotUntranslatable());
-    }
-    if (filters.name) {
-      filter.push({ term: { name: filters.name } });
     }
     return { bool: { filter } };
   }
