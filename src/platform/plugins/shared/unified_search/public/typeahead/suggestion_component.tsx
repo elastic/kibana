@@ -10,8 +10,8 @@
 import { EuiIcon, UseEuiTheme, euiFontSize } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { useCallback } from 'react';
-import { EmotionStyles, useMemoCss } from '../use_memo_css';
 import { css } from '@emotion/react';
+import { EmotionStyles, useMemoCss } from '../use_memo_css';
 import { QuerySuggestion } from '../autocomplete';
 import { SuggestionOnClick, SuggestionOnMouseEnter } from './types';
 
