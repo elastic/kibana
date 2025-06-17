@@ -61,7 +61,7 @@ export function initAPIAuthorization(
 
     const security = request.route.options.security!;
 
-    if (true || isAuthzDisabled(security.authz)) {
+    if (isAuthzDisabled(security.authz)) {
       return toolkit.next();
     }
 
