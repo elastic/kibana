@@ -43,9 +43,7 @@ export class ServerlessObservabilityPlugin
     const { serverless, management, security } = setupDeps;
     const navigationTree$ = (setupDeps.streams?.status$ || of({ status: 'disabled' })).pipe(
       map(({ status }) => {
-        return createNavigationTree({
-          streamsAvailable: status === 'enabled',
-        });
+        return createNavigationTree({ streamsAvailable: status === 'enabled' });
       })
     );
     serverless.setProjectHome('/app/observability/landing');
