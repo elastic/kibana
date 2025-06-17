@@ -4,12 +4,14 @@ agents:
   imageProject: elastic-images-prod
   machineType: n2-standard-2
 steps:
-  - group: 'Renovate PR opened'
-    if: "build.env('GITHUB_PR_USER') == 'elastic-renovate-prod[bot]' && build.env('GITHUB_PR_EVENT_TYPE') == 'pull_request' && build.env('GITHUB_PR_EVENT_ACTION') == 'opened'"
+  - group: 'Renovate PR opened or comment'
+    if: >-
+      "(build.env('GITHUB_PR_USER') == 'elastic-renovate-prod[bot]' && build.env('GITHUB_PR_EVENT_TYPE') == 'pull_request' && build.env('GITHUB_PR_EVENT_ACTION') == 'opened') ||
+       (build.env('GITHUB_PR_EVENT_TYPE') == 'issue_comment' && build.env('GITHUB_PR_EVENT_ACTION') == 'created')"
 
     steps:
       - command: .buildkite/scripts/steps/renovate/renovate_helper.sh
-        label: 'Run Renovate helper on PR opened'
+        label: 'Run Renovate helper on PR opened or comment'
         key: renovate_helper
         timeout_in_minutes: 20
         retry:
@@ -20,7 +22,7 @@ steps:
       - wait: ~
 
       - command: .buildkite/scripts/steps/renovate/trigger_pr.sh
-        label: 'Trigger Kibana PR pipeline on PR opened'
+        label: 'Trigger Kibana PR pipeline on PR opened or comment'
         key: trigger_pr_opened
         timeout_in_minutes: 10
         retry:
