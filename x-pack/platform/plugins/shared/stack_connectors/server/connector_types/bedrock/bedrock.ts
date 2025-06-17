@@ -86,9 +86,7 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
       this.logger,
       this.url
     );
-    const isHttps = (
-      this.configurationUtilities.getProxySettings()?.proxyUrl ?? this.url
-    ).startsWith('https');
+    const isHttps = this.url.startsWith('https');
     this.bedrockClient = new BedrockRuntimeClient({
       region: extractRegionId(this.config.apiUrl),
       credentials: {
