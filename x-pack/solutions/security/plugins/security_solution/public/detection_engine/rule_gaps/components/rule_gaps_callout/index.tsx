@@ -20,7 +20,7 @@ export const RuleGapsCallout = () => {
   const [isDismissed, setIsDismissed] = useState(false);
 
   const { data } = useGetRuleIdsWithGaps({
-    gapRange: GapRangeValue.LAST_7_D,
+    gapRange: GapRangeValue.LAST_1_D,
     statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
     hasUnfilledIntervals: true,
   });
