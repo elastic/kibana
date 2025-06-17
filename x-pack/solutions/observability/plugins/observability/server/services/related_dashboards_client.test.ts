@@ -17,6 +17,11 @@ describe('RelatedDashboardsClient', () => {
   let alertsClient: jest.Mocked<InvestigateAlertsClient>;
   let alertId: string;
   let client: RelatedDashboardsClient;
+  const baseMockAlert = {
+    getAllRelevantFields: jest.fn().mockReturnValue(['field1', 'field2']),
+    getRuleQueryIndex: jest.fn().mockReturnValue('index1'),
+    getRuleId: jest.fn().mockReturnValue('rule-id'),
+  } as unknown as AlertData;
 
   beforeEach(() => {
     logger = {
@@ -39,10 +44,16 @@ describe('RelatedDashboardsClient', () => {
           pagination: { total: 2 },
         },
       }),
+      get: jest.fn(),
     } as unknown as jest.Mocked<IContentClient<any>>;
 
     alertsClient = {
       getAlertById: jest.fn(),
+      getRuleById: jest.fn().mockResolvedValue({
+        artifacts: {
+          dashboards: [],
+        },
+      }),
     } as unknown as jest.Mocked<InvestigateAlertsClient>;
 
     alertId = 'test-alert-id';
@@ -55,18 +66,13 @@ describe('RelatedDashboardsClient', () => {
       // @ts-ignore next-line
       alertsClient.getAlertById.mockResolvedValue(null);
 
-      await expect(client.fetchSuggestedDashboards()).rejects.toThrow(
+      await expect(client.fetchRelatedDashboards()).rejects.toThrow(
         `Alert with id ${alertId} not found. Could not fetch related dashboards.`
       );
     });
 
     it('should fetch dashboards and return suggested dashboards', async () => {
-      const mockAlert = {
-        getAllRelevantFields: jest.fn().mockReturnValue(['field1', 'field2']),
-        getRuleQueryIndex: jest.fn().mockReturnValue('index1'),
-      } as unknown as AlertData;
-
-      alertsClient.getAlertById.mockResolvedValue(mockAlert);
+      alertsClient.getAlertById.mockResolvedValue(baseMockAlert);
       dashboardClient.search.mockResolvedValue({
         contentTypeId: 'dashboard',
         result: {
@@ -75,7 +81,7 @@ describe('RelatedDashboardsClient', () => {
         },
       });
 
-      const result = await client.fetchSuggestedDashboards();
+      const result = await client.fetchRelatedDashboards();
 
       expect(result.suggestedDashboards).toEqual([]);
       expect(alertsClient.getAlertById).toHaveBeenCalledWith(alertId);
@@ -83,11 +89,15 @@ describe('RelatedDashboardsClient', () => {
 
     it('should sort dashboards by score', async () => {
       const mockAlert = {
+        ...baseMockAlert,
         getAllRelevantFields: jest.fn().mockReturnValue(['field1']),
         getRuleQueryIndex: jest.fn().mockReturnValue('index1'),
       } as unknown as AlertData;
 
       alertsClient.getAlertById.mockResolvedValue(mockAlert);
+
+      // @ts-ignore next-line
+      client.setAlert(mockAlert);
 
       dashboardClient.search.mockResolvedValue({
         contentTypeId: 'dashboard',
@@ -150,7 +160,7 @@ describe('RelatedDashboardsClient', () => {
         },
       });
 
-      const result = await client.fetchSuggestedDashboards();
+      const result = await client.fetchRelatedDashboards();
 
       expect(result.suggestedDashboards).toEqual([
         {
@@ -239,6 +249,7 @@ describe('RelatedDashboardsClient', () => {
 
     it('should return only the top 10 results', async () => {
       const mockAlert = {
+        ...baseMockAlert,
         getAllRelevantFields: jest.fn().mockReturnValue(['field1']),
         getRuleQueryIndex: jest.fn().mockReturnValue('index1'),
       } as unknown as AlertData;
@@ -276,18 +287,22 @@ describe('RelatedDashboardsClient', () => {
         },
       });
 
-      const result = await client.fetchSuggestedDashboards();
+      const { suggestedDashboards } = await client.fetchRelatedDashboards();
 
-      expect(result.suggestedDashboards).toHaveLength(10);
+      expect(suggestedDashboards).toHaveLength(10);
     });
 
     it('should deduplicate dashboards found by field and index', async () => {
       const mockAlert = {
+        ...baseMockAlert,
         getAllRelevantFields: jest.fn().mockReturnValue(['field1']),
         getRuleQueryIndex: jest.fn().mockReturnValue('index1'),
       } as unknown as AlertData;
 
       alertsClient.getAlertById.mockResolvedValue(mockAlert);
+
+      // @ts-ignore next-line
+      client.setAlert(mockAlert);
 
       dashboardClient.search.mockResolvedValue({
         contentTypeId: 'dashboard',
@@ -320,12 +335,12 @@ describe('RelatedDashboardsClient', () => {
         },
       });
 
-      const result = await client.fetchSuggestedDashboards();
+      const { suggestedDashboards } = await client.fetchRelatedDashboards();
 
-      expect(result.suggestedDashboards).toHaveLength(1);
+      expect(suggestedDashboards).toHaveLength(1);
       // should return only one dashboard even though it was found by both internal methods
       // should mark the relevant panel as matching by index and field
-      expect(result.suggestedDashboards).toEqual([
+      expect(suggestedDashboards).toEqual([
         {
           id: 'dashboard1',
           matchedBy: { fields: ['field1'], index: ['index1'] },
@@ -370,6 +385,7 @@ describe('RelatedDashboardsClient', () => {
         },
       });
 
+      // @ts-ignore next-line
       await client.fetchDashboards({ page: 1, perPage: 2 });
 
       expect(dashboardClient.search).toHaveBeenCalledWith(
@@ -402,9 +418,11 @@ describe('RelatedDashboardsClient', () => {
         },
       } as any);
 
+      // @ts-ignore next-line
       const resultWithoutMatch = client.getDashboardsByIndex('index1');
       expect(resultWithoutMatch.dashboards).toEqual([]);
 
+      // @ts-ignore next-line
       const resultWithMatch = client.getDashboardsByIndex('index2');
       expect(resultWithMatch.dashboards).toHaveLength(1);
       expect(resultWithMatch.dashboards[0].id).toBe('dashboard1');
@@ -421,6 +439,7 @@ describe('RelatedDashboardsClient', () => {
         { panel: { panelIndex: '1' }, matchedBy: { fields: ['field1'] } },
       ];
 
+      // @ts-ignore next-line
       const result = client.dedupePanels(panels as any);
 
       expect(result).toHaveLength(1);
@@ -431,16 +450,19 @@ describe('RelatedDashboardsClient', () => {
   describe('getScore', () => {
     it('should calculate the relevance score for a dashboard', () => {
       const mockAlert = {
+        ...baseMockAlert,
         getAllRelevantFields: jest.fn().mockReturnValue(['field1', 'field2']),
         getRuleQueryIndex: jest.fn().mockReturnValue('index1'),
       } as unknown as AlertData;
 
+      // @ts-ignore next-line
       client.setAlert(mockAlert);
 
       const dashboard = {
         matchedBy: { fields: ['field1'], index: ['index1'] },
       } as any;
 
+      // @ts-ignore next-line
       const score = client.getScore(dashboard);
 
       expect(score).toBeCloseTo(2 / 3);
@@ -449,9 +471,245 @@ describe('RelatedDashboardsClient', () => {
         matchedBy: { fields: ['field1', 'field2'], index: ['index1'] },
       } as any;
 
+      // @ts-ignore next-line
       const score2 = client.getScore(dashboard2);
 
       expect(score2).toBe(1);
+    });
+  });
+
+  describe('Linked Dashboards', () => {
+    describe('getLinkedDashboards', () => {
+      it('should throw an error if no alert is set', async () => {
+        // @ts-ignore next-line
+        client.setAlert(null);
+
+        // @ts-ignore next-line
+        await expect(client.getLinkedDashboards()).rejects.toThrow(
+          `Alert with id ${alertId} not found. Could not fetch related dashboards.`
+        );
+      });
+
+      it('should return an empty array if no rule ID is found', async () => {
+        const mockAlert = {
+          ...baseMockAlert,
+          getRuleId: jest.fn().mockReturnValue(null),
+        } as unknown as AlertData;
+
+        // @ts-ignore next-line
+        client.setAlert(mockAlert);
+
+        // @ts-ignore next-line
+        await expect(client.getLinkedDashboards()).rejects.toThrow(
+          `Alert with id ${alertId} does not have a rule ID. Could not fetch linked dashboards.`
+        );
+      });
+
+      it('should return an empty array if no rule is found', async () => {
+        const mockAlert = {
+          getRuleId: jest.fn().mockReturnValue('rule-id'),
+        } as unknown as AlertData;
+
+        // @ts-ignore next-line
+        client.setAlert(mockAlert);
+        alertsClient.getRuleById = jest.fn().mockResolvedValue(null);
+
+        // @ts-ignore next-line
+        await expect(client.getLinkedDashboards()).rejects.toThrow(
+          `Rule with id rule-id not found. Could not fetch linked dashboards for alert with id ${alertId}.`
+        );
+      });
+
+      it('should return linked dashboards based on rule artifacts', async () => {
+        const mockAlert = {
+          getRuleId: jest.fn().mockReturnValue('rule-id'),
+        } as unknown as AlertData;
+
+        // @ts-ignore next-line
+        client.setAlert(mockAlert);
+
+        alertsClient.getRuleById = jest.fn().mockResolvedValue({
+          artifacts: {
+            dashboards: [{ id: 'dashboard1' }, { id: 'dashboard2' }],
+          },
+        });
+
+        dashboardClient.get = jest
+          .fn()
+          .mockResolvedValueOnce({
+            result: { item: { id: 'dashboard1', attributes: { title: 'Dashboard 1' } } },
+          })
+          .mockResolvedValueOnce({
+            result: { item: { id: 'dashboard2', attributes: { title: 'Dashboard 2' } } },
+          });
+
+        // @ts-ignore next-line
+        const result = await client.getLinkedDashboards();
+
+        expect(result).toEqual([
+          { id: 'dashboard1', title: 'Dashboard 1', matchedBy: { linked: true } },
+          { id: 'dashboard2', title: 'Dashboard 2', matchedBy: { linked: true } },
+        ]);
+      });
+    });
+
+    describe('getLinkedDashboardsByIds', () => {
+      it('should return linked dashboards by IDs', async () => {
+        dashboardClient.get = jest
+          .fn()
+          .mockResolvedValueOnce({
+            result: { item: { id: 'dashboard1', attributes: { title: 'Dashboard 1' } } },
+          })
+          .mockResolvedValueOnce({
+            result: { item: { id: 'dashboard2', attributes: { title: 'Dashboard 2' } } },
+          });
+        // @ts-ignore next-line
+        const result = await client.getLinkedDashboardsByIds(['dashboard1', 'dashboard2']);
+
+        expect(result).toEqual([
+          { id: 'dashboard1', title: 'Dashboard 1', matchedBy: { linked: true } },
+          { id: 'dashboard2', title: 'Dashboard 2', matchedBy: { linked: true } },
+        ]);
+        expect(dashboardClient.get).toHaveBeenCalledTimes(2);
+        expect(dashboardClient.get).toHaveBeenCalledWith('dashboard1');
+        expect(dashboardClient.get).toHaveBeenCalledWith('dashboard2');
+      });
+
+      it('should handle empty IDs array gracefully', async () => {
+        dashboardClient.get = jest.fn();
+        // @ts-ignore next-line
+        const result = await client.getLinkedDashboardsByIds([]);
+
+        expect(result).toEqual([]);
+        expect(dashboardClient.get).not.toHaveBeenCalled();
+      });
+
+      it('should handle errors when fetching dashboards', async () => {
+        dashboardClient.get = jest.fn().mockRejectedValue(new Error('Dashboard fetch failed'));
+
+        // @ts-ignore next-line
+        await expect(client.getLinkedDashboardsByIds(['dashboard1'])).rejects.toThrow(
+          'Dashboard fetch failed'
+        );
+      });
+    });
+  });
+
+  describe('deduplicateDashboards', () => {
+    it('should deduplicate suggested and linked dashboards', async () => {
+      const mockAlert = {
+        ...baseMockAlert,
+        getAllRelevantFields: jest.fn().mockReturnValue(['field1']),
+        getRuleQueryIndex: jest.fn().mockReturnValue('index1'),
+      } as unknown as AlertData;
+
+      alertsClient.getAlertById.mockResolvedValue(mockAlert);
+      // @ts-ignore next-line
+      alertsClient.getRuleById.mockResolvedValue({
+        artifacts: {
+          dashboards: [{ id: 'dashboard2' }],
+        },
+      });
+
+      dashboardClient.get = jest.fn().mockResolvedValueOnce({
+        result: { item: { id: 'dashboard2', attributes: { title: 'Dashboard 2' } } },
+      });
+
+      dashboardClient.search.mockResolvedValue({
+        contentTypeId: 'dashboard',
+        result: {
+          hits: [
+            {
+              id: 'dashboard1',
+              attributes: {
+                title: 'Dashboard 1',
+                panels: [
+                  {
+                    type: 'lens',
+                    panelIndex: '123',
+                    panelConfig: {
+                      attributes: {
+                        references: [{ name: 'indexpattern', id: 'index1' }], // matches by index which is handled by getDashboardsByIndex
+                        state: {
+                          datasourceStates: {
+                            formBased: { layers: [{ columns: [{ sourceField: 'field1' }] }] }, // matches by field which is handled by getDashboardsByField
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              id: 'dashboard2',
+              attributes: {
+                title: 'Dashboard 2',
+                panels: [
+                  {
+                    type: 'lens',
+                    panelIndex: '123',
+                    panelConfig: {
+                      attributes: {
+                        references: [{ name: 'indexpattern', id: 'index1' }],
+                        state: {
+                          datasourceStates: {
+                            formBased: { layers: [{ columns: [{ sourceField: 'field2' }] }] },
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+          pagination: { total: 1 },
+        },
+      });
+
+      const { suggestedDashboards, linkedDashboards } = await client.fetchRelatedDashboards();
+      expect(linkedDashboards).toHaveLength(1);
+      expect(linkedDashboards).toEqual([
+        {
+          id: 'dashboard2',
+          title: 'Dashboard 2',
+          matchedBy: { linked: true },
+        },
+      ]);
+
+      expect(suggestedDashboards).toHaveLength(1);
+      // should return only one dashboard even though it was found by both internal methods
+      // should mark the relevant panel as matching by index and field
+      expect(suggestedDashboards).toEqual([
+        {
+          id: 'dashboard1',
+          matchedBy: { fields: ['field1'], index: ['index1'] },
+          relevantPanelCount: 1,
+          relevantPanels: [
+            {
+              matchedBy: { index: ['index1'], fields: ['field1'] },
+              panel: {
+                panelConfig: {
+                  attributes: {
+                    references: [{ id: 'index1', name: 'indexpattern' }],
+                    state: {
+                      datasourceStates: {
+                        formBased: { layers: [{ columns: [{ sourceField: 'field1' }] }] },
+                      },
+                    },
+                  },
+                },
+                panelIndex: '123',
+                title: undefined,
+                type: 'lens',
+              },
+            },
+          ],
+          score: 0.5,
+          title: 'Dashboard 1',
+        },
+      ]);
     });
   });
 });

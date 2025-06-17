@@ -6045,6 +6045,14 @@
                 "path": "x-pack/platform/plugins/shared/inference/server/routes/chat_complete.ts"
               },
               {
+                "plugin": "inference",
+                "path": "x-pack/platform/plugins/shared/inference/server/routes/prompt.ts"
+              },
+              {
+                "plugin": "inference",
+                "path": "x-pack/platform/plugins/shared/inference/server/routes/prompt.ts"
+              },
+              {
                 "plugin": "@kbn/content-management-content-insights-server",
                 "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts"
               },
@@ -14160,6 +14168,10 @@
                 "path": "x-pack/platform/plugins/shared/maps/server/routes.ts"
               },
               {
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/mcp.ts"
+              },
+              {
                 "plugin": "lists",
                 "path": "x-pack/solutions/security/plugins/lists/server/routes/find_endpoint_list_item_route.ts"
               },
@@ -15802,6 +15814,10 @@
                 "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
               },
               {
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/mcp.ts"
+              },
+              {
                 "plugin": "lists",
                 "path": "x-pack/solutions/security/plugins/lists/server/routes/create_endpoint_list_item_route.ts"
               },
@@ -16630,6 +16646,10 @@
               {
                 "plugin": "maps",
                 "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
+              },
+              {
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/mcp.ts"
               },
               {
                 "plugin": "lists",
