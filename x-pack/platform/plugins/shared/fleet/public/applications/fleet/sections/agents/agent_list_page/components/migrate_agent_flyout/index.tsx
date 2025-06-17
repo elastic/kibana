@@ -27,6 +27,9 @@ import {
   EuiTextArea,
   EuiSwitch,
   EuiFlexItem,
+  EuiListGroupItem,
+  EuiListGroup,
+  EuiIcon,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -50,9 +53,15 @@ interface Props {
   agents: Agent[];
   onClose: () => void;
   onSave: () => void;
+  protectedAndFleetAgents: Agent[];
 }
 
-export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose, onSave }) => {
+export const AgentMigrateFlyout: React.FC<Props> = ({
+  agents,
+  onClose,
+  onSave,
+  protectedAndFleetAgents,
+}) => {
   const { notifications } = useStartServices();
   const migrateAgent = useMigrateSingleAgent;
   const migrateAgents = useBulkMigrateAgents;
@@ -154,6 +163,48 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose, onSave })
               }}
             />
           </EuiText>
+
+          {protectedAndFleetAgents.length > 0 && (
+            <>
+              <EuiSpacer />
+              <EuiPanel color="warning">
+                <EuiFlexGroup alignItems="center" gutterSize="s">
+                  <EuiFlexItem>
+                    <EuiText>
+                      <FormattedMessage
+                        id="xpack.fleet.agentList.migrateAgentFlyout.warning"
+                        defaultMessage="{icon} {x} of {y} selected Agents cannot be migrated as they are tamper protected or Fleet-Server agents."
+                        values={{
+                          x: protectedAndFleetAgents.length,
+                          y: agents.length,
+                          icon: <EuiIcon type="warning" />,
+                        }}
+                      />
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+
+                <EuiAccordion
+                  id="migrateAgentFlyoutWarningAccordion"
+                  buttonContent={
+                    <EuiButtonEmpty onClick={() => {}}>
+                      <FormattedMessage
+                        id="xpack.fleet.agentList.migrateAgentFlyout.warningAccordion"
+                        defaultMessage="View Agents"
+                      />
+                    </EuiButtonEmpty>
+                  }
+                  initialIsOpen={false}
+                >
+                  <EuiListGroup>
+                    {protectedAndFleetAgents.map((agent) => (
+                      <EuiListGroupItem key={agent.id} label={agent.id} />
+                    ))}
+                  </EuiListGroup>
+                </EuiAccordion>
+              </EuiPanel>
+            </>
+          )}
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <EuiForm>
@@ -565,7 +616,8 @@ export const AgentMigrateFlyout: React.FC<Props> = ({ agents, onClose, onSave })
             >
               <FormattedMessage
                 id="xpack.fleet.agentList.migrateAgentFlyout.submitButtonLabel"
-                defaultMessage="Migrate Agent"
+                defaultMessage="Migrate {plural}"
+                values={{ plural: agents.length === 1 ? 'agent' : 'agents' }}
               />
             </EuiButton>
           </EuiFlexGroup>

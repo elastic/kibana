@@ -9,6 +9,7 @@ import { differenceBy, isEqual } from 'lodash';
 import { EuiSpacer, EuiPortal } from '@elastic/eui';
 
 import { isStuckInUpdating } from '../../../../../../common/services/agent_status';
+import { FLEET_SERVER_PACKAGE } from '../../../../../../common';
 
 import type { Agent } from '../../../types';
 
@@ -87,6 +88,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
   // migrateAgentState
   const [agentsToMigrate, setAgentsToMigrate] = useState<Agent[] | undefined>(undefined);
+  const [protectedAndFleetAgents, setProtectedAndFleetAgents] = useState<Agent[]>([]);
   const [migrateFlyoutOpen, setMigrateFlyoutOpen] = useState(false);
 
   const {
@@ -180,7 +182,16 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   };
 
   const openMigrateFlyout = (agents: Agent[]) => {
-    setAgentsToMigrate(agents);
+    const protectedAgents = agents.filter(
+      (agent) => agentPoliciesIndexedById[agent.policy_id as string]?.is_protected
+    );
+    const fleetAgents = agents.filter((agent) =>
+      agentPoliciesIndexedById[agent.policy_id as string]?.package_policies?.some(
+        (p) => p.package?.name === FLEET_SERVER_PACKAGE
+      )
+    );
+    setProtectedAndFleetAgents([...protectedAgents, ...fleetAgents]);
+    setAgentsToMigrate(agents.filter((agent) => !protectedAndFleetAgents.includes(agent)));
     setMigrateFlyoutOpen(true);
   };
 
@@ -411,6 +422,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         <EuiPortal>
           <AgentMigrateFlyout
             agents={agentsToMigrate ?? []}
+            protectedAndFleetAgents={protectedAndFleetAgents ?? []}
             onClose={() => {
               setAgentsToMigrate(undefined);
               setMigrateFlyoutOpen(false);
