@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { retryForSuccess } from './retry_for_success';
+import retryForSuccessModule from './retry_for_success';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import * as testJestHelpers from '@kbn/test-jest-helpers';
 
 describe('Retry for success', () => {
+  const {retryForSuccess } = retryForSuccessModule;
   it(`should print out attempt counts with the retryCount parameter`, async () => {
     const retryCount = 3;
     const log = new ToolingLog();
@@ -69,7 +70,7 @@ describe('Retry for success', () => {
     `);
   });
   it('should call delay with initialDelay if initialDelay is provided', async () => {
-    const delaySpy = jest.spyOn(testJestHelpers, 'delay').mockResolvedValue(undefined);
+    const delaySpy = jest.spyOn(retryForSuccessModule, 'delay').mockResolvedValue(undefined);
     const log = new ToolingLog();
     const block = async () => 42;
     const initialDelay = 1234;
