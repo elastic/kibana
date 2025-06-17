@@ -44187,7 +44187,7 @@ paths:
         - system
   /api/streams:
     get:
-      description: 'Fetches list of all streams<br/><br/>[Required authorization] Route required privileges: read_stream.'
+      description: '[Required authorization] Route required privileges: read_stream.'
       operationId: get-streams
       parameters: []
       requestBody:
@@ -44203,13 +44203,13 @@ paths:
                   nullable: true
                 - not: {}
       responses: {}
-      summary: Get stream list
+      summary: ''
       tags:
         - streams
       x-state: Technical Preview
   /api/streams/_disable:
     post:
-      description: 'Disables wired streams and deletes all existing stream definitions. The data of wired streams is deleted, but the data of classic streams is preserved.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
+      description: '[Required authorization] Route required privileges: manage_stream.'
       operationId: post-streams-disable
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -44232,13 +44232,13 @@ paths:
                   nullable: true
                 - not: {}
       responses: {}
-      summary: Disable streams
+      summary: ''
       tags:
         - streams
       x-state: Technical Preview
   /api/streams/_enable:
     post:
-      description: 'Enables wired streams<br/><br/>[Required authorization] Route required privileges: manage_stream.'
+      description: '[Required authorization] Route required privileges: manage_stream.'
       operationId: post-streams-enable
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -44261,13 +44261,13 @@ paths:
                   nullable: true
                 - not: {}
       responses: {}
-      summary: Enable streams
+      summary: ''
       tags:
         - streams
       x-state: Technical Preview
   /api/streams/_resync:
     post:
-      description: 'Resyncs all streams, making sure that Elasticsearch assets are up to date<br/><br/>[Required authorization] Route required privileges: manage_stream.'
+      description: '[Required authorization] Route required privileges: manage_stream.'
       operationId: post-streams-resync
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -44290,13 +44290,13 @@ paths:
                   nullable: true
                 - not: {}
       responses: {}
-      summary: Resync streams
+      summary: ''
       tags:
         - streams
       x-state: Technical Preview
   /api/streams/{name}:
     delete:
-      description: 'Deletes a stream definition and the underlying data stream<br/><br/>[Required authorization] Route required privileges: manage_stream.'
+      description: '[Required authorization] Route required privileges: manage_stream.'
       operationId: delete-streams-name
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -44324,12 +44324,12 @@ paths:
                   nullable: true
                 - not: {}
       responses: {}
-      summary: Delete a stream
+      summary: ''
       tags:
         - streams
       x-state: Technical Preview
     get:
-      description: 'Fetches a stream definition and associated dashboards<br/><br/>[Required authorization] Route required privileges: read_stream.'
+      description: '[Required authorization] Route required privileges: read_stream.'
       operationId: get-streams-name
       parameters:
         - in: path
@@ -44350,12 +44350,12 @@ paths:
                   nullable: true
                 - not: {}
       responses: {}
-      summary: Get a stream
+      summary: ''
       tags:
         - streams
       x-state: Technical Preview
     put:
-      description: 'Creates or updates a stream definition. Classic streams can not be created through this API, only updated<br/><br/>[Required authorization] Route required privileges: manage_stream.'
+      description: '[Required authorization] Route required privileges: manage_stream.'
       operationId: put-streams-name
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -49313,13 +49313,13 @@ paths:
                     - type: object
                       properties: {}
       responses: {}
-      summary: Create or update a stream
+      summary: ''
       tags:
         - streams
       x-state: Technical Preview
   /api/streams/{name}/_fork:
     post:
-      description: 'Forks a wired stream and creates a child stream<br/><br/>[Required authorization] Route required privileges: manage_stream.'
+      description: '[Required authorization] Route required privileges: manage_stream.'
       operationId: post-streams-name-fork
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -49431,13 +49431,13 @@ paths:
                 - stream
                 - if
       responses: {}
-      summary: Fork a stream
+      summary: ''
       tags:
         - streams
       x-state: Technical Preview
   /api/streams/{name}/_group:
     get:
-      description: 'Fetches the group settings of a group stream definition<br/><br/>[Required authorization] Route required privileges: read_stream.'
+      description: '[Required authorization] Route required privileges: read_stream.'
       operationId: get-streams-name-group
       parameters:
         - in: path
@@ -49458,12 +49458,12 @@ paths:
                   nullable: true
                 - not: {}
       responses: {}
-      summary: Get group stream settings
+      summary: ''
       tags:
         - streams
       x-state: Technical Preview
     put:
-      description: 'Upserts the group settings of a group stream definition<br/><br/>[Required authorization] Route required privileges: manage_stream.'
+      description: '[Required authorization] Route required privileges: manage_stream.'
       operationId: put-streams-name-group
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -49498,13 +49498,13 @@ paths:
               required:
                 - group
       responses: {}
-      summary: Upsert group stream settings
+      summary: ''
       tags:
         - streams
       x-state: Technical Preview
   /api/streams/{name}/_ingest:
     get:
-      description: 'Fetches the ingest settings of an ingest stream definition<br/><br/>[Required authorization] Route required privileges: read_stream.'
+      description: '[Required authorization] Route required privileges: read_stream.'
       operationId: get-streams-name-ingest
       parameters:
         - in: path
@@ -49525,12 +49525,12 @@ paths:
                   nullable: true
                 - not: {}
       responses: {}
-      summary: Get ingest stream settings
+      summary: ''
       tags:
         - streams
       x-state: Technical Preview
     put:
-      description: 'Upserts the ingest settings of an ingest stream definition<br/><br/>[Required authorization] Route required privileges: manage_stream.'
+      description: '[Required authorization] Route required privileges: manage_stream.'
       operationId: put-streams-name-ingest
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -51886,13 +51886,13 @@ paths:
               required:
                 - ingest
       responses: {}
-      summary: Update ingest stream settings
+      summary: ''
       tags:
         - streams
       x-state: Technical Preview
   /api/streams/{name}/content/export:
     post:
-      description: 'Exports the content associated to a stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
+      description: '[Required authorization] Route required privileges: manage_stream.'
       operationId: post-streams-name-content-export
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -51957,12 +51957,12 @@ paths:
                 - replaced_patterns
                 - include
       responses: {}
-      summary: Export stream content
+      summary: ''
       tags:
         - streams
   /api/streams/{name}/content/import:
     post:
-      description: 'Links content objects to a stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
+      description: '[Required authorization] Route required privileges: manage_stream.'
       operationId: post-streams-name-content-import
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -51991,12 +51991,12 @@ paths:
                 - include
                 - content
       responses: {}
-      summary: Import content into a stream
+      summary: ''
       tags:
         - streams
   /api/streams/{name}/dashboards:
     get:
-      description: 'Fetches all dashboards linked to a stream that are visible to the current user in the current space.<br/><br/>[Required authorization] Route required privileges: read_stream.'
+      description: '[Required authorization] Route required privileges: read_stream.'
       operationId: get-streams-name-dashboards
       parameters:
         - in: path
@@ -52017,13 +52017,13 @@ paths:
                   nullable: true
                 - not: {}
       responses: {}
-      summary: Get stream dashboards
+      summary: ''
       tags:
         - streams
       x-state: Technical Preview
   /api/streams/{name}/dashboards/_bulk:
     post:
-      description: 'Bulk update dashboards linked to a stream. Can link new dashboards and delete existing ones.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
+      description: '[Required authorization] Route required privileges: manage_stream.'
       operationId: post-streams-name-dashboards-bulk
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -52078,13 +52078,13 @@ paths:
               required:
                 - operations
       responses: {}
-      summary: Bulk update dashboards
+      summary: ''
       tags:
         - streams
       x-state: Technical Preview
   /api/streams/{name}/dashboards/{dashboardId}:
     delete:
-      description: 'Unlinks a dashboard from a stream. Noop if the dashboard is not linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
+      description: '[Required authorization] Route required privileges: manage_stream.'
       operationId: delete-streams-name-dashboards-dashboardid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -52117,12 +52117,12 @@ paths:
                   nullable: true
                 - not: {}
       responses: {}
-      summary: Unlink a dashboard from a stream
+      summary: ''
       tags:
         - streams
       x-state: Technical Preview
     put:
-      description: 'Links a dashboard to a stream. Noop if the dashboard is already linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
+      description: '[Required authorization] Route required privileges: manage_stream.'
       operationId: put-streams-name-dashboards-dashboardid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -52155,13 +52155,13 @@ paths:
                   nullable: true
                 - not: {}
       responses: {}
-      summary: Link a dashboard to a stream
+      summary: ''
       tags:
         - streams
       x-state: Technical Preview
   /api/streams/{name}/queries:
     get:
-      description: 'Fetches all queries linked to a stream that are visible to the current user in the current space.<br/><br/>[Required authorization] Route required privileges: read_stream.'
+      description: '[Required authorization] Route required privileges: read_stream.'
       operationId: get-streams-name-queries
       parameters:
         - in: path
@@ -52182,13 +52182,13 @@ paths:
                   nullable: true
                 - not: {}
       responses: {}
-      summary: Get stream queries
+      summary: ''
       tags:
         - streams
       x-state: Technical Preview
   /api/streams/{name}/queries/_bulk:
     post:
-      description: 'Bulk update queries of a stream. Can add new queries and delete existing ones.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
+      description: '[Required authorization] Route required privileges: manage_stream.'
       operationId: post-streams-name-queries-bulk
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -52261,13 +52261,13 @@ paths:
               required:
                 - operations
       responses: {}
-      summary: Bulk update queries
+      summary: ''
       tags:
         - streams
       x-state: Technical Preview
   /api/streams/{name}/queries/{queryId}:
     delete:
-      description: 'Remove a query from a stream. Noop if the query is not found on the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
+      description: '[Required authorization] Route required privileges: manage_stream.'
       operationId: delete-streams-name-queries-queryid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -52300,12 +52300,12 @@ paths:
                   nullable: true
                 - not: {}
       responses: {}
-      summary: Remove a query from a stream
+      summary: ''
       tags:
         - streams
       x-state: Technical Preview
     put:
-      description: 'Adds a query to a stream. Noop if the query is already present on the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
+      description: '[Required authorization] Route required privileges: manage_stream.'
       operationId: put-streams-name-queries-queryid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -52348,13 +52348,13 @@ paths:
                 - title
                 - kql
       responses: {}
-      summary: Upsert a query to a stream
+      summary: ''
       tags:
         - streams
       x-state: Technical Preview
   /api/streams/{name}/significant_events:
     get:
-      description: 'Read the significant events<br/><br/>[Required authorization] Route required privileges: read_stream.'
+      description: '[Required authorization] Route required privileges: read_stream.'
       operationId: get-streams-name-significant-events
       parameters:
         - in: path
@@ -52392,7 +52392,7 @@ paths:
                   nullable: true
                 - not: {}
       responses: {}
-      summary: Read the significant events
+      summary: ''
       tags:
         - streams
       x-state: Technical Preview
