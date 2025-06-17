@@ -26,7 +26,6 @@ export const RunTestButton = ({
   isServiceAllowed?: boolean;
 }) => {
   const { handleSubmit } = useFormContext();
-
   const [inProgress, setInProgress] = useState(false);
   const [testRun, setTestRun] = useState<TestRun>();
   const { space } = useKibanaSpace();
@@ -47,7 +46,6 @@ export const RunTestButton = ({
     loading: isPushing,
     error: serviceError,
   } = useFetcher(() => {
-    // in case of test now mode outside of form add/edit, we don't need to trigger since it's already triggered
     if (testRun?.id) {
       return runOnceMonitor({
         monitor: testRun.monitor,
@@ -57,7 +55,7 @@ export const RunTestButton = ({
     }
   }, [space?.id, spaceId, testRun?.id, testRun?.monitor]);
 
-  const { tooltipContent } = useTooltipContent(inProgress);
+  const tooltipContent = inProgress ? TEST_SCHEDULED_LABEL : TEST_NOW_DESCRIPTION;
 
   return (
     <>
@@ -73,6 +71,7 @@ export const RunTestButton = ({
           {RUN_TEST}
         </EuiButton>
       </EuiToolTip>
+
       {testRun && (
         <TestNowModeFlyout
           serviceError={serviceError}
@@ -94,17 +93,8 @@ export const RunTestButton = ({
   );
 };
 
-const useTooltipContent = (isTestRunInProgress?: boolean) => {
-  const tooltipContent = isTestRunInProgress ? TEST_SCHEDULED_LABEL : TEST_NOW_DESCRIPTION;
-  return { tooltipContent };
-};
-
 const TEST_NOW_DESCRIPTION = i18n.translate('xpack.synthetics.testRun.description', {
   defaultMessage: 'Test your monitor and verify the results before saving',
-});
-
-const INVALID_DESCRIPTION = i18n.translate('xpack.synthetics.testRun.invalid', {
-  defaultMessage: 'Monitor has to be valid to run test, please fix above required fields.',
 });
 
 export const TEST_SCHEDULED_LABEL = i18n.translate(
