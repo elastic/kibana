@@ -73,7 +73,6 @@ export {
   useRuntimeState,
   selectTabRuntimeState,
   useCurrentTabRuntimeState,
-  useReactiveCurrentTabRuntimeState,
   RuntimeStateProvider,
   useCurrentDataView,
   useAdHocDataViews,

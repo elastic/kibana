@@ -10,7 +10,6 @@
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { EuiButtonIconProps, EuiButtonProps } from '@elastic/eui';
 import type { FieldTypeKnown, FieldBase } from '@kbn/field-utils/types';
-import { BehaviorSubject } from 'rxjs';
 
 export interface BucketedAggregation<KeyType = string> {
   buckets: Array<{
@@ -208,19 +207,3 @@ export interface UnifiedFieldListSidebarContainerCreationOptions {
 export interface UnifiedFieldListSidebarContainerStateService {
   creationOptions: UnifiedFieldListSidebarContainerCreationOptions;
 }
-
-/**
- * Used to pass initial props to the Unified Field List Container or to force re-rendering of the component
- */
-export interface UnifiedFieldListContainerInitialProps {
-  selectedFieldTypes?: FieldTypeKnown[];
-  nameFilter?: string;
-}
-
-export type UnifiedFieldListContainerInitialProps$ = BehaviorSubject<
-  UnifiedFieldListContainerInitialProps | undefined
->;
-
-export type OnUnifiedFieldListContainerInitialPropsChanged = (
-  props: Partial<UnifiedFieldListContainerInitialProps>
-) => void;

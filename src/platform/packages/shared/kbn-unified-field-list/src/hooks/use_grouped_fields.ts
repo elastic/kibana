@@ -22,8 +22,6 @@ import {
   FieldsGroupNames,
   ExistenceFetchStatus,
   AdditionalFieldGroups,
-  type UnifiedFieldListContainerInitialProps$,
-  type OnUnifiedFieldListContainerInitialPropsChanged,
 } from '../types';
 import { useExistingFieldsReader } from './use_existing_fields';
 import {
@@ -48,8 +46,6 @@ export interface GroupedFieldsParams<T extends FieldListItem> {
   onSelectedFieldFilter?: (field: T) => boolean;
   getNewFieldsBySpec?: UseNewFieldsParams<T>['getNewFieldsBySpec'];
   additionalFieldGroups?: AdditionalFieldGroups<T>;
-  unifiedFieldListContainerInitialProps$?: UnifiedFieldListContainerInitialProps$;
-  onUnifiedFieldListContainerInitialPropsChanged?: OnUnifiedFieldListContainerInitialPropsChanged;
 }
 
 export interface GroupedFieldsResult<T extends FieldListItem> {
@@ -78,8 +74,6 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
   onSelectedFieldFilter,
   getNewFieldsBySpec,
   additionalFieldGroups,
-  unifiedFieldListContainerInitialProps$,
-  onUnifiedFieldListContainerInitialPropsChanged,
 }: GroupedFieldsParams<T>): GroupedFieldsResult<T> {
   const fieldsExistenceReader = useExistingFieldsReader();
   const fieldListFilters = useFieldFilters<T>({
@@ -87,8 +81,6 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     services,
     getCustomFieldType,
     onSupportedFieldFilter,
-    unifiedFieldListContainerInitialProps$,
-    onUnifiedFieldListContainerInitialPropsChanged,
   });
 
   const onFilterFieldList = fieldListFilters.onFilterField;

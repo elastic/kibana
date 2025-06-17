@@ -12,7 +12,7 @@ import React, { type PropsWithChildren, createContext, useContext, useMemo } fro
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
-import type { UnifiedFieldListContainerInitialProps } from '@kbn/unified-field-list';
+import type { TabRestorableStatePerComponent } from '@kbn/unified-tabs';
 import { useCurrentTabContext } from './hooks';
 import type { DiscoverStateContainer } from '../discover_state';
 import type { ConnectedCustomizationService } from '../../../../customizations';
@@ -27,7 +27,7 @@ interface TabRuntimeState {
   stateContainer?: DiscoverStateContainer;
   customizationService?: ConnectedCustomizationService;
   unifiedHistogramLayoutProps?: UnifiedHistogramPartialLayoutProps;
-  unifiedFieldListInitialProps?: UnifiedFieldListContainerInitialProps;
+  restorableStatePerTabContentComponent?: TabRestorableStatePerComponent;
   scopedProfilesManager: ScopedProfilesManager;
   currentDataView: DataView;
 }
@@ -59,8 +59,8 @@ export const createTabRuntimeState = ({
   unifiedHistogramLayoutProps$: new BehaviorSubject<UnifiedHistogramPartialLayoutProps | undefined>(
     undefined
   ),
-  unifiedFieldListInitialProps$: new BehaviorSubject<
-    UnifiedFieldListContainerInitialProps | undefined
+  restorableStatePerTabContentComponent$: new BehaviorSubject<
+    TabRestorableStatePerComponent | undefined
   >(undefined),
   scopedProfilesManager$: new BehaviorSubject<ScopedProfilesManager>(
     profilesManager.createScopedProfilesManager()
@@ -107,14 +107,6 @@ export const useCurrentTabRuntimeState = <T,>(
 ) => {
   const { currentTabId } = useCurrentTabContext();
   return useRuntimeState(selector(selectTabRuntimeState(runtimeStateManager, currentTabId)));
-};
-
-export const useReactiveCurrentTabRuntimeState = <T,>(
-  runtimeStateManager: RuntimeStateManager,
-  selector: (tab: ReactiveTabRuntimeState) => BehaviorSubject<T>
-) => {
-  const { currentTabId } = useCurrentTabContext();
-  return selector(selectTabRuntimeState(runtimeStateManager, currentTabId));
 };
 
 export type CombinedRuntimeState = DiscoverRuntimeState &

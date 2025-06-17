@@ -435,7 +435,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             sidebarToggleState$={sidebarToggleState$}
             sidebarPanel={
               <SidebarMemoized
-                stateContainer={stateContainer}
                 columns={currentColumns}
                 documents$={stateContainer.dataState.data$.documents$}
                 onAddBreakdownField={canSetBreakdownField ? onAddBreakdownField : undefined}
