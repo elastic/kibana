@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { deleteAllAlerts } from '../../../../../../common/utils/security_solution';
 
 const roleToAccessSecuritySolution = {
   name: 'sec_all_spaces',
@@ -73,6 +74,10 @@ export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
   const security = getService('security');
+  const supertest = getService('supertest');
+  const log = getService('log');
+  const es = getService('es');
+
   // Notes: Similar tests should be added for serverless once infrastructure
   // is in place to test roles in MKI enviornment.
   describe('@ess @skipInServerless find alert with/without doc level security', () => {
@@ -98,6 +103,7 @@ export default ({ getService }: FtrProviderContext) => {
         email: userAllSecWithDls.email,
       });
 
+      await deleteAllAlerts(supertest, log, es);
       await esArchiver.load(
         'x-pack/test/functional/es_archives/security_solution/alerts/8.8.0_multiple_docs',
         {

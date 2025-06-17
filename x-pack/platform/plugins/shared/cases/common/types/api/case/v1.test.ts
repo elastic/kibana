@@ -134,6 +134,7 @@ const basicCase: Case = {
       description: null,
     },
   ],
+  incremental_id: 123,
 };
 
 describe('CasePostRequestRt', () => {

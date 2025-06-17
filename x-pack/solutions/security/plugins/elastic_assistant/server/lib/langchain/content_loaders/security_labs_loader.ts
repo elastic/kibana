@@ -8,14 +8,15 @@
 import globby from 'globby';
 import { Logger } from '@kbn/core/server';
 import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
-import { TextLoader } from 'langchain/document_loaders/fs/text';
 import { resolve } from 'path';
 import { Document } from 'langchain/document';
 import { Metadata } from '@kbn/elastic-assistant-common';
 import pMap from 'p-map';
+import { ENCODED_FILE_MICROMATCH_PATTERN } from '@kbn/ai-security-labs-content';
 import { addRequiredKbResourceMetadata } from './add_required_kb_resource_metadata';
 import { SECURITY_LABS_RESOURCE } from '../../../routes/knowledge_base/constants';
 import { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
+import { EncodedSecurityLabsContentLoader } from './encoded_security_labs_content_loader';
 
 /**
  * Loads the Elastic Security Labs mdx files into the Knowledge Base.
@@ -28,12 +29,13 @@ export const loadSecurityLabs = async (
     const docsLoader = new DirectoryLoader(
       resolve(__dirname, '../../../knowledge_base/security_labs'),
       {
-        '.md': (path) => new TextLoader(path),
+        '.md': (path) => new EncodedSecurityLabsContentLoader(path),
       },
       true
     );
 
     const rawDocs = await docsLoader.load();
+
     // Add additional metadata to set kbResource as esql
     const docs = addRequiredKbResourceMetadata({
       docs: rawDocs,
@@ -71,8 +73,9 @@ export const loadSecurityLabs = async (
 
 export const getSecurityLabsDocsCount = async ({ logger }: { logger: Logger }): Promise<number> => {
   try {
-    return (await globby(`${resolve(__dirname, '../../../knowledge_base/security_labs')}/**/*.md`))
-      ?.length;
+    return await globby(ENCODED_FILE_MICROMATCH_PATTERN, {
+      cwd: resolve(__dirname, '../../../knowledge_base/security_labs'),
+    }).then((files) => files.length);
   } catch (e) {
     logger.error(`Failed to get Security Labs source docs count\n${e}`);
     return 0;

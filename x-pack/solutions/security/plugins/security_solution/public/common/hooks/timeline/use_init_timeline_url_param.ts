@@ -29,7 +29,6 @@ export const useInitTimelineFromUrlParam = () => {
         queryTimelineById({
           activeTimelineTab: initialState.activeTab,
           duplicate: false,
-          graphEventId: initialState.graphEventId,
           timelineId: initialState.id,
           openTimeline: initialState.isOpen,
           savedSearchId: initialState.savedSearchId,
@@ -71,8 +70,6 @@ function hasTimelineStateChanged(
   return (
     activeTimeline &&
     newState &&
-    (activeTimeline.id !== newState.id ||
-      activeTimeline.savedSearchId !== newState.savedSearchId ||
-      activeTimeline.graphEventId !== newState.graphEventId)
+    (activeTimeline.id !== newState.id || activeTimeline.savedSearchId !== newState.savedSearchId)
   );
 }

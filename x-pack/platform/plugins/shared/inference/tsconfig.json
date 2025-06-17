@@ -40,8 +40,8 @@
     "@kbn/sse-utils-server",
     "@kbn/ml-is-populated-object",
     "@kbn/ml-is-defined",
-    "@kbn/tracing",
-    "@kbn/safer-lodash-set",
-    "@kbn/std"
+    "@kbn/sse-utils-client",
+    "@kbn/zod",
+    "@kbn/inference-tracing"
   ]
 }

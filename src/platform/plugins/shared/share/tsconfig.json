@@ -24,6 +24,9 @@
     "@kbn/datemath",
     "@kbn/licensing-plugin",
     "@kbn/core-rendering-browser",
+    "@kbn/std",
+    "@kbn/core-http-server-internal",
+    "@kbn/core-test-helpers-test-utils",
   ],
   "exclude": ["target/**/*"]
 }
