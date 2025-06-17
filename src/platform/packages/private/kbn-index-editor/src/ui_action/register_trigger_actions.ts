@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EditLookupIndexFlyoutDeps } from '../types';
 import {
   ACTION_EDIT_LOOKUP_INDEX,
   EDIT_LOOKUP_INDEX_CONTENT_TRIGGER,
   EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID,
-  type EditLookupIndexFlyoutDeps,
-} from '../..';
+} from './constants';
 
 export function registerIndexEditorActions(deps: EditLookupIndexFlyoutDeps) {
   const { uiActions } = deps;
@@ -23,7 +23,7 @@ export function registerIndexEditorActions(deps: EditLookupIndexFlyoutDeps) {
     EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID,
     ACTION_EDIT_LOOKUP_INDEX,
     async () => {
-      const { createEditLookupIndexContentAction } = await import('../..');
+      const { createEditLookupIndexContentAction } = await import('./create_edit_index_action');
       return createEditLookupIndexContentAction({
         data: deps.data,
         coreStart: deps.coreStart,
