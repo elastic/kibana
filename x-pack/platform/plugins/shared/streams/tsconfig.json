@@ -50,6 +50,7 @@
     "@kbn/i18n",
     "@kbn/zod-helpers",
     "@kbn/core-http-server-utils",
-    "@kbn/inference-common"
+    "@kbn/inference-common",
+    "@kbn/lock-manager"
   ]
 }
