@@ -13,4 +13,5 @@ export const transformResponse = (
 ): GetRuleIdsWithGapResponseBodyV1 => ({
   total: response.total,
   rule_ids: response.ruleIds,
+  latest_gap_timestamp: response.latestGapTimestamp,
 });
