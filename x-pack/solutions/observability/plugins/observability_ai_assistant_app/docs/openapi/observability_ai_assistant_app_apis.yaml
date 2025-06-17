@@ -1,0 +1,264 @@
+openapi: 3.0.3
+info:
+  title: Observability AI Assistant APIs
+  description: Kibana APIs for the Observability AI Assistant
+  version: '1.0.1'
+  license:
+    name: Elastic License 2.0
+    url: https://www.elastic.co/licensing/elastic-license
+tags:
+  - name: observability_ai_assistant
+    x-displayName: Observability AI Assistant
+    externalDocs:
+      url: https://www.elastic.co/docs/solutions/observability/observability-ai-assistant
+      description: Observability AI Assistant
+    description: Interact with the Observability AI Assistant resources.
+servers:
+  - url: /
+paths:
+  /api/observability_ai_assistant/chat/complete 2023-10-31:
+    post:
+      summary: Generate a chat completion
+      description: Creates a new chat completion via the Observability AI Assistant, returning the model's response based on the current conversation context. This endpoint also handles any tool requests within the conversation, which may trigger multiple calls to the underlying large language model (LLM).
+      tags:
+        - observability_ai_assistant
+      security:
+        - authz: ['ai_assistant']
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                messages:
+                  type: array
+                  description: 'Array of message objects containing the conversation history'
+                  items:
+                    $ref: '#/components/schemas/Message'
+                connectorId:
+                  type: string
+                  description: 'Unique identifier for the connector'
+                conversationId:
+                  type: string
+                  description: 'Unique identifier for the conversation (if continuing a conversation)'
+                title:
+                  type: string
+                  description: 'Title of the conversation'
+                persist:
+                  type: boolean
+                  description: 'Flag indicating whether to persist the conversation in Kibana'
+                actions:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Function'
+                disableFunctions:
+                  type: boolean
+                  description: 'Flag indicating whether functions should be disabled'
+                instructions:
+                  type: array
+                  description: An array of instruction objects, which can be either simple strings or detailed objects.
+                  items:
+                    $ref: '#/components/schemas/Instruction'
+              required:
+                - messages
+                - connectorId
+                - persist
+            examples:
+              completeChatRequestExample:
+                $ref: '#/components/schemas/completeChatRequestExample'
+      parameters:
+        - in: query
+          name: format
+          schema:
+            type: string
+            enum: [default, openai]
+          required: false
+          description: Response format, either 'default' or 'openai'. If 'openai', the response will be in OpenAI compatible format.
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                completeChatResponseExample:
+                  $ref: '#/components/schemas/completeChatResponseExample'
+
+components:
+  schemas:
+    Message:
+      type: object
+      description: A representation of a message.
+      properties:
+        '@timestamp':
+          type: string
+          description: The timestamp when the message was created.
+        message:
+          type: object
+          description: The main content of the message.
+          properties:
+            role:
+              $ref: '#/components/schemas/MessageRoleEnum'
+            content:
+              type: string
+              description: The content of the message.
+            name:
+              type: string
+              description: The name associated with the message.
+            event:
+              type: string
+              description: The event related to the message.
+            data:
+              type: string
+              description: Additional data associated with the message.
+            function_call:
+              $ref: '#/components/schemas/Unredaction'
+            unredactions:
+              type: array
+              description: A list of unredacted elements.
+              items:
+                $ref: '#/components/schemas/Unredaction'
+          required:
+            - role
+      required:
+        - '@timestamp'
+        - message
+    Unredaction:
+      type: object
+      description: A representation of an unredacted element.
+      properties:
+        entity:
+          type: string
+          description: The entity that has been unredacted.
+        class_name:
+          type: string
+          description: The class name associated with the entity.
+        start_pos:
+          type: number
+          description: The starting position of the unredacted entity.
+        end_pos:
+          type: number
+          description: The ending position of the unredacted entity.
+        type:
+          type: string
+          description: The type of unredaction applied.
+          enum:
+            - ner
+            - regex
+      required:
+        - entity
+        - class_name
+        - start_pos
+        - end_pos
+        - type
+    MessageRoleEnum:
+      description: The role of the message sender.
+      type: string
+      enum:
+        - system
+        - assistant
+        - function
+        - user
+        - elastic
+    FunctionCall:
+      type: object
+      description: Details of the function call within the message.
+      properties:
+        name:
+          type: string
+          description: The name of the function.
+        trigger:
+          type: string
+          enum:
+            - Assistant
+            - user
+            - elastic
+          description: The trigger of the function call.
+        arguments:
+          type: string
+          description: The arguments for the function call.
+      required:
+        - name
+        - trigger
+    Function:
+      type: object
+      properties:
+        name:
+          type: string
+          description: 'The name of the function'
+        description:
+          type: string
+          description: 'The description of the function'
+        parameters:
+          type: object
+          description: 'The parameters of the function'
+    Instruction:
+      oneOf:
+        - type: string
+          description: A simple instruction represented as a string.
+        - type: object
+          description: A detailed instruction with an ID and text.
+          properties:
+            id:
+              type: string
+              description: Unique identifier of the instruction.
+            text:
+              type: string
+              description: The text of the instruction.
+          required:
+            - id
+            - text
+    completeChatResponseExample:
+      summary: Get chat completion via the Observability AI Assistant
+      value:
+        - type: chatCompletionMessage
+          id: 'message-id'
+          message:
+            content: 'sample output'
+        - type: messageAdd
+          id: 'message-id'
+          message:
+            '@timestamp': '2025-01-17T15:45:46.255Z'
+            message:
+              content: 'sample output'
+              function_call:
+                name: 'function name'
+                arguments: 'function arguments'
+                trigger: 'message trigger'
+              role: 'message role'
+        - conversation:
+            title: 'my title'
+            id: 'message-id'
+            last_updated: '2025-06-16T15:45:46.258Z'
+          type: conversationCreate
+    completeChatRequestExample:
+      summary: Example of completing a chat interaction
+      description: Run `POST /api/observability_ai_assistant/chat/complete 2023-10-31` to complete a chat interaction.
+      value: |
+        {
+          "connectorId": "Elastic-Managed-LLM",
+          "conversationId": "uuid",
+          "disableFunctions": false,
+          "messages": [
+            {
+              "@timestamp": "2025-06-16T17:15:37.545Z",
+              "message": {
+              "role": "user",
+                "content": "What is the status of the server?"
+              }
+            }
+          ],
+          "persist": true,
+          "actions": [
+            {
+              "name": "fetchServerStatus",
+              "description": "Fetches the current server status",
+              "parameters": {}
+            }
+          ],
+          
+          "instructions": [
+            "Get the latest server status"
+          ]
+        }

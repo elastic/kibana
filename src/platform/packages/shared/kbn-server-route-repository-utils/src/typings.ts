@@ -152,6 +152,8 @@ export type CreateServerRouteFactory<
     handler: ServerRouteHandler<TRouteHandlerResources, TRouteParamsRT, TReturnType>;
     params?: TRouteParamsRT;
     security: RouteSecurity;
+    summary?: string;
+    description?: string;
   } & Required<
     {
       options?: (TRouteCreateOptions extends DefaultRouteCreateOptions ? TRouteCreateOptions : {}) &
@@ -182,6 +184,8 @@ export type ServerRoute<
   endpoint: TEndpoint;
   handler: ServerRouteHandler<TRouteHandlerResources, TRouteParamsRT, TReturnType>;
   security: RouteSecurity;
+  summary?: string;
+  description?: string;
 } & (TRouteParamsRT extends RouteParamsRT ? { params: TRouteParamsRT } : {}) &
   (TRouteCreateOptions extends DefaultRouteCreateOptions ? { options: TRouteCreateOptions } : {});
 
