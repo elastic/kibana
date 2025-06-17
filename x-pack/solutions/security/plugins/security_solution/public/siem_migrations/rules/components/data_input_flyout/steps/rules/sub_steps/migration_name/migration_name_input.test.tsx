@@ -68,13 +68,6 @@ describe('MigrationNameInput', () => {
     expect(mockSetMigrationName).not.toHaveBeenCalled();
   });
 
-  it('is disabled when subStep is not 1', () => {
-    render(<MigrationNameInput {...defaultProps} subStep={2} />);
-    const input = screen.getByDisplayValue('Default Name');
-
-    expect(input).toBeDisabled();
-  });
-
   it('focuses input on mount', () => {
     const { container } = render(<MigrationNameInput {...defaultProps} />);
     const input = container.querySelector('input');

@@ -72,7 +72,6 @@ export const MigrationNameInput = React.memo<MigrationNameInputProps>(
                 isInvalid={isInvalid}
                 onBlur={onBlur}
                 onKeyDown={onEnter}
-                disabled={subStep !== 1}
                 fullWidth
                 inputRef={inputRef}
               />
