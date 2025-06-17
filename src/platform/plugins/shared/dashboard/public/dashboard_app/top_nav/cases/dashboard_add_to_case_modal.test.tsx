@@ -116,7 +116,7 @@ describe('AddToCaseModal', () => {
     const { container } = render(
       <DashboardContext.Provider value={mockDashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
-          <AddToCaseModal screenshot={null} isOpen={true} />
+          <AddToCaseModal isOpen={true} />
         </DashboardInternalContext.Provider>
       </DashboardContext.Provider>
     );
@@ -134,7 +134,7 @@ describe('AddToCaseModal', () => {
     render(
       <DashboardContext.Provider value={mockDashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
-          <AddToCaseModal screenshot="mockScreenshot" isOpen={true} />
+          <AddToCaseModal isOpen={true} />
         </DashboardInternalContext.Provider>
       </DashboardContext.Provider>
     );
@@ -152,9 +152,6 @@ describe('AddToCaseModal', () => {
         persistableStateAttachmentTypeId: '.page',
         type: 'persistableState',
         persistableStateAttachmentState: {
-          snapshot: {
-            imgData: 'mockScreenshot',
-          },
           type: 'dashboard',
           url: {
             iconType: 'dashboardApp',
@@ -173,7 +170,7 @@ describe('AddToCaseModal', () => {
     const { container } = render(
       <DashboardContext.Provider value={mockDashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
-          <AddToCaseModal screenshot="mockScreenshot" isOpen={false} />
+          <AddToCaseModal isOpen={false} />
         </DashboardInternalContext.Provider>
       </DashboardContext.Provider>
     );
@@ -187,7 +184,7 @@ describe('AddToCaseModal', () => {
     render(
       <DashboardContext.Provider value={mockDashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
-          <AddToCaseModal screenshot="mockScreenshot" isOpen={true} />
+          <AddToCaseModal isOpen={true} />
         </DashboardInternalContext.Provider>
       </DashboardContext.Provider>
     );
@@ -209,7 +206,7 @@ describe('AddToCaseModal', () => {
     render(
       <DashboardContext.Provider value={mockDashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
-          <AddToCaseModal screenshot="mockScreenshot" isOpen={true} />
+          <AddToCaseModal isOpen={true} />
         </DashboardInternalContext.Provider>
       </DashboardContext.Provider>
     );
