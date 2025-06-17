@@ -25,8 +25,10 @@
     "@kbn/share-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/config-schema",
-    "@kbn/cloud",
-    "@kbn/analytics"
+    "@kbn/analytics",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/core-http-server",
+    "@kbn/logging"
   ],
   "exclude": [
     "target/**/*",
