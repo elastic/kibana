@@ -23,6 +23,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const log = getService('log');
   const svlUserManager = getService('svlUserManager');
   const alertingApi = getService('alertingApi');
+  const kibanaServer = getService('kibanaServer');
   let roleAuthc: RoleCredentials;
 
   async function refreshRulesList() {
@@ -74,6 +75,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     };
 
     before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       await svlCommonPage.loginWithPrivilegedRole();
       await svlObltNavigation.navigateToLandingPage();
@@ -90,6 +92,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
             .set('x-elastic-internal-origin', 'foo');
         })
       );
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     after(async () => {
@@ -99,7 +102,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     it('should create an ES Query Rule and display it when consumer is observability', async () => {
       const esQuery = await alertingApi.helpers.createEsQueryRule({
         roleAuthc,
-        name: 'ES Query',
+        name: 'ES Query with observability consumer',
         consumer: 'observability',
         ruleTypeId: '.es-query',
         params: {
@@ -118,13 +121,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await refreshRulesList();
       const searchResults = await svlTriggersActionsUI.getRulesList();
       expect(searchResults.length).toEqual(1);
-      expect(searchResults[0].name).toEqual('ES QueryElasticsearch query');
+      expect(searchResults[0].name).toEqual(
+        'ES Query with observability consumerElasticsearch query'
+      );
     });
 
-    it('should create an ES Query rule but not display it when consumer is stackAlerts', async () => {
+    it('should create an ES Query rule and NOT display it when consumer is stackAlerts', async () => {
       const esQuery = await alertingApi.helpers.createEsQueryRule({
         roleAuthc,
-        name: 'ES Query',
+        name: 'ES Query with stackAlerts consumer',
         consumer: 'stackAlerts',
         ruleTypeId: '.es-query',
         params: {
@@ -684,9 +689,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await testSubjects.click('ruleTypeFilterButton');
         }
 
-        expect(await (await testSubjects.find('ruleType0Group')).getVisibleText()).toEqual(
-          'Observability'
-        );
+        expect(await (await testSubjects.find('ruleType0Group')).getVisibleText()).toEqual('Apm');
       });
 
       await testSubjects.click('ruleTypeapm.anomalyFilterOption');
