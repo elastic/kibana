@@ -15,10 +15,14 @@ import type {
   UnresolvedContentReferenceNode,
 } from '../content_reference_parser';
 
-jest.mock('../../../../common/lib/kibana', () => ({
+jest.mock('@kbn/security-solution-navigation', () => ({
   useNavigation: jest.fn().mockReturnValue({
     navigateTo: jest.fn(),
   }),
+}));
+
+
+jest.mock('../../../../context/typed_kibana_context/typed_kibana_context', () => ({
   useKibana: jest.fn().mockReturnValue({
     services: {
       discover: {

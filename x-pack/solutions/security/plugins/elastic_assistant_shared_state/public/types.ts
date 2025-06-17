@@ -7,8 +7,11 @@
 
 import { CoreStart } from '@kbn/core/public';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ElasticAssistantSharedStatePublicPluginSetupDependencies {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ElasticAssistantSharedStatePublicPluginStartDependencies {}
 
 export type StartServices = CoreStart &
-  ElasticAssistantSharedStatePublicPluginStartDependencies & {};
+  ElasticAssistantSharedStatePublicPluginStartDependencies;

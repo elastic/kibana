@@ -78,7 +78,7 @@ export function AssistantProvider({ children }: { children: React.ReactElement }
         />
       );
     },
-    [elasticAssistantSharedState.comments.getActions$()]
+    [elasticAssistantSharedState.comments]
   );
 
   const memoizedGetComments = useMemo(() => {
@@ -112,7 +112,7 @@ export function AssistantProvider({ children }: { children: React.ReactElement }
     elasticAssistantSharedState.assistantContextValue.setAssistantContextValue(
       assistantContextValue
     );
-  }, [assistantContextValue]);
+  }, [assistantContextValue, elasticAssistantSharedState.assistantContextValue]);
 
   return (
     <ElasticAssistantProvider value={assistantContextValue}>{children}</ElasticAssistantProvider>

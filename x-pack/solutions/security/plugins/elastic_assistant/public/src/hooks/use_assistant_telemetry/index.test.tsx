@@ -16,8 +16,8 @@ const mockedTelemetry = {
   ...createTelemetryServiceMock(),
 };
 
-jest.mock('../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../common/lib/kibana');
+jest.mock('../../context/typed_kibana_context/typed_kibana_context', () => {
+  const original = jest.requireActual('../../context/typed_kibana_context/typed_kibana_context');
 
   return {
     ...original,

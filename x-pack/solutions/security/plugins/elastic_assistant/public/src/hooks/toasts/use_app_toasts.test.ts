@@ -23,7 +23,7 @@ import {
 } from './use_app_toasts';
 import { useToasts } from './use_toasts';
 
-jest.mock('../kibana/use_toast');
+jest.mock('./use_toasts');
 
 describe('useAppToasts', () => {
   let addErrorMock: jest.Mock;

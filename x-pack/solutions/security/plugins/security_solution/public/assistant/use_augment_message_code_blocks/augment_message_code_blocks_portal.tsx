@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import React,{ useEffect, useState } from 'react';
 import type { HtmlPortalNode } from 'react-reverse-portal';
 import { InPortal, OutPortal, createHtmlPortalNode } from 'react-reverse-portal';
 import ReactDOM from 'react-dom';
-import React from 'react';
 import type { Conversation } from '@kbn/elastic-assistant';
 import { analyzeMarkdown } from '@kbn/elastic-assistant';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
@@ -110,7 +109,7 @@ export const AugmentMessageCodeBlocksPortal = () => {
       cleanup();
       setPortals({});
     };
-  }, []);
+  }, [elasticAssistantSharedState.augmentMessageCodeBlocks]);
 
   return (
     <>

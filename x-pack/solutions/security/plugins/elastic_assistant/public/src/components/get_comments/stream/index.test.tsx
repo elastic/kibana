@@ -6,23 +6,23 @@
  */
 
 import React from 'react';
-import type { UseQueryResult } from '@tanstack/react-query';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { useFetchConnectorsQuery } from '../../../../../../../solutions/security/plugins/security_solution/public/detection_engine/rule_management/api/hooks/use_fetch_connectors_query';
+
 import { StreamComment } from '.';
 import { useStream } from './use_stream';
-import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import type { AsApiContract } from '@kbn/actions-plugin/common';
 
 const mockSetComplete = jest.fn();
 jest.mock('../../../detection_engine/rule_management/api/hooks/use_fetch_connectors_query');
 
 jest.mock('./use_stream');
 
-jest.mock('../../../common/lib/kibana', () => ({
+jest.mock('@kbn/security-solution-navigation', () => ({
   useNavigation: jest.fn().mockReturnValue({
     navigateTo: jest.fn(),
   }),
+}));
+
+jest.mock('../../../context/typed_kibana_context/typed_kibana_context', () => ({
   useKibana: jest.fn().mockReturnValue({
     services: {
       discover: {
@@ -71,9 +71,7 @@ describe('StreamComment', () => {
         actionTypeId: '.gen-ai',
       },
     ];
-    jest.mocked(useFetchConnectorsQuery).mockReturnValue({
-      data: connectors,
-    } as unknown as UseQueryResult<Array<AsApiContract<Connector>>, unknown>);
+
   });
   it('renders content correctly', () => {
     render(<StreamComment {...testProps} />);

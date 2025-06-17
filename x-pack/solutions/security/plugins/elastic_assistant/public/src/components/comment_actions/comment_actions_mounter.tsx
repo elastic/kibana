@@ -30,7 +30,7 @@ export const CommentActionsMounter = ({ message, getActions$ }: Props) => {
     return () => {
       unmountActions.forEach((unmount) => unmount());
     };
-  }, [actions]);
+  }, [actions, message]);
 
   return (
     <BaseCommentActions message={message}>
