@@ -36,8 +36,7 @@
       "logsDataAccess",
       "savedSearch",
       "entityManager",
-      "fieldsMetadata",
-      "esql"
+      "fieldsMetadata"
     ],
     "optionalPlugins": [
       "actions",
@@ -59,7 +58,8 @@
       "profilingDataAccess",
       "cases",
       "observabilityAIAssistant",
-      "share"
+      "share",
+      "esql"
     ],
     "requiredBundles": ["fleet", "kibanaReact", "kibanaUtils", "ml", "observability", "maps"]
   }
