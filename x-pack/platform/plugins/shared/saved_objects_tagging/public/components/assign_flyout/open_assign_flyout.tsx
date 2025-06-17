@@ -41,10 +41,10 @@ export const getAssignFlyoutOpener =
   ({
     overlays,
     notifications,
+    rendering,
     tagCache,
     assignmentService,
     assignableTypes,
-    ...startServices
   }: GetAssignFlyoutOpenerOptions): AssignFlyoutOpener =>
   async ({ tagIds }) => {
     const flyout = overlays.openFlyout(
@@ -59,7 +59,7 @@ export const getAssignFlyoutOpener =
             onClose={() => flyout.close()}
           />
         </React.Suspense>,
-        startServices
+        rendering
       ),
       { size: 'm', maxWidth: 600 }
     );

@@ -10,7 +10,11 @@ import { useMemo } from 'react';
 import type { PartialTheme } from '@elastic/charts';
 import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
 
-export const useDataVizChartTheme = (): PartialTheme => {
+interface DataVizChartThemeOptions {
+  disableGridLines?: boolean;
+}
+
+export const useDataVizChartTheme = (options: DataVizChartThemeOptions = {}): PartialTheme => {
   const { euiTheme } = useEuiTheme();
   const euiFontSizeXS = useEuiFontSize('xs', { unit: 'px' }).fontSize as string;
   const chartTheme = useMemo<PartialTheme>(() => {
@@ -23,6 +27,9 @@ export const useDataVizChartTheme = (): PartialTheme => {
           fontFamily: euiTheme.font.family,
           fontStyle: 'italic',
         },
+        ...(options.disableGridLines
+          ? { gridLine: { horizontal: { visible: false }, vertical: { visible: false } } }
+          : {}),
       },
       background: { color: 'transparent' },
       chartMargins: {
@@ -54,6 +61,6 @@ export const useDataVizChartTheme = (): PartialTheme => {
         area: { visible: true, opacity: 1 },
       },
     };
-  }, [euiFontSizeXS, euiTheme]);
+  }, [euiFontSizeXS, euiTheme, options.disableGridLines]);
   return chartTheme;
 };

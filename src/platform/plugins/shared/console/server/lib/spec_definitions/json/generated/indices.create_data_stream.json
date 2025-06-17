@@ -22,7 +22,7 @@
     "patterns": [
       "_data_stream/{name}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/data-streams.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-create-data-stream",
     "availability": {
       "stack": true,
       "serverless": true

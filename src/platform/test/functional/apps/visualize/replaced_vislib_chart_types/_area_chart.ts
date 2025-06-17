@@ -90,12 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show correct chart', async function () {
-      const xAxisLabels = [
-        '2015-09-20 00:00',
-        '2015-09-21 00:00',
-        '2015-09-22 00:00',
-        '2015-09-23 00:00',
-      ];
+      const xAxisLabels = ['September 2015', '19th', '20th', '21st', '22nd', '23rd'];
       const yAxisLabels = ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400'];
       const expectedAreaChartData = [
         37, 202, 740, 1437, 1371, 751, 188, 31, 42, 202, 683, 1361, 1415, 707, 177, 27, 32, 175,
