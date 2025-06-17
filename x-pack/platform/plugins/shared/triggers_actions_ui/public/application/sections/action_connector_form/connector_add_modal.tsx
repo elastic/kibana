@@ -222,6 +222,7 @@ const ConnectorAddModal = ({
       className="actConnectorModal"
       css={css`
         z-index: 9000;
+        overflow-y: auto;
       `}
       data-test-subj="connectorAddModal"
       onClose={closeModal}

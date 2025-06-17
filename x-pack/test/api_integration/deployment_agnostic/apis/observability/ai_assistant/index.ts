@@ -43,6 +43,7 @@ export default function aiAssistantApiIntegrationTests({
     loadTestFile(require.resolve('./index_assets/index_assets.spec.ts'));
     loadTestFile(require.resolve('./connectors/connectors.spec.ts'));
     loadTestFile(require.resolve('./conversations/conversations.spec.ts'));
+    loadTestFile(require.resolve('./anonymization/anonymization.spec.ts'));
 
     // public endpoints
     loadTestFile(require.resolve('./public_complete/public_complete.spec.ts'));

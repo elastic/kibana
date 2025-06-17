@@ -160,6 +160,7 @@ export function FocusedTraceWaterfall({ items, isEmbeddable = false }: Props) {
         <VerticalLinesContainer xMax={waterfall.totalDuration} margins={margin} />
         {waterfall.items.map((item) => (
           <WaterfallItem
+            key={item.id}
             timelineMargins={margin}
             color={item.color}
             hasToggle={false}
