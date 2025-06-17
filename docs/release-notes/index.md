@@ -21,6 +21,12 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [kibana-X.X.X-fixes]
 % *
 
+## 9.0.3 [kibana-9.0.3-release-notes]
+
+### Fixes [kibana-9.0.3-fixes]
+**Alerting**:
+* Fixes an issue that caused {{kib}} to repeatedly reload when `xpack.alerting.cancelAlertsOnRuleTimeout` was set to `false` in the `kibana.yml` file [#222263]({{kib-pull}}222263).
+
 ## 9.0.2 [kibana-9.0.2-release-notes]
 
 ### Enhancements [kibana-9.0.2-features-enhancements]
