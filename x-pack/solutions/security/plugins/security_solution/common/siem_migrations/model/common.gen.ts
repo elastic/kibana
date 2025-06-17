@@ -40,8 +40,8 @@ export const LangSmithOptions = z.object({
 /**
  * The LangSmith settings object for evaluations.
  */
-export type LangSmithEvaluationSettings = z.infer<typeof LangSmithEvaluationSettings>;
-export const LangSmithEvaluationSettings = LangSmithOptions.merge(
+export type LangSmithEvaluationOptions = z.infer<typeof LangSmithEvaluationOptions>;
+export const LangSmithEvaluationOptions = LangSmithOptions.merge(
   z.object({
     /**
      * The dataset name to use for evaluations.
