@@ -7,6 +7,7 @@
  */
 
 import {
+  CANVAS_APP_LOCATOR,
   DASHBOARD_APP_LOCATOR,
   LENS_APP_LOCATOR,
   VISUALIZE_APP_LOCATOR,
@@ -52,6 +53,7 @@ export const JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY =
 
 // Allowed locator types for reporting: the "reportable" analytical apps we expect to redirect to during screenshotting
 export const REPORTING_REDIRECT_ALLOWED_LOCATOR_TYPES = [
+  CANVAS_APP_LOCATOR,
   DASHBOARD_APP_LOCATOR,
   LENS_APP_LOCATOR,
   VISUALIZE_APP_LOCATOR,
