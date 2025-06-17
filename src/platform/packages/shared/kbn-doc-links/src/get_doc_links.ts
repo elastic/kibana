@@ -492,7 +492,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       detectionsReq: `${SECURITY_SOLUTION_DOCS}detections-permissions-section.html`,
       networkMap: `${SECURITY_SOLUTION_DOCS}conf-map-ui.html`,
       troubleshootGaps: `${SECURITY_SOLUTION_DOCS}alerts-ui-monitor.html#troubleshoot-gaps`,
-      ruleApiOverview: `${SECURITY_SOLUTION_DOCS}rule-api-overview.html`,
+      ruleApiOverview: isServerless
+        ? `${KIBANA_SERVERLESS_APIS}group/endpoint-security-detections-api`
+        : `${KIBANA_APIS}group/endpoint-security-detections-api`,
       configureAlertSuppression: `${SECURITY_SOLUTION_DOCS}alert-suppression.html#_configure_alert_suppression`,
     },
     logging: {
@@ -539,7 +541,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       },
       detectionEngineOverview: `${SECURITY_SOLUTION_DOCS}detection-engine-overview.html`,
       aiAssistant: `${SECURITY_SOLUTION_DOCS}security-assistant.html`,
-      signalsMigrationApi: `${SECURITY_SOLUTION_DOCS}signals-migration-api.html`,
+      signalsMigrationApi: isServerless
+        ? `${KIBANA_SERVERLESS_APIS}group/endpoint-security-detections-api`
+        : `${KIBANA_APIS}group/endpoint-security-detections-api`,
       legacyEndpointManagementApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-199598`,
       legacyRuleManagementBulkApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-207091`,
       siemMigrations: `${SECURITY_SOLUTION_DOCS}siem-migration.html`,
