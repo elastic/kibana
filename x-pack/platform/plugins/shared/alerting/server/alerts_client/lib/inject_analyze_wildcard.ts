@@ -6,8 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-
-const MAX_QUERIES = 20000;
+import { MAX_QUERIES } from './constants';
 
 export const injectAnalyzeWildcard = (query: QueryDslQueryContainer): void => {
   if (!query) {
