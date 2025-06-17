@@ -76,8 +76,6 @@ import {
   createNumericLiteral,
   createOption,
   createParam,
-  createPolicy,
-  createSetting,
   createTimeUnit,
   createUnknownItem,
   nonNullable,
@@ -143,18 +141,6 @@ export function collectAllColumnIdentifiers(
 ): ESQLAstItem[] {
   const identifiers = extractIdentifiers(ctx);
   return makeColumnsOutOfIdentifiers(identifiers);
-}
-
-export function getPolicyName(ctx: EnrichCommandContext) {
-  if (!ctx._policyName || !textExistsAndIsValid(ctx._policyName.text)) {
-    return [];
-  }
-  const policyComponents = ctx._policyName.text.split(':');
-  if (policyComponents.length > 1) {
-    const [setting, policyName] = policyComponents;
-    return [createSetting(ctx._policyName, setting), createPolicy(ctx._policyName, policyName)];
-  }
-  return [createPolicy(ctx._policyName, policyComponents[0])];
 }
 
 export function getMatchField(ctx: EnrichCommandContext) {

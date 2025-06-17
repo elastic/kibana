@@ -1,0 +1,33 @@
+{
+  "indices.get_data_stream_options": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "expand_wildcards": [
+        "all",
+        "open",
+        "closed",
+        "hidden",
+        "none"
+      ],
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_data_stream/{name}/_options"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

@@ -18,6 +18,7 @@ import {
   IndicesIndexState,
   SimulateIngestResponse,
   SimulateIngestSimulateIngestDocumentResult,
+  FieldCapsResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { flattenObjectNestedLast, calculateObjectDiff } from '@kbn/object-utils';
@@ -138,10 +139,10 @@ export type IngestSimulationResult =
     };
 
 export type DetectedField =
-  | WithName
-  | WithName<FieldDefinitionConfig | InheritedFieldDefinitionConfig>;
+  | WithNameAndEsType
+  | WithNameAndEsType<FieldDefinitionConfig | InheritedFieldDefinitionConfig>;
 
-export type WithName<TObj = {}> = TObj & { name: string };
+export type WithNameAndEsType<TObj = {}> = TObj & { name: string; esType?: string };
 export type WithRequired<TObj, TKey extends keyof TObj> = TObj & { [TProp in TKey]-?: TObj[TProp] };
 
 export const simulateProcessing = async ({
@@ -150,15 +151,20 @@ export const simulateProcessing = async ({
   streamsClient,
 }: SimulateProcessingDeps) => {
   /* 0. Retrieve required data to prepare the simulation */
-  const [stream, streamIndex] = await Promise.all([
-    streamsClient.getStream(params.path.name),
-    getStreamIndex(scopedClusterClient, streamsClient, params.path.name),
-  ]);
+  const [stream, { indexState: streamIndexState, fieldCaps: streamIndexFieldCaps }] =
+    await Promise.all([
+      streamsClient.getStream(params.path.name),
+      getStreamIndex(scopedClusterClient, streamsClient, params.path.name),
+    ]);
 
   /* 1. Prepare data for either simulation types (ingest, pipeline), prepare simulation body for the mandatory pipeline simulation */
   const simulationData = prepareSimulationData(params);
   const pipelineSimulationBody = preparePipelineSimulationBody(simulationData);
-  const ingestSimulationBody = prepareIngestSimulationBody(simulationData, streamIndex, params);
+  const ingestSimulationBody = prepareIngestSimulationBody(
+    simulationData,
+    streamIndexState,
+    params
+  );
   /**
    * 2. Run both pipeline and ingest simulations in parallel.
    * - The pipeline simulation is used to extract the documents reports and the processor metrics. This always runs.
@@ -189,7 +195,12 @@ export const simulateProcessing = async ({
   );
 
   /* 5. Extract valid detected fields asserting existing mapped fields from stream and ancestors */
-  const detectedFields = await computeDetectedFields(processorsMetrics, params, streamFields);
+  const detectedFields = await computeDetectedFields(
+    processorsMetrics,
+    params,
+    streamFields,
+    streamIndexFieldCaps
+  );
 
   /* 6. Derive general insights and process final response body */
   return prepareSimulationResponse(docReports, processorsMetrics, detectedFields);
@@ -264,7 +275,9 @@ const prepareSimulationProcessors = (
     },
   ];
 
-  const formattedProcessors = formatToIngestProcessors(processors);
+  const formattedProcessors = formatToIngestProcessors(processors, {
+    ignoreMalformedManualIngestPipeline: true,
+  });
 
   return [...dotExpanderProcessors, ...formattedProcessors];
 };
@@ -744,18 +757,30 @@ const getStreamIndex = async (
   scopedClusterClient: IScopedClusterClient,
   streamsClient: StreamsClient,
   streamName: string
-): Promise<IndicesIndexState> => {
+): Promise<{
+  indexState: IndicesIndexState;
+  fieldCaps: FieldCapsResponse['fields'];
+}> => {
   const dataStream = await streamsClient.getDataStream(streamName);
-  const lastIndex = dataStream.indices.at(-1);
-  if (!lastIndex) {
+  const lastIndexRef = dataStream.indices.at(-1);
+  if (!lastIndexRef) {
     throw new Error(`No writing index found for stream ${streamName}`);
   }
 
-  const lastIndexMapping = await scopedClusterClient.asCurrentUser.indices.get({
-    index: lastIndex.index_name,
-  });
+  const [lastIndex, lastIndexFieldCaps] = await Promise.all([
+    scopedClusterClient.asCurrentUser.indices.get({
+      index: lastIndexRef.index_name,
+    }),
+    scopedClusterClient.asCurrentUser.fieldCaps({
+      index: lastIndexRef.index_name,
+      fields: '*',
+    }),
+  ]);
 
-  return lastIndexMapping[lastIndex.index_name];
+  return {
+    indexState: lastIndex[lastIndexRef.index_name],
+    fieldCaps: lastIndexFieldCaps.fields,
+  };
 };
 
 const getStreamFields = async (
@@ -780,7 +805,8 @@ const getStreamFields = async (
 const computeDetectedFields = async (
   processorsMetrics: Record<string, ProcessorMetrics>,
   params: ProcessingSimulationParams,
-  streamFields: FieldDefinition
+  streamFields: FieldDefinition,
+  streamFieldCaps: FieldCapsResponse['fields']
 ): Promise<DetectedField[]> => {
   const fields = Object.values(processorsMetrics).flatMap((metrics) => metrics.detected_fields);
 
@@ -799,7 +825,11 @@ const computeDetectedFields = async (
       return { name, ...existingField };
     }
 
-    return { name, type: confirmedValidDetectedFields[name]?.type };
+    const existingFieldCaps = Object.keys(streamFieldCaps[name] || {});
+
+    const esType = existingFieldCaps.length > 0 ? existingFieldCaps[0] : undefined;
+
+    return { name, type: confirmedValidDetectedFields[name]?.type, esType };
   });
 };
 

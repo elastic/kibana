@@ -309,6 +309,19 @@
     "schemaVersion"
   ],
   "enterprise_search_telemetry": [],
+  "entity-analytics-monitoring-entity-source": [
+    "enabled",
+    "error",
+    "filter",
+    "indexPattern",
+    "integrationName",
+    "managed",
+    "matchers",
+    "matchers.fields",
+    "matchers.values",
+    "name",
+    "type"
+  ],
   "entity-definition": [
     "description",
     "filter",
@@ -828,6 +841,19 @@
     "job.job_id",
     "model_id"
   ],
+  "monitoring-entity-source": [
+    "enabled",
+    "error",
+    "filter",
+    "indexPattern",
+    "integrationName",
+    "managed",
+    "matchers",
+    "matchers.fields",
+    "matchers.values",
+    "name",
+    "type"
+  ],
   "monitoring-telemetry": [
     "reportedClusterUuids"
   ],
@@ -964,6 +990,11 @@
     "sourceIndex",
     "updated",
     "version"
+  ],
+  "security:reference-data": [
+    "id",
+    "owner",
+    "type"
   ],
   "siem-detection-engine-rule-actions": [
     "actions",

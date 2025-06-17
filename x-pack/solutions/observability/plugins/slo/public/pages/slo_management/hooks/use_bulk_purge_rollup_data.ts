@@ -46,7 +46,7 @@ export function useBulkPurgeRollupData({ onConfirm }: { onConfirm?: () => void }
       onSuccess: (_, { list }) => {
         toasts.addSuccess(
           i18n.translate('xpack.slo.bulkPurge.successNotification', {
-            defaultMessage: 'Bulk purge of rollup data for {count} SLOs scheduled',
+            defaultMessage: 'Bulk purge of rollup data scheduled for {count} SLOs',
             values: { count: list.length },
           })
         );
