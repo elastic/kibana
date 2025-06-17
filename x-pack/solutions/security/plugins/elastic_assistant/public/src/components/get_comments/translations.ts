@@ -11,9 +11,12 @@ export const SYSTEM = i18n.translate('xpack.elasticAssistantPlugin.assistant.get
   defaultMessage: 'System',
 });
 
-export const ASSISTANT = i18n.translate('xpack.elasticAssistantPlugin.assistant.getComments.assistant', {
-  defaultMessage: 'Assistant',
-});
+export const ASSISTANT = i18n.translate(
+  'xpack.elasticAssistantPlugin.assistant.getComments.assistant',
+  {
+    defaultMessage: 'Assistant',
+  }
+);
 
 export const AT = (timestamp: string) =>
   i18n.translate('xpack.elasticAssistantPlugin.assistant.getComments.at', {
