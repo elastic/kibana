@@ -11,6 +11,7 @@ import {
   objectTypeToGetResultSchema,
   createOptionsSchemas,
   createResultSchema,
+  updateOptionsSchema,
 } from '@kbn/content-management-utils';
 
 export const mapAttributesSchema = schema.object(
@@ -48,7 +49,17 @@ export const createOptionsSchema = schema.object({
   references: schema.maybe(createOptionsSchemas.references),
 });
 
+export const mapsCreateOptionsSchema = schema.object({
+  references: schema.maybe(createOptionsSchemas.references),
+});
+
+export const mapsUpdateOptionsSchema = schema.object({
+  references: updateOptionsSchema.references,
+});
+
 export const mapsGetResultSchema = objectTypeToGetResultSchema(mapSavedObjectSchema);
+
+export const mapsCreateResultSchema = createResultSchema(mapSavedObjectSchema);
 
 // Content management service definition.
 // We need it for BWC support between different versions of the content
@@ -71,14 +82,14 @@ export const serviceDefinition: ServicesDefinition = {
     },
     out: {
       result: {
-        schema: createResultSchema(mapSavedObjectSchema),
+        schema: mapsCreateResultSchema,
       },
     },
   },
   update: {
     in: {
       options: {
-        schema: createOptionsSchema, // same as create
+        schema: mapsUpdateOptionsSchema, // Is still the same as create?
       },
       data: {
         schema: mapAttributesSchema,
