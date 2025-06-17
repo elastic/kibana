@@ -12,6 +12,7 @@ import { createServerRoute } from '../../../create_server_route';
 
 const KUBERNETES = 'kubernetes';
 const DOCKER = 'docker';
+const METRICBEAT = 'metricbeat';
 
 const infraSideNavRoute = createServerRoute({
   endpoint: 'GET /internal/observability_navigation',
@@ -44,6 +45,63 @@ const infraSideNavRoute = createServerRoute({
         DOCKER
       ),
     ]);
+
+    const metricbeatData = await core.elasticsearch.client.asCurrentUser.search({
+      index: 'metrics-kubernetes*',
+      ignore_unavailable: true,
+      allow_no_indices: true,
+      track_total_hits: true,
+      terminate_after: 1,
+      size: 0,
+      query: {
+        bool: {
+          should: [
+            { term: { ['event.module']: KUBERNETES } },
+            { term: { ['agent.type']: METRICBEAT } },
+          ],
+          minimum_should_match: 1,
+        },
+      },
+    });
+
+    const otelData = await core.elasticsearch.client.asCurrentUser.search({
+      index: 'metrics-*.otel-*',
+      ignore_unavailable: true,
+      allow_no_indices: true,
+      track_total_hits: true,
+      terminate_after: 1,
+      size: 0,
+      query: {
+        bool: {
+          filter: [{ term: { ['data_stream.dataset']: '*.otel' } }],
+        },
+      },
+    });
+
+    console.log('hasEcsData:', metricbeatData?.hits?.total?.value !== 0);
+    console.log('hasOtelData:', otelData?.hits?.total?.value !== 0);
+
+    // TODO
+    const hasEcsData = metricbeatData?.hits?.total?.value !== 0;
+    const hasOtelData = otelData?.hits?.total?.value !== 0;
+
+    // Maybe separate the ecs / otel cases in the future
+    // if ((hasEcsData || hasOtelData) && !installedPackage ) {
+    //   return [
+    //     {
+    //       id: KUBERNETES,
+    //       title: KUBERNETES,
+    //       subItems: [
+    //         {
+    //           id: 'kubernetes',
+    //           sideNavTitle: 'Add Kubernetes data',
+    //           sideNavOrder: 100,
+    //           type: 'dashboard',
+    //         },
+    //       ],
+    //     },
+    //   ];
+    // }
 
     if (!installedPackage && !navigationOverrides) {
       return [];

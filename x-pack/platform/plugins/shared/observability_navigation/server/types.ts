@@ -16,8 +16,10 @@ export interface ObservabilityNavigationServer {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityNavigationPluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ObservabilityNavigationPluginStart {}
+
+export interface ObservabilityNavigationPluginStart {
+  core: CoreStart;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityNavigationPluginSetupDependencies {}
