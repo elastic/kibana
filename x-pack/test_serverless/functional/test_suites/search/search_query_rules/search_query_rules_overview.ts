@@ -15,7 +15,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'embeddedConsole',
     'common',
   ]);
-  const browser = getService('browser');
   const es = getService('es');
   const kibanaServer = getService('kibanaServer');
 
