@@ -53,6 +53,47 @@ describe('layout manager', () => {
     expect(layoutManager.api.children$.getValue()[panels.panelOne.gridData.i]).toBe(childApi);
   });
 
+  test('should append incoming embeddable to existing panels', () => {
+    const incomingEmbeddable = {
+      embeddableId: 'panelTwo',
+      serializedState: {
+        rawState: {
+          title: 'Panel Two',
+        },
+      },
+      size: {
+        height: 1,
+        width: 1,
+      },
+      type: 'testPanelType',
+    };
+    const layoutManager = initializeLayoutManager(
+      incomingEmbeddable,
+      panels,
+      {},
+      trackPanelMock,
+      () => []
+    );
+
+    const layout = layoutManager.internalApi.layout$.value;
+    expect(Object.keys(layout.panels).length).toBe(Object.keys(panels).length + 1);
+    expect(layout.panels.panelTwo).toEqual({
+      gridData: {
+        h: 1,
+        i: 'panelTwo',
+        sectionId: undefined,
+        w: 1,
+        x: 1,
+        y: 0,
+      },
+      type: 'testPanelType',
+    });
+    const incomingPanelState = layoutManager.internalApi.getSerializedStateForPanel('panelTwo');
+    expect(incomingPanelState.rawState).toEqual({
+      title: 'Panel Two',
+    });
+  });
+
   describe('serializeLayout', () => {
     test('should serialize the latest state of all panels', () => {
       const layoutManager = initializeLayoutManager(
