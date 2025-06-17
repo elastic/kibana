@@ -110,7 +110,7 @@ export class AnonymizationService {
 
         // Update hashMap
         entities.forEach((e) => {
-          this.currentHashMap.set(e.hash, {
+          this.currentHashMap.set(e.class_name + '_' + e.hash, {
             value: e.entity,
             class_name: e.class_name,
             type: e.type,
@@ -217,5 +217,14 @@ export class AnonymizationService {
         })
       );
     };
+  }
+  isEnabled(): boolean {
+    return this.rules.some((rule) => rule.enabled);
+  }
+  getAnonymizationInstruction(): string {
+    if (!this.isEnabled()) {
+      return '';
+    }
+    return 'Some entities in this conversation (like names, locations, or IDs) have been anonymized using placeholder hashes (e.g., `PER_123`, `LOC_abcd1234`). These tokens should be treated as distinct but semantically unknown entities. Do not try to infer their meaning. Refer to them as-is unless explicitly provided with a description.';
   }
 }
