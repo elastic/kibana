@@ -164,7 +164,7 @@ function InternalUnifiedFieldListSidebarContainer({
 }
 
 const UnifiedFieldListSidebarContainerWithRestorableState = withRestorableState(
-  InternalUnifiedFieldListSidebarContainer
+  memo(InternalUnifiedFieldListSidebarContainer)
 );
 
 type UnifiedFieldListSidebarContainerPropsWithRestorableState = ComponentProps<
@@ -229,186 +229,179 @@ export type UnifiedFieldListSidebarContainerProps = Omit<
  * Desktop: Sidebar view, all elements are visible
  * Mobile: A button to trigger a flyout with all elements
  */
-const UnifiedFieldListSidebarContainer = memo(
-  forwardRef<UnifiedFieldListSidebarContainerApi, UnifiedFieldListSidebarContainerProps>(
-    function UnifiedFieldListSidebarContainer(
-      { initialState, onInitialStateChange, ...props },
-      componentRef
-    ) {
-      const { getCreationOptions, services, dataView, onFieldEdited, additionalFilters } = props;
-      const [stateService] = useState<UnifiedFieldListSidebarContainerStateService>(
-        createStateService({ options: getCreationOptions() })
-      );
-      const { data, dataViewFieldEditor } = services;
-      const [isFieldListFlyoutVisible, setIsFieldListFlyoutVisible] = useState<boolean>(false);
-      const [sidebarVisibility] = useState(() =>
-        getSidebarVisibility({
-          localStorageKey: stateService.creationOptions.localStorageKeyPrefix
-            ? `${stateService.creationOptions.localStorageKeyPrefix}:sidebarClosed`
-            : undefined,
-        })
-      );
-      const isSidebarCollapsed = useObservable(sidebarVisibility.isCollapsed$, false);
+const UnifiedFieldListSidebarContainer = forwardRef<
+  UnifiedFieldListSidebarContainerApi,
+  UnifiedFieldListSidebarContainerProps
+>(function UnifiedFieldListSidebarContainer(
+  { initialState, onInitialStateChange, ...props },
+  componentRef
+) {
+  const { getCreationOptions, services, dataView, onFieldEdited, additionalFilters } = props;
+  const [stateService] = useState<UnifiedFieldListSidebarContainerStateService>(
+    createStateService({ options: getCreationOptions() })
+  );
+  const { data, dataViewFieldEditor } = services;
+  const [isFieldListFlyoutVisible, setIsFieldListFlyoutVisible] = useState<boolean>(false);
+  const [sidebarVisibility] = useState(() =>
+    getSidebarVisibility({
+      localStorageKey: stateService.creationOptions.localStorageKeyPrefix
+        ? `${stateService.creationOptions.localStorageKeyPrefix}:sidebarClosed`
+        : undefined,
+    })
+  );
+  const isSidebarCollapsed = useObservable(sidebarVisibility.isCollapsed$, false);
 
-      const canEditDataView =
-        Boolean(dataViewFieldEditor?.userPermissions.editIndexPattern()) ||
-        Boolean(dataView && !dataView.isPersisted());
-      const closeFieldEditor = useRef<() => void | undefined>();
-      const setFieldEditorRef = useCallback((ref: () => void | undefined) => {
-        closeFieldEditor.current = ref;
-      }, []);
+  const canEditDataView =
+    Boolean(dataViewFieldEditor?.userPermissions.editIndexPattern()) ||
+    Boolean(dataView && !dataView.isPersisted());
+  const closeFieldEditor = useRef<() => void | undefined>();
+  const setFieldEditorRef = useCallback((ref: () => void | undefined) => {
+    closeFieldEditor.current = ref;
+  }, []);
 
-      const closeFieldListFlyout = useCallback(() => {
-        setIsFieldListFlyoutVisible(false);
-      }, []);
+  const closeFieldListFlyout = useCallback(() => {
+    setIsFieldListFlyoutVisible(false);
+  }, []);
 
-      const querySubscriberResult = useQuerySubscriber({
-        data,
-        timeRangeUpdatesType: stateService.creationOptions.timeRangeUpdatesType,
-      });
-      const searchMode: SearchMode | undefined = querySubscriberResult.searchMode;
-      const isAffectedByGlobalFilter = Boolean(querySubscriberResult.filters?.length);
+  const querySubscriberResult = useQuerySubscriber({
+    data,
+    timeRangeUpdatesType: stateService.creationOptions.timeRangeUpdatesType,
+  });
+  const searchMode: SearchMode | undefined = querySubscriberResult.searchMode;
+  const isAffectedByGlobalFilter = Boolean(querySubscriberResult.filters?.length);
 
-      const filters = useMemo(
-        () => [...(querySubscriberResult.filters ?? []), ...(additionalFilters ?? [])],
-        [querySubscriberResult.filters, additionalFilters]
-      );
+  const filters = useMemo(
+    () => [...(querySubscriberResult.filters ?? []), ...(additionalFilters ?? [])],
+    [querySubscriberResult.filters, additionalFilters]
+  );
 
-      const { isProcessing, refetchFieldsExistenceInfo } = useExistingFieldsFetcher({
-        disableAutoFetching: stateService.creationOptions.disableFieldsExistenceAutoFetching,
-        dataViews: searchMode === 'documents' && dataView ? [dataView] : [],
-        query: querySubscriberResult.query,
-        filters,
-        fromDate: querySubscriberResult.fromDate,
-        toDate: querySubscriberResult.toDate,
-        services,
-      });
+  const { isProcessing, refetchFieldsExistenceInfo } = useExistingFieldsFetcher({
+    disableAutoFetching: stateService.creationOptions.disableFieldsExistenceAutoFetching,
+    dataViews: searchMode === 'documents' && dataView ? [dataView] : [],
+    query: querySubscriberResult.query,
+    filters,
+    fromDate: querySubscriberResult.fromDate,
+    toDate: querySubscriberResult.toDate,
+    services,
+  });
 
-      const editField = useMemo(
-        () =>
-          dataView && dataViewFieldEditor && searchMode === 'documents' && canEditDataView
-            ? async (fieldName?: string) => {
-                const ref = await dataViewFieldEditor.openEditor({
-                  ctx: {
-                    dataView,
-                  },
-                  fieldName,
-                  onSave: async () => {
-                    if (onFieldEdited) {
-                      await onFieldEdited({ editedFieldName: fieldName });
-                    }
-                  },
-                });
-                setFieldEditorRef(ref);
-                closeFieldListFlyout();
-              }
-            : undefined,
-        [
-          searchMode,
-          canEditDataView,
-          dataViewFieldEditor,
-          dataView,
-          setFieldEditorRef,
-          closeFieldListFlyout,
-          onFieldEdited,
-        ]
-      );
-
-      const deleteField = useMemo(
-        () =>
-          dataView && dataViewFieldEditor && editField
-            ? async (fieldName: string) => {
-                const ref = await dataViewFieldEditor.openDeleteModal({
-                  ctx: {
-                    dataView,
-                  },
-                  fieldName,
-                  onDelete: async () => {
-                    if (onFieldEdited) {
-                      await onFieldEdited({ removedFieldName: fieldName });
-                    }
-                  },
-                });
-                setFieldEditorRef(ref);
-                closeFieldListFlyout();
-              }
-            : undefined,
-        [
-          dataView,
-          setFieldEditorRef,
-          editField,
-          closeFieldListFlyout,
-          dataViewFieldEditor,
-          onFieldEdited,
-        ]
-      );
-
-      useEffect(() => {
-        const cleanup = () => {
-          if (closeFieldEditor?.current) {
-            closeFieldEditor?.current();
+  const editField = useMemo(
+    () =>
+      dataView && dataViewFieldEditor && searchMode === 'documents' && canEditDataView
+        ? async (fieldName?: string) => {
+            const ref = await dataViewFieldEditor.openEditor({
+              ctx: {
+                dataView,
+              },
+              fieldName,
+              onSave: async () => {
+                if (onFieldEdited) {
+                  await onFieldEdited({ editedFieldName: fieldName });
+                }
+              },
+            });
+            setFieldEditorRef(ref);
+            closeFieldListFlyout();
           }
-        };
-        return () => {
-          // Make sure to close the editor when unmounting
-          cleanup();
-        };
-      }, []);
+        : undefined,
+    [
+      searchMode,
+      canEditDataView,
+      dataViewFieldEditor,
+      dataView,
+      setFieldEditorRef,
+      closeFieldListFlyout,
+      onFieldEdited,
+    ]
+  );
 
-      useImperativeHandle(
-        componentRef,
-        () => ({
-          sidebarVisibility,
-          refetchFieldsExistenceInfo,
-          closeFieldListFlyout,
-          createField: editField,
-          editField,
-          deleteField,
-        }),
-        [
-          sidebarVisibility,
-          refetchFieldsExistenceInfo,
-          closeFieldListFlyout,
-          editField,
-          deleteField,
-        ]
-      );
+  const deleteField = useMemo(
+    () =>
+      dataView && dataViewFieldEditor && editField
+        ? async (fieldName: string) => {
+            const ref = await dataViewFieldEditor.openDeleteModal({
+              ctx: {
+                dataView,
+              },
+              fieldName,
+              onDelete: async () => {
+                if (onFieldEdited) {
+                  await onFieldEdited({ removedFieldName: fieldName });
+                }
+              },
+            });
+            setFieldEditorRef(ref);
+            closeFieldListFlyout();
+          }
+        : undefined,
+    [
+      dataView,
+      setFieldEditorRef,
+      editField,
+      closeFieldListFlyout,
+      dataViewFieldEditor,
+      onFieldEdited,
+    ]
+  );
 
-      if (!dataView) {
-        return null;
+  useEffect(() => {
+    const cleanup = () => {
+      if (closeFieldEditor?.current) {
+        closeFieldEditor?.current();
       }
+    };
+    return () => {
+      // Make sure to close the editor when unmounting
+      cleanup();
+    };
+  }, []);
 
-      const commonSidebarProps: UnifiedFieldListSidebarProps = {
-        ...props,
-        searchMode,
-        stateService,
-        isProcessing,
-        isAffectedByGlobalFilter,
-        onEditField: editField,
-        onDeleteField: deleteField,
-        compressed: stateService.creationOptions.compressed ?? false,
-        buttonAddFieldVariant: stateService.creationOptions.buttonAddFieldVariant ?? 'primary',
-      };
+  useImperativeHandle(
+    componentRef,
+    () => ({
+      sidebarVisibility,
+      refetchFieldsExistenceInfo,
+      closeFieldListFlyout,
+      createField: editField,
+      editField,
+      deleteField,
+    }),
+    [sidebarVisibility, refetchFieldsExistenceInfo, closeFieldListFlyout, editField, deleteField]
+  );
 
-      if (stateService.creationOptions.showSidebarToggleButton) {
-        commonSidebarProps.isSidebarCollapsed = isSidebarCollapsed;
-        commonSidebarProps.onToggleSidebar = sidebarVisibility.toggle;
-      }
+  if (!dataView) {
+    return null;
+  }
 
-      return (
-        <UnifiedFieldListSidebarContainerWithRestorableState
-          stateService={stateService}
-          isFieldListFlyoutVisible={isFieldListFlyoutVisible}
-          setIsFieldListFlyoutVisible={setIsFieldListFlyoutVisible}
-          commonSidebarProps={commonSidebarProps}
-          containerProps={props}
-          initialState={initialState}
-          onInitialStateChange={onInitialStateChange}
-        />
-      );
-    }
-  )
-);
+  const commonSidebarProps: UnifiedFieldListSidebarProps = {
+    ...props,
+    searchMode,
+    stateService,
+    isProcessing,
+    isAffectedByGlobalFilter,
+    onEditField: editField,
+    onDeleteField: deleteField,
+    compressed: stateService.creationOptions.compressed ?? false,
+    buttonAddFieldVariant: stateService.creationOptions.buttonAddFieldVariant ?? 'primary',
+  };
+
+  if (stateService.creationOptions.showSidebarToggleButton) {
+    commonSidebarProps.isSidebarCollapsed = isSidebarCollapsed;
+    commonSidebarProps.onToggleSidebar = sidebarVisibility.toggle;
+  }
+
+  return (
+    <UnifiedFieldListSidebarContainerWithRestorableState
+      stateService={stateService}
+      isFieldListFlyoutVisible={isFieldListFlyoutVisible}
+      setIsFieldListFlyoutVisible={setIsFieldListFlyoutVisible}
+      commonSidebarProps={commonSidebarProps}
+      containerProps={props}
+      initialState={initialState}
+      onInitialStateChange={onInitialStateChange}
+    />
+  );
+});
 
 // Necessary for React.lazy
 // eslint-disable-next-line import/no-default-export
