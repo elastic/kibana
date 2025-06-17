@@ -11,7 +11,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function SvlSearchHomePageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  const retry = getService('retry');
 
   return {
     async expectToBeOnHomepage() {
@@ -66,9 +65,6 @@ export function SvlSearchHomePageProvider({ getService }: FtrProviderContext) {
     },
     async expectToBeOnObservabilityPage() {
       expect(await browser.getCurrentUrl()).contain('app/integrations/browse/observability');
-    },
-    async expectToBeOnSpacesCreatePage() {
-      expect(await browser.getCurrentUrl()).contain('app/management/kibana/spaces/create');
     },
     async expectToBeOnSpacesCreatePage() {
       expect(await browser.getCurrentUrl()).contain('app/management/kibana/spaces/create');
