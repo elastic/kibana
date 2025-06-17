@@ -18,7 +18,7 @@ const GoToAction: React.FC<GoToDiscoverButtonProps> = ({ state }) => {
   const href = url?.pathAndQuery;
 
   const actionLabel = url?.actionLabel;
-  const iconType = state?.iconType as IconType;
+  const iconType = url?.iconType as IconType;
   if (!href || !actionLabel) {
     return null;
   }

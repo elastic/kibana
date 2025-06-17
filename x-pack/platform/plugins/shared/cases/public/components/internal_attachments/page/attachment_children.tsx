@@ -7,15 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiSpacer,
-  EuiLink,
-  EuiCallOut,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiLink, EuiCallOut, EuiText, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import type { PageAttachmentPersistedState } from './types';
 
 interface AttachmentChildrenProps {
@@ -51,7 +43,6 @@ export const PageAttachmentChildren: React.FC<AttachmentChildrenProps> = ({
 
   return (
     <>
-      <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiIcon type={persistableStateAttachmentState.url.iconType} size="m" />
