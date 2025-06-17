@@ -185,7 +185,7 @@ describe('Migrate handlers', () => {
     const mockSettings = {
       enrollment_token: 'token123',
       uri: 'https://example.com',
-      agentIds,
+      agents: agentIds,
     };
     const mockActionResponse = { id: 'action-id' };
 
