@@ -16,7 +16,7 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { APP_ID, LOCAL_STORAGE_KEY } from '../common/constants';
 
 const LOCAL_CONVERSATIONS_MIGRATION_STATUS_TOAST_TITLE = i18n.translate(
-  'xpack.securitySolution.assistant.conversationMigrationStatus.title',
+  'xpack.elasticAssistantPlugin.assistant.conversationMigrationStatus.title',
   {
     defaultMessage: 'Local storage conversations persisted successfully.',
   }

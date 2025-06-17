@@ -11,6 +11,7 @@
     "scripts/**/*.ts",
     // must declare *.json explicitly per https://github.com/microsoft/TypeScript/issues/25636
     "server/**/*.json",
+    "public/**/*",
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
