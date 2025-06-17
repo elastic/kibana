@@ -120,7 +120,6 @@ export const getSerializedState = ({
     syncTooltips,
     hidePanelTitles,
   };
-  const savedPanels = convertPanelSectionMapsToPanelsArray(panels, sections, true);
 
   /**
    * Parse global time filter settings
@@ -145,7 +144,7 @@ export const getSerializedState = ({
     refreshInterval,
     timeRestore,
     options,
-    panels: savedPanels,
+    panels,
     timeFrom,
     title,
     timeTo,
