@@ -10,7 +10,10 @@
 import React, { useCallback, useMemo } from 'react';
 import type { DataView } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
-import type { AppMenuActionSubmenuSecondary } from '@kbn/discover-utils';
+import type {
+  AppMenuActionSubmenuSecondary,
+  AppMenuSubmenuActionSecondary,
+} from '@kbn/discover-utils';
 import { AppMenuActionId, AppMenuActionType } from '@kbn/discover-utils';
 import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { AlertConsumers, ES_QUERY_ID, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
@@ -130,54 +133,62 @@ export const getAlertsAppMenuItem = ({
       defaultMessage: 'Alerts',
     }),
     testId: 'discoverAlertsButton',
-    actions: [
-      {
-        id: AppMenuActionId.createRule,
-        type: AppMenuActionType.secondary,
-        controlProps: {
-          label: i18n.translate('discover.alerts.createSearchThreshold', {
-            defaultMessage: 'Create search threshold rule',
-          }),
-          iconType: 'bell',
-          testId: 'discoverCreateAlertButton',
-          disableButton: !hasTimeFieldName,
-          tooltip: hasTimeFieldName
-            ? undefined
-            : i18n.translate('discover.alerts.missedTimeFieldToolTip', {
-                defaultMessage: 'Data view does not have a time field.',
-              }),
-          onClick: async (params) => {
-            return (
-              <CreateAlertFlyout
-                {...params}
-                discoverParams={discoverParams}
-                services={services}
-                stateContainer={stateContainer}
-              />
-            );
+    actions: services.capabilities.management?.insightsAndAlerting?.triggersActions
+      ? [
+          ...((discoverParams.authorizedRuleTypeIds.includes(ES_QUERY_ID)
+            ? [
+                {
+                  id: AppMenuActionId.createRule,
+                  type: AppMenuActionType.secondary,
+                  controlProps: {
+                    label: i18n.translate('discover.alerts.createSearchThreshold', {
+                      defaultMessage: 'Create search threshold rule',
+                    }),
+                    iconType: 'bell',
+                    testId: 'discoverCreateAlertButton',
+                    disableButton: !hasTimeFieldName,
+                    tooltip: hasTimeFieldName
+                      ? undefined
+                      : i18n.translate('discover.alerts.missedTimeFieldToolTip', {
+                          defaultMessage: 'Data view does not have a time field.',
+                        }),
+                    onClick: async (params) => {
+                      return (
+                        <CreateAlertFlyout
+                          {...params}
+                          discoverParams={discoverParams}
+                          services={services}
+                          stateContainer={stateContainer}
+                        />
+                      );
+                    },
+                  },
+                },
+              ]
+            : []) as AppMenuSubmenuActionSecondary[]),
+          {
+            id: 'alertsDivider',
+            type: AppMenuActionType.submenuHorizontalRule,
+            order: 109,
           },
-        },
-      },
-      {
-        id: 'alertsDivider',
-        type: AppMenuActionType.submenuHorizontalRule,
-      },
-      {
-        id: AppMenuActionId.manageRulesAndConnectors,
-        type: AppMenuActionType.secondary,
-        controlProps: {
-          label: i18n.translate('discover.alerts.manageRulesAndConnectors', {
-            defaultMessage: 'Manage rules and connectors',
-          }),
-          iconType: 'tableOfContents',
-          testId: 'discoverManageAlertsButton',
-          href: services.application.getUrlForApp(
-            'management/insightsAndAlerting/triggersActions/rules'
-          ),
-          onClick: undefined,
-        },
-      },
-    ],
+          {
+            id: AppMenuActionId.manageRulesAndConnectors,
+            type: AppMenuActionType.secondary,
+            order: 110,
+            controlProps: {
+              label: i18n.translate('discover.alerts.manageRulesAndConnectors', {
+                defaultMessage: 'Manage rules and connectors',
+              }),
+              iconType: 'tableOfContents',
+              testId: 'discoverManageAlertsButton',
+              href: services.application.getUrlForApp(
+                'management/insightsAndAlerting/triggersActions/rules'
+              ),
+              onClick: undefined,
+            },
+          },
+        ]
+      : [],
   };
 };
 
