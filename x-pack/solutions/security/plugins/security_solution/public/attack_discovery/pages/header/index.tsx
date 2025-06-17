@@ -71,7 +71,7 @@ const HeaderComponent: React.FC<Props> = ({
     } else {
       setIsEISCostTourDisabled(false);
     }
-  }, [connectorsAreConfigured, inferenceEnabled, isEISCostTourDisabled, showFlyout]);
+  }, [connectorsAreConfigured, inferenceEnabled, isEISCostTourDisabled, showFlyout, spaceId]);
 
   const handleCancel = useCallback(() => {
     setDidCancel(true);
