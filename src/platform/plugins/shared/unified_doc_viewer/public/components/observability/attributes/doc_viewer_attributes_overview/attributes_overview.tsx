@@ -11,6 +11,7 @@ import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { EuiSpacer, EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { SHOW_MULTIFIELDS, getShouldShowFieldHandler } from '@kbn/discover-utils';
 import {
   LOCAL_STORAGE_KEY_SEARCH_TERM,
   useTableFilters,
@@ -21,7 +22,7 @@ import {
   getTabContentAvailableHeight,
 } from '../../../doc_viewer_source/get_height';
 import { AttributesAccordion } from './attributes_accordion';
-import { getAttributesAccordionTitle } from './get_attributes_accordion_title';
+import { getDataStreamType } from './get_data_stream_type';
 
 export function AttributesOverview({
   columns,
@@ -34,46 +35,92 @@ export function AttributesOverview({
   onRemoveColumn,
 }: DocViewRenderProps) {
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
-  const { storage } = getUnifiedDocViewerServices();
+  const { storage, uiSettings } = getUnifiedDocViewerServices();
+  const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const { searchTerm, onChangeSearchTerm } = useTableFilters({
     storage,
     storageKey: LOCAL_STORAGE_KEY_SEARCH_TERM,
   });
 
-  const flattened = hit.flattened || {};
+  const flattened = hit.flattened;
 
-  const attributesTitle = getAttributesAccordionTitle(hit);
+  const shouldShowFieldHandler = useMemo(
+    () => getShouldShowFieldHandler(Object.keys(flattened), dataView, showMultiFields),
+    [flattened, dataView, showMultiFields]
+  );
+  const signalType = getDataStreamType(hit);
+
+  let attributesTitle: string;
+  switch (signalType) {
+    case 'logs':
+      attributesTitle = i18n.translate(
+        'unifiedDocViewer.docView.attributes.signalAttributesTitle.logs',
+        {
+          defaultMessage: 'Log attributes',
+        }
+      );
+      break;
+    case 'metrics':
+      attributesTitle = i18n.translate(
+        'unifiedDocViewer.docView.attributes.signalAttributesTitle.metrics',
+        {
+          defaultMessage: 'Metric attributes',
+        }
+      );
+      break;
+    case 'traces':
+      attributesTitle = i18n.translate(
+        'unifiedDocViewer.docView.attributes.signalAttributesTitle.traces',
+        {
+          defaultMessage: 'Span attributes',
+        }
+      );
+      break;
+    default:
+      attributesTitle = i18n.translate(
+        'unifiedDocViewer.docView.attributes.signalAttributesTitle.default',
+        {
+          defaultMessage: 'Attributes',
+        }
+      );
+  }
 
   const allFields = Object.keys(flattened);
 
+  // it filters out multifields that have a parent, to prevent entries for multifields like this: field, field.keyword, field.whatever
+  const filteredFields = useMemo(
+    () => allFields.filter(shouldShowFieldHandler),
+    [allFields, shouldShowFieldHandler]
+  );
+
   const attributesFields = useMemo(
     () =>
-      allFields.filter(
+      filteredFields.filter(
         (name) =>
           name.startsWith('attributes.') &&
           !name.startsWith('resource.attributes.') &&
           !name.startsWith('scope.attributes.') &&
           name.toLowerCase().includes(searchTerm.toLowerCase())
       ),
-    [allFields, searchTerm]
+    [filteredFields, searchTerm]
   );
   const resourceAttributesFields = useMemo(
     () =>
-      allFields.filter(
+      filteredFields.filter(
         (name) =>
           name.startsWith('resource.attributes.') &&
           name.toLowerCase().includes(searchTerm.toLowerCase())
       ),
-    [allFields, searchTerm]
+    [filteredFields, searchTerm]
   );
   const scopeAttributesFields = useMemo(
     () =>
-      allFields.filter(
+      filteredFields.filter(
         (name) =>
           name.startsWith('scope.attributes.') &&
           name.toLowerCase().includes(searchTerm.toLowerCase())
       ),
-    [allFields, searchTerm]
+    [filteredFields, searchTerm]
   );
 
   const containerHeight = containerRef

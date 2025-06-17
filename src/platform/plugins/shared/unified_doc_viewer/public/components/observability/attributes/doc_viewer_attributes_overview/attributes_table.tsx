@@ -11,7 +11,6 @@ import React, { useMemo } from 'react';
 import { EuiDataGrid, EuiDataGridProps } from '@elastic/eui';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { i18n } from '@kbn/i18n';
-import { SHOW_MULTIFIELDS, getShouldShowFieldHandler } from '@kbn/discover-utils';
 import { TableCell } from '../../../doc_viewer_table/table_cell';
 import {
   getFieldCellActions,
@@ -41,12 +40,7 @@ export const AttributesTable: React.FC<AttributesTableProps> = ({
   onRemoveColumn,
 }) => {
   const flattened = hit.flattened;
-  const { fieldFormats, toasts, uiSettings } = getUnifiedDocViewerServices();
-  const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
-  const shouldShowFieldHandler = useMemo(
-    () => getShouldShowFieldHandler(Object.keys(flattened), dataView, showMultiFields),
-    [flattened, dataView, showMultiFields]
-  );
+  const { fieldFormats, toasts } = getUnifiedDocViewerServices();
 
   const onToggleColumn = useMemo(() => {
     if (!onRemoveColumn || !onAddColumn || !columns) {
@@ -62,11 +56,8 @@ export const AttributesTable: React.FC<AttributesTableProps> = ({
   }, [onRemoveColumn, onAddColumn, columns]);
 
   const displayedFields = useMemo(
-    () =>
-      fields
-        .filter((field) => field.toLowerCase().includes(searchTerm.toLowerCase()))
-        .filter((field) => shouldShowFieldHandler(field)),
-    [fields, searchTerm, shouldShowFieldHandler]
+    () => fields.filter((field) => field.toLowerCase().includes(searchTerm.toLowerCase())),
+    [fields, searchTerm]
   );
 
   const rows: FieldRow[] = useMemo(

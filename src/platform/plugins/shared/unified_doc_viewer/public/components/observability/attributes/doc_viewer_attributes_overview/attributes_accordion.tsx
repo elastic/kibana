@@ -54,7 +54,7 @@ export const AttributesAccordion: React.FC<AttributesAccordionProps> = ({
         {fields.length}
       </EuiNotificationBadge>
     }
-    paddingSize="xl"
+    paddingSize="m"
   >
     <AttributesTable
       hit={hit}
