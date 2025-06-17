@@ -41,7 +41,10 @@ export const AddToCaseOpenModal = ({
     });
     const attachments = {
       persistableStateAttachmentState: {
-        pathname: url,
+        url: {
+          pathAndQuery: url,
+          label: dashboardTitle,
+        },
         label: dashboardTitle,
         type: 'dashboard',
         icon: 'dashboardApp',

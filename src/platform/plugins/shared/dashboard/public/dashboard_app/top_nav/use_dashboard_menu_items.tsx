@@ -120,6 +120,34 @@ export const useDashboardMenuItems = ({
     [dashboardApi, hasUnsavedChanges, viewMode, isMounted]
   );
 
+  function splitCanvasVertically(
+    canvas: HTMLCanvasElement,
+    maxChunkHeight = 2000
+  ): HTMLCanvasElement[] {
+    const parts: HTMLCanvasElement[] = [];
+    const width = canvas.width;
+    const height = canvas.height;
+
+    const partsCount = Math.ceil(height / maxChunkHeight);
+
+    for (let i = 0; i < partsCount; i++) {
+      const chunkHeight = i === partsCount - 1 ? height - i * maxChunkHeight : maxChunkHeight;
+
+      const chunkCanvas = document.createElement('canvas');
+      chunkCanvas.width = width;
+      chunkCanvas.height = chunkHeight;
+
+      const ctx = chunkCanvas.getContext('2d');
+      if (!ctx) continue;
+
+      ctx.drawImage(canvas, 0, i * maxChunkHeight, width, chunkHeight, 0, 0, width, chunkHeight);
+
+      parts.push(chunkCanvas);
+    }
+
+    return parts;
+  }
+
   /**
    * Register all of the top nav configs that can be used by dashboard.
    */
@@ -130,10 +158,21 @@ export const useDashboardMenuItems = ({
         return null;
       }
 
+      const originalScrollTop = element.scrollTop;
+      element.scrollTop = 0;
+
       try {
-        const canvas = await html2canvas(element);
-        const dataUrl = canvas.toDataURL('image/png');
-        setScreenshot(dataUrl);
+        const canvas = await html2canvas(element, {
+          scrollY: -window.scrollY,
+          scale: 0.9,
+        });
+
+        element.scrollTop = originalScrollTop;
+
+        const splitCanvases = splitCanvasVertically(canvas);
+        const base64Chunks = splitCanvases.map((chunk) => chunk.toDataURL('image/jpeg', 0.6));
+
+        setScreenshot(base64Chunks);
       } catch (error) {
         setScreenshot(null);
       }

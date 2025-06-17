@@ -15,6 +15,7 @@ export interface PageAttachmentPersistedState extends PersistableStateAttachment
     label: string;
   };
   snapshot: {
-    imgData: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    imgData: any;
   } | null;
 }
