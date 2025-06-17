@@ -460,11 +460,19 @@ describe('Data Streams tab', () => {
 
         const ds1 = createDataStreamPayload({
           name: 'dataStream1',
-          privileges: { delete_index: true, manage_data_stream_lifecycle: true },
+          privileges: {
+            delete_index: true,
+            manage_data_stream_lifecycle: true,
+            read_failure_store: true,
+          },
         });
         const ds2 = createDataStreamPayload({
           name: 'dataStream2',
-          privileges: { delete_index: true, manage_data_stream_lifecycle: true },
+          privileges: {
+            delete_index: true,
+            manage_data_stream_lifecycle: true,
+            read_failure_store: true,
+          },
         });
 
         setLoadDataStreamsResponse([ds1, ds2]);
@@ -1217,20 +1225,36 @@ describe('Data Streams tab', () => {
 
     const dataStreamFullPermissions = createDataStreamPayload({
       name: 'dataStreamFullPermissions',
-      privileges: { delete_index: true, manage_data_stream_lifecycle: true },
+      privileges: {
+        delete_index: true,
+        manage_data_stream_lifecycle: true,
+        read_failure_store: true,
+      },
     });
     const dataStreamNoDelete = createDataStreamPayload({
       name: 'dataStreamNoDelete',
-      privileges: { delete_index: false, manage_data_stream_lifecycle: true },
+      privileges: {
+        delete_index: false,
+        manage_data_stream_lifecycle: true,
+        read_failure_store: true,
+      },
     });
     const dataStreamNoEditRetention = createDataStreamPayload({
       name: 'dataStreamNoEditRetention',
-      privileges: { delete_index: true, manage_data_stream_lifecycle: false },
+      privileges: {
+        delete_index: true,
+        manage_data_stream_lifecycle: false,
+        read_failure_store: true,
+      },
     });
 
     const dataStreamNoPermissions = createDataStreamPayload({
       name: 'dataStreamNoPermissions',
-      privileges: { delete_index: false, manage_data_stream_lifecycle: false },
+      privileges: {
+        delete_index: false,
+        manage_data_stream_lifecycle: false,
+        read_failure_store: false,
+      },
     });
 
     describe('delete', () => {

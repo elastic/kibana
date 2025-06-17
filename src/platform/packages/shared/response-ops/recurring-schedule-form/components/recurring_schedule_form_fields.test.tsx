@@ -18,6 +18,7 @@ import type { RecurringSchedule } from '../types';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { getRecurringScheduleFormSchema } from '../schemas/recurring_schedule_form_schema';
 import { RecurrenceEnd } from '../constants';
+import { Frequency } from '@kbn/rrule';
 
 const baseProps: RecurringScheduleFieldsProps = {
   startDate: '2023-03-24',
@@ -29,7 +30,7 @@ interface FormValue {
 
 const initialValue: FormValue = {
   recurringSchedule: {
-    frequency: 'CUSTOM',
+    frequency: Frequency.WEEKLY,
     ends: RecurrenceEnd.NEVER,
   },
 };
@@ -57,7 +58,7 @@ describe('RecurringScheduleForm', () => {
     );
 
     expect(screen.getByTestId('frequency-field')).toBeInTheDocument();
-    expect(screen.queryByTestId('custom-recurring-form')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('customRecurringScheduleIntervalInput')).not.toBeInTheDocument();
     expect(screen.getByTestId('ends-field')).toBeInTheDocument();
     expect(screen.queryByTestId('until-field')).not.toBeInTheDocument();
     expect(screen.queryByTestId('count-field')).not.toBeInTheDocument();
@@ -87,5 +88,29 @@ describe('RecurringScheduleForm', () => {
 
     await userEvent.click(btn);
     expect(await screen.findByTestId('count-field')).toBeInTheDocument();
+  });
+
+  it('renders custom schedule if frequency = daily', async () => {
+    render(
+      <TestWrapper
+        iv={{ recurringSchedule: { frequency: Frequency.DAILY, ends: RecurrenceEnd.NEVER } }}
+      >
+        <RecurringScheduleFormFields {...baseProps} />
+      </TestWrapper>
+    );
+
+    expect(
+      await screen.findByTestId('customRecurringScheduleByWeekdayButtonGroup')
+    ).toBeInTheDocument();
+  });
+
+  it('renders custom schedule if frequency = custom', async () => {
+    render(
+      <TestWrapper iv={{ recurringSchedule: { frequency: 'CUSTOM', ends: RecurrenceEnd.NEVER } }}>
+        <RecurringScheduleFormFields {...baseProps} />
+      </TestWrapper>
+    );
+
+    expect(await screen.findByTestId('customRecurringScheduleIntervalInput')).toBeInTheDocument();
   });
 });

@@ -442,7 +442,9 @@ describe('SentinelOneActionsClient class', () => {
         applyEsClientSearchMock({
           esClientMock: classConstructorOptions.esClient,
           index: ENDPOINT_ACTIONS_INDEX,
-          response: actionRequestsSearchResponse,
+          response: jest
+            .fn(() => s1DataGenerator.toEsSearchResponse([]))
+            .mockReturnValueOnce(actionRequestsSearchResponse),
           pitUsage: true,
         });
 
@@ -651,7 +653,9 @@ describe('SentinelOneActionsClient class', () => {
         applyEsClientSearchMock({
           esClientMock: classConstructorOptions.esClient,
           index: ENDPOINT_ACTIONS_INDEX,
-          response: actionRequestsSearchResponse,
+          response: jest
+            .fn(() => s1DataGenerator.toEsSearchResponse([]))
+            .mockReturnValueOnce(actionRequestsSearchResponse),
           pitUsage: true,
         });
 
@@ -796,7 +800,9 @@ describe('SentinelOneActionsClient class', () => {
         applyEsClientSearchMock({
           esClientMock: classConstructorOptions.esClient,
           index: ENDPOINT_ACTIONS_INDEX,
-          response: actionRequestsSearchResponse,
+          response: jest
+            .fn(() => s1DataGenerator.toEsSearchResponse([]))
+            .mockReturnValueOnce(actionRequestsSearchResponse),
           pitUsage: true,
         });
 
@@ -952,7 +958,9 @@ describe('SentinelOneActionsClient class', () => {
           applyEsClientSearchMock({
             esClientMock: classConstructorOptions.esClient,
             index: ENDPOINT_ACTIONS_INDEX,
-            response: actionRequestsSearchResponse,
+            response: jest
+              .fn(() => s1DataGenerator.toEsSearchResponse([]))
+              .mockReturnValueOnce(actionRequestsSearchResponse),
             pitUsage: true,
           });
 
@@ -1052,7 +1060,9 @@ describe('SentinelOneActionsClient class', () => {
           applyEsClientSearchMock({
             esClientMock: classConstructorOptions.esClient,
             index: ENDPOINT_ACTIONS_INDEX,
-            response: actionRequestsSearchResponse,
+            response: jest
+              .fn(() => s1DataGenerator.toEsSearchResponse([]))
+              .mockReturnValueOnce(actionRequestsSearchResponse),
             pitUsage: true,
           });
 
@@ -1136,7 +1146,9 @@ describe('SentinelOneActionsClient class', () => {
           applyEsClientSearchMock({
             esClientMock: classConstructorOptions.esClient,
             index: ENDPOINT_ACTIONS_INDEX,
-            response: actionRequestsSearchResponse,
+            response: jest
+              .fn(() => s1DataGenerator.toEsSearchResponse([]))
+              .mockReturnValueOnce(actionRequestsSearchResponse),
             pitUsage: true,
           });
 

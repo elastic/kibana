@@ -20,7 +20,7 @@ export function registerGetApmDatasetInfoFunction({
   registerFunction(
     {
       name: 'get_apm_dataset_info',
-      visibility: FunctionVisibility.AssistantOnly,
+      visibility: FunctionVisibility.All,
       description: `Use this function to get information about APM data.`,
       parameters: {
         type: 'object',

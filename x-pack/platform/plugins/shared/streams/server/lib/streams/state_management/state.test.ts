@@ -21,6 +21,7 @@ import { StreamChange } from './types';
 import { ElasticsearchAction } from './execution_plan/types';
 import { ExecutionPlan } from './execution_plan/execution_plan';
 import { Streams } from '@kbn/streams-schema';
+import { LockManagerService } from '@kbn/lock-manager';
 
 describe('State', () => {
   const searchMock = jest.fn();
@@ -29,6 +30,9 @@ describe('State', () => {
   };
   const stateDependenciesMock = {
     storageClient: storageClientMock,
+    lockManager: {
+      withLock: (_, cb) => cb(),
+    } as LockManagerService,
     isDev: true,
   } as any;
 
