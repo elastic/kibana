@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { isEmpty } from 'lodash/fp';
 import {
   EuiDescriptionList,
@@ -24,7 +24,6 @@ import type { Filter } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
-import { isDataView } from '../../../../common/components/query_bar';
 import type {
   AlertSuppressionMissingFieldsStrategy,
   RequiredFieldArray,
@@ -58,6 +57,7 @@ import {
 import { getQueryLanguageLabel } from './helpers';
 import { useDefaultIndexPattern } from '../../hooks/use_default_index_pattern';
 import { useDataView } from './three_way_diff/final_edit/fields/hooks/use_data_view';
+import { matchFiltersToIndexPattern } from '../../../../common/components/query_bar/match_filters_to_index_pattern';
 
 interface SavedQueryNameProps {
   savedQueryName: string;
@@ -87,29 +87,16 @@ export const Filters = ({
     ? { dataViewId }
     : { indexPatterns: index ?? defaultIndexPattern };
   const { dataView } = useDataView(useDataViewParams);
+
   const isEsql = filters.some((filter) => filter?.query?.language === 'esql');
-  const searchBarFilters = useMemo(() => {
-    if (!index || isDataView(index) || isEsql) {
-      return filters;
-    }
-    const filtersWithUpdatedMetaIndex = filters.map((filter) => {
-      return {
-        ...filter,
-        meta: {
-          ...filter.meta,
-          index: index.join(','),
-        },
-      };
-    });
 
-    return filtersWithUpdatedMetaIndex;
-  }, [filters, index, isEsql]);
-
-  if (!dataView) {
+  if (!dataView?.id || isEsql) {
     return null;
   }
 
-  const flattenedFilters = mapAndFlattenFilters(searchBarFilters);
+  const flattenedFilters = mapAndFlattenFilters(filters);
+  const matchedFilters = matchFiltersToIndexPattern(dataView.id, flattenedFilters);
+
   const styles = filtersStyles;
 
   return (
@@ -120,7 +107,7 @@ export const Filters = ({
       responsive={false}
       gutterSize="xs"
     >
-      <FilterItems filters={flattenedFilters} indexPatterns={[dataView]} readOnly />
+      <FilterItems filters={matchedFilters} indexPatterns={[dataView]} readOnly />
     </EuiFlexGroup>
   );
 };
