@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createGrokCommand } from './grok';
 import {
   CompositeForkSubQueryContext,
   ForkCommandContext,
@@ -26,6 +25,7 @@ import { createStatsCommand } from './stats';
 import { createWhereCommand } from './where';
 import { createCompletionCommand } from './completion';
 import { createChangePointCommand } from './change_point';
+import { createGrokCommand } from './grok';
 
 export const createForkCommand = (ctx: ForkCommandContext): ESQLCommand<'fork'> => {
   const command = createCommand<'fork'>('fork', ctx);
