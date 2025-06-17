@@ -5,25 +5,26 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
-  EuiTitle,
-  EuiText,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiSpacer,
   EuiImage,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { CREATE_INDEX } from '../../../common/constants';
+import React from 'react';
 
 import VectorSearchImage from '../../assets/vector_search.svg';
 import { useKibana } from '../../hooks/use_kibana';
 
 export const VectorSearch: React.FC = () => {
-  const { http } = useKibana().services;
+  const { share } = useKibana().services;
+  const createIndexUrl = share?.url.locators.get('SEARCH_CREATE_INDEX')?.useUrl({});
+
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem grow={false}>
@@ -131,7 +132,7 @@ export const VectorSearch: React.FC = () => {
                   <EuiButton
                     iconType="plusInCircle"
                     size="s"
-                    href={http.basePath.prepend(CREATE_INDEX)}
+                    href={createIndexUrl}
                     data-test-subj="createVectorIndexButton"
                   >
                     {i18n.translate(

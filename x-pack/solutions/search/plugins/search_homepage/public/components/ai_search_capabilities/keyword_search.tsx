@@ -17,13 +17,13 @@ import {
   EuiImage,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { CREATE_INDEX } from '../../../common/constants';
 
 import KeywordSearchImage from '../../assets/keyword_search.svg';
 import { useKibana } from '../../hooks/use_kibana';
 
 export const KeywordSearch: React.FC = () => {
-  const { http } = useKibana().services;
+  const { share } = useKibana().services;
+  const createIndexUrl = share?.url.locators.get('SEARCH_CREATE_INDEX')?.useUrl({});
 
   return (
     <EuiFlexGroup direction="column">
@@ -131,7 +131,7 @@ export const KeywordSearch: React.FC = () => {
                 <div>
                   <EuiButton
                     iconType="plusInCircle"
-                    href={http.basePath.prepend(CREATE_INDEX)}
+                    href={createIndexUrl}
                     size="s"
                     data-test-subj="createKeywordIndexButton"
                   >
