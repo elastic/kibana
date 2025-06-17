@@ -131,6 +131,7 @@ export class SharePlugin
           title: 'Unused URLs Cleanup',
           description: "Deletes unused saved objects of type 'url'",
           maxAttempts: 5,
+          maxConcurrency: 1,
           createTaskRunner: () => ({
             run: async () => {
               await runDeleteUnusedUrlsTask({
