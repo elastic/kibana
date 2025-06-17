@@ -55,14 +55,11 @@ export function useRestorableStateInTabContent<StateT extends Record<string, any
   getDefaultState: () => StateT
 ): [StateT, (handler: (prevState: StateT) => StateT) => void] {
   const context = useContext(TabContentContext);
-  if (!context) {
-    throw new Error('useTabContentComponentState must be used within a TabContentContext provider');
-  }
   const [state, setState] = useState<StateT>(() => getDefaultState());
 
   useEffect(() => {
     const initialState = context.restorableStatePerTabContentComponent$.getValue()?.[namespace];
-    console.log('Initializing restorable state for namespace:', namespace, initialState);
+
     if (initialState) {
       setState(() => {
         const nextState: StateT = { ...getDefaultState() };
@@ -84,7 +81,6 @@ export function useRestorableStateInTabContent<StateT extends Record<string, any
           ...context.restorableStatePerTabContentComponent$.getValue(),
           [namespace]: nextState,
         });
-        console.log(`Updated restorable state for namespace "${namespace}":`, nextState);
         return nextState;
       });
     },
