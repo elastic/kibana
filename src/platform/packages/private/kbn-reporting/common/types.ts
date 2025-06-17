@@ -11,10 +11,10 @@ import type {
   LayoutParams,
   PerformanceMetrics as ScreenshotMetrics,
 } from '@kbn/screenshotting-plugin/common';
+import type { Rrule } from '@kbn/task-manager-plugin/server/task';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { JOB_STATUS } from './constants';
 import type { LocatorParams } from './url';
-import { Rrule } from '@kbn/task-manager-plugin/server/task';
 
 export * from './url';
 
