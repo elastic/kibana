@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { ResponseActionRequestTag } from '../../constants';
 import { getUnExpiredActionsEsQuery } from '../../utils/fetch_space_ids_with_maybe_pending_actions';
 import { catchAndWrapError } from '../../../../utils';
 import {
@@ -164,6 +165,7 @@ export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
   Pick<LogsEndpointAction<TParameters, TOutputContent, TMeta>, 'meta'> & {
     command: ResponseActionsApiCommandNames;
     actionId?: string;
+    tags?: ResponseActionRequestTag[];
   };
 
 export type ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
@@ -642,6 +644,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       user: {
         id: this.options.username,
       },
+      tags: actionRequest.tags ?? [],
       meta: actionRequest.meta,
       ...(errorMsg ? { error: { message: errorMsg } } : {}),
       ...(actionRequest.ruleId && actionRequest.ruleName

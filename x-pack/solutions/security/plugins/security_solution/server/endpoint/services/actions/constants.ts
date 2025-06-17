@@ -38,5 +38,5 @@ export const ALLOWED_ACTION_REQUEST_TAGS = Object.freeze({
   integrationPolicyDeleted: 'INTEGRATION-POLICY-DELETED',
 } as const);
 
-type ResponseActionRequestTag =
+export type ResponseActionRequestTag =
   (typeof ALLOWED_ACTION_REQUEST_TAGS)[keyof typeof ALLOWED_ACTION_REQUEST_TAGS];
