@@ -9,11 +9,19 @@ import type { Logger } from '@kbn/logging';
 import { StorageContext } from '@kbn/content-management-plugin/server';
 import { SavedObject, SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import Boom from '@hapi/boom';
-import { SearchQuery } from '@kbn/content-management-plugin/common';
+import { CreateResult, SearchQuery } from '@kbn/content-management-plugin/common';
 import type { MapAttributes, MapItem, MapsSearchOut } from '../../common/content_management';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common';
-import { MapsSavedObjectAttributes, MapsGetOut, MapsSearchOptions } from './schema/v1/types';
-import { savedObjectToItem } from './schema/v1/transform_utils';
+import {
+  MapsSavedObjectAttributes,
+  MapsGetOut,
+  MapsSearchOptions,
+  MapsCreateOptions,
+  MapsCreateOut,
+  MapsUpdateOptions,
+  MapsUpdateOut,
+} from './schema/v1/types';
+import { savedObjectToItem, itemToSavedObject } from './schema/v1/transform_utils';
 import { cmServicesDefinition } from './schema/cm_services';
 
 const savedObjectClientFromRequest = async (ctx: StorageContext) => {
@@ -149,6 +157,137 @@ export class MapsStorage {
   async bulkGet(): Promise<never> {
     // Not implemented
     throw new Error(`[bulkGet] has not been implemented. See MapsStorage class.`);
+  }
+
+  async create(
+    ctx: StorageContext,
+    data: MapAttributes,
+    options: MapsCreateOptions
+  ): Promise<MapsCreateOut> {
+    const transforms = ctx.utils.getTransforms(cmServicesDefinition);
+    const soClient = await savedObjectClientFromRequest(ctx);
+    this.logger.warn(`@@@+--------------------------------create+_______`);
+
+    // Validate input (data & options) & UP transform them to the latest version
+    const { value: dataToLatest, error: dataError } = transforms.create.in.data.up<
+      MapAttributes,
+      MapAttributes
+    >(data);
+    if (dataError) {
+      throw Boom.badRequest(`Invalid data. ${dataError.message}`);
+    }
+
+    const { value: optionsToLatest, error: optionsError } = transforms.create.in.options.up<
+      MapsCreateOptions,
+      MapsCreateOptions
+    >(options);
+    if (optionsError) {
+      throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
+    }
+
+    const { attributes: soAttributes, references: soReferences } = itemToSavedObject({
+      attributes: dataToLatest,
+      references: options.references,
+    });
+
+    // Save data in DB
+    const savedObject = await soClient.create<MapsSavedObjectAttributes>(
+      MAP_SAVED_OBJECT_TYPE,
+      soAttributes,
+      { ...optionsToLatest, references: soReferences }
+    );
+
+    const item = savedObjectToItem(savedObject, false);
+
+    const validationError = transforms.create.out.result.validate({ item });
+    if (validationError) {
+      if (this.throwOnResultValidationError) {
+        throw Boom.badRequest(`Invalid response. ${validationError.message}`);
+      } else {
+        this.logger.warn(`Invalid response. ${validationError.message}`);
+      }
+    }
+
+    // Validate DB response and DOWN transform to the request version
+    const { value, error: resultError } = transforms.create.out.result.down<CreateResult<MapItem>>(
+      { item },
+      undefined, // do not override version
+      { validate: false } // validation is done above
+    );
+
+    if (resultError) {
+      throw Boom.badRequest(`Invalid response. ${resultError.message}`);
+    }
+
+    return value;
+  }
+
+  async update(
+    ctx: StorageContext,
+    id: string,
+    data: MapAttributes,
+    options: MapsUpdateOptions
+  ): Promise<MapsUpdateOut> {
+    const transforms = ctx.utils.getTransforms(cmServicesDefinition);
+    const soClient = await savedObjectClientFromRequest(ctx);
+
+    // Validate input (data & options) & UP transform them to the latest version
+    const { value: dataToLatest, error: dataError } = transforms.update.in.data.up<
+      MapAttributes,
+      MapAttributes
+    >(data);
+    if (dataError) {
+      throw Boom.badRequest(`Invalid data. ${dataError.message}`);
+    }
+
+    this.logger.warn(`*******************************update**********+_______`);
+    const { value: optionsToLatest, error: optionsError } = transforms.update.in.options.up<
+      MapsUpdateOptions,
+      MapsUpdateOptions
+    >(options);
+    if (optionsError) {
+      throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
+    }
+
+    const { attributes: soAttributes, references: soReferences } = itemToSavedObject({
+      attributes: dataToLatest,
+      references: options.references,
+    });
+
+    // Save data in DB
+    const partialSavedObject = await soClient.update<MapsSavedObjectAttributes>(
+      MAP_SAVED_OBJECT_TYPE,
+      id,
+      soAttributes,
+      { ...optionsToLatest, references: soReferences }
+    );
+
+    const item = savedObjectToItem(partialSavedObject, true);
+
+    const validationError = transforms.update.out.result.validate({ item });
+    if (validationError) {
+      if (this.throwOnResultValidationError) {
+        throw Boom.badRequest(`Invalid response. ${validationError.message}`);
+      } else {
+        this.logger.warn(`Invalid response. ${validationError.message}`);
+      }
+    }
+
+    // Validate DB response and DOWN transform to the request version
+    const { value, error: resultError } = transforms.update.out.result.down<
+      MapsUpdateOut,
+      MapsUpdateOut
+    >(
+      { item },
+      undefined, // do not override version
+      { validate: false } // validation is done above
+    );
+
+    if (resultError) {
+      throw Boom.badRequest(`Invalid response. ${resultError.message}`);
+    }
+
+    return value;
   }
 }
 
