@@ -22,3 +22,13 @@ export const getReferencesForPanelId = (id: string, references: Reference[]): Re
 export const getReferencesForControls = (references: Reference[]): Reference[] => {
   return references.filter((reference) => reference.name.startsWith(controlGroupReferencePrefix));
 };
+
+export const prefixReferencesFromPanel = (id: string, references: Reference[]): Reference[] => {
+  const prefix = `${id}:`;
+  return references
+    .filter((reference) => reference.type !== 'tag') // panel references should never contain tags. If they do, they must be removed
+    .map((reference) => ({
+      ...reference,
+      name: `${prefix}${reference.name}`,
+    }));
+};

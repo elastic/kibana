@@ -16,8 +16,9 @@ export type {
 
 export {
   getReferencesForPanelId,
-  getReferencesForControls
-} from './get_references';
+  getReferencesForControls,
+  prefixReferencesFromPanel
+} from './reference_utils';
 
 export {
   isDashboardSection
