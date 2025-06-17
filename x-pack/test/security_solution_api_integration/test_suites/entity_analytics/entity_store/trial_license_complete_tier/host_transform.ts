@@ -294,7 +294,7 @@ async function cleanUpEntityStore(providerContext: FtrProviderContext): Promise<
   await utils.cleanEngines();
   for (const kind of ['host', 'user', 'service', 'generic']) {
     const name : string = `entity_store_field_retention_${kind}_default_v1.0.0`;
-    await es.enrich.deletePolicy({ name: RETENTION_POLICY_NAME }, { ignore: [404] });
+    await es.enrich.deletePolicy({ name }, { ignore: [404] });
   }
   return true;
 }
