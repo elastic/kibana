@@ -30,7 +30,7 @@ export function AddToCaseModal({
   screenshot,
   isOpen,
 }: {
-  screenshot: string | null;
+  screenshot: string[] | null;
   isOpen: boolean;
 }) {
   const getCasesContext = cases?.ui?.getCasesContext;
@@ -95,7 +95,7 @@ export function AddToCaseModal({
 interface OpenAddToCaseModalProps {
   savedObjectId: string;
   dashboardTitle: string;
-  screenshot: string | null;
+  screenshot: string[] | null;
   timeRange?: TimeRange;
 }
 
