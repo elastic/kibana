@@ -23,7 +23,7 @@ const regexRuleSchema = schema.allOf([
   schema.object({
     type: schema.literal('regex'),
     pattern: schema.string(),
-    entityClass: schema.maybe(schema.string()),
+    entityClass: schema.string(),
   }),
 ]);
 
