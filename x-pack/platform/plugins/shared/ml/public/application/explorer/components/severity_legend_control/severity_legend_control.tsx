@@ -41,9 +41,12 @@ export const SeverityLegendControl: FC<SeverityControlProps> = ({
       const isCurrentlySelected = selectedSeverities.some(
         (severity) => severity.val === clickedSeverity.val
       );
+      const allSelected = selectedSeverities.length === allSeverityOptions.length;
 
       let newSelectedSeverities: SeverityOption[];
-      if (isCurrentlySelected) {
+      if (allSelected) {
+        newSelectedSeverities = [clickedSeverity];
+      } else if (isCurrentlySelected) {
         newSelectedSeverities = selectedSeverities.filter(
           (severity) => severity.val !== clickedSeverity.val
         );
@@ -53,7 +56,7 @@ export const SeverityLegendControl: FC<SeverityControlProps> = ({
 
       onChange(newSelectedSeverities);
     },
-    [selectedSeverities, onChange]
+    [selectedSeverities, allSeverityOptions, onChange]
   );
 
   const severityControl = (
