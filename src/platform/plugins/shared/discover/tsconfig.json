@@ -106,6 +106,7 @@
     "@kbn/unified-tabs",
     "@kbn/unified-histogram",
     "@kbn/alerts-ui-shared",
+    "@kbn/core-pricing-browser-mocks",
     "@kbn/index-editor"
   ],
   "exclude": ["target/**/*"]
