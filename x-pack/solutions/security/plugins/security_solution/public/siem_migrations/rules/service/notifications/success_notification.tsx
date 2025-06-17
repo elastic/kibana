@@ -49,7 +49,7 @@ const SuccessToastContent: React.FC<{ migration: RuleMigrationStats }> = ({ migr
       <EuiFlexItem>
         <FormattedMessage
           id="xpack.securitySolution.siemMigrations.rulesService.polling.successText"
-          defaultMessage="SIEM rules migration '{name}' has finished translating. Results have been added to a dedicated page."
+          defaultMessage="SIEM rules migration {name} has finished translating. Results have been added to a dedicated page."
           values={{ name: migration.name }}
         />
       </EuiFlexItem>
