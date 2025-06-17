@@ -24,8 +24,8 @@ describe('Stackframe', () => {
     const stackframe = stacktracesMock[0];
     renderWithTheme(<StackframeComponent id="test" stackframe={stackframe} />);
 
-    expect(screen.getByTestId('context')).toBeInTheDocument();
-    expect(screen.getByTestId('variables')).toBeInTheDocument();
+    expect(screen.getByTestId('stacktraceContext')).toBeInTheDocument();
+    expect(screen.getByTestId('stacktraceLocalVariables')).toBeInTheDocument();
   });
 
   it('has isLibraryFrame=false by default when has source lines', () => {
@@ -41,8 +41,8 @@ describe('Stackframe', () => {
     renderWithTheme(<StackframeComponent id="test" stackframe={stackframe} />);
 
     expect(screen.getByTestId('FrameHeading')).toBeInTheDocument();
-    expect(screen.queryByTestId('context')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('variables')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('stacktraceContext')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('stacktraceLocalVariables')).not.toBeInTheDocument();
   });
 
   it('has isLibraryFrame=false by default when has no source lines', () => {

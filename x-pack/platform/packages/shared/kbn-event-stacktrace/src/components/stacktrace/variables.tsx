@@ -32,7 +32,7 @@ export function Variables({ vars }: Props) {
     <VariablesContainer>
       <EuiAccordion
         id="local-variables"
-        data-test-subj="variables"
+        data-test-subj="stacktraceLocalVariables"
         className="euiAccordion"
         buttonContent={i18n.translate(
           'xpack.eventStacktrace.stacktraceTab.localVariablesToogleButtonLabel',
