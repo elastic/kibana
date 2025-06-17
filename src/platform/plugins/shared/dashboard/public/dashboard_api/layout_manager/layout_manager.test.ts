@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardPanelMap } from '../../common';
+import type { DashboardPanelMap } from '../../../common';
 import { initializeLayoutManager } from './layout_manager';
-import { initializeTrackPanel } from './track_panel';
+import { initializeTrackPanel } from '../track_panel';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import {
   HasLibraryTransforms,

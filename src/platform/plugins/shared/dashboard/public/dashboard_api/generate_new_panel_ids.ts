@@ -10,11 +10,11 @@
 
 import { v4 } from 'uuid';
 import type { Reference } from '@kbn/content-management-utils';
-import type { DashboardAttributes, DashboardPanel } from '../../server';
-import { getReferencesForPanelId, isDashboardSection, prefixReferencesFromPanel } from '@kbn/dashboard-plugin/common';
+import type { DashboardPanel } from '../../server';
+import { DashboardState, getReferencesForPanelId, isDashboardSection, prefixReferencesFromPanel } from '@kbn/dashboard-plugin/common';
 
-export function generateNewPanelIds(panels: DashboardAttributes['panels'], references?: Reference[]) {
-  const newPanels: DashboardAttributes['panels'] = [];
+export function generateNewPanelIds(panels: DashboardState['panels'], references?: Reference[]) {
+  const newPanels: DashboardState['panels'] = [];
   const newPanelReferences: Reference[] = [];
 
   function generateNewPanelId(panel: DashboardPanel) {

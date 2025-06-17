@@ -47,9 +47,6 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import {
   DashboardLocatorParams,
-  DashboardPanelMap,
-  DashboardPanelState,
-  DashboardSectionMap,
   DashboardSettings,
   DashboardState,
 } from '../../common';
@@ -58,20 +55,11 @@ import {
   LoadDashboardReturn,
   SaveDashboardReturn,
 } from '../services/dashboard_content_management_service/types';
+import { DashboardLayout } from './layout_manager/types';
 
 export const DASHBOARD_API_TYPE = 'dashboard';
 
 export const ReservedLayoutItemTypes: readonly string[] = ['section'] as const;
-
-export type DashboardPanel = Pick<DashboardPanelState, 'gridData'> & HasType;
-export interface DashboardLayout {
-  panels: { [uuid: string]: DashboardPanel }; // partial of DashboardPanelState
-  sections: DashboardSectionMap;
-}
-
-export interface DashboardChildState {
-  [uuid: string]: SerializedPanelState<object>;
-}
 
 export interface DashboardChildren {
   [uuid: string]: DefaultEmbeddableApi;
@@ -179,8 +167,7 @@ export interface DashboardInternalApi {
   setControlGroupApi: (controlGroupApi: ControlGroupApi) => void;
   serializeLayout: () => {
     references: Reference[];
-    panels: DashboardPanelMap;
-    sections: DashboardSectionMap;
+    panels: DashboardState['panels'];
   };
   isSectionCollapsed: (sectionId?: string) => boolean;
 }

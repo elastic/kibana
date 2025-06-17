@@ -33,26 +33,26 @@ import {
 } from '@kbn/presentation-publishing';
 import { asyncForEach } from '@kbn/std';
 
-import type { DashboardSectionMap, DashboardState } from '../../common';
-import { DashboardPanelMap } from '../../common';
-import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../common/content_management';
-import { prefixReferencesFromPanel } from '../../common/dashboard_container/persistable_state/dashboard_container_references';
-import { dashboardClonePanelActionStrings } from '../dashboard_actions/_dashboard_actions_strings';
-import { getPanelAddedSuccessString } from '../dashboard_app/_dashboard_app_strings';
-import { getPanelPlacementSetting } from '../panel_placement/get_panel_placement_settings';
-import { placeClonePanel } from '../panel_placement/place_clone_panel_strategy';
-import { runPanelPlacementStrategy } from '../panel_placement/place_new_panel_strategies';
-import { PanelPlacementStrategy } from '../plugin_constants';
-import { coreServices, usageCollectionService } from '../services/kibana_services';
-import { DASHBOARD_UI_METRIC_ID } from '../utils/telemetry_constants';
-import { areLayoutsEqual } from './are_layouts_equal';
-import type { initializeTrackPanel } from './track_panel';
-import { DashboardChildState, DashboardChildren, DashboardLayout, DashboardPanel } from './types';
+import type { DashboardSectionMap, DashboardState } from '../../../common';
+import { DashboardPanelMap } from '../../../common';
+import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../common/content_management';
+import { prefixReferencesFromPanel } from '../../common';
+import { dashboardClonePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
+import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
+import { getPanelPlacementSetting } from '../../panel_placement/get_panel_placement_settings';
+import { placeClonePanel } from '../../panel_placement/place_clone_panel_strategy';
+import { runPanelPlacementStrategy } from '../../panel_placement/place_new_panel_strategies';
+import { PanelPlacementStrategy } from '../../plugin_constants';
+import { coreServices, usageCollectionService } from '../../services/kibana_services';
+import { DASHBOARD_UI_METRIC_ID } from '../../utils/telemetry_constants';
+import { areLayoutsEqual } from '../are_layouts_equal';
+import type { initializeTrackPanel } from '../track_panel';
+import { DashboardChildState, DashboardChildren, DashboardLayout, DashboardPanel } from '../types';
+import { deserializeLayout } from './deserialize_layout';
 
 export function initializeLayoutManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,
-  initialPanels: DashboardPanelMap, // SERIALIZED STATE ONLY TODO Remove the DashboardPanelMap layer. We could take the Saved Dashboard Panels array here directly.
-  initialSections: DashboardSectionMap,
+  initialPanels: DashboardState['panels'],
   trackPanel: ReturnType<typeof initializeTrackPanel>,
   getReferences: (id: string) => Reference[]
 ) {
@@ -62,35 +62,14 @@ export function initializeLayoutManager(
   const children$ = new BehaviorSubject<DashboardChildren>({});
   const { layout: initialLayout, childState: initialChildState } = deserializeLayout(
     initialPanels,
-    initialSections
+    getReferences
   );
   const layout$ = new BehaviorSubject<DashboardLayout>(initialLayout); // layout is the source of truth for which panels are in the dashboard.
   let currentChildState = initialChildState; // childState is the source of truth for the state of each panel.
 
-  function deserializeLayout(panelMap: DashboardPanelMap, sectionMap: DashboardSectionMap) {
-    const layout: DashboardLayout = {
-      panels: {},
-      sections: {},
-    };
-    const childState: DashboardChildState = {};
-    Object.keys(sectionMap).forEach((sectionId) => {
-      layout.sections[sectionId] = { collapsed: false, ...sectionMap[sectionId] };
-    });
-    Object.keys(panelMap).forEach((panelId) => {
-      const { gridData, explicitInput, type } = panelMap[panelId];
-      layout.panels[panelId] = { type, gridData } as DashboardPanel;
-      childState[panelId] = {
-        rawState: explicitInput,
-        references: getReferences(panelId),
-      };
-    });
-    return { layout, childState };
-  }
-
   const serializeLayout = (): {
     references: Reference[];
-    panels: DashboardPanelMap;
-    sections: DashboardSectionMap;
+    panels: DashboardState['panels'];
   } => {
     const references: Reference[] = [];
     const layout = layout$.value;
@@ -121,13 +100,10 @@ export function initializeLayoutManager(
     return { panels, sections: { ...layout.sections }, references };
   };
 
-  const resetLayout = ({
-    panels: lastSavedPanels,
-    sections: lastSavedSections,
-  }: DashboardState) => {
+  const resetLayout = (lastSavedPanels: DashboardState['panels']) => {
     const { layout: lastSavedLayout, childState: lastSavedChildState } = deserializeLayout(
       lastSavedPanels,
-      lastSavedSections
+      getReferences
     );
 
     layout$.next(lastSavedLayout);
@@ -374,7 +350,7 @@ export function initializeLayoutManager(
       serializeLayout,
       startComparing$: (
         lastSavedState$: BehaviorSubject<DashboardState>
-      ): Observable<{ panels?: DashboardPanelMap; sections?: DashboardSectionMap }> => {
+      ): Observable<{ panels?: DashboardState['panels'] }> => {
         return layout$.pipe(
           debounceTime(100),
           combineLatestWith(
@@ -393,8 +369,8 @@ export function initializeLayoutManager(
               if (shouldLogStateDiff()) {
                 logStateDiff(
                   'dashboard layout',
-                  deserializeLayout(lastSavedPanels, lastSavedSections).layout,
-                  deserializeLayout(panels, sections).layout
+                  deserializeLayout(lastSavedPanels, getReferences).layout,
+                  deserializeLayout(panels, getReferences).layout
                 );
               }
               return { panels, sections };
