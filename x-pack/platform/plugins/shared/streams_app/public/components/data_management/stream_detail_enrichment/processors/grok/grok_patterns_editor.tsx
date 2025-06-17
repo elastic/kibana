@@ -28,12 +28,15 @@ import {
   EuiButtonIcon,
   EuiFlexItem,
   EuiSpacer,
+  EuiButtonEmptyProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DraftGrokExpression, GrokCollection } from '@kbn/grok-ui';
 import { Expression } from '@kbn/grok-ui';
 import useDebounce from 'react-use/lib/useDebounce';
 import useObservable from 'react-use/lib/useObservable';
+import { STREAMS_TIERED_AI_FEATURE } from '@kbn/streams-plugin/common';
+import { useKibana } from '../../../../../hooks/use_kibana';
 import { useStreamsEnrichmentSelector } from '../../state_management/stream_enrichment_state_machine';
 import { SortableList } from '../../sortable_list';
 import { GrokPatternSuggestion } from './grok_pattern_suggestion';
@@ -46,11 +49,14 @@ import { GrokFormState, ProcessorFormState } from '../../types';
 import { useAIFeatures } from './use_ai_features';
 
 export const GrokPatternsEditor = () => {
+  const { core } = useKibana();
   const {
     formState: { errors },
     register,
     setValue,
   } = useFormContext();
+
+  const isAIAvailableForTier = core.pricing.isFeatureAvailable(STREAMS_TIERED_AI_FEATURE.id);
 
   const grokCollection = useStreamsEnrichmentSelector(
     (machineState) => machineState.context.grokCollection
@@ -59,23 +65,6 @@ export const GrokPatternsEditor = () => {
   const { fields, append, remove, move } = useFieldArray<Pick<GrokFormState, 'patterns'>>({
     name: 'patterns',
   });
-  const {
-    definition: { stream },
-  } = useStreamDetail();
-  const previewDocuments = useSimulatorSelector((snapshot) =>
-    selectPreviewDocuments(snapshot.context)
-  );
-  const fieldValue = useWatch<ProcessorFormState, 'field'>({ name: 'field' });
-  const isValidField = useMemo(() => {
-    return Boolean(
-      fieldValue &&
-        previewDocuments.some(
-          (sample) => sample[fieldValue] && typeof sample[fieldValue] === 'string'
-        )
-    );
-  }, [previewDocuments, fieldValue]);
-  const aiFeatures = useAIFeatures();
-  const [suggestionsState, refreshSuggestions] = useGrokPatternSuggestion();
 
   const fieldsWithError = fields.map((field, id) => {
     return {
@@ -127,70 +116,120 @@ export const GrokPatternsEditor = () => {
           </SortableList>
         </EuiPanel>
       </EuiFormRow>
-      {suggestionsState.value && suggestionsState.value[0] ? (
-        <GrokPatternSuggestion
-          suggestion={suggestionsState.value[0]}
-          onAccept={() => {
-            const [suggestion] = suggestionsState.value ?? [];
-            if (suggestion) {
-              setValue(
-                'patterns',
-                suggestion.grokProcessor.patterns.map(
-                  (value) => new DraftGrokExpression(grokCollection, value)
-                )
-              );
-              setValue('pattern_definitions', suggestion.grokProcessor.pattern_definitions);
-            }
-            refreshSuggestions(null);
-          }}
-          onDismiss={() => refreshSuggestions(null)}
+      {isAIAvailableForTier ? (
+        <GrokPatternAISuggestions
+          grokCollection={grokCollection}
+          setValue={setValue}
+          onAddPattern={handleAddPattern}
         />
       ) : (
-        <>
-          <EuiFlexGroup gutterSize="l" alignItems="center">
-            {aiFeatures && (
-              <EuiFlexItem grow={false}>
-                <GeneratePatternButton
-                  aiFeatures={aiFeatures}
-                  onClick={(connectorId) =>
-                    refreshSuggestions({
-                      connectorId,
-                      streamName: stream.name,
-                      samples: previewDocuments,
-                      fieldName: fieldValue,
-                    })
-                  }
-                  isLoading={suggestionsState.loading}
-                  isDisabled={!isValidField}
-                />
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                data-test-subj="streamsAppGrokPatternsEditorAddPatternButton"
-                onClick={handleAddPattern}
-                flush="left"
-                size="s"
-                isDisabled={suggestionsState.loading}
-              >
-                {i18n.translate(
-                  'xpack.streams.streamDetailView.managementTab.enrichment.processor.grokEditor.addPattern',
-                  { defaultMessage: 'Add pattern' }
-                )}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          {aiFeatures &&
-            aiFeatures.isManagedAIConnector &&
-            !aiFeatures.hasAcknowledgedAdditionalCharges && (
-              <>
-                <EuiSpacer size="s" />
-                <AdditionalChargesCallout aiFeatures={aiFeatures} />
-              </>
-            )}
-        </>
+        <AddPatternButton onClick={handleAddPattern} />
       )}
     </>
+  );
+};
+
+const GrokPatternAISuggestions = ({
+  grokCollection,
+  setValue,
+  onAddPattern,
+}: {
+  grokCollection: GrokCollection;
+  setValue: UseFormSetValue<FieldValues>;
+  onAddPattern: () => void;
+}): React.ReactElement => {
+  const {
+    definition: { stream },
+  } = useStreamDetail();
+
+  const previewDocuments = useSimulatorSelector((snapshot) =>
+    selectPreviewDocuments(snapshot.context)
+  );
+
+  const aiFeatures = useAIFeatures();
+  const [suggestionsState, refreshSuggestions] = useGrokPatternSuggestion();
+
+  const fieldValue = useWatch<ProcessorFormState, 'field'>({ name: 'field' });
+  const isValidField = useMemo(() => {
+    return Boolean(
+      fieldValue &&
+        previewDocuments.some(
+          (sample) => sample[fieldValue] && typeof sample[fieldValue] === 'string'
+        )
+    );
+  }, [previewDocuments, fieldValue]);
+
+  if (suggestionsState.value && suggestionsState.value[0]) {
+    return (
+      <GrokPatternSuggestion
+        suggestion={suggestionsState.value[0]}
+        onAccept={() => {
+          const [suggestion] = suggestionsState.value ?? [];
+          if (suggestion) {
+            setValue(
+              'patterns',
+              suggestion.grokProcessor.patterns.map(
+                (value) => new DraftGrokExpression(grokCollection, value)
+              )
+            );
+            setValue('pattern_definitions', suggestion.grokProcessor.pattern_definitions);
+          }
+          refreshSuggestions(null);
+        }}
+        onDismiss={() => refreshSuggestions(null)}
+      />
+    );
+  }
+
+  return (
+    <>
+      <EuiFlexGroup gutterSize="l" alignItems="center">
+        {aiFeatures && (
+          <EuiFlexItem grow={false}>
+            <GeneratePatternButton
+              aiFeatures={aiFeatures}
+              onClick={(connectorId) =>
+                refreshSuggestions({
+                  connectorId,
+                  streamName: stream.name,
+                  samples: previewDocuments,
+                  fieldName: fieldValue,
+                })
+              }
+              isLoading={suggestionsState.loading}
+              isDisabled={!isValidField}
+            />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          <AddPatternButton onClick={onAddPattern} isDisabled={suggestionsState.loading} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {aiFeatures &&
+        aiFeatures.isManagedAIConnector &&
+        !aiFeatures.hasAcknowledgedAdditionalCharges && (
+          <>
+            <EuiSpacer size="s" />
+            <AdditionalChargesCallout aiFeatures={aiFeatures} />
+          </>
+        )}
+    </>
+  );
+};
+
+const AddPatternButton = (props: EuiButtonEmptyProps) => {
+  return (
+    <EuiButtonEmpty
+      data-test-subj="streamsAppGrokPatternsEditorAddPatternButton"
+      flush="left"
+      size="s"
+      {...props}
+    >
+      {i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.grokEditor.addPattern',
+        { defaultMessage: 'Add pattern' }
+      )}
+    </EuiButtonEmpty>
   );
 };
 
