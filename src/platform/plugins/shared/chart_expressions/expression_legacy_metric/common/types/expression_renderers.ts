@@ -7,16 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { $Values } from '@kbn/utility-types';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import {
-  ColorMode,
-  Labels,
-  CustomPaletteState,
-  Style as ChartStyle,
-} from '@kbn/charts-plugin/common';
-import { Style } from '@kbn/expressions-plugin/common';
-import { LabelPosition } from '../constants';
+import { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
+import type {
+  LegacyMetricAlignment,
+  LegacyMetricLabelsConfig,
+  LegacyMetricStyle,
+} from '@kbn/visualization-types-and-defaults';
 
 export const visType = 'metric';
 
@@ -25,21 +22,14 @@ export interface DimensionsVisParam {
   bucket?: ExpressionValueVisDimension | string;
 }
 
-export type LabelPositionType = $Values<typeof LabelPosition>;
-
-export type MetricStyle = Style & Pick<ChartStyle, 'bgColor' | 'labelColor'>;
-
-export type LabelsConfig = Labels & { style: Style; position: LabelPositionType };
-
-export type MetricAlignment = 'left' | 'center' | 'right';
 export interface MetricVisParam {
-  autoScaleMetricAlignment?: MetricAlignment;
+  autoScaleMetricAlignment?: LegacyMetricAlignment;
   percentageMode: boolean;
   percentageFormatPattern?: string;
   metricColorMode: ColorMode;
   palette?: CustomPaletteState;
-  labels: LabelsConfig;
-  style: MetricStyle;
+  labels: LegacyMetricLabelsConfig;
+  style: LegacyMetricStyle;
   colorFullBackground: boolean;
   autoScale?: boolean;
 }

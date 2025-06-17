@@ -10,6 +10,8 @@
 import {
   Datatable,
   DatatableColumn,
+  DatatableMeta,
+  DatatableRow,
   DimensionType,
 } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { ExpressionValueVisDimension } from '../expression_functions/vis_dimension';
@@ -82,11 +84,19 @@ const getDimensionType = (
   }
 };
 
+export interface InspectorLogTable {
+  columns: DatatableColumn[];
+  type: 'datatable';
+  meta?: DatatableMeta | undefined;
+  rows: DatatableRow[];
+  warning?: string | undefined;
+}
+
 export const prepareLogTable = (
   datatable: Datatable,
   dimensions: LayerDimension[] | Dimension[],
   removeUnmappedColumns: boolean = false
-) => {
+): InspectorLogTable => {
   const hasLayerDimensions = isLayerDimensions(dimensions);
   return {
     ...datatable,

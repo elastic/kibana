@@ -8,8 +8,3 @@
  */
 
 export const EXPRESSION_METRIC_NAME = 'legacyMetricVis';
-
-export const LabelPosition = {
-  BOTTOM: 'bottom',
-  TOP: 'top',
-} as const;

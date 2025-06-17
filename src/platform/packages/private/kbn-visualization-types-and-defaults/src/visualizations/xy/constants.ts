@@ -1,27 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
-import { $Values } from '@kbn/utility-types';
-import type { ColorMapping, PaletteOutput } from '@kbn/coloring';
-import type {
-  LegendConfig,
-  AxisExtentConfig,
-  XYCurveType,
-  FittingFunction,
-  EndValue,
-  YScaleType,
-  XScaleType,
-  LineStyle,
-  IconPosition,
-  FillStyle,
-  YAxisConfig,
-} from '@kbn/expression-xy-plugin/common';
-import { EventAnnotationConfig, EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import {
   IconChartArea,
   IconChartLine,
@@ -34,11 +20,7 @@ import {
   IconChartBarPercentage,
   IconChartBarHorizontal,
 } from '@kbn/chart-icons';
-import type { AxesSettingsConfig } from '@kbn/visualizations-plugin/common';
-
-import { CollapseFunction } from '../../../common/expressions';
-import type { VisualizationType } from '../../types';
-import type { ValueLabelConfig } from '../../../common/types';
+import { VisualizationType } from '../../types';
 
 export const YAxisModes = {
   AUTO: 'auto',
@@ -60,141 +42,21 @@ export const SeriesTypes = {
   BAR_HORIZONTAL_PERCENTAGE_STACKED: 'bar_horizontal_percentage_stacked',
 } as const;
 
-export const defaultSeriesType = SeriesTypes.BAR_STACKED;
-
-export type YAxisMode = $Values<typeof YAxisModes>;
-export type SeriesType = $Values<typeof SeriesTypes>;
-
-export interface AxisConfig extends Omit<YAxisConfig, 'extent'> {
-  extent?: AxisExtentConfig;
-}
-
-export interface LabelsOrientationConfig {
-  x: number;
-  yLeft: number;
-  yRight: number;
-}
-
-export interface YConfig {
-  forAccessor: string;
-  color?: string;
-  icon?: string;
-  lineWidth?: number;
-  lineStyle?: Exclude<LineStyle, 'dot-dashed'>;
-  fill?: FillStyle;
-  iconPosition?: IconPosition;
-  textVisibility?: boolean;
-  axisMode?: YAxisMode;
-}
-
-export interface XYDataLayerConfig {
-  layerId: string;
-  accessors: string[];
-  layerType: 'data';
-  seriesType: SeriesType;
-  xAccessor?: string;
-  simpleView?: boolean;
-  yConfig?: YConfig[];
-  splitAccessor?: string;
-  /**
-   * @deprecated use `colorMapping` config
-   */
-  palette?: PaletteOutput;
-  collapseFn?: CollapseFunction;
-  xScaleType?: XScaleType;
-  isHistogram?: boolean;
-  columnToLabel?: string;
-  colorMapping?: ColorMapping.Config;
-}
-
-export interface XYReferenceLineLayerConfig {
-  layerId: string;
-  accessors: string[];
-  yConfig?: YConfig[];
-  layerType: 'referenceLine';
-}
-
-export interface XYByValueAnnotationLayerConfig {
-  layerId: string;
-  layerType: 'annotations';
-  annotations: EventAnnotationConfig[];
-  indexPatternId: string;
-  ignoreGlobalFilters: boolean;
-  // populated only when the annotation has been forked from the
-  // version saved in the library (persisted as XYPersistedLinkedByValueAnnotationLayerConfig)
-  cachedMetadata?: {
-    title: string;
-    description: string;
-    tags: string[];
-  };
-}
-
-export type XYByReferenceAnnotationLayerConfig = XYByValueAnnotationLayerConfig & {
-  annotationGroupId: string;
-  __lastSaved: EventAnnotationGroupConfig;
-};
-
-export type XYAnnotationLayerConfig =
-  | XYByReferenceAnnotationLayerConfig
-  | XYByValueAnnotationLayerConfig;
-
-export type XYLayerConfig =
-  | XYDataLayerConfig
-  | XYReferenceLineLayerConfig
-  | XYAnnotationLayerConfig;
-
-export interface ValidXYDataLayerConfig extends XYDataLayerConfig {
-  xAccessor: NonNullable<XYDataLayerConfig['xAccessor']>;
-  layerId: string;
-}
-
-export type ValidLayer = ValidXYDataLayerConfig | XYReferenceLineLayerConfig;
-
-// Persisted parts of the state
-export interface XYState {
-  preferredSeriesType: SeriesType;
-  legend: LegendConfig;
-  valueLabels?: ValueLabelConfig;
-  fittingFunction?: FittingFunction;
-  emphasizeFitting?: boolean;
-  endValue?: EndValue;
-  xExtent?: AxisExtentConfig;
-  yLeftExtent?: AxisExtentConfig;
-  yRightExtent?: AxisExtentConfig;
-  layers: XYLayerConfig[];
-  xTitle?: string;
-  yTitle?: string;
-  yRightTitle?: string;
-  yLeftScale?: YScaleType;
-  yRightScale?: YScaleType;
-  axisTitlesVisibilitySettings?: AxesSettingsConfig;
-  tickLabelsVisibilitySettings?: AxesSettingsConfig;
-  gridlinesVisibilitySettings?: AxesSettingsConfig;
-  labelsOrientation?: LabelsOrientationConfig;
-  curveType?: XYCurveType;
-  fillOpacity?: number;
-  minBarHeight?: number;
-  hideEndzones?: boolean;
-  showCurrentTimeMarker?: boolean;
-}
-
-export type State = XYState;
-
-const barShared = {
+const barShared: Pick<VisualizationType, 'sortPriority' | 'description'> = {
   sortPriority: 1,
   description: i18n.translate('xpack.lens.bar.visualizationDescription', {
     defaultMessage: 'Compare categories or groups of data with bars.',
   }),
 };
 
-const areaShared = {
+const areaShared: Pick<VisualizationType, 'sortPriority' | 'description'> = {
   sortPriority: 3,
   description: i18n.translate('xpack.lens.area.visualizationDescription', {
     defaultMessage: 'Compare distributions of cumulative data trends.',
   }),
 };
 
-const lineShared = {
+const lineShared: VisualizationType = {
   id: 'line',
   icon: IconChartLine,
   label: i18n.translate('xpack.lens.xyVisualization.lineLabel', {

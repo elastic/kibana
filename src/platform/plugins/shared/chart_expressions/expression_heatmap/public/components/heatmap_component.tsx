@@ -44,6 +44,7 @@ import { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { IconChartHeatmap } from '@kbn/chart-icons';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import { LENS_HEATMAP_DEFAULT_PALETTE_PARAMS } from '@kbn/visualization-types-and-defaults';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
 import {
   applyPaletteParams,
@@ -55,7 +56,6 @@ import {
   LegendColorPickerWrapperContext,
   LegendColorPickerWrapper,
 } from '../utils/get_color_picker';
-import { defaultPaletteParams } from '../constants';
 import { ChartSplit } from './chart_split';
 import { getSplitDimensionAccessor, createSplitPoint } from '../utils/get_split_dimension_utils';
 
@@ -114,7 +114,7 @@ function computeColorRanges(
     paletteParams?.colors ||
     applyPaletteParams(
       paletteService,
-      { type: 'palette', name: defaultPaletteParams.name },
+      { type: 'palette', name: LENS_HEATMAP_DEFAULT_PALETTE_PARAMS.name },
       minMax
     ).map(({ color }) => color);
   // Repeat the first color at the beginning to cover below and above the defined palette
@@ -123,9 +123,9 @@ function computeColorRanges(
   const ranges = shiftAndNormalizeStops(
     {
       gradient: false,
-      range: defaultPaletteParams.rangeType,
-      rangeMin: defaultPaletteParams.rangeMin,
-      rangeMax: defaultPaletteParams.rangeMax,
+      range: LENS_HEATMAP_DEFAULT_PALETTE_PARAMS.rangeType,
+      rangeMin: LENS_HEATMAP_DEFAULT_PALETTE_PARAMS.rangeMin,
+      rangeMax: LENS_HEATMAP_DEFAULT_PALETTE_PARAMS.rangeMax,
       stops: [],
       ...paletteParams,
       colors: colors.slice(1),

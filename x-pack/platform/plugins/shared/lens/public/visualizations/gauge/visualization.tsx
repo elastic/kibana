@@ -31,17 +31,16 @@ import {
 } from '@kbn/expression-gauge-plugin/public';
 import { IconChartGauge } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { FormBasedPersistedState } from '../../datasources/form_based/types';
-import type {
-  DatasourceLayers,
-  FramePublicAPI,
+import {
+  GaugeVisualizationState,
+  LENS_GAUGE_GROUP_ID,
+  LENS_GAUGE_ID,
   OperationMetadata,
-  Suggestion,
   UserMessage,
-  Visualization,
-} from '../../types';
+} from '@kbn/visualization-types-and-defaults';
+import type { FormBasedPersistedState } from '../../datasources/form_based/types';
+import type { DatasourceLayers, FramePublicAPI, Suggestion, Visualization } from '../../types';
 import { getSuggestions } from './suggestions';
-import { GROUP_ID, LENS_GAUGE_ID, GaugeVisualizationState } from './constants';
 import { GaugeToolbar } from './toolbar_component';
 import { GaugeDimensionEditor } from './dimension_editor';
 import { generateId } from '../../id_generator';
@@ -253,7 +252,7 @@ export const getGaugeVisualization = ({
         {
           enableFormatSelector: true,
           layerId: state.layerId,
-          groupId: GROUP_ID.METRIC,
+          groupId: LENS_GAUGE_GROUP_ID.METRIC,
           groupLabel: i18n.translate('xpack.lens.gauge.metricLabel', {
             defaultMessage: 'Metric',
           }),
@@ -287,7 +286,7 @@ export const getGaugeVisualization = ({
           supportStaticValue: true,
           enableFormatSelector: false,
           layerId: state.layerId,
-          groupId: GROUP_ID.MIN,
+          groupId: LENS_GAUGE_GROUP_ID.MIN,
           groupLabel: i18n.translate('xpack.lens.gauge.minValueLabel', {
             defaultMessage: 'Minimum value',
           }),
@@ -313,7 +312,7 @@ export const getGaugeVisualization = ({
           supportStaticValue: true,
           enableFormatSelector: false,
           layerId: state.layerId,
-          groupId: GROUP_ID.MAX,
+          groupId: LENS_GAUGE_GROUP_ID.MAX,
           groupLabel: i18n.translate('xpack.lens.gauge.maxValueLabel', {
             defaultMessage: 'Maximum value',
           }),
@@ -339,7 +338,7 @@ export const getGaugeVisualization = ({
           supportStaticValue: true,
           enableFormatSelector: false,
           layerId: state.layerId,
-          groupId: GROUP_ID.GOAL,
+          groupId: LENS_GAUGE_GROUP_ID.GOAL,
           groupLabel: i18n.translate('xpack.lens.gauge.goalValueLabel', {
             defaultMessage: 'Goal value',
           }),
@@ -372,16 +371,16 @@ export const getGaugeVisualization = ({
 
   setDimension({ prevState, layerId, columnId, groupId, previousColumn }) {
     const update: Partial<GaugeVisualizationState> = {};
-    if (groupId === GROUP_ID.MIN) {
+    if (groupId === LENS_GAUGE_GROUP_ID.MIN) {
       update.minAccessor = columnId;
     }
-    if (groupId === GROUP_ID.MAX) {
+    if (groupId === LENS_GAUGE_GROUP_ID.MAX) {
       update.maxAccessor = columnId;
     }
-    if (groupId === GROUP_ID.GOAL) {
+    if (groupId === LENS_GAUGE_GROUP_ID.GOAL) {
       update.goalAccessor = columnId;
     }
-    if (groupId === GROUP_ID.METRIC) {
+    if (groupId === LENS_GAUGE_GROUP_ID.METRIC) {
       update.metricAccessor = columnId;
     }
     return {

@@ -7,7 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const EXPRESSION_HEATMAP_NAME = 'heatmap';
-export const EXPRESSION_HEATMAP_LEGEND_NAME = 'heatmap_legend';
-export const EXPRESSION_HEATMAP_GRID_NAME = 'heatmap_grid';
 export const HEATMAP_FUNCTION_RENDERER_NAME = 'heatmap_renderer';

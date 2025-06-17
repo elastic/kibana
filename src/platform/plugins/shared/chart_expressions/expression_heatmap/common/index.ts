@@ -16,9 +16,6 @@ export type {
   BrushEvent,
   FormatFactory,
   HeatmapRenderProps,
-  HeatmapLegendConfigResult,
-  HeatmapGridConfigResult,
-  HeatmapArguments,
   HeatmapExpressionFunctionDefinition,
   HeatmapLegendExpressionFunctionDefinition,
   HeatmapGridExpressionFunctionDefinition,
@@ -26,4 +23,5 @@ export type {
 
 export { heatmapFunction, heatmapLegendConfig, heatmapGridConfig } from './expression_functions';
 
-export { EXPRESSION_HEATMAP_NAME } from './constants';
+export { EXPRESSION_HEATMAP_NAME } from '@kbn/visualization-types-and-defaults';
+export type { HeatmapExpressionLayerState as HeatmapArguments } from '@kbn/visualization-types-and-defaults';

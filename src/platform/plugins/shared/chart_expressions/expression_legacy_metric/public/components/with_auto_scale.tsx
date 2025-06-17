@@ -18,10 +18,11 @@ import React, {
 } from 'react';
 import { throttle } from 'lodash';
 import { useResizeObserver } from '@elastic/eui';
+import { LegacyMetricAlignment } from '@kbn/visualization-types-and-defaults';
 import { autoScaleWrapperStyle } from './with_auto_scale.styles';
 
 interface AutoScaleParams {
-  autoScaleMetricAlignment?: 'left' | 'center' | 'right';
+  autoScaleMetricAlignment?: LegacyMetricAlignment;
   minScale?: number;
   containerStyles: CSSProperties;
 }

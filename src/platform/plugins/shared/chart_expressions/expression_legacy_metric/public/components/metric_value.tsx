@@ -12,12 +12,13 @@ import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { UseEuiTheme, euiTextTruncate } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { MetricOptions, MetricStyle, MetricVisParam } from '../../common/types';
+import type { LegacyMetricStyle } from '@kbn/visualization-types-and-defaults';
+import type { MetricOptions, MetricVisParam } from '../../common/types';
 
 interface MetricVisValueProps {
   metric: MetricOptions;
   onFilter?: () => void;
-  style: MetricStyle;
+  style: LegacyMetricStyle;
   labelConfig: MetricVisParam['labels'];
   colorFullBackground: boolean;
   autoScale?: boolean;

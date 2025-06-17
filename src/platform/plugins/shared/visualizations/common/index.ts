@@ -33,6 +33,7 @@ export {
   getAccessor,
   getFormatByAccessor,
   getStopsWithColorsFromRanges,
+  type InspectorLogTable,
 } from './utils';
 export type {
   Arguments,

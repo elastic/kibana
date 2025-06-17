@@ -33,10 +33,8 @@ import type {
   BrushTriggerEvent,
   MultiClickTriggerEvent,
 } from '@kbn/charts-plugin/public';
-import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
-import type { FieldSpec, DataViewSpec, DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { EuiButtonIconProps } from '@elastic/eui';
 import type { estypes } from '@elastic/elasticsearch';
@@ -47,7 +45,23 @@ import type { DraggingIdentifier, DragDropIdentifier, DropType } from '@kbn/dom-
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
 import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
 import { AlertRuleFromVisUIActionData } from '@kbn/alerts-ui-shared';
-import type { DateRange, LayerType, SortingHint } from '../common/types';
+import {
+  AddUserMessages,
+  DataSourceInfo,
+  IndexPattern,
+  IndexPatternField,
+  IndexPatternMap,
+  IndexPatternRef,
+  Operation,
+  OperationDescriptor,
+  OperationMetadata,
+  PublicAPIProps,
+  UserMessage,
+  UserMessagesGetter,
+  VisualizationInfo,
+  VisualizationType,
+} from '@kbn/visualization-types-and-defaults';
+import type { DateRange, LayerType } from '../common/types';
 import type {
   LensSortActionData,
   LensResizeActionData,
@@ -78,52 +92,52 @@ export type StartServices = Pick<
   | 'userProfile'
 >;
 
-export interface IndexPatternRef {
-  id: string;
-  title: string;
-  name?: string;
-}
+// export interface IndexPatternRef {
+//   id: string;
+//   title: string;
+//   name?: string;
+// }
 
-export interface IndexPattern {
-  getFormatterForField( // used extensively in lens
-    sourceField: string
-  ): unknown;
-  id: string;
-  fields: IndexPatternField[];
-  getFieldByName(name: string): IndexPatternField | undefined;
-  title: string;
-  name?: string;
-  timeFieldName?: string;
-  fieldFormatMap?: Record<
-    string,
-    {
-      id: string;
-      params: FieldFormatParams;
-    }
-  >;
-  hasRestrictions: boolean;
-  spec: DataViewSpec;
-  isPersisted: boolean;
-}
+// export interface IndexPattern {
+//   getFormatterForField( // used extensively in lens
+//     sourceField: string
+//   ): unknown;
+//   id: string;
+//   fields: IndexPatternField[];
+//   getFieldByName(name: string): IndexPatternField | undefined;
+//   title: string;
+//   name?: string;
+//   timeFieldName?: string;
+//   fieldFormatMap?: Record<
+//     string,
+//     {
+//       id: string;
+//       params: FieldFormatParams;
+//     }
+//   >;
+//   hasRestrictions: boolean;
+//   spec: DataViewSpec;
+//   isPersisted: boolean;
+// }
 
-export type IndexPatternField = FieldSpec & {
-  displayName: string;
-  aggregationRestrictions?: Partial<IndexPatternAggRestrictions>;
-  /**
-   * Map of fields which can be used, but may fail partially (ranked lower than others)
-   */
-  partiallyApplicableFunctions?: Partial<Record<string, boolean>>;
-  timeSeriesMetric?: 'histogram' | 'summary' | 'gauge' | 'counter' | 'position';
-  timeSeriesRollup?: boolean;
-  meta?: boolean;
-  runtime?: boolean;
-};
+// export type IndexPatternField = FieldSpec & {
+//   displayName: string;
+//   aggregationRestrictions?: Partial<IndexPatternAggRestrictions>;
+//   /**
+//    * Map of fields which can be used, but may fail partially (ranked lower than others)
+//    */
+//   partiallyApplicableFunctions?: Partial<Record<string, boolean>>;
+//   timeSeriesMetric?: 'histogram' | 'summary' | 'gauge' | 'counter' | 'position';
+//   timeSeriesRollup?: boolean;
+//   meta?: boolean;
+//   runtime?: boolean;
+// };
 
-export interface PublicAPIProps<T> {
-  state: T;
-  layerId: string;
-  indexPatterns: IndexPatternMap;
-}
+// export interface PublicAPIProps<T> {
+//   state: T;
+//   layerId: string;
+//   indexPatterns: IndexPatternMap;
+// }
 
 export interface EditorFrameProps {
   showNoDataPopover: () => void;
@@ -135,7 +149,7 @@ export interface EditorFrameProps {
 
 export type VisualizationMap = Record<string, Visualization>;
 export type DatasourceMap = Record<string, Datasource>;
-export type IndexPatternMap = Record<string, IndexPattern>;
+// export type IndexPatternMap = Record<string, IndexPattern>;
 
 export interface EditorFrameInstance {
   EditorFrameContainer: (props: EditorFrameProps) => React.ReactElement;
@@ -164,27 +178,27 @@ export interface TableSuggestionColumn {
   operation: Operation;
 }
 
-export interface DataSourceInfo {
-  layerId: string;
-  dataView?: DataView;
-  columns: Array<{
-    id: string;
-    role: 'split' | 'metric';
-    operation: OperationDescriptor & { type: string; fields?: string[]; filter?: Query };
-  }>;
-}
+// export interface DataSourceInfo {
+//   layerId: string;
+//   dataView?: DataView;
+//   columns: Array<{
+//     id: string;
+//     role: 'split' | 'metric';
+//     operation: OperationDescriptor & { type: string; fields?: string[]; filter?: Query };
+//   }>;
+// }
 
-export interface VisualizationInfo {
-  layers: Array<{
-    layerId: string;
-    layerType: string;
-    chartType?: string;
-    icon?: IconType;
-    label?: string;
-    dimensions: Array<{ name: string; id: string; dimensionType: string }>;
-    palette?: string[];
-  }>;
-}
+// export interface VisualizationInfo {
+//   layers: Array<{
+//     layerId: string;
+//     layerType: string;
+//     chartType?: string;
+//     icon?: IconType;
+//     label?: string;
+//     dimensions: Array<{ name: string; id: string; dimensionType: string }>;
+//     palette?: string[];
+//   }>;
+// }
 
 /**
  * A possible table a datasource can create. This object is passed to the visualization
@@ -287,43 +301,43 @@ interface DimensionLink {
   };
 }
 
-type UserMessageDisplayLocation =
-  | {
-      // NOTE: We want to move toward more errors that do not block the render!
-      id:
-        | 'toolbar'
-        | 'embeddableBadge'
-        | 'visualization' // blocks render
-        | 'visualizationOnEmbeddable' // blocks render in embeddable only
-        | 'visualizationInEditor' // blocks render in editor only
-        | 'textBasedLanguagesQueryInput'
-        | 'banner';
-    }
-  | { id: 'dimensionButton'; dimensionId: string };
+// type UserMessageDisplayLocation =
+//   | {
+//       // NOTE: We want to move toward more errors that do not block the render!
+//       id:
+//         | 'toolbar'
+//         | 'embeddableBadge'
+//         | 'visualization' // blocks render
+//         | 'visualizationOnEmbeddable' // blocks render in embeddable only
+//         | 'visualizationInEditor' // blocks render in editor only
+//         | 'textBasedLanguagesQueryInput'
+//         | 'banner';
+//     }
+//   | { id: 'dimensionButton'; dimensionId: string };
 
-export type UserMessagesDisplayLocationId = UserMessageDisplayLocation['id'];
+// export type UserMessagesDisplayLocationId = UserMessageDisplayLocation['id'];
 
-export interface UserMessage {
-  uniqueId: string;
-  severity: 'error' | 'warning' | 'info';
-  hidePopoverIcon?: boolean;
-  shortMessage: string;
-  longMessage: string | React.ReactNode | ((closePopover?: () => void) => React.ReactNode);
-  fixableInEditor: boolean;
-  displayLocations: UserMessageDisplayLocation[];
-}
+// export interface UserMessage {
+//   uniqueId: string;
+//   severity: 'error' | 'warning' | 'info';
+//   hidePopoverIcon?: boolean;
+//   shortMessage: string;
+//   longMessage: string | React.ReactNode | ((closePopover?: () => void) => React.ReactNode);
+//   fixableInEditor: boolean;
+//   displayLocations: UserMessageDisplayLocation[];
+// }
 
-export interface UserMessageFilters {
-  severity?: UserMessage['severity'];
-  dimensionId?: string;
-}
+// export interface UserMessageFilters {
+//   severity?: UserMessage['severity'];
+//   dimensionId?: string;
+// }
 
-export type UserMessagesGetter = (
-  locationId: UserMessagesDisplayLocationId | UserMessagesDisplayLocationId[] | undefined,
-  filters?: UserMessageFilters
-) => UserMessage[];
+// export type UserMessagesGetter = (
+//   locationId: UserMessagesDisplayLocationId | UserMessagesDisplayLocationId[] | undefined,
+//   filters?: UserMessageFilters
+// ) => UserMessage[];
 
-export type AddUserMessages = (messages: UserMessage[]) => () => void;
+// export type AddUserMessages = (messages: UserMessage[]) => () => void;
 
 /**
  * Interface for the datasource registry
@@ -729,58 +743,58 @@ export interface DatasourceDimensionDropHandlerProps<T> {
   indexPatterns: IndexPatternMap;
 }
 
-export type FieldOnlyDataType =
-  | 'document'
-  | 'ip'
-  | 'histogram'
-  | 'geo_point'
-  | 'geo_shape'
-  | 'counter'
-  | 'gauge'
-  | 'murmur3';
-export type DataType = 'string' | 'number' | 'date' | 'boolean' | FieldOnlyDataType;
+// export type FieldOnlyDataType =
+//   | 'document'
+//   | 'ip'
+//   | 'histogram'
+//   | 'geo_point'
+//   | 'geo_shape'
+//   | 'counter'
+//   | 'gauge'
+//   | 'murmur3';
+// export type DataType = 'string' | 'number' | 'date' | 'boolean' | FieldOnlyDataType;
 
-// An operation represents a column in a table, not any information
-// about how the column was created such as whether it is a sum or average.
-// Visualizations are able to filter based on the output, not based on the
-// underlying data
-export interface Operation extends OperationMetadata {
-  // User-facing label for the operation
-  label: string;
-  sortingHint?: SortingHint;
-}
+// // An operation represents a column in a table, not any information
+// // about how the column was created such as whether it is a sum or average.
+// // Visualizations are able to filter based on the output, not based on the
+// // underlying data
+// export interface Operation extends OperationMetadata {
+//   // User-facing label for the operation
+//   label: string;
+//   sortingHint?: SortingHint;
+// }
 
-export interface OperationMetadata {
-  interval?: string;
-  // The output of this operation will have this data type
-  dataType: DataType;
-  // A bucketed operation is grouped by duplicate values, otherwise each row is
-  // treated as unique
-  isBucketed: boolean;
-  /**
-   * ordinal: Each name is a unique value, but the names are in sorted order, like "Top values"
-   * interval: Histogram data, like date or number histograms
-   * ratio: Most number data is rendered as a ratio that includes 0
-   */
-  scale?: 'ordinal' | 'interval' | 'ratio';
-  // Extra meta-information like cardinality, color
-  // TODO currently it's not possible to differentiate between a field from a raw
-  // document and an aggregated metric which might be handy in some cases. Once we
-  // introduce a raw document datasource, this should be considered here.
-  isStaticValue?: boolean;
-  // Extra metadata to infer array support in an operation
-  hasArraySupport?: boolean;
-}
+// export interface OperationMetadata {
+//   interval?: string;
+//   // The output of this operation will have this data type
+//   dataType: DataType;
+//   // A bucketed operation is grouped by duplicate values, otherwise each row is
+//   // treated as unique
+//   isBucketed: boolean;
+//   /**
+//    * ordinal: Each name is a unique value, but the names are in sorted order, like "Top values"
+//    * interval: Histogram data, like date or number histograms
+//    * ratio: Most number data is rendered as a ratio that includes 0
+//    */
+//   scale?: 'ordinal' | 'interval' | 'ratio';
+//   // Extra meta-information like cardinality, color
+//   // TODO currently it's not possible to differentiate between a field from a raw
+//   // document and an aggregated metric which might be handy in some cases. Once we
+//   // introduce a raw document datasource, this should be considered here.
+//   isStaticValue?: boolean;
+//   // Extra metadata to infer array support in an operation
+//   hasArraySupport?: boolean;
+// }
 
-/**
- * Specific type used to store some meta information on top of the Operation type
- * Rather than populate the Operation type with optional types, it can leverage a super type
- */
-export interface OperationDescriptor extends Operation {
-  hasTimeShift: boolean;
-  hasReducedTimeRange: boolean;
-  inMetricDimension?: boolean;
-}
+// /**
+//  * Specific type used to store some meta information on top of the Operation type
+//  * Rather than populate the Operation type with optional types, it can leverage a super type
+//  */
+// export interface OperationDescriptor extends Operation {
+//   hasTimeShift: boolean;
+//   hasReducedTimeRange: boolean;
+//   inMetricDimension?: boolean;
+// }
 
 export interface VisualizationConfigProps<T = unknown> {
   layerId: string;
@@ -973,45 +987,6 @@ export interface FramePublicAPI {
   activeData?: Record<string, Datatable>;
   dataViews: DataViewsState;
   forceDSL?: boolean;
-}
-
-/**
- * A visualization type advertised to the user in the chart switcher
- */
-export interface VisualizationType {
-  /**
-   * Unique id of the visualization type within the visualization defining it
-   */
-  id: string;
-  /**
-   * Icon used in the chart switcher
-   */
-  icon: IconType;
-  /**
-   * Visible label used in the chart switcher and above the workspace panel in collapsed state
-   */
-  label: string;
-  description: string;
-  /**
-   * Optional label used in visualization type search if chart switcher is expanded and for tooltips
-   */
-  fullLabel?: string;
-  /**
-   * Priority of the visualization for sorting in chart switch
-   * Lower number means higher priority (aka top of list).
-   *
-   */
-  sortPriority: number;
-  /**
-   * Indicates if visualization is in the experimental stage.
-   */
-  showExperimentalBadge?: boolean;
-  /**
-   * Indicates if visualization is deprecated.
-   */
-  isDeprecated?: boolean;
-  subtypes?: string[];
-  getCompatibleSubtype?: (seriesType?: string) => string | undefined;
 }
 
 export interface VisualizationDisplayOptions {

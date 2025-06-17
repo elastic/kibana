@@ -74,21 +74,6 @@ export type MetricVisExpressionFunctionDefinition = ExpressionFunctionDefinition
   ExecutionContext<DefaultInspectorAdapters>
 >;
 
-export interface TrendlineArguments {
-  metric: ExpressionValueVisDimension | string;
-  timeField: ExpressionValueVisDimension | string;
-  breakdownBy?: ExpressionValueVisDimension | string;
-  table: Datatable;
-  inspectorTableId: string;
-}
-
-export interface TrendlineResult {
-  type: typeof EXPRESSION_METRIC_TRENDLINE_NAME;
-  trends: Record<string, MetricWTrend['trend']>;
-  inspectorTable: ReturnType<typeof prepareLogTable>;
-  inspectorTableId: string;
-}
-
 export type TrendlineExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof EXPRESSION_METRIC_TRENDLINE_NAME,
   Datatable,

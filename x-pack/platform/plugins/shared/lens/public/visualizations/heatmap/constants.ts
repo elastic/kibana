@@ -5,33 +5,7 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { IconChartHeatmap } from '@kbn/chart-icons';
-
 export const LENS_HEATMAP_RENDERER = 'lens_heatmap_renderer';
-
-export const LENS_HEATMAP_ID = 'lnsHeatmap';
-export const DEFAULT_PALETTE_NAME = 'temperature';
-
-export const CHART_SHAPES = {
-  HEATMAP: 'heatmap',
-} as const;
-
-export const CHART_NAMES = {
-  heatmap: {
-    shapeType: CHART_SHAPES.HEATMAP,
-    icon: IconChartHeatmap,
-    label: i18n.translate('xpack.lens.heatmap.heatmapLabel', {
-      defaultMessage: 'Heat map',
-    }),
-  },
-};
-
-export const GROUP_ID = {
-  X: 'x',
-  Y: 'y',
-  CELL: 'cell',
-} as const;
 
 export const FUNCTION_NAME = 'heatmap';
 

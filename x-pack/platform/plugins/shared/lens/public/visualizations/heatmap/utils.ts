@@ -7,8 +7,8 @@
 
 import { applyPaletteParams, type PaletteRegistry } from '@kbn/coloring';
 import type { Datatable } from '@kbn/expressions-plugin/common';
+import { LENS_HEATMAP_DEFAULT_PALETTE_NAME } from '@kbn/visualization-types-and-defaults';
 import { findMinMaxByColumnId } from '../../shared_components';
-import { DEFAULT_PALETTE_NAME } from './constants';
 import type { HeatmapVisualizationState, Palette } from './types';
 
 export function getSafePaletteParams(
@@ -22,7 +22,7 @@ export function getSafePaletteParams(
   }
   const finalActivePalette: Palette = activePalette ?? {
     type: 'palette',
-    name: DEFAULT_PALETTE_NAME,
+    name: LENS_HEATMAP_DEFAULT_PALETTE_NAME,
     accessor,
   };
   const minMaxByColumnId = findMinMaxByColumnId([accessor], currentData);

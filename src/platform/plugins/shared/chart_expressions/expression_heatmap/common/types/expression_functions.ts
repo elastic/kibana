@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Position } from '@elastic/charts';
-import type { PaletteOutput } from '@kbn/coloring';
 import {
   Datatable,
   DefaultInspectorAdapters,
@@ -16,85 +14,19 @@ import {
   ExpressionFunctionDefinition,
   ExpressionValueRender,
 } from '@kbn/expressions-plugin/common';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-
 import {
-  AllowedChartOverrides,
-  AllowedSettingsOverrides,
-  CustomPaletteState,
-} from '@kbn/charts-plugin/common';
-import type { LegendSize } from '@kbn/visualizations-plugin/public';
-import {
-  EXPRESSION_HEATMAP_NAME,
+  type HeatmapExpressionLayerState as HeatmapArguments,
+  type HeatmapLegendConfigResult,
+  type HeatmapGridConfigResult,
   EXPRESSION_HEATMAP_LEGEND_NAME,
   EXPRESSION_HEATMAP_GRID_NAME,
-  HEATMAP_FUNCTION_RENDERER_NAME,
-} from '../constants';
+  EXPRESSION_HEATMAP_NAME,
+} from '@kbn/visualization-types-and-defaults';
+import { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
+import { HEATMAP_FUNCTION_RENDERER_NAME } from '../constants';
 
-export interface HeatmapLegendConfig {
-  /**
-   * Flag whether the legend should be shown. If there is just a single series, it will be hidden
-   */
-  isVisible: boolean;
-  /**
-   * Position of the legend relative to the chart
-   */
-  position: Position;
-  /**
-   * Defines the number of lines per legend item
-   */
-  maxLines?: number;
-  /**
-   * Defines if the legend items should be truncated
-   */
-  shouldTruncate?: boolean;
-  /**
-   * Exact legend width (vertical) or height (horizontal)
-   * Limited to max of 70% of the chart container dimension Vertical legends limited to min of 30% of computed width
-   */
-  legendSize?: LegendSize;
-}
-
-export type HeatmapLegendConfigResult = HeatmapLegendConfig & {
-  type: typeof EXPRESSION_HEATMAP_LEGEND_NAME;
-};
-
-export interface HeatmapGridConfig {
-  // grid
-  strokeWidth?: number;
-  strokeColor?: string;
-  // cells
-  isCellLabelVisible: boolean;
-  // Y-axis
-  isYAxisLabelVisible: boolean;
-  isYAxisTitleVisible: boolean;
-  yTitle?: string;
-  // X-axis
-  isXAxisLabelVisible: boolean;
-  xAxisLabelRotation?: number;
-  isXAxisTitleVisible: boolean;
-  xTitle?: string;
-}
-
-export type HeatmapGridConfigResult = HeatmapGridConfig & {
-  type: typeof EXPRESSION_HEATMAP_GRID_NAME;
-};
-
-export interface HeatmapArguments {
-  percentageMode?: boolean;
-  lastRangeIsRightOpen?: boolean;
-  showTooltip?: boolean;
-  highlightInHover?: boolean;
-  palette?: PaletteOutput<CustomPaletteState>;
-  xAccessor?: string | ExpressionValueVisDimension;
-  yAccessor?: string | ExpressionValueVisDimension;
-  valueAccessor?: string | ExpressionValueVisDimension;
-  splitRowAccessor?: string | ExpressionValueVisDimension;
-  splitColumnAccessor?: string | ExpressionValueVisDimension;
-  legend: HeatmapLegendConfigResult;
-  gridConfig: HeatmapGridConfigResult;
-  ariaLabel?: string;
-}
+export type HeatmapLegendConfig = Omit<HeatmapLegendConfigResult, 'type'>;
+export type HeatmapGridConfig = Omit<HeatmapGridConfigResult, 'type'>;
 
 export type HeatmapInput = Datatable;
 

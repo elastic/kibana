@@ -21,10 +21,14 @@ import { i18n } from '@kbn/i18n';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { css } from '@emotion/react';
+import {
+  type SeriesType,
+  type XYState,
+  visualizationTypes,
+} from '@kbn/visualization-types-and-defaults';
 import { AddLayerFunction, VisualizationLayerDescription } from '../../types';
 import { LoadAnnotationLibraryFlyout } from './load_annotation_library_flyout';
 import type { ExtraAppendLayerArg } from './visualization';
-import { SeriesType, XYState, visualizationTypes } from './types';
 import { isHorizontalChart, isHorizontalSeries, isPercentageSeries } from './state_helpers';
 import { getDataLayers } from './visualization_helpers';
 import { ExperimentalBadge } from '../../shared_components';
