@@ -56,8 +56,8 @@ export class DeploymentParamsMapper {
    */
   private readonly serverlessVCPUBreakpoints: VCPUBreakpoints = {
     low: { min: this.minAllowedNumberOfAllocation, max: 2, static: 2 },
-    medium: { min: 1, max: 32, static: 32 },
-    high: { min: 1, max: 512, static: 512 },
+    medium: { min: 0, max: 32, static: 32 },
+    high: { min: 0, max: 512, static: 512 },
   };
 
   /**
