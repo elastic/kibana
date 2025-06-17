@@ -12,6 +12,7 @@ import { AssistantNavLink } from '@kbn/elastic-assistant/impl/assistant_context/
 import { licenseService } from './src/hooks/licence/use_licence';
 import { ReactQueryClientProvider } from './src/context/query_client_context/elastic_assistant_query_client_provider';
 import { AssistantSpaceIdProvider } from './src/context/assistant_space_id/assistant_space_id_provider';
+import { TelemetryService } from './src/common/lib/telemetry/telemetry_service';
 
 export type ElasticAssistantPublicPluginSetup = ReturnType<ElasticAssistantPublicPlugin['setup']>;
 export type ElasticAssistantPublicPluginStart = ReturnType<ElasticAssistantPublicPlugin['start']>;
@@ -23,14 +24,16 @@ export class ElasticAssistantPublicPlugin implements Plugin<
   ElasticAssistantPublicPluginStartDependencies> {
   private readonly version: string;
   private readonly storage = new Storage(localStorage);
-
+  private readonly telemetry: TelemetryService = new TelemetryService();
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.version = initializerContext.env.packageInfo.version;
   }
 
-  public setup(core: CoreSetup) {
-
+  public setup(coreSetup: CoreSetup) {
+    this.telemetry.setup(
+      { analytics: coreSetup.analytics },
+    );
     return {};
   }
 
@@ -39,6 +42,7 @@ export class ElasticAssistantPublicPlugin implements Plugin<
     const startServices = (): StartServices => {
       const { ...startPlugins } = coreStart.security;
       licenseService.start(dependencies.licensing.license$);
+      const telemetry = this.telemetry.start();
 
       const services: StartServices = {
         ...coreStart,
@@ -46,7 +50,7 @@ export class ElasticAssistantPublicPlugin implements Plugin<
         licensing: dependencies.licensing,
         triggersActionsUi: dependencies.triggersActionsUi,
         security: dependencies.security,
-        telemetry: {} as unknown,
+        telemetry: telemetry,
         productDocBase: dependencies.productDocBase,
         storage: this.storage,
         discover: dependencies.discover,

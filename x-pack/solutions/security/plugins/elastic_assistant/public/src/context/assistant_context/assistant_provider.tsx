@@ -12,7 +12,8 @@ import { useAssistantAvailability } from '../../hooks/assistant_availability/use
 import { useBasePath } from '../../hooks/base_path/use_base_path';
 import { CommentActionsMounter } from '../../components/comment_actions/comment_actions_mounter';
 import { useAssistantContextValue } from '@kbn/elastic-assistant/impl/assistant_context';
-import { AugmentMessageCodeBlocks } from '@kbn/elastic-assistant-shared-state';
+import {useAssistantTelemetry} from '../../hooks/use_assistant_telemetry';
+
 const ASSISTANT_TITLE = i18n.translate('xpack.securitySolution.assistant.title', {
     defaultMessage: 'Elastic AI Assistant',
 });
@@ -41,7 +42,7 @@ export function AssistantProvider({
     const basePath = useBasePath()
     const assistantAvailability = useAssistantAvailability();
 
-    const assistantTelemetry = undefined // useAssistantTelemetry();
+    const assistantTelemetry = useAssistantTelemetry();
     const currentAppId = useObservable(currentAppId$, '');
     const promptContext = useObservable(elasticAssistantSharedState.promptContexts.getPromptContext$(), {});
     const augmentMessageCodeBlocks = useObservable(elasticAssistantSharedState.augmentMessageCodeBlocks.getAugmentMessageCodeBlocks$(), {

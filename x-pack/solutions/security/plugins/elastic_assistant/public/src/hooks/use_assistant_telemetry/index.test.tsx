@@ -7,8 +7,8 @@
 
 import { renderHook } from '@testing-library/react';
 import { useAssistantTelemetry } from '.';
+import { AssistantEventTypes } from '../../common/lib/telemetry/events/ai_assistant/types';
 import { createTelemetryServiceMock } from '../../common/lib/telemetry/telemetry_service.mock';
-import { AssistantEventTypes } from '../../common/lib/telemetry';
 
 const customId = `My Convo`;
 

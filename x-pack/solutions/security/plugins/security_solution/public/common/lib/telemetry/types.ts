@@ -18,7 +18,6 @@ import type {
   EntityAnalyticsTelemetryEventsMap,
   EntityEventTypes,
 } from './events/entity_analytics/types';
-import type { AssistantEventTypes, AssistantTelemetryEventsMap } from './events/ai_assistant/types';
 import type {
   DocumentDetailsTelemetryEventsMap,
   DocumentEventTypes,
@@ -44,7 +43,6 @@ import type {
 } from './events/siem_migrations/types';
 
 export * from './events/app/types';
-export * from './events/ai_assistant/types';
 export * from './events/alerts_grouping/types';
 export * from './events/data_quality/types';
 export * from './events/onboarding/types';
@@ -60,9 +58,7 @@ export interface TelemetryServiceSetupParams {
 }
 
 // Combine all event type data
-export type TelemetryEventTypeData<T extends TelemetryEventTypes> = T extends AssistantEventTypes
-  ? AssistantTelemetryEventsMap[T]
-  : T extends AlertsEventTypes
+export type TelemetryEventTypeData<T extends TelemetryEventTypes> = T extends AlertsEventTypes
   ? AlertsGroupingTelemetryEventsMap[T]
   : T extends PreviewRuleEventTypes
   ? PreviewRuleTelemetryEventsMap[T]
@@ -87,7 +83,6 @@ export type TelemetryEventTypeData<T extends TelemetryEventTypes> = T extends As
   : never;
 
 export type TelemetryEventTypes =
-  | AssistantEventTypes
   | AlertsEventTypes
   | PreviewRuleEventTypes
   | EntityEventTypes

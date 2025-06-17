@@ -15,8 +15,7 @@
     "scripts/**/*.json",
     "public/**/*.json",
     "../../../../../typings/**/*",
-    "emotion.d.ts"
-  ],
+    "emotion.d.ts" ],
   "exclude": [
     "target/**/*",
     "**/cypress/**",

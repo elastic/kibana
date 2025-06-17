@@ -6,15 +6,10 @@
  */
 
 import { type AssistantTelemetry } from '@kbn/elastic-assistant';
-import { useCallback } from 'react';
-import { useKibana } from '../../common/lib/kibana';
-import type {
-  ReportAssistantInvokedParams,
-  ReportAssistantMessageSentParams,
-  ReportAssistantQuickPromptParams,
-  ReportAssistantSettingToggledParams,
-} from '../../common/lib/telemetry';
-import { AssistantEventTypes } from '../../common/lib/telemetry';
+import { useCallback, useMemo } from 'react';
+import { useKibana } from "../../context/typed_kibana_context/typed_kibana_context";
+import { AssistantEventTypes, ReportAssistantInvokedParams, ReportAssistantMessageSentParams, ReportAssistantQuickPromptParams, ReportAssistantSettingToggledParams } from '../../common/lib/telemetry/events/ai_assistant/types';
+
 export const useAssistantTelemetry = (): AssistantTelemetry => {
   const {
     services: { telemetry },
@@ -27,14 +22,15 @@ export const useAssistantTelemetry = (): AssistantTelemetry => {
     }: {
       eventType: AssistantEventTypes;
       params:
-        | ReportAssistantInvokedParams
-        | ReportAssistantMessageSentParams
-        | ReportAssistantQuickPromptParams;
-    }) => telemetry.reportEvent(eventType, params),
+      | ReportAssistantInvokedParams
+      | ReportAssistantMessageSentParams
+      | ReportAssistantQuickPromptParams;
+    }) => {
+      telemetry.reportEvent(eventType, params)},
     [telemetry]
   );
 
-  return {
+  return useMemo<AssistantTelemetry>(() => ({
     reportAssistantInvoked: (params: ReportAssistantInvokedParams) =>
       reportTelemetry({ eventType: AssistantEventTypes.AssistantInvoked, params }),
     reportAssistantMessageSent: (params: ReportAssistantMessageSentParams) =>
@@ -43,5 +39,5 @@ export const useAssistantTelemetry = (): AssistantTelemetry => {
       reportTelemetry({ eventType: AssistantEventTypes.AssistantQuickPrompt, params }),
     reportAssistantSettingToggled: (params: ReportAssistantSettingToggledParams) =>
       telemetry.reportEvent(AssistantEventTypes.AssistantSettingToggled, params),
-  };
+  }), [reportTelemetry, telemetry]);
 };
