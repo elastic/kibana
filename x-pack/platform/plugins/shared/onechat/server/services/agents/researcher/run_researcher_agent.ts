@@ -117,9 +117,6 @@ export const runSearchAgent: RunResearcherAgentFn = async (
   const lastEvent = await lastValueFrom(events$);
   const generatedAnswer = lastEvent.data.output.generatedAnswer;
 
-  console.log('**** last output');
-  console.log(JSON.stringify(lastEvent.data.output, null, 2));
-
   return {
     answer: generatedAnswer,
   };
