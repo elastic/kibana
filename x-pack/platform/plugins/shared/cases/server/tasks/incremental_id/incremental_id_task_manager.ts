@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { addMinutes } from 'date-fns';
 import { SavedObjectsClient, type CoreStart, type Logger } from '@kbn/core/server';
 import {
   TaskStatus,
@@ -101,7 +100,9 @@ export class IncrementalIdTaskManager {
           id: CASES_INCREMENTAL_ID_SYNC_TASK_ID,
           taskType: CASES_INCREMENTAL_ID_SYNC_TASK_TYPE,
           // start delayed to give the system some time to start up properly
-          runAt: addMinutes(new Date(), CASES_INCREMENTAL_ID_SYNC_INTERVAL_DEFAULT_MINUTES),
+          runAt: new Date(
+            new Date().getTime() + CASES_INCREMENTAL_ID_SYNC_INTERVAL_DEFAULT_MINUTES * 60 * 1000
+          ),
           schedule: {
             interval: CASES_INCREMENTAL_ID_SYNC_INTERVAL_DEFAULT,
           },
