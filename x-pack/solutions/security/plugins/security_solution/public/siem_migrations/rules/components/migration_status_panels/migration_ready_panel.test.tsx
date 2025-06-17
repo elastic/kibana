@@ -37,8 +37,10 @@ const mockStartMigration = jest.fn();
 
 const mockMigrationStateWithError = {
   status: SiemMigrationTaskStatus.READY,
-  last_error:
-    'Failed to populate ELSER indices. Make sure the ELSER model is deployed and running at Machine Learning > Trained Models. Error: Exception when running inference id [.elser-2-elasticsearch] on field [elser_embedding]',
+  last_execution: {
+    error:
+      'Failed to populate ELSER indices. Make sure the ELSER model is deployed and running at Machine Learning > Trained Models. Error: Exception when running inference id [.elser-2-elasticsearch] on field [elser_embedding]',
+  },
   id: 'c44d2c7d-0de1-4231-8b82-0dcfd67a9fe3',
   rules: { total: 6, pending: 6, processing: 0, completed: 0, failed: 0 },
   created_at: '2025-05-27T12:12:17.563Z',
@@ -46,8 +48,8 @@ const mockMigrationStateWithError = {
   number: 1,
 };
 
-const mockMigrationStatsAborted = {
-  status: SiemMigrationTaskStatus.ABORTED,
+const mockMigrationStatsStopped = {
+  status: SiemMigrationTaskStatus.STOPPED,
   id: 'c44d2c7d-0de1-4231-8b82-0dcfd67a9fe3',
   rules: { total: 6, pending: 6, processing: 0, completed: 0, failed: 0 },
   created_at: '2025-05-27T12:12:17.563Z',
@@ -94,14 +96,14 @@ describe('MigrationReadyPanel', () => {
     it('should render description text correctly', () => {
       render(<MigrationReadyPanel migrationStats={mockMigrationStatsReady} />);
       expect(screen.getByTestId('ruleMigrationDescription')).toHaveTextContent(
-        `Migration of 6 rules is created but the translation has not started yet.`
+        `Migration of 6 rules is created and ready to be start.`
       );
     });
 
     it('should render start migration button', () => {
       render(<MigrationReadyPanel migrationStats={mockMigrationStatsReady} />);
       expect(screen.getByTestId('startMigrationButton')).toBeVisible();
-      expect(screen.getByTestId('startMigrationButton')).toHaveTextContent('Start translation');
+      expect(screen.getByTestId('startMigrationButton')).toHaveTextContent('Start');
     });
   });
 
@@ -118,21 +120,21 @@ describe('MigrationReadyPanel', () => {
 
     it('should render start migration button when there is an error', () => {
       render(<MigrationReadyPanel migrationStats={mockMigrationStateWithError} />);
-      expect(screen.queryByTestId('startMigrationButton')).toHaveTextContent('Start translation');
+      expect(screen.queryByTestId('startMigrationButton')).toHaveTextContent('Start');
     });
   });
 
-  describe('Aborted Migration', () => {
+  describe('Stopped Migration', () => {
     it('should render aborted migration message', () => {
-      render(<MigrationReadyPanel migrationStats={mockMigrationStatsAborted} />);
+      render(<MigrationReadyPanel migrationStats={mockMigrationStatsStopped} />);
       expect(screen.getByTestId('ruleMigrationDescription')).toHaveTextContent(
-        'Migration of 6 rules was stopped. You can resume it any time.'
+        'Migration of 6 rules was stopped, you can resume it any time.'
       );
     });
 
     it('should render correct start migration button for aborted migration', () => {
-      render(<MigrationReadyPanel migrationStats={mockMigrationStatsAborted} />);
-      expect(screen.getByTestId('startMigrationButton')).toHaveTextContent('Resume translation');
+      render(<MigrationReadyPanel migrationStats={mockMigrationStatsStopped} />);
+      expect(screen.getByTestId('startMigrationButton')).toHaveTextContent('Resume');
     });
   });
 
@@ -154,7 +156,7 @@ describe('MigrationReadyPanel', () => {
       render(<MigrationReadyPanel migrationStats={mockMigrationStatsReady} />);
       await waitFor(() => {
         expect(screen.getByTestId('ruleMigrationDescription')).toHaveTextContent(
-          'Migration of 6 rules is created but the translation has not started yet. Upload macros & lookups and start the translation process.'
+          'Migration of 6 rules is created and ready to be start. You can also upload the missing macros & lookups for more accurate results.'
         );
       });
     });

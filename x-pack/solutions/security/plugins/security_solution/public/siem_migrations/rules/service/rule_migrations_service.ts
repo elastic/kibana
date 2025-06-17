@@ -31,7 +31,7 @@ import {
   type MissingCapability,
   type CapabilitiesLevel,
 } from './capabilities';
-import type { RuleMigrationStats } from '../types';
+import type { RuleMigrationSettings, RuleMigrationStats } from '../types';
 import { getSuccessToast } from './notifications/success_notification';
 import { RuleMigrationsStorage } from './storage';
 import * as i18n from './translations';
@@ -170,7 +170,8 @@ export class SiemRulesMigrationsService {
 
   public async startRuleMigration(
     migrationId: string,
-    retry?: SiemMigrationRetryFilter
+    retry?: SiemMigrationRetryFilter,
+    settings?: RuleMigrationSettings
   ): Promise<StartRuleMigrationResponse> {
     const missingCapabilities = this.getMissingCapabilities('all');
     if (missingCapabilities.length > 0) {
@@ -179,12 +180,20 @@ export class SiemRulesMigrationsService {
       );
       return { started: false };
     }
-    const connectorId = this.connectorIdStorage.get();
+    const connectorId = settings?.connectorId ?? this.connectorIdStorage.get();
+    const skipPrebuiltRulesMatching = settings?.skipPrebuiltRulesMatching;
     if (!connectorId) {
       this.core.notifications.toasts.add(getNoConnectorToast(this.core));
       return { started: false };
     }
-    const params: api.StartRuleMigrationParams = { migrationId, connectorId, retry };
+    const params: api.StartRuleMigrationParams = {
+      migrationId,
+      settings: {
+        connectorId,
+        skipPrebuiltRulesMatching,
+      },
+      retry,
+    };
 
     const traceOptions = this.traceOptionsStorage.get();
     if (traceOptions) {
@@ -201,7 +210,10 @@ export class SiemRulesMigrationsService {
       this.telemetry.reportStartTranslation(params);
       return result;
     } catch (error) {
-      this.telemetry.reportStartTranslation({ ...params, error });
+      this.telemetry.reportStartTranslation({
+        ...params,
+        error,
+      });
       throw error;
     }
   }
@@ -306,11 +318,18 @@ export class SiemRulesMigrationsService {
           pendingMigrationIds.push(result.id);
         }
 
-        // automatically resume stopped migrations when all conditions are met
-        if (result.status === SiemMigrationTaskStatus.STOPPED && !result.last_error) {
-          const connectorId = this.connectorIdStorage.get();
+        // automatically resume interrupted migrations when the proper conditions are met
+        if (
+          result.status === SiemMigrationTaskStatus.INTERRUPTED &&
+          !result.last_execution?.error
+        ) {
+          const connectorId = result.last_execution?.connector_id ?? this.connectorIdStorage.get();
+          const skipPrebuiltRulesMatching = result.last_execution?.skip_prebuilt_rules_matching;
           if (connectorId && !this.hasMissingCapabilities('all')) {
-            await api.startRuleMigration({ migrationId: result.id, connectorId });
+            await api.startRuleMigration({
+              migrationId: result.id,
+              settings: { connectorId, skipPrebuiltRulesMatching },
+            });
             pendingMigrationIds.push(result.id);
           }
         }
