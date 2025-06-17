@@ -32,8 +32,6 @@ import {
   getLiveQueryResultsRequestQuerySchema,
 } from '../../../common/api';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
-import { fetchOsqueryPackagePolicyIds } from '../utils';
 
 export const getLiveQueryResultsRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -69,16 +67,6 @@ export const getLiveQueryResultsRoute = (
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
         try {
-          const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
-            osqueryContext,
-            request
-          );
-
-          const osqueryPackagePolicyIdsWithinCurrentSpace = await fetchOsqueryPackagePolicyIds(
-            spaceScopedClient,
-            osqueryContext
-          );
-
           const spaceId = osqueryContext?.service?.getActiveSpace
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
             : DEFAULT_SPACE_ID;
@@ -90,7 +78,6 @@ export const getLiveQueryResultsRoute = (
                 actionId: request.params.id,
                 kuery: request.query.kuery,
                 factoryQueryType: OsqueryQueries.actionDetails,
-                policyIds: osqueryPackagePolicyIdsWithinCurrentSpace,
                 spaceId,
               },
               { abortSignal, strategy: 'osquerySearchStrategy' }
