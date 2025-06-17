@@ -58,7 +58,9 @@ interface InternalUnifiedFieldListSidebarContainerProps {
   isFieldListFlyoutVisible: boolean;
   setIsFieldListFlyoutVisible: (isVisible: boolean) => void;
   commonSidebarProps: UnifiedFieldListSidebarProps;
-  containerProps: UnifiedFieldListSidebarContainerProps;
+  prependInFlyout?: () => UnifiedFieldListSidebarProps['prepend'];
+  variant: 'responsive' | 'button-and-flyout-always' | 'list-always';
+  workspaceSelectedFieldNames?: UnifiedFieldListSidebarCustomizableProps['workspaceSelectedFieldNames'];
 }
 
 function InternalUnifiedFieldListSidebarContainer({
@@ -66,9 +68,10 @@ function InternalUnifiedFieldListSidebarContainer({
   isFieldListFlyoutVisible,
   setIsFieldListFlyoutVisible,
   commonSidebarProps,
-  containerProps,
+  prependInFlyout,
+  variant,
+  workspaceSelectedFieldNames,
 }: InternalUnifiedFieldListSidebarContainerProps) {
-  const { variant = 'responsive', workspaceSelectedFieldNames, prependInFlyout } = containerProps;
   const buttonPropsToTriggerFlyout = stateService.creationOptions.buttonPropsToTriggerFlyout;
 
   const renderListVariant = () => {
@@ -200,12 +203,12 @@ export type UnifiedFieldListSidebarContainerProps = Omit<
   /**
    * Custom content to render at the top of field list in the flyout (for example a data view picker)
    */
-  prependInFlyout?: () => UnifiedFieldListSidebarProps['prepend'];
+  prependInFlyout?: InternalUnifiedFieldListSidebarContainerProps['prependInFlyout'];
 
   /**
    * Customization for responsive behaviour. Default: `responsive`.
    */
-  variant?: 'responsive' | 'button-and-flyout-always' | 'list-always';
+  variant?: InternalUnifiedFieldListSidebarContainerProps['variant'];
 
   /**
    * Custom logic for determining which field is selected. Otherwise, use `workspaceSelectedFieldNames` prop.
@@ -236,7 +239,16 @@ const UnifiedFieldListSidebarContainer = forwardRef<
   { initialState, onInitialStateChange, ...props },
   componentRef
 ) {
-  const { getCreationOptions, services, dataView, onFieldEdited, additionalFilters } = props;
+  const {
+    getCreationOptions,
+    services,
+    dataView,
+    workspaceSelectedFieldNames,
+    prependInFlyout,
+    variant = 'responsive',
+    onFieldEdited,
+    additionalFilters,
+  } = props;
   const [stateService] = useState<UnifiedFieldListSidebarContainerStateService>(
     createStateService({ options: getCreationOptions() })
   );
@@ -369,25 +381,39 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     [sidebarVisibility, refetchFieldsExistenceInfo, closeFieldListFlyout, editField, deleteField]
   );
 
+  const commonSidebarProps: UnifiedFieldListSidebarProps = useMemo(() => {
+    const commonProps: UnifiedFieldListSidebarProps = {
+      ...props,
+      searchMode,
+      stateService,
+      isProcessing,
+      isAffectedByGlobalFilter,
+      onEditField: editField,
+      onDeleteField: deleteField,
+      compressed: stateService.creationOptions.compressed ?? false,
+      buttonAddFieldVariant: stateService.creationOptions.buttonAddFieldVariant ?? 'primary',
+    };
+
+    if (stateService.creationOptions.showSidebarToggleButton) {
+      commonProps.isSidebarCollapsed = isSidebarCollapsed;
+      commonProps.onToggleSidebar = sidebarVisibility.toggle;
+    }
+
+    return commonProps;
+  }, [
+    deleteField,
+    editField,
+    isAffectedByGlobalFilter,
+    isProcessing,
+    isSidebarCollapsed,
+    props,
+    searchMode,
+    sidebarVisibility.toggle,
+    stateService,
+  ]);
+
   if (!dataView) {
     return null;
-  }
-
-  const commonSidebarProps: UnifiedFieldListSidebarProps = {
-    ...props,
-    searchMode,
-    stateService,
-    isProcessing,
-    isAffectedByGlobalFilter,
-    onEditField: editField,
-    onDeleteField: deleteField,
-    compressed: stateService.creationOptions.compressed ?? false,
-    buttonAddFieldVariant: stateService.creationOptions.buttonAddFieldVariant ?? 'primary',
-  };
-
-  if (stateService.creationOptions.showSidebarToggleButton) {
-    commonSidebarProps.isSidebarCollapsed = isSidebarCollapsed;
-    commonSidebarProps.onToggleSidebar = sidebarVisibility.toggle;
   }
 
   return (
@@ -396,7 +422,9 @@ const UnifiedFieldListSidebarContainer = forwardRef<
       isFieldListFlyoutVisible={isFieldListFlyoutVisible}
       setIsFieldListFlyoutVisible={setIsFieldListFlyoutVisible}
       commonSidebarProps={commonSidebarProps}
-      containerProps={props}
+      prependInFlyout={prependInFlyout}
+      variant={variant}
+      workspaceSelectedFieldNames={workspaceSelectedFieldNames}
       initialState={initialState}
       onInitialStateChange={onInitialStateChange}
     />
