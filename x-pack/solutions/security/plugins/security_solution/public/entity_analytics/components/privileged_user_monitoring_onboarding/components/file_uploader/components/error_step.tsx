@@ -14,6 +14,7 @@ import {
   EuiButtonEmpty,
   useEuiTheme,
   EuiCodeBlock,
+  EuiText,
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -70,20 +71,20 @@ export const PrivilegedUserMonitoringErrorStep: React.FC<{
         iconType="warning"
       >
         <EuiSpacer size="s" />
-        <p>
+        <EuiText size="s">
           <FormattedMessage
             defaultMessage="{assignedCount, plural, one {# privileged user assignment succeeded.} other {# privileged user assignments succeeded.}}"
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.fileUploader.errorStep.assignedEntities"
             values={{ assignedCount: result.stats.successful }}
           />
-        </p>
-        <p>
+        </EuiText>
+        <EuiText size="s" color={euiTheme.colors.danger}>
           <FormattedMessage
             defaultMessage="{failedCount, plural, one {# privileged user assignment failed.} other {# privileged user assignments failed.}}"
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.fileUploader.errorStep.failedEntities"
             values={{ failedCount: result.stats.failed }}
           />
-        </p>
+        </EuiText>
 
         <EuiCodeBlock
           overflowHeight={300}

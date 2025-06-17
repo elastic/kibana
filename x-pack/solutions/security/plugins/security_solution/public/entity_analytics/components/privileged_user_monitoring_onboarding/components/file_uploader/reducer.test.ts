@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { UploadAssetCriticalityRecordsResponse } from '../../../../common/api/entity_analytics';
+import type { PrivmonBulkUploadUsersCSVResponse } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/upload_csv.gen';
+
 import type { ReducerAction, ReducerState, ValidationStepState } from './reducer';
 import { reducer } from './reducer';
 import { FileUploaderSteps } from './types';
@@ -43,7 +44,7 @@ describe('reducer', () => {
   });
 
   it('should handle "fileUploaded" action with response', () => {
-    const response: UploadAssetCriticalityRecordsResponse = {
+    const response: PrivmonBulkUploadUsersCSVResponse = {
       errors: [],
       stats: {
         total: 10,

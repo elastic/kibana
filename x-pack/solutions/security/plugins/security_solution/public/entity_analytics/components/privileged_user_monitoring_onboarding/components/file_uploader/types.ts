@@ -31,5 +31,6 @@ export interface OnCompleteParams {
 export enum FileUploaderSteps {
   FILE_PICKER = 1,
   VALIDATION = 2,
-  ERROR = 3,
+  RESULT = 3,
+  ERROR = 4,
 }

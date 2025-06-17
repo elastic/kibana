@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
+import { createTelemetryServiceMock } from '../../../../../common/lib/telemetry/telemetry_service.mock';
 import { TestProviders } from '@kbn/timelines-plugin/public/mock';
 import { waitFor, renderHook } from '@testing-library/react';
 import { useFileValidation } from './hooks';
-import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
-import { mockGlobalState } from '../../../common/mock';
+import { useKibana as mockUseKibana } from '../../../../../common/lib/kibana/__mocks__';
+import { mockGlobalState } from '../../../../../common/mock';
 
 const mockedExperimentalFeatures = mockGlobalState.app.enableExperimental;
 const mockedUseKibana = mockUseKibana();
 const mockedTelemetry = createTelemetryServiceMock();
 
-jest.mock('../../../common/hooks/use_experimental_features', () => ({
+jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
   useEnableExperimental: () => ({ ...mockedExperimentalFeatures }),
 }));
 
-jest.mock('../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../common/lib/kibana');
+jest.mock('../../../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../../../common/lib/kibana');
 
   return {
     ...original,

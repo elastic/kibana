@@ -47,6 +47,10 @@ export type ReducerAction =
   | {
       type: 'fileUploadError';
       payload: { errorMessage?: string; response?: PrivmonBulkUploadUsersCSVResponse };
+    }
+  | {
+      type: 'fileUploaded';
+      payload: { response?: PrivmonBulkUploadUsersCSVResponse; errorMessage?: string };
     };
 
 export const INITIAL_STATE: FilePickerState = {

@@ -35,7 +35,7 @@ export const softDeleteOmittedUsers =
       query: {
         bool: {
           must: [
-            { term: { 'labels.monitoring_status': 'privileged_user_monitored' } },
+            { term: { 'labels.monitoring.privileged_users': 'monitored' } },
             { term: { 'labels.sources': 'csv' } },
           ],
           must_not: [{ terms: { 'user.name': uploaded } }],
@@ -52,14 +52,16 @@ export const softDeleteOmittedUsers =
       flushBytes,
       retries,
       refreshOnCompletion: index,
-      onDocument: (username) => [
-        { update: { _id: username } },
-        {
-          doc: {
-            labels: { monitoring_status: 'privileged_user_not_monitored' },
+      onDocument: (id) => {
+        return [
+          { update: { _id: id } },
+          {
+            doc: {
+              labels: { monitoring: { privileged_users: 'deleted' } },
+            },
           },
-        },
-      ],
+        ];
+      },
       onDrop: ({ error, document }) => {
         errors.push({
           message: error?.message || 'Unknown error',
