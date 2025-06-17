@@ -11,10 +11,11 @@ import expect from '@kbn/expect';
 import { ReportManager, METRIC_TYPE, UiCounterMetricType, Report } from '@kbn/analytics';
 import { UsageCountersSavedObject } from '@kbn/usage-collection-plugin/server';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
-import { delay } from '@kbn/test-jest-helpers';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const APP_NAME = 'myApp';
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
