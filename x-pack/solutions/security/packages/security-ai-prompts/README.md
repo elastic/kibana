@@ -2,9 +2,19 @@
 
 Utility library for Security AI Prompt management.
 
+## Update prompts in Kibana
+
+1. Update prompts in Kibana, located in either:
+  - `x-pack/solutions/security/plugins/elastic_assistant/server/lib/prompt/local_prompt_object.ts`
+  - `x-pack/solutions/security/plugins/elastic_assistant/server/lib/prompt/tool_prompts.ts`
+
+2. Uninstall the Security AI Prompts integration in Kibana. This will remove the saved objects from Kibana. The local prompts will be used, so now you can test your changes.
+3. Once you've confirmed your changes, post your PR and run the evaluations in CI to confirm there are no regressions due to your prompt changes.
+4. Once your PR is merged, you can regenerate the saved objects in Kibana and update the integration package.
+
 ## How to Update Prompt Saved Objects Content & Bump the Package Version
 
-When updating  Security AI Prompts saved objects in the `elastic/integrations` repository, follow these steps to regenerate content, update the integration package, and bump its version. Here is an example PR: https://github.com/elastic/integrations/pull/14171
+When updating Security AI Prompts saved objects in the `elastic/integrations` repository, follow these steps to regenerate content, update the integration package, and bump its version. Here is an example PR: https://github.com/elastic/integrations/pull/14171
 
 ---
 
