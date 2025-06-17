@@ -19,7 +19,7 @@ import {
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { AlertsLocatorDefinition, sloFeatureId } from '@kbn/observability-plugin/common';
-import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { SLO_BURN_RATE_RULE_TYPE_ID, DEPRECATED_ALERTING_CONSUMERS } from '@kbn/rule-data-utils';
 import { mapValues } from 'lodash';
 import { LockAcquisitionError, LockManagerService } from '@kbn/lock-manager';
 import { getSloClientWithRequest } from './client';
@@ -81,7 +81,7 @@ export class SLOPlugin
 
     const alertingFeatures = sloRuleTypes.map((ruleTypeId) => ({
       ruleTypeId,
-      consumers: [sloFeatureId, ALERTING_FEATURE_ID],
+      consumers: [sloFeatureId, ALERTING_FEATURE_ID, ...DEPRECATED_ALERTING_CONSUMERS],
     }));
 
     plugins.features.registerKibanaFeature({

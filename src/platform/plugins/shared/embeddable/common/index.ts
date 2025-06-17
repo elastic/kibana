@@ -8,8 +8,7 @@
  */
 
 export type {
-  CommonEmbeddableStartContract,
+  EmbeddableRegistryDefinition,
   EmbeddableStateWithType,
   EmbeddablePersistableStateService,
-  EmbeddableRegistryDefinition,
-} from './types';
+} from '../server';
