@@ -17,6 +17,7 @@ import {
 } from 'openai/resources/chat/completions';
 import { Stream } from 'openai/streaming';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { getCustomAgents } from '@kbn/actions-plugin/server/lib/get_custom_agents';
 import { removeEndpointFromUrl } from './lib/openai_utils';
 import {
   RunActionParamsSchema,
@@ -63,7 +64,6 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
 
   constructor(params: ServiceParams<Config, Secrets>) {
     super(params);
-
     this.url = this.config.apiUrl;
     this.provider = this.config.apiProvider;
     this.key = this.secrets.apiKey;
@@ -75,6 +75,16 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       ...('projectId' in this.config ? { 'OpenAI-Project': this.config.projectId } : {}),
     };
 
+    const { httpAgent, httpsAgent } = getCustomAgents(
+      this.configurationUtilities,
+      this.logger,
+      this.url
+    );
+
+    const isHttps = (this.configurationUtilities.getProxySettings()?.proxyUrl ?? this.url)
+      .toLowerCase()
+      .startsWith('https');
+
     this.openAI =
       this.config.apiProvider === OpenAiProviderType.AzureAi
         ? new OpenAI({
@@ -85,6 +95,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
               ...this.headers,
               'api-key': this.secrets.apiKey,
             },
+            httpAgent: isHttps ? httpsAgent : httpAgent,
           })
         : new OpenAI({
             baseURL: removeEndpointFromUrl(this.config.apiUrl),
@@ -92,6 +103,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
             defaultHeaders: {
               ...this.headers,
             },
+            httpAgent: isHttps ? httpsAgent : httpAgent,
           });
 
     this.registerSubActions();

@@ -27,10 +27,13 @@ const defaultProps = {
   onConnectorIdSelected: jest.fn(),
   openFlyout: jest.fn(),
   setLocalStorageAttackDiscoveryMaxAlerts: jest.fn(),
+  showFlyout: false,
 };
 
 describe('Actions', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
+
     (useAssistantAvailability as jest.Mock).mockReturnValue({
       hasAssistantPrivilege: true,
       isAssistantEnabled: true,

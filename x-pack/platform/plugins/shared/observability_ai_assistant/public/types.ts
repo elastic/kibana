@@ -63,11 +63,7 @@ export interface ObservabilityAIAssistantChatService {
     connectorId: string;
     messages: Message[];
     persist: boolean;
-    disableFunctions:
-      | boolean
-      | {
-          except: string[];
-        };
+    disableFunctions: boolean;
     signal: AbortSignal;
     instructions?: AdHocInstruction[];
     scopes: AssistantScope[];

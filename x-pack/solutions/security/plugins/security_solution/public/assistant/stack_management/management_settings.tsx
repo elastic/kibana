@@ -21,6 +21,7 @@ import type { FetchConversationsResponse } from '@kbn/elastic-assistant/impl/ass
 import { SECURITY_AI_SETTINGS } from '@kbn/elastic-assistant/impl/assistant/settings/translations';
 import { CONVERSATIONS_TAB } from '@kbn/elastic-assistant/impl/assistant/settings/const';
 import type { SettingsTabs } from '@kbn/elastic-assistant/impl/assistant/settings/types';
+
 import { useKibana } from '../../common/lib/kibana';
 
 const defaultSelectedConversationId = WELCOME_CONVERSATION_TITLE;
