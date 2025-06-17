@@ -35,6 +35,15 @@ export const searchOptionsSchema = schema.maybe(
   )
 );
 
+export const mapsSearchOptionsSchema = schema.maybe(
+  schema.object(
+    {
+      onlyTitle: schema.maybe(schema.boolean()),
+    },
+    { unknowns: 'forbid' }
+  )
+);
+
 export const createOptionsSchema = schema.object({
   references: schema.maybe(createOptionsSchemas.references),
 });
