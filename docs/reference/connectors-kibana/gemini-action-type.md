@@ -2,21 +2,23 @@
 navigation_title: "{{gemini}}"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/gemini-action-type.html
+applies_to:
+  stack: all
+  serverless: all
 ---
 
 # {{gemini}} connector and action [gemini-action-type]
 
-
 The {{gemini}} connector uses [axios](https://github.com/axios/axios) to send a POST request to {{gemini}}.
-
 
 ## Create connectors in {{kib}} [define-gemini-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.  For example:
 
-% TO DO: Use `:class: screenshot`
-![{{gemini}} connector](../images/gemini-connector.png)
-
+:::{image} ../images/gemini-connector.png
+:alt: {{gemini}} connector
+:screenshot:
+:::
 
 ### Connector configuration [gemini-connector-configuration]
 
@@ -40,13 +42,14 @@ Default model
 Credentials JSON
 :   The GCP service account JSON file for authentication.
 
-
 ## Test connectors [gemini-action-configuration]
 
-You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
+You can test connectors as you're creating or editing the connector in {{kib}}. For example:
 
-% TO DO: Use `:class: screenshot`
-![{{gemini}} params test](../images/gemini-params.png)
+:::{image} ../images/gemini-params.png
+:alt: {{gemini}} params test
+:screenshot:
+:::
 
 The {{gemini}} actions have the following configuration properties.
 
@@ -68,12 +71,9 @@ Body
     }
     ```
 
-
 Model
-:   An optional string that overwrites the connector’s default model.
-
+:   An optional string that overwrites the connector's default model.
 
 ## Connector networking configuration [gemini-connector-networking-configuration]
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
-

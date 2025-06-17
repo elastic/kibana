@@ -17,12 +17,14 @@ import type {
   DefendInsightsGetRequestQuery,
   DefendInsightsPostRequestBody,
 } from '@kbn/elastic-assistant-common';
-import { combineLatest, firstValueFrom, ReplaySubject } from 'rxjs';
 import { CallbackIds } from '@kbn/elastic-assistant-plugin/server/types';
+import { combineLatest, firstValueFrom, ReplaySubject } from 'rxjs';
+import { cloneDeep } from 'lodash';
 
-import type {
-  SearchParams,
-  SecurityWorkflowInsight,
+import {
+  ActionType,
+  type SearchParams,
+  type SecurityWorkflowInsight,
 } from '../../../../common/endpoint/types/workflow_insights';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { SecurityWorkflowInsightsFailedInitialized } from './errors';
@@ -141,28 +143,30 @@ class SecurityWorkflowInsightsService {
   public async create(insight: SecurityWorkflowInsight): Promise<WriteResponseBase | void> {
     await this.isInitialized;
 
-    const id = generateInsightId(insight);
+    const insightToCreate = cloneDeep(insight);
 
     const remediationExists = await checkIfRemediationExists({
-      insight,
+      insight: insightToCreate,
       exceptionListsClient: this.endpointContext.getExceptionListsClient(),
       endpointMetadataClient: this.endpointContext.getEndpointMetadataService(),
     });
 
     if (remediationExists) {
-      return;
+      insightToCreate.action.type = ActionType.Remediated;
     }
+
+    const id = generateInsightId(insightToCreate);
 
     // if insight already exists, update instead
     const existingInsights = await this.fetch({ ids: [id] });
     if (existingInsights.length) {
-      return this.update(id, insight, existingInsights[0]._index);
+      return this.update(id, insightToCreate, existingInsights[0]._index);
     }
 
     return this.esClient.index<SecurityWorkflowInsight>({
       index: DATA_STREAM_NAME,
       id,
-      document: insight,
+      document: insightToCreate,
       refresh: 'wait_for',
       op_type: 'create',
     });

@@ -10,9 +10,8 @@ import type {
   PluginSetupContract as ActionsPluginSetup,
 } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { BoundChatCompleteOptions } from '@kbn/inference-common';
+import type { BoundInferenceClient, BoundOptions, InferenceClient } from '@kbn/inference-common';
 import type { InferenceChatModel, InferenceChatModelParams } from '@kbn/inference-langchain';
-import type { InferenceClient, BoundInferenceClient } from './inference_client';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -46,7 +45,7 @@ export interface InferenceBoundClientCreateOptions extends InferenceUnboundClien
   /**
    * The parameters to bind the client to.
    */
-  bindTo: BoundChatCompleteOptions;
+  bindTo: BoundOptions;
 }
 
 /**

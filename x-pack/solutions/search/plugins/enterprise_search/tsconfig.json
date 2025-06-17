@@ -4,7 +4,6 @@
     "outDir": "target/types",
   },
   "exclude": [
-    "public/applications/**/cypress/**/*",
     "target/**/*",
   ],
   "include": [
@@ -41,7 +40,6 @@
     "@kbn/core-http-server",
     "@kbn/core-saved-objects-server",
     "@kbn/data-views-plugin",
-    "@kbn/cypress-config",
     "@kbn/discover-plugin",
     "@kbn/guided-onboarding",
     "@kbn/shared-ux-router",

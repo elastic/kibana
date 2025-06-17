@@ -170,9 +170,11 @@ describe('Execute Report Task', () => {
   });
 
   it('schedules task with request if health indicates security and api keys are enabled', async () => {
-    jest
-      .spyOn(mockReporting, 'getHealthInfo')
-      .mockResolvedValueOnce({ isSufficientlySecure: true, hasPermanentEncryptionKey: true });
+    jest.spyOn(mockReporting, 'getHealthInfo').mockResolvedValueOnce({
+      isSufficientlySecure: true,
+      hasPermanentEncryptionKey: true,
+      areNotificationsEnabled: true,
+    });
     const task = new ExecuteReportTask(mockReporting, configType, logger);
     const mockTaskManager = taskManagerMock.createStart();
     await task.init(mockTaskManager);
@@ -201,9 +203,11 @@ describe('Execute Report Task', () => {
   });
 
   it('schedules task without request if health indicates security is disabled', async () => {
-    jest
-      .spyOn(mockReporting, 'getHealthInfo')
-      .mockResolvedValueOnce({ isSufficientlySecure: false, hasPermanentEncryptionKey: true });
+    jest.spyOn(mockReporting, 'getHealthInfo').mockResolvedValueOnce({
+      isSufficientlySecure: false,
+      hasPermanentEncryptionKey: true,
+      areNotificationsEnabled: false,
+    });
     const task = new ExecuteReportTask(mockReporting, configType, logger);
     const mockTaskManager = taskManagerMock.createStart();
     await task.init(mockTaskManager);
@@ -229,9 +233,11 @@ describe('Execute Report Task', () => {
   });
 
   it('schedules task without request if health indicates no permanent encryption key', async () => {
-    jest
-      .spyOn(mockReporting, 'getHealthInfo')
-      .mockResolvedValueOnce({ isSufficientlySecure: true, hasPermanentEncryptionKey: false });
+    jest.spyOn(mockReporting, 'getHealthInfo').mockResolvedValueOnce({
+      isSufficientlySecure: true,
+      hasPermanentEncryptionKey: false,
+      areNotificationsEnabled: true,
+    });
     const task = new ExecuteReportTask(mockReporting, configType, logger);
     const mockTaskManager = taskManagerMock.createStart();
     await task.init(mockTaskManager);

@@ -6,19 +6,15 @@
  */
 
 import { useMemo } from 'react';
-import { useStoredIntegrationTabId } from './use_stored_state';
 import type { Tab } from '../types';
+import { useStoredIntegrationTabId } from './use_stored_state';
+import { useIntegrationContext } from './integration_context';
 
 export type UseSelectedTabReturn = ReturnType<typeof useSelectedTab>;
 
-export const useSelectedTab = ({
-  spaceId,
-  integrationTabs,
-}: {
-  spaceId: string;
-  integrationTabs: Tab[];
-}) => {
-  const [toggleIdSelected, setSelectedTabIdToStorage] = useStoredIntegrationTabId(
+export const useSelectedTab = () => {
+  const { spaceId, integrationTabs } = useIntegrationContext();
+  const [selectedTabId, setSelectedTabId] = useStoredIntegrationTabId(
     spaceId,
     integrationTabs[0].id
   );
@@ -29,13 +25,9 @@ export const useSelectedTab = ({
   );
 
   const selectedTab = useMemo(
-    /**
-     * When toggleIdSelected from the local storage is not found in the integrationTabs,
-     * we fallback to the first tab in the integrationTabs array.
-     */
-    () => integrationTabsById[toggleIdSelected] ?? integrationTabs[0],
-    [integrationTabs, integrationTabsById, toggleIdSelected]
+    () => integrationTabsById[selectedTabId] ?? integrationTabs[0], // fallback to first tab if not found
+    [integrationTabs, integrationTabsById, selectedTabId]
   );
 
-  return { selectedTab, toggleIdSelected, setSelectedTabIdToStorage, integrationTabs };
+  return { selectedTab, setSelectedTabId };
 };

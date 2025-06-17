@@ -162,6 +162,42 @@ FROM index
       );
     });
   });
+
+  describe('RERANK', () => {
+    test('default example', () => {
+      const { text } = reprint(`FROM a | RERANK "query" ON field1 WITH some_id`);
+
+      expect(text).toBe('FROM a | RERANK "query" ON field1 WITH some_id');
+    });
+
+    test('wraps long query', () => {
+      const { text } = reprint(
+        `FROM a | RERANK "asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf" ON field1 WITH some_id`
+      );
+
+      expect(text).toBe(`FROM a
+  | RERANK "asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf asdf"
+        ON field1
+        WITH some_id`);
+    });
+
+    test('two fields', () => {
+      const { text } = reprint(`FROM a | RERANK "query" ON field1,field2 WITH some_id`);
+
+      expect(text).toBe('FROM a | RERANK "query" ON field1, field2 WITH some_id');
+    });
+
+    test('wraps many fields', () => {
+      const { text } = reprint(
+        `FROM a | RERANK "query" ON field1,field2,field3,field4,field5,field6,field7,field8,field9,field10,field11,field12 WITH some_id`
+      );
+      expect(text).toBe(`FROM a
+  | RERANK "query"
+        ON field1, field2, field3, field4, field5, field6, field7, field8, field9,
+          field10, field11, field12
+        WITH some_id`);
+    });
+  });
 });
 
 describe('casing', () => {

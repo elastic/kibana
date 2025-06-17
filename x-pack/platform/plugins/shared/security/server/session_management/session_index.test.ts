@@ -1580,7 +1580,7 @@ describe('Session index', () => {
           index: aliasName,
           document: sessionValue,
           refresh: false,
-          querystring: { require_alias: true },
+          require_alias: true,
         },
         { ignore: [404], meta: true }
       );
@@ -1591,7 +1591,7 @@ describe('Session index', () => {
           index: aliasName,
           document: sessionValue,
           refresh: false,
-          querystring: { require_alias: true },
+          require_alias: true,
         },
         { ignore: [], meta: true }
       );
@@ -1635,7 +1635,7 @@ describe('Session index', () => {
           index: aliasName,
           document: sessionValue,
           refresh: false,
-          querystring: { require_alias: true },
+          require_alias: true,
         },
         { meta: true, ignore: [404] }
       );

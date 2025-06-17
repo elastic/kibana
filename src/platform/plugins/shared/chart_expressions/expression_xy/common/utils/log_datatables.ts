@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DimensionType } from '@kbn/expressions-plugin/common';
 import { QueryPointEventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
 import {
   Datatable,
@@ -14,7 +15,11 @@ import {
   ExecutionContext,
 } from '@kbn/expressions-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import { Dimension, prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
+import {
+  Dimension,
+  LayerDimension,
+  prepareLogTable,
+} from '@kbn/visualizations-plugin/common/utils';
 import { LayerTypes, REFERENCE_LINE } from '../constants';
 import { strings } from '../i18n';
 import {
@@ -49,10 +54,12 @@ export const logDatatables = (
     layerDimensions.push([
       splitColumnAccessor ? [splitColumnAccessor] : undefined,
       strings.getSplitColumnHelp(),
+      DimensionType.SPLIT_COLUMN,
     ]);
     layerDimensions.push([
       splitRowAccessor ? [splitRowAccessor] : undefined,
       strings.getSplitRowHelp(),
+      DimensionType.SPLIT_ROW,
     ]);
 
     const logTable = prepareLogTable(layer.table, layerDimensions, true);
@@ -100,7 +107,7 @@ export const logDatatable = (
     handlers.inspectorAdapters.tables.reset();
     handlers.inspectorAdapters.tables.allowCsvExport = true;
 
-    const layerDimensions = layers.reduce<Dimension[]>((dimensions, layer) => {
+    const layerDimensions = layers.reduce<LayerDimension[]>((dimensions, layer) => {
       if (layer.layerType === LayerTypes.ANNOTATIONS || layer.type === REFERENCE_LINE) {
         return dimensions;
       }
@@ -111,10 +118,12 @@ export const logDatatable = (
     layerDimensions.push([
       splitColumnAccessor ? [splitColumnAccessor] : undefined,
       strings.getSplitColumnHelp(),
+      DimensionType.SPLIT_COLUMN,
     ]);
     layerDimensions.push([
       splitRowAccessor ? [splitRowAccessor] : undefined,
       strings.getSplitRowHelp(),
+      DimensionType.SPLIT_ROW,
     ]);
 
     const logTable = prepareLogTable(data, layerDimensions, true);
@@ -124,7 +133,7 @@ export const logDatatable = (
 
 export const getLayerDimensions = (
   layer: CommonXYDataLayerConfig | ReferenceLineLayerConfig
-): Dimension[] => {
+): LayerDimension[] => {
   let xAccessor;
   let splitAccessors;
   let markSizeAccessor;
@@ -139,9 +148,18 @@ export const getLayerDimensions = (
     [
       accessors ? accessors : undefined,
       layerType === LayerTypes.DATA ? strings.getMetricHelp() : strings.getReferenceLineHelp(),
+      layerType === LayerTypes.DATA ? DimensionType.Y_AXIS : DimensionType.REFERENCE_LINE,
     ],
-    [xAccessor ? [xAccessor] : undefined, strings.getXAxisHelp()],
-    [splitAccessors ? splitAccessors : undefined, strings.getBreakdownHelp()],
-    [markSizeAccessor ? [markSizeAccessor] : undefined, strings.getMarkSizeHelp()],
+    [xAccessor ? [xAccessor] : undefined, strings.getXAxisHelp(), DimensionType.X_AXIS],
+    [
+      splitAccessors ? splitAccessors : undefined,
+      strings.getBreakdownHelp(),
+      DimensionType.BREAKDOWN,
+    ],
+    [
+      markSizeAccessor ? [markSizeAccessor] : undefined,
+      strings.getMarkSizeHelp(),
+      DimensionType.MARK_SIZE,
+    ],
   ];
 };

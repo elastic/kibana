@@ -10,7 +10,6 @@ import { Logger } from '@kbn/logging';
 import { ChatCompleteResponse } from '@kbn/inference-common';
 import type { ObservabilityAIAssistantClient } from '..';
 import { Message, MessageRole } from '../../../../common';
-import { LangTracer } from '../instrumentation/lang_tracer';
 
 export const TITLE_CONVERSATION_FUNCTION_NAME = 'title_conversation';
 export const TITLE_SYSTEM_MESSAGE =
@@ -27,12 +26,10 @@ export function getGeneratedTitle({
   messages,
   chat,
   logger,
-  tracer,
 }: {
   messages: Message[];
   chat: ChatFunctionWithoutConnectorAndTokenCount;
   logger: Pick<Logger, 'debug' | 'error'>;
-  tracer: LangTracer;
 }): Observable<string> {
   return from(
     chat('generate_title', {
@@ -65,7 +62,6 @@ export function getGeneratedTitle({
         },
       ],
       functionCall: TITLE_CONVERSATION_FUNCTION_NAME,
-      tracer,
       stream: false,
     })
   ).pipe(

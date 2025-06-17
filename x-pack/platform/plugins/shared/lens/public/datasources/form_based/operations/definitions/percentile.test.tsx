@@ -694,4 +694,26 @@ describe('percentile', () => {
       // ).toEqual(true);
     });
   });
+
+  describe('getDefaultLabel', () => {
+    it('should prevent label percentile rounding after 3 decimal digits', () => {
+      const column: PercentileIndexPatternColumn = {
+        label: '99.9999th percentile of bytes',
+        dataType: 'number',
+        isBucketed: false,
+        sourceField: 'bytes',
+        operationType: 'percentile',
+        params: {
+          percentile: 99.9999,
+        },
+      };
+      const indexPattern = createMockedIndexPattern();
+      const defaultLabel = percentileOperation.getDefaultLabel(
+        column,
+        { columnId: column },
+        indexPattern
+      );
+      expect(defaultLabel).toEqual('99.9999th percentile of bytes');
+    });
+  });
 });

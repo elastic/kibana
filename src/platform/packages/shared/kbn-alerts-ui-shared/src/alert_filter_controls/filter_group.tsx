@@ -342,7 +342,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
 
   const upsertPersistableControls = useCallback(async () => {
     if (!controlGroup) return;
-    const currentPanels = getFilterItemObjListFromControlState(controlGroup.snapshotRuntimeState());
+    const currentPanels = getFilterItemObjListFromControlState(controlGroup.getInput());
 
     const reorderedControls = reorderControlsWithDefaultControls({
       controls: currentPanels,

@@ -159,7 +159,7 @@ export const performCreate = async <T>(
     refresh,
     document: raw._source,
     ...(overwrite && version ? decodeRequestVersion(version) : {}),
-    querystring: { require_alias: true },
+    require_alias: true,
   };
 
   const { body, statusCode, headers } =

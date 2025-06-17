@@ -41,7 +41,7 @@ describe('MetricVisComponent', function () {
       metricColorMode: 'None',
       percentageMode: false,
       palette: {
-        colors: ['rgb(0, 0, 0, 0)', 'rgb(112, 38, 231)'],
+        colors: ['rgba(0, 0, 0, 0)', 'rgb(112, 38, 231)'],
         stops: [0, 10000],
         gradient: false,
         rangeMin: 0,

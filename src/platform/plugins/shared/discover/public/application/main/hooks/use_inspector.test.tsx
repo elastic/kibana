@@ -18,7 +18,7 @@ import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { internalStateActions } from '../state_management/redux';
 import React from 'react';
-import { DiscoverMainProvider } from '../state_management/discover_state_provider';
+import { DiscoverTestProvider } from '../../../__mocks__/test_provider';
 
 describe('test useInspector', () => {
   test('inspector open function is executed, expanded doc is closed', async () => {
@@ -31,7 +31,7 @@ describe('test useInspector', () => {
     const lensRequests = new RequestAdapter();
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     stateContainer.internalState.dispatch(
-      internalStateActions.setExpandedDoc({} as unknown as DataTableRecord)
+      internalStateActions.setExpandedDoc({ expandedDoc: {} as unknown as DataTableRecord })
     );
     const { result } = renderHook(
       () => {
@@ -42,7 +42,7 @@ describe('test useInspector', () => {
       },
       {
         wrapper: ({ children }) => (
-          <DiscoverMainProvider value={stateContainer}>{children}</DiscoverMainProvider>
+          <DiscoverTestProvider stateContainer={stateContainer}>{children}</DiscoverTestProvider>
         ),
       }
     );

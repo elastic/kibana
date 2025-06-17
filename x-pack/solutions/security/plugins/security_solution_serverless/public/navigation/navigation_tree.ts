@@ -31,14 +31,9 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
       defaultIsCollapsed: false,
       children: [
         {
-          breadcrumbStatus: 'hidden',
-          children: [
-            {
-              link: 'discover',
-            },
-            defaultNavigationTree.dashboards(),
-          ],
+          link: 'discover',
         },
+        defaultNavigationTree.dashboards(),
         {
           breadcrumbStatus: 'hidden',
           children: [
@@ -72,6 +67,10 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
         {
           breadcrumbStatus: 'hidden',
           children: [
+            {
+              id: SecurityPageName.assetInventory,
+              link: securityLink(SecurityPageName.assetInventory),
+            },
             defaultNavigationTree.assets(services),
             defaultNavigationTree.entityAnalytics(),
           ],

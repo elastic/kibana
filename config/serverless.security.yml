@@ -108,9 +108,6 @@ telemetry.labels.serverless: security
 
 # Fleet specific configuration
 xpack.fleet.internal.registry.capabilities: ['security']
-xpack.fleet.internal.registry.spec.min: '3.0'
-xpack.fleet.internal.registry.spec.max: '3.3'
-xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
 xpack.fleet.internal.registry.excludePackages: [
     # Oblt integrations
     'apm',
@@ -172,3 +169,12 @@ xpack.task_manager.capacity: 20
 
 ## Enable uiSettings validations
 xpack.securitySolution.enableUiSettingsValidations: true
+
+# Alerting and action circuit breakers
+xpack.alerting.rules.run.ruleTypeOverrides:
+  - id: siem.indicatorRule
+    timeout: 10m
+  - id: siem.eqlRule
+    timeout: 5m
+  - id: attack-discovery
+    timeout: 10m

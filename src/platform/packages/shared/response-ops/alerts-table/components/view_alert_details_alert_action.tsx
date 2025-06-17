@@ -26,6 +26,7 @@ export const ViewAlertDetailsAlertAction = typedMemo(
     isAlertDetailsEnabled,
     resolveAlertPagePath,
     tableId,
+    openLinksInNewTab,
   }: AlertActionsProps<AC>) => {
     const {
       services: {
@@ -45,6 +46,7 @@ export const ViewAlertDetailsAlertAction = typedMemo(
           key="viewAlertDetailsPage"
           size="s"
           href={linkToAlert}
+          target={openLinksInNewTab ? '_blank' : undefined}
         >
           {i18n.translate('xpack.triggersActionsUI.alertsTable.viewAlertDetails', {
             defaultMessage: 'View alert details',

@@ -9,12 +9,14 @@ import { KibanaRequest } from '@kbn/core-http-server';
 import { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { InferenceClient } from '@kbn/inference-plugin/server';
+import { InferenceClient } from '@kbn/inference-common';
 import { StreamsServer } from '../types';
 import { AssetService } from '../lib/streams/assets/asset_service';
 import { AssetClient } from '../lib/streams/assets/asset_client';
 import { StreamsClient } from '../lib/streams/client';
 import { StreamsTelemetryClient } from '../lib/telemetry/client';
+import { ContentClient } from '../lib/content/content_client';
+import { QueryClient } from '../lib/streams/assets/query/query_client';
 
 type GetScopedClients = ({
   request,
@@ -28,6 +30,8 @@ export interface RouteHandlerScopedClients {
   assetClient: AssetClient;
   streamsClient: StreamsClient;
   inferenceClient: InferenceClient;
+  contentClient: ContentClient;
+  queryClient: QueryClient;
 }
 
 export interface RouteDependencies {

@@ -138,6 +138,14 @@ export interface LogsEndpointAction<
   TMeta extends {} = {}
 > {
   '@timestamp': string;
+  /**
+   * Property identifies the space ID from where the action was created.
+   *
+   * NOTE:  Used primarily for completing 3rd party EDR response actions, since those are completed
+   *        via a background task. It assists in identifying the space that should be used when
+   *        initializing the Response Actions Client to process pending actions.
+   */
+  originSpaceId: string;
   agent: {
     id: string | string[];
     /**
@@ -145,7 +153,11 @@ export interface LogsEndpointAction<
      * Added in support of space awareness.
      */
     policy: Array<{
-      /** The agent id running on the host */
+      /**
+       * The agent id running on the host. This is same value included in `agent.id`,
+       * **HOWEVER** it is not a mapped field in the index, so no search queries can be targeted
+       * at this field.
+       */
       agentId: string;
       /** The elastic agent id that ingested the data. This will be different from `agentId` for 3rd party EDRs */
       elasticAgentId: string;
@@ -162,7 +174,11 @@ export interface LogsEndpointAction<
     id: string;
     name: string;
   };
-  /** Area to store any additional metadata  */
+  /**
+   * Area to store any additional metadata.
+   *
+   * NOTE: this property is not mapped in the index!
+   */
   meta?: TMeta;
 }
 

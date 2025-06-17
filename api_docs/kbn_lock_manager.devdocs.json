@@ -206,12 +206,80 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/lock-manager",
+            "id": "def-server.LockManagerService.getLock",
+            "type": "Function",
+            "tags": [],
+            "label": "getLock",
+            "description": [],
+            "signature": [
+              "(lockId: string) => Promise<",
+              "LockDocument",
+              " | undefined>"
+            ],
+            "path": "packages/kbn-lock-manager/src/lock_manager_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lock-manager",
+                "id": "def-server.LockManagerService.getLock.$1",
+                "type": "string",
+                "tags": [],
+                "label": "lockId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-lock-manager/src/lock_manager_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
       }
     ],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/lock-manager",
+        "id": "def-server.isLockAcquisitionError",
+        "type": "Function",
+        "tags": [],
+        "label": "isLockAcquisitionError",
+        "description": [],
+        "signature": [
+          "(error: unknown) => boolean"
+        ],
+        "path": "packages/kbn-lock-manager/src/lock_manager_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/lock-manager",
+            "id": "def-server.isLockAcquisitionError.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/kbn-lock-manager/src/lock_manager_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
     "misc": [],

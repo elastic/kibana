@@ -8,7 +8,7 @@
  */
 export function removeComments(text: string): string {
   // Remove single-line comments
-  const withoutSingleLineComments = text.replace(/\/\/.*$/gm, '');
+  const withoutSingleLineComments = text.replace(/\/\/.*?(?:\r\n|\r|\n|$)/gm, '');
   // Remove multi-line comments
   const withoutMultiLineComments = withoutSingleLineComments.replace(/\/\*[\s\S]*?\*\//g, '');
   return withoutMultiLineComments.trim();
@@ -48,13 +48,4 @@ export function toSingleLine(inputString: string): string {
     .map((line) => line.trim())
     .filter((line) => line !== '')
     .join(' | ');
-}
-
-export function getFirstPipeValue(inputString: string): string {
-  const queryNoComments = removeComments(inputString);
-  const parts = queryNoComments.split('|');
-  if (parts.length > 1) {
-    return parts[0].trim();
-  }
-  return queryNoComments.trim();
 }

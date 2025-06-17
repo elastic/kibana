@@ -10,7 +10,7 @@
 import React, { memo, useEffect } from 'react';
 import { EuiCode } from '@elastic/eui';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
-import { fireEvent, within } from '@testing-library/react';
+import { act, fireEvent, within } from '@testing-library/react';
 import { convertToTestId } from './components/command_list';
 import { Console } from './console';
 import type {
@@ -88,16 +88,22 @@ export const getConsoleSelectorsAndActionMock = (
 
   const openHelpPanel: ConsoleSelectorsAndActionsMock['openHelpPanel'] = () => {
     if (!isHelpPanelOpen()) {
-      renderResult.getByTestId(`${dataTestSubj}-header-helpButton`).click();
+      act(() => {
+        renderResult.getByTestId(`${dataTestSubj}-header-helpButton`).click();
+      });
     }
   };
   const closeHelpPanel: ConsoleSelectorsAndActionsMock['closeHelpPanel'] = () => {
     if (isHelpPanelOpen()) {
-      renderResult.getByTestId(`${dataTestSubj}-sidePanel-headerCloseButton`).click();
+      act(() => {
+        renderResult.getByTestId(`${dataTestSubj}-sidePanel-headerCloseButton`).click();
+      });
     }
   };
   const submitCommand: ConsoleSelectorsAndActionsMock['submitCommand'] = () => {
-    renderResult.getByTestId(`${dataTestSubj}-inputTextSubmitButton`).click();
+    act(() => {
+      renderResult.getByTestId(`${dataTestSubj}-inputTextSubmitButton`).click();
+    });
   };
   const enterCommand: ConsoleSelectorsAndActionsMock['enterCommand'] = async (
     cmd,

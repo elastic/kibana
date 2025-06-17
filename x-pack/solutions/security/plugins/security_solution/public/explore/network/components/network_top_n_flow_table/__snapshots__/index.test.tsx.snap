@@ -272,27 +272,31 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
               role="columnheader"
               scope="col"
             >
-              <button
-                class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                data-test-subj="tableHeaderSortButton"
-                type="button"
+              <span
+                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
               >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                <button
+                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                  data-test-subj="tableHeaderSortButton"
+                  type="button"
                 >
-                  <span
-                    class="eui-textTruncate"
-                    title="Bytes in"
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
                   >
-                    Bytes in
-                  </span>
-                  <span
-                    class="euiTableSortIcon euiTableSortIcon--sortable"
-                    color="subdued"
-                    data-euiicon-type="sortable"
-                  />
-                </div>
-              </button>
+                    <span
+                      class="eui-textTruncate"
+                      title="Bytes in"
+                    >
+                      Bytes in
+                    </span>
+                    <span
+                      class="euiTableSortIcon euiTableSortIcon--sortable"
+                      color="subdued"
+                      data-euiicon-type="sortable"
+                    />
+                  </div>
+                </button>
+              </span>
             </th>
             <th
               aria-sort="descending"
@@ -301,26 +305,30 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
               role="columnheader"
               scope="col"
             >
-              <button
-                class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
-                data-test-subj="tableHeaderSortButton"
-                type="button"
+              <span
+                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
               >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                <button
+                  class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
+                  data-test-subj="tableHeaderSortButton"
+                  type="button"
                 >
-                  <span
-                    class="eui-textTruncate"
-                    title="Bytes out"
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
                   >
-                    Bytes out
-                  </span>
-                  <span
-                    class="euiTableSortIcon"
-                    data-euiicon-type="sortDown"
-                  />
-                </div>
-              </button>
+                    <span
+                      class="eui-textTruncate"
+                      title="Bytes out"
+                    >
+                      Bytes out
+                    </span>
+                    <span
+                      class="euiTableSortIcon"
+                      data-euiicon-type="sortDown"
+                    />
+                  </div>
+                </button>
+              </span>
             </th>
             <th
               aria-sort="none"
@@ -329,27 +337,31 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
               role="columnheader"
               scope="col"
             >
-              <button
-                class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                data-test-subj="tableHeaderSortButton"
-                type="button"
+              <span
+                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
               >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                <button
+                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                  data-test-subj="tableHeaderSortButton"
+                  type="button"
                 >
-                  <span
-                    class="eui-textTruncate"
-                    title="Flows"
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
                   >
-                    Flows
-                  </span>
-                  <span
-                    class="euiTableSortIcon euiTableSortIcon--sortable"
-                    color="subdued"
-                    data-euiicon-type="sortable"
-                  />
-                </div>
-              </button>
+                    <span
+                      class="eui-textTruncate"
+                      title="Flows"
+                    >
+                      Flows
+                    </span>
+                    <span
+                      class="euiTableSortIcon euiTableSortIcon--sortable"
+                      color="subdued"
+                      data-euiicon-type="sortable"
+                    />
+                  </div>
+                </button>
+              </span>
             </th>
           </tr>
         </thead>
@@ -1020,27 +1032,31 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
               role="columnheader"
               scope="col"
             >
-              <button
-                class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                data-test-subj="tableHeaderSortButton"
-                type="button"
+              <span
+                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
               >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                <button
+                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                  data-test-subj="tableHeaderSortButton"
+                  type="button"
                 >
-                  <span
-                    class="eui-textTruncate"
-                    title="Bytes in"
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
                   >
-                    Bytes in
-                  </span>
-                  <span
-                    class="euiTableSortIcon euiTableSortIcon--sortable"
-                    color="subdued"
-                    data-euiicon-type="sortable"
-                  />
-                </div>
-              </button>
+                    <span
+                      class="eui-textTruncate"
+                      title="Bytes in"
+                    >
+                      Bytes in
+                    </span>
+                    <span
+                      class="euiTableSortIcon euiTableSortIcon--sortable"
+                      color="subdued"
+                      data-euiicon-type="sortable"
+                    />
+                  </div>
+                </button>
+              </span>
             </th>
             <th
               aria-sort="descending"
@@ -1049,26 +1065,30 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
               role="columnheader"
               scope="col"
             >
-              <button
-                class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
-                data-test-subj="tableHeaderSortButton"
-                type="button"
+              <span
+                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
               >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                <button
+                  class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
+                  data-test-subj="tableHeaderSortButton"
+                  type="button"
                 >
-                  <span
-                    class="eui-textTruncate"
-                    title="Bytes out"
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
                   >
-                    Bytes out
-                  </span>
-                  <span
-                    class="euiTableSortIcon"
-                    data-euiicon-type="sortDown"
-                  />
-                </div>
-              </button>
+                    <span
+                      class="eui-textTruncate"
+                      title="Bytes out"
+                    >
+                      Bytes out
+                    </span>
+                    <span
+                      class="euiTableSortIcon"
+                      data-euiicon-type="sortDown"
+                    />
+                  </div>
+                </button>
+              </span>
             </th>
             <th
               aria-sort="none"
@@ -1077,27 +1097,31 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
               role="columnheader"
               scope="col"
             >
-              <button
-                class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                data-test-subj="tableHeaderSortButton"
-                type="button"
+              <span
+                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
               >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                <button
+                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                  data-test-subj="tableHeaderSortButton"
+                  type="button"
                 >
-                  <span
-                    class="eui-textTruncate"
-                    title="Flows"
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
                   >
-                    Flows
-                  </span>
-                  <span
-                    class="euiTableSortIcon euiTableSortIcon--sortable"
-                    color="subdued"
-                    data-euiicon-type="sortable"
-                  />
-                </div>
-              </button>
+                    <span
+                      class="eui-textTruncate"
+                      title="Flows"
+                    >
+                      Flows
+                    </span>
+                    <span
+                      class="euiTableSortIcon euiTableSortIcon--sortable"
+                      color="subdued"
+                      data-euiicon-type="sortable"
+                    />
+                  </div>
+                </button>
+              </span>
             </th>
             <th
               aria-sort="none"
@@ -1106,27 +1130,31 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
               role="columnheader"
               scope="col"
             >
-              <button
-                class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                data-test-subj="tableHeaderSortButton"
-                type="button"
+              <span
+                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
               >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                <button
+                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                  data-test-subj="tableHeaderSortButton"
+                  type="button"
                 >
-                  <span
-                    class="eui-textTruncate"
-                    title="Destination IPs"
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
                   >
-                    Destination IPs
-                  </span>
-                  <span
-                    class="euiTableSortIcon euiTableSortIcon--sortable"
-                    color="subdued"
-                    data-euiicon-type="sortable"
-                  />
-                </div>
-              </button>
+                    <span
+                      class="eui-textTruncate"
+                      title="Destination IPs"
+                    >
+                      Destination IPs
+                    </span>
+                    <span
+                      class="euiTableSortIcon euiTableSortIcon--sortable"
+                      color="subdued"
+                      data-euiicon-type="sortable"
+                    />
+                  </div>
+                </button>
+              </span>
             </th>
           </tr>
         </thead>

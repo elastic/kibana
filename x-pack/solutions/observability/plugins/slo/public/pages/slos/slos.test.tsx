@@ -324,7 +324,9 @@ describe('SLOs Page', () => {
 
         expect(button).toBeTruthy();
 
-        button.click();
+        act(() => {
+          button.click();
+        });
 
         expect(screen.getByTestId('add-rule-flyout')).toBeInTheDocument();
       });
@@ -377,7 +379,9 @@ describe('SLOs Page', () => {
 
         expect(button).toBeTruthy();
 
-        button.click();
+        act(() => {
+          button.click();
+        });
 
         screen.getByTestId('observabilitySolutionSloDeleteModalConfirmButton').click();
 

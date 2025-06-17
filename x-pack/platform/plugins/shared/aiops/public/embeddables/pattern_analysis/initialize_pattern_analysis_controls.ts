@@ -7,19 +7,23 @@
 
 import type { StateComparators } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import type { PatternAnalysisComponentApi, PatternAnalysisEmbeddableState } from './types';
+import type {
+  PatternAnalysisComponentApi,
+  PatternAnalysisEmbeddableRuntimeState,
+  PatternAnalysisEmbeddableState,
+} from './types';
 
 type PatternAnalysisEmbeddableCustomState = Omit<
   PatternAnalysisEmbeddableState,
   'timeRange' | 'title' | 'description' | 'hidePanelTitles'
 >;
 
-export const initializePatternAnalysisControls = (rawState: PatternAnalysisEmbeddableState) => {
-  const dataViewId = new BehaviorSubject(rawState.dataViewId);
-  const fieldName = new BehaviorSubject(rawState.fieldName);
-  const minimumTimeRangeOption = new BehaviorSubject(rawState.minimumTimeRangeOption);
-  const randomSamplerMode = new BehaviorSubject(rawState.randomSamplerMode);
-  const randomSamplerProbability = new BehaviorSubject(rawState.randomSamplerProbability);
+export const initializePatternAnalysisControls = (state: PatternAnalysisEmbeddableRuntimeState) => {
+  const dataViewId = new BehaviorSubject(state.dataViewId);
+  const fieldName = new BehaviorSubject(state.fieldName);
+  const minimumTimeRangeOption = new BehaviorSubject(state.minimumTimeRangeOption);
+  const randomSamplerMode = new BehaviorSubject(state.randomSamplerMode);
+  const randomSamplerProbability = new BehaviorSubject(state.randomSamplerProbability);
 
   const updateUserInput = (update: PatternAnalysisEmbeddableCustomState) => {
     dataViewId.next(update.dataViewId);
@@ -41,14 +45,11 @@ export const initializePatternAnalysisControls = (rawState: PatternAnalysisEmbed
 
   const patternAnalysisControlsComparators: StateComparators<PatternAnalysisEmbeddableCustomState> =
     {
-      dataViewId: [dataViewId, (arg) => dataViewId.next(arg)],
-      fieldName: [fieldName, (arg) => fieldName.next(arg)],
-      minimumTimeRangeOption: [minimumTimeRangeOption, (arg) => minimumTimeRangeOption.next(arg)],
-      randomSamplerMode: [randomSamplerMode, (arg) => randomSamplerMode.next(arg)],
-      randomSamplerProbability: [
-        randomSamplerProbability,
-        (arg) => randomSamplerProbability.next(arg),
-      ],
+      dataViewId: 'referenceEquality',
+      fieldName: 'referenceEquality',
+      minimumTimeRangeOption: 'referenceEquality',
+      randomSamplerMode: 'referenceEquality',
+      randomSamplerProbability: 'referenceEquality',
     };
 
   return {

@@ -10,6 +10,6 @@ import { IntegrationCatalogView } from '../components/integrations/listing/integ
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
 
 export const WorkChatCatalogPage: React.FC = () => {
-  useBreadcrumb([{ text: 'Integrations' }]);
+  useBreadcrumb([{ text: 'Tools' }]);
   return <IntegrationCatalogView />;
 };

@@ -197,7 +197,7 @@ export function PreviewPanel() {
     <>
       <EuiFlexItem grow={false}>
         {isLoadingDocuments && <EuiProgress size="xs" color="accent" position="absolute" />}
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" wrap>
           <EuiFlexGroup component="span" gutterSize="s" alignItems="center">
             <EuiIcon type="inspect" />
             <strong>

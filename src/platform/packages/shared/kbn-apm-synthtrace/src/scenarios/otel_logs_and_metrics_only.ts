@@ -64,9 +64,8 @@ const scenario: Scenario<OtelLogDocument> = async (runOptions) => {
   };
 
   return {
-    bootstrap: async ({ logsEsClient, apmEsClient }) => {
+    bootstrap: async ({ logsEsClient }) => {
       await logsEsClient.createIndexTemplate(IndexTemplateName.LogsDb);
-      apmEsClient.pipeline(apmEsClient.getPipeline(ApmSynthtracePipelineSchema.Otel));
     },
     generate: ({ range, clients: { logsEsClient, apmEsClient } }) => {
       const {
@@ -121,6 +120,9 @@ const scenario: Scenario<OtelLogDocument> = async (runOptions) => {
           logger.perf('generating_apm_metrics', () => metricsets)
         ),
       ];
+    },
+    setupPipeline({ apmEsClient }) {
+      apmEsClient.setPipeline(apmEsClient.resolvePipelineType(ApmSynthtracePipelineSchema.Otel));
     },
   };
 };

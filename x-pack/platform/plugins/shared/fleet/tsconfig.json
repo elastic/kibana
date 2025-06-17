@@ -107,6 +107,7 @@
     "@kbn/zod-helpers",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-context-theme",
     "@kbn/fields-metadata-plugin",
     "@kbn/test-jest-helpers",
     "@kbn/core-saved-objects-utils-server",

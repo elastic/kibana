@@ -211,6 +211,7 @@ const CreatePackagePolicyProps = {
       streams: schema.maybe(schema.arrayOf(schema.object(PackagePolicyStreamsSchema))),
     })
   ),
+  spaceIds: schema.maybe(schema.arrayOf(schema.string())),
 };
 
 export const CreatePackagePolicyRequestBodySchema = schema.object({

@@ -17,8 +17,10 @@ import {
   EuiLoadingSpinner,
   EuiPageHeader,
   EuiPageSection,
+  type EuiSearchBarOnChangeArgs,
   EuiSpacer,
 } from '@elastic/eui';
+import { debounce } from 'lodash';
 import React, { Component, lazy, Suspense } from 'react';
 
 import type {
@@ -61,6 +63,7 @@ interface Props {
 
 interface State {
   spaces: Space[];
+  spacesFiltered: Space[];
   activeSpace: Space | null;
   features: KibanaFeature[];
   loading: boolean;
@@ -73,6 +76,7 @@ export class SpacesGridPage extends Component<Props, State> {
     super(props);
     this.state = {
       spaces: [],
+      spacesFiltered: [],
       activeSpace: null,
       features: [],
       loading: true,
@@ -85,6 +89,8 @@ export class SpacesGridPage extends Component<Props, State> {
     if (this.props.capabilities.spaces.manage) {
       this.loadGrid();
     }
+
+    this.debouncedOnQueryChange?.cancel();
   }
 
   public render() {
@@ -112,6 +118,24 @@ export class SpacesGridPage extends Component<Props, State> {
     );
   }
 
+  public onQueryChange = ({ query }: EuiSearchBarOnChangeArgs) => {
+    const text = query?.text?.toLowerCase() || '';
+
+    this.setState({ loading: true });
+
+    const spacesFiltered = this.state.spaces.filter(
+      (space) =>
+        space.name.toLowerCase().includes(text) || space.description?.toLowerCase().includes(text)
+    );
+
+    this.setState({
+      spacesFiltered,
+      loading: false,
+    });
+  };
+
+  public debouncedOnQueryChange = debounce(this.onQueryChange, 200);
+
   public getPageContent() {
     if (!this.props.capabilities.spaces.manage) {
       return (
@@ -132,7 +156,7 @@ export class SpacesGridPage extends Component<Props, State> {
         <EuiInMemoryTable
           itemId={'id'}
           data-test-subj="spacesListTable"
-          items={this.state.spaces}
+          items={this.state.spacesFiltered}
           tableCaption={i18n.translate('xpack.spaces.management.spacesGridPage.tableCaption', {
             defaultMessage: 'Kibana spaces',
           })}
@@ -144,11 +168,14 @@ export class SpacesGridPage extends Component<Props, State> {
           pagination={true}
           sorting={true}
           search={{
+            onChange: this.debouncedOnQueryChange,
             box: {
+              incremental: true,
               placeholder: i18n.translate(
                 'xpack.spaces.management.spacesGridPage.searchPlaceholder',
                 { defaultMessage: 'Search' }
               ),
+              'data-test-subj': 'spacesListTableSearchBox',
             },
           }}
           loading={this.state.loading}
@@ -217,6 +244,7 @@ export class SpacesGridPage extends Component<Props, State> {
     this.setState({
       loading: true,
       spaces: [],
+      spacesFiltered: [],
       features: [],
     });
 
@@ -232,6 +260,7 @@ export class SpacesGridPage extends Component<Props, State> {
       this.setState({
         loading: false,
         spaces,
+        spacesFiltered: spaces,
         activeSpace,
         features,
       });

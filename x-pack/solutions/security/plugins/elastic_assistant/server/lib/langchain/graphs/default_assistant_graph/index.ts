@@ -163,6 +163,19 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     )
   ).filter((e) => e != null) as StructuredTool[];
 
+  const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
+  const telemetryTracer = telemetryParams
+    ? new TelemetryTracer(
+        {
+          // this line MUST come before kbTools are added
+          elasticTools: tools.map(({ name }) => name),
+          telemetry,
+          telemetryParams,
+        },
+        logger
+      )
+    : undefined;
+
   // If KB enabled, fetch for any KB IndexEntries and generate a tool for each
   if (isEnabledKnowledgeBase) {
     const kbTools = await dataClients?.kbDataClient?.getAssistantTools({
@@ -198,19 +211,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     prompt: chatPromptTemplate,
   });
 
-  const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
-  const telemetryTracer = telemetryParams
-    ? new TelemetryTracer(
-        {
-          elasticTools: tools.map(({ name }) => name),
-          totalTools: tools.length,
-          telemetry,
-          telemetryParams,
-        },
-        logger
-      )
-    : undefined;
-
   const { provider } =
     !llmType || llmType === 'inference'
       ? await resolveProviderAndModel({
@@ -240,6 +240,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
         screenContextTimezone: screenContext?.timeZone,
         uiSettingsDateFormatTimezone,
       }),
+    telemetry,
+    telemetryParams,
     contentReferencesStore,
   });
   const inputs: GraphInputs = {
@@ -258,9 +260,11 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       apmTracer,
       assistantGraph,
       inputs,
+      isEnabledKnowledgeBase: telemetryParams?.isEnabledKnowledgeBase ?? false,
       logger,
       onLlmResponse,
       request,
+      telemetry,
       telemetryTracer,
       traceOptions,
     });

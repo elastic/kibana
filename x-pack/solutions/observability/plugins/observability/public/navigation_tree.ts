@@ -256,7 +256,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               {
                 id: 'category-aiops_labs',
                 title: i18n.translate('xpack.observability.obltNav.ml.aiops_labs', {
-                  defaultMessage: 'Aiops labs',
+                  defaultMessage: 'AIOps labs',
                 }),
                 breadcrumbStatus: 'hidden',
                 children: [
@@ -381,6 +381,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                       { link: 'management:cross_cluster_replication' },
                       { link: 'management:remote_clusters' },
                       { link: 'management:migrate_data' },
+                      { link: 'management:content_connectors' },
                     ],
                   },
                   {

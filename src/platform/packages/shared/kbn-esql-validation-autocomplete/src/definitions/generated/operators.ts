@@ -346,7 +346,7 @@ const addDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
-          type: 'time_literal',
+          type: 'time_duration',
         },
         {
           name: 'right',
@@ -363,7 +363,7 @@ const addDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'time_literal',
+          type: 'time_duration',
         },
       ],
       returnType: 'date',
@@ -377,6 +377,7 @@ const addDefinition: FunctionDefinition = {
     Location.SORT,
     Location.STATS_WHERE,
     Location.STATS_BY,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [],
@@ -552,6 +553,7 @@ const divDefinition: FunctionDefinition = {
     Location.SORT,
     Location.STATS_WHERE,
     Location.STATS_BY,
+    Location.COMPLETION,
   ],
   validate: (fnDef) => {
     const [left, right] = fnDef.args;
@@ -1024,47 +1026,6 @@ const equalsDefinition: FunctionDefinition = {
       ],
       returnType: 'boolean',
     },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'boolean',
-        },
-        {
-          name: 'right',
-          type: 'boolean',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'boolean',
-        },
-        {
-          name: 'right',
-          type: 'keyword',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'keyword',
-          constantOnly: true,
-        },
-        {
-          name: 'right',
-          type: 'boolean',
-        },
-      ],
-      returnType: 'boolean',
-    },
   ],
   locationsAvailable: [
     Location.STATS,
@@ -1074,6 +1035,7 @@ const equalsDefinition: FunctionDefinition = {
     Location.SORT,
     Location.STATS_WHERE,
     Location.STATS_BY,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [],
@@ -1455,6 +1417,7 @@ const greaterThanDefinition: FunctionDefinition = {
     Location.SORT,
     Location.STATS_WHERE,
     Location.STATS_BY,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [],
@@ -1839,6 +1802,7 @@ const greaterThanOrEqualDefinition: FunctionDefinition = {
     Location.SORT,
     Location.STATS_WHERE,
     Location.STATS_BY,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [],
@@ -2086,6 +2050,7 @@ const inDefinition: FunctionDefinition = {
     Location.SORT,
     Location.ROW,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['ROW a = 1, b = 4, c = 3\n| WHERE c-a IN (3, b / 2, a)'],
@@ -2258,6 +2223,7 @@ const isNotNullDefinition: FunctionDefinition = {
     Location.SORT,
     Location.ROW,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['FROM employees\n| WHERE is_rehired IS NOT NULL\n| STATS COUNT(emp_no)'],
@@ -2430,6 +2396,7 @@ const isNullDefinition: FunctionDefinition = {
     Location.SORT,
     Location.ROW,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['FROM employees\n| WHERE birth_date IS NULL'],
@@ -2811,6 +2778,7 @@ const lessThanDefinition: FunctionDefinition = {
     Location.SORT,
     Location.STATS_WHERE,
     Location.STATS_BY,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [],
@@ -3130,6 +3098,62 @@ const lessThanOrEqualDefinition: FunctionDefinition = {
       ],
       returnType: 'boolean',
     },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'ip',
+        },
+        {
+          name: 'right',
+          type: 'text',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'text',
+          constantOnly: true,
+        },
+        {
+          name: 'right',
+          type: 'ip',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'version',
+        },
+        {
+          name: 'right',
+          type: 'text',
+          constantOnly: true,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'text',
+          constantOnly: true,
+        },
+        {
+          name: 'right',
+          type: 'version',
+        },
+      ],
+      returnType: 'boolean',
+    },
   ],
   locationsAvailable: [
     Location.STATS,
@@ -3139,6 +3163,7 @@ const lessThanOrEqualDefinition: FunctionDefinition = {
     Location.SORT,
     Location.STATS_WHERE,
     Location.STATS_BY,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [],
@@ -3187,38 +3212,6 @@ const likeDefinition: FunctionDefinition = {
       returnType: 'boolean',
       minParams: 2,
     },
-    {
-      params: [
-        {
-          name: 'str',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'pattern',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'str',
-          type: 'keyword',
-          optional: false,
-        },
-        {
-          name: 'pattern',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
   ],
   locationsAvailable: [
     Location.EVAL,
@@ -3226,6 +3219,7 @@ const likeDefinition: FunctionDefinition = {
     Location.SORT,
     Location.ROW,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: ['FROM employees\n| WHERE first_name LIKE """?b*"""\n| KEEP first_name, last_name'],
@@ -3736,7 +3730,7 @@ const matchOperatorDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  locationsAvailable: [Location.WHERE],
+  locationsAvailable: [Location.WHERE, Location.STATS_WHERE],
   validate: undefined,
   examples: ['FROM books\n| WHERE author:"Faulkner"'],
 };
@@ -3911,6 +3905,7 @@ const modDefinition: FunctionDefinition = {
     Location.SORT,
     Location.STATS_WHERE,
     Location.STATS_BY,
+    Location.COMPLETION,
   ],
   validate: (fnDef) => {
     const [left, right] = fnDef.args;
@@ -4111,6 +4106,7 @@ const mulDefinition: FunctionDefinition = {
     Location.SORT,
     Location.STATS_WHERE,
     Location.STATS_BY,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [],
@@ -4425,6 +4421,7 @@ const notInDefinition: FunctionDefinition = {
     Location.SORT,
     Location.ROW,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [],
@@ -4481,6 +4478,7 @@ const notLikeDefinition: FunctionDefinition = {
     Location.SORT,
     Location.ROW,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [],
@@ -4537,6 +4535,7 @@ const notRlikeDefinition: FunctionDefinition = {
     Location.SORT,
     Location.ROW,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [],
@@ -4984,47 +4983,6 @@ const notEqualsDefinition: FunctionDefinition = {
       ],
       returnType: 'boolean',
     },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'boolean',
-        },
-        {
-          name: 'right',
-          type: 'boolean',
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'boolean',
-        },
-        {
-          name: 'right',
-          type: 'keyword',
-          constantOnly: true,
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'keyword',
-          constantOnly: true,
-        },
-        {
-          name: 'right',
-          type: 'boolean',
-        },
-      ],
-      returnType: 'boolean',
-    },
   ],
   locationsAvailable: [
     Location.STATS,
@@ -5034,6 +4992,7 @@ const notEqualsDefinition: FunctionDefinition = {
     Location.SORT,
     Location.STATS_WHERE,
     Location.STATS_BY,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [],
@@ -5082,38 +5041,6 @@ const rlikeDefinition: FunctionDefinition = {
       returnType: 'boolean',
       minParams: 2,
     },
-    {
-      params: [
-        {
-          name: 'str',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'pattern',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'str',
-          type: 'keyword',
-          optional: false,
-        },
-        {
-          name: 'pattern',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
   ],
   locationsAvailable: [
     Location.EVAL,
@@ -5121,6 +5048,7 @@ const rlikeDefinition: FunctionDefinition = {
     Location.SORT,
     Location.ROW,
     Location.STATS_WHERE,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [
@@ -5413,7 +5341,7 @@ const subDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
-          type: 'time_literal',
+          type: 'time_duration',
         },
         {
           name: 'right',
@@ -5430,7 +5358,7 @@ const subDefinition: FunctionDefinition = {
         },
         {
           name: 'right',
-          type: 'time_literal',
+          type: 'time_duration',
         },
       ],
       returnType: 'date',
@@ -5444,6 +5372,7 @@ const subDefinition: FunctionDefinition = {
     Location.SORT,
     Location.STATS_WHERE,
     Location.STATS_BY,
+    Location.COMPLETION,
   ],
   validate: undefined,
   examples: [],

@@ -171,6 +171,7 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
               defaultMessage="Fix errors before continuing."
             />
           }
+          role="alert"
           color="danger"
           iconType="cross"
           data-test-subj="repositoryFormError"

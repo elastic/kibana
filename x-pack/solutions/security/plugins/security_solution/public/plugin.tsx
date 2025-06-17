@@ -26,6 +26,7 @@ import type {
 } from '@kbn/discover-shared-plugin/public/services/discover_features';
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import { ProductFeatureAssistantKey } from '@kbn/security-solution-features/src/product_features_keys';
+import type { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { getLazyCloudSecurityPosturePliAuthBlockExtension } from './cloud_security_posture/lazy_cloud_security_posture_pli_auth_block_extension';
 import { getLazyEndpointAgentTamperProtectionExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_agent_tamper_protection_extension';
 import type {
@@ -58,13 +59,15 @@ import { getLazyEndpointGenericErrorsListExtension } from './management/pages/po
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
+import { LazyAssetInventoryReplaceDefineStepExtension } from './asset_inventory/components/fleet_extensions/lazy_asset_inventory_replacestep_extension';
 import { LazyCustomCriblExtension } from './security_integrations/cribl/components/lazy_custom_cribl_extension';
 
 import type { SecurityAppStore } from './common/store/types';
 import { PluginContract } from './plugin_contract';
 import { PluginServices } from './plugin_services';
 import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/external_reference';
-import { hasAccessToSecuritySolution } from './helpers_access';
+import { isSecuritySolutionAccessible } from './helpers_access';
+import { generateAttachmentType } from './threat_intelligence/modules/cases/utils/attachments';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -230,6 +233,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     cases?.attachmentFramework.registerExternalReference(
       getExternalReferenceAttachmentEndpointRegular()
     );
+
+    const externalAttachmentType: ExternalReferenceAttachmentType = generateAttachmentType();
+    cases?.attachmentFramework?.registerExternalReference(externalAttachmentType);
 
     this.registerDiscoverSharedFeatures(core, plugins);
 
@@ -437,7 +443,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     // When the user does not have any of the capabilities required to access security solution, the plugin should be inaccessible
     // This is necessary to hide security solution from the selectable solutions in the spaces UI
-    if (!hasAccessToSecuritySolution(capabilities)) {
+    if (!isSecuritySolutionAccessible(capabilities)) {
       this.appUpdater$.next(() => ({ status: AppStatus.inaccessible, visibleIn: [] }));
       // no need to register the links updater when the plugin is inaccessible. return early
       return;
@@ -482,6 +488,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         upsellingService: this.contract.upsellingService,
       },
     };
+
+    registerExtension({
+      package: 'cloud_asset_inventory',
+      view: 'package-policy-replace-define-step',
+      Component: LazyAssetInventoryReplaceDefineStepExtension,
+    });
 
     registerExtension({
       package: 'endpoint',

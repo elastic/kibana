@@ -106,6 +106,7 @@ export const toGroupedEsqlQueryHits = (
   const duplicateAlertIds: Set<string> = new Set<string>();
   const longAlertIds: Set<string> = new Set<string>();
   const rows: EsqlDocument[] = [];
+  const mappedAlertIds: Record<string, Array<string | null>> = {};
   const groupedHits = table.values.reduce<Record<string, EsqlHit[]>>((acc, row) => {
     const document = rowToDocument(table.columns, row);
     const mappedAlertId = alertIdFields.filter((a) => !isNil(document[a])).map((a) => document[a]);
@@ -121,6 +122,7 @@ export const toGroupedEsqlQueryHits = (
         acc[alertId].push(hit);
       } else {
         acc[alertId] = [hit];
+        mappedAlertIds[alertId] = mappedAlertId;
       }
       rows.push({ [ALERT_ID_COLUMN]: alertId, ...document });
 
@@ -135,7 +137,7 @@ export const toGroupedEsqlQueryHits = (
     groupAgg: {
       buckets: entries(groupedHits).map(([key, value]) => {
         return {
-          key,
+          key: mappedAlertIds[key],
           doc_count: value.length,
           topHitsAgg: {
             hits: {
@@ -158,6 +160,7 @@ export const toGroupedEsqlQueryHits = (
         hits: { hits: [] },
         aggregations,
       },
+      termField: alertIdFields,
     },
     duplicateAlertIds,
     longAlertIds,

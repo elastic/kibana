@@ -30,7 +30,6 @@ import { useApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { BetaBadge } from '../../../shared/beta_badge';
 import { ApmEnvironmentFilter } from '../../../shared/environment_filter';
 import { UnifiedSearchBar } from '../../../shared/unified_search_bar';
 
@@ -138,9 +137,6 @@ export function AgentExplorer() {
                   defaultMessage: 'Agent explorer',
                 })}
               </h2>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <BetaBadge icon="beta" />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiTitle>

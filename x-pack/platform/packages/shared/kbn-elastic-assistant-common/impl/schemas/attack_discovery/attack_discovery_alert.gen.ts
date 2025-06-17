@@ -17,7 +17,7 @@
 import { z } from '@kbn/zod';
 
 import { Replacements } from '../conversations/common_attributes.gen';
-import { NonEmptyString, User } from '../common_attributes.gen';
+import { NonEmptyTimestamp, User } from '../common_attributes.gen';
 
 /**
  * An attack discovery that's also an alert
@@ -65,7 +65,7 @@ export const AttackDiscoveryAlert = z.object({
    */
   mitreAttackTactics: z.array(z.string()).optional(),
   /**
-   * Optional Key-value pairs that are used to replace placeholders in the markdown fields
+   * Key-value pairs that are used to replace placeholders in the markdown fields
    */
   replacements: Replacements.optional(),
   /**
@@ -79,7 +79,7 @@ export const AttackDiscoveryAlert = z.object({
   /**
    * The time the attack discovery was generated
    */
-  timestamp: NonEmptyString,
+  timestamp: NonEmptyTimestamp,
   /**
    * A title for the attack discovery, in plain text
    */

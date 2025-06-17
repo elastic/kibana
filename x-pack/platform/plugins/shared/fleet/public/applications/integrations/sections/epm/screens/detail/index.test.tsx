@@ -62,7 +62,7 @@ describe('When on integration detail', () => {
   beforeEach(async () => {
     testRenderer = createIntegrationsTestRendererMock();
     mockedApi = mockApiCalls(testRenderer.startServices.http);
-    act(() => testRenderer.mountHistory.push(detailPageUrlPath));
+    await act(() => testRenderer.mountHistory.push(detailPageUrlPath));
   });
 
   describe('and the package is installed', () => {
@@ -76,11 +76,11 @@ describe('When on integration detail', () => {
     }, TESTS_TIMEOUT);
 
     it('should display agent policy usage count', async () => {
-      expect(renderResult.queryByTestId('agentPolicyCount')).not.toBeNull();
+      expect(await renderResult.findByTestId('agentPolicyCount')).not.toBeNull();
     });
 
     it('should show the Policies tab', async () => {
-      expect(renderResult.queryByTestId('tab-policies')).not.toBeNull();
+      expect(await renderResult.findByTestId('tab-policies')).not.toBeNull();
     });
   });
 

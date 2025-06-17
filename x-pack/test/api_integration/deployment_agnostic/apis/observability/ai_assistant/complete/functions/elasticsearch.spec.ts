@@ -26,8 +26,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   describe('elasticsearch', function () {
-    // Fails on MKI: https://github.com/elastic/kibana/issues/205581
-    this.tags(['failsOnMKI']);
+    // LLM Proxy is not yet support in MKI: https://github.com/elastic/obs-ai-assistant-team/issues/199
+    this.tags(['skipCloud']);
     let proxy: LlmProxy;
     let connectorId: string;
     let events: MessageAddEvent[];
@@ -41,7 +41,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       // intercept the LLM request and return a fixed response
-      void proxy.interceptConversation('Hello from LLM Proxy');
+      void proxy.interceptWithResponse('Hello from LLM Proxy');
 
       await generateApmData(apmSynthtraceEsClient);
 

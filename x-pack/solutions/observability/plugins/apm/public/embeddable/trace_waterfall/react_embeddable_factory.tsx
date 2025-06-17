@@ -4,12 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { DefaultEmbeddableApi, ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { SerializedTitles } from '@kbn/presentation-publishing';
-import { initializeTitleManager, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import {
+  initializeTitleManager,
+  titleComparators,
+  useBatchedPublishingSubjects,
+} from '@kbn/presentation-publishing';
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, map, merge } from 'rxjs';
 import { isEmpty } from 'lodash';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { ApmEmbeddableContext } from '../embeddable_context';
 import type { EmbeddableDeps } from '../types';
 import { APM_TRACE_WATERFALL_EMBEDDABLE } from './constant';
@@ -30,6 +35,8 @@ export interface ApmTraceWaterfallEmbeddableEntryProps extends BaseProps, Serial
   serviceName: string;
   entryTransactionId: string;
   displayLimit?: number;
+  scrollElement?: Element;
+  onNodeClick?: (nodeSpanId: string) => void;
 }
 
 export type ApmTraceWaterfallEmbeddableProps =
@@ -37,16 +44,13 @@ export type ApmTraceWaterfallEmbeddableProps =
   | ApmTraceWaterfallEmbeddableEntryProps;
 
 export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
-  const factory: ReactEmbeddableFactory<
-    ApmTraceWaterfallEmbeddableProps,
+  const factory: EmbeddableFactory<
     ApmTraceWaterfallEmbeddableProps,
     DefaultEmbeddableApi<ApmTraceWaterfallEmbeddableProps>
   > = {
     type: APM_TRACE_WATERFALL_EMBEDDABLE,
-    deserializeState: (state) => {
-      return state.rawState as ApmTraceWaterfallEmbeddableProps;
-    },
-    buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
+    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+      const state = initialState.rawState;
       const titleManager = initializeTitleManager(state);
       const serviceName$ = new BehaviorSubject('serviceName' in state ? state.serviceName : '');
       const traceId$ = new BehaviorSubject(state.traceId);
@@ -57,36 +61,87 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
       const rangeTo$ = new BehaviorSubject(state.rangeTo);
       const displayLimit$ = new BehaviorSubject('displayLimit' in state ? state.displayLimit : 0);
       const docId$ = new BehaviorSubject('docId' in state ? state.docId : '');
-
-      const api = buildApi(
-        {
-          ...titleManager.api,
-          serializeState: () => {
-            return {
-              rawState: {
-                ...titleManager.serialize(),
-                serviceName: serviceName$.getValue(),
-                traceId: traceId$.getValue(),
-                entryTransactionId: entryTransactionId$.getValue(),
-                rangeFrom: rangeFrom$.getValue(),
-                rangeTo: rangeTo$.getValue(),
-                displayLimit: displayLimit$.getValue(),
-                docId: docId$.getValue(),
-              },
-            };
-          },
-        },
-        {
-          ...titleManager.comparators,
-          serviceName: [serviceName$, (value) => serviceName$.next(value)],
-          traceId: [traceId$, (value) => traceId$.next(value)],
-          entryTransactionId: [entryTransactionId$, (value) => entryTransactionId$.next(value)],
-          rangeFrom: [rangeFrom$, (value) => rangeFrom$.next(value)],
-          rangeTo: [rangeTo$, (value) => rangeFrom$.next(value)],
-          displayLimit: [displayLimit$, (value) => displayLimit$.next(value)],
-          docId: [docId$, (value) => docId$.next(value)],
-        }
+      const scrollElement$ = new BehaviorSubject(
+        'scrollElement' in state ? state.scrollElement : undefined
       );
+      const onNodeClick$ = new BehaviorSubject(
+        'onNodeClick' in state ? state.onNodeClick : undefined
+      );
+
+      function serializeState() {
+        return {
+          rawState: {
+            ...titleManager.getLatestState(),
+            serviceName: serviceName$.getValue(),
+            traceId: traceId$.getValue(),
+            entryTransactionId: entryTransactionId$.getValue(),
+            rangeFrom: rangeFrom$.getValue(),
+            rangeTo: rangeTo$.getValue(),
+            displayLimit: displayLimit$.getValue(),
+            docId: docId$.getValue(),
+            scrollElement: scrollElement$.getValue(),
+            onNodeClick: onNodeClick$.getValue(),
+          },
+        };
+      }
+
+      const unsavedChangesApi = initializeUnsavedChanges<ApmTraceWaterfallEmbeddableProps>({
+        uuid,
+        parentApi,
+        serializeState,
+        anyStateChange$: merge(
+          titleManager.anyStateChange$,
+          serviceName$,
+          traceId$,
+          entryTransactionId$,
+          rangeFrom$,
+          rangeTo$,
+          displayLimit$,
+          docId$,
+          scrollElement$,
+          onNodeClick$
+        ).pipe(map(() => undefined)),
+        getComparators: () => {
+          return {
+            ...titleComparators,
+            serviceName: 'referenceEquality',
+            traceId: 'referenceEquality',
+            entryTransactionId: 'referenceEquality',
+            rangeFrom: 'referenceEquality',
+            rangeTo: 'referenceEquality',
+            displayLimit: 'referenceEquality',
+            docId: 'referenceEquality',
+            scrollElement: 'referenceEquality',
+            onNodeClick: 'referenceEquality',
+          };
+        },
+        onReset: (lastSaved) => {
+          titleManager.reinitializeState(lastSaved?.rawState);
+
+          // reset base state
+          traceId$.next(lastSaved?.rawState.traceId ?? '');
+          rangeFrom$.next(lastSaved?.rawState.rangeFrom ?? '');
+          rangeFrom$.next(lastSaved?.rawState.rangeTo ?? '');
+
+          // reset entry state
+          const entryState = lastSaved?.rawState as ApmTraceWaterfallEmbeddableEntryProps;
+          serviceName$.next(entryState?.serviceName ?? '');
+          entryTransactionId$.next(entryState?.entryTransactionId ?? '');
+          displayLimit$.next(entryState?.displayLimit ?? 0);
+          scrollElement$.next(entryState?.scrollElement ?? undefined);
+          onNodeClick$.next(entryState?.onNodeClick ?? undefined);
+
+          // reset focused state
+          const focusedState = lastSaved?.rawState as ApmTraceWaterfallEmbeddableFocusedProps;
+          docId$.next(focusedState?.docId ?? '');
+        },
+      });
+
+      const api = finalizeApi({
+        ...unsavedChangesApi,
+        ...titleManager.api,
+        serializeState,
+      });
 
       return {
         api,
@@ -99,6 +154,8 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
             rangeTo,
             displayLimit,
             docId,
+            scrollElement,
+            onNodeClick,
           ] = useBatchedPublishingSubjects(
             serviceName$,
             traceId$,
@@ -106,7 +163,9 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
             rangeFrom$,
             rangeTo$,
             displayLimit$,
-            docId$
+            docId$,
+            scrollElement$,
+            onNodeClick$
           );
           const content = isEmpty(docId) ? (
             <TraceWaterfallEmbeddable
@@ -116,6 +175,8 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
               rangeFrom={rangeFrom}
               rangeTo={rangeTo}
               displayLimit={displayLimit}
+              onNodeClick={onNodeClick}
+              scrollElement={scrollElement}
             />
           ) : (
             <FocusedTraceWaterfallEmbeddable

@@ -20,7 +20,6 @@ import { useEuiTheme, EuiFlexGroup, EuiLoadingSpinner, EuiFlexItem } from '@elas
 
 import { i18n } from '@kbn/i18n';
 import { getTimeZone } from '@kbn/visualization-utils';
-import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import type { LogRateHistogramItem } from '@kbn/aiops-log-rate-analysis';
 
 import { useDataVisualizerKibana } from '../../../../kibana_context';
@@ -60,7 +59,6 @@ export const DocumentCountChart: FC<Props> = ({
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
 
   const xAxisFormatter = fieldFormats.deserialize({ id: 'date' });
-  const useLegacyTimeAxis = uiSettings.get('visualization:useLegacyTimeAxis', false);
 
   const seriesName = i18n.translate(
     'xpack.dataVisualizer.dataGrid.field.documentCountChart.seriesLabel',
@@ -142,15 +140,12 @@ export const DocumentCountChart: FC<Props> = ({
             position={Position.Bottom}
             showOverlappingTicks={true}
             tickFormat={(value) => xAxisFormatter.convert(value)}
-            // temporary fix to reduce horizontal chart margin until fixed in Elastic Charts itself
-            labelFormat={useLegacyTimeAxis ? undefined : () => ''}
-            timeAxisLayerCount={useLegacyTimeAxis ? 0 : 2}
-            style={useLegacyTimeAxis ? {} : MULTILAYER_TIME_AXIS_STYLE}
           />
           <Axis id="left" position={Position.Left} />
           <HistogramBarSeries
             id={SPEC_ID}
             name={seriesName}
+            // Defaults to multi layer time axis as of Elastic Charts v70
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
             xAccessor="time"
