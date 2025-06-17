@@ -94,7 +94,7 @@ const walker = new Walker({
 
 ### Aborting the walk
 
-By default, the walker traverses the entire AST exaclty once. However, you can
+By default, the walker traverses the entire AST exactly once. However, you can
 abort the walk early by calling the `walker.abort()` method from within
 any of the visitor callbacks. This will stop the walk immediately and no further
 nodes will be visited.
