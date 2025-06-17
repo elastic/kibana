@@ -136,18 +136,19 @@ export const ConfigNumberField: React.FC<ConfigInputFieldProps> = ({
           setInnerValue('');
         },
       }}
-      onChange={(event) => {
-        const newValue = isEmpty(event.target.value) ? '0' : event.target.value;
-        setInnerValue(newValue);
-        validateAndSetConfigValue(newValue);
-      }}
     >
       <EuiFieldNumber
+        min={0}
         fullWidth
         disabled={isLoading || (isEdit && !updatable) || isPreconfigured}
         data-test-subj={`${key}-number`}
         value={innerValue as number}
         isInvalid={!isValid}
+        onChange={(event) => {
+          const newValue = isEmpty(event.target.value) ? '0' : event.target.value;
+          setInnerValue(newValue);
+          validateAndSetConfigValue(newValue);
+        }}
       />
     </EuiFormControlLayout>
   );
