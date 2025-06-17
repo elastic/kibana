@@ -6,13 +6,16 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import { convertAlertingRuleToRuleResponse } from '../../../lib/detection_engine/rule_management/logic/detection_rules_client/converters/convert_alerting_rule_to_rule_response';
 import type { RuleAdoption } from './types';
+import { getCustomizedFieldsStatus } from './get_customized_fields_status';
 
 import { updateRuleUsage } from './update_usage';
 import { getDetectionRules } from '../../queries/get_detection_rules';
 import { getAlerts } from '../../queries/get_alerts';
 import { MAX_PER_PAGE, MAX_RESULTS_WINDOW } from '../../constants';
 import {
+  getInitialCustomizedFieldsStatus,
   getInitialEventLogUsage,
   getInitialRulesUsage,
   getInitialSpacesUsage,
@@ -58,6 +61,7 @@ export const getRuleMetrics = async ({
         detection_rule_detail: [],
         detection_rule_usage: getInitialRulesUsage(),
         detection_rule_status: getInitialEventLogUsage(),
+        detection_rule_customized_fields_status: getInitialCustomizedFieldsStatus(),
         spaces_usage: getInitialSpacesUsage(),
       };
     }
@@ -125,10 +129,33 @@ export const getRuleMetrics = async ({
       getInitialRulesUsage()
     );
 
+    const ruleResponsesForPrebuiltRules = ruleResults
+      .filter((rule) => rule.attributes.params.immutable === true)
+      .map((rule) =>
+        convertAlertingRuleToRuleResponse({
+          ...rule.attributes,
+          id: rule.id,
+          createdAt: new Date(rule.attributes.createdAt),
+          updatedAt: new Date(rule.attributes.updatedAt),
+        })
+      );
+
+    let customizedFieldsStatus;
+    if (ruleResponsesForPrebuiltRules.length === 0) {
+      customizedFieldsStatus = getInitialCustomizedFieldsStatus();
+    } else {
+      customizedFieldsStatus = await getCustomizedFieldsStatus({
+        savedObjectsClient,
+        ruleResponsesForPrebuiltRules,
+        logger,
+      });
+    }
+
     return {
       detection_rule_detail: elasticRuleObjects,
       detection_rule_usage: rulesUsage,
       detection_rule_status: eventLogMetricsTypeStatus,
+      detection_rule_customized_fields_status: customizedFieldsStatus,
       spaces_usage: getSpacesUsage(ruleResults),
     };
   } catch (e) {
@@ -140,6 +167,7 @@ export const getRuleMetrics = async ({
       detection_rule_detail: [],
       detection_rule_usage: getInitialRulesUsage(),
       detection_rule_status: getInitialEventLogUsage(),
+      detection_rule_customized_fields_status: getInitialCustomizedFieldsStatus(),
       spaces_usage: getInitialSpacesUsage(),
     };
   }

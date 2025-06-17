@@ -9,6 +9,7 @@ import type { DetectionMetrics } from './types';
 
 import { getInitialMlJobUsage } from './ml_jobs/get_initial_usage';
 import {
+  getInitialCustomizedFieldsStatus,
   getInitialEventLogUsage,
   getInitialRulesUsage,
   getInitialSpacesUsage,
@@ -28,6 +29,7 @@ export const getInitialDetectionMetrics = (): DetectionMetrics => ({
     detection_rule_detail: [],
     detection_rule_usage: getInitialRulesUsage(),
     detection_rule_status: getInitialEventLogUsage(),
+    detection_rule_customized_fields_status: getInitialCustomizedFieldsStatus(),
     spaces_usage: getInitialSpacesUsage(),
   },
   legacy_siem_signals: getInitialLegacySiemSignalsUsage(),

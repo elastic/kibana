@@ -35,17 +35,78 @@ import {
 import { getInitialDetectionMetrics } from './get_initial_usage';
 import { getDetectionsMetrics } from './get_metrics';
 import { getInitialRulesUsage, initialAlertSuppression } from './rules/get_initial_usage';
+import { createPrebuiltRuleAssetsClient as createPrebuiltRuleAssetsClientMock } from '../../lib/detection_engine/prebuilt_rules/logic/rule_assets/__mocks__/prebuilt_rule_assets_client';
+import type { QueryRule, RuleResponse } from '../../../common/api/detection_engine';
+import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server/src/apis/find';
+import type { RuleSearchResult } from '../types';
+
+function prepareSavedObjectRule(
+  customizedRule: SavedObjectsFindResult<RuleSearchResult>
+): RuleResponse {
+  return {
+    description: customizedRule.attributes.params.description,
+    enabled: customizedRule.attributes.enabled,
+    filters: (customizedRule.attributes.params as unknown as QueryRule).filters ?? [],
+    id: customizedRule.id,
+    index: (customizedRule.attributes.params as unknown as QueryRule).index ?? [],
+    immutable: customizedRule.attributes.params.immutable,
+    rule_id: customizedRule.attributes.params.ruleId,
+    language: (customizedRule.attributes.params as unknown as QueryRule).language ?? 'kuery',
+    risk_score: customizedRule.attributes.params.riskScore,
+    risk_score_mapping: customizedRule.attributes.params.riskScoreMapping,
+    name: customizedRule.attributes.name,
+    max_signals: customizedRule.attributes.params.maxSignals,
+    query: (customizedRule.attributes.params as unknown as QueryRule).query ?? '',
+    references: customizedRule.attributes.params.references,
+    severity: customizedRule.attributes.params.severity,
+    severity_mapping: customizedRule.attributes.params.severityMapping,
+    tags: customizedRule.attributes.tags,
+    to: customizedRule.attributes.params.to,
+    type: (customizedRule.attributes.params as unknown as QueryRule).type ?? '',
+    threat: customizedRule.attributes.params.threat,
+    updated_at: customizedRule.attributes.updatedAt,
+    created_at: customizedRule.attributes.createdAt,
+    created_by: (customizedRule.attributes.params as unknown as QueryRule).created_by ?? '',
+    updated_by: (customizedRule.attributes.params as unknown as QueryRule).updated_by ?? '',
+    author: customizedRule.attributes.params.author,
+    version: customizedRule.attributes.params.version,
+    setup: (customizedRule.attributes.params as unknown as QueryRule).setup ?? '',
+    interval: customizedRule.attributes.schedule.interval,
+    from: customizedRule.attributes.params.from,
+    revision: customizedRule.attributes.revision,
+    false_positives: customizedRule.attributes.params.falsePositives,
+    related_integrations:
+      (customizedRule.attributes.params as unknown as QueryRule).related_integrations ?? [],
+    required_fields:
+      (customizedRule.attributes.params as unknown as QueryRule).required_fields ?? [],
+    exceptions_list: customizedRule.attributes.params.exceptionsList,
+    actions: (customizedRule.attributes.params as unknown as QueryRule).actions ?? [],
+    rule_source: (customizedRule.attributes.params as unknown as QueryRule).rule_source ?? '',
+    timestamp_override: customizedRule.attributes.params.timestampOverride,
+    note: customizedRule.attributes.params.note,
+  };
+}
+
+let mockPrebuiltRuleAssetsClient: ReturnType<typeof createPrebuiltRuleAssetsClientMock>;
+jest.mock(
+  '../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client',
+  () => ({
+    createPrebuiltRuleAssetsClient: () => mockPrebuiltRuleAssetsClient,
+  })
+);
 
 describe('Detections Usage and Metrics', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let mlClient: ReturnType<typeof mlServicesMock.createSetupContract>;
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
-  describe('getRuleMetrics()', () => {
+  describe('getDetectionsMetrics()', () => {
     beforeEach(() => {
       esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       mlClient = mlServicesMock.createSetupContract();
       savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectResponse());
+      mockPrebuiltRuleAssetsClient = createPrebuiltRuleAssetsClientMock();
     });
 
     it('returns zeroed counts if calls are empty', async () => {
@@ -67,10 +128,14 @@ describe('Detections Usage and Metrics', () => {
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
       esClient.search.mockResponseOnce(getMockRuleAlertsResponse(3400));
-      savedObjectsClient.find.mockResolvedValueOnce(getMockRuleSearchResponse());
+      const prebuiltNonCustomizedRuleSearchResponse = getMockRuleSearchResponse();
+      savedObjectsClient.find.mockResolvedValueOnce(prebuiltNonCustomizedRuleSearchResponse);
       savedObjectsClient.find.mockResolvedValueOnce(getMockAlertCaseCommentsResponse());
-      // Get empty saved object for legacy notification system.
-      savedObjectsClient.find.mockResolvedValueOnce(getEmptySavedObjectResponse());
+
+      const savedRuleMock = prepareSavedObjectRule(
+        prebuiltNonCustomizedRuleSearchResponse.saved_objects[0]
+      );
+      mockPrebuiltRuleAssetsClient.fetchAssetsByVersion.mockResolvedValueOnce([savedRuleMock]);
 
       const logger = loggingSystemMock.createLogger();
       const result = await getDetectionsMetrics({
@@ -139,19 +204,28 @@ describe('Detections Usage and Metrics', () => {
               alert_suppression: initialAlertSuppression,
             },
           },
+          detection_rule_customized_fields_status: {
+            rules_with_missing_base_version: 0,
+            customized_fields_breakdown: [],
+          },
         },
       });
     });
 
-    it('returns information with on non elastic prebuilt rule', async () => {
+    it('returns information on non elastic prebuilt rule', async () => {
       esClient.search.mockResponseOnce(getEventLogAllRules());
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
       esClient.search.mockResponseOnce(getMockRuleAlertsResponse(800));
-      savedObjectsClient.find.mockResolvedValueOnce(getMockRuleSearchResponse(false));
+      const prebuiltNonCustomizedRuleSearchResponse = getMockRuleSearchResponse(false);
+      savedObjectsClient.find.mockResolvedValueOnce(prebuiltNonCustomizedRuleSearchResponse);
       savedObjectsClient.find.mockResolvedValueOnce(getMockAlertCaseCommentsResponse());
-      // Get empty saved object for legacy notification system.
-      savedObjectsClient.find.mockResolvedValueOnce(getEmptySavedObjectResponse());
+
+      const savedRuleMock = prepareSavedObjectRule(
+        prebuiltNonCustomizedRuleSearchResponse.saved_objects[0]
+      );
+      mockPrebuiltRuleAssetsClient.fetchAssetsByVersion.mockResolvedValueOnce([savedRuleMock]);
+
       const logger = loggingSystemMock.createLogger();
       const result = await getDetectionsMetrics({
         eventLogIndex: '',
@@ -199,6 +273,10 @@ describe('Detections Usage and Metrics', () => {
               alert_suppression: initialAlertSuppression,
             },
           },
+          detection_rule_customized_fields_status: {
+            rules_with_missing_base_version: 0,
+            customized_fields_breakdown: [],
+          },
         },
       });
     });
@@ -208,10 +286,14 @@ describe('Detections Usage and Metrics', () => {
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
       esClient.search.mockResponseOnce(getMockRuleAlertsResponse(0));
-      savedObjectsClient.find.mockResolvedValueOnce(getMockRuleSearchResponse());
+      const prebuiltNonCustomizedRuleSearchResponse = getMockRuleSearchResponse();
+      savedObjectsClient.find.mockResolvedValueOnce(prebuiltNonCustomizedRuleSearchResponse);
       savedObjectsClient.find.mockResolvedValueOnce(getMockAlertCaseCommentsResponse());
-      // Get empty saved object for legacy notification system.
-      savedObjectsClient.find.mockResolvedValueOnce(getEmptySavedObjectResponse());
+
+      const savedRuleMock = prepareSavedObjectRule(
+        prebuiltNonCustomizedRuleSearchResponse.saved_objects[0]
+      );
+      mockPrebuiltRuleAssetsClient.fetchAssetsByVersion.mockResolvedValueOnce([savedRuleMock]);
 
       const logger = loggingSystemMock.createLogger();
       const result = await getDetectionsMetrics({
@@ -280,17 +362,107 @@ describe('Detections Usage and Metrics', () => {
               alert_suppression: initialAlertSuppression,
             },
           },
+          detection_rule_customized_fields_status: {
+            rules_with_missing_base_version: 0,
+            customized_fields_breakdown: [],
+          },
         },
       });
     });
-  });
 
-  describe('getDetectionsMetrics()', () => {
-    beforeEach(() => {
-      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      mlClient = mlServicesMock.createSetupContract();
-      savedObjectsClient = savedObjectsClientMock.create();
-      savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectResponse());
+    it('returns information with customized rule, alerts and cases', async () => {
+      esClient.search.mockResponseOnce(getEventLogAllRules());
+      esClient.search.mockResponseOnce(getEventLogElasticRules());
+      esClient.search.mockResponseOnce(getElasticLogCustomRules());
+      esClient.search.mockResponseOnce(getMockRuleAlertsResponse(3400));
+      const customizedRuleSearchResponse = getMockRuleSearchResponse();
+      const customizedRule = customizedRuleSearchResponse.saved_objects[0];
+      const unmodifiedRuleCopy = JSON.parse(JSON.stringify(customizedRule));
+      customizedRule.attributes.tags = ['test'];
+      savedObjectsClient.find.mockResolvedValueOnce(customizedRuleSearchResponse);
+      savedObjectsClient.find.mockResolvedValueOnce(getMockAlertCaseCommentsResponse());
+
+      const savedRuleMock = prepareSavedObjectRule(unmodifiedRuleCopy);
+      mockPrebuiltRuleAssetsClient.fetchAssetsByVersion.mockResolvedValueOnce([savedRuleMock]);
+
+      const logger = loggingSystemMock.createLogger();
+      const result = await getDetectionsMetrics({
+        eventLogIndex: '',
+        signalsIndex: '',
+        esClient,
+        savedObjectsClient,
+        logger,
+        mlClient,
+        legacySignalsIndex: '',
+      });
+
+      expect(result).toEqual<DetectionMetrics>({
+        ...getInitialDetectionMetrics(),
+        detection_rules: {
+          spaces_usage: {
+            rules_in_spaces: [1],
+            total: 1,
+          },
+          detection_rule_status: getAllEventLogTransform(),
+          detection_rule_detail: [
+            {
+              alert_count_daily: 3400,
+              cases_count_total: 1,
+              created_on: '2021-03-23T17:15:59.634Z',
+              elastic_rule: true,
+              enabled: false,
+              rule_id: '5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
+              rule_name: 'Azure Diagnostic Settings Deletion',
+              rule_type: 'query',
+              rule_version: 4,
+              updated_on: '2021-03-23T17:15:59.634Z',
+              has_legacy_notification: false,
+              has_notification: false,
+              has_legacy_investigation_field: false,
+              has_alert_suppression_missing_fields_strategy_do_not_suppress: false,
+              has_alert_suppression_per_rule_execution: false,
+              has_alert_suppression_per_time_period: false,
+              alert_suppression_fields_count: 0,
+            },
+          ],
+          detection_rule_usage: {
+            ...getInitialRulesUsage(),
+            query: {
+              enabled: 0,
+              disabled: 1,
+              alerts: 3400,
+              cases: 1,
+              legacy_notifications_enabled: 0,
+              legacy_notifications_disabled: 0,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_investigation_fields: 0,
+              alert_suppression: initialAlertSuppression,
+            },
+            elastic_total: {
+              alerts: 3400,
+              cases: 1,
+              disabled: 1,
+              enabled: 0,
+              legacy_notifications_enabled: 0,
+              legacy_notifications_disabled: 0,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_investigation_fields: 0,
+              alert_suppression: initialAlertSuppression,
+            },
+          },
+          detection_rule_customized_fields_status: {
+            rules_with_missing_base_version: 0,
+            customized_fields_breakdown: [
+              {
+                count: 1,
+                field: 'tags',
+              },
+            ],
+          },
+        },
+      });
     });
 
     it('returns an empty array if there is no data', async () => {
