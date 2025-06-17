@@ -110,7 +110,7 @@ const generateReason = (
   threshold: number[]
 ) =>
   i18n.translate('xpack.datasetQuality.rule.alertTypeContextReasonDescription', {
-    defaultMessage: `Percentage of degraded documents is {value} in the last {window} for {group}. Alert when {comparator} {threshold}.`,
+    defaultMessage: `Percentage of degraded documents is {value}% in the last {window} for {group}. Alert when {comparator} {threshold}%.`,
     values: {
       value,
       window: `${timeSize}${timeUnit}`,
