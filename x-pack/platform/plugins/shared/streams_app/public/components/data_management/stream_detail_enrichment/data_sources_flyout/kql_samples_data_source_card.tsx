@@ -27,6 +27,7 @@ interface KqlSamplesDataSourceCardProps {
 
 export const KqlSamplesDataSourceCard = ({ dataSourceRef }: KqlSamplesDataSourceCardProps) => {
   const { data } = useKibana().dependencies.start;
+
   const definition = useStreamEnrichmentSelector((state) => state.context.definition);
   const dataSource = useDataSourceSelector(
     dataSourceRef,
@@ -59,6 +60,7 @@ export const KqlSamplesDataSourceCard = ({ dataSourceRef }: KqlSamplesDataSource
       dataSourceRef={dataSourceRef}
       title={DATA_SOURCES_I18N.kqlDataSource.defaultName}
       subtitle={DATA_SOURCES_I18N.kqlDataSource.subtitle}
+      isPreviewVisible
     >
       <NameField
         onChange={(event) => handleChange({ name: event.target.value })}
@@ -75,7 +77,6 @@ export const KqlSamplesDataSourceCard = ({ dataSourceRef }: KqlSamplesDataSource
             indexPatterns={[streamDataView]}
             isDisabled={isDisabled}
             onFiltersUpdated={(filters) => handleChange({ filters })}
-            onQueryChange={handleQueryChange}
             onQuerySubmit={handleQueryChange}
             query={dataSource.query}
             showDatePicker

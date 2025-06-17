@@ -20,6 +20,8 @@ import {
   EuiEmptyPrompt,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
+import { flattenObjectNestedLast } from '@kbn/object-utils';
+import { FlattenRecord } from '@kbn/streams-schema';
 import { useDiscardConfirm } from '../../../../hooks/use_discard_confirm';
 import {
   DataSourceActorRef,
@@ -33,6 +35,7 @@ interface DataSourceCardProps {
   readonly dataSourceRef: DataSourceActorRef;
   readonly title?: string;
   readonly subtitle?: string;
+  readonly isPreviewVisible?: boolean;
 }
 
 export const DataSourceCard = ({
@@ -40,6 +43,7 @@ export const DataSourceCard = ({
   dataSourceRef,
   title,
   subtitle,
+  isPreviewVisible,
 }: PropsWithChildren<DataSourceCardProps>) => {
   const dataSourceState = useDataSourceSelector(dataSourceRef, (snapshot) => snapshot);
 
@@ -101,6 +105,7 @@ export const DataSourceCard = ({
       <EuiAccordion
         id={dataSourceRef.id}
         buttonContent={DATA_SOURCES_I18N.dataSourceCard.dataPreviewAccordionLabel}
+        initialIsOpen={isPreviewVisible}
       >
         <EuiSpacer size="s" />
         {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
@@ -111,7 +116,10 @@ export const DataSourceCard = ({
             title={<h4>{DATA_SOURCES_I18N.dataSourceCard.noDataPreview}</h4>}
           />
         ) : (
-          <PreviewTable documents={previewDocs} height={150} />
+          <PreviewTable
+            documents={previewDocs.map(flattenObjectNestedLast) as FlattenRecord[]}
+            height={150}
+          />
         )}
       </EuiAccordion>
     </EuiCheckableCard>
