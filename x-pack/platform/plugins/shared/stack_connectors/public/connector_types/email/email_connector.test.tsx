@@ -7,24 +7,34 @@
 
 import React, { Suspense } from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { act } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import EmailActionConnectorFields from './email_connector';
-import * as hooks from './use_email_config';
 import {
   AppMockRenderer,
   ConnectorFormTestProvider,
   createAppMockRenderer,
   waitForComponentToUpdate,
 } from '../lib/test_utils';
+import { getServiceConfig } from './api';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
-const enabledEmailServices = ['*'];
+jest.mock('./api', () => {
+  return {
+    getServiceConfig: jest.fn(),
+  };
+});
 
 describe('EmailActionConnectorFields', () => {
+  const enabledEmailServices = ['*'];
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('all connector fields are rendered', async () => {
     const actionConnector = {
       secrets: {
@@ -172,12 +182,11 @@ describe('EmailActionConnectorFields', () => {
   });
 
   test('host, port and secure fields should be disabled when service field is set to well known service', async () => {
-    const getEmailServiceConfig = jest
-      .fn()
-      .mockResolvedValue({ host: 'https://example.com', port: 80, secure: false });
-    jest
-      .spyOn(hooks, 'useEmailConfig')
-      .mockImplementation(() => ({ isLoading: false, getEmailServiceConfig }));
+    (getServiceConfig as jest.Mock).mockResolvedValue({
+      host: 'https://example.com',
+      port: 80,
+      secure: false,
+    });
 
     const actionConnector = {
       secrets: {
@@ -216,12 +225,11 @@ describe('EmailActionConnectorFields', () => {
   });
 
   test('host, port and secure fields should not be disabled when service field is set to other', async () => {
-    const getEmailServiceConfig = jest
-      .fn()
-      .mockResolvedValue({ host: 'https://example.com', port: 80, secure: false });
-    jest
-      .spyOn(hooks, 'useEmailConfig')
-      .mockImplementation(() => ({ isLoading: false, getEmailServiceConfig }));
+    (getServiceConfig as jest.Mock).mockResolvedValue({
+      host: 'https://example.com',
+      port: 80,
+      secure: false,
+    });
 
     const actionConnector = {
       secrets: {
@@ -689,5 +697,71 @@ describe('EmailActionConnectorFields', () => {
         isValid: true,
       });
     });
+  });
+});
+
+describe('when only one email service is enabled', () => {
+  const enabledEmailServices = ['google-mail'];
+  let appMockRenderer: AppMockRenderer;
+  const onSubmit = jest.fn();
+  const validateEmailAddresses = jest.fn();
+
+  beforeEach(() => {
+    appMockRenderer = createAppMockRenderer();
+    validateEmailAddresses.mockReturnValue([{ valid: true }]);
+    (getServiceConfig as jest.Mock).mockResolvedValue({
+      host: 'https://example.com',
+      port: 2255,
+      secure: true,
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('autofills the only available service options', async () => {
+    const actionConnector = {
+      secrets: {
+        user: 'user',
+        password: 'pass',
+        clientSecret: null,
+      },
+      id: 'test',
+      actionTypeId: '.email',
+      name: 'email',
+      config: {
+        from: 'test@test.com',
+        test: 'test',
+        secure: true,
+      },
+      isDeprecated: false,
+    };
+
+    const { getByTestId } = appMockRenderer.render(
+      <ConnectorFormTestProvider
+        connector={actionConnector}
+        onSubmit={onSubmit}
+        connectorServices={{ validateEmailAddresses, enabledEmailServices }}
+      >
+        <EmailActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    const emailHostInput = screen.getByTestId('emailHostInput') as HTMLInputElement;
+    await waitFor(() => {
+      expect(emailHostInput.value).toBe('https://example.com');
+    });
+
+    await userEvent.click(getByTestId('form-test-provide-submit'));
+
+    expect(onSubmit.mock.calls[0][0].data.config.service).toBe('gmail');
+    expect(onSubmit.mock.calls[0][0].data.config.host).toBe('https://example.com');
+    expect(onSubmit.mock.calls[0][0].data.config.port).toBe(2255);
+    expect(onSubmit.mock.calls[0][0].data.config.secure).toBe(true);
   });
 });
