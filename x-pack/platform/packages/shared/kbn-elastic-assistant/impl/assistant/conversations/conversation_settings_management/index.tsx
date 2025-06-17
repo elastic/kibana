@@ -26,11 +26,7 @@ import { ConversationStreamingSwitch } from '../conversation_settings/conversati
 import { AIConnector } from '../../../connectorland/connector_selector';
 import * as i18n from './translations';
 
-import {
-  ConversationsBulkActions,
-  useFetchCurrentUserConversations,
-  useFetchPrompts,
-} from '../../api';
+import { useFetchCurrentUserConversations, useFetchPrompts } from '../../api';
 import { useAssistantContext } from '../../../assistant_context';
 import { useFlyoutModalVisibility } from '../../common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
 import { Flyout } from '../../common/components/assistant_settings_management/flyout';
@@ -143,12 +139,12 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
 
   const handleSave = useCallback(
-    async (param?: { callback?: () => void; bulkActions?: ConversationsBulkActions }) => {
-      const { bulkActions, callback } = param ?? {};
+    async (param?: { callback?: () => void }) => {
+      const { callback } = param ?? {};
       const saveConversationsSettingsParams =
         isDeleteAll || excludedIds.length > 0
           ? { isDeleteAll: true, excludedIds }
-          : { isDeleteAll: false, bulkActions };
+          : { isDeleteAll: false };
       const isSuccess = await saveConversationsSettings(saveConversationsSettingsParams);
       if (isSuccess) {
         toasts?.addSuccess({

@@ -126,16 +126,17 @@ export const useConversationsUpdater = (
    */
   const saveConversationsSettings = useCallback(
     async (params?: SaveConversationsSettingsParams): Promise<boolean> => {
-      const { isDeleteAll, bulkActions, excludedIds } = params ?? {};
+      const { isDeleteAll, bulkActions, excludedIds = [] } = params ?? {};
       // had trouble with conversationsSettingsBulkActions not updating fast enough
       // from the setConversationsSettingsBulkActions in saveSystemPromptSettings
       const bulkUpdates = bulkActions ?? conversationsSettingsBulkActions;
       const hasBulkConversations = bulkUpdates.create || bulkUpdates.update || bulkUpdates.delete;
-      const bulkResult = isDeleteAll
-        ? await deleteAllConversations({ http, toasts, excludedIds })
-        : hasBulkConversations
-        ? await bulkUpdateConversations(http, bulkUpdates, toasts)
-        : undefined;
+      const bulkResult =
+        isDeleteAll || excludedIds?.length > 0
+          ? await deleteAllConversations({ http, toasts, excludedIds })
+          : hasBulkConversations
+          ? await bulkUpdateConversations(http, bulkUpdates, toasts)
+          : undefined;
       const didUpdateAssistantStreamingEnabled =
         assistantStreamingEnabled !== updatedAssistantStreamingEnabled;
 

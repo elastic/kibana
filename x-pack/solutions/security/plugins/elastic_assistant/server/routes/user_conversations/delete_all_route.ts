@@ -54,14 +54,15 @@ export const deleteAllConversationsRoute = (router: ElasticAssistantPluginRouter
             excludedIds: request.body?.excludedIds,
           });
 
+          const hasFailures = result?.failures && result.failures.length > 0;
+
           return response.ok({
             body: {
-              success: true,
+              success: hasFailures,
               totalDeleted: result?.total,
-              failures:
-                result?.failures && result.failures.length > 0
-                  ? result.failures.map((failure) => failure.cause.reason)
-                  : null,
+              failures: hasFailures
+                ? result.failures?.map((failure) => failure.cause.reason)
+                : null,
             },
           });
         } catch (err) {
