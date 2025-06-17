@@ -9,9 +9,10 @@ import React from 'react';
 import { useWaterfallFetcher } from '../../components/app/transaction_details/use_waterfall_fetcher';
 import { Waterfall } from '../../components/app/transaction_details/waterfall_with_summary/waterfall_container/waterfall';
 import { WaterfallLegends } from '../../components/app/transaction_details/waterfall_with_summary/waterfall_container/waterfall_legends';
-import { isPending } from '../../hooks/use_fetcher';
+import { isPending, useFetcher } from '../../hooks/use_fetcher';
 import { Loading } from './loading';
 import type { ApmTraceWaterfallEmbeddableEntryProps } from './react_embeddable_factory';
+import { TraceWaterfall } from '../../components/shared/trace_waterfall';
 
 export function TraceWaterfallEmbeddable({
   serviceName,
@@ -24,6 +25,18 @@ export function TraceWaterfallEmbeddable({
   onNodeClick,
   getRelatedErrorsHref,
 }: ApmTraceWaterfallEmbeddableEntryProps) {
+  const { data, status } = useFetcher(
+    (callApmApi) => {
+      return callApmApi('GET /internal/apm/unified_traces/{traceId}', {
+        params: {
+          path: { traceId },
+          query: { entryTransactionId, start: rangeFrom, end: rangeTo },
+        },
+      });
+    },
+    [entryTransactionId, rangeFrom, rangeTo, traceId]
+  );
+
   const waterfallFetchResult = useWaterfallFetcher({
     traceId,
     transactionId: entryTransactionId,
@@ -31,7 +44,7 @@ export function TraceWaterfallEmbeddable({
     end: rangeTo,
   });
 
-  if (isPending(waterfallFetchResult.status)) {
+  if (isPending(status)) {
     return <Loading />;
   }
 
@@ -52,6 +65,7 @@ export function TraceWaterfallEmbeddable({
           scrollElement={scrollElement}
           getRelatedErrorsHref={getRelatedErrorsHref}
         />
+        <TraceWaterfall traceItems={data?.traceItems!} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

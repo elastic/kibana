@@ -7,6 +7,7 @@
 
 import { toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
+import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
 import { TraceSearchType } from '../../../common/trace_explorer';
 import type { Span } from '../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../typings/es_schemas/ui/transaction';
@@ -103,6 +104,53 @@ const tracesByIdRoute = createApmServerRoute({
         end,
         maxTraceItemsFromUrlParam: params.query.maxTraceItems,
         logger,
+      }),
+      getTransaction({
+        transactionId: entryTransactionId,
+        traceId,
+        apmEventClient,
+        start,
+        end,
+      }),
+    ]);
+    return {
+      traceItems,
+      entryTransaction,
+    };
+  },
+});
+
+const unifiedTracesByIdRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/unified_traces/{traceId}',
+  params: t.type({
+    path: t.type({
+      traceId: t.string,
+    }),
+    query: t.intersection([
+      rangeRt,
+      t.type({ entryTransactionId: t.string }),
+      t.partial({ maxTraceItems: toNumberRt }),
+    ]),
+  }),
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (
+    resources
+  ): Promise<{
+    traceItems: TraceItem[];
+    entryTransaction?: Transaction;
+  }> => {
+    const apmEventClient = await getApmEventClient(resources);
+    const { params, config } = resources;
+    const { traceId } = params.path;
+    const { start, end, entryTransactionId } = params.query;
+    const [traceItems, entryTransaction] = await Promise.all([
+      getUnifiedTraceItems({
+        apmEventClient,
+        traceId,
+        start,
+        end,
+        maxTraceItemsFromUrlParam: params.query.maxTraceItems,
+        config,
       }),
       getTransaction({
         transactionId: entryTransactionId,
@@ -362,6 +410,7 @@ const spanFromTraceByIdRoute = createApmServerRoute({
 
 export const traceRouteRepository = {
   ...tracesByIdRoute,
+  ...unifiedTracesByIdRoute,
   ...tracesRoute,
   ...rootTransactionByTraceIdRoute,
   ...transactionByIdRoute,
