@@ -15,15 +15,17 @@
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import {
   EuiButtonIcon,
+  EuiCallOut,
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
   EuiSuperSelect,
   EuiTextTruncate,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useToasts } from '../../../common/lib/kibana';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 import { useGenericEntityCriticality } from './hooks/use_generic_entity_criticality';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
@@ -39,16 +41,18 @@ export const HeaderDataCards = ({
   subType: string;
   type: string;
 }) => {
-  const toasts = useToasts();
   const { getAssetCriticality, assignAssetCriticality } = useGenericEntityCriticality({
     idField: EntityIdentifierFields.generic,
     idValue: id,
   });
 
-  const criticality = getAssetCriticality.data?.criticality_level;
+  const criticality = getAssetCriticality?.data?.criticality_level;
 
-  const [localCriticality, setLocalCriticality] =
-    useState<CriticalityLevelWithUnassigned>(criticality);
+  const [localCriticality, setLocalCriticality] = useState<CriticalityLevelWithUnassigned>(
+    criticality ?? 'unassigned'
+  );
+
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     if (getAssetCriticality.data?.criticality_level) {
@@ -56,16 +60,6 @@ export const HeaderDataCards = ({
     }
   }, [getAssetCriticality.data?.criticality_level]);
 
-  // const assignCriticality = useCallback(
-  //   (value: CriticalityLevelWithUnassigned) => {
-  //     assignAssetCriticality.mutate({
-  //       criticalityLevel: value,
-  //       idField: EntityIdentifierFields.generic,
-  //       idValue: id,
-  //     });
-  //   },
-  //   [assignAssetCriticality, id]
-  // );
   const assignCriticality = useCallback(
     (value: CriticalityLevelWithUnassigned) => {
       const previousValue = localCriticality;
@@ -79,15 +73,12 @@ export const HeaderDataCards = ({
         {
           onError: (error) => {
             setLocalCriticality(previousValue);
-            toasts.addDanger({
-              title: 'Failed to assign criticality',
-              text: (error as Error).message,
-            });
+            setHasError(true);
           },
         }
       );
     },
-    [assignAssetCriticality, id, localCriticality, toasts]
+    [assignAssetCriticality, id, localCriticality]
   );
 
   const cards = useMemo(
@@ -157,5 +148,34 @@ export const HeaderDataCards = ({
     [id, subType, type, assignCriticality, criticality]
   );
 
-  return <ResponsiveDataCards cards={cards} collapseWidth={750} />;
+  return (
+    <>
+      {hasError && (
+        <>
+          <EuiCallOut
+            onDismiss={() => {
+              setHasError(false);
+            }}
+            title={
+              <FormattedMessage
+                id="xpack.securitySolution.assetInventory.onboarding.getStarted.errorTitle"
+                defaultMessage="We could not assign the selected criticality"
+              />
+            }
+            color="danger"
+            iconType="error"
+          >
+            <p>
+              {i18n.translate('xpack.securitySolution.assetInventory.errorStatusCallout', {
+                defaultMessage:
+                  'Something went wrong while setting things up. You can try again or go back to Get Started with Inventory.',
+              })}
+            </p>
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
+      )}
+      <ResponsiveDataCards cards={cards} collapseWidth={750} />
+    </>
+  );
 };

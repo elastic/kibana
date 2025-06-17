@@ -7,7 +7,6 @@
 
 import React from 'react';
 import type { FC, PropsWithChildren } from 'react';
-import { EuiCallOut } from '@elastic/eui';
 import { GetStarted } from './get_started';
 import { AssetInventoryLoading } from '../asset_inventory_loading';
 import { useAssetInventoryStatus } from '../../hooks/use_asset_inventory_status';
@@ -21,23 +20,11 @@ import { PermissionDenied } from './permission_denied';
  * matches, it will render the child components.
  */
 export const AssetInventoryOnboarding: FC<PropsWithChildren> = ({ children }) => {
-  const { data, isLoading, isError } = useAssetInventoryStatus();
-  if (isError) {
-    return (
-      <EuiCallOut
-        data-test-subj="risk-preview-error"
-        title={'ERROR_TITLE'}
-        color="danger"
-        iconType="error"
-      >
-        <p>{'ERROR MESSAGE HERE'}</p>
-      </EuiCallOut>
-    );
-  }
+  const { data, isLoading } = useAssetInventoryStatus();
+
   if (isLoading || !data) {
     return <AssetInventoryLoading />;
   }
-
   const { status, privileges } = data;
 
   // Render different screens based on the onboarding status.

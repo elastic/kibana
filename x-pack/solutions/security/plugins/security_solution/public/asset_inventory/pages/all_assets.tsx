@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n-react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiCallOut,
@@ -17,6 +17,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { AssetInventorySearchBar } from '../components/asset_inventory_search_bar';
 import { AssetInventoryFilters } from '../components/filters/asset_inventory_filters';
 import { AssetInventoryBarChart } from '../components/asset_inventory_bar_chart';
@@ -38,6 +39,7 @@ import {
   LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY,
 } from '../constants';
 import { OnboardingSuccessCallout } from '../components/onboarding/onboarding_success_callout';
+import { useEnableAssetInventory } from '../components/onboarding/hooks/use_enable_asset_inventory';
 
 const getDefaultQuery = ({ query, filters, pageFilters }: AssetsBaseURLQuery): URLQuery => ({
   query,
@@ -48,6 +50,8 @@ const getDefaultQuery = ({ query, filters, pageFilters }: AssetsBaseURLQuery): U
 
 export const AllAssets = () => {
   const spaceId = useSpaceId();
+
+  const { isEnabling, error, reset, enableAssetInventory } = useEnableAssetInventory();
 
   const dataViewQuery = useDataView(
     spaceId ? `${ASSET_INVENTORY_DATA_VIEW_ID_PREFIX}-${spaceId}` : undefined
@@ -66,18 +70,50 @@ export const AllAssets = () => {
   if (!dataViewQuery.data) {
     return (
       <>
-        <EuiCallOut title="Failed to load data view" color="danger" iconType="alert">
-          <p>{'The asset inventory data view could not be loaded. Please try again.'}</p>
-        </EuiCallOut>
-        <EuiSpacer size="m" />
-        <EuiButton
-          onClick={() => {
-            dataViewQuery.refetch();
-          }}
-          isLoading={dataViewQuery.isRefetching}
-        >
-          {'Reload'}
-        </EuiButton>
+        <EuiFlexGroup justifyContent="spaceAround" alignItems="center">
+          <EuiFlexItem grow={true}>
+            <EuiCallOut
+              title={i18n.translate('xpack.securitySolution.assetInventory.error.missingDataView', {
+                defaultMessage: 'Unable to show your Inventory',
+              })}
+              color="danger"
+              iconType="alert"
+            >
+              <p>
+                {i18n.translate(
+                  'xpack.securitySolution.assetInventory.missingDataViewCalloutDescription',
+                  {
+                    defaultMessage:
+                      'The data view needed to display this page can’t be found. It may have been deleted or renamed. You can enable Inventory again to fix this or go back to Get Started with Inventory.',
+                  }
+                )}
+              </p>
+              <EuiFlexGroup justifyContent="spaceAround">
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    onClick={() => {
+                      enableAssetInventory();
+                      dataViewQuery.refetch();
+                    }}
+                    isLoading={isEnabling}
+                  >
+                    {isEnabling ? (
+                      <FormattedMessage
+                        id="xpack.securitySolution.assetInventory.emptyState.enableAssetInventory.loading"
+                        defaultMessage="Enabling Asset Inventory"
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="xpack.securitySolution.assetInventory.emptyState.enableAssetInventory"
+                        defaultMessage="Enable Asset Inventory"
+                      />
+                    )}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiCallOut>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </>
     );
   }

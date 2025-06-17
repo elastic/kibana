@@ -28,6 +28,44 @@ import { NeedHelp } from './need_help';
 export const GetStarted = () => {
   const { isEnabling, error, reset, enableAssetInventory } = useEnableAssetInventory();
 
+  if (error) {
+    return (
+      <EuiCallOut
+        data-test-subj="asset-inventory-error-status"
+        title={i18n.translate('xpack.securitySolution.assetInventory.errorStatusTitle', {
+          defaultMessage: 'We could not enable Inventory',
+        })}
+        color="danger"
+        iconType="error"
+      >
+        <p>
+          {i18n.translate('xpack.securitySolution.assetInventory.errorStatusCallout', {
+            defaultMessage:
+              'Something went wrong while setting things up. You can try again or go back to Get Started with Inventory.',
+          })}
+        </p>
+        <EuiFlexGroup justifyContent="spaceAround">
+          <EuiFlexItem grow={false}>
+            <EuiButton onClick={enableAssetInventory}>
+              <FormattedMessage
+                id="xpack.securitySolution.assetInventory.errorStatus.tryAgainText"
+                defaultMessage="Try again"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton onClick={reset}>
+              <FormattedMessage
+                id="xpack.securitySolution.assetInventory.errorStatus.tryAgainText"
+                defaultMessage="Back to Get Started with Inventory"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiCallOut>
+    );
+  }
+
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
@@ -126,21 +164,6 @@ export const GetStarted = () => {
                     }}
                   />
                 </p>
-                {error && (
-                  <EuiCallOut
-                    onDismiss={reset}
-                    title={
-                      <FormattedMessage
-                        id="xpack.securitySolution.assetInventory.onboarding.getStarted.errorTitle"
-                        defaultMessage="Sorry, there was an error"
-                      />
-                    }
-                    color="danger"
-                    iconType="error"
-                  >
-                    <p>{error}</p>
-                  </EuiCallOut>
-                )}
               </>
             }
             actions={[
