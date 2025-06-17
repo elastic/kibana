@@ -17,7 +17,7 @@ const singlePath = new Set([
   'createWriteStream',
 ]);
 
-const dualPath = new Set(['copyFile', 'copyFileSync', 'rename', 'renameSync']);
+const dualPath = new Set(['copyFile', 'copyFileSync']);
 
 const { REPO_ROOT } = require('@kbn/repo-info');
 
@@ -79,6 +79,8 @@ const realMethods = {
   rename,
   renameSync,
 };
+
+const noop = () => {};
 
 // TODO: propagate here file specified for file logger (it can change in the runtime)
 // Idea 1: Use EventEmitter to propagate file logger path.
@@ -163,7 +165,7 @@ const patchFs = (fs) => {
             // When mock-fs is active, it replaces the fs.[method] with its own implementation,
             // which internally calls a stored reference to our proxy function.
             // This creates an infinite loop: proxy -> mock-fs -> proxy -> mock-fs
-            return realMethods[prop](userPath, data, options, cb);
+            return realMethods[prop](userPath, data, options, cb || noop);
           }
 
           cb ||= options;
