@@ -31,6 +31,7 @@ const nerRuleSchema = schema.allOf([
   baseRuleSchema,
   schema.object({
     type: schema.literal('ner'),
+    modelId: schema.maybe(schema.string()),
   }),
 ]);
 
@@ -112,7 +113,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
             <li><strong>pattern:</strong> (regex rules only) the regular-expression string to match</li>
             <li><strong>enabled:</strong> boolean flag to turn the rule on or off</li>
             <li><strong>description:</strong> optional human-readable description</li>
-            <li><strong>modelId:</strong> ("ner" rules only) id of the trained model to use</li>
+            <li><strong>modelId:</strong> (ner rules only) ID of the trained model to use</li>
           </ul>`,
         values: {
           ul: (chunks) => `<ul>${chunks}</ul>`,
