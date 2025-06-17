@@ -105,12 +105,9 @@ const OpenAddToCaseOpenModal = ({
   useEffect(() => {
     if (!dashboardLocator) {
       coreServices.notifications.toasts.addDanger({
-        title: i18n.translate(
-          'xpack.dashboard.topNav.cases.addToCaseModal.error.noDashboardLocator',
-          {
-            defaultMessage: 'Error adding dashboard to case',
-          }
-        ),
+        title: i18n.translate('dashboard.topNav.cases.addToCaseModal.error.noDashboardLocator', {
+          defaultMessage: 'Error adding dashboard to case',
+        }),
         'data-test-subj': 'dashboardAddToCaseError',
       });
       return;
