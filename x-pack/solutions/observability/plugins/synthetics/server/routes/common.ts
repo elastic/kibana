@@ -85,7 +85,8 @@ interface Filters {
 }
 
 export const getMonitorFilters = async (
-  context: RouteContext<Record<string, any>, OverviewStatusQuery>
+  context: RouteContext<Record<string, any>, OverviewStatusQuery>,
+  attr: string = syntheticsMonitorAttributes
 ) => {
   const {
     tags,
@@ -109,7 +110,8 @@ export const getMonitorFilters = async (
       monitorQueryIds,
       locations,
     },
-    useLogicalAndFor
+    useLogicalAndFor,
+    attr
   );
 };
 
@@ -124,7 +126,8 @@ export const parseArrayFilters = (
     monitorQueryIds,
     locations,
   }: Filters,
-  useLogicalAndFor: MonitorsQuery['useLogicalAndFor'] = []
+  useLogicalAndFor: MonitorsQuery['useLogicalAndFor'] = [],
+  attributes: string = syntheticsMonitorAttributes
 ) => {
   const filtersStr = [
     filter,
@@ -132,17 +135,19 @@ export const parseArrayFilters = (
       field: 'tags',
       values: tags,
       operator: useLogicalAndFor.includes('tags') ? 'AND' : 'OR',
+      attributes,
     }),
-    getSavedObjectKqlFilter({ field: 'project_id', values: projects }),
-    getSavedObjectKqlFilter({ field: 'type', values: monitorTypes }),
+    getSavedObjectKqlFilter({ field: 'project_id', values: projects, attributes }),
+    getSavedObjectKqlFilter({ field: 'type', values: monitorTypes, attributes }),
     getSavedObjectKqlFilter({
       field: 'locations.id',
       values: locations,
       operator: useLogicalAndFor.includes('locations') ? 'AND' : 'OR',
+      attributes,
     }),
-    getSavedObjectKqlFilter({ field: 'schedule.number', values: schedules }),
-    getSavedObjectKqlFilter({ field: 'id', values: monitorQueryIds }),
-    getSavedObjectKqlFilter({ field: 'config_id', values: configIds }),
+    getSavedObjectKqlFilter({ field: 'schedule.number', values: schedules, attributes }),
+    getSavedObjectKqlFilter({ field: 'id', values: monitorQueryIds, attributes }),
+    getSavedObjectKqlFilter({ field: 'config_id', values: configIds, attributes }),
   ]
     .filter((f) => !!f)
     .join(' AND ');
@@ -155,11 +160,13 @@ export const getSavedObjectKqlFilter = ({
   values,
   operator = 'OR',
   searchAtRoot = false,
+  attributes = syntheticsMonitorAttributes,
 }: {
   field: string;
   values?: string | string[];
   operator?: string;
   searchAtRoot?: boolean;
+  attributes?: string;
 }) => {
   if (values === 'All' || (Array.isArray(values) && values?.includes('All'))) {
     return undefined;
@@ -172,7 +179,7 @@ export const getSavedObjectKqlFilter = ({
   if (searchAtRoot) {
     fieldKey = `${field}`;
   } else {
-    fieldKey = `${syntheticsMonitorAttributes}.${field}`;
+    fieldKey = `${attributes}.${field}`;
   }
 
   if (Array.isArray(values)) {

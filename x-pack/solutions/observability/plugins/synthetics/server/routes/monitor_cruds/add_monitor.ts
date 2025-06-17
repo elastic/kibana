@@ -38,7 +38,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
     },
   },
   handler: async (routeContext): Promise<any> => {
-    const { request, response, server } = routeContext;
+    const { request, response, server, spaceId } = routeContext;
     // usually id is auto generated, but this is useful for testing
     const { id, internal } = request.query;
 
@@ -80,7 +80,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
         request.body as CreateMonitorPayLoad
       );
 
-      const validationResult = validateMonitor(monitorWithDefaults);
+      const validationResult = validateMonitor(monitorWithDefaults, spaceId);
 
       if (!validationResult.valid || !validationResult.decodedMonitor) {
         const { reason: message, details } = validationResult;

@@ -7,6 +7,8 @@
 import {
   syntheticsMonitorAttributes,
   syntheticsMonitorSavedObjectType,
+  legacySyntheticsMonitorTypeSingle,
+  legacyMonitorAttributes,
 } from '../../../common/types/saved_objects';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import {
@@ -55,6 +57,97 @@ interface AggsResponse {
   };
 }
 
+// Helper to sum buckets by key
+function sumBuckets(bucketsA: Buckets = [], bucketsB: Buckets = []): Buckets {
+  const map = new Map<string, number>();
+  for (const { key, doc_count } of bucketsA) {
+    map.set(key, doc_count);
+  }
+  for (const { key, doc_count } of bucketsB) {
+    map.set(key, (map.get(key) || 0) + doc_count);
+  }
+  return Array.from(map.entries()).map(([key, doc_count]) => ({ key, doc_count }));
+}
+
+// Helper to sum monitorIdsAggs buckets
+function sumMonitorIdsBuckets(
+  bucketsA: AggsResponse['monitorIdsAggs']['buckets'] = [],
+  bucketsB: AggsResponse['monitorIdsAggs']['buckets'] = []
+): AggsResponse['monitorIdsAggs']['buckets'] {
+  const map = new Map<string, { doc_count: number; name?: any }>();
+  for (const b of bucketsA) {
+    map.set(b.key, { doc_count: b.doc_count, name: b.name });
+  }
+  for (const b of bucketsB) {
+    if (map.has(b.key)) {
+      map.get(b.key)!.doc_count += b.doc_count;
+    } else {
+      map.set(b.key, { doc_count: b.doc_count, name: b.name });
+    }
+  }
+  return Array.from(map.entries()).map(([key, { doc_count, name }]) => ({ key, doc_count, name }));
+}
+
+// Helper to generate aggs for new or legacy monitors
+function getAggs(isLegacy: boolean) {
+  const attributes = isLegacy ? legacyMonitorAttributes : syntheticsMonitorAttributes;
+  const savedObjectType = isLegacy
+    ? legacySyntheticsMonitorTypeSingle
+    : syntheticsMonitorSavedObjectType;
+  return {
+    tagsAggs: {
+      terms: {
+        field: `${attributes}.${ConfigKey.TAGS}`,
+        size: 10000,
+        exclude: [''],
+      },
+    },
+    monitorTypeAggs: {
+      terms: {
+        field: `${attributes}.${ConfigKey.MONITOR_TYPE}.keyword`,
+        size: 10000,
+        exclude: [''],
+      },
+    },
+    locationsAggs: {
+      terms: {
+        field: `${attributes}.${ConfigKey.LOCATIONS}.id`,
+        size: 10000,
+        exclude: [''],
+      },
+    },
+    projectsAggs: {
+      terms: {
+        field: `${attributes}.${ConfigKey.PROJECT_ID}`,
+        size: 10000,
+        exclude: [''],
+      },
+    },
+    monitorTypesAggs: {
+      terms: {
+        field: `${attributes}.${ConfigKey.MONITOR_TYPE}.keyword`,
+        size: 10000,
+        exclude: [''],
+      },
+    },
+    monitorIdsAggs: {
+      terms: {
+        field: `${attributes}.${ConfigKey.MONITOR_QUERY_ID}`,
+        size: 10000,
+        exclude: [''],
+      },
+      aggs: {
+        name: {
+          top_hits: {
+            _source: [`${savedObjectType}.${ConfigKey.NAME}`],
+            size: 1,
+          },
+        },
+      },
+    },
+  };
+}
+
 export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
   MonitorFiltersResult
 > = () => ({
@@ -64,50 +157,90 @@ export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
     query: QuerySchema,
   },
   handler: async (route): Promise<any> => {
-    const { monitorConfigRepository } = route;
+    const { savedObjectsClient } = route;
     const { query } = route.request.query;
 
-    const { filtersStr } = await getMonitorFilters(route);
+    const { filtersStr } = await getMonitorFilters(route, syntheticsMonitorAttributes);
     const { allLocations = [] } = await getAllLocations(route);
-    const data = await monitorConfigRepository.find<EncryptedSyntheticsMonitorAttributes>({
+
+    // Find for new monitors
+    const data = await savedObjectsClient.find<EncryptedSyntheticsMonitorAttributes>({
+      type: syntheticsMonitorSavedObjectType,
       perPage: 0,
-      filter: filtersStr ? `${filtersStr}` : undefined,
-      aggs,
+      filter: filtersStr ? filtersStr : undefined,
+      aggs: getAggs(false),
       search: query ? `${query}*` : undefined,
       searchFields: SEARCH_FIELDS,
     });
 
+    const { filtersStr: legacyFilterStr } = await getMonitorFilters(route, legacyMonitorAttributes);
+
+    // Find for legacy monitors
+    const legacyData = await savedObjectsClient.find<any>({
+      type: legacySyntheticsMonitorTypeSingle,
+      perPage: 0,
+      filter: legacyFilterStr ? legacyFilterStr : undefined,
+      aggs: getAggs(true),
+      search: query ? `${query}*` : undefined,
+      searchFields: SEARCH_FIELDS,
+    });
+
+    // Extract aggs
     const { monitorTypesAggs, tagsAggs, locationsAggs, projectsAggs, monitorIdsAggs } =
       (data?.aggregations as AggsResponse) ?? {};
+
+    const {
+      monitorTypesAggs: legacyMonitorTypesAggs,
+      tagsAggs: legacyTagsAggs,
+      locationsAggs: legacyLocationsAggs,
+      projectsAggs: legacyProjectsAggs,
+      monitorIdsAggs: legacyMonitorIdsAggs,
+    } = (legacyData?.aggregations as AggsResponse) ?? {};
+
     const allLocationsMap = new Map(allLocations.map((obj) => [obj.id, obj.label]));
 
+    // Sum buckets
+    const summedTags = sumBuckets(tagsAggs?.buckets, legacyTagsAggs?.buckets);
+    const summedLocations = sumBuckets(locationsAggs?.buckets, legacyLocationsAggs?.buckets);
+    const summedProjects = sumBuckets(projectsAggs?.buckets, legacyProjectsAggs?.buckets);
+    const summedMonitorTypes = sumBuckets(
+      monitorTypesAggs?.buckets,
+      legacyMonitorTypesAggs?.buckets
+    );
+    const summedMonitorIds = sumMonitorIdsBuckets(
+      monitorIdsAggs?.buckets,
+      legacyMonitorIdsAggs?.buckets
+    );
+
     return {
-      monitorIds: monitorIdsAggs?.buckets?.map(({ key, doc_count: count, name }) => ({
+      monitorIds: summedMonitorIds?.map(({ key, doc_count: count, name }) => ({
         label:
-          name?.hits?.hits[0]?._source?.[syntheticsMonitorSavedObjectType]?.[ConfigKey.NAME] || key,
+          name?.hits?.hits[0]?._source?.[syntheticsMonitorSavedObjectType]?.[ConfigKey.NAME] ||
+          name?.hits?.hits[0]?._source?.[legacySyntheticsMonitorTypeSingle]?.[ConfigKey.NAME] ||
+          key,
         value: key,
         count,
       })),
       tags:
-        tagsAggs?.buckets?.map(({ key, doc_count: count }) => ({
+        summedTags?.map(({ key, doc_count: count }) => ({
           label: key,
           value: key,
           count,
         })) ?? [],
       locations:
-        locationsAggs?.buckets?.map(({ key, doc_count: count }) => ({
+        summedLocations?.map(({ key, doc_count: count }) => ({
           label: allLocationsMap.get(key) || key,
           value: key,
           count,
         })) ?? [],
       projects:
-        projectsAggs?.buckets?.map(({ key, doc_count: count }) => ({
+        summedProjects?.map(({ key, doc_count: count }) => ({
           label: key,
           value: key,
           count,
         })) ?? [],
       monitorTypes:
-        monitorTypesAggs?.buckets?.map(({ key, doc_count: count }) => ({
+        summedMonitorTypes?.map(({ key, doc_count: count }) => ({
           label: key,
           value: key,
           count,
@@ -115,56 +248,3 @@ export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
     };
   },
 });
-
-const aggs = {
-  tagsAggs: {
-    terms: {
-      field: `${syntheticsMonitorAttributes}.${ConfigKey.TAGS}`,
-      size: 10000,
-      exclude: [''],
-    },
-  },
-  monitorTypeAggs: {
-    terms: {
-      field: `${syntheticsMonitorAttributes}.${ConfigKey.MONITOR_TYPE}.keyword`,
-      size: 10000,
-      exclude: [''],
-    },
-  },
-  locationsAggs: {
-    terms: {
-      field: `${syntheticsMonitorAttributes}.${ConfigKey.LOCATIONS}.id`,
-      size: 10000,
-      exclude: [''],
-    },
-  },
-  projectsAggs: {
-    terms: {
-      field: `${syntheticsMonitorAttributes}.${ConfigKey.PROJECT_ID}`,
-      size: 10000,
-      exclude: [''],
-    },
-  },
-  monitorTypesAggs: {
-    terms: {
-      field: `${syntheticsMonitorAttributes}.${ConfigKey.MONITOR_TYPE}.keyword`,
-      size: 10000,
-      exclude: [''],
-    },
-  },
-  monitorIdsAggs: {
-    terms: {
-      field: `${syntheticsMonitorAttributes}.${ConfigKey.MONITOR_QUERY_ID}`,
-      size: 10000,
-      exclude: [''],
-    },
-    aggs: {
-      name: {
-        top_hits: {
-          _source: [`${syntheticsMonitorSavedObjectType}.${ConfigKey.NAME}`],
-          size: 1,
-        },
-      },
-    },
-  },
-};

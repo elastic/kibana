@@ -107,6 +107,7 @@ const STANDARD_LIST_TYPES = [
   'cases-connector-mappings',
   // synthetics based objects
   'synthetics-monitor',
+  'synthetics-monitor-multiple',
   'uptime-dynamic-settings',
   'synthetics-privates-locations',
   'synthetics-private-location',

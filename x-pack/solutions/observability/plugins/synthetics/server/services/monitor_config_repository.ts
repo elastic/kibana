@@ -10,11 +10,13 @@ import {
   SavedObjectsClientContract,
   type SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
+  type SavedObjectsFindResponse,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_span';
-import { isEqual } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
+import { Logger } from '@kbn/logging';
 import {
   legacyMonitorAttributes,
   legacySyntheticsMonitorTypeSingle,
@@ -40,13 +42,14 @@ const getSuccessfulResult = <T>(
     }
   }
   const firstError = results.find((r): r is PromiseRejectedResult => r.status === 'rejected');
-  throw new Error(firstError?.reason || 'Unknown error');
+  throw firstError?.reason || new Error('Unknown error');
 };
 
 export class MonitorConfigRepository {
   constructor(
     private soClient: SavedObjectsClientContract,
-    private encryptedSavedObjectsClient: EncryptedSavedObjectsClient
+    private encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
+    private logger?: Logger // Replace with appropriate logger type
   ) {}
 
   async get(id: string) {
@@ -92,12 +95,20 @@ export class MonitorConfigRepository {
     };
   }
 
-  async create({ id, normalizedMonitor }: { id: string; normalizedMonitor: SyntheticsMonitor }) {
+  async create({
+    id,
+    spaceId,
+    normalizedMonitor,
+  }: {
+    id: string;
+    normalizedMonitor: SyntheticsMonitor;
+    spaceId: string;
+  }) {
     const { spaces } = normalizedMonitor;
     const opts: SavedObjectsCreateOptions = {
       id,
       ...(id && { overwrite: true }),
-      ...(spaces && { initialNamespaces: spaces }),
+      ...(!isEmpty(spaces) && { initialNamespaces: spaces }),
     };
 
     return await this.soClient.create<EncryptedSyntheticsMonitorAttributes>(
@@ -107,6 +118,7 @@ export class MonitorConfigRepository {
         [ConfigKey.MONITOR_QUERY_ID]: normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || id,
         [ConfigKey.CONFIG_ID]: id,
         revision: 1,
+        [ConfigKey.KIBANA_SPACES]: isEmpty(spaces) ? [spaceId] : spaces,
       }),
       opts
     );
@@ -136,6 +148,7 @@ export class MonitorConfigRepository {
   ) {
     const soType = decryptedPreviousMonitor.type;
     const prevSpaces = (decryptedPreviousMonitor.namespaces || []).sort();
+
     const spaces = (data.spaces || []).sort();
     // If the spaces have changed, we need to delete the saved object and recreate it
     if (isEqual(prevSpaces, spaces)) {
@@ -144,7 +157,7 @@ export class MonitorConfigRepository {
       return this.soClient.delete(soType, id).then(() => {
         return this.soClient.create(syntheticsMonitorSavedObjectType, data, {
           id,
-          initialNamespaces: spaces,
+          ...(!isEmpty(spaces) && { initialNamespaces: spaces }),
         });
       });
     }
@@ -167,23 +180,19 @@ export class MonitorConfigRepository {
     );
   }
 
-  async find<T>(options: Omit<SavedObjectsFindOptions, 'type'>) {
-    const findResult = this.soClient.find<T>({
-      type: syntheticsMonitorSavedObjectType,
-      ...options,
-      perPage: options.perPage ?? 5000,
+  async find<T>(
+    options: Omit<SavedObjectsFindOptions, 'type'>,
+    types: string[] = syntheticsMonitorSOTypes
+  ): Promise<SavedObjectsFindResponse<T>> {
+    const promises: Array<Promise<SavedObjectsFindResponse<T>>> = types.map((type) => {
+      const opts = {
+        type,
+        ...options,
+        perPage: options.perPage ?? 5000,
+      };
+      return this.soClient.find<T>(this.handleLegacyOptions(opts, type));
     });
-    const legacyOptions = { ...options };
-    if (legacyOptions.filter) {
-      // replace all instances of syntheticsMonitorAttributes with legacyMonitorAttributes
-      legacyOptions.filter = this.handleLegacyFilter(legacyOptions.filter);
-    }
-    const legacyFindResult = this.soClient.find<T>({
-      type: legacySyntheticsMonitorTypeSingle,
-      ...legacyOptions,
-      perPage: legacyOptions.perPage ?? 5000,
-    });
-    const [result, legacyResult] = await Promise.all([findResult, legacyFindResult]);
+    const [result, legacyResult] = await Promise.all(promises);
     return {
       ...result,
       total: result.total + legacyResult.total,
@@ -279,8 +288,26 @@ export class MonitorConfigRepository {
     if (!filter) {
       return filter;
     }
-
     // Replace syntheticsMonitorAttributes with legacyMonitorAttributes in the filter
     return filter.replace(new RegExp(syntheticsMonitorAttributes, 'g'), legacyMonitorAttributes);
   };
+
+  handleLegacyOptions(options: Omit<SavedObjectsFindOptions, 'type'>, type: string) {
+    // convert the options to string and replace if the type is opposite of either of the synthetics monitor types
+    try {
+      const opts = JSON.stringify(options);
+      if (type === syntheticsMonitorSavedObjectType) {
+        return JSON.parse(
+          opts.replace(new RegExp(legacyMonitorAttributes, 'g'), syntheticsMonitorAttributes)
+        );
+      } else if (type === legacySyntheticsMonitorTypeSingle) {
+        return JSON.parse(
+          opts.replace(new RegExp(syntheticsMonitorAttributes, 'g'), legacyMonitorAttributes)
+        );
+      }
+    } catch (e) {
+      this.logger?.error(`Error parsing handleLegacyOptions: ${e}`);
+      return options;
+    }
+  }
 }

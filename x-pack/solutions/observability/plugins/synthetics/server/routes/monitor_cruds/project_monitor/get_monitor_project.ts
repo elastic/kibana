@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { legacySyntheticsMonitorTypeSingle } from '../../../../common/types/saved_objects';
+import { syntheticsMonitorSavedObjectType } from '../../../../common/types/saved_objects';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 import { ConfigKey, EncryptedSyntheticsMonitorAttributes } from '../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
@@ -43,7 +43,7 @@ export const getSyntheticsProjectMonitorsRoute: SyntheticsRestApiRouteFactory = 
           perPage,
           searchFields: SEARCH_FIELDS,
           fields: [ConfigKey.JOURNEY_ID, ConfigKey.CONFIG_HASH],
-          filter: `${legacySyntheticsMonitorTypeSingle}.attributes.${ConfigKey.PROJECT_ID}: "${decodedProjectName}"`,
+          filter: `${syntheticsMonitorSavedObjectType}.attributes.${ConfigKey.PROJECT_ID}: "${decodedProjectName}"`,
           sortField: ConfigKey.JOURNEY_ID,
           sortOrder: 'asc',
           searchAfter: decodedSearchAfter ? [...decodedSearchAfter.split(',')] : undefined,

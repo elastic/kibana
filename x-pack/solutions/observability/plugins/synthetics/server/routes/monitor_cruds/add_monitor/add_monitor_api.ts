@@ -74,6 +74,7 @@ export class AddEditMonitorAPI {
       const newMonitorPromise = this.routeContext.monitorConfigRepository.create({
         normalizedMonitor: monitorWithNamespace,
         id: newMonitorId,
+        spaceId,
       });
 
       const syncErrorsPromise = syntheticsMonitorClient.addMonitors(
@@ -219,7 +220,12 @@ export class AddEditMonitorAPI {
   }
 
   initDefaultAlerts(name: string) {
-    const { server, savedObjectsClient, context } = this.routeContext;
+    const { server, savedObjectsClient, context, request } = this.routeContext;
+    const { gettingStarted } = request.query;
+    if (!gettingStarted) {
+      return;
+    }
+
     try {
       // we do this async, so we don't block the user, error handling will be done on the UI via separate api
       const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
