@@ -12,6 +12,7 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const path = require('path');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
+const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 
 const KIBANA_ROOT = path.resolve(__dirname, '../../../../../..');
 const isProd = process.env.NODE_ENV === 'production';
@@ -41,7 +42,6 @@ module.exports = {
       "lodash": 'commonjs lodash',
       "react-dom": 'commonjs react-dom',
       "react-markdown": "commonjs react-markdown",
-      // "monaco-editor": 'commonjs monaco-editor',
       "moment": 'commonjs moment',
       "@elastic/eui": 'commonjs @elastic/eui',
       "rxjs": "commonjs rxjs",
@@ -205,5 +205,10 @@ module.exports = {
     splitChunks: false,
   },
 
-  plugins: [new NodeLibsBrowserPlugin(), new CleanWebpackPlugin(), /* new BundleAnalyzerPlugin() */],
+  plugins: [
+    new NodeLibsBrowserPlugin(),
+    new CleanWebpackPlugin(),
+    // new MonacoWebpackPlugin({}),
+    /* new BundleAnalyzerPlugin() */
+  ],
 };

@@ -8,6 +8,69 @@
  */
 
 import React from 'react';
+import 'monaco-editor/min/vs/editor/editor.main.css';
+import { autocompleteEntities } from './http_mocks/autocomplete_entities';
+
+// Import Console language registration - this registers the Console Monaco language
+import '@kbn/monaco/src/languages/console';
+import { initializeSupportedLanguages } from '@kbn/monaco/src/languages';
+import { getSyncParsedRequestsProvider } from './sync_console_parser';
+
+// Configure Monaco Environment for packaged use (no workers needed)
+(window as any).MonacoEnvironment = {
+  getWorkerUrl: () => '',
+  getWorker: () => new Worker('data:application/javascript;charset=utf-8,'),
+};
+
+// Initialize all Monaco languages including Console
+initializeSupportedLanguages();
+
+// Patch the getParsedRequestsProvider function to use our sync implementation
+setTimeout(() => {
+  try {
+    // Get the Monaco module and override the getParsedRequestsProvider function
+    const monacoModule = require('@kbn/monaco');
+    const originalGetParsedRequestsProvider = monacoModule.getParsedRequestsProvider;
+    
+    monacoModule.getParsedRequestsProvider = function(model: any) {
+      console.log('Using synchronous parsed requests provider');
+      return getSyncParsedRequestsProvider(model);
+    };
+    
+    console.log('Successfully patched getParsedRequestsProvider to use sync implementation');
+  } catch (error) {
+    console.error('Failed to patch getParsedRequestsProvider:', error);
+  }
+}, 100);
+
+// Test the parser after patches are applied
+setTimeout(() => {
+  try {
+    const { monaco, getParsedRequestsProvider } = require('@kbn/monaco');
+    console.log('Testing patched parser...');
+    const testModel = monaco.editor.createModel('GET /_search\n{\n  "query": { "match_all": {} }\n}', 'console');
+    console.log('Test model created:', testModel);
+
+    const provider = getParsedRequestsProvider(testModel);
+    console.log('Provider obtained:', provider);
+
+    provider.getRequests()
+      .then((requests: any) => {
+        console.log('SUCCESS - Parsed requests:', requests);
+        console.log('Number of requests found:', requests ? requests.length : 0);
+        if (requests && requests.length > 0) {
+          console.log('First request:', requests[0]);
+        }
+        testModel.dispose();
+      })
+      .catch((error: any) => {
+        console.error('FAILED - Parser error:', error);
+        testModel.dispose();
+      });
+  } catch (error) {
+    console.error('Failed to test parser:', error);
+  }
+}, 1500);
 
 import {
   createStorage,
@@ -145,11 +208,32 @@ export const OneConsole = ({ }: BootDependencies) => {
   const executionContext = executionContextService.setup({ analytics });
 
   const httpService = new HttpService();
-  const http = httpService.setup({
+  const originalHttp = httpService.setup({
     injectedMetadata,
     fatalErrors,
     executionContext,
   }) as HttpSetup;
+
+  // Create a mock HTTP service that intercepts specific API calls
+  const http = {
+    ...originalHttp,
+    get: (path: string, options?: any) => {
+      if (path === '/api/console/es_config') {
+        return Promise.resolve({
+          host: 'http://localhost:9200',
+          pathMatch: '*',
+          requestTimeout: 30000,
+        });
+      }
+
+      if (path === '/api/console/autocomplete_entities') {
+        return Promise.resolve(autocompleteEntities);
+      }
+
+      // For all other requests, use the original HTTP service
+      return originalHttp.get(path, options);
+    },
+  };
 
   // await loadActiveApi(http);
 
