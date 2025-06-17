@@ -10,7 +10,7 @@
 import { SavedObjectReference } from '@kbn/core/server';
 import { SavedDashboardPanel, SavedDashboardSection } from '../../../../dashboard_saved_object';
 import { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
-import { getReferencesForPanelId } from '../../../../../common/dashboard_container/persistable_state/dashboard_container_references';
+import { getReferencesForPanelId } from '../../../../../common';
 
 export function transformPanelsOut(
   panelsJSON: string = '{}',

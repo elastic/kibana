@@ -86,24 +86,3 @@ export const convertPanelMapToSavedPanels = (
     convertPanelStateToSavedDashboardPanel(panel, removeLegacyVersion)
   );
 };
-
-/**
- * When saving a dashboard as a copy, we should generate new IDs for all panels so that they are
- * properly refreshed when navigating between Dashboards
- */
-export const generateNewPanelIds = (panels: DashboardPanelState810, references?: Reference[]) => {
-  const newPanelsMap: DashboardPanelMap810 = {};
-  const newReferences: Reference[] = [];
-  for (const [oldId, panel] of Object.entries(panels)) {
-    const newId = v4();
-    newPanelsMap[newId] = {
-      ...panel,
-      gridData: { ...panel.gridData, i: newId },
-      explicitInput: { ...panel.explicitInput, id: newId },
-    };
-    newReferences.push(
-      ...prefixReferencesFromPanel(newId, getReferencesForPanelId(oldId, references ?? []))
-    );
-  }
-  return { panels: newPanelsMap, references: newReferences };
-};

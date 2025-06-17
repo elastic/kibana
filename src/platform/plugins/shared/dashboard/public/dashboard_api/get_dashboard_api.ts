@@ -15,7 +15,7 @@ import { DASHBOARD_APP_ID } from '../../common/constants';
 import {
   getReferencesForControls,
   getReferencesForPanelId,
-} from '../../common/dashboard_container/persistable_state/dashboard_container_references';
+} from '../../common';
 import type { DashboardState } from '../../common/types';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';

@@ -12,13 +12,9 @@ import { pick } from 'lodash';
 import moment, { Moment } from 'moment';
 
 import type { Reference } from '@kbn/content-management-utils';
-import {
-  convertPanelSectionMapsToPanelsArray,
-  generateNewPanelIds,
-} from '../../common/lib/dashboard_panel_converters';
 import type { DashboardAttributes } from '../../server';
 
-import type { DashboardState } from '../../common';
+import { isDashboardSection, type DashboardState, getReferencesForPanelId } from '../../common';
 import { LATEST_VERSION } from '../../common/content_management';
 import {
   convertDashboardVersionToNumber,
@@ -26,6 +22,7 @@ import {
 } from '../services/dashboard_content_management_service/lib/dashboard_versioning';
 import { dataService, savedObjectsTaggingService } from '../services/kibana_services';
 import { DashboardApi } from './types';
+import { v4 } from 'uuid';
 
 const LATEST_DASHBOARD_CONTAINER_VERSION = convertNumberToDashboardVersion(LATEST_VERSION);
 
@@ -37,6 +34,32 @@ export const convertTimeToUTCString = (time?: string | Moment): undefined | stri
     // like 'now' or 'now-15m'.
     return time as string;
   }
+};
+
+/**
+ * When saving a dashboard as a copy, we should generate new IDs for all panels so that they are
+ * properly refreshed when navigating between Dashboards
+ */
+const generateNewPanelIds = (panels: DashboardAttributes['panels'], references?: Reference[]) => {
+  const newPanels: DashboardAttributes['panels'] = [];
+  const newReferences: Reference[] = [];
+  for (const panel of panels) {
+    // TODO update section ids. This will require updating 
+    if (isDashboardSection(panel)) {
+      newPanels.push(panel);
+      continue;
+    }
+    const newId = v4();
+    newPanels.push({
+      ...panel,
+      panelIndex: newId,
+      gridData: { ...panel.gridData, i: newId },
+    });
+    newReferences.push(
+      ...prefixReferencesFromPanel(newId, getReferencesForPanelId(oldId, references ?? []))
+    );
+  }
+  return { panels: newPanels, references: newReferences };
 };
 
 export const getSerializedState = ({
@@ -64,7 +87,6 @@ export const getSerializedState = ({
     filters,
     timeRestore,
     description,
-    sections,
 
     // Dashboard options
     useMargins,

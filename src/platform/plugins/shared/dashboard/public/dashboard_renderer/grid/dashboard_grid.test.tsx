@@ -14,7 +14,7 @@ import { useBatchedPublishingSubjects as mockUseBatchedPublishingSubjects } from
 import { RenderResult, act, getByLabelText, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { DashboardPanelMap, DashboardSectionMap } from '../../../common';
+import { DashboardPanelMap, DashboardSectionMap, DashboardState } from '../../../common';
 import {
   DashboardContext,
   useDashboardApi as mockUseDashboardApi,
@@ -68,17 +68,9 @@ const verifyElementHasClass = (
   expect(itemToCheck!.classList.contains(className)).toBe(true);
 };
 
-const createAndMountDashboardGrid = async (overrides?: {
-  panels?: DashboardPanelMap;
-  sections?: DashboardSectionMap;
-}) => {
-  const panels = overrides?.panels ?? getMockDashboardPanels().panels;
-  const sections = overrides?.sections;
+const createAndMountDashboardGrid = async (overrides?: Partial<DashboardState>) => {
   const { api, internalApi } = buildMockDashboardApi({
-    overrides: {
-      panels,
-      ...(sections && { sections }),
-    },
+    overrides,
   });
   const component = render(
     <EuiThemeProvider>
@@ -91,6 +83,7 @@ const createAndMountDashboardGrid = async (overrides?: {
   );
 
   // panels in collapsed sections should not render
+  const { panels, sections } = internalApi.layout$.value;
   const panelRenderCount = sections
     ? Object.values(panels).filter((value) => {
         const sectionId = value.gridData.sectionId;

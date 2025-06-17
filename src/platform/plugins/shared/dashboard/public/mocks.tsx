@@ -126,8 +126,7 @@ export function getSampleDashboardState(overrides?: Partial<DashboardState>): Da
     },
     timeRestore: false,
     viewMode: 'view',
-    panels: {},
-    sections: {},
+    panels: [],
     ...overrides,
   };
 }
