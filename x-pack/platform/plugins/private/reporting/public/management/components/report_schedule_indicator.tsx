@@ -47,7 +47,7 @@ export const ReportScheduleIndicator: FC<ReportScheduleIndicatorProps> = ({ sche
   return (
     <EuiBadge
       data-test-subj={`reportScheduleIndicator-${schedule.rrule.freq}`}
-      color="subdued"
+      color="default"
       aria-label={statusText}
     >
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>

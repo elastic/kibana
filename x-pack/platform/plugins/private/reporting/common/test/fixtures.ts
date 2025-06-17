@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { Frequency } from '@kbn/rrule';
 import { JOB_STATUS } from '@kbn/reporting-common';
 import { ReportApiJSON } from '@kbn/reporting-common/types';
+import { ListScheduledReportApiJSON } from '../../server/types';
 import type { ReportMock } from './types';
 
 const buildMockReport = (baseObj: ReportMock): ReportApiJSON => ({
@@ -172,4 +174,52 @@ export const mockJobs: ReportApiJSON[] = [
     started_at: '2020-04-09T19:09:54.570Z',
     status: JOB_STATUS.COMPLETED,
   }),
+];
+
+export const mockScheduledReports: ListScheduledReportApiJSON[] = [
+  {
+    created_at: '2025-06-10T12:41:45.136Z',
+    created_by: 'Foo Bar',
+    enabled: true,
+    id: 'scheduled-report-1',
+    jobtype: 'printable_pdf_v2',
+    last_run: '2025-05-10T12:41:46.959Z',
+    next_run: '2025-06-16T13:56:07.123Z',
+    object_type: 'dashboard',
+    schedule: {
+      rrule: { freq: Frequency.WEEKLY, tzid: 'UTC', interval: 1 },
+    },
+    title: 'Scheduled report 1',
+    notification: {},
+  },
+  {
+    created_at: '2025-06-16T12:41:45.136Z',
+    created_by: 'Test abc',
+    enabled: true,
+    id: 'scheduled-report-2',
+    jobtype: 'printable_pdf_v2',
+    last_run: '2025-06-16T12:41:46.959Z',
+    next_run: '2025-06-16T13:56:07.123Z',
+    object_type: 'discover',
+    schedule: {
+      rrule: { freq: Frequency.DAILY, tzid: 'UTC', interval: 1 },
+    },
+    title: 'Scheduled report 2',
+    notification: {},
+  },
+  {
+    created_at: '2025-06-12T12:41:45.136Z',
+    created_by: 'New',
+    enabled: false,
+    id: 'scheduled-report-3',
+    jobtype: 'printable_pdf_v2',
+    last_run: '2025-06-16T12:41:46.959Z',
+    next_run: '2025-06-16T13:56:07.123Z',
+    object_type: 'discover',
+    schedule: {
+      rrule: { freq: Frequency.MONTHLY, tzid: 'UTC', interval: 2 },
+    },
+    title: 'Scheduled report 3',
+    notification: {},
+  },
 ];

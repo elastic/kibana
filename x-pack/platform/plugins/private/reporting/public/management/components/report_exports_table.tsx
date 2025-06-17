@@ -29,6 +29,7 @@ import { prettyPrintJobType } from '../../../common/job_utils';
 import { Poller } from '../../../common/poller';
 import { ReportDeleteButton, ReportInfoFlyout, ReportStatusIndicator } from '.';
 import { guessAppIconTypeFromObjectType, getDisplayNameFromObjectType } from '../utils';
+import { NO_CREATED_REPORTS_DESCRIPTION } from '../../translations';
 
 type TableColumn = EuiBasicTableColumn<Job>;
 
@@ -318,7 +319,9 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
         name: i18n.translate('xpack.reporting.exports.tableColumns.content', {
           defaultMessage: 'Content',
         }),
-        render: (_status: string, job) => prettyPrintJobType(job.jobtype),
+        render: (_status: string, job) => (
+          <div data-test-subj="reportJobContent">{prettyPrintJobType(job.jobtype)}</div>
+        ),
         mobileOptions: {
           show: false,
         },
@@ -329,9 +332,9 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
         name: i18n.translate('xpack.reporting.exports.tableColumns.exportType', {
           defaultMessage: 'Export type',
         }),
-        render: (_scheduledReportId: string, job) => {
-          return job.getExportType();
-        },
+        render: (_scheduledReportId: string, job) => (
+          <div data-test-subj="reportJobExportType">{job.getExportType()}</div>
+        ),
         mobileOptions: {
           show: false,
         },
@@ -428,15 +431,7 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
           items={this.state.jobs}
           loading={this.state.isLoading}
           columns={tableColumns}
-          noItemsMessage={
-            this.state.isLoading
-              ? i18n.translate('xpack.reporting.exports.table.loadingReportsDescription', {
-                  defaultMessage: 'Loading reports',
-                })
-              : i18n.translate('xpack.reporting.exports.table.noCreatedReportsDescription', {
-                  defaultMessage: 'No reports have been created',
-                })
-          }
+          noItemsMessage={NO_CREATED_REPORTS_DESCRIPTION}
           pagination={pagination}
           selection={selection}
           onChange={this.onTableChange}
