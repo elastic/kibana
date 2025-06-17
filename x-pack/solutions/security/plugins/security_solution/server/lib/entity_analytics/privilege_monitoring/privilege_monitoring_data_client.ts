@@ -146,19 +146,7 @@ export class PrivilegeMonitoringDataClient {
         'info',
         `Found index sources for privilege monitoring:\n${JSON.stringify(indexSources, null, 2)}`
       );
-      const userNames = await this.queryAllUserNames(indexSources); // TODO: temp naming, to update.
-      this.log(
-        'info',
-        `Queried all usernames from index sources: ${JSON.stringify(userNames, null, 2)}`
-      );
-      // for each user in the userNames, create user is called. ITERATION I - will need to do update later?
-      // save down into internal index
-      Object.entries(userNames).forEach(([index, usernames]) => {
-        this.log('info', `Index: ${index}`);
-        usernames.forEach((username) => {
-          this.log('info', ` - Username: ${username}`);
-        });
-      });
+      await this.queryAllUserNames(indexSources);
     } catch (e) {
       this.log('error', `Error initializing privilege monitoring engine: ${e}`);
       this.audit(
@@ -231,6 +219,9 @@ export class PrivilegeMonitoringDataClient {
       const username = hit._source?.user?.name;
       if (username) {
         usernames.add(username);
+        if (username) {
+          this.createUser({ user: { name: username } }, 'index_sync'); // this is the end of what you need, everything else is logging and you can delete the array outside of this!
+        }
       }
     }
     this.log('info', `Found ${usernames.size} unique usernames in index: ${indexName}`);
