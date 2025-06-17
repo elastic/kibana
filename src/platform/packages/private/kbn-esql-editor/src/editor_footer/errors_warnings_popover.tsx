@@ -204,6 +204,7 @@ export function ErrorsWarningsFooterPopover({
               onClick={() => {
                 setIsPopoverOpen(!isPopoverOpen);
               }}
+              data-test-subj={`ESQLEditor-footerPopoverButton-${type}`}
             >
               {isSpaceReduced ? visibleItems.length : message}
             </EuiButtonEmpty>
@@ -211,7 +212,6 @@ export function ErrorsWarningsFooterPopover({
           ownFocus={false}
           isOpen={isPopoverOpen}
           closePopover={closePopover}
-          data-test-subj={`ESQLEditor-footerPopover-${type}`}
         >
           {visibleItems.length > 0 && (
             <ErrorsWarningsContent items={visibleItems} type={type} onErrorClick={onErrorClick} />
