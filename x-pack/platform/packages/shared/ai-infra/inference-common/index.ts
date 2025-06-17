@@ -31,6 +31,7 @@ export {
   type FunctionCallingMode,
   type ToolChoice,
   type ChatCompleteAPI,
+  type ChatCompleteAPIResponse,
   type ChatCompleteOptions,
   type ChatCompleteCompositeResponse,
   type ChatCompletionTokenCountEvent,
@@ -43,7 +44,6 @@ export {
   type ChatCompleteRetryConfiguration,
   type ChatCompletionTokenCount,
   type BoundChatCompleteAPI,
-  type BoundChatCompleteOptions,
   type UnboundChatCompleteOptions,
   withoutTokenCountEvents,
   withoutChunkEvents,
@@ -75,7 +75,6 @@ export {
   type Output,
   type OutputEvent,
   type BoundOutputAPI,
-  type BoundOutputOptions,
   type UnboundOutputOptions,
   isOutputCompleteEvent,
   isOutputUpdateEvent,
@@ -139,7 +138,6 @@ export { type Model, ModelFamily, ModelPlatform, ModelProvider } from './src/mod
 
 export {
   type BoundPromptAPI,
-  type BoundPromptOptions,
   type Prompt,
   type PromptAPI,
   type PromptCompositeResponse,
@@ -152,3 +150,5 @@ export {
   type UnboundPromptOptions,
   createPrompt,
 } from './src/prompt';
+
+export { type BoundOptions, type UnboundOptions, bindApi } from './src/bind';
