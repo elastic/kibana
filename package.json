@@ -1060,6 +1060,7 @@
     "@smithy/eventstream-codec": "^4.0.1",
     "@smithy/eventstream-serde-node": "^4.0.1",
     "@smithy/middleware-stack": "^4.0.1",
+    "@smithy/node-http-handler": "^4.0.1",
     "@smithy/types": "^4.1.0",
     "@smithy/util-utf8": "^4.0.0",
     "@tanstack/react-query": "^4.29.12",
