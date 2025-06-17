@@ -383,6 +383,7 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
             ? selectedMenuItem.config.flyoutSizing || {}
             : {})}
         >
+          {/* TODO: remove this global style once https://github.com/elastic/eui/issues/8801 is resolved  */}
           <Global
             // @ts-expect-error -- we pass a z-index specifying important so we override the default z-index, so solve a known bug,
             // where when `headerZindexLocation` is set to `above`, the popover panel z-index is not high enough
