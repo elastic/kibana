@@ -18,11 +18,11 @@ class ESDocLinks {
 
   setDocLinks(newDocLinks: DocLinks) {
     this.kibanaFeedback = newDocLinks.kibana.feedback;
-    this.elasticCommunity = newDocLinks.elasticCommunity;
+    this.elasticCommunity = newDocLinks.searchHomepage.elasticCommunity;
     this.elasticsearchGettingStarted = newDocLinks.elasticsearch.gettingStarted;
-    this.visitSearchLabs = newDocLinks.visitSearchLabs;
-    this.notebooksExamples = newDocLinks.notebooksExamples;
-    this.customerEngineerRequestForm = newDocLinks.customerEngineerRequestForm;
+    this.visitSearchLabs = newDocLinks.searchHomepage.visitSearchLabs;
+    this.notebooksExamples = newDocLinks.searchHomepage.notebooksExamples;
+    this.customerEngineerRequestForm = newDocLinks.searchHomepage.customerEngineerRequestForm;
   }
 }
 

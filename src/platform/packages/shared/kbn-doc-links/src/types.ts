@@ -80,9 +80,12 @@ export interface DocLinks {
     readonly auditdModule: string;
     readonly systemModule: string;
   };
-  readonly visitSearchLabs: string;
-  readonly notebooksExamples: string;
-  readonly customerEngineerRequestForm: string;
+  readonly searchHomepage: {
+    readonly visitSearchLabs: string;
+    readonly notebooksExamples: string;
+    readonly customerEngineerRequestForm: string;
+    readonly elasticCommunity: string;
+  };
   readonly metricbeat: {
     readonly base: string;
     readonly configure: string;
@@ -251,7 +254,6 @@ export interface DocLinks {
     readonly migrateOffScriptedFields: string;
   };
   readonly addData: string;
-  readonly elasticCommunity: string;
   readonly kibana: {
     readonly askElastic: string;
     readonly createGithubIssue: string;
