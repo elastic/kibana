@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/react';
+import React from 'react';
+import { render, waitFor } from '@testing-library/react';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
-import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { UnifiedSearchBar } from '.';
 import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
@@ -27,7 +26,21 @@ jest.mock('react-router-dom', () => ({
   useLocation: jest.fn(),
 }));
 
-async function setup({ urlParams, history }: { urlParams: UrlParams; history: MemoryHistory }) {
+interface SetupResult {
+  setQuerySpy: jest.SpyInstance;
+  getQuerySpy: jest.SpyInstance;
+  clearQuerySpy: jest.SpyInstance;
+  setTimeSpy: jest.SpyInstance;
+  setRefreshIntervalSpy: jest.SpyInstance;
+}
+
+async function setup({
+  urlParams,
+  history,
+}: {
+  urlParams: UrlParams;
+  history: MemoryHistory;
+}): Promise<SetupResult> {
   history.replace({
     pathname: '/services',
     search: fromQuery(urlParams),
@@ -39,12 +52,10 @@ async function setup({ urlParams, history }: { urlParams: UrlParams; history: Me
   const setTimeSpy = jest.fn();
   const setRefreshIntervalSpy = jest.fn();
 
-  // mock transaction types
   jest.spyOn(useApmDataViewHook, 'useAdHocApmDataView').mockReturnValue({ dataView: undefined });
-
   jest.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
 
-  const wrapper = mount(
+  render(
     <MockApmPluginContextWrapper
       history={history}
       value={
@@ -82,7 +93,6 @@ async function setup({ urlParams, history }: { urlParams: UrlParams; history: Me
   );
 
   return {
-    wrapper,
     setQuerySpy,
     getQuerySpy,
     clearQuerySpy,
@@ -91,7 +101,7 @@ async function setup({ urlParams, history }: { urlParams: UrlParams; history: Me
   };
 }
 
-describe('when kuery is already present in the url, the search bar must reflect the same', () => {
+describe('UnifiedSearchBar', () => {
   let history: MemoryHistory;
 
   beforeEach(() => {
@@ -104,16 +114,13 @@ describe('when kuery is already present in the url, the search bar must reflect 
     jest.clearAllMocks();
   });
 
-  jest.spyOn(useProcessorEventHook, 'useProcessorEvent').mockReturnValue(undefined);
+  it('sets search bar state based on URL parameters', async () => {
+    jest.spyOn(useProcessorEventHook, 'useProcessorEvent').mockReturnValue(undefined);
 
-  const search = '?method=json';
-  const pathname = '/services';
-  (useLocation as jest.Mock).mockReturnValue(() => ({
-    search,
-    pathname,
-  }));
+    const search = '?method=json';
+    const pathname = '/services';
+    (useLocation as jest.Mock).mockReturnValue({ search, pathname });
 
-  it('sets the searchbar value based on URL', async () => {
     const expectedQuery = {
       query: 'service.name:"opbeans-android"',
       language: 'kuery',
@@ -140,6 +147,7 @@ describe('when kuery is already present in the url, the search bar must reflect 
       refreshPaused: refreshInterval.pause,
       refreshInterval: refreshInterval.value,
     };
+
     jest.spyOn(useApmParamsHook, 'useApmParams').mockReturnValue({ query: urlParams, path: {} });
 
     const { setQuerySpy, setTimeSpy, setRefreshIntervalSpy } = await setup({
@@ -148,9 +156,9 @@ describe('when kuery is already present in the url, the search bar must reflect 
     });
 
     await waitFor(() => {
-      expect(setQuerySpy).toBeCalledWith(expectedQuery);
-      expect(setTimeSpy).toBeCalledWith(expectedTimeRange);
-      expect(setRefreshIntervalSpy).toBeCalledWith(refreshInterval);
+      expect(setQuerySpy).toHaveBeenCalledWith(expectedQuery);
+      expect(setTimeSpy).toHaveBeenCalledWith(expectedTimeRange);
+      expect(setRefreshIntervalSpy).toHaveBeenCalledWith(refreshInterval);
     });
   });
 });

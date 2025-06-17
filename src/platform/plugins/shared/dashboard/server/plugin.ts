@@ -38,7 +38,6 @@ export class DashboardPlugin
     Plugin<DashboardPluginSetup, DashboardPluginStart, DashboardSetupDeps, DashboardStartDeps>
 {
   private contentClient?: ReturnType<ContentManagementServerSetup['register']>['contentClient'];
-  private embeddableService?: EmbeddableStart;
   private readonly logger: Logger;
 
   constructor(private initializerContext: PluginInitializerContext) {
@@ -54,8 +53,7 @@ export class DashboardPlugin
     core.savedObjects.registerType(
       createDashboardSavedObjectType({
         migrationDeps: {
-          embeddableSetup: plugins.embeddable,
-          getEmbeddableStart: () => this.embeddableService,
+          embeddable: plugins.embeddable,
         },
       })
     );
@@ -126,9 +124,6 @@ export class DashboardPlugin
 
   public start(core: CoreStart, plugins: DashboardStartDeps) {
     this.logger.debug('dashboard: Started');
-    if (plugins.embeddable) {
-      this.embeddableService = plugins.embeddable;
-    }
 
     if (plugins.share) {
       plugins.share.url.locators.create(

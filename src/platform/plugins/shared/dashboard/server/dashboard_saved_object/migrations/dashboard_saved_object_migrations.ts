@@ -9,41 +9,41 @@
 
 import { flow, mapValues } from 'lodash';
 
-import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import { mergeSavedObjectMigrationMaps } from '@kbn/core-saved-objects-utils-server';
-
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/server';
-import { SavedObjectMigration, SavedObjectMigrationMap } from '@kbn/core-saved-objects-server';
+import {
+  mergeMigrationFunctionMaps,
+  MigrateFunctionsObject,
+} from '@kbn/kibana-utils-plugin/common';
+import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { SavedObjectMigrationFn, SavedObjectMigrationMap } from '@kbn/core/server';
 
 import { migrations730, migrations700 } from './migrate_to_730';
 import { migrateMatchAllQuery } from './migrate_match_all_query';
 import { migrateExplicitlyHiddenTitles } from './migrate_hidden_titles';
 import { replaceIndexPatternReference } from './migrate_index_pattern_reference';
 import { migrateByValueDashboardPanels } from './migrate_by_value_dashboard_panels';
-import { createExtractPanelReferencesMigration } from './migrate_extract_panel_references';
+import { createExtractPanelReferencesMigration } from './migrate_extract_panel_references/migrate_extract_panel_references';
 
 export interface DashboardSavedObjectTypeMigrationsDeps {
-  embeddableSetup: EmbeddableSetup;
-  getEmbeddableStart: () => EmbeddableStart | undefined;
+  embeddable: EmbeddableSetup;
 }
 
 export const createDashboardSavedObjectTypeMigrations = (
   deps: DashboardSavedObjectTypeMigrationsDeps
 ): SavedObjectMigrationMap => {
-  const embeddableMigrations = mapValues<MigrateFunctionsObject, SavedObjectMigration>(
-    deps.embeddableSetup.getAllMigrations(),
+  const embeddableMigrations = mapValues<MigrateFunctionsObject, SavedObjectMigrationFn>(
+    deps.embeddable.getAllMigrations(),
     migrateByValueDashboardPanels
-  );
+  ) as MigrateFunctionsObject;
 
   const dashboardMigrations = {
     '6.7.2': flow(migrateMatchAllQuery),
     '7.0.0': flow(migrations700),
     '7.3.0': flow(migrations730),
     '7.9.3': flow(migrateMatchAllQuery),
-    '7.11.0': createExtractPanelReferencesMigration(deps),
+    '7.11.0': flow(createExtractPanelReferencesMigration(deps)),
     '7.14.0': flow(replaceIndexPatternReference),
     '7.17.3': flow(migrateExplicitlyHiddenTitles),
   };
 
-  return mergeSavedObjectMigrationMaps(dashboardMigrations, embeddableMigrations);
+  return mergeMigrationFunctionMaps(dashboardMigrations, embeddableMigrations);
 };
