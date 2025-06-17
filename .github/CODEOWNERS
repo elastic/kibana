@@ -747,7 +747,6 @@ src/platform/test/plugin_functional/plugins/core_plugin_deprecations @elastic/ki
 src/platform/test/plugin_functional/plugins/core_plugin_execution_context @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/core_plugin_helpmenu @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/core_plugin_route_timeouts @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/core_plugin_static_assets @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/core_provider_plugin @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/data_search @elastic/kibana-data-discovery
 src/platform/test/plugin_functional/plugins/elasticsearch_client_plugin @elastic/kibana-core

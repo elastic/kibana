@@ -369,7 +369,6 @@
     "@kbn/core-plugin-helpmenu-plugin": "link:src/platform/test/plugin_functional/plugins/core_plugin_helpmenu",
     "@kbn/core-plugin-initializer-context-plugin": "link:src/platform/test/node_roles_functional/plugins/core_plugin_initializer_context",
     "@kbn/core-plugin-route-timeouts-plugin": "link:src/platform/test/plugin_functional/plugins/core_plugin_route_timeouts",
-    "@kbn/core-plugin-static-assets-plugin": "link:src/platform/test/plugin_functional/plugins/core_plugin_static_assets",
     "@kbn/core-plugins-base-server-internal": "link:src/core/packages/plugins/base-server-internal",
     "@kbn/core-plugins-browser": "link:src/core/packages/plugins/browser",
     "@kbn/core-plugins-browser-internal": "link:src/core/packages/plugins/browser-internal",
