@@ -101,10 +101,6 @@ export const setDataTableSelectAll = actionCreator<{ id: string; selectAll: bool
   'SET_DATA_TABLE_SELECT_ALL'
 );
 
-export const updateGraphEventId = actionCreator<{ id: string; graphEventId: string }>(
-  'UPDATE_DATA_TABLE_GRAPH_EVENT_ID'
-);
-
 export const setTableUpdatedAt = actionCreator<{ id: string; updated: number }>(
   'SET_TABLE_UPDATED_AT'
 );

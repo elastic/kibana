@@ -10,15 +10,18 @@ import type { FunctionComponent } from 'react';
 import React, { useEffect, useState } from 'react';
 
 import { EuiCallOut, EuiCodeBlock, UseEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 
 import type { ScopedHistory } from '@kbn/core/public';
-import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '@kbn/reporting-common';
+import {
+  REPORTING_REDIRECT_LOCATOR_STORE_KEY,
+  REPORTING_REDIRECT_ALLOWED_LOCATOR_TYPES,
+} from '@kbn/reporting-common';
 import { LocatorParams } from '@kbn/reporting-common/types';
+import { ReportingAPIClient } from '@kbn/reporting-public';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
 
-import { ReportingAPIClient } from '@kbn/reporting-public';
 import type { SharePluginSetup } from '../shared_imports';
 
 interface Props {
@@ -63,12 +66,19 @@ export const RedirectApp: FunctionComponent<Props> = ({ apiClient, screenshotMod
           throw new Error('Could not find locator params for report');
         }
 
+        if (!REPORTING_REDIRECT_ALLOWED_LOCATOR_TYPES.includes(locatorParams.id)) {
+          // eslint-disable-next-line no-console
+          console.error(`Report job execution cannot redirect using ${locatorParams.id}`);
+          throw new Error(
+            'Report job execution can only redirect using a locator for an expected analytical app'
+          );
+        }
+
         share.navigate(locatorParams);
       } catch (e) {
         setError(e);
         // eslint-disable-next-line no-console
         console.error(i18nTexts.consoleMessagePrefix, e.message);
-        throw e;
       }
     })();
   }, [apiClient, screenshotMode, share]);

@@ -14,7 +14,6 @@ import {
   EventMetric,
   FieldType,
   TrackedApplicationClick,
-  TrackedError,
   TrackedSavedObjectClick,
   TrackUiMetricFn,
 } from '../types';
@@ -121,20 +120,6 @@ export class EventReporter {
       [FieldType.SAVED_OBJECT_TYPE]: type,
       [FieldType.SELECTED_RANK]: context.selectedRank,
       [FieldType.SELECTED_LABEL]: context.selectedLabel,
-    });
-  }
-
-  /**
-   * Called from error handlers
-   */
-  public error(context: TrackedError | undefined) {
-    this.trackUiMetric(METRIC_TYPE.COUNT, CountMetric.UNHANDLED_ERROR);
-
-    const message = context?.message.toString() ?? 'unknown';
-    const terms = context?.searchValue ?? '';
-    this.reportEvent(EventMetric.ERROR, {
-      [FieldType.TERMS]: terms,
-      [FieldType.ERROR_MESSAGE]: message,
     });
   }
 }

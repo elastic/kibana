@@ -138,6 +138,16 @@ const availableProcessors: TAvailableProcessors = {
     ),
   },
   ...configDrivenProcessors,
+  manual_ingest_pipeline: {
+    type: 'manual_ingest_pipeline',
+    inputDisplay: 'Manual pipeline configuration',
+    getDocUrl: () => (
+      <FormattedMessage
+        id="xpack.streams.streamDetailView.managementTab.enrichment.processor.manualIngestPipelineHelpText"
+        defaultMessage="Specify an array of ingest pipeline processors using JSON."
+      />
+    ),
+  },
 };
 
 const getProcessorDescription = (esDocUrl: string) => (type: ProcessorType) =>

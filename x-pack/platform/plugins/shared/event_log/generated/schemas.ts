@@ -144,6 +144,11 @@ export const EventSchema = schema.maybe(
             flapping: ecsBoolean(),
             maintenance_window_ids: ecsStringMulti(),
             uuid: ecsString(),
+            deletion: schema.maybe(
+              schema.object({
+                num_deleted: ecsStringOrNumber(),
+              })
+            ),
             rule: schema.maybe(
               schema.object({
                 consumer: ecsString(),

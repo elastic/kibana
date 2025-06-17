@@ -10,11 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText, EuiLink, EuiSteps, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 
 import { Error } from '../../../../../../../components';
-import {
-  useStartServices,
-  useAgentVersion,
-  useShowCompleteAgentInstructions,
-} from '../../../../../../../../../hooks';
+import { useStartServices, useAgentVersion } from '../../../../../../../../../hooks';
 
 import { CreatePackagePolicyBottomBar, NotObscuredByBottomBar } from '../..';
 import {
@@ -54,9 +50,6 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
   const [commandCopied, setCommandCopied] = useState(false);
   const [applyCommandCopied, setApplyCommandCopied] = useState(false);
 
-  const { onChangeShowCompleteAgentInstructions, showCompleteAgentInstructions } =
-    useShowCompleteAgentInstructions();
-
   if (!enrollmentAPIKey) {
     return (
       <Error
@@ -82,7 +75,6 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
     fleetServerHost,
     agentVersion: agentVersion || '',
     showInstallServers,
-    showCompleteAgentInstructions,
   });
 
   const steps = [
@@ -97,8 +89,6 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
       fleetServerHost,
       onCopy: () => setCommandCopied(true),
       rootIntegrations: getRootIntegrations(agentPolicy?.package_policies ?? []),
-      onChangeShowCompleteAgentInstructions,
-      showCompleteAgentInstructions,
     }),
   ];
 

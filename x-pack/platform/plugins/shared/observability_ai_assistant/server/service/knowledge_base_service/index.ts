@@ -47,7 +47,6 @@ export interface RecalledEntry {
   title?: string;
   text: string;
   esScore: number | null;
-  is_correction?: boolean;
   labels?: Record<string, string>;
 }
 
@@ -70,7 +69,7 @@ export class KnowledgeBaseService {
     user?: { name: string };
   }): Promise<RecalledEntry[]> {
     const response = await this.dependencies.esClient.asInternalUser.search<
-      Pick<KnowledgeBaseEntry, 'text' | 'is_correction' | 'labels' | 'title'> & { doc_id?: string }
+      Pick<KnowledgeBaseEntry, 'text' | 'labels' | 'title'> & { doc_id?: string }
     >({
       index: [resourceNames.writeIndexAlias.kb],
       query: {
@@ -96,13 +95,12 @@ export class KnowledgeBaseService {
       },
       size: 20,
       _source: {
-        includes: ['text', 'is_correction', 'labels', 'doc_id', 'title'],
+        includes: ['text', 'labels', 'doc_id', 'title'],
       },
     });
 
     return response.hits.hits.map((hit) => ({
       text: hit._source?.text!,
-      is_correction: hit._source?.is_correction,
       labels: hit._source?.labels,
       title: hit._source?.title ?? hit._source?.doc_id, // use `doc_id` as fallback title for backwards compatibility
       esScore: hit._score!,
@@ -284,19 +282,7 @@ export class KnowledgeBaseService {
             : [{ [String(sortBy)]: { order: sortDirection } }],
         size: 500,
         _source: {
-          includes: [
-            'title',
-            'doc_id',
-            'text',
-            'is_correction',
-            'labels',
-            'confidence',
-            'public',
-            '@timestamp',
-            'role',
-            'user.name',
-            'type',
-          ],
+          excludes: ['confidence', 'is_correction'], // fields deprecated in https://github.com/elastic/kibana/pull/222814
         },
       });
 
@@ -458,6 +444,55 @@ export class KnowledgeBaseService {
         );
       }
 
+      throw error;
+    }
+  };
+
+  addBulkEntries = async ({
+    entries,
+    user,
+    namespace,
+  }: {
+    entries: Array<Omit<KnowledgeBaseEntry, '@timestamp'>>;
+    user?: { name: string; id?: string };
+    namespace: string;
+  }): Promise<void> => {
+    if (!this.dependencies.config.enableKnowledgeBase) {
+      return;
+    }
+
+    try {
+      const bulkBody = entries.flatMap((entry) => [
+        { index: { _index: resourceNames.writeIndexAlias.kb, _id: entry.id } },
+        {
+          '@timestamp': new Date().toISOString(),
+          ...entry,
+          ...(entry.text ? { semantic_text: entry.text } : {}),
+          user,
+          namespace,
+        },
+      ]);
+
+      const bulkResult = await this.dependencies.esClient.asInternalUser.bulk({
+        refresh: 'wait_for',
+        body: bulkBody,
+      });
+
+      if (bulkResult.errors) {
+        const errorMessages = bulkResult.items
+          .filter((item: any) => item.index?.error)
+          .map((item: any) => item.index?.error?.reason);
+        throw new Error(`Indexing failed: ${errorMessages.join(', ')}`);
+      }
+
+      this.dependencies.logger.debug(
+        `Successfully added ${entries.length} entries to the knowledge base`
+      );
+    } catch (error) {
+      this.dependencies.logger.error(`Failed to add entries to the knowledge base: ${error}`);
+      if (isInferenceEndpointMissingOrUnavailable(error)) {
+        throwKnowledgeBaseNotReady(error);
+      }
       throw error;
     }
   };

@@ -31,7 +31,6 @@ import {
   getAllFunctions,
   isSingleItem,
   getColumnExists,
-  correctQuerySyntax,
   getColumnByName,
   getAllCommands,
   getExpressionType,
@@ -74,12 +73,14 @@ import {
   pushItUpInTheList,
   extractTypeFromASTArg,
   getSuggestionsToRightOfOperatorExpression,
+  correctQuerySyntax,
 } from './helper';
 import {
   FunctionParameter,
   FunctionDefinitionTypes,
   GetPolicyMetadataFn,
   getLocationFromCommandOrOptionName,
+  FunctionParameterType,
 } from '../definitions/types';
 import { comparisonFunctions } from '../definitions/all_operators';
 import {
@@ -99,7 +100,7 @@ export async function suggest(
 ): Promise<SuggestionRawDefinition[]> {
   // Partition out to inner ast / ast context for the latest command
   const innerText = fullText.substring(0, offset);
-  const correctedQuery = correctQuerySyntax(innerText, context);
+  const correctedQuery = correctQuerySyntax(innerText);
   const { ast, root } = parse(correctedQuery, { withFormatting: true });
   const astContext = getAstContext(innerText, ast, offset);
 
@@ -141,10 +142,12 @@ export async function suggest(
           resourceRetriever,
           innerText
         );
-        const editorExtensions =
-          (await resourceRetriever?.getEditorExtensions?.(fromCommand)) ?? [];
-        const recommendedQueriesSuggestionsFromExtensions =
-          mapRecommendedQueriesFromExtensions(editorExtensions);
+        const editorExtensions = (await resourceRetriever?.getEditorExtensions?.(fromCommand)) ?? {
+          recommendedQueries: [],
+        };
+        const recommendedQueriesSuggestionsFromExtensions = mapRecommendedQueriesFromExtensions(
+          editorExtensions.recommendedQueries
+        );
 
         const recommendedQueriesSuggestionsFromStaticTemplates =
           await getRecommendedQueriesSuggestionsFromStaticTemplates(
@@ -353,9 +356,12 @@ async function getSuggestionsWithinCommandExpression(
 
   // Function returning suggestions from static templates and editor extensions
   const getRecommendedQueries = async (queryString: string, prefix: string = '') => {
-    const editorExtensions = (await callbacks?.getEditorExtensions?.(queryString)) ?? [];
-    const recommendedQueriesFromExtensions =
-      getRecommendedQueriesTemplatesFromExtensions(editorExtensions);
+    const editorExtensions = (await callbacks?.getEditorExtensions?.(queryString)) ?? {
+      recommendedQueries: [],
+    };
+    const recommendedQueriesFromExtensions = getRecommendedQueriesTemplatesFromExtensions(
+      editorExtensions.recommendedQueries
+    );
 
     const recommendedQueriesFromTemplates =
       await getRecommendedQueriesSuggestionsFromStaticTemplates(getColumnsByType, prefix);
@@ -396,6 +402,7 @@ async function getSuggestionsWithinCommandExpression(
     supportsControls,
     getPolicies,
     getPolicyMetadata,
+    references,
   });
 }
 
@@ -504,17 +511,25 @@ async function getFunctionArgsSuggestions(
     const finalCommandArg = command.args[finalCommandArgIndex];
 
     const fnToIgnore = [];
-    // just ignore the current function
+
+    if (node.subtype === 'variadic-call') {
+      // for now, this getFunctionArgsSuggestions is being used in STATS to suggest for
+      // operators. When that is fixed, we can remove this "is variadic-call" check
+      // and always exclude the grouping functions
+      fnToIgnore.push(
+        ...getAllFunctions({ type: FunctionDefinitionTypes.GROUPING }).map(({ name }) => name)
+      );
+    }
+
     if (
       command.name !== 'stats' ||
       (isOptionItem(finalCommandArg) && finalCommandArg.name === 'by')
     ) {
+      // ignore the current function
       fnToIgnore.push(node.name);
     } else {
       fnToIgnore.push(
         ...getFunctionsToIgnoreForStats(command, finalCommandArgIndex),
-        // ignore grouping functions, they are only used for grouping
-        ...getAllFunctions({ type: FunctionDefinitionTypes.GROUPING }).map(({ name }) => name),
         ...(isAggFunctionUsedAlready(command, finalCommandArgIndex)
           ? getAllFunctions({ type: FunctionDefinitionTypes.AGG }).map(({ name }) => name)
           : [])
@@ -531,7 +546,7 @@ async function getFunctionArgsSuggestions(
     // inherit that constraint: func1(func2(shouldBeConstantOnly)))
     //
     const constantOnlyParamDefs = typesToSuggestNext.filter(
-      (p) => p.constantOnly || /_literal/.test(p.type as string)
+      (p) => p.constantOnly || /_duration/.test(p.type as string)
     );
 
     const getTypesFromParamDefs = (paramDefs: FunctionParameter[]) => {
@@ -551,6 +566,16 @@ async function getFunctionArgsSuggestions(
       )
     );
 
+    const ensureKeywordAndText = (types: FunctionParameterType[]) => {
+      if (types.includes('keyword') && !types.includes('text')) {
+        types.push('text');
+      }
+      if (types.includes('text') && !types.includes('keyword')) {
+        types.push('keyword');
+      }
+      return types;
+    };
+
     // Fields
 
     suggestions.push(
@@ -561,9 +586,11 @@ async function getFunctionArgsSuggestions(
           canBeBooleanCondition
             ? ['any']
             : // @TODO: have a way to better suggest constant only params
-              (getTypesFromParamDefs(
-                typesToSuggestNext.filter((d) => !d.constantOnly)
-              ) as string[]),
+              ensureKeywordAndText(
+                getTypesFromParamDefs(
+                  typesToSuggestNext.filter((d) => !d.constantOnly)
+                ) as FunctionParameterType[]
+              ),
           [],
           {
             addComma: shouldAddComma,
@@ -582,7 +609,9 @@ async function getFunctionArgsSuggestions(
           location: getLocationFromCommandOrOptionName(option?.name ?? command.name),
           returnTypes: canBeBooleanCondition
             ? ['any']
-            : (getTypesFromParamDefs(typesToSuggestNext) as string[]),
+            : (ensureKeywordAndText(
+                getTypesFromParamDefs(typesToSuggestNext)
+              ) as FunctionParameterType[]),
           ignored: fnToIgnore,
         }).map((suggestion) => ({
           ...suggestion,
