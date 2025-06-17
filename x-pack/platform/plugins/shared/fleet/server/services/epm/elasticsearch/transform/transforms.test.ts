@@ -387,6 +387,7 @@ _meta:
             composed_of: [
               'logs-endpoint.metadata_current-template@package',
               'logs-endpoint.metadata_current-template@custom',
+              'ecs@mappings',
             ],
             index_patterns: ['.metrics-endpoint.metadata_united_default'],
             priority: 250,
@@ -671,6 +672,7 @@ _meta:
             composed_of: [
               'logs-endpoint.metadata_current-template@package',
               'logs-endpoint.metadata_current-template@custom',
+              'ecs@mappings',
             ],
             index_patterns: ['.metrics-endpoint.metadata_united_default'],
             priority: 250,
@@ -932,6 +934,7 @@ _meta:
             composed_of: [
               'logs-endpoint.metadata_current-template@package',
               'logs-endpoint.metadata_current-template@custom',
+              'ecs@mappings',
             ],
             index_patterns: ['.metrics-endpoint.metadata_united_default'],
             priority: 250,
