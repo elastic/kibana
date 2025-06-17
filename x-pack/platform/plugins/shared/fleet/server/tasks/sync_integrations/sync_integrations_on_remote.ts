@@ -59,7 +59,8 @@ export const getFollowerIndex = async (
 
 const getSyncedIntegrationsCCRDoc = async (
   esClient: ElasticsearchClient,
-  abortController: AbortController
+  abortController: AbortController,
+  logger: Logger
 ): Promise<SyncIntegrationsData | undefined> => {
   const index = await getFollowerIndex(esClient, abortController);
 
@@ -70,6 +71,7 @@ const getSyncedIntegrationsCCRDoc = async (
     { signal: abortController.signal }
   );
   if (response.hits.hits.length === 0) {
+    logger.warn(`getSyncedIntegrationsCCRDoc - Sync integration doc not found`);
     return undefined;
   }
   return response.hits.hits[0]._source as SyncIntegrationsData;
@@ -130,6 +132,7 @@ async function installPackageIfNotInstalled(
         RETRY_BACKOFF_MINUTES[attempt - 1] * 60 * 1000;
 
     if (!shouldRetryInstall) {
+      logger.debug(`installPackageIfNotInstalled - Max retry attempts reached`);
       return;
     }
   }
@@ -176,6 +179,7 @@ async function uninstallPackageIfInstalled(
 ) {
   const installation = await getInstallation({ savedObjectsClient, pkgName: pkg.package_name });
   if (!installation) {
+    logger.warn(`uninstallPackageIfInstalled - Installation for ${pkg.package_name} not found`);
     return;
   }
   if (
@@ -184,6 +188,9 @@ async function uninstallPackageIfInstalled(
       semverEq(installation.version, pkg.package_version)
     )
   ) {
+    logger.warn(
+      `uninstallPackageIfInstalled - Package ${pkg.package_name} cannot be uninstalled - Found status: ${installation.install_status}, version: ${installation.version} `
+    );
     return;
   }
 
@@ -212,7 +219,7 @@ export const syncIntegrationsOnRemote = async (
   abortController: AbortController,
   logger: Logger
 ) => {
-  const syncIntegrationsDoc = await getSyncedIntegrationsCCRDoc(esClient, abortController);
+  const syncIntegrationsDoc = await getSyncedIntegrationsCCRDoc(esClient, abortController, logger);
 
   const isSyncIntegrationsEnabled = await getSyncIntegrationsEnabled(
     soClient,
@@ -220,6 +227,7 @@ export const syncIntegrationsOnRemote = async (
   );
 
   if (!isSyncIntegrationsEnabled) {
+    logger.debug(`Sync integration not enabled because of remote outputs configuration`);
     return;
   }
 
