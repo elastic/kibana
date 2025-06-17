@@ -69,9 +69,11 @@
 
     "ai4dsoc_cases:server:serverless": "npm run initialize-server:ai4dsoc cases serverless",
     "ai4dsoc_cases:runner:serverless": "npm run run-tests:ai4dsoc cases serverless serverlessEnv",
+    "ai4dsoc_cases:qa:serverless": "npm run run-tests:ai4dsoc cases serverless qaPeriodicEnv",
 
     "ai4dsoc_nlp_cleanup_task:server:serverless": "npm run initialize-server:ai4dsoc nlp_cleanup_task serverless",
     "ai4dsoc_nlp_cleanup_task:runner:serverless": "npm run run-tests:ai4dsoc nlp_cleanup_task serverless serverlessEnv",
+    "ai4dsoc_nlp_cleanup_task:qa:serverless": "npm run run-tests:ai4dsoc nlp_cleanup_task serverless qaPeriodicEnv",
 
     "genai_evals:server:ess": "npm run initialize-server:genai:trial_complete evaluations ess",
     "genai_evals:runner:ess": "npm run run-tests:genai:trial_complete evaluations ess essEnv",
