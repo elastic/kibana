@@ -39,7 +39,7 @@ export const useAssetInventoryRoutes = () => {
       });
     };
 
-    const installAssetInventoryDataView = async () => {
+    const postInstallAssetInventoryDataView = async () => {
       return http.fetch<AssetInventoryInstallDataViewResponse>(
         ASSET_INVENTORY_INSTALL_DATA_VIEW_API_PATH,
         {
@@ -52,7 +52,7 @@ export const useAssetInventoryRoutes = () => {
     return {
       getAssetInventoryStatus,
       postEnableAssetInventory,
-      installAssetInventoryDataView,
+      postInstallAssetInventoryDataView,
     };
   }, [http]);
 };
