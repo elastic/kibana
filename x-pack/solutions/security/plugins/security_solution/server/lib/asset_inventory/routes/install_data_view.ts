@@ -49,7 +49,7 @@ export const installAssetInventoryDataViewRoute = (
           }
 
           const error = transformError(e);
-          logger.error(`Error initializing asset inventory: ${error.message}`);
+          logger.error(`Error installing asset inventory data view: ${error.message}`);
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,
