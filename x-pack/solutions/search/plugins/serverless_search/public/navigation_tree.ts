@@ -162,14 +162,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
         id: 'search_project_nav_footer',
         children: [
           {
-            id: 'gettingStarted',
-            title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
-              defaultMessage: 'Getting Started',
-            }),
-            link: 'serverlessElasticsearch',
-            icon: 'launch',
-          },
-          {
             id: 'project_settings_project_nav',
             title: i18n.translate('xpack.serverlessSearch.nav.projectSettings', {
               defaultMessage: 'Project settings',
