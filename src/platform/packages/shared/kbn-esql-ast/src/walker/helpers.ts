@@ -63,18 +63,18 @@ export const templateToPredicate = (
   template: NodeMatchTemplate
 ): ((node: ESQLProperNode) => boolean) => {
   const keys = Object.keys(template) as Array<keyof ESQLProperNode>;
-  const predicate = (child: ESQLProperNode) => {
+  const predicate = (node: ESQLProperNode) => {
     for (const key of keys) {
       const matcher = template[key];
       if (matcher instanceof Array) {
-        if (!(matcher as any[]).includes(child[key])) {
+        if (!(matcher as any[]).includes(node[key])) {
           return false;
         }
       } else if (matcher instanceof RegExp) {
-        if (!matcher.test(String(child[key]))) {
+        if (!matcher.test(String(node[key]))) {
           return false;
         }
-      } else if (child[key] !== matcher) {
+      } else if (node[key] !== matcher) {
         return false;
       }
     }

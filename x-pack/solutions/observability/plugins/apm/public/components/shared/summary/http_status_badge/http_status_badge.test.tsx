@@ -52,7 +52,7 @@ describe('HttpStatusBadge', () => {
 
     const badge = screen.getByTestId('httpStatusBadge');
     expect(badge).toHaveStyle({
-      '--euiBadgeBackgroundColor': result.current.euiTheme.colors.vis.euiColorVisWarning0,
+      '--euiBadgeBackgroundColor': result.current.euiTheme.colors.vis.euiColorVisWarning1,
     });
     expect(badge).toHaveTextContent('404');
   });
