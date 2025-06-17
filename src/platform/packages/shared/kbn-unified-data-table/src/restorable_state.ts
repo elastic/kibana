@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const ADHOC_DATA_VIEW_RENDER_EVENT = 'ad_hoc_data_view';
+import { createRestorableStateProvider } from '@kbn/restorable-state';
 
-export const SEARCH_SESSION_ID_QUERY_PARAM = 'searchSessionId';
+export interface UnifiedDataTableRestorableState {
+  selectedDocsSet: Set<string>;
+  isCompareActive: boolean;
+}
 
-// TEMPORARY: This is a temporary flag to enable/disable tabs in Discover until the feature is fully implemented.
-export const TABS_ENABLED = true;
+export const { withRestorableState, useRestorableState } =
+  createRestorableStateProvider<UnifiedDataTableRestorableState>();

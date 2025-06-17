@@ -77,6 +77,7 @@ import {
 } from '../../../../context_awareness';
 import {
   internalStateActions,
+  useCurrentTabAction,
   useCurrentTabSelector,
   useInternalStateDispatch,
   useInternalStateSelector,
@@ -398,6 +399,9 @@ function DiscoverDocumentsComponent({
     [viewModeToggle, callouts, loadingIndicator]
   );
 
+  const dataGridUiState = useCurrentTabSelector((state) => state.uiState.dataGrid);
+  const setDataGridUiState = useCurrentTabAction(internalStateActions.setDataGridUiState);
+
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
       // class is used in tests
@@ -478,6 +482,10 @@ function DiscoverDocumentsComponent({
             cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
             cellActionsMetadata={cellActionsMetadata}
             cellActionsHandling="append"
+            initialState={dataGridUiState}
+            onInitialStateChange={(newDataGridUiState) =>
+              dispatch(setDataGridUiState({ dataGridUiState: newDataGridUiState }))
+            }
           />
         </CellActionsProvider>
       </div>

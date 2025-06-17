@@ -68,6 +68,7 @@ export const defaultTabState: Omit<TabState, keyof TabItem> = {
     loadingStatus: LoadingStatus.Uninitialized,
     result: {},
   },
+  uiState: {},
 };
 
 const initialState: DiscoverInternalState = {
@@ -218,6 +219,14 @@ export const internalStateSlice = createSlice({
       withTab(state, action, (tab) => {
         tab.overriddenVisContextAfterInvalidation = undefined;
         state.expandedDoc = undefined;
+      }),
+
+    setDataGridUiState: (
+      state,
+      action: TabAction<{ dataGridUiState: TabState['uiState']['dataGrid'] }>
+    ) =>
+      withTab(state, action, (tab) => {
+        tab.uiState.dataGrid = action.payload.dataGridUiState;
       }),
   },
   extraReducers: (builder) => {
