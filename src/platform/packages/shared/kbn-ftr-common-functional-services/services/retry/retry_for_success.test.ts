@@ -9,7 +9,6 @@
 
 import retryForSuccessModule from './retry_for_success';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
-import * as testJestHelpers from '@kbn/test-jest-helpers';
 
 describe('Retry for success', () => {
   const {retryForSuccess } = retryForSuccessModule;
