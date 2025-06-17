@@ -92,12 +92,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchQueryRules.QueryRulesDetailPage.expectQueryRulesDetailPageBackButtonToExist();
         await pageObjects.searchQueryRules.QueryRulesDetailPage.expectQueryRulesDetailPageSaveButtonToExist();
         // Delete the ruleset created for this test
-        deleteTestRuleset('my-test-ruleset');
+        await deleteTestRuleset('my-test-ruleset');
       });
     });
     describe('Adding a new ruleset in a non-empty deployment', () => {
       it('is rulesets management page loaded with existing ruleset successfully', async () => {
-        createTestRuleset('my-test-ruleset');
+        await createTestRuleset('my-test-ruleset');
       });
 
       it('should be able to create a new ruleset on top of an existing one', async () => {
@@ -118,7 +118,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
     describe('Deleting a query ruleset', () => {
       it('is rulesets management page loaded with existing ruleset successfully - pass 1', async () => {
-        createTestRuleset('my-test-ruleset');
+        await createTestRuleset('my-test-ruleset');
       });
       it('should be able to delete an existing ruleset from the ruleset details page', async () => {
         await pageObjects.searchQueryRules.QueryRulesManagementPage.clickRuleset('my-test-ruleset');
@@ -128,7 +128,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchQueryRules.QueryRulesDeleteRulesetModal.clickConfirmDeleteModal();
       });
       it('is rulesets management page loaded with existing ruleset successfully - pass 2', async () => {
-        createTestRuleset('my-test-ruleset');
+        await createTestRuleset('my-test-ruleset');
       });
       it('should be able to delete an existing ruleset from the ruleset management page', async () => {
         await pageObjects.searchQueryRules.QueryRulesManagementPage.clickDeleteRulesetRow(0);
@@ -138,7 +138,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
     describe('Editing a query ruleset with document pinning/exclude', () => {
       it('is rulesets management page loaded with existing ruleset successfully - pass 1', async () => {
-        createTestRuleset('my-test-ruleset');
+        await createTestRuleset('my-test-ruleset');
       });
       it('should edit the document id and the criteria field', async () => {
         await pageObjects.searchQueryRules.QueryRulesManagementPage.clickRuleset('my-test-ruleset');
