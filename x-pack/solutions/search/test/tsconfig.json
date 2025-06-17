@@ -19,7 +19,6 @@
   "exclude": ["target/**/*", "*/plugins/**/*", "plugins/**/*"],
   "kbn_references": [
     "@kbn/test",
-    "@kbn/core-http-common",
     "@kbn/scout-info",
     "@kbn/test-suites-xpack-platform",
   ]
