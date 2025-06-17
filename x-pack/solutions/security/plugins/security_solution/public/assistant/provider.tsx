@@ -23,6 +23,7 @@ import { useAssistantAvailability } from './use_assistant_availability';
 import { licenseService } from '../common/hooks/use_license';
 import { CommentActionsPortal } from './comment_actions/comment_actions_portal';
 import { AugmentMessageCodeBlocksPortal } from './use_augment_message_code_blocks/augment_message_code_blocks_portal';
+import { useElasticAssistantSharedStateSignalIndex } from './use_elastic_assistant_shared_state_signal_index/use_elastic_assistant_shared_state_signal_index';
 
 
 export const createBasePrompts = async (notifications: NotificationsStart, http: HttpSetup) => {
@@ -56,6 +57,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
 
   const assistantAvailability = useAssistantAvailability();
   const hasEnterpriseLicence = licenseService.isEnterprise();
+  useElasticAssistantSharedStateSignalIndex()
 
   useEffect(() => {
     const createSecurityPrompts = once(async () => {
@@ -95,7 +97,6 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
       value={assistantContextValue}
     >
       <CommentActionsPortal />
-      
       <AugmentMessageCodeBlocksPortal />
       {children}
     </ElasticAssistantProvider>

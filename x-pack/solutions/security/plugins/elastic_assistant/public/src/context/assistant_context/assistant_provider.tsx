@@ -45,14 +45,13 @@ export function AssistantProvider({
     const assistantTelemetry = useAssistantTelemetry();
     const currentAppId = useObservable(currentAppId$, '');
     const promptContext = useObservable(elasticAssistantSharedState.promptContexts.getPromptContext$(), {});
+    const alertsIndexPattern = useObservable(elasticAssistantSharedState.signalIndex.getSignalIndex$(), undefined);
     const augmentMessageCodeBlocks = useObservable(elasticAssistantSharedState.augmentMessageCodeBlocks.getAugmentMessageCodeBlocks$(), {
         mount: () => () => {},
     });
 
     useMigrateConversationsFromLocalStorage()
 
-    const signalIndexName = undefined//const { signalIndexName } = useSignalIndex();
-    const alertsIndexPattern = signalIndexName ?? undefined;
     const toasts = useAppToasts() as unknown as IToasts; // useAppToasts is the current, non-deprecated method of getting the toasts service in the Security Solution, but it doesn't return the IToasts interface (defined by core)
 
     const memoizedCommentActionsMounter = useCallback((args: { message: ClientMessage }) => {
