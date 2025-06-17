@@ -51,7 +51,8 @@ export const mapRecommendedQueriesFromExtensions = (
     return {
       label: extension.name,
       text: extension.query,
-      detail: extension.description ?? '',
+      detail: extension.name ?? '',
+      ...(extension.description ? { documentation: { value: extension.description } } : {}),
       kind: 'Issue',
       sortText: 'D',
     };
