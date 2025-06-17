@@ -1770,34 +1770,6 @@ Object {
 exports[`Connector type config checks detect connector type changes for: .bedrock 8`] = `
 Object {
   "flags": Object {
-    "error": [Function],
-  },
-  "metas": Array [
-    Object {
-      "x-oas-any-type": true,
-    },
-  ],
-  "type": "any",
-}
-`;
-
-exports[`Connector type config checks detect connector type changes for: .bedrock 9`] = `
-Object {
-  "flags": Object {
-    "error": [Function],
-  },
-  "metas": Array [
-    Object {
-      "x-oas-any-type": true,
-    },
-  ],
-  "type": "any",
-}
-`;
-
-exports[`Connector type config checks detect connector type changes for: .bedrock 10`] = `
-Object {
-  "flags": Object {
     "default": Object {
       "special": "deep",
     },
