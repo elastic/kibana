@@ -22,7 +22,7 @@ import { BASE_SECURITY_QUICK_PROMPTS } from './content/quick_prompts';
 import { useAssistantAvailability } from './use_assistant_availability';
 import { licenseService } from '../common/hooks/use_license';
 import { CommentActionsPortal } from './comment_actions/comment_actions_portal';
-import { useAugmentMessageCodeBlocks } from './use_augment_message_code_blocks/use_augment_message_code_blocks';
+import { AugmentMessageCodeBlocksPortal } from './use_augment_message_code_blocks/augment_message_code_blocks_portal';
 
 
 export const createBasePrompts = async (notifications: NotificationsStart, http: HttpSetup) => {
@@ -50,17 +50,12 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
     notifications,
     elasticAssistantSharedState
   } = useKibana().services;
-  const {inPortals: augmentMessageCodeBlockPortals, augmentMessageCodeBlocksFunc} = useAugmentMessageCodeBlocks()
 
   const assistantContextValue = useObservable(
     elasticAssistantSharedState.assistantContextValue.getAssistantContextValue$());
 
   const assistantAvailability = useAssistantAvailability();
   const hasEnterpriseLicence = licenseService.isEnterprise();
-
-  useEffect(()=>{
-    elasticAssistantSharedState.augmentMessageCodeBlocks.registerAugmentMessageCodeBlocks(augmentMessageCodeBlocksFunc)
-  }, [])
 
   useEffect(() => {
     const createSecurityPrompts = once(async () => {
@@ -95,13 +90,13 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
     return null;
   }
 
-  console.log(augmentMessageCodeBlockPortals)
   return (
     <ElasticAssistantProvider
       value={assistantContextValue}
     >
       <CommentActionsPortal />
-      {augmentMessageCodeBlockPortals}
+      
+      <AugmentMessageCodeBlocksPortal />
       {children}
     </ElasticAssistantProvider>
   );

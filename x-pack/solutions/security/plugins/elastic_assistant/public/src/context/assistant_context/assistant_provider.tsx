@@ -44,13 +44,9 @@ export function AssistantProvider({
     const assistantTelemetry = undefined // useAssistantTelemetry();
     const currentAppId = useObservable(currentAppId$, '');
     const promptContext = useObservable(elasticAssistantSharedState.promptContexts.getPromptContext$(), {});
-    const [augmentMessageCodeBlocks, setAugmentMessageCodeBlocks] = useState<AugmentMessageCodeBlocks>(()=>()=>[])
-
-    useEffect(() => {
-        elasticAssistantSharedState.augmentMessageCodeBlocks.getAugmentMessageCodeBlocks$().subscribe((x)=>{
-            setAugmentMessageCodeBlocks(()=>x)
-        })
-    }, [elasticAssistantSharedState.augmentMessageCodeBlocks.getAugmentMessageCodeBlocks$]);
+    const augmentMessageCodeBlocks = useObservable(elasticAssistantSharedState.augmentMessageCodeBlocks.getAugmentMessageCodeBlocks$(), {
+        mount: () => () => {},
+    });
 
     useMigrateConversationsFromLocalStorage()
 

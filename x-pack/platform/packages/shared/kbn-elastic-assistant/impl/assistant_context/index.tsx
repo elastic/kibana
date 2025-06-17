@@ -14,7 +14,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
-import { ChromeStart, NavigateToAppOptions, UserProfileService } from '@kbn/core/public';
+import { ChromeStart, NavigateToAppOptions, UnmountCallback, UserProfileService } from '@kbn/core/public';
 import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
 import { useQuery } from '@tanstack/react-query';
 import { updatePromptContexts } from './helpers';
@@ -65,10 +65,12 @@ export interface AssistantProviderProps {
   alertsIndexPattern?: string;
   assistantAvailability: AssistantAvailability;
   assistantTelemetry?: AssistantTelemetry;
-  augmentMessageCodeBlocks: (
-    currentConversation: Conversation,
-    showAnonymizedValues: boolean
-  ) => CodeBlockDetails[][];
+  augmentMessageCodeBlocks: {
+    mount: (args: {
+      currentConversation: Conversation,
+      showAnonymizedValues: boolean
+    }) => UnmountCallback;
+  };
   basePath: string;
   basePromptContexts?: PromptContextTemplate[];
   docLinks: Omit<DocLinksStart, 'links'>;
@@ -98,10 +100,12 @@ export interface UseAssistantContext {
   assistantFeatures: Partial<AssistantFeatures>;
   assistantStreamingEnabled: boolean;
   assistantTelemetry?: AssistantTelemetry;
-  augmentMessageCodeBlocks: (
-    currentConversation: Conversation,
-    showAnonymizedValues: boolean
-  ) => CodeBlockDetails[][];
+  augmentMessageCodeBlocks: {
+    mount: (args: {
+      currentConversation: Conversation,
+      showAnonymizedValues: boolean
+    }) => UnmountCallback;
+  };
   docLinks: Omit<DocLinksStart, 'links'>;
   basePath: string;
   currentUserAvatar?: UserAvatar;
