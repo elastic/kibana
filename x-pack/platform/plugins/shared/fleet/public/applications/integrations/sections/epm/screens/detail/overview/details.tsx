@@ -32,7 +32,7 @@ import type {
   RegistryPolicyIntegrationTemplate,
 } from '../../../../../types';
 import { entries } from '../../../../../types';
-import { useConfig, useGetCategoriesQuery, useStartServices } from '../../../../../hooks';
+import { useConfig, useGetCategoriesQuery } from '../../../../../hooks';
 import { AssetTitleMap, DisplayedAssetsFromPackageInfo, ServiceTitleMap } from '../../../constants';
 
 import { ChangelogModal } from '../settings/changelog_modal';
