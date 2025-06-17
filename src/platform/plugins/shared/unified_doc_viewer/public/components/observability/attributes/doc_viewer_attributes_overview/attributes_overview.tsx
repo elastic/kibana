@@ -21,7 +21,7 @@ import {
   getTabContentAvailableHeight,
 } from '../../../doc_viewer_source/get_height';
 import { AttributesAccordion } from './attributes_accordion';
-import { getDataStreamType } from './get_data_stream_type';
+import { getAttributesAccordionTitle } from './get_attributes_accordion_title';
 
 export function AttributesOverview({
   columns,
@@ -42,42 +42,7 @@ export function AttributesOverview({
 
   const flattened = hit.flattened || {};
 
-  const signalType = getDataStreamType(hit);
-
-  let attributesTitle: string;
-  switch (signalType) {
-    case 'logs':
-      attributesTitle = i18n.translate(
-        'unifiedDocViewer.docView.attributes.signalAttributesTitle.logs',
-        {
-          defaultMessage: 'Log attributes',
-        }
-      );
-      break;
-    case 'metrics':
-      attributesTitle = i18n.translate(
-        'unifiedDocViewer.docView.attributes.signalAttributesTitle.metrics',
-        {
-          defaultMessage: 'Metric attributes',
-        }
-      );
-      break;
-    case 'traces':
-      attributesTitle = i18n.translate(
-        'unifiedDocViewer.docView.attributes.signalAttributesTitle.traces',
-        {
-          defaultMessage: 'Span attributes',
-        }
-      );
-      break;
-    default:
-      attributesTitle = i18n.translate(
-        'unifiedDocViewer.docView.attributes.signalAttributesTitle.default',
-        {
-          defaultMessage: 'Attributes',
-        }
-      );
-  }
+  const attributesTitle = getAttributesAccordionTitle(hit);
 
   const allFields = Object.keys(flattened);
 
