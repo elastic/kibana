@@ -175,6 +175,8 @@ export function ErrorsWarningsFooterPopover({
   isSpaceReduced?: boolean;
   dataErrorsControl?: DataErrorsControl;
 }) {
+  // Visible items may be 0 if dataErrorsControl is enabled and there are only data errors.
+  // In this case, we still want to show the popover with the switch, so the user can disable it to see the errors.
   const visibleItems = useMemo(() => {
     if (dataErrorsControl?.enabled === false) {
       return filterDataErrors(items);
