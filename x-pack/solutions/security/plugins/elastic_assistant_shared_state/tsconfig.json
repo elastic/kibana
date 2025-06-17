@@ -9,7 +9,8 @@
     "public/**/*",
   ],
   "kbn_references": [
-
+    "@kbn/core",
+    "@kbn/elastic-assistant-shared-state",
   ],
   "exclude": [
     "target/**/*",
