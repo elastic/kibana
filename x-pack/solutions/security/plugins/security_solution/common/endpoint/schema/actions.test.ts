@@ -838,6 +838,81 @@ describe('actions schemas', () => {
         endpoint_ids: ['endpoint_id'],
         agent_type: 'crowdstrike' as const,
       };
+      describe('Common fields validation', () => {
+        it.each([
+          {
+            description: 'should reject when no endpoint_ids are provided',
+            payload: {
+              agent_type: 'crowdstrike',
+              parameters: { raw: 'Get-Process' },
+            },
+            shouldThrow: true,
+          },
+          {
+            description: 'should reject empty endpoint_ids array',
+            payload: {
+              endpoint_ids: [],
+              agent_type: 'crowdstrike',
+              parameters: { raw: 'Get-Process' },
+            },
+            shouldThrow: true,
+          },
+          {
+            description: 'should reject when no agent_type is specified',
+            payload: {
+              endpoint_ids: ['endpoint_id'],
+              parameters: { raw: 'Get-Process' },
+            },
+            shouldThrow: true,
+          },
+          {
+            description: 'should reject unsupported agent types',
+            payload: {
+              endpoint_ids: ['endpoint_id'],
+              agent_type: 'unsupported_agent',
+              parameters: { raw: 'Get-Process' },
+            },
+            shouldThrow: true,
+          },
+          {
+            description: 'should accept optional comment field',
+            payload: {
+              endpoint_ids: ['endpoint_id'],
+              agent_type: 'crowdstrike',
+              parameters: { raw: 'Get-Process' },
+              comment: 'Running process enumeration',
+            },
+            shouldThrow: false,
+          },
+          {
+            description: 'should accept optional case_ids field',
+            payload: {
+              endpoint_ids: ['endpoint_id'],
+              agent_type: 'crowdstrike',
+              parameters: { raw: 'Get-Process' },
+              case_ids: ['case-id-1', 'case-id-2'],
+            },
+            shouldThrow: false,
+          },
+          {
+            description: 'should accept optional alert_ids field',
+            payload: {
+              endpoint_ids: ['endpoint_id'],
+              agent_type: 'crowdstrike',
+              parameters: { raw: 'Get-Process' },
+              alert_ids: ['alert-id-1', 'alert-id-2'],
+            },
+            shouldThrow: false,
+          },
+        ])('$description', ({ payload, shouldThrow }) => {
+          const validate = () => RunScriptActionRequestSchema.body.validate(payload);
+          if (shouldThrow) {
+            expect(validate).toThrow();
+          } else {
+            expect(validate).not.toThrow();
+          }
+        });
+      });
 
       it('should accept valid raw parameter', () => {
         expect(() => {
@@ -928,7 +1003,7 @@ describe('actions schemas', () => {
               hostPath: '  ',
             },
           });
-        }).toThrow('Raw cannot be an empty string');
+        }).toThrow('HostPath cannot be an empty string');
       });
 
       it('should reject empty cloudFile parameter', () => {
@@ -939,7 +1014,7 @@ describe('actions schemas', () => {
               cloudFile: '  ',
             },
           });
-        }).toThrow('Raw cannot be an empty string');
+        }).toThrow('CloudFile cannot be an empty string');
       });
 
       it('should reject when no required parameters are provided', () => {
@@ -1035,9 +1110,7 @@ describe('actions schemas', () => {
               args: '-Parameter Value',
             },
           });
-        }).toThrow(
-          '[parameters.1.scriptName]: expected value of type [string] but got [undefined]'
-        );
+        }).toThrow('[parameters.scriptName]: expected value of type [string] but got [undefined]');
       });
 
       it('should reject when parameters object is empty', () => {
@@ -1046,9 +1119,7 @@ describe('actions schemas', () => {
             ...validMdeBase,
             parameters: {},
           });
-        }).toThrow(
-          '[parameters.1.scriptName]: expected value of type [string] but got [undefined]'
-        );
+        }).toThrow('[parameters.scriptName]: expected value of type [string] but got [undefined]');
       });
 
       it('should reject empty args parameter', () => {
@@ -1061,93 +1132,6 @@ describe('actions schemas', () => {
             },
           });
         }).toThrow();
-      });
-    });
-
-    describe('Common validation', () => {
-      it('should reject when no endpoint_ids are provided', () => {
-        expect(() => {
-          RunScriptActionRequestSchema.body.validate({
-            agent_type: 'crowdstrike',
-            parameters: {
-              raw: 'Get-Process',
-            },
-          });
-        }).toThrow();
-      });
-
-      it('should reject empty endpoint_ids array', () => {
-        expect(() => {
-          RunScriptActionRequestSchema.body.validate({
-            endpoint_ids: [],
-            agent_type: 'crowdstrike',
-            parameters: {
-              raw: 'Get-Process',
-            },
-          });
-        }).toThrow();
-      });
-
-      it('should reject when no agent_type is specified', () => {
-        expect(() => {
-          RunScriptActionRequestSchema.body.validate({
-            endpoint_ids: ['endpoint_id'],
-            parameters: {
-              raw: 'Get-Process',
-            },
-          });
-        }).toThrow();
-      });
-
-      it('should reject unsupported agent types', () => {
-        expect(() => {
-          RunScriptActionRequestSchema.body.validate({
-            endpoint_ids: ['endpoint_id'],
-            agent_type: 'unsupported_agent',
-            parameters: {
-              raw: 'Get-Process',
-            },
-          });
-        }).toThrow();
-      });
-
-      it('should accept optional comment field', () => {
-        expect(() => {
-          RunScriptActionRequestSchema.body.validate({
-            endpoint_ids: ['endpoint_id'],
-            agent_type: 'crowdstrike',
-            parameters: {
-              raw: 'Get-Process',
-            },
-            comment: 'Running process enumeration',
-          });
-        }).not.toThrow();
-      });
-
-      it('should accept optional case_ids field', () => {
-        expect(() => {
-          RunScriptActionRequestSchema.body.validate({
-            endpoint_ids: ['endpoint_id'],
-            agent_type: 'crowdstrike',
-            parameters: {
-              raw: 'Get-Process',
-            },
-            case_ids: ['case-id-1', 'case-id-2'],
-          });
-        }).not.toThrow();
-      });
-
-      it('should accept optional alert_ids field', () => {
-        expect(() => {
-          RunScriptActionRequestSchema.body.validate({
-            endpoint_ids: ['endpoint_id'],
-            agent_type: 'crowdstrike',
-            parameters: {
-              raw: 'Get-Process',
-            },
-            alert_ids: ['alert-id-1', 'alert-id-2'],
-          });
-        }).not.toThrow();
       });
     });
   });

@@ -31,7 +31,7 @@ import type {
   IsolationRouteRequestBody,
   RunScriptActionRequestBody,
   UnisolationRouteRequestBody,
-  MSDefenderRunScriptActionRequestBody,
+  MSDefenderRunScriptActionRequestParams,
 } from '../../../../../../../../common/api/endpoint';
 import type {
   ActionDetails,
@@ -527,12 +527,9 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
             id: reqIndexOptions.endpoint_ids[0],
             comment: this.buildExternalComment(reqIndexOptions),
             parameters: {
-              scriptName: (
-                reqIndexOptions.parameters as MSDefenderRunScriptActionRequestBody['parameters']
-              ).scriptName,
-              args: (
-                reqIndexOptions.parameters as MSDefenderRunScriptActionRequestBody['parameters']
-              ).args,
+              scriptName: (reqIndexOptions.parameters as MSDefenderRunScriptActionRequestParams)
+                .scriptName,
+              args: (reqIndexOptions.parameters as MSDefenderRunScriptActionRequestParams).args,
             },
           });
 

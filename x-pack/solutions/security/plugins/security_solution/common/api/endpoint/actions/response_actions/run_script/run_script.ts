@@ -10,14 +10,15 @@ import { schema } from '@kbn/config-schema';
 import { BaseActionRequestSchema } from '../../common/base';
 
 const { parameters, ...restBaseSchema } = BaseActionRequestSchema;
-const NonEmptyString = schema.string({
-  minLength: 1,
-  validate: (value) => {
-    if (!value.trim().length) {
-      return 'Raw cannot be an empty string';
-    }
-  },
-});
+const getNonEmptyString = (fieldName: string) =>
+  schema.string({
+    minLength: 1,
+    validate: (value) => {
+      if (!value.trim().length) {
+        return `${fieldName} cannot be an empty string`;
+      }
+    },
+  });
 
 // CrowdStrike schemas
 const CrowdStrikeRunScriptActionRequestParamsSchema = schema.object(
@@ -25,19 +26,19 @@ const CrowdStrikeRunScriptActionRequestParamsSchema = schema.object(
     /**
      * The script to run
      */
-    raw: schema.maybe(NonEmptyString),
+    raw: schema.maybe(getNonEmptyString('Raw')),
     /**
      * The path to the script on the host to run
      */
-    hostPath: schema.maybe(NonEmptyString),
+    hostPath: schema.maybe(getNonEmptyString('HostPath')),
     /**
      * The path to the script in the cloud to run
      */
-    cloudFile: schema.maybe(NonEmptyString),
+    cloudFile: schema.maybe(getNonEmptyString('CloudFile')),
     /**
      * The command line to run
      */
-    commandLine: schema.maybe(NonEmptyString),
+    commandLine: schema.maybe(getNonEmptyString('CommandLine')),
     /**
      * The max timeout value before the command is killed. Number represents milliseconds
      */
@@ -52,20 +53,13 @@ const CrowdStrikeRunScriptActionRequestParamsSchema = schema.object(
   }
 );
 
-export const CrowdStrikeRunScriptActionRequestSchema = {
-  body: schema.object({
-    ...restBaseSchema,
-    parameters: CrowdStrikeRunScriptActionRequestParamsSchema,
-  }),
-};
-
 // Microsoft Defender Endpoint schemas
-const MSDefenderEndpointRunScriptActionRequestParamsSchema = schema.object({
+export const MSDefenderEndpointRunScriptActionRequestParamsSchema = schema.object({
   /**
    * The path to the script in the cloud to run
    */
-  scriptName: NonEmptyString,
-  args: schema.maybe(NonEmptyString),
+  scriptName: getNonEmptyString('ScriptName'),
+  args: schema.maybe(getNonEmptyString('Args')),
 });
 
 export const MSDefenderEndpointRunScriptActionRequestSchema = {
@@ -75,77 +69,24 @@ export const MSDefenderEndpointRunScriptActionRequestSchema = {
   }),
 };
 
-// Main schema for validation (unchanged for backward compatibility)
 export const RunScriptActionRequestSchema = {
   body: schema.object({
     ...restBaseSchema,
-    parameters: schema.oneOf([
-      // CrowdStrike schema
-      schema.conditional(
-        schema.siblingRef('agent_type'),
-        'crowdstrike',
-        schema.object(
-          {
-            /**
-             * The script to run
-             */
-            raw: schema.maybe(NonEmptyString),
-            /**
-             * The path to the script on the host to run
-             */
-            hostPath: schema.maybe(NonEmptyString),
-            /**
-             * The path to the script in the cloud to run
-             */
-            cloudFile: schema.maybe(NonEmptyString),
-            /**
-             * The command line to run
-             */
-            commandLine: schema.maybe(NonEmptyString),
-            /**
-             * The max timeout value before the command is killed. Number represents milliseconds
-             */
-            timeout: schema.maybe(schema.number({ min: 1 })),
-          },
-          {
-            validate: (params) => {
-              if (!params.raw && !params.hostPath && !params.cloudFile) {
-                return 'At least one of Raw, HostPath, or CloudFile must be provided';
-              }
-            },
-          }
-        ),
-        schema.never()
-      ),
-      // Microsoft Defender Endpoint schema
+    parameters: schema.conditional(
+      schema.siblingRef('agent_type'),
+      'crowdstrike',
+      CrowdStrikeRunScriptActionRequestParamsSchema,
       schema.conditional(
         schema.siblingRef('agent_type'),
         'microsoft_defender_endpoint',
-        schema.object({
-          /**
-           * The path to the script in the cloud to run
-           */
-          scriptName: NonEmptyString,
-          args: schema.maybe(NonEmptyString),
-        }),
+        MSDefenderEndpointRunScriptActionRequestParamsSchema,
         schema.never()
-      ),
-    ]),
+      )
+    ),
   }),
 };
 
-// Typed exports
-export type MSDefenderRunScriptActionRequestBody = TypeOf<
-  typeof MSDefenderEndpointRunScriptActionRequestSchema.body
+export type MSDefenderRunScriptActionRequestParams = TypeOf<
+  typeof MSDefenderEndpointRunScriptActionRequestParamsSchema
 >;
-export type CrowdStrikeRunScriptActionRequestBody = TypeOf<
-  typeof CrowdStrikeRunScriptActionRequestSchema.body
->;
-
 export type RunScriptActionRequestBody = TypeOf<typeof RunScriptActionRequestSchema.body>;
-
-// export type RunScriptActionRequestBody = Omit<BaseRunScriptActionRequest, 'parameters'> & {
-//   parameters:
-//   | MSDefenderRunScriptActionRequestBody['parameters']
-//   | CrowdStrikeRunScriptActionRequestBody['parameters'];
-// };
