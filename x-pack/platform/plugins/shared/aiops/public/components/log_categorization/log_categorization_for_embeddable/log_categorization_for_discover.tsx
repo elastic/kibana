@@ -25,7 +25,7 @@ import { css } from '@emotion/react';
 import { useTableState } from '@kbn/ml-in-memory-table/hooks/use_table_state';
 import useMountedState from 'react-use/lib/useMountedState';
 import { getEsQueryConfig } from '@kbn/data-service';
-import { getCategorizationDataViewField } from '@kbn/aiops-log-pattern-analysis';
+import { getCategorizationDataViewField } from '@kbn/aiops-common/get_categorization_field';
 import {
   type LogCategorizationPageUrlState,
   getDefaultLogCategorizationAppState,

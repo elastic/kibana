@@ -16,6 +16,8 @@
   "kbn_references": [
     "@kbn/ml-is-populated-object",
     "@kbn/i18n",
+    "@kbn/data-views-plugin",
+    "@kbn/field-types",
   ],
   "exclude": [
     "target/**/*",

@@ -28,7 +28,7 @@ import {
   getRecommendedQueriesTemplatesFromExtensions,
 } from '@kbn/esql-validation-autocomplete';
 import { LanguageDocumentationFlyout } from '@kbn/language-documentation';
-import { getCategorizationField } from '@kbn/aiops-log-pattern-analysis';
+import { getCategorizationField } from '@kbn/aiops-common/get_categorization_field';
 import type { IUnifiedSearchPluginServices } from '../types';
 
 export interface ESQLMenuPopoverProps {

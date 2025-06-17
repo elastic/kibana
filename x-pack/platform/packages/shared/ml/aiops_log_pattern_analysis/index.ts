@@ -8,4 +8,3 @@
 export { categorizeSchema } from './schema';
 export type { CategorizeSchema } from './schema';
 export { extractKeywordsFromRegex } from './extract_keywords';
-export { getCategorizationField, getCategorizationDataViewField } from './get_categorization_field';
