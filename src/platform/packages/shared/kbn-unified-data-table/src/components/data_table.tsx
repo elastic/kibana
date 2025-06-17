@@ -521,7 +521,6 @@ const InternalUnifiedDataTable = ({
     services;
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [isFilterActive, setIsFilterActive] = useState(false);
-  // const [isCompareActive, setIsCompareActive] = useState(false);
   const [isCompareActive, setIsCompareActive] = useRestorableState('isCompareActive', false);
   const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, dataView);

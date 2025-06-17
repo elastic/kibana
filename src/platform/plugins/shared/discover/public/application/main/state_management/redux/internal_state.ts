@@ -228,6 +228,14 @@ export const internalStateSlice = createSlice({
       withTab(state, action, (tab) => {
         tab.uiState.dataGrid = action.payload.dataGridUiState;
       }),
+
+    setFieldListUiState: (
+      state,
+      action: TabAction<{ fieldListUiState: TabState['uiState']['fieldList'] }>
+    ) =>
+      withTab(state, action, (tab) => {
+        tab.uiState.fieldList = action.payload.fieldListUiState;
+      }),
   },
   extraReducers: (builder) => {
     builder.addCase(loadDataViewList.fulfilled, (state, action) => {

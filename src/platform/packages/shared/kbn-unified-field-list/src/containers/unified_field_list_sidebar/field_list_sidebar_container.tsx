@@ -16,6 +16,7 @@ import React, {
   useRef,
   useMemo,
   useEffect,
+  type ComponentProps,
 } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -50,6 +51,125 @@ import type {
   UnifiedFieldListSidebarContainerStateService,
   SearchMode,
 } from '../../types';
+import { withRestorableState } from '../../restorable_state';
+
+interface InternalUnifiedFieldListSidebarContainerProps {
+  stateService: UnifiedFieldListSidebarContainerStateService;
+  isFieldListFlyoutVisible: boolean;
+  setIsFieldListFlyoutVisible: (isVisible: boolean) => void;
+  commonSidebarProps: UnifiedFieldListSidebarProps;
+  containerProps: UnifiedFieldListSidebarContainerProps;
+}
+
+function InternalUnifiedFieldListSidebarContainer({
+  stateService,
+  isFieldListFlyoutVisible,
+  setIsFieldListFlyoutVisible,
+  commonSidebarProps,
+  containerProps,
+}: InternalUnifiedFieldListSidebarContainerProps) {
+  const { variant = 'responsive', workspaceSelectedFieldNames, prependInFlyout } = containerProps;
+  const buttonPropsToTriggerFlyout = stateService.creationOptions.buttonPropsToTriggerFlyout;
+
+  const renderListVariant = () => {
+    return <UnifiedFieldListSidebar {...commonSidebarProps} />;
+  };
+
+  const renderButtonVariant = () => {
+    return (
+      <>
+        <div className="unifiedFieldListSidebar__mobile">
+          <EuiButton
+            {...buttonPropsToTriggerFlyout}
+            contentProps={{
+              ...buttonPropsToTriggerFlyout?.contentProps,
+              className: 'unifiedFieldListSidebar__mobileButton',
+            }}
+            fullWidth
+            onClick={() => setIsFieldListFlyoutVisible(true)}
+          >
+            <FormattedMessage
+              id="unifiedFieldList.fieldListSidebar.fieldsMobileButtonLabel"
+              defaultMessage="Fields"
+            />
+            <EuiBadge
+              className="unifiedFieldListSidebar__mobileBadge"
+              color={workspaceSelectedFieldNames?.[0] === '_source' ? 'default' : 'accent'}
+            >
+              {!workspaceSelectedFieldNames?.length || workspaceSelectedFieldNames[0] === '_source'
+                ? 0
+                : workspaceSelectedFieldNames.length}
+            </EuiBadge>
+          </EuiButton>
+        </div>
+        {isFieldListFlyoutVisible && (
+          <EuiPortal>
+            <EuiFlyout
+              size="s"
+              onClose={() => setIsFieldListFlyoutVisible(false)}
+              aria-labelledby="flyoutTitle"
+              ownFocus
+            >
+              <EuiFlyoutHeader hasBorder>
+                <EuiTitle size="s">
+                  <h2 id="flyoutTitle">
+                    <EuiLink color="text" onClick={() => setIsFieldListFlyoutVisible(false)}>
+                      <EuiIcon
+                        className="eui-alignBaseline"
+                        aria-label={i18n.translate(
+                          'unifiedFieldList.fieldListSidebar.flyoutBackIcon',
+                          {
+                            defaultMessage: 'Back',
+                          }
+                        )}
+                        type="arrowLeft"
+                      />{' '}
+                      <strong>
+                        {i18n.translate('unifiedFieldList.fieldListSidebar.flyoutHeading', {
+                          defaultMessage: 'Field list',
+                        })}
+                      </strong>
+                    </EuiLink>
+                  </h2>
+                </EuiTitle>
+              </EuiFlyoutHeader>
+              <UnifiedFieldListSidebar
+                {...commonSidebarProps}
+                alwaysShowActionButton={true}
+                buttonAddFieldVariant="primary" // always for the flyout
+                isSidebarCollapsed={undefined}
+                prepend={prependInFlyout?.()}
+              />
+            </EuiFlyout>
+          </EuiPortal>
+        )}
+      </>
+    );
+  };
+
+  if (variant === 'button-and-flyout-always') {
+    return renderButtonVariant();
+  }
+
+  if (variant === 'list-always') {
+    return renderListVariant();
+  }
+
+  return (
+    <>
+      <EuiHideFor sizes={['xs', 's']}>{renderListVariant()}</EuiHideFor>
+      <EuiShowFor sizes={['xs', 's']}>{renderButtonVariant()}</EuiShowFor>
+    </>
+  );
+}
+
+const UnifiedFieldListSidebarContainerWithRestorableState = withRestorableState(
+  InternalUnifiedFieldListSidebarContainer
+);
+
+type UnifiedFieldListSidebarContainerPropsWithRestorableState = ComponentProps<
+  typeof UnifiedFieldListSidebarContainerWithRestorableState
+>;
 
 export interface UnifiedFieldListSidebarContainerApi {
   sidebarVisibility: SidebarVisibility;
@@ -99,6 +219,9 @@ export type UnifiedFieldListSidebarContainerProps = Omit<
     removedFieldName?: string;
     editedFieldName?: string;
   }) => Promise<void>;
+
+  initialState?: UnifiedFieldListSidebarContainerPropsWithRestorableState['initialState'];
+  onInitialStateChange?: UnifiedFieldListSidebarContainerPropsWithRestorableState['onInitialStateChange'];
 };
 
 /**
@@ -108,17 +231,11 @@ export type UnifiedFieldListSidebarContainerProps = Omit<
  */
 const UnifiedFieldListSidebarContainer = memo(
   forwardRef<UnifiedFieldListSidebarContainerApi, UnifiedFieldListSidebarContainerProps>(
-    function UnifiedFieldListSidebarContainer(props, componentRef) {
-      const {
-        getCreationOptions,
-        services,
-        dataView,
-        workspaceSelectedFieldNames,
-        prependInFlyout,
-        variant = 'responsive',
-        onFieldEdited,
-        additionalFilters,
-      } = props;
+    function UnifiedFieldListSidebarContainer(
+      { initialState, onInitialStateChange, ...props },
+      componentRef
+    ) {
+      const { getCreationOptions, services, dataView, onFieldEdited, additionalFilters } = props;
       const [stateService] = useState<UnifiedFieldListSidebarContainerStateService>(
         createStateService({ options: getCreationOptions() })
       );
@@ -278,98 +395,16 @@ const UnifiedFieldListSidebarContainer = memo(
         commonSidebarProps.onToggleSidebar = sidebarVisibility.toggle;
       }
 
-      const buttonPropsToTriggerFlyout = stateService.creationOptions.buttonPropsToTriggerFlyout;
-
-      const renderListVariant = () => {
-        return <UnifiedFieldListSidebar {...commonSidebarProps} />;
-      };
-
-      const renderButtonVariant = () => {
-        return (
-          <>
-            <div className="unifiedFieldListSidebar__mobile">
-              <EuiButton
-                {...buttonPropsToTriggerFlyout}
-                contentProps={{
-                  ...buttonPropsToTriggerFlyout?.contentProps,
-                  className: 'unifiedFieldListSidebar__mobileButton',
-                }}
-                fullWidth
-                onClick={() => setIsFieldListFlyoutVisible(true)}
-              >
-                <FormattedMessage
-                  id="unifiedFieldList.fieldListSidebar.fieldsMobileButtonLabel"
-                  defaultMessage="Fields"
-                />
-                <EuiBadge
-                  className="unifiedFieldListSidebar__mobileBadge"
-                  color={workspaceSelectedFieldNames?.[0] === '_source' ? 'default' : 'accent'}
-                >
-                  {!workspaceSelectedFieldNames?.length ||
-                  workspaceSelectedFieldNames[0] === '_source'
-                    ? 0
-                    : workspaceSelectedFieldNames.length}
-                </EuiBadge>
-              </EuiButton>
-            </div>
-            {isFieldListFlyoutVisible && (
-              <EuiPortal>
-                <EuiFlyout
-                  size="s"
-                  onClose={() => setIsFieldListFlyoutVisible(false)}
-                  aria-labelledby="flyoutTitle"
-                  ownFocus
-                >
-                  <EuiFlyoutHeader hasBorder>
-                    <EuiTitle size="s">
-                      <h2 id="flyoutTitle">
-                        <EuiLink color="text" onClick={() => setIsFieldListFlyoutVisible(false)}>
-                          <EuiIcon
-                            className="eui-alignBaseline"
-                            aria-label={i18n.translate(
-                              'unifiedFieldList.fieldListSidebar.flyoutBackIcon',
-                              {
-                                defaultMessage: 'Back',
-                              }
-                            )}
-                            type="arrowLeft"
-                          />{' '}
-                          <strong>
-                            {i18n.translate('unifiedFieldList.fieldListSidebar.flyoutHeading', {
-                              defaultMessage: 'Field list',
-                            })}
-                          </strong>
-                        </EuiLink>
-                      </h2>
-                    </EuiTitle>
-                  </EuiFlyoutHeader>
-                  <UnifiedFieldListSidebar
-                    {...commonSidebarProps}
-                    alwaysShowActionButton={true}
-                    buttonAddFieldVariant="primary" // always for the flyout
-                    isSidebarCollapsed={undefined}
-                    prepend={prependInFlyout?.()}
-                  />
-                </EuiFlyout>
-              </EuiPortal>
-            )}
-          </>
-        );
-      };
-
-      if (variant === 'button-and-flyout-always') {
-        return renderButtonVariant();
-      }
-
-      if (variant === 'list-always') {
-        return renderListVariant();
-      }
-
       return (
-        <>
-          <EuiHideFor sizes={['xs', 's']}>{renderListVariant()}</EuiHideFor>
-          <EuiShowFor sizes={['xs', 's']}>{renderButtonVariant()}</EuiShowFor>
-        </>
+        <UnifiedFieldListSidebarContainerWithRestorableState
+          stateService={stateService}
+          isFieldListFlyoutVisible={isFieldListFlyoutVisible}
+          setIsFieldListFlyoutVisible={setIsFieldListFlyoutVisible}
+          commonSidebarProps={commonSidebarProps}
+          containerProps={props}
+          initialState={initialState}
+          onInitialStateChange={onInitialStateChange}
+        />
       );
     }
   )
