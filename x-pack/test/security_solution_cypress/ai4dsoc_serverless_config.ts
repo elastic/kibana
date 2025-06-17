@@ -34,8 +34,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ])}`,
         '--csp.strict=false',
         '--csp.warnLegacyBrowsers=false',
-        '--xpack.features.overrides.securitySolutionTimeline.hidden=true',
-        '--xpack.features.overrides.securitySolutionNotes.hidden=true',
       ],
     },
     testRunner: SecuritySolutionConfigurableCypressTestRunner,

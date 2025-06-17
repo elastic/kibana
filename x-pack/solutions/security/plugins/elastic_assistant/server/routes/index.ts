@@ -10,6 +10,7 @@ export { postActionsConnectorExecuteRoute } from './post_actions_connector_execu
 
 // Attack Discovery
 export { postAttackDiscoveryRoute } from './attack_discovery/post/post_attack_discovery';
+export { findAttackDiscoveriesRoute } from './attack_discovery/get/find_attack_discoveries';
 export { getAttackDiscoveryRoute } from './attack_discovery/get/get_attack_discovery';
 
 // Defend insights

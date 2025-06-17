@@ -255,7 +255,7 @@ As pointed out above, deployment agnostic tests should be designed to run in sta
 
 Here are the supported suite labels to control execution in test environments:
 * `skipStateful` - this will exclude the suite from **all stateful test runs, local and ECH**
-* `skipCloud` - this will exclude the suite from **stateful cloud / ECH test runs**
+* `skipCloud` - this will exclude the suite from **all cloud test runs, ECH and MKI**
 * `skipServerless` - this will exclude the suite from **all serverless test runs, local and MKI**
 * `skipMKI` - this will exclude the suite from **serverless cloud / MKI test runs**
 

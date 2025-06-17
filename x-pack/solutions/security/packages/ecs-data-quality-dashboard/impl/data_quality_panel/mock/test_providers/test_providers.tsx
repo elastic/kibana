@@ -13,7 +13,7 @@ import React from 'react';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Theme } from '@elastic/charts';
-import { coreMock } from '@kbn/core/public/mocks';
+import { coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';
 import { UserProfileService } from '@kbn/core/public';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
@@ -48,6 +48,7 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
   const mockNavigateToApp = jest.fn();
   const mockAssistantAvailability: AssistantAvailability = {
+    hasSearchAILakeConfigurations: false,
     hasAssistantPrivilege: false,
     hasConnectorsAllPrivilege: true,
     hasConnectorsReadPrivilege: true,
@@ -67,6 +68,7 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
       error: () => {},
     },
   });
+
   const chrome = chromeServiceMock.createStartContract();
   chrome.getChromeStyle$.mockReturnValue(of('classic'));
 
@@ -80,10 +82,7 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
               assistantAvailability={mockAssistantAvailability}
               augmentMessageCodeBlocks={jest.fn()}
               basePath={'https://localhost:5601/kbn'}
-              docLinks={{
-                ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-                DOC_LINK_VERSION: 'current',
-              }}
+              docLinks={docLinksServiceMock.createStartContract()}
               getComments={mockGetComments}
               http={mockHttp}
               navigateToApp={mockNavigateToApp}
@@ -92,6 +91,7 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
               }}
               currentAppId={'securitySolutionUI'}
               userProfileService={jest.fn() as unknown as UserProfileService}
+              getUrlForApp={jest.fn()}
               chrome={chrome}
             >
               {children}

@@ -24,255 +24,61 @@ jest.mock('../../hooks/use_app_toasts', () => ({
   }),
 }));
 
-const closeModal = jest.fn();
-const importComplete = jest.fn();
-const importData = jest.fn().mockReturnValue({ success: true, errors: [] });
-const file = new File(['file'], 'image1.png', { type: 'image/png' });
-
 describe('ImportDataModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
+
   test('renders correctly against snapshot', () => {
-    const wrapper = render(
+    const { queryByText } = render(
       <ImportDataModalComponent
-        showModal={true}
-        closeModal={closeModal}
-        importComplete={importComplete}
-        checkBoxLabel="checkBoxLabel"
-        description="description"
+        isModalVisible={true}
+        closeModal={jest.fn()}
+        title="Import Modal Title"
+        description="Import Modal Description"
+        filePickerPrompt="Please select a file"
+        submitBtnText="Import Button"
         errorMessage={jest.fn()}
-        failedDetailed={jest.fn()}
-        importData={importData}
-        showCheckBox={true}
-        submitBtnText="submitBtnText"
-        subtitle="subtitle"
-        successMessage={jest.fn((totalCount) => 'successMessage')}
-        title="title"
+        importData={jest.fn()}
+        onImportComplete={jest.fn()}
       />
     );
-    expect(wrapper.container).toMatchSnapshot();
+
+    expect(queryByText('Import Modal Title')).toBeVisible();
+    expect(queryByText('Import Modal Description')).toBeVisible();
+    expect(queryByText('Please select a file')).toBeVisible();
+    expect(queryByText('Import Button')).toBeVisible();
   });
-  test('should import file, cleanup the states and close Modal', async () => {
+
+  test('should import file and invoke a callback on completion', async () => {
+    const importData = jest.fn().mockReturnValue({ success: true, errors: [] });
+    const importComplete = jest.fn();
+
     const { queryByTestId } = render(
       <ImportDataModalComponent
-        showModal={true}
-        closeModal={closeModal}
-        importComplete={importComplete}
-        checkBoxLabel="checkBoxLabel"
-        description="description"
+        isModalVisible={true}
+        closeModal={jest.fn()}
+        title="Import Modal Title"
+        description="Import Modal Description"
+        filePickerPrompt="Please select a file"
+        submitBtnText="Import Button"
         errorMessage={jest.fn()}
-        failedDetailed={jest.fn()}
         importData={importData}
-        showCheckBox={true}
-        submitBtnText="submitBtnText"
-        subtitle="subtitle"
-        successMessage={jest.fn((totalCount) => 'successMessage')}
-        title="title"
+        onImportComplete={importComplete}
       />
     );
+
     await waitFor(() => {
       fireEvent.change(queryByTestId('rule-file-picker') as HTMLInputElement, {
-        target: { files: [file] },
+        target: { files: [new File(['file'], 'image1.png', { type: 'image/png' })] },
       });
     });
+
     await waitFor(() => {
       fireEvent.click(queryByTestId('import-data-modal-button') as HTMLButtonElement);
     });
+
     expect(importData).toHaveBeenCalled();
-    expect(closeModal).toHaveBeenCalled();
     expect(importComplete).toHaveBeenCalled();
-  });
-  test('should uncheck the selected checkboxes after importing new file', async () => {
-    const { queryByTestId } = render(
-      <ImportDataModalComponent
-        showModal={true}
-        closeModal={closeModal}
-        importComplete={importComplete}
-        checkBoxLabel="checkBoxLabel"
-        description="description"
-        errorMessage={jest.fn()}
-        failedDetailed={jest.fn()}
-        importData={importData}
-        showCheckBox={true}
-        submitBtnText="submitBtnText"
-        subtitle="subtitle"
-        successMessage={jest.fn((totalCount) => 'successMessage')}
-        title="title"
-        showExceptionsCheckBox={true}
-        showActionConnectorsCheckBox={true}
-      />
-    );
-    const overwriteCheckbox: HTMLInputElement = queryByTestId(
-      'importDataModalCheckboxLabel'
-    ) as HTMLInputElement;
-    const exceptionCheckbox: HTMLInputElement = queryByTestId(
-      'importDataModalExceptionsCheckboxLabel'
-    ) as HTMLInputElement;
-    const connectorsCheckbox: HTMLInputElement = queryByTestId(
-      'importDataModalActionConnectorsCheckbox'
-    ) as HTMLInputElement;
-
-    await waitFor(() => fireEvent.click(overwriteCheckbox));
-    await waitFor(() => fireEvent.click(exceptionCheckbox));
-    await waitFor(() => fireEvent.click(connectorsCheckbox));
-
-    await waitFor(() =>
-      fireEvent.change(queryByTestId('rule-file-picker') as HTMLInputElement, {
-        target: { files: [file] },
-      })
-    );
-    expect(overwriteCheckbox.checked).toBeTruthy();
-    expect(exceptionCheckbox.checked).toBeTruthy();
-    expect(connectorsCheckbox.checked).toBeTruthy();
-
-    await waitFor(() => {
-      fireEvent.click(queryByTestId('import-data-modal-button') as HTMLButtonElement);
-    });
-    expect(importData).toHaveBeenCalled();
-    expect(closeModal).toHaveBeenCalled();
-
-    expect(overwriteCheckbox.checked).toBeFalsy();
-    expect(exceptionCheckbox.checked).toBeFalsy();
-    expect(connectorsCheckbox.checked).toBeFalsy();
-  });
-  test('should uncheck the selected checkboxes after closing the Flyout', async () => {
-    const { queryByTestId, getAllByRole } = render(
-      <ImportDataModalComponent
-        showModal={true}
-        closeModal={closeModal}
-        importComplete={importComplete}
-        checkBoxLabel="checkBoxLabel"
-        description="description"
-        errorMessage={jest.fn()}
-        failedDetailed={jest.fn()}
-        importData={importData}
-        showCheckBox={true}
-        submitBtnText="submitBtnText"
-        subtitle="subtitle"
-        successMessage={jest.fn((totalCount) => 'successMessage')}
-        title="title"
-        showExceptionsCheckBox={true}
-        showActionConnectorsCheckBox={true}
-      />
-    );
-
-    const closeButton = getAllByRole('button')[0];
-
-    const overwriteCheckbox: HTMLInputElement = queryByTestId(
-      'importDataModalCheckboxLabel'
-    ) as HTMLInputElement;
-    const exceptionCheckbox: HTMLInputElement = queryByTestId(
-      'importDataModalExceptionsCheckboxLabel'
-    ) as HTMLInputElement;
-    const connectorsCheckbox: HTMLInputElement = queryByTestId(
-      'importDataModalActionConnectorsCheckbox'
-    ) as HTMLInputElement;
-
-    await waitFor(() => fireEvent.click(overwriteCheckbox));
-    await waitFor(() => fireEvent.click(exceptionCheckbox));
-    await waitFor(() => fireEvent.click(connectorsCheckbox));
-
-    await waitFor(() =>
-      fireEvent.change(queryByTestId('rule-file-picker') as HTMLInputElement, {
-        target: { files: [file] },
-      })
-    );
-    expect(overwriteCheckbox.checked).toBeTruthy();
-    expect(exceptionCheckbox.checked).toBeTruthy();
-
-    await waitFor(() => {
-      fireEvent.click(closeButton as HTMLButtonElement);
-    });
-    expect(closeModal).toHaveBeenCalled();
-
-    expect(overwriteCheckbox.checked).toBeFalsy();
-    expect(exceptionCheckbox.checked).toBeFalsy();
-    expect(connectorsCheckbox.checked).toBeFalsy();
-  });
-
-  test('should import file, with warnings but no action_connectors_success_count', async () => {
-    const importWithWarning = jest.fn().mockReturnValue({
-      ...importData(),
-      action_connectors_warnings: [
-        { message: 'message', actionPath: 'path', buttonLabel: 'buttonLabel' },
-      ],
-      action_connectors_success_count: 0,
-    });
-    const wrapper = render(
-      <ImportDataModalComponent
-        showModal={true}
-        closeModal={closeModal}
-        importComplete={importComplete}
-        checkBoxLabel="checkBoxLabel"
-        description="description"
-        errorMessage={jest.fn()}
-        failedDetailed={jest.fn()}
-        importData={importWithWarning}
-        showCheckBox={true}
-        submitBtnText="submitBtnText"
-        subtitle="subtitle"
-        successMessage={jest.fn((totalCount) => 'successMessage')}
-        title="title"
-      />
-    );
-    const { queryByTestId } = wrapper;
-    await waitFor(() => {
-      fireEvent.change(queryByTestId('rule-file-picker') as HTMLInputElement, {
-        target: { files: [file] },
-      });
-    });
-    await waitFor(() => {
-      fireEvent.click(queryByTestId('import-data-modal-button') as HTMLButtonElement);
-    });
-    expect(wrapper.container).toMatchSnapshot();
-    expect(queryByTestId('actionConnectorsWarningsCallOut')).not.toBeInTheDocument();
-    expect(importWithWarning).toHaveBeenCalled();
-    expect(closeModal).not.toHaveBeenCalled();
-    expect(importComplete).toHaveBeenCalled();
-  });
-  test('should import file, with warnings', async () => {
-    const importWithWarning = jest.fn().mockReturnValue({
-      ...importData(),
-      action_connectors_warnings: [
-        {
-          message: '1 connector has sensitive information that requires updates.',
-          actionPath: 'path',
-          buttonLabel: 'buttonLabel',
-        },
-      ],
-      action_connectors_success_count: 1,
-    });
-    const wrapper = render(
-      <ImportDataModalComponent
-        showModal={true}
-        closeModal={closeModal}
-        importComplete={importComplete}
-        checkBoxLabel="checkBoxLabel"
-        description="description"
-        errorMessage={jest.fn()}
-        failedDetailed={jest.fn()}
-        importData={importWithWarning}
-        showCheckBox={true}
-        submitBtnText="submitBtnText"
-        subtitle="subtitle"
-        successMessage={jest.fn((totalCount) => 'successMessage')}
-        title="title"
-      />
-    );
-    const { queryByTestId } = wrapper;
-    await waitFor(() => {
-      fireEvent.change(queryByTestId('rule-file-picker') as HTMLInputElement, {
-        target: { files: [file] },
-      });
-    });
-    await waitFor(() => {
-      fireEvent.click(queryByTestId('import-data-modal-button') as HTMLButtonElement);
-    });
-    expect(wrapper.container).toMatchSnapshot();
-    expect(queryByTestId('actionConnectorsWarningsCallOut')).toBeInTheDocument();
-    expect(importWithWarning).toHaveBeenCalled();
-    expect(importComplete).toHaveBeenCalled();
-    expect(closeModal).not.toHaveBeenCalled();
   });
 });

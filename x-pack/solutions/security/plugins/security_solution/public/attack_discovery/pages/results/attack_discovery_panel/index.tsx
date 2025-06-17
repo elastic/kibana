@@ -5,19 +5,25 @@
  * 2.0.
  */
 
+import { EuiPanel, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import {
+  type AttackDiscovery,
+  type AttackDiscoveryAlert,
+  type Replacements,
+} from '@kbn/elastic-assistant-common';
 import { css } from '@emotion/react';
-import { EuiAccordion, EuiPanel, EuiSpacer, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
-import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useState } from 'react';
 
 import { ActionableSummary } from './actionable_summary';
-import { Actions } from './actions';
+import { PanelHeader } from './panel_header';
 import { Tabs } from './tabs';
-import { Title } from './title';
 
 interface Props {
-  attackDiscovery: AttackDiscovery;
+  attackDiscovery: AttackDiscovery | AttackDiscoveryAlert;
   initialIsOpen?: boolean;
+  isSelected: boolean;
+  setIsSelected?: ({ id, selected }: { id: string; selected: boolean }) => void;
+  setSelectedAttackDiscoveries: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
   onToggle?: (newState: 'open' | 'closed') => void;
   replacements?: Replacements;
   showAnonymized?: boolean;
@@ -26,55 +32,35 @@ interface Props {
 const AttackDiscoveryPanelComponent: React.FC<Props> = ({
   attackDiscovery,
   initialIsOpen,
+  isSelected,
+  setIsSelected,
+  setSelectedAttackDiscoveries,
   onToggle,
   replacements,
   showAnonymized = false,
 }) => {
   const { euiTheme } = useEuiTheme();
 
-  const htmlId = useGeneratedHtmlId({
-    prefix: 'attackDiscoveryAccordion',
-  });
   const [isOpen, setIsOpen] = useState<'open' | 'closed'>(initialIsOpen ? 'open' : 'closed');
-  const updateIsOpen = useCallback(() => {
-    const newState = isOpen === 'open' ? 'closed' : 'open';
-
-    setIsOpen(newState);
-    onToggle?.(newState);
-  }, [isOpen, onToggle]);
-
-  const actions = useMemo(
-    () => <Actions attackDiscovery={attackDiscovery} replacements={replacements} />,
-    [attackDiscovery, replacements]
-  );
-
-  const buttonContent = useMemo(
-    () => (
-      <Title
-        isLoading={false}
-        replacements={replacements}
-        showAnonymized={showAnonymized}
-        title={attackDiscovery.title}
-      />
-    ),
-    [attackDiscovery.title, replacements, showAnonymized]
-  );
 
   return (
     <>
       <EuiPanel data-test-subj="attackDiscovery" hasBorder={true}>
-        <EuiAccordion
-          buttonContent={buttonContent}
-          data-test-subj="attackDiscoveryAccordion"
-          extraAction={actions}
-          forceState={isOpen}
-          id={htmlId}
-          onToggle={updateIsOpen}
-        >
-          <span data-test-subj="emptyAccordionContent" />
-        </EuiAccordion>
+        <EuiSpacer size="xs" />
 
-        <EuiSpacer size="m" />
+        <PanelHeader
+          attackDiscovery={attackDiscovery}
+          isOpen={isOpen}
+          isSelected={isSelected}
+          setIsSelected={setIsSelected}
+          onToggle={onToggle}
+          replacements={replacements}
+          setIsOpen={setIsOpen}
+          setSelectedAttackDiscoveries={setSelectedAttackDiscoveries}
+          showAnonymized={showAnonymized}
+        />
+
+        <EuiSpacer size="s" />
 
         <ActionableSummary
           attackDiscovery={attackDiscovery}

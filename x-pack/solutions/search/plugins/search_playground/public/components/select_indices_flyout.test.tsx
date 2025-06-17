@@ -118,7 +118,7 @@ describe('SelectIndicesFlyout', () => {
     );
 
     // Simulate typing into the search input field
-    const searchInput = getByPlaceholderText('Filter options');
+    const searchInput = getByPlaceholderText('Search');
     fireEvent.change(searchInput, { target: { value: 'filteredIndex' } });
 
     fireEvent.click(getByTestId('sourceIndex-3'));

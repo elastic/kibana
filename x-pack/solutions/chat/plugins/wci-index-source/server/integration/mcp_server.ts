@@ -82,9 +82,9 @@ const createSearchTool = async ({
     description,
     schema: toolSchema,
     execute: async ({ query, ...filterValues }) => {
-      logger.info(
+      logger.debug(
         () =>
-          `Searching for "${query}" in index "${index} with filters: ${JSON.stringify(
+          `Searching for "${query}" in index "${index}" with filters: ${JSON.stringify(
             filterValues
           )}"`
       );
@@ -134,7 +134,7 @@ const createSearchTool = async ({
         };
       }
 
-      logger.info(`Found ${result.hits.hits.length} hits`);
+      logger.debug(`Found ${result.hits.hits.length} hits`);
 
       const createRef = contentRefBuilder({
         sourceType: ContentRefSourceType.integration,

@@ -13,7 +13,7 @@ import { ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response
 import type { Rule } from '../../../../application/rule/types';
 import type { AlertingRequestHandlerContext } from '../../../../types';
 import { BASE_ALERTING_API_PATH, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
-import { transformRuleToRuleResponseV1 } from '../../transforms';
+import { transformGetResponseV1 } from './transforms';
 
 import type {
   GetRuleRequestParamsV1,
@@ -75,9 +75,9 @@ const buildGetRuleRoute = ({
           excludeFromPublicApi,
           includeSnoozeData: true,
         })) as Rule<RuleParamsV1>;
-
+        const includeArtifacts = excludeFromPublicApi !== undefined ? !excludeFromPublicApi : false;
         const response: GetRuleResponseV1<RuleParamsV1> = {
-          body: transformRuleToRuleResponseV1<RuleParamsV1>(rule),
+          body: transformGetResponseV1<RuleParamsV1>(rule, includeArtifacts),
         };
         return res.ok(response);
       })

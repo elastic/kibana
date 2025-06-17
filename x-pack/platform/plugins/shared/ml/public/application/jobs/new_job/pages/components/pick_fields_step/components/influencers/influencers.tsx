@@ -7,6 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useContext, useEffect, useState } from 'react';
+import { useGeneratedHtmlId } from '@elastic/eui';
 
 import { InfluencersSelect } from './influencers_select';
 import { JobCreatorContext } from '../../../job_creator_context';
@@ -23,7 +24,9 @@ export const Influencers: FC = () => {
   const jobCreator = jc as MultiMetricJobCreator | PopulationJobCreator | AdvancedJobCreator;
   const { fields } = useNewJobCapsService();
   const [influencers, setInfluencers] = useState([...jobCreator.influencers]);
-
+  const titleId = useGeneratedHtmlId({
+    prefix: 'influencers',
+  });
   useEffect(() => {
     jobCreator.removeAllInfluencers();
     influencers.forEach((i) => jobCreator.addInfluencer(i));
@@ -37,11 +40,12 @@ export const Influencers: FC = () => {
   }, [jobCreatorUpdated]);
 
   return (
-    <Description>
+    <Description titleId={titleId}>
       <InfluencersSelect
         fields={fields}
         changeHandler={setInfluencers}
         selectedInfluencers={influencers}
+        titleId={titleId}
       />
     </Description>
   );

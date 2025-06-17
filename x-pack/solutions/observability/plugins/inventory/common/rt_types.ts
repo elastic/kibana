@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { decode, encode } from '@kbn/rison';
-import { isRight } from 'fp-ts/lib/Either';
+import { isRight } from 'fp-ts/Either';
 import * as t from 'io-ts';
 
 const validate = (validationRt: t.Any) => (input: unknown, context: t.Context) => {

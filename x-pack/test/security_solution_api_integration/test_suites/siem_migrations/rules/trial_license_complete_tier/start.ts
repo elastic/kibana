@@ -4,24 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
   SiemMigrationsAPIErrorResponse,
   defaultOriginalRule,
-  migrationRulesRouteHelpersFactory,
+  ruleMigrationRouteHelpersFactory,
 } from '../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const migrationRulesRoutes = migrationRulesRouteHelpersFactory(supertest);
+  const migrationRulesRoutes = ruleMigrationRouteHelpersFactory(supertest);
 
   describe('Start Migration', () => {
     let migrationId: string;
     beforeEach(async () => {
-      migrationId = uuidv4();
-      await migrationRulesRoutes.create({
+      const createMigrationRespose = await migrationRulesRoutes.create({});
+      migrationId = createMigrationRespose.body.migration_id;
+      await migrationRulesRoutes.addRulesToMigration({
         migrationId,
         payload: [defaultOriginalRule],
       });
@@ -30,22 +30,51 @@ export default ({ getService }: FtrProviderContext) => {
     afterEach(async () => {
       await migrationRulesRoutes.stop({ migrationId });
     });
-    it('should start migration successfully', async () => {
+    it('should start migration successfully with default settings', async () => {
       const response = await migrationRulesRoutes.start({
         migrationId,
         payload: {
-          connector_id: 'preconfigured-bedrock',
+          settings: {
+            connector_id: 'preconfigured-bedrock',
+          },
         },
       });
 
       expect(response.body).to.eql({ started: true });
+
+      // Make sure the started_at is populated
+      const migrationResponse = await migrationRulesRoutes.get({ migrationId });
+      expect(migrationResponse.body?.last_execution?.started_at).to.be.ok();
+      expect(migrationResponse.body?.last_execution?.connector_id).to.eql('preconfigured-bedrock');
+      expect(migrationResponse.body?.last_execution?.skip_prebuilt_rules_matching).to.be(false);
+    });
+
+    it('should start migration successfully with custom settings', async () => {
+      const response = await migrationRulesRoutes.start({
+        migrationId,
+        payload: {
+          settings: {
+            connector_id: 'preconfigured-bedrock',
+            skip_prebuilt_rules_matching: true,
+          },
+        },
+      });
+
+      expect(response.body).to.eql({ started: true });
+
+      // Make sure the started_at is populated
+      const migrationResponse = await migrationRulesRoutes.get({ migrationId });
+      expect(migrationResponse.body?.last_execution?.started_at).to.be.ok();
+      expect(migrationResponse.body?.last_execution?.skip_prebuilt_rules_matching).to.be(true);
     });
 
     it('should return status of running migration correctly ', async () => {
       await migrationRulesRoutes.start({
         migrationId,
         payload: {
-          connector_id: 'preconfigured-bedrock',
+          settings: {
+            connector_id: 'preconfigured-bedrock',
+          },
         },
       });
 
@@ -69,7 +98,9 @@ export default ({ getService }: FtrProviderContext) => {
       await migrationRulesRoutes.start({
         migrationId,
         payload: {
-          connector_id: 'preconfigured-bedrock',
+          settings: {
+            connector_id: 'preconfigured-bedrock',
+          },
         },
       });
 
@@ -77,7 +108,9 @@ export default ({ getService }: FtrProviderContext) => {
         migrationId,
         expectStatusCode: 200,
         payload: {
-          connector_id: 'preconfigured-bedrock',
+          settings: {
+            connector_id: 'preconfigured-bedrock',
+          },
         },
       });
 
@@ -87,10 +120,12 @@ export default ({ getService }: FtrProviderContext) => {
     describe('error scenarios', () => {
       it('should reject if connector_id is incorrect', async () => {
         const response = await migrationRulesRoutes.start({
-          migrationId: 'invalid_migration_id',
-          expectStatusCode: 400,
+          migrationId,
+          expectStatusCode: 500,
           payload: {
-            connector_id: 'preconfigured_bedrock',
+            settings: {
+              connector_id: 'preconfigured_bedrock',
+            },
           },
         });
 
@@ -104,12 +139,14 @@ export default ({ getService }: FtrProviderContext) => {
           migrationId,
           expectStatusCode: 400,
           payload: {
-            // @ts-expect-error
-            connector_id: undefined,
+            settings: {
+              // @ts-expect-error
+              connector_id: undefined,
+            },
           },
         });
         expect((response.body as unknown as SiemMigrationsAPIErrorResponse).message).to.eql(
-          '[request body]: connector_id: Required'
+          '[request body]: settings.connector_id: Required'
         );
       });
 
@@ -118,9 +155,27 @@ export default ({ getService }: FtrProviderContext) => {
           migrationId: 'invalid_migration_id',
           expectStatusCode: 404,
           payload: {
-            connector_id: 'preconfigured-bedrock',
+            settings: {
+              connector_id: 'preconfigured-bedrock',
+            },
           },
         });
+      });
+
+      it('should reject with 404 if migrationId is not provided', async () => {
+        // @ts-expect-error
+        const response = await migrationRulesRoutes.start({
+          expectStatusCode: 404,
+          payload: {
+            settings: {
+              connector_id: 'preconfigured-bedrock',
+            },
+          },
+        });
+
+        expect((response.body as unknown as SiemMigrationsAPIErrorResponse).message).to.eql(
+          'No Migration found with id: undefined'
+        );
       });
     });
   });

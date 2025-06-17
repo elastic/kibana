@@ -8,6 +8,7 @@
  */
 
 import { parse } from '..';
+import { ESQLAstQueryExpression } from '../../types';
 
 describe('FORK', () => {
   describe('correctly formatted', () => {
@@ -39,6 +40,29 @@ describe('FORK', () => {
         { type: 'query', commands: [{ name: 'where' }, { name: 'sort' }, { name: 'limit' }] },
         { type: 'query', commands: [{ name: 'where' }, { name: 'limit' }] },
       ]);
+    });
+  });
+
+  describe('FORK subcommand types', () => {
+    const testCases = [
+      { type: 'where', query: '(WHERE bytes > 1)' },
+      { type: 'sort', query: '(SORT bytes ASC)' },
+      { type: 'limit', query: '(LIMIT 100)' },
+      { type: 'stats', query: '(STATS AVG(bytes))' },
+      { type: 'dissect', query: '(DISSECT event.dataset "%{firstWord}")' },
+      { type: 'eval', query: '(EVAL FLOOR(1.2))' },
+    ];
+
+    it.each(testCases)('checks FORK contains $type command', ({ type, query }) => {
+      const text = `FROM kibana_ecommerce_data
+| FORK
+    ${query}`;
+      const { root } = parse(text);
+
+      expect(root.commands[1].args).toHaveLength(1);
+      expect((root.commands[1].args[0] as ESQLAstQueryExpression).commands[0]).toMatchObject({
+        name: type,
+      });
     });
   });
 

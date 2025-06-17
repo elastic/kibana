@@ -19,6 +19,7 @@ export async function getSavedObjectFromES<T>(
   return await es.search<T>(
     {
       index: ALL_SAVED_OBJECT_INDICES,
+      ignore_unavailable: true,
       query: {
         bool: {
           filter: [

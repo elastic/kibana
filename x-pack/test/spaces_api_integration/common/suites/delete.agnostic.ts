@@ -178,6 +178,7 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
     // are updated to remove it, and of those, any that don't exist in any space are deleted.
     const multiNamespaceResponse = await es.search<Record<string, any>>({
       index: ALL_SAVED_OBJECT_INDICES,
+      ignore_unavailable: true,
       size: 100,
       query: { terms: { type: ['index-pattern'] } },
     });

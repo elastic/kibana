@@ -475,6 +475,21 @@ export const alertDelaySchema = schema.object(
   }
 );
 
+export const dashboardsSchema = schema.arrayOf(schema.object({ id: schema.string() }));
+
+export const investigationGuideSchema = schema.object({
+  blob: schema.string({
+    meta: {
+      description: 'User-created content that describes alert causes and remdiation.',
+    },
+  }),
+});
+
+export const artifactsSchema = schema.object({
+  dashboards: schema.maybe(dashboardsSchema),
+  investigation_guide: schema.maybe(investigationGuideSchema),
+});
+
 export const ruleResponseSchema = schema.object({
   id: schema.string({
     meta: {
@@ -639,6 +654,7 @@ export const ruleResponseSchema = schema.object({
   ),
   alert_delay: schema.maybe(alertDelaySchema),
   flapping: schema.maybe(schema.nullable(flappingSchemaV1)),
+  artifacts: schema.maybe(artifactsSchema),
 });
 
 export const scheduleIdsSchema = schema.maybe(schema.arrayOf(schema.string()));

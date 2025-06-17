@@ -132,7 +132,7 @@ export const getDataViewRule = (
   threat: [getMitre1(), getMitre2()],
   note: '# test markdown',
   interval: '100m',
-  from: 'now-50000h',
+  from: '1900-01-01T00:00:00.000Z',
   max_signals: 100,
   ...rewrites,
 });
@@ -153,7 +153,7 @@ export const getNewRule = (
   threat: [getMitre1(), getMitre2()],
   note: '# test markdown',
   interval: '100m',
-  from: 'now-50000h',
+  from: '1900-01-01T00:00:00.000Z',
   max_signals: 100,
   ...rewrites,
 });
@@ -168,7 +168,7 @@ export const getSavedQueryRule = (
   name: 'New Rule Test',
   description: 'The new rule description.',
   interval: '100m',
-  from: 'now-50000h',
+  from: '1900-01-01T00:00:00.000Z',
   severity: 'low',
   risk_score: 21,
   ...rewrites,
@@ -183,7 +183,7 @@ export const getSimpleCustomQueryRule = (
   name: 'New Rule Test',
   description: 'The new rule description.',
   interval: '100m',
-  from: 'now-50000h',
+  from: '1900-01-01T00:00:00.000Z',
   severity: 'low',
   risk_score: 21,
   ...rewrites,
@@ -205,7 +205,7 @@ export const getBuildingBlockRule = (
   threat: [getMitre1(), getMitre2()],
   note: '# test markdown',
   interval: '100m',
-  from: 'now-50000h',
+  from: '1900-01-01T00:00:00.000Z',
   max_signals: 100,
   building_block_type: 'default',
   ...rewrites,
@@ -227,7 +227,7 @@ export const getUnmappedRule = (
   threat: [getMitre1(), getMitre2()],
   note: '# test markdown',
   interval: '100m',
-  from: 'now-50000h',
+  from: '1900-01-01T00:00:00.000Z',
   max_signals: 100,
   ...rewrites,
 });
@@ -248,7 +248,7 @@ export const getUnmappedCCSRule = (
   threat: [getMitre1(), getMitre2()],
   note: '# test markdown',
   interval: '100m',
-  from: 'now-50000h',
+  from: '1900-01-01T00:00:00.000Z',
   max_signals: 100,
   ...rewrites,
 });
@@ -269,7 +269,7 @@ export const getExistingRule = (
   threat: [],
   note: 'This is my note',
   interval: '100m',
-  from: 'now-50000h',
+  from: '1900-01-01T00:00:00.000Z',
   // Please do not change, or if you do, needs
   // to be any number other than default value
   max_signals: 500,
@@ -303,7 +303,7 @@ export const getNewOverrideRule = (
   rule_name_override: 'agent.type',
   timestamp_override: '@timestamp',
   interval: '100m',
-  from: 'now-50000h',
+  from: '1900-01-01T00:00:00.000Z',
   max_signals: 100,
   ...rewrites,
 });
@@ -328,7 +328,7 @@ export const getNewThresholdRule = (
     value: 1,
   },
   interval: '100m',
-  from: 'now-50000h',
+  from: '1900-01-01T00:00:00.000Z',
   max_signals: 100,
   ...rewrites,
 });
@@ -349,9 +349,9 @@ export const getNewTermsRule = (
   threat: [getMitre1(), getMitre2()],
   note: '# test markdown',
   new_terms_fields: ['host.name'],
-  history_window_start: 'now-51000h',
+  history_window_start: `now-${365 * 150}d`,
   interval: '100m',
-  from: 'now-50000h',
+  from: '1900-01-01T00:00:00.000Z',
   max_signals: 100,
   ...rewrites,
 });
@@ -375,7 +375,7 @@ export const getMachineLearningRule = (
   threat: [getMitre1()],
   note: '# test markdown',
   interval: '100m',
-  from: 'now-50000h',
+  from: '1900-01-01T00:00:00.000Z',
   ...rewrites,
 });
 
@@ -396,7 +396,7 @@ export const getEqlRule = (
   threat: [getMitre1(), getMitre2()],
   note: '# test markdown',
   interval: '100m',
-  from: 'now-50000h',
+  from: '1900-01-01T00:00:00.000Z',
   max_signals: 100,
   ...rewrites,
 });
@@ -417,7 +417,7 @@ export const getEsqlRule = (
   threat: [getMitre1(), getMitre2()],
   note: '# test markdown',
   interval: '100m',
-  from: 'now-50000h',
+  from: '1900-01-01T00:00:00.000Z',
   max_signals: 100,
   ...rewrites,
 });
@@ -439,7 +439,7 @@ export const getCCSEqlRule = (
   threat: [getMitre1(), getMitre2()],
   note: '# test markdown',
   interval: '100m',
-  from: 'now-50000h',
+  from: '1900-01-01T00:00:00.000Z',
   max_signals: 100,
   ...rewrites,
 });
@@ -464,7 +464,7 @@ export const getEqlSequenceRule = (
   threat: [getMitre1(), getMitre2()],
   note: '# test markdown',
   interval: '100m',
-  from: 'now-50000h',
+  from: '1900-01-01T00:00:00.000Z',
   max_signals: 100,
   ...rewrites,
 });
@@ -487,7 +487,7 @@ export const getNewThreatIndicatorRule = (
   threat: [getMitre1(), getMitre2()],
   note: '# test markdown',
   interval: '100m',
-  from: 'now-50000h',
+  from: '2000-01-01T00:00:00.000Z',
   threat_index: ['filebeat-*'],
   threat_mapping: [
     {
@@ -673,7 +673,7 @@ export const getEndpointRule = (): QueryRuleCreateProps => ({
   severity: 'high',
   risk_score: 17,
   interval: '1m',
-  from: 'now-50000h',
+  from: '1900-01-01T00:00:00.000Z',
   max_signals: 100,
   exceptions_list: [
     {

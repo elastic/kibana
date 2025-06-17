@@ -7,15 +7,6 @@
 
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
-// Static index names: may be more obvious and easier to manage.
-export const privilegedMonitorBaseIndexName = '.entity_analytics.monitoring';
-// Used in Phase 0.
-export const getPrivilegedMonitorUsersIndex = (namespace: string) =>
-  `${privilegedMonitorBaseIndexName}.users-${namespace}`;
-// Not required in phase 0.
-export const getPrivilegedMonitorGroupsIndex = (namespace: string) =>
-  `${privilegedMonitorBaseIndexName}.groups-${namespace}`;
-
 export type MappingProperties = NonNullable<MappingTypeMapping['properties']>;
 
 export const PRIVILEGED_MONITOR_USERS_INDEX_MAPPING: MappingProperties = {

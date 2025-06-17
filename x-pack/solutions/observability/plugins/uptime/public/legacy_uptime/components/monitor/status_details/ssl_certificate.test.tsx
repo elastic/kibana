@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import 'jest-styled-components';
 import moment from 'moment';
 import { EuiIcon } from '@elastic/eui';
 import { Tls } from '../../../../../common/runtime_types';

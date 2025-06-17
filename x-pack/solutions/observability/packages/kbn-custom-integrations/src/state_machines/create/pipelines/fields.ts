@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/pipeable';
 import { replaceSpecialChars } from '../../../components/create/utils';
 import { CreateCustomIntegrationContext, UpdateFieldsEvent, WithTouchedFields } from '../types';
 

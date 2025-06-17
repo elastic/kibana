@@ -29,7 +29,9 @@ export default function ({ getService, getPageObjects, getPageObject }: FtrProvi
 
     describe('page navigation', () => {
       it('renders trained models list', async () => {
-        await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
+        await svlCommonNavigation.sidenav.openSection(
+          'search_project_nav_footer.project_settings_project_nav'
+        );
         await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:trained_models' });
         await svlCommonNavigation.sidenav.expectLinkActive({
           deepLinkId: 'management:trained_models',

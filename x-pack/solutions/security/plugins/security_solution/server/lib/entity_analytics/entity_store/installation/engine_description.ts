@@ -15,6 +15,7 @@ import {
   hostEntityEngineDescription,
   userEntityEngineDescription,
   serviceEntityEngineDescription,
+  genericEntityEngineDescription,
 } from '../entity_definitions/entity_descriptions';
 import type { EntityStoreConfig } from '../types';
 import { buildEntityDefinitionId, mergeEntityStoreIndices } from '../utils';
@@ -27,6 +28,7 @@ const engineDescriptionRegistry: Record<EntityType, EntityDescription> = {
   host: hostEntityEngineDescription,
   user: userEntityEngineDescription,
   service: serviceEntityEngineDescription,
+  generic: genericEntityEngineDescription,
 };
 
 interface EngineDescriptionParams {

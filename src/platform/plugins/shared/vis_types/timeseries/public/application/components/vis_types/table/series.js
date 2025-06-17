@@ -23,6 +23,7 @@ import {
 import { createTextHandler } from '../../lib/create_text_handler';
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import { Aggs } from '../../aggs/aggs';
+import { useSeriesBodyStyles } from '../../_series_editor';
 
 function TableSeriesUI(props) {
   const {
@@ -40,6 +41,8 @@ function TableSeriesUI(props) {
     intl,
     uiRestrictions,
   } = props;
+
+  const seriesBodyStyles = useSeriesBodyStyles();
 
   const handleChange = createTextHandler(onChange);
 
@@ -76,7 +79,7 @@ function TableSeriesUI(props) {
       );
     }
     body = (
-      <div className="tvbSeries__body">
+      <div className="tvbSeries__body" css={seriesBodyStyles}>
         <EuiTabs size="s">
           <EuiTab isSelected={selectedTab === 'metrics'} onClick={() => props.switchTab('metrics')}>
             <FormattedMessage

@@ -190,14 +190,23 @@ describe('filterByAgent', () => {
     });
 
     it('opentelemetry/java/elastic', () => {
-      expect(getSettingKeysForAgent('opentelemetry/java/elastic')).toEqual([
-        'deactivate_all_instrumentations',
-        'deactivate_instrumentations',
-        'recording',
-        'send_logs',
-        'send_metrics',
-        'send_traces',
-      ]);
+      expect(getSettingKeysForAgent('opentelemetry/java/elastic')).toEqual(
+        expect.arrayContaining([
+          'deactivate_all_instrumentations',
+          'deactivate_instrumentations',
+          'logging_level',
+          'recording',
+          'send_logs',
+          'send_metrics',
+          'send_traces',
+        ])
+      );
+    });
+
+    it('opentelemetry/nodejs/elastic', () => {
+      expect(getSettingKeysForAgent('opentelemetry/nodejs/elastic')).toEqual(
+        expect.arrayContaining(['logging_level'])
+      );
     });
 
     it('"All" services (no agent name)', () => {

@@ -126,6 +126,10 @@ export async function getTransaction({
 
   return {
     ...event,
+    server: {
+      ...event.server,
+      port: event.server?.port ? Number(event.server?.port) : undefined,
+    },
     transaction: {
       ...event.transaction,
       marks: source?.transaction?.marks,

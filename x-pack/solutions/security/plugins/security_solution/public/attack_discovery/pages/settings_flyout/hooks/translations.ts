@@ -34,3 +34,10 @@ export const SCHEDULE_TAB_LABEL = i18n.translate(
     defaultMessage: 'Schedule',
   }
 );
+
+export const CREATE_NEW_SCHEDULE = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.settingsFlyout.createNewScheduleButton',
+  {
+    defaultMessage: 'Create new schedule',
+  }
+);

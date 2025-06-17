@@ -19,6 +19,16 @@ export interface Config {
   apiProvider: OpenAiProviderType;
   apiUrl: string;
   defaultModel?: string;
+  headers?: Record<string, string>;
+  // PKI properties are only used when apiProvider is OpenAiProviderType.Other
+  certificateData?: string;
+  privateKeyData?: string;
+  verificationMode?: 'full' | 'certificate' | 'none';
+  caData?: string;
+}
+
+export interface InternalConfig {
+  hasPKI: boolean;
 }
 
 export interface Secrets {

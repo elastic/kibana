@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { METRIC_TYPE, useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { useApmRouter } from '../../../../../../../hooks/use_apm_router';
 import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -37,7 +38,9 @@ export function StickySpanProperties({ span, transaction }: Props) {
     '/traces/explorer',
     '/dependencies/operation'
   );
-  const { environment, comparisonEnabled, offset } = query;
+  const router = useApmRouter();
+
+  const { environment } = query;
 
   const latencyAggregationType =
     ('latencyAggregationType' in query && query.latencyAggregationType) ||
@@ -82,15 +85,17 @@ export function StickySpanProperties({ span, transaction }: Props) {
           fieldName: TRANSACTION_NAME,
           val: (
             <TransactionDetailLink
-              serviceName={transaction.service.name}
-              transactionId={transaction.transaction.id}
-              traceId={transaction.trace.id}
               transactionName={transaction.transaction.name}
-              transactionType={transaction.transaction.type}
-              environment={nextEnvironment}
-              latencyAggregationType={latencyAggregationType}
-              comparisonEnabled={comparisonEnabled}
-              offset={offset}
+              href={router.link('/services/{serviceName}/transactions/view', {
+                path: { serviceName: transaction.service.name },
+                query: {
+                  ...query,
+                  environment: nextEnvironment,
+                  serviceGroup,
+                  latencyAggregationType,
+                  transactionName: transaction.transaction.name,
+                },
+              })}
             >
               {transaction.transaction.name}
             </TransactionDetailLink>

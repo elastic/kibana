@@ -22,7 +22,11 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { ReindexStatus } from '../../../../../../../../../common/types';
+import {
+  EnrichedDeprecationInfo,
+  ReindexAction,
+  ReindexStatus,
+} from '../../../../../../../../../common/types';
 import { LoadingState } from '../../../../../../types';
 import type { ReindexState } from '../../../use_reindex';
 import { ReindexProgress } from './progress';
@@ -79,7 +83,9 @@ export const ReindexFlyoutStep: React.FunctionComponent<{
   reindexState: ReindexState;
   startReindex: () => void;
   cancelReindex: () => void;
-}> = ({ closeFlyout, reindexState, startReindex, cancelReindex }) => {
+  startReadonly: () => void;
+  deprecation: EnrichedDeprecationInfo;
+}> = ({ closeFlyout, reindexState, startReindex, cancelReindex, startReadonly, deprecation }) => {
   const {
     services: {
       api,
@@ -87,13 +93,23 @@ export const ReindexFlyoutStep: React.FunctionComponent<{
     },
   } = useAppContext();
 
-  const { loadingState, status, hasRequiredPrivileges } = reindexState;
+  const { loadingState, status, hasRequiredPrivileges, meta } = reindexState;
   const loading = loadingState === LoadingState.Loading || status === ReindexStatus.inProgress;
   const isCompleted = status === ReindexStatus.completed;
   const hasFetchFailed = status === ReindexStatus.fetchFailed;
   const hasReindexingFailed = status === ReindexStatus.failed;
 
   const { data: nodes } = api.useLoadNodeDiskSpace();
+
+  const { excludedActions = [] } = (deprecation.correctiveAction as ReindexAction) || {};
+
+  const readOnlyExcluded = excludedActions.includes('readOnly');
+
+  const canShowReadonlyButton =
+    !readOnlyExcluded &&
+    !loading &&
+    !meta.isReadonly &&
+    reindexState.status === ReindexStatus.failed;
 
   return (
     <Fragment>
@@ -197,21 +213,38 @@ export const ReindexFlyoutStep: React.FunctionComponent<{
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
-          {!hasFetchFailed && !isCompleted && hasRequiredPrivileges && (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                color={status === ReindexStatus.paused ? 'warning' : 'primary'}
-                iconType={status === ReindexStatus.paused ? 'play' : undefined}
-                onClick={startReindex}
-                isLoading={loading}
-                disabled={loading || !hasRequiredPrivileges}
-                data-test-subj="startReindexingButton"
-              >
-                {buttonLabel(status)}
-              </EuiButton>
-            </EuiFlexItem>
-          )}
+          <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+            {canShowReadonlyButton && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  onClick={startReadonly}
+                  disabled={!hasRequiredPrivileges}
+                  color={'primary'}
+                  data-test-subj="startIndexReadonlyButton"
+                >
+                  <FormattedMessage
+                    id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.startIndexReadonlyButton"
+                    defaultMessage="Mark as read-only"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+            {!hasFetchFailed && !isCompleted && hasRequiredPrivileges && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  color={status === ReindexStatus.paused ? 'warning' : 'primary'}
+                  iconType={status === ReindexStatus.paused ? 'play' : undefined}
+                  onClick={startReindex}
+                  isLoading={loading}
+                  disabled={loading || !hasRequiredPrivileges}
+                  data-test-subj="startReindexingButton"
+                >
+                  {buttonLabel(status)}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </Fragment>

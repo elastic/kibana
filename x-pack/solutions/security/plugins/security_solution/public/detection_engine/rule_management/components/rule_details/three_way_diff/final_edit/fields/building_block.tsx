@@ -21,7 +21,7 @@ export function BuildingBlockEdit(): JSX.Element {
 
 export function buildingBlockDeserializer(defaultValue: FormData) {
   return {
-    isBuildingBlock: defaultValue.building_block,
+    isBuildingBlock: Boolean(defaultValue.building_block),
   };
 }
 

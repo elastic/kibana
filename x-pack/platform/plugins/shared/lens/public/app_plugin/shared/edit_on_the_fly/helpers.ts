@@ -11,7 +11,7 @@ import {
   formatESQLColumns,
   mapVariableToColumn,
 } from '@kbn/esql-utils';
-import { isEqual, cloneDeep } from 'lodash';
+import { isEqual } from 'lodash';
 import { type AggregateQuery, buildEsQuery } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ESQLRow } from '@kbn/es-types';
@@ -78,7 +78,14 @@ export const getGridAttrs = async (
     variables: esqlVariables,
   });
 
-  const columns = formatESQLColumns(results.response.columns);
+  let queryColumns = results.response.columns;
+  // if the query columns are empty, we need to use the all_columns property
+  // which has all columns regardless if they have data or not
+  if (queryColumns.length === 0 && results.response.all_columns) {
+    queryColumns = results.response.all_columns;
+  }
+
+  const columns = formatESQLColumns(queryColumns);
 
   return {
     rows: results.response.values,
@@ -190,7 +197,7 @@ export const injectESQLQueryIntoLensLayers = (
     return attributes;
   }
 
-  const datasourceState = cloneDeep(attributes.state.datasourceStates[datasourceId]);
+  const datasourceState = structuredClone(attributes.state.datasourceStates[datasourceId]);
 
   if (datasourceState && datasourceState.layers) {
     Object.values(datasourceState.layers).forEach((layer) => {

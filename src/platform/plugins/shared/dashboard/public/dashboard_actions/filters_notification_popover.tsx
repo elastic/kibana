@@ -29,10 +29,11 @@ import {
   EmbeddableApiContext,
   apiCanLockHoverActions,
   getViewModeSubject,
-  useBatchedOptionalPublishingSubjects,
+  useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { ActionExecutionMeta } from '@kbn/ui-actions-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { BehaviorSubject } from 'rxjs';
 import { uiActionsService } from '../services/kibana_services';
 import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
 import { FiltersNotificationActionApi } from './filters_notification_action';
@@ -77,9 +78,9 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
     }
   }, [api, setDisableEditButton]);
 
-  const [dataViews, parentViewMode] = useBatchedOptionalPublishingSubjects(
-    api.parentApi?.dataViews$,
-    getViewModeSubject(api ?? undefined)
+  const [dataViews, parentViewMode] = useBatchedPublishingSubjects(
+    api.parentApi?.dataViews$ ?? new BehaviorSubject(undefined),
+    getViewModeSubject(api) ?? new BehaviorSubject(undefined)
   );
 
   const showEditButton = !disableEditbutton && parentViewMode === 'edit' && canEditUnifiedSearch;

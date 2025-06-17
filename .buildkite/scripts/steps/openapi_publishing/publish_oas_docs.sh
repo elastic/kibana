@@ -43,13 +43,30 @@ if [[ "$BUILDKITE_BRANCH" == "main" ]]; then
   BUMP_KIBANA_DOC_NAME="$(vault_get kibana-bump-sh kibana-doc-name)"
   BUMP_KIBANA_DOC_TOKEN="$(vault_get kibana-bump-sh kibana-token)"
   deploy_to_bump "$(pwd)/oas_docs/output/kibana.yaml" $BUMP_KIBANA_DOC_NAME $BUMP_KIBANA_DOC_TOKEN main;
+  BUMP_KIBANA_SERVERLESS_DOC_NAME="$(vault_get kibana-serverless-bump-sh kibana-serverless-doc-name)"
+  BUMP_KIBANA_SERVERLESS_DOC_TOKEN="$(vault_get kibana-serverless-bump-sh kibana-serverless-token)"
+  deploy_to_bump "$(pwd)/oas_docs/output/kibana.serverless.yaml" $BUMP_KIBANA_SERVERLESS_DOC_NAME $BUMP_KIBANA_SERVERLESS_DOC_TOKEN main;
   exit 0;
 fi
 
-if [[ "$BUILDKITE_BRANCH" == "8.x" ]]; then
+if [[ "$BUILDKITE_BRANCH" == "9.0" ]]; then
+  BUMP_KIBANA_DOC_NAME="$(vault_get kibana-bump-sh kibana-doc-name)"
+  BUMP_KIBANA_DOC_TOKEN="$(vault_get kibana-bump-sh kibana-token)"
+  deploy_to_bump "$(pwd)/oas_docs/output/kibana.yaml" $BUMP_KIBANA_DOC_NAME $BUMP_KIBANA_DOC_TOKEN v9;
+  exit 0;
+fi
+
+if [[ "$BUILDKITE_BRANCH" == "8.19" ]]; then
   BUMP_KIBANA_DOC_NAME="$(vault_get kibana-bump-sh kibana-doc-name)"
   BUMP_KIBANA_DOC_TOKEN="$(vault_get kibana-bump-sh kibana-token)"
   deploy_to_bump "$(pwd)/oas_docs/output/kibana.yaml" $BUMP_KIBANA_DOC_NAME $BUMP_KIBANA_DOC_TOKEN 8x-unreleased;
+  exit 0;
+fi
+
+if [[ "$BUILDKITE_BRANCH" == "8.18" ]]; then
+  BUMP_KIBANA_DOC_NAME="$(vault_get kibana-bump-sh kibana-doc-name)"
+  BUMP_KIBANA_DOC_TOKEN="$(vault_get kibana-bump-sh kibana-token)"
+  deploy_to_bump "$(pwd)/oas_docs/output/kibana.yaml" $BUMP_KIBANA_DOC_NAME $BUMP_KIBANA_DOC_TOKEN v8;
   exit 0;
 fi
 

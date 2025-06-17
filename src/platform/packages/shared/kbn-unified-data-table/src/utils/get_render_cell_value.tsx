@@ -75,7 +75,7 @@ export const getRenderCellValueFn = ({
     });
     const ctx = useContext(UnifiedDataTableContext);
     const { euiTheme } = useEuiTheme();
-    const { backgroundBasePrimary: anchorColor } = euiTheme.colors;
+    const { backgroundBaseWarning: anchorColor } = euiTheme.colors;
 
     useEffect(() => {
       if (row?.isAnchor) {

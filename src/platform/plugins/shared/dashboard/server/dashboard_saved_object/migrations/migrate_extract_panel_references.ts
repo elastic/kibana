@@ -9,7 +9,10 @@
 
 import { SavedObject, SavedObjectMigrationFn } from '@kbn/core/server';
 
-import { extractReferences, injectReferences } from '../../../common';
+import {
+  extractReferences,
+  injectReferences,
+} from '../../../common/dashboard_saved_object/persistable_state/dashboard_saved_object_references';
 import type { DashboardSavedObjectTypeMigrationsDeps } from './dashboard_saved_object_migrations';
 import type { DashboardSavedObjectAttributes } from '../schema';
 import { itemAttrsToSavedObject, savedObjectToItem } from '../../content_management/latest';

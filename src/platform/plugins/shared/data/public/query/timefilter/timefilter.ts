@@ -77,7 +77,7 @@ export class Timefilter {
     this._time = config.timeDefaults;
     this.setRefreshInterval(config.refreshIntervalDefaults);
 
-    this.useTimefilter = createUseTimefilterHook(this);
+    this.useTimefilter = createUseTimefilterHook(this, nowProvider);
   }
 
   public isTimeRangeSelectorEnabled() {
@@ -115,6 +115,10 @@ export class Timefilter {
    * Apps should use this callback to start next auto refresh loop when view finished updating
    */
   public getAutoRefreshFetch$ = () => this.autoRefreshLoop.loop$;
+
+  public triggerFetch = () => {
+    this.fetch$.next();
+  };
 
   public getFetch$ = () => {
     return this.fetch$.asObservable();

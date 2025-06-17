@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 
 import { fetchConnectors } from '@kbn/search-connectors';
 
-import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../common/constants';
+import { ENTERPRISE_SEARCH_DATA_PLUGIN } from '../../common/constants';
 
 import { calculateScore } from './calculate_search_score';
 
@@ -43,7 +43,7 @@ export function getConnectorsSearchResultProvider(
                 defaultMessage: 'Connector',
               }),
               url: {
-                path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/${id}`,
+                path: `${ENTERPRISE_SEARCH_DATA_PLUGIN.URL}/connectors/${id}`,
                 prependBasePath: true,
               },
             };

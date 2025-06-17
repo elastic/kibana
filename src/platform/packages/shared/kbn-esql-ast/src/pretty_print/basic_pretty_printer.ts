@@ -279,6 +279,26 @@ export class BasicPrettyPrinter {
       return this.decorateWithComments(ctx.node, formatted);
     })
 
+    .on('visitMapEntryExpression', (ctx) => {
+      const key = ctx.visitKey();
+      const value = ctx.visitValue();
+      const formatted = key + ': ' + value;
+
+      return this.decorateWithComments(ctx.node, formatted);
+    })
+
+    .on('visitMapExpression', (ctx) => {
+      let entriesFormatted = '';
+
+      for (const entry of ctx.visitEntries()) {
+        entriesFormatted += (entriesFormatted ? ', ' : '') + entry;
+      }
+
+      const formatted = '{' + entriesFormatted + '}';
+
+      return this.decorateWithComments(ctx.node, formatted);
+    })
+
     .on('visitFunctionCallExpression', (ctx) => {
       const opts = this.opts;
       const node = ctx.node;

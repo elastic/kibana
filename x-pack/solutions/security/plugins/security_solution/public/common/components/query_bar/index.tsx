@@ -26,7 +26,7 @@ export interface QueryBarComponentProps {
   dateRangeFrom?: string;
   dateRangeTo?: string;
   hideSavedQuery?: boolean;
-  indexPattern: DataViewBase;
+  indexPattern: DataView | DataViewBase;
   isLoading?: boolean;
   isRefreshPaused?: boolean;
   filterQuery: Query;
@@ -40,6 +40,7 @@ export interface QueryBarComponentProps {
   displayStyle?: SearchBarProps['displayStyle'];
   isDisabled?: boolean;
   bubbleSubmitEvent?: boolean;
+  preventCacheClearOnUnmount?: boolean;
 }
 
 export const isDataView = (obj: unknown): obj is DataView =>
@@ -86,6 +87,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
     displayStyle,
     isDisabled,
     bubbleSubmitEvent,
+    preventCacheClearOnUnmount = false,
   }) => {
     const { data } = useKibana().services;
     const [dataView, setDataView] = useState<DataView>();
@@ -158,11 +160,12 @@ export const QueryBar = memo<QueryBarComponentProps>(
         createDataView();
       }
       return () => {
-        if (dv?.id) {
+        // Cache needs to be cleared in certain instances where ad-hoc dataviews are created, like rule creation
+        if (dv?.id && !preventCacheClearOnUnmount) {
           data.dataViews.clearInstanceCache(dv?.id);
         }
       };
-    }, [data.dataViews, indexPattern, isEsql]);
+    }, [data.dataViews, indexPattern, isEsql, preventCacheClearOnUnmount]);
 
     const searchBarFilters = useMemo(() => {
       if (isDataView(indexPattern) || isEsql) {

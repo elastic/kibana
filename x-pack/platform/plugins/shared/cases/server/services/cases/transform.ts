@@ -97,7 +97,8 @@ export function transformAttributesToESModel(caseAttributes: Partial<CaseTransfo
   attributes: Partial<CasePersistedAttributes>;
   referenceHandler: ConnectorReferenceHandler;
 } {
-  const { connector, external_service, severity, status, ...restAttributes } = caseAttributes;
+  const { connector, external_service, severity, status, incremental_id, ...restAttributes } =
+    caseAttributes;
   const { connector_id: pushConnectorId, ...restExternalService } = external_service ?? {};
 
   const transformedConnector = {
@@ -182,6 +183,7 @@ export function transformSavedObjectToExternalModel(
     ? []
     : (caseSavedObjectAttributes.customFields as CaseCustomFields);
   const observables = caseSavedObjectAttributes.observables ?? [];
+  const incremental_id = caseSavedObjectAttributes.incremental_id ?? undefined;
 
   return {
     ...caseSavedObject,
@@ -194,6 +196,7 @@ export function transformSavedObjectToExternalModel(
       category,
       customFields,
       observables,
+      incremental_id,
     },
   };
 }

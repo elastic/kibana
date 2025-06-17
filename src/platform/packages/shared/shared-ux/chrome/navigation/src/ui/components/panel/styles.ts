@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { transparentize, type EuiThemeComputed } from '@elastic/eui';
+import { type EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/css';
 
-const PANEL_WIDTH = '270px';
+const PANEL_WIDTH = '248px';
 
 export const getPanelWrapperStyles = () => css`
   clip-path: polygon(
@@ -26,22 +26,7 @@ export const getPanelWrapperStyles = () => css`
 `;
 
 export const getNavPanelStyles = (euiTheme: EuiThemeComputed<{}>) => css`
-  background-color: ${euiTheme.colors.body};
+  background-color: ${euiTheme.colors.backgroundBaseSubdued};
   height: 100%;
   width: ${PANEL_WIDTH};
-
-  .sideNavPanelLink {
-    &:focus-within {
-      background-color: transparent;
-      a {
-        text-decoration: auto;
-      }
-    }
-    &:hover {
-      background-color: ${transparentize(euiTheme.colors.primary, 0.1)};
-      a {
-        text-decoration: underline;
-      }
-    }
-  }
 `;

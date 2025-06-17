@@ -99,8 +99,10 @@ describe('TimeComparison component', () => {
       );
 
     jest.spyOn(useEnvironmentContextModule, 'useEnvironmentsContext').mockReturnValue({
-      // @ts-ignore mocking only partial data
       preferredEnvironment: 'prod',
+      environment: 'prod',
+      environments: [],
+      status: FETCH_STATUS.SUCCESS,
     });
   };
   beforeAll(() => {
@@ -152,8 +154,10 @@ describe('TimeComparison component', () => {
 
     it('shows enabled option for expected bounds when there are ML jobs available matching the preferred environment', () => {
       jest.spyOn(useEnvironmentContextModule, 'useEnvironmentsContext').mockReturnValueOnce({
-        // @ts-ignore mocking only partial data
         preferredEnvironment: 'prod',
+        environment: 'prod',
+        environments: [],
+        status: FETCH_STATUS.SUCCESS,
       });
 
       const Wrapper = getWrapper({

@@ -88,6 +88,7 @@ export const sloKeys = {
     excludeStale?: boolean;
     remoteName?: string;
   }) => [...sloKeys.all, 'fetch_slo_groupings', params] as const,
+  bulkDeleteStatus: (taskId: string) => [...sloKeys.all, 'bulkDeleteStatus', taskId] as const,
 };
 
 export type SloKeys = typeof sloKeys;

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { ContentReferencesStore } from '../../types';
+import { ContentReferencesStore, Options } from '../../types';
 
-export const newContentReferencesStoreMock: () => ContentReferencesStore = jest
+export const newContentReferencesStoreMock: (options?: Options) => ContentReferencesStore = jest
   .fn()
-  .mockReturnValue({
+  .mockImplementation((options?: Options) => ({
     add: jest.fn().mockImplementation((creator: Parameters<ContentReferencesStore['add']>[0]) => {
       return creator({ id: 'exampleContentReferenceId' });
     }),
     getStore: jest.fn().mockReturnValue({}),
-  });
+    options,
+  }));

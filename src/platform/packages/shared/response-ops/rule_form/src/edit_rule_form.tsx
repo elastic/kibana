@@ -112,6 +112,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
           actions: newFormData.actions,
           alertDelay: newFormData.alertDelay,
           flapping: newFormData.flapping,
+          artifacts: newFormData.artifacts,
         },
       });
     },

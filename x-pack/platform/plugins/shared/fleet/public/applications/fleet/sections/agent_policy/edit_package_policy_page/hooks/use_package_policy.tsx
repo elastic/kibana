@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { load } from 'js-yaml';
 import deepEqual from 'fast-deep-equal';
-import { pick } from 'lodash';
+import { omit, pick } from 'lodash';
 
 import type {
   GetOnePackagePolicyResponse,
@@ -98,10 +98,15 @@ export function usePackagePolicyWithRelatedData(
     setFormState('LOADING');
     const {
       policy: { elasticsearch, ...restPackagePolicy },
-    } = await prepareInputPackagePolicyDataset({
-      ...packagePolicy,
-      ...(packagePolicyOverride ?? {}),
-    });
+    } = await prepareInputPackagePolicyDataset(
+      omit(
+        {
+          ...packagePolicy,
+          ...(packagePolicyOverride ?? {}),
+        },
+        'spaceIds'
+      )
+    );
     const result = await sendUpdatePackagePolicy(packagePolicyId, restPackagePolicy);
 
     setFormState('SUBMITTED');

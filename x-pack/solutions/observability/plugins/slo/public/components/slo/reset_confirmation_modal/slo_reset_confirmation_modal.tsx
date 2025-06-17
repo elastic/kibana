@@ -9,28 +9,27 @@ import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
+import { useResetSlo } from '../../../hooks/use_reset_slo';
 
 export interface SloResetConfirmationModalProps {
   slo: SLOWithSummaryResponse | SLODefinitionResponse;
   onCancel: () => void;
   onConfirm: () => void;
-  isLoading?: boolean;
 }
 
 export function SloResetConfirmationModal({
   slo,
   onCancel,
   onConfirm,
-  isLoading,
 }: SloResetConfirmationModalProps) {
-  const { name } = slo;
+  const { mutate: resetSlo } = useResetSlo();
   return (
     <EuiConfirmModal
       buttonColor="danger"
       data-test-subj="sloResetConfirmationModal"
       title={i18n.translate('xpack.slo.resetConfirmationModal.title', {
         defaultMessage: 'Reset {name}?',
-        values: { name },
+        values: { name: slo.name },
       })}
       cancelButtonText={i18n.translate('xpack.slo.resetConfirmationModal.cancelButtonLabel', {
         defaultMessage: 'Cancel',
@@ -39,8 +38,10 @@ export function SloResetConfirmationModal({
         defaultMessage: 'Reset',
       })}
       onCancel={onCancel}
-      onConfirm={onConfirm}
-      isLoading={isLoading}
+      onConfirm={() => {
+        resetSlo({ id: slo.id, name: slo.name });
+        onConfirm();
+      }}
     >
       {i18n.translate('xpack.slo.resetConfirmationModal.descriptionText', {
         defaultMessage: 'Resetting this SLO will also regenerate the historical data.',

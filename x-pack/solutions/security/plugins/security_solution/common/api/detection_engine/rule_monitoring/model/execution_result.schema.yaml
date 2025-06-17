@@ -48,6 +48,8 @@ components:
           type: integer
         gap_duration_s:
           type: integer
+        frozen_indices_queried_count:
+          type: integer
         security_status:
           type: string
         security_message:
@@ -84,6 +86,7 @@ components:
         - indexing_duration_ms
         - search_duration_ms
         - gap_duration_s
+        - frozen_indices_queried_count
         - security_status
         - security_message
 

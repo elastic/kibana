@@ -6,8 +6,7 @@
  */
 
 import { from } from 'rxjs';
-import isEmpty from 'lodash/isEmpty';
-import get from 'lodash/get';
+import { isEmpty, get } from 'lodash';
 import deepmerge from 'deepmerge';
 import { ElasticsearchClient, StartServicesAccessor } from '@kbn/core/server';
 import {

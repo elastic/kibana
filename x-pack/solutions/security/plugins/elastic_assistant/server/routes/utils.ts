@@ -182,6 +182,16 @@ export const getLlmType = (actionTypeId: string): string | undefined => {
   return llmTypeDictionary[actionTypeId];
 };
 
+export const getActionTypeId = (llmType: string): string | undefined => {
+  const actionTypeDictionary: Record<string, string> = {
+    openai: `.gen-ai`,
+    bedrock: `.bedrock`,
+    gemini: `.gemini`,
+    inference: `.inference`,
+  };
+  return actionTypeDictionary[llmType];
+};
+
 export const getLlmClass = (llmType?: string) => {
   switch (llmType) {
     case 'bedrock':

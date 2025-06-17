@@ -259,6 +259,7 @@ export type {
   QuerySetup,
   TimefilterSetup,
   GlobalQueryStateFromUrl,
+  TimefilterHook,
 } from './query';
 
 export type { AggsStart } from './search/aggs';

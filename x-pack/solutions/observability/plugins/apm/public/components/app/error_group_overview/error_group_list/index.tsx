@@ -157,6 +157,7 @@ export function ErrorGroupList({
           <GroupIdLink
             serviceName={serviceName}
             errorGroupId={groupId}
+            query={query}
             data-test-subj="errorGroupId"
           >
             {groupId.slice(0, 5) || NOT_AVAILABLE_LABEL}
@@ -200,7 +201,7 @@ export function ErrorGroupList({
           return (
             <MessageAndCulpritCell>
               <EuiToolTip id="error-message-tooltip" content={item.name || NOT_AVAILABLE_LABEL}>
-                <MessageLink serviceName={serviceName} errorGroupId={item.groupId}>
+                <MessageLink serviceName={serviceName} errorGroupId={item.groupId} query={query}>
                   {item.name || NOT_AVAILABLE_LABEL}
                 </MessageLink>
               </EuiToolTip>

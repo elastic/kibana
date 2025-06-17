@@ -47,7 +47,7 @@ const useStyles = () => {
   };
 };
 
-export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
+export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery'> {
   filterQuery?: string;
   defaultView: TimelineEventsType;
   field: AlertsStackByField;
@@ -75,7 +75,6 @@ const TopNComponent: React.FC<Props> = ({
   paddingSize,
   query,
   setAbsoluteRangeDatePickerTarget,
-  setQuery,
   scopeId,
   to,
   toggleTopN,
@@ -129,9 +128,7 @@ const TopNComponent: React.FC<Props> = ({
             paddingSize={paddingSize}
             query={query}
             queryType="topN"
-            setQuery={setQuery}
             showSpacer={false}
-            toggleTopN={toggleTopN}
             sourcererScopeId={sourcererScopeId}
             to={to}
             hideQueryToggle

@@ -39,6 +39,7 @@ import {
   getBulkUnsnooze,
   verifySnoozeScheduleLimit,
   injectReferencesIntoActions,
+  injectReferencesIntoArtifacts,
 } from '../../../../rules_client/common';
 import {
   alertingAuthorizationFilterOpts,
@@ -61,7 +62,7 @@ import type {
   NormalizedAlertActionWithGeneratedValues,
   NormalizedAlertAction,
 } from '../../../../rules_client/types';
-import { migrateLegacyActions } from '../../../../rules_client/lib';
+import { bulkMigrateLegacyActions } from '../../../../rules_client/lib';
 import type {
   BulkEditFields,
   BulkEditOperation,
@@ -310,6 +311,8 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
 
     prevInterval.concat(intervals);
 
+    await bulkMigrateLegacyActions({ context, rules: response.saved_objects });
+
     await pMap(
       response.saved_objects,
       async (rule: SavedObjectsFindResult<RawRule>) =>
@@ -329,7 +332,6 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
     );
   }
   await rulesFinder.close();
-
   const updatedInterval = rules
     .filter((rule) => rule.attributes.enabled)
     .map((rule) => rule.attributes.schedule?.interval)
@@ -459,24 +461,16 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
 
     await ensureAuthorizationForBulkUpdate(context, operations, rule);
 
-    // migrate legacy actions only for SIEM rules
-    // TODO (http-versioning) Remove RawRuleAction and RawRule casts
-    const migratedActions = await migrateLegacyActions(context, {
-      ruleId: rule.id,
-      actions: rule.attributes.actions as RawRuleAction[],
-      references: rule.references,
-      attributes: rule.attributes as RawRule,
-    });
-
-    if (migratedActions.hasLegacyActions) {
-      rule.attributes.actions = migratedActions.resultedActions;
-      rule.references = migratedActions.resultedReferences;
-    }
-
     const ruleActions = injectReferencesIntoActions(
       rule.id,
       rule.attributes.actions || [],
       rule.references || []
+    );
+
+    const ruleArtifacts = injectReferencesIntoArtifacts(
+      rule.id,
+      rule.attributes.artifacts,
+      rule.references
     );
 
     const ruleDomain: RuleDomain<Params> = transformRuleAttributesToRuleDomain<Params>(
@@ -545,11 +539,13 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
       references,
       params: updatedParams,
       actions: actionsWithRefs,
+      artifacts: artifactsWithRefs,
     } = await extractReferences(
       context,
       ruleType,
       updatedRuleActions as NormalizedAlertActionWithGeneratedValues[],
-      validatedMutatedAlertTypeParams
+      validatedMutatedAlertTypeParams,
+      ruleArtifacts ?? {}
     );
 
     const ruleAttributes = transformRuleDomainToRuleAttributes({
@@ -559,6 +555,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
         legacyId: rule.attributes.legacyId,
         paramsWithRefs: updatedParams,
       },
+      artifactsWithRefs,
     });
 
     const { apiKeyAttributes } = await prepareApiKeys(

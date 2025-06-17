@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LANDING_PAGE_PATH } from '../plugin_constants';
+import { LANDING_PAGE_PATH } from '../../common/constants';
 
 export const DASHBOARD_STATE_STORAGE_KEY = '_a';
 export const GLOBAL_STATE_STORAGE_KEY = '_g';

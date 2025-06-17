@@ -66,6 +66,7 @@ const buildIngestPipeline = ({
     {
       set: {
         field: 'entity.name',
+        override: false,
         value: `{{${description.identityField}}}`,
       },
     },

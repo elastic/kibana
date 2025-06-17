@@ -8,7 +8,7 @@
  */
 
 import { Client, estypes } from '@elastic/elasticsearch';
-import { ApmFields, ApmOtelFields } from '@kbn/apm-synthtrace-client';
+import { ApmFields, ApmOtelFields, ApmSynthtracePipelines } from '@kbn/apm-synthtrace-client';
 import { ValuesType } from 'utility-types';
 import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../../../shared/base_client';
 import { Logger } from '../../../utils/create_logger';
@@ -25,7 +25,11 @@ export enum ComponentTemplateName {
   TracesApmRum = 'traces-apm.rum@custom',
   TracesApmSampled = 'traces-apm.sampled@custom',
 }
-export type ApmSynthtracePipelines = 'default' | 'otelToApm' | 'apmToOtel';
+
+interface Pipeline {
+  includeSerialization?: boolean;
+  versionOverride?: string;
+}
 
 export interface ApmSynthtraceEsClientOptions extends Omit<SynthtraceEsClientOptions, 'pipeline'> {
   version: string;
@@ -34,10 +38,16 @@ export interface ApmSynthtraceEsClientOptions extends Omit<SynthtraceEsClientOpt
 export class ApmSynthtraceEsClient extends SynthtraceEsClient<ApmFields | ApmOtelFields> {
   public readonly version: string;
 
-  constructor(options: { client: Client; logger: Logger } & ApmSynthtraceEsClientOptions) {
+  constructor(
+    options: { client: Client; logger: Logger; pipeline?: Pipeline } & ApmSynthtraceEsClientOptions
+  ) {
     super({
       ...options,
-      pipeline: apmPipeline(options.logger, options.version),
+      pipeline: apmPipeline(
+        options.logger,
+        options.pipeline?.versionOverride ?? options.version,
+        options.pipeline?.includeSerialization
+      ),
     });
     this.dataStreams = [
       'traces-apm*',
@@ -76,19 +86,7 @@ export class ApmSynthtraceEsClient extends SynthtraceEsClient<ApmFields | ApmOte
     this.logger.info(`Updated component template: ${name}`);
   }
 
-  getDefaultPipeline(
-    {
-      includeSerialization,
-      versionOverride,
-    }: {
-      includeSerialization?: boolean;
-      versionOverride?: string;
-    } = { includeSerialization: true }
-  ) {
-    return apmPipeline(this.logger, versionOverride ?? this.version, includeSerialization);
-  }
-
-  getPipeline(
+  resolvePipelineType(
     pipeline: ApmSynthtracePipelines,
     options: {
       includeSerialization?: boolean;
@@ -96,7 +94,7 @@ export class ApmSynthtraceEsClient extends SynthtraceEsClient<ApmFields | ApmOte
     } = { includeSerialization: true }
   ) {
     switch (pipeline) {
-      case 'otelToApm': {
+      case 'otel': {
         return otelToApmPipeline(this.logger, options.includeSerialization);
       }
       case 'apmToOtel': {
@@ -107,7 +105,11 @@ export class ApmSynthtraceEsClient extends SynthtraceEsClient<ApmFields | ApmOte
         );
       }
       default: {
-        return this.getDefaultPipeline(options);
+        return apmPipeline(
+          this.logger,
+          options.versionOverride ?? this.version,
+          options.includeSerialization
+        );
       }
     }
   }

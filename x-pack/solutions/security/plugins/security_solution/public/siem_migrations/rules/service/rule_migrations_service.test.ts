@@ -19,12 +19,9 @@ import {
   createRuleMigration,
   upsertMigrationResources,
   startRuleMigration as startRuleMigrationAPI,
-  getRuleMigrationStats,
   getRuleMigrationsStatsAll,
-  getMissingResources,
-  getIntegrations,
+  addRulesToMigration,
 } from '../api';
-import type { CreateRuleMigrationRequestBody } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 import {
   SiemMigrationRetryFilter,
@@ -37,6 +34,7 @@ import {
   REQUEST_POLLING_INTERVAL_SECONDS,
   SiemRulesMigrationsService,
 } from './rule_migrations_service';
+import type { CreateRuleMigrationRulesRequestBody } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 
 // --- Mocks for external modules ---
 
@@ -48,6 +46,7 @@ jest.mock('../api', () => ({
   getRuleMigrationsStatsAll: jest.fn(),
   getMissingResources: jest.fn(),
   getIntegrations: jest.fn(),
+  addRulesToMigration: jest.fn(),
 }));
 
 jest.mock('./capabilities', () => ({
@@ -132,37 +131,42 @@ describe('SiemRulesMigrationsService', () => {
     });
 
     it('should create migration with a single batch', async () => {
-      const body = [{ id: 'rule1' }] as CreateRuleMigrationRequestBody;
+      const body = [{ id: 'rule1' }] as CreateRuleMigrationRulesRequestBody;
       (createRuleMigration as jest.Mock).mockResolvedValue({ migration_id: 'mig-1' });
+      (addRulesToMigration as jest.Mock).mockResolvedValue(undefined);
 
       const migrationId = await service.createRuleMigration(body);
 
       expect(createRuleMigration).toHaveBeenCalledTimes(1);
-      expect(createRuleMigration).toHaveBeenCalledWith({ migrationId: undefined, body });
+      expect(createRuleMigration).toHaveBeenCalledWith({});
+      expect(addRulesToMigration).toHaveBeenCalledWith({ migrationId: 'mig-1', body });
       expect(migrationId).toBe('mig-1');
     });
 
     it('should create migration in batches if body length exceeds the batch size', async () => {
       // Create an array of 51 items (the service batches in chunks of 50)
       const body = new Array(51).fill({ rule: 'rule' });
-      (createRuleMigration as jest.Mock)
-        .mockResolvedValueOnce({ migration_id: 'mig-1' })
-        .mockResolvedValueOnce({ migration_id: 'mig-2' });
+      (createRuleMigration as jest.Mock).mockResolvedValueOnce({ migration_id: 'mig-1' });
+      (addRulesToMigration as jest.Mock).mockResolvedValue(undefined);
 
       const migrationId = await service.createRuleMigration(body);
 
-      expect(createRuleMigration).toHaveBeenCalledTimes(2);
+      expect(createRuleMigration).toHaveBeenCalledTimes(1);
+      expect(addRulesToMigration).toHaveBeenCalledTimes(2);
       // First call: first 50 items, migrationId undefined
-      expect((createRuleMigration as jest.Mock).mock.calls[0][0]).toEqual({
-        migrationId: undefined,
+      expect(createRuleMigration).toHaveBeenNthCalledWith(1, {});
+
+      expect(addRulesToMigration).toHaveBeenNthCalledWith(1, {
+        migrationId: 'mig-1',
         body: body.slice(0, 50),
       });
-      // Second call: remaining 1 item, migrationId passed from previous batch
-      expect((createRuleMigration as jest.Mock).mock.calls[1][0]).toEqual({
+
+      expect(addRulesToMigration).toHaveBeenNthCalledWith(2, {
         migrationId: 'mig-1',
         body: body.slice(50, 51),
       });
-      expect(migrationId).toBe('mig-2');
+
+      expect(migrationId).toBe('mig-1');
     });
   });
 
@@ -228,23 +232,15 @@ describe('SiemRulesMigrationsService', () => {
 
       expect(startRuleMigrationAPI).toHaveBeenCalledWith({
         migrationId: 'mig-1',
-        connectorId: 'connector-123',
+        settings: {
+          connectorId: 'connector-123',
+          skipPrebuiltRulesMatching: undefined,
+        },
         retry: SiemMigrationRetryFilter.NOT_FULLY_TRANSLATED,
         langSmithOptions: { project_name: 'proj', api_key: 'key' },
       });
       expect(startPollingSpy).toHaveBeenCalled();
       expect(result).toEqual({ started: true });
-    });
-  });
-
-  describe('getRuleMigrationStats', () => {
-    it('should return migration stats', async () => {
-      const stats = { id: 'mig-1', status: SiemMigrationTaskStatus.RUNNING };
-      (getRuleMigrationStats as jest.Mock).mockResolvedValue(stats);
-
-      const result = await service.getRuleMigrationStats('mig-1');
-      expect(getRuleMigrationStats).toHaveBeenCalledWith({ migrationId: 'mig-1' });
-      expect(result).toEqual(stats);
     });
   });
 
@@ -264,28 +260,6 @@ describe('SiemRulesMigrationsService', () => {
 
       const latestStats = await firstValueFrom(service.getLatestStats$());
       expect(latestStats).toEqual(result);
-    });
-  });
-
-  describe('getMissingResources', () => {
-    it('should return missing resources', async () => {
-      const resources = [{ resource: 'res1' }];
-      (getMissingResources as jest.Mock).mockResolvedValue(resources);
-
-      const result = await service.getMissingResources('mig-1');
-      expect(getMissingResources).toHaveBeenCalledWith({ migrationId: 'mig-1' });
-      expect(result).toEqual(resources);
-    });
-  });
-
-  describe('getIntegrations', () => {
-    it('should return integrations', async () => {
-      const integrations = { integration1: { id: 'int-1' } };
-      (getIntegrations as jest.Mock).mockResolvedValue(integrations);
-
-      const result = await service.getIntegrations();
-      expect(getIntegrations).toHaveBeenCalledWith({});
-      expect(result).toEqual(integrations);
     });
   });
 
@@ -338,7 +312,9 @@ describe('SiemRulesMigrationsService', () => {
         const stoppedMigration = {
           id: 'mig-1',
           status: SiemMigrationTaskStatus.STOPPED,
-          last_error: 'some failure',
+          last_execution: {
+            error: 'some failure',
+          },
         };
         const finishedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.FINISHED };
 
@@ -436,9 +412,16 @@ describe('SiemRulesMigrationsService', () => {
         jest.useRealTimers();
       });
 
-      it('should automatically start the stopped migration', async () => {
+      it('should automatically start the stopped migration with last_execution values', async () => {
         jest.useFakeTimers();
-        const stoppedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.STOPPED };
+        const stoppedMigration = {
+          id: 'mig-1',
+          status: SiemMigrationTaskStatus.STOPPED,
+          last_execution: {
+            connector_id: 'connector-last',
+            skip_prebuilt_rules_matching: true,
+          },
+        };
         const finishedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.FINISHED };
 
         service.getRuleMigrationsStats = jest
@@ -463,7 +446,10 @@ describe('SiemRulesMigrationsService', () => {
         // Expect that the migration was resumed
         expect(startRuleMigrationAPI).toHaveBeenCalledWith({
           migrationId: 'mig-1',
-          connectorId: 'connector-123',
+          settings: {
+            connectorId: 'connector-last',
+            skipPrebuiltRulesMatching: true,
+          },
         });
 
         // Restore real timers.

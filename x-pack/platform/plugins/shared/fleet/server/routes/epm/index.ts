@@ -60,6 +60,9 @@ import {
   GetOneBulkOperationPackagesRequestSchema,
   GetOneBulkOperationPackagesResponseSchema,
   BulkUninstallPackagesRequestSchema,
+  CustomIntegrationRequestSchema,
+  DeletePackageDatastreamAssetsRequestSchema,
+  DeletePackageDatastreamAssetsResponseSchema,
 } from '../../types';
 import type { FleetConfigType } from '../../config';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
@@ -83,6 +86,7 @@ import {
   getDataStreamsHandler,
   createCustomIntegrationHandler,
   getInputsHandler,
+  updateCustomIntegrationHandler,
 } from './handlers';
 import { getFileHandler } from './file_handler';
 import {
@@ -94,6 +98,7 @@ import {
   postBulkUninstallPackagesHandler,
   getOneBulkOperationPackagesHandler,
 } from './bulk_handler';
+import { deletePackageDatastreamAssetsHandler } from './package_datastream_assets_handler';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
 
@@ -810,5 +815,64 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         },
       },
       reauthorizeTransformsHandler
+    );
+
+  router.versioned
+    .put({
+      path: EPM_API_ROUTES.UPDATE_CUSTOM_INTEGRATIONS_PATTERN,
+      security: {
+        authz: {
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.SETTINGS.ALL,
+            FLEET_API_PRIVILEGES.INTEGRATIONS.ALL,
+          ],
+        },
+      },
+      summary: `Update a custom integration`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: CustomIntegrationRequestSchema,
+          response: {
+            200: {},
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      updateCustomIntegrationHandler
+    );
+
+  router.versioned
+    .delete({
+      path: EPM_API_ROUTES.PACKAGES_DATASTREAM_ASSETS,
+      security: INSTALL_PACKAGES_SECURITY,
+      summary: `Delete assets for an input package`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: DeletePackageDatastreamAssetsRequestSchema,
+          response: {
+            200: {
+              body: () => DeletePackageDatastreamAssetsResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      deletePackageDatastreamAssetsHandler
     );
 };

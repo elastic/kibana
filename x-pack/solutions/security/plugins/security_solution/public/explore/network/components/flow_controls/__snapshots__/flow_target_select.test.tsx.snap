@@ -1,35 +1,41 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`FlowTargetSelect Component rendering it renders the FlowTargetSelect 1`] = `
-<EuiSuperSelect
-  compressed={false}
-  fullWidth={false}
-  hasDividers={false}
-  isInvalid={false}
-  isLoading={false}
-  onChange={[MockFunction]}
-  options={
-    Array [
-      Object {
-        "directions": Array [
-          "uniDirectional",
-          "biDirectional",
-        ],
-        "id": "TestFlowTargetId-select-flow-target-source",
-        "inputDisplay": "Source",
-        "value": "source",
-      },
-      Object {
-        "directions": Array [
-          "uniDirectional",
-          "biDirectional",
-        ],
-        "id": "TestFlowTargetId-select-flow-target-destination",
-        "inputDisplay": "Destination",
-        "value": "destination",
-      },
-    ]
-  }
-  valueOfSelected="source"
-/>
+exports[`FlowTargetSelect Component it renders the FlowTargetSelect 1`] = `
+<div
+  class="euiPopover euiInputPopover euiSuperSelect emotion-euiPopover-block-EuiInputPopover"
+>
+  <input
+    type="hidden"
+    value="source"
+  />
+  <div
+    class="euiFormControlLayout emotion-euiFormControlLayout"
+  >
+    <div
+      class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+      style="--euiFormControlRightIconsCount: 1;"
+    >
+      <button
+        aria-haspopup="listbox"
+        class="euiSuperSelectControl emotion-euiSuperSelect__control"
+        type="button"
+      >
+        Source
+      </button>
+      <div
+        class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
+      >
+        <span
+          class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
+        >
+          <span
+            aria-hidden="true"
+            class="euiFormControlLayoutCustomIcon__icon"
+            data-euiicon-type="arrowDown"
+          />
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
 `;

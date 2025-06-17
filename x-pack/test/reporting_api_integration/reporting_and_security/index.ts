@@ -25,6 +25,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./ilm_migration_apis'));
     loadTestFile(require.resolve('./security_roles_privileges'));
     loadTestFile(require.resolve('./spaces'));
+    loadTestFile(require.resolve('./list_jobs'));
 
     // CSV-specific
     loadTestFile(require.resolve('./csv/csv_v2'));

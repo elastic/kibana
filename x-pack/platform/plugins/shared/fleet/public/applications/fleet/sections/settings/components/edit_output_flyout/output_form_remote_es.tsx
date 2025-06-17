@@ -21,11 +21,13 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import { snakeCase } from 'lodash';
+
 import { MultiRowInput } from '../multi_row_input';
 
 import { ExperimentalFeaturesService } from '../../../../services';
 
-import { useStartServices } from '../../../../hooks';
+import { licenseService, useStartServices } from '../../../../hooks';
 
 import type { OutputFormInputsType } from './use_output_form';
 import { SecretFormRow } from './output_form_secret_form_row';
@@ -44,7 +46,7 @@ export interface IsConvertedToSecret {
 }
 
 export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props) => {
-  const { docLinks } = useStartServices();
+  const { docLinks, cloud } = useStartServices();
   const { inputs, useSecretsStorage, onToggleSecretStorage } = props;
   const [isConvertedToSecret, setIsConvertedToSecret] = React.useState<IsConvertedToSecret>({
     serviceToken: false,
@@ -52,6 +54,9 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
     sslKey: false,
   });
   const { enableSyncIntegrationsOnRemote, enableSSLSecrets } = ExperimentalFeaturesService.get();
+  const enableSyncIntegrations =
+    enableSyncIntegrationsOnRemote && licenseService.isEnterprise() && !cloud?.isServerlessEnabled;
+
   const [isRemoteClusterInstructionsOpen, setIsRemoteClusterInstructionsOpen] =
     React.useState(false);
 
@@ -206,7 +211,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
         onToggleSecretAndClearValue={onToggleSecretAndClearValue}
       />
       <EuiSpacer size="m" />
-      {enableSyncIntegrationsOnRemote ? (
+      {enableSyncIntegrations ? (
         <>
           <EuiFormRow
             fullWidth
@@ -332,7 +337,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
                             followerIndex: (
                               <EuiCode>
                                 fleet-synced-integrations-ccr-
-                                {inputs.nameInput.props.value || '<output name>'}
+                                {snakeCase(inputs.nameInput.props.value) || '<output name>'}
                               </EuiCode>
                             ),
                           }}
@@ -346,6 +351,24 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
                         />
                       </li>
                     </ol>
+                    <EuiSpacer size="s" />
+                    <FormattedMessage
+                      id="xpack.fleet.settings.remoteClusterConfiguration.ccsDescription"
+                      defaultMessage="To search accross remote clusters from this cluster, see the {prerequisites}. Once the remote cluster is added, CCS Data Views will be created automatically."
+                      values={{
+                        prerequisites: (
+                          <EuiLink
+                            target="_blank"
+                            href={`${docLinks.links.ccs.guide}#_prerequisites`}
+                          >
+                            <FormattedMessage
+                              id="xpack.fleet.settings.remoteClusterConfiguration.ccsDocumentationLink"
+                              defaultMessage="CCS prerequisites"
+                            />
+                          </EuiLink>
+                        ),
+                      }}
+                    />
                   </>
                 )}
               </EuiCallOut>

@@ -9,7 +9,7 @@ import { EuiInMemoryTable } from '@elastic/eui';
 import type { EuiSearchBarProps, EuiTableSelectionType } from '@elastic/eui';
 import React, { useCallback, useMemo, useState, useRef } from 'react';
 
-import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
+import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import styled from '@emotion/styled';
 import { getColumns } from './get_columns';
 import { getRows } from './get_rows';

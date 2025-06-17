@@ -34,7 +34,6 @@
       "telemetry"
     ],
     "requiredBundles": [
-      "unifiedHistogram",
       "discover"
     ],
     "extraPublicDirs": [

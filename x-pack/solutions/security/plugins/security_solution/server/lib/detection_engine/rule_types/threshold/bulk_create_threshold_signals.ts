@@ -11,7 +11,7 @@ import type { ThresholdNormalized } from '../../../../../common/api/detection_en
 import type { GenericBulkCreateResponse } from '../factories/bulk_create_factory';
 import { calculateThresholdSignalUuid } from './utils';
 import { buildReasonMessageForThresholdAlert } from '../utils/reason_formatters';
-import type { ThresholdBucket } from './types';
+import type { ThresholdCompositeBucket } from './types';
 import type { SecurityRuleServices, SecuritySharedParams } from '../types';
 import type { ThresholdRuleParams } from '../../rule_schema';
 import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
@@ -19,13 +19,13 @@ import { bulkCreate, wrapHits } from '../factories';
 
 interface BulkCreateThresholdSignalsParams {
   sharedParams: SecuritySharedParams<ThresholdRuleParams>;
-  buckets: ThresholdBucket[];
+  buckets: ThresholdCompositeBucket[];
   services: SecurityRuleServices;
   startedAt: Date;
 }
 
 export const transformBucketIntoHit = (
-  bucket: ThresholdBucket,
+  bucket: ThresholdCompositeBucket,
   inputIndex: string,
   startedAt: Date,
   from: Date,
@@ -65,7 +65,7 @@ export const transformBucketIntoHit = (
 };
 
 export const getTransformedHits = (
-  buckets: ThresholdBucket[],
+  buckets: ThresholdCompositeBucket[],
   inputIndex: string,
   startedAt: Date,
   from: Date,

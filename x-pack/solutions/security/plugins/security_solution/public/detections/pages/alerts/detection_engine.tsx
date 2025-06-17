@@ -34,12 +34,15 @@ import {
 import { isEqual } from 'lodash';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { useGroupTakeActionsItems } from '../../hooks/alerts_table/use_group_take_action_items';
 import {
   defaultGroupingOptions,
   defaultGroupStatsAggregations,
   defaultGroupStatsRenderer,
   defaultGroupTitleRenderers,
 } from '../../components/alerts_table/grouping_settings';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { DetectionEngineFilters } from '../../components/detection_engine_filters/detection_engine_filters';
 import { FilterByAssigneesPopover } from '../../../common/components/filter_by_assignees_popover/filter_by_assignees_popover';
 import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
@@ -69,7 +72,6 @@ import {
   focusUtilityBarAction,
   onTimelineTabKeyPressed,
   resetKeyboardFocus,
-  showGlobalFilters,
 } from '../../../timelines/components/timeline/helpers';
 import {
   buildAlertAssigneesFilter,
@@ -91,6 +93,7 @@ import type { Status } from '../../../../common/api/detection_engine';
 import { GroupedAlertsTable } from '../../components/alerts_table/alerts_grouping';
 import { DetectionEngineAlertsTable } from '../../components/alerts_table';
 import type { AddFilterProps } from '../../components/alerts_kpis/common/types';
+import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -107,9 +110,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
-  const graphEventId = useShallowEqualSelector(
-    (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).graphEventId
-  );
 
   const isTableLoading = useShallowEqualSelector(
     (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).isLoading
@@ -156,9 +156,18 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
     FilterGroupHandler | undefined
   >();
 
-  const { sourcererDataView, loading: isLoadingIndexPattern } = useSourcererDataView(
+  const { sourcererDataView: oldSourcererDataViewSpec, loading: oldIsLoadingIndexPattern } =
+    useSourcererDataView(SourcererScopeName.detections);
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataViewSpec: experimentalDataViewSpec, status: dataViewSpecStatus } = useDataViewSpec(
     SourcererScopeName.detections
   );
+  const sourcererDataViewSpec: DataViewSpec = newDataViewPickerEnabled
+    ? experimentalDataViewSpec
+    : oldSourcererDataViewSpec;
+  const isLoadingIndexPattern = newDataViewPickerEnabled
+    ? dataViewSpecStatus !== 'ready'
+    : oldIsLoadingIndexPattern;
 
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
 
@@ -327,6 +336,11 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
     [alertsTableDefaultFilters, isAlertTableLoading]
   );
 
+  const groupTakeActionItems = useGroupTakeActionsItems({
+    currentStatus: statusFilter,
+    showAlertStatusActions: Boolean(hasIndexWrite) && Boolean(hasIndexMaintenance),
+  });
+
   const accordionExtraActionGroupStats = useMemo(
     () => ({
       aggregations: defaultGroupStatsAggregations,
@@ -379,11 +393,11 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
       ) : !signalIndexNeedsInit && hasIndexRead && canUserREAD ? (
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
-          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
+          <FiltersGlobal>
             <SiemSearchBar
               id={InputsModelId.global}
               pollForSignalIndex={pollForSignalIndex}
-              sourcererDataView={sourcererDataView}
+              sourcererDataView={sourcererDataViewSpec}
             />
           </FiltersGlobal>
           <SecuritySolutionPageWrapper
@@ -419,7 +433,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
                 query={query}
                 timeRange={pageFiltersTimerange}
                 onInit={setDetectionPageFilterHandler}
-                dataViewSpec={sourcererDataView}
+                dataViewSpec={sourcererDataViewSpec}
               />
               <EuiSpacer size="l" />
               <ChartPanels
@@ -427,7 +441,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
                 alertsDefaultFilters={alertsDefaultFilters}
                 isLoadingIndexPattern={isChartPanelLoading}
                 query={query}
-                runtimeMappings={sourcererDataView.runtimeFieldMap as RunTimeMappings}
+                runtimeMappings={sourcererDataViewSpec.runtimeFieldMap as RunTimeMappings}
                 signalIndexName={signalIndexName}
                 updateDateRangeCallback={updateDateRangeCallback}
               />
@@ -436,18 +450,15 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
             <GroupedAlertsTable
               accordionButtonContent={defaultGroupTitleRenderers}
               accordionExtraActionGroupStats={accordionExtraActionGroupStats}
-              currentAlertStatusFilterValue={statusFilter}
+              dataViewSpec={sourcererDataViewSpec}
               defaultFilters={alertsTableDefaultFilters}
               defaultGroupingOptions={defaultGroupingOptions}
               from={from}
               globalFilters={filters}
               globalQuery={query}
-              hasIndexMaintenance={hasIndexMaintenance ?? false}
-              hasIndexWrite={hasIndexWrite ?? false}
+              groupTakeActionItems={groupTakeActionItems}
               loading={isAlertTableLoading}
               renderChildComponent={renderAlertTable}
-              runtimeMappings={sourcererDataView.runtimeFieldMap as RunTimeMappings}
-              signalIndexName={signalIndexName}
               tableId={TableId.alertsOnAlertsPage}
               to={to}
             />

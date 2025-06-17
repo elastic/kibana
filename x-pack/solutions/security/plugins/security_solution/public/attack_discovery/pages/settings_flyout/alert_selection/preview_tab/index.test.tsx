@@ -56,6 +56,9 @@ describe('PreviewTab', () => {
 
     mockUseKibana.mockReturnValue({
       services: {
+        featureFlags: {
+          getBooleanValue: jest.fn().mockReturnValue(true),
+        },
         lens: {
           EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
         },

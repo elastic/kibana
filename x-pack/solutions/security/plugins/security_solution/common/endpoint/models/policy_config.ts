@@ -95,9 +95,11 @@ export const policyFactory = ({
     },
     mac: {
       events: {
+        dns: true,
         process: true,
         file: true,
         network: true,
+        security: true,
       },
       malware: {
         mode: ProtectionModes.prevent,

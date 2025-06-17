@@ -28,6 +28,7 @@ import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { installClientMock } from '../doc_install_status/service.mock';
 import type { ProductInstallState } from '../../../common/install_status';
 import { PackageInstaller } from './package_installer';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
 const artifactsFolder = '/lost';
 const artifactRepositoryUrl = 'https://repository.com';
@@ -114,6 +115,7 @@ describe('PackageInstaller', () => {
 
       expect(createIndexMock).toHaveBeenCalledTimes(1);
       expect(createIndexMock).toHaveBeenCalledWith({
+        elserInferenceId: defaultInferenceEndpoints.ELSER,
         indexName,
         mappings,
         manifestVersion: TEST_FORMAT_VERSION,
@@ -123,6 +125,7 @@ describe('PackageInstaller', () => {
 
       expect(populateIndexMock).toHaveBeenCalledTimes(1);
       expect(populateIndexMock).toHaveBeenCalledWith({
+        elserInferenceId: defaultInferenceEndpoints.ELSER,
         indexName,
         archive: zipArchive,
         manifestVersion: TEST_FORMAT_VERSION,

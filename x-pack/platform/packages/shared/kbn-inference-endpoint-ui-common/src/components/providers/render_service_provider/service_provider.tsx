@@ -18,6 +18,7 @@ import azureOpenAIIcon from '../assets/images/azure_open_ai.svg';
 import googleAIStudioIcon from '../assets/images/google_ai_studio.svg';
 import mistralIcon from '../assets/images/mistral.svg';
 import amazonBedrockIcon from '../assets/images/amazon_bedrock.svg';
+import amazonSageMakerIcon from '../assets/images/amazon_sagemaker_monochrome.svg';
 import anthropicIcon from '../assets/images/anthropic.svg';
 import alibabaCloudIcon from '../assets/images/alibaba_cloud.svg';
 import ibmWatsonxIcon from '../assets/images/ibm_watsonx.svg';
@@ -43,6 +44,11 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
     icon: amazonBedrockIcon,
     name: 'Amazon Bedrock',
     solutions: ['Observability', 'Security', 'Search'],
+  },
+  [ServiceProviderKeys.amazon_sagemaker]: {
+    icon: amazonSageMakerIcon,
+    name: 'Amazon SageMaker',
+    solutions: ['Search'],
   },
   [ServiceProviderKeys.azureaistudio]: {
     icon: azureAIStudioIcon,

@@ -164,6 +164,8 @@ actions:
                     - $ref:  '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/genai_azure_config.yaml'
                     # OpenAI (.gen-ai)
                     - $ref:  '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/genai_openai_config.yaml'
+                    # Other OpenAI (.gen-ai)
+                    - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/genai_openai_other_config.yaml'
                     # Opsgenie (.opsgenie)
                     - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/opsgenie_config.yaml'
                     # PagerDuty (.pagerduty)
@@ -213,6 +215,8 @@ actions:
                     # Index (.index) N/A
                     # Jira (.jira)
                     - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/jira_secrets.yaml'
+                    # Microsoft Defender for Endpoint (.microsoft_defender_endpoint)
+                    - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/defender_secrets.yaml'
                     # Microsoft Teams (.teams)
                     - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/teams_secrets.yaml'
                     # Observability AI Assistant (.observability-ai-assistant) TBD
@@ -275,6 +279,8 @@ actions:
                     - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/index_config.yaml'
                     # Jira (.jira)
                     - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/jira_config.yaml'
+                    # Microsoft Defender for Endpoint (.microsoft_defender_endpoint)
+                    - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/defender_config.yaml'
                     # Microsoft Teams (.teams) N/A
                     # Observability AI Assistant (.observability-ai-assistant) TBD
                     # Azue OpenAI (.gen-ai)
@@ -388,6 +394,8 @@ actions:
                     - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/run_closeincident.yaml'
                     - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/run_createalert.yaml'
                     - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/run_fieldsbyissuetype.yaml'
+                    - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/run_getagentdetails.yaml'
+                    - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/run_getagents.yaml'
                     - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/run_getchoices.yaml'
                     - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/run_getfields.yaml'
                     - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/run_getincident.yaml'

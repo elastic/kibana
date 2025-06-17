@@ -13,7 +13,7 @@ import React, { useMemo } from 'react';
 import { EuiListGroupItem, UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import { Query, isFilterPinned } from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import {

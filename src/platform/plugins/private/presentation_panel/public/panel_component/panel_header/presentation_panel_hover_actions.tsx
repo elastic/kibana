@@ -37,6 +37,7 @@ import { css } from '@emotion/react';
 import {
   apiCanLockHoverActions,
   EmbeddableApiContext,
+  PublishesTitle,
   useBatchedOptionalPublishingSubjects,
   ViewMode,
 } from '@kbn/presentation-publishing';
@@ -147,7 +148,7 @@ export const PresentationPanelHoverActions = ({
       api?.description$,
       api?.hideTitle$,
       api?.hasLockedHoverActions$,
-      api?.parentApi?.hideTitle$
+      (api?.parentApi as Partial<PublishesTitle>)?.hideTitle$
     );
 
   const hideTitle = hidePanelTitle || parentHideTitle;
