@@ -19,6 +19,7 @@ import {
 } from './attachments_index';
 import { createCasesAnalyticsIndex, scheduleCasesAnalyticsSyncTask } from './cases_index';
 import { createCommentsAnalyticsIndex, scheduleCommentsAnalyticsSyncTask } from './comments_index';
+import { createActivityAnalyticsIndex, scheduleActivityAnalyticsSyncTask } from './activity_index';
 
 export const createCasesAnalyticsIndexes = ({
   esClient,
@@ -49,11 +50,18 @@ export const createCasesAnalyticsIndexes = ({
     isServerless,
     taskManager,
   });
+  const casesActivityIndex = createActivityAnalyticsIndex({
+    logger,
+    esClient,
+    isServerless,
+    taskManager,
+  });
 
   return Promise.all([
     casesIndex.upsertIndex(),
     casesAttachmentsIndex.upsertIndex(),
     casesCommentsIndex.upsertIndex(),
+    casesActivityIndex.upsertIndex(),
   ]);
 };
 
@@ -77,6 +85,7 @@ export const scheduleCasesAnalyticsSyncTasks = ({
   taskManager: TaskManagerStartContract;
   logger: Logger;
 }) => {
+  scheduleActivityAnalyticsSyncTask({ taskManager, logger });
   scheduleCasesAnalyticsSyncTask({ taskManager, logger });
   scheduleCommentsAnalyticsSyncTask({ taskManager, logger });
   scheduleAttachmentsAnalyticsSyncTask({ taskManager, logger });

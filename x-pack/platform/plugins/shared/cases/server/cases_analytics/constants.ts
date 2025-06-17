@@ -16,6 +16,10 @@ import {
   CAI_COMMENTS_INDEX_NAME,
   getCommentsSynchronizationSourceQuery,
 } from './comments_index/constants';
+import {
+  CAI_ACTIVITY_INDEX_NAME,
+  getActivitySynchronizationSourceQuery,
+} from './activity_index/constants';
 
 export const CAI_NUMBER_OF_SHARDS = 1;
 /** Allocate 1 replica if there are enough data nodes, otherwise continue with 0 */
@@ -41,4 +45,5 @@ export const SYNCHRONIZATION_QUERIES_DICTIONARY: Record<
   [CAI_CASES_INDEX_NAME]: getCasesSynchronizationSourceQuery,
   [CAI_COMMENTS_INDEX_NAME]: getCommentsSynchronizationSourceQuery,
   [CAI_ATTACHMENTS_INDEX_NAME]: getAttachmentsSynchronizationSourceQuery,
+  [CAI_ACTIVITY_INDEX_NAME]: getActivitySynchronizationSourceQuery,
 };
