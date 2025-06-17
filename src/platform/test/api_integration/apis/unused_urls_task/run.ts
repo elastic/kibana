@@ -29,12 +29,22 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('runs unused URLs cleanup', async () => {
-      const response = await supertest.post('/internal/unused_urls_task/run');
+      const response1 = await supertest.post('/internal/unused_urls_task/run');
 
-      expect(response.status).to.be(200);
-      expect(response.body).to.eql({
+      expect(response1.status).to.be(200);
+      // Deletes only 5 URLs because the limit is set to 5
+      expect(response1.body).to.eql({
         message: 'Unused URLs cleanup task has finished.',
         deletedCount: 5,
+      });
+
+      // Delete the remaining URL
+      const response2 = await supertest.post('/internal/unused_urls_task/run');
+
+      expect(response2.status).to.be(200);
+      expect(response2.body).to.eql({
+        message: 'Unused URLs cleanup task has finished.',
+        deletedCount: 1,
       });
     });
   });
