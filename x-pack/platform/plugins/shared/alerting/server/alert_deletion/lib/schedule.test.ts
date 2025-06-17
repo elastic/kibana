@@ -13,6 +13,7 @@ import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server/spaces_service';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
 
 const fakeRequest = {
   headers: {},
@@ -68,6 +69,10 @@ describe('scheduleTask', () => {
   test('should schedule ad hoc task with given settings and space IDs', async () => {
     const auditLog = auditService.withoutRequest;
     auditService.asScoped = jest.fn(() => auditLog);
+    taskManagerStart.fetch.mockResolvedValueOnce({
+      docs: [],
+      versionMap: new Map(),
+    });
 
     await alertDeletionClient.scheduleTask(
       fakeRequest,
@@ -80,8 +85,8 @@ describe('scheduleTask', () => {
       },
       ['space-1', 'default']
     );
-    expect(taskManagerStart.ensureScheduled).toHaveBeenCalledWith({
-      id: `Alerting-alert-deletion`,
+    expect(taskManagerStart.schedule).toHaveBeenCalledWith({
+      id: expect.stringContaining('Alerting-alert-deletion-'),
       taskType: 'alert-deletion',
       params: {
         settings: {
@@ -107,10 +112,68 @@ describe('scheduleTask', () => {
     });
   });
 
+  test('should skip scheduling task and return message if task is already running for spaceID', async () => {
+    const auditLog = auditService.withoutRequest;
+    auditService.asScoped = jest.fn(() => auditLog);
+    taskManagerStart.fetch.mockResolvedValueOnce({
+      docs: [
+        {
+          taskType: 'alert-deletion',
+          scope: ['alerting'],
+          state: {},
+          params: {
+            settings: {
+              isActiveAlertDeleteEnabled: true,
+              isInactiveAlertDeleteEnabled: false,
+              activeAlertDeleteThreshold: 1,
+              inactiveAlertDeleteThreshold: 1,
+              categoryIds: ['management', 'observability', 'securitySolution'],
+            },
+            spaceIds: ['default', 'space-1'],
+          },
+          traceparent: '',
+          enabled: true,
+          attempts: 1,
+          scheduledAt: new Date('2025-06-10T23:21:22.630Z'),
+          startedAt: new Date('2025-06-10T23:21:24.083Z'),
+          retryAt: new Date('2025-06-10T23:26:54.083Z'),
+          runAt: new Date('2025-06-10T23:21:22.630Z'),
+          status: TaskStatus.Running,
+          partition: 232,
+          ownerId: 'kibana:5b2de169-2785-441b-ae8c-186a1936b17d',
+          id: 'Alerting-alert-deletion-493c3342-304f-43eb-9770-db79c84e8162',
+        },
+      ],
+      versionMap: new Map(),
+    });
+
+    const response = await alertDeletionClient.scheduleTask(
+      fakeRequest,
+      {
+        isActiveAlertDeleteEnabled: false,
+        isInactiveAlertDeleteEnabled: true,
+        activeAlertDeleteThreshold: 1,
+        inactiveAlertDeleteThreshold: 30,
+        categoryIds: ['observability', 'management', 'securitySolution'],
+      },
+      ['default']
+    );
+    expect(response).toEqual(`Alert deletion task is already running for this space.`);
+    expect(taskManagerStart.schedule).not.toHaveBeenCalled();
+    expect(auditLog.log).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Found alert deletion tasks running for space IDs: default, space-1'
+    );
+  });
+
   test('should log and re-throw error if error scheduling task', async () => {
     const auditLog = auditService.withoutRequest;
     auditService.asScoped = jest.fn(() => auditLog);
-    taskManagerStart.ensureScheduled.mockRejectedValueOnce(new Error('Failed to schedule task'));
+    taskManagerStart.schedule.mockRejectedValueOnce(new Error('Failed to schedule task'));
+    taskManagerStart.fetch.mockResolvedValueOnce({
+      docs: [],
+      versionMap: new Map(),
+    });
     await expect(
       alertDeletionClient.scheduleTask(
         fakeRequest,

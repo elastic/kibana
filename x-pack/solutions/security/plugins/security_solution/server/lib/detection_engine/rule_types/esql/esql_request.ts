@@ -69,6 +69,7 @@ export const performEsqlRequest = async ({
     loggedRequests?.push({
       request: logEsqlRequest(requestBody, requestQueryParams),
       description: i18n.ESQL_SEARCH_REQUEST_DESCRIPTION,
+      request_type: 'findMatches',
     });
     const asyncSearchStarted = performance.now();
     const asyncEsqlResponse = await esClient.transport.request<AsyncEsqlResponse>({

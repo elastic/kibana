@@ -105,6 +105,21 @@ export const retriever = (specService: SpecDefinitionsService) => {
       match_criteria: {},
       rank_window_size: 10,
     },
+    pinned: {
+      __template: {
+        retriever: {},
+        ids: [],
+        match_criteria: {},
+      },
+      retriever: {
+        __scope_link: '.',
+      },
+      // Only one of 'ids' or 'docs' should be used at a time
+      ids: [],
+      docs: [],
+      match_criteria: {},
+      rank_window_size: 10,
+    },
     standard: {
       __template: {
         query: {},

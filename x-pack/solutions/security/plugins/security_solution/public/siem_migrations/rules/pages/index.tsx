@@ -118,8 +118,8 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
             )}
             {[
               SiemMigrationTaskStatus.READY,
+              SiemMigrationTaskStatus.INTERRUPTED,
               SiemMigrationTaskStatus.STOPPED,
-              SiemMigrationTaskStatus.ABORTED,
             ].includes(migrationStats.status) && (
               <MigrationReadyPanel migrationStats={migrationStats} />
             )}

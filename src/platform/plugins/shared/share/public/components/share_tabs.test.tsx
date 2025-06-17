@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { ShareMenuTabs } from './share_tabs';
-import { ShareMenuProvider, type IShareContext } from './context';
+import { ShareProvider, type IShareContext } from './context';
 import { screen, render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { KibanaLocation, LocatorGetUrlParams, UrlService } from '../../common/url_service';
@@ -91,9 +91,9 @@ describe('Share modal tabs', () => {
   it('does not render an export tab', () => {
     render(
       <IntlProvider locale="en">
-        <ShareMenuProvider shareContext={{ ...mockShareContext }}>
+        <ShareProvider shareContext={{ ...mockShareContext }}>
           <ShareMenuTabs />
-        </ShareMenuProvider>
+        </ShareProvider>
       </IntlProvider>
     );
     expect(screen.queryByTestId('export')).not.toBeInTheDocument();
@@ -116,9 +116,9 @@ describe('Share modal tabs', () => {
 
       render(
         <IntlProvider locale="en">
-          <ShareMenuProvider shareContext={{ ...disabledLinkShareContext }}>
+          <ShareProvider shareContext={{ ...disabledLinkShareContext }}>
             <ShareMenuTabs />
-          </ShareMenuProvider>
+          </ShareProvider>
         </IntlProvider>
       );
       expect(screen.queryByTestId('link')).not.toBeInTheDocument();
