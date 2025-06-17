@@ -51,6 +51,7 @@ import type {
   APMPluginSetupDependencies,
   APMPluginStartDependencies,
 } from './types';
+import { RECOMMENDED_QUERIES } from './recommended_queries';
 
 export class APMPlugin
   implements Plugin<APMPluginSetup, void, APMPluginSetupDependencies, APMPluginStartDependencies>
@@ -73,6 +74,10 @@ export class APMPlugin
 
     const currentConfig = this.initContext.config.get<APMConfig>();
     this.currentConfig = currentConfig;
+
+    if (plugins.esql) {
+      plugins.esql.getExtensionsRegistry().setRecommendedQueries(RECOMMENDED_QUERIES, 'oblt');
+    }
 
     if (
       plugins.taskManager &&
