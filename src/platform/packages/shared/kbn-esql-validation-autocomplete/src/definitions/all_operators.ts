@@ -15,12 +15,7 @@ import { operatorFunctionDefinitions } from './generated/operators';
 // other operators and the comparison ones, so we do this here.
 export const comparisonFunctions: FunctionDefinition[] = operatorFunctionDefinitions.filter(
   ({ name }) =>
-    name === '==' ||
-    name === '!=' ||
-    name === '<' ||
-    name === '>' ||
-    name === '<=' ||
-    name === '>='
+    name === '==' || name === '!=' || name === '<' || name === '>' || name === '<=' || name === '>='
 );
 
 export const logicalOperators: FunctionDefinition[] = [
