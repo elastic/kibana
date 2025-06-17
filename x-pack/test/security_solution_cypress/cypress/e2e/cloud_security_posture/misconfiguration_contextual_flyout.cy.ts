@@ -232,7 +232,7 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
     () => {
       beforeEach(() => {
         putIndexMapping();
-        createMockFinding(false, 'host.name');
+        createMockMisconfigurationFinding(false, 'host.name');
         cy.reload();
         expandFirstAlertHostFlyout();
       });
@@ -253,7 +253,7 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
   context('User name - Has misconfiguration findings', () => {
     beforeEach(() => {
       putIndexMapping();
-      createMockFinding(true, 'user.name');
+      createMockMisconfigurationFinding(true, 'user.name');
       cy.reload();
       expandFirstAlertUserFlyout();
     });
@@ -279,7 +279,7 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
     () => {
       beforeEach(() => {
         putIndexMapping();
-        createMockFinding(false, 'user.name');
+        createMockMisconfigurationFinding(false, 'user.name');
         cy.reload();
         expandFirstAlertHostFlyout();
       });
