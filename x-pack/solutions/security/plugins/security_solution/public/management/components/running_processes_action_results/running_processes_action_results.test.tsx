@@ -22,7 +22,8 @@ jest.mock('../../../common/components/user_privileges');
 
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
-describe('Running Processes Action Results component', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/208987
+describe.skip('Running Processes Action Results component', () => {
   let appTestContext: AppContextTestRender;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let render: () => ReturnType<AppContextTestRender['render']>;

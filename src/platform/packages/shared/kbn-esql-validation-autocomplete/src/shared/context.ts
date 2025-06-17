@@ -154,7 +154,15 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
   let inComment = false;
 
   Walker.visitComments(ast, (node) => {
+    // if the cursor (offset) is within the range of a comment node
     if (within(offset, node.location)) {
+      inComment = true;
+      // or if the cursor (offset) is right after a single-line comment (which means there was no newline)
+    } else if (
+      node.subtype === 'single-line' &&
+      node.location &&
+      offset === node.location.max + 1
+    ) {
       inComment = true;
     }
   });

@@ -54,7 +54,7 @@ function getPosition(params: CommandSuggestParams<'completion'>): CompletionPosi
   const expressionRoot = prompt?.text !== EDITOR_MARKER ? prompt : undefined;
   const expressionType = getExpressionType(expressionRoot);
 
-  if (isExpressionComplete(expressionType, innerText) && inferenceId.incomplete) {
+  if (isExpressionComplete(expressionType, innerText)) {
     return CompletionPosition.AFTER_PROMPT;
   }
 

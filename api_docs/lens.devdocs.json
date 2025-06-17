@@ -14993,6 +14993,27 @@
             "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.XYState.pointVisibility",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "pointVisibility",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.PointVisibility",
+                "text": "PointVisibility"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -23954,17 +23975,17 @@
             "() => ",
             {
               "pluginId": "embeddable",
-              "scope": "common",
+              "scope": "server",
               "docId": "kibEmbeddablePluginApi",
-              "section": "def-common.EmbeddableRegistryDefinition",
+              "section": "def-server.EmbeddableRegistryDefinition",
               "text": "EmbeddableRegistryDefinition"
             },
             "<",
             {
               "pluginId": "embeddable",
-              "scope": "common",
+              "scope": "server",
               "docId": "kibEmbeddablePluginApi",
-              "section": "def-common.EmbeddableStateWithType",
+              "section": "def-server.EmbeddableStateWithType",
               "text": "EmbeddableStateWithType"
             },
             ">"
