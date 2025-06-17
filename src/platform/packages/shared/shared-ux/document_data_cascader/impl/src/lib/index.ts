@@ -8,5 +8,5 @@
  */
 
 export { getStatsGroupByColumnsFromQuery } from './parse_esql';
-export type { DocWithId, IStoreState } from './store/reducers';
+export type { GroupNode, LeafNode, IStoreState } from './store/reducers';
 export { DataCascadeProvider, useDataCascadeDispatch, useDataCascadeState } from './store';
