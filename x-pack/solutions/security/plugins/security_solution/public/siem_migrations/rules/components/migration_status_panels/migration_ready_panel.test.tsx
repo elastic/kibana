@@ -48,7 +48,7 @@ const mockMigrationStateWithError = {
   number: 1,
 };
 
-const mockMigrationStatsAborted = {
+const mockMigrationStatsStopped = {
   status: SiemMigrationTaskStatus.STOPPED,
   id: 'c44d2c7d-0de1-4231-8b82-0dcfd67a9fe3',
   rules: { total: 6, pending: 6, processing: 0, completed: 0, failed: 0 },
@@ -126,14 +126,14 @@ describe('MigrationReadyPanel', () => {
 
   describe('Aborted Migration', () => {
     it('should render aborted migration message', () => {
-      render(<MigrationReadyPanel migrationStats={mockMigrationStatsAborted} />);
+      render(<MigrationReadyPanel migrationStats={mockMigrationStatsStopped} />);
       expect(screen.getByTestId('ruleMigrationDescription')).toHaveTextContent(
         'Migration of 6 rules was stopped. You can resume it any time.'
       );
     });
 
     it('should render correct start migration button for aborted migration', () => {
-      render(<MigrationReadyPanel migrationStats={mockMigrationStatsAborted} />);
+      render(<MigrationReadyPanel migrationStats={mockMigrationStatsStopped} />);
       expect(screen.getByTestId('startMigrationButton')).toHaveTextContent('Resume translation');
     });
   });

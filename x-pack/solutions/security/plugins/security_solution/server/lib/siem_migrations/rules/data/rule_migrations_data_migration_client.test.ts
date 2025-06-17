@@ -234,7 +234,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
       });
     });
 
-    it('should update `is_stopped` & `finished_at` correctly when called setIsStopped', async () => {
+    it('should update `is_stopped` correctly when called setIsStopped', async () => {
       const migrationId = 'testId';
 
       await ruleMigrationsDataMigrationClient.setIsStopped({ id: migrationId });
