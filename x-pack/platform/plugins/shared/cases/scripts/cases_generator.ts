@@ -13,6 +13,7 @@ import type { KbnClientOptions } from '@kbn/test';
 import fs from 'fs';
 import pMap from 'p-map';
 import yargs from 'yargs';
+import { CaseSeverity, type CasePostRequest } from '../common';
 
 const toolingLogger = new ToolingLog({
   level: 'debug',
@@ -39,7 +40,21 @@ function updateURL({
   return urlObject.href;
 }
 
-const makeRequest = async ({ url, newCase, path, username, password, ssl }) => {
+const makeRequest = async ({
+  url,
+  newCase,
+  path,
+  username,
+  password,
+  ssl,
+}: {
+  url: string;
+  newCase: CasePostRequest;
+  path: string;
+  username: string;
+  password: string;
+  ssl: boolean;
+}) => {
   let ca: Buffer;
   const toolingLogOptions = { log: toolingLogger };
 
@@ -76,18 +91,19 @@ const makeRequest = async ({ url, newCase, path, username, password, ssl }) => {
       body: newCase,
     })
     .then(({ data }) => data)
-    .catch(console.error);
+    .catch(toolingLogger.error.bind(toolingLogger, `Error creating case: ${newCase.title}`));
 };
 
-const createCase = (counter, owner, reqId) => ({
+const createCase = (counter: number, owner: string, reqId: string): CasePostRequest => ({
   title: `Sample Case: ${reqId} - ${counter}`,
   tags: [],
-  severity: 'low',
+  severity: CaseSeverity.LOW,
   description: `Auto generated case ${counter}`,
   assignees: [],
   connector: {
     id: 'none',
     name: 'none',
+    // @ts-ignore
     type: '.none',
     fields: null,
   },
@@ -98,12 +114,26 @@ const createCase = (counter, owner, reqId) => ({
   customFields: [],
 });
 
-const getRandomString = (length) =>
+const getRandomString = (length: number) =>
   Math.random()
     .toString(36)
     .substring(2, length + 2);
 
-const generateCases = async ({ cases, space, username, password, kibana, port, ssl }) => {
+const generateCases = async ({
+  cases,
+  space,
+  username,
+  password,
+  kibana,
+  ssl,
+}: {
+  cases: CasePostRequest[];
+  space: string;
+  username: string;
+  password: string;
+  kibana: string;
+  ssl: boolean;
+}) => {
   try {
     console.log(`Creating ${cases.length} cases in ${space ? `space: ${space}` : 'default space'}`);
     const path = space ? `/s/${space}/api/cases` : '/api/cases';
@@ -167,7 +197,7 @@ const main = async () => {
       },
     }).argv;
 
-    const { username, password, kibana, port, count, owners, space, ssl } = argv;
+    const { username, password, kibana, count, owners, space, ssl } = argv;
     const numCasesToCreate = Number(count);
     const potentialOwners = new Set(['securitySolution', 'observability', 'cases']);
     const invalidOwnerProvided = owners.some((owner) => !potentialOwners.has(owner));
@@ -187,7 +217,7 @@ const main = async () => {
         return createCase(index + 1, owner, idForThisRequest);
       });
 
-    await generateCases({ cases, space, username, password, kibana, port, ssl });
+    await generateCases({ cases, space, username, password, kibana, ssl });
   } catch (error) {
     console.log(error);
   }
