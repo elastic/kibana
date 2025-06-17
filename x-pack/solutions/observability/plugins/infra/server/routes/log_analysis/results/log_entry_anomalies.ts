@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
-import { OBSERVABILITY_ANOMALIES_AND_CATEGORIES_ID } from '@kbn/observability-shared-plugin/common';
+import {} from '@kbn/observability-shared-plugin/common';
 import { logAnalysisResultsV1 } from '../../../../common/http_api';
 import type { InfraBackendLibs } from '../../../lib/infra_types';
 
@@ -16,13 +16,7 @@ import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 import { getLogEntryAnomalies } from '../../../lib/log_analysis';
 import { isMlPrivilegesError } from '../../../lib/log_analysis/errors';
 
-export const initGetLogEntryAnomaliesRoute = ({ framework, pricing }: InfraBackendLibs) => {
-  const isAnomaliesCategoriesAvailable = pricing!.isFeatureAvailable(
-    OBSERVABILITY_ANOMALIES_AND_CATEGORIES_ID
-  );
-  if (!isAnomaliesCategoriesAvailable) {
-    return;
-  }
+export const initGetLogEntryAnomaliesRoute = ({ framework }: InfraBackendLibs) => {
   framework
     .registerVersionedRoute({
       access: 'internal',

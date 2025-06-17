@@ -16,7 +16,6 @@ import type {
   MetricsExplorerLocator,
 } from '@kbn/observability-shared-plugin/common';
 import type { AlertsLocator } from '@kbn/observability-plugin/common';
-import type { PricingServiceStart } from '@kbn/core-pricing-server';
 import type { RulesServiceSetup } from '../services/rules';
 import type { InfraConfig, InfraPluginStartServicesAccessor } from '../types';
 import type { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
@@ -52,7 +51,6 @@ export interface InfraBackendLibs extends InfraDomainLibs {
   handleEsError: typeof handleEsError;
   logger: Logger;
   plugins: Plugins;
-  pricing?: PricingServiceStart;
 }
 
 export interface InfraLocators {

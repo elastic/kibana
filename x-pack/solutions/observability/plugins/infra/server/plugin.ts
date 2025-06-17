@@ -16,7 +16,6 @@ import {
   AssetDetailsLocatorDefinition,
   InventoryLocatorDefinition,
   MetricsExplorerLocatorDefinition,
-  OBSERVABILITY_ANOMALIES_AND_CATEGORIES_ID,
 } from '@kbn/observability-shared-plugin/common';
 import { type AlertsLocatorParams, alertsLocatorID } from '@kbn/observability-plugin/common';
 import { mapValues } from 'lodash';
@@ -130,16 +129,6 @@ export class InfraServerPlugin
       new MetricsExplorerLocatorDefinition()
     );
     const inventoryLocator = plugins.share.url.locators.create(new InventoryLocatorDefinition());
-
-    // Register product feature for Anomalies and Categories
-    core.pricing.registerProductFeatures([
-      {
-        id: OBSERVABILITY_ANOMALIES_AND_CATEGORIES_ID,
-        description:
-          'Observability Anomalies and Categories - Enables Anomalies and Categories links.',
-        products: [{ name: 'observability', tier: 'complete' }],
-      },
-    ]);
 
     // Setup infra services
     const inventoryViews = this.inventoryViews.setup();
@@ -265,8 +254,6 @@ export class InfraServerPlugin
   }
 
   start(core: CoreStart) {
-    this.libs.pricing = core.pricing;
-
     const inventoryViews = this.inventoryViews.start({
       infraSources: this.libs.sources,
       savedObjects: core.savedObjects,

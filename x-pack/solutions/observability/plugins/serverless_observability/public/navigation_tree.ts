@@ -10,10 +10,8 @@ import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 
 export const createNavigationTree = ({
   streamsAvailable,
-  isAnomaliesCategoriesAvailable,
 }: {
   streamsAvailable?: boolean;
-  isAnomaliesCategoriesAvailable: boolean;
 }): NavigationTreeDefinition => {
   return {
     body: [
@@ -259,7 +257,6 @@ export const createNavigationTree = ({
             title: i18n.translate('xpack.serverlessObservability.nav.otherTools', {
               defaultMessage: 'Other tools',
             }),
-            getIsActive: () => isAnomaliesCategoriesAvailable,
             renderAs: 'panelOpener',
             children: [
               {
