@@ -99,16 +99,20 @@ export function ComponentTemplatePanel({
       display="subdued"
       paddingSize="l"
       textAlign="left"
-      css={{ borderRadius: euiTheme.border.radius.small }}
+      css={{
+        '& [class*="euiCard__description"]': {
+          marginTop: '0',
+        },
+      }}
       title={
-        <EuiText size="s" css={{ fontWeight: euiTheme.font.weight.semiBold }} color="inherit">
+        <EuiText size="m" css={{ fontWeight: euiTheme.font.weight.semiBold }} color="inherit">
           {i18n.translate('xpack.streams.componentTemplatePanel.title', {
             defaultMessage: 'Component templates',
           })}
         </EuiText>
       }
       description={
-        <EuiText size="xs" color="subdued">
+        <EuiText size="s" color="subdued">
           {i18n.translate('xpack.streams.componentTemplatePanel.description', {
             defaultMessage:
               'Reuse settings, mappings, and aliases configurations in multiple index templates.',

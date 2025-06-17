@@ -16,7 +16,6 @@ import {
   Criteria,
   useEuiTheme,
 } from '@elastic/eui';
-
 import { css } from '@emotion/css';
 import { getSegments } from '@kbn/streams-schema';
 import { isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
@@ -42,7 +41,6 @@ type TableRow = EnrichedStreamTree & {
   rootDocumentsCount: number;
   rootRetentionMs: number;
 };
-
 export function StreamsTreeTable({
   loading,
   streams,
@@ -53,18 +51,6 @@ export function StreamsTreeTable({
   const router = useStreamsAppRouter();
   const { euiTheme } = useEuiTheme();
 
-  const toggleRowCollapsed = React.useCallback((name: string) => {
-    setCollapsedNodes((prev) => {
-      const next = new Set(prev);
-      if (next.has(name)) {
-        next.delete(name);
-      } else {
-        next.add(name);
-      }
-      return next;
-    });
-  }, []);
-
   const {
     dependencies: {
       start: {
@@ -72,7 +58,6 @@ export function StreamsTreeTable({
       },
     },
   } = useKibana();
-
   const { timeState } = useTimefilter();
   const [docCounts, setDocCounts] = useState<Record<string, number>>({});
 
@@ -112,19 +97,15 @@ export function StreamsTreeTable({
         setDocCounts(counts);
       }
     };
-
     fetchCounts();
-
     return () => {
       controller.abort();
     };
   }, [streamNames, timeState, streamsRepositoryClient]);
-
   type SortableField = 'nameSortKey' | 'documentsCount' | 'retentionMs';
   const [sortField, setSortField] = useState<SortableField>('nameSortKey');
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
 
-  const [collapsedNodes, setCollapsedNodes] = useState<Set<string>>(new Set());
   const enrichedTree = React.useMemo(() => {
     const enrich = (node: StreamTree): EnrichedStreamTree => {
       const documentsCount = docCounts[node.name] ?? 0;
@@ -144,66 +125,37 @@ export function StreamsTreeTable({
         children: node.children.map(enrich),
       } as EnrichedStreamTree;
     };
-
     return asTrees(streams ?? []).map(enrich);
   }, [streams, docCounts]);
 
-  const rootNames = React.useMemo(() => enrichedTree.map((t) => t.name), [enrichedTree]);
-
-  const areAllRootsCollapsed = React.useMemo(
-    () => rootNames.length > 0 && rootNames.every((n) => collapsedNodes.has(n)),
-    [rootNames, collapsedNodes]
-  );
-
-  useEffect(() => {
-    if (rootNames.length === 0) return;
-    setCollapsedNodes((prev) => {
-      const next = new Set<string>();
-      prev.forEach((n) => {
-        if (rootNames.includes(n)) next.add(n);
-      });
-      return next;
-    });
-  }, [rootNames]);
-
-  const flattenTree = useCallback(
-    (roots: EnrichedStreamTree[], collapsed: Set<string>): TableRow[] => {
-      const result: TableRow[] = [];
-
-      const walk = (node: EnrichedStreamTree, level: number, rootRow: TableRow) => {
-        node.children.forEach((child) => {
-          const childRow: TableRow = {
-            ...child,
-            level,
-            rootNameSortKey: rootRow.rootNameSortKey,
-            rootDocumentsCount: rootRow.rootDocumentsCount,
-            rootRetentionMs: rootRow.rootRetentionMs,
-          };
-          result.push(childRow);
-          if (!collapsed.has(child.name)) {
-            walk(child, level + 1, rootRow);
-          }
-        });
-      };
-
-      roots.forEach((root) => {
-        const rootRow: TableRow = {
-          ...root,
-          level: 0,
-          rootNameSortKey: root.nameSortKey,
-          rootDocumentsCount: root.documentsCount,
-          rootRetentionMs: root.retentionMs,
+  const flattenTree = useCallback((roots: EnrichedStreamTree[]): TableRow[] => {
+    const result: TableRow[] = [];
+    const walk = (node: EnrichedStreamTree, level: number, rootRow: TableRow) => {
+      node.children.forEach((child) => {
+        const childRow: TableRow = {
+          ...child,
+          level,
+          rootNameSortKey: rootRow.rootNameSortKey,
+          rootDocumentsCount: rootRow.rootDocumentsCount,
+          rootRetentionMs: rootRow.rootRetentionMs,
         };
-        result.push(rootRow);
-        if (!collapsed.has(root.name)) {
-          walk(root, 1, rootRow);
-        }
+        result.push(childRow);
+        walk(child, level + 1, rootRow);
       });
-
-      return result;
-    },
-    []
-  );
+    };
+    roots.forEach((root) => {
+      const rootRow: TableRow = {
+        ...root,
+        level: 0,
+        rootNameSortKey: root.nameSortKey,
+        rootDocumentsCount: root.documentsCount,
+        rootRetentionMs: root.retentionMs,
+      };
+      result.push(rootRow);
+      walk(root, 1, rootRow);
+    });
+    return result;
+  }, []);
 
   const sortedRoots = React.useMemo(() => {
     return [...enrichedTree].sort((a, b) => {
@@ -220,9 +172,8 @@ export function StreamsTreeTable({
   }, [enrichedTree, sortField, sortDirection]);
 
   const items = React.useMemo(() => {
-    return flattenTree(sortedRoots, collapsedNodes);
-  }, [sortedRoots, collapsedNodes, flattenTree]);
-
+    return flattenTree(sortedRoots);
+  }, [sortedRoots, flattenTree]);
   const onTableChange = useCallback(({ sort }: Criteria<TableRow>) => {
     if (sort) {
       setSortField(sort.field as SortableField);
@@ -243,35 +194,9 @@ export function StreamsTreeTable({
       columns={[
         {
           field: 'nameSortKey',
-          name: (
-            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} component="span">
-              <EuiFlexItem grow={false}>
-                <EuiIcon
-                  type={areAllRootsCollapsed ? 'unfold' : 'fold'}
-                  size="m"
-                  color="text"
-                  display="base"
-                  aria-label={i18n.translate('xpack.streams.streamsTreeTable.toggleFold', {
-                    defaultMessage: 'Toggle fold',
-                  })}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (areAllRootsCollapsed) {
-                      setCollapsedNodes(new Set());
-                    } else {
-                      setCollapsedNodes(new Set(rootNames));
-                    }
-                  }}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} css={{ width: 4 }} />
-              <EuiFlexItem grow={false}>
-                {i18n.translate('xpack.streams.streamsTreeTable.nameColumnName', {
-                  defaultMessage: 'Name',
-                })}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ),
+          name: i18n.translate('xpack.streams.streamsTreeTable.nameColumnName', {
+            defaultMessage: 'Name',
+          }),
           sortable: (row: TableRow) => row.rootNameSortKey,
           dataType: 'string',
           render: (_: unknown, item: TableRow) => (
@@ -285,19 +210,7 @@ export function StreamsTreeTable({
             >
               <EuiFlexItem grow={false}>
                 {item.children.length > 0 ? (
-                  <EuiIcon
-                    type={collapsedNodes.has(item.name) ? 'arrowRight' : 'arrowDown'}
-                    color="text"
-                    size="m"
-                    aria-label={i18n.translate('xpack.streams.streamsTreeTable.toggleRowFold', {
-                      defaultMessage: 'Toggle fold for {name}',
-                      values: { name: item.name },
-                    })}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleRowCollapsed(item.name);
-                    }}
-                  />
+                  <EuiIcon type="arrowDown" color="text" size="m" />
                 ) : (
                   <EuiIcon type="empty" color="text" size="m" />
                 )}
@@ -346,7 +259,7 @@ export function StreamsTreeTable({
       message={i18n.translate('xpack.streams.streamsTreeTable.noStreamsMessage', {
         defaultMessage: 'Loading streams...',
       })}
-      onChange={onTableChange}
+      onTableChange={onTableChange}
       pagination={{
         initialPageSize: 25,
         pageSizeOptions: [25, 50, 100],
