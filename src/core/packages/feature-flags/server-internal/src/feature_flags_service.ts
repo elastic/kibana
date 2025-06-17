@@ -26,6 +26,7 @@ import {
 import deepMerge from 'deepmerge';
 import { filter, switchMap, startWith, Subject, BehaviorSubject, pairwise, takeUntil } from 'rxjs';
 import { get } from 'lodash';
+import type { InitialFeatureFlagsGetter } from '@kbn/core-feature-flags-server/src/contracts';
 import { createOpenFeatureLogger } from './create_open_feature_logger';
 import { setProviderWithRetries } from './set_provider_with_retries';
 import { type FeatureFlagsConfig, featureFlagsConfig } from './feature_flags_config';
@@ -39,6 +40,11 @@ export interface InternalFeatureFlagsSetup extends FeatureFlagsSetup {
    * Used by the rendering service to share the overrides with the service on the browser side.
    */
   getOverrides: () => Record<string, unknown>;
+  /**
+   * Required to bootstrap the browser-side OpenFeature client with a seed of the feature flags for faster load-times
+   * and to work-around air-gapped environments.
+   */
+  getInitialFeatureFlags: () => Promise<Record<string, unknown>>;
 }
 
 /**
@@ -51,6 +57,7 @@ export class FeatureFlagsService {
   private readonly stop$ = new Subject<void>();
   private readonly overrides$ = new BehaviorSubject<Record<string, unknown>>({});
   private context: MultiContextEvaluationContext = { kind: 'multi' };
+  private initialFeatureFlagsGetter: InitialFeatureFlagsGetter = async () => ({});
 
   /**
    * The core service's constructor
@@ -77,6 +84,10 @@ export class FeatureFlagsService {
 
     return {
       getOverrides: () => this.overrides$.value,
+      getInitialFeatureFlags: () => this.initialFeatureFlagsGetter(),
+      setInitialFeatureFlagsGetter: (getter: InitialFeatureFlagsGetter) => {
+        this.initialFeatureFlagsGetter = getter;
+      },
       setProvider: (provider) => {
         if (OpenFeature.providerMetadata !== NOOP_PROVIDER.metadata) {
           throw new Error('A provider has already been set. This API cannot be called twice.');

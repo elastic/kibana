@@ -61,6 +61,7 @@ export interface InternalInjectedMetadataSetup {
   getFeatureFlags: () =>
     | {
         overrides: Record<string, unknown>;
+        initialFeatureFlags: Record<string, unknown>;
       }
     | undefined;
 }

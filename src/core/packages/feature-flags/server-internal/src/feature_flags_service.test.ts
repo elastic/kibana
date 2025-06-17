@@ -320,4 +320,19 @@ describe('FeatureFlagsService Server', () => {
       'myDestructuredObjPlugin.myOverriddenFlag': true,
     });
   });
+
+  describe('bootstrapping helpers', () => {
+    test('return empty initial feature flags if no getter registered', async () => {
+      const { getInitialFeatureFlags } = featureFlagsService.setup();
+      await expect(getInitialFeatureFlags()).resolves.toEqual({});
+    });
+
+    test('calls the getter when registered', async () => {
+      const { setInitialFeatureFlagsGetter, getInitialFeatureFlags } = featureFlagsService.setup();
+      const mockGetter = jest.fn().mockResolvedValue({ myFlag: true });
+      setInitialFeatureFlagsGetter(mockGetter);
+      await expect(getInitialFeatureFlags()).resolves.toEqual({ myFlag: true });
+      expect(mockGetter).toHaveBeenCalledTimes(1);
+    });
+  });
 });

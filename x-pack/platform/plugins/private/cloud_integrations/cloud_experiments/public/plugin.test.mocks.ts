@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { registerUsageCollector, getAllFlags } from './register_usage_collector';
+export const LaunchDarklyClientProviderMocked = jest.fn();
+jest.doMock('@openfeature/launchdarkly-client-provider', () => {
+  return {
+    LaunchDarklyClientProvider: LaunchDarklyClientProviderMocked,
+  };
+});
