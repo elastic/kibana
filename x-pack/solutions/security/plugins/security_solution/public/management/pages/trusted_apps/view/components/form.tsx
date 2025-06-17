@@ -260,6 +260,8 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
     >({});
     const [hasFormChanged, setHasFormChanged] = useState(false);
     const showAssignmentSection = useCanAssignArtifactPerPolicy(item, mode, hasFormChanged);
+    const [basicFormConditions, setBasicFormConditions] = useState<ArtifactFormComponentProps['item']>(item);
+    const [advancedFormConditions, setAdvancedFormConditions] = useState<ArtifactFormComponentProps['item']>(item);
     const [validationResult, setValidationResult] = useState<ValidationResult>(() =>
       validateValues(item)
     );
@@ -273,7 +275,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
     );
 
     const autocompleteSuggestions = useSuggestions(getSuggestionsFn);
-    
+
     // This value has to be memoized to avoid infinite useEffect loop on useFetchIndex
     const indexNames = useMemo(() => [eventsIndexPattern], []);
     const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(
@@ -314,6 +316,13 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       (updatedFormValues: ArtifactFormComponentProps['item']) => {
         const updatedValidationResult = validateValues(updatedFormValues);
         setValidationResult(updatedValidationResult);
+
+        if (isFormAdvancedMode) {
+          setAdvancedFormConditions(updatedFormValues);
+        } else {
+          setBasicFormConditions(updatedFormValues);
+        }
+
         onChange({
           item: updatedFormValues,
           isValid: updatedValidationResult.isValid,
@@ -371,20 +380,20 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
 
     const handleAdvancedModeChange = useCallback(
       (selectedId: string) => {
-        onChange({
-          item: {
-            ...item,
-            tags: getTagsUpdatedBy(
-              'advancedMode',
-              selectedId === 'advancedMode'
-                ? [ADVANCED_MODE_TAG]
-                : []
-            ),
-          },
-          isValid: true,
-        });
+        const nextItem: ArtifactFormComponentProps['item'] = {
+          ...(selectedId === 'advancedMode' ? advancedFormConditions : basicFormConditions),
+          tags: getTagsUpdatedBy(
+            'advancedMode',
+            selectedId === 'advancedMode'
+              ? [ADVANCED_MODE_TAG]
+              : []
+          ),
+        }
+
+        processChanged(nextItem);
+        setHasFormChanged(true);
       },
-      [getTagsUpdatedBy, item, onChange]
+      [getTagsUpdatedBy, item, processChanged]
     );
 
     const handleOnOsChange = useCallback(
