@@ -13485,7 +13485,7 @@ paths:
                       properties:
                         description:
                           type: string
-                        jobId:
+                        job_id:
                           type: string
                         state:
                           enum:
@@ -13496,22 +13496,22 @@ paths:
                             - opening
                           type: string
                       required:
-                        - jobId
+                        - job_id
                         - state
                     type: array
-                  mlModuleSetupStatus:
+                  ml_module_setup_status:
                     enum:
                       - complete
                       - incomplete
                     type: string
-                  packageInstallationStatus:
+                  package_installation_status:
                     enum:
                       - complete
                       - incomplete
                     type: string
                 required:
-                  - packageInstallationStatus
-                  - mlModuleSetupStatus
+                  - package_installation_status
+                  - ml_module_setup_status
                   - jobs
           description: Privileged access detection status retrieved
       summary: Gets the status of the privileged access detection package for the Entity Analytics privileged user monitoring experience
