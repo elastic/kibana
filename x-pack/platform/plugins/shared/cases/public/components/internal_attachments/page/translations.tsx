@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const ADDED_PAGE = i18n.translate('xpack.cases.caseView.links.addedLink', {
-  defaultMessage: 'added page',
+  defaultMessage: 'added a page',
 });
 export const REMOVED_PAGE = i18n.translate('xpack.cases.caseView.links.removedLink', {
   defaultMessage: 'removed page',

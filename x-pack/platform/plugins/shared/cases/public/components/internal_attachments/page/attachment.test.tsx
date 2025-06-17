@@ -19,16 +19,17 @@ describe('getPageAttachmentType', () => {
     persistableStateAttachmentState: {
       pathname: '/test/path',
       type: PAGE_ATTACHMENT_TYPE,
-      icon: 'link',
-      label: 'Test Page',
       url: {
         pathAndQuery: '/test/path?query=1',
+        iconType: 'link',
+        actionLabel: 'View in Dashboards',
         label: 'Test Link',
       },
       snapshot: {
         imgData: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA...',
       },
       renderComponentId: 'PageAttachmentChildren',
+      screenContext: 'This is a sample screen context for testing purposes.',
     },
     attachmentId: 'test',
     caseData: { title: 'Test Case', id: 'case-id' },

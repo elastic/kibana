@@ -106,7 +106,7 @@ export interface DashboardStartDependencies {
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   screenshotMode: ScreenshotModePluginStart;
-  share?: SharePluginStart;
+  share: SharePluginStart;
   spaces?: SpacesPluginStart;
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;

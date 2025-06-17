@@ -46,7 +46,7 @@ export let presentationUtilService: PresentationUtilPluginStart;
 export let savedObjectsTaggingService: SavedObjectTaggingOssPluginStart | undefined;
 export let screenshotModeService: ScreenshotModePluginStart;
 export let serverlessService: ServerlessPluginStart | undefined;
-export let shareService: SharePluginStart | undefined;
+export let shareService: SharePluginStart;
 export let spacesService: SpacesApi | undefined;
 export let uiActionsService: UiActionsPublicStart;
 export let urlForwardingService: UrlForwardingStart;

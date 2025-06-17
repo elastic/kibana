@@ -12,16 +12,17 @@ import type { PageAttachmentPersistedState } from './types';
 
 describe('PageAttachmentChildren', () => {
   const mockPersistableState: PageAttachmentPersistedState = {
-    label: 'Test Page',
-    icon: 'link',
     snapshot: {
       imgData: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA...',
     },
     type: 'mockType',
     url: {
+      actionLabel: 'View in Dashboards',
       pathAndQuery: '/test/path?query=1',
-      label: 'Test Link',
+      label: 'Sample Dashboard',
+      iconType: 'link',
     },
+    screenContext: 'This is a sample screen context for testing purposes.',
   };
 
   it('renders the link with correct label and href', () => {

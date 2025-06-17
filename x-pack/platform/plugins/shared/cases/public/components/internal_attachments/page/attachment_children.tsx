@@ -6,7 +6,17 @@
  */
 
 import React from 'react';
-import { EuiImage, EuiLink } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiImage,
+  EuiSpacer,
+  EuiLink,
+  EuiCallOut,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+} from '@elastic/eui';
 import type { PageAttachmentPersistedState } from './types';
 
 interface AttachmentChildrenProps {
@@ -16,13 +26,46 @@ interface AttachmentChildrenProps {
 export const PageAttachmentChildren: React.FC<AttachmentChildrenProps> = ({
   persistableStateAttachmentState,
 }) => {
-  const { pathname, label, snapshot } = persistableStateAttachmentState;
-
+  const { url, snapshot } = persistableStateAttachmentState;
+  if (!url) {
+    return (
+      <EuiCallOut
+        title={i18n.translate('xpack.cases.caseView.pageAttachment.noUrlProvidedTitle', {
+          defaultMessage: 'No URL provided',
+        })}
+        color="danger"
+        iconType="alert"
+      >
+        <EuiText>
+          <p>
+            {i18n.translate('xpack.cases.caseView.pageAttachment.noUrlProvided', {
+              defaultMessage: 'This page attachment does not contain a valid URL.',
+            })}
+          </p>
+        </EuiText>
+      </EuiCallOut>
+    );
+  }
+  const href = url.pathAndQuery || '';
+  const label = url.label;
   return (
     <>
-      <EuiLink href={pathname}>{label}</EuiLink>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiIcon type={persistableStateAttachmentState.url.iconType} size="m" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiLink href={href}>
+            <EuiText size="m">{label}</EuiText>
+          </EuiLink>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       {snapshot?.imgData && (
-        <EuiImage key="screenshot" src={snapshot.imgData} alt="screenshot" allowFullScreen />
+        <>
+          <EuiSpacer size="m" />
+          <EuiImage key="screenshot" src={snapshot.imgData} alt="screenshot" allowFullScreen />
+        </>
       )}
     </>
   );

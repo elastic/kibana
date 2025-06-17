@@ -9,7 +9,6 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import UseUnmount from 'react-use/lib/useUnmount';
-
 import {
   EuiBadge,
   EuiBreadcrumb,
@@ -56,9 +55,8 @@ import {
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoriteButton } from './dashboard_favorite_button';
-import { cases } from '../services/kibana_services';
-import { AddToCaseOpenModal } from '../dashboard_app/top_nav/cases/add_to_case_modal';
-
+import { AddToCaseModal } from '../dashboard_app/top_nav/cases/dashboard_add_to_case_modal';
+import { useScreenshot } from '../dashboard_app/top_nav/cases/use_screenshot';
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
   embedSettings?: DashboardEmbedSettings;
@@ -83,18 +81,12 @@ export function InternalDashboardTopNav({
   const [isChromeVisible, setIsChromeVisible] = useState(false);
   const [isLabsShown, setIsLabsShown] = useState(false);
   const [isAddToCaseModalOpen, setIsAddToCaseModalOpen] = useState(false);
-  const [screenshot, setScreenshot] = useState();
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
 
-  const {
-    ui: { getCasesContext },
-    helpers: { canUseCases },
-  } = cases;
-
   const isLabsEnabled = useMemo(() => coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI), []);
-  const canCases = useMemo(() => canUseCases(), [canUseCases]);
-  const CasesContext = useMemo(() => getCasesContext(), [getCasesContext]);
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
+
+  const { generateScreenshot, screenshot } = useScreenshot();
 
   const dashboardApi = useDashboardApi();
 
@@ -277,9 +269,8 @@ export function InternalDashboardTopNav({
   const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
     isLabsShown,
     setIsLabsShown,
-    isAddToCaseModalOpen,
     setIsAddToCaseModalOpen,
-    setScreenshot,
+    generateScreenshot,
     maybeRedirect,
     showResetChange,
   });
@@ -405,16 +396,7 @@ export function InternalDashboardTopNav({
       {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
       ) : null}
-      {isAddToCaseModalOpen && canCases && lastSavedId ? (
-        <CasesContext permissions={canCases} owner={[]}>
-          <AddToCaseOpenModal
-            savedObjectId={lastSavedId}
-            dashboardTitle={dashboardTitle}
-            screenshot={screenshot}
-            onClose={() => setIsAddToCaseModalOpen(false)}
-          />
-        </CasesContext>
-      ) : null}
+      <AddToCaseModal screenshot={screenshot} isOpen={isAddToCaseModalOpen} />
       {viewMode === 'edit' ? <DashboardEditingToolbar isDisabled={!!focusedPanelId} /> : null}
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
       <MountPointPortal setMountPoint={setFavoriteButtonMountPoint}>

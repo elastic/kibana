@@ -27,7 +27,6 @@
       "urlForwarding",
       "presentationUtil",
       "unifiedSearch",
-      "cases"
     ],
     "optionalPlugins": [
       "home",
@@ -40,14 +39,16 @@
       "serverless",
       "noDataPage",
       "observabilityAIAssistant",
-      "lens"
+      "lens",
+      "cases"
     ],
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
       "presentationUtil",
       "presentationPanel",
-      "savedObjects"
+      "savedObjects",
+      "cases"
     ]
   }
 }
