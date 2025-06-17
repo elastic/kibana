@@ -129,7 +129,7 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
           reporting: this.opts.reporting,
           index: report._index,
           id: report._id,
-          extension,
+          filename: `${title}-${runAt.toISOString()}.${extension}`,
           contentType: output.content_type,
           relatedObject: {
             id: reportSO.id,
@@ -140,7 +140,7 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
             to: email.to,
             cc: email.cc,
             bcc: email.bcc,
-            subject: `${title} [${runAt.toISOString()}] scheduled report`,
+            subject: `${title}-${runAt.toISOString()} scheduled report`,
             spaceId,
           },
         });

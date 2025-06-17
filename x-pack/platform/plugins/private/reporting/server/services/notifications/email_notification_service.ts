@@ -29,7 +29,7 @@ export class EmailNotificationService implements NotificationService {
     reporting: ReportingCore,
     index: string,
     id: string,
-    extension: string,
+    filename: string,
     contentType?: string | null
   ): Promise<Attachment[]> {
     const stream = await getContentStream(reporting, { id, index });
@@ -43,7 +43,7 @@ export class EmailNotificationService implements NotificationService {
       {
         content: content.toString('base64'),
         ...(contentType ? { contentType } : {}),
-        filename: `report.${extension}`,
+        filename,
         encoding: 'base64',
       },
     ];
@@ -54,7 +54,7 @@ export class EmailNotificationService implements NotificationService {
     index,
     id,
     contentType,
-    extension,
+    filename,
     relatedObject,
     emailParams,
   }: NotifyArgs) {
@@ -62,9 +62,9 @@ export class EmailNotificationService implements NotificationService {
       throw new Error('Email notification service is not available');
     }
 
-    const attachments = await this.getAttachments(reporting, index, id, extension, contentType);
+    const attachments = await this.getAttachments(reporting, index, id, filename, contentType);
     const { to, bcc, cc, subject, spaceId } = emailParams;
-    const message = "Here's your report!";
+    const message = 'Your scheduled report is attached for you to download or share.';
     await this.notifications.getEmailService().sendAttachmentEmail({
       to,
       bcc,

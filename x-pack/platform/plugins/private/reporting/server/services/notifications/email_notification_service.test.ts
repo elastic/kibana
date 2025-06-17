@@ -49,7 +49,7 @@ describe('EmailNotificationService', () => {
       reporting: mockCore,
       index: '.reporting-test-1234',
       id: '1234',
-      extension: 'pdf',
+      filename: 'test-report.pdf',
       contentType: 'test-content-type',
       relatedObject: {
         id: 'report-so-id',
@@ -68,7 +68,7 @@ describe('EmailNotificationService', () => {
           content: 'dGVzdC1vdXRwdXR0ZXN0LW91dHB1dA==',
           contentType: 'test-content-type',
           encoding: 'base64',
-          filename: 'report.pdf',
+          filename: 'test-report.pdf',
         },
       ],
       context: {
@@ -80,7 +80,7 @@ describe('EmailNotificationService', () => {
           },
         ],
       },
-      message: "Here's your report!",
+      message: 'Your scheduled report is attached for you to download or share.',
       spaceId: 'space1',
       subject: 'Scheduled report for 04/18/2025',
       to: ['test@test.com'],
@@ -95,7 +95,7 @@ describe('EmailNotificationService', () => {
         reporting: mockCore,
         index: '.reporting-test-1234',
         id: '1234',
-        extension: 'pdf',
+        filename: 'test-report.pdf',
         contentType: 'test-content-type',
         relatedObject: {
           id: 'report-so-id',
