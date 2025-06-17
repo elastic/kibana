@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse } from '../parser';
-import { Parser } from '../parser/parser';
+import { parse } from '../../parser';
+import { Parser } from '../../parser/parser';
+import { EsqlQuery } from '../../query';
 import {
   ESQLColumn,
   ESQLCommand,
@@ -23,41 +24,40 @@ import {
   ESQLIdentifier,
   ESQLMap,
   ESQLMapEntry,
-  ESQLAstRerankCommand,
-} from '../types';
-import { walk, Walker } from './walker';
-
-test('can walk all functions', () => {
-  const { root } = parse('TS index | EVAL a(b(c(foo)))');
-  const functions: string[] = [];
-
-  walk(root, {
-    visitFunction: (fn) => functions.push(fn.name),
-  });
-
-  expect(functions.sort()).toStrictEqual(['a', 'b', 'c']);
-});
-
-test('can find assignment expression', () => {
-  const query = 'TS source | STATS var0 = bucket(bytes, 1 hour)';
-  const { root } = parse(query);
-  const functions: ESQLFunction[] = [];
-
-  Walker.walk(root, {
-    visitFunction: (fn) => {
-      if (fn.name === '=') {
-        functions.push(fn);
-      }
-    },
-  });
-
-  expect(functions.length).toBe(1);
-  expect(functions[0].name).toBe('=');
-  expect(functions[0].args.length).toBe(2);
-  expect((functions[0].args[0] as any).name).toBe('var0');
-});
+} from '../../types';
+import { walk, Walker } from '../walker';
 
 describe('structurally can walk all nodes', () => {
+  test('can walk all functions', () => {
+    const { root } = parse('TS index | EVAL a(b(c(foo)))');
+    const functions: string[] = [];
+
+    walk(root, {
+      visitFunction: (fn) => functions.push(fn.name),
+    });
+
+    expect(functions.sort()).toStrictEqual(['a', 'b', 'c']);
+  });
+
+  test('can find assignment expression', () => {
+    const query = 'TS source | STATS var0 = bucket(bytes, 1 hour)';
+    const { root } = parse(query);
+    const functions: ESQLFunction[] = [];
+
+    Walker.walk(root, {
+      visitFunction: (fn) => {
+        if (fn.name === '=') {
+          functions.push(fn);
+        }
+      },
+    });
+
+    expect(functions.length).toBe(1);
+    expect(functions[0].name).toBe('=');
+    expect(functions[0].args.length).toBe(2);
+    expect((functions[0].args[0] as any).name).toBe('var0');
+  });
+
   describe('commands', () => {
     test('can visit a single source command', () => {
       const { ast } = parse('FROM index');
@@ -863,431 +863,52 @@ describe('structurally can walk all nodes', () => {
       ]);
     });
   });
-});
 
-describe('Walker.commands()', () => {
-  test('can collect all commands', () => {
-    const { ast } = parse(
-      'FROM index | STATS a = 123 | WHERE 123 | LIMIT 10 | RERANK "query" ON field WITH id'
-    );
-    const commands = Walker.commands(ast);
+  describe('returns parent nodes', () => {
+    test('function arguments', () => {
+      const { ast } = EsqlQuery.fromSrc('ROW a(1), b(2)');
+      const tuples: Array<[value: number, function: string]> = [];
 
-    expect(commands.map(({ name }) => name).sort()).toStrictEqual([
-      'from',
-      'limit',
-      'rerank',
-      'stats',
-      'where',
-    ]);
-  });
-});
-
-describe('Walker.params()', () => {
-  test('can collect all params', () => {
-    const query = 'ROW x = ?';
-    const { ast } = parse(query);
-    const params = Walker.params(ast);
-
-    expect(params).toMatchObject([
-      {
-        type: 'literal',
-        literalType: 'param',
-        paramType: 'unnamed',
-      },
-    ]);
-  });
-
-  test('can collect all params from grouping functions', () => {
-    const query =
-      'ROW x=1, time=2024-07-10 | stats z = avg(x) by bucket(time, 20, ?_tstart,?_tend)';
-    const { ast } = parse(query);
-    const params = Walker.params(ast);
-
-    expect(params).toMatchObject([
-      {
-        type: 'literal',
-        literalType: 'param',
-        paramType: 'named',
-        value: '_tstart',
-      },
-      {
-        type: 'literal',
-        literalType: 'param',
-        paramType: 'named',
-        value: '_tend',
-      },
-    ]);
-  });
-
-  test('can collect params from column names', () => {
-    const query = 'ROW ?a.?b';
-    const { ast } = parse(query);
-    const params = Walker.params(ast);
-
-    expect(params).toMatchObject([
-      {
-        type: 'literal',
-        literalType: 'param',
-        paramType: 'named',
-        value: 'a',
-      },
-      {
-        type: 'literal',
-        literalType: 'param',
-        paramType: 'named',
-        value: 'b',
-      },
-    ]);
-  });
-
-  test('can collect params from column names, where first part is not a param', () => {
-    const query = 'ROW a.?b';
-    const { ast } = parse(query);
-    const params = Walker.params(ast);
-
-    expect(params).toMatchObject([
-      {
-        type: 'literal',
-        literalType: 'param',
-        paramType: 'named',
-        value: 'b',
-      },
-    ]);
-  });
-
-  test('can collect all types of param from column name', () => {
-    const query = 'ROW ?.?0.?a';
-    const { ast } = parse(query);
-    const params = Walker.params(ast);
-
-    expect(params).toMatchObject([
-      {
-        type: 'literal',
-        literalType: 'param',
-        paramType: 'unnamed',
-      },
-      {
-        type: 'literal',
-        literalType: 'param',
-        paramType: 'positional',
-        value: 0,
-      },
-      {
-        type: 'literal',
-        literalType: 'param',
-        paramType: 'named',
-        value: 'a',
-      },
-    ]);
-  });
-
-  test('can collect params from function names', () => {
-    const query = 'FROM a | STATS ?lala()';
-    const { ast } = parse(query);
-    const params = Walker.params(ast);
-
-    expect(params).toMatchObject([
-      {
-        type: 'literal',
-        literalType: 'param',
-        paramType: 'named',
-        value: 'lala',
-      },
-    ]);
-  });
-
-  test('can collect params from function names (unnamed)', () => {
-    const query = 'FROM a | STATS ?()';
-    const { ast } = parse(query);
-    const params = Walker.params(ast);
-
-    expect(params).toMatchObject([
-      {
-        type: 'literal',
-        literalType: 'param',
-        paramType: 'unnamed',
-      },
-    ]);
-  });
-
-  test('can collect params from function names (positional)', () => {
-    const query = 'FROM a | STATS agg(test), ?123()';
-    const { ast } = parse(query);
-    const params = Walker.params(ast);
-
-    expect(params).toMatchObject([
-      {
-        type: 'literal',
-        literalType: 'param',
-        paramType: 'positional',
-        value: 123,
-      },
-    ]);
-  });
-});
-
-describe('Walker.find()', () => {
-  test('can find a bucket() function', () => {
-    const query = 'FROM b | STATS var0 = bucket(bytes, 1 hour), fn(1), fn(2), agg(true)';
-    const fn = Walker.find(
-      parse(query).ast!,
-      (node) => node.type === 'function' && node.name === 'bucket'
-    );
-
-    expect(fn).toMatchObject({
-      type: 'function',
-      name: 'bucket',
-    });
-  });
-
-  test('can find RERANK command by inference ID', () => {
-    const query =
-      'FROM b | RERANK "query" ON field WITH abc | RERANK "query" ON field WITH my_id | LIMIT 10';
-    const command = Walker.find(parse(query).root, (node) => {
-      if (node.type === 'command' && node.name === 'rerank') {
-        const cmd = node as ESQLAstRerankCommand;
-        if (cmd.inferenceId.name === 'my_id') {
-          return true;
-        }
-      }
-      return false;
-    });
-
-    expect(command).toMatchObject({
-      type: 'command',
-      name: 'rerank',
-      inferenceId: {
-        type: 'identifier',
-        name: 'my_id',
-      },
-    });
-  });
-
-  test('finds the first "fn" function', () => {
-    const query = 'FROM b | STATS var0 = bucket(bytes, 1 hour), fn(1), fn(2), agg(true)';
-    const fn = Walker.find(
-      parse(query).ast!,
-      (node) => node.type === 'function' && node.name === 'fn'
-    );
-
-    expect(fn).toMatchObject({
-      type: 'function',
-      name: 'fn',
-      args: [
-        {
-          type: 'literal',
-          value: 1,
+      walk(ast, {
+        visitLiteral: (node, parent) => {
+          tuples.push([node.value as number, (parent as ESQLFunction).name]);
         },
-      ],
+      });
+
+      expect(tuples).toStrictEqual([
+        [1, 'a'],
+        [2, 'b'],
+      ]);
     });
   });
-});
 
-describe('Walker.findAll()', () => {
-  test('find all "fn" functions', () => {
-    const query = 'FROM b | STATS var0 = bucket(bytes, 1 hour), fn(1), fn(2), agg(true)';
-    const list = Walker.findAll(
-      parse(query).ast!,
-      (node) => node.type === 'function' && node.name === 'fn'
-    );
+  test('source parent command', () => {
+    const { ast } = EsqlQuery.fromSrc('FROM a, b');
+    const tuples: Array<[index: string, command: string]> = [];
 
-    expect(list).toMatchObject([
-      {
-        type: 'function',
-        name: 'fn',
-        args: [
-          {
-            type: 'literal',
-            value: 1,
-          },
-        ],
+    walk(ast, {
+      visitSource: (node, parent) => {
+        tuples.push([node.name, (parent as ESQLCommand).name]);
       },
-      {
-        type: 'function',
-        name: 'fn',
-        args: [
-          {
-            type: 'literal',
-            value: 2,
-          },
-        ],
-      },
-    ]);
-  });
-});
-
-describe('Walker.match()', () => {
-  test('can find a bucket() function', () => {
-    const query = 'FROM b | STATS var0 = bucket(bytes, 1 hour), fn(1), fn(2), agg(true)';
-    const fn = Walker.match(parse(query).ast!, {
-      type: 'function',
-      name: 'bucket',
     });
 
-    expect(fn).toMatchObject({
-      type: 'function',
-      name: 'bucket',
-    });
-  });
-
-  test('finds the first "fn" function', () => {
-    const query = 'FROM b | STATS var0 = bucket(bytes, 1 hour), fn(1), fn(2), agg(true)';
-    const fn = Walker.match(parse(query).ast!, { type: 'function', name: 'fn' });
-
-    expect(fn).toMatchObject({
-      type: 'function',
-      name: 'fn',
-      args: [
-        {
-          type: 'literal',
-          value: 1,
-        },
-      ],
-    });
-  });
-
-  test('can find a deeply nested column', () => {
-    const query =
-      'FROM index | WHERE 123 == add(1 + fn(NOT 10 + -(a.b.c::ip)::INTEGER /* comment */))';
-    const { root } = parse(query);
-    const res = Walker.match(root, {
-      type: 'column',
-      name: 'a.b.c',
-    });
-
-    expect(res).toMatchObject({
-      type: 'column',
-      name: 'a.b.c',
-    });
-  });
-
-  test('can find WHERE command by its type', () => {
-    const query = 'FROM index | LEFT JOIN a | RIGHT JOIN b';
-    const { root } = parse(query);
-
-    const join1 = Walker.match(root, {
-      type: 'command',
-      name: 'join',
-      commandType: 'left',
-    })!;
-    const source1 = Walker.match(join1, {
-      type: 'source',
-      name: 'a',
-    })!;
-    const join2 = Walker.match(root, {
-      type: 'command',
-      name: 'join',
-      commandType: 'right',
-    })!;
-    const source2 = Walker.match(join2, {
-      type: 'source',
-      name: 'b',
-    })!;
-
-    expect(source1).toMatchObject({
-      name: 'a',
-    });
-    expect(source2).toMatchObject({
-      name: 'b',
-    });
-  });
-});
-
-describe('Walker.matchAll()', () => {
-  test('find all "fn" functions', () => {
-    const query = 'FROM b | STATS var0 = bucket(bytes, 1 hour), fn(1), fn(2), agg(true)';
-    const list = Walker.matchAll(parse(query).ast!, {
-      type: 'function',
-      name: 'fn',
-    });
-
-    expect(list).toMatchObject([
-      {
-        type: 'function',
-        name: 'fn',
-        args: [
-          {
-            type: 'literal',
-            value: 1,
-          },
-        ],
-      },
-      {
-        type: 'function',
-        name: 'fn',
-        args: [
-          {
-            type: 'literal',
-            value: 2,
-          },
-        ],
-      },
+    expect(tuples).toStrictEqual([
+      ['a', 'from'],
+      ['b', 'from'],
     ]);
   });
 
-  test('find all "fn" and "agg" functions', () => {
-    const query = 'FROM b | STATS var0 = bucket(bytes, 1 hour), fn(1), fn(2), agg(true)';
-    const list = Walker.matchAll(parse(query).ast!, {
-      type: 'function',
-      name: ['fn', 'agg'],
+  test('column parent', () => {
+    const { ast } = EsqlQuery.fromSrc('ROW a | LIMIT 10');
+    const tuples: Array<[index: string, command: string]> = [];
+
+    walk(ast, {
+      visitColumn: (node, parent) => {
+        tuples.push([node.name, (parent as ESQLCommand).name]);
+      },
+      order: 'backward',
     });
 
-    expect(list).toMatchObject([
-      {
-        type: 'function',
-        name: 'fn',
-        args: [
-          {
-            type: 'literal',
-            value: 1,
-          },
-        ],
-      },
-      {
-        type: 'function',
-        name: 'fn',
-        args: [
-          {
-            type: 'literal',
-            value: 2,
-          },
-        ],
-      },
-      {
-        type: 'function',
-        name: 'agg',
-      },
-    ]);
-  });
-
-  test('find all functions which start with "b" or "a"', () => {
-    const query = 'FROM b | STATS var0 = bucket(bytes, 1 hour), fn(1), fn(2), agg(true)';
-    const list = Walker.matchAll(parse(query).ast!, {
-      type: 'function',
-      name: /^a|b/i,
-    });
-
-    expect(list).toMatchObject([
-      {
-        type: 'function',
-        name: 'bucket',
-      },
-      {
-        type: 'function',
-        name: 'agg',
-      },
-    ]);
-  });
-});
-
-describe('Walker.hasFunction()', () => {
-  test('can find binary expression expression', () => {
-    const query1 = 'FROM a | STATS bucket(bytes, 1 hour)';
-    const query2 = 'FROM b | STATS var0 == bucket(bytes, 1 hour)';
-    const has1 = Walker.hasFunction(parse(query1).ast!, '==');
-    const has2 = Walker.hasFunction(parse(query2).ast!, '==');
-
-    expect(has1).toBe(false);
-    expect(has2).toBe(true);
+    expect(tuples).toStrictEqual([['a', 'row']]);
   });
 });
