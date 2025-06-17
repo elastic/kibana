@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiLink, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { IlmLocatorParams, ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-common-shared';
 import {
@@ -19,11 +19,22 @@ import { useKibana } from '../../hooks/use_kibana';
 
 export function ClassicStreamBadge() {
   return (
-    <EuiBadge color="hollow">
-      {i18n.translate('xpack.streams.entityDetailViewWithoutParams.unmanagedBadgeLabel', {
-        defaultMessage: 'Classic',
+    <EuiToolTip
+      position="top"
+      title={i18n.translate('xpack.streams.badges.classic.title', {
+        defaultMessage: 'Classic Stream',
       })}
-    </EuiBadge>
+      content={i18n.translate('xpack.streams.badges.classic.description', {
+        defaultMessage:
+          'Classic streams are based on existing data streams and may not support all Streams features like custom re-routing',
+      })}
+    >
+      <EuiBadge color="hollow">
+        {i18n.translate('xpack.streams.entityDetailViewWithoutParams.unmanagedBadgeLabel', {
+          defaultMessage: 'Classic',
+        })}
+      </EuiBadge>
+    </EuiToolTip>
   );
 }
 
@@ -41,6 +52,7 @@ export function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamEffective
         <EuiLink
           data-test-subj="streamsAppLifecycleBadgeIlmPolicyNameLink"
           color="text"
+          target="_blank"
           href={ilmLocator?.getRedirectUrl({
             page: 'policy_edit',
             policyName: lifecycle.ilm.policy,

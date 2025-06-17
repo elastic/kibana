@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiHealth, EuiLink, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiHealth, EuiLink, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import type { UnmanagedElasticsearchAssetDetails } from '@kbn/streams-plugin/server/lib/streams/stream_crud';
 import { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import { LocatorPublic } from '@kbn/share-plugin/public';
@@ -36,7 +36,7 @@ function DataStreamHealth({ health }: { health?: HealthStatus }) {
   if (!health) {
     return '-';
   }
-  return <EuiHealth color={healthToColor(health)}>{health}</EuiHealth>;
+  return <EuiHealth color={healthToColor(health)}>{health.toLowerCase()}</EuiHealth>;
 }
 
 export function DataStreamDetails({
@@ -44,8 +44,6 @@ export function DataStreamDetails({
   onFlyoutOpen,
   indexManagementLocator,
 }: DataStreamDetailsProps) {
-  const { euiTheme } = useEuiTheme();
-
   return (
     <EuiPanel
       hasShadow={false}
@@ -56,39 +54,47 @@ export function DataStreamDetails({
       `}
     >
       <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiText css={{ fontWeight: euiTheme.font.weight.semiBold }}>
-          {i18n.translate('xpack.streams.streamDetailView.dataStream', {
-            defaultMessage: 'Data stream',
-          })}
-        </EuiText>
+        <EuiTitle size="xs">
+          <p>
+            {i18n.translate('xpack.streams.streamDetailView.dataStream', {
+              defaultMessage: 'Data stream',
+            })}
+          </p>
+        </EuiTitle>
         <EuiFlexGroup direction="row" gutterSize="xs">
           <EuiFlexGroup direction="column" gutterSize="xs">
-            <EuiText size="xs" css={{ fontWeight: euiTheme.font.weight.semiBold }}>
-              {i18n.translate('xpack.streams.streamDetailView.dataStreamName', {
-                defaultMessage: 'Name',
-              })}
-            </EuiText>
+            <EuiTitle size="xxxs">
+              <p>
+                {i18n.translate('xpack.streams.streamDetailView.dataStreamName', {
+                  defaultMessage: 'Name',
+                })}
+              </p>
+            </EuiTitle>
             <EuiLink onClick={() => onFlyoutOpen(dataStream?.name || '')}>
               {dataStream ? dataStream.name : '-'}
               <ManagedBadge meta={dataStream?._meta} />
             </EuiLink>
           </EuiFlexGroup>
           <EuiFlexGroup direction="column" gutterSize="xs">
-            <EuiText size="xs" css={{ fontWeight: euiTheme.font.weight.semiBold }}>
-              {i18n.translate('xpack.streams.streamDetailView.health', {
-                defaultMessage: 'Health',
-              })}
-            </EuiText>
-            <EuiText size="xs" css={{ fontWeight: euiTheme.font.weight.semiBold }}>
+            <EuiTitle size="xxxs">
+              <p>
+                {i18n.translate('xpack.streams.streamDetailView.health', {
+                  defaultMessage: 'Health',
+                })}
+              </p>
+            </EuiTitle>
+            <EuiText size="xs">
               <DataStreamHealth health={dataStream?.status} />
             </EuiText>
           </EuiFlexGroup>
           <EuiFlexGroup direction="column" gutterSize="xs">
-            <EuiText size="xs" css={{ fontWeight: euiTheme.font.weight.semiBold }}>
-              {i18n.translate('xpack.streams.streamDetailView.numberOfIndices', {
-                defaultMessage: 'Indices',
-              })}
-            </EuiText>
+            <EuiTitle size="xxxs">
+              <p>
+                {i18n.translate('xpack.streams.streamDetailView.numberOfIndices', {
+                  defaultMessage: 'Indices',
+                })}
+              </p>
+            </EuiTitle>
             <EuiLink
               href={
                 (dataStream &&
@@ -103,12 +109,14 @@ export function DataStreamDetails({
             </EuiLink>
           </EuiFlexGroup>
           <EuiFlexGroup direction="column" gutterSize="xs">
-            <EuiText size="xs" css={{ fontWeight: euiTheme.font.weight.semiBold }}>
-              {i18n.translate('xpack.streams.streamDetailView.indexMode', {
-                defaultMessage: 'Index mode',
-              })}
-            </EuiText>
-            <EuiText size="s" css={{ fontWeight: euiTheme.font.weight.semiBold }}>
+            <EuiTitle size="xxxs">
+              <p>
+                {i18n.translate('xpack.streams.streamDetailView.indexMode', {
+                  defaultMessage: 'Index mode',
+                })}
+              </p>
+            </EuiTitle>
+            <EuiText size="s">
               {/* index_mode is a new property and not part of the typing yet */}
               {(dataStream as { index_mode?: string } | undefined)?.index_mode || '-'}
             </EuiText>

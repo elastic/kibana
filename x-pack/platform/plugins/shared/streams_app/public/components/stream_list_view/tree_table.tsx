@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -26,8 +26,6 @@ import { DocumentsColumn } from './documents_column';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { RetentionColumn } from './retention_column';
 import { parseDurationInSeconds } from '../data_management/stream_detail_lifecycle/helpers';
-import { useKibana } from '../../hooks/use_kibana';
-import { useTimefilter } from '../../hooks/use_timefilter';
 
 interface EnrichedStreamTree extends Omit<StreamTree, 'children'> {
   children: EnrichedStreamTree[];
@@ -51,64 +49,12 @@ export function StreamsTreeTable({
   const router = useStreamsAppRouter();
   const { euiTheme } = useEuiTheme();
 
-  const {
-    dependencies: {
-      start: {
-        streams: { streamsRepositoryClient },
-      },
-    },
-  } = useKibana();
-  const { timeState } = useTimefilter();
-  const [docCounts, setDocCounts] = useState<Record<string, number>>({});
-
-  const streamNames = React.useMemo(() => (streams ?? []).map((s) => s.stream.name), [streams]);
-
-  useEffect(() => {
-    if (streamNames.length === 0) return;
-
-    const controller = new AbortController();
-    const fetchCounts = async () => {
-      const counts: Record<string, number> = {};
-      await Promise.all(
-        streamNames.map(async (name) => {
-          try {
-            const startStr = String(timeState.start);
-            const endStr = String(timeState.end);
-
-            const { details } = await streamsRepositoryClient.fetch(
-              'GET /internal/streams/{name}/_details',
-              {
-                params: {
-                  path: { name },
-                  query: { start: startStr, end: endStr },
-                },
-                signal: controller.signal,
-              }
-            );
-            counts[name] = details?.count ?? 0;
-          } catch (e) {
-            if (!controller.signal.aborted) {
-              counts[name] = 0;
-            }
-          }
-        })
-      );
-      if (!controller.signal.aborted) {
-        setDocCounts(counts);
-      }
-    };
-    fetchCounts();
-    return () => {
-      controller.abort();
-    };
-  }, [streamNames, timeState, streamsRepositoryClient]);
-  type SortableField = 'nameSortKey' | 'documentsCount' | 'retentionMs';
+  type SortableField = 'nameSortKey' | 'retentionMs';
   const [sortField, setSortField] = useState<SortableField>('nameSortKey');
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
 
   const enrichedTree = React.useMemo(() => {
     const enrich = (node: StreamTree): EnrichedStreamTree => {
-      const documentsCount = docCounts[node.name] ?? 0;
       let retentionMs = 0;
       const lc = node.effective_lifecycle;
       if (isDslLifecycle(lc)) {
@@ -120,13 +66,13 @@ export function StreamsTreeTable({
       return {
         ...node,
         nameSortKey,
-        documentsCount,
+        documentsCount: 0,
         retentionMs,
         children: node.children.map(enrich),
       } as EnrichedStreamTree;
     };
     return asTrees(streams ?? []).map(enrich);
-  }, [streams, docCounts]);
+  }, [streams]);
 
   const flattenTree = useCallback((roots: EnrichedStreamTree[]): TableRow[] => {
     const result: TableRow[] = [];
@@ -175,7 +121,7 @@ export function StreamsTreeTable({
     return flattenTree(sortedRoots);
   }, [sortedRoots, flattenTree]);
   const onTableChange = useCallback(({ sort }: Criteria<TableRow>) => {
-    if (sort) {
+    if (sort && (sort.field === 'nameSortKey' || sort.field === 'retentionMs')) {
       setSortField(sort.field as SortableField);
       setSortDirection(sort.direction);
     }
@@ -228,11 +174,19 @@ export function StreamsTreeTable({
         },
         {
           field: 'documentsCount',
-          name: i18n.translate('xpack.streams.streamsTreeTable.documentsColumnName', {
-            defaultMessage: 'Documents',
-          }),
+          name: (
+            <span
+              className={css`
+                margin-right: ${euiTheme.size.l};
+              `}
+            >
+              {i18n.translate('xpack.streams.streamsTreeTable.documentsColumnName', {
+                defaultMessage: 'Documents',
+              })}
+            </span>
+          ),
           width: '280px',
-          sortable: (row: TableRow) => row.rootDocumentsCount,
+          sortable: false,
           dataType: 'number',
           render: (_: unknown, item: TableRow) =>
             item.data_stream ? (

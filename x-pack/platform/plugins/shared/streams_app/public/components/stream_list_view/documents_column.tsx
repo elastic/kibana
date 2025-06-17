@@ -48,7 +48,7 @@ export function DocumentsColumn({
   const chartBaseTheme = useElasticChartsTheme();
   const { euiTheme } = useEuiTheme();
 
-  const LoadingState: React.FC = React.useCallback(
+  const LoadingPlaceholder: React.FC = React.useCallback(
     () => (
       <EuiFlexGroup
         alignItems="center"
@@ -140,7 +140,7 @@ export function DocumentsColumn({
       `}
     >
       {histogramQueryFetch.loading ? (
-        <LoadingState />
+        <LoadingPlaceholder />
       ) : (
         <>
           <EuiFlexItem
@@ -149,7 +149,13 @@ export function DocumentsColumn({
               text-align: right;
             `}
           >
-            {hasData ? <EuiI18nNumber value={docCount} /> : 'N/A'}
+            {hasData ? (
+              <EuiI18nNumber value={docCount} />
+            ) : (
+              i18n.translate('xpack.streams.documentsColumn.noDataLabel', {
+                defaultMessage: 'N/A',
+              })
+            )}
           </EuiFlexItem>
           <EuiFlexItem
             grow={3}

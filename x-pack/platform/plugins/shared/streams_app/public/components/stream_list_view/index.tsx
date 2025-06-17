@@ -17,7 +17,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { StreamsTreeTable } from './tree_table';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
-import { StreamsListEmptyState } from './streams_list_empty_state';
+import { StreamsListEmptyPrompt } from './streams_list_empty_prompt';
 
 export function StreamListView() {
   const {
@@ -105,7 +105,7 @@ export function StreamListView() {
 
       <StreamsAppPageTemplate.Body grow>
         {!streamsListFetch.loading && !streamsListFetch.value?.length ? (
-          <StreamsListEmptyState onAddData={handleAddData} />
+          <StreamsListEmptyPrompt onAddData={handleAddData} />
         ) : (
           <StreamsTreeTable loading={streamsListFetch.loading} streams={streamsListFetch.value} />
         )}

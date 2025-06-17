@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiLink, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiLink, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import type { UnmanagedElasticsearchAssetDetails } from '@kbn/streams-plugin/server/lib/streams/stream_crud';
 import { css } from '@emotion/css';
 import { ManagedBadge } from './managed_badge';
@@ -21,8 +21,6 @@ export function IngestPipelineDetails({
   ingestPipeline,
   onFlyoutOpen,
 }: IngestPipelineDetailsProps) {
-  const { euiTheme } = useEuiTheme();
-
   return (
     <EuiPanel
       hasShadow={false}
@@ -33,18 +31,22 @@ export function IngestPipelineDetails({
       `}
     >
       <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiText css={{ fontWeight: euiTheme.font.weight.semiBold }}>
-          {i18n.translate('xpack.streams.streamDetailView.ingestPipeline', {
-            defaultMessage: 'Ingest pipeline',
-          })}
-        </EuiText>
+        <EuiTitle size="xs">
+          <p>
+            {i18n.translate('xpack.streams.streamDetailView.ingestPipeline', {
+              defaultMessage: 'Ingest pipeline',
+            })}
+          </p>
+        </EuiTitle>
         <EuiFlexGroup direction="row" gutterSize="xs">
           <EuiFlexGroup direction="column" gutterSize="xs">
-            <EuiText size="xs" css={{ fontWeight: euiTheme.font.weight.semiBold }}>
-              {i18n.translate('xpack.streams.streamDetailView.ingestPipelineName', {
-                defaultMessage: 'Name',
-              })}
-            </EuiText>
+            <EuiTitle size="xxxs">
+              <p>
+                {i18n.translate('xpack.streams.streamDetailView.ingestPipelineName', {
+                  defaultMessage: 'Name',
+                })}
+              </p>
+            </EuiTitle>
             {ingestPipeline ? (
               <EuiLink onClick={() => onFlyoutOpen(ingestPipeline.name)}>
                 {ingestPipeline.name}

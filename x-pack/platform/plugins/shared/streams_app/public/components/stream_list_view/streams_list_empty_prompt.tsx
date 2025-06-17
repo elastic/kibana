@@ -24,7 +24,7 @@ interface Props {
   onAddData?: () => void;
 }
 
-export const StreamsListEmptyState: React.FC<Props> = ({ onAddData }) => (
+export const StreamsListEmptyPrompt: React.FC<Props> = ({ onAddData }) => (
   <EuiFlexGroup justifyContent="center" alignItems="center">
     <EuiPanel
       paddingSize="none"
@@ -106,3 +106,6 @@ export const StreamsListEmptyState: React.FC<Props> = ({ onAddData }) => (
     </EuiPanel>
   </EuiFlexGroup>
 );
+
+// Temporary alias to maintain backward compatibility while other imports are updated.
+export { StreamsListEmptyPrompt as StreamsListEmptyState };

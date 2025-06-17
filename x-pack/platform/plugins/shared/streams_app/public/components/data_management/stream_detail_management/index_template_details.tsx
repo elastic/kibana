@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiLink, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiLink, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import type { UnmanagedElasticsearchAssetDetails } from '@kbn/streams-plugin/server/lib/streams/stream_crud';
 import { css } from '@emotion/css';
 import { ManagedBadge } from './managed_badge';
@@ -18,7 +18,6 @@ interface IndexTemplateDetailsProps {
 }
 
 export function IndexTemplateDetails({ indexTemplate, onFlyoutOpen }: IndexTemplateDetailsProps) {
-  const { euiTheme } = useEuiTheme();
   const patterns = indexTemplate?.index_template.index_patterns ?? [];
 
   return (
@@ -31,18 +30,22 @@ export function IndexTemplateDetails({ indexTemplate, onFlyoutOpen }: IndexTempl
       `}
     >
       <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiText css={{ fontWeight: euiTheme.font.weight.semiBold }}>
-          {i18n.translate('xpack.streams.streamDetailView.indexTemplate', {
-            defaultMessage: 'Index template',
-          })}
-        </EuiText>
+        <EuiTitle size="xs">
+          <p>
+            {i18n.translate('xpack.streams.streamDetailView.indexTemplate', {
+              defaultMessage: 'Index template',
+            })}
+          </p>
+        </EuiTitle>
         <EuiFlexGroup direction="row" gutterSize="xs">
           <EuiFlexGroup direction="column" gutterSize="xs">
-            <EuiText size="xs" css={{ fontWeight: euiTheme.font.weight.semiBold }}>
-              {i18n.translate('xpack.streams.streamDetailView.indexTemplateName', {
-                defaultMessage: 'Name',
-              })}
-            </EuiText>
+            <EuiTitle size="xxxs">
+              <p>
+                {i18n.translate('xpack.streams.streamDetailView.indexTemplateName', {
+                  defaultMessage: 'Name',
+                })}
+              </p>
+            </EuiTitle>
             <EuiLink
               onClick={() => {
                 onFlyoutOpen(indexTemplate?.name || '');
@@ -53,11 +56,13 @@ export function IndexTemplateDetails({ indexTemplate, onFlyoutOpen }: IndexTempl
             </EuiLink>
           </EuiFlexGroup>
           <EuiFlexGroup direction="column" gutterSize="xs">
-            <EuiText size="xs" css={{ fontWeight: euiTheme.font.weight.semiBold }}>
-              {i18n.translate('xpack.streams.streamDetailView.indexPatterns', {
-                defaultMessage: 'Patterns',
-              })}
-            </EuiText>
+            <EuiTitle size="xxxs">
+              <p>
+                {i18n.translate('xpack.streams.streamDetailView.indexPatterns', {
+                  defaultMessage: 'Patterns',
+                })}
+              </p>
+            </EuiTitle>
             <EuiText size="s">{Array.isArray(patterns) ? patterns.join(', ') : '-'}</EuiText>
           </EuiFlexGroup>
         </EuiFlexGroup>
