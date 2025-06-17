@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Client as ESClient } from 'elasticsearch-8.x'; // Switch to `@elastic/elasticsearch` when the CI cluster is upgraded.
+import { Client as ESClient } from '@elastic/elasticsearch';
 import {
   AggregationsAvgAggregate,
   AggregationsMaxAggregate,
@@ -15,7 +15,7 @@ import {
   AggregationsStatsBucketAggregate,
   AggregationsStringTermsBucket,
   SearchResponse,
-} from 'elasticsearch-8.x/lib/api/types'; // Switch to `@elastic/elasticsearch/lib/api/types` when the CI cluster is upgraded.
+} from '@elastic/elasticsearch/lib/api/types';
 import fs from 'node:fs';
 import path from 'node:path';
 import { z } from '@kbn/zod';
