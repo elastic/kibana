@@ -259,6 +259,38 @@ describe('AlertDelete Modal', () => {
     });
   });
 
+  it('shows a warning toast when schedule returns a message', async () => {
+    mockHttpGet({ affectedAlertCount: 100 });
+    http.post.mockResolvedValueOnce(`task is already running!`);
+
+    render(
+      <AlertDeleteModal
+        onCloseModal={closeModalMock}
+        isVisible
+        services={servicesMock}
+        categoryIds={['management']}
+      />,
+      { wrapper }
+    );
+
+    const activeCheckbox = screen.getByTestId('alert-delete-active-checkbox');
+    fireEvent.click(activeCheckbox);
+
+    const deleteInput = screen.getByTestId('alert-delete-delete-confirmation');
+    fireEvent.change(deleteInput, { target: { value: i18n.DELETE_PASSKEY } });
+
+    const submitButton = screen.getByTestId('alert-delete-submit');
+    await waitFor(() => {
+      expect(submitButton).not.toBeDisabled();
+    });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(notifications.toasts.addInfo).toHaveBeenCalledWith(`task is already running!`);
+      expect(closeModalMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
   it('doesnt include a threshold that has been activated and then deactivated', async () => {
     mockHttpGet({ affectedAlertCount: 100 });
     http.post.mockResolvedValueOnce(null);
