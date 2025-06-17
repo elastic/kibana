@@ -173,9 +173,11 @@ describe('injectAnalyzeWildcard', () => {
       MAX_QUERIES: 5,
     }));
 
-    const { injectAnalyzeWildcard } = await import('./inject_analyze_wildcard');
+    const { injectAnalyzeWildcard: injectAnalyzeWildcardMocked } = await import(
+      './inject_analyze_wildcard'
+    );
     const query = getQuery();
 
-    expect(() => injectAnalyzeWildcard(query)).toThrow('Query is too deeply nested');
+    expect(() => injectAnalyzeWildcardMocked(query)).toThrow('Query is too deeply nested');
   });
 });
