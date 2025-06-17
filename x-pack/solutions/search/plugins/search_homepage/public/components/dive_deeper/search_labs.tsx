@@ -6,9 +6,8 @@
  */
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { docLinks } from '../../../common/doc_links';
-
 import React from 'react';
+import { docLinks } from '../../../common/doc_links';
 
 export const SearchLabs: React.FC = () => (
   <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="searchLabsSection">

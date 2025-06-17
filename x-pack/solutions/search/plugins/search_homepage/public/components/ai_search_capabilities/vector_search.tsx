@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { CREATE_INDEX } from '../../../common/constants';
 
-import VectorSearchImage from '../../../public/assets/vector_search.svg';
+import VectorSearchImage from '../../assets/vector_search.svg';
 import { useKibana } from '../../hooks/use_kibana';
 
 export const VectorSearch: React.FC = () => {

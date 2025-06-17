@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { CREATE_INDEX } from '../../../common/constants';
 
-import SemanticSearchImage from '../../../public/assets/semantic_search.svg';
+import SemanticSearchImage from '../../assets/semantic_search.svg';
 import { useKibana } from '../../hooks/use_kibana';
 
 export const SemanticSearch: React.FC = () => {

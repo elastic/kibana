@@ -13,12 +13,12 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { QueryClient, QueryCache } from '@tanstack/react-query';
 import { PLUGIN_ID } from '../common';
 
 import { SearchHomepage } from './embeddable';
 import { isHomepageEnabled } from './feature_flags';
 import { docLinks } from '../common/doc_links';
-import { QueryClient, QueryCache } from '@tanstack/react-query';
 import {
   SearchHomepageConfigType,
   SearchHomepagePluginSetup,
