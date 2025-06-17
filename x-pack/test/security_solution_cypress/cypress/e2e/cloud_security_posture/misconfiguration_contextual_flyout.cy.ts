@@ -19,8 +19,8 @@ import { login } from '../../tasks/login';
 import { ALERTS_URL } from '../../urls/navigation';
 import { visit } from '../../tasks/navigation';
 
-export const CDR_MOCK_THIRD_PARTY_INDEX_PATTERN =
-  'logs-cloud_security_posture.findings_latest-default';
+export const CDR_MOCK_THIRD_PARTY_MISCONFIGURATION_LATEST_INDEX =
+  'security_solution-test.misconfiguration_latest';
 
 const CSP_INSIGHT_MISCONFIGURATION_TITLE = getDataTestSubjectSelector(
   'securitySolutionFlyoutInsightsMisconfigurationsTitleLink'
@@ -99,13 +99,17 @@ const mockFindingUserName = (matches: boolean) => {
 const putIndexMapping = () => {
   rootRequest({
     method: 'PUT',
-    url: `${Cypress.env('ELASTICSEARCH_URL')}/${CDR_MOCK_THIRD_PARTY_INDEX_PATTERN}`,
+    url: `${Cypress.env(
+      'ELASTICSEARCH_URL'
+    )}/${CDR_MOCK_THIRD_PARTY_MISCONFIGURATION_LATEST_INDEX}`,
     body: {},
   });
 
   rootRequest({
     method: 'PUT',
-    url: `${Cypress.env('ELASTICSEARCH_URL')}/${CDR_MOCK_THIRD_PARTY_INDEX_PATTERN}/_mapping`,
+    url: `${Cypress.env(
+      'ELASTICSEARCH_URL'
+    )}/${CDR_MOCK_THIRD_PARTY_MISCONFIGURATION_LATEST_INDEX}/_mapping`,
     body: {
       properties: {
         'result.evaluation': {
@@ -163,10 +167,15 @@ const putIndexMapping = () => {
     },
   });
 };
-const createMockFinding = (isNameMatches: boolean, findingType: 'host.name' | 'user.name') => {
+const createMockMisconfigurationFinding = (
+  isNameMatches: boolean,
+  findingType: 'host.name' | 'user.name'
+) => {
   return rootRequest({
     method: 'POST',
-    url: `${Cypress.env('ELASTICSEARCH_URL')}/${CDR_MOCK_THIRD_PARTY_INDEX_PATTERN}/_doc`,
+    url: `${Cypress.env(
+      'ELASTICSEARCH_URL'
+    )}/${CDR_MOCK_THIRD_PARTY_MISCONFIGURATION_LATEST_INDEX}/_doc`,
     body:
       findingType === 'host.name'
         ? mockFindingHostName(isNameMatches)
@@ -174,10 +183,12 @@ const createMockFinding = (isNameMatches: boolean, findingType: 'host.name' | 'u
   });
 };
 
-const deleteDataStream = () => {
+const deleteLatestMisconfigurationIndex = () => {
   return rootRequest({
     method: 'DELETE',
-    url: `${Cypress.env('ELASTICSEARCH_URL')}/${CDR_MOCK_THIRD_PARTY_INDEX_PATTERN}`,
+    url: `${Cypress.env(
+      'ELASTICSEARCH_URL'
+    )}/${CDR_MOCK_THIRD_PARTY_MISCONFIGURATION_LATEST_INDEX}`,
   });
   return;
 };
@@ -194,14 +205,14 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
   context('Host name - Has misconfiguration findings', () => {
     beforeEach(() => {
       putIndexMapping();
-      createMockFinding(true, 'host.name');
+      createMockMisconfigurationFinding(true, 'host.name');
       cy.reload();
       expandFirstAlertHostFlyout();
     });
 
     afterEach(() => {
       /* Deleting data stream even though we don't create it because data stream is automatically created when Cloud security API is used  */
-      deleteDataStream();
+      deleteLatestMisconfigurationIndex();
     });
 
     it('should display Misconfiguration preview under Insights Entities when it has Misconfiguration Findings', () => {
@@ -227,7 +238,7 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
       });
 
       afterEach(() => {
-        deleteDataStream();
+        deleteLatestMisconfigurationIndex();
       });
 
       it('should display Misconfiguration preview under Insights Entities when it has Misconfiguration Findings', () => {
@@ -248,7 +259,7 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
     });
 
     afterEach(() => {
-      deleteDataStream();
+      deleteLatestMisconfigurationIndex();
     });
 
     it('should display Misconfiguration preview under Insights Entities when it has Misconfiguration Findings', () => {
@@ -274,7 +285,7 @@ describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless']
       });
 
       afterEach(() => {
-        deleteDataStream();
+        deleteLatestMisconfigurationIndex();
       });
 
       it('should display Misconfiguration preview under Insights Entities when it has Misconfiguration Findings', () => {
