@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FormProvider as ReactHookFormProvider, useForm } from 'react-hook-form';
+import { FormProvider as ReactHookFormProvider, useForm, UseFormGetValues } from 'react-hook-form';
 import React, { useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useDebounceFn } from '@kbn/react-hooks';
@@ -18,7 +18,7 @@ import { playgroundFormResolver } from '../utils/playground_form_resolver';
 
 type PartialPlaygroundForm = Partial<PlaygroundForm>;
 export const LOCAL_STORAGE_KEY = 'search_playground_session';
-export const LOCAL_STORAGE_DEBOUNCE_OPTIONS = { wait: 100 };
+export const LOCAL_STORAGE_DEBOUNCE_OPTIONS = { wait: 100, maxWait: 500 };
 
 const DEFAULT_FORM_VALUES: PartialPlaygroundForm = {
   prompt: DEFAULT_LLM_PROMPT,
@@ -43,7 +43,8 @@ const getLocalSession = (storage: Storage): PartialPlaygroundForm => {
   }
 };
 
-const setLocalSession = (formState: PartialPlaygroundForm, storage: Storage) => {
+const setLocalSession = (getValues: UseFormGetValues<PlaygroundForm>, storage: Storage) => {
+  const formState = getValues();
   // omit question and search_query from the session state
   const { question, search_query: _searchQuery, ...state } = formState;
 
@@ -86,8 +87,8 @@ export const UnsavedFormProvider: React.FC<React.PropsWithChildren<UnsavedFormPr
 
   const setLocalSessionDebounce = useDebounceFn(setLocalSession, LOCAL_STORAGE_DEBOUNCE_OPTIONS);
   useEffect(() => {
-    const subscription = form.watch((values) =>
-      setLocalSessionDebounce.run(values as PartialPlaygroundForm, storage)
+    const subscription = form.watch((_values) =>
+      setLocalSessionDebounce.run(form.getValues, storage)
     );
     return () => subscription.unsubscribe();
   }, [form, storage, setLocalSessionDebounce]);
