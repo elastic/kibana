@@ -129,7 +129,7 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
           reporting: this.opts.reporting,
           index: report._index,
           id: report._id,
-          filename: `${title}.${extension}`,
+          filename: `${title}-${runAt.toISOString()}.${extension}`,
           contentType: output.content_type,
           relatedObject: {
             id: reportSO.id,
