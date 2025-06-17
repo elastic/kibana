@@ -272,7 +272,8 @@ async function enableEntityStore(providerContext: FtrProviderContext): Promise<v
         .expect(200);
       if (body.status == 'error') {
         console.log(`Expected body.status to be 'running', got 'error': ${JSON.stringify(body)}`);
-        return false;
+        success = false;
+        return true;
       }
       expect(body.status).to.eql('running');
       success = true;
