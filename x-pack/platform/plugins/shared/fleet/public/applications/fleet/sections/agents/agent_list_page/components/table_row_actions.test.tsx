@@ -53,7 +53,7 @@ function renderTableRowActions({
 }
 describe('TableRowActions', () => {
   beforeEach(() => {
-    mockedExperimentalFeaturesService.get.mockReturnValue({ enableAgentMigrations: false } as any);
+    mockedExperimentalFeaturesService.get.mockReturnValue({ enableAgentMigrations: true } as any); // mock the flag as true so the test runs and the table action item renders
     mockedUseAuthz.mockReturnValue({
       fleet: {
         all: true,
@@ -65,10 +65,7 @@ describe('TableRowActions', () => {
     mockedUseAgentVersion.mockReturnValue('8.10.2');
   });
 
-  // Conditionally run the migrate agent tests only if the flag is enabled
-  const agentMigrationsEnabled = mockedExperimentalFeaturesService.get().enableAgentMigrations;
-
-  (agentMigrationsEnabled ? describe : describe.skip)('Migrate agent action', () => {
+  describe('Migrate agent action', () => {
     function renderAndGetMigrateButton({
       agent,
       agentPolicy,
@@ -128,6 +125,24 @@ describe('TableRowActions', () => {
           is_managed: true,
           is_protected: false,
           package_policies: [{ package: { name: 'fleet_server' } }],
+        } as AgentPolicy,
+      });
+
+      expect(res).toBe(null);
+    });
+    it('should not render an active action button when feature flag is disabled', async () => {
+      mockedExperimentalFeaturesService.get.mockReturnValue({
+        enableAgentMigrations: false,
+      } as any);
+      const res = renderAndGetMigrateButton({
+        agent: {
+          active: true,
+          status: 'online',
+          local_metadata: { elastic: { agent: { version: '8.8.0' } } },
+        } as any,
+        agentPolicy: {
+          is_managed: false,
+          is_protected: false,
         } as AgentPolicy,
       });
 
