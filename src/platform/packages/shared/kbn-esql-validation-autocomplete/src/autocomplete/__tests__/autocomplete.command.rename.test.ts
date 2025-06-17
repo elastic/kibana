@@ -25,13 +25,22 @@ describe('autocomplete.suggest', () => {
       await assertSuggestions('from a | rename field = foo, fie/', expectedSuggestions);
     });
 
-    it('suggests AS and = after field', async () => {
+    it('suggests AS after an existing field', async () => {
       const { assertSuggestions } = await setup();
-      await assertSuggestions('from a | rename field /', ['AS ', '= ']);
-      await assertSuggestions('from a | rename field A/', ['AS ', '= ']);
-      await assertSuggestions('from a | rename field AS foo, field2 /', ['AS ', '= ']);
-      await assertSuggestions('from a | rename field as foo , field2 /', ['AS ', '= ']);
-      await assertSuggestions('from a | rename field AS foo, field2 A/', ['AS ', '= ']);
+      await assertSuggestions('from a | rename textField /', ['AS ']);
+      await assertSuggestions('from a | rename textField A/', ['AS ']);
+      await assertSuggestions('from a | rename field AS foo, textField /', ['AS ']);
+      await assertSuggestions('from a | rename field as foo , textField /', ['AS ']);
+      await assertSuggestions('from a | rename field AS foo, textField A/', ['AS ']);
+    });
+
+    it('suggests = after a field that does not exist', async () => {
+      const { assertSuggestions } = await setup();
+      await assertSuggestions('from a | rename field /', ['= ']);
+      await assertSuggestions('from a | rename field A/', ['= ']);
+      await assertSuggestions('from a | rename field AS foo, field /', ['= ']);
+      await assertSuggestions('from a | rename field as foo , field /', ['= ']);
+      await assertSuggestions('from a | rename field AS foo, field A/', ['= ']);
     });
 
     it('suggests nothing after AS', async () => {
