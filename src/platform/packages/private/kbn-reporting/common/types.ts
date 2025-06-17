@@ -14,7 +14,6 @@ import type {
 import type { ConcreteTaskInstance, RruleSchedule } from '@kbn/task-manager-plugin/server';
 import { JOB_STATUS } from './constants';
 import type { LocatorParams } from './url';
-import { Rrule } from '@kbn/task-manager-plugin/server/task';
 
 export * from './url';
 
