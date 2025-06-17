@@ -37,8 +37,8 @@
     "@kbn/esql-types",
     "@kbn/field-types",
     "@kbn/licensing-plugin",
-    "@kbn/i18n-react",
-    "@kbn/file-upload-common"
+    "@kbn/index-editor",
+    "@kbn/esql-ast"
   ],
   "exclude": [
     "target/**/*",
