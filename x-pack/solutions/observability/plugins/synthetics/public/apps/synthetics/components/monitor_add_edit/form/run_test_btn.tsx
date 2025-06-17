@@ -25,30 +25,21 @@ export const RunTestButton = ({
   canUsePublicLocations?: boolean;
   isServiceAllowed?: boolean;
 }) => {
-  const { formState, getValues, handleSubmit } = useFormContext();
+  const { handleSubmit } = useFormContext();
 
   const [inProgress, setInProgress] = useState(false);
   const [testRun, setTestRun] = useState<TestRun>();
   const { space } = useKibanaSpace();
   const { spaceId } = useGetUrlParams();
 
-  const handleTestNow = () => {
-    const config = getValues() as MonitorFieldsType;
-    if (config) {
-      // Trigger form validation
-      const isValid = Object.keys(formState.errors).length === 0;
-      if (isValid) {
-        setInProgress(true);
-        setTestRun({
-          id: uuidv4(),
-          name: config.name,
-          monitor: format(config) as MonitorFieldsType,
-        });
-      } else {
-        // Trigger form validation to show errors
-        handleSubmit(() => {})();
-      }
-    }
+  const handleTestNow = (formData: any) => {
+    const config = formData as MonitorFieldsType;
+    setInProgress(true);
+    setTestRun({
+      id: uuidv4(),
+      name: config.name,
+      monitor: format(config) as MonitorFieldsType,
+    });
   };
 
   const {
