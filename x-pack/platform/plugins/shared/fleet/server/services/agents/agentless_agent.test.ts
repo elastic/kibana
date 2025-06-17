@@ -51,7 +51,7 @@ mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
 }));
 
 jest.spyOn(agentPolicyService, 'getFullAgentPolicy').mockResolvedValue({
-  outputs: { elasticsearch: {} as any },
+  outputs: { agentless: {} as any },
 } as any);
 
 const mockedListEnrollmentApiKeys = listEnrollmentApiKeys as jest.Mock<
@@ -199,7 +199,7 @@ describe('Agentless Agent service', () => {
             elasticsearch_app_token: 'es-app-token',
           },
           policy_details: {
-            output_name: 'elasticsearch',
+            output_name: 'agentless',
           },
         }),
         headers: expect.anything(),
@@ -304,6 +304,9 @@ describe('Agentless Agent service', () => {
           secrets: {
             fleet_app_token: 'fleet-app-token',
             elasticsearch_app_token: 'es-app-token',
+          },
+          policy_details: {
+            output_name: 'agentless',
           },
         }),
         headers: expect.anything(),
@@ -422,6 +425,9 @@ describe('Agentless Agent service', () => {
           secrets: {
             fleet_app_token: 'fleet-app-token',
             elasticsearch_app_token: 'es-app-token',
+          },
+          policy_details: {
+            output_name: 'agentless',
           },
         }),
         headers: expect.anything(),
@@ -548,6 +554,9 @@ describe('Agentless Agent service', () => {
           secrets: {
             fleet_app_token: 'fleet-app-token',
             elasticsearch_app_token: 'es-app-token',
+          },
+          policy_details: {
+            output_name: 'agentless',
           },
         }),
         headers: expect.anything(),
