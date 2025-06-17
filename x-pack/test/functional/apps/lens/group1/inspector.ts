@@ -12,7 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const inspector = getService('inspector');
 
-  describe('Inspector nick', () => {
+  describe('Inspector', () => {
     it('should allow switch between table page', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
