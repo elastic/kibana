@@ -39,19 +39,17 @@ export const PageSelectionCheckbox = ({
   );
   const [pageSelectionChecked, setPageSelectionChecked] = useState(
     (!isExcludedMode &&
-      (isDeleteAll ||
-        conversationOptionsIds.every((id) => deletedConversationsIds.includes(id)))) ||
+      conversationOptionsIds.every((id) => deletedConversationsIds.includes(id))) ||
       (isExcludedMode && !excludedIds.some((id) => conversationOptionsIds.includes(id)))
   );
 
   useEffect(() => {
     setPageSelectionChecked(
       (!isExcludedMode &&
-        (isDeleteAll ||
-          conversationOptionsIds.every((id) => deletedConversationsIds.includes(id)))) ||
+        conversationOptionsIds.every((id) => deletedConversationsIds.includes(id))) ||
         (isExcludedMode && !excludedIds.some((id) => conversationOptionsIds.includes(id)))
     );
-  }, [isDeleteAll, deletedConversationsIds, conversationOptionsIds, excludedIds, isExcludedMode]);
+  }, [deletedConversationsIds, conversationOptionsIds, excludedIds, isExcludedMode]);
 
   if (conversationOptionsIds.length === 0) {
     return null;
@@ -95,16 +93,16 @@ export const InputCheckbox = ({
   totalItemCount: number;
 }) => {
   const [checked, setChecked] = useState(
-    (!isExcludedMode && (isDeleteAll || deletedConversationsIds.includes(conversation.id))) ||
+    (!isExcludedMode && deletedConversationsIds.includes(conversation.id)) ||
       (isExcludedMode && !excludedIds.includes(conversation.id))
   );
 
   useEffect(() => {
     setChecked(
-      (!isExcludedMode && (isDeleteAll || deletedConversationsIds.includes(conversation.id))) ||
+      (!isExcludedMode && deletedConversationsIds.includes(conversation.id)) ||
         (isExcludedMode && !excludedIds.includes(conversation.id))
     );
-  }, [isDeleteAll, deletedConversationsIds, conversation.id, excludedIds, isExcludedMode]);
+  }, [deletedConversationsIds, conversation.id, excludedIds, isExcludedMode]);
 
   return (
     <EuiCheckbox

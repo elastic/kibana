@@ -58,7 +58,7 @@ export const deleteAllConversationsRoute = (router: ElasticAssistantPluginRouter
 
           return response.ok({
             body: {
-              success: hasFailures,
+              success: !hasFailures,
               totalDeleted: result?.total,
               failures: hasFailures
                 ? result.failures?.map((failure) => failure.cause.reason)
