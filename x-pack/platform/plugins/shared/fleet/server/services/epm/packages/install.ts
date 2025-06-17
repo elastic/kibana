@@ -99,6 +99,7 @@ import { removeInstallation } from './remove';
 
 export const UPLOAD_RETRY_AFTER_MS = 10000; // 10s
 const MAX_ENSURE_INSTALL_TIME = 60 * 1000;
+const MAX_INSTALL_RETRIES = 5;
 
 const PACKAGES_TO_INSTALL_WITH_STREAMING = [
   // The security_detection_engine package contains a large number of assets and
@@ -205,16 +206,30 @@ export async function ensureInstalledPackage(options: {
     };
   }
   const pkgkey = Registry.pkgToPkgKey(pkgKeyProps);
-  const installResult = await installPackage({
-    installSource: 'registry',
-    savedObjectsClient,
-    pkgkey,
-    spaceId,
-    esClient,
-    neverIgnoreVerificationError: !force,
-    force: true, // Always force outdated packages to be installed if a later version isn't installed
-    authorizationHeader,
-  });
+
+  const installPackageWithRetries = async (attempt: number): Promise<InstallResult> => {
+    const installResult = await installPackage({
+      installSource: 'registry',
+      savedObjectsClient,
+      pkgkey,
+      spaceId,
+      esClient,
+      neverIgnoreVerificationError: !force,
+      force: true, // Always force outdated packages to be installed if a later version isn't installed
+      authorizationHeader,
+    });
+
+    if (
+      attempt < MAX_INSTALL_RETRIES &&
+      installResult.error?.message.includes('version_conflict_engine_exception')
+    ) {
+      return await installPackageWithRetries(++attempt);
+    } else {
+      return installResult;
+    }
+  };
+
+  const installResult = await installPackageWithRetries(0);
 
   if (installResult.error) {
     const errorPrefix =
