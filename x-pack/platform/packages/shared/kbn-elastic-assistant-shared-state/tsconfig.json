@@ -20,6 +20,6 @@
   ],
   "kbn_references": [
     "@kbn/elastic-assistant",
-    "@kbn/core",
+    "@kbn/core-mount-utils-browser",
   ]
 }
