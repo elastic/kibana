@@ -311,11 +311,11 @@ export class SiemRulesMigrationsService {
     this.invalidateRuleMigrationQueries(ruleMigrationStats.id);
   }
 
-  /*
+  /**
    * Once a migration finishes, we invalidate siem migration's
    * selected`GET` queries
    *
-   * */
+   */
   private invalidateRuleMigrationQueries(migrationId: string) {
     const MIGRATION_QUERY_PATHS_TO_INVALIDATE = [
       SIEM_RULE_MIGRATION_RULES_PATH,
