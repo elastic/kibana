@@ -212,4 +212,43 @@ describe('useEditorQuerySync', () => {
       abortController
     );
   });
+  it('should  overwrite editor when external query changes during loading', () => {
+    const abortController = new AbortController();
+    const onTextLangQuerySubmit = jest.fn();
+    const { result, rerender } = renderHook((props) => useEditorQuerySync(props), {
+      initialProps: {
+        ...defaultProps,
+        initialQueryEsql: 'FROM test | LIMIT 1',
+        isLoading: true,
+        editorIsInline: false,
+        isEditorMounted: true,
+        currentAbortController: abortController,
+        onTextLangQuerySubmit,
+      },
+    });
+
+    act(() => {
+      result.current.handleQueryUpdate('FROM test | LIMIT 10');
+    });
+
+    expect(result.current.code).toBe('FROM test | LIMIT 10');
+
+    rerender({
+      ...defaultProps,
+      isLoading: true,
+      initialQueryEsql: 'FROM test | LIMIT 10',
+      isEditorMounted: true,
+      onTextLangQuerySubmit,
+    });
+    expect(result.current.code).toBe('FROM test | LIMIT 10');
+
+    rerender({
+      ...defaultProps,
+      isLoading: true,
+      initialQueryEsql: 'FROM test | LIMIT 1000',
+      isEditorMounted: true,
+      onTextLangQuerySubmit,
+    });
+    expect(result.current.code).toBe('FROM test | LIMIT 1000');
+  });
 });

@@ -44,8 +44,8 @@ export const useEditorQuerySync = ({
 
   const [query, setQuery] = useState({
     external: fixedQuery,
-    edited: fixedQuery ?? '',
-    submitted: fixedQuery ?? '',
+    edited: '',
+    submitted: '',
     isLoading,
     isLoadingExternal: isLoading,
   });
@@ -61,14 +61,20 @@ export const useEditorQuerySync = ({
           ...prevState,
           external: fixedQuery,
           isLoadingExternal: isLoading,
+          edited: prevState.edited === fixedQuery ? '' : prevState.edited,
         };
 
         if (externalIsLoadingChanged) {
           nextQuery.isLoading = isLoading;
         }
 
-        if (queryChanged && (editorIsInline || (externalQueryChanged && !prevState.isLoading))) {
-          nextQuery.edited = fixedQuery;
+        if (
+          queryChanged &&
+          (editorIsInline ||
+            nextQuery.edited === '' ||
+            (externalQueryChanged && !prevState.isLoading))
+        ) {
+          nextQuery.edited = '';
         }
 
         return nextQuery;
@@ -88,10 +94,10 @@ export const useEditorQuerySync = ({
       setNewAbortController(abc);
       setQuery((prevState) => ({
         ...prevState,
-        submitted: query.edited,
+        submitted: query.edited || fixedQuery,
         isLoading: true,
       }));
-      onTextLangQuerySubmit({ esql: query.edited } as AggregateQuery, abc);
+      onTextLangQuerySubmit({ esql: query.edited || fixedQuery } as AggregateQuery, abc);
     }
   }, [
     currentAbortController,
@@ -101,6 +107,7 @@ export const useEditorQuerySync = ({
     query.isLoading,
     onTextLangQuerySubmit,
     setNewAbortController,
+    fixedQuery,
   ]);
 
   const handleQueryUpdate = useCallback(
@@ -109,19 +116,19 @@ export const useEditorQuerySync = ({
         // allows to apply changes to the code when the query is running
         // preventing a race condition in the inline editor mode, when this is not necessary
         // setCode(value);
-        setQuery((prevState) => ({ ...prevState, edited: value }));
+        setQuery((prevState) => ({ ...prevState, edited: value === fixedQuery ? '' : value }));
       }
       onTextLangQueryChange({ esql: value } as AggregateQuery);
     },
-    [onTextLangQueryChange, setQuery, editorIsInline]
+    [onTextLangQueryChange, setQuery, editorIsInline, fixedQuery]
   );
 
   return {
     handleQuerySubmit,
     handleQueryUpdate,
     isQueryLoading: query.isLoading,
-    code: query.edited,
-    codeWhenSubmitted: query.submitted,
+    code: query.edited || fixedQuery,
+    codeWhenSubmitted: query.submitted || fixedQuery,
     fixedQuery,
   };
 };
