@@ -48,12 +48,12 @@ describe('DeploymentParamsMapper', () => {
           static: 16,
         });
         expect(mapper.getVCURange('medium')).toEqual({
-          min: 8,
+          min: 0,
           max: 256,
           static: 256,
         });
         expect(mapper.getVCURange('high')).toEqual({
-          min: 8,
+          min: 0,
           max: 4096,
           static: 4096,
         });
