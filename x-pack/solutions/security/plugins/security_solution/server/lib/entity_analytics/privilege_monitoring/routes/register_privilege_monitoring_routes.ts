@@ -8,7 +8,10 @@
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { healthCheckPrivilegeMonitoringRoute } from './health';
 import { initPrivilegeMonitoringEngineRoute } from './init';
-import { monitoringEntitySourceRoute } from './monitoring_entity_source';
+import {
+  monitoringEntitySourceRoute,
+  listMonitoringEntitySourceRoute,
+} from './monitoring_entity_source';
 import { searchPrivilegeMonitoringIndicesRoute } from './search_indices';
 
 import {
@@ -30,6 +33,7 @@ export const registerPrivilegeMonitoringRoutes = ({
   healthCheckPrivilegeMonitoringRoute(router, logger, config);
   searchPrivilegeMonitoringIndicesRoute(router, logger, config);
   monitoringEntitySourceRoute(router, logger, config);
+  listMonitoringEntitySourceRoute(router, logger, config);
   getUserRoute(router, logger);
   createUserRoute(router, logger);
   deleteUserRoute(router, logger);

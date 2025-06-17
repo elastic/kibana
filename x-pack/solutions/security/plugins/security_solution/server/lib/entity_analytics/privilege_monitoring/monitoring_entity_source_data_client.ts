@@ -32,6 +32,8 @@ export class MonitoringEntitySourceDataClient {
     input: MonitoringEntitySourceDescriptor
   ): Promise<MonitoringEntitySourceResponse> {
     const descriptor = await this.monitoringEntitySourceClient.create({
+      type: input.type,
+      name: input.name,
       ...input,
     });
     this.log('debug', 'Initializing MonitoringEntitySourceDataClient Saved Object');
@@ -60,6 +62,11 @@ export class MonitoringEntitySourceDataClient {
   public async delete() {
     this.log('debug', 'Deleting Monitoring Entity Source Sync saved object');
     return this.monitoringEntitySourceClient.delete();
+  }
+
+  public async list(): Promise<MonitoringEntitySourceResponse[]> {
+    this.log('debug', 'Finding all Monitoring Entity Source Sync saved objects');
+    return this.monitoringEntitySourceClient.findAll();
   }
 
   private log(level: Exclude<keyof Logger, 'get' | 'log' | 'isLevelEnabled'>, msg: string) {

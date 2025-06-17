@@ -191,6 +191,7 @@ export class PrivilegeMonitoringDataClient {
    * @returns
    */
   public async queryAllUserNames(indexSources: MonitoringEntitySourceDescriptor[]) {
+    // TODO: move this to a more appropriate place
     const results: Record<string, string[]> = {};
     for (const source of indexSources) {
       const index = source.indexPattern ?? '';
@@ -215,6 +216,7 @@ export class PrivilegeMonitoringDataClient {
    * @param kuery
    */
   public async listUserNamesFromSource(indexName: string, kuery?: string): Promise<string[]> {
+    // TODO: move this
     const query = kuery ? toElasticsearchQuery(fromKueryExpression(kuery)) : { match_all: {} };
 
     const response = await this.esClient.search<{ user?: { name?: string } }>({

@@ -73,6 +73,19 @@ paths:
         "200":
           description: Entity source deleted successfully
 
+  /api/entity_analytics/monitoring/entity_source/list:
+    get:
+      operationId: listEntitySources
+      summary: List all entity source configurations
+      responses:
+        "200":
+          description: List of entity sources retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MonitoringEntitySourceDescriptor"
 components:
   schemas:
     MonitoringEntitySourceDescriptor:
