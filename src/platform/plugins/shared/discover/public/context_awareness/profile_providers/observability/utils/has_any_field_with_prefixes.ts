@@ -7,6 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { createGetAppMenu } from './get_app_menu';
-export { getDefaultAdHocDataViews } from './get_default_ad_hoc_data_views';
-export { getDocViewer } from './get_doc_viewer';
+import type { DataTableRecord } from '@kbn/discover-utils';
+
+export const hasAnyFieldWithPrefixes = (prefixes: string[]) => {
+  return (record: DataTableRecord): boolean => {
+    const data = record.flattened;
+
+    for (const prefix of prefixes) {
+      for (const key in data) {
+        if (key.startsWith(prefix) && data[key] != null) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  };
+};
