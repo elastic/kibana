@@ -65,7 +65,10 @@ describe('TableRowActions', () => {
     mockedUseAgentVersion.mockReturnValue('8.10.2');
   });
 
-  describe('Migrate agent action', () => {
+  // Conditionally run the migrate agent tests only if the flag is enabled
+  const agentMigrationsEnabled = ExperimentalFeaturesService.get().enableAgentMigrations;
+
+  (agentMigrationsEnabled ? describe : describe.skip)('Migrate agent action', () => {
     function renderAndGetMigrateButton({
       agent,
       agentPolicy,
