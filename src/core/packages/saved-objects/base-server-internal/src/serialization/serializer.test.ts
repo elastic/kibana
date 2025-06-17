@@ -698,6 +698,16 @@ describe('#rawToSavedObject', () => {
         accessMode: 'read_only',
       });
     });
+
+    test('it does not create the accessControl property if not present to _source.accessControl', () => {
+      const actual = singleNamespaceSerializer.rawToSavedObject({
+        _id: 'foo:bar',
+        _source: {
+          type: 'foo',
+        },
+      });
+      expect(actual).not.toHaveProperty('accessControl');
+    });
   });
 });
 
@@ -994,6 +1004,14 @@ describe('#savedObjectToRaw', () => {
       owner: 'my_user_id',
       accessMode: 'read_only',
     });
+  });
+
+  test(`if _source.accessControl is unspecified it doesn't set accessControl`, () => {
+    const actual = singleNamespaceSerializer.savedObjectToRaw({
+      type: 'foo',
+      attributes: {},
+    } as any);
+    expect(actual).not.toHaveProperty('accessControl');
   });
 });
 
