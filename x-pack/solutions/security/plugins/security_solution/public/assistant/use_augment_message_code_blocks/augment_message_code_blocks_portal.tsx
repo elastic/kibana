@@ -1,11 +1,20 @@
-import { useEffect, useState } from "react";
-import { InPortal, OutPortal, createHtmlPortalNode, HtmlPortalNode } from "react-reverse-portal";
-import ReactDOM from "react-dom";
-import React from "react";
-import { Conversation, analyzeMarkdown } from "@kbn/elastic-assistant";
-import { replaceAnonymizedValuesWithOriginalValues } from "@kbn/elastic-assistant-common";
-import { AugmentMessageCodeBlockButton } from "./augment_message_code_block_button";
-import { useKibana } from "../../common/lib/kibana";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { useEffect, useState } from 'react';
+import type { HtmlPortalNode } from 'react-reverse-portal';
+import { InPortal, OutPortal, createHtmlPortalNode } from 'react-reverse-portal';
+import ReactDOM from 'react-dom';
+import React from 'react';
+import type { Conversation } from '@kbn/elastic-assistant';
+import { analyzeMarkdown } from '@kbn/elastic-assistant';
+import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
+import { AugmentMessageCodeBlockButton } from './augment_message_code_block_button';
+import { useKibana } from '../../common/lib/kibana';
 
 interface PortalInfo {
   portalId: string;
@@ -28,9 +37,9 @@ export const AugmentMessageCodeBlocksPortal = () => {
     const codeBlockDetails = currentConversation.messages.map(({ content }) =>
       analyzeMarkdown(
         showAnonymizedValues
-          ? content ?? ""
+          ? content ?? ''
           : replaceAnonymizedValuesWithOriginalValues({
-              messageContent: content ?? "",
+              messageContent: content ?? '',
               replacements: currentConversation.replacements,
             })
       )
@@ -92,9 +101,10 @@ export const AugmentMessageCodeBlocksPortal = () => {
   };
 
   useEffect(() => {
-    const cleanup = elasticAssistantSharedState.augmentMessageCodeBlocks.registerAugmentMessageCodeBlocks({
-      mount: mountMessageCodeBlocks,
-    });
+    const cleanup =
+      elasticAssistantSharedState.augmentMessageCodeBlocks.registerAugmentMessageCodeBlocks({
+        mount: mountMessageCodeBlocks,
+      });
 
     return () => {
       cleanup();
@@ -111,7 +121,7 @@ export const AugmentMessageCodeBlocksPortal = () => {
 
       {/* OutPortals rendered into target elements via createPortal */}
       {Object.values(portals).map(({ portalId, node, target }) =>
-        target ? ReactDOM.createPortal(<OutPortal node={node} key={portalId}/>, target) : null
+        target ? ReactDOM.createPortal(<OutPortal node={node} key={portalId} />, target) : null
       )}
     </>
   );

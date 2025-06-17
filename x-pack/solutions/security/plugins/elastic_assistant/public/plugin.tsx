@@ -1,14 +1,25 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import type { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import ReactDOM from 'react-dom';
-import React from 'react'
-import { ElasticAssistantPublicPluginSetupDependencies, ElasticAssistantPublicPluginStartDependencies, StartServices } from './types';
+import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AssistantOverlay } from '@kbn/elastic-assistant';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { AssistantNavLink } from '@kbn/elastic-assistant/impl/assistant_context/assistant_nav_link';
+import {
+  ElasticAssistantPublicPluginSetupDependencies,
+  ElasticAssistantPublicPluginStartDependencies,
+  StartServices,
+} from './types';
 import { EuiThemeProvider } from './src/context/eui_them_context/eui_them_provider';
 import { AssistantProvider } from './src/context/assistant_context/assistant_provider';
 import { KibanaContextProvider } from './src/context/typed_kibana_context/typed_kibana_context';
-import { AssistantNavLink } from '@kbn/elastic-assistant/impl/assistant_context/assistant_nav_link';
 import { licenseService } from './src/hooks/licence/use_licence';
 import { ReactQueryClientProvider } from './src/context/query_client_context/elastic_assistant_query_client_provider';
 import { AssistantSpaceIdProvider } from './src/context/assistant_space_id/assistant_space_id_provider';
@@ -17,11 +28,15 @@ import { TelemetryService } from './src/common/lib/telemetry/telemetry_service';
 export type ElasticAssistantPublicPluginSetup = ReturnType<ElasticAssistantPublicPlugin['setup']>;
 export type ElasticAssistantPublicPluginStart = ReturnType<ElasticAssistantPublicPlugin['start']>;
 
-export class ElasticAssistantPublicPlugin implements Plugin<
-  ElasticAssistantPublicPluginSetup,
-  ElasticAssistantPublicPluginStart,
-  ElasticAssistantPublicPluginSetupDependencies,
-  ElasticAssistantPublicPluginStartDependencies> {
+export class ElasticAssistantPublicPlugin
+  implements
+    Plugin<
+      ElasticAssistantPublicPluginSetup,
+      ElasticAssistantPublicPluginStart,
+      ElasticAssistantPublicPluginSetupDependencies,
+      ElasticAssistantPublicPluginStartDependencies
+    >
+{
   private readonly version: string;
   private readonly storage = new Storage(localStorage);
   private readonly telemetry: TelemetryService = new TelemetryService();
@@ -31,14 +46,11 @@ export class ElasticAssistantPublicPlugin implements Plugin<
   }
 
   public setup(coreSetup: CoreSetup) {
-    this.telemetry.setup(
-      { analytics: coreSetup.analytics },
-    );
+    this.telemetry.setup({ analytics: coreSetup.analytics });
     return {};
   }
 
   public start(coreStart: CoreStart, dependencies: ElasticAssistantPublicPluginStartDependencies) {
-
     const startServices = (): StartServices => {
       const { ...startPlugins } = coreStart.security;
       licenseService.start(dependencies.licensing.license$);
@@ -50,7 +62,7 @@ export class ElasticAssistantPublicPlugin implements Plugin<
         licensing: dependencies.licensing,
         triggersActionsUi: dependencies.triggersActionsUi,
         security: dependencies.security,
-        telemetry: telemetry,
+        telemetry,
         productDocBase: dependencies.productDocBase,
         storage: this.storage,
         discover: dependencies.discover,

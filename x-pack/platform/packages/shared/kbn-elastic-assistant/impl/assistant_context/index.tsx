@@ -14,7 +14,12 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
-import { ChromeStart, NavigateToAppOptions, UnmountCallback, UserProfileService } from '@kbn/core/public';
+import {
+  ChromeStart,
+  NavigateToAppOptions,
+  UnmountCallback,
+  UserProfileService,
+} from '@kbn/core/public';
 import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
 import { useQuery } from '@tanstack/react-query';
 import { updatePromptContexts } from './helpers';
@@ -30,7 +35,6 @@ import {
   GetAssistantMessages,
 } from './types';
 import { DEFAULT_ASSISTANT_TITLE } from '../assistant/translations';
-import { CodeBlockDetails } from '../assistant/use_conversation/helpers';
 import { PromptContextTemplate } from '../assistant/prompt_context/types';
 import { KnowledgeBaseConfig, TraceOptions } from '../assistant/types';
 import {
@@ -67,8 +71,8 @@ export interface AssistantProviderProps {
   assistantTelemetry?: AssistantTelemetry;
   augmentMessageCodeBlocks: {
     mount: (args: {
-      currentConversation: Conversation,
-      showAnonymizedValues: boolean
+      currentConversation: Conversation;
+      showAnonymizedValues: boolean;
     }) => UnmountCallback;
   };
   basePath: string;
@@ -102,8 +106,8 @@ export interface UseAssistantContext {
   assistantTelemetry?: AssistantTelemetry;
   augmentMessageCodeBlocks: {
     mount: (args: {
-      currentConversation: Conversation,
-      showAnonymizedValues: boolean
+      currentConversation: Conversation;
+      showAnonymizedValues: boolean;
     }) => UnmountCallback;
   };
   docLinks: Omit<DocLinksStart, 'links'>;
@@ -155,8 +159,6 @@ export const useAssistantContext = () => {
 
   return context;
 };
-
-
 
 export const useAssistantContextValue = (props: AssistantProviderProps): UseAssistantContext => {
   const {
@@ -264,7 +266,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
   /**
    * Global Assistant Overlay actions
    */
-  const [showAssistantOverlay, setShowAssistantOverlay] = useState<ShowAssistantOverlay>(() => { });
+  const [showAssistantOverlay, setShowAssistantOverlay] = useState<ShowAssistantOverlay>(() => {});
 
   /**
    * Current User Avatar
@@ -290,7 +292,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
   /**
    * Setting code block ref that can be used to store callback from parent components
    */
-  const codeBlockRef = useRef(() => { });
+  const codeBlockRef = useRef(() => {});
 
   // Fetch assistant capabilities
   const { data: assistantFeatures } = useCapabilities({ http, toasts });
@@ -386,20 +388,12 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
     ]
   );
 
-  return value
-
-}
+  return value;
+};
 
 export const AssistantProvider: React.FC<{
   children: React.ReactNode;
   value: ReturnType<typeof useAssistantContextValue>;
-}> = ({
-  children,
-  value,
-}) => {
-    return (
-      <AssistantContext.Provider value={value}>
-        {children}
-      </AssistantContext.Provider>
-    );
-  };
+}> = ({ children, value }) => {
+  return <AssistantContext.Provider value={value}>{children}</AssistantContext.Provider>;
+};

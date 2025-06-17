@@ -11,7 +11,7 @@ import { EuiToolTip, EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from
 import { i18n } from '@kbn/i18n';
 import { ChromeStyle } from '@kbn/core-chrome-browser';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
-import { useAssistantContext } from '@kbn/elastic-assistant';
+import { useAssistantContext } from '../..';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -27,8 +27,7 @@ const LINK_LABEL = i18n.translate('xpack.elasticAssistant.assistantContext.assis
 });
 
 export const AssistantNavLink: FC = () => {
-  const { chrome, showAssistantOverlay, assistantAvailability } =
-    useAssistantContext();
+  const { chrome, showAssistantOverlay, assistantAvailability } = useAssistantContext();
   const [chromeStyle, setChromeStyle] = useState<ChromeStyle | undefined>(undefined);
 
   // useObserverable would change the order of re-renders that are tested against closely.
@@ -49,20 +48,20 @@ export const AssistantNavLink: FC = () => {
   const EuiButtonBasicOrEmpty = chromeStyle === 'project' ? EuiButtonEmpty : EuiButton;
 
   return (
-      <EuiToolTip content={TOOLTIP_CONTENT}>
-        <EuiButtonBasicOrEmpty
-          onClick={showOverlay}
-          color="success"
-          size="s"
-          data-test-subj="assistantNavLink"
-        >
-          <EuiFlexGroup gutterSize="s" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <AssistantIcon size="m" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>{LINK_LABEL}</EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiButtonBasicOrEmpty>
-      </EuiToolTip>
+    <EuiToolTip content={TOOLTIP_CONTENT}>
+      <EuiButtonBasicOrEmpty
+        onClick={showOverlay}
+        color="success"
+        size="s"
+        data-test-subj="assistantNavLink"
+      >
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <AssistantIcon size="m" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{LINK_LABEL}</EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiButtonBasicOrEmpty>
+    </EuiToolTip>
   );
 };

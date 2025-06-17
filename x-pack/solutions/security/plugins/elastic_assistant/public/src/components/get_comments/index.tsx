@@ -44,188 +44,190 @@ const transformMessageWithReplacements = ({
     content: showAnonymizedValues
       ? content
       : replaceAnonymizedValuesWithOriginalValues({
-        messageContent: content,
-        replacements,
-      }),
+          messageContent: content,
+          replacements,
+        }),
   };
 };
 
 type GetComments = (args: {
-  CommentActions: React.FC<{ message: ClientMessage }>,
-}) => GetAssistantMessages
+  CommentActions: React.FC<{ message: ClientMessage }>;
+}) => GetAssistantMessages;
 
-export const getComments: GetComments = (args) => ({
-  abortStream,
-  currentConversation,
-  isFetchingResponse,
-  refetchCurrentConversation,
-  regenerateMessage,
-  showAnonymizedValues,
-  currentUserAvatar,
-  setIsStreaming,
-  systemPromptContent,
-  contentReferencesVisible,
-}) => {
-  if (!currentConversation) return [];
+export const getComments: GetComments =
+  (args) =>
+  ({
+    abortStream,
+    currentConversation,
+    isFetchingResponse,
+    refetchCurrentConversation,
+    regenerateMessage,
+    showAnonymizedValues,
+    currentUserAvatar,
+    setIsStreaming,
+    systemPromptContent,
+    contentReferencesVisible,
+  }) => {
+    if (!currentConversation) return [];
 
-  const regenerateMessageOfConversation = () => {
-    regenerateMessage(currentConversation.id);
-  };
+    const regenerateMessageOfConversation = () => {
+      regenerateMessage(currentConversation.id);
+    };
 
-  const extraLoadingComment = isFetchingResponse
-    ? [
-      {
-        username: i18n.ASSISTANT,
-        timelineAvatar: (
-          <SpinnerWrapper>
-            <EuiLoadingSpinner size="xl" />
-          </SpinnerWrapper>
-        ),
-        timestamp: '...',
-        children: (
-          <StreamComment
-            abortStream={abortStream}
-            content=""
-            refetchCurrentConversation={refetchCurrentConversation}
-            regenerateMessage={regenerateMessageOfConversation}
-            setIsStreaming={setIsStreaming}
-            contentReferencesVisible={contentReferencesVisible}
-            transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
-            contentReferences={null}
-            messageRole="assistant"
-            isFetching
-            // we never need to append to a code block in the loading comment, which is what this index is used for
-            index={999}
-          />
-        ),
-      },
-    ]
-    : [];
-
-  const UserAvatar = () => {
-    if (currentUserAvatar) {
-      return (
-        <EuiAvatar
-          name="user"
-          size="l"
-          color={currentUserAvatar?.color ?? 'subdued'}
-          {...(currentUserAvatar?.imageUrl
-            ? { imageUrl: currentUserAvatar.imageUrl as string }
-            : { initials: currentUserAvatar?.initials })}
-        />
-      );
-    }
-
-    return <EuiAvatar name="user" size="l" color="subdued" iconType="userAvatar" />;
-  };
-
-  return [
-    ...(systemPromptContent && currentConversation.messages.length
+    const extraLoadingComment = isFetchingResponse
       ? [
-        {
-          username: i18n.SYSTEM,
-          timelineAvatar: <AssistantAvatar name="machine" size="l" color="subdued" />,
-          timestamp:
-            currentConversation.messages[0].timestamp.length === 0
-              ? new Date().toLocaleString()
-              : new Date(currentConversation.messages[0].timestamp).toLocaleString(),
-          children: (
-            <StreamComment
-              abortStream={abortStream}
-              content={systemPromptContent}
-              refetchCurrentConversation={refetchCurrentConversation}
-              regenerateMessage={regenerateMessageOfConversation}
-              setIsStreaming={setIsStreaming}
-              contentReferences={null}
-              contentReferencesVisible={contentReferencesVisible}
-              transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
-              messageRole={'assistant'}
-              // we never need to append to a code block in the system comment, which is what this index is used for
-              index={999}
-            />
+          {
+            username: i18n.ASSISTANT,
+            timelineAvatar: (
+              <SpinnerWrapper>
+                <EuiLoadingSpinner size="xl" />
+              </SpinnerWrapper>
+            ),
+            timestamp: '...',
+            children: (
+              <StreamComment
+                abortStream={abortStream}
+                content=""
+                refetchCurrentConversation={refetchCurrentConversation}
+                regenerateMessage={regenerateMessageOfConversation}
+                setIsStreaming={setIsStreaming}
+                contentReferencesVisible={contentReferencesVisible}
+                transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
+                contentReferences={null}
+                messageRole="assistant"
+                isFetching
+                // we never need to append to a code block in the loading comment, which is what this index is used for
+                index={999}
+              />
+            ),
+          },
+        ]
+      : [];
+
+    const UserAvatar = () => {
+      if (currentUserAvatar) {
+        return (
+          <EuiAvatar
+            name="user"
+            size="l"
+            color={currentUserAvatar?.color ?? 'subdued'}
+            {...(currentUserAvatar?.imageUrl
+              ? { imageUrl: currentUserAvatar.imageUrl as string }
+              : { initials: currentUserAvatar?.initials })}
+          />
+        );
+      }
+
+      return <EuiAvatar name="user" size="l" color="subdued" iconType="userAvatar" />;
+    };
+
+    return [
+      ...(systemPromptContent && currentConversation.messages.length
+        ? [
+            {
+              username: i18n.SYSTEM,
+              timelineAvatar: <AssistantAvatar name="machine" size="l" color="subdued" />,
+              timestamp:
+                currentConversation.messages[0].timestamp.length === 0
+                  ? new Date().toLocaleString()
+                  : new Date(currentConversation.messages[0].timestamp).toLocaleString(),
+              children: (
+                <StreamComment
+                  abortStream={abortStream}
+                  content={systemPromptContent}
+                  refetchCurrentConversation={refetchCurrentConversation}
+                  regenerateMessage={regenerateMessageOfConversation}
+                  setIsStreaming={setIsStreaming}
+                  contentReferences={null}
+                  contentReferencesVisible={contentReferencesVisible}
+                  transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
+                  messageRole={'assistant'}
+                  // we never need to append to a code block in the system comment, which is what this index is used for
+                  index={999}
+                />
+              ),
+            },
+          ]
+        : []),
+      ...currentConversation.messages.map((message, index) => {
+        const isLastComment = index === currentConversation.messages.length - 1;
+        const isUser = message.role === 'user';
+        const replacements = currentConversation.replacements;
+
+        const messageProps = {
+          timelineAvatar: isUser ? (
+            <UserAvatar />
+          ) : (
+            <AssistantAvatar name="machine" size="l" color="subdued" />
           ),
-        },
-      ]
-      : []),
-    ...currentConversation.messages.map((message, index) => {
-      const isLastComment = index === currentConversation.messages.length - 1;
-      const isUser = message.role === 'user';
-      const replacements = currentConversation.replacements;
+          timestamp: i18n.AT(
+            message.timestamp.length === 0
+              ? new Date().toLocaleString()
+              : new Date(message.timestamp).toLocaleString()
+          ),
+          username: isUser ? i18n.YOU : i18n.ASSISTANT,
+          eventColor: message.isError ? ('danger' as EuiPanelProps['color']) : undefined,
+        };
 
-      const messageProps = {
-        timelineAvatar: isUser ? (
-          <UserAvatar />
-        ) : (
-          <AssistantAvatar name="machine" size="l" color="subdued" />
-        ),
-        timestamp: i18n.AT(
-          message.timestamp.length === 0
-            ? new Date().toLocaleString()
-            : new Date(message.timestamp).toLocaleString()
-        ),
-        username: isUser ? i18n.YOU : i18n.ASSISTANT,
-        eventColor: message.isError ? ('danger' as EuiPanelProps['color']) : undefined,
-      };
+        const isControlsEnabled = isLastComment && !isUser;
 
-      const isControlsEnabled = isLastComment && !isUser;
+        const transformMessage = (content: string) =>
+          transformMessageWithReplacements({
+            message,
+            content,
+            showAnonymizedValues,
+            replacements,
+          });
 
-      const transformMessage = (content: string) =>
-        transformMessageWithReplacements({
-          message,
-          content,
-          showAnonymizedValues,
-          replacements,
-        });
+        // message still needs to stream, no actions returned and replacements handled by streamer
+        if (!(message.content && message.content.length)) {
+          return {
+            ...messageProps,
+            children: (
+              <StreamComment
+                abortStream={abortStream}
+                contentReferences={null}
+                contentReferencesVisible={contentReferencesVisible}
+                index={index}
+                isControlsEnabled={isControlsEnabled}
+                isError={message.isError}
+                reader={message.reader}
+                refetchCurrentConversation={refetchCurrentConversation}
+                regenerateMessage={regenerateMessageOfConversation}
+                setIsStreaming={setIsStreaming}
+                transformMessage={transformMessage}
+                messageRole={message.role}
+              />
+            ),
+          };
+        }
 
-      // message still needs to stream, no actions returned and replacements handled by streamer
-      if (!(message.content && message.content.length)) {
+        // transform message here so we can send correct message to CommentActions
+        const transformedMessage = transformMessage(message.content ?? '');
+
         return {
           ...messageProps,
+          actions: <args.CommentActions message={transformedMessage} />,
           children: (
             <StreamComment
               abortStream={abortStream}
-              contentReferences={null}
+              content={transformedMessage.content}
+              contentReferences={message.metadata?.contentReferences}
               contentReferencesVisible={contentReferencesVisible}
               index={index}
               isControlsEnabled={isControlsEnabled}
               isError={message.isError}
-              reader={message.reader}
-              refetchCurrentConversation={refetchCurrentConversation}
+              // reader is used to determine if streaming controls are shown
+              reader={transformedMessage.reader}
               regenerateMessage={regenerateMessageOfConversation}
+              refetchCurrentConversation={refetchCurrentConversation}
               setIsStreaming={setIsStreaming}
               transformMessage={transformMessage}
               messageRole={message.role}
             />
           ),
         };
-      }
-
-      // transform message here so we can send correct message to CommentActions
-      const transformedMessage = transformMessage(message.content ?? '');
-
-      return {
-        ...messageProps,
-        actions: <args.CommentActions message={transformedMessage} />,
-        children: (
-          <StreamComment
-            abortStream={abortStream}
-            content={transformedMessage.content}
-            contentReferences={message.metadata?.contentReferences}
-            contentReferencesVisible={contentReferencesVisible}
-            index={index}
-            isControlsEnabled={isControlsEnabled}
-            isError={message.isError}
-            // reader is used to determine if streaming controls are shown
-            reader={transformedMessage.reader}
-            regenerateMessage={regenerateMessageOfConversation}
-            refetchCurrentConversation={refetchCurrentConversation}
-            setIsStreaming={setIsStreaming}
-            transformMessage={transformMessage}
-            messageRole={message.role}
-          />
-        ),
-      };
-    }),
-    ...extraLoadingComment,
-  ];
-};
+      }),
+      ...extraLoadingComment,
+    ];
+  };

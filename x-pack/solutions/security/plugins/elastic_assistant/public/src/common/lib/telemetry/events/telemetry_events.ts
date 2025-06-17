@@ -6,6 +6,4 @@
  */
 import { assistantTelemetryEvents } from './ai_assistant';
 
-export const telemetryEvents = [
-  ...assistantTelemetryEvents,
-];
+export const telemetryEvents = [...assistantTelemetryEvents];

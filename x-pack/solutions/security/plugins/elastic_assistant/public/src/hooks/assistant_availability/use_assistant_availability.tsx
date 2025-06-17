@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-
+import type { UseAssistantAvailability } from '@kbn/elastic-assistant';
 import { ASSISTANT_FEATURE_ID, SECURITY_FEATURE_ID } from '../../common/constants';
 import { useKibana } from '../../context/typed_kibana_context/typed_kibana_context';
 
 import { useLicense } from '../licence/use_licence';
-import type { UseAssistantAvailability } from '@kbn/elastic-assistant';
 
 export const useAssistantAvailability = (): UseAssistantAvailability => {
   const isEnterprise = useLicense().isEnterprise();

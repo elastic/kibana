@@ -141,13 +141,20 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
         const subPluginRoutes = getSubPluginRoutesByCapabilities(subPlugins, services);
 
-        const unmountPromptContext = services.elasticAssistantSharedState.promptContexts.setPromptContext(PROMPT_CONTEXTS)
+        const unmountPromptContext =
+          services.elasticAssistantSharedState.promptContexts.setPromptContext(PROMPT_CONTEXTS);
 
-        const unmountApp = renderApp({ ...params, services, store, usageCollection, subPluginRoutes });
+        const unmountApp = renderApp({
+          ...params,
+          services,
+          store,
+          usageCollection,
+          subPluginRoutes,
+        });
 
         return () => {
           unmountApp();
-          unmountPromptContext()
+          unmountPromptContext();
         };
       },
     });

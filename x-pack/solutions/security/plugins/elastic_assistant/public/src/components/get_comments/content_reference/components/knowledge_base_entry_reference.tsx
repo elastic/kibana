@@ -13,7 +13,6 @@ import type { ResolvedContentReferenceNode } from '../content_reference_parser';
 import { PopoverReference } from './popover_reference';
 import { useKibana } from '../../../../context/typed_kibana_context/typed_kibana_context';
 
-
 interface Props {
   contentReferenceNode: ResolvedContentReferenceNode<KnowledgeBaseEntryContentReference>;
 }

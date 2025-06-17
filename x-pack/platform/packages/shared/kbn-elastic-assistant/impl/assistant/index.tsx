@@ -209,13 +209,13 @@ const AssistantComponent: React.FC<Props> = ({
     if (currentConversation) {
       // need in order for code block controls to be added to the DOM
       setTimeout(() => {
-        unmountFunc = augmentMessageCodeBlocks.mount({currentConversation, showAnonymizedValues})
+        unmountFunc = augmentMessageCodeBlocks.mount({ currentConversation, showAnonymizedValues });
       }, 0);
     }
 
     return () => {
       unmountFunc();
-    }
+    };
   }, [augmentMessageCodeBlocks, currentConversation, showAnonymizedValues]);
 
   // Keyboard shortcuts to toggle the visibility of content references and anonymized values

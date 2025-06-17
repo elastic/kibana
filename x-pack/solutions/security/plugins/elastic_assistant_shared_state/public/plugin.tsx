@@ -1,22 +1,45 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import type { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 
-import { ElasticAssistantSharedStatePublicPluginSetupDependencies, ElasticAssistantSharedStatePublicPluginStartDependencies } from './types';
-import { CommentsService, PromptContextService, AssistantContextValueService, AugmentMessageCodeBlocksService, SignalIndexService } from '@kbn/elastic-assistant-shared-state';
-
-export type ElasticAssistantSharedStatePublicPluginSetup = ReturnType<ElasticAssistantSharedStatePublicPlugin['setup']>;
-export type ElasticAssistantSharedStatePublicPluginStart = ReturnType<ElasticAssistantSharedStatePublicPlugin['start']>;
-
-export class ElasticAssistantSharedStatePublicPlugin implements Plugin<
-  ElasticAssistantSharedStatePublicPluginSetup,
-  ElasticAssistantSharedStatePublicPluginStart,
+import {
+  CommentsService,
+  PromptContextService,
+  AssistantContextValueService,
+  AugmentMessageCodeBlocksService,
+  SignalIndexService,
+} from '@kbn/elastic-assistant-shared-state';
+import {
   ElasticAssistantSharedStatePublicPluginSetupDependencies,
-  ElasticAssistantSharedStatePublicPluginStartDependencies> {
-  private readonly commentService: CommentsService;
-  private readonly promptContextService: PromptContextService
-  private readonly assistantContextValueService: AssistantContextValueService
-  private readonly augmentMessageCodeBlocksService: AugmentMessageCodeBlocksService
-  private readonly signalIndexService: SignalIndexService
+  ElasticAssistantSharedStatePublicPluginStartDependencies,
+} from './types';
 
+export type ElasticAssistantSharedStatePublicPluginSetup = ReturnType<
+  ElasticAssistantSharedStatePublicPlugin['setup']
+>;
+export type ElasticAssistantSharedStatePublicPluginStart = ReturnType<
+  ElasticAssistantSharedStatePublicPlugin['start']
+>;
+
+export class ElasticAssistantSharedStatePublicPlugin
+  implements
+    Plugin<
+      ElasticAssistantSharedStatePublicPluginSetup,
+      ElasticAssistantSharedStatePublicPluginStart,
+      ElasticAssistantSharedStatePublicPluginSetupDependencies,
+      ElasticAssistantSharedStatePublicPluginStartDependencies
+    >
+{
+  private readonly commentService: CommentsService;
+  private readonly promptContextService: PromptContextService;
+  private readonly assistantContextValueService: AssistantContextValueService;
+  private readonly augmentMessageCodeBlocksService: AugmentMessageCodeBlocksService;
+  private readonly signalIndexService: SignalIndexService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.commentService = new CommentsService();
@@ -30,7 +53,10 @@ export class ElasticAssistantSharedStatePublicPlugin implements Plugin<
     return {};
   }
 
-  public start(coreStart: CoreStart, dependencies: ElasticAssistantSharedStatePublicPluginStartDependencies) {
+  public start(
+    coreStart: CoreStart,
+    dependencies: ElasticAssistantSharedStatePublicPluginStartDependencies
+  ) {
     const comments = this.commentService.start();
     const promptContexts = this.promptContextService.start();
     const assistantContextValue = this.assistantContextValueService.start();
@@ -42,7 +68,7 @@ export class ElasticAssistantSharedStatePublicPlugin implements Plugin<
       promptContexts,
       assistantContextValue,
       augmentMessageCodeBlocks,
-      signalIndex
+      signalIndex,
     };
   }
 

@@ -9,9 +9,7 @@ import type { AnalyticsServiceSetup } from '@kbn/core/public';
 
 import type { AssistantEventTypes, AssistantTelemetryEventsMap } from './events/ai_assistant/types';
 
-
 export * from './events/ai_assistant/types';
-
 
 export interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;
@@ -22,5 +20,4 @@ export type TelemetryEventTypeData<T extends TelemetryEventTypes> = T extends As
   ? AssistantTelemetryEventsMap[T]
   : never;
 
-export type TelemetryEventTypes =
-  | AssistantEventTypes
+export type TelemetryEventTypes = AssistantEventTypes;

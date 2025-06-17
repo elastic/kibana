@@ -12,7 +12,10 @@ import type { ResolvedContentReferenceNode } from '../content_reference_parser';
 import { PopoverReference } from './popover_reference';
 import { SECURITY_ALERTS_PAGE_REFERENCE_LABEL } from './translations';
 import { useNavigateToAlertsPageWithFilters } from '../../../../hooks/navigate_to_alerts_page_with_filters/use_navigate_to_alerts_page_with_filters';
-import { ALERTS_PAGE_FILTER_ACKNOWLEDGED, ALERTS_PAGE_FILTER_OPEN } from '../../../../common/constants';
+import {
+  ALERTS_PAGE_FILTER_ACKNOWLEDGED,
+  ALERTS_PAGE_FILTER_OPEN,
+} from '../../../../common/constants';
 
 interface Props {
   contentReferenceNode: ResolvedContentReferenceNode<SecurityAlertsPageContentReference>;

@@ -1,12 +1,19 @@
-import { MountPoint } from "@kbn/core/packages/mount-utils/browser";
-import { BehaviorSubject, ReplaySubject } from "rxjs";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { MountPoint } from '@kbn/core-mount-utils-browser';
+import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs';
 import { sortBy } from 'lodash';
 import { ClientMessage } from '@kbn/elastic-assistant';
 
-export type CommentServiceActions = {
+export interface CommentServiceActions {
   order?: number;
-  mount: (args: { message: ClientMessage }) => MountPoint
+  mount: (args: { message: ClientMessage }) => MountPoint;
 }
 
 export class CommentsService {
@@ -17,11 +24,11 @@ export class CommentsService {
 
     return {
       registerActions: (actions: CommentServiceActions) => {
-        actions$.next(new Set([...actions$.value.values(), actions]))
+        actions$.next(new Set([...actions$.value.values(), actions]));
         return () => {
-          const newActions = new Set([...actions$.value.values()].filter((a) => a !== actions))
-          actions$.next(newActions)
-        }
+          const newActions = new Set([...actions$.value.values()].filter((a) => a !== actions));
+          actions$.next(newActions);
+        };
       },
 
       getActions$: () =>

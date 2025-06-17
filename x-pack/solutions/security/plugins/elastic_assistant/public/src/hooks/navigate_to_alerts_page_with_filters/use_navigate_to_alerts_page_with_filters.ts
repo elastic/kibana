@@ -8,13 +8,9 @@
 import { encode } from '@kbn/rison';
 
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
-import {
-  SecurityPageName,
-  useNavigation
-} from '@kbn/security-solution-navigation';
+import { SecurityPageName, useNavigation } from '@kbn/security-solution-navigation';
 import { URL_PARAM_KEY } from './constants';
 import { formatPageFilterSearchParam } from './format_page_filter_search_param';
-
 
 export const useNavigateToAlertsPageWithFilters = () => {
   const { navigateTo } = useNavigation();

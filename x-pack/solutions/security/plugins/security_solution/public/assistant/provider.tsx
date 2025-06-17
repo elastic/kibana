@@ -17,14 +17,13 @@ import { once } from 'lodash/fp';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '../common/lib/kibana';
-//import { getComments } from './get_comments';
+// import { getComments } from './get_comments';
 import { BASE_SECURITY_QUICK_PROMPTS } from './content/quick_prompts';
 import { useAssistantAvailability } from './use_assistant_availability';
 import { licenseService } from '../common/hooks/use_license';
 import { CommentActionsPortal } from './comment_actions/comment_actions_portal';
 import { AugmentMessageCodeBlocksPortal } from './use_augment_message_code_blocks/augment_message_code_blocks_portal';
 import { useElasticAssistantSharedStateSignalIndex } from './use_elastic_assistant_shared_state_signal_index/use_elastic_assistant_shared_state_signal_index';
-
 
 export const createBasePrompts = async (notifications: NotificationsStart, http: HttpSetup) => {
   const promptsToCreate = [...BASE_SECURITY_QUICK_PROMPTS];
@@ -46,18 +45,15 @@ export const createBasePrompts = async (notifications: NotificationsStart, http:
  * This component configures the Elastic AI Assistant context provider for the Security Solution app.
  */
 export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
-  const {
-    http,
-    notifications,
-    elasticAssistantSharedState
-  } = useKibana().services;
+  const { http, notifications, elasticAssistantSharedState } = useKibana().services;
 
   const assistantContextValue = useObservable(
-    elasticAssistantSharedState.assistantContextValue.getAssistantContextValue$());
+    elasticAssistantSharedState.assistantContextValue.getAssistantContextValue$()
+  );
 
   const assistantAvailability = useAssistantAvailability();
   const hasEnterpriseLicence = licenseService.isEnterprise();
-  useElasticAssistantSharedStateSignalIndex()
+  useElasticAssistantSharedStateSignalIndex();
 
   useEffect(() => {
     const createSecurityPrompts = once(async () => {
@@ -76,7 +72,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
             await createBasePrompts(notifications, http);
           }
           // eslint-disable-next-line no-empty
-        } catch (e) { }
+        } catch (e) {}
       }
     });
     createSecurityPrompts();
@@ -93,9 +89,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
   }
 
   return (
-    <ElasticAssistantProvider
-      value={assistantContextValue}
-    >
+    <ElasticAssistantProvider value={assistantContextValue}>
       <CommentActionsPortal />
       <AugmentMessageCodeBlocksPortal />
       {children}

@@ -7,8 +7,14 @@
 
 import { type AssistantTelemetry } from '@kbn/elastic-assistant';
 import { useCallback, useMemo } from 'react';
-import { useKibana } from "../../context/typed_kibana_context/typed_kibana_context";
-import { AssistantEventTypes, ReportAssistantInvokedParams, ReportAssistantMessageSentParams, ReportAssistantQuickPromptParams, ReportAssistantSettingToggledParams } from '../../common/lib/telemetry/events/ai_assistant/types';
+import { useKibana } from '../../context/typed_kibana_context/typed_kibana_context';
+import {
+  AssistantEventTypes,
+  ReportAssistantInvokedParams,
+  ReportAssistantMessageSentParams,
+  ReportAssistantQuickPromptParams,
+  ReportAssistantSettingToggledParams,
+} from '../../common/lib/telemetry/events/ai_assistant/types';
 
 export const useAssistantTelemetry = (): AssistantTelemetry => {
   const {
@@ -22,22 +28,26 @@ export const useAssistantTelemetry = (): AssistantTelemetry => {
     }: {
       eventType: AssistantEventTypes;
       params:
-      | ReportAssistantInvokedParams
-      | ReportAssistantMessageSentParams
-      | ReportAssistantQuickPromptParams;
+        | ReportAssistantInvokedParams
+        | ReportAssistantMessageSentParams
+        | ReportAssistantQuickPromptParams;
     }) => {
-      telemetry.reportEvent(eventType, params)},
+      telemetry.reportEvent(eventType, params);
+    },
     [telemetry]
   );
 
-  return useMemo<AssistantTelemetry>(() => ({
-    reportAssistantInvoked: (params: ReportAssistantInvokedParams) =>
-      reportTelemetry({ eventType: AssistantEventTypes.AssistantInvoked, params }),
-    reportAssistantMessageSent: (params: ReportAssistantMessageSentParams) =>
-      reportTelemetry({ eventType: AssistantEventTypes.AssistantMessageSent, params }),
-    reportAssistantQuickPrompt: (params: ReportAssistantQuickPromptParams) =>
-      reportTelemetry({ eventType: AssistantEventTypes.AssistantQuickPrompt, params }),
-    reportAssistantSettingToggled: (params: ReportAssistantSettingToggledParams) =>
-      telemetry.reportEvent(AssistantEventTypes.AssistantSettingToggled, params),
-  }), [reportTelemetry, telemetry]);
+  return useMemo<AssistantTelemetry>(
+    () => ({
+      reportAssistantInvoked: (params: ReportAssistantInvokedParams) =>
+        reportTelemetry({ eventType: AssistantEventTypes.AssistantInvoked, params }),
+      reportAssistantMessageSent: (params: ReportAssistantMessageSentParams) =>
+        reportTelemetry({ eventType: AssistantEventTypes.AssistantMessageSent, params }),
+      reportAssistantQuickPrompt: (params: ReportAssistantQuickPromptParams) =>
+        reportTelemetry({ eventType: AssistantEventTypes.AssistantQuickPrompt, params }),
+      reportAssistantSettingToggled: (params: ReportAssistantSettingToggledParams) =>
+        telemetry.reportEvent(AssistantEventTypes.AssistantSettingToggled, params),
+    }),
+    [reportTelemetry, telemetry]
+  );
 };
