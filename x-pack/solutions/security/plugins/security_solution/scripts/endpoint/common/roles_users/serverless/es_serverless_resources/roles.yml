@@ -56,7 +56,7 @@ viewer:
         - '.asset-criticality.asset-criticality-*'
         - '.entities.v1.latest.security_*'
         - '.ml-anomalies-*'
-        - 'security_solution-*.misconfiguration_latest*'
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - read
   applications:
@@ -107,6 +107,7 @@ editor:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - read
         - write
@@ -132,7 +133,6 @@ editor:
       allow_restricted_indices: false
     - names:
         - '.ml-anomalies-*'
-        - 'security_solution-*.misconfiguration_latest*'
       privileges:
         - read
   applications:
@@ -197,7 +197,7 @@ t1_analyst:
         - .asset-criticality.asset-criticality-*
         - .entities.v1.latest.security_*
         - '.ml-anomalies-*'
-        - 'security_solution-*.misconfiguration_latest*'
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - read
   applications:
@@ -252,11 +252,11 @@ t2_analyst:
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
         - '.ml-anomalies-*'
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - read
     - names:
         - .asset-criticality.asset-criticality-*
-        - 'security_solution-*.misconfiguration_latest*'
       privileges:
         - read
         - write
@@ -298,6 +298,7 @@ t3_analyst:
         - packetbeat-*
         - winlogbeat-*
         - .asset-criticality.asset-criticality-*
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - read
         - write
@@ -321,7 +322,6 @@ t3_analyst:
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
         - '.ml-anomalies-*'
-        - 'security_solution-*.misconfiguration_latest*'
       privileges:
         - read
   applications:
@@ -373,6 +373,7 @@ threat_intelligence_analyst:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - read
     - names:
@@ -396,7 +397,6 @@ threat_intelligence_analyst:
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
         - '.ml-anomalies-*'
-        - 'security_solution-*.misconfiguration_latest*'
       privileges:
         - read
   applications:
@@ -436,6 +436,7 @@ rule_author:
         - packetbeat-*
         - winlogbeat-*
         - .asset-criticality.asset-criticality-*
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - read
         - write
@@ -464,7 +465,6 @@ rule_author:
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
         - '.ml-anomalies-*'
-        - 'security_solution-*.misconfiguration_latest*'
       privileges:
         - read
   applications:
@@ -513,6 +513,7 @@ soc_manager:
         - winlogbeat-*
         - .asset-criticality.asset-criticality-*
         - .entities.v1.latest.security_*
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - read
         - write
@@ -540,7 +541,6 @@ soc_manager:
         - risk-score.risk-score-*
         - .asset-criticality.asset-criticality-*
         - '.ml-anomalies-*'
-        - 'security_solution-*.misconfiguration_latest*'
       privileges:
         - read
   applications:
@@ -602,6 +602,7 @@ detections_admin:
         - .internal.preview.alerts-security*
         - .adhoc.alerts-security*
         - .internal.adhoc.alerts-security*
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - read
         - write
@@ -611,7 +612,6 @@ detections_admin:
         - .fleet-agents*
         - .fleet-actions*
         - '.ml-anomalies-*'
-        - 'security_solution-*.misconfiguration_latest*'
       privileges:
         - read
     - names:
@@ -670,6 +670,7 @@ platform_engineer:
         - .adhoc.alerts-security*
         - .internal.adhoc.alerts-security*
         - risk-score.risk-score-*
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - all
     - names:
@@ -680,7 +681,6 @@ platform_engineer:
         - write
     - names:
         - '.ml-anomalies-*'
-        - 'security_solution-*.misconfiguration_latest*'
       privileges:
         - read
   applications:
@@ -741,7 +741,7 @@ endpoint_operations_analyst:
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
         - '.ml-anomalies-*'
-        - 'security_solution-*.misconfiguration_latest*'
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - read
     - names:
@@ -820,7 +820,7 @@ endpoint_policy_manager:
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
         - '.ml-anomalies-*'
-        - 'security_solution-*.misconfiguration_latest*'
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - read
     - names:
