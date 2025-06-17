@@ -160,7 +160,7 @@ export class CspPlugin
           ): Promise<UpdatePackagePolicy> => {
             if (isCspPackage(packagePolicy.package?.name)) {
               const isIntegrationVersionIncludesTransformAsset =
-                parseInt(packagePolicy.package.version.split('.')[0], 10) >= 2;
+                parseInt(packagePolicy.package!.version.split('.')[0], 10) >= 2;
               await deletePreviousTransformsVersions(
                 esClient,
                 isIntegrationVersionIncludesTransformAsset,
