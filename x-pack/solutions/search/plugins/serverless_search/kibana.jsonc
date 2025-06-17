@@ -29,7 +29,8 @@
       "security",
       "serverless",
       "share",
-      "visualizations"
+      "visualizations",
+      "onechat",
     ],
     "optionalPlugins": [
       "indexManagement",
