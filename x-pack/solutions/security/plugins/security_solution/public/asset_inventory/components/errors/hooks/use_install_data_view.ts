@@ -16,7 +16,7 @@ import { useAssetInventoryRoutes } from '../../../hooks/use_asset_inventory_rout
 /**
  * Hook with related business logic for installing Asset Inventory data view
  */
-export const useInstallDataView = ({ callback }: { callback?: () => void }) => {
+export const useInstallDataView = ({ callback }: { callback?: () => void } = {}) => {
   const { postInstallAssetInventoryDataView } = useAssetInventoryRoutes();
 
   const mutation = useMutation<AssetInventoryInstallDataViewResponse, AssetInventoryServerApiError>(
