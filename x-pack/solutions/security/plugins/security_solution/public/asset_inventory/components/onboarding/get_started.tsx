@@ -39,19 +39,19 @@ export const GetStarted = () => {
               color="danger"
               title={
                 <h2>
-                  {' '}
-                  {i18n.translate('xpack.securitySolution.assetInventory.errorTitle', {
-                    defaultMessage: 'Unable to show your Inventory',
-                  })}
+                  <FormattedMessage
+                    id="xpack.securitySolution.assetInventory.errorTitle"
+                    defaultMessage="Unable to show your Inventory"
+                  />
                 </h2>
               }
               body={
                 <>
                   <p>
-                    {i18n.translate('xpack.securitySolution.assetInventory.errorDescription', {
-                      defaultMessage:
-                        'Something went wrong while setting things up. You can try again or go back to Get Started with Inventory.',
-                    })}
+                    <FormattedMessage
+                      id="xpack.securitySolution.assetInventory.errorDescription"
+                      defaultMessage="Something went wrong while setting things up. You can try again or go back to Get Started with Inventory."
+                    />
                   </p>
                   <EuiFlexGroup direction="column" alignItems="center" gutterSize="m">
                     <EuiFlexItem grow={false}>

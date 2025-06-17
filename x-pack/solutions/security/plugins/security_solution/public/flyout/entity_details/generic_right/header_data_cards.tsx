@@ -71,7 +71,7 @@ export const HeaderDataCards = ({
           idValue: id,
         },
         {
-          onError: (error) => {
+          onError: () => {
             setLocalCriticality(previousValue);
             setHasError(true);
           },
@@ -158,7 +158,7 @@ export const HeaderDataCards = ({
             }}
             title={
               <FormattedMessage
-                id="xpack.securitySolution.assetInventory.onboarding.getStarted.errorTitle"
+                id="xpack.securitySolution.genericEntityFlyout.flyoutHeader.headerDataBoxes.assignCriticalityErrorTitle"
                 defaultMessage="We could not assign the selected criticality"
               />
             }
@@ -166,10 +166,10 @@ export const HeaderDataCards = ({
             iconType="error"
           >
             <p>
-              {i18n.translate('xpack.securitySolution.assetInventory.errorStatusCallout', {
-                defaultMessage:
-                  'Something went wrong while setting things up. You can try again or go back to Get Started with Inventory.',
-              })}
+              <FormattedMessage
+                id="xpack.securitySolution.genericEntityFlyout.flyoutHeader.headerDataBoxes.assignCriticalityErrorTexte"
+                defaultMessage="Something went wrong during validation. Please try again"
+              />
             </p>
           </EuiCallOut>
           <EuiSpacer />
