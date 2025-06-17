@@ -13,7 +13,7 @@ import {
   createResultSchema,
 } from '@kbn/content-management-utils';
 
-const mapAttributesSchema = schema.object(
+export const mapAttributesSchema = schema.object(
   {
     title: schema.string(),
     description: schema.maybe(schema.nullable(schema.string())),
@@ -24,9 +24,9 @@ const mapAttributesSchema = schema.object(
   { unknowns: 'forbid' }
 );
 
-const mapSavedObjectSchema = savedObjectSchema(mapAttributesSchema);
+export const mapSavedObjectSchema = savedObjectSchema(mapAttributesSchema);
 
-const searchOptionsSchema = schema.maybe(
+export const searchOptionsSchema = schema.maybe(
   schema.object(
     {
       onlyTitle: schema.maybe(schema.boolean()),
@@ -35,9 +35,11 @@ const searchOptionsSchema = schema.maybe(
   )
 );
 
-const createOptionsSchema = schema.object({
+export const createOptionsSchema = schema.object({
   references: schema.maybe(createOptionsSchemas.references),
 });
+
+export const mapsGetResultSchema = objectTypeToGetResultSchema(mapSavedObjectSchema);
 
 // Content management service definition.
 // We need it for BWC support between different versions of the content
