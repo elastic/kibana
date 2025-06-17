@@ -8,6 +8,7 @@
  */
 
 import React, { type FC, useState, Fragment, useMemo, useCallback, useRef, useEffect } from 'react';
+import { Global } from '@emotion/react';
 import {
   EuiWrappingPopover,
   EuiListGroup,
@@ -367,6 +368,15 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
             ? selectedMenuItem.config.flyoutSizing || {}
             : {})}
         >
+          <Global
+            // @ts-expect-error -- we pass a z-index specifying important so we override the default z-index, so solve a known bug,
+            // where when `headerZindexLocation` is set to `above`, the popover panel z-index is not high enough
+            styles={{
+              '.euiPopover__panel[data-popover-open="true"]': {
+                zIndex: '7000 !important',
+              },
+            }}
+          />
           {selectedMenuItemMeta!.group === 'export' ? (
             <ManagedFlyout
               exportIntegration={selectedMenuItem as ExportShareConfig}
