@@ -1111,19 +1111,22 @@ export async function restartInstallation(options: {
   pkgVersion: string;
   installSource: InstallSource;
   verificationResult?: PackageVerificationResult;
+  previousVersion?: string;
 }) {
-  const { savedObjectsClient, pkgVersion, pkgName, installSource, verificationResult } = options;
+  const {
+    savedObjectsClient,
+    pkgVersion,
+    pkgName,
+    installSource,
+    verificationResult,
+    previousVersion,
+  } = options;
 
-  const currentInstallation = await savedObjectsClient.get<Installation>(
-    PACKAGES_SAVED_OBJECT_TYPE,
-    pkgName
-  );
   let savedObjectUpdate: Partial<Installation> = {
     install_version: pkgVersion,
     install_status: 'installing',
     install_started_at: new Date().toISOString(),
     install_source: installSource,
-    previous_version: currentInstallation.attributes.version,
   };
 
   if (verificationResult) {
@@ -1132,6 +1135,10 @@ export async function restartInstallation(options: {
       verification_key_id: null, // unset any previous verification key id
       ...formatVerificationResultForSO(verificationResult),
     };
+  }
+
+  if (previousVersion) {
+    savedObjectUpdate.previous_version = previousVersion;
   }
 
   auditLoggingService.writeCustomSoAuditLog({
