@@ -34,24 +34,21 @@ export const RunTestButton = ({
 
   const handleTestNow = () => {
     const config = getValues() as MonitorFieldsType;
-    if (config && !Object.keys(formState.errors).length) {
-      setInProgress(true);
-      setTestRun({
-        id: uuidv4(),
-        name: config.name,
-        monitor: format(config) as MonitorFieldsType,
-      });
+    if (config) {
+      // Trigger form validation
+      const isValid = Object.keys(formState.errors).length === 0;
+      if (isValid) {
+        setInProgress(true);
+        setTestRun({
+          id: uuidv4(),
+          name: config.name,
+          monitor: format(config) as MonitorFieldsType,
+        });
+      } else {
+        // Trigger form validation to show errors
+        handleSubmit(() => {})();
+      }
     }
-  };
-
-  // Simple function to show validation errors when button is clicked while disabled
-  const handleButtonClick = () => {
-    if (!formState.isValid) {
-      // Just trigger validation to show all errors
-      handleSubmit(() => {})();
-      return;
-    }
-    handleSubmit(handleTestNow)();
   };
 
   const {
@@ -69,22 +66,21 @@ export const RunTestButton = ({
     }
   }, [space?.id, spaceId, testRun?.id, testRun?.monitor]);
 
-  const { tooltipContent, isDisabled } = useTooltipContent(formState.isValid, inProgress);
+  const { tooltipContent } = useTooltipContent(inProgress);
 
   return (
     <>
       <EuiToolTip key={tooltipContent} content={tooltipContent}>
-        <div onClick={handleButtonClick} style={{ display: 'inline-block' }}>
-          <EuiButton
-            data-test-subj="syntheticsRunTestBtn"
-            color="success"
-            disabled={isDisabled || !canUsePublicLocations || !isServiceAllowed}
-            aria-label={TEST_NOW_ARIA_LABEL}
-            iconType="play"
-          >
-            {RUN_TEST}
-          </EuiButton>
-        </div>
+        <EuiButton
+          data-test-subj="syntheticsRunTestBtn"
+          color="success"
+          disabled={inProgress || !canUsePublicLocations || !isServiceAllowed}
+          aria-label={TEST_NOW_ARIA_LABEL}
+          iconType="play"
+          onClick={handleSubmit(handleTestNow)}
+        >
+          {RUN_TEST}
+        </EuiButton>
       </EuiToolTip>
       {testRun && (
         <TestNowModeFlyout
@@ -107,14 +103,9 @@ export const RunTestButton = ({
   );
 };
 
-const useTooltipContent = (isValid: boolean, isTestRunInProgress?: boolean) => {
-  let tooltipContent = !isValid ? INVALID_DESCRIPTION : TEST_NOW_DESCRIPTION;
-
-  tooltipContent = isTestRunInProgress ? TEST_SCHEDULED_LABEL : tooltipContent;
-
-  const isDisabled = isTestRunInProgress || !isValid;
-
-  return { tooltipContent, isDisabled };
+const useTooltipContent = (isTestRunInProgress?: boolean) => {
+  const tooltipContent = isTestRunInProgress ? TEST_SCHEDULED_LABEL : TEST_NOW_DESCRIPTION;
+  return { tooltipContent };
 };
 
 const TEST_NOW_DESCRIPTION = i18n.translate('xpack.synthetics.testRun.description', {
