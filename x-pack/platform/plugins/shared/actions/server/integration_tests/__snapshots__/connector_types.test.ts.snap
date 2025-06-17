@@ -37914,6 +37914,12 @@ Object {
       ],
       "type": "string",
     },
+    "isRuleSeverity": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "type": "boolean",
+    },
     "severity": Object {
       "flags": Object {
         "default": null,

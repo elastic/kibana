@@ -63,7 +63,7 @@ export const TLP_LABEL = i18n.translate(
 export const IS_RULE_SEVERITY_LABEL = i18n.translate(
   'xpack.stackConnectors.components.thehive.isRuleSeverityToggleLabel',
   {
-    defaultMessage: 'Keep severity from rule',
+    defaultMessage: 'Use severity assigned to the rule',
   }
 );
 
