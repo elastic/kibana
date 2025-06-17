@@ -12,5 +12,5 @@ export type {
   PromptResponse,
   PromptStreamResponse,
 } from './api';
-export type { BoundPromptAPI, BoundPromptOptions, UnboundPromptOptions } from './bound_api';
+export type { BoundPromptAPI, UnboundPromptOptions } from './bound_api';
 export type { Prompt, PromptFactory, PromptVersion, ToolOptionsOfPrompt } from './types';
