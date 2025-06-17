@@ -126,6 +126,8 @@ export const HistoricalResultsComponent: FC<Props> = ({ indexName }) => {
             aria-label={FILTER_RESULTS_BY_OUTCOME}
           >
             <EuiFilterButton
+              isToggle
+              isSelected={isShowAll}
               hasActiveFilters={isShowAll}
               role="radio"
               data-test-subj="historicalResultsOutcomeFilterAll"
@@ -135,6 +137,8 @@ export const HistoricalResultsComponent: FC<Props> = ({ indexName }) => {
               {ALL}
             </EuiFilterButton>
             <EuiFilterButton
+              isToggle
+              isSelected={isShowPass}
               hasActiveFilters={isShowPass}
               role="radio"
               data-test-subj="historicalResultsOutcomeFilterPass"
@@ -144,6 +148,8 @@ export const HistoricalResultsComponent: FC<Props> = ({ indexName }) => {
               {PASS}
             </EuiFilterButton>
             <EuiFilterButton
+              isToggle
+              isSelected={isShowFail}
               hasActiveFilters={isShowFail}
               role="radio"
               data-test-subj="historicalResultsOutcomeFilterFail"
