@@ -109,10 +109,10 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
                 />
                 <EuiSpacer size="m" />
                 <MigrationRulesTable
-                  migrationId={migrationId}
                   refetchData={refetchData}
                   integrations={integrations}
                   isIntegrationsLoading={isIntegrationsLoading}
+                  migrationStats={migrationStats}
                 />
               </>
             )}
