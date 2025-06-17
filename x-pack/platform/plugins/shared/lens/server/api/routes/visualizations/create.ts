@@ -7,7 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { CONTENT_ID } from '../../../../common/content_management';
+import { boomify, isBoom } from '@hapi/boom';
+import { CONTENT_ID, type LensSavedObject } from '../../../../common/content_management';
 import {
   PUBLIC_API_PATH,
   PUBLIC_API_VERSION,
@@ -17,7 +18,7 @@ import {
 import {
   lensAttributesSchema,
   lensCreateOptionsSchema,
-  lensCreateResultSchema,
+  lensSavedObjectSchema,
 } from '../../../content_management/v1';
 import { RegisterAPIRouteFn } from '../../types';
 
@@ -29,7 +30,8 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
     path: `${PUBLIC_API_PATH}/visualizations`,
     access: PUBLIC_API_ACCESS,
     enableQueryVersion: true,
-    summary: 'Create a Lens visualization',
+    summary: 'Create Lens visualization',
+    description: 'Create a new Lens visualization.',
     options: {
       tags: ['oas-tag:Lens'],
       availability: {
@@ -49,47 +51,49 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
       version: PUBLIC_API_VERSION,
       validate: {
         request: {
-          params: schema.object({
-            // should we allow custom ids?
-            id: schema.maybe(
-              schema.string({
-                meta: {
-                  description: 'The saved object ID of the Lens visualization.',
-                },
-              })
-            ),
-          }),
           body: schema.object({
             options: lensCreateOptionsSchema,
             data: lensAttributesSchema,
           }),
         },
         response: {
-          200: {
-            body: () => lensCreateResultSchema,
+          201: {
+            body: () => lensSavedObjectSchema,
+            description: 'Created',
+          },
+          400: {
+            description: 'Malformed request',
+          },
+          401: {
+            description: 'Unauthorized',
+          },
+          403: {
+            description: 'Forbidden',
+          },
+          500: {
+            description: 'Internal Server Error',
           },
         },
       },
     },
     async (ctx, req, res) => {
+      let result;
       const { data, options } = req.body;
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for(CONTENT_ID, PUBLIC_API_CONTENT_MANAGEMENT_VERSION);
-      let result;
+        .for<LensSavedObject>(CONTENT_ID, PUBLIC_API_CONTENT_MANAGEMENT_VERSION);
+
       try {
         ({ result } = await client.create(data, options));
-      } catch (e) {
-        // TODO prevent duplicate titles?
-
-        if (e.isBoom && e.output.statusCode === 403) {
+      } catch (error) {
+        if (isBoom(error) && error.output.statusCode === 403) {
           return res.forbidden();
         }
 
-        return res.badRequest();
+        return boomify(error); // forward unknown error
       }
 
-      return res.ok({ body: result });
+      return res.created({ body: result.item });
     }
   );
 };

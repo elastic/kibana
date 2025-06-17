@@ -54,7 +54,7 @@ export const lensSavedObjectSchema = schema.object(
   { unknowns: 'allow' }
 );
 
-export const lensGetResultSchema = schema.object(
+const lensGetResultSchema = schema.object(
   {
     item: lensSavedObjectSchema,
     meta: schema.object(
@@ -93,17 +93,12 @@ export const lensSearchOptionsSchema = schema.maybe(
   )
 );
 
-export const lensCreateResultSchema = schema.object(
+const lensCreateResultSchema = schema.object(
   {
     item: lensSavedObjectSchema,
   },
   { unknowns: 'forbid' }
 );
-
-export const lensSearchResultSchema = schema.object({
-  items: schema.arrayOf(lensSavedObjectSchema),
-  total: schema.number(),
-});
 
 // Content management service definition.
 // We need it for BWC support between different versions of the content
