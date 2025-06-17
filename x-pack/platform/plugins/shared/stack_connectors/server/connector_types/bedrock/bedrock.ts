@@ -86,7 +86,7 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
       this.logger,
       this.url
     );
-    const isHttps = this.url.startsWith('https');
+    const isHttps = this.url.toLowerCase().startsWith('https');
     this.bedrockClient = new BedrockRuntimeClient({
       region: extractRegionId(this.config.apiUrl),
       credentials: {
