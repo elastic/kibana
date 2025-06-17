@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorSelectorInline } from '@kbn/elastic-assistant';
 import {
-  EuiFormRow,
   EuiTab,
   EuiTabs,
   EuiText,
@@ -19,9 +17,6 @@ import type { FilterManager } from '@kbn/data-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 import React, { useMemo, useState } from 'react';
 
-import { ElasticLLMCostAwarenessTour } from '@kbn/elastic-assistant/impl/tour/elastic_llm';
-import { css } from '@emotion/react';
-import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '@kbn/elastic-assistant/impl/tour/const';
 import { AlertSelectionQuery } from './alert_selection_query';
 import { AlertSelectionRange } from './alert_selection_range';
 import { getTabs } from './helpers/get_tabs';
@@ -60,7 +55,6 @@ const AlertSelectionComponent: React.FC<Props> = ({
   setStart,
   start,
 }) => {
-  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
 
   const tabs = useMemo(
     () =>
@@ -107,32 +101,7 @@ const AlertSelectionComponent: React.FC<Props> = ({
         <EuiSpacer size="m" />
       </EuiFlexItem>
 
-      <EuiSpacer size="m" />
-
-      <ElasticLLMCostAwarenessTour
-        isDisabled={false}
-        wrapper={false}
-        selectedConnectorId={connectorId}
-        storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM_USAGE_ATTACK_DISCOVERY_FLYOUT}
-      >
-        <EuiFormRow
-          label={i18n.CONNECTOR}
-          css={css`
-            flex-grow: 1;
-          `}
-        >
-          <ConnectorSelectorInline
-            fullWidth={true}
-            onConnectorSelected={noop}
-            onConnectorIdSelected={onConnectorIdSelected}
-            selectedConnectorId={connectorId}
-            stats={attackDiscoveryAlertsEnabled ? undefined : stats}
-          />
-        </EuiFormRow>
-      </ElasticLLMCostAwarenessTour>
-      <EuiSpacer size="m" />
-
-      <EuiFormRow label={i18n.CUSTOM_QUERY}>
+      <EuiFlexItem grow={false}>
         <AlertSelectionQuery
           end={end}
           filterManager={filterManager}
@@ -143,7 +112,7 @@ const AlertSelectionComponent: React.FC<Props> = ({
           setStart={setStart}
           start={start}
         />
-      </EuiFormRow>
+      </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
         <EuiSpacer />
