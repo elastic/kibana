@@ -82,6 +82,7 @@ export class RuleMigrationsTaskClient {
     await this.data.migrations.saveAsStarted({
       id: migrationId,
       connectorId,
+      skipPrebuiltRulesMatching: invocationConfig.configurable?.skipPrebuiltRulesMatching,
     });
 
     // run the migration in the background without awaiting and resolve the `start` promise
@@ -166,11 +167,10 @@ export class RuleMigrationsTaskClient {
   private getTaskStats(
     migration: StoredSiemMigration,
     dataStats: RuleMigrationDataStats['rules']
-  ): Pick<RuleMigrationTaskStats, 'status' | 'last_error'> {
-    const lastError = migration?.last_execution?.error;
+  ): Pick<RuleMigrationTaskStats, 'status' | 'last_execution'> {
     return {
       status: this.getTaskStatus(migration, dataStats),
-      ...(lastError && { last_error: lastError }),
+      last_execution: migration.last_execution,
     };
   }
 
@@ -217,7 +217,7 @@ export class RuleMigrationsTaskClient {
 
   /** Creates a new evaluator for the rule migration task */
   async evaluate(params: RuleMigrationTaskEvaluateParams): Promise<void> {
-    const { evaluationId, langsmithSettings, connectorId, invocationConfig, abortController } =
+    const { evaluationId, langsmithOptions, connectorId, invocationConfig, abortController } =
       params;
 
     const migrationLogger = this.logger.get('evaluate');
@@ -233,7 +233,7 @@ export class RuleMigrationsTaskClient {
 
     await migrationTaskEvaluator.evaluate({
       connectorId,
-      langsmithSettings,
+      langsmithOptions,
       invocationConfig,
     });
   }
