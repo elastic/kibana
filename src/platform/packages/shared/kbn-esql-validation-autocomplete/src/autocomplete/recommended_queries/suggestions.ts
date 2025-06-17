@@ -82,7 +82,10 @@ export const getRecommendedQueriesTemplatesFromExtensions = (
       return {
         label: recommendedQuery.name,
         text: `|${queryParts.slice(1).join('|')}`,
-        detail: recommendedQuery.description ?? '',
+        detail: recommendedQuery.name ?? '',
+        ...(recommendedQuery.description
+          ? { documentation: { value: recommendedQuery.description } }
+          : {}),
         kind: 'Issue',
         sortText: 'D',
       };
