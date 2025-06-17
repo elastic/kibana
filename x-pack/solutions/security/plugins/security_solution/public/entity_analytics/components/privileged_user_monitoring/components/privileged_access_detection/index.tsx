@@ -66,13 +66,7 @@ export const PrivilegedAccessDetectionsPanel: React.FC<{ spaceId: string }> = ({
   return (
     <>
       {!padInstallationStatus && (
-        <EuiPanel
-          hasShadow={false}
-          hasBorder={true}
-          css={css`
-            width: 100%;
-          `}
-        >
+        <EuiPanel hasShadow={false} hasBorder={true}>
           <EuiProgress size="xs" color="accent" />
         </EuiPanel>
       )}
