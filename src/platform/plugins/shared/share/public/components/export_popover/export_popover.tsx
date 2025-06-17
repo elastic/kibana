@@ -199,7 +199,7 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
                   id="share.export.flyoutTitle"
                   defaultMessage="Export {objectType} as {type}"
                   values={{
-                    objectType: (objectTypeAlias ?? objectType).toLocaleLowerCase(),
+                    objectType: objectTypeAlias ?? objectType.toLocaleLowerCase(),
                     type: selectedMenuItem?.config.label,
                   }}
                 />

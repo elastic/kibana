@@ -22,6 +22,8 @@ export enum SUB_ACTION {
   DASHBOARD = 'getDashboard',
   TEST = 'test',
   BEDROCK_CLIENT_SEND = 'bedrockClientSend',
+  CONVERSE = 'converse',
+  CONVERSE_STREAM = 'converseStream',
 }
 
 export const DEFAULT_TIMEOUT_MS = 120000;

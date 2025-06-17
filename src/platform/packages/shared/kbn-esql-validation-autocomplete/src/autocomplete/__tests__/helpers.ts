@@ -31,7 +31,12 @@ import {
   FunctionReturnType,
   SupportedDataType,
 } from '../../definitions/types';
-import { joinIndices, timeseriesIndices, editorExtensions } from '../../__tests__/helpers';
+import {
+  joinIndices,
+  timeseriesIndices,
+  editorExtensions,
+  inferenceEndpoints,
+} from '../../__tests__/helpers';
 
 export interface Integration {
   name: string;
@@ -306,10 +311,13 @@ export function createCustomCallbackMocks(
     getTimeseriesIndices: jest.fn(async () => ({ indices: timeseriesIndices })),
     getEditorExtensions: jest.fn(async (queryString: string) => {
       if (queryString.includes('logs*')) {
-        return editorExtensions;
+        return {
+          recommendedQueries: editorExtensions.recommendedQueries,
+        };
       }
-      return [];
+      return { recommendedQueries: [] };
     }),
+    getInferenceEndpoints: jest.fn(async () => ({ inferenceEndpoints })),
   };
 }
 
