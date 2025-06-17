@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import { StatusError } from '../../errors/status_error';
 
-export const BasicRules = () => {
-  return <h1>{'Basic Rules'}</h1>;
-};
+export class ConcurrentAccessError extends StatusError {
+  constructor(message: string) {
+    super(message, 409);
+    this.name = 'ConcurrentAccessError';
+  }
+}
