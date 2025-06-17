@@ -22,7 +22,11 @@ import type {
   ExecutableTool,
   ToolProvider,
 } from '@kbn/onechat-server';
-import { providerToLangchainTools, toLangchainTool, conversationToLangchainMessages } from './utils';
+import {
+  providerToLangchainTools,
+  toLangchainTool,
+  conversationToLangchainMessages,
+} from './utils';
 import { createAgentGraph } from './graph';
 import { convertGraphEvents, addRoundCompleteEvent } from './convert_graph_events';
 
