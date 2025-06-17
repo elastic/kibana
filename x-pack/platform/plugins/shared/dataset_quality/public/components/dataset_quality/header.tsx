@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { EuiBetaBadge, EuiLink, EuiPageHeader, EuiCode, EuiButton } from '@elastic/eui';
+import { EuiBetaBadge, EuiButton, EuiCode, EuiLink, EuiPageHeader } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DEGRADED_DOCS_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { default as React, useMemo, useState } from 'react';
 import { KNOWN_TYPES } from '../../../common/constants';
 import { createAlertText, datasetQualityAppTitle } from '../../../common/translations';
 import { AlertFlyout } from '../../alerts/alert_flyout';
 import { getAlertingCapabilities } from '../../alerts/get_alerting_capabilities';
 import { useKibanaContextForPlugin } from '../../utils';
+import { DEFAULT_DATASET_TYPE } from '../../../common/constants';
+import { useDatasetQualityFilters } from '../../hooks/use_dataset_quality_filters';
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
@@ -27,6 +29,11 @@ export default function Header() {
   const [ruleType, setRuleType] = useState<typeof DEGRADED_DOCS_RULE_TYPE_ID | null>(null);
 
   const { isAlertingAvailable } = getAlertingCapabilities(alerting, capabilities);
+  const { isDatasetQualityAllSignalsAvailable } = useDatasetQualityFilters();
+  const validTypes = useMemo(
+    () => (isDatasetQualityAllSignalsAvailable ? KNOWN_TYPES : [DEFAULT_DATASET_TYPE]),
+    [isDatasetQualityAllSignalsAvailable]
+  );
 
   return (
     <EuiPageHeader
@@ -47,7 +54,7 @@ export default function Header() {
           id="xpack.datasetQuality.appDescription"
           defaultMessage="Monitor the data set quality for {types} data streams that follow the {dsNamingSchemeLink}."
           values={{
-            types: KNOWN_TYPES.map((type, index) => {
+            types: validTypes.map((type, index) => {
               return (
                 <>
                   {index > 0 && ', '}
