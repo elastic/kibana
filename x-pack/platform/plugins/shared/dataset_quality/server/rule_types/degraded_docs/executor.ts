@@ -17,12 +17,11 @@ import {
 } from '@kbn/rule-data-utils';
 import { Comparator } from '@kbn/stack-alerts-plugin/common/comparator_types';
 import { LocatorClient } from '@kbn/share-plugin/common/url_service';
-import { INDEX, _IGNORED } from '../../../common/es_fields';
+import { _IGNORED } from '../../../common/es_fields';
 import { generateContext } from '../context';
 import { getDocsStats } from '../get_docs_stats';
 import {
   AdditionalContext,
-  DATASET_QUALITY_DATASTREAM_NAME,
   THRESHOLD_MET_GROUP,
   type DatasetQualityAlert,
   type DatasetQualityAlertContext,
@@ -113,13 +112,13 @@ export const getRuleExecutor = (locatorsClient?: LocatorClient) =>
         continue;
       }
 
-      const groupByFields: AdditionalContext = bucketKey.reduce((acc, field, i) => {
-        const fieldName = (params.groupBy ?? [])[i];
-        return {
-          ...acc,
-          [fieldName === INDEX ? DATASET_QUALITY_DATASTREAM_NAME : fieldName]: field, // _index is reserved for the actual alerts index
-        };
-      }, {});
+      const groupByFields: AdditionalContext = {};
+      const groupBy = params.groupBy ?? [];
+
+      for (let i = 0; i < bucketKey.length; i++) {
+        const fieldName = groupBy[i];
+        groupByFields[fieldName] = bucketKey[i];
+      }
 
       if (generatedAlerts < alertLimit) {
         const context = generateContext({
