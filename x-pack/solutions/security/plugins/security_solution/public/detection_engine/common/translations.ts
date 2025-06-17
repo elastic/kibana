@@ -197,14 +197,14 @@ export const BULK_ACTION_ALERT_SUPPRESSION = i18n.translate(
 export const BULK_ACTION_SET_ALERT_SUPPRESSION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.setAlertSuppression',
   {
-    defaultMessage: 'Set alert suppression',
+    defaultMessage: 'Apply alert suppression',
   }
 );
 
 export const BULK_ACTION_SET_ALERT_SUPPRESSION_FOR_THRESHOLD = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.setAlertSuppressionForThreshold',
   {
-    defaultMessage: 'Set alert suppression to threshold rules',
+    defaultMessage: 'Apply alert suppression to threshold rules',
   }
 );
 

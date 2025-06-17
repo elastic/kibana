@@ -92,7 +92,7 @@ describe(
           clickSetAlertSuppressionMenuItem();
 
           cy.get(MODAL_CONFIRMATION_BODY).contains(
-            `${skippedCount} threshold rule can't be edited. To add alert suppression to these rules, use the Set alert suppression to threshold rules option.`
+            `${skippedCount} threshold rule can't be edited. To bulk-apply alert suppression to this rule, use the Apply alert suppression to threshold rules option.`
           );
 
           confirmBulkEditAction();
@@ -127,7 +127,7 @@ describe(
           clickSetAlertSuppressionForThresholdMenuItem();
 
           cy.get(MODAL_CONFIRMATION_BODY).contains(
-            `${skippedCount} rules can't be edited. To add alert suppression to these rules, use the Set alert suppression option.`
+            `${skippedCount} rules can't be edited. To bulk-apply alert suppression to these rules, use the Apply alert suppression option.`
           );
 
           confirmBulkEditAction();

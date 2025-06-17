@@ -92,7 +92,7 @@ const BulkEditRuleErrorItem = ({
         <li key={message}>
           <FormattedMessage
             id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.thresholdRuleInSuppressionDescription"
-            defaultMessage="{rulesCount, plural, =1 {# threshold rule} other {# threshold rules}} can't be edited. To add alert suppression to these rules, use the {actionStrong} option."
+            defaultMessage="{rulesCount, plural, =1 {# threshold rule} other {# threshold rules}} can't be edited. To bulk-apply alert suppression {rulesCount, plural, =1 {to this rule} other {to these rules}}, use the {actionStrong} option."
             values={{
               rulesCount,
               actionStrong: <strong>{BULK_ACTION_SET_ALERT_SUPPRESSION_FOR_THRESHOLD}</strong>,
@@ -105,7 +105,7 @@ const BulkEditRuleErrorItem = ({
         <li key={message}>
           <FormattedMessage
             id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.unsupportedRulesInThresholdSuppressionDescription"
-            defaultMessage="{rulesCount, plural, =1 {# rule} other {# rules}} can't be edited. To add alert suppression to these rules, use the {actionStrong} option."
+            defaultMessage="{rulesCount, plural, =1 {# rule} other {# rules}} can't be edited. To bulk-apply alert suppression {rulesCount, plural, =1 {to this rule} other {to these rules}}, use the {actionStrong} option."
             values={{
               rulesCount,
               actionStrong: <strong>{BULK_ACTION_SET_ALERT_SUPPRESSION}</strong>,
