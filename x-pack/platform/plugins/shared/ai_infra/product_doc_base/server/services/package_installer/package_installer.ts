@@ -22,6 +22,7 @@ import {
   loadManifestFile,
   ensureDefaultElserDeployed,
   type ZipArchive,
+  ensureInferenceDeployed,
 } from './utils';
 import { majorMinor, latestVersion } from './utils/semver';
 import {

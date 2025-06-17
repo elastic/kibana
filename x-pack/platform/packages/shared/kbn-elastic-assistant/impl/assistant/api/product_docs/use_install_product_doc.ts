@@ -13,13 +13,13 @@ import { REACT_QUERY_KEYS } from './const';
 import { useAssistantContext } from '../../../..';
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
-export function useInstallProductDoc(inferenceId?: string) {
+export function useInstallProductDoc() {
   const { productDocBase, toasts } = useAssistantContext();
   const queryClient = useQueryClient();
 
   return useMutation<PerformInstallResponse, ServerError, void>(
     [REACT_QUERY_KEYS.INSTALL_PRODUCT_DOC],
-    () => {
+    (inferenceId?: string) => {
       return productDocBase.installation.install({ inferenceId });
     },
     {

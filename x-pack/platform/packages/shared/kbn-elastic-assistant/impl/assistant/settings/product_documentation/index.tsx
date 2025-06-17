@@ -27,7 +27,7 @@ export const ProductDocumentationManagement = React.memo<{
     mutateAsync: installProductDoc,
     isSuccess: isInstalled,
     isLoading: isInstalling,
-  } = useInstallProductDoc(inferenceId);
+  } = useInstallProductDoc();
 
   const onClickInstall = useCallback(() => {
     installProductDoc(inferenceId);

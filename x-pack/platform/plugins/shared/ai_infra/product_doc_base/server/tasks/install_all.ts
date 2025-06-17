@@ -33,8 +33,7 @@ export const registerInstallAllTaskDefinition = ({
         return {
           async run() {
             const { packageInstaller } = getServices();
-            // @todo: remove inferenceId: undefined
-            return packageInstaller.installAll({ inferenceId: undefined });
+            return packageInstaller.installAll({ inferenceId });
           },
         };
       },

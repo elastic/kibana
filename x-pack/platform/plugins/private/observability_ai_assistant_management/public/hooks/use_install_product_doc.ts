@@ -9,7 +9,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import type { PerformInstallResponse } from '@kbn/product-doc-base-plugin/common/http_api/installation';
-import { useKnowledgeBase } from '@kbn/ai-assistant';
 import { REACT_QUERY_KEYS } from '../constants';
 import { useKibana } from './use_kibana';
 
@@ -21,14 +20,9 @@ export function useInstallProductDoc() {
     notifications: { toasts },
   } = useKibana().services;
   const queryClient = useQueryClient();
-  const knowledgeBase = useKnowledgeBase();
-  const inferenceId =
-    knowledgeBase.status.value?.currentInferenceId ??
-    knowledgeBase.status.value?.endpoint?.inference_id;
   return useMutation<PerformInstallResponse, ServerError, void>(
     [REACT_QUERY_KEYS.INSTALL_PRODUCT_DOC],
-    () => {
-      // @Todo
+    (inferenceId?: string) => {
       return productDocBase!.installation.install({ inferenceId });
     },
     {

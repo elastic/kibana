@@ -31,7 +31,6 @@ export const createIndex = async ({
   const legacySemanticText = isLegacySemanticTextVersion(manifestVersion);
 
   overrideInferenceId(mappings, inferenceId);
-
   await esClient.indices.create({
     index: indexName,
     mappings,
