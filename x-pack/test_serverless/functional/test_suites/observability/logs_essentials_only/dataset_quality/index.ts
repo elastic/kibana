@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('logs essentials only', function () {
-    loadTestFile(require.resolve('./navigation'));
-    loadTestFile(require.resolve('./dataset_quality'));
+  describe('Dataset Quality', function () {
+    loadTestFile(require.resolve('./dataset_quality_table_filters'));
   });
 }
