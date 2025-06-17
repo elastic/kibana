@@ -13,8 +13,9 @@ export const ensureInferenceDeployed = async ({
   inferenceId,
 }: {
   client: ElasticsearchClient;
-  inferenceId: string;
+  inferenceId?: string;
 }) => {
+  if (!inferenceId) return;
   await client.inference.inference(
     {
       inference_id: inferenceId,

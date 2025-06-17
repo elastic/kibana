@@ -157,6 +157,7 @@ export class PackageInstaller {
       });
 
       if (inferenceId || this.elserInferenceId !== defaultInferenceEndpoints.ELSER) {
+        // @TODO: Verify if inference is appropriate type before ensure deployment?
         await ensureInferenceDeployed({
           client: this.esClient,
           inferenceId,
