@@ -15,9 +15,7 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/common';
 
 const baseRuleSchema = schema.object({
-  id: schema.string(),
   enabled: schema.boolean(),
-  description: schema.maybe(schema.string()),
 });
 
 const regexRuleSchema = schema.allOf([
@@ -98,21 +96,18 @@ export const uiSettings: Record<string, UiSettingsParams> = {
           entityClass: 'PER',
           type: 'ner',
           enabled: false,
-          description: 'Anonymize person names using named entity recognition',
         },
         {
           id: 'location_ner',
           entityClass: 'LOC',
           type: 'ner',
           enabled: false,
-          description: 'Anonymize location names using named entity recognition',
         },
         {
           id: 'organization_ner',
           entityClass: 'ORG',
           type: 'ner',
           enabled: false,
-          description: 'Anonymize organization names using named entity recognition',
         },
       ],
       null,
@@ -123,12 +118,10 @@ export const uiSettings: Record<string, UiSettingsParams> = {
       {
         defaultMessage:
           'List of anonymization rules.\n' +
-          '- id: unique string identifier\n' +
           '- type: "ner" or "regex"\n' +
           '- entityClass: PER, ORG, LOC\n' +
           '- pattern: (regex rules only) the regular‑expression string to match\n' +
-          '- enabled: boolean flag to turn the rule on or off\n' +
-          '- description: optional human‑readable description\n',
+          '- enabled: boolean flag to turn the rule on or off\n',
       }
     ),
     schema: schema.arrayOf(schema.oneOf([regexRuleSchema, nerRuleSchema])),
