@@ -33,7 +33,8 @@ export interface PageAttachmentPersistedState extends PersistableStateAttachment
    * Optional snapshot of the page, used to render a screenshot in the comment
    */
   snapshot: {
-    imgData: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    imgData: any;
   } | null;
   /**
    * Optional screen context for the page. A plain text description that
