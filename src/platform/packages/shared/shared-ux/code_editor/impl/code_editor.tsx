@@ -486,6 +486,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       enableCustomContextMenu,
       registerContextMenuActions,
       isReadOnly,
+      customConextMenuActions,
     ]
   );
 
