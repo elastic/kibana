@@ -11,7 +11,7 @@ import { timeout } from 'rxjs';
 import { Writable } from 'stream';
 import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
 import { UpdateResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger, SavedObject } from '@kbn/core/server';
 import {
   CancellationToken,
   KibanaShuttingDownError,
@@ -44,9 +44,11 @@ import { ReportTaskParams, ReportingTask, ReportingTaskStatus, TIME_BETWEEN_ATTE
 import type { ReportingCore } from '../..';
 import { EventTracker } from '../../usage';
 import { Report, SavedReport } from '../store';
-import type { ReportFailedFields } from '../store/store';
+import type { ReportFailedFields, ReportWarningFields } from '../store/store';
 import { errorLogger } from './error_logger';
 import { finishedWithNoPendingCallbacks, getContentStream } from '../content_stream';
+import { EmailNotificationService } from '../../services/notifications/email_notification_service';
+import { ScheduledReportType } from '../../types';
 
 type CompletedReportOutput = Omit<ReportOutput, 'content'>;
 
@@ -91,6 +93,7 @@ export interface PrepareJobResults {
   jobId: string;
   report?: SavedReport;
   task?: ReportTaskParams;
+  reportSO?: SavedObject<ScheduledReportType>;
 }
 
 type ReportTaskParamsType = Record<string, any>;
@@ -106,6 +109,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
   protected kibanaName?: string;
   protected exportTypesRegistry: ExportTypesRegistry;
   protected eventTracker?: EventTracker;
+  protected emailNotificationService?: EmailNotificationService;
 
   constructor(protected readonly opts: ConstructorOpts) {
     this.logger = opts.logger.get('runTask');
@@ -127,13 +131,27 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
 
   protected abstract getMaxAttempts(): number | undefined;
 
+  protected abstract notify(
+    report: SavedReport,
+    taskInstance: ConcreteTaskInstance,
+    output: TaskRunResult,
+    byteSize: number,
+    reportSO?: SavedObject<ScheduledReportType>,
+    spaceId?: string
+  ): Promise<void>;
+
   // Public methods
-  public async init(taskManager: TaskManagerStartContract) {
+  public async init(
+    taskManager: TaskManagerStartContract,
+    emailNotificationService?: EmailNotificationService
+  ) {
     this.taskManagerStart = taskManager;
 
     const { uuid, name } = this.opts.reporting.getServerInfo();
     this.kibanaId = uuid;
     this.kibanaName = name;
+
+    this.emailNotificationService = emailNotificationService;
   }
 
   public getStatus() {
@@ -169,6 +187,11 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
   protected getJobContentEncoding(jobType: string) {
     const exportType = this.exportTypesRegistry.getByJobType(jobType);
     return exportType.jobContentEncoding;
+  }
+
+  protected getJobContentExtension(jobType: string) {
+    const exportType = this.exportTypesRegistry.getByJobType(jobType);
+    return exportType.jobContentExtension;
   }
 
   protected async failJob(
@@ -225,6 +248,24 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     };
 
     return await store.setReportError(report, doc);
+  }
+
+  protected async saveExecutionWarning(
+    report: SavedReport,
+    output: CompletedReportOutput,
+    message: string
+  ): Promise<UpdateResponse<ReportDocument>> {
+    const logger = this.logger.get(report._id);
+    logger.warn(message);
+
+    // update the report in the store
+    const store = await this.opts.reporting.getStore();
+    const doc: ReportWarningFields = {
+      output,
+      warning: message,
+    };
+
+    return await store.setReportWarning(report, doc);
   }
 
   protected formatOutput(output: CompletedReportOutput | ReportingError): ReportOutput {
@@ -440,6 +481,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
             jobId: jId,
             report: preparedReport,
             task,
+            reportSO,
           } = await this.prepareJob(taskInstance);
           jobId = jId;
           report = preparedReport;
@@ -517,18 +559,28 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
             report._seq_no = stream.getSeqNo()!;
             report._primary_term = stream.getPrimaryTerm()!;
 
+            const byteSize = stream.bytesWritten;
             eventLog.logExecutionComplete({
               ...(output.metrics ?? {}),
-              byteSize: stream.bytesWritten,
+              byteSize,
             });
 
             if (output) {
-              logger.debug(`Job output size: ${stream.bytesWritten} bytes.`);
+              logger.debug(`Job output size: ${byteSize} bytes.`);
               // Update the job status to "completed"
               report = await this.completeJob(report, {
                 ...output,
-                size: stream.bytesWritten,
+                size: byteSize,
               });
+
+              await this.notify(
+                report,
+                taskInstance,
+                output,
+                byteSize,
+                reportSO,
+                task.payload.spaceId
+              );
             }
 
             // untrack the report for concurrency awareness

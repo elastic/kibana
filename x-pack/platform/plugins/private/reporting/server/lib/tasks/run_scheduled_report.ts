@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, SavedObject } from '@kbn/core/server';
 import { numberToDuration } from '@kbn/reporting-common';
+import type { TaskRunResult } from '@kbn/reporting-common/types';
 import type { ConcreteTaskInstance, TaskInstance } from '@kbn/task-manager-plugin/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
@@ -22,6 +23,8 @@ import { PrepareJobResults, RunReportTask } from './run_report';
 import { ScheduledReport } from '../store/scheduled_report';
 import { ScheduledReportType } from '../../types';
 
+const MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024; // 10mb
+
 type ScheduledReportTaskInstance = Omit<TaskInstance, 'params'> & {
   params: Omit<ScheduledReportTaskParams, 'schedule'>;
 };
@@ -35,6 +38,7 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
 
     let report: SavedReport | undefined;
     let jobId: string;
+    let reportSO: SavedObject<ScheduledReportType> | undefined;
     const task = scheduledReportTaskParams as ScheduledReportTaskParams;
     const reportSoId = task.id;
     const reportSpaceId = task.spaceId || DEFAULT_SPACE_ID;
@@ -47,7 +51,7 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
       }
 
       const internalSoClient = await this.opts.reporting.getInternalSoClient();
-      const reportSO = await internalSoClient.get<ScheduledReportType>(
+      reportSO = await internalSoClient.get<ScheduledReportType>(
         SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
         reportSoId,
         { namespace: reportSpaceId }
@@ -75,11 +79,89 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
       errorLogger(this.logger, `Error in running scheduled report ${reportSoId}`, failedToClaim);
     }
 
-    return { isLastAttempt: false, jobId: jobId!, report, task: report?.toReportTaskJSON() };
+    return {
+      isLastAttempt: false,
+      jobId: jobId!,
+      report,
+      task: report?.toReportTaskJSON(),
+      reportSO,
+    };
   }
 
   protected getMaxAttempts() {
     return undefined;
+  }
+
+  protected async notify(
+    report: SavedReport,
+    taskInstance: ConcreteTaskInstance,
+    output: TaskRunResult,
+    byteSize: number,
+    reportSO?: SavedObject<ScheduledReportType>,
+    spaceId?: string
+  ): Promise<void> {
+    try {
+      const { runAt, params } = taskInstance;
+      const task = params as ScheduledReportTaskParams;
+      if (!reportSO) {
+        const internalSoClient = await this.opts.reporting.getInternalSoClient();
+        reportSO = await internalSoClient.get<ScheduledReportType>(
+          SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
+          task.id,
+          { namespace: spaceId }
+        );
+      }
+
+      const { notification } = reportSO.attributes;
+      if (notification && notification.email) {
+        if (byteSize > MAX_ATTACHMENT_SIZE) {
+          throw new Error('The report is larger than the 10MB limit.');
+        }
+        if (!this.emailNotificationService) {
+          throw new Error('Reporting notification service has not been initialized.');
+        }
+
+        const email = notification.email;
+        const title = reportSO.attributes.title;
+        const extension = this.getJobContentExtension(report.jobtype);
+
+        await this.emailNotificationService.notify({
+          reporting: this.opts.reporting,
+          index: report._index,
+          id: report._id,
+          extension,
+          contentType: output.content_type,
+          relatedObject: {
+            id: reportSO.id,
+            type: reportSO.type,
+            namespace: spaceId,
+          },
+          emailParams: {
+            to: email.to,
+            cc: email.cc,
+            bcc: email.bcc,
+            subject: `${title} [${runAt.toISOString()}] scheduled report`,
+            spaceId,
+          },
+        });
+      }
+    } catch (error) {
+      const message = `Error sending notification for scheduled report: ${error.message}`;
+      this.saveExecutionWarning(
+        report,
+        {
+          ...output,
+          size: byteSize,
+        },
+        message
+      ).catch((failedToSaveWarning) => {
+        errorLogger(
+          this.logger,
+          `Error in saving execution warning ${report._id}`,
+          failedToSaveWarning
+        );
+      });
+    }
   }
 
   public getTaskDefinition() {

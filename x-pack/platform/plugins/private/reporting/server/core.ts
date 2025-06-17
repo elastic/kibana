@@ -63,6 +63,7 @@ import {
 import type { ReportingPluginRouter } from './types';
 import { EventTracker } from './usage';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from './saved_objects';
+import { EmailNotificationService } from './services/notifications/email_notification_service';
 import { API_PRIVILEGES } from './features';
 
 export interface ReportingInternalSetup {
@@ -181,12 +182,16 @@ export class ReportingCore {
       et.start({ ...startDeps });
     });
 
-    const { taskManager } = startDeps;
+    const { taskManager, notifications } = startDeps;
+    const emailNotificationService = new EmailNotificationService({
+      notifications,
+    });
+
     const { runSingleReportTask, runScheduledReportTask } = this;
     // enable this instance to generate reports
     await Promise.all([
       runSingleReportTask.init(taskManager),
-      runScheduledReportTask.init(taskManager),
+      runScheduledReportTask.init(taskManager, emailNotificationService),
     ]);
   }
 
