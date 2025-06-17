@@ -120,106 +120,114 @@ export const stubPutWorkflowInsightsApiResponse = () => {
 };
 
 export const stubDefendInsightsApiResponse = (
-  overrides: Record<string, string> = {},
+  overrides: Record<string, unknown> = {},
   config: { times?: number } = {}
 ) => {
-  cy.intercept(
-    {
-      method: 'GET',
-      url: '**/internal/elastic_assistant/defend_insights?status=running**',
-      ...(config.times ? { times: config.times } : {}),
-    },
-    (req) => {
-      req.continue((res) => {
-        return res.send(200, {
-          data: [
-            {
-              timestamp: '2024-12-16T13:44:52.633Z',
-              id: 'd95561cb-1f75-4a6c-8be4-cb7529ddd5e0',
-              backingIndex:
-                '.ds-.kibana-elastic-ai-assistant-defend-insights-default-2024.12.16-000001',
-              createdAt: '2024-12-16T13:44:52.633Z',
-              updatedAt: '2024-12-16T13:44:52.633Z',
-              lastViewedAt: '2024-12-16T13:44:53.866Z',
-              users: [
-                {
-                  id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-                  name: 'elastic',
-                },
-              ],
-              namespace: 'default',
-              status: 'running',
-              apiConfig: {
-                connectorId: 'db760d65-6722-4646-955f-fbdc9851df86',
-                actionTypeId: '.bedrock',
-              },
-              endpointIds: ['33581c4f-bef1-4162-9809-4c208e2e1991'],
-              insightType: 'incompatible_antivirus',
-              insights: [],
-              generationIntervals: [],
-              averageIntervalMs: 0,
-              ...overrides,
-            },
-          ],
-        });
-      });
-    }
-  );
-};
-
-export const stubWorkflowInsightsApiResponse = (endpointId: string) => {
-  cy.intercept('GET', '**/internal/api/endpoint/workflow_insights**', (req) => {
-    req.continue((res) => {
-      return res.send(200, [
-        {
-          remediation: {
-            exception_list_items: [
+  return cy
+    .intercept(
+      {
+        method: 'GET',
+        url: '**/internal/elastic_assistant/defend_insights**',
+        ...(config.times ? { times: config.times } : {}),
+      },
+      (req) => {
+        req.continue((res) => {
+          return res.send(200, {
+            data: [
               {
-                entries: [
+                timestamp: '2024-12-16T13:44:52.633Z',
+                id: 'd95561cb-1f75-4a6c-8be4-cb7529ddd5e0',
+                backingIndex:
+                  '.ds-.kibana-elastic-ai-assistant-defend-insights-default-2024.12.16-000001',
+                createdAt: '2024-12-16T13:44:52.633Z',
+                updatedAt: '2024-12-16T13:44:52.633Z',
+                lastViewedAt: '2024-12-16T13:44:53.866Z',
+                users: [
                   {
-                    field: 'process.executable.caseless',
-                    type: 'match',
-                    value: '/usr/bin/clamscan',
-                    operator: 'included',
+                    id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+                    name: 'elastic',
                   },
                 ],
-                list_id: 'endpoint_trusted_apps',
-                name: 'ClamAV',
-                os_types: ['linux'],
-                description: 'Suggested by Automatic Troubleshooting',
-                tags: ['policy:all'],
+                namespace: 'default',
+                status: 'running',
+                apiConfig: {
+                  connectorId: 'db760d65-6722-4646-955f-fbdc9851df86',
+                  actionTypeId: '.bedrock',
+                },
+                endpointIds: ['33581c4f-bef1-4162-9809-4c208e2e1991'],
+                insightType: 'incompatible_antivirus',
+                insights: [],
+                generationIntervals: [],
+                averageIntervalMs: 0,
+                ...overrides,
               },
             ],
-          },
-          metadata: {
-            notes: {
-              llm_model: '',
+          });
+        });
+      }
+    )
+    .as('getDefendInsights');
+};
+
+function getDefaultMockWorkflowInsight(endpointId: string) {
+  return {
+    remediation: {
+      exception_list_items: [
+        {
+          entries: [
+            {
+              field: 'process.executable.caseless',
+              type: 'match',
+              value: '/usr/bin/clamscan',
+              operator: 'included',
             },
-          },
-          '@timestamp': '2024-12-16T13:45:03.055Z',
-          action: {
-            type: 'refreshed',
-            timestamp: '2024-12-16T13:45:03.055Z',
-          },
-          source: {
-            data_range_end: '2024-12-17T13:45:03.055Z',
-            id: 'db760d65-6722-4646-955f-fbdc9851df86',
-            type: 'llm-connector',
-            data_range_start: '2024-12-16T13:45:03.055Z',
-          },
-          message: 'Incompatible antiviruses detected',
-          category: 'endpoint',
-          type: 'incompatible_antivirus',
-          value: 'ClamAV',
-          target: {
-            ids: [endpointId],
-            type: 'endpoint',
-          },
-          id: 'CMm3z5MBPx3JiizjFx5g',
+          ],
+          list_id: 'endpoint_trusted_apps',
+          name: 'ClamAV',
+          os_types: ['linux'],
+          description: 'Suggested by Automatic Troubleshooting',
+          tags: ['policy:all'],
         },
-      ]);
+      ],
+    },
+    metadata: {
+      notes: {
+        llm_model: '',
+      },
+    },
+    '@timestamp': '2024-12-16T13:45:03.055Z',
+    action: {
+      type: 'refreshed',
+      timestamp: '2024-12-16T13:45:03.055Z',
+    },
+    source: {
+      data_range_end: '2024-12-17T13:45:03.055Z',
+      id: 'db760d65-6722-4646-955f-fbdc9851df86',
+      type: 'llm-connector',
+      data_range_start: '2024-12-16T13:45:03.055Z',
+    },
+    message: 'Incompatible antiviruses detected',
+    category: 'endpoint',
+    type: 'incompatible_antivirus',
+    value: 'ClamAV',
+    target: {
+      ids: [endpointId],
+      type: 'endpoint',
+    },
+    id: 'CMm3z5MBPx3JiizjFx5g',
+  };
+}
+
+export const stubWorkflowInsightsApiResponse = (endpointId: string, count = 1) => {
+  cy.intercept('GET', '**/internal/api/endpoint/workflow_insights**', (req) => {
+    req.continue((res) => {
+      const insights = [];
+      for (let i = 0; i < count; i++) {
+        insights.push(getDefaultMockWorkflowInsight(endpointId));
+      }
+      return res.send(200, insights);
     });
-  });
+  }).as('getWorkflowInsights');
 };
 
 export const triggerRunningDefendInsights = () => {

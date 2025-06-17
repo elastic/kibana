@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { IngestStreamGetResponse, isRootStreamDefinition } from '@kbn/streams-schema';
+import { Streams, isRootStreamDefinition } from '@kbn/streams-schema';
 import { RootStreamEmptyPrompt } from './root_stream_empty_prompt';
 
 const StreamDetailEnrichmentContent = dynamic(() =>
@@ -16,7 +16,7 @@ const StreamDetailEnrichmentContent = dynamic(() =>
 );
 
 interface StreamDetailEnrichmentProps {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   refreshDefinition: () => void;
 }
 

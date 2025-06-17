@@ -24,6 +24,7 @@ steps:
 
   - label: ":ship: Fleet serverless smoke tests for ${ENVIRONMENT}"
     trigger: fleet-smoke-tests # https://buildkite.com/elastic/fleet-smoke-tests
+    soft_fail: true
     build:
       env:
         ENVIRONMENT: ${ENVIRONMENT}

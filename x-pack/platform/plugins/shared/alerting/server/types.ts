@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type { MappingDynamicTemplate } from '@elastic/elasticsearch/lib/api/types';
 import type {
   IRouter,
   CustomRequestHandlerContext,
   SavedObjectReference,
   IUiSettingsClient,
+  KibanaRequest,
 } from '@kbn/core/server';
 import type { z } from '@kbn/zod';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
@@ -50,18 +52,29 @@ import type {
   SanitizedRuleConfig,
   SanitizedRule,
   RuleAlertData,
+  Artifacts,
 } from '../common';
 import type { PublicAlertFactory } from './alert/create_alert_factory';
 import type { RulesSettingsFlappingProperties } from '../common/rules_settings';
 import type { PublicAlertsClient } from './alerts_client/types';
 import type { GetTimeRangeResult } from './lib/get_time_range';
+import type { AlertDeletionClient } from './alert_deletion';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };
+export type { Artifacts };
+
+export interface HasRequiredPrivilegeGrantedInAllSpaces {
+  spaceIds: string[];
+  requiredPrivilege: string;
+  request: KibanaRequest;
+}
+
 /**
  * @public
  */
 export interface AlertingApiRequestHandlerContext {
+  getAlertDeletionClient: () => AlertDeletionClient;
   getRulesClient: () => Promise<RulesClient>;
   getRulesSettingsClient: (withoutAuth?: boolean) => RulesSettingsClient;
   getMaintenanceWindowClient: () => MaintenanceWindowClient;
@@ -138,6 +151,7 @@ export interface RuleExecutorOptions<
   flappingSettings: RulesSettingsFlappingProperties;
   getTimeRange: (timeWindow?: string) => GetTimeRangeResult;
   isServerless: boolean;
+  ruleExecutionTimeout?: string;
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {
@@ -201,6 +215,7 @@ export type GetViewInAppRelativeUrlFn<Params extends RuleTypeParams> = (
 interface ComponentTemplateSpec {
   dynamic?: 'strict' | false; // defaults to 'strict'
   fieldMap: FieldMap;
+  dynamicTemplates?: Array<Record<string, MappingDynamicTemplate>>;
 }
 
 export type FormatAlert<AlertData extends RuleAlertData> = (

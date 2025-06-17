@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiConfirmModal, EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
+import { EuiConfirmModal, EUI_MODAL_CANCEL_BUTTON, useGeneratedHtmlId } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export function ConfirmDeleteModal({
@@ -15,6 +15,7 @@ export function ConfirmDeleteModal({
   selection,
   showConfirmDeleteModal,
 }) {
+  const modalTitleId = useGeneratedHtmlId();
   if (!showConfirmDeleteModal) {
     return null;
   }
@@ -80,6 +81,8 @@ export function ConfirmDeleteModal({
       onCancel={cancelDeletePipelines}
       onConfirm={deleteSelectedPipelines}
       title={confirmText.title}
+      titleProps={{ id: modalTitleId }}
+      aria-labelledby={modalTitleId}
     >
       <p>{confirmText.message}</p>
     </EuiConfirmModal>

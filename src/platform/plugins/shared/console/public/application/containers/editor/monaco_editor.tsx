@@ -230,6 +230,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
             above: false,
           },
           contextmenu: true,
+          lineHeight: 24,
         }}
         suggestionProvider={suggestionProvider}
         enableFindAction={true}

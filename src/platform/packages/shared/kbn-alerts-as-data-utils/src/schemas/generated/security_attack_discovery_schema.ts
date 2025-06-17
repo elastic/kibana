@@ -10,7 +10,7 @@
 // this file was generated, and should not be edited by hand
 // ---------------------------------- WARNING ----------------------------------
 import * as rt from 'io-ts';
-import type { Either } from 'fp-ts/lib/Either';
+import type { Either } from 'fp-ts/Either';
 import { AlertSchema } from './alert_schema';
 import { EcsSchema } from './ecs_schema';
 const ISO_DATE_PATTERN = /^d{4}-d{2}-d{2}Td{2}:d{2}:d{2}.d{3}Z$/;
@@ -75,11 +75,13 @@ const SecurityAttackDiscoveryAlertRequired = rt.type({
   'kibana.alert.attack_discovery.api_config': schemaUnknown,
   'kibana.alert.attack_discovery.details_markdown': schemaString,
   'kibana.alert.attack_discovery.details_markdown_with_replacements': schemaString,
+  'kibana.alert.attack_discovery.replacements.uuid': schemaString,
+  'kibana.alert.attack_discovery.replacements.value': schemaString,
   'kibana.alert.attack_discovery.summary_markdown': schemaString,
   'kibana.alert.attack_discovery.summary_markdown_with_replacements': schemaString,
   'kibana.alert.attack_discovery.title': schemaString,
   'kibana.alert.attack_discovery.title_with_replacements': schemaString,
-  'kibana.alert.attack_discovery.users.id': schemaString,
+  'kibana.alert.attack_discovery.users.name': schemaString,
   'kibana.alert.instance.id': schemaString,
   'kibana.alert.rule.category': schemaString,
   'kibana.alert.rule.consumer': schemaString,
@@ -105,9 +107,10 @@ const SecurityAttackDiscoveryAlertOptional = rt.partial({
   'kibana.alert.attack_discovery.mitre_attack_tactics': schemaStringArray,
   'kibana.alert.attack_discovery.replacements': schemaUnknown,
   'kibana.alert.attack_discovery.user.id': schemaString,
+  'kibana.alert.attack_discovery.user.name': schemaString,
   'kibana.alert.attack_discovery.users': rt.array(
     rt.partial({
-      name: schemaString,
+      id: schemaString,
     })
   ),
   'kibana.alert.case_ids': schemaStringArray,

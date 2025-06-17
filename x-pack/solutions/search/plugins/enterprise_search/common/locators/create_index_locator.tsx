@@ -8,14 +8,14 @@
 import type { LocatorDefinition } from '@kbn/share-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 
-import { CREATE_NEW_INDEX_URL, ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../constants';
+import { CREATE_NEW_INDEX_URL, ENTERPRISE_SEARCH_DATA_PLUGIN } from '../constants';
 
 export type CreateIndexLocatorParams = SerializableRecord;
 
 export class CreateIndexLocatorDefinition implements LocatorDefinition<CreateIndexLocatorParams> {
   public readonly getLocation = async () => {
     return {
-      app: ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
+      app: ENTERPRISE_SEARCH_DATA_PLUGIN.ID,
       path: CREATE_NEW_INDEX_URL,
       state: {},
     };

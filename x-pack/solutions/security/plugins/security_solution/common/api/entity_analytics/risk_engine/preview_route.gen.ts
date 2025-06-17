@@ -94,9 +94,9 @@ export const RiskScoresPreviewResponse = z.object({
      */
     service: z.array(EntityRiskScoreRecord).optional(),
     /**
-     * A list of universal risk scores
+     * A list of generic entities risk scores
      */
-    universal: z.array(EntityRiskScoreRecord).optional(),
+    generic: z.array(EntityRiskScoreRecord).optional(),
   }),
 });
 

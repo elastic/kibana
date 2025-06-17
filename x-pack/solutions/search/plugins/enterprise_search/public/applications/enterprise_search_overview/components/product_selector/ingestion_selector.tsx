@@ -17,7 +17,7 @@ import { OPEN_FILE_UPLOAD_LITE_TRIGGER } from '@kbn/file-upload-common';
 import { i18n } from '@kbn/i18n';
 
 import {
-  ENTERPRISE_SEARCH_CONTENT_PLUGIN,
+  ENTERPRISE_SEARCH_DATA_PLUGIN,
   ENTERPRISE_SEARCH_ELASTICSEARCH_URL,
   CRAWLER,
 } from '../../../../../common/constants';
@@ -118,7 +118,7 @@ export const IngestionSelector: React.FC = () => {
                 }
               )}
               href={generatePath(
-                ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + NEW_INDEX_SELECT_CONNECTOR_PATH
+                ENTERPRISE_SEARCH_DATA_PLUGIN.URL + NEW_INDEX_SELECT_CONNECTOR_PATH
               )}
               logo={connectorLogo}
               title={i18n.translate('xpack.enterpriseSearch.ingestSelector.method.connectors', {

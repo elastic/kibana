@@ -23,11 +23,10 @@ type InitialState = DatasetQualityPublicStateUpdate;
 interface Dependencies {
   core: CoreStart;
   dataStreamStatsService: DataStreamsStatsServiceStart;
-  isFailureStoreEnabled: boolean;
 }
 
 export const createDatasetQualityControllerFactory =
-  ({ core, dataStreamStatsService, isFailureStoreEnabled }: Dependencies) =>
+  ({ core, dataStreamStatsService }: Dependencies) =>
   async ({
     initialState = DEFAULT_CONTEXT,
   }: {
@@ -41,7 +40,6 @@ export const createDatasetQualityControllerFactory =
       initialContext,
       toasts: core.notifications.toasts,
       dataStreamStatsClient,
-      isFailureStoreEnabled,
     });
 
     const service = interpret(machine, {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UninstallFailedAttempt } from '../../../types';
+import type { FailedAttempt } from '../../../types';
 
 const MAX_ATTEMPTS_TO_KEEP = 5;
 
@@ -16,8 +16,8 @@ export function updateUninstallFailedAttempts({
 }: {
   error: Error;
   createdAt: string;
-  latestAttempts?: UninstallFailedAttempt[];
-}): UninstallFailedAttempt[] {
+  latestAttempts?: FailedAttempt[];
+}): FailedAttempt[] {
   return [
     {
       created_at: createdAt,

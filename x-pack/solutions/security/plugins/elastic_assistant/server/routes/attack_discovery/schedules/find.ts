@@ -9,11 +9,14 @@ import type { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
-import { API_VERSIONS, FindAttackDiscoverySchedulesResponse } from '@kbn/elastic-assistant-common';
+import {
+  API_VERSIONS,
+  ATTACK_DISCOVERY_SCHEDULES_FIND,
+  FindAttackDiscoverySchedulesRequestQuery,
+  FindAttackDiscoverySchedulesResponse,
+} from '@kbn/elastic-assistant-common';
 import { buildResponse } from '../../../lib/build_response';
-import { ATTACK_DISCOVERY_SCHEDULES_FIND } from '../../../../common/constants';
 import { ElasticAssistantRequestHandlerContext } from '../../../types';
-import { convertAlertingRuleToSchedule } from './utils/convert_alerting_rule_to_schedule';
 import { performChecks } from '../../helpers';
 import { isFeatureAvailable } from './utils/is_feature_available';
 
@@ -34,6 +37,9 @@ export const findAttackDiscoverySchedulesRoute = (
       {
         version: API_VERSIONS.internal.v1,
         validate: {
+          request: {
+            query: buildRouteValidationWithZod(FindAttackDiscoverySchedulesRequestQuery),
+          },
           response: {
             200: {
               body: {
@@ -78,12 +84,15 @@ export const findAttackDiscoverySchedulesRoute = (
             });
           }
 
-          const results = await dataClient.findSchedules();
-          const { page, perPage, total, data } = results;
+          const { page, perPage, sortField, sortDirection } = request.query;
 
-          const schedules = data.map(convertAlertingRuleToSchedule);
+          const results = await dataClient.findSchedules({
+            page,
+            perPage,
+            sort: { sortField, sortDirection },
+          });
 
-          return response.ok({ body: { page, perPage, total, data: schedules } });
+          return response.ok({ body: results });
         } catch (err) {
           logger.error(err);
           const error = transformError(err);

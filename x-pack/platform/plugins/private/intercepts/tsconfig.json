@@ -1,0 +1,31 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "public/**/*.json",
+    "server/**/*",
+    "test_helpers/**/*",
+    "storybook/**/*",
+    "../../../../../typings/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/core-analytics-browser",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/config-schema",
+    "@kbn/i18n",
+    "@kbn/task-manager-plugin",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/core-notifications-browser-mocks",
+    "@kbn/core-analytics-browser-mocks",
+    "@kbn/core-rendering-browser-mocks",
+    "@kbn/core-rendering-browser",
+    "@kbn/core-notifications-browser",
+    "@kbn/core-http-browser"
+  ],
+  "exclude": ["target/**/*"]
+}

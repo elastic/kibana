@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { screen, render, fireEvent } from '@testing-library/react';
 
 import {
   RowItemOverflowComponent,
@@ -14,9 +14,7 @@ import {
   getRowItemsWithActions,
 } from './helpers';
 import { TestProviders } from '../../mock';
-import { useMountAppended } from '../../utils/use_mount_appended';
 import { getEmptyValue } from '../empty_value';
-import { render } from '@testing-library/react';
 
 jest.mock('../../lib/kibana');
 
@@ -24,7 +22,6 @@ jest.mock('../../hooks/use_get_field_spec');
 
 describe('Table Helpers', () => {
   const items = ['item1', 'item2', 'item3'];
-  const mount = useMountAppended();
 
   describe('#getRowItemsWithActions', () => {
     test('it returns empty value when values is undefined', () => {
@@ -91,10 +88,7 @@ describe('Table Helpers', () => {
         idPrefix: 'idPrefix',
         displayCount: 2,
       });
-      const { queryAllByTestId, queryByTestId, debug } = render(
-        <TestProviders>{rowItems}</TestProviders>
-      );
-      debug();
+      const { queryAllByTestId, queryByTestId } = render(<TestProviders>{rowItems}</TestProviders>);
       expect(queryAllByTestId('cellActions-renderContent-attrName').length).toBe(2);
       expect(queryByTestId('overflow-button')).toBeInTheDocument();
     });
@@ -102,33 +96,22 @@ describe('Table Helpers', () => {
 
   describe('#RowItemOverflow', () => {
     test('it returns correctly against snapshot', () => {
-      const wrapper = shallow(
-        <RowItemOverflowComponent
-          values={items}
-          fieldName="attrName"
-          idPrefix="idPrefix"
-          overflowIndexStart={1}
-          maxOverflowItems={1}
-        />
+      const { container } = render(
+        <TestProviders>
+          <RowItemOverflowComponent
+            values={items}
+            fieldName="attrName"
+            idPrefix="idPrefix"
+            overflowIndexStart={1}
+            maxOverflowItems={1}
+          />
+        </TestProviders>
       );
-      expect(wrapper).toMatchSnapshot();
+      expect(container.children[0]).toMatchSnapshot();
     });
 
     test('it does not show "more not shown" when maxOverflowItems are not exceeded', () => {
-      const wrapper = shallow(
-        <RowItemOverflowComponent
-          values={items}
-          fieldName="attrName"
-          idPrefix="idPrefix"
-          maxOverflowItems={5}
-          overflowIndexStart={1}
-        />
-      );
-      expect(wrapper.find('[data-test-subj="popover-additional-overflow"]').length).toBe(0);
-    });
-
-    test('it shows correct number of overflow items when maxOverflowItems are not exceeded', () => {
-      const wrapper = mount(
+      const { queryByTestId } = render(
         <TestProviders>
           <RowItemOverflowComponent
             values={items}
@@ -139,29 +122,30 @@ describe('Table Helpers', () => {
           />
         </TestProviders>
       );
-      wrapper.find('[data-test-subj="overflow-button"]').first().find('button').simulate('click');
-
-      expect(
-        wrapper.find('[data-test-subj="overflow-items"]').last().prop<JSX.Element[]>('children')
-          ?.length
-      ).toEqual(2);
+      expect(queryByTestId('popover-additional-overflow')).not.toBeInTheDocument();
     });
 
-    test('it shows "more not shown" when maxOverflowItems are exceeded', () => {
-      const wrapper = shallow(
-        <RowItemOverflowComponent
-          values={items}
-          fieldName="attrName"
-          idPrefix="idPrefix"
-          maxOverflowItems={1}
-          overflowIndexStart={1}
-        />
+    test('it shows correct number of overflow items when maxOverflowItems are not exceeded', async () => {
+      const { getByTestId } = render(
+        <TestProviders>
+          <RowItemOverflowComponent
+            values={items}
+            fieldName="attrName"
+            idPrefix="idPrefix"
+            maxOverflowItems={5}
+            overflowIndexStart={1}
+          />
+        </TestProviders>
       );
-      expect(wrapper.find('[data-test-subj="popover-additional-overflow"]').length).toBe(1);
+
+      fireEvent.click(getByTestId('overflow-button'));
+
+      const overflowItems = await screen.findByTestId('overflow-items');
+      expect(overflowItems?.children.length).toEqual(2);
     });
 
-    test('it shows correct number of overflow items when maxOverflowItems are exceeded', () => {
-      const wrapper = mount(
+    test('it shows "more not shown" when maxOverflowItems are exceeded', async () => {
+      render(
         <TestProviders>
           <RowItemOverflowComponent
             values={items}
@@ -172,34 +156,55 @@ describe('Table Helpers', () => {
           />
         </TestProviders>
       );
-      wrapper.find('[data-test-subj="overflow-button"]').first().find('button').simulate('click');
 
-      expect(
-        wrapper.find('[data-test-subj="overflow-items"]').last().prop<JSX.Element[]>('children')
-          ?.length
-      ).toBe(1);
+      fireEvent.click(screen.getByTestId('overflow-button'));
+
+      expect(await screen.findByTestId('popover-additional-overflow')).toBeInTheDocument();
+    });
+
+    test('it shows correct number of overflow items when maxOverflowItems are exceeded', async () => {
+      render(
+        <TestProviders>
+          <RowItemOverflowComponent
+            values={items}
+            fieldName="attrName"
+            idPrefix="idPrefix"
+            maxOverflowItems={1}
+            overflowIndexStart={1}
+          />
+        </TestProviders>
+      );
+
+      fireEvent.click(screen.getByTestId('overflow-button'));
+
+      const overflowItems = await screen.findByTestId('overflow-items');
+      expect(overflowItems?.children.length).toBe(1);
     });
   });
 
   describe('OverflowField', () => {
-    test('it returns correctly against snapshot', () => {
+    test('it renders', () => {
       const overflowString = 'This string is exactly fifty-one chars in length!!!';
-      const wrapper = shallow(
+      const { container } = render(
         <OverflowFieldComponent value={overflowString} showToolTip={false} />
       );
-      expect(wrapper).toMatchSnapshot();
+      expect(container.children[0]).toMatchSnapshot();
     });
 
     test('it does not truncates as per custom overflowLength value', () => {
       const overflowString = 'This string is short';
-      const wrapper = mount(<OverflowFieldComponent value={overflowString} overflowLength={20} />);
-      expect(wrapper.text()).toBe('This string is short');
+      const { container } = render(
+        <OverflowFieldComponent value={overflowString} overflowLength={20} />
+      );
+      expect(container.textContent).toBe('This string is short');
     });
 
     test('it truncates as per custom overflowLength value', () => {
       const overflowString = 'This string is exactly fifty-one chars in length!!!';
-      const wrapper = mount(<OverflowFieldComponent value={overflowString} overflowLength={20} />);
-      expect(wrapper.text()).toBe('This string is exact');
+      const { container } = render(
+        <OverflowFieldComponent value={overflowString} overflowLength={20} />
+      );
+      expect(container.textContent).toBe('This string is exact');
     });
   });
 });

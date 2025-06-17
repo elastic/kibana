@@ -2031,6 +2031,48 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.OtelInstance.appMetrics",
+            "type": "Function",
+            "tags": [],
+            "label": "appMetrics",
+            "description": [],
+            "signature": [
+              "(metrics: Partial<{ 'system.process.memory.size': number; 'system.memory.actual.free': number; 'system.memory.total': number; 'system.process.cgroup.memory.mem.limit.bytes': number; 'system.process.cgroup.memory.mem.usage.bytes': number; 'system.cpu.total.norm.pct': number; 'system.process.memory.rss.bytes': number; 'system.process.cpu.total.norm.pct': number; 'jvm.memory.heap.used': number; 'jvm.memory.non_heap.used': number; 'jvm.thread.count': number; 'faas.billed_duration': number; 'faas.timeout': number; 'faas.coldstart_duration': number; 'faas.duration': number; 'application.launch.time': number; }>) => ",
+              "OtelMetricset",
+              "<",
+              {
+                "pluginId": "@kbn/apm-synthtrace-client",
+                "scope": "common",
+                "docId": "kibKbnApmSynthtraceClientPluginApi",
+                "section": "def-common.ApmOtelFields",
+                "text": "ApmOtelFields"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/apm/otel/otel_instance.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace-client",
+                "id": "def-common.OtelInstance.appMetrics.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "metrics",
+                "description": [],
+                "signature": [
+                  "Partial<{ 'system.process.memory.size': number; 'system.memory.actual.free': number; 'system.memory.total': number; 'system.process.cgroup.memory.mem.limit.bytes': number; 'system.process.cgroup.memory.mem.usage.bytes': number; 'system.cpu.total.norm.pct': number; 'system.process.memory.rss.bytes': number; 'system.process.cpu.total.norm.pct': number; 'jvm.memory.heap.used': number; 'jvm.memory.non_heap.used': number; 'jvm.thread.count': number; 'faas.billed_duration': number; 'faas.timeout': number; 'faas.coldstart_duration': number; 'faas.duration': number; 'application.launch.time': number; }>"
+                ],
+                "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/apm/otel/otel_instance.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
             "id": "def-common.OtelInstance.error",
             "type": "Function",
             "tags": [],
@@ -3442,7 +3484,20 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/apm-synthtrace-client",
+        "id": "def-common.ApmSynthtracePipelineSchema",
+        "type": "Enum",
+        "tags": [],
+        "label": "ApmSynthtracePipelineSchema",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/types/apm_synthtrace_pipelines.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "@kbn/apm-synthtrace-client",
@@ -3522,6 +3577,27 @@
           "; dropped_attributes_count: number; dropped_events_count: number; dropped_links_count: number; duration: number; links: { span_id: string; trace_id: string; }[]; } & { \"attributes.event.outcome\"?: string | undefined; \"attributes.processor.event\"?: string | undefined; \"attributes.service.name\"?: string | undefined; \"attributes.transaction.name\"?: string | undefined; \"attributes.transaction.type\"?: string | undefined; \"attributes.service.target.name\"?: string | undefined; \"attributes.service.target.type\"?: string | undefined; \"attributes.span.id\"?: string | undefined; \"attributes.transaction.id\"?: string | undefined; \"attributes.url.full\"?: string | undefined; \"attributes.metricset.name\"?: string | undefined; \"attributes.span.destination.service.resource\"?: string | undefined; \"attributes.transaction.duration.us\"?: number | undefined; \"attributes.transaction.result\"?: string | undefined; \"attributes.transaction.sampled\"?: boolean | undefined; \"attributes.span.duration.us\"?: number | undefined; \"attributes.span.type\"?: string | undefined; \"attributes.span.subtype\"?: string | undefined; \"attributes.span.name\"?: string | undefined; \"attributes.timestamp.us\"?: number | undefined; \"attributes.metricset.interval\"?: string | undefined; \"attributes.event.name\"?: string | undefined; } & ErrorAttributes & { 'attributes.db.statement': string; 'attributes.db.system': string; 'attributes.network.peer.address': string; 'attributes.network.peer.port': number; 'attributes.network.type': string; 'attributes.rpc.grpc.status_code': number; 'attributes.rpc.method': string; 'attributes.rpc.service': string; 'attributes.rpc.system': string; 'attributes.server.address': string; 'attributes.server.port': number; 'attributes.session.id': string; 'attributes.thread.id': number; 'attributes.thread.name': string; 'attributes.service.namespace': string; 'attributes.http.request.method': string; 'attributes.http.response.status_code': number; 'attributes.http.url': string; 'attributes.span.kind': string; 'attributes.method': string; 'attributes.messaging.system': string; 'attributes.messaging.operation': string; 'attributes.messaging.destination.name': string; 'attributes.status.code': number; 'attributes.url.path': string; 'attributes.url.scheme': string; } & { \"metrics.transaction.duration.histogram\"?: { values: number[]; counts: number[]; } | undefined; \"metrics.span.destination.service.response_time.count\"?: number | undefined; \"metrics.span.destination.service.response_time.sum.us\"?: number | undefined; } & { 'metrics.event.success_count': { sum: number; value_count: number; }; 'metrics.transaction.duration.summary': { sum: number; value_count: number; }; } & { \"resource.attributes.agent.name\"?: string | undefined; \"resource.attributes.container.id\"?: string | undefined; \"resource.attributes.host.name\"?: string | undefined; \"resource.attributes.service.name\"?: string | undefined; \"resource.attributes.agent.version\"?: string | undefined; \"resource.attributes.cloud.account.id\"?: string | undefined; \"resource.attributes.cloud.account.name\"?: string | undefined; \"resource.attributes.cloud.availability_zone\"?: string | undefined; \"resource.attributes.cloud.machine.type\"?: string | undefined; \"resource.attributes.cloud.project.id\"?: string | undefined; \"resource.attributes.cloud.project.name\"?: string | undefined; \"resource.attributes.cloud.provider\"?: string | undefined; \"resource.attributes.cloud.region\"?: string | undefined; \"resource.attributes.cloud.service.name\"?: string | undefined; \"resource.attributes.faas.coldstart\"?: boolean | undefined; \"resource.attributes.faas.id\"?: string | undefined; \"resource.attributes.faas.name\"?: string | undefined; \"resource.attributes.faas.version\"?: string | undefined; \"resource.attributes.service.node.name\"?: string | undefined; \"resource.attributes.faas.trigger.type\"?: string | undefined; } & { 'resource.attributes.deployment.environment': string; 'resource.attributes.service.namespace': string; 'resource.attributes.service.instance.id': string; 'resource.attributes.telemetry.sdk.language': string; 'resource.attributes.telemetry.sdk.name': string; 'resource.attributes.telemetry.sdk.version': string; 'resource.attributes.telemetry.distro.name': string; 'resource.attributes.telemetry.distro.version': string; 'resource.attributes.process.runtime.name': string; 'resource.attributes.process.runtime.version': string; 'resource.attributes.os.type': string; 'resource.attributes.os.description': string; 'resource.attributes.host.arch': string; 'resource.attributes.k8s.pod.name': string; }>"
         ],
         "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/apm/otel/apm_otel_fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-synthtrace-client",
+        "id": "def-common.ApmSynthtracePipelines",
+        "type": "Type",
+        "tags": [],
+        "label": "ApmSynthtracePipelines",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/apm-synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnApmSynthtraceClientPluginApi",
+            "section": "def-common.ApmSynthtracePipelineSchema",
+            "text": "ApmSynthtracePipelineSchema"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/types/apm_synthtrace_pipelines.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3655,6 +3731,21 @@
           "KibanaStatsDocument"
         ],
         "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/monitoring/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-synthtrace-client",
+        "id": "def-common.OtelLogDocument",
+        "type": "Type",
+        "tags": [],
+        "label": "OtelLogDocument",
+        "description": [],
+        "signature": [
+          "{ '@timestamp'?: number | undefined; } & Partial<{ _index?: string | undefined; trace_id?: string | undefined; attributes?: Record<string, unknown> | undefined; severity_text?: string | undefined; resource?: { attributes?: Record<string, unknown> | undefined; } | undefined; body?: { text?: string | undefined; structured?: Record<string, unknown> | undefined; } | undefined; }>"
+        ],
+        "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel_logs/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4960,6 +5051,64 @@
                 "label": "index",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/monitoring/kibana.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-synthtrace-client",
+        "id": "def-common.otelLog",
+        "type": "Object",
+        "tags": [],
+        "label": "otelLog",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel_logs/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.otelLog.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => OtelLog"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel_logs/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.otelLog.createForIndex",
+            "type": "Function",
+            "tags": [],
+            "label": "createForIndex",
+            "description": [],
+            "signature": [
+              "(index: string) => OtelLog"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel_logs/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace-client",
+                "id": "def-common.otelLog.createForIndex.$1",
+                "type": "string",
+                "tags": [],
+                "label": "index",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel_logs/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

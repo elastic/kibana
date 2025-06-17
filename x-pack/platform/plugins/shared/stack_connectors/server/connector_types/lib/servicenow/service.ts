@@ -157,6 +157,9 @@ export const createExternalService: ServiceFactory = ({
 
   const getIncident = async (id: string): Promise<ServiceNowIncident> => {
     try {
+      if (id?.trim() === '') {
+        throw new Error('Incident id is empty.');
+      }
       const res = await request({
         axios: axiosInstance,
         url: `${tableApiIncidentUrl}/${id}`,
@@ -273,6 +276,9 @@ export const createExternalService: ServiceFactory = ({
     correlationId: string
   ): Promise<ServiceNowIncident | null> => {
     try {
+      if (correlationId?.trim() === '') {
+        throw new Error('Correlation ID is empty.');
+      }
       const res = await request({
         axios: axiosInstance,
         url: getIncidentByCorrelationIdUrl(correlationId),

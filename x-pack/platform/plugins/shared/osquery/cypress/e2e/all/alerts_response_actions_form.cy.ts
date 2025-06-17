@@ -24,10 +24,9 @@ import {
 import { clickRuleName, inputQuery, typeInECSFieldInput } from '../../tasks/live_query';
 import { closeDateTabIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 
-// FLAKY: https://github.com/elastic/kibana/issues/169785
-describe.skip(
+describe(
   'Alert Event Details - Response Actions Form',
-  { tags: ['@ess', '@serverless'] },
+  { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
     let multiQueryPackId: string;
     let multiQueryPackName: string;

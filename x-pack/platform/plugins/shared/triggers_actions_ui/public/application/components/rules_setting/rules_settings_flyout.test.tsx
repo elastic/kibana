@@ -19,6 +19,7 @@ import { fetchFlappingSettings } from '@kbn/alerts-ui-shared/src/common/apis/fet
 import { updateFlappingSettings } from '../../lib/rule_api/update_flapping_settings';
 import { getQueryDelaySettings } from '../../lib/rule_api/get_query_delay_settings';
 import { updateQueryDelaySettings } from '../../lib/rule_api/update_query_delay_settings';
+import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_flapping_settings', () => ({
@@ -35,6 +36,12 @@ jest.mock('../../lib/rule_api/update_query_delay_settings', () => ({
 }));
 jest.mock('../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+}));
+jest.mock('../../../common/get_experimental_features', () => ({
+  getIsExperimentalFeatureEnabled: jest.fn(),
+}));
+jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
+  useUiSetting: jest.fn().mockImplementation((_, defaultValue) => defaultValue),
 }));
 
 const queryClient = new QueryClient({
@@ -85,6 +92,7 @@ const flyoutProps: RulesSettingsFlyoutProps = {
   setUpdatingRulesSettings: jest.fn(),
   onClose: jest.fn(),
   onSave: jest.fn(),
+  alertDeleteCategoryIds: ['management'],
 };
 
 const RulesSettingsFlyoutWithProviders: React.FunctionComponent<RulesSettingsFlyoutProps> = (
@@ -450,5 +458,54 @@ describe('rules_settings_flyout', () => {
     const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
     await waitForFlyoutLoad({ queryDelaySection: false });
     expect(result.queryByTestId('rulesSettingsQueryDelaySection')).not.toBeInTheDocument();
+  });
+
+  test('alert delete is disabled when provided with insufficient write permissions', async () => {
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+
+    const [
+      {
+        application: { capabilities },
+      },
+    ] = await mocks.getStartServices();
+    useKibanaMock().services.application.capabilities = {
+      ...capabilities,
+      rulesSettings: {
+        save: true,
+        show: true,
+        writeAlertDeleteSettingsUI: false,
+        readAlertDeleteSettingsUI: true,
+      },
+    };
+    const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
+    await waitFor(() => {
+      expect(screen.queryByTestId('rulesSettingsFlyout')).not.toBe(null);
+    });
+
+    expect(result.getByTestId('alert-delete-open-modal-button')).toBeDisabled();
+  });
+
+  test('alert delete not visible when provided with insufficient read permissions', async () => {
+    const [
+      {
+        application: { capabilities },
+      },
+    ] = await mocks.getStartServices();
+    useKibanaMock().services.application.capabilities = {
+      ...capabilities,
+      rulesSettings: {
+        save: true,
+        show: false,
+        writeAlertDeleteSettingsUI: true,
+        readAlertDeleteSettingsUI: false,
+      },
+    };
+
+    const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
+    await waitFor(() => {
+      expect(screen.queryByTestId('rulesSettingsFlyout')).not.toBe(null);
+    });
+
+    expect(result.queryByTestId('alert-delete-open-modal-button')).toBe(null);
   });
 });

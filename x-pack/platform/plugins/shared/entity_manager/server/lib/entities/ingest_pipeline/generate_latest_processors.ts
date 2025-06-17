@@ -111,7 +111,7 @@ export function generateLatestProcessors(definition: EntityDefinition) {
     },
     {
       set: {
-        field: 'entity.type',
+        field: 'entity.EngineMetadata.Type',
         value: definition.type,
       },
     },

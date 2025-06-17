@@ -11,7 +11,6 @@ import { isEqual } from 'lodash';
 import type { CSSProperties, ReactNode } from 'react';
 import React, { createContext, memo, useEffect, useRef, useState } from 'react';
 import { useEuiTheme } from '@elastic/eui';
-import { useTraceExplorerEnabledSetting } from '../../../hooks/use_trace_explorer_enabled_setting';
 import { getCytoscapeOptions } from './cytoscape_options';
 import { useCytoscapeEventHandlers } from './use_cytoscape_event_handlers';
 
@@ -51,9 +50,8 @@ function useCytoscape(options: cytoscape.CytoscapeOptions) {
 
 function CytoscapeComponent({ children, elements, height, serviceName, style }: CytoscapeProps) {
   const { euiTheme } = useEuiTheme();
-  const isTraceExplorerEnabled = useTraceExplorerEnabledSetting();
   const [ref, cy] = useCytoscape({
-    ...getCytoscapeOptions(euiTheme, isTraceExplorerEnabled),
+    ...getCytoscapeOptions(euiTheme),
     elements,
   });
   useCytoscapeEventHandlers({ cy, serviceName, euiTheme });

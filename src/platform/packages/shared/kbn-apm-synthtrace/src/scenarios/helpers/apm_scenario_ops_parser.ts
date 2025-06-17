@@ -7,16 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ApmSynthtracePipelines } from '../../lib/apm/client/apm_synthtrace_es_client';
+import { ApmSynthtracePipelineSchema, ApmSynthtracePipelines } from '@kbn/apm-synthtrace-client';
 
-const validPipelines: ApmSynthtracePipelines[] = ['apmToOtel', 'otelToApm', 'default'];
+const validPipelines: ApmSynthtracePipelines[] = [
+  ApmSynthtracePipelineSchema.ApmToOtel,
+  ApmSynthtracePipelineSchema.Otel,
+  ApmSynthtracePipelineSchema.Default,
+];
 const parseApmPipeline = (value: ApmSynthtracePipelines): ApmSynthtracePipelines => {
-  if (!value) return 'default';
+  if (!value) return ApmSynthtracePipelineSchema.Default;
 
   if (validPipelines.includes(value)) {
     return value;
   } else {
-    return 'default';
+    return ApmSynthtracePipelineSchema.Default;
   }
 };
 

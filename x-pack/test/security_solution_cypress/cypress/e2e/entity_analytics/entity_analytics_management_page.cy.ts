@@ -46,7 +46,7 @@ describe(
     });
 
     it('renders page as expected', () => {
-      cy.get(PAGE_TITLE).should('have.text', 'Entity Risk Score');
+      cy.get(PAGE_TITLE).should('have.text', 'Entity risk score');
     });
 
     describe('Risk preview', () => {

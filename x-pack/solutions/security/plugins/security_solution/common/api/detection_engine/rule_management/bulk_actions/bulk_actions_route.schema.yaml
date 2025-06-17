@@ -1146,6 +1146,12 @@ components:
           minItems: 1
           items:
             type: string
+        gaps_range_start:
+          description: Gaps range start, valid only when query is provided
+          type: string
+        gaps_range_end:
+          description: Gaps range end, valid only when query is provided
+          type: string
 
     BulkDeleteRules:
       allOf:
@@ -1235,6 +1241,7 @@ components:
                   description: End date of the manual rule run
               required:
                 - start_date
+                - end_date
           required:
             - action
             - run

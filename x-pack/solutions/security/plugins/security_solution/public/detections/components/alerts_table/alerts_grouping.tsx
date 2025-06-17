@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import type { Filter, Query } from '@kbn/es-query';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import {
   type GroupOption,
   type GroupStatsItem,
@@ -20,15 +21,13 @@ import { isEmpty, isEqual } from 'lodash/fp';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import type { GetGroupStats, GroupingArgs, GroupPanelRenderer } from '@kbn/grouping/src';
+import type { GroupTakeActionItems } from './types';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
 import { groupIdSelector } from '../../../common/store/grouping/selectors';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { updateGroups } from '../../../common/store/grouping/actions';
-import type { Status } from '../../../../common/api/detection_engine';
 import { defaultUnit } from '../../../common/components/toolbar/unit';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import type { RunTimeMappings } from '../../../sourcerer/store/model';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useKibana } from '../../../common/lib/kibana';
 import { GroupedSubLevel } from './alerts_sub_grouping';
 import { AlertsEventTypes, track } from '../../../common/lib/telemetry';
@@ -56,7 +55,10 @@ export interface AlertsTableComponentProps {
      */
     renderer: GetGroupStats<AlertsGroupingAggregation>;
   };
-  currentAlertStatusFilterValue?: Status[];
+  /**
+   * DataViewSpec object to use internally to fetch the data
+   */
+  dataViewSpec: DataViewSpec;
   defaultFilters?: Filter[];
   /**
    * Default values to display in the group selection dropdown.
@@ -66,12 +68,13 @@ export interface AlertsTableComponentProps {
   from: string;
   globalFilters: Filter[];
   globalQuery: Query;
-  hasIndexMaintenance: boolean;
-  hasIndexWrite: boolean;
+  /**
+   * Allows to customize the content of the Take actions button rendered at the group level.
+   * If no value is provided, the Take actins button is not displayed.
+   */
+  groupTakeActionItems?: GroupTakeActionItems;
   loading: boolean;
   renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
-  runtimeMappings: RunTimeMappings;
-  signalIndexName: string | null;
   tableId: TableIdLiteral;
   to: string;
 }
@@ -133,10 +136,6 @@ const useStorage = (storage: Storage, tableId: string) =>
 const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props) => {
   const dispatch = useDispatch();
 
-  const { sourcererDataView, selectedPatterns } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
-
   const {
     services: { storage, telemetry },
   } = useKibana();
@@ -174,7 +173,10 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     [dispatch, props.tableId]
   );
 
-  const fields = useMemo(() => Object.values(sourcererDataView.fields || {}), [sourcererDataView]);
+  const fields = useMemo(
+    () => Object.values(props.dataViewSpec.fields || {}),
+    [props.dataViewSpec]
+  );
 
   const groupingOptions = useMemo(
     () => props.defaultGroupingOptions || DEFAULT_GROUPING_OPTIONS,
@@ -328,21 +330,24 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
           getGrouping={getGrouping}
           groupingLevel={level}
           groupStatsAggregations={groupStatusAggregations}
+          groupTakeActionItems={props.groupTakeActionItems}
           onGroupClose={() => resetGroupChildrenPagination(level)}
           pageIndex={pageIndex[level] ?? DEFAULT_PAGE_INDEX}
           pageSize={pageSize[level] ?? DEFAULT_PAGE_SIZE}
           parentGroupingFilter={parentGroupingFilter}
           renderChildComponent={rcc}
+          runtimeMappings={props.dataViewSpec.runtimeFieldMap as RunTimeMappings}
           selectedGroup={selectedGroup}
           setPageIndex={(newIndex: number) => setPageVar(newIndex, level, 'index')}
           setPageSize={(newSize: number) => setPageVar(newSize, level, 'size')}
+          signalIndexName={props.dataViewSpec.title}
         />
       );
     },
     [getGrouping, groupStatusAggregations, pageIndex, pageSize, props, selectedGroups, setPageVar]
   );
 
-  if (isEmpty(selectedPatterns)) {
+  if (isEmpty(props.dataViewSpec.title)) {
     return null;
   }
 

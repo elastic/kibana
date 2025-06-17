@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import type { RelatedIntegration } from '../../../../common/api/detection_engine';
-import type { RuleMigration } from '../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationRule } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type { TableColumn } from '../components/rules_table_columns';
 import {
   createActionsColumn,
@@ -27,8 +27,8 @@ export const useMigrationRulesTableColumns = ({
   getMigrationRuleData,
 }: {
   disableActions?: boolean;
-  openMigrationRuleDetails: (rule: RuleMigration) => void;
-  installMigrationRule: (migrationRule: RuleMigration, enable?: boolean) => void;
+  openMigrationRuleDetails: (rule: RuleMigrationRule) => void;
+  installMigrationRule: (migrationRule: RuleMigrationRule, enable?: boolean) => void;
   getMigrationRuleData: (
     ruleId: string
   ) => { relatedIntegrations?: RelatedIntegration[]; isIntegrationsLoading?: boolean } | undefined;

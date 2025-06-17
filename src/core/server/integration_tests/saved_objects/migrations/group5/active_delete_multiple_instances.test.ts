@@ -18,7 +18,10 @@ import {
   nextMinor,
   startElasticsearch,
 } from '../kibana_migrator_test_kit';
-import { getUpToDateMigratorTestKit } from '../kibana_migrator_test_kit.fixtures';
+import {
+  getUpToDateBaselineTypes,
+  getUpToDateMigratorTestKit,
+} from '../kibana_migrator_test_kit.fixtures';
 import {
   BASELINE_TEST_ARCHIVE_500K,
   BASELINE_DOCUMENTS_PER_TYPE_500K,
@@ -54,7 +57,6 @@ describe('multiple migrator instances running in parallel', () => {
       const testKits = await Promise.all(
         new Array(PARALLEL_MIGRATORS)
           .fill({
-            filterDeprecated: true,
             settings: {
               migrations: {
                 discardUnknownObjects: nextMinor,
@@ -65,6 +67,8 @@ describe('multiple migrator instances running in parallel', () => {
             getUpToDateMigratorTestKit({
               ...config,
               logFilePath: join(__dirname, `active_delete_instance_${index}.log`),
+              removedTypes: ['server'],
+              types: getUpToDateBaselineTypes(['server', 'deprecated']),
             })
           )
       );

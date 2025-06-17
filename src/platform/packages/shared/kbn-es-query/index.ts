@@ -39,6 +39,9 @@ export type {
   ScriptedPhraseFilter,
   ScriptedRangeFilter,
   TimeRange,
+  TimeState,
+  RelativeTimeRange,
+  AbsoluteTimeRange,
   CombinedFilter,
 } from './src/filters';
 

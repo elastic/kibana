@@ -18,11 +18,15 @@ export interface Agent {
   user: UserNameAndId;
   public: boolean;
   configuration: Record<string, any>;
+  avatar: {
+    color?: string;
+    text?: string;
+  };
 }
 
 export type AgentCreateRequest = Pick<
   Agent,
-  'name' | 'description' | 'configuration' | 'public'
+  'name' | 'description' | 'configuration' | 'public' | 'avatar'
 > & {
   id?: string;
 };

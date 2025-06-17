@@ -26,7 +26,7 @@ export const useGetIntegrations = (onSuccess: OnSuccess) => {
     (async () => {
       try {
         dispatch({ type: 'start' });
-        const integrations = await siemMigrations.rules.getIntegrations();
+        const integrations = await siemMigrations.rules.api.getIntegrations();
 
         onSuccess(integrations);
         dispatch({ type: 'success' });
@@ -36,7 +36,7 @@ export const useGetIntegrations = (onSuccess: OnSuccess) => {
         dispatch({ type: 'error', error: apiError });
       }
     })();
-  }, [siemMigrations.rules, notifications.toasts, onSuccess]);
+  }, [siemMigrations.rules.api, notifications.toasts, onSuccess]);
 
   return { isLoading: state.loading, error: state.error, getIntegrations };
 };

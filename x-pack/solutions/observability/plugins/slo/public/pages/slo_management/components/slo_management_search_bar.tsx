@@ -11,7 +11,7 @@ import { EuiComboBox, EuiComboBoxOptionOption, EuiText } from '@elastic/eui';
 import { observabilityAppId } from '@kbn/observability-shared-plugin/common';
 import { useFetchSLOSuggestions } from '../../slo_edit/hooks/use_fetch_suggestions';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useUrlSearchState } from './hooks/use_url_search_state';
+import { useUrlSearchState } from '../hooks/use_url_search_state';
 
 interface Props {
   onRefresh: () => void;

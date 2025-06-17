@@ -1,0 +1,30 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": "search-books",
+    "mappings": {
+      "properties": {
+        "author": {
+          "type": "text"
+        },
+        "name": {
+          "type": "text"
+        },
+        "page_count": {
+          "type": "float"
+        },
+        "release_date": {
+          "type": "date"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

@@ -44,14 +44,10 @@ const getDurationInString = (duration: number): string => {
   return `${durationInSeconds}s`;
 };
 
-export const transformRRuleToCustomSchedule = (snoozeSchedule?: {
+export const transformRRuleToCustomSchedule = (snoozeSchedule: {
   duration: number;
   rRule: RRule;
-}): ScheduleRequest | undefined => {
-  if (!snoozeSchedule) {
-    return;
-  }
-
+}): ScheduleRequest => {
   const { rRule, duration } = snoozeSchedule;
   const transformedFrequency = transformFrequencyToEvery(rRule.freq as Frequency);
   const transformedDuration = getDurationInString(duration);

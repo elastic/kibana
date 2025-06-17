@@ -7,25 +7,67 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { flow } from 'lodash';
-import { SavedDashboardPanel } from '../../../../dashboard_saved_object';
-import { DashboardAttributes } from '../../types';
+import { SavedObjectReference } from '@kbn/core/server';
+import { SavedDashboardPanel, SavedDashboardSection } from '../../../../dashboard_saved_object';
+import { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
+import { getReferencesForPanelId } from '../../../../../common/dashboard_container/persistable_state/dashboard_container_references';
 
-export function transformPanelsOut(panelsJSON: string): DashboardAttributes['panels'] {
-  return flow(JSON.parse, transformPanelsProperties)(panelsJSON);
+export function transformPanelsOut(
+  panelsJSON: string = '{}',
+  sections: SavedDashboardSection[] = [],
+  references?: SavedObjectReference[]
+): DashboardAttributes['panels'] {
+  const panels = JSON.parse(panelsJSON);
+  const sectionsMap: { [uuid: string]: DashboardPanel | DashboardSection } = sections.reduce(
+    (prev, section) => {
+      const sectionId = section.gridData.i;
+      return { ...prev, [sectionId]: { ...section, panels: [] } };
+    },
+    {}
+  );
+  panels.forEach((panel: SavedDashboardPanel) => {
+    const filteredReferences = getReferencesForPanelId(panel.panelIndex, references ?? []);
+    const panelReferences = filteredReferences.length === 0 ? references : filteredReferences;
+    const { sectionId } = panel.gridData;
+    if (sectionId) {
+      (sectionsMap[sectionId] as DashboardSection).panels.push(
+        transformPanelProperties(panel, panelReferences)
+      );
+    } else {
+      sectionsMap[panel.panelIndex] = transformPanelProperties(panel, panelReferences);
+    }
+  });
+  return Object.values(sectionsMap);
 }
 
-function transformPanelsProperties(panels: SavedDashboardPanel[]) {
-  return panels.map(
-    ({ embeddableConfig, gridData, id, panelIndex, panelRefName, title, type, version }) => ({
-      gridData,
-      id,
-      panelConfig: embeddableConfig,
-      panelIndex,
-      panelRefName,
-      title,
-      type,
-      version,
-    })
-  );
+function transformPanelProperties(
+  {
+    embeddableConfig,
+    gridData,
+    id,
+    panelIndex,
+    panelRefName,
+    title,
+    type,
+    version,
+  }: SavedDashboardPanel,
+  references?: SavedObjectReference[]
+) {
+  const { sectionId, ...rest } = gridData; // drop section ID, if it exists
+
+  const matchingReference =
+    panelRefName && references
+      ? references.find((reference) => reference.name === panelRefName)
+      : undefined;
+
+  return {
+    gridData: rest,
+    id: matchingReference ? matchingReference.id : id,
+    panelConfig: embeddableConfig,
+    panelIndex,
+    panelRefName,
+    title,
+    type: matchingReference ? matchingReference.type : type,
+    version,
+  };
 }

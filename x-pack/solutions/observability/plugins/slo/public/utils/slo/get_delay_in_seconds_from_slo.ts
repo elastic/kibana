@@ -10,7 +10,7 @@ import {
   timeslicesBudgetingMethodSchema,
   durationType,
 } from '@kbn/slo-schema';
-import { isLeft } from 'fp-ts/lib/Either';
+import { isLeft } from 'fp-ts/Either';
 
 export function getDelayInSecondsFromSLO(slo: SLODefinitionResponse) {
   const fixedInterval = timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)

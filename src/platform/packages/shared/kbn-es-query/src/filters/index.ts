@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { FilterCompareOptions, TimeRange } from './helpers';
+export type {
+  FilterCompareOptions,
+  TimeRange,
+  TimeState,
+  RelativeTimeRange,
+  AbsoluteTimeRange,
+} from './helpers';
 
 export {
   dedupFilters,

@@ -28,13 +28,16 @@ import {
   createRuntimeStateManager,
   createTabActionInjector,
   selectTab,
+  internalStateActions,
 } from './redux';
 import { mockCustomizationContext } from '../../../customizations/__mocks__/customization_context';
+import { createTabsStorageManager, type TabsStorageManager } from './tabs_storage_manager';
 
 let history: History;
 let stateStorage: IKbnUrlStateStorage;
 let internalState: InternalStateStore;
 let savedSearchState: DiscoverSavedSearchContainer;
+let tabsStorageManager: TabsStorageManager;
 let getCurrentTab: () => TabState;
 
 describe('Test discover app state container', () => {
@@ -46,23 +49,32 @@ describe('Test discover app state container', () => {
       history,
       ...(toasts && withNotifyOnErrors(toasts)),
     });
+    tabsStorageManager = createTabsStorageManager({
+      urlStateStorage: stateStorage,
+      storage: discoverServiceMock.storage,
+    });
     internalState = createInternalStateStore({
       services: discoverServiceMock,
       customizationContext: mockCustomizationContext,
       runtimeStateManager: createRuntimeStateManager(),
       urlStateStorage: stateStorage,
+      tabsStorageManager,
     });
+    internalState.dispatch(
+      internalStateActions.initializeTabs({ userId: 'mockUserId', spaceId: 'mockSpaceId' })
+    );
     savedSearchState = getSavedSearchContainer({
       services: discoverServiceMock,
       globalStateContainer: getDiscoverGlobalStateContainer(stateStorage),
       internalState,
     });
     getCurrentTab = () =>
-      selectTab(internalState.getState(), internalState.getState().tabs.allIds[0]);
+      selectTab(internalState.getState(), internalState.getState().tabs.unsafeCurrentId);
   });
 
   const getStateContainer = () =>
     getDiscoverAppStateContainer({
+      tabId: getCurrentTab().id,
       stateStorage,
       internalState,
       savedSearchContainer: savedSearchState,

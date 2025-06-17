@@ -18,6 +18,7 @@ import { mockHistory } from '../../mock/router';
 import { DEFAULT_EVENTS_STACK_BY_VALUE } from './histogram_configurations';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { useUserPrivileges } from '../user_privileges';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('../../hooks/use_experimental_features');
 jest.mock('../user_privileges');
@@ -95,7 +96,6 @@ jest.mock('../../hooks/use_license', () => {
 describe('EventsQueryTabBody', () => {
   const commonProps: EventsQueryTabBodyComponentProps = {
     indexNames: ['test-index'],
-    setQuery: jest.fn(),
     tableId: TableId.test,
     type: HostsType.page,
     endDate: new Date('2000').toISOString(),
@@ -162,14 +162,14 @@ describe('EventsQueryTabBody', () => {
     );
   });
 
-  it('renders the matrix histogram stacked by alerts default value', () => {
+  it('renders the matrix histogram stacked by alerts default value', async () => {
     const result = render(
       <TestProviders>
         <EventsQueryTabBody {...commonProps} />
       </TestProviders>
     );
 
-    result.getByTestId('showExternalAlertsCheckbox').click();
+    await userEvent.click(result.getByTestId('showExternalAlertsCheckbox'));
 
     expect(result.getByTestId('header-section-supplements').querySelector('select')?.value).toEqual(
       'event.module'

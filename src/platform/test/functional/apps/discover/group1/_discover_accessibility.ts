@@ -50,8 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/217012
-    describe.skip('top nav menu buttons', () => {
+    describe('top nav menu buttons', () => {
       const focusAndPressButton = async (buttonTestSubject: string | WebElementWrapper) => {
         const button =
           typeof buttonTestSubject === 'string'
@@ -68,7 +67,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           expect(await hasFocus(menuButtonTestSubject)).to.be(false);
         });
-
+        // Small delay to allow the overlay to open fully
+        await new Promise((resolve) => setTimeout(resolve, 500));
         await browser.pressKeys(browser.keys.ESCAPE);
         await retry.try(async () => {
           expect(await hasFocus(menuButtonTestSubject)).to.be(true);

@@ -13,6 +13,8 @@ import {
   ProcessorTypeOf,
 } from '@kbn/streams-schema';
 
+import { ManualIngestPipelineProcessorConfig } from '@kbn/streams-schema';
+import { DraftGrokExpression } from '@kbn/grok-ui';
 import { ConfigDrivenProcessorFormState } from './processors/config_driven/types';
 
 export type WithUIAttributes<T extends ProcessorDefinition> = T & {
@@ -24,14 +26,22 @@ export type ProcessorDefinitionWithUIAttributes = WithUIAttributes<ProcessorDefi
 
 export type GrokFormState = Omit<GrokProcessorConfig, 'patterns'> & {
   type: 'grok';
-  patterns: Array<{ value: string }>;
+  patterns: DraftGrokExpression[];
 };
 
 export type DissectFormState = DissectProcessorConfig & { type: 'dissect' };
 
 export type DateFormState = DateProcessorConfig & { type: 'date' };
 
-export type SpecialisedFormState = GrokFormState | DissectFormState | DateFormState;
+export type ManualIngestPipelineFormState = ManualIngestPipelineProcessorConfig & {
+  type: 'manual_ingest_pipeline';
+};
+
+export type SpecialisedFormState =
+  | GrokFormState
+  | DissectFormState
+  | DateFormState
+  | ManualIngestPipelineFormState;
 
 export type ProcessorFormState = SpecialisedFormState | ConfigDrivenProcessorFormState;
 

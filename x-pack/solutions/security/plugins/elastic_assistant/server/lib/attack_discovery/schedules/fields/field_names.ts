@@ -30,6 +30,7 @@ export const ALERT_ATTACK_DISCOVERY_TITLE = `${ALERT_ATTACK_DISCOVERY}.title` as
 export const ALERT_ATTACK_DISCOVERY_TITLE_WITH_REPLACEMENTS =
   `${ALERT_ATTACK_DISCOVERY}.title_with_replacements` as const;
 export const ALERT_ATTACK_DISCOVERY_USER_ID = `${ALERT_ATTACK_DISCOVERY}.user.id` as const;
+export const ALERT_ATTACK_DISCOVERY_USER_NAME = `${ALERT_ATTACK_DISCOVERY}.user.name` as const;
 
 // Alert base fields
 

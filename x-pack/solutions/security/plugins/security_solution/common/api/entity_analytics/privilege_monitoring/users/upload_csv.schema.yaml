@@ -1,0 +1,29 @@
+openapi: 3.0.0
+info:
+  title: Privileged User Monitoring API
+  version: "2023-10-31"
+
+paths:
+  /api/entity_analytics/monitoring/users/_csv:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: BulkUploadUsersCSV
+      summary: Upsert multiple monitored users via CSV upload
+      requestBody:
+        description: CSV file containing users to upsert
+        required: true
+        content:
+          text/csv:
+            schema:
+              type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  upserted_count:
+                    type: integer

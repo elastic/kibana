@@ -200,6 +200,7 @@ export const MonacoEditorOutput: FunctionComponent = () => {
           theme: CONSOLE_OUTPUT_THEME_ID,
           automaticLayout: true,
           contextmenu: true,
+          lineHeight: 24,
         }}
       />
     </div>

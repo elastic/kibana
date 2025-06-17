@@ -12,8 +12,8 @@ import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { LoggerAdapter } from '@kbn/core-logging-server-internal';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
-import * as Either from 'fp-ts/lib/Either';
-import * as Option from 'fp-ts/lib/Option';
+import * as Either from 'fp-ts/Either';
+import * as Option from 'fp-ts/Option';
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
@@ -34,6 +34,11 @@ describe('migrationsStateActionMachine', () => {
   const abort = jest.fn();
   const mockLogger = loggingSystemMock.create();
   const typeRegistry = typeRegistryMock.create();
+  typeRegistry.getLegacyTypes.mockReturnValue([
+    'deprecated_type_1',
+    'deprecatedType2',
+    'deprecated-type-3',
+  ]);
   const docLinks = docLinksServiceMock.createSetupContract();
 
   const initialState = createInitialState({

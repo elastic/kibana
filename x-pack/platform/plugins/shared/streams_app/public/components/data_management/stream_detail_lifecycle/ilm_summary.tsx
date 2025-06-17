@@ -11,9 +11,9 @@ import {
   IlmPolicyDeletePhase,
   IlmPolicyPhase,
   IlmPolicyPhases,
-  IngestStreamGetResponse,
   IngestStreamLifecycleILM,
   PhaseName,
+  Streams,
 } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import {
@@ -38,7 +38,7 @@ export function IlmSummary({
   definition,
   lifecycle,
 }: {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   lifecycle: IngestStreamLifecycleILM;
 }) {
   const {
@@ -156,7 +156,7 @@ function IlmPhase({
       <EuiFlexGroup
         direction="column"
         gutterSize="xs"
-        style={phase.name !== 'delete' ? { borderRight: '1px dashed black' } : undefined}
+        css={phase.name !== 'delete' ? { borderRight: '1px dashed black' } : undefined}
       >
         <EuiPanel
           paddingSize="s"
@@ -170,7 +170,7 @@ function IlmPhase({
           grow={false}
         >
           {phase.name === 'delete' ? (
-            <EuiText size="xs" style={{ margin: '0 2px' }}>
+            <EuiText size="xs" css={{ margin: '0 2px' }}>
               <EuiIcon size="s" type="trash" />
             </EuiText>
           ) : (
@@ -186,7 +186,7 @@ function IlmPhase({
             hasBorder={false}
             hasShadow={false}
             grow={false}
-            style={{ marginBottom: '40px' }}
+            css={{ marginBottom: '40px' }}
           >
             <EuiText size="xs">
               <p>
@@ -201,7 +201,7 @@ function IlmPhase({
         {phase.name !== 'delete' ? (
           <EuiPanel
             paddingSize="xs"
-            style={{
+            css={{
               marginRight: minAge ? '-20px' : '-5px',
               width: '50px',
               backgroundColor: ilmPhases.delete.color,
@@ -266,7 +266,7 @@ function PhasesLegend({ phases }: { phases?: IlmPolicyPhases }) {
       {descriptions.map((phase, index) => (
         <React.Fragment key={phase.name}>
           <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={false} style={{ width: '20px', alignItems: 'center' }}>
+            <EuiFlexItem grow={false} css={{ width: '20px', alignItems: 'center' }}>
               {'color' in phase ? (
                 <span
                   style={{

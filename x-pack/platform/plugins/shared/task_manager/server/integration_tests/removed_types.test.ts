@@ -126,6 +126,15 @@ describe('unrecognized task types', () => {
       }
     });
 
+    // wait until the task finishes
+    await retry(async () => {
+      const hasRun = await taskManagerPlugin
+        .get('mark_removed_tasks_as_unrecognized')
+        .then((t) => t.runAt != null)
+        .catch(() => false);
+      expect(hasRun).toBe(true);
+    });
+
     await retry(async () => {
       const task = await getTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser);
       expect(task?._source?.task?.status).toBe('unrecognized');

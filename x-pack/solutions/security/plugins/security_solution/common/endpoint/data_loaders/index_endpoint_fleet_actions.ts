@@ -151,6 +151,17 @@ export const buildIEndpointAndFleetActionsBulkOperations = ({
     for (let i = 0; i < count; i++) {
       // start with endpoint action
       const logsEndpointAction: LogsEndpointAction = endpointActionGenerator.generate({
+        agent: {
+          id: [agentId],
+          policy: [
+            {
+              agentId,
+              elasticAgentId: agentId,
+              integrationPolicyId: endpoint.Endpoint.policy.applied.id,
+              agentPolicyId: '',
+            },
+          ],
+        },
         EndpointActions: {
           data: {
             comment: 'data generator: this host is bad',

@@ -157,7 +157,9 @@ export class ModelsProvider {
 
       const inferenceAPIMap = groupBy(
         endpoints,
-        (endpoint) => endpoint.service === 'elser' && endpoint.service_settings.model_id
+        (endpoint) =>
+          (endpoint.service === 'elser' || endpoint.service === 'elasticsearch') &&
+          endpoint.service_settings.model_id
       );
 
       for (const model of trainedModels) {
@@ -232,10 +234,15 @@ export class ModelsProvider {
     const idMap = new Map<string, TrainedModelUIItem>(
       resultItems.map((model) => [model.model_id, model])
     );
-    /**
-     * Fetches model definitions available for download
-     */
-    const forDownload = await this.getModelDownloads();
+
+    const [rawModels, forDownload] = await Promise.all([
+      this._client.asCurrentUser.ml.getTrainedModels({
+        size: 1000,
+      }),
+      this.getModelDownloads(),
+    ]);
+
+    const allExistingModelIds = new Set(rawModels.trained_model_configs.map((m) => m.model_id));
 
     const notDownloaded: TrainedModelUIItem[] = forDownload
       .filter(({ model_id: modelId, hidden, recommended, supported, disclaimer, techPreview }) => {
@@ -253,13 +260,18 @@ export class ModelsProvider {
         return !idMap.has(modelId) && !hidden;
       })
       .map<ModelDownloadItem>((modelDefinition) => {
+        // Check if this downloadable model already exists in the system, but not in current space
+        const isDownloadedWithinDifferentSpace = allExistingModelIds.has(modelDefinition.model_id);
+
         return {
           model_id: modelDefinition.model_id,
           type: modelDefinition.type,
           tags: modelDefinition.type?.includes(ELASTIC_MODEL_TAG) ? [ELASTIC_MODEL_TAG] : [],
           putModelConfig: modelDefinition.config,
           description: modelDefinition.description,
-          state: MODEL_STATE.NOT_DOWNLOADED,
+          state: isDownloadedWithinDifferentSpace
+            ? MODEL_STATE.DOWNLOADED_IN_DIFFERENT_SPACE
+            : MODEL_STATE.NOT_DOWNLOADED,
           recommended: !!modelDefinition.recommended,
           modelName: modelDefinition.modelName,
           os: modelDefinition.os,

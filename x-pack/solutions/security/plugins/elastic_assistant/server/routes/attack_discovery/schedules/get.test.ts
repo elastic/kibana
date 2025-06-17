@@ -12,7 +12,7 @@ import { getAttackDiscoverySchedulesRoute } from './get';
 import { serverMock } from '../../../__mocks__/server';
 import { requestContextMock } from '../../../__mocks__/request_context';
 import { getAttackDiscoverySchedulesRequest } from '../../../__mocks__/request';
-import { getInternalAttackDiscoveryScheduleMock } from '../../../__mocks__/attack_discovery_schedules.mock';
+import { getAttackDiscoveryScheduleMock } from '../../../__mocks__/attack_discovery_schedules.mock';
 import { AttackDiscoveryScheduleDataClient } from '../../../lib/attack_discovery/schedules/data_client';
 
 const { clients, context } = requestContextMock.createTools();
@@ -33,6 +33,7 @@ const mockApiConfig = {
   connectorId: 'connector-id',
   actionTypeId: '.bedrock',
   model: 'model',
+  name: 'Test Bedrock',
   provider: OpenAiProviderType.OpenAi,
 };
 const basicAttackDiscoveryScheduleMock = {
@@ -59,7 +60,7 @@ describe('getAttackDiscoverySchedulesRoute', () => {
     context.core.featureFlags.getBooleanValue.mockResolvedValue(true);
     getAttackDiscoverySchedulesRoute(server.router);
     getAttackDiscoverySchedule.mockResolvedValue(
-      getInternalAttackDiscoveryScheduleMock(basicAttackDiscoveryScheduleMock)
+      getAttackDiscoveryScheduleMock(basicAttackDiscoveryScheduleMock)
     );
   });
 

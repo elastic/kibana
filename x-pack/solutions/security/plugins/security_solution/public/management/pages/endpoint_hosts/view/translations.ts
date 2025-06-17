@@ -62,7 +62,7 @@ export const WORKFLOW_INSIGHTS = {
     emptyResults: i18n.translate(
       'xpack.securitySolution.endpointDetails.workflowInsights.issues.emptyResults',
       {
-        defaultMessage: 'No issues had been found',
+        defaultMessage: 'Troubleshooting scan complete, no issues found.',
       }
     ),
     remediationButton: {
@@ -109,6 +109,12 @@ export const WORKFLOW_INSIGHTS = {
       'xpack.securitySolution.endpointDetails.workflowInsights.toast.updateInsightError',
       {
         defaultMessage: 'Failed to mark insight as remediated',
+      }
+    ),
+    maxFetchAttemptsReached: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.toast.maxFetchAttemptsReached',
+      {
+        defaultMessage: 'Failed to fetch insights after multiple attempts',
       }
     ),
   },

@@ -69,12 +69,13 @@ export const Node = ({
       position="right"
       content={<ConditionalToolTip currentTime={currentTime} node={node} nodeType={nodeType} />}
     >
-      <div>
+      <div role="listitem">
         <NodeSquare
           squareSize={squareSize}
           togglePopover={toggleAssetPopover}
           color={color}
           nodeName={node.name}
+          nodeMetric={metric ? metric.name : ''}
           value={value}
           showBorder={detailsItemId === node.id || isPopoverOpen}
         />

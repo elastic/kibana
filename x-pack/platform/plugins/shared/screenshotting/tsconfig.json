@@ -26,6 +26,7 @@
     "@kbn/core-plugins-server",
     "@kbn/task-manager-plugin",
     "@kbn/screenshotting-server",
+    "@kbn/handlebars",
   ],
   "exclude": [
     "target/**/*",

@@ -11,6 +11,7 @@ import { ENVIRONMENT_ALL, ENVIRONMENT_NOT_DEFINED } from './environment_filter_v
 export const environmentStringRt = t.union([
   t.literal(ENVIRONMENT_NOT_DEFINED.value),
   t.literal(ENVIRONMENT_ALL.value),
+  t.string,
   nonEmptyStringRt,
 ]);
 

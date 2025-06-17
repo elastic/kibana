@@ -36,6 +36,15 @@ export function adserviceEdot({ from, to }: { from: number; to: number }) {
           'attributes.url.scheme': 'https',
         })
         .timestamp(timestamp)
+        .failure()
+        .errors(
+          edotInstance
+            .error({
+              message: '[ResponseError] index_not_found_exception',
+              type: 'ResponseError',
+            })
+            .timestamp(timestamp + 50)
+        )
         .duration(551)
         .success(),
     ]);

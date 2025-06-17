@@ -33,6 +33,7 @@ export const registerHealthRoute = (reporting: ReportingCore, logger: Logger) =>
           body: {
             has_permanent_encryption_key: healthInfo.hasPermanentEncryptionKey,
             is_sufficiently_secure: healthInfo.isSufficientlySecure,
+            are_notifications_enabled: healthInfo.areNotificationsEnabled,
           },
         });
       } catch (err) {

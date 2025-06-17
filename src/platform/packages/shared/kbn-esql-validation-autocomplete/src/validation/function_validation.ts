@@ -545,18 +545,21 @@ function validateFunctionColumnArg(
     !checkFunctionArgMatchesDefinition(actualArg, parameterDefinition, references, parentCommand)
   ) {
     const columnHit = getColumnForASTNode(actualArg, references);
-    messages.push(
-      getMessageFromId({
-        messageId: 'wrongArgumentType',
-        values: {
-          name: astFunction.name,
-          argType: parameterDefinition.type as string,
-          value: actualArg.name,
-          givenType: columnHit!.type,
-        },
-        locations: actualArg.location,
-      })
-    );
+    const isConflictType = columnHit && 'hasConflict' in columnHit && columnHit.hasConflict;
+    if (!isConflictType) {
+      messages.push(
+        getMessageFromId({
+          messageId: 'wrongArgumentType',
+          values: {
+            name: astFunction.name,
+            argType: parameterDefinition.type as string,
+            value: actualArg.name,
+            givenType: columnHit!.type,
+          },
+          locations: actualArg.location,
+        })
+      );
+    }
   }
 
   return messages;

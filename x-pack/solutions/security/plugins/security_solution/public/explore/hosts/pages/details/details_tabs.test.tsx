@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { render } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import useResizeObserver from 'use-resize-observer/polyfilled';
@@ -18,11 +19,13 @@ import {
 } from '../../../../common/mock';
 import { HostDetailsTabs } from './details_tabs';
 import { hostDetailsPagePath } from '../types';
-import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { getHostDetailsPageFilters } from './helpers';
 import { HostsType, HostsTableType } from '../../store/model';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { AuthenticationsQueryTabBody, UncommonProcessQueryTabBody } from '../navigation';
+import { AnomaliesQueryTabBody } from '../../../../common/containers/anomalies/anomalies_query_tab_body';
+import { EventsQueryTabBody } from '../../../../common/components/events_tab';
 
 jest.mock('../../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../../common/lib/kibana');
@@ -69,6 +72,45 @@ mockUseResizeObserver.mockImplementation(() => ({}));
 jest.mock('../../../../common/components/visualization_actions/actions');
 jest.mock('../../../../common/components/visualization_actions/lens_embeddable');
 
+jest.mock('../navigation/authentications_query_tab_body', () => {
+  const original = jest.requireActual('../navigation/authentications_query_tab_body');
+  return {
+    ...original,
+    AuthenticationsQueryTabBody: jest.fn(() => (
+      <div data-test-subj="authentications-query-tab-body">{'AuthenticationsQueryTabBody'}</div>
+    )),
+  };
+});
+jest.mock('../navigation/uncommon_process_query_tab_body', () => {
+  const original = jest.requireActual('../navigation/uncommon_process_query_tab_body');
+  return {
+    ...original,
+    UncommonProcessQueryTabBody: jest.fn(() => (
+      <div data-test-subj="uncommon-process-query-tab-body">{'UncommonProcessQueryTabBody'}</div>
+    )),
+  };
+});
+jest.mock('../../../../common/containers/anomalies/anomalies_query_tab_body', () => {
+  const original = jest.requireActual(
+    '../../../../common/containers/anomalies/anomalies_query_tab_body'
+  );
+  return {
+    ...original,
+    AnomaliesQueryTabBody: jest.fn(() => (
+      <div data-test-subj="anomalies-query-tab-body">{'AnomaliesQueryTabBody'}</div>
+    )),
+  };
+});
+jest.mock('../../../../common/components/events_tab', () => {
+  const original = jest.requireActual('../../../../common/components/events_tab');
+  return {
+    ...original,
+    EventsQueryTabBody: jest.fn(() => (
+      <div data-test-subj="events-query-tab-body">{'EventsQueryTabBody'}</div>
+    )),
+  };
+});
+
 const myStore = createMockStore({
   ...mockGlobalState,
   dataTable: {
@@ -78,12 +120,25 @@ const myStore = createMockStore({
   },
 });
 
+const AuthenticationsQueryTabBodyMocked = AuthenticationsQueryTabBody as jest.MockedFunction<
+  typeof AuthenticationsQueryTabBody
+>;
+const UncommonProcessQueryTabBodyMocked = UncommonProcessQueryTabBody as jest.MockedFunction<
+  typeof UncommonProcessQueryTabBody
+>;
+const AnomaliesQueryTabBodyMocked = AnomaliesQueryTabBody as jest.MockedFunction<
+  typeof AnomaliesQueryTabBody
+>;
+const EventsQueryTabBodyMocked = EventsQueryTabBody as jest.MockedFunction<
+  typeof EventsQueryTabBody
+>;
+
 describe('body', () => {
   const scenariosMap = {
-    [HostsTableType.authentications]: 'AuthenticationsQueryTabBody',
-    [HostsTableType.uncommonProcesses]: 'UncommonProcessQueryTabBody',
-    [HostsTableType.anomalies]: 'AnomaliesQueryTabBody',
-    [HostsTableType.events]: 'EventsQueryTabBody',
+    [HostsTableType.authentications]: AuthenticationsQueryTabBodyMocked,
+    [HostsTableType.uncommonProcesses]: UncommonProcessQueryTabBodyMocked,
+    [HostsTableType.anomalies]: AnomaliesQueryTabBodyMocked,
+    [HostsTableType.events]: EventsQueryTabBodyMocked,
   };
 
   const mockHostDetailsPageFilters = getHostDetailsPageFilters('host-1');
@@ -97,11 +152,9 @@ describe('body', () => {
     },
   });
 
-  const mount = useMountAppended();
-
   Object.entries(scenariosMap).forEach(([path, componentName]) =>
-    test(`it should pass expected object properties to ${componentName}`, () => {
-      const wrapper = mount(
+    test(`it should pass expected object properties to ${path}`, () => {
+      render(
         <TestProviders store={myStore}>
           <MemoryRouter initialEntries={[`/hosts/name/host-1/${path}`]}>
             <HostDetailsTabs
@@ -122,7 +175,7 @@ describe('body', () => {
       );
 
       // match against everything but the functions to ensure they are there as expected
-      expect(wrapper.find(componentName).props()).toMatchObject({
+      expect(componentName.mock.calls[0][0]).toMatchObject({
         endDate: '2020-07-08T08:20:18.966Z',
         filterQuery,
         skip: false,

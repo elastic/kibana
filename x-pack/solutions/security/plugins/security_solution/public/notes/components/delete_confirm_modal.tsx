@@ -35,7 +35,7 @@ export const DELETE_NOTES_CANCEL = i18n.translate(
 /**
  * Renders a confirmation modal to delete notes in the notes management page
  */
-export const DeleteConfirmModal = React.memo(() => {
+export const DeleteConfirmModal = React.memo(({ refetch = true }: { refetch?: boolean }) => {
   const dispatch = useDispatch();
   const pendingDeleteIds = useSelector(selectNotesTablePendingDeleteIds);
   const deleteNotesStatus = useSelector(selectDeleteNotesStatus);
@@ -46,8 +46,8 @@ export const DeleteConfirmModal = React.memo(() => {
   }, [dispatch]);
 
   const onConfirm = useCallback(() => {
-    dispatch(deleteNotes({ ids: pendingDeleteIds, refetch: true }));
-  }, [dispatch, pendingDeleteIds]);
+    dispatch(deleteNotes({ ids: pendingDeleteIds, refetch }));
+  }, [dispatch, pendingDeleteIds, refetch]);
 
   return (
     <EuiConfirmModal

@@ -12,7 +12,7 @@ export async function getNodeProcesses(
 ): Promise<Array<{ pid: number; command: string; ports: number[] }>> {
   const candidates = await execa
     .command(
-      `ps -eo pid,command | grep -E '^[[:space:]0-9]+[[:space:]]*node[[:space:]]?' | grep -v grep ${
+      `ps -eo pid,command | grep -E '^[[:space:]]*[0-9]+[[:space:]]+([^[:space:]]+/)*node($|[[:space:]])' | grep -v grep ${
         grep ? `| grep "${grep}" ` : ''
       }`,
       { shell: true, reject: false }

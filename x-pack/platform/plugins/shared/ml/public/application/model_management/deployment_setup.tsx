@@ -59,6 +59,7 @@ import type { HttpService } from '../services/http_service';
 import { ModelStatusIndicator } from './model_status_indicator';
 import type { TrainedModelsService } from './trained_models_service';
 import { useMlKibana } from '../contexts/kibana';
+import type { MlCapabilitiesService } from '../capabilities/check_capabilities';
 
 interface DeploymentSetupProps {
   config: DeploymentParamsUI;
@@ -243,7 +244,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               'xpack.ml.trainedModels.modelsList.startDeployment.cloudAutoscaling.lowCpuAdaptiveHelp',
               {
                 defaultMessage:
-                  'This level limits resources to the minimum required for ELSER to run if supported by your Cloud console selection. It may not be sufficient for a production application.',
+                  'This level limits resources to the minimum required for the model to run if supported by your Cloud console selection. It may not be sufficient for a production application.',
               }
             );
           case 'medium':
@@ -274,7 +275,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               'xpack.ml.trainedModels.modelsList.startDeployment.cloudAutoscaling.lowCpuStaticHelp',
               {
                 defaultMessage:
-                  'This level sets resources to the minimum required for ELSER to run if supported by your Cloud console selection. It may not be sufficient for a production application.',
+                  'This level sets resources to the minimum required for the model to run if supported by your Cloud console selection. It may not be sufficient for a production application.',
               }
             );
           case 'medium':
@@ -341,7 +342,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               'xpack.ml.trainedModels.modelsList.startDeployment.hardwareLimits.lowCpuStaticHelp',
               {
                 defaultMessage:
-                  'This level sets resources to the minimum required for ELSER to run. It may not be sufficient for a production application.',
+                  'This level sets resources to the minimum required for the model to run. It may not be sufficient for a production application.',
               }
             );
           case 'medium':
@@ -917,7 +918,8 @@ export const getUserInputModelDeploymentParamsProvider =
     showNodeInfo: boolean,
     nlpSettings: NLPSettings,
     httpService: HttpService,
-    trainedModelsService: TrainedModelsService
+    trainedModelsService: TrainedModelsService,
+    mlCapabilities: MlCapabilitiesService
   ) =>
   (
     modelId: string,
@@ -939,7 +941,9 @@ export const getUserInputModelDeploymentParamsProvider =
       try {
         const modalSession = overlays.openModal(
           toMountPoint(
-            <KibanaContextProvider services={{ mlServices: { httpService, trainedModelsService } }}>
+            <KibanaContextProvider
+              services={{ mlServices: { httpService, trainedModelsService, mlCapabilities } }}
+            >
               <StartUpdateDeploymentModal
                 nlpSettings={nlpSettings}
                 showNodeInfo={showNodeInfo}

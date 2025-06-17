@@ -11,11 +11,15 @@ import type { OnboardingCardId } from '../constants';
 import { OnboardingTopicId } from '../constants';
 import { OnboardingHubEventTypes } from '../../common/lib/telemetry';
 import { onboardingConfig } from '../config';
+import { trackOnboardingLinkClick } from './lib/telemetry';
+import type { ReportLinkClick } from '../../common/lib/integrations/hooks/integration_context';
 
 export interface OnboardingTelemetry {
   reportCardOpen: (cardId: OnboardingCardId, options?: { auto?: boolean }) => void;
   reportCardComplete: (cardId: OnboardingCardId, options?: { auto?: boolean }) => void;
   reportCardLinkClicked: (cardId: OnboardingCardId, linkId: string) => void;
+  reportCardSelectorClicked: (cardId: OnboardingCardId, selectorId: string) => void;
+  reportLinkClick: ReportLinkClick;
 }
 
 export const useOnboardingTelemetry = (): OnboardingTelemetry => {
@@ -40,6 +44,13 @@ export const useOnboardingTelemetry = (): OnboardingTelemetry => {
           stepLinkId: linkId,
         });
       },
+      reportCardSelectorClicked: (cardId, selectorId: string) => {
+        telemetry.reportEvent(OnboardingHubEventTypes.OnboardingHubStepSelectorClicked, {
+          originStepId: getStepId(cardId),
+          selectorId,
+        });
+      },
+      reportLinkClick: trackOnboardingLinkClick,
     }),
     [telemetry]
   );

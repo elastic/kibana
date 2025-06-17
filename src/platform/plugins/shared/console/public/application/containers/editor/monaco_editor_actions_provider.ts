@@ -64,7 +64,6 @@ export class MonacoEditorActionsProvider {
     private setEditorActionsCss: (css: CSSProperties) => void,
     private isDevMode: boolean
   ) {
-    this.editor.focus();
     this.parsedRequestsProvider = getParsedRequestsProvider(this.editor.getModel());
     this.highlightedLines = this.editor.createDecorationsCollection();
 

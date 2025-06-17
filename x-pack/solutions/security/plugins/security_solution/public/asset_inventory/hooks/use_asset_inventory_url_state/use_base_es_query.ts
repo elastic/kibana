@@ -21,14 +21,17 @@ const getBaseQuery = ({
   dataView,
   query,
   filters,
+  pageFilters,
   config,
 }: AssetsBaseURLQuery &
   AssetsBaseESQueryConfig & {
     dataView: DataView | undefined;
   }) => {
   try {
+    const mergedFilters = [...filters, ...(pageFilters ?? [])];
+
     return {
-      query: buildEsQuery(dataView, query, filters, config), // will throw for malformed query
+      query: buildEsQuery(dataView, query, mergedFilters, config), // will throw for malformed query
     };
   } catch (error) {
     return {
@@ -38,7 +41,7 @@ const getBaseQuery = ({
   }
 };
 
-export const useBaseEsQuery = ({ filters = [], query }: AssetsBaseURLQuery) => {
+export const useBaseEsQuery = ({ filters = [], query, pageFilters = [] }: AssetsBaseURLQuery) => {
   const {
     notifications: { toasts },
     data: {
@@ -54,10 +57,11 @@ export const useBaseEsQuery = ({ filters = [], query }: AssetsBaseURLQuery) => {
       getBaseQuery({
         dataView,
         filters,
+        pageFilters,
         query,
         config,
       }),
-    [dataView, filters, query, config]
+    [dataView, filters, pageFilters, query, config]
   );
 
   /**

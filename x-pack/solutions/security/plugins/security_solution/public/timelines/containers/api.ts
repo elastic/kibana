@@ -18,6 +18,7 @@ import type {
   GetDraftTimelinesResponse,
   GetTimelinesRequestQuery,
   SavedTimeline,
+  ImportTimelinesResponse,
 } from '../../../common/api/timeline';
 import {
   ImportTimelineResult,
@@ -48,7 +49,6 @@ import { parseOrThrowErrorFactory } from '../../../common/timelines/zod_errors';
 import type {
   ExportDocumentsProps,
   ImportDataProps,
-  ImportDataResponse,
 } from '../../detection_engine/rule_management/logic';
 
 interface RequestPostTimeline {
@@ -264,11 +264,11 @@ export const persistTimeline = async ({
 export const importTimelines = async ({
   fileToImport,
   signal,
-}: ImportDataProps): Promise<ImportDataResponse> => {
+}: ImportDataProps): Promise<ImportTimelineResult> => {
   const formData = new FormData();
   formData.append('file', fileToImport);
 
-  return KibanaServices.get().http.fetch<ImportDataResponse>(`${TIMELINE_IMPORT_URL}`, {
+  return KibanaServices.get().http.fetch<ImportTimelinesResponse>(`${TIMELINE_IMPORT_URL}`, {
     method: 'POST',
     headers: { 'Content-Type': undefined },
     body: formData,

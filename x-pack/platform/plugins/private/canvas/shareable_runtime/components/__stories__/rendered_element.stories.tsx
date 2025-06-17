@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { imageFunction } from '@kbn/expression-image-plugin/__fixtures__';
+import { image } from '../../../canvas_plugin_src/functions/common/image';
 import { ExampleContext } from '../../test/context_example';
 
 import { sharedWorkpads } from '../../test';
@@ -43,7 +43,7 @@ export const Component = {
     <ExampleContext style={{ height: 100, width: 100 }}>
       <RenderedElementComponent
         index={0}
-        fn={imageFunction()}
+        fn={image()}
         element={{
           id: '123',
           position: {

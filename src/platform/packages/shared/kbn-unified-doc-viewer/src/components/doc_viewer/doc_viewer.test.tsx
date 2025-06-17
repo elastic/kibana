@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { mount, shallow } from 'enzyme';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { DocViewer, INITIAL_TAB } from './doc_viewer';
@@ -88,13 +88,17 @@ describe('<DocViewer />', () => {
     expect(screen.getByTestId('docViewerTab-test1').getAttribute('aria-selected')).toBe('true');
     expect(screen.getByTestId('docViewerTab-test2').getAttribute('aria-selected')).toBe('false');
 
-    screen.getByTestId('docViewerTab-test2').click();
+    act(() => {
+      screen.getByTestId('docViewerTab-test2').click();
+    });
 
     expect(screen.getByTestId('docViewerTab-test1').getAttribute('aria-selected')).toBe('false');
     expect(screen.getByTestId('docViewerTab-test2').getAttribute('aria-selected')).toBe('true');
     expect(mockSetLocalStorage).toHaveBeenCalledWith('kbn_doc_viewer_tab_test2');
 
-    screen.getByTestId('docViewerTab-test1').click();
+    act(() => {
+      screen.getByTestId('docViewerTab-test1').click();
+    });
 
     expect(screen.getByTestId('docViewerTab-test1').getAttribute('aria-selected')).toBe('true');
     expect(screen.getByTestId('docViewerTab-test2').getAttribute('aria-selected')).toBe('false');
@@ -129,5 +133,27 @@ describe('<DocViewer />', () => {
     expect(screen.getByTestId('docViewerTab-test2').getAttribute('aria-selected')).toBe('false');
 
     mockTestInitialLocalStorageValue = undefined;
+  });
+
+  test('should render if a specific tab is passed as prop', () => {
+    const initialTabId = 'test2';
+
+    const registry = new DocViewsRegistry();
+    registry.add({ id: 'test1', order: 10, title: 'Render 1st Tab', render: jest.fn() });
+    registry.add({ id: initialTabId, order: 20, title: 'Render 2nd Tab', render: jest.fn() });
+    registry.add({ id: 'test3', order: 30, title: 'Render 3rd Tab', render: jest.fn() });
+
+    render(
+      <DocViewer
+        docViews={registry.getAll()}
+        initialTabId={initialTabId}
+        hit={records[0]}
+        dataView={dataViewMock}
+      />
+    );
+
+    expect(screen.getByTestId('docViewerTab-test1').getAttribute('aria-selected')).toBe('false');
+    expect(screen.getByTestId('docViewerTab-test2').getAttribute('aria-selected')).toBe('true');
+    expect(screen.getByTestId('docViewerTab-test3').getAttribute('aria-selected')).toBe('false');
   });
 });

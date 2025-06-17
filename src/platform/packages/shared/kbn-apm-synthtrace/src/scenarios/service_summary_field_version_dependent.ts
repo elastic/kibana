@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ApmFields, apm } from '@kbn/apm-synthtrace-client';
+import { ApmFields, ApmSynthtracePipelineSchema, apm } from '@kbn/apm-synthtrace-client';
 import { random } from 'lodash';
 import semver from 'semver';
 import { Scenario } from '../cli/scenario';
@@ -22,15 +22,6 @@ const scenario: Scenario<ApmFields> = async ({
   const version = versionOverride as string;
   const isLegacy = version ? semver.lt(version as string, '8.7.0') : false;
   return {
-    bootstrap: async ({ apmEsClient }) => {
-      if (isLegacy) {
-        apmEsClient.pipeline(
-          apmEsClient.getPipeline('default', {
-            versionOverride: version,
-          })
-        );
-      }
-    },
     generate: ({ range, clients: { apmEsClient } }) => {
       const successfulTimestamps = range.ratePerMinute(6);
       const instance = apm
@@ -54,6 +45,15 @@ const scenario: Scenario<ApmFields> = async ({
             .success();
         })
       );
+    },
+    setupPipeline: ({ apmEsClient }) => {
+      if (isLegacy) {
+        apmEsClient.setPipeline(
+          apmEsClient.resolvePipelineType(ApmSynthtracePipelineSchema.Default, {
+            versionOverride: version,
+          })
+        );
+      }
     },
   };
 };
