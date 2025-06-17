@@ -53,7 +53,7 @@ function renderTableRowActions({
 }
 describe('TableRowActions', () => {
   beforeEach(() => {
-    mockedExperimentalFeaturesService.get.mockReturnValue({} as any);
+    mockedExperimentalFeaturesService.get.mockReturnValue({ enableAgentMigrations: false } as any);
     mockedUseAuthz.mockReturnValue({
       fleet: {
         all: true,
@@ -66,7 +66,7 @@ describe('TableRowActions', () => {
   });
 
   // Conditionally run the migrate agent tests only if the flag is enabled
-  const agentMigrationsEnabled = ExperimentalFeaturesService.get().enableAgentMigrations;
+  const agentMigrationsEnabled = mockedExperimentalFeaturesService.get().enableAgentMigrations;
 
   (agentMigrationsEnabled ? describe : describe.skip)('Migrate agent action', () => {
     function renderAndGetMigrateButton({
