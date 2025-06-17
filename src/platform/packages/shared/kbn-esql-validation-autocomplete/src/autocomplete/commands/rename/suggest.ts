@@ -18,7 +18,16 @@ export async function suggest({
   getColumnsByType,
   innerText,
   getSuggestedUserDefinedColumnName,
+  columnExists,
 }: CommandSuggestParams<'rename'>): Promise<SuggestionRawDefinition[]> {
+  // If the left side of the rename is a column that exists, we suggest the 'AS' completion item.
+  // If it doesn't exist, we suggest the '=' completion item.
+  const match = innerText.match(/(?:rename|,)\s+(\S+)\s+a?$/i);
+  if (match) {
+    const leftSideOfRename = match[1];
+    return columnExists(leftSideOfRename) ? [asCompletionItem] : [assignCompletionItem];
+  }
+
   if (/(?:rename|,)\s+\S+\s+a?$/i.test(innerText)) {
     return [asCompletionItem, assignCompletionItem];
   }

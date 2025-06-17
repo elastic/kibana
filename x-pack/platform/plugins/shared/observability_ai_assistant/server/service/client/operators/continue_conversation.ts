@@ -140,11 +140,7 @@ function getFunctionDefinitions({
   const systemFunctions = functionClient
     .getFunctions()
     .map((fn) => fn.definition)
-    .filter(
-      (def) =>
-        !def.visibility ||
-        [FunctionVisibility.AssistantOnly, FunctionVisibility.All].includes(def.visibility)
-    );
+    .filter(({ visibility }) => visibility !== FunctionVisibility.Internal);
 
   const actions = functionClient.getActions();
 
@@ -184,7 +180,7 @@ export function continueConversation({
 
   const functionLimitExceeded = functionCallsLeft <= 0;
 
-  const definitions = getFunctionDefinitions({
+  const functionDefinitions = getFunctionDefinitions({
     functionLimitExceeded,
     functionClient,
     disableFunctions,
@@ -204,7 +200,7 @@ export function continueConversation({
 
       return chat(operationName, {
         messages: initialMessages,
-        functions: definitions,
+        functions: functionDefinitions,
         connectorId,
         stream: true,
       }).pipe(emitWithConcatenatedMessage(), catchFunctionNotFoundError(functionLimitExceeded));

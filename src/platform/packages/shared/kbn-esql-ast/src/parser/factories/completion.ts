@@ -38,22 +38,20 @@ export const createCompletionCommand = (
 
     command.targetField = targetField;
     command.args.push(assignment);
+  } else if (ctx._prompt) {
+    const prompt = visitPrimaryExpression(ctx._prompt) as ESQLSingleAstItem;
+    command.prompt = prompt;
+    command.args.push(prompt);
   } else {
     // When the user is typing a column as prompt i.e: | COMPLETION message^,
     // ANTLR does not know if it is trying to type a prompt
     // or a target field, so it does not return neither _prompt nor _targetField. We fill the AST
     // with an unknown item until the user inserts the next keyword and breaks the tie.
-    // completionCommand
-    //     : COMPLETION (targetField=qualifiedName ASSIGN)? prompt=primaryExpression WITH inferenceId=identifierOrParameter
-    const prompt = ctx._prompt
-      ? (visitPrimaryExpression(ctx._prompt) as ESQLSingleAstItem)
-      : {
-          ...createUnknownItem(ctx),
-          text: ctx.getText().replace(/^completion/i, ''),
-        };
+    const unknownItem = createUnknownItem(ctx);
+    unknownItem.text = ctx.getText().replace(/^completion/i, '');
 
-    command.prompt = prompt;
-    command.args.push(prompt);
+    command.prompt = unknownItem;
+    command.args.push(unknownItem);
   }
 
   const withCtx = ctx.WITH();
