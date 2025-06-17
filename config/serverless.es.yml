@@ -85,7 +85,7 @@ xpack.ml.dfa.enabled: false
 xpack.ml.nlp:
   enabled: true
   modelDeployment:
-    allowStaticAllocations: true
+    allowStaticAllocations: false
     vCPURange:
       low:
         min: 0
