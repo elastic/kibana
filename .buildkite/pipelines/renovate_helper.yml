@@ -5,7 +5,7 @@ agents:
   machineType: n2-standard-2
 steps:
   - group: 'Renovate PR opened'
-    if: "build.env('GITHUB_PR_USER') == 'elastic-renovate-prod[bot]' && build.env('GITHUB_PR_EVENT_TYPE') == 'opened'"
+    if: "build.env('GITHUB_PR_USER') == 'elastic-renovate-prod[bot]' && build.env('GITHUB_PR_EVENT_TYPE') == 'pull_request' && build.env('GITHUB_PR_EVENT_ACTION') == 'opened'"
 
     steps:
       - command: .buildkite/scripts/steps/renovate/renovate_helper.sh
@@ -29,8 +29,7 @@ steps:
               limit: 1
 
   - group: 'Renovate PR updated'
-    # TODO: check for commit author elastic contributor or kibanamachine notice
-    if: "build.env('GITHUB_PR_USER') != 'elastic-renovate-prod[bot]' && build.env('GITHUB_PR_EVENT_TYPE') == 'synchronize'"
+    if: "build.env('GITHUB_PR_USER') != 'elastic-renovate-prod[bot]' && build.env('GITHUB_PR_EVENT_TYPE') == 'pull_request' && build.env('GITHUB_PR_EVENT_ACTION') == 'synchronize'"
 
     steps:
       - command: .buildkite/scripts/steps/renovate/trigger_pr.sh
