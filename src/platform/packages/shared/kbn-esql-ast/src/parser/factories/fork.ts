@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createGrokCommand } from './grok';
 import {
   CompositeForkSubQueryContext,
   ForkCommandContext,
@@ -23,6 +24,8 @@ import { createLimitCommand } from './limit';
 import { createSortCommand } from './sort';
 import { createStatsCommand } from './stats';
 import { createWhereCommand } from './where';
+import { createCompletionCommand } from './completion';
+import { createChangePointCommand } from './change_point';
 
 export const createForkCommand = (ctx: ForkCommandContext): ESQLCommand<'fork'> => {
   const command = createCommand<'fork'>('fork', ctx);
@@ -94,5 +97,20 @@ function visitForkSubQueryProcessingCommandContext(ctx: ForkSubQueryProcessingCo
   const statsCtx = ctx.statsCommand();
   if (statsCtx) {
     return createStatsCommand(statsCtx);
+  }
+
+  const grokCtx = ctx.grokCommand();
+  if (grokCtx) {
+    return createGrokCommand(grokCtx);
+  }
+
+  const changePointCtx = ctx.changePointCommand();
+  if (changePointCtx) {
+    return createChangePointCommand(changePointCtx);
+  }
+
+  const completionCtx = ctx.completionCommand();
+  if (completionCtx) {
+    return createCompletionCommand(completionCtx);
   }
 }
