@@ -6,6 +6,7 @@
  */
 
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
+import moment from 'moment';
 
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { getIndexVersion } from '../../routes/index/get_index_version';
@@ -16,9 +17,14 @@ import { getDataTierFilter } from '../utils/get_data_tier_filter';
 import { getSharedParamsMock } from '../__mocks__/shared_params';
 import type { PersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 import { createPersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
+import { getMvExpandFields } from '@kbn/securitysolution-utils';
 
 jest.mock('../../routes/index/get_index_version');
 jest.mock('../utils/get_data_tier_filter', () => ({ getDataTierFilter: jest.fn() }));
+jest.mock('@kbn/securitysolution-utils', () => ({
+  ...jest.requireActual('@kbn/securitysolution-utils'),
+  getMvExpandFields: jest.fn().mockReturnValue([]),
+}));
 
 const getDataTierFilterMock = getDataTierFilter as jest.Mock;
 
@@ -98,6 +104,75 @@ describe('esqlExecutor', () => {
 
       expect(result).not.toHaveProperty('userError');
       expect(result).toHaveProperty('errors', ['Unknown Error']);
+    });
+  });
+
+  describe('rule state', () => {
+    it('should add a warning message when excluded documents exceed 100,000', async () => {
+      mockedArguments.state = {
+        excludedDocuments: Array.from({ length: 100001 }, (_, i) => ({
+          id: `doc${i + 1}`,
+          timestamp: `2025-04-28T10:00:00Z`,
+        })),
+      };
+      mockedArguments.sharedParams.tuple = {
+        from: moment('2025-04-28T09:00:00Z'),
+        to: moment('2025-04-28T12:00:00Z'),
+        maxSignals: 100,
+      };
+
+      const result = await esqlExecutor(mockedArguments);
+
+      expect(result.warningMessages).toContain(
+        'Excluded documents exceeded the limit of 100000, some alerts might not have been created. Consider reducing the lookback time for the rule.'
+      );
+      expect(
+        ruleServices.scopedClusterClient.asCurrentUser.transport.request
+      ).not.toHaveBeenCalled();
+    });
+
+    it('should include documents ids from state in ES|QL request', async () => {
+      mockedArguments.state = {
+        excludedDocuments: [
+          { id: 'doc1', timestamp: '2025-04-28T10:00:00Z' },
+          { id: 'doc2', timestamp: '2025-04-28T11:00:00Z' },
+        ],
+      };
+      mockedArguments.sharedParams.tuple = {
+        from: moment('2025-04-28T09:00:00Z'),
+        to: moment('2025-04-28T12:00:00Z'),
+        maxSignals: 100,
+      };
+
+      await esqlExecutor(mockedArguments);
+      const transportRequestArgs =
+        ruleServices.scopedClusterClient.asCurrentUser.transport.request.mock.calls[0][0];
+
+      expect(transportRequestArgs).toHaveProperty('body.filter.bool.must_not.ids.values', [
+        'doc1',
+        'doc2',
+      ]);
+    });
+
+    it('should include documents ids from state in ES|QL request when query has mv_expand', async () => {
+      mockedArguments.state = {
+        excludedDocuments: [
+          { id: 'doc1', timestamp: '2025-04-28T10:00:00Z' },
+          { id: 'doc2', timestamp: '2025-04-28T11:00:00Z' },
+        ],
+      };
+      (getMvExpandFields as jest.Mock).mockReturnValue(['agent.name']);
+      mockedArguments.sharedParams.tuple = {
+        from: moment('2025-04-28T09:00:00Z'),
+        to: moment('2025-04-28T12:00:00Z'),
+        maxSignals: 100,
+      };
+
+      await esqlExecutor(mockedArguments);
+      const transportRequestArgs =
+        ruleServices.scopedClusterClient.asCurrentUser.transport.request.mock.calls[0][0];
+
+      expect(transportRequestArgs).not.toHaveProperty('body.filter.bool.must_not.ids.values');
     });
   });
 });
