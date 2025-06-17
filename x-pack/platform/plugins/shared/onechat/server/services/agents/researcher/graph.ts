@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { StateGraph, Annotation } from '@langchain/langgraph';
+import { StateGraph, Annotation, Send } from '@langchain/langgraph';
 import { BaseMessage } from '@langchain/core/messages';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { StructuredTool } from '@langchain/core/tools';
@@ -21,9 +21,10 @@ export interface ResearchGoal {
   question: string;
 }
 
-export const createAgentGraph = async ({
+export const createResearcherAgentGraph = async ({
   chatModel,
   tools,
+  logger: log,
 }: {
   chatModel: InferenceChatModel;
   tools: StructuredTool[];
@@ -32,12 +33,18 @@ export const createAgentGraph = async ({
   const StateAnnotation = Annotation.Root({
     // inputs
     initialQuery: Annotation<string>(), // the search query
-    cycleBudget: Annotation<number>(), // budget in number of cycles - TODO
+    cycleBudget: Annotation<number>(), // budget in number of cycles
     // internal state
     remainingCycles: Annotation<number>(),
     actionsQueue: Annotation<ResearchGoal[], ResearchGoal[]>({
       reducer: (state, actions) => {
         return actions ?? state;
+      },
+      default: () => [],
+    }),
+    pendingActions: Annotation<ActionResult[], ActionResult[] | 'clear'>({
+      reducer: (state, actions) => {
+        return actions === 'clear' ? [] : [...state, ...actions];
       },
       default: () => [],
     }),
@@ -51,10 +58,18 @@ export const createAgentGraph = async ({
     generatedAnswer: Annotation<string>(),
   });
 
+  type StateType = typeof StateAnnotation.State;
+
+  type ResearchStepState = StateType & {
+    researchGoal: ResearchGoal;
+  };
+
+  const stringify = (obj: unknown) => JSON.stringify(obj, null, 2);
+
   /**
    * Initialize the flow by adding a first index explorer call to the action queue.
    */
-  const initialize = async (state: typeof StateAnnotation.State) => {
+  const initialize = async (state: StateType) => {
     const firstAction: ResearchGoal = {
       question: state.initialQuery,
     };
@@ -64,10 +79,19 @@ export const createAgentGraph = async ({
     };
   };
 
-  const processQueueItem = async (state: typeof StateAnnotation.State) => {
-    const [nextItem, ...queue] = state.actionsQueue;
+  const dispatchActions = async (state: StateType) => {
+    return state.actionsQueue.map((action) => {
+      return new Send('perform_search', {
+        ...state,
+        researchGoal: action,
+      } satisfies ResearchStepState);
+    });
+  };
 
-    console.log('*** processQueueItem - nextItem: ', nextItem);
+  const performSearch = async (state: ResearchStepState) => {
+    const nextItem = state.researchGoal;
+
+    log.trace(() => `performSearch - nextItem: ${stringify(nextItem)}`);
 
     const toolNode = new ToolNode<BaseMessage[]>(tools);
     const executionModel = chatModel.bindTools(tools);
@@ -80,7 +104,7 @@ export const createAgentGraph = async ({
     );
     const toolCalls = getToolCalls(response);
 
-    console.log('*** processQueueItem - toolCalls: ', toolCalls);
+    log.trace(() => `performSearch - toolCalls: ${stringify(toolCalls)}`);
 
     const toolMessages = await toolNode.invoke([response]);
     const toolResults = extractToolResults(toolMessages);
@@ -101,20 +125,26 @@ export const createAgentGraph = async ({
     }
 
     return {
-      actionsQueue: queue,
-      backlog: [...actionResults],
+      pendingActions: [...actionResults],
     };
   };
 
-  const evaluateQueue = async (state: typeof StateAnnotation.State) => {
-    const { actionsQueue } = state;
-    if (actionsQueue.length) {
-      return 'process_queue_item';
-    }
-    return 'reflection';
+  const collectResults = async (state: StateType) => {
+    log.trace(
+      () =>
+        `collectResults - pending actions: ${stringify(
+          state.pendingActions.map((action) => action.researchGoal)
+        )}`
+    );
+
+    return {
+      pendingActions: 'clear',
+      actionsQueue: [],
+      backlog: [...state.pendingActions],
+    };
   };
 
-  const reflection = async (state: typeof StateAnnotation.State) => {
+  const reflection = async (state: StateType) => {
     const reflectModel = chatModel.withStructuredOutput(
       z.object({
         isSufficient: z.boolean().describe(
@@ -145,12 +175,14 @@ export const createAgentGraph = async ({
       })
     );
 
-    console.log('*** reflection response: ', response);
-    console.log('*** reflection remainingCycles: ', state.remainingCycles);
+    log.trace(
+      () =>
+        `reflection - remaining cycles: ${state.remainingCycles} - response: ${stringify(response)}`
+    );
 
     return {
       remainingCycles: state.remainingCycles - 1,
-      backlog: [...state.backlog, response],
+      backlog: [response],
       actionsQueue: [
         ...state.actionsQueue,
         ...response.nextQuestions.map<ResearchGoal>((nextQuestion) => ({ question: nextQuestion })),
@@ -158,24 +190,17 @@ export const createAgentGraph = async ({
     };
   };
 
-  const evaluateReflection = async (state: typeof StateAnnotation.State) => {
+  const evaluateReflection = async (state: StateType) => {
     const remainingCycles = state.remainingCycles;
     const reflectionResult = lastReflectionResult(state.backlog);
-    console.log(
-      '*** evaluateReflection - state: ',
-      reflectionResult.isSufficient,
-      reflectionResult.reasoning
-    );
 
     if (reflectionResult.isSufficient || remainingCycles <= 0) {
       return 'answer';
     }
-    return 'process_queue_item';
+    return dispatchActions(state);
   };
 
-  const answer = async (state: typeof StateAnnotation.State) => {
-    console.log('*** answer - start');
-
+  const answer = async (state: StateType) => {
     const answerModel = chatModel.withConfig({
       tags: ['researcher-answer'],
     });
@@ -187,11 +212,9 @@ export const createAgentGraph = async ({
       })
     );
 
-    console.log('*** answer - raw response: ', response);
-
     const generatedAnswer = extractTextContent(response);
 
-    console.log('*** answer - response: ', generatedAnswer);
+    log.trace(() => `answer - response ${stringify(generatedAnswer)}`);
 
     return {
       generatedAnswer,
@@ -202,18 +225,19 @@ export const createAgentGraph = async ({
   const graph = new StateGraph(StateAnnotation)
     // nodes
     .addNode('initialize', initialize)
-    .addNode('process_queue_item', processQueueItem)
+    .addNode('perform_search', performSearch)
+    .addNode('collect_results', collectResults)
     .addNode('reflection', reflection)
     .addNode('answer', answer)
     // edges
     .addEdge('__start__', 'initialize')
-    .addEdge('initialize', 'process_queue_item')
-    .addConditionalEdges('process_queue_item', evaluateQueue, {
-      process_queue_item: 'process_queue_item',
-      reflection: 'reflection',
+    .addConditionalEdges('initialize', dispatchActions, {
+      perform_search: 'perform_search',
     })
+    .addEdge('perform_search', 'collect_results')
+    .addEdge('collect_results', 'reflection')
     .addConditionalEdges('reflection', evaluateReflection, {
-      process_queue_item: 'process_queue_item',
+      perform_search: 'perform_search',
       answer: 'answer',
     })
     .addEdge('answer', '__end__')

@@ -5,26 +5,15 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import { Observable, from, filter, shareReplay, firstValueFrom, map, lastValueFrom } from 'rxjs';
+import { from, filter, shareReplay, lastValueFrom } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import { StreamEvent } from '@langchain/core/tracers/log_stream';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import {
-  ChatAgentEvent,
-  isRoundCompleteEvent,
-  BuiltinToolIds,
-  builtinToolProviderId,
-} from '@kbn/onechat-common';
+import { ChatAgentEvent, BuiltinToolIds, builtinToolProviderId } from '@kbn/onechat-common';
 import type { ModelProvider, ScopedRunner, ToolProvider } from '@kbn/onechat-server';
 import { filterProviderTools } from '@kbn/onechat-genai-utils/framework';
-import {
-  providerToLangchainTools,
-  toLangchainTool,
-  conversationToLangchainMessages,
-} from '../chat/utils';
-import { createAgentGraph } from './graph';
-import { convertGraphEvents, addRoundCompleteEvent } from '../chat/convert_graph_events';
+import { toLangchainTool } from '../chat/utils';
+import { createResearcherAgentGraph } from './graph';
 
 export interface RunSearchAgentContext {
   logger: Logger;
@@ -96,7 +85,7 @@ export const runSearchAgent: RunResearcherAgentFn = async (
 
   const langchainTools = researcherTools.map((tool) => toLangchainTool({ tool, logger }));
 
-  const agentGraph = await createAgentGraph({
+  const agentGraph = await createResearcherAgentGraph({
     logger,
     chatModel: model.chatModel,
     tools: langchainTools,
@@ -118,12 +107,7 @@ export const runSearchAgent: RunResearcherAgentFn = async (
     }
   );
 
-  const events$ = from(eventStream).pipe(
-    filter(isStreamEvent),
-    // convertGraphEvents({ graphName: agentGraphName, runName: agentGraphName }),
-    // addRoundCompleteEvent({ userInput: instructions }),
-    shareReplay()
-  );
+  const events$ = from(eventStream).pipe(filter(isStreamEvent), shareReplay());
 
   events$.subscribe((event) => {
     // later we should emit reasoning events from there.
@@ -132,6 +116,9 @@ export const runSearchAgent: RunResearcherAgentFn = async (
   //  event: 'on_chain_end', name: 'researcher-agent'
   const lastEvent = await lastValueFrom(events$);
   const generatedAnswer = lastEvent.data.output.generatedAnswer;
+
+  console.log('**** last output');
+  console.log(JSON.stringify(lastEvent.data.output, null, 2));
 
   return {
     answer: generatedAnswer,

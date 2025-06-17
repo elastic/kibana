@@ -6,6 +6,7 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
+import { BuiltinToolIds as Tools } from '@kbn/onechat-common';
 import type { ResearchGoal } from './graph';
 import {
   isActionResult,
@@ -14,62 +15,6 @@ import {
   ReflectionResult,
   ActionResult,
 } from './backlog';
-
-const renderBacklog = (backlog: BacklogItem[]): string => {
-  const renderItem = (item: BacklogItem, i: number) => {
-    if (isActionResult(item)) {
-      return renderActionResult(item, i);
-    }
-    if (isReflectionResult(item)) {
-      return renderReflectionResult(item, i);
-    }
-    return `Unknown item type`;
-  };
-
-  return backlog.map((item, i) => renderItem(item, i)).join('\n\n');
-};
-
-const renderReflectionResult = (
-  { isSufficient, nextQuestions, reasoning }: ReflectionResult,
-  index: number
-): string => {
-  return `### Cycle ${index + 1}
-
-  At cycle "${index + 1}", you reflected on the data gathered so far:
-
-  - You decided that the current information were ${
-    isSufficient ? '*sufficient*' : '*insufficient*'
-  } to fully answer the question, with the following reasoning: ${reasoning}
-
-  ${
-    nextQuestions.length > 0
-      ? `- You identified the following questions to follow up on:
-${nextQuestions.map((question) => `  - ${question}`).join('\n')}`
-      : ''
-  }
-  `;
-};
-
-const renderActionResult = (actionResult: ActionResult, index: number): string => {
-  return `### Cycle ${index + 1}
-
-  At cycle "${index + 1}", you performed the following action:
-
-  - Action type: tool execution
-
-  - Tool name: ${actionResult.toolName}
-
-  - Tool parameters:
-  \`\`\`json
-  ${JSON.stringify(actionResult.arguments, undefined, 2)}
-  \`\`\`
-
-  - Tool response:
-    \`\`\`json
-  ${JSON.stringify(actionResult.response, undefined, 2)}
-  \`\`\`
-  `;
-};
 
 export const getExecutionPrompt = ({
   currentResearchGoal,
@@ -83,25 +28,35 @@ export const getExecutionPrompt = ({
       'system',
       `You are a research agent at Elasticsearch with access to external tools.
 
-      Your task:
+      ### Your task
       - Based on a research goal, choose the most appropriate tool to help resolve it.
       - You will also be provided with a list of past actions and results.
 
-      Instructions:
+      ### Instructions
       - You must select one tool and invoke it with the most relevant and precise parameters.
       - Choose the tool that will best help fulfill the current research goal.
       - Some tools (e.g., search) may require contextual information (such as an index name or prior step result). Retrieve it from the action history if needed.
       - Do not repeat a tool invocation that has already been attempted with the same or equivalent parameters.
       - Think carefully about what the goal requires and which tool best advances it.
 
-      Constraints:
+      ### Constraints
       - Tool use is mandatory. You must respond with a tool call.
       - Do not speculate or summarize. Only act by selecting the best next tool and invoking it.
 
-      Output format:
+      ### Tools description
+      Your two main search tools are "${Tools.relevanceSearch}" and "${Tools.naturalLanguageSearch}"
+      - When doing fulltext search, prefer the "${
+        Tools.relevanceSearch
+      }" tool as it performs better for plain fulltext searches.
+      - For more advanced queries (filtering, aggregation, buckets), use the "${
+        Tools.naturalLanguageSearch
+      }" tool.
+
+
+      ### Output format
       Respond using the tool-calling schema provided by the system.
 
-      Additional information:
+      ### Additional information
       - The current date is ${new Date().toISOString()}.
       `,
     ],
@@ -139,7 +94,7 @@ export const getReflectionPrompt = ({
       `You are an expert research assistant from the Elasticsearch company analyzing information about the user's question: "${userQuery}".
 
       Instructions:
-      - Analyze the completeness and depth of the provided summaries.
+      - Analyze the completeness and depth of data available in your backlog history.
       - Identify any missing, unclear, or shallow information.
       - If necessary, break down complex questions into smaller sub-problems.
       - Your goal is to generate a precise list of actionable questions that will help drive the research forward.
@@ -267,4 +222,60 @@ export const getAnswerPrompt = ({
     `,
     ],
   ];
+};
+
+const renderBacklog = (backlog: BacklogItem[]): string => {
+  const renderItem = (item: BacklogItem, i: number) => {
+    if (isActionResult(item)) {
+      return renderActionResult(item, i);
+    }
+    if (isReflectionResult(item)) {
+      return renderReflectionResult(item, i);
+    }
+    return `Unknown item type`;
+  };
+
+  return backlog.map((item, i) => renderItem(item, i)).join('\n\n');
+};
+
+const renderReflectionResult = (
+  { isSufficient, nextQuestions, reasoning }: ReflectionResult,
+  index: number
+): string => {
+  return `### Cycle ${index + 1}
+
+  At cycle "${index + 1}", you reflected on the data gathered so far:
+
+  - You decided that the current information were ${
+    isSufficient ? '*sufficient*' : '*insufficient*'
+  } to fully answer the question, with the following reasoning: ${reasoning}
+
+  ${
+    nextQuestions.length > 0
+      ? `- You identified the following questions to follow up on:
+${nextQuestions.map((question) => `  - ${question}`).join('\n')}`
+      : ''
+  }
+  `;
+};
+
+const renderActionResult = (actionResult: ActionResult, index: number): string => {
+  return `### Cycle ${index + 1}
+
+  At cycle "${index + 1}", you performed the following action:
+
+  - Action type: tool execution
+
+  - Tool name: ${actionResult.toolName}
+
+  - Tool parameters:
+  \`\`\`json
+  ${JSON.stringify(actionResult.arguments, undefined, 2)}
+  \`\`\`
+
+  - Tool response:
+    \`\`\`json
+  ${JSON.stringify(actionResult.response, undefined, 2)}
+  \`\`\`
+  `;
 };
