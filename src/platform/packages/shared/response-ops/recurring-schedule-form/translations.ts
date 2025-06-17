@@ -105,6 +105,20 @@ export const RECURRING_SCHEDULE_FORM_ENDS = i18n.translate(
   }
 );
 
+export const RECURRING_SCHEDULE_FORM_UNTIL_REQUIRED_MESSAGE = i18n.translate(
+  'responseOpsRecurringScheduleForm.untilRequiredMessage',
+  {
+    defaultMessage: 'End date required',
+  }
+);
+
+export const RECURRING_SCHEDULE_FORM_UNTIL_PLACEHOLDER = i18n.translate(
+  'responseOpsRecurringScheduleForm.untilPlaceholder',
+  {
+    defaultMessage: 'Select an end date',
+  }
+);
+
 export const RECURRING_SCHEDULE_FORM_ENDS_NEVER = i18n.translate(
   'responseOpsRecurringScheduleForm.ends.never',
   {

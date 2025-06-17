@@ -17,7 +17,7 @@ describe('convertToRRule', () => {
   const startDate = moment(today);
 
   test('should convert a maintenance window that is not recurring', () => {
-    const rRule = convertToRRule(startDate, timezone, undefined);
+    const rRule = convertToRRule({ startDate, timezone });
 
     expect(rRule).toEqual({
       dtstart: startDate.toISOString(),
@@ -28,10 +28,14 @@ describe('convertToRRule', () => {
   });
 
   test('should convert a maintenance window that is recurring on a daily schedule', () => {
-    const rRule = convertToRRule(startDate, timezone, {
-      byweekday: { 1: false, 2: false, 3: true, 4: false, 5: false, 6: false, 7: false },
-      ends: 'never',
-      frequency: Frequency.DAILY,
+    const rRule = convertToRRule({
+      startDate,
+      timezone,
+      recurringSchedule: {
+        byweekday: { 1: false, 2: false, 3: true, 4: false, 5: false, 6: false, 7: false },
+        ends: 'never',
+        frequency: Frequency.DAILY,
+      },
     });
 
     expect(rRule).toEqual({
@@ -45,11 +49,15 @@ describe('convertToRRule', () => {
 
   test('should convert a maintenance window that is recurring on a daily schedule until', () => {
     const until = moment(today).add(1, 'month').toISOString();
-    const rRule = convertToRRule(startDate, timezone, {
-      byweekday: { 1: false, 2: false, 3: true, 4: false, 5: false, 6: false, 7: false },
-      ends: 'until',
-      until,
-      frequency: Frequency.DAILY,
+    const rRule = convertToRRule({
+      startDate,
+      timezone,
+      recurringSchedule: {
+        byweekday: { 1: false, 2: false, 3: true, 4: false, 5: false, 6: false, 7: false },
+        ends: 'until',
+        until,
+        frequency: Frequency.DAILY,
+      },
     });
 
     expect(rRule).toEqual({
@@ -63,11 +71,15 @@ describe('convertToRRule', () => {
   });
 
   test('should convert a maintenance window that is recurring on a daily schedule after x', () => {
-    const rRule = convertToRRule(startDate, timezone, {
-      byweekday: { 1: false, 2: false, 3: true, 4: false, 5: false, 6: false, 7: false },
-      ends: 'afterx',
-      count: 3,
-      frequency: Frequency.DAILY,
+    const rRule = convertToRRule({
+      startDate,
+      timezone,
+      recurringSchedule: {
+        byweekday: { 1: false, 2: false, 3: true, 4: false, 5: false, 6: false, 7: false },
+        ends: 'afterx',
+        count: 3,
+        frequency: Frequency.DAILY,
+      },
     });
 
     expect(rRule).toEqual({
@@ -81,9 +93,13 @@ describe('convertToRRule', () => {
   });
 
   test('should convert a maintenance window that is recurring on a weekly schedule', () => {
-    const rRule = convertToRRule(startDate, timezone, {
-      ends: 'never',
-      frequency: Frequency.WEEKLY,
+    const rRule = convertToRRule({
+      startDate,
+      timezone,
+      recurringSchedule: {
+        ends: 'never',
+        frequency: Frequency.WEEKLY,
+      },
     });
 
     expect(rRule).toEqual({
@@ -96,9 +112,13 @@ describe('convertToRRule', () => {
   });
 
   test('should convert a maintenance window that is recurring on a monthly schedule', () => {
-    const rRule = convertToRRule(startDate, timezone, {
-      ends: 'never',
-      frequency: Frequency.MONTHLY,
+    const rRule = convertToRRule({
+      startDate,
+      timezone,
+      recurringSchedule: {
+        ends: 'never',
+        frequency: Frequency.MONTHLY,
+      },
     });
 
     expect(rRule).toEqual({
@@ -111,9 +131,13 @@ describe('convertToRRule', () => {
   });
 
   test('should convert a maintenance window that is recurring on a yearly schedule', () => {
-    const rRule = convertToRRule(startDate, timezone, {
-      ends: 'never',
-      frequency: Frequency.YEARLY,
+    const rRule = convertToRRule({
+      startDate,
+      timezone,
+      recurringSchedule: {
+        ends: 'never',
+        frequency: Frequency.YEARLY,
+      },
     });
 
     expect(rRule).toEqual({
@@ -127,11 +151,15 @@ describe('convertToRRule', () => {
   });
 
   test('should convert a maintenance window that is recurring on a custom daily schedule', () => {
-    const rRule = convertToRRule(startDate, timezone, {
-      customFrequency: Frequency.DAILY,
-      ends: 'never',
-      frequency: 'CUSTOM',
-      interval: 1,
+    const rRule = convertToRRule({
+      startDate,
+      timezone,
+      recurringSchedule: {
+        customFrequency: Frequency.DAILY,
+        ends: 'never',
+        frequency: 'CUSTOM',
+        interval: 1,
+      },
     });
 
     expect(rRule).toEqual({
@@ -143,12 +171,16 @@ describe('convertToRRule', () => {
   });
 
   test('should convert a maintenance window that is recurring on a custom weekly schedule', () => {
-    const rRule = convertToRRule(startDate, timezone, {
-      byweekday: { 1: false, 2: false, 3: true, 4: true, 5: false, 6: false, 7: false },
-      customFrequency: Frequency.WEEKLY,
-      ends: 'never',
-      frequency: 'CUSTOM',
-      interval: 1,
+    const rRule = convertToRRule({
+      startDate,
+      timezone,
+      recurringSchedule: {
+        byweekday: { 1: false, 2: false, 3: true, 4: true, 5: false, 6: false, 7: false },
+        customFrequency: Frequency.WEEKLY,
+        ends: 'never',
+        frequency: 'CUSTOM',
+        interval: 1,
+      },
     });
 
     expect(rRule).toEqual({
@@ -161,12 +193,16 @@ describe('convertToRRule', () => {
   });
 
   test('should convert a maintenance window that is recurring on a custom monthly by day schedule', () => {
-    const rRule = convertToRRule(startDate, timezone, {
-      bymonth: 'day',
-      customFrequency: Frequency.MONTHLY,
-      ends: 'never',
-      frequency: 'CUSTOM',
-      interval: 1,
+    const rRule = convertToRRule({
+      startDate,
+      timezone,
+      recurringSchedule: {
+        bymonth: 'day',
+        customFrequency: Frequency.MONTHLY,
+        ends: 'never',
+        frequency: 'CUSTOM',
+        interval: 1,
+      },
     });
 
     expect(rRule).toEqual({
@@ -179,12 +215,16 @@ describe('convertToRRule', () => {
   });
 
   test('should convert a maintenance window that is recurring on a custom monthly by weekday schedule', () => {
-    const rRule = convertToRRule(startDate, timezone, {
-      bymonth: 'weekday',
-      customFrequency: Frequency.MONTHLY,
-      ends: 'never',
-      frequency: 'CUSTOM',
-      interval: 1,
+    const rRule = convertToRRule({
+      startDate,
+      timezone,
+      recurringSchedule: {
+        bymonth: 'weekday',
+        customFrequency: Frequency.MONTHLY,
+        ends: 'never',
+        frequency: 'CUSTOM',
+        interval: 1,
+      },
     });
 
     expect(rRule).toEqual({
@@ -197,11 +237,15 @@ describe('convertToRRule', () => {
   });
 
   test('should convert a maintenance window that is recurring on a custom yearly schedule', () => {
-    const rRule = convertToRRule(startDate, timezone, {
-      customFrequency: Frequency.YEARLY,
-      ends: 'never',
-      frequency: 'CUSTOM',
-      interval: 3,
+    const rRule = convertToRRule({
+      startDate,
+      timezone,
+      recurringSchedule: {
+        customFrequency: Frequency.YEARLY,
+        ends: 'never',
+        frequency: 'CUSTOM',
+        interval: 3,
+      },
     });
 
     expect(rRule).toEqual({

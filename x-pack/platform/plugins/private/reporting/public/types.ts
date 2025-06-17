@@ -51,10 +51,11 @@ export interface JobSummarySet {
   failed?: JobSummary[];
 }
 
+export type ReportTypeId = 'pngV2' | 'printablePdfV2' | 'csv_searchsource';
+
 export interface ScheduledReport {
-  jobParams: string;
-  fileName: string;
-  fileType: string;
+  title: string;
+  reportTypeId: ReportTypeId;
   startDate: string;
   timezone: string;
   recurring: boolean;
@@ -63,7 +64,7 @@ export interface ScheduledReport {
   emailRecipients: string[];
 }
 
-export interface ReportFormat {
+export interface ReportTypeData {
   label: string;
   id: string;
 }

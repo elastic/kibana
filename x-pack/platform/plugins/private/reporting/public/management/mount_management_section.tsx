@@ -22,11 +22,10 @@ import {
   KibanaContext,
 } from '@kbn/reporting-public';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '../query_client';
 import { ReportListing } from '.';
 import { PolicyStatusContextProvider } from '../lib/default_status_context';
-
-const queryClient = new QueryClient();
 
 export async function mountManagementSection({
   coreStart,

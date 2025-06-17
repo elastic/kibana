@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const SCHEDULE_EXPORT_BUTTON_LABEL = i18n.translate(
+  'xpack.reporting.scheduleExportButtonLabel',
+  {
+    defaultMessage: 'Schedule export',
+  }
+);
+
 export const SCHEDULED_REPORT_FLYOUT_TITLE = i18n.translate(
   'xpack.reporting.scheduledReportingFlyout.title',
   {
@@ -121,7 +128,14 @@ export const SCHEDULED_REPORT_FORM_EXPORTS_SECTION_DESCRIPTION = i18n.translate(
   'xpack.reporting.scheduledReportingForm.exportsSectionDescription',
   {
     defaultMessage:
-      "On the scheduled date we'll create a snapshot and list it in Stack Management > Reporting for download",
+      "On the scheduled date, we'll create a snapshot of this data point and will post the downloadable report on the ",
+  }
+);
+
+export const REPORTING_PAGE_LINK_TEXT = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.reportingPageLinkText',
+  {
+    defaultMessage: 'Reporting page',
   }
 );
 
@@ -157,14 +171,21 @@ export const SCHEDULED_REPORT_FORM_EMAIL_RECIPIENTS_HINT = i18n.translate(
   'xpack.reporting.scheduledReportingForm.emailRecipientsHint',
   {
     defaultMessage:
-      "On the scheduled date we'll send an email to these recipients with the file attached",
+      "On the scheduled date, we'll also email the report to the addresses you specify below.",
   }
 );
 
 export const SCHEDULED_REPORT_FORM_MISSING_EMAIL_CONNECTOR_TITLE = i18n.translate(
   'xpack.reporting.scheduledReportingForm.missingEmailConnectorTitle',
   {
-    defaultMessage: 'No email connector configured',
+    defaultMessage: "Email connector hasn't been created yet",
+  }
+);
+
+export const SCHEDULED_REPORT_FORM_MISSING_EMAIL_CONNECTOR_MESSAGE = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.missingEmailConnectorMessage',
+  {
+    defaultMessage: 'A default email connector must be configured in order to send notifications.',
   }
 );
 
@@ -175,10 +196,67 @@ export const SCHEDULED_REPORT_FORM_EMAIL_SENSITIVE_INFO_TITLE = i18n.translate(
   }
 );
 
+export const SCHEDULED_REPORT_FORM_EMAIL_SENSITIVE_INFO_MESSAGE = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.emailSensitiveInfoMessage',
+  {
+    defaultMessage: 'Report may contain sensitive information',
+  }
+);
+
+export const SCHEDULED_REPORT_FORM_SUCCESS_TOAST_TITLE = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.successToastTitle',
+  {
+    defaultMessage: 'Export scheduled',
+  }
+);
+
+export const SCHEDULED_REPORT_FORM_CREATE_EMAIL_CONNECTOR_LABEL = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.createEmailConnectorLabel',
+  {
+    defaultMessage: 'Create Email connector',
+  }
+);
+
+export const SCHEDULED_REPORT_FORM_SUCCESS_TOAST_MESSAGE = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.successToastMessage',
+  {
+    defaultMessage: 'Find your schedule information and your exports in the ',
+  }
+);
+
+export const SCHEDULED_REPORT_FORM_FAILURE_TOAST_TITLE = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.failureToastTitle',
+  {
+    defaultMessage: 'Schedule error',
+  }
+);
+
+export const SCHEDULED_REPORT_FORM_FAILURE_TOAST_MESSAGE = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.failureToastMessage',
+  {
+    defaultMessage: 'Sorry, we couldn’t schedule your export. Please try again.',
+  }
+);
+
 export const CANNOT_LOAD_REPORTING_HEALTH_TITLE = i18n.translate(
   'xpack.reporting.scheduledReportingForm.cannotLoadReportingHealthTitle',
   {
     defaultMessage: 'Cannot load reporting health',
+  }
+);
+
+export const UNMET_REPORTING_PREREQUISITES_TITLE = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.unmetReportingPrerequisitesTitle',
+  {
+    defaultMessage: 'Cannot schedule reports',
+  }
+);
+
+export const UNMET_REPORTING_PREREQUISITES_MESSAGE = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.unmetReportingPrerequisitesMessage',
+  {
+    defaultMessage:
+      'One or more prerequisites for scheduling reports was not met. Contact your administrator to know more.',
   }
 );
 

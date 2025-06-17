@@ -6,65 +6,33 @@
  */
 
 import React from 'react';
-import {
-  EuiCallOut,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiLoadingSpinner,
-  EuiTitle,
-} from '@elastic/eui';
-import { SetRequired } from 'type-fest';
-import {
-  CANNOT_LOAD_REPORTING_HEALTH_MESSAGE,
-  CANNOT_LOAD_REPORTING_HEALTH_TITLE,
-  SCHEDULED_REPORT_FLYOUT_TITLE,
-} from '../translations';
-import { ReportFormat, ScheduledReport } from '../../types';
-import { useGetReportingHealthQuery } from '../hooks/use_get_reporting_health_query';
-import { ScheduledReportForm } from './scheduled_report_flyout_content';
+import { EuiFlyout } from '@elastic/eui';
+import { ReportingAPIClient } from '@kbn/reporting-public';
+import { ReportTypeData, ScheduledReport } from '../../types';
+import { ScheduledReportFlyoutContent } from './scheduled_report_flyout_content';
 
 export interface ScheduledReportFlyoutProps {
-  scheduledReport: SetRequired<Partial<ScheduledReport>, 'jobParams'>;
-  availableFormats: ReportFormat[];
+  apiClient: ReportingAPIClient;
+  scheduledReport: Partial<ScheduledReport>;
+  availableReportTypes: ReportTypeData[];
   onClose: () => void;
-  readOnly?: boolean;
 }
 
 export const ScheduledReportFlyout = ({
+  apiClient,
   scheduledReport,
-  availableFormats,
+  availableReportTypes,
   onClose,
-  readOnly = false,
 }: ScheduledReportFlyoutProps) => {
-  const { data: reportingHealth, isLoading, isError } = useGetReportingHealthQuery();
-
   return (
     <EuiFlyout size="m" maxWidth={500} paddingSize="l" ownFocus={true} onClose={onClose}>
-      <EuiFlyoutHeader hasBorder={true}>
-        <EuiTitle size="s">
-          <h2>{SCHEDULED_REPORT_FLYOUT_TITLE}</h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-
-      {isLoading || isError ? (
-        <EuiFlyoutBody>
-          {isLoading && <EuiLoadingSpinner size="l" />}
-          {isError && (
-            <EuiCallOut title={CANNOT_LOAD_REPORTING_HEALTH_TITLE} iconType="error" color="danger">
-              <p>{CANNOT_LOAD_REPORTING_HEALTH_MESSAGE}</p>
-            </EuiCallOut>
-          )}
-        </EuiFlyoutBody>
-      ) : (
-        <ScheduledReportForm
-          scheduledReport={scheduledReport}
-          availableFormats={availableFormats}
-          onClose={onClose}
-          readOnly={readOnly}
-          hasEmailConnector={reportingHealth?.hasEmailConnector}
-        />
-      )}
+      <ScheduledReportFlyoutContent
+        apiClient={apiClient}
+        scheduledReport={scheduledReport}
+        availableReportTypes={availableReportTypes}
+        onClose={onClose}
+        readOnly
+      />
     </EuiFlyout>
   );
 };

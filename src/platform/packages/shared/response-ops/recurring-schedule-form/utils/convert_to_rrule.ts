@@ -15,11 +15,17 @@ import { parseSchedule } from './parse_schedule';
 import { getNthByWeekday } from './get_nth_by_weekday';
 import type { RRuleParams, RecurringSchedule } from '../types';
 
-export const convertToRRule = (
-  startDate: Moment,
-  timezone: string,
-  recurringSchedule?: RecurringSchedule
-): RRuleParams => {
+export const convertToRRule = ({
+  startDate,
+  timezone,
+  recurringSchedule,
+  includeTime = false,
+}: {
+  startDate: Moment;
+  timezone: string;
+  recurringSchedule?: RecurringSchedule;
+  includeTime?: boolean;
+}): RRuleParams => {
   const presets = getPresets(startDate);
 
   const parsedSchedule = parseSchedule(recurringSchedule);
@@ -27,6 +33,9 @@ export const convertToRRule = (
   const rRule: RRuleParams = {
     dtstart: startDate.toISOString(),
     tzid: timezone,
+    ...(Boolean(includeTime)
+      ? { byhour: [startDate.get('hour')], byminute: [startDate.get('minute')] }
+      : {}),
   };
 
   if (!parsedSchedule)

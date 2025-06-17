@@ -15,7 +15,12 @@ import { i18n } from '@kbn/i18n';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
-import type { SharePluginSetup, SharePluginStart, ExportShare } from '@kbn/share-plugin/public';
+import type {
+  SharePluginSetup,
+  SharePluginStart,
+  ExportShare,
+  ExportShareDerivatives,
+} from '@kbn/share-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 import { durationToNumber } from '@kbn/reporting-common';
@@ -31,6 +36,7 @@ import {
 import { ReportingCsvPanelAction } from '@kbn/reporting-csv-share-panel';
 import { InjectedIntl } from '@kbn/i18n-react';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+import { createScheduledReportShareIntegration } from './management/integrations/scheduled_report_share_integration';
 import type { ReportingSetup, ReportingStart } from '.';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
 import { StartServices } from './types';
@@ -237,6 +243,13 @@ export class ReportingPublicPlugin
         })
       );
     }
+
+    shareSetup.registerShareIntegration<ExportShareDerivatives>(
+      createScheduledReportShareIntegration({
+        apiClient,
+        services: { ...core, ...setupDeps },
+      })
+    );
 
     this.startServices$ = startServices$;
     return this.getContract(apiClient, startServices$);

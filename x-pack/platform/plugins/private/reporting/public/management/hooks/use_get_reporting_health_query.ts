@@ -6,14 +6,15 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
+import { HttpSetup } from '@kbn/core/public';
 import { getReportingHealth } from '../apis/get_reporting_health';
 import { queryKeys } from '../query_keys';
 
 export const getKey = queryKeys.getHealth;
 
-export const useGetReportingHealthQuery = () => {
+export const useGetReportingHealthQuery = ({ http }: { http: HttpSetup }) => {
   return useQuery({
     queryKey: getKey(),
-    queryFn: getReportingHealth,
+    queryFn: () => getReportingHealth({ http }),
   });
 };

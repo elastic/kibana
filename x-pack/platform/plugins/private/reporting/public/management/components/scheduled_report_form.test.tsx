@@ -6,14 +6,15 @@
  */
 
 import React, { PropsWithChildren } from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { type ReportingAPIClient, useKibana } from '@kbn/reporting-public';
+import { ScheduledReportForm } from './scheduled_report_form';
 import { ReportTypeData, ScheduledReport } from '../../types';
-import { getReportingHealth } from '../apis/get_reporting_health';
+import { scheduleReport } from '../apis/schedule_report';
 import { coreMock } from '@kbn/core/public/mocks';
 import { testQueryClient } from '../test_utils/test_query_client';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { ScheduledReportFlyoutContent } from './scheduled_report_flyout_content';
+import { ScheduledReportApiJSON } from '../../../server/types';
 
 // Mock Kibana hooks and context
 jest.mock('@kbn/reporting-public', () => ({
@@ -24,16 +25,37 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useUiSetting: () => 'UTC',
 }));
 
-jest.mock('./scheduled_report_form', () => ({
-  ScheduledReportForm: () => <div data-test-subj="scheduled-report-form" />,
-}));
+jest.mock(
+  '@kbn/response-ops-recurring-schedule-form/components/recurring_schedule_form_fields',
+  () => ({
+    RecurringScheduleFormFields: () => <div data-test-subj="recurring-schedule-form-fields" />,
+  })
+);
 
-jest.mock('../apis/get_reporting_health');
-const mockGetReportingHealth = jest.mocked(getReportingHealth);
-mockGetReportingHealth.mockResolvedValue({
-  isSufficientlySecure: true,
-  hasPermanentEncryptionKey: true,
-  areNotificationsEnabled: true,
+jest.mock('../apis/schedule_report');
+const mockScheduleReport = jest.mocked(scheduleReport);
+mockScheduleReport.mockResolvedValue({
+  job: {
+    id: '8c5529c0-67ed-41c4-8a1b-9a97bdc11d27',
+    jobtype: 'printable_pdf_v2',
+    created_at: '2025-06-17T15:50:52.879Z',
+    created_by: 'elastic',
+    meta: {
+      isDeprecated: false,
+      layout: 'preserve_layout',
+      objectType: 'dashboard',
+    },
+    schedule: {
+      rrule: {
+        tzid: 'UTC',
+        byhour: [17],
+        byminute: [50],
+        freq: 3,
+        interval: 1,
+        byweekday: ['TU'],
+      },
+    },
+  } as unknown as ScheduledReportApiJSON,
 });
 
 const objectType = 'dashboard';
@@ -59,13 +81,11 @@ const mockApiClient = {
   getDecoratedJobParams: jest.fn().mockImplementation((params) => params),
 } as unknown as ReportingAPIClient;
 
-const mockOnClose = jest.fn();
-
 const TestProviders = ({ children }: PropsWithChildren) => (
   <QueryClientProvider client={testQueryClient}>{children}</QueryClientProvider>
 );
 
-describe('ScheduledReportFlyoutContent', () => {
+describe('ScheduledReportForm', () => {
   const scheduledReport = {
     title: 'Title',
     reportTypeId: 'printablePdfV2',
@@ -90,69 +110,69 @@ describe('ScheduledReportFlyoutContent', () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         ...coreMock.createStart(),
+        actions: {
+          validateEmailAddresses: jest.fn().mockResolvedValue([]),
+        },
       },
     });
     jest.clearAllMocks();
     testQueryClient.clear();
   });
 
-  it('should not render the flyout footer when the form is in readOnly mode', () => {
+  it('renders form fields', () => {
     render(
       <TestProviders>
-        <ScheduledReportFlyoutContent
+        <ScheduledReportForm
           apiClient={mockApiClient}
           objectType={objectType}
           sharingData={sharingData}
           scheduledReport={scheduledReport}
           availableReportTypes={availableFormats}
-          onClose={mockOnClose}
-          readOnly={true}
+          hasEmailConnector={true}
         />
       </TestProviders>
     );
 
-    expect(screen.queryByText('Cancel')).not.toBeInTheDocument();
+    expect(screen.getByText('Report name')).toBeInTheDocument();
+    expect(screen.getByText('File type')).toBeInTheDocument();
+    expect(screen.getByText('Send by email')).toBeInTheDocument();
   });
 
-  it('should show a callout in case of errors while fetching reporting health', async () => {
-    mockGetReportingHealth.mockRejectedValueOnce({});
+  it('shows email fields when send by email is enabled', async () => {
     render(
       <TestProviders>
-        <ScheduledReportFlyoutContent
+        <ScheduledReportForm
           apiClient={mockApiClient}
           objectType={objectType}
           sharingData={sharingData}
           scheduledReport={scheduledReport}
           availableReportTypes={availableFormats}
-          onClose={mockOnClose}
+          hasEmailConnector={true}
         />
       </TestProviders>
     );
 
-    expect(
-      await screen.findByText('Reporting health is a prerequisite to create scheduled exports')
-    ).toBeInTheDocument();
+    const toggle = screen.getByText('Send by email');
+    fireEvent.click(toggle);
+
+    expect(await screen.findByText('To')).toBeInTheDocument();
+    expect(await screen.findByText('Sensitive information')).toBeInTheDocument();
   });
 
-  it('should show a callout in case of unmet prerequisites in the reporting health', async () => {
-    mockGetReportingHealth.mockResolvedValueOnce({
-      isSufficientlySecure: false,
-      hasPermanentEncryptionKey: false,
-      areNotificationsEnabled: false,
-    });
+  it('shows warning when email connector is missing', () => {
     render(
       <TestProviders>
-        <ScheduledReportFlyoutContent
+        <ScheduledReportForm
           apiClient={mockApiClient}
           objectType={objectType}
           sharingData={sharingData}
           scheduledReport={scheduledReport}
           availableReportTypes={availableFormats}
-          onClose={mockOnClose}
+          hasEmailConnector={false}
         />
       </TestProviders>
     );
 
-    expect(await screen.findByText('Cannot schedule reports')).toBeInTheDocument();
+    expect(screen.getByText("Email connector hasn't been created yet")).toBeInTheDocument();
   });
 });
