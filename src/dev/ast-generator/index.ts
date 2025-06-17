@@ -7,28 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable no-console */
-
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreemen Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
+import path from 'path';
 import { Worker } from 'worker_threads';
 import { MultiBar, SingleBar, Presets } from 'cli-progress';
 import { getPackages } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
-import path from 'path';
+import { ToolingLog } from '@kbn/tooling-log';
 import { createIndexInElasticsearch, createWorker, deleteWorker } from './utils';
+
+const log = new ToolingLog({
+  level: 'info',
+  writeTo: process.stdout,
+});
+
+// export const ES_HOST = 'http://localhost:9200';
+export const ES_HOST = 'https://edge-lite-oblt-ccs-vbxbb.es.us-west2.gcp.elastic-cloud.com:443';
+export const INDEX_NAME = 'kibana-ast';
+// export const AUTH = Buffer.from('elastic:changeme').toString('base64');
+export const AUTH = Buffer.from('elastic:NEoMDyEuqezYpJqWb54dhbQw').toString('base64');
 
 export interface FunctionInfo {
   id: string;
   name: string;
-  startLine: number;
+  line: number;
   parameters:
     | Array<{
         name: string;
@@ -39,8 +40,8 @@ export interface FunctionInfo {
   returnType: string | undefined;
   fullText: string;
   normalizedCode: string;
-  astFeatures: {};
   filePath: string;
+  returnsJSX: boolean;
 }
 
 const startTime = Date.now();
@@ -48,22 +49,23 @@ const startTime = Date.now();
 const debug = process.env.NODE_ENV === 'dev';
 
 export async function generateAST() {
-  console.log('Generating AST for Kibana files...');
+  log.info('Generating AST for Kibana files...');
 
-  if (debug) deleteWorker();
-  if (!debug) createWorker();
+  if (debug) deleteWorker(log);
+  if (!debug) createWorker(log, { es: ES_HOST, index: INDEX_NAME, auth: AUTH });
 
-  console.log('hello?');
-  await createIndexInElasticsearch();
+  await createIndexInElasticsearch(log);
 
   const packages = getPackages(REPO_ROOT);
 
   if (packages.length === 0) {
-    console.log('No packages found in the repository.');
+    log.error('No packages found in the repository.');
     return;
   }
 
-  console.log(`Found ${packages.length} packages.`);
+  log.info(`Found ${packages.length} packages.`);
+
+  const processedFilesMap = new Map<string, true>();
 
   const progress = new MultiBar(
     {
@@ -82,15 +84,31 @@ export async function generateAST() {
     stat: '',
   });
 
-  packagesBar?.start(packages.length, 0, { name: 'Processing packages...' });
+  packagesBar?.start(packages.length, 0, { name: 'Processing packages...', stat: '' });
 
   // Run workers in parallel, but limit concurrency to avoid resource exhaustion
-  const maxWorkers = 10;
+  const maxWorkers = 12;
   let running = 0;
   let idx = 0;
   let completed = 0;
 
-  function runNext({ packageBar, map }: { packageBar: SingleBar; map: Map<string, true> }) {
+  const activeWorkers = new Set<Worker>();
+
+  log.info(`Using ${maxWorkers} workers.`);
+
+  function broadcastProcessedFile(fileName: string) {
+    processedFilesMap.set(fileName, true);
+
+    // Notify all active workers about the processed file
+    activeWorkers.forEach((worker) => {
+      worker.postMessage({
+        action: 'fileProcessed',
+        data: { fileName },
+      });
+    });
+  }
+
+  function runNext({ packageBar }: { packageBar: SingleBar }) {
     packageBar?.setTotal(0);
 
     if (idx >= packages.length) return;
@@ -101,14 +119,19 @@ export async function generateAST() {
 
     running++;
 
-    const worker = new Worker(path.join(__dirname, 'process_package_worker'));
+    // Worker file is created in /utils
+    const worker = new Worker(path.join(__dirname, 'worker'));
+
+    activeWorkers.add(worker);
+
+    const arrayedMap = Array.from(processedFilesMap.entries());
 
     worker.postMessage({
       action: 'processPackage',
       data: {
         directory,
         id,
-        map: Array.from(map),
+        map: arrayedMap,
       },
     });
 
@@ -117,26 +140,31 @@ export async function generateAST() {
         case 'create':
           packageBar.start(0, 0, { name: id, stat: `🚀 ${msg.msg}` });
           break;
+
         case 'total':
           packageBar.setTotal(msg.total);
           break;
+
         case 'update':
           packageBar.update({ name: id, stat: `🚀 ${msg.msg || ''}` });
           break;
+
         case 'total':
           packageBar.setTotal(msg.total);
           break;
+
         case 'processFile':
-          if (msg.filePath in map === false) {
-            map.set(msg.filePath, true);
-          }
+          broadcastProcessedFile(msg.fileName);
+
           packageBar.increment(1, { name: id, stat: msg.msg || '' });
           break;
+
         case 'foundDuplicate':
           packageBar.update({
             stat: `⚠️ Duplicate file found: ${msg.filePath}`,
           });
           break;
+
         case 'done':
           completed++;
 
@@ -145,32 +173,33 @@ export async function generateAST() {
 
           packagesBar.increment(1, { stat: `✅ Processed ${id}.` });
           break;
+
         case 'error':
           completed++;
 
           packagesBar.increment(1, {
             name: id,
-            stat: `❌ Worker error for ${id}: ${msg.error}`,
+            stat: `❌ Worker error for ${id}: ${msg.msg}`,
           });
-
           break;
+
         default:
-          console.warn(`Unknown message type from worker: ${msg.type}`);
+          log.warning(`Unknown message type from worker: ${msg.type}`);
       }
     });
 
     worker.on('exit', () => {
+      activeWorkers.delete(worker);
       running--;
 
       if (completed >= packages.length) {
         progress.stop();
       } else {
-        runNext({ packageBar, map });
+        runNext({ packageBar });
       }
     });
   }
 
-  const map = new Map<string, true>();
   // Start initial workers
   for (let i = 0; i < Math.min(maxWorkers, packages.length); i++) {
     const packageBar = progress.create(
@@ -180,7 +209,7 @@ export async function generateAST() {
       { autopadding: true, clearOnComplete: true, stopOnComplete: true, emptyOnZero: true }
     );
 
-    runNext({ packageBar, map });
+    runNext({ packageBar });
   }
 
   // Wait for all workers to finish
@@ -192,5 +221,5 @@ export async function generateAST() {
 generateAST().then(() => {
   const endTime = Date.now();
   const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
-  console.log(`AST generation completed in ${elapsedTime} seconds`);
+  log.info(`AST generation completed in ${elapsedTime} seconds`);
 });

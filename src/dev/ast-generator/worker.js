@@ -72,44 +72,54 @@ var worker_threads_1 = require("worker_threads");
 var fs = require("fs");
 var path = require("path");
 var debug = process.env.NODE_ENV === 'dev';
-var ES_HOST = 'http://localhost:9200';
-var INDEX_NAME = 'kibana-ast';
-var AUTH = Buffer.from('elastic:changeme').toString('base64');
 var cwd = process.cwd();
+var processedFilesMap = new Map();
 worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.on('message', function (_a) {
     var action = _a.action, data = _a.data;
     return __awaiter(void 0, void 0, void 0, function () {
-        var directory, id, map, error_1;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
+        var _b, directory, id, map, error_1;
+        return __generator(this, function (_c) {
+            switch (_c.label) {
                 case 0:
-                    _b.trys.push([0, 3, , 4]);
-                    directory = data.directory, id = data.id, map = data.map;
-                    if (!(action === 'processPackage')) return [3 /*break*/, 2];
-                    return [4 /*yield*/, processPackage(directory, id, map)];
+                    _b = action;
+                    switch (_b) {
+                        case 'processPackage': return [3 /*break*/, 1];
+                        case 'fileProcessed': return [3 /*break*/, 6];
+                    }
+                    return [3 /*break*/, 7];
                 case 1:
-                    _b.sent();
+                    _c.trys.push([1, 4, , 5]);
+                    directory = data.directory, id = data.id, map = data.map;
+                    if (!(action === 'processPackage')) return [3 /*break*/, 3];
+                    return [4 /*yield*/, processPackage(directory, id, map)];
+                case 2:
+                    _c.sent();
                     process.exit(0);
-                    _b.label = 2;
-                case 2: return [3 /*break*/, 4];
-                case 3:
-                    error_1 = _b.sent();
-                    // Handle or report the error
-                    console.error('worker error:', error_1);
-                    return [3 /*break*/, 4];
-                case 4: return [2 /*return*/];
+                    _c.label = 3;
+                case 3: return [3 /*break*/, 5];
+                case 4:
+                    error_1 = _c.sent();
+                    log({ type: 'error', msg: "Error: ".concat(error_1) });
+                    return [3 /*break*/, 5];
+                case 5: return [3 /*break*/, 7];
+                case 6:
+                    // Only update if this worker didn't process the file
+                    if (!processedFilesMap.has(data.fileName)) {
+                        processedFilesMap.set(data.fileName, true);
+                    }
+                    return [3 /*break*/, 7];
+                case 7: return [2 /*return*/];
             }
         });
     });
 });
 function processPackage(directory, id, map) {
     return __awaiter(this, void 0, void 0, function () {
-        var files, processedFilesMap, configPath, rootDirectory, configFile, parsed, program, sourceFiles, packageMap, _i, sourceFiles_1, sourceFile, fileName, functions, _a, functions_1, func;
+        var files, configPath, rootDirectory, configFile, parsed, program, checker, sourceFiles, packageMap, _i, sourceFiles_1, sourceFile, fileName, functions, _a, functions_1, func;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
                     files = getAllFiles(directory);
-                    processedFilesMap = new Map(map);
                     if (files.length === 0) {
                         log({
                             type: 'done',
@@ -118,17 +128,19 @@ function processPackage(directory, id, map) {
                         });
                         return [2 /*return*/];
                     }
+                    processedFilesMap = new Map(map);
                     configPath = (0, typescript_1.findConfigFile)(directory, typescript_1.sys.fileExists, 'tsconfig.json');
                     if (!configPath)
                         throw new Error('Could not find a valid tsconfig.json');
                     rootDirectory = process.cwd();
-                    log({ type: 'create', id: id, msg: "Creating program for ".concat(id) });
+                    log({ type: 'create', id: id, msg: "Creating program for ".concat(id, "...") });
                     configFile = (0, typescript_1.readConfigFile)(configPath, typescript_1.sys.readFile);
                     parsed = (0, typescript_1.parseJsonConfigFileContent)(configFile.config, typescript_1.sys, rootDirectory);
                     program = (0, typescript_1.createProgram)({
                         rootNames: files,
                         options: __assign(__assign({}, parsed.options), { noEmit: true }),
                     });
+                    checker = program.getTypeChecker();
                     sourceFiles = program.getSourceFiles();
                     log({ type: 'total', total: sourceFiles.length });
                     packageMap = new Map();
@@ -138,7 +150,7 @@ function processPackage(directory, id, map) {
                     if (!(_i < sourceFiles_1.length)) return [3 /*break*/, 6];
                     sourceFile = sourceFiles_1[_i];
                     fileName = path.relative(cwd, sourceFile.fileName);
-                    log({ type: 'processFile', msg: "Processing ".concat(fileName) });
+                    log({ type: 'processFile', fileName: fileName });
                     if (sourceFile.fileName.includes('node_modules'))
                         return [3 /*break*/, 5];
                     if (sourceFile.fileName.includes('.d.ts'))
@@ -147,13 +159,13 @@ function processPackage(directory, id, map) {
                         log({ type: 'foundDuplicate', filePath: fileName });
                         return [3 /*break*/, 5];
                     }
-                    functions = extractFunctionInfo({ sourceFile: sourceFile, map: packageMap }) || [];
+                    functions = extractFunctionInfo({ sourceFile: sourceFile, map: packageMap, checker: checker });
                     _a = 0, functions_1 = functions;
                     _b.label = 2;
                 case 2:
                     if (!(_a < functions_1.length)) return [3 /*break*/, 5];
                     func = functions_1[_a];
-                    return [4 /*yield*/, queueFunctionForBulkUpload(func, worker_threads_1.parentPort)];
+                    return [4 /*yield*/, queueFunctionForBulkUpload(func)];
                 case 3:
                     _b.sent();
                     _b.label = 4;
@@ -181,74 +193,87 @@ function getAllFiles(dir) {
                 : [];
     });
 }
-function extractFunctionInfo(_a) {
-    var sourceFile = _a.sourceFile, map = _a.map;
-    var functions = [];
-    var fileName = path.relative(cwd, sourceFile.fileName);
-    log({ type: 'update', msg: "Extracting functions from ".concat(fileName) });
-    function getFunctionName(node) {
-        var _a, _b;
-        // Direct function declarations and methods
-        if ((0, typescript_1.isFunctionDeclaration)(node) || (0, typescript_1.isMethodDeclaration)(node)) {
-            return ((_a = node.name) === null || _a === void 0 ? void 0 : _a.getText(sourceFile)) || 'anonymous';
-        }
-        // Arrow functions assigned to variables
-        if ((0, typescript_1.isVariableDeclaration)(node) && node.initializer && (0, typescript_1.isArrowFunction)(node.initializer)) {
-            return ((_b = node.name) === null || _b === void 0 ? void 0 : _b.getText(sourceFile)) || 'anonymous';
-        }
-        // Standalone arrow functions
-        if ((0, typescript_1.isArrowFunction)(node)) {
-            return 'anonymous';
-        }
-        return 'unknown';
+function getFunctionName(node, sourceFile) {
+    var _a, _b;
+    // Direct function declarations and methods
+    if ((0, typescript_1.isFunctionDeclaration)(node) || (0, typescript_1.isMethodDeclaration)(node)) {
+        return ((_a = node.name) === null || _a === void 0 ? void 0 : _a.getText(sourceFile)) || 'anonymous';
     }
+    // Arrow functions assigned to variables
+    if ((0, typescript_1.isVariableDeclaration)(node) && node.initializer && (0, typescript_1.isArrowFunction)(node.initializer)) {
+        return ((_b = node.name) === null || _b === void 0 ? void 0 : _b.getText(sourceFile)) || 'anonymous';
+    }
+    // Standalone arrow functions
+    if ((0, typescript_1.isArrowFunction)(node)) {
+        return 'anonymous';
+    }
+    if ((0, typescript_1.isVariableStatement)(node)) {
+        for (var _i = 0, _c = node.declarationList.declarations; _i < _c.length; _i++) {
+            var decl = _c[_i];
+            if ((0, typescript_1.isVariableDeclaration)(decl) &&
+                decl.initializer &&
+                (0, typescript_1.isArrowFunction)(decl.initializer) &&
+                (0, typescript_1.isIdentifier)(decl.name)) {
+                return decl.name.text;
+            }
+        }
+    }
+    return 'noFunction';
+}
+function extractFunctionInfo(_a) {
+    var sourceFile = _a.sourceFile, map = _a.map, checker = _a.checker;
+    var fileName = path.relative(cwd, sourceFile.fileName);
+    var functions = [];
+    log({ type: 'update', msg: "Extracting functions from ".concat(fileName, "...") });
     function visit(node) {
         if ((0, typescript_1.isFunctionDeclaration)(node) ||
             (0, typescript_1.isMethodDeclaration)(node) ||
             (0, typescript_1.isArrowFunction)(node) ||
-            ((0, typescript_1.isVariableDeclaration)(node) && node.initializer && (0, typescript_1.isArrowFunction)(node.initializer))) {
-            var functionName = getFunctionName(node);
+            (0, typescript_1.isVariableStatement)(node)) {
+            var functionName = getFunctionName(node, sourceFile);
+            if (functionName === 'noFunction')
+                return;
+            var functionNode = void 0;
             var id = "".concat(fileName.replaceAll('/', '-'), "_").concat(functionName);
             if (map.has(id))
                 return;
             map.set(id, [fileName, functionName]);
             var startPos = node.getStart(sourceFile);
             var line = sourceFile.getLineAndCharacterOfPosition(startPos).line;
-            var returnType = node.type ? node.type.getText(sourceFile) : 'void';
-            var functionDescription = "'".concat(functionName.replace(/([a-z])([A-Z])/g, '$1 $2'), "' is a function that returns");
-            if (node.type) {
-                functionDescription += " a value of type '".concat(returnType, "'.");
-            }
-            else {
-                functionDescription += ' a value of unknown type.';
-            }
-            var functionNode = void 0;
             if ((0, typescript_1.isFunctionDeclaration)(node) || (0, typescript_1.isMethodDeclaration)(node) || (0, typescript_1.isArrowFunction)(node)) {
                 functionNode = node;
             }
-            else if ((0, typescript_1.isVariableDeclaration)(node) &&
-                node.initializer &&
-                (0, typescript_1.isArrowFunction)(node.initializer)) {
-                functionNode = node.initializer; // The arrow function is in the initializer
+            else if ((0, typescript_1.isVariableStatement)(node)) {
+                var decl = node.declarationList.declarations[0];
+                if ((0, typescript_1.isVariableDeclaration)(decl) && decl.initializer && (0, typescript_1.isArrowFunction)(decl.initializer)) {
+                    functionNode = decl.initializer;
+                }
             }
+            var returnType = 'any';
+            if (functionNode) {
+                // Get return type from signature if available
+                var signature = checker.getSignatureFromDeclaration(functionNode);
+                if (signature) {
+                    var retType = checker.getReturnTypeOfSignature(signature);
+                    returnType = checker.typeToString(retType);
+                }
+            }
+            // Use custom JSX detection which works for both concise and block arrow functions
+            var returnsJSX = functionNode ? doesReturnJSX(functionNode) : false;
+            var finalReturnType = returnsJSX ? 'JSX.Element (or React component)' : returnType;
+            var functionDescription = "'".concat(functionName.replace(/([a-z])([A-Z])/g, '$1 $2'), "' is a function that returns a ").concat(returnsJSX ? 'React component' : "value of type \"".concat(returnType, "\""));
+            var parameters = getFunctionParameters(functionNode, sourceFile, checker);
             var info = {
                 id: id,
                 name: functionName,
                 functionDescription: functionDescription,
-                startLine: line,
-                filePath: path.relative(cwd, sourceFile.fileName),
-                parameters: functionNode === null || functionNode === void 0 ? void 0 : functionNode.parameters.map(function (param) {
-                    var _a;
-                    return ({
-                        name: param.name ? param.name.getText(sourceFile) : 'anonymous',
-                        type: (_a = param.type) === null || _a === void 0 ? void 0 : _a.getText(sourceFile),
-                        optional: !!param.questionToken,
-                    });
-                }),
-                returnType: returnType,
+                line: line,
+                filePath: fileName,
+                parameters: parameters,
+                returnType: finalReturnType,
                 fullText: node.getText(sourceFile),
                 normalizedCode: normalizeKibanaCode(node.getText(sourceFile)),
-                astFeatures: {},
+                returnsJSX: returnsJSX,
             };
             functions.push(info);
         }
@@ -258,6 +283,55 @@ function extractFunctionInfo(_a) {
     return functions;
 }
 exports.extractFunctionInfo = extractFunctionInfo;
+function getFunctionParameters(node, sourceFile, checker) {
+    if (!node || !node.parameters)
+        return undefined;
+    return node.parameters.map(function (param) {
+        var paramName = param.name.getText(sourceFile);
+        var paramType = param.type
+            ? checker.typeToString(checker.getTypeAtLocation(param.type))
+            : undefined;
+        var isOptional = !!param.questionToken;
+        return {
+            name: paramName,
+            type: paramType,
+            optional: isOptional,
+        };
+    });
+}
+function doesReturnJSX(node) {
+    var foundJSX = false;
+    function check(n, isRootFunction) {
+        if (isRootFunction === void 0) { isRootFunction = false; }
+        // Check return statements containing JSX
+        if ((0, typescript_1.isReturnStatement)(n) && n.expression) {
+            if (isJSXExpression(n.expression)) {
+                foundJSX = true;
+                return;
+            }
+        }
+        // Check concise arrow function returning JSX directly
+        if ((0, typescript_1.isArrowFunction)(n) && isJSXExpression(n.body)) {
+            foundJSX = true;
+            return;
+        }
+        // Don't traverse into nested functions (but do traverse the root function)
+        if (!isRootFunction &&
+            ((0, typescript_1.isFunctionDeclaration)(n) || (0, typescript_1.isArrowFunction)(n) || (0, typescript_1.isMethodDeclaration)(n))) {
+            return;
+        }
+        (0, typescript_1.forEachChild)(n, function (child) { return check(child, false); });
+    }
+    check(node, true);
+    return foundJSX;
+}
+function isJSXExpression(node) {
+    return ((0, typescript_1.isJsxElement)(node) ||
+        (0, typescript_1.isJsxSelfClosingElement)(node) ||
+        (0, typescript_1.isJsxFragment)(node) ||
+        // Handle parenthesized JSX expressions
+        ((0, typescript_1.isParenthesizedExpression)(node) && isJSXExpression(node.expression)));
+}
 function normalizeKibanaCode(codeText) {
     var normalized = codeText;
     normalized = normalized.replace(/use[A-Z][a-zA-Z]*/g, 'useHOOK');
@@ -285,14 +359,14 @@ function normalizeCode(codeText) {
 }
 var BULK_BATCH_SIZE = 10;
 var bulkQueue = [];
-function queueFunctionForBulkUpload(func, messagePort) {
+function queueFunctionForBulkUpload(func) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     bulkQueue.push(func);
                     if (!(bulkQueue.length >= BULK_BATCH_SIZE)) return [3 /*break*/, 2];
-                    return [4 /*yield*/, flushBulkQueue(messagePort)];
+                    return [4 /*yield*/, flushBulkQueue()];
                 case 1:
                     _a.sent();
                     _a.label = 2;
@@ -302,9 +376,9 @@ function queueFunctionForBulkUpload(func, messagePort) {
     });
 }
 // Call this one final time after everything is processed
-function flushBulkQueue(messagePort) {
+function flushBulkQueue() {
     return __awaiter(this, void 0, void 0, function () {
-        var bulkBody, res;
+        var bulkBody, res, responseJson;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -312,22 +386,31 @@ function flushBulkQueue(messagePort) {
                         return [2 /*return*/];
                     bulkBody = bulkQueue.flatMap(function (func) {
                         var id = func.id, rest = __rest(func, ["id"]);
-                        return [{ index: { _index: INDEX_NAME, _id: id } }, rest];
+                        return [{ index: { _index: "kibana-ast", _id: id } }, rest];
                     });
-                    return [4 /*yield*/, fetch("".concat(ES_HOST, "/_bulk"), {
+                    return [4 /*yield*/, fetch("".concat("https://edge-lite-oblt-ccs-vbxbb.es.us-west2.gcp.elastic-cloud.com:443", "/_bulk"), {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/x-ndjson',
-                                Authorization: "Basic ".concat(AUTH),
+                                Authorization: "Basic ".concat("ZWxhc3RpYzpORW9NRHlFdXFlellwSnFXYjU0ZGhiUXc="),
                             },
                             body: bulkBody.map(function (line) { return JSON.stringify(line); }).join('\n') + '\n',
                         })];
                 case 1:
                     res = _a.sent();
+                    return [4 /*yield*/, res.json()];
+                case 2:
+                    responseJson = _a.sent();
                     if (!res.ok) {
                         log({
                             type: 'error',
                             msg: "Failed to bulk upload functions: ".concat(res.status, " - ").concat(res.statusText),
+                        });
+                    }
+                    else if (responseJson.errors) {
+                        log({
+                            type: 'error',
+                            msg: "Failed to bulk upload functions, ES errors: ".concat(JSON.stringify(responseJson, null, 2)),
                         });
                     }
                     bulkQueue.length = 0; // Clear queue
@@ -337,6 +420,11 @@ function flushBulkQueue(messagePort) {
     });
 }
 function log(args) {
-    //   console.log(args);
-    worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.postMessage(args);
+    if (debug) {
+        // eslint-disable-next-line no-console
+        console.log("[Worker]", args);
+    }
+    else {
+        worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.postMessage(args);
+    }
 }
