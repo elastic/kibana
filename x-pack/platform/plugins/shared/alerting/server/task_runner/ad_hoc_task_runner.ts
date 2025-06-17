@@ -315,6 +315,16 @@ export class AdHocTaskRunner implements CancellableTask {
 
       const namespace = this.context.spaceIdToNamespace(spaceId);
 
+      this.logger.info(
+        `Initializing event logger with context ${JSON.stringify({
+          savedObjectId: adHocRunParamsId,
+          savedObjectType: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+          spaceId,
+          executionId: this.executionId,
+          taskScheduledAt: this.taskInstance.scheduledAt,
+          ...(namespace ? { namespace } : {}),
+        })}`
+      );
       this.alertingEventLogger.initialize({
         context: {
           savedObjectId: adHocRunParamsId,
@@ -593,6 +603,8 @@ export class AdHocTaskRunner implements CancellableTask {
     if (this.cancelled) {
       return;
     }
+
+    this.logger.info(`Cancelling ad hoc task!`);
     this.cancelled = true;
     this.searchAbortController.abort();
     this.ruleTypeRunner.cancelRun();
