@@ -122,7 +122,7 @@ const OpenAddToCaseOpenModal = ({
         pathAndQuery: url,
         label: dashboardTitle,
         actionLabel: i18n.translate(
-          'xpack.dashboard.topNav.cases.addToCaseModal.goToDashboardActionLabel',
+          'dashboard.topNav.cases.addToCaseModal.goToDashboardActionLabel',
           {
             defaultMessage: 'Go to dashboard',
           }
