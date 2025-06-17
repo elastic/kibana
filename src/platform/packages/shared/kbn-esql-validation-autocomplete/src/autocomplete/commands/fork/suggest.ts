@@ -27,7 +27,6 @@ const FORK_AVAILABLE_COMMANDS = [
   'dissect',
   'stats',
   'eval',
-  'change_point',
   'completion',
   'grok',
 ];

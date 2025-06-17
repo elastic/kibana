@@ -55,7 +55,6 @@ describe('autocomplete.suggest', () => {
           'DISSECT ',
           'STATS ',
           'EVAL ',
-          'CHANGE_POINT ',
           'GROK ',
         ];
 
