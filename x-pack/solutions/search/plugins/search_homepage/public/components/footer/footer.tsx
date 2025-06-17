@@ -13,18 +13,14 @@ import { docLinks } from '../../../common/doc_links';
 export const Footer: React.FC = () => (
   <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m">
     <EuiFlexItem grow={false}>
-      <EuiLink
-        href={docLinks.elasticCommunity}
-        target="_blank"
-        data-test-subj="elasticCommunityLink"
-      >
+      <EuiLink href={docLinks.elasticCommunity} data-test-subj="elasticCommunityLink">
         {i18n.translate('xpack.searchHomepage.footer.elasticCommunity', {
           defaultMessage: 'Connect with the Elastic Community',
         })}
       </EuiLink>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiLink href={docLinks.kibanaFeedback} target="_blank" data-test-subj="giveFeedbackLink">
+      <EuiLink href={docLinks.kibanaFeedback} data-test-subj="giveFeedbackLink">
         {i18n.translate('xpack.searchHomepage.footer.giveFeedback', {
           defaultMessage: 'Give feedback',
         })}

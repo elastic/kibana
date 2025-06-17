@@ -148,5 +148,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchHomePage.expectToBeOnGetStartedDocumentationPage();
       });
     });
+
+    describe('Footer content', function () {
+      it('displays the community link', async () => {
+        await testSubjects.existOrFail('elasticCommunityLink');
+        await testSubjects.click('elasticCommunityLink');
+        await pageObjects.svlSearchHomePage.expectToBeOnCommunityPage();
+      });
+
+      it('displays the feedbacks link', async () => {
+        await testSubjects.existOrFail('giveFeedbackLink');
+        await testSubjects.click('giveFeedbackLink');
+        await pageObjects.svlSearchHomePage.expectToBeOnGiveFeedbackPage();
+      });
+    });
   });
 }
