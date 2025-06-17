@@ -19,6 +19,7 @@ import React from 'react';
 import { asDuration } from '../../../../common/utils/formatters';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
+import { useTraceWaterfallContext } from './trace_waterfall_context';
 
 export function BarDetails({
   item,
@@ -30,6 +31,7 @@ export function BarDetails({
   onErrorClick?: (params: { traceId: string; docId: string }) => void;
 }) {
   const theme = useEuiTheme();
+  const { getRelatedErrorsHref } = useTraceWaterfallContext();
 
   return (
     <div
@@ -70,7 +72,7 @@ export function BarDetails({
         </EuiFlexItem>
         {item.hasError ? (
           <EuiFlexItem grow={false}>
-            {onErrorClick ? (
+            {onErrorClick || getRelatedErrorsHref ? (
               <EuiButtonIcon
                 aria-label={i18n.translate('xpack.apm.barDetails.errorButton.ariaLabel', {
                   defaultMessage: 'View error details',
@@ -79,6 +81,7 @@ export function BarDetails({
                 color="danger"
                 iconType="errorFilled"
                 iconSize="s"
+                href={getRelatedErrorsHref ? (getRelatedErrorsHref(item.id) as any) : undefined}
                 onClick={(e: React.MouseEvent) => {
                   if (onErrorClick) {
                     e.preventDefault();

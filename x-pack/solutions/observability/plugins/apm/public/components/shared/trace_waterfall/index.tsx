@@ -17,6 +17,7 @@ import { ACCORDION_HEIGHT, BORDER_THICKNESS, TraceItemRow } from './trace_item_r
 import type { OnErrorClick, OnNodeClick } from './trace_waterfall_context';
 import { TraceWaterfallContextProvider, useTraceWaterfallContext } from './trace_waterfall_context';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
+import type { IWaterfallGetRelatedErrorsHref } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 
 export interface Props {
   traceItems: TraceItem[];
@@ -24,6 +25,8 @@ export interface Props {
   highlightedTraceId?: string;
   onClick?: OnNodeClick;
   onErrorClick?: OnErrorClick;
+  scrollElement?: Element;
+  getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
 }
 
 export function TraceWaterfall({
@@ -32,6 +35,8 @@ export function TraceWaterfall({
   highlightedTraceId,
   onClick,
   onErrorClick,
+  scrollElement,
+  getRelatedErrorsHref,
 }: Props) {
   return (
     <TraceWaterfallContextProvider
@@ -40,6 +45,8 @@ export function TraceWaterfall({
       highlightedTraceId={highlightedTraceId}
       onClick={onClick}
       onErrorClick={onErrorClick}
+      scrollElement={scrollElement}
+      getRelatedErrorsHref={getRelatedErrorsHref}
     >
       <TraceWaterfallComponent />
     </TraceWaterfallContextProvider>
@@ -102,7 +109,7 @@ function TraceWaterfallComponent() {
 }
 
 function TraceTree() {
-  const { traceWaterfallMap, traceWaterfall } = useTraceWaterfallContext();
+  const { traceWaterfallMap, traceWaterfall, scrollElement } = useTraceWaterfallContext();
   const listRef = useRef<List>(null);
   const rowSizeMapRef = useRef(new Map<number, number>());
   const [accordionStatesMap, setAccordionStateMap] = useState(
@@ -137,7 +144,7 @@ function TraceTree() {
   );
 
   return (
-    <WindowScroller onScroll={onScroll}>
+    <WindowScroller onScroll={onScroll} scrollElement={scrollElement}>
       {({ registerChild }) => (
         <AutoSizer disableHeight>
           {({ width }) => (
