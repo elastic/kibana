@@ -72,11 +72,10 @@ const DatasetQualityAlertRequired = rt.type({
 });
 // prettier-ignore
 const DatasetQualityAlertOptional = rt.partial({
-  'kibana.alert.evaluation.conditions': schemaString,
   'kibana.alert.evaluation.threshold': schemaStringOrNumber,
   'kibana.alert.evaluation.value': schemaString,
+  'kibana.alert.grouping': schemaUnknown,
   'kibana.alert.reason': schemaString,
-  'kibana.alert.title': schemaString,
 });
 
 // prettier-ignore
