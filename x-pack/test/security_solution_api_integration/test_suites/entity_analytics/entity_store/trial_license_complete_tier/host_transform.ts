@@ -19,7 +19,6 @@ import { EntityStoreUtils } from '../../utils';
 const DATASTREAM_NAME: string = 'logs-elastic_agent.cloudbeat-test';
 const HOST_TRANSFORM_ID: string = 'entities-v1-latest-security_host_default';
 const INDEX_NAME: string = '.entities.v1.latest.security_host_default';
-const RETENTION_POLICY_NAME: string = 'entity_store_field_retention_host_default_v1.0.0';
 const TIMEOUT_MS: number = 600000; // 10 minutes
 
 export default function (providerContext: FtrProviderContext) {
@@ -293,7 +292,10 @@ async function cleanUpEntityStore(providerContext: FtrProviderContext): Promise<
   const es = providerContext.getService('es');
   const utils = EntityStoreUtils(providerContext.getService);
   await utils.cleanEngines();
-  await es.enrich.deletePolicy({ name: RETENTION_POLICY_NAME }, { ignore: [404] });
+  for (const kind of ['host', 'user', 'service', 'generic']) {
+    const name : string = `entity_store_field_retention_${kind}_default_v1.0.0`;
+    await es.enrich.deletePolicy({ name: RETENTION_POLICY_NAME }, { ignore: [404] });
+  }
   return true;
 }
 
