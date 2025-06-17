@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-export const configSchema = schema.object({
-  experimental: schema.object({
-    significantEventsEnabled: offeringBasedSchema({
-      serverless: schema.boolean({ defaultValue: false }),
-      traditional: schema.boolean({ defaultValue: true }),
-    }),
-  }),
-});
+export const configSchema = schema.object({});
 
 export type StreamsConfig = TypeOf<typeof configSchema>;
 

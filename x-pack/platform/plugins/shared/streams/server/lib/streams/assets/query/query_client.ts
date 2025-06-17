@@ -12,7 +12,6 @@ import { StreamQuery } from '@kbn/streams-schema';
 import { map, partition } from 'lodash';
 import pLimit from 'p-limit';
 import { QueryLink } from '../../../../../common/assets';
-import { StreamsConfig } from '../../../../../common/config';
 import { EsqlRuleParams } from '../../../rules/esql/types';
 import { AssetClient, getAssetLinkUuid } from '../asset_client';
 import { ASSET_ID, ASSET_TYPE } from '../fields';
@@ -32,22 +31,20 @@ function toQueryLink(query: StreamQuery, stream: string): QueryLink {
 }
 
 export class QueryClient {
-  private readonly isSignificantEventsEnabled: boolean;
-
   constructor(
     private readonly dependencies: {
       assetClient: AssetClient;
       rulesClient: RulesClient;
       logger: Logger;
-      config: StreamsConfig;
-    }
-  ) {
-    this.isSignificantEventsEnabled =
-      dependencies.config.experimental.significantEventsEnabled ?? false;
-  }
+    },
+    private readonly isSignificantEventsEnabled: boolean = false
+  ) {}
 
   public async syncQueries(stream: string, queries: StreamQuery[]) {
     if (!this.isSignificantEventsEnabled) {
+      this.dependencies.logger.debug(
+        `Skipping syncQueries for stream "${stream}" because significant events feature is disabled.`
+      );
       return;
     }
 
@@ -105,6 +102,9 @@ export class QueryClient {
 
   public async upsert(stream: string, query: StreamQuery) {
     if (!this.isSignificantEventsEnabled) {
+      this.dependencies.logger.debug(
+        `Skipping upsert for stream "${stream}" because significant events feature is disabled.`
+      );
       return;
     }
 
@@ -113,6 +113,9 @@ export class QueryClient {
 
   public async delete(stream: string, queryId: string) {
     if (!this.isSignificantEventsEnabled) {
+      this.dependencies.logger.debug(
+        `Skipping delete for stream "${stream}" because significant events feature is disabled.`
+      );
       return;
     }
 
@@ -124,6 +127,9 @@ export class QueryClient {
     operations: Array<{ index?: StreamQuery; delete?: { id: string } }>
   ) {
     if (!this.isSignificantEventsEnabled) {
+      this.dependencies.logger.debug(
+        `Skipping bulk update for stream "${stream}" because significant events feature is disabled.`
+      );
       return;
     }
 

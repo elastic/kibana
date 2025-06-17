@@ -39,6 +39,7 @@ import {
   StreamsPluginStartDependencies,
   StreamsServer,
 } from './types';
+import { featureFlagUiSettings } from './feature_flags';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -89,10 +90,12 @@ export class StreamsPlugin
 
     registerRules({ plugins, logger: this.logger.get('rules') });
 
+    core.uiSettings.register(featureFlagUiSettings);
+
     const assetService = new AssetService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);
     const contentService = new ContentService(core, this.logger);
-    const queryService = new QueryService(core, this.logger, this.config);
+    const queryService = new QueryService(core, this.logger);
 
     plugins.features.registerKibanaFeature({
       id: STREAMS_FEATURE_ID,
