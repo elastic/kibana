@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PROXY_MODE, SECURITY_MODEL } from '../constants';
+import { PROXY_MODE, SNIFF_MODE, SECURITY_MODEL } from '../constants';
 
 // Values returned from ES GET /_remote/info
 /**
@@ -29,15 +29,17 @@ export interface ClusterInfoEs {
   num_proxy_sockets_connected?: number;
   server_name?: string;
   cluster_credentials?: string;
+  node_connections?: number | undefined;
+  proxy_socket_connections?: number | undefined;
 }
 
 export interface Cluster {
   name: string;
   seeds?: string[];
   skipUnavailable?: boolean;
-  nodeConnections?: number;
+  nodeConnections?: number | null;
   proxyAddress?: string;
-  proxySocketConnections?: number;
+  proxySocketConnections?: number | null;
   serverName?: string;
   mode?: 'proxy' | 'sniff';
   isConnected?: boolean;
@@ -45,6 +47,7 @@ export interface Cluster {
   transportCompress?: boolean;
   connectedNodesCount?: number;
   maxConnectionsPerCluster?: string | number;
+  maxProxySocketConnections?: string | number;
   initialConnectTimeout?: string | number;
   connectedSocketsCount?: number;
   hasDeprecatedProxySetting?: boolean;
@@ -78,7 +81,9 @@ export function deserializeCluster(
   name: string,
   esClusterObject: ClusterInfoEs,
   deprecatedProxyAddress?: string | undefined,
-  isCloudEnabled?: boolean | undefined
+  isCloudEnabled?: boolean | undefined,
+  nodeConnectionsSettings?: number | undefined,
+  proxySocketConnectionsSettings?: number | undefined
 ): Cluster {
   if (!name || !esClusterObject || typeof esClusterObject !== 'object') {
     throw new Error('Unable to deserialize cluster');
@@ -94,10 +99,12 @@ export function deserializeCluster(
     skip_unavailable: skipUnavailable,
     transport,
     proxy_address: proxyAddress,
-    max_proxy_socket_connections: proxySocketConnections,
+    max_proxy_socket_connections: maxProxySocketConnections,
     num_proxy_sockets_connected: connectedSocketsCount,
     server_name: serverName,
     cluster_credentials: clusterCredentials,
+    node_connections: nodeConnections,
+    proxy_socket_connections: proxySocketConnections,
   } = esClusterObject;
 
   let deserializedClusterObject: Cluster = {
@@ -111,10 +118,20 @@ export function deserializeCluster(
     seeds,
     proxyAddress,
     proxySocketConnections,
+    maxProxySocketConnections,
     connectedSocketsCount,
     serverName,
+    nodeConnections,
     securityModel: clusterCredentials ? SECURITY_MODEL.API : SECURITY_MODEL.CERTIFICATE,
   };
+
+  if (mode === SNIFF_MODE && !nodeConnections) {
+    deserializedClusterObject.nodeConnections = nodeConnectionsSettings || null;
+  }
+
+  if (mode === PROXY_MODE && !proxySocketConnections) {
+    deserializedClusterObject.proxySocketConnections = proxySocketConnectionsSettings || null;
+  }
 
   if (transport) {
     const { ping_schedule: transportPingSchedule, compress: transportCompress } = transport;

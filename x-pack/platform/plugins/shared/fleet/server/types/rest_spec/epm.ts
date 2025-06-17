@@ -345,6 +345,10 @@ export const InstallKibanaAssetsResponseSchema = schema.object({
   success: schema.boolean(),
 });
 
+export const DeletePackageDatastreamAssetsResponseSchema = schema.object({
+  success: schema.boolean(),
+});
+
 export const BulkInstallPackagesResponseItemSchema = schema.oneOf([
   schema.object({
     name: schema.string(),
@@ -662,6 +666,16 @@ export const DeleteKibanaAssetsRequestSchema = {
   params: schema.object({
     pkgName: schema.string(),
     pkgVersion: schema.string(),
+  }),
+};
+
+export const DeletePackageDatastreamAssetsRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string(),
+    pkgVersion: schema.string(),
+  }),
+  query: schema.object({
+    packagePolicyId: schema.string(),
   }),
 };
 

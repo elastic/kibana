@@ -25,15 +25,13 @@ const KEY = 'investigation';
  * It contains investigation guide (alerts only) and highlighted fields.
  */
 export const InvestigationSection = memo(() => {
-  const { dataFormattedForFieldBrowser, getFieldsData, investigationFields, isPreview, scopeId } =
+  const { dataFormattedForFieldBrowser, getFieldsData, investigationFields, scopeId } =
     useDocumentDetailsContext();
   const eventKind = getField(getFieldsData('event.kind'));
 
   const expanded = useExpandSection({ title: KEY, defaultValue: true });
 
-  const editHighlightedFieldsEnabled = useIsExperimentalFeatureEnabled(
-    'editHighlightedFieldsEnabled'
-  );
+  const editHighlightedFieldsEnabled = useIsExperimentalFeatureEnabled('editHighlightedFields');
 
   return (
     <ExpandableSection
@@ -57,7 +55,6 @@ export const InvestigationSection = memo(() => {
       <HighlightedFields
         dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
         investigationFields={investigationFields}
-        isPreview={isPreview}
         scopeId={scopeId}
         showCellActions={true}
         showEditButton={editHighlightedFieldsEnabled}

@@ -57,22 +57,18 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     async function getEvents(params: {
       screenContexts?: ObservabilityAIAssistantScreenContextRequest[];
     }) {
-      const supertestEditorWithCookieCredentials: SupertestWithRoleScope =
-        await roleScopedSupertest.getSupertestWithRoleScope('editor', {
-          useCookieHeader: true,
-          withInternalHeaders: true,
-        });
-
-      const response = await supertestEditorWithCookieCredentials
-        .post('/internal/observability_ai_assistant/chat/complete')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          messages,
-          connectorId,
-          persist: true,
-          screenContexts: params.screenContexts || [],
-          scopes: ['all'],
-        });
+      const response = await observabilityAIAssistantAPIClient.editor({
+        endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
+        params: {
+          body: {
+            messages,
+            connectorId,
+            persist: true,
+            screenContexts: params.screenContexts || [],
+            scopes: ['all'],
+          },
+        },
+      });
 
       await proxy.waitForAllInterceptorsToHaveBeenCalled();
 

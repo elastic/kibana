@@ -26,7 +26,7 @@ import { TransactionActionMenu } from './transaction_action_menu';
 import * as Transactions from './__fixtures__/mock_data';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import * as useAdHocApmDataView from '../../../hooks/use_adhoc_apm_data_view';
-import { useProfilingIntegrationSetting } from '../../../hooks/use_profiling_integration_setting';
+import { useProfilingPluginSetting } from '../../../hooks/use_profiling_integration_setting';
 import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/common';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import type {
@@ -76,7 +76,7 @@ const apmContextMock = {
 } as unknown as ApmPluginContextValue;
 
 jest.mock('../../../hooks/use_profiling_integration_setting', () => ({
-  useProfilingIntegrationSetting: jest.fn().mockReturnValue(false),
+  useProfilingPluginSetting: jest.fn().mockReturnValue(false),
 }));
 
 const history = createMemoryHistory();
@@ -285,7 +285,7 @@ describe('TransactionActionMenu ', () => {
 
   describe('Profiling items', () => {
     beforeEach(() => {
-      (useProfilingIntegrationSetting as jest.Mock).mockReturnValue(true);
+      (useProfilingPluginSetting as jest.Mock).mockReturnValue(true);
     });
 
     it('renders flamegraph item', async () => {

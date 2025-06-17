@@ -10,7 +10,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { EuiText, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiText, EuiLoadingSpinner, EuiThemeProvider } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { ReactWrapper } from 'enzyme';
@@ -22,6 +22,9 @@ import { ExistenceFetchStatus } from '../../types';
 import { FieldsAccordion } from './fields_accordion';
 import { NoFieldsCallout } from './no_fields_callout';
 import { useGroupedFields, type GroupedFieldsParams } from '../../hooks/use_grouped_fields';
+import { screen, within } from '@testing-library/react';
+import { render } from '@elastic/eui/lib/test/rtl';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
@@ -76,7 +79,7 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
     hookParams: Omit<GroupedFieldsParams<DataViewField>, 'services'>;
   }
 
-  async function mountGroupedList({ listProps, hookParams }: WrapperProps): Promise<ReactWrapper> {
+  function mountWithRTL({ listProps, hookParams }: WrapperProps) {
     const Wrapper: React.FC<WrapperProps> = (props) => {
       const {
         fieldListFiltersProps,
@@ -94,6 +97,30 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
       );
     };
 
+    render(<Wrapper hookParams={hookParams} listProps={listProps} />);
+  }
+
+  const mountComponent = async (component: React.ReactElement) =>
+    await mountWithIntl(<EuiThemeProvider>{component}</EuiThemeProvider>);
+
+  async function mountGroupedList({ listProps, hookParams }: WrapperProps): Promise<ReactWrapper> {
+    const Wrapper: React.FC<WrapperProps> = (props) => {
+      const {
+        fieldListFiltersProps,
+        fieldListGroupedProps: { fieldGroups },
+      } = useGroupedFields({
+        ...props.hookParams,
+        services: mockedServices,
+      });
+
+      return (
+        <EuiThemeProvider>
+          <FieldListFilters {...fieldListFiltersProps} />
+          <FieldListGrouped {...props.listProps} fieldGroups={fieldGroups} />
+        </EuiThemeProvider>
+      );
+    };
+
     let wrapper: ReactWrapper;
     await act(async () => {
       wrapper = await mountWithIntl(<Wrapper hookParams={hookParams} listProps={listProps} />);
@@ -105,8 +132,8 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
     return wrapper!;
   }
 
-  it('renders correctly in empty state', () => {
-    const wrapper = mountWithIntl(
+  it('renders correctly in empty state', async () => {
+    const wrapper = await mountComponent(
       <FieldListGrouped
         {...defaultProps}
         fieldGroups={{}}
@@ -124,7 +151,7 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
         fieldsExistenceStatus: ExistenceFetchStatus.unknown,
       },
       hookParams: {
-        dataViewId: dataView.id!,
+        dataViewId: dataView.id ?? null,
         allFields,
       },
     });
@@ -464,6 +491,81 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
     expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
       '2 selected fields. 10 popular fields. 25 available fields. 112 unmapped fields. 3 meta fields.'
     );
+  });
+
+  describe('Skip Link Functionality', () => {
+    it('renders the skip link when there is a next section', async () => {
+      mountWithRTL({
+        listProps: {
+          ...defaultProps,
+          fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
+        },
+        hookParams: {
+          dataViewId: dataView.id!,
+          allFields,
+        },
+      });
+
+      // Check that the first accordion (Available Fields) has a skip link
+      const availableFieldsAccordion = screen.getByTestId('fieldListGroupedAvailableFields');
+      const skipLinks = within(availableFieldsAccordion).getAllByRole('link', {
+        name: /go to meta fields/i,
+      });
+
+      // Since we have multiple sections, we should have at least one skip link
+      expect(skipLinks.length).toBe(1);
+    });
+
+    it('does not render a skip link in the last section', async () => {
+      mountWithRTL({
+        listProps: {
+          ...defaultProps,
+          fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
+        },
+        hookParams: {
+          dataViewId: dataView.id!,
+          allFields,
+        },
+      });
+
+      // Find the last accordion (should be Meta Fields)
+      const metaFieldsAccordion = screen.getByTestId('fieldListGroupedMetaFields');
+
+      // The last section shouldn't have a skip link
+      const skipLinksInLastAccordion = within(metaFieldsAccordion).queryAllByRole('link', {
+        name: /go to/i,
+      });
+
+      expect(skipLinksInLastAccordion.length).toBe(0);
+    });
+
+    it('sets focus on the next section when skip link is clicked', async () => {
+      const user = userEvent.setup();
+
+      mountWithRTL({
+        listProps: {
+          ...defaultProps,
+          fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
+        },
+        hookParams: {
+          dataViewId: dataView.id!,
+          allFields,
+        },
+      });
+
+      // Find the skip link in the Available Fields accordion
+      const availableFieldsAccordion = screen.getByTestId('fieldListGroupedAvailableFields');
+      const skipLink = within(availableFieldsAccordion).getByRole('link', {
+        name: /go to meta fields/i,
+      });
+
+      // Click the skip link
+      await user.click(skipLink);
+
+      // Verify that the Meta Fields accordion is now focused
+      const metaFieldsButton = screen.getByRole('button', { name: /meta fields/i });
+      expect(metaFieldsButton).toHaveFocus();
+    });
   });
 
   it('persists sections state in local storage', async () => {

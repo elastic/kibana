@@ -8,11 +8,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
+import { HttpServiceSetup, IRouter } from '@kbn/core/server';
+import { isInternalURL } from '@kbn/std';
 import { UrlServiceError } from '../../error';
 import { ServerUrlService } from '../../types';
 
-export const registerCreateRoute = (router: IRouter, url: ServerUrlService) => {
+export const registerCreateRoute = (
+  router: IRouter,
+  url: ServerUrlService,
+  http: HttpServiceSetup
+) => {
   router.post(
     {
       path: '/api/short_url',
@@ -55,8 +60,7 @@ export const registerCreateRoute = (router: IRouter, url: ServerUrlService) => {
       },
     },
     router.handleLegacyErrors(async (ctx, req, res) => {
-      const savedObjects = (await ctx.core).savedObjects.client;
-      const shortUrls = url.shortUrls.get({ savedObjects });
+      const core = await ctx.core;
       const { locatorId, params, slug } = req.body;
       const locator = url.locators.get(locatorId);
 
@@ -66,6 +70,17 @@ export const registerCreateRoute = (router: IRouter, url: ServerUrlService) => {
           body: 'Locator not found.',
         });
       }
+
+      const urlFromParams = (params as { url: string | undefined }).url;
+      if (urlFromParams && !isInternalURL(urlFromParams, http.basePath.get(req))) {
+        return res.customError({
+          statusCode: 400,
+          body: 'Can not create a short URL for an external URL.',
+        });
+      }
+
+      const savedObjects = core.savedObjects.client;
+      const shortUrls = url.shortUrls.get({ savedObjects });
 
       try {
         const shortUrl = await shortUrls.create({

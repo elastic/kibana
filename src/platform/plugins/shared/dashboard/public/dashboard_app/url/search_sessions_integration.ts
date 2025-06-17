@@ -19,7 +19,7 @@ import {
 import { History } from 'history';
 import { map } from 'rxjs';
 import { SEARCH_SESSION_ID } from '../../../common/constants';
-import { convertPanelMapToPanelsArray } from '../../../common/lib/dashboard_panel_converters';
+import { convertPanelSectionMapsToPanelsArray } from '../../../common/lib/dashboard_panel_converters';
 import { DashboardLocatorParams } from '../../../common/types';
 import { DashboardApi, DashboardInternalApi } from '../../dashboard_api/types';
 import { dataService } from '../../services/kibana_services';
@@ -81,7 +81,7 @@ function getLocatorParams({
   shouldRestoreSearchSession: boolean;
 }): DashboardLocatorParams {
   const savedObjectId = dashboardApi.savedObjectId$.value;
-  const { panels, references } = dashboardInternalApi.serializePanels();
+  const { panels, sections, references } = dashboardInternalApi.serializeLayout();
   return {
     viewMode: dashboardApi.viewMode$.value ?? 'view',
     useHash: false,
@@ -104,7 +104,10 @@ function getLocatorParams({
     ...(savedObjectId
       ? {}
       : {
-          panels: convertPanelMapToPanelsArray(panels) as DashboardLocatorParams['panels'],
+          panels: convertPanelSectionMapsToPanelsArray(
+            panels,
+            sections
+          ) as DashboardLocatorParams['panels'],
           references: references as DashboardLocatorParams['references'],
         }),
   };

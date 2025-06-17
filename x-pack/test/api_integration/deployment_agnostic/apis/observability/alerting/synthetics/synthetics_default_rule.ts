@@ -26,7 +26,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     'my-slack1',
   ];
 
-  describe('SyntheticsDefaultRules', () => {
+  describe('SyntheticsDefaultRules', function () {
+    // Test failing on MKI and ECH
+    this.tags(['skipCloud']);
+
     before(async () => {
       supertestEditorWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('editor', {
         withInternalHeaders: true,

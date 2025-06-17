@@ -14,7 +14,8 @@ export type ESQLAstCommand =
   | ESQLAstTimeseriesCommand
   | ESQLAstJoinCommand
   | ESQLAstChangePointCommand
-  | ESQLAstRerankCommand;
+  | ESQLAstRerankCommand
+  | ESQLAstCompletionCommand;
 
 export type ESQLAstNode = ESQLAstCommand | ESQLAstExpression | ESQLAstItem;
 
@@ -33,7 +34,6 @@ export type ESQLSingleAstItem =
   | ESQLList
   | ESQLLiteral
   | ESQLIdentifier
-  | ESQLCommandMode
   | ESQLInlineCast
   | ESQLOrderExpression
   | ESQLUnknownItem
@@ -111,6 +111,12 @@ export interface ESQLAstChangePointCommand extends ESQLCommand<'change_point'> {
   };
 }
 
+export interface ESQLAstCompletionCommand extends ESQLCommand<'completion'> {
+  prompt: ESQLAstExpression;
+  inferenceId: ESQLIdentifierOrParam;
+  targetField?: ESQLColumn;
+}
+
 export interface ESQLAstRerankCommand extends ESQLCommand<'rerank'> {
   query: ESQLLiteral;
   fields: ESQLAstField[];
@@ -130,10 +136,6 @@ export interface ESQLCommandOption extends ESQLAstBaseItem {
  */
 export interface ESQLAstRenameExpression extends ESQLCommandOption {
   name: 'as';
-}
-
-export interface ESQLCommandMode extends ESQLAstBaseItem {
-  type: 'mode';
 }
 
 export interface ESQLAstQueryExpression extends ESQLAstBaseItem<''> {
@@ -296,14 +298,15 @@ export interface ESQLSource extends ESQLAstBaseItem {
   sourceType: 'index' | 'policy';
 
   /**
-   * Represents the cluster part of the source identifier. Empty string if not
-   * present.
+   * Represents the prefix part of the source identifier. Empty string if not
+   * present. Used in index pattern as the cluster identifier or as "mode" in
+   * enrich policy.
    *
    * ```
-   * FROM [<cluster>:]<index>
+   * FROM [<prefix>:]<index>
    * ```
    */
-  cluster?: ESQLStringLiteral | undefined;
+  prefix?: ESQLStringLiteral | undefined;
 
   /**
    * Represents the index part of the source identifier. Unescaped and unquoted.

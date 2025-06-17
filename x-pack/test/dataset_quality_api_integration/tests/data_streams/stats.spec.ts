@@ -59,9 +59,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     ]);
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/211517
-  // Failing: See https://github.com/elastic/kibana/issues/213290
-  registry.when.skip('Api Key privileges check', { config: 'basic' }, () => {
+  registry.when('Api Key privileges check', { config: 'basic' }, () => {
     describe('index privileges', () => {
       it('returns user authorization as false for noAccessUser', async () => {
         const resp = await callApiAs('noAccessUser');
@@ -78,6 +76,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(resp.body.datasetUserPrivileges).to.eql({
           canRead: true,
           canMonitor: true,
+          canReadFailureStore: true,
           canViewIntegrations: true,
         });
       });

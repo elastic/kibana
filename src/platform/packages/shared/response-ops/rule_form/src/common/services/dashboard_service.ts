@@ -40,7 +40,7 @@ export function dashboardServiceProvider(contentManagementService: ContentManage
       const response = await contentManagementService.client.search({
         contentTypeId: 'dashboard',
         query,
-        options: { spaces: ['*'], fields: ['title', 'description'] },
+        options: { spaces: ['*'], fields: ['title', 'description'], includeReferences: ['tag'] },
       });
 
       // Assert the type of response to access hits property

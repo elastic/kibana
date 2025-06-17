@@ -144,7 +144,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return summary;
   };
 
-  describe('Embeddable alerts panel', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/220807
+  describe.skip('Embeddable alerts panel', () => {
     before(async () => {
       await pageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,

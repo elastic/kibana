@@ -83,6 +83,7 @@ export default function ({ getService }) {
             skipUnavailable: false,
             seeds: [NODE_SEED],
             mode: 'sniff',
+            nodeConnections: 3,
           })
           .expect(200);
 
@@ -93,6 +94,7 @@ export default function ({ getService }) {
           isConfiguredByNode: false,
           mode: 'sniff',
           securityModel: 'certificate',
+          nodeConnections: 3,
         });
       });
     });
@@ -113,10 +115,11 @@ export default function ({ getService }) {
               connectedNodesCount: 1,
               maxConnectionsPerCluster: 3,
               initialConnectTimeout: '30s',
-              skipUnavailable: false,
+              skipUnavailable: 'false', // ES issue #35671
               isConfiguredByNode: false,
               mode: 'sniff',
               securityModel: 'certificate',
+              nodeConnections: 3,
             },
           ]);
         });
