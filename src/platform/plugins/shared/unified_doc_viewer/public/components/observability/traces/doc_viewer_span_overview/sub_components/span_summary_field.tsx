@@ -16,9 +16,14 @@ import { FieldConfiguration } from '../../resources/get_field_configuration';
 export interface SpanSummaryFieldProps {
   fieldId: string;
   fieldConfiguration: FieldConfiguration;
+  showActions?: boolean;
 }
 
-export function SpanSummaryField({ fieldConfiguration, fieldId }: SpanSummaryFieldProps) {
+export function SpanSummaryField({
+  fieldConfiguration,
+  fieldId,
+  showActions = true,
+}: SpanSummaryFieldProps) {
   const { transaction, loading } = useTransactionContext();
   const [fieldValue, setFieldValue] = useState(fieldConfiguration.value);
   const isTransactionNameField = fieldId === TRANSACTION_NAME_FIELD;
@@ -47,6 +52,7 @@ export function SpanSummaryField({ fieldConfiguration, fieldId }: SpanSummaryFie
         formattedValue={fieldValue as string}
         fieldMetadata={fieldConfiguration.fieldMetadata}
         loading={isTransactionNameFieldWithoutValue && loading}
+        showActions={showActions}
       >
         <div>{fieldConfiguration.content(fieldValue, fieldConfiguration.formattedValue)}</div>
       </FieldWithActions>
