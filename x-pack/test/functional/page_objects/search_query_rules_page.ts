@@ -23,69 +23,6 @@ export function SearchQueryRulesPageProvider({ getService }: FtrProviderContext)
         await testSubjects.click(this.TEST_IDS.GET_STARTED_BUTTON);
       },
     },
-    QueryRulesCreateRulesetModal: {
-      TEST_IDS: {
-        CREATE_QUERY_RULES_SET_MODAL_INPUT: 'searchRulesetCreateRulesetModalFieldText',
-        CREATE_QUERY_RULES_SET_MODAL_CREATE_BUTTON: 'searchRulesetCreateRulesetModalCreateButton',
-      },
-      async setQueryRulesSetName(name: string) {
-        await testSubjects.setValue(this.TEST_IDS.CREATE_QUERY_RULES_SET_MODAL_INPUT, name);
-      },
-      async clickSaveButton() {
-        await testSubjects.click(this.TEST_IDS.CREATE_QUERY_RULES_SET_MODAL_CREATE_BUTTON);
-      },
-    },
-    QueryRulesDeleteRulesetModal: {
-      TEST_IDS: {
-        DELETE_QUERY_RULES_RULESET_MODAL_DELETE_BUTTON:
-          'searchRulesetDeleteRulesetModalDeleteButton',
-        DELETE_QUERY_RULES_RULESET_MODAL_ACKNOWLEDGE_BUTTON: 'confirmDeleteRulesetCheckbox',
-        DELETE_QUERY_RULES_RULESET_MODAL_CANCEL_BUTTON:
-          'searchRulesetDeleteRulesetModalCancelButton',
-      },
-      async clickDeleteButton() {
-        await testSubjects.click(this.TEST_IDS.DELETE_QUERY_RULES_RULESET_MODAL_DELETE_BUTTON);
-      },
-      async clickAcknowledgeButton() {
-        await testSubjects.click(this.TEST_IDS.DELETE_QUERY_RULES_RULESET_MODAL_ACKNOWLEDGE_BUTTON);
-      },
-      async clickCancelButton() {
-        await testSubjects.click(this.TEST_IDS.DELETE_QUERY_RULES_RULESET_MODAL_CANCEL_BUTTON);
-      },
-      async clickConfirmDeleteModal() {
-        await testSubjects.click('confirmModalConfirmButton');
-      },
-    },
-    QueryRulesDetailPage: {
-      TEST_IDS: {
-        RULESET_DETAILS_PAGE_BACK_BUTTON: 'queryRulesetDetailBackButton',
-        RULESET_DETAILS_PAGE_SAVE_BUTTON: 'queryRulesetDetailHeaderSaveButton',
-        RULESET_DETAILS_PAGE_HEADER: 'queryRulesetDetailHeader',
-        RULESET_DETAILS_PAGE_ACTIONS_BUTTON: 'searchQueryRulesQueryRulesetActionsButton',
-        RULESET_DETAILS_PAGE_DELETE_BUTTON: 'queryRulesetDetailDeleteButton',
-      },
-      async expectQueryRulesDetailPageNavigated(name: string) {
-        const h1Element = await find.byCssSelector(
-          `main header[data-test-subj="${this.TEST_IDS.RULESET_DETAILS_PAGE_HEADER}"] h1`
-        );
-        const text = await h1Element.getVisibleText();
-        if (text !== name) {
-          throw new Error(`Expected page title to be "${name}" but got "${text}"`);
-        }
-      },
-      async expectQueryRulesDetailPageBackButtonToExist() {
-        await testSubjects.existOrFail(this.TEST_IDS.RULESET_DETAILS_PAGE_BACK_BUTTON);
-      },
-      async expectQueryRulesDetailPageSaveButtonToExist() {
-        await testSubjects.existOrFail(this.TEST_IDS.RULESET_DETAILS_PAGE_SAVE_BUTTON);
-      },
-      async clickQueryRulesDetailPageActionsButton() {
-        await testSubjects.click(this.TEST_IDS.RULESET_DETAILS_PAGE_ACTIONS_BUTTON);
-      },
-      async clickQueryRulesDetailPageDeleteButton() {
-        await testSubjects.click(this.TEST_IDS.RULESET_DETAILS_PAGE_DELETE_BUTTON);
-      },
-    },
     QueryRulesManagementPage: {
       TEST_IDS: {
         QUERY_RULES_RULESETS_TABLE: 'queryRulesSetTable',
@@ -151,6 +88,151 @@ export function SearchQueryRulesPageProvider({ getService }: FtrProviderContext)
       },
       async clickPaginationPrevious() {
         await testSubjects.click(this.TEST_IDS.PAGINATION_PREVIOUS_BUTTON);
+      },
+    },
+    QueryRulesDetailPage: {
+      TEST_IDS: {
+        RULESET_DETAILS_PAGE_BACK_BUTTON: 'queryRulesetDetailBackButton',
+        RULESET_DETAILS_PAGE_SAVE_BUTTON: 'queryRulesetDetailHeaderSaveButton',
+        RULESET_DETAILS_PAGE_HEADER: 'queryRulesetDetailHeader',
+        RULESET_DETAILS_PAGE_ACTIONS_BUTTON: 'searchQueryRulesQueryRulesetActionsButton',
+        RULESET_DETAILS_PAGE_DELETE_BUTTON: 'queryRulesetDetailDeleteButton',
+        RULESET_RULES_CONTAINER: 'searchQueryRulesDroppable',
+        RULESET_RULE_ITEM_NAME: 'searchQueryRulesDraggableItem',
+        RULESET_RULE_ITEM_ACTIONS_BUTTON: 'searchQueryRulesQueryRulesetDetailButton',
+        RULESET_RULE_ITEM_ACTIONS_DELETE_BUTTON: 'searchQueryRulesQueryRulesetDetailDeleteButton',
+        RULESET_RULE_ITEM_ACTIONS_EDIT_BUTTON: 'searchQueryRulesQueryRulesetDetailEditButton',
+      },
+      async expectQueryRulesDetailPageNavigated(name: string) {
+        const h1Element = await find.byCssSelector(
+          `main header[data-test-subj="${this.TEST_IDS.RULESET_DETAILS_PAGE_HEADER}"] h1`
+        );
+        const text = await h1Element.getVisibleText();
+        if (text !== name) {
+          throw new Error(`Expected page title to be "${name}" but got "${text}"`);
+        }
+      },
+      async expectQueryRulesDetailPageBackButtonToExist() {
+        await testSubjects.existOrFail(this.TEST_IDS.RULESET_DETAILS_PAGE_BACK_BUTTON);
+      },
+      async expectQueryRulesDetailPageSaveButtonToExist() {
+        await testSubjects.existOrFail(this.TEST_IDS.RULESET_DETAILS_PAGE_SAVE_BUTTON);
+      },
+      async clickQueryRulesDetailPageSaveButton() {
+        await testSubjects.click(this.TEST_IDS.RULESET_DETAILS_PAGE_SAVE_BUTTON);
+      },
+      async clickQueryRulesDetailPageActionsButton() {
+        await testSubjects.click(this.TEST_IDS.RULESET_DETAILS_PAGE_ACTIONS_BUTTON);
+      },
+      async clickQueryRulesDetailPageDeleteButton() {
+        await testSubjects.click(this.TEST_IDS.RULESET_DETAILS_PAGE_DELETE_BUTTON);
+      },
+      async clickEditRulesetRule(id: number) {
+        const items = await testSubjects.findAll(this.TEST_IDS.RULESET_RULE_ITEM_NAME);
+        if (items[id]) {
+          const actionButton = await items[id].findByTestSubject(
+            this.TEST_IDS.RULESET_RULE_ITEM_ACTIONS_BUTTON
+          );
+          await actionButton.click();
+          await testSubjects.click(this.TEST_IDS.RULESET_RULE_ITEM_ACTIONS_EDIT_BUTTON);
+        } else {
+          throw new Error(`Ruleset rule with id "${id}" not found`);
+        }
+      },
+    },
+    QueryRulesCreateRulesetModal: {
+      TEST_IDS: {
+        CREATE_QUERY_RULES_SET_MODAL_INPUT: 'searchRulesetCreateRulesetModalFieldText',
+        CREATE_QUERY_RULES_SET_MODAL_CREATE_BUTTON: 'searchRulesetCreateRulesetModalCreateButton',
+      },
+      async setQueryRulesSetName(name: string) {
+        await testSubjects.setValue(this.TEST_IDS.CREATE_QUERY_RULES_SET_MODAL_INPUT, name);
+      },
+      async clickSaveButton() {
+        await testSubjects.click(this.TEST_IDS.CREATE_QUERY_RULES_SET_MODAL_CREATE_BUTTON);
+      },
+    },
+    QueryRulesDeleteRulesetModal: {
+      TEST_IDS: {
+        DELETE_QUERY_RULES_RULESET_MODAL_DELETE_BUTTON:
+          'searchRulesetDeleteRulesetModalDeleteButton',
+        DELETE_QUERY_RULES_RULESET_MODAL_ACKNOWLEDGE_BUTTON: 'confirmDeleteRulesetCheckbox',
+        DELETE_QUERY_RULES_RULESET_MODAL_CANCEL_BUTTON:
+          'searchRulesetDeleteRulesetModalCancelButton',
+      },
+      async clickDeleteButton() {
+        await testSubjects.click(this.TEST_IDS.DELETE_QUERY_RULES_RULESET_MODAL_DELETE_BUTTON);
+      },
+      async clickAcknowledgeButton() {
+        await testSubjects.click(this.TEST_IDS.DELETE_QUERY_RULES_RULESET_MODAL_ACKNOWLEDGE_BUTTON);
+      },
+      async clickCancelButton() {
+        await testSubjects.click(this.TEST_IDS.DELETE_QUERY_RULES_RULESET_MODAL_CANCEL_BUTTON);
+      },
+      async clickConfirmDeleteModal() {
+        await testSubjects.click('confirmModalConfirmButton');
+      },
+    },
+    QueryRulesRuleFlyout: {
+      TEST_IDS: {
+        RULE_FLYOUT: 'searchQueryRulesQueryRuleFlyout',
+        RULE_FLYOUT_UPDATE_BUTTON: 'searchQueryRulesQueryRuleFlyoutUpdateButton',
+        RULE_FLYOUT_PIN_MORE_BUTTON: 'searchQueryRulesPinMoreButton',
+        RULE_FLYOUT_METADATA_ADD_BUTTON: 'searchQueryRulesQueryRuleMetadataEditorAddCriteriaButton',
+        RULE_FLYOUT_DOCUMENT_DRAGGABLE_ID: 'editableResultDocumentId',
+        RULE_FLYOUT_ACTION_TYPE_EXCLUDE: 'searchQueryRulesQueryRuleActionTypeExclude',
+        RULE_FLYOUT_ACTION_TYPE_PINNED: 'searchQueryRulesQueryRuleActionTypePinned',
+        RULE_FLYOUT_CRITERIA_CUSTOM: 'searchQueryRulesQueryRuleCriteriaCustom',
+        RULE_FLYOUT_CRITERIA_ALWAYS: 'searchQueryRulesQueryRuleCriteriaAlways',
+        RULE_FLYOUT_CRITERIA_METADATA_BLOCK: 'searchQueryRulesQueryRuleMetadataEditor',
+        RULE_FLYOUT_CRITERIA_METADATA_BLOCK_FIELD: 'searchQueryRulesQueryRuleMetadataEditorField',
+      },
+      async expectRuleFlyoutToExist() {
+        await testSubjects.existOrFail(this.TEST_IDS.RULE_FLYOUT);
+      },
+      async clickUpdateButton() {
+        await testSubjects.click(this.TEST_IDS.RULE_FLYOUT_UPDATE_BUTTON);
+      },
+      async clickActionTypeExclude() {
+        await testSubjects.click(this.TEST_IDS.RULE_FLYOUT_ACTION_TYPE_EXCLUDE);
+      },
+      async clickActionTypePinned() {
+        await testSubjects.click(this.TEST_IDS.RULE_FLYOUT_ACTION_TYPE_PINNED);
+      },
+      async clickCriteriaCustom() {
+        await testSubjects.click(this.TEST_IDS.RULE_FLYOUT_CRITERIA_CUSTOM);
+      },
+      async clickCriteriaAlways() {
+        await testSubjects.click(this.TEST_IDS.RULE_FLYOUT_CRITERIA_ALWAYS);
+      },
+      async changeDocumentIdField(id: number, newValue: string = '') {
+        const documentFields = await testSubjects.findAll(
+          this.TEST_IDS.RULE_FLYOUT_DOCUMENT_DRAGGABLE_ID
+        );
+        if (documentFields[id]) {
+          const targetField = await documentFields[id];
+          await targetField.click();
+          await targetField.type(newValue);
+        } else {
+          await testSubjects.click(this.TEST_IDS.RULE_FLYOUT_PIN_MORE_BUTTON);
+          await this.changeDocumentIdField(id);
+        }
+      },
+      async changeMetadata(id: number, newValue: string = '') {
+        const metadataFields = await testSubjects.findAll(
+          this.TEST_IDS.RULE_FLYOUT_CRITERIA_METADATA_BLOCK
+        );
+        if (metadataFields[id]) {
+          const targetMetadataBlock = await metadataFields[id];
+          const targetField = await targetMetadataBlock.findByTestSubject(
+            this.TEST_IDS.RULE_FLYOUT_CRITERIA_METADATA_BLOCK_FIELD
+          );
+          await targetField.click();
+          await targetField.type(newValue);
+        } else {
+          await testSubjects.click(this.TEST_IDS.RULE_FLYOUT_METADATA_ADD_BUTTON);
+          await this.changeMetadata(id);
+        }
       },
     },
   };

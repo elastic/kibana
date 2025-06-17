@@ -203,6 +203,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
       onClose={onClose}
       ownFocus={false}
       size="l"
+      data-test-subj="searchQueryRulesQueryRuleFlyout"
       aria-labelledby="flyoutTitle"
       css={css({
         overflowY: 'hidden',
@@ -493,7 +494,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               ) : null}
               <EuiSpacer size="m" />
               <EuiButton
-                data-test-subj="searchQueryRulesQueryRuleFlyoutButton"
+                data-test-subj="searchQueryRulesPinMoreButton"
                 iconType="plusInCircle"
                 color={actionFields.length === 0 ? 'primary' : 'text'}
                 size="s"

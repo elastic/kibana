@@ -19,7 +19,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const es = getService('es');
   const kibanaServer = getService('kibanaServer');
 
-  // Helper function to create a test ruleset via ES API
   const createTestRuleset = async (rulesetId: string) => {
     await es.transport.request({
       path: `_query_rules/${rulesetId}`,
@@ -60,6 +59,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await pageObjects.searchQueryRules.QueryRulesManagementPage.expectQueryRulesTableToExist();
   };
 
+  const deleteTestRuleset = async (rulesetId: string) => {
+    await es.transport.request({
+      path: `_query_rules/${rulesetId}`,
+      method: 'DELETE',
+    });
+  };
+
   describe('Serverless Query Rules Overview', function () {
     before(async () => {
       await kibanaServer.uiSettings.update({ 'queryRules:queryRulesEnabled': 'true' });
@@ -86,10 +92,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchQueryRules.QueryRulesDetailPage.expectQueryRulesDetailPageBackButtonToExist();
         await pageObjects.searchQueryRules.QueryRulesDetailPage.expectQueryRulesDetailPageSaveButtonToExist();
         // Delete the ruleset created for this test
-        await es.transport.request({
-          path: '_query_rules/my-test-ruleset',
-          method: 'DELETE',
-        });
+        deleteTestRuleset('my-test-ruleset');
       });
     });
     describe('Adding a new ruleset in a non-empty deployment', () => {
@@ -109,14 +112,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchQueryRules.QueryRulesDetailPage.expectQueryRulesDetailPageBackButtonToExist();
         await pageObjects.searchQueryRules.QueryRulesDetailPage.expectQueryRulesDetailPageSaveButtonToExist();
         // Delete the rulesets created for this test
-        await es.transport.request({
-          path: '_query_rules/my-test-ruleset',
-          method: 'DELETE',
-        });
-        await es.transport.request({
-          path: '_query_rules/my-test-ruleset-2',
-          method: 'DELETE',
-        });
+        await deleteTestRuleset('my-test-ruleset');
+        await deleteTestRuleset('my-test-ruleset-2');
       });
     });
     describe('Deleting a query ruleset', () => {
@@ -137,6 +134,27 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchQueryRules.QueryRulesManagementPage.clickDeleteRulesetRow(0);
         await pageObjects.searchQueryRules.QueryRulesDeleteRulesetModal.clickAcknowledgeButton();
         await pageObjects.searchQueryRules.QueryRulesDeleteRulesetModal.clickConfirmDeleteModal();
+      });
+    });
+    describe('Editing a query ruleset with document pinning/exclude', () => {
+      it('is rulesets management page loaded with existing ruleset successfully - pass 1', async () => {
+        createTestRuleset('my-test-ruleset');
+      });
+      it('should edit the document id and the criteria field', async () => {
+        await pageObjects.searchQueryRules.QueryRulesManagementPage.clickRuleset('my-test-ruleset');
+        await pageObjects.searchQueryRules.QueryRulesDetailPage.clickEditRulesetRule(0);
+        await pageObjects.searchQueryRules.QueryRulesRuleFlyout.expectRuleFlyoutToExist();
+        await pageObjects.searchQueryRules.QueryRulesRuleFlyout.changeDocumentIdField(
+          0,
+          'W08XfZcBYqFvZsDKwTp4'
+        );
+        await pageObjects.searchQueryRules.QueryRulesRuleFlyout.clickActionTypePinned();
+        await pageObjects.searchQueryRules.QueryRulesRuleFlyout.clickActionTypeExclude();
+        await pageObjects.searchQueryRules.QueryRulesRuleFlyout.changeMetadata(0, 'my_query_field');
+        await pageObjects.searchQueryRules.QueryRulesRuleFlyout.clickUpdateButton();
+        await pageObjects.searchQueryRules.QueryRulesDetailPage.clickQueryRulesDetailPageSaveButton();
+        // Delete the rulesets created for this test
+        await deleteTestRuleset('my-test-ruleset');
       });
     });
   });
