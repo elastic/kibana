@@ -46222,7 +46222,7 @@ paths:
       summary: Add or update a note
       tags:
         - Security Timeline API
-  /api/observability_ai_assistant/chat/complete 2023-10-31:
+  /api/observability_ai_assistant/chat/complete:
     post:
       description: Creates a new chat completion via the Observability AI Assistant, returning the model's response based on the current conversation context. This endpoint also handles any tool requests within the conversation, which may trigger multiple calls to the underlying large language model (LLM).
       parameters:
@@ -69263,7 +69263,7 @@ components:
       title: Sync API response for trained models
       type: object
     Observability_AI_Assistant_APIs_completeChatRequestExample:
-      description: Run `POST /api/observability_ai_assistant/chat/complete 2023-10-31` to complete a chat interaction.
+      description: Run `POST /api/observability_ai_assistant/chat/complete` to complete a chat interaction.
       summary: Example of completing a chat interaction
       value: |
         {

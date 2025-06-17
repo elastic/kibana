@@ -16,7 +16,7 @@ tags:
 servers:
   - url: /
 paths:
-  /api/observability_ai_assistant/chat/complete 2023-10-31:
+  /api/observability_ai_assistant/chat/complete:
     post:
       summary: Generate a chat completion
       description: Creates a new chat completion via the Observability AI Assistant, returning the model's response based on the current conversation context. This endpoint also handles any tool requests within the conversation, which may trigger multiple calls to the underlying large language model (LLM).
@@ -234,7 +234,7 @@ components:
           type: conversationCreate
     completeChatRequestExample:
       summary: Example of completing a chat interaction
-      description: Run `POST /api/observability_ai_assistant/chat/complete 2023-10-31` to complete a chat interaction.
+      description: Run `POST /api/observability_ai_assistant/chat/complete` to complete a chat interaction.
       value: |
         {
           "connectorId": "Elastic-Managed-LLM",
