@@ -318,6 +318,7 @@ export function createCustomCallbackMocks(
       return { recommendedQueries: [] };
     }),
     getInferenceEndpoints: jest.fn(async () => ({ inferenceEndpoints })),
+    getCurrentAppId: jest.fn(async () => 'discover'),
   };
 }
 

@@ -334,6 +334,7 @@ src/platform/packages/private/kbn-handlebars @elastic/kibana-security
 src/platform/packages/private/kbn-hapi-mocks @elastic/kibana-core
 src/platform/packages/private/kbn-health-gateway-server @elastic/kibana-core
 src/platform/packages/private/kbn-import-resolver @elastic/kibana-operations
+src/platform/packages/private/kbn-index-editor @elastic/kibana-esql
 src/platform/packages/private/kbn-item-buffer @elastic/appex-sharedux
 src/platform/packages/private/kbn-jest-serializers @elastic/kibana-operations
 src/platform/packages/private/kbn-journeys @elastic/kibana-operations @elastic/appex-qa

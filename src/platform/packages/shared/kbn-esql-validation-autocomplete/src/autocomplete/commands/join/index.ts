@@ -21,7 +21,11 @@ import {
 } from '../../../definitions/types';
 import { specialIndicesToSuggestions } from '../../helper';
 import { getPosition, suggestionIntersection, suggestionUnion } from './util';
-import { TRIGGER_SUGGESTION_COMMAND, buildFieldsDefinitionsWithMetadata } from '../../factories';
+import {
+  TRIGGER_SUGGESTION_COMMAND,
+  buildFieldsDefinitionsWithMetadata,
+  getLookupIndexCreateSuggestion,
+} from '../../factories';
 import type { GetColumnsByTypeFn, SuggestionRawDefinition } from '../../types';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import { handleFragment } from '../../helper';
@@ -227,13 +231,22 @@ export const suggest: CommandSuggestFunction<'join'> = async ({
 
     case 'after_mnemonic':
     case 'index': {
-      const joinIndices = await callbacks?.getJoinIndices?.();
+      const indexNameInput = commandText.split(' ').pop() ?? '';
+      const isCreateCommandEnabled = (await callbacks?.getCurrentAppId?.()) === 'discover';
 
-      if (!joinIndices) {
-        return [];
+      const joinIndices = await callbacks?.getJoinIndices?.();
+      const suggestions: SuggestionRawDefinition[] = [];
+
+      if (isCreateCommandEnabled) {
+        const createIndexCommandSuggestion = getLookupIndexCreateSuggestion(indexNameInput);
+        suggestions.push(createIndexCommandSuggestion);
       }
 
-      return specialIndicesToSuggestions(joinIndices.indices);
+      if (joinIndices) {
+        suggestions.push(...specialIndicesToSuggestions(joinIndices.indices));
+      }
+
+      return suggestions;
     }
 
     case 'after_index': {

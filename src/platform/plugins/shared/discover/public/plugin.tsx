@@ -26,6 +26,7 @@ import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { once } from 'lodash';
 import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
+import { registerIndexEditorActions } from '@kbn/index-editor';
 import { DISCOVER_APP_LOCATOR, PLUGIN_ID, type DiscoverAppLocator } from '../common';
 import {
   DISCOVER_CONTEXT_APP_LOCATOR,
@@ -242,6 +243,15 @@ export class DiscoverPlugin
     );
     plugins.uiActions.registerTrigger(SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER);
     plugins.uiActions.registerTrigger(DISCOVER_CELL_ACTIONS_TRIGGER);
+
+    /** Async register the index editor UI actions */
+    registerIndexEditorActions({
+      data: plugins.data,
+      coreStart: core,
+      share: plugins.share,
+      uiActions: plugins.uiActions,
+      fieldFormats: plugins.fieldFormats,
+    });
 
     const isEsqlEnabled = core.uiSettings.get(ENABLE_ESQL);
 

@@ -33,10 +33,11 @@ import { ESQLLang, ESQL_LANG_ID, monaco, type ESQLCallbacks } from '@kbn/monaco'
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { fixESQLQueryWithVariables } from '@kbn/esql-utils';
 import { createPortal } from 'react-dom';
-import { css } from '@emotion/react';
+import { css, Global } from '@emotion/react';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { type ESQLFieldWithMetadata } from '@kbn/esql-validation-autocomplete';
 import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
+import { firstValueFrom, of } from 'rxjs';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {
@@ -59,6 +60,7 @@ import {
   esqlEditorStyles,
 } from './esql_editor.styles';
 import type { ESQLEditorProps, ESQLEditorDeps, ControlsContext } from './types';
+import { useCreateLookupIndexCommand } from './custom_commands';
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
@@ -449,7 +451,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     return { cache: fn.cache, memoizedSources: fn };
   }, []);
 
-  const esqlCallbacks: ESQLCallbacks = useMemo(() => {
+  const esqlCallbacks = useMemo<ESQLCallbacks>(() => {
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
         clearCacheWhenOld(dataSourcesCache, fixedQuery);
@@ -514,6 +516,9 @@ export const ESQLEditor = memo(function ESQLEditor({
         return variablesService?.areSuggestionsEnabled ?? false;
       },
       getJoinIndices: kibana.services?.esql?.getJoinIndicesAutocomplete,
+      getCurrentAppId: async () => {
+        return await firstValueFrom(application?.currentAppId$ ?? of(undefined));
+      },
       getTimeseriesIndices: kibana.services?.esql?.getTimeseriesIndicesAutocomplete,
       getEditorExtensions: async (queryString: string) => {
         if (activeSolutionId) {
@@ -550,7 +555,25 @@ export const ESQLEditor = memo(function ESQLEditor({
     indexManagementApiService,
     histogramBarTarget,
     activeSolutionId,
+    application?.currentAppId$,
   ]);
+
+  const onIndexCreated = useCallback(
+    (resultQueryString: string) => {
+      onQueryUpdate(resultQueryString);
+      esqlCallbacks.getJoinIndices?.();
+    },
+    [esqlCallbacks, onQueryUpdate]
+  );
+
+  const { lookupIndexBadgeStyle, lookupIndexLabelClickHandler, addLookupIndicesDecorator } =
+    useCreateLookupIndexCommand(
+      editor1,
+      editorModel,
+      esqlCallbacks?.getJoinIndices,
+      query,
+      onIndexCreated
+    );
 
   const queryRunButtonProperties = useMemo(() => {
     if (allowQueryCancellation && isLoading) {
@@ -763,6 +786,7 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   const editorPanel = (
     <>
+      <Global styles={lookupIndexBadgeStyle} />
       {Boolean(editorIsInline) && !hideRunQueryButton && (
         <EuiFlexGroup
           gutterSize="none"
@@ -840,19 +864,27 @@ export const ESQLEditor = memo(function ESQLEditor({
                     const model = editor.getModel();
                     if (model) {
                       editorModel.current = model;
+                      // TODO add decorator here
+                      addLookupIndicesDecorator();
                     }
+
+                    monaco.languages.setLanguageConfiguration(ESQL_LANG_ID, {
+                      wordPattern: /'?\w[\w'-.]*[?!,;:"]*/,
+                    });
+
                     // this is fixing a bug between the EUIPopover and the monaco editor
                     // when the user clicks the editor, we force it to focus and the onDidFocusEditorText
                     // to fire, the timeout is needed because otherwise it refocuses on the popover icon
                     // and the user needs to click again the editor.
                     // IMPORTANT: The popover needs to be wrapped with the EuiOutsideClickDetector component.
-                    editor.onMouseDown(() => {
+                    editor.onMouseDown(async (e) => {
                       setTimeout(() => {
                         editor.focus();
                       }, 100);
                       if (datePickerOpenStatusRef.current) {
                         setPopoverPosition({});
                       }
+                      await lookupIndexLabelClickHandler(e);
                     });
 
                     editor.onDidFocusEditorText(() => {
