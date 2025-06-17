@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiPanel, EuiProgress } from '@elastic/eui';
 import React from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { css } from '@emotion/css';
 import { PrivilegedAccessDetectionMLPopover } from './pad_ml_popover';
 import { HeaderSection } from '../../../../../common/components/header_section';
 import { PRIVILEGED_USER_ACTIVITY_QUERY_ID } from '../privileged_user_activity/constants';
@@ -64,7 +65,17 @@ export const PrivilegedAccessDetectionsPanel: React.FC<{ spaceId: string }> = ({
 
   return (
     <>
-      {!padInstallationStatus && <div css={{ height: '400px' }} />}
+      {!padInstallationStatus && (
+        <EuiPanel
+          hasShadow={false}
+          hasBorder={true}
+          css={css`
+            width: 100%;
+          `}
+        >
+          <EuiProgress size="xs" color="accent" />
+        </EuiPanel>
+      )}
       {padInstallationStatus && !packageInstallationComplete && !currentlyInstalling && (
         <PrivilegedAccessDetectionInstallPrompt install={install} />
       )}
