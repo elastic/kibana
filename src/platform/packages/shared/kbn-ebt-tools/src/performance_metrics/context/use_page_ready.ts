@@ -17,11 +17,11 @@ interface UsePageReadyProps {
   isReady: boolean;
   meta?: Meta;
   isRefreshing: boolean;
-  customInitialLoadReported?: { value: boolean; onInitialLoadReported: () => void };
+  customInitialLoad?: { value: boolean; onInitialLoadReported: () => void };
 }
 
 export const usePageReady = ({
-  customInitialLoadReported,
+  customInitialLoad,
   isReady,
   isRefreshing,
   customMetrics,
@@ -29,21 +29,19 @@ export const usePageReady = ({
 }: UsePageReadyProps) => {
   const { onPageReady, onPageRefreshStart } = usePerformanceContext();
   const prevIsRefreshing = usePrevious(isRefreshing);
-  const [isInitialLoadReportedInternal, setIsInitialLoadReportedInternal] = useState(false);
+  const [isInitialLoadInternal, setIsInitialLoadInternal] = useState(true);
 
-  const isInitialLoadReported = customInitialLoadReported
-    ? customInitialLoadReported.value
-    : isInitialLoadReportedInternal;
+  const isInitialLoad = customInitialLoad ? customInitialLoad.value : isInitialLoadInternal;
 
   useEffect(() => {
     // Skip until either the page is ready for the first time or a refresh cycle begins
-    if (!isInitialLoadReported && !isReady) return;
+    if (isInitialLoad && !isReady) return;
 
     // Initial load flow
-    if (isReady && !isInitialLoadReported) {
+    if (isReady && isInitialLoad) {
       onPageReady({ customMetrics, meta });
-      customInitialLoadReported?.onInitialLoadReported();
-      setIsInitialLoadReportedInternal(true);
+      customInitialLoad?.onInitialLoadReported();
+      setIsInitialLoadInternal(false);
       return;
     }
 
@@ -54,9 +52,9 @@ export const usePageReady = ({
       onPageReady({ customMetrics, meta });
     }
   }, [
-    customInitialLoadReported,
+    customInitialLoad,
     customMetrics,
-    isInitialLoadReported,
+    isInitialLoad,
     isReady,
     isRefreshing,
     meta,

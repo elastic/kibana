@@ -95,15 +95,15 @@ describe('usePageReady', () => {
     await waitFor(() => expect(mockOnPageReady).toHaveBeenCalledTimes(2));
   });
 
-  it('uses external customInitialLoadReported flag', async () => {
-    const external = { value: false, onInitialLoadReported: jest.fn() };
+  it('uses external customInitialLoad flag', async () => {
+    const external = { value: true, onInitialLoadReported: jest.fn() };
 
     const { rerender } = renderHook(
       ({ ready }) =>
         usePageReady({
           isReady: ready,
           isRefreshing: false,
-          customInitialLoadReported: external,
+          customInitialLoad: external,
         }),
       { initialProps: { ready: false } }
     );

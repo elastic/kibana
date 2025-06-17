@@ -142,7 +142,7 @@ export const mockState: SyntheticsAppState = {
     loading: false,
     status: null,
     error: null,
-    isInitialLoadReported: false,
+    isInitialLoad: true,
   },
   globalParams: {
     addError: null,

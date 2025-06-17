@@ -12,7 +12,7 @@ import { initialLoadReported, selectOverviewStatus } from '../state/overview_sta
 export const useSyntheticsPageReady = () => {
   const {
     loaded,
-    isInitialLoadReported,
+    isInitialLoad,
     loading: isLoadingOverviewStatus,
   } = useSelector(selectOverviewStatus);
 
@@ -20,8 +20,8 @@ export const useSyntheticsPageReady = () => {
 
   usePageReady({
     isReady: loaded,
-    customInitialLoadReported: {
-      value: isInitialLoadReported,
+    customInitialLoad: {
+      value: isInitialLoad,
       onInitialLoadReported: () => {
         dispatch(initialLoadReported());
       },
