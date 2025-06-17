@@ -10,8 +10,9 @@
 import React from 'react';
 import { css, Global } from '@emotion/react';
 import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
+import { CommonGlobalAppStyles } from '../common/global_app_styles';
 
-export const renderingOverrides = (euiTheme: UseEuiTheme['euiTheme']) => css`
+const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
   :root {
     // height of the header banner
     --kbnHeaderBannerHeight: ${euiTheme.size.xl};
@@ -100,25 +101,6 @@ export const renderingOverrides = (euiTheme: UseEuiTheme['euiTheme']) => css`
     }
   }
 
-  // Due to pure HTML and the scope being large, we decided to temporarily apply following 3 style blocks globally.
-  // TODO: refactor within github issue #223571
-
-  // Styles applied to the span.ffArray__highlight from FieldFormat class that is used to visually distinguish array delimiters when rendering array values as HTML in Kibana field formatters
-  .ffArray__highlight {
-    color: ${euiTheme.colors.mediumShade};
-  }
-
-  // Styles applied to the span.ffString__emptyValue from FieldFormat class that is used to visually distinguish empty string values when rendering string values as HTML in Kibana field formatters
-  .ffString__emptyValue {
-    color: ${euiTheme.colors.darkShade};
-  }
-
-  .lnsTableCell--colored .ffString__emptyValue {
-    color: unset;
-  }
-`;
-
-export const chromeStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
   .euiDataGrid__restrictBody {
     .headerGlobalNav,
     .kbnQueryBar {
@@ -137,11 +119,9 @@ export const chromeStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
 export const LegacyFixedLayoutGlobalStyles = () => {
   const { euiTheme } = useEuiTheme();
   return (
-    <Global
-      styles={css`
-        ${chromeStyles(euiTheme)}
-        ${renderingOverrides(euiTheme)}
-      `}
-    />
+    <>
+      <Global styles={globalLayoutStyles(euiTheme)} />
+      <CommonGlobalAppStyles />
+    </>
   );
 };
