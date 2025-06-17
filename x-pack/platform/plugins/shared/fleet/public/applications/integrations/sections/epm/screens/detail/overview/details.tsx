@@ -65,7 +65,6 @@ const Replacements = euiStyled(EuiFlexItem)`
 `;
 
 export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) => {
-  const { notifications } = useStartServices();
   const config = useConfig();
   const { data: categoriesData, isLoading: isLoadingCategories } = useGetCategoriesQuery();
 
