@@ -12,10 +12,17 @@ import { HOSTS_VIEW_PATH, ML_JOB_IDS } from './constants';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const pageObjects = getPageObjects(['assetDetails', 'common', 'infraHome', 'infraHostsView']);
+  const pageObjects = getPageObjects([
+    'assetDetails',
+    'common',
+    'infraHome',
+    'infraHostsView',
+    'header',
+  ]);
   const infraSourceConfigurationForm = getService('infraSourceConfigurationForm');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const retry = getService('retry');
 
   describe('Metrics UI Anomaly Flyout', function () {
     before(async () => {
@@ -144,10 +151,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.infraHome.setAnomaliesDate('Apr 21, 2021 @ 00:00:00.000');
           const hostName = await pageObjects.infraHome.getAnomalyHostName();
           await pageObjects.infraHome.clickShowAffectedHostsButton();
-          const currentUrl = await browser.getCurrentUrl();
-          expect(currentUrl).to.contain(
-            encodeURIComponent(`query:(terms:(host.name:!(${hostName})))`)
-          );
+          await pageObjects.header.waitUntilLoadingHasFinished();
+
+          await retry.tryForTime(5000, async () => {
+            const currentUrl = await browser.getCurrentUrl();
+            expect(currentUrl).to.contain(
+              encodeURIComponent(`query:(terms:(host.name:!(${hostName})))`)
+            );
+          });
         });
       });
     });
