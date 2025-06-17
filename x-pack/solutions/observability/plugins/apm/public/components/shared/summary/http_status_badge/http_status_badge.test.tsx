@@ -52,6 +52,7 @@ describe('HttpStatusBadge', () => {
 
     const badge = screen.getByTestId('httpStatusBadge');
     expect(badge).toHaveStyle({
+      // @ts-expect-error euiColorVisWarning1 seems to not be defined in the euiTheme
       '--euiBadgeBackgroundColor': result.current.euiTheme.colors.vis.euiColorVisWarning1,
     });
     expect(badge).toHaveTextContent('404');

@@ -13,6 +13,7 @@ export const useGetStatusColor = (status: string | number) => {
     1: euiTheme.colors.vis.euiColorVisGrey0,
     2: euiTheme.colors.vis.euiColorVisSuccess0,
     3: euiTheme.colors.vis.euiColorVisGrey0,
+    // @ts-expect-error euiColorVisWarning1 seems to not be defined in the euiTheme
     4: euiTheme.colors.vis.euiColorVisWarning1,
     5: euiTheme.colors.vis.euiColorVisDanger0,
   };
