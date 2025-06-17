@@ -35,30 +35,18 @@ export class EsqlToolRegistryImpl implements EsqlToolRegistry {
 
   async has(options: { toolId: string; request: KibanaRequest }): Promise<boolean> {
     const { toolId, request } = options;
-    try {
-      await this.get({ toolId, request });
-      return true;
-    } catch (error) {
-      return false;
-    }
+    await this.get({ toolId, request });
+    return true;
   }
 
   async get(options: { toolId: string; request: KibanaRequest }): Promise<RegisteredTool> {
     const { toolId, request } = options;
     const client = await this.getScopedClient({ request });
-    try {
-      const document = await client.get(toolId);
-      const tool = document;
-      const executableTool = esqlToolCreator(tool);
+    const document = await client.get(toolId);
+    const tool = document;
+    const executableTool = esqlToolCreator(tool);
 
-      return executableTool as EsqlTool;
-    } catch (error) {
-      if (error.statusCode === 404) {
-        throw new Error(`Tool with ID ${toolId} not found`);
-      }
-      this.logger.error(`Error retrieving ESQL tool with ID ${toolId}: ${error}`);
-      throw error;
-    }
+    return executableTool as EsqlTool;
   }
 
   async list(options: { request: KibanaRequest }): Promise<RegisteredTool[]> {
@@ -74,20 +62,15 @@ export class EsqlToolRegistryImpl implements EsqlToolRegistry {
   }
 
   async getScopedClient({ request }: { request: KibanaRequest }): Promise<EsqlToolClient> {
-    try {
-      const storage = createStorage({
-        logger: this.logger,
-        esClient: this.elasticsearch.client.asScoped(request).asInternalUser,
-      });
+    const storage = createStorage({
+      logger: this.logger,
+      esClient: this.elasticsearch.client.asScoped(request).asInternalUser,
+    });
 
-      const client = createClient({
-        storage,
-      });
+    const client = createClient({
+      storage,
+    });
 
-      return client;
-    } catch (error) {
-      this.logger.error(error);
-      throw error;
-    }
+    return client;
   }
 }

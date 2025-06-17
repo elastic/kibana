@@ -17,6 +17,7 @@ export const esqlSchema = z.object({
 });
 
 export const esqlToolCreator = (tool: EsqlToolCreateResponse): EsqlTool => {
+  console.log("Tool creator called with tool:", tool);
   const executableTool: EsqlTool = {
     id: tool.id,
     name: tool.name,
@@ -25,33 +26,29 @@ export const esqlToolCreator = (tool: EsqlToolCreateResponse): EsqlTool => {
     params: tool.params,
     schema: esqlSchema,
     handler: async ({ params }, { esClient }) => {
-      try {
-        const client = esClient.asCurrentUser;
+      const client = esClient.asCurrentUser;
+      console.log("Params received in handler:", params);
+      const filledQuery = tool.query.replace(/\?(\w+)/g, (_, key) => {
+        if (!(key in tool.params)) {
+          throw new Error(
+            `Error with query: Parameter ${key} not found in tool params. Available: ${Object.keys(
+              tool.params
+            ).join(', ')}`
+          );
+        }
+        const value = params[key];
+        if (value === undefined || value === null) {
+          throw new Error(`Error with query: Parameter ${key} is required but was not provided`);
+        }
 
-        const filledQuery = tool.query.replace(/\?(\w+)/g, (_, key) => {
-          if (!(key in tool.params)) {
-            throw new Error(
-              `Parameter ${key} not found in tool params. Available: ${Object.keys(
-                tool.params
-              ).join(', ')}`
-            );
-          }
-          const value = params[key];
-          if (value === undefined || value === null) {
-            throw new Error(`Parameter ${key} is required but was not provided`);
-          }
+        return typeof value === 'string' ? `"${value.replace(/"/g, '\\"')}"` : value;
+      });
 
-          return typeof value === 'string' ? `"${value.replace(/"/g, '\\"')}"` : value;
-        });
+      const response = await client.esql.query({
+        query: filledQuery,
+      })
 
-        const response = await client.esql.query({
-          query: filledQuery,
-        })
-
-        return response;
-      } catch (error) {
-        throw error;
-      }
+      return response;
     },
     meta: tool.meta,
   };

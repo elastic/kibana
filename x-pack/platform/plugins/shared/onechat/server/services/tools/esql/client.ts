@@ -31,23 +31,15 @@ class EsqlToolClientImpl {
     this.storage = storage;
   }
 
-  async get(name: string): Promise<EsqlToolCreateResponse> {
+  async get(id: string): Promise<EsqlToolCreateResponse> {
     try {
-        const document = await this.storage.getClient().search({
-            query: {
-              term: {
-                name: name
-              }
-            },
-            size: 1,
-            track_total_hits: true
-          });
+      const document = await this.storage.getClient().get({id})
         
-      const tool = document.hits.hits[0]?._source as EsqlToolCreateResponse;
+      const tool = document._source as EsqlToolCreateResponse;
 
       return tool;
     } catch (error) {
-      logger.error(`Error retrieving ESQL tool with ID ${name}: ${error}`);
+      logger.error(`Error retrieving ESQL tool with Name ${name}: ${error}`);
       throw error;
     }
   }
@@ -80,7 +72,7 @@ class EsqlToolClientImpl {
         ...tool,
         meta: {
           providerId: esqlToolProviderId,
-          tags: [],
+          tags: tool.meta?.tags ?? [],
         },
       };
 
@@ -130,17 +122,28 @@ class EsqlToolClientImpl {
   }
   async delete(name: string): Promise<boolean> {
     try {
-      const document = await this.get(name);
+        const document = await this.storage.getClient().search({
+            query: {
+                term: {
+                name: name
+                }
+            },
+            size: 1,
+            track_total_hits: true
+            });
 
-      if (!document) {
-        throw new Error(`Tool with Name ${name} not found`);
-      }
+        if (!document){
+            throw new Error(`Tool with name ${name} not found`);
+        }
 
-      await this.storage.getClient().delete({ id: document.id });
+        const tool = document.hits.hits[0]?._source as EsqlToolCreateResponse;
+
+        await this.storage.getClient().delete({ id: tool.id });
+         return true;
     } catch (error) {
       logger.error(`Error deleting ESQL tool with Name ${name}: ${error}`);
       throw error;
     }
-    return true;
+   
   }
 }
