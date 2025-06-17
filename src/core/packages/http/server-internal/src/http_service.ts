@@ -273,7 +273,7 @@ export class HttpService
       version: schema.maybe(schema.string()),
       excludePathsMatching: schema.maybe(stringOrStringArraySchema),
       pathStartsWith: schema.maybe(stringOrStringArraySchema),
-      pluginId: schema.maybe(schema.string()),
+      pluginId: schema.maybe(schema.string()), // i.e. `@kbn/lens-plugin`
     });
 
     server.route({
@@ -324,7 +324,15 @@ export class HttpService
         );
       },
       options: {
-        app: { access: 'public' },
+        app: {
+          access: 'public',
+          security: {
+            authz: {
+              enabled: false,
+              reason: 'Dev only route',
+            },
+          },
+        },
         auth: false,
         cache: {
           privacy: 'public',
