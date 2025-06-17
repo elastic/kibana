@@ -3198,6 +3198,21 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.DURATION",
+        "type": "string",
+        "tags": [],
+        "label": "DURATION",
+        "description": [],
+        "signature": [
+          "\"duration\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/otel.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.ELASTIC_PROFILER_STACK_TRACE_IDS",
         "type": "string",
         "tags": [],
@@ -3380,6 +3395,21 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.ERROR_MESSAGE",
+        "type": "string",
+        "tags": [],
+        "label": "ERROR_MESSAGE",
+        "description": [],
+        "signature": [
+          "\"error.message\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/otel.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.ERROR_PAGE_URL",
         "type": "string",
         "tags": [],
@@ -3479,6 +3509,36 @@
           "\"unknown\" | \"success\" | \"failure\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/event_outcome.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.EXCEPTION_MESSAGE",
+        "type": "string",
+        "tags": [],
+        "label": "EXCEPTION_MESSAGE",
+        "description": [],
+        "signature": [
+          "\"exception.message\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/otel.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.EXCEPTION_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "EXCEPTION_TYPE",
+        "description": [],
+        "signature": [
+          "\"exception.type\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/otel.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5199,6 +5259,21 @@
           "StackframeBase & { line: Line & { context: string; }; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/stackframe.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.STATUS_CODE",
+        "type": "string",
+        "tags": [],
+        "label": "STATUS_CODE",
+        "description": [],
+        "signature": [
+          "\"status.code\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/otel.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
