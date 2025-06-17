@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { addMinutes } from 'date-fns';
 import { SavedObjectsClient, type CoreStart, type Logger } from '@kbn/core/server';
 import {
   TaskStatus,
@@ -17,7 +18,8 @@ export const CASES_INCREMENTAL_ID_SYNC_TASK_TYPE = 'cases_incremental_id_assignm
 export const CASES_INCREMENTAL_ID_SYNC_TASK_ID = `Cases:${CASES_INCREMENTAL_ID_SYNC_TASK_TYPE}`;
 
 export const CasesIncrementIdTaskVersion = '1.0.0';
-const CASES_INCREMENTAL_ID_SYNC_INTERVAL_DEFAULT = '10s';
+const CASES_INCREMENTAL_ID_SYNC_INTERVAL_DEFAULT_MINUTES = 10;
+const CASES_INCREMENTAL_ID_SYNC_INTERVAL_DEFAULT = `${CASES_INCREMENTAL_ID_SYNC_INTERVAL_DEFAULT_MINUTES}m`;
 
 export class IncrementalIdTaskManager {
   private logger: Logger;
@@ -32,7 +34,7 @@ export class IncrementalIdTaskManager {
       [CASES_INCREMENTAL_ID_SYNC_TASK_TYPE]: {
         title: 'Cases Numerical ID assignment',
         description: 'Applying incremental numeric ids to cases',
-        timeout: '10s',
+        timeout: '10m',
         createTaskRunner: () => {
           return {
             run: async () => {
@@ -98,6 +100,8 @@ export class IncrementalIdTaskManager {
         .ensureScheduled({
           id: CASES_INCREMENTAL_ID_SYNC_TASK_ID,
           taskType: CASES_INCREMENTAL_ID_SYNC_TASK_TYPE,
+          // start delayed to give the system some time to start up properly
+          runAt: addMinutes(new Date(), CASES_INCREMENTAL_ID_SYNC_INTERVAL_DEFAULT_MINUTES),
           schedule: {
             interval: CASES_INCREMENTAL_ID_SYNC_INTERVAL_DEFAULT,
           },
