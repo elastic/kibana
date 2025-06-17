@@ -59,7 +59,7 @@ export const DetectionEngineFilters = ({
 
   const dataViewSpec = useMemo(() => {
     // NOTE: index pattern should have a title or an id to be considered valid
-    // it is possible that the empty id or title witll be set for compatibility reasons.
+    // it is possible that the empty id or title are set temporarily during page load (compatibility reasons as we support adhoc data views now).
     // to be removed after the cleanup work in scope of https://github.com/elastic/security-team/issues/11959
     // is done.
     const isIndexPatternValid = indexPattern && (indexPattern.title || indexPattern.id);
