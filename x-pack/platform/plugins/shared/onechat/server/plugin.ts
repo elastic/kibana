@@ -19,7 +19,7 @@ import type {
 import { registerRoutes } from './routes';
 import { ServiceManager } from './services';
 import { registerFeatures } from './features';
-import { ONECHAT_MCP_SERVER_UI_SETTING_ID } from '../common/constants';
+import { ESQL_TOOL_API_UI_SETTING_ID, ONECHAT_MCP_SERVER_UI_SETTING_ID } from '../common/constants';
 
 export class OnechatPlugin
   implements
@@ -57,6 +57,21 @@ export class OnechatPlugin
         }),
         name: i18n.translate('onechat.uiSettings.mcpServer.name', {
           defaultMessage: 'MCP Server',
+        }),
+        schema: schema.boolean(),
+        value: false,
+        readonly: true,
+        readonlyMode: 'ui',
+      },
+    });
+
+    coreSetup.uiSettings.register({
+      [ESQL_TOOL_API_UI_SETTING_ID]: {
+        description: i18n.translate('onechat.uiSettings.esqlToolApi.description', {
+          defaultMessage: 'Enables ESQL Tool API to craete your own ESQL-based tools.',
+        }),
+        name: i18n.translate('onechat.uiSettings.esqlToolApi.name', {
+          defaultMessage: 'ESQL Tool API',
         }),
         schema: schema.boolean(),
         value: false,

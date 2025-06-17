@@ -31,14 +31,23 @@ class EsqlToolClientImpl {
     this.storage = storage;
   }
 
-  async get(id: string): Promise<EsqlToolCreateResponse> {
+  async get(name: string): Promise<EsqlToolCreateResponse> {
     try {
-      const document = await this.storage.getClient().get({ id });
-      const tool = document._source as EsqlToolCreateResponse;
+        const document = await this.storage.getClient().search({
+            query: {
+              term: {
+                name: name
+              }
+            },
+            size: 1,
+            track_total_hits: true
+          });
+        
+      const tool = document.hits.hits[0]?._source as EsqlToolCreateResponse;
 
       return tool;
     } catch (error) {
-      logger.error(`Error retrieving ESQL tool with ID ${id}: ${error}`);
+      logger.error(`Error retrieving ESQL tool with ID ${name}: ${error}`);
       throw error;
     }
   }
@@ -119,17 +128,17 @@ class EsqlToolClientImpl {
       throw error;
     }
   }
-  async delete(id: string): Promise<boolean> {
+  async delete(name: string): Promise<boolean> {
     try {
-      const document = await this.storage.getClient().get({ id });
+      const document = await this.get(name);
 
-      if (!document._source) {
-        throw new Error(`Tool with ID ${id} not found`);
+      if (!document) {
+        throw new Error(`Tool with Name ${name} not found`);
       }
 
-      await this.storage.getClient().delete({ id });
+      await this.storage.getClient().delete({ id: document.id });
     } catch (error) {
-      logger.error(`Error deleting ESQL tool with ID ${id}: ${error}`);
+      logger.error(`Error deleting ESQL tool with Name ${name}: ${error}`);
       throw error;
     }
     return true;

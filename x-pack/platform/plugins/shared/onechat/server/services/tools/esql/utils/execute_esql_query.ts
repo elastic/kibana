@@ -44,13 +44,9 @@ export const esqlToolCreator = (tool: EsqlToolCreateResponse): EsqlTool => {
           return typeof value === 'string' ? `"${value.replace(/"/g, '\\"')}"` : value;
         });
 
-        const response = await client.transport.request({
-          method: 'POST',
-          path: '/_query',
-          body: {
-            query: filledQuery,
-          },
-        });
+        const response = await client.esql.query({
+          query: filledQuery,
+        })
 
         return response;
       } catch (error) {
