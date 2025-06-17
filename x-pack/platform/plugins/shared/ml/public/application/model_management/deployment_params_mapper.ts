@@ -154,9 +154,7 @@ export class DeploymentParamsMapper {
         Math.floor(levelValues.min / threadsPerAllocation) ||
         // For serverless env, always allow scale down to 0
         // For other envs, allow scale down to 0 only for "low" vCPU usage
-        (this.showNodeInfo === false
-          ? this.minAllowedNumberOfAllocation
-          : params.vCPUUsage === 'low'
+        (this.showNodeInfo === false || params.vCPUUsage === 'low'
           ? this.minAllowedNumberOfAllocation
           : 1),
       max_number_of_allocations: maxValue,
