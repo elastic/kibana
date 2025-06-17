@@ -19,6 +19,7 @@ import type { ILicense } from '@kbn/licensing-plugin/server';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
+import { migrateEndpointDataToSupportSpaces } from './endpoint/migrations/space_awareness_migration';
 import { SavedObjectsClientFactory } from './endpoint/services/saved_objects';
 import { registerEntityStoreDataViewRefreshTask } from './lib/entity_analytics/entity_store/tasks/data_view_refresh/data_view_refresh_task';
 import { ensureIndicesExistsForPolicies } from './endpoint/migrations/ensure_indices_exists_for_policies';
@@ -695,6 +696,12 @@ export class Plugin implements ISecuritySolutionPlugin {
           // Ensure policies have backing DOT indices (We don't need to `await` this.
           // It can run in the background)
           ensureIndicesExistsForPolicies(this.endpointAppContextService).catch(() => {});
+
+          // Migrate endpoint data if space awareness is enabled
+          // (We don't need to `await` this. It can run in the background)
+          migrateEndpointDataToSupportSpaces(this.endpointAppContextService).catch((e) => {
+            logger.error(e);
+          });
         })
         .catch(() => {});
 
