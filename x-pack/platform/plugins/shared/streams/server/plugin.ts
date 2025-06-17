@@ -208,7 +208,7 @@ export class StreamsPlugin
     core.uiSettings.register({
       [OBSERVABILITY_ENABLE_STREAMS_UI]: {
         category: ['observability'],
-        name: 'Streams',
+        name: 'Streams UI',
         value: isObservabilityServerless,
         description: i18n.translate('xpack.streams.enableStreamsUIDescription', {
           defaultMessage: '{technicalPreviewLabel} Enable the {streamsLink}.',
