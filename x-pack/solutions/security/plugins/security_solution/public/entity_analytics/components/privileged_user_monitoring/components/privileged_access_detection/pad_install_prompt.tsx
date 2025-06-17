@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiImage, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiImage, EuiToolTip, EuiPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { MlNodeAvailableWarningShared } from '@kbn/ml-plugin/public';
@@ -28,65 +28,66 @@ export const PrivilegedAccessDetectionInstallPrompt: React.FC<{ install: () => P
   );
 
   return (
-    <EuiEmptyPrompt
-      css={{ minWidth: '100%' }}
-      hasBorder
-      layout="horizontal"
-      actions={
-        <EuiToolTip
-          content={
-            mlNodesAvailable
-              ? privilegedAccessDetectionInstallTooltipText
-              : privilegedAccessDetectionInstallTooltipUnavailableText
-          }
-        >
-          <EuiButton
-            color="primary"
-            disabled={!mlNodesAvailable}
-            fill
-            onClick={() => install()}
-            data-test-subj={`privilegedUserMonitoringEnablementButton`}
+    <EuiPanel hasShadow={false} hasBorder={true}>
+      <EuiEmptyPrompt
+        hasBorder={false}
+        layout="horizontal"
+        actions={
+          <EuiToolTip
+            content={
+              mlNodesAvailable
+                ? privilegedAccessDetectionInstallTooltipText
+                : privilegedAccessDetectionInstallTooltipUnavailableText
+            }
           >
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedAccessDetection.enableButton"
-              defaultMessage="Install"
-            />
-          </EuiButton>
-        </EuiToolTip>
-      }
-      icon={
-        <EuiImage
-          size="l"
-          hasShadow
-          src={dashboardEnableImg}
-          alt={i18n.translate(
-            'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.topPrivilegedAccessDetectionAnomalies.installAndEnable',
-            { defaultMessage: 'Install and Enable.' }
-          )}
-        />
-      }
-      data-test-subj="privilegedUserMonitoringEnablementPanel"
-      title={
-        <h2>
-          {i18n.translate(
-            'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.topPrivilegedAccessDetectionAnomalies.enablePrivilegedAccessDetection',
-            { defaultMessage: 'Enable Privileged access detection.' }
-          )}
-        </h2>
-      }
-      body={
-        <>
-          <p>
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedAccessEnablementDescription"
-              defaultMessage={
-                'Detect anomalous privileged access activity in Windows, Linux and Okta system logs.'
-              }
-            />
-          </p>
-          <MlNodeAvailableWarningShared size="s" nodeAvailableCallback={setMlNodesAvailable} />
-        </>
-      }
-    />
+            <EuiButton
+              color="primary"
+              disabled={!mlNodesAvailable}
+              fill
+              onClick={() => install()}
+              data-test-subj={`privilegedUserMonitoringEnablementButton`}
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedAccessDetection.enableButton"
+                defaultMessage="Install"
+              />
+            </EuiButton>
+          </EuiToolTip>
+        }
+        icon={
+          <EuiImage
+            size="l"
+            hasShadow
+            src={dashboardEnableImg}
+            alt={i18n.translate(
+              'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.topPrivilegedAccessDetectionAnomalies.installAndEnable',
+              { defaultMessage: 'Install and Enable.' }
+            )}
+          />
+        }
+        data-test-subj="privilegedUserMonitoringEnablementPanel"
+        title={
+          <h2>
+            {i18n.translate(
+              'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.topPrivilegedAccessDetectionAnomalies.enablePrivilegedAccessDetection',
+              { defaultMessage: 'Enable Privileged access detection.' }
+            )}
+          </h2>
+        }
+        body={
+          <>
+            <p>
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedAccessEnablementDescription"
+                defaultMessage={
+                  'Detect anomalous privileged access activity in Windows, Linux and Okta system logs.'
+                }
+              />
+            </p>
+            <MlNodeAvailableWarningShared size="s" nodeAvailableCallback={setMlNodesAvailable} />
+          </>
+        }
+      />
+    </EuiPanel>
   );
 };

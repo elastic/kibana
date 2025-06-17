@@ -82,30 +82,31 @@ export const PrivilegedAccessDetectionsPanel: React.FC<{ spaceId: string }> = ({
 
       {currentlyInstalling && (
         <>
-          <EuiEmptyPrompt
-            css={{ minWidth: '100%' }}
-            hasBorder
-            iconType="logoSecurity"
-            title={
-              <h2>
-                {i18n.translate(
-                  'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.topPrivilegedAccessDetectionAnomalies.privilegedAccessDetection',
-                  { defaultMessage: 'Privileged access detection' }
-                )}
-              </h2>
-            }
-            body={
-              <>
-                <p>
+          <EuiPanel hasShadow={false} hasBorder={true}>
+            <EuiEmptyPrompt
+              hasBorder={false}
+              iconType="logoSecurity"
+              title={
+                <h2>
                   {i18n.translate(
-                    'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.topPrivilegedAccessDetectionAnomalies.installingPrivilegedAccessDetection',
-                    { defaultMessage: 'Installing Privileged access detection package' }
+                    'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.topPrivilegedAccessDetectionAnomalies.privilegedAccessDetection',
+                    { defaultMessage: 'Privileged access detection' }
                   )}
-                </p>
-                <EuiProgress size="s" color="accent" />
-              </>
-            }
-          />
+                </h2>
+              }
+              body={
+                <>
+                  <p>
+                    {i18n.translate(
+                      'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.topPrivilegedAccessDetectionAnomalies.installingPrivilegedAccessDetection',
+                      { defaultMessage: 'Installing Privileged access detection package' }
+                    )}
+                  </p>
+                  <EuiProgress size="s" color="accent" />
+                </>
+              }
+            />
+          </EuiPanel>
         </>
       )}
 
