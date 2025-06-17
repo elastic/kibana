@@ -17,7 +17,7 @@ export function FailedToLoadResponse() {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiText size="s" color="danger">
-          {i18n.translate('xpack.securitySolution.aiAssistant.failedLoadingResponseText', {
+          {i18n.translate('xpack.elasticAssistantPlugin.aiAssistant.failedLoadingResponseText', {
             defaultMessage: 'Failed to load response',
           })}
         </EuiText>

@@ -24,7 +24,7 @@ import { useBasePath } from '../../hooks/base_path/use_base_path';
 import { CommentActionsMounter } from '../../components/comment_actions/comment_actions_mounter';
 import { useAssistantTelemetry } from '../../hooks/use_assistant_telemetry';
 
-const ASSISTANT_TITLE = i18n.translate('xpack.securitySolution.assistant.title', {
+const ASSISTANT_TITLE = i18n.translate('xpack.elasticAssistantPlugin.assistant.title', {
   defaultMessage: 'Elastic AI Assistant',
 });
 

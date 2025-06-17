@@ -21,7 +21,6 @@ jest.mock('@kbn/security-solution-navigation', () => ({
   }),
 }));
 
-
 jest.mock('../../../../context/typed_kibana_context/typed_kibana_context', () => ({
   useKibana: jest.fn().mockReturnValue({
     services: {

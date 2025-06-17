@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import type { Plugin, CoreSetup } from '@kbn/core/public';
 
 import {
   CommentsService,
@@ -41,7 +41,7 @@ export class ElasticAssistantSharedStatePublicPlugin
   private readonly augmentMessageCodeBlocksService: AugmentMessageCodeBlocksService;
   private readonly signalIndexService: SignalIndexService;
 
-  constructor(private readonly initializerContext: PluginInitializerContext) {
+  constructor() {
     this.commentService = new CommentsService();
     this.promptContextService = new PromptContextService();
     this.assistantContextValueService = new AssistantContextValueService();
@@ -53,10 +53,7 @@ export class ElasticAssistantSharedStatePublicPlugin
     return {};
   }
 
-  public start(
-    coreStart: CoreStart,
-    dependencies: ElasticAssistantSharedStatePublicPluginStartDependencies
-  ) {
+  public start() {
     const comments = this.commentService.start();
     const promptContexts = this.promptContextService.start();
     const assistantContextValue = this.assistantContextValueService.start();

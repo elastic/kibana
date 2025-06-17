@@ -13,7 +13,7 @@ import { removeContentReferences } from '@kbn/elastic-assistant-common';
 import { i18n } from '@kbn/i18n';
 
 export const COPY_TO_CLIPBOARD = i18n.translate(
-  'xpack.securitySolution.assistant.commentActions.copyToClipboard',
+  'xpack.elasticAssistantPlugin.assistant.commentActions.copyToClipboard',
   {
     defaultMessage: 'Copy to clipboard',
   }

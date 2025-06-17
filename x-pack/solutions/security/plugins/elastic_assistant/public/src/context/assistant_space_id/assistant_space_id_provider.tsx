@@ -6,8 +6,8 @@
  */
 
 import { AssistantSpaceIdProvider as ElasticAssistantSpaceIdProvider } from '@kbn/elastic-assistant';
+import React from 'react';
 import { useSpaceId } from '../../hooks/space_id/use_space_id';
-import React from 'react'
 
 export const AssistantSpaceIdProvider: React.FC<{
   children: React.ReactNode;

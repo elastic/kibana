@@ -5,7 +5,8 @@
     "outDir": "target/types",
   },
   "include": [
-    "../../../../../typings/**/*"
+    "../../../../../typings/**/*",
+    "public/**/*",
   ],
   "kbn_references": [
 

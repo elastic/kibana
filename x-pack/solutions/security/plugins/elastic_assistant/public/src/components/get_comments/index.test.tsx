@@ -42,11 +42,11 @@ const testProps = {
 };
 describe('getComments', () => {
   it('Does not add error state message has no error', () => {
-    const result = getComments(testProps);
+    const result = getComments({ CommentActions: () => null })(testProps);
     expect(result[0].eventColor).toEqual(undefined);
   });
   it('Adds error state when message has error', () => {
-    const result = getComments({
+    const result = getComments({ CommentActions: () => null })({
       ...testProps,
       currentConversation: {
         category: 'assistant',
@@ -72,7 +72,7 @@ describe('getComments', () => {
   });
 
   it('It transforms message timestamp from server side ISO format to local date string', () => {
-    const result = getComments(testProps);
+    const result = getComments({ CommentActions: () => null })(testProps);
     expect(result[0].timestamp).toEqual(
       `at: ${new Date('2024-03-19T18:59:18.174Z').toLocaleString()}`
     );

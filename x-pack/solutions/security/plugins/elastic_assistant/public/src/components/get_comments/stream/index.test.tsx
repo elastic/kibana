@@ -12,7 +12,6 @@ import { StreamComment } from '.';
 import { useStream } from './use_stream';
 
 const mockSetComplete = jest.fn();
-jest.mock('../../../detection_engine/rule_management/api/hooks/use_fetch_connectors_query');
 
 jest.mock('./use_stream');
 
@@ -64,14 +63,6 @@ describe('StreamComment', () => {
       pendingMessage: 'Test Message',
       setComplete: mockSetComplete,
     });
-    const connectors: unknown[] = [
-      {
-        id: 'hi',
-        name: 'OpenAI connector',
-        actionTypeId: '.gen-ai',
-      },
-    ];
-
   });
   it('renders content correctly', () => {
     render(<StreamComment {...testProps} />);

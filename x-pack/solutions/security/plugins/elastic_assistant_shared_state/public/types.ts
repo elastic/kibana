@@ -13,5 +13,4 @@ export interface ElasticAssistantSharedStatePublicPluginSetupDependencies {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ElasticAssistantSharedStatePublicPluginStartDependencies {}
 
-export type StartServices = CoreStart &
-  ElasticAssistantSharedStatePublicPluginStartDependencies;
+export type StartServices = CoreStart & ElasticAssistantSharedStatePublicPluginStartDependencies;

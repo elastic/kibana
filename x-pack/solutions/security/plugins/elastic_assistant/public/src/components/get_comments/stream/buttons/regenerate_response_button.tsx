@@ -18,7 +18,7 @@ export function RegenerateResponseButton(props: Partial<EuiButtonEmptyProps>) {
       iconType="sparkles"
       {...props}
     >
-      {i18n.translate('xpack.securitySolution.aiAssistant.regenerateResponseButtonLabel', {
+      {i18n.translate('xpack.elasticAssistantPlugin.aiAssistant.regenerateResponseButtonLabel', {
         defaultMessage: 'Regenerate',
       })}
     </EuiButtonEmpty>

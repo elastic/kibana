@@ -19,7 +19,7 @@ export function StopGeneratingButton(props: Partial<EuiButtonEmptyProps>) {
       size="s"
       {...props}
     >
-      {i18n.translate('xpack.securitySolution.aiAssistant.stopGeneratingButtonLabel', {
+      {i18n.translate('xpack.elasticAssistantPlugin.aiAssistant.stopGeneratingButtonLabel', {
         defaultMessage: 'Stop generating',
       })}
     </EuiButtonEmpty>

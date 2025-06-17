@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React,{ useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { HtmlPortalNode } from 'react-reverse-portal';
 import { InPortal, OutPortal, createHtmlPortalNode } from 'react-reverse-portal';
 import ReactDOM from 'react-dom';

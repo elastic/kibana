@@ -34,6 +34,7 @@ import {
   FetchHistoricalResultsReducerState,
   UseHistoricalResultsReturnValue,
 } from '../../data_quality_details/indices_details/pattern/hooks/use_historical_results/types';
+import { useAssistantContextValue } from '@kbn/elastic-assistant/impl/assistant_context';
 
 interface TestExternalProvidersProps {
   children: React.ReactNode;
@@ -65,11 +66,28 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
     logger: {
       log: jest.fn(),
       warn: jest.fn(),
-      error: () => {},
+      error: () => { },
     },
   });
   const chrome = chromeServiceMock.createStartContract();
   chrome.getChromeStyle$.mockReturnValue(of('classic'));
+
+  const assistantContextValue = useAssistantContextValue({
+    actionTypeRegistry: actionTypeRegistry,
+    assistantAvailability: mockAssistantAvailability,
+    augmentMessageCodeBlocks: {
+      mount: jest.fn().mockReturnValue(() => { }),
+    },
+    basePath: 'https://localhost:5601/kbn',
+    docLinks: { ELASTIC_WEBSITE_URL: 'https://www.elastic.co/', DOC_LINK_VERSION: 'current', },
+    getComments: mockGetComments,
+    http: mockHttp,
+    navigateToApp: mockNavigateToApp,
+    productDocBase: { installation: { getStatus: jest.fn(), install: jest.fn(), uninstall: jest.fn() }, },
+    currentAppId: 'securitySolutionUI',
+    userProfileService: jest.fn() as unknown as UserProfileService,
+    chrome: chrome,
+  })
 
   return (
     <KibanaRenderContextProvider {...coreMock.createStart()}>
@@ -77,23 +95,7 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
         <EuiThemeProvider>
           <QueryClientProvider client={queryClient}>
             <AssistantProvider
-              actionTypeRegistry={actionTypeRegistry}
-              assistantAvailability={mockAssistantAvailability}
-              augmentMessageCodeBlocks={jest.fn()}
-              basePath={'https://localhost:5601/kbn'}
-              docLinks={{
-                ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-                DOC_LINK_VERSION: 'current',
-              }}
-              getComments={mockGetComments}
-              http={mockHttp}
-              navigateToApp={mockNavigateToApp}
-              productDocBase={{
-                installation: { getStatus: jest.fn(), install: jest.fn(), uninstall: jest.fn() },
-              }}
-              currentAppId={'securitySolutionUI'}
-              userProfileService={jest.fn() as unknown as UserProfileService}
-              chrome={chrome}
+              value={assistantContextValue}
             >
               {children}
             </AssistantProvider>

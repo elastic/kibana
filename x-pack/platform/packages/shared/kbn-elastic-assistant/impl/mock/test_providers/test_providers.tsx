@@ -16,7 +16,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { UserProfileService } from '@kbn/core/public';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
-import { AssistantProvider, AssistantProviderProps, useAssistantContextValue } from '../../assistant_context';
+import {
+  AssistantProvider,
+  AssistantProviderProps,
+  useAssistantContextValue,
+} from '../../assistant_context';
 import { AssistantAvailability } from '../../assistant_context/types';
 import { AssistantSpaceIdProvider } from '../../assistant/use_space_aware_context';
 
@@ -64,7 +68,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
     logger: {
       log: console.log,
       warn: console.warn,
-      error: () => { },
+      error: () => {},
     },
   });
 
@@ -72,30 +76,30 @@ export const TestProvidersComponent: React.FC<Props> = ({
   chrome.getChromeStyle$.mockReturnValue(of('classic'));
 
   const assistantContextValue = useAssistantContextValue({
-    actionTypeRegistry: actionTypeRegistry,
-    assistantAvailability: assistantAvailability,
+    actionTypeRegistry,
+    assistantAvailability,
     augmentMessageCodeBlocks: {
       mount: jest.fn().mockReturnValue(() => {}),
     },
     basePath: 'https://localhost:5601/kbn',
-    docLinks: { ELASTIC_WEBSITE_URL: 'https://www.elastic.co/', DOC_LINK_VERSION: 'current', },
+    docLinks: { ELASTIC_WEBSITE_URL: 'https://www.elastic.co/', DOC_LINK_VERSION: 'current' },
     getComments: mockGetComments,
     http: mockHttp,
     navigateToApp: mockNavigateToApp,
     ...providerContext,
     currentAppId: 'test',
-    productDocBase: { installation: { getStatus: jest.fn(), install: jest.fn(), uninstall: jest.fn() } },
+    productDocBase: {
+      installation: { getStatus: jest.fn(), install: jest.fn(), uninstall: jest.fn() },
+    },
     userProfileService: jest.fn() as unknown as UserProfileService,
-    chrome: chrome,
-  })
+    chrome,
+  });
 
   return (
     <I18nProvider>
       <ThemeProvider>
         <QueryClientProvider client={queryClient}>
-          <AssistantProvider
-            value={assistantContextValue}
-          >
+          <AssistantProvider value={assistantContextValue}>
             <AssistantSpaceIdProvider spaceId="default">{children}</AssistantSpaceIdProvider>
           </AssistantProvider>
         </QueryClientProvider>
