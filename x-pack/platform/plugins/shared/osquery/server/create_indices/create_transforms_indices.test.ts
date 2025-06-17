@@ -88,7 +88,7 @@ function makeEsIndexMappings(
         },
       },
       pack_id: { ignore_above: 1024, type: 'keyword' },
-      policy_ids: { type: 'keyword' },
+      space_id: { type: 'keyword' },
       input_type: { ignore_above: 1024, type: 'keyword' },
       pack_prebuilt: { type: 'boolean' },
       type: { ignore_above: 1024, type: 'keyword' },
@@ -107,7 +107,6 @@ function makeEsIndexMappings(
         },
         ...((overrides.queries as any) || {}),
       },
-      space: { type: 'keyword' },
       agents: { ignore_above: 1024, type: 'keyword' },
       '@timestamp': { type: 'date' },
       action_id: { ignore_above: 1024, type: 'keyword' },
@@ -211,7 +210,7 @@ describe('createTransformIndices', () => {
 
       it('returns false if a required field is missing in ES mapping', () => {
         const esIndexMappings = makeEsIndexMappings();
-        delete esIndexMappings.properties.policy_ids;
+        delete esIndexMappings.properties.space_id;
         expect(
           isSubsetMapping(
             actionsMapping as Record<string, unknown>,
