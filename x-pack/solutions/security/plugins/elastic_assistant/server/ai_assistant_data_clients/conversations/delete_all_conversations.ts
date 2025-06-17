@@ -40,8 +40,8 @@ export const deleteAllConversations = async ({
     });
 
     if (!response.deleted && response.deleted === 0) {
-      logger.error('No conversation has been deleted');
-      throw Error('No conversation has been deleted');
+      logger.error('No conversations have been deleted.');
+      throw Error('No conversations have been deleted.');
     }
     return response;
   } catch (err) {
