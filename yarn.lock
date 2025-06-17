@@ -9416,12 +9416,12 @@
     "@types/node" ">=18.0.0"
     axios "^1.6.0"
 
-"@smithy/abort-controller@^4.0.1":
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/@smithy/abort-controller/-/abort-controller-4.0.1.tgz#7c5e73690c4105ad264c2896bd1ea822450c3819"
-  integrity sha512-fiUIYgIgRjMWznk6iLJz35K2YxSLHzLBA/RC6lBrKfQ8fHbPfvk7Pk9UvpKoHgJjI18MnbPuEju53zcVy6KF1g==
+"@smithy/abort-controller@^4.0.4":
+  version "4.0.4"
+  resolved "https://registry.yarnpkg.com/@smithy/abort-controller/-/abort-controller-4.0.4.tgz#ab991d521fc78b5c7f24907fcd6803c0f2da51d9"
+  integrity sha512-gJnEjZMvigPDQWHrW3oPrFhQtkrgqBkyjj3pCIdF3A5M6vsZODG93KNlfJprv6bp4245bdT32fsHK4kkH3KYDA==
   dependencies:
-    "@smithy/types" "^4.1.0"
+    "@smithy/types" "^4.3.1"
     tslib "^2.6.2"
 
 "@smithy/config-resolver@^4.0.1":
@@ -9612,15 +9612,15 @@
     "@smithy/types" "^4.1.0"
     tslib "^2.6.2"
 
-"@smithy/node-http-handler@^4.0.2":
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/@smithy/node-http-handler/-/node-http-handler-4.0.2.tgz#48d47a046cf900ab86bfbe7f5fd078b52c82fab6"
-  integrity sha512-X66H9aah9hisLLSnGuzRYba6vckuFtGE+a5DcHLliI/YlqKrGoxhisD5XbX44KyoeRzoNlGr94eTsMVHFAzPOw==
+"@smithy/node-http-handler@^4.0.1", "@smithy/node-http-handler@^4.0.2":
+  version "4.0.6"
+  resolved "https://registry.yarnpkg.com/@smithy/node-http-handler/-/node-http-handler-4.0.6.tgz#a022da499ba3af4b6b4c815104fde973c0eccc40"
+  integrity sha512-NqbmSz7AW2rvw4kXhKGrYTiJVDHnMsFnX4i+/FzcZAfbOBauPYs2ekuECkSbtqaxETLLTu9Rl/ex6+I2BKErPA==
   dependencies:
-    "@smithy/abort-controller" "^4.0.1"
-    "@smithy/protocol-http" "^5.0.1"
-    "@smithy/querystring-builder" "^4.0.1"
-    "@smithy/types" "^4.1.0"
+    "@smithy/abort-controller" "^4.0.4"
+    "@smithy/protocol-http" "^5.1.2"
+    "@smithy/querystring-builder" "^4.0.4"
+    "@smithy/types" "^4.3.1"
     tslib "^2.6.2"
 
 "@smithy/property-provider@^4.0.1":
@@ -9631,20 +9631,20 @@
     "@smithy/types" "^4.1.0"
     tslib "^2.6.2"
 
-"@smithy/protocol-http@^5.0.1":
-  version "5.0.1"
-  resolved "https://registry.yarnpkg.com/@smithy/protocol-http/-/protocol-http-5.0.1.tgz#37c248117b29c057a9adfad4eb1d822a67079ff1"
-  integrity sha512-TE4cpj49jJNB/oHyh/cRVEgNZaoPaxd4vteJNB0yGidOCVR0jCw/hjPVsT8Q8FRmj8Bd3bFZt8Dh7xGCT+xMBQ==
+"@smithy/protocol-http@^5.0.1", "@smithy/protocol-http@^5.1.2":
+  version "5.1.2"
+  resolved "https://registry.yarnpkg.com/@smithy/protocol-http/-/protocol-http-5.1.2.tgz#8094860c2407f250b80c95899e0385112d6eb98b"
+  integrity sha512-rOG5cNLBXovxIrICSBm95dLqzfvxjEmuZx4KK3hWwPFHGdW3lxY0fZNXfv2zebfRO7sJZ5pKJYHScsqopeIWtQ==
   dependencies:
-    "@smithy/types" "^4.1.0"
+    "@smithy/types" "^4.3.1"
     tslib "^2.6.2"
 
-"@smithy/querystring-builder@^4.0.1":
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/@smithy/querystring-builder/-/querystring-builder-4.0.1.tgz#37e1e05d0d33c6f694088abc3e04eafb65cb6976"
-  integrity sha512-wU87iWZoCbcqrwszsOewEIuq+SU2mSoBE2CcsLwE0I19m0B2gOJr1MVjxWcDQYOzHbR1xCk7AcOBbGFUYOKvdg==
+"@smithy/querystring-builder@^4.0.1", "@smithy/querystring-builder@^4.0.4":
+  version "4.0.4"
+  resolved "https://registry.yarnpkg.com/@smithy/querystring-builder/-/querystring-builder-4.0.4.tgz#f7546efd59d457b3d2525a330c6137e5f907864c"
+  integrity sha512-SwREZcDnEYoh9tLNgMbpop+UTGq44Hl9tdj3rf+yeLcfH7+J8OXEBaMc2kDxtyRHu8BhSg9ADEx0gFHvpJgU8w==
   dependencies:
-    "@smithy/types" "^4.1.0"
+    "@smithy/types" "^4.3.1"
     "@smithy/util-uri-escape" "^4.0.0"
     tslib "^2.6.2"
 
@@ -9698,10 +9698,10 @@
     "@smithy/util-stream" "^4.0.2"
     tslib "^2.6.2"
 
-"@smithy/types@^4.1.0":
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/@smithy/types/-/types-4.1.0.tgz#19de0b6087bccdd4182a334eb5d3d2629699370f"
-  integrity sha512-enhjdwp4D7CXmwLtD6zbcDMbo6/T6WtuuKCY49Xxc6OMOmUWlBEBDREsxxgV2LIdeQPW756+f97GzcgAwp3iLw==
+"@smithy/types@^4.1.0", "@smithy/types@^4.3.1":
+  version "4.3.1"
+  resolved "https://registry.yarnpkg.com/@smithy/types/-/types-4.3.1.tgz#c11276ea16235d798f47a68aef9f44d3dbb70dd4"
+  integrity sha512-UqKOQBL2x6+HWl3P+3QqFD4ncKq0I8Nuz9QItGv5WuKuMHuuwlhvqcZCoXGfc+P1QmfJE7VieykoYYmrOoFJxA==
   dependencies:
     tslib "^2.6.2"
 

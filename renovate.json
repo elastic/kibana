@@ -158,6 +158,7 @@
         "@langtrase/trace-attributes",
         "@opentelemetry/sdk-trace-base",
         "@smithy/eventstream-serde-node",
+        "@smithy/node-http-handler",
         "@smithy/types",
         "@types/aws4",
         "ajv",
