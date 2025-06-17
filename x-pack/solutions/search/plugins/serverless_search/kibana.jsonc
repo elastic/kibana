@@ -28,6 +28,7 @@
       "searchprofiler",
       "security",
       "serverless",
+      "searchHomepage",
       "share",
       "visualizations"
     ],
@@ -35,7 +36,6 @@
       "indexManagement",
       "contentConnectors",
       "searchInferenceEndpoints",
-      "searchHomepage",
       "searchPlayground",
       "usageCollection"
     ],
