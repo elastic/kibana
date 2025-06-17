@@ -58,7 +58,6 @@ export type {
   RenderFieldItemParams,
   SearchMode,
   AdditionalFieldGroups,
-  UnifiedFieldListContainerInitialProps,
 } from './src/types';
 export { ExistenceFetchStatus, FieldsGroupNames } from './src/types';
 
