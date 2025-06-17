@@ -7,31 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import useMountedState from 'react-use/lib/useMountedState';
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { UI_SETTINGS } from '../../../common/constants';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { openSettingsFlyout } from '../../dashboard_renderer/settings/open_settings_flyout';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { SaveDashboardReturn } from '../../services/dashboard_content_management_service/types';
-import { coreServices, shareService } from '../../services/kibana_services';
+import { shareService } from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import { topNavStrings } from '../_dashboard_app_strings';
 import { ShowShareModal } from './share/show_share_modal';
 
 export const useDashboardMenuItems = ({
-  isLabsShown,
-  setIsLabsShown,
   maybeRedirect,
   showResetChange,
 }: {
-  isLabsShown: boolean;
-  setIsLabsShown: Dispatch<SetStateAction<boolean>>;
   maybeRedirect: (result?: SaveDashboardReturn) => void;
   showResetChange?: boolean;
 }) => {
@@ -127,13 +122,6 @@ export const useDashboardMenuItems = ({
         disableButton: disableTopNav,
       } as TopNavMenuData,
 
-      labs: {
-        ...topNavStrings.labs,
-        id: 'labs',
-        testId: 'dashboardLabs',
-        run: () => setIsLabsShown(!isLabsShown),
-      } as TopNavMenuData,
-
       edit: {
         ...topNavStrings.edit,
         emphasize: true,
@@ -224,8 +212,6 @@ export const useDashboardMenuItems = ({
     viewMode,
     showShare,
     dashboardApi,
-    setIsLabsShown,
-    isLabsShown,
     quickSaveDashboard,
     resetChanges,
     isResetting,
@@ -254,11 +240,6 @@ export const useDashboardMenuItems = ({
     isResetting,
   ]);
 
-  /**
-   * Build ordered menus for view and edit mode.
-   */
-  const isLabsEnabled = useMemo(() => coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI), []);
-
   const hasExportIntegration = Boolean(
     shareService?.availableIntegrations('dashboard', 'export')?.length
   );
@@ -266,7 +247,6 @@ export const useDashboardMenuItems = ({
   const viewModeTopNavConfig = useMemo(() => {
     const { showWriteControls } = getDashboardCapabilities();
 
-    const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
     const shareMenuItem = shareService
       ? ([
           // Only show the export button if the current user meets the requirements for at least one registered export integration
@@ -279,7 +259,6 @@ export const useDashboardMenuItems = ({
     const mayberesetChangesMenuItem = showResetChange ? [resetChangesMenuItem] : [];
 
     return [
-      ...labsMenuItem,
       menuItems.fullScreen,
       ...duplicateMenuItem,
       ...mayberesetChangesMenuItem,
@@ -287,8 +266,6 @@ export const useDashboardMenuItems = ({
       ...editMenuItem,
     ];
   }, [
-    isLabsEnabled,
-    menuItems.labs,
     menuItems.export,
     menuItems.share,
     menuItems.interactiveSave,
@@ -301,7 +278,6 @@ export const useDashboardMenuItems = ({
   ]);
 
   const editModeTopNavConfig = useMemo(() => {
-    const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
     const shareMenuItem = shareService
       ? ([
           // Only show the export button if the current user meets the requirements for at least one registered export integration
@@ -324,15 +300,13 @@ export const useDashboardMenuItems = ({
       editModeItems.push(menuItems.switchToViewMode, menuItems.interactiveSave);
     }
 
-    const editModeTopNavConfigItems = [...labsMenuItem, menuItems.settings, ...editModeItems];
+    const editModeTopNavConfigItems = [menuItems.settings, ...editModeItems];
 
     // insert share menu item before the last item in edit mode
     editModeTopNavConfigItems.splice(-1, 0, ...shareMenuItem);
 
     return editModeTopNavConfigItems;
   }, [
-    isLabsEnabled,
-    menuItems.labs,
     menuItems.export,
     menuItems.share,
     menuItems.settings,
