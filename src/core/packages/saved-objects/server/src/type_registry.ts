@@ -98,4 +98,9 @@ export interface ISavedObjectTypeRegistry {
    * the property/type is not registered.
    */
   getNameAttribute(type: string): string;
+
+  /**
+   * Returns whether the type supports access control.
+   */
+  supportsAccessControl(type: string): boolean;
 }
