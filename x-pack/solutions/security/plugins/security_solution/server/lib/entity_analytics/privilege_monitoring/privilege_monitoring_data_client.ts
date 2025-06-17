@@ -106,7 +106,6 @@ export class PrivilegeMonitoringDataClient {
     const descriptor = await this.engineClient.init();
     this.log('debug', `Initialized privileged monitoring engine saved object`);
 
-    // TODO: testing this out, remove log in future.
     const indexSourceDescriptor = await this.monitoringIndexSourceClient.create({
       type: 'index',
       managed: true,
@@ -114,7 +113,7 @@ export class PrivilegeMonitoringDataClient {
       name: 'defaultName', // TODO: double check what default name should be
     });
     this.log(
-      'info',
+      'debug',
       `Created index source for privilege monitoring: ${JSON.stringify(indexSourceDescriptor)}`
     );
     try {
@@ -143,10 +142,10 @@ export class PrivilegeMonitoringDataClient {
       const indexSources: MonitoringEntitySourceDescriptor[] =
         await this.monitoringIndexSourceClient.findByIndex();
       this.log(
-        'info',
+        'debug',
         `Found index sources for privilege monitoring:\n${JSON.stringify(indexSources, null, 2)}`
       );
-      await this.queryAllUserNames(indexSources);
+      await this.syncAllIndexUsers(indexSources);
     } catch (e) {
       this.log('error', `Error initializing privilege monitoring engine: ${e}`);
       this.audit(
@@ -171,61 +170,6 @@ export class PrivilegeMonitoringDataClient {
     }
 
     return descriptor;
-  }
-
-  /**
-   * Question: should this be responsibility of the data client or the descriptor client? (monitoring)
-   * @param indexSources
-   * @returns
-   */
-  public async queryAllUserNames(indexSources: MonitoringEntitySourceDescriptor[]) {
-    // TODO: move this to a more appropriate place
-    const results: Record<string, string[]> = {};
-    for (const source of indexSources) {
-      const index = source.indexPattern ?? '';
-      const kuery =
-        typeof source.filter?.kuery === 'string' ? (source.filter.kuery as string) : undefined;
-
-      this.log('info', `Querying index: ${index} with kuery: ${kuery ?? 'none'}`);
-
-      try {
-        const usernames = await this.listUserNamesFromSource(index, kuery);
-        results[index] = usernames;
-      } catch (error) {
-        this.log('error', `Failed to query index ${index}: ${error}`);
-      }
-    }
-    return results;
-  }
-
-  /**
-   * Question: should this be responsibility of the data client or the descriptor client? (monitoring)
-   * @param indexName
-   * @param kuery
-   */
-  public async listUserNamesFromSource(indexName: string, kuery?: string): Promise<string[]> {
-    // TODO: move this
-    const query = kuery ? toElasticsearchQuery(fromKueryExpression(kuery)) : { match_all: {} };
-
-    const response = await this.esClient.search<{ user?: { name?: string } }>({
-      index: indexName,
-      _source: ['user.name'],
-      query,
-    });
-
-    const usernames = new Set<string>();
-
-    for (const hit of response.hits.hits) {
-      const username = hit._source?.user?.name;
-      if (username) {
-        usernames.add(username);
-        if (username) {
-          this.createUser({ user: { name: username } }, 'index_sync'); // this is the end of what you need, everything else is logging and you can delete the array outside of this!
-        }
-      }
-    }
-    this.log('info', `Found ${usernames.size} unique usernames in index: ${indexName}`);
-    return Array.from(usernames);
   }
 
   public async createOrUpdateIndex() {
@@ -371,5 +315,63 @@ export class PrivilegeMonitoringDataClient {
     };
 
     return this.opts.auditLogger?.log(event);
+  }
+
+  // --- Privileged User Sync Orchestration ---
+  // These methods coordinate syncing users from monitoring sources.
+  public async syncAllIndexUsers(indexSources: MonitoringEntitySourceDescriptor[]) {
+    const allUserNames = new Set<string>();
+    for (const source of indexSources) {
+      const index = source.indexPattern ?? '';
+      const kuery =
+        typeof source.filter?.kuery === 'string' ? (source.filter.kuery as string) : undefined;
+      try {
+        const usernames = await this.createUsersFromIndexSource(index, kuery);
+        usernames.forEach((username) => allUserNames.add(username));
+      } catch (error) {
+        this.log('error', `Failed to sync users from index ${index}: ${error}`);
+      }
+    }
+    await this.removeStaleIndexUsers(allUserNames);
+  }
+
+  public async createUsersFromIndexSource(indexName: string, kuery?: string): Promise<Set<string>> {
+    const query = kuery ? toElasticsearchQuery(fromKueryExpression(kuery)) : { match_all: {} };
+
+    const response = await this.esClient.search<{ user?: { name?: string } }>({
+      index: indexName,
+      _source: ['user.name'],
+      query,
+    });
+
+    const usernames = new Set<string>();
+
+    for (const hit of response.hits.hits) {
+      const username = hit._source?.user?.name;
+      if (username && !usernames.has(username)) {
+        usernames.add(username);
+        this.createUser({ user: { name: username } }, 'index_sync');
+      }
+    }
+    return usernames;
+  }
+
+  private async removeStaleIndexUsers(currentUsernames: Set<string>) {
+    const existingDocs: MonitoredUserDoc[] = await this.listUsers('source: "index_sync"');
+
+    const staleUserIds: string[] = [];
+
+    for (const doc of existingDocs) {
+      const username = doc.user?.name;
+      if (doc.id && username && !currentUsernames.has(username)) {
+        staleUserIds.push(doc.id);
+      }
+    }
+
+    for (const id of staleUserIds) {
+      await this.deleteUser(id);
+    }
+
+    this.log('info', `Removed ${staleUserIds.length} stale users from index_sync`);
   }
 }
