@@ -11,11 +11,26 @@ import React, { FC } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import type { ChromeUserBanner } from '@kbn/core-chrome-browser';
+import { css } from '@emotion/react';
 import { HeaderExtension } from './header_extension';
 
 export interface HeaderTopBannerProps {
   headerBanner$: Observable<ChromeUserBanner | undefined>;
 }
+
+const styles = {
+  root: css`
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: var(--kbnHeaderBannerHeight);
+    width: 100%;
+  `,
+  container: css`
+    height: 100%;
+    width: 100%;
+  `,
+};
 
 export const HeaderTopBanner: FC<HeaderTopBannerProps> = ({ headerBanner$ }) => {
   const headerBanner = useObservable(headerBanner$, undefined);
@@ -24,7 +39,20 @@ export const HeaderTopBanner: FC<HeaderTopBannerProps> = ({ headerBanner$ }) => 
   }
 
   return (
-    <div className="header__topBanner" data-test-subj="headerTopBanner">
+    <div
+      css={[
+        styles.root,
+        ({ euiTheme }) => ({
+          zIndex: euiTheme.levels.header,
+        }),
+        css`
+          .header__topBannerContainer {
+            ${styles.container};
+          }
+        `,
+      ]}
+      data-test-subj="headerTopBanner"
+    >
       <HeaderExtension
         containerClassName="header__topBannerContainer"
         display="block"

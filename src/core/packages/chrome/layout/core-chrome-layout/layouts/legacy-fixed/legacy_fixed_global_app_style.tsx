@@ -12,6 +12,17 @@ import { css, Global } from '@emotion/react';
 import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 
 export const renderingOverrides = (euiTheme: UseEuiTheme['euiTheme']) => css`
+  :root {
+    // height of the header banner
+    --kbnHeaderBannerHeight: ${euiTheme.size.xl};
+    // total height of all fixed headers (when the banner is *not* present) inherited from EUI
+    --kbnHeaderOffset: var(--euiFixedHeadersOffset, 0);
+    // total height of everything when the banner is present
+    --kbnHeaderOffsetWithBanner: calc(var(--kbnHeaderBannerHeight) + var(--kbnHeaderOffset));
+    // height of the action menu in the header in serverless projects
+    --kbnProjectHeaderAppActionMenuHeight: ${euiTheme.base * 3};
+  }
+
   #kibana-body {
     // DO NOT ADD ANY OVERFLOW BEHAVIORS HERE
     // It will break the sticky navigation
@@ -90,22 +101,6 @@ export const renderingOverrides = (euiTheme: UseEuiTheme['euiTheme']) => css`
   }
 `;
 
-export const bannerStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
-  .header__topBanner {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: var(--kbnHeaderBannerHeight);
-    width: 100%;
-    z-index: ${euiTheme.levels.header};
-  }
-
-  .header__topBannerContainer {
-    height: 100%;
-    width: 100%;
-  }
-`;
-
 export const chromeStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
   .euiDataGrid__restrictBody {
     .headerGlobalNav,
@@ -120,46 +115,14 @@ export const chromeStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
       height: 100%;
     }
   }
-
-  .chrHeaderHelpMenu__version {
-    text-transform: none;
-  }
-
-  .chrHeaderBadge__wrapper {
-    align-self: center;
-    margin-right: ${euiTheme.size.base};
-  }
-
-  .header__toggleNavButtonSection {
-    .euiBody--collapsibleNavIsDocked & {
-      display: none;
-    }
-  }
-
-  .header__breadcrumbsWithExtensionContainer {
-    overflow: hidden; // enables text-ellipsis in the last breadcrumb
-    .euiHeaderBreadcrumbs,
-    .euiBreadcrumbs {
-      // stop breadcrumbs from growing.
-      // this makes the extension appear right next to the last breadcrumb
-      flex-grow: 0;
-      margin-right: 0;
-
-      overflow: hidden; // enables text-ellipsis in the last breadcrumb
-    }
-  }
-  .header__breadcrumbsAppendExtension--last {
-    flex-grow: 1;
-  }
 `;
 
-export const GlobalAppStyle = () => {
+export const LegacyFixedLayoutGlobalStyles = () => {
   const { euiTheme } = useEuiTheme();
   return (
     <Global
       styles={css`
-        ${bannerStyles(euiTheme)}
-        ${chromeStyles(euiTheme)} 
+        ${chromeStyles(euiTheme)}
         ${renderingOverrides(euiTheme)}
       `}
     />

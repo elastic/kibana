@@ -25,10 +25,6 @@
   }
 }
 
-.euiBody--collapsibleNavIsDocked .euiBottomBar {
-  margin-left: 320px; // Hard-coded for now -- @cchaos
-}
-
 // Add support for serverless navbar
 .euiBody--hasFlyout .euiBottomBar--fixed {
   margin-left: var(--euiCollapsibleNavOffset, 0);

@@ -7,10 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useRef } from 'react';
-import { APP_FIXED_VIEWPORT_ID } from '@kbn/core-chrome-layout/app_fixed_viewport';
-
-export function useAppFixedViewport() {
-  const ref = useRef(document.getElementById(APP_FIXED_VIEWPORT_ID) ?? undefined);
-  return ref.current;
-}
+export { type LayoutService } from './layout_service';
+export { LAYOUT_FEATURE_FLAG_KEY, type LayoutFeatureFlag } from './layout_feature_flag';
