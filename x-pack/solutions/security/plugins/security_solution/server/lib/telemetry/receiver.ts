@@ -220,7 +220,10 @@ export interface ITelemetryReceiver {
     >
   >;
 
-  fetchResponseActionsRules(): Promise<
+  fetchResponseActionsRules(
+    executeFrom: string,
+    executeTo: string
+  ): Promise<
     TransportResult<SearchResponse<unknown, Record<string, AggregationsAggregate>>, unknown>
   >;
 
@@ -758,7 +761,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
    * Find elastic rules SOs which are the rules that have immutable set to true and are of a particular rule type
    * @returns custom elastic rules SOs with response actions enabled
    */
-  public async fetchResponseActionsRules() {
+  public async fetchResponseActionsRules(executeFrom: string, executeTo: string) {
     const query: SearchRequest = {
       index: `${this.getAlertsIndex()}*`,
       ignore_unavailable: true,
@@ -793,8 +796,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
             {
               range: {
                 'kibana.alert.rule.updated_at': {
-                  gte: 'now-24h/h',
-                  lte: 'now',
+                  gte: executeFrom,
+                  lte: executeTo,
                 },
               },
             },

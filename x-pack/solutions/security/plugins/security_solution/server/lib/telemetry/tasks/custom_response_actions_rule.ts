@@ -20,6 +20,7 @@ import type { ITelemetryReceiver } from '../receiver';
 import type { ResponseActionRules, ResponseActionsRuleResponseAggregations } from '../types';
 import type { TaskExecutionPeriod } from '../task';
 import type { ITaskMetricsService } from '../task_metrics.types';
+import { telemetryConfiguration } from '../configuration';
 
 export function createTelemetryCustomResponseActionRulesTaskConfig(maxTelemetryBatch: number) {
   const taskName = 'Security Solution Response Actions Rules Telemetry';
@@ -64,7 +65,10 @@ export function createTelemetryCustomResponseActionRulesTaskConfig(maxTelemetryB
 
         const {
           body: { aggregations },
-        } = (await receiver.fetchResponseActionsRules()) ?? {};
+        } = await receiver.fetchResponseActionsRules(
+          taskExecutionPeriod.last ?? 'now-24h',
+          taskExecutionPeriod.current
+        );
 
         if (!aggregations || !aggregations.actionTypes) {
           log.debug('no custom response action rules found');
@@ -90,6 +94,8 @@ export function createTelemetryCustomResponseActionRulesTaskConfig(maxTelemetryB
           responseActionRules.osquery.length === 0;
 
         if (shouldNotProcessTelemetry) {
+          log.debug('no new custom response action rules found');
+          await taskMetricsService.end(trace);
           return 0;
         }
 
@@ -115,14 +121,17 @@ export function createTelemetryCustomResponseActionRulesTaskConfig(maxTelemetryB
           incrementBy: responseActionsRulesTelemetryData.response_actions.osquery.count,
         });
 
-        const batches = batchTelemetryRecords(
-          cloneDeep(Object.values(responseActionsRulesTelemetryData)),
-          maxTelemetryBatch
-        );
+        const documents = cloneDeep(Object.values(responseActionsRulesTelemetryData));
 
-        for (const batch of batches) {
-          await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch);
+        if (telemetryConfiguration.use_async_sender) {
+          await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, documents);
+        } else {
+          const batches = batchTelemetryRecords(documents, maxTelemetryBatch);
+          for (const batch of batches) {
+            await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch);
+          }
         }
+
         await taskMetricsService.end(trace);
 
         const totalCount = Object.values(responseActionsRulesTelemetryData.response_actions)
