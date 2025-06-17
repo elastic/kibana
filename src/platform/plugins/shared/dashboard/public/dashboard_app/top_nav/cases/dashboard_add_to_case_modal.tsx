@@ -26,13 +26,7 @@ import { getDashboardTitle } from '../../_dashboard_app_strings';
 import { cases, shareService, coreServices } from '../../../services/kibana_services';
 import { DashboardLocatorParams } from '../../../../common/types';
 
-export function AddToCaseModal({
-  screenshot,
-  isOpen,
-}: {
-  screenshot: string | null;
-  isOpen: boolean;
-}) {
+export function AddToCaseModal({ isOpen }: { isOpen: boolean }) {
   const getCasesContext = cases?.ui?.getCasesContext;
   const canUseCases = cases?.helpers?.canUseCases;
 
@@ -85,7 +79,6 @@ export function AddToCaseModal({
       <OpenAddToCaseOpenModal
         savedObjectId={lastSavedId}
         dashboardTitle={dashboardTitle}
-        screenshot={screenshot}
         timeRange={timeRange}
       />
     </CasesContext>
@@ -95,14 +88,12 @@ export function AddToCaseModal({
 interface OpenAddToCaseModalProps {
   savedObjectId: string;
   dashboardTitle: string;
-  screenshot: string | null;
   timeRange?: TimeRange;
 }
 
 const OpenAddToCaseOpenModal = ({
   savedObjectId,
   dashboardTitle,
-  screenshot,
   timeRange,
 }: OpenAddToCaseModalProps) => {
   // Conditionally checked in wrapper to ensure cases is available
@@ -141,11 +132,6 @@ const OpenAddToCaseOpenModal = ({
         ),
         iconType: 'dashboardApp',
       },
-      snapshot: screenshot
-        ? {
-            imgData: screenshot,
-          }
-        : null,
       screenContext: null,
     };
     const attachments = {
@@ -156,7 +142,7 @@ const OpenAddToCaseOpenModal = ({
     casesModal.open({
       getAttachments: () => [attachments] as CaseAttachmentsWithoutOwner,
     });
-  }, [casesModal, dashboardLocator, savedObjectId, dashboardTitle, screenshot, timeRange]);
+  }, [casesModal, dashboardLocator, savedObjectId, dashboardTitle, timeRange]);
 
   return <></>;
 };

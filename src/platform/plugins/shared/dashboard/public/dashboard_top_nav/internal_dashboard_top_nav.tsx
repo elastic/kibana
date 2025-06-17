@@ -56,7 +56,6 @@ import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoriteButton } from './dashboard_favorite_button';
 import { AddToCaseModal } from '../dashboard_app/top_nav/cases/dashboard_add_to_case_modal';
-import { useScreenshot } from '../dashboard_app/top_nav/cases/use_screenshot';
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
   embedSettings?: DashboardEmbedSettings;
@@ -85,8 +84,6 @@ export function InternalDashboardTopNav({
 
   const isLabsEnabled = useMemo(() => coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI), []);
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
-
-  const { generateScreenshot, screenshot } = useScreenshot();
 
   const dashboardApi = useDashboardApi();
 
@@ -270,7 +267,6 @@ export function InternalDashboardTopNav({
     isLabsShown,
     setIsLabsShown,
     setIsAddToCaseModalOpen,
-    generateScreenshot,
     maybeRedirect,
     showResetChange,
   });
@@ -396,7 +392,7 @@ export function InternalDashboardTopNav({
       {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
       ) : null}
-      <AddToCaseModal screenshot={screenshot} isOpen={isAddToCaseModalOpen} />
+      <AddToCaseModal isOpen={isAddToCaseModalOpen} />
       {viewMode === 'edit' ? <DashboardEditingToolbar isDisabled={!!focusedPanelId} /> : null}
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
       <MountPointPortal setMountPoint={setFavoriteButtonMountPoint}>

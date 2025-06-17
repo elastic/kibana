@@ -28,14 +28,12 @@ export const useDashboardMenuItems = ({
   isLabsShown,
   setIsLabsShown,
   setIsAddToCaseModalOpen,
-  generateScreenshot,
   maybeRedirect,
   showResetChange,
 }: {
   isLabsShown: boolean;
   setIsLabsShown: Dispatch<SetStateAction<boolean>>;
   setIsAddToCaseModalOpen: Dispatch<SetStateAction<boolean>>;
-  generateScreenshot: () => Promise<null | undefined>;
   maybeRedirect: (result?: SaveDashboardReturn) => void;
   showResetChange?: boolean;
 }) => {
@@ -224,7 +222,6 @@ export const useDashboardMenuItems = ({
         testId: 'dashboardAddToCaseButton',
         disableButton: disableTopNav,
         run: async () => {
-          await generateScreenshot();
           setIsAddToCaseModalOpen(true);
         },
       },
@@ -244,7 +241,6 @@ export const useDashboardMenuItems = ({
     resetChanges,
     isResetting,
     setIsAddToCaseModalOpen,
-    generateScreenshot,
   ]);
 
   const resetChangesMenuItem = useMemo(() => {

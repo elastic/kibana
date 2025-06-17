@@ -30,13 +30,6 @@ export interface PageAttachmentPersistedState extends PersistableStateAttachment
     label: string;
   };
   /**
-   * Optional snapshot of the page, used to render a screenshot in the comment
-   */
-  snapshot: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    imgData: any;
-  } | null;
-  /**
    * Optional screen context for the page. A plain text description that
    * can be provided to an LLM to generate a summary or perform analysis
    */

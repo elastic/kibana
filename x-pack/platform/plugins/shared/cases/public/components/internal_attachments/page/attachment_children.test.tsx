@@ -12,9 +12,6 @@ import type { PageAttachmentPersistedState } from './types';
 
 describe('PageAttachmentChildren', () => {
   const mockPersistableState: PageAttachmentPersistedState = {
-    snapshot: {
-      imgData: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA...',
-    },
     type: 'mockType',
     url: {
       actionLabel: 'View in Dashboards',
@@ -30,20 +27,5 @@ describe('PageAttachmentChildren', () => {
 
     const link = screen.getByRole('link', { name: 'Test Page' });
     expect(link).toHaveAttribute('href', '/test/path');
-  });
-
-  it('renders the image when snapshot data is provided', () => {
-    render(<PageAttachmentChildren persistableStateAttachmentState={mockPersistableState} />);
-
-    const image = screen.getByAltText('screenshot');
-    expect(image).toHaveAttribute('src', mockPersistableState.snapshot?.imgData);
-  });
-
-  it('does not render the image when snapshot data is missing', () => {
-    const stateWithoutSnapshot = { ...mockPersistableState, snapshot: null };
-    render(<PageAttachmentChildren persistableStateAttachmentState={stateWithoutSnapshot} />);
-
-    const image = screen.queryByAltText('screenshot');
-    expect(image).not.toBeInTheDocument();
   });
 });
