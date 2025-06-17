@@ -102,6 +102,8 @@ const normalizeFilterArray = (filters: RuleFilterArray | undefined): RuleFilterA
           params: filter.meta.params,
           relation: 'relation' in filter.meta ? filter.meta?.relation : undefined,
           type: filter.meta.type ?? 'custom',
+          alias: filter.meta.alias ?? undefined,
+          key: filter.meta.key ?? undefined,
         }
       : undefined,
   }));
