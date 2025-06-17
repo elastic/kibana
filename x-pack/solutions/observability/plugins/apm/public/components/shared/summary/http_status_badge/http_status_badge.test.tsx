@@ -9,7 +9,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import { HttpStatusBadge } from '.';
 import { renderWithTheme } from '../../../../utils/test_helpers';
-import { httpStatusCodeToColor } from '@kbn/apm-plugin/public/utils/http_status_code_to_color';
+import { httpStatusCodeToColor } from '../../../../utils/http_status_code_to_color';
 
 describe('HttpStatusBadge', () => {
   it('renders status code 100 with neutral color', () => {
