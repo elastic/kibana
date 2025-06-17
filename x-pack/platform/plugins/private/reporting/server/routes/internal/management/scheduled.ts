@@ -76,7 +76,7 @@ export function registerScheduledRoutesInternal(reporting: ReportingCore, logger
             MAX_SCHEDULED_REPORT_LIST_SIZE,
             parseInt(querySize, 10) || DEFAULT_SCHEDULED_REPORT_LIST_SIZE
           );
-          const results = await scheduledQuery.list(req, res, user, page, size);
+          const results = await scheduledQuery.list(logger, req, res, user, page, size);
 
           counters.usageCounter();
 

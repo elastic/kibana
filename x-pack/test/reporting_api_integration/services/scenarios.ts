@@ -277,7 +277,6 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .auth(username, password)
       .set('kbn-xsrf', 'xxx');
 
-    log.info(`listScheduledReports: ${JSON.stringify(res)}`);
     return res.body;
   };
 

@@ -10,11 +10,14 @@ import type {
   KibanaResponseFactory,
   SavedObject,
   SavedObjectsFindResponse,
+  SavedObjectsFindResult,
 } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
 import { REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY } from '@kbn/reporting-server';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { RRule } from '@kbn/rrule';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { ReportApiJSON } from '@kbn/reporting-common/types';
 import type { ReportingCore } from '../../..';
 import type {
   ListScheduledReportApiJSON,
@@ -59,7 +62,47 @@ interface BulkDisableResult {
 
 export type CreatedAtSearchResponse = SearchResponse<{ created_at: string }>;
 
+export function transformSingleResponse(
+  logger: Logger,
+  so: SavedObjectsFindResult<ScheduledReportType>,
+  lastResponse?: CreatedAtSearchResponse
+) {
+  const id = so.id;
+  const lastRunForId = (lastResponse?.hits.hits ?? []).find(
+    (hit) => hit.fields?.[SCHEDULED_REPORT_ID_FIELD]?.[0] === id
+  );
+
+  const schedule = so.attributes.schedule;
+  const _rrule = new RRule({
+    ...schedule.rrule,
+    dtstart: new Date(),
+  });
+
+  let payload: ReportApiJSON['payload'] | undefined;
+  try {
+    payload = JSON.parse(so.attributes.payload);
+  } catch (e) {
+    logger.warn(`Failed to parse payload for scheduled report ${id}: ${e.message}`);
+  }
+
+  return {
+    id,
+    created_at: so.attributes.createdAt,
+    created_by: so.attributes.createdBy,
+    enabled: so.attributes.enabled,
+    jobtype: so.attributes.jobType,
+    last_run: lastRunForId?._source?.[CREATED_AT_FIELD],
+    next_run: _rrule.after(new Date())?.toISOString(),
+    notification: so.attributes.notification,
+    payload,
+    schedule: so.attributes.schedule,
+    space_id: so.namespaces?.[0] ?? DEFAULT_SPACE_ID,
+    title: so.attributes.title,
+  };
+}
+
 export function transformResponse(
+  logger: Logger,
   result: SavedObjectsFindResponse<ScheduledReportType>,
   lastResponse?: CreatedAtSearchResponse
 ): ApiResponse {
@@ -67,37 +110,13 @@ export function transformResponse(
     page: result.page,
     per_page: result.per_page,
     total: result.total,
-    data: result.saved_objects.map((so) => {
-      const id = so.id;
-      const lastRunForId = (lastResponse?.hits.hits ?? []).find(
-        (hit) => hit.fields?.[SCHEDULED_REPORT_ID_FIELD]?.[0] === id
-      );
-
-      const schedule = so.attributes.schedule;
-      const _rrule = new RRule({
-        ...schedule.rrule,
-        dtstart: new Date(),
-      });
-
-      return {
-        id,
-        created_at: so.attributes.createdAt,
-        created_by: so.attributes.createdBy,
-        enabled: so.attributes.enabled,
-        jobtype: so.attributes.jobType,
-        object_type: so.attributes.meta.objectType,
-        last_run: lastRunForId?._source?.[CREATED_AT_FIELD],
-        next_run: _rrule.after(new Date())?.toISOString(),
-        notification: so.attributes.notification,
-        schedule: so.attributes.schedule,
-        title: so.attributes.title,
-      };
-    }),
+    data: result.saved_objects.map((so) => transformSingleResponse(logger, so, lastResponse)),
   };
 }
 
 export interface ScheduledQueryFactory {
   list(
+    logger: Logger,
     req: KibanaRequest,
     res: KibanaResponseFactory,
     user: ReportingUser,
@@ -115,7 +134,7 @@ export interface ScheduledQueryFactory {
 
 export function scheduledQueryFactory(reportingCore: ReportingCore): ScheduledQueryFactory {
   return {
-    async list(req, res, user, page = 1, size = DEFAULT_SCHEDULED_REPORT_LIST_SIZE) {
+    async list(logger, req, res, user, page = 1, size = DEFAULT_SCHEDULED_REPORT_LIST_SIZE) {
       try {
         const esClient = await reportingCore.getEsClient();
         const auditLogger = await reportingCore.getAuditLogger(req);
@@ -181,9 +200,10 @@ export function scheduledQueryFactory(reportingCore: ReportingCore): ScheduledQu
         } catch (error) {
           // if no scheduled reports have run yet, we will get an error from the collapse query
           // ignore these and return an empty last run
+          logger.warn(`Error getting last run for scheduled reports: ${error.message}`);
         }
 
-        return transformResponse(response, lastRunResponse);
+        return transformResponse(logger, response, lastRunResponse);
       } catch (error) {
         throw res.customError({
           statusCode: 500,

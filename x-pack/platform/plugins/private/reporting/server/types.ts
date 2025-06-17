@@ -129,11 +129,12 @@ export interface ListScheduledReportApiJSON {
   created_by: RawScheduledReport['createdBy'];
   enabled: RawScheduledReport['enabled'];
   jobtype: RawScheduledReport['jobType'];
-  object_type: RawScheduledReport['meta']['objectType'];
   last_run: string | undefined;
   next_run: string | undefined;
   notification: RawScheduledReport['notification'];
+  payload?: ReportApiJSON['payload'];
   schedule: RruleSchedule;
+  space_id: string;
   title: RawScheduledReport['title'];
 }
 
