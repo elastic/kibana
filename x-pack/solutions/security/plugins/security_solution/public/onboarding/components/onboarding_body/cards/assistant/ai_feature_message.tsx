@@ -18,9 +18,7 @@ export const ElasticAIFeatureMessage = React.memo(() => {
   const {
     docLinks: {
       links: {
-        securitySolution: {
-          elasticAiFeatures: ELASTIC_AI_FEATURES_LINK,
-        },
+        securitySolution: { elasticAiFeatures: ELASTIC_AI_FEATURES_LINK },
         observability: { elasticManagedLlmUsageCost: ELASTIC_LLM_USAGE_COST_LINK },
       },
     },
