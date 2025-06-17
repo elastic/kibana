@@ -197,6 +197,10 @@ export const RuleMigration = z
      * The rule migration id
      */
     id: NonEmptyString,
+    /**
+     * The rule migration name
+     */
+    name: NonEmptyString,
   })
   .merge(RuleMigrationData);
 
@@ -324,6 +328,10 @@ export const RuleMigrationTaskStats = z.object({
    * The migration id
    */
   id: NonEmptyString,
+  /**
+   * The migration name
+   */
+  name: NonEmptyString,
   /**
    * Indicates if the migration task status.
    */
