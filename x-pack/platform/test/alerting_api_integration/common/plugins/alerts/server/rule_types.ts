@@ -1193,7 +1193,7 @@ function getSeverityRuleType() {
 }
 
 const getInternalRuleType = () => {
-  const result: RuleType<never, never, {}, {}, {}, 'default'> = {
+  const result: RuleType<{}, never, {}, {}, {}, 'default'> = {
     id: 'test.internal-rule-type',
     name: 'Test: Internal Rule Type',
     actionGroups: [{ id: 'default', name: 'Default' }],
@@ -1208,8 +1208,7 @@ const getInternalRuleType = () => {
     isExportable: true,
     internallyManaged: true,
     async executor(ruleExecutorOptions) {
-      const { services, params, state, spaceId, namespace, rule } = ruleExecutorOptions;
-      const ruleInfo = { spaceId, namespace, ...rule };
+      const { services } = ruleExecutorOptions;
 
       services.alertsClient?.report({ id: '1', actionGroup: 'default' });
       services.alertsClient?.report({ id: '2', actionGroup: 'default' });
