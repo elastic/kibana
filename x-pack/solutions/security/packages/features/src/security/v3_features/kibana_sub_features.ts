@@ -712,6 +712,18 @@ const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
   ],
 });
 
+/**
+ * Writing global (i.e. not per-policy) Artifacts is gated with `Global Artifact Management: ALL`, starting with `siemV3`.
+ *
+ * **Role migration implemented:**
+ * Users, who have been able to write ANY artifact before, are now granted with this privilege to keep existing behavior.
+ * - for Trusted Apps, Event Filters, Host Isolation Exceptions, Blocklists: the new privilege is added based on `artifact:ALL` sub-feature privilege
+ * - for Endpoint Exceptions:
+ *   - on Serverless offering, the new privilege is added for Endpoint Exceptions sub-privilege `ALL`,
+ *   - on ESS offering, there is no EE sub-privilege, so the new privilege is added to `siem|siemV2:ALL|MINIMAL_ALL`,
+ *     as these include the Endpoint Exceptions write privilege
+ *
+ */
 const globalArtifactManagementSubFeature = (
   experimentalFeatures: SecurityFeatureParams['experimentalFeatures']
 ): SubFeatureConfig => {

@@ -115,7 +115,13 @@ const trustedApplicationsSubFeature = (): SubFeatureConfig => ({
           replacedBy: [
             {
               feature: SECURITY_FEATURE_ID_V3,
-              privileges: ['trusted_applications_all', 'global_artifact_management_all'],
+              privileges: [
+                'trusted_applications_all',
+
+                // Writing global (not per-policy) Artifacts is gated with Global Artifact Management:ALL starting with siemV3.
+                // Users who have been able to write ANY Artifact before are now granted with this privilege to keep existing behavior.
+                'global_artifact_management_all',
+              ],
             },
           ],
           api: [
@@ -181,7 +187,13 @@ const hostIsolationExceptionsBasicSubFeature = (): SubFeatureConfig => ({
           replacedBy: [
             {
               feature: SECURITY_FEATURE_ID_V3,
-              privileges: ['host_isolation_exceptions_all', 'global_artifact_management_all'],
+              privileges: [
+                'host_isolation_exceptions_all',
+
+                // Writing global (not per-policy) Artifacts is gated with Global Artifact Management:ALL starting with siemV3.
+                // Users who have been able to write ANY Artifact before are now granted with this privilege to keep existing behavior.
+                'global_artifact_management_all',
+              ],
             },
           ],
           api: [
@@ -244,7 +256,13 @@ const blocklistSubFeature = (): SubFeatureConfig => ({
           replacedBy: [
             {
               feature: SECURITY_FEATURE_ID_V3,
-              privileges: ['blocklist_all', 'global_artifact_management_all'],
+              privileges: [
+                'blocklist_all',
+
+                // Writing global (not per-policy) Artifacts is gated with Global Artifact Management:ALL starting with siemV3.
+                // Users who have been able to write ANY Artifact before are now granted with this privilege to keep existing behavior.
+                'global_artifact_management_all',
+              ],
             },
           ],
           api: [
@@ -308,7 +326,13 @@ const eventFiltersSubFeature = (): SubFeatureConfig => ({
           replacedBy: [
             {
               feature: SECURITY_FEATURE_ID_V3,
-              privileges: ['event_filters_all', 'global_artifact_management_all'],
+              privileges: [
+                'event_filters_all',
+
+                // Writing global (not per-policy) Artifacts is gated with Global Artifact Management:ALL starting with siemV3.
+                // Users who have been able to write ANY Artifact before are now granted with this privilege to keep existing behavior.
+                'global_artifact_management_all',
+              ],
             },
           ],
           api: [
@@ -740,7 +764,14 @@ const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
           replacedBy: [
             {
               feature: SECURITY_FEATURE_ID_V3,
-              privileges: ['endpoint_exceptions_all', 'global_artifact_management_all'],
+              privileges: [
+                'endpoint_exceptions_all',
+
+                // Writing global (not per-policy) Artifacts is gated with Global Artifact Management:ALL starting with siemV3.
+                // Users who have been able to write ANY Artifact before are now granted with this privilege to keep existing behavior.
+                // This migration is for the serverless offering, where endpoint exception privilege exists.
+                'global_artifact_management_all',
+              ],
             },
           ],
           id: 'endpoint_exceptions_all',
