@@ -11,6 +11,7 @@ import React, { useMemo } from 'react';
 import type { FC } from 'react';
 import { EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { extractKeywordsFromRegex } from '@kbn/aiops-log-pattern-analysis';
 
 export interface Props {
   row: DataTableRecord;
@@ -37,7 +38,7 @@ export const PatternCellRenderer: FC<Props> = ({ row, columnId, isDetails, defau
     [euiTheme]
   );
 
-  const keywords = useMemo(() => extractGenericKeywords(pattern), [pattern]);
+  const keywords = useMemo(() => extractKeywordsFromRegex(pattern), [pattern]);
 
   const formattedTokens = useMemo(
     () =>
@@ -57,6 +58,17 @@ export const PatternCellRenderer: FC<Props> = ({ row, columnId, isDetails, defau
   const rowHeight = useMemo(
     () => (defaultRowHeight ? Math.floor(defaultRowHeight / 1.5) : 2),
     [defaultRowHeight]
+  );
+
+  const containerStyle = useMemo(
+    () => ({
+      display: '-webkit-box',
+      WebkitBoxOrient: 'vertical' as const,
+      WebkitLineClamp: rowHeight,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+    }),
+    [rowHeight]
   );
 
   if (isDetails) {
@@ -80,50 +92,8 @@ export const PatternCellRenderer: FC<Props> = ({ row, columnId, isDetails, defau
     );
   }
 
-  return (
-    <div
-      css={{
-        display: '-webkit-box',
-        WebkitBoxOrient: 'vertical',
-        WebkitLineClamp: rowHeight,
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-      }}
-    >
-      {formattedTokens}
-    </div>
-  );
+  return <div css={containerStyle}>{formattedTokens}</div>;
 };
-
-/**
- * Extracts "keywords" from a regex string by stripping leading/trailing '.*?'
- * and splitting the remainder by '.+?'.
- *
- * @param {string} regexString The regular expression string.
- * @returns {string[]} An array of extracted "keywords".
- */
-export function extractGenericKeywords(regexString: string) {
-  let cleanedString = regexString;
-
-  // Remove backslashes
-  cleanedString = cleanedString.replace(/\\/g, '');
-
-  // Strip leading '.*?'
-  if (cleanedString.startsWith('.*?')) {
-    cleanedString = cleanedString.substring('.*?'.length);
-  }
-
-  // Strip trailing '.*?'
-  if (cleanedString.endsWith('.*?')) {
-    cleanedString = cleanedString.substring(0, cleanedString.length - '.*?'.length);
-  }
-
-  // Split by '.+?'
-  // Escape the '.' so it's treated as a literal dot, not a wildcard
-  // '.+?' as a literal string to split by.
-  const keywords = cleanedString.split(/\.\+\?/);
-  return keywords.map((keyword) => keyword.trim()).filter((keyword) => keyword.length > 0);
-}
 
 export function getPatternCellRenderer({
   row,

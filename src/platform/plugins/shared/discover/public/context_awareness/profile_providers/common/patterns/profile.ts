@@ -11,10 +11,11 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getCategorizeColumns } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import { extractKeywordsFromRegex } from '@kbn/aiops-log-pattern-analysis';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
-import { extractGenericKeywords, getPatternCellRenderer } from './pattern_cell_renderer';
+import { getPatternCellRenderer } from './pattern_cell_renderer';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 
 export const createPatternDataSourceProfileProvider = (
@@ -65,7 +66,7 @@ export const createPatternDataSourceProfileProvider = (
               return;
             }
 
-            const pattern = extractGenericKeywords(context.value as string).join(' ');
+            const pattern = extractKeywordsFromRegex(context.value as string).join(' ');
             const categorizeField = context.query.esql.match(/CATEGORIZE\((.*)\)/)?.[1]?.trim();
 
             if (!categorizeField || !pattern) {

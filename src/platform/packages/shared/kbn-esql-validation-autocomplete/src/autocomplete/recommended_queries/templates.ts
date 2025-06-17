@@ -14,11 +14,11 @@ import { i18n } from '@kbn/i18n';
 export const getRecommendedQueries = ({
   fromCommand,
   timeField,
-  patternAnalysisField,
+  categorizationField,
 }: {
   fromCommand: string;
   timeField?: string;
-  patternAnalysisField?: string;
+  categorizationField?: string;
 }) => {
   const queries = [
     {
@@ -172,7 +172,7 @@ export const getRecommendedQueries = ({
           },
         ]
       : []),
-    ...(patternAnalysisField
+    ...(categorizationField
       ? [
           {
             label: i18n.translate(
@@ -187,7 +187,7 @@ export const getRecommendedQueries = ({
                 defaultMessage: 'Identify patterns in my logs',
               }
             ),
-            queryString: `${fromCommand}\n  | STATS Count=COUNT(*) BY Pattern=CATEGORIZE(${patternAnalysisField})\n  | SORT Count DESC`,
+            queryString: `${fromCommand}\n  | STATS Count=COUNT(*) BY Pattern=CATEGORIZE(${categorizationField})\n  | SORT Count DESC`,
           },
         ]
       : []),

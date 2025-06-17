@@ -18,24 +18,19 @@ export const getRecommendedQueriesSuggestionsFromStaticTemplates = async (
     openSuggestions: true,
   });
   let timeField = '';
-  let patternAnalysisField: string | undefined = '';
+  let categorizationField: string | undefined = '';
 
   if (fieldSuggestions.length) {
-    const labels = new Set(fieldSuggestions.map((field) => field.label));
-    timeField = labels.has('@timestamp') ? '@timestamp' : fieldSuggestions[0].label;
-    patternAnalysisField = labels.has('message')
-      ? 'message'
-      : labels.has('error.message')
-      ? 'error.message'
-      : labels.has('event.original')
-      ? 'event.original'
-      : undefined;
+    timeField =
+      fieldSuggestions?.find((field) => field.label === '@timestamp')?.label ||
+      fieldSuggestions[0].label;
+    categorizationField = getCategorizationField(fieldSuggestions.map((field) => field.label));
   }
 
   const recommendedQueries = getRecommendedQueries({
     fromCommand,
     timeField,
-    patternAnalysisField,
+    categorizationField,
   });
 
   const suggestions: SuggestionRawDefinition[] = recommendedQueries.map((query) => {
@@ -103,3 +98,25 @@ export const getRecommendedQueriesTemplatesFromExtensions = (
 
   return recommendedQueriesTemplates;
 };
+
+/**
+ * This function returns the categorization field from the list of fields.
+ * It checks for the presence of 'message', 'error.message', or 'event.original' in that order.
+ *
+ * This function is a duplicate of the one in x-pack/platform/packages/shared/ml/aiops_log_pattern_analysis/get_categorization_field.ts.
+ * It is included here to avoid build errors when importing from xpack packages.
+ *
+ * @param fields, the list of fields to check
+ * @returns string | undefined, the categorization field if found, otherwise undefined
+ */
+
+export function getCategorizationField(fields: string[]): string | undefined {
+  const fieldPriority = ['message', 'error.message', 'event.original'];
+  const fieldSet = new Set(fields);
+  for (const field of fieldPriority) {
+    if (fieldSet.has(field)) {
+      return field;
+    }
+  }
+  return undefined;
+}
