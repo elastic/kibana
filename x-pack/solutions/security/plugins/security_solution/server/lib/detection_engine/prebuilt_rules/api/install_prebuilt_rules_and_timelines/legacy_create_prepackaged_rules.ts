@@ -37,7 +37,6 @@ export const legacyCreatePrepackagedRules = async (
   rulesClient: RulesClient,
   exceptionsClient?: ExceptionListClient
 ): Promise<InstallPrebuiltRulesAndTimelinesResponse> => {
-  const config = context.getConfig();
   const savedObjectsClient = context.core.savedObjects.client;
   const siemClient = context.getAppClient();
   const exceptionsListClient = context.getExceptionListClient() ?? exceptionsClient;
@@ -53,11 +52,7 @@ export const legacyCreatePrepackagedRules = async (
     await exceptionsListClient.createEndpointList();
   }
 
-  const latestPrebuiltRules = await ensureLatestRulesPackageInstalled(
-    ruleAssetsClient,
-    config,
-    context
-  );
+  const latestPrebuiltRules = await ensureLatestRulesPackageInstalled(ruleAssetsClient, context);
 
   const installedPrebuiltRules = rulesToMap(await getExistingPrepackagedRules({ rulesClient }));
   const rulesToInstall = getRulesToInstall(latestPrebuiltRules, installedPrebuiltRules);
