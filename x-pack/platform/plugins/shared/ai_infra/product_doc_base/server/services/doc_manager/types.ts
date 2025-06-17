@@ -61,6 +61,10 @@ export interface DocInstallOptions {
    * Defaults to `false`
    */
   wait?: boolean;
+  /**
+   * If provided, the docs will be installed with the model indicated by Inference ID
+   */
+  inferenceId?: string;
 }
 
 /**

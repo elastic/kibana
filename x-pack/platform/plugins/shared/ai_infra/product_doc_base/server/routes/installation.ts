@@ -7,6 +7,7 @@
 
 import type { IRouter } from '@kbn/core/server';
 import { ApiPrivileges } from '@kbn/core-security-server';
+import { schema } from '@kbn/config-schema';
 import {
   INSTALLATION_STATUS_API_PATH,
   INSTALL_ALL_API_PATH,
@@ -54,7 +55,11 @@ export const registerInstallationRoutes = ({
   router.post(
     {
       path: INSTALL_ALL_API_PATH,
-      validate: false,
+      validate: {
+        body: schema.object({
+          inferenceId: schema.maybe(schema.string()),
+        }),
+      },
       options: {
         access: 'internal',
         timeout: { idleSocket: 20 * 60 * 1000 }, // install can take time.
@@ -72,6 +77,7 @@ export const registerInstallationRoutes = ({
         request: req,
         force: false,
         wait: true,
+        inferenceId: req.body?.inferenceId,
       });
 
       // check status after installation in case of failure

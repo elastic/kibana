@@ -29,10 +29,12 @@ export const registerInstallAllTaskDefinition = ({
       timeout: '10m',
       maxAttempts: 3,
       createTaskRunner: (context) => {
+        const inferenceId = context.taskInstance?.params?.inferenceId;
         return {
           async run() {
             const { packageInstaller } = getServices();
-            return packageInstaller.installAll({});
+            // @todo: remove inferenceId: undefined
+            return packageInstaller.installAll({ inferenceId: undefined });
           },
         };
       },
@@ -44,15 +46,17 @@ export const registerInstallAllTaskDefinition = ({
 export const scheduleInstallAllTask = async ({
   taskManager,
   logger,
+  inferenceId,
 }: {
   taskManager: TaskManagerStartContract;
   logger: Logger;
+  inferenceId?: string;
 }) => {
   try {
     await taskManager.ensureScheduled({
       id: INSTALL_ALL_TASK_ID,
       taskType: INSTALL_ALL_TASK_TYPE,
-      params: {},
+      params: { inferenceId },
       state: {},
       scope: ['productDoc'],
     });

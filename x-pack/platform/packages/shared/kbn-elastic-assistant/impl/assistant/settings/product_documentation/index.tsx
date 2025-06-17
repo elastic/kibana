@@ -21,16 +21,17 @@ import * as i18n from './translations';
 
 export const ProductDocumentationManagement = React.memo<{
   status?: InstallationStatus;
-}>(({ status }) => {
+  inferenceId?: string;
+}>(({ status, inferenceId }) => {
   const {
     mutateAsync: installProductDoc,
     isSuccess: isInstalled,
     isLoading: isInstalling,
-  } = useInstallProductDoc();
+  } = useInstallProductDoc(inferenceId);
 
   const onClickInstall = useCallback(() => {
-    installProductDoc();
-  }, [installProductDoc]);
+    installProductDoc(inferenceId);
+  }, [installProductDoc, inferenceId]);
 
   const content = useMemo(() => {
     if (isInstalling) {

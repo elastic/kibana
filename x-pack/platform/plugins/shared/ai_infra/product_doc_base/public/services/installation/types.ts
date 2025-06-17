@@ -13,6 +13,6 @@ import type {
 
 export interface InstallationAPI {
   getStatus(): Promise<InstallationStatusResponse>;
-  install(): Promise<PerformInstallResponse>;
+  install({ inferenceId }?: { inferenceId?: string }): Promise<PerformInstallResponse>;
   uninstall(): Promise<UninstallResponse>;
 }

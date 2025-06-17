@@ -14,12 +14,14 @@ import { registerUninstallAllTaskDefinition } from './uninstall_all';
 export const registerTaskDefinitions = ({
   getServices,
   taskManager,
+  inferenceId,
 }: {
   getServices: () => InternalServices;
   taskManager: TaskManagerSetupContract;
+  inferenceId?: string;
 }) => {
   registerEnsureUpToDateTaskDefinition({ getServices, taskManager });
-  registerInstallAllTaskDefinition({ getServices, taskManager });
+  registerInstallAllTaskDefinition({ getServices, taskManager, inferenceId });
   registerUninstallAllTaskDefinition({ getServices, taskManager });
 };
 
