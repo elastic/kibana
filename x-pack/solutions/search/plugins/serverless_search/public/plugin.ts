@@ -29,6 +29,7 @@ import {
 import { createIndexDocumentsContent } from './application/components/index_documents/documents_tab';
 import { getErrorCode, getErrorMessage, isKibanaServerError } from './utils/get_error_message';
 import { navigationTree } from './navigation_tree';
+import { SEARCH_HOMEPAGE_PATH } from './application/constants';
 
 export class ServerlessSearchPlugin
   implements
@@ -164,7 +165,7 @@ export class ServerlessSearchPlugin
     services: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
     const { serverless, management, indexManagement, security } = services;
-    serverless.setProjectHome('/app/elasticsearch/home');
+    serverless.setProjectHome(SEARCH_HOMEPAGE_PATH);
     const aiAssistantIsEnabled = core.application.capabilities.observabilityAIAssistant?.show;
 
     const navigationTree$ = of(navigationTree(core.application));
