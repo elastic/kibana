@@ -5,16 +5,24 @@
  * 2.0.
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiImage, EuiToolTip, EuiPanel } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiEmptyPrompt,
+  EuiImage,
+  EuiToolTip,
+  EuiPanel,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { MlNodeAvailableWarningShared } from '@kbn/ml-plugin/public';
 import { i18n } from '@kbn/i18n';
 import dashboardEnableImg from '../../../../images/entity_store_dashboard.png';
 
-export const PrivilegedAccessDetectionInstallPrompt: React.FC<{ install: () => Promise<void> }> = ({
-  install,
-}) => {
+export const PrivilegedAccessDetectionInstallPrompt: React.FC<{
+  installationErrorOccurred: boolean;
+  install: () => Promise<void>;
+}> = ({ installationErrorOccurred, install }) => {
   const [mlNodesAvailable, setMlNodesAvailable] = useState(false);
 
   const privilegedAccessDetectionInstallTooltipText = i18n.translate(
@@ -85,6 +93,19 @@ export const PrivilegedAccessDetectionInstallPrompt: React.FC<{ install: () => P
               />
             </p>
             <MlNodeAvailableWarningShared size="s" nodeAvailableCallback={setMlNodesAvailable} />
+            {installationErrorOccurred && (
+              <EuiCallOut
+                title={i18n.translate(
+                  'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedAccessDetection.installErrorStatus',
+                  {
+                    defaultMessage:
+                      'There was an error installing the privileged access detection package.',
+                  }
+                )}
+                color="danger"
+                iconType="error"
+              />
+            )}
           </>
         }
       />

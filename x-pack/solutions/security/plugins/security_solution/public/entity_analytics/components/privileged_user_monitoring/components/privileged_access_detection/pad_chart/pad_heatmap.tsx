@@ -18,8 +18,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiText, EuiTitle } from '@elastic
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { padChartStyling, useIntervalForHeatmap } from '.';
-import type { ESQLAnomalyRecord } from './pad_query_hooks';
+import { useIntervalForHeatmap } from './hooks/pad_heatmap_interval_hooks';
+import { padChartStyling } from './pad_chart_styling';
+import type { ESQLAnomalyRecord } from './hooks/pad_query_hooks';
 import { useGlobalTime } from '../../../../../../common/containers/use_global_time';
 import type { AnomalyBand } from './pad_anomaly_bands';
 import illustration from '../../../../../../common/images/illustration_product_no_results_magnifying_glass.svg';

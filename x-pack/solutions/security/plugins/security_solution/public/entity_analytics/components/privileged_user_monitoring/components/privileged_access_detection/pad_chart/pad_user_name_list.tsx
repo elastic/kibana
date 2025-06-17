@@ -9,7 +9,7 @@ import React from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { padChartStyling } from '.';
+import { padChartStyling } from './pad_chart_styling';
 import { UserPanelKey } from '../../../../../../flyout/entity_details/shared/constants';
 
 const PRIVILEGED_ACCESS_DETECTION_TABLE_ID = 'PadAnomalies-table';

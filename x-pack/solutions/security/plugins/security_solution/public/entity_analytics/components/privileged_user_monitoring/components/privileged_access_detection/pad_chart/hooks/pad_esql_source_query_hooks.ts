@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useIntervalForHeatmap } from '.';
-import { getPrivilegedMonitorUsersJoin } from '../../../helpers';
-import type { AnomalyBand } from './pad_anomaly_bands';
+import { useIntervalForHeatmap } from './pad_heatmap_interval_hooks';
+import { getPrivilegedMonitorUsersJoin } from '../../../../helpers';
+import type { AnomalyBand } from '../pad_anomaly_bands';
 
 const getHiddenBandsFilters = (anomalyBands: AnomalyBand[]) => {
   const hiddenBands = anomalyBands.filter((each) => each.hidden);

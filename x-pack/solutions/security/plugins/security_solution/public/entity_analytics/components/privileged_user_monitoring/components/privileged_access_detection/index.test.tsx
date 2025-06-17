@@ -44,16 +44,14 @@ describe('PrivilegedAccessDetectionsPanel', () => {
     });
   });
 
-  it(`renders a loading element when we don't yet have a status (by returning an unsettled promise)`, async () => {
+  it(`renders a loading element when we don't yet have a status`, async () => {
     mockUsePrivilegedAccessDetectionRoutes.mockReturnValue({
       ...mockAllRoutes,
       getPrivilegedAccessDetectionStatus: () => promiseThatNeverSettles(),
     });
     render(<PrivilegedAccessDetectionsPanel spaceId={'default'} />, { wrapper: TestProviders });
 
-    await waitFor(() =>
-      expect(screen.getByTestId('euiSkeletonLoadingAriaWrapper')).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByTestId('pad-loading-status')).toBeInTheDocument());
   });
 
   it(`renders the enablement prompt if the package hasn't been installed`, async () => {
@@ -68,7 +66,7 @@ describe('PrivilegedAccessDetectionsPanel', () => {
     render(<PrivilegedAccessDetectionsPanel spaceId={'default'} />, { wrapper: TestProviders });
 
     await waitFor(() =>
-      expect(screen.getByText('Enable Privileged access detection')).toBeInTheDocument()
+      expect(screen.getByText('Enable Privileged access detection.')).toBeInTheDocument()
     );
   });
 
@@ -84,11 +82,11 @@ describe('PrivilegedAccessDetectionsPanel', () => {
     render(<PrivilegedAccessDetectionsPanel spaceId={'default'} />, { wrapper: TestProviders });
 
     await waitFor(() =>
-      expect(screen.getByText('Enable Privileged access detection')).toBeInTheDocument()
+      expect(screen.getByText('Enable Privileged access detection.')).toBeInTheDocument()
     );
   });
 
-  it(`TODO whats it do when complete`, async () => {
+  it(`once installation is complete, ensure the header is visible`, async () => {
     mockUsePrivilegedAccessDetectionRoutes.mockReturnValue({
       ...mockAllRoutes,
       getPrivilegedAccessDetectionStatus: () => ({
@@ -99,7 +97,9 @@ describe('PrivilegedAccessDetectionsPanel', () => {
     });
     render(<PrivilegedAccessDetectionsPanel spaceId={'default'} />, { wrapper: TestProviders });
 
-    await waitFor(() => expect(screen.getByText('TODO')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText('Top privileged access detection anomalies')).toBeInTheDocument()
+    );
   });
 
   it('shows a loading state while installation is in progress', async () => {
@@ -115,13 +115,13 @@ describe('PrivilegedAccessDetectionsPanel', () => {
     render(<PrivilegedAccessDetectionsPanel spaceId={'default'} />, { wrapper: TestProviders });
 
     await waitFor(() =>
-      expect(screen.getByText('Enable Privileged access detection')).toBeInTheDocument()
+      expect(screen.getByText('Enable Privileged access detection.')).toBeInTheDocument()
     );
 
     await userEvent.click(screen.getByTestId('privilegedUserMonitoringEnablementButton'));
 
     await waitFor(() =>
-      expect(screen.getByText('Installing Privileged Access Detection package')).toBeInTheDocument()
+      expect(screen.getByText('Installing Privileged access detection package')).toBeInTheDocument()
     );
   });
 });

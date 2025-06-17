@@ -8,11 +8,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { getESQLResults } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
-import { useEsqlGlobalFilterQuery } from '../../../../../../common/hooks/esql/use_esql_global_filter';
-import { esqlResponseToRecords } from '../../../../../../common/utils/esql';
-import { useKibana } from '../../../../../../common/lib/kibana';
-import { useErrorToast } from '../../../../../../common/hooks/use_error_toast';
-import type { AnomalyBand } from './pad_anomaly_bands';
+import { useEsqlGlobalFilterQuery } from '../../../../../../../common/hooks/esql/use_esql_global_filter';
+import { esqlResponseToRecords } from '../../../../../../../common/utils/esql';
+import { useKibana } from '../../../../../../../common/lib/kibana';
+import { useErrorToast } from '../../../../../../../common/hooks/use_error_toast';
+import type { AnomalyBand } from '../pad_anomaly_bands';
 import {
   usePadAnomalyDataEsqlSource,
   usePadTopAnomalousUsersEsqlSource,

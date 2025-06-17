@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiPanel, EuiProgress } from '@elastic/eui';
+import { EuiCallOut, EuiEmptyPrompt, EuiFlexGroup, EuiPanel, EuiProgress } from '@elastic/eui';
 import React from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { PrivilegedAccessDetectionMLPopover } from './pad_ml_popover';
@@ -36,13 +36,13 @@ export const PrivilegedAccessDetectionsPanel: React.FC<{ spaceId: string }> = ({
     installPrivilegedAccessDetectionPackage,
   } = usePrivilegedAccessDetectionRoutes();
 
-  const { data: padInstallationStatus, refetch: refetchInstallationStatus } = useQuery(
-    ['padInstallationStatus'],
-    getPrivilegedAccessDetectionStatus,
-    {
-      refetchInterval: PRIVILEGED_ACCESS_DETECTIONS_STATUS_REFRESH_INTERVAL_IN_MS,
-    }
-  );
+  const {
+    data: padInstallationStatus,
+    error: padInstallationStatusError,
+    refetch: refetchInstallationStatus,
+  } = useQuery(['padInstallationStatus'], getPrivilegedAccessDetectionStatus, {
+    refetchInterval: PRIVILEGED_ACCESS_DETECTIONS_STATUS_REFRESH_INTERVAL_IN_MS,
+  });
 
   const setupMlModuleMutation = useMutation({ mutationFn: setupPrivilegedAccessDetectionMlModule });
   const installPrivilegedAccessDetectionPackageMutation = useMutation({
@@ -64,13 +64,31 @@ export const PrivilegedAccessDetectionsPanel: React.FC<{ spaceId: string }> = ({
 
   return (
     <>
-      {!padInstallationStatus && (
-        <EuiPanel hasShadow={false} hasBorder={true}>
+      {padInstallationStatusError && (
+        <EuiCallOut
+          title={i18n.translate(
+            'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedAccessDetection.errorStatus',
+            {
+              defaultMessage:
+                'There was an error retrieving the status of the privileged access detection package.',
+            }
+          )}
+          color="danger"
+          iconType="error"
+        />
+      )}
+      {!padInstallationStatus && !padInstallationStatusError && (
+        <EuiPanel data-test-subj={'pad-loading-status'} hasShadow={false} hasBorder={true}>
           <EuiProgress size="xs" color="accent" />
         </EuiPanel>
       )}
       {padInstallationStatus && !packageInstallationComplete && !currentlyInstalling && (
-        <PrivilegedAccessDetectionInstallPrompt install={install} />
+        <PrivilegedAccessDetectionInstallPrompt
+          installationErrorOccurred={
+            !!installPrivilegedAccessDetectionPackageMutation.error || !!setupMlModuleMutation.error
+          }
+          install={install}
+        />
       )}
 
       {currentlyInstalling && (
