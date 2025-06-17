@@ -33,19 +33,19 @@ export const PrivilegedAccessDetectionSeverityFilter: React.FC<SeverityFilterPro
       <EuiPanel grow={false} hasBorder hasShadow={false}>
         <EuiFlexGroup alignItems={'center'}>
           <p css={{ fontWeight: euiTheme.font.weight.bold }}>{'Anomaly score'}</p>
-          {anomalyBands.map((eachBand) => {
-            if (eachBand.hidden) {
+          {anomalyBands.map((band) => {
+            if (band.hidden) {
               return (
                 <EuiFlexItem
-                  key={`${eachBand.start}-${eachBand.end}`}
+                  key={`${band.start}-${band.end}`}
                   css={{ cursor: 'pointer' }}
-                  onClick={() => toggleHiddenBand(eachBand)}
+                  onClick={() => toggleHiddenBand(band)}
                   grow={false}
                 >
                   <EuiFlexGroup alignItems={'center'} gutterSize={'xs'}>
                     <EuiIcon type={'eyeClosed'} />
                     <EuiText size={'s'} color={euiTheme.colors.textSubdued}>
-                      <p>{`${eachBand.start}-${eachBand.end}`}</p>
+                      <p>{`${band.start}-${band.end}`}</p>
                     </EuiText>
                   </EuiFlexGroup>
                 </EuiFlexItem>
@@ -53,11 +53,11 @@ export const PrivilegedAccessDetectionSeverityFilter: React.FC<SeverityFilterPro
             }
             return (
               <EuiHealth
-                key={`${eachBand.start}-${eachBand.end}`}
+                key={`${band.start}-${band.end}`}
                 css={{ cursor: 'pointer' }}
-                onClick={() => toggleHiddenBand(eachBand)}
-                color={eachBand.color}
-              >{`${eachBand.start}-${eachBand.end}`}</EuiHealth>
+                onClick={() => toggleHiddenBand(band)}
+                color={band.color}
+              >{`${band.start}-${band.end}`}</EuiHealth>
             );
           })}
         </EuiFlexGroup>

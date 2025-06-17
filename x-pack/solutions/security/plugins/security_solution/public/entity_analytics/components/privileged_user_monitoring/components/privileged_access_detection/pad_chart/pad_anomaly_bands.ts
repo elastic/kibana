@@ -40,9 +40,9 @@ export const useAnomalyBands: () => {
 
   const toggleHiddenBand = (bandToToggle: AnomalyBand) => {
     setBands((currentBands) =>
-      currentBands.map((eachBand) => ({
-        ...eachBand,
-        hidden: bandsAreEqual(bandToToggle, eachBand) ? !eachBand.hidden : eachBand.hidden,
+      currentBands.map((band) => ({
+        ...band,
+        hidden: bandsAreEqual(bandToToggle, band) ? !band.hidden : band.hidden,
       }))
     );
   };

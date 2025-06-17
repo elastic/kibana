@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { PrivilegedAccessDetectionSeverityFilter } from './pad_chart_severity_filter';
 import { useGlobalTime } from '../../../../../../common/containers/use_global_time';
-import { usePrivilegedAccessDetectionAnomaliesQuery } from './pad_query';
+import { usePrivilegedAccessDetectionAnomaliesQuery } from './pad_query_hooks';
 import { useAnomalyBands } from './pad_anomaly_bands';
 import { UserNameList } from './pad_user_name_list';
 import { PrivilegedAccessDetectionHeatmap } from './pad_heatmap';

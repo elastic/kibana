@@ -10,6 +10,9 @@ import { API_VERSIONS } from '../../../../../../common/entity_analytics/constant
 import { useKibana } from '../../../../../common/lib/kibana';
 import type { GetStatusPrivilegedAccessDetectionPackageResponse } from '../../../../../../common/api/entity_analytics/privilege_monitoring/privileged_access_detection/status.gen';
 
+const PRIVILEGED_ACCESS_DETECTION_INDEX_PATTERN =
+  'logs-*,ml_okta_multiple_user_sessions_pad.all,ml_windows_privilege_type_pad.all';
+
 export const usePrivilegedAccessDetectionRoutes = () => {
   const http = useKibana().services.http;
 
@@ -36,8 +39,7 @@ export const usePrivilegedAccessDetectionRoutes = () => {
         version: '1',
         method: 'POST',
         body: JSON.stringify({
-          indexPatternName:
-            'logs-*,ml_okta_multiple_user_sessions_pad.all,ml_windows_privilege_type_pad.all',
+          indexPatternName: PRIVILEGED_ACCESS_DETECTION_INDEX_PATTERN,
           useDedicatedIndex: false,
           startDatafeed: false,
         }),

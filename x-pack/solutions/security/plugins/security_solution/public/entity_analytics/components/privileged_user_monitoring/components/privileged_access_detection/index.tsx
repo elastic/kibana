@@ -25,6 +25,8 @@ const TITLE = i18n.translate(
 
 const PRIVILEGED_ACCESS_DETECTIONS_QUERY_ID = 'privileged-access-detection-query';
 
+const PRIVILEGED_ACCESS_DETECTIONS_STATUS_REFRESH_INTERVAL_IN_MS = 10_000;
+
 export const PrivilegedAccessDetectionsPanel: React.FC<{ spaceId: string }> = ({ spaceId }) => {
   const { toggleStatus, setToggleStatus } = useQueryToggle(PRIVILEGED_USER_ACTIVITY_QUERY_ID);
 
@@ -38,7 +40,7 @@ export const PrivilegedAccessDetectionsPanel: React.FC<{ spaceId: string }> = ({
     ['padInstallationStatus'],
     getPrivilegedAccessDetectionStatus,
     {
-      refetchInterval: 10000,
+      refetchInterval: PRIVILEGED_ACCESS_DETECTIONS_STATUS_REFRESH_INTERVAL_IN_MS,
     }
   );
 
@@ -73,10 +75,22 @@ export const PrivilegedAccessDetectionsPanel: React.FC<{ spaceId: string }> = ({
             css={{ minWidth: '100%' }}
             hasBorder
             iconType="logoSecurity"
-            title={<h2>{'Privileged Access Detection'}</h2>}
+            title={
+              <h2>
+                {i18n.translate(
+                  'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.topPrivilegedAccessDetectionAnomalies.privilegedAccessDetection',
+                  { defaultMessage: 'Privileged access detection' }
+                )}
+              </h2>
+            }
             body={
               <>
-                <p>{'Installing Privileged Access Detection package'}</p>
+                <p>
+                  {i18n.translate(
+                    'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.topPrivilegedAccessDetectionAnomalies.installingPrivilegedAccessDetection',
+                    { defaultMessage: 'Installing Privileged access detection package' }
+                  )}
+                </p>
                 <EuiProgress size="s" color="accent" />
               </>
             }

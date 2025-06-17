@@ -16,7 +16,7 @@ import type { AnomalyBand } from './pad_anomaly_bands';
 import {
   usePadAnomalyDataEsqlSource,
   usePadTopAnomalousUsersEsqlSource,
-} from './pad_esql_source_query';
+} from './pad_esql_source_query_hooks';
 
 interface ESQLRawAnomalyRecord extends Record<string, string | number> {
   '@timestamp': number | string;

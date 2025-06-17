@@ -19,10 +19,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { padChartStyling, useIntervalForHeatmap } from '.';
-import type { ESQLAnomalyRecord } from './pad_query';
+import type { ESQLAnomalyRecord } from './pad_query_hooks';
 import { useGlobalTime } from '../../../../../../common/containers/use_global_time';
-import { useKibana } from '../../../../../../common/lib/kibana';
 import type { AnomalyBand } from './pad_anomaly_bands';
+import illustration from '../../../../../../common/images/illustration_product_no_results_magnifying_glass.svg';
 
 const heatmapComponentStyle: RecursivePartial<HeatmapStyle> = {
   brushTool: {
@@ -59,8 +59,6 @@ interface PrivilegedAccessDetectionHeatmapProps {
 }
 
 const PrivilegedAccessDetectionHeatmapNoResults: React.FC = () => {
-  const { http } = useKibana().services;
-
   return (
     <EuiFlexGroup css={{ maxWidth: '600px' }}>
       <EuiFlexItem>
@@ -83,11 +81,14 @@ const PrivilegedAccessDetectionHeatmapNoResults: React.FC = () => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiImage
-          size="200"
-          alt=""
-          url={http.basePath.prepend(
-            '/plugins/timelines/assets/illustration_product_no_results_magnifying_glass.svg'
+          size="200px"
+          alt={i18n.translate(
+            'xpack.securitySolution.privilegedUserMonitoring.privilegedAccessDetection.emptyState.illustrationAlt',
+            {
+              defaultMessage: 'No results',
+            }
           )}
+          url={illustration}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -98,8 +99,8 @@ const useGlobalTimeInMillis = () => {
   const { from, to } = useGlobalTime();
 
   return {
-    from: from ? new Date(from).getTime() : 0,
-    to: to ? new Date(to).getTime() : 0,
+    from: new Date(from).getTime(),
+    to: new Date(to).getTime(),
   };
 };
 
