@@ -19,6 +19,7 @@ import { EntityStoreUtils } from '../../utils';
 const DATASTREAM_NAME: string = 'logs-elastic_agent.cloudbeat-test';
 const HOST_TRANSFORM_ID: string = 'entities-v1-latest-security_host_default';
 const INDEX_NAME: string = '.entities.v1.latest.security_host_default';
+const RETENTION_POLICY_NAME: string = 'entity_store_field_retention_host_default_v1.0.0';
 const TIMEOUT_MS: number = 600000; // 10 minutes
 
 export default function (providerContext: FtrProviderContext) {
@@ -40,7 +41,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('Install Entity Store and test Host transform', () => {
       before(async () => {
-        await utils.cleanEngines();
+        await cleanUpEntityStore(providerContext);
         // Initialize security solution by creating a prerequisite index pattern.
         // Helps avoid "Error initializing entity store: Data view not found 'security-solution-default'"
         await dataView.create('security-solution');
@@ -59,7 +60,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       afterEach(async () => {
-        await utils.cleanEngines();
+        await cleanUpEntityStore(providerContext);
       });
 
       it("Should return 200 and status 'running' for all engines", async () => {
@@ -282,10 +283,18 @@ async function enableEntityStore(providerContext: FtrProviderContext): Promise<v
     if (success) {
       break;
     } else {
-      await utils.cleanEngines();
+      await cleanUpEntityStore(providerContext);
     }
   }
   expect(success).ok();
+}
+
+async function cleanUpEntityStore(providerContext: FtrProviderContext): Promise<void> {
+  const es = providerContext.getService('es');
+  const utils = EntityStoreUtils(providerContext.getService);
+  await utils.cleanEngines();
+  await es.enrich.deletePolicy({ name: RETENTION_POLICY_NAME }, { ignore: [404] });
+  return true;
 }
 
 interface HostTransformResult {
