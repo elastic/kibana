@@ -94,6 +94,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
         },
         {
           type: 'ner',
+          modelId: 'elastic__distilbert-base-uncased-finetuned-conll03-english',
           enabled: false,
         },
       ],
@@ -103,12 +104,21 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     description: i18n.translate(
       'xpack.observabilityAiAssistantManagement.settingsPage.anonymizationRulesDescription',
       {
-        defaultMessage:
-          'List of anonymization rules.\n' +
-          '- type: "ner" or "regex"\n' +
-          '- entityClass: (regex type only) eg: email, url, ip\n' +
-          '- pattern: (regex type only) the regular‑expression string to match\n' +
-          '- enabled: boolean flag to turn the rule on or off\n',
+        defaultMessage: `List of anonymization rules.
+          <ul>
+            <li><strong>id:</strong> unique string identifier</li>
+            <li><strong>type:</strong> "ner" or "regex"</li>
+            <li><strong>entityClass:</strong> PER, ORG, LOC</li>
+            <li><strong>pattern:</strong> (regex rules only) the regular-expression string to match</li>
+            <li><strong>enabled:</strong> boolean flag to turn the rule on or off</li>
+            <li><strong>description:</strong> optional human-readable description</li>
+            <li><strong>modelId:</strong> ("ner" rules only) id of the trained model to use</li>
+          </ul>`,
+        values: {
+          ul: (chunks) => `<ul>${chunks}</ul>`,
+          li: (chunks) => `<li>${chunks}</li>`,
+          strong: (chunks) => `<strong>${chunks}</strong>`,
+        },
       }
     ),
     schema: schema.arrayOf(schema.oneOf([regexRuleSchema, nerRuleSchema])),

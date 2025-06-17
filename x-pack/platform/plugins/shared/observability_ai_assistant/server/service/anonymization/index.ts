@@ -68,13 +68,17 @@ export class AnonymizationService {
     const batches = chunk(chunks, BATCH_SIZE);
     this.logger.debug(`Processing ${batches.length} batches of up to ${BATCH_SIZE} chunks each`);
 
+    // Determine which model to use: first enabled NER rule that specifies a modelId, otherwise fallback
+    const modelId =
+      this.rules.find((r) => r.type === 'ner' && r.enabled && r.modelId)?.modelId ?? NER_MODEL_ID;
+
     const tasks = batches.map((batchChunks) =>
       limiter(async () =>
         withInferenceSpan('infer_ner', async () => {
           let response;
           try {
             response = await this.esClient.asCurrentUser.ml.inferTrainedModel({
-              model_id: NER_MODEL_ID,
+              model_id: modelId,
               docs: batchChunks.map((batchChunk) => ({ text_field: batchChunk.chunkText })),
             });
           } catch (error) {
@@ -234,6 +238,7 @@ export class AnonymizationService {
     }
     return { unredactedMessages: messages };
   }
+
   unredactChatCompletionEvent(): OperatorFunction<
     ChatCompletionEvent,
     ChatCompletionEvent | ChatCompletionUnredactedMessageEvent

@@ -190,6 +190,7 @@ export interface NerAnonymizationRule {
   type: 'ner';
   entityClass: 'PER' | 'ORG' | 'LOC';
   enabled: boolean;
+  modelId?: string;
 }
 
 export interface RegexAnonymizationRule {
