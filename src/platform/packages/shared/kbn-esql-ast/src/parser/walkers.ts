@@ -385,23 +385,31 @@ export function visitRenameClauses(clausesCtx: RenameClauseContext[]): ESQLAstIt
       const renameToken = asToken || assignToken;
 
       if (renameToken && textExistsAndIsValid(renameToken.getText())) {
-        const option = createOption(renameToken.getText().toLowerCase(), clause);
+        const renameFunction = createFunction(
+          renameToken.getText().toLowerCase(),
+          clause,
+          undefined,
+          'binary-expression'
+        );
 
         const renameArgsInOrder = asToken
           ? [clause._oldName, clause._newName]
           : [clause._newName, clause._oldName];
+
         for (const arg of renameArgsInOrder) {
           if (textExistsAndIsValid(arg.getText())) {
-            option.args.push(createColumn(arg));
+            renameFunction.args.push(createColumn(arg));
           }
         }
-        const firstArg = firstItem(option.args);
-        const lastArg = lastItem(option.args);
-        const location = option.location;
+        const firstArg = firstItem(renameFunction.args);
+        const lastArg = lastItem(renameFunction.args);
+        const location = renameFunction.location;
         if (firstArg) location.min = firstArg.location.min;
         if (lastArg) location.max = lastArg.location.max;
-        return option;
-      } else if (textExistsAndIsValid(clause._oldName?.getText())) {
+        return renameFunction;
+      }
+
+      if (textExistsAndIsValid(clause._oldName?.getText())) {
         return createColumn(clause._oldName);
       }
     })

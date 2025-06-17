@@ -6,37 +6,28 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import {
-  type ESQLAstCommand,
-  walk,
-  type ESQLAstRenameExpression,
-  type ESQLAstBaseItem,
-} from '@kbn/esql-ast';
+import { type ESQLAstCommand, type ESQLAstBaseItem, type ESQLFunction } from '@kbn/esql-ast';
 import uniqBy from 'lodash/uniqBy';
 import type { ESQLFieldWithMetadata } from '../../../validation/types';
-import { isOptionItem } from '../../../shared/helpers';
+import { isFunctionItem } from '../../../shared/helpers';
 
 export const fieldsSuggestionsAfter = (
   command: ESQLAstCommand,
   previousCommandFields: ESQLFieldWithMetadata[],
   userDefinedColumns: ESQLFieldWithMetadata[]
 ) => {
-  const asRenamePairs: ESQLAstRenameExpression[] = [];
-  const assignRenamePairs: ESQLAstRenameExpression[] = [];
+  const asRenamePairs: ESQLFunction[] = [];
+  const assignRenamePairs: ESQLFunction[] = [];
 
-  walk(command, {
-    visitCommand: (node) => {
-      for (const arg of node.args) {
-        if (isOptionItem(arg)) {
-          if (arg.name === 'as') {
-            asRenamePairs.push(arg as ESQLAstRenameExpression);
-          } else if (arg.name === '=') {
-            assignRenamePairs.push(arg as ESQLAstRenameExpression);
-          }
-        }
+  for (const arg of command.args) {
+    if (isFunctionItem(arg)) {
+      if (arg.name === 'as') {
+        asRenamePairs.push(arg);
+      } else if (arg.name === '=') {
+        assignRenamePairs.push(arg);
       }
-    },
-  });
+    }
+  }
 
   // rename the columns with the user defined name
   const newFields = previousCommandFields.map((oldColumn) => {
