@@ -71,7 +71,7 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, th
                             <AssistantProvider>
                               {/*
                                 keep third party context such as CasesContext outside of ReactQueryClientProvider
-                                otherwise risk of them overriding security solutions's queryClient
+                                otherwise there is a risk of them overriding security solutions's queryClient
                               */}
                               <ReactQueryClientProvider>
                                 <PageRouter history={history}>{children}</PageRouter>
