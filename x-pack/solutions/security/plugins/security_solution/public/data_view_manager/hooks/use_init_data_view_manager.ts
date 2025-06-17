@@ -16,11 +16,11 @@ import type { RootState } from '../redux/reducer';
 import { useKibana } from '../../common/lib/kibana';
 import { createDataViewSelectedListener } from '../redux/listeners/data_view_selected';
 import { createInitListener } from '../redux/listeners/init_listener';
-import { useEnableExperimental } from '../../common/hooks/use_experimental_features';
 import { sharedDataViewManagerSlice } from '../redux/slices';
 import { type SelectDataViewAsyncPayload } from '../redux/actions';
 import { DataViewManagerScopeName } from '../constants';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 type OriginalListener = Parameters<typeof originalAddListener>[0];
 
@@ -41,7 +41,7 @@ const removeListener = <T extends AnyAction>(listener: Listener<T>) =>
 export const useInitDataViewManager = () => {
   const dispatch = useDispatch();
   const services = useKibana().services;
-  const { newDataViewPickerEnabled } = useEnableExperimental();
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const {
     signalIndexName,
