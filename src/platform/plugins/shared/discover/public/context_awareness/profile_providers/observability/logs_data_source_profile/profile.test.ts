@@ -15,7 +15,11 @@ import { createDataViewDataSource, createEsqlDataSource } from '../../../../../c
 import type { DataSourceProfileProviderParams, RootContext } from '../../../profiles';
 import { DataSourceCategory, SolutionType } from '../../../profiles';
 import { createContextAwarenessMocks } from '../../../__mocks__';
-import { type LogOverviewContext, createLogsDataSourceProfileProvider } from './profile';
+import {
+  type LogOverviewContext,
+  createLogsDataSourceProfileProvider,
+  isLogsDataSourceContext,
+} from './profile';
 import { DataGridDensity } from '@kbn/unified-data-table';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import type { ContextWithProfileId } from '../../../profile_service';
@@ -273,5 +277,27 @@ describe('logsDataSourceProfileProvider', () => {
 
       expect(rowAdditionalLeadingControls).toHaveLength(0);
     });
+  });
+});
+
+describe('isLogsDataSourceContext', () => {
+  const logsDataSourceContext = {
+    category: DataSourceCategory.Logs,
+    logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
+  };
+
+  it('should return true for context with DataSourceCategory.Logs and logOverviewContext$', () => {
+    expect(isLogsDataSourceContext(logsDataSourceContext)).toBe(true);
+  });
+
+  it('should return false for context with other DataSourceCategory', () => {
+    expect(
+      isLogsDataSourceContext({ ...logsDataSourceContext, category: DataSourceCategory.Default })
+    ).toBe(false);
+  });
+
+  it('should return false for context without logOverviewContext$', () => {
+    const { logOverviewContext$, ...restContext } = logsDataSourceContext;
+    expect(isLogsDataSourceContext(restContext)).toBe(false);
   });
 });
