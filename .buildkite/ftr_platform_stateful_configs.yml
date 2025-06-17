@@ -154,6 +154,7 @@ enabled:
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group2/config.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group3/config.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group4/config.ts
+  - x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group4/config_with_schedule_circuit_breaker.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/actions/config.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/action_task_params/config.ts
   - x-pack/test/api_integration_basic/config.ts
@@ -201,6 +202,7 @@ enabled:
   - x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/with_email_services_enabled_kbn_config/config.ts
   - x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/with_single_email_service_enabled_kbn_config/config.ts
   - x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/shared/config.ts
+  - x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/webhook_disabled_ssl_pfx/config.ts
   - x-pack/test/functional/apps/advanced_settings/config.ts
   - x-pack/test/functional/apps/aiops/config.ts
   - x-pack/test/functional/apps/api_keys/config.ts

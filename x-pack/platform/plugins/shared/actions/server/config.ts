@@ -188,6 +188,15 @@ export const configSchema = schema.object({
       })
     ),
   }),
+  webhook: schema.maybe(
+    schema.object({
+      ssl: schema.object({
+        pfx: schema.object({
+          enabled: schema.boolean({ defaultValue: true }),
+        }),
+      }),
+    })
+  ),
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;
