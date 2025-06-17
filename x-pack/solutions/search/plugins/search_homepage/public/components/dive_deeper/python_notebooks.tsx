@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { docLinks } from '../../../common/doc_links';
 
 export const PythonNotebooks: React.FC = () => (
-  <EuiFlexGroup direction="column" gutterSize="m">
+  <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="pythonNotebooksSection">
     <EuiFlexItem grow={false}>
       <EuiTitle size="s">
         <span>
@@ -33,11 +33,7 @@ export const PythonNotebooks: React.FC = () => (
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <span>
-        <EuiButton
-          href={docLinks.notebooksExamples}
-          target="_blank"
-          data-test-subj="openNotebooksButton"
-        >
+        <EuiButton href={docLinks.notebooksExamples} data-test-subj="openNotebooksButton">
           {i18n.translate('xpack.searchHomepage.pythonNotebooks.buttonText', {
             defaultMessage: 'Open notebooks',
           })}

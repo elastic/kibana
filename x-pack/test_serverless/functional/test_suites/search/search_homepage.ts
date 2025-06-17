@@ -125,5 +125,28 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchHomePage.expectToBeOnSpacesCreatePage();
       });
     });
+
+    describe('Dive deeper with Elasticsearch', function () {
+      it('renders Search labs content', async () => {
+        await testSubjects.existOrFail('searchLabsSection');
+        await testSubjects.existOrFail('searchLabsButton');
+        await testSubjects.click('searchLabsButton');
+        await pageObjects.svlSearchHomePage.expectToBeOnSearchLabsTutorialsPage();
+      });
+
+      it('renders Open Notebooks content', async () => {
+        await testSubjects.existOrFail('pythonNotebooksSection');
+        await testSubjects.existOrFail('openNotebooksButton');
+        await testSubjects.click('openNotebooksButton');
+        await pageObjects.svlSearchHomePage.expectToBeOnNotebooksExamplesPage();
+      });
+
+      it('renders Elasticsearch Documentation content', async () => {
+        await testSubjects.existOrFail('elasticsearchDocumentationSection');
+        await testSubjects.existOrFail('viewDocumentationButton');
+        await testSubjects.click('viewDocumentationButton');
+        await pageObjects.svlSearchHomePage.expectToBeOnGetStartedDocumentationPage();
+      });
+    });
   });
 }

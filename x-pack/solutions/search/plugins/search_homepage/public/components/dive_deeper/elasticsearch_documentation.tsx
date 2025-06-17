@@ -10,7 +10,11 @@ import { docLinks } from '../../../common/doc_links';
 import React from 'react';
 
 export const ElasticsearchDocumentation: React.FC = () => (
-  <EuiFlexGroup direction="column" gutterSize="m">
+  <EuiFlexGroup
+    direction="column"
+    gutterSize="m"
+    data-test-subj="elasticsearchDocumentationSection"
+  >
     <EuiFlexItem grow={false}>
       <EuiTitle size="s">
         <span>
@@ -35,7 +39,6 @@ export const ElasticsearchDocumentation: React.FC = () => (
         <EuiButton
           href={docLinks.elasticsearchGettingStarted}
           iconType={'documentation'}
-          target="_blank"
           data-test-subj="viewDocumentationButton"
         >
           {i18n.translate('xpack.searchHomepage.elasticsearchDocumentation.buttonText', {

@@ -73,6 +73,15 @@ export function SvlSearchHomePageProvider({ getService }: FtrProviderContext) {
     async expectToBeOnSpacesCreatePage() {
       expect(await browser.getCurrentUrl()).contain('app/management/kibana/spaces/create');
     },
+    async expectToBeOnSearchLabsTutorialsPage() {
+      expect(await browser.getCurrentUrl()).contain('search-labs/tutorials');
+    },
+    async expectToBeOnNotebooksExamplesPage() {
+      expect(await browser.getCurrentUrl()).contain('search-labs/tutorials/examples');
+    },
+    async expectToBeOnGetStartedDocumentationPage() {
+      expect(await browser.getCurrentUrl()).contain('docs/solutions/search/get-started');
+    },
     async createApiKeyInFlyout(keyName: string) {
       await testSubjects.existOrFail('connectionDetailsApiKeyNameInput');
       await testSubjects.existOrFail('connectionDetailsApiKeySubmitBtn');

@@ -11,7 +11,7 @@ import { docLinks } from '../../../common/doc_links';
 import React from 'react';
 
 export const SearchLabs: React.FC = () => (
-  <EuiFlexGroup direction="column" gutterSize="m">
+  <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="searchLabsSection">
     <EuiFlexItem grow={false}>
       <EuiTitle size="s">
         <span>
@@ -36,7 +36,6 @@ export const SearchLabs: React.FC = () => (
         <EuiButton
           iconType={'popout'}
           href={docLinks.visitSearchLabs}
-          target="_blank"
           iconSide="right"
           data-test-subj="searchLabsButton"
         >
