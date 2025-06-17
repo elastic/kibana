@@ -27,14 +27,12 @@ export const EntityAnalyticsLandingPage = () => {
     Array.isArray(entityAnalyticsLandingNavLink.links)
       ? entityAnalyticsLandingNavLink.links
       : [];
-  const entityAnalyticsRiskAnalyticsNavLink = useRootNavLink(
-    SecurityPageName.entityAnalyticsOverview
-  );
+  const entityAnalyticsOverviewNavLink = useRootNavLink(SecurityPageName.entityAnalyticsOverview);
   const entityAnalyticsOverviewlinks =
-    entityAnalyticsRiskAnalyticsNavLink &&
-    'links' in entityAnalyticsRiskAnalyticsNavLink &&
-    Array.isArray(entityAnalyticsRiskAnalyticsNavLink.links)
-      ? entityAnalyticsRiskAnalyticsNavLink.links
+    entityAnalyticsOverviewNavLink &&
+    'links' in entityAnalyticsOverviewNavLink &&
+    Array.isArray(entityAnalyticsOverviewNavLink.links)
+      ? entityAnalyticsOverviewNavLink.links
       : [];
   const urlState = useGlobalQueryString();
 

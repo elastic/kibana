@@ -16,7 +16,7 @@ import {
 import type { LinkItem } from '../common/links/types';
 import { ENTITY_ANALYTICS, ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING } from '../app/translations';
 import privilegedUserMonitoringPageImg from '../common/images/privileged_user_monitoring_page.png';
-import riskAnalyticsPageImg from '../common/images/risk_analytics_page.png';
+import eaOverviewPageImg from '../common/images/ea_overview_page.png';
 
 const privMonLinks: LinkItem = {
   id: SecurityPageName.entityAnalyticsPrivilegedUserMonitoring,
@@ -35,12 +35,12 @@ const privMonLinks: LinkItem = {
   licenseType: 'platinum',
 };
 
-const riskAnalyticsLinks: LinkItem = {
+const eaOverviewLinks: LinkItem = {
   id: SecurityPageName.entityAnalyticsOverview,
   title: i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.overview', {
     defaultMessage: 'Overview',
   }),
-  landingImage: riskAnalyticsPageImg,
+  landingImage: eaOverviewPageImg,
   path: ENTITY_ANALYTICS_OVERVIEW_PATH,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.overview', {
@@ -63,7 +63,7 @@ export const entityAnalyticsLinks: LinkItem = {
       defaultMessage: 'Entity analytics',
     }),
   ],
-  links: [riskAnalyticsLinks, privMonLinks],
+  links: [eaOverviewLinks, privMonLinks],
   hideTimeline: true,
   skipUrlState: true,
   experimentalKey: 'privilegeMonitoringEnabled',
