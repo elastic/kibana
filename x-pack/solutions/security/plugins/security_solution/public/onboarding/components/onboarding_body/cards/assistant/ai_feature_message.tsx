@@ -20,7 +20,6 @@ export const ElasticAIFeatureMessage = React.memo(() => {
       links: {
         securitySolution: {
           elasticAiFeatures: ELASTIC_AI_FEATURES_LINK,
-          thirdPartyLlmProviders: THIRD_PARTY_LLM_LINK,
         },
         observability: { elasticManagedLlmUsageCost: ELASTIC_LLM_USAGE_COST_LINK },
       },
@@ -52,11 +51,7 @@ export const ElasticAIFeatureMessage = React.memo(() => {
             {ELASTIC_LLM_USAGE_COSTS}
           </EuiLink>
         ),
-        thirdParty: (
-          <EuiLink href={THIRD_PARTY_LLM_LINK} target="_blank" rel="noopener noreferrer" external>
-            {ELASTIC_LLM_THIRD_PARTY}
-          </EuiLink>
-        ),
+        thirdParty: ELASTIC_LLM_THIRD_PARTY,
       }}
     />
   );
