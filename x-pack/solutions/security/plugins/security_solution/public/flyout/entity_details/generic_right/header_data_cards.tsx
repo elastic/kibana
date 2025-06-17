@@ -109,6 +109,7 @@ export const HeaderDataCards = ({
               onChange={(newValue) => {
                 assignCriticality(newValue);
               }}
+              isInvalid={hasError}
             />
           </div>
         ),
@@ -145,7 +146,7 @@ export const HeaderDataCards = ({
         description: <EuiTextTruncate text={subType || ''} />,
       },
     ],
-    [id, subType, type, assignCriticality, criticality]
+    [criticality, hasError, id, type, subType, assignCriticality]
   );
 
   return (
