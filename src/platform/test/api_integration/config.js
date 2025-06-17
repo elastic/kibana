@@ -39,9 +39,6 @@ export default async function ({ readConfigFile }) {
         '--savedObjects.maxImportPayloadBytes=30000000',
         // for testing set buffer duration to 0 to immediately flush counters into saved objects.
         '--usageCollection.usageCounters.bufferDuration=0',
-        // unused URLs task
-        '--share.url_expiration.enabled=true',
-        '--share.url_expiration.url_limit=5',
       ],
     },
   };
