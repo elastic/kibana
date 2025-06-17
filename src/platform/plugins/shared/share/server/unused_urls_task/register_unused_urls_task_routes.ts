@@ -17,6 +17,7 @@ export const registerUrlServiceRoutes = ({
   urlExpirationDuration,
   urlLimit,
   logger,
+  isEnabled,
 }: {
   router: IRouter;
   core: CoreSetup;
