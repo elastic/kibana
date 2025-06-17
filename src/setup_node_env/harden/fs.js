@@ -96,7 +96,8 @@ const getSafePath = (userPath) => {
     isDevOrCI &&
     (normalizedPath.endsWith('.txt') ||
       normalizedPath.endsWith('.md') ||
-      normalizedPath.endsWith('.log'))
+      normalizedPath.endsWith('.log') ||
+      normalizedPath.includes('__fixtures__'))
   ) {
     return normalizedPath;
   }
