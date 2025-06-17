@@ -98,13 +98,13 @@ export const PrivilegedUserMonitoringFilePickerStep: React.FC<PrivilegedUserMoni
           <ul className={listStyle}>
             <li>
               <FormattedMessage
-                defaultMessage="<b>User.name:</b> holds a privileged user’s name"
+                defaultMessage="User.name: holds a privileged user’s name"
                 id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.filePicker.userNameDescription"
               />
             </li>
             <li>
               <FormattedMessage
-                defaultMessage="<b>User.label (optional):</b> represents a label assigned to user, e.g. their role, group, team etc."
+                defaultMessage="User.label (optional): represents a label assigned to user, e.g. their role, group, team etc."
                 id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.filePicker.userLabelDescription"
               />
             </li>
