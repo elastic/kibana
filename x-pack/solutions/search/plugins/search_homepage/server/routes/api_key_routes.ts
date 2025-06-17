@@ -11,7 +11,7 @@ import { errorHandler } from '../utils/error_handler';
 export const registerApiKeyRoutes = ({ logger, router, getSecurity }: RouteDependencies) => {
   router.get(
     {
-      path: '/internal/serverless_search/api_keys',
+      path: '/internal/search_homepage/api_keys',
       validate: {},
       security: {
         authz: {

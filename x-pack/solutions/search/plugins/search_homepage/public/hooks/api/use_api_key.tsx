@@ -15,7 +15,7 @@ export const useGetApiKeys = () => {
     queryKey: ['apiKey'],
     queryFn: () =>
       http.fetch<{ apiKeys: ApiKey[]; canManageOwnApiKey: boolean }>(
-        '/internal/serverless_search/api_keys'
+        '/internal/search_homepage/api_keys'
       ),
   });
 };
