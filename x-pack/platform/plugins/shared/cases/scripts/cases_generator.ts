@@ -136,7 +136,7 @@ const generateCases = async ({
 }) => {
   try {
     console.log(`Creating ${cases.length} cases in ${space ? `space: ${space}` : 'default space'}`);
-    const path = space ? `/s/${space}/api/cases` : '/api/cases';
+    const path = `${space ? `/s/${space}` : ''}/api/cases`;
     await pMap(
       cases,
       (newCase) => {
