@@ -50,6 +50,7 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { AdditionalFieldGroups } from '@kbn/unified-field-list';
 import { useDataGridInTableSearch } from '@kbn/data-grid-in-table-search';
 import { useThrottleFn } from '@kbn/react-hooks';
+import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import { DATA_GRID_DENSITY_STYLE_MAP, useDataGridDensity } from '../hooks/use_data_grid_density';
 import {
   UnifiedDataTableSettings,
@@ -819,21 +820,28 @@ export const UnifiedDataTable = ({
     [displayedRows]
   );
 
-  const cellActionsFields = useMemo<UseDataGridColumnsCellActionsProps['fields']>(
-    () =>
-      cellActionsTriggerId
-        ? visibleColumns.map(
-            (columnName) =>
-              dataView.getFieldByName(columnName)?.toSpec() ?? {
-                name: '',
-                type: '',
-                aggregatable: false,
-                searchable: false,
-              }
-          )
-        : undefined,
-    [cellActionsTriggerId, visibleColumns, dataView]
-  );
+  const cellActionsFields = useMemo<UseDataGridColumnsCellActionsProps['fields']>(() => {
+    if (!cellActionsTriggerId) {
+      return undefined;
+    }
+
+    return visibleColumns.map((columnName) => {
+      const field = getDataViewFieldOrCreateFromColumnMeta({
+        dataView,
+        fieldName: columnName,
+        columnMeta: columnsMeta?.[columnName],
+      });
+      return (
+        field?.toSpec() ?? {
+          name: '',
+          type: '',
+          aggregatable: false,
+          searchable: false,
+        }
+      );
+    });
+  }, [cellActionsTriggerId, visibleColumns, dataView, columnsMeta]);
+
   const allCellActionsMetadata = useMemo(
     () => ({ dataViewId: dataView.id, ...(cellActionsMetadata ?? {}) }),
     [dataView, cellActionsMetadata]
