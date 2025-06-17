@@ -266,9 +266,9 @@ export class SiemRulesMigrationsService {
       if (pendingMigrationIds.length > 0) {
         // send notifications for finished migrations
         pendingMigrationIds.forEach((pendingMigrationId) => {
-          const migration = results.find((item) => item.id === pendingMigrationId);
-          if (migration?.status === SiemMigrationTaskStatus.FINISHED) {
-            this.onMigrationFinished(migration);
+          const migrationStats = results.find((item) => item.id === pendingMigrationId);
+          if (migrationStats?.status === SiemMigrationTaskStatus.FINISHED) {
+            this.onRuleMigrationFinished(migrationStats);
           }
         });
       }
@@ -306,7 +306,7 @@ export class SiemRulesMigrationsService {
     } while (pendingMigrationIds.length > 0);
   }
 
-  private onMigrationFinished(ruleMigrationStats: RuleMigrationStats) {
+  private onRuleMigrationFinished(ruleMigrationStats: RuleMigrationStats) {
     this.core.notifications.toasts.addSuccess(getSuccessToast(ruleMigrationStats, this.core));
     this.invalidateRuleMigrationQueries(ruleMigrationStats.id);
   }
