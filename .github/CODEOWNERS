@@ -1012,8 +1012,8 @@ x-pack/test
 x-pack/solutions/observability/test
 x-pack/performance @elastic/appex-qa
 x-pack/platform/test
-x-pack/solutions/security/test @elastic/security-solution
 x-pack/solutions/search/test @elastic/search-kibana
+x-pack/solutions/security/test
 x-pack/examples/testing_embedded_lens @elastic/kibana-visualizations
 x-pack/examples/third_party_lens_navigation_prompt @elastic/kibana-visualizations
 x-pack/examples/third_party_vis_lens_example @elastic/kibana-visualizations
