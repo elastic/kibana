@@ -10,7 +10,7 @@
 import React from 'react';
 import { StoryObj, Meta } from '@storybook/react';
 import { i18n } from '@kbn/i18n';
-import { EuiText, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
+import { EuiText, EuiFlexGroup, EuiFlexItem, EuiBadge, EuiDescriptionList } from '@elastic/eui';
 import { faker } from '@faker-js/faker';
 import { DataCascade } from '..';
 
@@ -59,7 +59,7 @@ export const GridImplementation: StoryObj<{ query: string }> = {
             )}
             rowHeaderTitleSlot={({ row }) => (
               <EuiText>
-                <h2>{row.original.group ?? row.original.customer_full_name}</h2>
+                <h2>{row.original.group}</h2>
               </EuiText>
             )}
             rowHeaderMetaSlots={({ row }) => [
@@ -69,14 +69,24 @@ export const GridImplementation: StoryObj<{ query: string }> = {
                 </p>
               </EuiText>,
             ]}
-            rowContentSlot={({ row }) => (
-              <EuiFlexItem>{JSON.stringify(row.original, null, 2)}</EuiFlexItem>
-            )}
+            leafContentSlot={({ data }) => {
+              return (
+                <EuiDescriptionList
+                  listItems={(data ?? []).map((datum) => ({
+                    title: datum.group,
+                    description: JSON.stringify(datum, null, 2),
+                  }))}
+                />
+              );
+            }}
             onGroupByChange={(groupBy) => {
               // eslint-disable-next-line no-console -- Handle group by change if needed
               console.log('Group By Changed:', groupBy);
             }}
-            onGroupByRowExpanded={async ({ row, state }) => {
+            onGroupNodeExpanded={async ({ row, nodePath }) => {
+              // eslint-disable-next-line no-console -- Handle row expansion if needed
+              console.log({ row, nodePath });
+
               // Simulate a data fetch on row expansion
               return new Promise((resolve) => {
                 setTimeout(() => {
@@ -84,15 +94,26 @@ export const GridImplementation: StoryObj<{ query: string }> = {
                     new Array(row.original.count).fill(null).map(() => {
                       return {
                         id: faker.string.uuid(),
-                        ...state.groupByColumns?.reduce((acc, cur) => {
-                          if (cur === state.currentGroupByColumn) {
-                            acc[cur] = row.original.group;
-                          } else {
-                            acc[cur] = faker.lorem.word();
-                          }
-                          return acc;
-                        }, {} as Record<string, string>),
-                        details: faker.lorem.sentence(),
+                        group: faker.person.fullName(),
+                        count: faker.number.int({ min: 1, max: row.original.count }),
+                      };
+                    })
+                  );
+                }, 3000);
+              });
+            }}
+            onGroupLeafExpanded={async ({ row, nodePathMap: pathValue, nodePath }) => {
+              // eslint-disable-next-line no-console -- Handle leaf expansion if needed
+              console.log({ row, pathValue, nodePath });
+
+              // Simulate a data fetch for the expanded leaf, ideally we'd want to use nodePath information to fetch this data
+              return new Promise((resolve) => {
+                setTimeout(() => {
+                  resolve(
+                    new Array(row.original.count).fill(null).map(() => {
+                      return {
+                        id: faker.string.uuid(),
+                        ...pathValue,
                       };
                     })
                   );

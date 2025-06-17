@@ -16,38 +16,47 @@ import React, {
   type Dispatch,
   type PropsWithChildren,
 } from 'react';
+import { enableMapSet } from 'immer';
 import { once } from 'lodash';
-import { type DocWithId, type IStoreState, type IDispatchAction, storeReducer } from './reducers';
+import {
+  type GroupNode,
+  type LeafNode,
+  type IStoreState,
+  type IDispatchAction,
+  storeReducer,
+} from './reducers';
 import { getStatsGroupByColumnsFromQuery } from '../parse_esql';
 
-interface IStoreContext<T extends DocWithId> {
-  state: IStoreState<T>;
-  dispatch: Dispatch<IDispatchAction>;
+interface IStoreContext<N extends GroupNode, L extends LeafNode> {
+  state: IStoreState<N, L>;
+  dispatch: Dispatch<IDispatchAction<N, L>>;
 }
 
 interface IDataCascadeProviderProps {
   query: string;
 }
 
-export const createStoreContext = once(<T extends DocWithId>() => {
-  return createContext<IStoreContext<T> | null>(null);
+export const createStoreContext = once(<N extends GroupNode, L extends LeafNode>() => {
+  enableMapSet(); // Enable Map and Set support for immer
+  return createContext<IStoreContext<N, L> | null>(null);
 });
 
-export function DataCascadeProvider<T extends DocWithId>({
+export function DataCascadeProvider<N extends GroupNode, L extends LeafNode>({
   query,
   children,
 }: PropsWithChildren<IDataCascadeProviderProps>) {
-  const StoreContext = createStoreContext<T>();
+  const StoreContext = createStoreContext<N, L>();
 
-  const initialState = useRef<IStoreContext<T>['state']>({
-    data: [],
+  const initialState = useRef<IStoreContext<N, L>['state']>({
+    groupNodes: [],
+    leafNodes: new Map<string, L[]>(),
     currentQueryString: '',
-    groupByColumns: null,
-    currentGroupByColumn: null,
+    groupByColumns: [],
+    currentGroupByColumns: [],
   });
 
   const createInitialState = useCallback(
-    (state: IStoreContext<T>['state']) => {
+    (state: IStoreContext<N, L>['state']): IStoreContext<N, L>['state'] => {
       if (query !== state.currentQueryString) {
         // TODO: Eyo - move this logic out of the provider so the component itself becomes even more generic
         const columns = getStatsGroupByColumnsFromQuery(query);
@@ -55,7 +64,7 @@ export function DataCascadeProvider<T extends DocWithId>({
           ...state,
           currentQueryString: query,
           groupByColumns: columns,
-          currentGroupByColumn: columns.length > 0 ? columns[0] : null,
+          currentGroupByColumns: columns.length ? [columns[0]] : [],
         };
       }
       return state;
@@ -68,20 +77,33 @@ export function DataCascadeProvider<T extends DocWithId>({
   return <StoreContext.Provider value={{ state, dispatch }}>{children}</StoreContext.Provider>;
 }
 
-function useDataCascadeStore<T extends DocWithId>() {
-  const ctx = useContext(createStoreContext<T>());
+function useDataCascadeStore<T extends GroupNode, L extends LeafNode>() {
+  const ctx = useContext(createStoreContext<T, L>());
   if (!ctx) {
     throw new Error('useDataCascadeStore must be used within a DataCascadeProvider');
   }
   return ctx;
 }
 
-export function useDataCascadeDispatch<T extends DocWithId = DocWithId>() {
-  const ctx = useDataCascadeStore<T>();
+export function useDataCascadeDispatch<
+  T extends GroupNode = GroupNode,
+  L extends LeafNode = LeafNode
+>() {
+  const ctx = useDataCascadeStore<T, L>();
   return ctx.dispatch;
 }
 
-export function useDataCascadeState<T extends DocWithId>() {
-  const ctx = useDataCascadeStore<T>();
+export function useDataCascadeState<T extends GroupNode, L extends LeafNode>() {
+  const ctx = useDataCascadeStore<T, L>();
   return ctx.state;
+}
+
+export function useCascadeGroupNodes<T extends GroupNode, L extends LeafNode>() {
+  const { groupNodes } = useDataCascadeState<T, L>();
+  return groupNodes;
+}
+
+export function useCascadeLeafNode<T extends GroupNode, L extends LeafNode>(cacheKey: string[]) {
+  const { leafNodes } = useDataCascadeState<T, L>();
+  return leafNodes.get(cacheKey) ?? [];
 }
