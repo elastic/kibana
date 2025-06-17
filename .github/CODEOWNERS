@@ -1012,6 +1012,7 @@ x-pack/test
 x-pack/solutions/observability/test
 x-pack/performance @elastic/appex-qa
 x-pack/platform/test
+x-pack/solutions/security/test
 x-pack/examples/testing_embedded_lens @elastic/kibana-visualizations
 x-pack/examples/third_party_lens_navigation_prompt @elastic/kibana-visualizations
 x-pack/examples/third_party_vis_lens_example @elastic/kibana-visualizations
@@ -2614,9 +2615,9 @@ x-pack/test/kubernetes_security @elastic/kibana-cloud-security-posture
 x-pack/test/functional/es_archives/session_view @elastic/kibana-cloud-security-posture
 x-pack/test/session_view @elastic/kibana-cloud-security-posture # Assigned per https://github.com/elastic/kibana/blob/main/api_docs/session_view.mdx#L18
 ## CSP tests
-x-pack/test/api_integration/apis/cloud_security_posture/ @elastic/kibana-cloud-security-posture
-x-pack/test/cloud_security_posture_functional/ @elastic/kibana-cloud-security-posture
-x-pack/test/cloud_security_posture_api/ @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/test/api_integration/apis/cloud_security_posture/ @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/test/cloud_security_posture_functional/ @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/test/cloud_security_posture_api/ @elastic/kibana-cloud-security-posture
 ## CSP Serverless tests
 x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.* @elastic/kibana-cloud-security-posture
 x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture/ @elastic/kibana-cloud-security-posture
