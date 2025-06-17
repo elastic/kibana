@@ -11,7 +11,7 @@ import { BuiltinToolIds, BuiltinTags } from '@kbn/onechat-common';
 import { runSearchAgent } from './run_researcher_agent';
 
 const researcherSchema = z.object({
-  instructions: z.string().describe('Instructions for the researcher'),
+  instructions: z.string().describe('Research instructions for the agent'),
 });
 
 export interface ResearcherResponse {
@@ -21,7 +21,22 @@ export interface ResearcherResponse {
 export const researcherTool = (): RegisteredTool<typeof researcherSchema, ResearcherResponse> => {
   return {
     id: BuiltinToolIds.researcherAgent,
-    description: 'An agentic researcher agent to perform search tasks',
+    description: `An agentic researcher tool to perform search and analysis tasks.
+
+      Can be used to perform "deep search" tasks where a single query or search is not enough
+      and where we need some kind of more in depth-research with multiple search requests and analysis.
+
+      Example where the agent should be used:
+        - "Summarize the changes between our previous and current work from home policy"
+        - "Find the vulnerabilities involved in our latest alerts and gather information about them"
+        - Any time the user explicitly asks to use this tool
+
+      Example where the agent should not be used (in favor of more simple search tools):
+        - "Show me the last 5 documents in the index 'foo'"
+        - "Show me my latest alerts"
+
+      Notes:
+        - Please include all useful information in the instructions, as the agent has no other context. `,
     schema: researcherSchema,
     handler: async ({ instructions }, { toolProvider, request, modelProvider, runner, logger }) => {
       const searchAgentResult = await runSearchAgent(

@@ -97,15 +97,17 @@ export const runSearchAgent: RunChatAgentFn = async (
   });
 
   const eventStream = agentGraph.streamEvents(
-    { initialQuery: instructions },
+    {
+      initialQuery: instructions,
+      cycleBudget: 10,
+    },
     {
       version: 'v2',
       runName: agentGraphName,
       metadata: {
         graphName: agentGraphName,
-        // runId,
       },
-      recursionLimit: 10,
+      recursionLimit: 30,
       callbacks: [],
     }
   );
@@ -121,11 +123,12 @@ export const runSearchAgent: RunChatAgentFn = async (
     // later we should emit reasoning events from there.
   });
 
-  await lastValueFrom(events$);
+  //  event: 'on_chain_end', name: 'researcher-agent'
+  const lastEvent = await lastValueFrom(events$);
+  const generatedAnswer = lastEvent.data.output.generatedAnswer;
 
-  // return await extractRound(events$);
   return {
-    answer: 'hello',
+    answer: generatedAnswer,
   };
 };
 

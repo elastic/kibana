@@ -12,47 +12,21 @@ import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { StructuredTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/core/server';
 import { InferenceChatModel } from '@kbn/inference-langchain';
+import { getToolCalls, extractTextContent } from '../chat/utils/from_langchain_messages';
 import { getReflectionPrompt, getExecutionPrompt, getAnswerPrompt } from './prompts';
 import { extractToolResults } from './utils';
-import { getToolCalls, extractTextContent } from '../chat/utils/from_langchain_messages';
+import { ActionResult, ReflectionResult, BacklogItem, lastReflectionResult } from './backlog';
 
-// tool_choice: toolName
-
-export interface PlannedAction {
-  knowledgeGap: string;
-}
-
-export interface ExecutedAction {
-  knowledgeGap: string;
-  toolName: string;
-  arguments: any;
-  response: any;
-}
-
-//
-// process queue -> create knowledge entries -> reason
-//
-
-// tools:
-// - index explorer
-// - relevance search
-// - nl search
-// - get_document_by_id
-
-interface ReflectionResult {
-  isSufficient: boolean;
-  knowledgeGaps: string[];
-  reasoning?: string;
+export interface ResearchGoal {
+  question: string;
 }
 
 export const createAgentGraph = async ({
   chatModel,
   tools,
-  systemPrompt,
 }: {
   chatModel: InferenceChatModel;
   tools: StructuredTool[];
-  systemPrompt?: string;
   logger: Logger;
 }) => {
   const StateAnnotation = Annotation.Root({
@@ -60,19 +34,18 @@ export const createAgentGraph = async ({
     initialQuery: Annotation<string>(), // the search query
     cycleBudget: Annotation<number>(), // budget in number of cycles - TODO
     // internal state
-    actionsQueue: Annotation<PlannedAction[], PlannedAction[]>({
+    actionsQueue: Annotation<ResearchGoal[], ResearchGoal[]>({
       reducer: (state, actions) => {
         return actions ?? state;
       },
       default: () => [],
     }),
-    processedActions: Annotation<ExecutedAction[], ExecutedAction[]>({
+    backlog: Annotation<BacklogItem[]>({
       reducer: (current, next) => {
         return [...current, ...next];
       },
       default: () => [],
     }),
-    lastReflectionResult: Annotation<ReflectionResult>(),
     // outputs
     generatedAnswer: Annotation<string>(),
   });
@@ -81,8 +54,8 @@ export const createAgentGraph = async ({
    * Initialize the flow by adding a first index explorer call to the action queue.
    */
   const initialize = async (state: typeof StateAnnotation.State) => {
-    const firstAction: PlannedAction = {
-      knowledgeGap: state.initialQuery,
+    const firstAction: ResearchGoal = {
+      question: state.initialQuery,
     };
     return {
       actionsQueue: [firstAction],
@@ -99,8 +72,8 @@ export const createAgentGraph = async ({
 
     const response = await executionModel.invoke(
       getExecutionPrompt({
-        nextAction: nextItem,
-        executedActions: state.processedActions,
+        currentResearchGoal: nextItem,
+        backlog: state.backlog,
       })
     );
     const toolCalls = getToolCalls(response);
@@ -110,17 +83,24 @@ export const createAgentGraph = async ({
     const toolMessages = await toolNode.invoke([response]);
     const toolResults = extractToolResults(toolMessages);
 
-    const processedActions: ExecutedAction[] = [];
-    processedActions.push({
-      ...nextItem,
-      toolName: toolCalls[0].toolId.toolId,
-      arguments: toolCalls[0].args,
-      response: toolResults[0].result,
-    });
+    const actionResults: ActionResult[] = [];
+    for (let i = 0; i < toolResults.length; i++) {
+      const toolCall = toolCalls[i];
+      const toolResult = toolResults[i];
+      if (toolCall && toolResult) {
+        const actionResult: ActionResult = {
+          researchGoal: nextItem.question,
+          toolName: toolCall.toolId.toolId,
+          arguments: toolCall.args,
+          response: toolResult.result,
+        };
+        actionResults.push(actionResult);
+      }
+    }
 
     return {
       actionsQueue: queue,
-      processedActions: [processedActions],
+      backlog: [actionResults],
     };
   };
 
@@ -135,17 +115,21 @@ export const createAgentGraph = async ({
   const reflection = async (state: typeof StateAnnotation.State) => {
     const reflectModel = chatModel.withStructuredOutput(
       z.object({
-        isSufficient: z
-          .boolean()
-          .describe('Whether the provided info are sufficient to answer the user question'),
-        knowledgeGaps: z
-          .array(z.string())
-          .describe('A description of what information is missing or needs clarification'),
+        isSufficient: z.boolean().describe(
+          `Set to true if the current information fully answers the user question without requiring further research.
+           Set to false if any knowledge gaps or unresolved sub-problems remain.`
+        ),
+        nextQuestions: z.array(z.string()).describe(
+          `A list of self-contained, actionable research questions or sub-problems that need to be explored
+          further to fully answer the user question. Leave empty if isSufficient is true.`
+        ),
         reasoning: z
           .string()
           .optional()
           .describe(
-            'Optional reasoning on why the provided info are sufficient or not. Can be used as scratch pad for thoughts.'
+            `Brief internal reasoning explaining why the current information is sufficient or not.
+            You may list what was already answered, what gaps exist, or whether decomposition was necessary.
+            Use this as your thought process or scratchpad before producing the final output.`
           ),
       })
     );
@@ -153,35 +137,50 @@ export const createAgentGraph = async ({
     const response: ReflectionResult = await reflectModel.invoke(
       getReflectionPrompt({
         userQuery: state.initialQuery,
-        summaries: state.processedActions,
+        backlog: state.backlog,
       })
     );
 
     console.log('*** reflection response: ', response);
 
     return {
-      lastReflectionResult: response,
+      backlog: [...state.backlog, response],
       actionsQueue: [
         ...state.actionsQueue,
-        response.knowledgeGaps.map((gap) => ({ knowledgeGap: gap })),
+        response.nextQuestions.map<ResearchGoal>((nextQuestion) => ({ question: nextQuestion })),
       ],
     };
   };
 
   const evaluateReflection = async (state: typeof StateAnnotation.State) => {
-    if (state.lastReflectionResult.isSufficient) {
+    const reflectionResult = lastReflectionResult(state.backlog);
+    console.log(
+      '*** evaluateReflection - state: ',
+      reflectionResult.isSufficient,
+      reflectionResult.reasoning
+    );
+
+    if (reflectionResult.isSufficient) {
       return 'answer';
     }
     return 'process_queue_item';
   };
 
   const answer = async (state: typeof StateAnnotation.State) => {
-    const response = await chatModel.invoke(
+    console.log('*** answer - start');
+
+    const answerModel = chatModel.withConfig({
+      tags: ['researcher-answer'],
+    });
+
+    const response = await answerModel.invoke(
       getAnswerPrompt({
         userQuery: state.initialQuery,
-        executedActions: state.processedActions,
+        backlog: state.backlog,
       })
     );
+
+    console.log('*** answer - raw response: ', response);
 
     const generatedAnswer = extractTextContent(response);
 
@@ -194,10 +193,12 @@ export const createAgentGraph = async ({
 
   // note: the node names are used in the event convertion logic, they should *not* be changed
   const graph = new StateGraph(StateAnnotation)
+    // nodes
     .addNode('initialize', initialize)
     .addNode('process_queue_item', processQueueItem)
     .addNode('reflection', reflection)
     .addNode('answer', answer)
+    // edges
     .addEdge('__start__', 'initialize')
     .addEdge('initialize', 'process_queue_item')
     .addConditionalEdges('process_queue_item', evaluateQueue, {

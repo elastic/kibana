@@ -6,43 +6,115 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
-import type { PlannedAction, ExecutedAction } from './graph';
+import type { ResearchGoal } from './graph';
+import {
+  isActionResult,
+  isReflectionResult,
+  BacklogItem,
+  ReflectionResult,
+  ActionResult,
+} from './backlog';
+
+const renderBacklog = (backlog: BacklogItem[]): string => {
+  const renderItem = (item: BacklogItem, i: number) => {
+    if (isActionResult(item)) {
+      return renderActionResult(item, i);
+    }
+    if (isReflectionResult(item)) {
+      return renderReflectionResult(item, i);
+    }
+    return `Unknown item type`;
+  };
+
+  return backlog.map((item, i) => renderItem(item, i)).join('\n\n');
+};
+
+const renderReflectionResult = (
+  { isSufficient, nextQuestions, reasoning }: ReflectionResult,
+  index: number
+): string => {
+  return `### Cycle ${index + 1}
+
+  At cycle "${index + 1}", you reflected on the data gathered so far:
+
+  - You decided that the current information were ${
+    isSufficient ? '*sufficient*' : '*insufficient*'
+  } to fully answer the question, with the following reasoning: ${reasoning}
+
+  ${
+    nextQuestions.length > 0
+      ? `- You identified the following questions to follow up on:
+${nextQuestions.map((question) => `  - ${question}`).join('\n')}`
+      : ''
+  }
+  `;
+};
+
+const renderActionResult = (actionResult: ActionResult, index: number): string => {
+  return `### Cycle ${index + 1}
+
+  At cycle "${index + 1}", you performed the following action:
+
+  - Action type: tool execution
+
+  - Tool name: ${actionResult.toolName}
+
+  - Tool parameters:
+  \`\`\`json
+  ${JSON.stringify(actionResult.arguments, undefined, 2)}
+  \`\`\`
+
+  - Tool response:
+    \`\`\`json
+  ${JSON.stringify(actionResult.response, undefined, 2)}
+  \`\`\`
+  `;
+};
 
 export const getExecutionPrompt = ({
-  nextAction,
-  executedActions,
+  currentResearchGoal,
+  backlog,
 }: {
-  nextAction: PlannedAction;
-  executedActions: ExecutedAction[];
+  currentResearchGoal: ResearchGoal;
+  backlog: BacklogItem[];
 }): BaseMessageLike[] => {
   return [
     [
       'system',
-      `You are an expert research assistant from the Elasticsearch company.
+      `You are a research agent at Elasticsearch with access to external tools.
+
+      Your task:
+      - Based on a research goal, choose the most appropriate tool to help resolve it.
+      - You will also be provided with a list of past actions and results.
 
       Instructions:
-       You will be with a goal, and a list of already executed actions. With those information,
-       please choose which tool to call to reach the goal.
+      - You must select one tool and invoke it with the most relevant and precise parameters.
+      - Choose the tool that will best help fulfill the current research goal.
+      - Some tools (e.g., search) may require contextual information (such as an index name or prior step result). Retrieve it from the action history if needed.
+      - Do not repeat a tool invocation that has already been attempted with the same or equivalent parameters.
+      - Think carefully about what the goal requires and which tool best advances it.
 
-      Requirements:
-      - You *must* call a tool
-      - Be attentive, as some tools may require information from the previously executed action. For
-        example, search tools usually require to target an index, which can be retrieved using the index explorer tool.
-      - Be careful to not call the same tool twice with the same parameters. Check the action history.
+      Constraints:
+      - Tool use is mandatory. You must respond with a tool call.
+      - Do not speculate or summarize. Only act by selecting the best next tool and invoking it.
 
-      Action history and current goal will be provided in the next user message.
+      Output format:
+      Respond using the tool-calling schema provided by the system.
+
+      Additional information:
+      - The current date is ${new Date().toISOString()}.
       `,
     ],
     [
       'user',
       `
-      ### Current goal:
+      ### Current Research Goal
 
-      Trying to find information about: "${nextAction.knowledgeGap}"
+      Trying to find information about: "${currentResearchGoal.question}"
 
-      ### Action history:
+      ### Previous Actions
 
-      ${executedActions.map((action) => JSON.stringify(action, undefined, 2)).join('\n')}
+      ${renderBacklog(backlog)}
     `,
     ],
   ];
@@ -50,45 +122,81 @@ export const getExecutionPrompt = ({
 
 export const getReflectionPrompt = ({
   userQuery,
-  summaries,
+  backlog,
 }: {
   userQuery: string;
-  summaries: any[];
+  backlog: BacklogItem[];
 }): BaseMessageLike[] => {
   return [
     [
       'system',
-      `You are an expert research assistant from the Elasticsearch company analyzing summaries about "${userQuery}".
+      `You are an expert research assistant from the Elasticsearch company analyzing information about the user's question: "${userQuery}".
 
       Instructions:
-       Identify knowledge gaps or areas that need deeper exploration and generate the corresponding follow-up queries. (1 or multiple).
-      - If provided summaries are sufficient to answer the user's question, don't generate a follow-up query.
-      - Focus on technical details, implementation specifics, or emerging trends that weren't fully covered.
+      - Analyze the completeness and depth of the provided summaries.
+      - Identify any missing, unclear, or shallow information.
+      - If necessary, break down complex questions into smaller sub-problems.
+      - Your goal is to generate a precise list of actionable questions that will help drive the research forward.
 
-      Requirements:
-      - Ensure the follow-up query is self-contained and includes necessary context for web search.
+      Guidelines:
+      - Only generate questions if the current information is incomplete or insufficient.
+      - Focus on technical depth, implementation details, trade-offs, edge cases, or emerging trends.
+      - Each question must be self-contained and ready to be used for search or further investigation.
+
+      Additional information:
+      - The current date is ${new Date().toISOString()}.
 
       Output Format:
       - Format your response as a JSON object with these exact keys:
-         - "is_sufficient": true or false
-         - "knowledge_gap": Describe what information is missing or needs clarification
-         - "follow_up_queries": Write a specific question to address this gap
+         - "isSufficient": true or false
+         - "nextQuestions": list of standalone research questions (empty if isSufficient is true)
+         - "reasoning": internal reasoning (brief thought process for your analysis)
 
-      Example 1: if information are sufficient:
+      ### Example 1: information is sufficient
       \`\`\`json
-      {
+        {
           "isSufficient": true,
-          "knowledgeGaps": [],
-      }
+          "nextQuestions": [],
+          "reasoning": "The provided summaries fully explain how Elasticsearch handles vector search, including indexing, retrieval, and trade-offs."
+        }
+      \`\`\`
+
+      ### Example 2: minor gaps or missing details
+      \`\`\`json
+        {
+          "isSufficient": false,
+          "nextQuestions": [
+            "How does Elasticsearch query performance scale with large document sizes?",
+            "What is the default scoring mechanism used in Elasticsearch for dense vector fields?"
+          ],
+          "reasoning": "While the summaries explain vector search basics, they lack detail on scaling performance and scoring behavior."
+        }
+      \`\`\`
+
+      ### Example 3: complex decomposition
+      \`\`\`json
+        {
+          "isSufficient": false,
+          "nextQuestions": [
+            "What is the architecture of Elasticsearch when used as a retrieval component in RAG pipelines with LLMs?",
+            "How does hybrid search compare to dense retrieval in Elasticsearch in terms of accuracy and recall?",
+            "What are the performance and cost trade-offs between using vector search and keyword-based search in Elasticsearch?"
+          ],
+          "reasoning": "The summaries cover general Elasticsearch features but miss details about RAG architectures, hybrid retrieval comparisons, and performance trade-offs."
+        }
       \`\`\`
       `,
     ],
     [
       'user',
       `
-      ### Summaries:
+      ## User question
 
-      ${summaries.map((summary) => JSON.stringify(summary, undefined, 2)).join('\n')}
+      "${userQuery}"
+
+      ## Backlog
+
+      ${renderBacklog(backlog)}
     `,
     ],
   ];
@@ -96,28 +204,33 @@ export const getReflectionPrompt = ({
 
 export const getAnswerPrompt = ({
   userQuery,
-  executedActions,
+  backlog,
 }: {
   userQuery: string;
-  executedActions: ExecutedAction[];
+  backlog: BacklogItem[];
 }): BaseMessageLike[] => {
   return [
     [
       'system',
-      `Generate a high-quality answer to the user's question based on the provided summaries.
+      `You are a senior technical expert from the Elasticsearch company.
+       Your role is to provide a clear, well-reasoned answer to the user's question using the information gathered by prior research steps.
 
       Instructions:
+      - Carefully read the user's original question and the gathered information.
+      - Synthesize an accurate response that directly answers the user's question.
+      - Do not hedge. If the information is complete, provide a confident and final answer.
+      - If there are still uncertainties or unresolved issues, acknowledge them clearly and state what is known and what is not.
+      - Prefer structured, organized output (e.g., use paragraphs, bullet points, or sections if helpful).
+
+      Guidelines:
+      - Do not mention the research process or that you are an AI or assistant.
+      - Do not mention that the answer was generated based on previous steps.
+      - Do not repeat the user's question or summarize the JSON input.
+      - Do not speculate beyond the gathered information unless logically inferred from it.
+
+      Additional information:
       - The current date is ${new Date().toISOString()}.
-      - You are the final step of a multi-step research process, don't mention that you are the final step.
-      - You have access to all the information gathered from the previous steps.
-      - You have access to the user's question.
-      - Generate a high-quality answer to the user's question based on the provided summaries and the user's question.
 
-      User Context:
-      - {research_topic}
-
-      Summaries:
-      {summaries}
       `,
     ],
     [
@@ -129,9 +242,7 @@ export const getAnswerPrompt = ({
 
       ### Gathered information
 
-      \`\`\`json
-      ${JSON.stringify(executedActions, undefined, 2)}
-      \`\`\`
+      ${renderBacklog(backlog.filter(isActionResult))}
     `,
     ],
   ];
