@@ -36,7 +36,6 @@ jest.mock('../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
 }));
 
-
 const useAssistantContextMock = useAssistantContext as jest.Mock;
 const useFetchCurrentUserConversationsMock = useFetchCurrentUserConversations as jest.Mock;
 const useKibanaMock = useKibana as jest.Mock;

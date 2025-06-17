@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiTab,
-  EuiTabs,
-  EuiText,
-  EuiSpacer,
-  EuiFlexItem,
-  EuiFlexGroup,
-} from '@elastic/eui';
+import { EuiTab, EuiTabs, EuiText, EuiSpacer, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 import React, { useMemo, useState } from 'react';
@@ -55,7 +48,6 @@ const AlertSelectionComponent: React.FC<Props> = ({
   setStart,
   start,
 }) => {
-
   const tabs = useMemo(
     () =>
       getTabs({
