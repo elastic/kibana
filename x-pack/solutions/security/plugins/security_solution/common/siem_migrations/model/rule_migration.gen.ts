@@ -109,7 +109,7 @@ export const ElasticRule = z.object({
   /**
    * The Elastic prebuilt rule id matched.
    */
-  prebuilt_rule_id: NonEmptyString.optional(),
+  prebuilt_rule_id: NonEmptyString.nullable().optional(),
   /**
    * The IDs of the Elastic integrations suggested to be installed for this rule.
    */
@@ -151,9 +151,9 @@ export const RuleMigrationLastExecution = z.object({
    */
   started_at: z.string().optional(),
   /**
-   * The moment the last execution ended.
+   * The moment the last execution finished.
    */
-  ended_at: z.string().nullable().optional(),
+  finished_at: z.string().nullable().optional(),
   /**
    * The connector ID used for the last execution.
    */
@@ -163,9 +163,13 @@ export const RuleMigrationLastExecution = z.object({
    */
   error: z.string().nullable().optional(),
   /**
-   * Indicates if the last execution was aborted by the user.
+   * Indicates if the last execution was stopped by the user.
    */
-  is_aborted: z.boolean().optional(),
+  is_stopped: z.boolean().optional(),
+  /**
+   * Indicates if the last execution skipped pre-built rule matching.
+   */
+  skip_prebuilt_rules_matching: z.boolean().optional(),
 });
 
 /**
@@ -314,7 +318,7 @@ export const RuleMigrationTaskStatus = z.enum([
   'running',
   'stopped',
   'finished',
-  'aborted',
+  'interrupted',
 ]);
 export type RuleMigrationTaskStatusEnum = typeof RuleMigrationTaskStatus.enum;
 export const RuleMigrationTaskStatusEnum = RuleMigrationTaskStatus.enum;
@@ -370,9 +374,9 @@ export const RuleMigrationTaskStats = z.object({
    */
   last_updated_at: z.string(),
   /**
-   * The last error message if the migration task execution failed.
+   * The last execution of the migration task.
    */
-  last_error: z.string().optional(),
+  last_execution: RuleMigrationLastExecution.optional(),
 });
 
 /**
@@ -547,3 +551,18 @@ export const RuleMigrationResource = RuleMigrationResourceBase.merge(
     updated_by: z.string().optional(),
   })
 );
+
+/**
+ * The rule migration task execution settings.
+ */
+export type RuleMigrationTaskExecutionSettings = z.infer<typeof RuleMigrationTaskExecutionSettings>;
+export const RuleMigrationTaskExecutionSettings = z.object({
+  /**
+   * The connector ID used for the last execution.
+   */
+  connector_id: z.string(),
+  /**
+   * Indicates if the current execution should skip matching prebuilt rules.
+   */
+  skip_prebuilt_rules_matching: z.boolean().optional(),
+});
