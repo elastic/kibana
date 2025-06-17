@@ -8,7 +8,7 @@ steps:
     if: "build.env('GITHUB_PR_USER') == 'elastic-renovate-prod[bot]' && build.env('GITHUB_PR_EVENT_TYPE') == 'opened'"
 
     steps:
-      - command: .buildkite/scripts/steps/renovate_helper.sh
+      - command: .buildkite/scripts/steps/renovate/renovate_helper.sh
         label: 'Run Renovate helper on PR opened'
         key: renovate_helper
         timeout_in_minutes: 20
@@ -16,4 +16,28 @@ steps:
           automatic:
             - exit_status: '*'
               limit: 1
-# TODO trigger build when event is updated and commit author is not renovate
+
+      - wait: ~
+
+      - command: .buildkite/scripts/steps/renovate/trigger_pr.sh
+        label: 'Trigger Kibana PR pipeline on PR opened'
+        key: trigger_pr_opened
+        timeout_in_minutes: 10
+        retry:
+          automatic:
+            - exit_status: '*'
+              limit: 1
+
+  - group: 'Renovate PR updated'
+    # TODO: check for commit author elastic contributor or kibanamachine notice
+    if: "build.env('GITHUB_PR_USER') != 'elastic-renovate-prod[bot]' && build.env('GITHUB_PR_EVENT_TYPE') == 'synchronize'"
+
+    steps:
+      - command: .buildkite/scripts/steps/renovate/trigger_pr.sh
+        label: 'Trigger Kibana PR pipeline on PR updated'
+        key: trigger_pr_updated
+        timeout_in_minutes: 10
+        retry:
+          automatic:
+            - exit_status: '*'
+              limit: 1
