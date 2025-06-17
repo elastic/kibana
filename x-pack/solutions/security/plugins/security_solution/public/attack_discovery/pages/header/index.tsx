@@ -15,7 +15,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { AssistantSpaceIdProvider, ConnectorSelectorInline, useAssistantContext } from '@kbn/elastic-assistant';
+import {
+  AssistantSpaceIdProvider,
+  ConnectorSelectorInline,
+  useAssistantContext,
+} from '@kbn/elastic-assistant';
 import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -63,10 +67,10 @@ const HeaderComponent: React.FC<Props> = ({
   const spaceId = useSpaceId();
 
   const [isEISCostTourDisabled, setIsEISCostTourDisabled] = useState<boolean>(
-    !connectorsAreConfigured ||!spaceId || !inferenceEnabled || showFlyout
+    !connectorsAreConfigured || !spaceId || !inferenceEnabled || showFlyout
   );
   useEffect(() => {
-    if (!connectorsAreConfigured ||!spaceId || !inferenceEnabled || showFlyout) {
+    if (!connectorsAreConfigured || !spaceId || !inferenceEnabled || showFlyout) {
       setIsEISCostTourDisabled(true);
     } else {
       setIsEISCostTourDisabled(false);
