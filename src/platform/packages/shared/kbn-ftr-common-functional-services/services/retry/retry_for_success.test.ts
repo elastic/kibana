@@ -11,7 +11,7 @@ import retryForSuccessModule from './retry_for_success';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 
 describe('Retry for success', () => {
-  const {retryForSuccess } = retryForSuccessModule;
+  const { retryForSuccess } = retryForSuccessModule;
   it(`should print out attempt counts with the retryCount parameter`, async () => {
     const retryCount = 3;
     const log = new ToolingLog();
