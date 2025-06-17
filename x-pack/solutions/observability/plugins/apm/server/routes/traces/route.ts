@@ -137,13 +137,12 @@ const unifiedTracesByIdRoute = createApmServerRoute({
     resources
   ): Promise<{
     traceItems: TraceItem[];
-    entryTransaction?: Transaction;
   }> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params, config } = resources;
     const { traceId } = params.path;
-    const { start, end, entryTransactionId } = params.query;
-    const [traceItems, entryTransaction] = await Promise.all([
+    const { start, end } = params.query;
+    const [traceItems] = await Promise.all([
       getUnifiedTraceItems({
         apmEventClient,
         traceId,
@@ -152,17 +151,9 @@ const unifiedTracesByIdRoute = createApmServerRoute({
         maxTraceItemsFromUrlParam: params.query.maxTraceItems,
         config,
       }),
-      getTransaction({
-        transactionId: entryTransactionId,
-        traceId,
-        apmEventClient,
-        start,
-        end,
-      }),
     ]);
     return {
       traceItems,
-      entryTransaction,
     };
   },
 });
