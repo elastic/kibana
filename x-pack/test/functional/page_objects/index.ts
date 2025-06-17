@@ -40,10 +40,10 @@ import { ObservabilityPageProvider } from './observability_page';
 import { AlertControlsProvider } from './alert_controls';
 import { RemoteClustersPageProvider } from './remote_clusters_page';
 import { ReportingPageObject } from './reporting_page';
-import { RoleMappingsPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/role_mappings_page';
+// import { RoleMappingsPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/role_mappings_page';
 import { RollupPageObject } from './rollup_page';
 import { SearchSessionsPageProvider } from './search_sessions_management_page';
-import { SecurityPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/security_page';
+// import { SecurityPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/security_page';
 import { ShareSavedObjectsToSpacePageProvider } from './share_saved_objects_to_space_page';
 import { SnapshotRestorePageProvider } from './snapshot_restore_page';
 import { SpaceSelectorPageObject } from './space_selector_page';
@@ -100,7 +100,7 @@ export const pageObjects = {
   alertControls: AlertControlsProvider,
   remoteClusters: RemoteClustersPageProvider,
   reporting: ReportingPageObject,
-  roleMappings: RoleMappingsPageProvider,
+  // roleMappings: RoleMappingsPageProvider,
   rollup: RollupPageObject,
   searchApiKeys: SearchApiKeysProvider,
   searchClassicNavigation: SearchClassicNavigationProvider,
@@ -112,7 +112,7 @@ export const pageObjects = {
   searchPlayground: SearchPlaygroundPageProvider,
   searchSynonyms: SearchSynonymsPageProvider,
   searchSessionsManagement: SearchSessionsPageProvider,
-  security: SecurityPageObject,
+  // security: SecurityPageObject,
   shareSavedObjectsToSpace: ShareSavedObjectsToSpacePageProvider,
   snapshotRestore: SnapshotRestorePageProvider,
   spaceSelector: SpaceSelectorPageObject,

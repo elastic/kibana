@@ -50,7 +50,7 @@ import { PipelineEditorProvider } from './pipeline_editor';
 // @ts-ignore not ts yet
 import { RandomProvider } from './random';
 // @ts-ignore not ts yet
-import { AceEditorProvider } from './ace_editor';
+import { AceEditorProvider } from '@kbn/test-suites-xpack-platform/funcional/services/ace_editor';
 import { CanvasElementProvider } from './canvas_element';
 // @ts-ignore not ts yet
 import { GrokDebuggerProvider } from './grok_debugger';
@@ -112,7 +112,7 @@ export const services = {
   pipelineList: PipelineListProvider,
   pipelineEditor: PipelineEditorProvider,
   random: RandomProvider,
-  aceEditor: AceEditorProvider,
+  // aceEditor: AceEditorProvider,
   canvasElement: CanvasElementProvider,
   grokDebugger: GrokDebuggerProvider,
   userMenu: UserMenuProvider,
