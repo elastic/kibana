@@ -1,0 +1,315 @@
+{
+  "id": "71c9c185-3e6d-49d0-b7e5-f966eaf51625",
+  "type": "lens",
+  "namespaces": [
+    "default"
+  ],
+  "updated_at": "2025-06-17T15:47:13.313Z",
+  "created_at": "2025-06-17T15:47:13.313Z",
+  "version": "WzU5LDFd",
+  "attributes": {
+    "title": "Lens example - 1",
+    "description": "",
+    "visualizationType": "lnsMetric",
+    "state": {
+      "visualization": {
+        "layerId": "7aa8fd7f-f664-48fe-8232-3a26054f9cdc",
+        "layerType": "data",
+        "metricAccessor": "89a69d8d-a6bc-47a8-80c6-94272762e785",
+        "secondaryTrend": {
+          "type": "none"
+        }
+      },
+      "query": {
+        "query": "",
+        "language": "kuery"
+      },
+      "filters": [],
+      "datasourceStates": {
+        "formBased": {
+          "layers": {
+            "7aa8fd7f-f664-48fe-8232-3a26054f9cdc": {
+              "columns": {
+                "89a69d8d-a6bc-47a8-80c6-94272762e785": {
+                  "label": "Count of records",
+                  "dataType": "number",
+                  "operationType": "count",
+                  "isBucketed": false,
+                  "scale": "ratio",
+                  "sourceField": "___records___",
+                  "params": {
+                    "emptyAsNull": true
+                  }
+                }
+              },
+              "columnOrder": [
+                "89a69d8d-a6bc-47a8-80c6-94272762e785"
+              ],
+              "incompleteColumns": {
+                "806819b9-b606-4383-9337-e6a40b8602ad": {
+                  "operationType": "date_histogram"
+                }
+              },
+              "sampling": 1
+            }
+          }
+        },
+        "indexpattern": {
+          "layers": {}
+        },
+        "textBased": {
+          "layers": {}
+        }
+      },
+      "internalReferences": [],
+      "adHocDataViews": {}
+    }
+  },
+  "references": [
+    {
+      "type": "index-pattern",
+      "id": "91200a00-9efd-11e7-acb3-3dab96693fab",
+      "name": "indexpattern-datasource-layer-7aa8fd7f-f664-48fe-8232-3a26054f9cdc"
+    }
+  ],
+  "managed": false,
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "8.9.0"
+}
+
+{
+  "id": "4fad4960-5be9-408c-854b-3b53ac80df81",
+  "type": "lens",
+  "namespaces": [
+    "default"
+  ],
+  "updated_at": "2025-06-17T15:48:59.917Z",
+  "created_at": "2025-06-17T15:48:59.917Z",
+  "version": "WzYyLDFd",
+  "attributes": {
+    "title": "Lens example - 2",
+    "description": "",
+    "visualizationType": "lnsMetric",
+    "state": {
+      "visualization": {
+        "layerId": "7aa8fd7f-f664-48fe-8232-3a26054f9cdc",
+        "layerType": "data",
+        "metricAccessor": "89a69d8d-a6bc-47a8-80c6-94272762e785",
+        "secondaryTrend": {
+          "type": "none"
+        }
+      },
+      "query": {
+        "query": "",
+        "language": "kuery"
+      },
+      "filters": [],
+      "datasourceStates": {
+        "formBased": {
+          "layers": {
+            "7aa8fd7f-f664-48fe-8232-3a26054f9cdc": {
+              "columns": {
+                "89a69d8d-a6bc-47a8-80c6-94272762e785": {
+                  "label": "Count of records",
+                  "dataType": "number",
+                  "operationType": "count",
+                  "isBucketed": false,
+                  "scale": "ratio",
+                  "sourceField": "___records___",
+                  "params": {
+                    "emptyAsNull": true
+                  }
+                }
+              },
+              "columnOrder": [
+                "89a69d8d-a6bc-47a8-80c6-94272762e785"
+              ],
+              "incompleteColumns": {
+                "806819b9-b606-4383-9337-e6a40b8602ad": {
+                  "operationType": "date_histogram"
+                }
+              },
+              "sampling": 1
+            }
+          }
+        },
+        "indexpattern": {
+          "layers": {}
+        },
+        "textBased": {
+          "layers": {}
+        }
+      },
+      "internalReferences": [],
+      "adHocDataViews": {}
+    }
+  },
+  "references": [
+    {
+      "type": "index-pattern",
+      "id": "91200a00-9efd-11e7-acb3-3dab96693fab",
+      "name": "indexpattern-datasource-layer-7aa8fd7f-f664-48fe-8232-3a26054f9cdc"
+    }
+  ],
+  "managed": false,
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "8.9.0"
+}
+
+{
+  "id": "af239293-933a-4f35-969f-9dcccfefa8e4",
+  "type": "lens",
+  "namespaces": [
+    "default"
+  ],
+  "updated_at": "2025-06-17T15:50:00.097Z",
+  "created_at": "2025-06-17T15:50:00.097Z",
+  "version": "WzY0LDFd",
+  "attributes": {
+    "title": "Lens example - 3",
+    "description": "Some description - 1",
+    "visualizationType": "lnsMetric",
+    "state": {
+      "visualization": {
+        "layerId": "7aa8fd7f-f664-48fe-8232-3a26054f9cdc",
+        "layerType": "data",
+        "metricAccessor": "89a69d8d-a6bc-47a8-80c6-94272762e785",
+        "secondaryTrend": {
+          "type": "none"
+        }
+      },
+      "query": {
+        "query": "",
+        "language": "kuery"
+      },
+      "filters": [],
+      "datasourceStates": {
+        "formBased": {
+          "layers": {
+            "7aa8fd7f-f664-48fe-8232-3a26054f9cdc": {
+              "columns": {
+                "89a69d8d-a6bc-47a8-80c6-94272762e785": {
+                  "label": "Count of records",
+                  "dataType": "number",
+                  "operationType": "count",
+                  "isBucketed": false,
+                  "scale": "ratio",
+                  "sourceField": "___records___",
+                  "params": {
+                    "emptyAsNull": true
+                  }
+                }
+              },
+              "columnOrder": [
+                "89a69d8d-a6bc-47a8-80c6-94272762e785"
+              ],
+              "incompleteColumns": {
+                "806819b9-b606-4383-9337-e6a40b8602ad": {
+                  "operationType": "date_histogram"
+                }
+              },
+              "sampling": 1
+            }
+          }
+        },
+        "indexpattern": {
+          "layers": {}
+        },
+        "textBased": {
+          "layers": {}
+        }
+      },
+      "internalReferences": [],
+      "adHocDataViews": {}
+    }
+  },
+  "references": [
+    {
+      "type": "index-pattern",
+      "id": "91200a00-9efd-11e7-acb3-3dab96693fab",
+      "name": "indexpattern-datasource-layer-7aa8fd7f-f664-48fe-8232-3a26054f9cdc"
+    }
+  ],
+  "managed": false,
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "8.9.0"
+}
+
+{
+  "id": "f708d303-2418-4313-aa28-c2830f7cf4cd",
+  "type": "lens",
+  "namespaces": [
+    "default"
+  ],
+  "updated_at": "2025-06-17T15:50:05.680Z",
+  "created_at": "2025-06-17T15:50:05.680Z",
+  "version": "WzY2LDFd",
+  "attributes": {
+    "title": "Lens example - 4",
+    "description": "",
+    "visualizationType": "lnsMetric",
+    "state": {
+      "visualization": {
+        "layerId": "7aa8fd7f-f664-48fe-8232-3a26054f9cdc",
+        "layerType": "data",
+        "metricAccessor": "89a69d8d-a6bc-47a8-80c6-94272762e785",
+        "secondaryTrend": {
+          "type": "none"
+        }
+      },
+      "query": {
+        "query": "",
+        "language": "kuery"
+      },
+      "filters": [],
+      "datasourceStates": {
+        "formBased": {
+          "layers": {
+            "7aa8fd7f-f664-48fe-8232-3a26054f9cdc": {
+              "columns": {
+                "89a69d8d-a6bc-47a8-80c6-94272762e785": {
+                  "label": "Count of records",
+                  "dataType": "number",
+                  "operationType": "count",
+                  "isBucketed": false,
+                  "scale": "ratio",
+                  "sourceField": "___records___",
+                  "params": {
+                    "emptyAsNull": true
+                  }
+                }
+              },
+              "columnOrder": [
+                "89a69d8d-a6bc-47a8-80c6-94272762e785"
+              ],
+              "incompleteColumns": {
+                "806819b9-b606-4383-9337-e6a40b8602ad": {
+                  "operationType": "date_histogram"
+                }
+              },
+              "sampling": 1
+            }
+          }
+        },
+        "indexpattern": {
+          "layers": {}
+        },
+        "textBased": {
+          "layers": {}
+        }
+      },
+      "internalReferences": [],
+      "adHocDataViews": {}
+    }
+  },
+  "references": [
+    {
+      "type": "index-pattern",
+      "id": "91200a00-9efd-11e7-acb3-3dab96693fab",
+      "name": "indexpattern-datasource-layer-7aa8fd7f-f664-48fe-8232-3a26054f9cdc"
+    }
+  ],
+  "managed": false,
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "8.9.0"
+}
