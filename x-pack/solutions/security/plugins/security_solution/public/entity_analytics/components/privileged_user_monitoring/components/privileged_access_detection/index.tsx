@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiPanel, EuiProgress } from '@elastic/eui';
 import React from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { css } from '@emotion/css';
 import { PrivilegedAccessDetectionMLPopover } from './pad_ml_popover';
 import { HeaderSection } from '../../../../../common/components/header_section';
 import { PRIVILEGED_USER_ACTIVITY_QUERY_ID } from '../privileged_user_activity/constants';
