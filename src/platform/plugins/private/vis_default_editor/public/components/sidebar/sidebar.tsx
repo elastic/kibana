@@ -17,7 +17,7 @@ import React, {
 } from 'react';
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { keys, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { keys, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, UseEuiTheme } from '@elastic/eui';
 import { EventEmitter } from 'events';
 
 import {
@@ -28,12 +28,22 @@ import {
 import type { Schema } from '@kbn/visualizations-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { css } from '@emotion/react';
 import { DefaultEditorNavBar } from './navbar';
 import { DefaultEditorControls } from './controls';
 import { setStateParamValue, useEditorReducer, useEditorFormState, discardChanges } from './state';
 import { DefaultEditorAggCommonProps } from '../agg_common_props';
 import { SidebarTitle } from './sidebar_title';
 import { useOptionTabs } from './use_option_tabs';
+
+const defaultEditorSideBarStyles = {
+  collapsibleSideBarButton: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      position: 'absolute',
+      right: euiTheme.size.xs,
+      top: euiTheme.size.s,
+    }),
+};
 
 interface DefaultEditorSideBarProps {
   embeddableHandler: VisualizeEmbeddableContract;
@@ -241,6 +251,7 @@ function DefaultEditorSideBarComponent({
         color="text"
         iconType={isCollapsed ? 'menuLeft' : 'menuRight'}
         onClick={onClickCollapse}
+        css={defaultEditorSideBarStyles.collapsibleSideBarButton}
       />
     </>
   );
