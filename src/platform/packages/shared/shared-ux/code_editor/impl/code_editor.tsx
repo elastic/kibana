@@ -34,6 +34,8 @@ import {
   type MonacoEditorProps as ReactMonacoEditorProps,
 } from './react_monaco_editor';
 import { remeasureFonts } from './remeasure_fonts';
+import { useContextMenuUtils } from './use_context_menu_utils';
+import type { ContextMenuAction } from './use_context_menu_utils';
 
 import { PlaceholderWidget } from './placeholder_widget';
 import { styles } from './editor.styles';
@@ -161,6 +163,17 @@ export interface CodeEditorProps {
    * Custom CSS class to apply to the container
    */
   classNameCss?: Interpolation<Theme>;
+
+  /**
+   * Enables a custom context menu with Cut, Copy, Paste actions. Disabled by default.
+   */
+  enableCustomContextMenu?: boolean;
+
+  /**
+   * If the custom context menu is enable through {@link enableCustomContextMenu},
+   * this prop allows adding more custom menu actions, on top of the default Cut, Copy, and Paste actions.
+   */
+  customConextMenuActions?: ContextMenuAction[];
 }
 
 export const CodeEditor: React.FC<CodeEditorProps> = ({
@@ -194,8 +207,11 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   enableFindAction,
   dataTestSubj,
   classNameCss,
+  enableCustomContextMenu = false,
+  customConextMenuActions = [],
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { registerContextMenuActions, unregisterContextMenuActions } = useContextMenuUtils();
 
   // We need to be able to mock the MonacoEditor in our test in order to not test implementation
   // detail and not have to call methods on the <CodeEditor /> component instance.
@@ -451,20 +467,40 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         });
       }
 
+      if (enableCustomContextMenu) {
+        registerContextMenuActions({
+          editor,
+          enableWriteActions: !isReadOnly,
+          customActions: customConextMenuActions,
+        });
+      }
+
       editorDidMount?.(editor);
       setEditor(editor);
     },
-    [editorDidMount, onBlurMonaco, onKeydownMonaco, readOnlyMessage]
+    [
+      editorDidMount,
+      onBlurMonaco,
+      onKeydownMonaco,
+      readOnlyMessage,
+      enableCustomContextMenu,
+      registerContextMenuActions,
+      isReadOnly,
+    ]
   );
 
   const _editorWillUnmount = useCallback<NonNullable<ReactMonacoEditorProps['editorWillUnmount']>>(
     (editor) => {
+      if (enableCustomContextMenu) {
+        unregisterContextMenuActions();
+      }
+
       editorWillUnmount?.();
 
       const model = editor.getModel();
       model?.dispose();
     },
-    [editorWillUnmount]
+    [editorWillUnmount, enableCustomContextMenu, unregisterContextMenuActions]
   );
 
   useEffect(() => {
@@ -554,7 +590,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               fontFamily: 'Roboto Mono',
               fontSize: isFullScreen ? 16 : 12,
               lineHeight: isFullScreen ? 24 : 21,
-              contextmenu: false, // Disable custom Monaco context menu by default
+              contextmenu: enableCustomContextMenu,
               // @ts-expect-error, see https://github.com/microsoft/monaco-editor/issues/3829
               'bracketPairColorization.enabled': false,
               ...options,

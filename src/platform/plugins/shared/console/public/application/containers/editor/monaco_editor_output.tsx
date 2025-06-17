@@ -38,7 +38,7 @@ import {
 } from './utils';
 import { useEditorReadContext, useRequestReadContext, useServicesContext } from '../../contexts';
 import { MonacoEditorOutputActionsProvider } from './monaco_editor_output_actions_provider';
-import { useContextMenuUtils, useResizeCheckerUtils } from './hooks';
+import { useResizeCheckerUtils } from './hooks';
 
 export const MonacoEditorOutput: FunctionComponent = () => {
   const context = useServicesContext();
@@ -54,7 +54,6 @@ export const MonacoEditorOutput: FunctionComponent = () => {
   const divRef = useRef<HTMLDivElement | null>(null);
   const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
   const lineDecorations = useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
-  const { registerContextMenuActions, unregisterContextMenuActions } = useContextMenuUtils();
 
   const actionsProvider = useRef<MonacoEditorOutputActionsProvider | null>(null);
   const [editorActionsCss, setEditorActionsCss] = useState<CSSProperties>({});
@@ -66,18 +65,13 @@ export const MonacoEditorOutput: FunctionComponent = () => {
 
       setupResizeChecker(divRef.current!, editor);
       lineDecorations.current = editor.createDecorationsCollection();
-      registerContextMenuActions({
-        editor,
-        enableWriteActions: false,
-      });
     },
-    [registerContextMenuActions, setupResizeChecker]
+    [setupResizeChecker]
   );
 
   const editorWillUnmountCallback = useCallback(() => {
     destroyResizeChecker();
-    unregisterContextMenuActions();
-  }, [destroyResizeChecker, unregisterContextMenuActions]);
+  }, [destroyResizeChecker]);
 
   useEffect(() => {
     // Clean up any existing line decorations
@@ -193,13 +187,13 @@ export const MonacoEditorOutput: FunctionComponent = () => {
         editorDidMount={editorDidMountCallback}
         editorWillUnmount={editorWillUnmountCallback}
         enableFindAction={true}
+        enableCustomContextMenu={true}
         options={{
           readOnly: true,
           fontSize: readOnlySettings.fontSize,
           wordWrap: readOnlySettings.wrapMode === true ? 'on' : 'off',
           theme: CONSOLE_OUTPUT_THEME_ID,
           automaticLayout: true,
-          contextmenu: true,
         }}
       />
     </div>
